@@ -2,8 +2,8 @@
 
 A family of modern, single-binary assemblers and disassemblers for the 198x
 family's target CPUs. One of three sibling projects under the `198x/` umbrella;
-see [`../CLAUDE.md`](../CLAUDE.md) for umbrella context and cross-project rules,
-and [`../decisions/sibling-project-coordination.md`](../decisions/sibling-project-coordination.md)
+see [`../../CLAUDE.md`](../../CLAUDE.md) for umbrella context and cross-project rules,
+and [`../../decisions/sibling-project-coordination.md`](../../decisions/sibling-project-coordination.md)
 for the sibling relationship (Asm198x is the third sibling, peer to Code198x
 and Emu198x — not a child of either).
 
@@ -17,7 +17,7 @@ rescue over replace.
 
 ## Binding architecture
 
-Read [`../decisions/asm198x-and-shared-isa-spec.md`](../decisions/asm198x-and-shared-isa-spec.md)
+Read [`../../decisions/asm198x-and-shared-isa-spec.md`](../../decisions/asm198x-and-shared-isa-spec.md)
 before changing the crate structure or the ISA layer. The load-bearing points:
 
 - **Shared declarative ISA spec.** The [`isa`](crates/isa) crate is the single
@@ -54,12 +54,12 @@ debuginfo-heavy binaries, not its crate count.)
 ## Where things live
 
 - [`decisions/`](decisions/) — Asm198x-only decisions (syntax stance, dialect
-  targets). Cross-project decisions live in [`../decisions/`](../decisions/).
+  targets). Cross-project decisions live in [`../../decisions/`](../../decisions/).
 - [`crates/`](crates/) — the Rust workspace.
 - [`examples/`](examples/) — sample source.
 
-Hardware facts come from the umbrella primary library at [`../reference/`](../reference/)
-and syntheses at [`../syntheses/`](../syntheses/), per
-[`../decisions/shared-hardware-reference-canon.md`](../decisions/shared-hardware-reference-canon.md).
+Hardware facts come from the umbrella primary library at [`../../reference/`](../../reference/)
+and syntheses at [`../../syntheses/`](../../syntheses/), per
+[`../../decisions/shared-hardware-reference-canon.md`](../../decisions/shared-hardware-reference-canon.md).
 The `isa` spec is the machine-readable distillation of the encoding slice of
 those facts; it cites the library, not the other way round.

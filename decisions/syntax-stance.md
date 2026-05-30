@@ -33,7 +33,7 @@ genuinely conflict, document the choice here.
 
 A unified syntax would be cleaner to teach and document, but it would make
 every existing body of source need porting — which defeats the rescue mission
-(see [`../../decisions/asm198x-and-shared-isa-spec.md`](../../decisions/asm198x-and-shared-isa-spec.md)).
+(see [`../../../decisions/asm198x-and-shared-isa-spec.md`](../../../decisions/asm198x-and-shared-isa-spec.md)).
 The whole reason Asm198x exists is that the *tools* are hard to run, not that
 the *source* is wrong. Keep the source working.
 

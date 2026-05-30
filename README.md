@@ -38,10 +38,10 @@ second CPU makes those seams real. The `isa` crate stays standalone so Emu198x
 can depend on it without pulling in the assembler.
 
 This is the **assembler** pillar of the 198x family, a sibling to
-[Code198x](../Code198x) (curriculum) and [Emu198x](../Emu198x) (emulator),
+[Code198x](../../Code198x) (curriculum) and [Emu198x](../../Emu198x) (emulator),
 built on the same shared hardware reference. The binding architecture decision
 lives in the umbrella record:
-[`../decisions/asm198x-and-shared-isa-spec.md`](../decisions/asm198x-and-shared-isa-spec.md).
+[`../../decisions/asm198x-and-shared-isa-spec.md`](../../decisions/asm198x-and-shared-isa-spec.md).
 
 ## Build
 
