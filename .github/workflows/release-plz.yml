@@ -1,0 +1,50 @@
+name: Release-plz
+
+on:
+  push:
+    branches:
+      - main
+
+concurrency:
+  group: release-plz-${{ github.ref }}
+  cancel-in-progress: false
+
+permissions:
+  pull-requests: write
+  contents: write
+
+jobs:
+  release-plz:
+    name: Release-plz
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v6
+        with:
+          # release-plz needs full history to diff the changelog from the
+          # last tag.
+          fetch-depth: 0
+          # NOTE: tag pushes made with GITHUB_TOKEN do not fire other
+          # workflows, so the cargo-dist release.yml will NOT trigger
+          # automatically on the tag unless RELEASE_PLZ_TOKEN is a PAT (or
+          # GitHub App token) with workflow-trigger rights. Set that secret
+          # to close the loop; otherwise tag and run release.yml by hand.
+          token: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
+
+      - name: Read pinned toolchain
+        id: toolchain
+        run: |
+          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
+          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.toolchain.outputs.channel }}
+
+      - name: Run release-plz
+        uses: release-plz/action@v0.5
+        with:
+          command: release-pr
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}

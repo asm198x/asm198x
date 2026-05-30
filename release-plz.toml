@@ -1,0 +1,21 @@
+# release-plz configuration.
+#
+# Trigger: every push to main runs release-plz, which opens (or updates) a
+# "chore: release" PR with a bumped workspace version and a CHANGELOG entry
+# generated from the new commits (conventional-commit prefixes drive the
+# bump). Merging that PR creates a git tag, which fires
+# .github/workflows/release.yml (cargo-dist) to build the `asm198x` CLI and
+# attach the archives to a GitHub Release.
+#
+# Versioning is lockstep: every workspace crate inherits its version from
+# [workspace.package] in Cargo.toml, so a single bump applies everywhere.
+#
+# publish = false: we do NOT publish to crates.io (the binary ships via the
+# GitHub Release instead, and the generic `isa` crate name shouldn't be
+# claimed there). git_release_enable = false: cargo-dist owns the GitHub
+# Release, not release-plz — release-plz only bumps, changelogs, and tags.
+[workspace]
+publish = false
+git_release_enable = false
+git_tag_enable = true
+changelog_update = true

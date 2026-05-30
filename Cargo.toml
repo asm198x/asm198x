@@ -22,7 +22,7 @@ default-members = ["crates/asm198x"]
 edition = "2024"
 version = "0.0.1"
 license = "GPL-2.0-or-later"
-repository = "https://github.com/Asm198x/asm198x"
+repository = "https://github.com/asm198x/asm198x"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
@@ -41,3 +41,19 @@ split-debuginfo = "unpacked"
 [profile.release]
 lto = "thin"
 codegen-units = 1
+
+# cargo-dist release configuration. On a `v*` tag push (created by
+# release-plz when its release PR merges), .github/workflows/release.yml
+# builds the `asm198x` CLI for each target and attaches archives to a
+# GitHub Release. Regenerate that workflow with `dist generate` after
+# editing this section. The `isa` crate has no binary, so dist ignores it.
+[workspace.metadata.dist]
+cargo-dist-version = "0.32.0"
+ci = "github"
+installers = []
+targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
+pr-run-mode = "plan"
+
+[profile.dist]
+inherits = "release"
+lto = "thin"
