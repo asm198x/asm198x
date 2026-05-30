@@ -1,0 +1,17 @@
+[package]
+name = "asm198x"
+description = "A family of modern, single-binary assemblers for retro CPUs. 6502 today; more to follow."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+# One crate provides both the library API (`asm198x::assemble_6502`) and the
+# `asm198x` binary (src/main.rs). The engine-vs-dialect crate split is deferred
+# until a second CPU makes the seam real — see the umbrella decision record.
+
+[dependencies]
+isa = { path = "../isa" }
+
+[lints]
+workspace = true

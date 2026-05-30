@@ -1,0 +1,13 @@
+[package]
+name = "isa"
+description = "Declarative instruction-set specifications for the 198x family CPUs — the single source of truth for instruction encoding, shared between Asm198x and (eventually) Emu198x."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+# Zero dependencies, by design. This is the neutral layer Emu198x can depend on
+# without pulling in the assembler. See ../../../decisions/asm198x-and-shared-isa-spec.md
+
+[lints]
+workspace = true

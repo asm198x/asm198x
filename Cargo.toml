@@ -1,0 +1,43 @@
+# Asm198x — a family of modern, single-binary assemblers and disassemblers
+# for the 198x family's target CPUs. One workspace, many crates.
+#
+# Layout decision and the shared-ISA-spec architecture live in the umbrella
+# decision record: ../decisions/asm198x-and-shared-isa-spec.md
+#
+# Build-time levers (baked in from line one so this never drifts toward the
+# Emu198x `cargo test` pain — see ../decisions, "build-time" notes):
+#   * default-members keeps a bare `cargo build`/`test` scoped to the CLI;
+#   * [profile.dev] drops full debuginfo, the biggest `cargo test` link cost.
+# Assemblers are featherweight (no wgpu/winit/audio), so this stays fast.
+
+[workspace]
+resolver = "2"
+members = [
+    "crates/isa",
+    "crates/asm198x",
+]
+default-members = ["crates/asm198x"]
+
+[workspace.package]
+edition = "2024"
+version = "0.0.1"
+license = "GPL-2.0-or-later"
+repository = "https://github.com/Asm198x/asm198x"
+
+[workspace.lints.rust]
+unsafe_code = "forbid"
+unused_must_use = "deny"
+
+[workspace.lints.clippy]
+dbg_macro = "deny"
+unwrap_used = "deny"
+
+[profile.dev]
+# Line tables give backtraces without the full-debuginfo link tax. This is
+# the lever that matters most once a workspace grows many test binaries.
+debug = "line-tables-only"
+split-debuginfo = "unpacked"
+
+[profile.release]
+lto = "thin"
+codegen-units = 1
