@@ -1,5 +1,7 @@
 # Asm198x
 
+[![CI](https://github.com/asm198x/asm198x/actions/workflows/ci.yml/badge.svg)](https://github.com/asm198x/asm198x/actions/workflows/ci.yml)
+
 A family of modern, single-binary assemblers (and, in time, disassemblers) for
 the retro CPUs of the 198x era. One tool, consistent across machines, built to
 still run in ten years.
