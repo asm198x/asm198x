@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.3](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.2...asm198x-v0.0.3) - 2026-06-01
+
+### Added
+
+- scaffold Asm198x workspace with a working 6502 assembler slice
+
+### Other
+
+- release v0.0.2 ([#1](https://github.com/asm198x/asm198x/pull/1))
+
 ## [0.0.2](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.1...asm198x-v0.0.2) - 2026-06-01
 
 ### Added
