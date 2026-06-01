@@ -11,4 +11,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- scaffold Asm198x workspace with a working 6502 assembler slice
+- Declarative 6502 instruction-set spec: every mnemonic's opcodes, operand
+  layout, addressing modes, cycle counts, and flag effects as authored `const`
+  data, plus the types that describe them. Dependency-free and standalone — the
+  single source of truth the assembler consumes, and that Emu198x can later
+  validate its hand-written decoders against.
