@@ -19,3 +19,12 @@ publish = false
 git_release_enable = false
 git_tag_enable = true
 changelog_update = true
+
+# The `isa` crate is not dist-able (no binary) and never ships independently —
+# it exists only as a dependency of `asm198x`. cargo-dist's release.yml fires on
+# any version-like tag and errors on a non-dist-able package, so an `isa-vX.Y.Z`
+# tag would produce a failed release run. Keep isa version-bumped (lockstep) but
+# untagged; only `asm198x-vX.Y.Z` drives a release.
+[[package]]
+name = "isa"
+git_tag_enable = false
