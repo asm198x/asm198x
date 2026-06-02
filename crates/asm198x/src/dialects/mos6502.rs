@@ -137,17 +137,26 @@ pub(crate) fn parse_operand(
         return Ok(OperandSyntax::Immediate(value(rest, line)?));
     }
     if t.starts_with('(') {
-        let upper = t.to_ascii_uppercase();
-        if let Some(inner) = upper.strip_suffix(",X)") {
-            return Ok(OperandSyntax::IndexedIndirect(value(&t[1..inner.len()], line)?));
-        }
-        if let Some(inner) = upper.strip_suffix("),Y") {
-            return Ok(OperandSyntax::IndirectIndexed(value(&t[1..inner.len()], line)?));
-        }
+        // The three indirect forms, tolerant of spaces around `,` and `)`:
+        //   `(expr)`      indirect            `(expr,x)`  indexed-indirect
+        //   `(expr),y`    indirect-indexed
+        let malformed = || AsmError::new(line, format!("malformed indirect operand `{raw}`"));
         if let Some(inner) = t.strip_suffix(')') {
-            return Ok(OperandSyntax::Indirect(value(&inner[1..], line)?));
+            let inner = &inner[1..];
+            if let Some(c) = top_level_rfind(inner, ',')
+                && inner[c + 1..].trim().eq_ignore_ascii_case("x")
+            {
+                return Ok(OperandSyntax::IndexedIndirect(value(&inner[..c], line)?));
+            }
+            return Ok(OperandSyntax::Indirect(value(inner, line)?));
         }
-        return Err(AsmError::new(line, format!("malformed indirect operand `{raw}`")));
+        let close = t.rfind(')').ok_or_else(malformed)?;
+        let after = t[close + 1..].trim();
+        let idx = after.strip_prefix(',').map(str::trim);
+        if idx.is_some_and(|i| i.eq_ignore_ascii_case("y")) {
+            return Ok(OperandSyntax::IndirectIndexed(value(&t[1..close], line)?));
+        }
+        return Err(malformed());
     }
     if let Some(comma) = top_level_rfind(t, ',') {
         let index = match t[comma + 1..].trim() {
@@ -177,9 +186,6 @@ pub(crate) fn parse_operand(
 #[derive(Clone, Copy)]
 pub(crate) enum BytePrec {
     Loose,
-    // Consumed by the ca65 dialect (the next increment); exercised by this
-    // module's tests in the meantime.
-    #[allow(dead_code)]
     Tight,
 }
 

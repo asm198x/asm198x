@@ -5,6 +5,7 @@
 //! here — not touching the engine.
 
 pub(crate) mod acme;
+pub(crate) mod ca65;
 pub(crate) mod mos6502;
 pub(crate) mod pasmo;
 pub(crate) mod sjasmplus;

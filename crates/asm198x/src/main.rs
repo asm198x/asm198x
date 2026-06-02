@@ -13,6 +13,9 @@ use std::process::ExitCode;
 #[derive(Clone, Copy)]
 enum Assembler {
     Acme,
+    /// ca65 for the NES — assembled and linked to a `.nes` ROM, handled
+    /// separately from the flat-binary dialects.
+    Ca65,
     Pasmo { z80n: bool },
     Sjasmplus { z80n: bool },
 }
@@ -30,16 +33,17 @@ impl Assembler {
             },
         };
         match dialect.map(str::to_ascii_lowercase).as_deref() {
-            // ACME is the default (and only) 6502 dialect today; ca65 is planned.
+            // ACME is the default 6502 dialect (C64); ca65 targets the NES.
             Some("acme" | "6502" | "mos6502") => Ok(Self::Acme),
+            Some("ca65" | "nes") => Ok(Self::Ca65),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo { z80n: z80n.unwrap_or(false) }),
             Some("pasmonext") => Ok(Self::Pasmo { z80n: z80n.unwrap_or(true) }),
             Some("sjasmplus" | "sjasm") => Ok(Self::Sjasmplus { z80n: z80n.unwrap_or(false) }),
-            Some(other) => {
-                Err(format!("unknown dialect `{other}` (try acme, pasmo, pasmonext, or sjasmplus)"))
-            }
+            Some(other) => Err(format!(
+                "unknown dialect `{other}` (try acme, ca65, pasmo, pasmonext, or sjasmplus)"
+            )),
             // No --dialect: a Z80 target implies pasmo syntax; otherwise 6502/acme.
             None => match z80n {
                 Some(z) => Ok(Self::Pasmo { z80n: z }),
@@ -51,6 +55,8 @@ impl Assembler {
     fn assemble(self, source: &str) -> Result<asm198x::Assembly, asm198x::AsmError> {
         match self {
             Self::Acme => asm198x::assemble_acme(source),
+            // ca65 is linked to a ROM and handled directly in `run`.
+            Self::Ca65 => unreachable!("ca65 is linked in run()"),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
             Self::Pasmo { z80n: true } => asm198x::assemble_pasmonext(source),
             Self::Sjasmplus { z80n: false } => asm198x::assemble_sjasmplus(source),
@@ -133,6 +139,16 @@ fn run(args: &[String]) -> Result<String, String> {
 
     let assembler = Assembler::resolve(dialect, target)?;
     let source = std::fs::read_to_string(input).map_err(|e| format!("cannot read {input}: {e}"))?;
+
+    // ca65 assembles and links to a `.nes` ROM rather than a flat binary.
+    if let Assembler::Ca65 = assembler {
+        let rom = asm198x::assemble_ca65(&source).map_err(|e| e.to_string())?;
+        let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("nes"));
+        std::fs::write(&out_path, &rom)
+            .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+        return Ok(format!("assembled + linked {} byte(s) -> {}", rom.len(), out_path.display()));
+    }
+
     let assembly = assembler.assemble(&source).map_err(|e| e.to_string())?;
     let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
     std::fs::write(&out_path, &assembly.bytes)

@@ -32,6 +32,18 @@ pub fn assemble_acme(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::Acme)
 }
 
+/// Assemble ca65-syntax 6502 source for the NES and link it into a `.nes` ROM
+/// image — the NES curriculum's toolchain (ca65 + ld65) in one step. Unlike the
+/// flat assemblers, this returns the finished ROM bytes (iNES header + 32K PRG +
+/// 8K CHR) because the output is the linker's, not a single origin's.
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_ca65(source: &str) -> Result<Vec<u8>, AsmError> {
+    dialects::ca65::assemble(source)
+}
+
 /// Assemble pasmo-syntax Z80 source into a flat binary, targeting a **plain
 /// Z80** (Z80N opcodes are rejected, as vanilla pasmo rejects them).
 ///
