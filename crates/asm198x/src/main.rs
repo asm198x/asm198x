@@ -11,6 +11,7 @@ use std::process::ExitCode;
 #[derive(Clone, Copy)]
 enum Dialect {
     Mos6502,
+    Pasmo,
     PasmoNext,
 }
 
@@ -19,14 +20,18 @@ impl Dialect {
     fn parse(name: &str) -> Result<Self, String> {
         match name.to_ascii_lowercase().as_str() {
             "6502" | "mos6502" | "ca65" => Ok(Self::Mos6502),
-            "pasmonext" | "pasmo" | "z80" => Ok(Self::PasmoNext),
-            other => Err(format!("unknown dialect `{other}` (try 6502 or pasmonext)")),
+            "pasmo" | "z80" => Ok(Self::Pasmo),
+            "pasmonext" => Ok(Self::PasmoNext),
+            other => {
+                Err(format!("unknown dialect `{other}` (try 6502, pasmo, or pasmonext)"))
+            }
         }
     }
 
     fn assemble(self, source: &str) -> Result<asm198x::Assembly, asm198x::AsmError> {
         match self {
             Self::Mos6502 => asm198x::assemble_6502(source),
+            Self::Pasmo => asm198x::assemble_pasmo(source),
             Self::PasmoNext => asm198x::assemble_pasmonext(source),
         }
     }
@@ -96,7 +101,7 @@ fn run(args: &[String]) -> Result<String, String> {
 fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
      usage: asm198x [--dialect <name>] <input> [-o <output.bin>]\n\n\
-     dialects: 6502 (default, ca65/ACME-shaped), pasmonext (Z80)\n\n\
+     dialects: 6502 (default, ca65/ACME-shaped), pasmo (Z80), pasmonext (Z80)\n\n\
      Assembles retro CPU source to a flat binary."
         .to_string()
 }

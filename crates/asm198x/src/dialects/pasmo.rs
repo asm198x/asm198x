@@ -1,18 +1,21 @@
-//! The PasmoNext Z80 dialect front-end.
+//! The pasmo-family Z80 dialect front-ends.
 //!
-//! PasmoNext (the ZX Spectrum Next fork of pasmo, invoked as `pasmonext`) is
-//! the Code198x curriculum's assembler, so it is Asm198x's primary Z80 dialect
-//! (see `decisions/syntax-stance.md`). It is a syntactic superset of vanilla
-//! pasmo; for standard Z80 the two are byte-identical, and this front-end
-//! covers that shared core. PasmoNext's Z80N extended opcodes are a deferred
-//! ISA-spec extension — the current curriculum uses only standard Z80.
+//! Two dialects share this one parser: [`Pasmo`] (vanilla pasmo, by Julián
+//! Albo) and [`PasmoNext`] (the ZX Spectrum Next fork, invoked as `pasmonext`,
+//! which the Code198x curriculum uses). PasmoNext is a syntactic *superset* of
+//! pasmo, differing only in the Spectrum Next's Z80N extended opcodes. For
+//! standard Z80 the two are byte-identical, so they run the same code here; the
+//! only future divergence is that PasmoNext will also accept Z80N mnemonics (a
+//! deferred ISA-spec extension), which base Pasmo never will. See
+//! `decisions/syntax-stance.md`.
 //!
-//! This front-end targets [`isa::z80`] and covers the base page and ED group,
-//! plus the directives real curriculum source uses: `org`, `equ`, `defb`/`db`,
-//! `defw`/`dw`, `end`. Numbers are `$hex`, `%binary`, decimal, and `'c'` char
-//! literals. Labels sit in column 0 (with or without a trailing `:`);
-//! instructions are indented. Local-style labels beginning with `.` are
-//! accepted as ordinary identifiers.
+//! This front-end targets [`isa::z80`] and covers the standard Z80 instruction
+//! set, plus the directives real curriculum source uses: `org`, `equ`,
+//! `defb`/`db`, `defw`/`dw`, `end`. Numbers are `$hex`, `%binary`, decimal, and
+//! `'c'` char literals; `defb` also takes `"strings"`. Operand values are
+//! arithmetic expressions (`+ - * /`, parens, C precedence). Labels sit in
+//! column 0 (with or without a trailing `:`); instructions are indented.
+//! Local-style labels beginning with `.` are accepted as ordinary identifiers.
 //!
 //! ## Resolving operands to spec mode labels
 //!
@@ -38,41 +41,61 @@ use std::collections::BTreeMap;
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
 
-/// The PasmoNext Z80 dialect.
+/// Vanilla pasmo (standard Z80 only).
+pub(crate) struct Pasmo;
+
+/// PasmoNext: pasmo plus the ZX Spectrum Next's Z80N opcodes (the curriculum's
+/// assembler). Identical to [`Pasmo`] for standard Z80; Z80N is deferred.
 pub(crate) struct PasmoNext;
+
+impl Dialect for Pasmo {
+    fn instruction_set(&self) -> &'static isa::InstructionSet {
+        &isa::z80::SET
+    }
+    fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
+        parse_z80(self.instruction_set(), source)
+    }
+}
 
 impl Dialect for PasmoNext {
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::z80::SET
     }
-
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        let set = self.instruction_set();
-        let mut out = Vec::new();
-        // Constants defined with `equ`, recorded as parsed. Opcode-embedded
-        // operands (BIT n, IM n, RST n) must be known at parse time to pick the
-        // form, so they resolve against this — not the engine's pass-2 symbols.
-        let mut consts: BTreeMap<String, i64> = BTreeMap::new();
-        for (i, raw) in source.lines().enumerate() {
-            let line = i + 1;
-            let code = strip_comment(raw);
-            if code.trim().is_empty() {
-                continue;
-            }
-            let (label, rest) = split_label(set, code, line)?;
-            let op = parse_op(set, rest, line, &consts)?;
-            if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
-                && let Some(v) = eval_const(e, &consts)
-            {
-                consts.insert(name.clone(), v);
-            }
-            if label.is_none() && op.is_none() {
-                continue;
-            }
-            out.push(Statement { line, label, op });
-        }
-        Ok(out)
+        // Identical to base pasmo today; the Z80N extension hooks in here.
+        parse_z80(self.instruction_set(), source)
     }
+}
+
+/// Parse pasmo-family Z80 source into the engine's statement stream.
+fn parse_z80(
+    set: &'static isa::InstructionSet,
+    source: &str,
+) -> Result<Vec<Statement>, AsmError> {
+    let mut out = Vec::new();
+    // Constants defined with `equ`, recorded as parsed. Opcode-embedded
+    // operands (BIT n, IM n, RST n) must be known at parse time to pick the
+    // form, so they resolve against this — not the engine's pass-2 symbols.
+    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
+    for (i, raw) in source.lines().enumerate() {
+        let line = i + 1;
+        let code = strip_comment(raw);
+        if code.trim().is_empty() {
+            continue;
+        }
+        let (label, rest) = split_label(set, code, line)?;
+        let op = parse_op(set, rest, line, &consts)?;
+        if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
+            && let Some(v) = eval_const(e, &consts)
+        {
+            consts.insert(name.clone(), v);
+        }
+        if label.is_none() && op.is_none() {
+            continue;
+        }
+        out.push(Statement { line, label, op });
+    }
+    Ok(out)
 }
 
 // ---------------------------------------------------------------------------
@@ -740,6 +763,15 @@ mod tests {
     fn ed_block_move_assembles() {
         // LDIR is an ED-prefix op: ED B0.
         assert_eq!(asm("        ldir\n").expect("ldir").bytes, vec![0xED, 0xB0]);
+    }
+
+    #[test]
+    fn base_pasmo_and_pasmonext_agree_on_standard_z80() {
+        // The two dialects are byte-identical for standard Z80.
+        let src = "        org $8000\n.loop:  ld a, 0\n        ldir\n        bit 7,(hl)\n        jr .loop\n";
+        let base = crate::assemble_pasmo(src).expect("pasmo");
+        let next = crate::assemble_pasmonext(src).expect("pasmonext");
+        assert_eq!(base.bytes, next.bytes);
     }
 
     #[test]
