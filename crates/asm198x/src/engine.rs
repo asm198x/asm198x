@@ -100,6 +100,9 @@ impl Expr {
 pub(crate) enum Operation {
     /// Set the program counter (the `.org`/`org` directive).
     Org(Expr),
+    /// Define the statement's label as a constant value rather than the PC
+    /// (the `equ`/`=` directive). The statement must carry a label.
+    Equ(Expr),
     /// Emit one byte per expression.
     Bytes(Vec<Expr>),
     /// Emit one word per expression, in the instruction set's endianness.
@@ -142,6 +145,22 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
     let mut pc: i64 = 0;
     let mut origin: Option<i64> = None;
     for s in &statements {
+        // `equ` binds the label to a value, not the current address, and emits
+        // nothing — so it is handled before the address-label assignment below.
+        if let Some(Operation::Equ(e)) = &s.op {
+            let label = s
+                .label
+                .as_ref()
+                .ok_or_else(|| AsmError::new(s.line, "`equ` needs a label"))?;
+            let v = e.eval(&symbols, s.line)?;
+            let value = u16::try_from(v).map_err(|_| {
+                AsmError::new(s.line, format!("equ value {v} out of range 0..=65535"))
+            })?;
+            if symbols.insert(label.clone(), value).is_some() {
+                return Err(AsmError::new(s.line, format!("duplicate label `{label}`")));
+            }
+            continue;
+        }
         if let Some(label) = &s.label {
             if !(0..=0xFFFF).contains(&pc) {
                 return Err(AsmError::new(s.line, "address out of range"));
@@ -165,6 +184,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
             Some(Operation::Instruction { mnemonic, mode, .. }) => {
                 pc += form(set, mnemonic, mode, s.line)?.len() as i64;
             }
+            Some(Operation::Equ(_)) => {} // handled above
         }
     }
     let origin = origin.unwrap_or(0);
@@ -182,6 +202,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 }
                 bytes.resize(bytes.len() + (target - cur) as usize, 0);
             }
+            Some(Operation::Equ(_)) => {} // defines a symbol; emits nothing
             Some(Operation::Bytes(items)) => {
                 for e in items {
                     let v = e.eval(&symbols, s.line)?;
