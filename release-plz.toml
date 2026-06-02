@@ -20,6 +20,14 @@ git_release_enable = false
 git_tag_enable = true
 changelog_update = true
 
+# git_only = true: take the previous version from the git tag, not the
+# crates.io registry. Required whenever publish = false — with no registry
+# baseline, release-plz can't see the last release and never bumps the version
+# (it reports "already up-to-date" and opens no release PR). See the umbrella
+# project-skeleton-standard decision for the full story.
+# (Must precede the [[package]] table below: it is a [workspace] key.)
+git_only = true
+
 # The `isa` crate is not dist-able (no binary) and never ships independently —
 # it exists only as a dependency of `asm198x`. cargo-dist's release.yml fires on
 # any version-like tag and errors on a non-dist-able package, so an `isa-vX.Y.Z`
