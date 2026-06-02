@@ -13,11 +13,12 @@
 //! live in [`crate::engine`]. See `decisions/syntax-stance.md`.
 //!
 //! Implemented so far: `*=`, `name = expr`, `!byte`/`!by`/`!8`,
-//! `!word`/`!wo`/`!16`, `!fill`, arithmetic expressions (`+ - * /` with C
-//! precedence and parentheses), the `<`/`>` low/high-byte prefixes, `*` as the
-//! program counter in value position, and anonymous `-`/`+` labels. Not yet:
-//! the text directives (`!text`/`!pet`/`!scr`) and conditional assembly
-//! (`!if`/`!ifdef`/`!ifndef`) — tracked in `decisions/syntax-stance.md`.
+//! `!word`/`!wo`/`!16`, `!fill`, `!text`/`!tx` (raw) and `!scr` (screen codes),
+//! arithmetic expressions (`+ - * /` with C precedence and parentheses), the
+//! `<`/`>` low/high-byte prefixes, `*` as the program counter in value
+//! position, anonymous `-`/`+` labels, and conditional assembly
+//! (`!if`/`!ifdef`/`!ifndef` … `{ }` … `else`). Not yet: `!pet` (no curriculum
+//! use), macros, and `!for`/`!zone` — tracked in `decisions/syntax-stance.md`.
 
 use std::collections::BTreeMap;
 
@@ -477,7 +478,7 @@ fn parse_op(
         return Ok(None);
     }
     if let Some(directive) = rest.strip_prefix('!') {
-        return Ok(Some(parse_directive(anons, directive, line)?));
+        return Ok(Some(parse_directive(anons, env, directive, line)?));
     }
     let (mnemonic, remainder) = split_first_word(rest);
     let mnemonic = mnemonic.to_ascii_uppercase();
@@ -497,31 +498,107 @@ fn parse_op(
 // Directives
 // ---------------------------------------------------------------------------
 
-fn parse_directive(anons: &[AnonDef], directive: &str, line: usize) -> Result<Operation, AsmError> {
+fn parse_directive(
+    anons: &[AnonDef],
+    env: &BTreeMap<String, i64>,
+    directive: &str,
+    line: usize,
+) -> Result<Operation, AsmError> {
     let (name, rest) = split_first_word(directive);
     match name.to_ascii_lowercase().as_str() {
         "byte" | "by" | "8" => Ok(Operation::Bytes(parse_list(anons, rest, line)?)),
         "word" | "wo" | "16" => Ok(Operation::Words(parse_list(anons, rest, line)?)),
-        "fill" => parse_fill(anons, rest, line),
+        "fill" => parse_fill(anons, env, rest, line),
+        // `!text` emits raw bytes; `!scr` converts to C64 screen codes.
+        "text" | "tx" => parse_text(anons, rest, line, |c| c),
+        "scr" => parse_text(anons, rest, line, screen_code),
         other => Err(AsmError::new(line, format!("unsupported directive `!{other}`"))),
     }
 }
 
-/// `!fill amount [, value]` — `amount` bytes of `value` (default 0). Both must
-/// fold to constants (the size has to be known at parse time).
-fn parse_fill(anons: &[AnonDef], rest: &str, line: usize) -> Result<Operation, AsmError> {
+/// Parse a text directive: a comma list mixing `"..."` strings (one byte per
+/// character, passed through `convert`) and bare values (emitted as-is). ACME's
+/// `!text` passes characters through unchanged; `!scr` maps them to screen codes.
+fn parse_text(
+    anons: &[AnonDef],
+    rest: &str,
+    line: usize,
+    convert: fn(u8) -> u8,
+) -> Result<Operation, AsmError> {
+    let rest = rest.trim();
+    if rest.is_empty() {
+        return Err(AsmError::new(line, "text directive needs a value"));
+    }
+    let mut bytes = Vec::new();
+    for piece in split_data_items(rest) {
+        if let Some(text) = string_literal(piece) {
+            bytes.extend(text.bytes().map(|b| Expr::Num(i64::from(convert(b)))));
+        } else {
+            bytes.push(parse_value(anons, piece, line)?);
+        }
+    }
+    Ok(Operation::Bytes(bytes))
+}
+
+/// ACME's `!scr` conversion: ASCII to C64 screen codes. Lowercase maps to the
+/// uppercase screen codes (1–26) — the default uppercase/graphics set — so
+/// lowercase source text shows as capitals. Derived from the acme binary.
+fn screen_code(c: u8) -> u8 {
+    match c {
+        b'@' => 0x00,
+        b'A'..=b'Z' => c,        // unchanged (acme convention)
+        0x5B..=0x5F => c - 0x40, // [ \ ] ^ _  ->  0x1B–0x1F
+        b'`' => 0x40,
+        b'a'..=b'z' => c - 0x60, // a–z  ->  0x01–0x1A
+        _ => c,
+    }
+}
+
+/// Split a data list on commas that are not inside a `"..."` string.
+fn split_data_items(s: &str) -> Vec<&str> {
+    let mut out = Vec::new();
+    let mut in_string = false;
+    let mut start = 0;
+    for (i, c) in s.char_indices() {
+        match c {
+            '"' => in_string = !in_string,
+            ',' if !in_string => {
+                out.push(s[start..i].trim());
+                start = i + 1;
+            }
+            _ => {}
+        }
+    }
+    out.push(s[start..].trim());
+    out
+}
+
+/// The contents of a `"..."` string literal, or `None` if `piece` is not one.
+fn string_literal(piece: &str) -> Option<&str> {
+    let p = piece.trim();
+    (p.len() >= 2 && p.starts_with('"') && p.ends_with('"')).then(|| &p[1..p.len() - 1])
+}
+
+/// `!fill amount [, value]` — `amount` bytes of `value` (default 0). Both fold
+/// against the parse-time `env` (so a `= const` like `MAX_NOTES` works), because
+/// the size has to be known before pass two assigns addresses.
+fn parse_fill(
+    anons: &[AnonDef],
+    env: &BTreeMap<String, i64>,
+    rest: &str,
+    line: usize,
+) -> Result<Operation, AsmError> {
     let mut parts = rest.splitn(2, ',');
     let amount_src = parts.next().unwrap_or("").trim();
-    let amount = match parse_value(anons, amount_src, line)? {
-        Expr::Num(n) if n >= 0 => n as usize,
-        _ => return Err(AsmError::new(line, "`!fill` needs a constant byte count")),
-    };
+    let amount = fold_const(&parse_value(anons, amount_src, line)?, env, line)?;
+    let amount = usize::try_from(amount)
+        .map_err(|_| AsmError::new(line, "`!fill` byte count must be a non-negative constant"))?;
     let value = match parts.next() {
         None => 0,
-        Some(v) => match parse_value(anons, v, line)? {
-            Expr::Num(n) if (0..=0xFF).contains(&n) => n as u8,
-            _ => return Err(AsmError::new(line, "`!fill` value must be a constant byte")),
-        },
+        Some(v) => {
+            let n = fold_const(&parse_value(anons, v, line)?, env, line)?;
+            u8::try_from(n).map_err(|_| AsmError::new(line, "`!fill` value must be a constant byte"))?
+        }
     };
     Ok(Operation::Bytes(vec![Expr::Num(i64::from(value)); amount]))
 }
@@ -1046,6 +1123,27 @@ mod tests {
         )
         .expect("if-true");
         assert_eq!(a.bytes, vec![0xA9, 0x11]);
+    }
+
+    #[test]
+    fn text_emits_raw_bytes() {
+        // `!text` passes characters through unchanged (ASCII).
+        assert_eq!(asm("!text \"2064\"").expect("text").bytes, vec![0x32, 0x30, 0x36, 0x34]);
+    }
+
+    #[test]
+    fn scr_converts_to_screen_codes() {
+        // lowercase -> uppercase screen codes 1..26; space stays $20.
+        assert_eq!(
+            asm("!scr \"sid\"").expect("scr").bytes,
+            vec![0x13, 0x09, 0x04]
+        );
+        // a comma inside the string is data, not a separator.
+        assert_eq!(
+            asm("!scr \"a, z\"").expect("scr comma").bytes,
+            vec![0x01, 0x2C, 0x20, 0x1A]
+        );
+        assert_eq!(asm("!scr \"@A`\"").expect("scr edge").bytes, vec![0x00, 0x41, 0x40]);
     }
 
     #[test]
