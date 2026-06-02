@@ -18,7 +18,7 @@ same spec (e.g. acme and ca65 both emit 6502). One CPU, one spec, many possible
 front-ends.
 
 The goal: real-world source for a machine assembles **unchanged**. Someone with
-a working acme C64 project, a ca65 NES project, or a pasmo Spectrum project
+a working acme C64 project, a ca65 NES project, or a PasmoNext Spectrum project
 should point Asm198x at it and get the same bytes out, without porting syntax.
 
 ## Dialect targets, prioritised by curriculum
@@ -30,13 +30,19 @@ must assemble unchanged. A 2026-06-02 scan of the curriculum settled the list:
 | CPU | First-class dialects | Curriculum platform(s) | Also consider |
 |-----|---------------------|------------------------|----------------|
 | 6502 | **acme**, **ca65** | C64 (acme), NES (ca65) | 64tass, dasm |
-| Z80 | **pasmo** (primary), sjasmplus | Spectrum (pasmo) | z80asm |
+| Z80 | **PasmoNext** (primary), sjasmplus | Spectrum (pasmonext) | pasmo, z80asm |
 | 68000 | **vasm** (mot syntax) | Amiga (vasm) | Devpac/HiSoft |
 
 Both 6502 dialects are first-class: the curriculum uses acme for the C64 and
-ca65 for the NES, so neither is "also consider." For Z80, **pasmo is primary**
-because it is the Spectrum curriculum's assembler; sjasmplus stays a first-class
-second front-end (popular in the wider scene, useful breadth). This corrects an
+ca65 for the NES, so neither is "also consider." For Z80, **PasmoNext is
+primary** — the ZX Spectrum Next fork of pasmo (Julián Albo, modified by C
+Kirby) that the curriculum invokes as `pasmonext`. PasmoNext is a syntactic
+superset of vanilla pasmo; for standard Z80 the two are byte-identical, so one
+standard-Z80 backend serves both, and vanilla pasmo drops to "also consider."
+The Z80N extended opcodes PasmoNext adds (MUL, LDIRX, NEXTREG, …) are a deferred
+ISA-spec extension, authored when the curriculum uses them — a 2026-06-02 scan
+found the corpus uses only standard Z80. sjasmplus stays a first-class second
+front-end (popular in the wider scene, useful breadth). This corrects an
 earlier version of this record that named sjasmplus primary — the curriculum
 does not use it.
 
@@ -74,11 +80,11 @@ acme or ca65. It supports the common addressing modes, labels,
 compatibility with *any* real dialect: arithmetic expressions, that dialect's
 directive set and scoping, segments, macros, string escapes.
 
-**Active first target: Z80 + pasmo**, to unblock the Spectrum curriculum. This
-is also the move that forces the engine ↔ dialect ↔ spec seam (today the engine
-and the lone 6502 front-end are fused in one crate) while the codebase is still
-small. The work: author the Z80 `isa` spec, split the seam, and write a pasmo
-front-end whose output matches pasmo's bytes on real Spectrum source.
+The Z80 + PasmoNext backend is the first delivered: the engine ↔ dialect ↔ spec
+seam is split, the Z80 `isa` spec covers the base page and the ED group, and the
+PasmoNext front-end assembles standard-Z80 source. Remaining for full Spectrum
+coverage: the CB (bit/rotate) and DD/FD (IX/IY) prefix groups, and validating
+output byte-for-byte against the `pasmonext` binary on real curriculum source.
 
 ## Drift triggers
 
@@ -96,8 +102,11 @@ front-end whose output matches pasmo's bytes on real Spectrum source.
   not yet. Write real front-ends first; generalise only if the variance proves
   tabular. See "What is shared vs per-dialect."
 - **"Prioritise the most popular dialect in the scene"** — priority is set by
-  curriculum consumption, not wild popularity. That is why Z80 leads with pasmo,
-  not sjasmplus.
+  curriculum consumption, not wild popularity. That is why Z80 leads with
+  PasmoNext, not sjasmplus.
+- **"The Z80 target is vanilla pasmo"** — no; the curriculum uses **PasmoNext**
+  (invoked as `pasmonext`), a Spectrum Next superset of pasmo. Validate against
+  the `pasmonext` binary. Z80N extended opcodes are a deferred ISA extension.
 
 ## Log
 
@@ -112,3 +121,14 @@ from sjasmplus to **pasmo** (the Spectrum curriculum's assembler); sjasmplus
 stays first-class for breadth. Set the active first target to **Z80 + pasmo**,
 which also forces the engine/dialect/spec seam while the codebase is small.
 Held the line against a premature data-driven dialect engine.
+
+### 2026-06-02 — Z80 target is PasmoNext, not vanilla pasmo
+
+Steve noted the course is "busily using pasmonext." The installed assembler is
+PasmoNext v0.1.3 — the ZX Spectrum Next fork of pasmo (Julián Albo, modified by
+C Kirby) — and the curriculum invokes `pasmonext`. Renamed the Z80 dialect
+target from pasmo to **PasmoNext**; it is a syntactic superset, so for standard
+Z80 the byte output is identical and one backend serves both. The Z80N extended
+opcodes (MUL, LDIRX, NEXTREG, …) are deferred: a corpus scan found only standard
+Z80 in use (apparent `TEST`/`MIRROR` hits were comment/filename noise). Renamed
+the code dialect to `pasmonext`/`PasmoNext`; `pasmo` stays a CLI alias.
