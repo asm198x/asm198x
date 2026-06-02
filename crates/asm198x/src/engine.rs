@@ -171,6 +171,7 @@ pub(crate) struct Statement {
 /// symbol-resolution failure.
 pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, AsmError> {
     let set = dialect.instruction_set();
+    let ext = dialect.extension_set();
     let statements = dialect.parse(source)?;
 
     // Pass 1 — assign addresses to labels.
@@ -215,7 +216,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
             Some(Operation::Bytes(items)) => pc += items.len() as i64,
             Some(Operation::Words(items)) => pc += 2 * items.len() as i64,
             Some(Operation::Instruction { mnemonic, mode, .. }) => {
-                pc += form(set, mnemonic, mode, s.line)?.len() as i64;
+                pc += form(set, ext, mnemonic, mode, s.line)?.len() as i64;
             }
             Some(Operation::Equ(_)) => {} // handled above
         }
@@ -253,7 +254,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 mode,
                 operands,
             }) => {
-                let f = form(set, mnemonic, mode, s.line)?;
+                let f = form(set, ext, mnemonic, mode, s.line)?;
                 if operands.len() != f.operands.len() {
                     return Err(AsmError::new(
                         s.line,
@@ -330,13 +331,17 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
 /// line if the mnemonic is unknown or lacks the chosen addressing mode.
 fn form<'a>(
     set: &'a isa::InstructionSet,
+    ext: Option<&'a isa::InstructionSet>,
     mnemonic: &str,
     mode: &str,
     line: usize,
 ) -> Result<&'a isa::Form, AsmError> {
-    if let Some(f) = set.find_form(mnemonic, mode) {
+    let found = set
+        .find_form(mnemonic, mode)
+        .or_else(|| ext.and_then(|e| e.find_form(mnemonic, mode)));
+    if let Some(f) = found {
         Ok(f)
-    } else if set.has_mnemonic(mnemonic) {
+    } else if set.has_mnemonic(mnemonic) || ext.is_some_and(|e| e.has_mnemonic(mnemonic)) {
         Err(AsmError::new(
             line,
             format!("`{mnemonic}` has no {mode} addressing mode"),

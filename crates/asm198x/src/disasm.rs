@@ -24,15 +24,20 @@ pub struct Line {
     pub text: String,
 }
 
-/// Disassemble a flat Z80 binary loaded at `origin`.
+/// Disassemble a flat Z80 binary loaded at `origin`. With `z80n`, the Spectrum
+/// Next's Z80N opcodes are also decoded; otherwise only standard Z80 is.
 #[must_use]
-pub fn disassemble_z80(code: &[u8], origin: u16) -> Vec<Line> {
-    let set = &isa::z80::SET;
+pub fn disassemble_z80(code: &[u8], origin: u16, z80n: bool) -> Vec<Line> {
+    let sets: &[&isa::InstructionSet] = if z80n {
+        &[&isa::z80::SET, &isa::z80::NEXT]
+    } else {
+        &[&isa::z80::SET]
+    };
     let mut out = Vec::new();
     let mut pos = 0;
     while pos < code.len() {
         let addr = origin.wrapping_add(pos as u16);
-        if let Some((mnemonic, form, values, len)) = decode_one(set, code, pos) {
+        if let Some((mnemonic, form, values, len)) = decode_one(sets, code, pos) {
             out.push(Line {
                 addr,
                 bytes: code[pos..pos + len].to_vec(),
@@ -54,9 +59,9 @@ pub fn disassemble_z80(code: &[u8], origin: u16) -> Vec<Line> {
 
 /// Render a disassembly as reassemblable source text (one instruction per line).
 #[must_use]
-pub fn listing_z80(code: &[u8], origin: u16) -> String {
+pub fn listing_z80(code: &[u8], origin: u16, z80n: bool) -> String {
     let mut s = format!("        org ${origin:04X}\n");
-    for line in disassemble_z80(code, origin) {
+    for line in disassemble_z80(code, origin, z80n) {
         s.push_str("        ");
         s.push_str(&line.text);
         s.push('\n');
@@ -74,7 +79,7 @@ pub fn listing_z80(code: &[u8], origin: u16) -> String {
 /// prefixed opcode (`CB`/`ED`/`DD`/`FD`) is two bytes and no prefix byte is
 /// itself a one-byte opcode.
 fn decode_one<'a>(
-    set: &'a isa::InstructionSet,
+    sets: &[&'a isa::InstructionSet],
     code: &[u8],
     pos: usize,
 ) -> Option<(&'a str, &'a isa::Form, Vec<i64>, usize)> {
@@ -83,22 +88,26 @@ fn decode_one<'a>(
             continue;
         }
         let opcode = &code[pos..pos + opcode_len];
-        for insn in set.instructions {
-            for form in insn.forms {
-                if form.opcode != opcode {
-                    continue;
+        for set in sets {
+            for insn in set.instructions {
+                for form in insn.forms {
+                    if form.opcode != opcode {
+                        continue;
+                    }
+                    let operand_len: usize =
+                        form.operands.iter().map(|o| o.bytes as usize).sum();
+                    let suffix_at = pos + opcode_len + operand_len;
+                    let end = suffix_at + form.suffix.len();
+                    if end > code.len() {
+                        continue;
+                    }
+                    if code[suffix_at..end] != *form.suffix {
+                        continue;
+                    }
+                    let values =
+                        read_operands(form, &code[pos + opcode_len..], set.endianness);
+                    return Some((insn.mnemonic, form, values, end - pos));
                 }
-                let operand_len: usize = form.operands.iter().map(|o| o.bytes as usize).sum();
-                let suffix_at = pos + opcode_len + operand_len;
-                let end = suffix_at + form.suffix.len();
-                if end > code.len() {
-                    continue;
-                }
-                if code[suffix_at..end] != *form.suffix {
-                    continue;
-                }
-                let values = read_operands(form, &code[pos + opcode_len..], set.endianness);
-                return Some((insn.mnemonic, form, values, end - pos));
             }
         }
     }
@@ -198,7 +207,7 @@ mod tests {
     use crate::assemble_pasmonext;
 
     fn one(bytes: &[u8]) -> String {
-        let lines = disassemble_z80(bytes, 0x8000);
+        let lines = disassemble_z80(bytes, 0x8000, false);
         assert_eq!(lines.len(), 1, "expected one instruction, got {lines:?}");
         lines[0].text.clone()
     }
@@ -240,7 +249,24 @@ mod tests {
             jr $8000\n\
             ret\n";
         let original = assemble_pasmonext(source).expect("assemble");
-        let listing = listing_z80(&original.bytes, original.origin);
+        let listing = listing_z80(&original.bytes, original.origin, true);
+        let reassembled = assemble_pasmonext(&listing).expect("reassemble");
+        assert_eq!(reassembled.bytes, original.bytes, "listing was:\n{listing}");
+    }
+
+    #[test]
+    fn round_trips_z80n_opcodes() {
+        let source = "\
+            org $8000\n\
+            swapnib\n\
+            mul\n\
+            add hl, a\n\
+            add hl, $1234\n\
+            nextreg $07, $02\n\
+            push $abcd\n\
+            ldirx\n";
+        let original = assemble_pasmonext(source).expect("assemble");
+        let listing = listing_z80(&original.bytes, original.origin, true);
         let reassembled = assemble_pasmonext(&listing).expect("reassemble");
         assert_eq!(reassembled.bytes, original.bytes, "listing was:\n{listing}");
     }

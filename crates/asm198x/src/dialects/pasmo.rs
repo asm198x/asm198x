@@ -41,35 +41,33 @@ use std::collections::BTreeMap;
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
 
-/// Vanilla pasmo (standard Z80 only).
-pub(crate) struct Pasmo;
-
-/// PasmoNext: pasmo plus the ZX Spectrum Next's Z80N opcodes (the curriculum's
-/// assembler). Identical to [`Pasmo`] for standard Z80; Z80N is deferred.
-pub(crate) struct PasmoNext;
+/// The pasmo-family Z80 dialect. Syntax is identical regardless of target; the
+/// `z80n` flag selects the **target CPU's instruction set** — `false` for a
+/// plain Z80 (vanilla pasmo), `true` for the ZX Spectrum Next's Z80N
+/// (pasmonext). Z80N availability is a target property, not a syntax one, so it
+/// lives here as a flag rather than as a separate dialect (see
+/// `decisions/syntax-stance.md`).
+pub(crate) struct Pasmo {
+    pub(crate) z80n: bool,
+}
 
 impl Dialect for Pasmo {
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::z80::SET
     }
+    fn extension_set(&self) -> Option<&'static isa::InstructionSet> {
+        self.z80n.then_some(&isa::z80::NEXT)
+    }
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        parse_z80(self.instruction_set(), source)
+        parse_z80(self.instruction_set(), self.extension_set(), source)
     }
 }
 
-impl Dialect for PasmoNext {
-    fn instruction_set(&self) -> &'static isa::InstructionSet {
-        &isa::z80::SET
-    }
-    fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        // Identical to base pasmo today; the Z80N extension hooks in here.
-        parse_z80(self.instruction_set(), source)
-    }
-}
-
-/// Parse pasmo-family Z80 source into the engine's statement stream.
+/// Parse pasmo-family Z80 source into the engine's statement stream. `ext` is
+/// the optional Z80N set (present for PasmoNext, absent for base pasmo).
 fn parse_z80(
     set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
     source: &str,
 ) -> Result<Vec<Statement>, AsmError> {
     let mut out = Vec::new();
@@ -83,8 +81,8 @@ fn parse_z80(
         if code.trim().is_empty() {
             continue;
         }
-        let (label, rest) = split_label(set, code, line)?;
-        let op = parse_op(set, rest, line, &consts)?;
+        let (label, rest) = split_label(set, ext, code, line)?;
+        let op = parse_op(set, ext, rest, line, &consts)?;
         if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
             && let Some(v) = eval_const(e, &consts)
         {
@@ -116,6 +114,7 @@ fn strip_comment(line: &str) -> &str {
 /// directive is treated as the operation, not a label.
 fn split_label<'a>(
     set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
     code: &'a str,
     line: usize,
 ) -> Result<(Option<String>, &'a str), AsmError> {
@@ -137,7 +136,7 @@ fn split_label<'a>(
     // Column 0, no colon: a known op/directive is the operation; anything else
     // is a label.
     let (word, remainder) = split_first_word(trimmed);
-    if is_known_op(set, word) {
+    if is_known_op(set, ext, word) {
         return Ok((None, trimmed));
     }
     if !is_ident(word) {
@@ -146,9 +145,13 @@ fn split_label<'a>(
     Ok((Some(word.to_string()), remainder))
 }
 
-/// Whether `word` names a Z80 instruction or a pasmo directive.
-fn is_known_op(set: &'static isa::InstructionSet, word: &str) -> bool {
-    set.instruction(&word.to_ascii_uppercase()).is_some()
+/// Whether `word` names an instruction (in either set) or a pasmo directive.
+fn is_known_op(
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    word: &str,
+) -> bool {
+    has_mnemonic(set, ext, &word.to_ascii_uppercase())
         || matches!(
             word.to_ascii_lowercase().as_str(),
             "org" | "equ" | "defb" | "db" | "defm" | "defw" | "dw" | "end"
@@ -157,6 +160,7 @@ fn is_known_op(set: &'static isa::InstructionSet, word: &str) -> bool {
 
 fn parse_op(
     set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
     rest: &str,
     line: usize,
     consts: &BTreeMap<String, i64>,
@@ -173,10 +177,10 @@ fn parse_op(
         "end" => Ok(None), // entry-point marker; a flat binary ignores it
         _ => {
             let mnemonic = word.to_ascii_uppercase();
-            if !set.has_mnemonic(&mnemonic) {
+            if !has_mnemonic(set, ext, &mnemonic) {
                 return Err(AsmError::new(line, format!("unknown instruction `{mnemonic}`")));
             }
-            let (mode, operands) = resolve(set, &mnemonic, args, line, consts)?;
+            let (mode, operands) = resolve(set, ext, &mnemonic, args, line, consts)?;
             Ok(Some(Operation::Instruction {
                 mnemonic,
                 mode,
@@ -184,6 +188,26 @@ fn parse_op(
             }))
         }
     }
+}
+
+/// Find a form across the primary set and an optional extension (Z80N).
+fn find_form(
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    mnemonic: &str,
+    mode: &str,
+) -> Option<&'static isa::Form> {
+    set.find_form(mnemonic, mode)
+        .or_else(|| ext.and_then(|e| e.find_form(mnemonic, mode)))
+}
+
+/// Whether a mnemonic exists in the primary set or the extension.
+fn has_mnemonic(
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    mnemonic: &str,
+) -> bool {
+    set.has_mnemonic(mnemonic) || ext.is_some_and(|e| e.has_mnemonic(mnemonic))
 }
 
 // ---------------------------------------------------------------------------
@@ -213,6 +237,7 @@ type Alternative = (String, Vec<Expr>);
 /// that combination's emitted values are returned.
 fn resolve(
     set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
     mnemonic: &str,
     args: &str,
     line: usize,
@@ -230,7 +255,7 @@ fn resolve(
             .map(|(token, _)| token.as_str())
             .collect::<Vec<_>>()
             .join(",");
-        if let Some(f) = set.find_form(mnemonic, &label) {
+        if let Some(f) = find_form(set, ext, mnemonic, &label) {
             let emitted = combo.into_iter().flat_map(|(_, values)| values).collect();
             return Ok((f.mode, emitted));
         }
@@ -859,10 +884,14 @@ mod tests {
     }
 
     #[test]
-    fn z80n_op_errors_clearly() {
-        // Z80N extended opcodes (PasmoNext-only, deferred) are not in the spec:
-        // a clean error, not a miscompile.
-        let err = asm("        swapnib\n").expect_err("z80n not yet supported");
+    fn z80n_opcodes_follow_the_target_not_the_dialect() {
+        // Z80N is available when targeting the Next (pasmonext), and rejected
+        // on a plain Z80 (pasmo) — same syntax, different target.
+        assert_eq!(
+            crate::assemble_pasmonext("        swapnib\n").expect("z80n on").bytes,
+            vec![0xED, 0x23]
+        );
+        let err = crate::assemble_pasmo("        swapnib\n").expect_err("z80n off");
         assert!(err.message.contains("SWAPNIB"), "unexpected: {err}");
     }
 }

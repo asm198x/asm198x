@@ -32,24 +32,25 @@ pub fn assemble_6502(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::Mos6502)
 }
 
-/// Assemble Z80 source in the vanilla pasmo dialect into a flat binary.
+/// Assemble pasmo-syntax Z80 source into a flat binary, targeting a **plain
+/// Z80** (Z80N opcodes are rejected, as vanilla pasmo rejects them).
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_pasmo(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Pasmo)
+    engine::assemble(source, &dialects::Pasmo { z80n: false })
 }
 
-/// Assemble Z80 source in the PasmoNext dialect into a flat binary. Identical
-/// to [`assemble_pasmo`] for standard Z80; PasmoNext additionally accepts the
-/// Spectrum Next's Z80N opcodes (deferred).
+/// Assemble pasmo-syntax Z80 source targeting the **ZX Spectrum Next (Z80N)** —
+/// the same syntax as [`assemble_pasmo`] with the Z80N opcodes also available
+/// (what `pasmonext` does).
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_pasmonext(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::PasmoNext)
+    engine::assemble(source, &dialects::Pasmo { z80n: true })
 }
 
 #[cfg(test)]

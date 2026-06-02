@@ -12,8 +12,15 @@
 use crate::engine::{AsmError, Statement};
 
 pub(crate) trait Dialect {
-    /// The instruction set this dialect assembles against.
+    /// The primary instruction set this dialect assembles against.
     fn instruction_set(&self) -> &'static isa::InstructionSet;
+
+    /// An optional extension set whose forms are *also* available — e.g. the
+    /// Z80N opcodes a PasmoNext dialect adds on top of standard Z80. A dialect
+    /// without one (the default) rejects those opcodes as unknown.
+    fn extension_set(&self) -> Option<&'static isa::InstructionSet> {
+        None
+    }
 
     /// Parse source into the engine's statement stream, resolving each
     /// instruction's addressing mode (so form sizes are stable across passes).

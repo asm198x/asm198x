@@ -1022,6 +1022,58 @@ const INSTRUCTIONS: &[Instruction] = &[
     ]),
 ];
 
+// ============================ Z80N (Spectrum Next) ============================
+
+const TWO_N: &[Operand] = &[IMM8, IMM8]; // NEXTREG reg,val
+
+/// The ZX Spectrum Next's **Z80N** extended opcodes — all ED-prefixed. These
+/// are an extension set, available when targeting the Next; standard-Z80
+/// assembly does not see them. Every encoding here was cross-checked against
+/// the `pasmonext` binary — including two surprises: `MUL` takes no operands
+/// (it is implicitly `D*E`), and `PUSH nn`'s immediate is little-endian like
+/// every other Z80 word, not big-endian as some references claim.
+pub const NEXT: InstructionSet = InstructionSet {
+    cpu: "Zilog Z80N",
+    endianness: Endianness::Little,
+    instructions: NEXT_INSTRUCTIONS,
+};
+
+#[rustfmt::skip]
+const NEXT_INSTRUCTIONS: &[Instruction] = &[
+    inst!("SWAPNIB", "Swap the nibbles of A",          [form(&[0xED, 0x23], "",    NONE,  Cycles::fixed(8),  "")]),
+    inst!("MIRROR",  "Mirror the bits of A",           [form(&[0xED, 0x24], "A",   NONE,  Cycles::fixed(8),  "")]),
+    inst!("TEST",    "AND A with n, set flags only",   [form(&[0xED, 0x27], "n",   ONE_N, Cycles::fixed(11), "SZHPNC")]),
+    inst!("BSLA",    "Barrel shift left arithmetic",   [form(&[0xED, 0x28], "DE,B", NONE, Cycles::fixed(8),  "")]),
+    inst!("BSRA",    "Barrel shift right arithmetic",  [form(&[0xED, 0x29], "DE,B", NONE, Cycles::fixed(8),  "")]),
+    inst!("BSRL",    "Barrel shift right logical",     [form(&[0xED, 0x2A], "DE,B", NONE, Cycles::fixed(8),  "")]),
+    inst!("BSRF",    "Barrel shift right feed",        [form(&[0xED, 0x2B], "DE,B", NONE, Cycles::fixed(8),  "")]),
+    inst!("BRLC",    "Barrel rotate left circular",    [form(&[0xED, 0x2C], "DE,B", NONE, Cycles::fixed(8),  "")]),
+    inst!("MUL",     "8x8 multiply D*E into DE",       [form(&[0xED, 0x30], "",     NONE, Cycles::fixed(8),  "")]),
+    inst!("ADD", "Add (Z80N)", [
+        form(&[0xED, 0x31], "HL,A",  NONE,   Cycles::fixed(8),  ""),
+        form(&[0xED, 0x32], "DE,A",  NONE,   Cycles::fixed(8),  ""),
+        form(&[0xED, 0x33], "BC,A",  NONE,   Cycles::fixed(8),  ""),
+        form(&[0xED, 0x34], "HL,nn", ONE_NN, Cycles::fixed(16), ""),
+        form(&[0xED, 0x35], "DE,nn", ONE_NN, Cycles::fixed(16), ""),
+        form(&[0xED, 0x36], "BC,nn", ONE_NN, Cycles::fixed(16), ""),
+    ]),
+    inst!("PUSH", "Push a 16-bit immediate", [form(&[0xED, 0x8A], "nn", ONE_NN, Cycles::fixed(23), "")]),
+    inst!("OUTINB", "Output (HL) to port (C), inc HL",   [form(&[0xED, 0x90], "", NONE, Cycles::fixed(16), "")]),
+    inst!("NEXTREG", "Set a Next hardware register", [
+        form(&[0xED, 0x91], "n,n", TWO_N, Cycles::fixed(20), ""),
+        form(&[0xED, 0x92], "n,A", ONE_N, Cycles::fixed(17), ""),
+    ]),
+    inst!("PIXELDN", "Advance HL to the next pixel row", [form(&[0xED, 0x93], "", NONE, Cycles::fixed(8), "")]),
+    inst!("PIXELAD", "Compute pixel address into HL",    [form(&[0xED, 0x94], "", NONE, Cycles::fixed(8), "")]),
+    inst!("SETAE",   "Set A to the E pixel mask",        [form(&[0xED, 0x95], "", NONE, Cycles::fixed(8), "")]),
+    inst!("LDIX",    "Block load (transparent), inc",    [form(&[0xED, 0xA4], "", NONE, Cycles::fixed(16), "")]),
+    inst!("LDWS",    "Load word, special",               [form(&[0xED, 0xA5], "", NONE, Cycles::fixed(14), "")]),
+    inst!("LDDX",    "Block load (transparent), dec",    [form(&[0xED, 0xAC], "", NONE, Cycles::fixed(16), "")]),
+    inst!("LDIRX",   "Repeat LDIX",                      [form(&[0xED, 0xB4], "", NONE, cond(16, 5), "")]),
+    inst!("LDPIRX",  "Repeat LDIX over a pattern",       [form(&[0xED, 0xB7], "", NONE, cond(16, 5), "")]),
+    inst!("LDDRX",   "Repeat LDDX",                      [form(&[0xED, 0xBC], "", NONE, cond(16, 5), "")]),
+];
+
 #[cfg(test)]
 mod tests {
     use super::*;

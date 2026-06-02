@@ -7,32 +7,47 @@
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
-/// A source dialect the CLI can assemble.
+/// A resolved assembler: a syntax dialect plus, for Z80, a target instruction
+/// set. Dialect (`--dialect`, syntax) and target (`--cpu`/`--target`, the chip)
+/// are orthogonal; Z80N availability is a target property, not a syntax one.
 #[derive(Clone, Copy)]
-enum Dialect {
+enum Assembler {
     Mos6502,
-    Pasmo,
-    PasmoNext,
+    Pasmo { z80n: bool },
 }
 
-impl Dialect {
-    /// Resolve a `--dialect` value (or CPU alias) to a dialect.
-    fn parse(name: &str) -> Result<Self, String> {
-        match name.to_ascii_lowercase().as_str() {
-            "6502" | "mos6502" | "ca65" => Ok(Self::Mos6502),
-            "pasmo" | "z80" => Ok(Self::Pasmo),
-            "pasmonext" => Ok(Self::PasmoNext),
-            other => {
-                Err(format!("unknown dialect `{other}` (try 6502, pasmo, or pasmonext)"))
-            }
+impl Assembler {
+    fn resolve(dialect: Option<&str>, target: Option<&str>) -> Result<Self, String> {
+        // The Z80 target, if one was given explicitly via --cpu/--target.
+        let z80n = match target {
+            None => None,
+            Some(t) => match t.to_ascii_lowercase().as_str() {
+                "z80" => Some(false),
+                "z80n" | "next" => Some(true),
+                "6502" => return Ok(Self::Mos6502),
+                other => return Err(format!("unknown target `{other}` (try z80 or z80n)")),
+            },
+        };
+        match dialect.map(str::to_ascii_lowercase).as_deref() {
+            Some("6502" | "mos6502" | "ca65") => Ok(Self::Mos6502),
+            // pasmo defaults to plain Z80; pasmonext defaults to Z80N. Either
+            // way an explicit --cpu/--target wins.
+            Some("pasmo") => Ok(Self::Pasmo { z80n: z80n.unwrap_or(false) }),
+            Some("pasmonext") => Ok(Self::Pasmo { z80n: z80n.unwrap_or(true) }),
+            Some(other) => Err(format!("unknown dialect `{other}` (try 6502, pasmo, or pasmonext)")),
+            // No --dialect: a Z80 target implies pasmo syntax; otherwise 6502.
+            None => match z80n {
+                Some(z) => Ok(Self::Pasmo { z80n: z }),
+                None => Ok(Self::Mos6502),
+            },
         }
     }
 
     fn assemble(self, source: &str) -> Result<asm198x::Assembly, asm198x::AsmError> {
         match self {
             Self::Mos6502 => asm198x::assemble_6502(source),
-            Self::Pasmo => asm198x::assemble_pasmo(source),
-            Self::PasmoNext => asm198x::assemble_pasmonext(source),
+            Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
+            Self::Pasmo { z80n: true } => asm198x::assemble_pasmonext(source),
         }
     }
 }
@@ -60,7 +75,8 @@ fn run(args: &[String]) -> Result<String, String> {
 
     let mut input: Option<&str> = None;
     let mut output: Option<PathBuf> = None;
-    let mut dialect = Dialect::Mos6502;
+    let mut dialect: Option<&str> = None;
+    let mut target: Option<&str> = None;
     let mut disassemble = false;
     let mut origin: u16 = 0;
     let mut i = 0;
@@ -71,10 +87,13 @@ fn run(args: &[String]) -> Result<String, String> {
                 let path = args.get(i).ok_or("`-o` needs a path")?;
                 output = Some(PathBuf::from(path));
             }
-            "-d" | "--dialect" | "--cpu" => {
+            "-d" | "--dialect" => {
                 i += 1;
-                let name = args.get(i).ok_or("`--dialect` needs a value")?;
-                dialect = Dialect::parse(name)?;
+                dialect = Some(args.get(i).ok_or("`--dialect` needs a value")?);
+            }
+            "--cpu" | "--target" => {
+                i += 1;
+                target = Some(args.get(i).ok_or("`--target` needs a value")?);
             }
             "--disasm" | "--disassemble" => disassemble = true,
             "--org" => {
@@ -96,13 +115,15 @@ fn run(args: &[String]) -> Result<String, String> {
     let input = input.ok_or("no input file given (try --help)")?;
 
     if disassemble {
+        let z80n = matches!(Assembler::resolve(dialect, target)?, Assembler::Pasmo { z80n: true });
         let bytes = std::fs::read(input).map_err(|e| format!("cannot read {input}: {e}"))?;
-        print!("{}", asm198x::listing_z80(&bytes, origin));
+        print!("{}", asm198x::listing_z80(&bytes, origin, z80n));
         return Ok(format!("disassembled {} byte(s) at ${origin:04X}", bytes.len()));
     }
 
+    let assembler = Assembler::resolve(dialect, target)?;
     let source = std::fs::read_to_string(input).map_err(|e| format!("cannot read {input}: {e}"))?;
-    let assembly = dialect.assemble(&source).map_err(|e| e.to_string())?;
+    let assembly = assembler.assemble(&source).map_err(|e| e.to_string())?;
     let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
     std::fs::write(&out_path, &assembly.bytes)
         .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
@@ -127,9 +148,12 @@ fn parse_u16(value: &str) -> Result<u16, String> {
 
 fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
-     assemble:    asm198x [--dialect <name>] <input> [-o <output.bin>]\n\
+     assemble:    asm198x [--dialect <name>] [--cpu <target>] <input> [-o <out.bin>]\n\
      disassemble: asm198x --disasm [--org <addr>] <input.bin>   (Z80)\n\n\
-     dialects: 6502 (default, ca65/ACME-shaped), pasmo (Z80), pasmonext (Z80)\n\n\
+     dialects (syntax): 6502 (default, ca65/ACME-shaped), pasmo, pasmonext\n\
+     targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
+     \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
+     \x20                 the dialect\n\n\
      Assembles retro CPU source to a flat binary, or disassembles one back."
         .to_string()
 }
