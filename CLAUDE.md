@@ -34,12 +34,28 @@ before changing the crate structure or the ISA layer. The load-bearing points:
 
 ## Crate layout
 
-Two crates today; split further only when a second CPU makes a seam real (the
-engine-vs-dialect boundary, and per-CPU `isa` crates).
+Two crates today; split further only when the per-CPU `isa` boundary or
+Emu198x's consumption makes it real.
 
-- [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502`).
-- [`crates/asm198x`](crates/asm198x) — engine + 6502 dialect (library) and the
-  `asm198x` CLI.
+- [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`,
+  the latter including the Z80N extension set).
+- [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
+  the shared per-CPU cores, the dialect front-ends, and the disassembler) and
+  the `asm198x` CLI.
+
+Delivered so far, all validated byte-identical against the real tool on the
+curriculum corpus:
+
+- **6502** — `acme` (C64) and `ca65` (NES) front-ends over a shared
+  `dialects::mos6502` core, plus a spec-driven 6502 disassembler. ca65 also
+  carries a **bounded ld65-style linker** for the fixed NES config (it emits a
+  `.nes` ROM, not a flat binary — see the flat-vs-linked note in the library
+  crate docs and `decisions/syntax-stance.md`).
+- **Z80** — `pasmo`/`pasmonext` and `sjasmplus` front-ends over a shared
+  `dialects::z80` core, the Z80N target, and a spec-driven Z80 disassembler.
+
+The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
+bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
 
 ## Build-time discipline
 

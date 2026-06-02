@@ -13,6 +13,22 @@
 //! [`dialects`], a new CPU is a new spec in [`isa`], and the engine is reused
 //! unchanged. See `decisions/syntax-stance.md` and the umbrella decision
 //! `asm198x-and-shared-isa-spec.md`.
+//!
+//! ## Two output shapes: flat vs linked
+//!
+//! Most dialects ([`assemble_acme`], [`assemble_pasmo`], …) implement the
+//! `Dialect` trait and run through that engine, producing a flat [`Assembly`]
+//! at one origin. **ca65** ([`assemble_ca65`]) is the exception: it is an
+//! assembler whose output is normally linked by ld65, so it does *not* implement
+//! `Dialect` or use the flat engine. Instead it reuses only the genuinely shared
+//! parts — the 6502 operand/expression core (`dialects::mos6502`) and the
+//! [`isa`] spec — and runs its own assemble + (bounded) link pass, returning the
+//! finished `.nes` ROM bytes. The asymmetry is deliberate: linking places code
+//! into segments at config-defined addresses, which the single-origin engine has
+//! no notion of. See the linker scope note in `decisions/syntax-stance.md`.
+//!
+//! Disassembly ([`disassemble_z80`]/[`disassemble_6502`]) is the inverse, driven
+//! by the same [`isa`] spec the assemblers emit from.
 
 mod dialect;
 mod dialects;
