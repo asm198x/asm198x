@@ -109,8 +109,7 @@ fn decode_one<'a>(
                     if form.opcode != opcode {
                         continue;
                     }
-                    let operand_len: usize =
-                        form.operands.iter().map(|o| o.bytes as usize).sum();
+                    let operand_len: usize = form.operands.iter().map(|o| o.bytes as usize).sum();
                     let suffix_at = pos + opcode_len + operand_len;
                     let end = suffix_at + form.suffix.len();
                     if end > code.len() {
@@ -119,8 +118,7 @@ fn decode_one<'a>(
                     if code[suffix_at..end] != *form.suffix {
                         continue;
                     }
-                    let values =
-                        read_operands(form, &code[pos + opcode_len..], set.endianness);
+                    let values = read_operands(form, &code[pos + opcode_len..], set.endianness);
                     return Some((insn.mnemonic, form, values, end - pos));
                 }
             }
@@ -173,7 +171,10 @@ fn render_z80(mnemonic: &str, form: &isa::Form, values: &[i64], addr: u16, len: 
     if mnemonic == "RST" {
         return format!("{mnemonic} ${}", form.mode);
     }
-    format!("{mnemonic} {}", render_operands(form.mode, values, addr, len))
+    format!(
+        "{mnemonic} {}",
+        render_operands(form.mode, values, addr, len)
+    )
 }
 
 /// Substitute the `nn`/`n`/`+d`/`e` placeholders in a mode label with formatted

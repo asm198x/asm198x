@@ -134,7 +134,10 @@ fn split_label<'a, S: Z80Syntax>(
         let before = &trimmed[..colon];
         if !before.contains(char::is_whitespace) {
             if !is_ident(before.trim()) {
-                return Err(AsmError::new(line, format!("invalid label `{}`", before.trim())));
+                return Err(AsmError::new(
+                    line,
+                    format!("invalid label `{}`", before.trim()),
+                ));
             }
             return Ok((Some(before.trim().to_string()), trimmed[colon + 1..].trim()));
         }
@@ -169,7 +172,10 @@ fn parse_op<S: Z80Syntax>(
     }
     let mnemonic = word.to_ascii_uppercase();
     if !has_mnemonic(set, ext, &mnemonic) {
-        return Err(AsmError::new(line, format!("unknown instruction `{mnemonic}`")));
+        return Err(AsmError::new(
+            line,
+            format!("unknown instruction `{mnemonic}`"),
+        ));
     }
     let (mode, operands) = resolve(syntax, set, ext, &mnemonic, args, line, consts)?;
     Ok(Some(Operation::Instruction {
@@ -187,11 +193,7 @@ fn parse_op<S: Z80Syntax>(
 pub(crate) fn is_common_directive(word: &str) -> bool {
     matches!(
         word.to_ascii_lowercase().as_str(),
-        "org" | "equ"
-            | "defb" | "db" | "defm" | "dm"
-            | "defw" | "dw"
-            | "defs" | "ds"
-            | "end"
+        "org" | "equ" | "defb" | "db" | "defm" | "dm" | "defw" | "dw" | "defs" | "ds" | "end"
     )
 }
 
@@ -210,7 +212,12 @@ pub(crate) fn common_directive<S: Z80Syntax>(
         "defs" | "ds" => {
             let count = match parse_value(syntax, args, line)? {
                 Expr::Num(n) if n >= 0 => n as usize,
-                _ => return Err(AsmError::new(line, "`ds`/`defs` needs a literal byte count")),
+                _ => {
+                    return Err(AsmError::new(
+                        line,
+                        "`ds`/`defs` needs a literal byte count",
+                    ));
+                }
             };
             Some(Operation::Bytes(vec![Expr::Num(0); count]))
         }
@@ -254,7 +261,10 @@ enum Operand {
     /// An indexed operand `(IX+d)` / `(IY+d)`. `disp` is `None` for a bare
     /// `(IX)` — either register-indirect (`JP (IX)`) or `(IX+0)`, by which form
     /// exists.
-    Indexed { reg: &'static str, disp: Option<Expr> },
+    Indexed {
+        reg: &'static str,
+        disp: Option<Expr>,
+    },
 }
 
 /// One way an operand can be written into a mode label: the token it
@@ -451,9 +461,17 @@ fn qualify_locals(op: Operation, g: &str) -> Operation {
     match op {
         Operation::Org(e) => Operation::Org(qualify_expr(e, g)),
         Operation::Equ(e) => Operation::Equ(qualify_expr(e, g)),
-        Operation::Bytes(v) => Operation::Bytes(v.into_iter().map(|e| qualify_expr(e, g)).collect()),
-        Operation::Words(v) => Operation::Words(v.into_iter().map(|e| qualify_expr(e, g)).collect()),
-        Operation::Instruction { mnemonic, mode, operands } => Operation::Instruction {
+        Operation::Bytes(v) => {
+            Operation::Bytes(v.into_iter().map(|e| qualify_expr(e, g)).collect())
+        }
+        Operation::Words(v) => {
+            Operation::Words(v.into_iter().map(|e| qualify_expr(e, g)).collect())
+        }
+        Operation::Instruction {
+            mnemonic,
+            mode,
+            operands,
+        } => Operation::Instruction {
             mnemonic,
             mode,
             operands: operands.into_iter().map(|e| qualify_expr(e, g)).collect(),
@@ -468,9 +486,11 @@ fn qualify_expr(e: Expr, g: &str) -> Expr {
         Expr::Lo(b) => Expr::Lo(Box::new(qualify_expr(*b, g))),
         Expr::Hi(b) => Expr::Hi(Box::new(qualify_expr(*b, g))),
         Expr::Neg(b) => Expr::Neg(Box::new(qualify_expr(*b, g))),
-        Expr::Bin(op, l, r) => {
-            Expr::Bin(op, Box::new(qualify_expr(*l, g)), Box::new(qualify_expr(*r, g)))
-        }
+        Expr::Bin(op, l, r) => Expr::Bin(
+            op,
+            Box::new(qualify_expr(*l, g)),
+            Box::new(qualify_expr(*r, g)),
+        ),
     }
 }
 
@@ -504,9 +524,29 @@ fn is_indirect_reg(up: &str) -> bool {
 fn is_reg_or_cond(up: &str) -> bool {
     matches!(
         up,
-        "A" | "B" | "C" | "D" | "E" | "H" | "L" | "I" | "R" | "AF" | "AF'"
-            | "BC" | "DE" | "HL" | "SP" | "IX" | "IY"
-            | "NZ" | "Z" | "NC" | "PO" | "PE" | "P" | "M"
+        "A" | "B"
+            | "C"
+            | "D"
+            | "E"
+            | "H"
+            | "L"
+            | "I"
+            | "R"
+            | "AF"
+            | "AF'"
+            | "BC"
+            | "DE"
+            | "HL"
+            | "SP"
+            | "IX"
+            | "IY"
+            | "NZ"
+            | "Z"
+            | "NC"
+            | "PO"
+            | "PE"
+            | "P"
+            | "M"
     )
 }
 
@@ -593,7 +633,11 @@ fn parse_value<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Expr,
     if tokens.is_empty() {
         return Err(AsmError::new(line, "expected a value"));
     }
-    let mut parser = ExprParser { tokens, pos: 0, line };
+    let mut parser = ExprParser {
+        tokens,
+        pos: 0,
+        line,
+    };
     let expr = parser.expr()?;
     if parser.pos != parser.tokens.len() {
         return Err(AsmError::new(

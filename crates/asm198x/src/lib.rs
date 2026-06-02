@@ -35,8 +35,8 @@ mod dialects;
 mod disasm;
 mod engine;
 
-pub use disasm::{disassemble_6502, disassemble_z80, listing_6502, listing_z80, Line};
-pub use engine::{Assembly, AsmError};
+pub use disasm::{Line, disassemble_6502, disassemble_z80, listing_6502, listing_z80};
+pub use engine::{AsmError, Assembly};
 
 /// Assemble ACME-syntax 6502 source into a flat binary — the C64 curriculum's
 /// dialect (`*=` to set the PC, `!byte`/`!word`/`!fill`, `name = value`).
@@ -122,7 +122,9 @@ mod tests {
         assert_eq!(a.origin, 0x0200);
         assert_eq!(
             a.bytes,
-            vec![0xA9, 0x00, 0xA2, 0x08, 0x9D, 0x00, 0x04, 0xCA, 0xD0, 0xFA, 0x60]
+            vec![
+                0xA9, 0x00, 0xA2, 0x08, 0x9D, 0x00, 0x04, 0xCA, 0xD0, 0xFA, 0x60
+            ]
         );
         assert_eq!(a.symbols.get("start"), Some(&0x0200));
         assert_eq!(a.symbols.get("loop"), Some(&0x0204));
@@ -136,7 +138,13 @@ mod tests {
 
     #[test]
     fn z80_entry_points_wire_through() {
-        assert_eq!(assemble_pasmo("ld a, 0").expect("pasmo").bytes, vec![0x3E, 0x00]);
-        assert_eq!(assemble_sjasmplus("ld a, 0").expect("sjasm").bytes, vec![0x3E, 0x00]);
+        assert_eq!(
+            assemble_pasmo("ld a, 0").expect("pasmo").bytes,
+            vec![0x3E, 0x00]
+        );
+        assert_eq!(
+            assemble_sjasmplus("ld a, 0").expect("sjasm").bytes,
+            vec![0x3E, 0x00]
+        );
     }
 }

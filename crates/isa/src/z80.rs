@@ -1141,7 +1141,11 @@ mod tests {
         assert_eq!(ld.form("HL,nn").expect("len").len(), 3);
 
         assert_eq!(
-            SET.instruction("HALT").expect("HALT").form("").expect("form").opcode,
+            SET.instruction("HALT")
+                .expect("HALT")
+                .form("")
+                .expect("form")
+                .opcode,
             &[0x76]
         );
 
@@ -1158,16 +1162,69 @@ mod tests {
         assert_eq!(add.form("A,B").expect("ADD A,B").opcode, &[0x80]);
 
         // Upper-half spot-checks.
-        assert_eq!(SET.instruction("JP").expect("JP").form("nn").expect("JP nn").opcode, &[0xC3]);
-        assert_eq!(SET.instruction("CALL").expect("CALL").form("nn").expect("CALL nn").opcode, &[0xCD]);
-        assert_eq!(SET.instruction("RET").expect("RET").form("").expect("RET").opcode, &[0xC9]);
-        assert_eq!(SET.instruction("CP").expect("CP").form("(HL)").expect("CP (HL)").opcode, &[0xBE]);
-        assert_eq!(SET.instruction("PUSH").expect("PUSH").form("AF").expect("PUSH AF").opcode, &[0xF5]);
-        assert_eq!(SET.instruction("RST").expect("RST").form("38").expect("RST 38").opcode, &[0xFF]);
-        assert_eq!(SET.instruction("LD").expect("LD").form("SP,HL").expect("LD SP,HL").opcode, &[0xF9]);
+        assert_eq!(
+            SET.instruction("JP")
+                .expect("JP")
+                .form("nn")
+                .expect("JP nn")
+                .opcode,
+            &[0xC3]
+        );
+        assert_eq!(
+            SET.instruction("CALL")
+                .expect("CALL")
+                .form("nn")
+                .expect("CALL nn")
+                .opcode,
+            &[0xCD]
+        );
+        assert_eq!(
+            SET.instruction("RET")
+                .expect("RET")
+                .form("")
+                .expect("RET")
+                .opcode,
+            &[0xC9]
+        );
+        assert_eq!(
+            SET.instruction("CP")
+                .expect("CP")
+                .form("(HL)")
+                .expect("CP (HL)")
+                .opcode,
+            &[0xBE]
+        );
+        assert_eq!(
+            SET.instruction("PUSH")
+                .expect("PUSH")
+                .form("AF")
+                .expect("PUSH AF")
+                .opcode,
+            &[0xF5]
+        );
+        assert_eq!(
+            SET.instruction("RST")
+                .expect("RST")
+                .form("38")
+                .expect("RST 38")
+                .opcode,
+            &[0xFF]
+        );
+        assert_eq!(
+            SET.instruction("LD")
+                .expect("LD")
+                .form("SP,HL")
+                .expect("LD SP,HL")
+                .opcode,
+            &[0xF9]
+        );
 
         // CALL cc pays 7 extra T-states when taken; JP cc is a flat 10.
-        let call_nz = SET.instruction("CALL").expect("CALL").form("NZ,nn").expect("CALL NZ,nn");
+        let call_nz = SET
+            .instruction("CALL")
+            .expect("CALL")
+            .form("NZ,nn")
+            .expect("CALL NZ,nn");
         assert_eq!((call_nz.cycles.base, call_nz.cycles.branch_taken), (10, 7));
     }
 
@@ -1176,19 +1233,35 @@ mod tests {
     #[test]
     fn ed_group_encodings_and_uniqueness() {
         assert_eq!(
-            SET.instruction("LDIR").expect("LDIR").form("").expect("form").opcode,
+            SET.instruction("LDIR")
+                .expect("LDIR")
+                .form("")
+                .expect("form")
+                .opcode,
             &[0xED, 0xB0]
         );
         assert_eq!(
-            SET.instruction("NEG").expect("NEG").form("").expect("form").opcode,
+            SET.instruction("NEG")
+                .expect("NEG")
+                .form("")
+                .expect("form")
+                .opcode,
             &[0xED, 0x44]
         );
         assert_eq!(
-            SET.instruction("IM").expect("IM").form("1").expect("IM 1").opcode,
+            SET.instruction("IM")
+                .expect("IM")
+                .form("1")
+                .expect("IM 1")
+                .opcode,
             &[0xED, 0x56]
         );
         assert_eq!(
-            SET.instruction("SBC").expect("SBC").form("HL,DE").expect("SBC HL,DE").opcode,
+            SET.instruction("SBC")
+                .expect("SBC")
+                .form("HL,DE")
+                .expect("SBC HL,DE")
+                .opcode,
             &[0xED, 0x52]
         );
 
@@ -1196,11 +1269,19 @@ mod tests {
         for instruction in SET.instructions {
             for f in instruction.forms {
                 if f.opcode.first() == Some(&0xED) {
-                    assert_eq!(f.opcode.len(), 2, "{} {} malformed ED opcode", instruction.mnemonic, f.mode);
+                    assert_eq!(
+                        f.opcode.len(),
+                        2,
+                        "{} {} malformed ED opcode",
+                        instruction.mnemonic,
+                        f.mode
+                    );
                     assert!(
                         seen.insert(f.opcode[1]),
                         "duplicate ED opcode $ED ${:02X} ({} {})",
-                        f.opcode[1], instruction.mnemonic, f.mode
+                        f.opcode[1],
+                        instruction.mnemonic,
+                        f.mode
                     );
                 }
             }
@@ -1215,7 +1296,13 @@ mod tests {
         for instruction in SET.instructions {
             for f in instruction.forms {
                 if f.opcode.first() == Some(&0xCB) {
-                    assert_eq!(f.opcode.len(), 2, "{} {} malformed CB opcode", instruction.mnemonic, f.mode);
+                    assert_eq!(
+                        f.opcode.len(),
+                        2,
+                        "{} {} malformed CB opcode",
+                        instruction.mnemonic,
+                        f.mode
+                    );
                     let op = f.opcode[1] as usize;
                     assert!(
                         !seen[op],
@@ -1231,18 +1318,48 @@ mod tests {
         }
 
         // Spot-checks against the validated decoder grid.
-        assert_eq!(SET.instruction("BIT").expect("BIT").form("7,(HL)").expect("f").opcode, &[0xCB, 0x7E]);
-        assert_eq!(SET.instruction("SET").expect("SET").form("0,A").expect("f").opcode, &[0xCB, 0xC7]);
-        assert_eq!(SET.instruction("RLC").expect("RLC").form("B").expect("f").opcode, &[0xCB, 0x00]);
+        assert_eq!(
+            SET.instruction("BIT")
+                .expect("BIT")
+                .form("7,(HL)")
+                .expect("f")
+                .opcode,
+            &[0xCB, 0x7E]
+        );
+        assert_eq!(
+            SET.instruction("SET")
+                .expect("SET")
+                .form("0,A")
+                .expect("f")
+                .opcode,
+            &[0xCB, 0xC7]
+        );
+        assert_eq!(
+            SET.instruction("RLC")
+                .expect("RLC")
+                .form("B")
+                .expect("f")
+                .opcode,
+            &[0xCB, 0x00]
+        );
     }
 
     /// DD/FD (IX/IY) forms, including the two-operand and DD-CB encodings.
     #[test]
     fn index_register_encodings() {
         // 16-bit and indexed forms (mnemonic forms span entries -> find_form).
-        assert_eq!(SET.find_form("LD", "IX,nn").expect("ld ix,nn").opcode, &[0xDD, 0x21]);
-        assert_eq!(SET.find_form("ADD", "IY,SP").expect("add iy,sp").opcode, &[0xFD, 0x39]);
-        assert_eq!(SET.find_form("JP", "(IX)").expect("jp (ix)").opcode, &[0xDD, 0xE9]);
+        assert_eq!(
+            SET.find_form("LD", "IX,nn").expect("ld ix,nn").opcode,
+            &[0xDD, 0x21]
+        );
+        assert_eq!(
+            SET.find_form("ADD", "IY,SP").expect("add iy,sp").opcode,
+            &[0xFD, 0x39]
+        );
+        assert_eq!(
+            SET.find_form("JP", "(IX)").expect("jp (ix)").opcode,
+            &[0xDD, 0xE9]
+        );
 
         // LD (IX+d),n: opcode DD 36, then a displacement and an immediate byte.
         let ldn = SET.find_form("LD", "(IX+d),n").expect("ld (ix+d),n");

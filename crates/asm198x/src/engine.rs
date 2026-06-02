@@ -111,7 +111,10 @@ impl Expr {
             ),
             Expr::Lo(e) => e.eval(symbols, pc, line)? & 0xFF,
             Expr::Hi(e) => (e.eval(symbols, pc, line)? >> 8) & 0xFF,
-            Expr::Neg(e) => e.eval(symbols, pc, line)?.checked_neg().ok_or_else(overflow)?,
+            Expr::Neg(e) => e
+                .eval(symbols, pc, line)?
+                .checked_neg()
+                .ok_or_else(overflow)?,
             Expr::Bin(op, l, r) => {
                 let a = l.eval(symbols, pc, line)?;
                 let b = r.eval(symbols, pc, line)?;
@@ -356,7 +359,10 @@ fn form<'a>(
             format!("`{mnemonic}` has no {mode} addressing mode"),
         ))
     } else {
-        Err(AsmError::new(line, format!("unknown instruction `{mnemonic}`")))
+        Err(AsmError::new(
+            line,
+            format!("unknown instruction `{mnemonic}`"),
+        ))
     }
 }
 

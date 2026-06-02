@@ -25,7 +25,12 @@ impl Dialect for Pasmo {
         self.z80n.then_some(&isa::z80::NEXT)
     }
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        z80::assemble(&PasmoSyntax, self.instruction_set(), self.extension_set(), source)
+        z80::assemble(
+            &PasmoSyntax,
+            self.instruction_set(),
+            self.extension_set(),
+            source,
+        )
     }
 }
 
@@ -62,9 +67,18 @@ mod tests {
         assert_eq!(asm("ld a, 0").expect("ld a,0").bytes, vec![0x3E, 0x00]);
         assert_eq!(asm("ld a, c").expect("ld a,c").bytes, vec![0x79]);
         // 16-bit immediate, little-endian.
-        assert_eq!(asm("ld hl, $5800").expect("ld hl").bytes, vec![0x21, 0x00, 0x58]);
-        assert_eq!(asm("ld bc, 767").expect("ld bc").bytes, vec![0x01, 0xFF, 0x02]);
-        assert_eq!(asm("ld (hl), $0F").expect("ld (hl),n").bytes, vec![0x36, 0x0F]);
+        assert_eq!(
+            asm("ld hl, $5800").expect("ld hl").bytes,
+            vec![0x21, 0x00, 0x58]
+        );
+        assert_eq!(
+            asm("ld bc, 767").expect("ld bc").bytes,
+            vec![0x01, 0xFF, 0x02]
+        );
+        assert_eq!(
+            asm("ld (hl), $0F").expect("ld (hl),n").bytes,
+            vec![0x36, 0x0F]
+        );
     }
 
     #[test]
@@ -77,7 +91,10 @@ mod tests {
     fn sixteen_bit_add_and_indirect() {
         assert_eq!(asm("add hl, de").expect("add").bytes, vec![0x19]);
         assert_eq!(asm("ld a, (bc)").expect("ld a,(bc)").bytes, vec![0x0A]);
-        assert_eq!(asm("ld ($5800), hl").expect("ld (nn),hl").bytes, vec![0x22, 0x00, 0x58]);
+        assert_eq!(
+            asm("ld ($5800), hl").expect("ld (nn),hl").bytes,
+            vec![0x22, 0x00, 0x58]
+        );
     }
 
     #[test]
@@ -102,14 +119,19 @@ mod tests {
             .expect("location counter");
         assert_eq!(
             a.bytes,
-            vec![0x18, 0xFE, 0x21, 0x02, 0x80, 0xC3, 0x08, 0x80, 0x08, 0x80, 0x01, 0x09, 0x80]
+            vec![
+                0x18, 0xFE, 0x21, 0x02, 0x80, 0xC3, 0x08, 0x80, 0x08, 0x80, 0x01, 0x09, 0x80
+            ]
         );
     }
 
     #[test]
     fn dollar_hex_is_still_a_number() {
         // `$5800` is a hex literal, not `$` (PC) followed by `5800`.
-        assert_eq!(asm("ld hl, $5800").expect("hex").bytes, vec![0x21, 0x00, 0x58]);
+        assert_eq!(
+            asm("ld hl, $5800").expect("hex").bytes,
+            vec![0x21, 0x00, 0x58]
+        );
     }
 
     #[test]
@@ -123,8 +145,14 @@ mod tests {
     #[test]
     fn arithmetic_respects_c_precedence() {
         // $5800 + 23*32 = $5AE0.
-        assert_eq!(asm("ld hl, $5800 + 23*32").expect("precedence").bytes, vec![0x21, 0xE0, 0x5A]);
-        assert_eq!(asm("ld hl, (1+2)*3").expect("parens").bytes, vec![0x21, 0x09, 0x00]);
+        assert_eq!(
+            asm("ld hl, $5800 + 23*32").expect("precedence").bytes,
+            vec![0x21, 0xE0, 0x5A]
+        );
+        assert_eq!(
+            asm("ld hl, (1+2)*3").expect("parens").bytes,
+            vec![0x21, 0x09, 0x00]
+        );
         let a = asm("ROW equ 64\n        ld a, ROW / 8\n").expect("div");
         assert_eq!(a.bytes, vec![0x3E, 0x08]);
     }
@@ -155,28 +183,51 @@ mod tests {
 
     #[test]
     fn defb_string_expands_to_char_bytes() {
-        assert_eq!(asm("        defb \"AB\", 0\n").expect("defb").bytes, vec![0x41, 0x42, 0x00]);
+        assert_eq!(
+            asm("        defb \"AB\", 0\n").expect("defb").bytes,
+            vec![0x41, 0x42, 0x00]
+        );
     }
 
     #[test]
     fn cb_bit_ops_assemble() {
-        assert_eq!(asm("        bit 7,(hl)\n").expect("bit").bytes, vec![0xCB, 0x7E]);
-        assert_eq!(asm("        set 0,a\n").expect("set").bytes, vec![0xCB, 0xC7]);
+        assert_eq!(
+            asm("        bit 7,(hl)\n").expect("bit").bytes,
+            vec![0xCB, 0x7E]
+        );
+        assert_eq!(
+            asm("        set 0,a\n").expect("set").bytes,
+            vec![0xCB, 0xC7]
+        );
         assert_eq!(asm("        rlc b\n").expect("rlc").bytes, vec![0xCB, 0x00]);
     }
 
     #[test]
     fn ix_iy_ops_assemble() {
-        assert_eq!(asm("        push ix\n").expect("push ix").bytes, vec![0xDD, 0xE5]);
-        assert_eq!(asm("        ld a,(ix+5)\n").expect("ld a,(ix+d)").bytes, vec![0xDD, 0x7E, 0x05]);
-        assert_eq!(asm("        ld (ix+5),$0a\n").expect("ld (ix+d),n").bytes, vec![0xDD, 0x36, 0x05, 0x0A]);
-        assert_eq!(asm("        bit 7,(iy-1)\n").expect("bit (iy+d)").bytes, vec![0xFD, 0xCB, 0xFF, 0x7E]);
+        assert_eq!(
+            asm("        push ix\n").expect("push ix").bytes,
+            vec![0xDD, 0xE5]
+        );
+        assert_eq!(
+            asm("        ld a,(ix+5)\n").expect("ld a,(ix+d)").bytes,
+            vec![0xDD, 0x7E, 0x05]
+        );
+        assert_eq!(
+            asm("        ld (ix+5),$0a\n").expect("ld (ix+d),n").bytes,
+            vec![0xDD, 0x36, 0x05, 0x0A]
+        );
+        assert_eq!(
+            asm("        bit 7,(iy-1)\n").expect("bit (iy+d)").bytes,
+            vec![0xFD, 0xCB, 0xFF, 0x7E]
+        );
     }
 
     #[test]
     fn z80n_opcodes_follow_the_target_not_the_dialect() {
         assert_eq!(
-            crate::assemble_pasmonext("        swapnib\n").expect("z80n on").bytes,
+            crate::assemble_pasmonext("        swapnib\n")
+                .expect("z80n on")
+                .bytes,
             vec![0xED, 0x23]
         );
         let err = crate::assemble_pasmo("        swapnib\n").expect_err("z80n off");

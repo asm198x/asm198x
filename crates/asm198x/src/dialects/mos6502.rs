@@ -52,7 +52,10 @@ pub(crate) fn resolve_mode(
             } else if insn.form("accumulator").is_some() {
                 ("accumulator", None)
             } else {
-                return Err(AsmError::new(line, format!("`{}` requires an operand", insn.mnemonic)));
+                return Err(AsmError::new(
+                    line,
+                    format!("`{}` requires an operand", insn.mnemonic),
+                ));
             }
         }
         OperandSyntax::Accumulator => ("accumulator", None),
@@ -60,13 +63,22 @@ pub(crate) fn resolve_mode(
         OperandSyntax::Indirect(e) => ("indirect", Some(e)),
         OperandSyntax::IndexedIndirect(e) => ("(indirect,x)", Some(e)),
         OperandSyntax::IndirectIndexed(e) => ("(indirect),y", Some(e)),
-        OperandSyntax::Indexed(e, Index::X) => (pick_zp_abs(insn, &e, env, force_abs, "zeropage,x", "absolute,x"), Some(e)),
-        OperandSyntax::Indexed(e, Index::Y) => (pick_zp_abs(insn, &e, env, force_abs, "zeropage,y", "absolute,y"), Some(e)),
+        OperandSyntax::Indexed(e, Index::X) => (
+            pick_zp_abs(insn, &e, env, force_abs, "zeropage,x", "absolute,x"),
+            Some(e),
+        ),
+        OperandSyntax::Indexed(e, Index::Y) => (
+            pick_zp_abs(insn, &e, env, force_abs, "zeropage,y", "absolute,y"),
+            Some(e),
+        ),
         OperandSyntax::Direct(e) => {
             if insn.form("relative").is_some() {
                 ("relative", Some(e))
             } else {
-                (pick_zp_abs(insn, &e, env, force_abs, "zeropage", "absolute"), Some(e))
+                (
+                    pick_zp_abs(insn, &e, env, force_abs, "zeropage", "absolute"),
+                    Some(e),
+                )
             }
         }
     };
@@ -97,7 +109,11 @@ fn pick_zp_abs(
 
 /// Fold an expression to a constant, resolving symbols against the parse-time
 /// `env`. Errors on the location counter or an unknown symbol.
-pub(crate) fn fold_const(e: &Expr, env: &BTreeMap<String, i64>, line: usize) -> Result<i64, AsmError> {
+pub(crate) fn fold_const(
+    e: &Expr,
+    env: &BTreeMap<String, i64>,
+    line: usize,
+) -> Result<i64, AsmError> {
     let overflow = || AsmError::new(line, "arithmetic overflow in expression");
     Ok(match e {
         Expr::Num(n) => *n,
@@ -107,7 +123,9 @@ pub(crate) fn fold_const(e: &Expr, env: &BTreeMap<String, i64>, line: usize) -> 
         Expr::Pc => return Err(AsmError::new(line, "`*` cannot be used here")),
         Expr::Lo(b) => fold_const(b, env, line)? & 0xFF,
         Expr::Hi(b) => (fold_const(b, env, line)? >> 8) & 0xFF,
-        Expr::Neg(b) => fold_const(b, env, line)?.checked_neg().ok_or_else(overflow)?,
+        Expr::Neg(b) => fold_const(b, env, line)?
+            .checked_neg()
+            .ok_or_else(overflow)?,
         Expr::Bin(op, l, r) => {
             let a = fold_const(l, env, line)?;
             let b = fold_const(r, env, line)?;
@@ -166,7 +184,12 @@ pub(crate) fn parse_operand(
         let index = match t[comma + 1..].trim() {
             i if i.eq_ignore_ascii_case("x") => Index::X,
             i if i.eq_ignore_ascii_case("y") => Index::Y,
-            _ => return Err(AsmError::new(line, format!("expected `,X` or `,Y` in `{raw}`"))),
+            _ => {
+                return Err(AsmError::new(
+                    line,
+                    format!("expected `,X` or `,Y` in `{raw}`"),
+                ));
+            }
         };
         return Ok(OperandSyntax::Indexed(value(&t[..comma], line)?, index));
     }
@@ -205,10 +228,18 @@ pub(crate) fn parse_expr(
     if tokens.is_empty() {
         return Err(AsmError::new(line, "expected a value"));
     }
-    let mut parser = ExprParser { tokens, pos: 0, line, prec };
+    let mut parser = ExprParser {
+        tokens,
+        pos: 0,
+        line,
+        prec,
+    };
     let expr = parser.expr()?;
     if parser.pos != parser.tokens.len() {
-        return Err(AsmError::new(line, format!("unexpected trailing tokens in `{}`", raw.trim())));
+        return Err(AsmError::new(
+            line,
+            format!("unexpected trailing tokens in `{}`", raw.trim()),
+        ));
     }
     Ok(expr)
 }
@@ -239,14 +270,38 @@ fn tokenize(
         let c = chars[i];
         match c {
             ws if ws.is_whitespace() => i += 1,
-            '+' => { tokens.push(Tok::Plus); i += 1; }
-            '-' => { tokens.push(Tok::Minus); i += 1; }
-            '*' => { tokens.push(Tok::Star); i += 1; }
-            '/' => { tokens.push(Tok::Slash); i += 1; }
-            '<' => { tokens.push(Tok::Lo); i += 1; }
-            '>' => { tokens.push(Tok::Hi); i += 1; }
-            '(' => { tokens.push(Tok::LParen); i += 1; }
-            ')' => { tokens.push(Tok::RParen); i += 1; }
+            '+' => {
+                tokens.push(Tok::Plus);
+                i += 1;
+            }
+            '-' => {
+                tokens.push(Tok::Minus);
+                i += 1;
+            }
+            '*' => {
+                tokens.push(Tok::Star);
+                i += 1;
+            }
+            '/' => {
+                tokens.push(Tok::Slash);
+                i += 1;
+            }
+            '<' => {
+                tokens.push(Tok::Lo);
+                i += 1;
+            }
+            '>' => {
+                tokens.push(Tok::Hi);
+                i += 1;
+            }
+            '(' => {
+                tokens.push(Tok::LParen);
+                i += 1;
+            }
+            ')' => {
+                tokens.push(Tok::RParen);
+                i += 1;
+            }
             '\'' => {
                 if i + 2 < chars.len() && chars[i + 2] == '\'' {
                     let s: String = chars[i..=i + 2].iter().collect();
@@ -262,14 +317,20 @@ fn tokenize(
                 while i < chars.len() && chars[i].is_ascii_alphanumeric() {
                     i += 1;
                 }
-                tokens.push(Tok::Num(parse_number(&chars[start..i].iter().collect::<String>(), line)?));
+                tokens.push(Tok::Num(parse_number(
+                    &chars[start..i].iter().collect::<String>(),
+                    line,
+                )?));
             }
             d if d.is_ascii_digit() => {
                 let start = i;
                 while i < chars.len() && chars[i].is_ascii_alphanumeric() {
                     i += 1;
                 }
-                tokens.push(Tok::Num(parse_number(&chars[start..i].iter().collect::<String>(), line)?));
+                tokens.push(Tok::Num(parse_number(
+                    &chars[start..i].iter().collect::<String>(),
+                    line,
+                )?));
             }
             l if l.is_ascii_alphabetic() || l == '_' || l == '.' => {
                 let start = i;
@@ -280,7 +341,12 @@ fn tokenize(
                 }
                 tokens.push(Tok::Sym(chars[start..i].iter().collect()));
             }
-            other => return Err(AsmError::new(line, format!("unexpected character `{other}` in expression"))),
+            other => {
+                return Err(AsmError::new(
+                    line,
+                    format!("unexpected character `{other}` in expression"),
+                ));
+            }
         }
     }
     Ok(tokens)

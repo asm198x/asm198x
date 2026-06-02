@@ -43,7 +43,10 @@ fn main_asms(project: &Path) -> Vec<PathBuf> {
     for unit in units.flatten() {
         let dir = unit.path();
         let is_unit = dir.is_dir()
-            && dir.file_name().and_then(|n| n.to_str()).is_some_and(|n| n.starts_with("unit-"));
+            && dir
+                .file_name()
+                .and_then(|n| n.to_str())
+                .is_some_and(|n| n.starts_with("unit-"));
         if !is_unit {
             continue;
         }
@@ -61,7 +64,11 @@ fn main_asms(project: &Path) -> Vec<PathBuf> {
 }
 
 fn label(file: &Path) -> String {
-    let unit = file.parent().and_then(|p| p.file_name()).and_then(|n| n.to_str()).unwrap_or("?");
+    let unit = file
+        .parent()
+        .and_then(|p| p.file_name())
+        .and_then(|n| n.to_str())
+        .unwrap_or("?");
     let proj = file
         .parent()
         .and_then(|p| p.parent())
@@ -142,7 +149,11 @@ fn curriculum_is_byte_identical() {
             let rom = tmp.join("ref.nes");
             let mut ca = Command::new("ca65");
             ca.arg(file).arg("-o").arg(&obj);
-            let assembled = ca.current_dir(&tmp).output().map(|o| o.status.success()).unwrap_or(false);
+            let assembled = ca
+                .current_dir(&tmp)
+                .output()
+                .map(|o| o.status.success())
+                .unwrap_or(false);
             let mut ld = Command::new("ld65");
             ld.arg("-C").arg(&cfg).arg(&obj).arg("-o").arg(&rom);
             match (assembled, ref_bytes(&tmp, &rom, ld)) {
@@ -180,7 +191,9 @@ fn curriculum_is_byte_identical() {
             }
             // Z80 disassembler round-trip.
             let listing = asm198x::listing_z80(&ours.bytes, ours.origin, true);
-            let round = asm198x::assemble_pasmonext(&listing).expect("reassemble").bytes;
+            let round = asm198x::assemble_pasmonext(&listing)
+                .expect("reassemble")
+                .bytes;
             if round != ours.bytes {
                 fails.push(format!("Z80 disasm round-trip: {}", label(file)));
             }
@@ -216,5 +229,8 @@ fn curriculum_is_byte_identical() {
         fails.len(),
         fails.join("\n  ")
     );
-    assert!(checked > 0, "no comparisons ran — no tools or corpus present?");
+    assert!(
+        checked > 0,
+        "no comparisons ran — no tools or corpus present?"
+    );
 }

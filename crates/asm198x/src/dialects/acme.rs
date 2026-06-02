@@ -16,8 +16,8 @@
 use std::collections::BTreeMap;
 
 use super::mos6502::{
-    self, assignment_split, fold_const, is_ident, parse_number, split_data_items, split_first_word,
-    string_literal, top_level_rfind, BytePrec,
+    self, BytePrec, assignment_split, fold_const, is_ident, parse_number, split_data_items,
+    split_first_word, string_literal, top_level_rfind,
 };
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, Expr, Operation, Statement};
@@ -99,7 +99,12 @@ fn prescan_anons(source: &str) -> Vec<AnonDef> {
         let (word, _) = split_first_word(code.trim());
         if let Some((sign, level)) = anon_marker(word) {
             let name = format!("\u{1}{sign}{level}#{}", defs.len());
-            defs.push(AnonDef { line, sign, level, name });
+            defs.push(AnonDef {
+                line,
+                sign,
+                level,
+                name,
+            });
         }
     }
     defs
@@ -117,13 +122,20 @@ fn resolve_anon(
 ) -> Result<String, AsmError> {
     let matching = anons.iter().filter(|d| d.sign == sign && d.level == level);
     let chosen = if sign == '-' {
-        matching.filter(|d| d.line <= ref_line).max_by_key(|d| d.line)
+        matching
+            .filter(|d| d.line <= ref_line)
+            .max_by_key(|d| d.line)
     } else {
-        matching.filter(|d| d.line >= ref_line).min_by_key(|d| d.line)
+        matching
+            .filter(|d| d.line >= ref_line)
+            .min_by_key(|d| d.line)
     };
     chosen.map(|d| d.name.clone()).ok_or_else(|| {
         let run: String = std::iter::repeat_n(sign, level).collect();
-        AsmError::new(line, format!("no anonymous label `{run}` in that direction"))
+        AsmError::new(
+            line,
+            format!("no anonymous label `{run}` in that direction"),
+        )
     })
 }
 
@@ -152,7 +164,10 @@ fn tokenize_braces(source: &str) -> Vec<Unit> {
         let bytes = code.as_bytes();
         let flush = |seg: &str, units: &mut Vec<Unit>| {
             if !seg.trim().is_empty() {
-                units.push(Unit { line, text: seg.to_string() });
+                units.push(Unit {
+                    line,
+                    text: seg.to_string(),
+                });
             }
         };
         for (j, &b) in bytes.iter().enumerate() {
@@ -161,7 +176,10 @@ fn tokenize_braces(source: &str) -> Vec<Unit> {
                 b'"' if !in_char => in_str = !in_str,
                 b'{' | b'}' if !in_char && !in_str => {
                     flush(&code[start..j], &mut units);
-                    units.push(Unit { line, text: (b as char).to_string() });
+                    units.push(Unit {
+                        line,
+                        text: (b as char).to_string(),
+                    });
                     start = j + 1;
                 }
                 _ => {}
@@ -268,9 +286,8 @@ fn eval_condition(
     cond: &str,
     line: usize,
 ) -> Result<bool, AsmError> {
-    let value = |s: &str| -> Result<i64, AsmError> {
-        fold_const(&parse_value(anons, s, line)?, env, line)
-    };
+    let value =
+        |s: &str| -> Result<i64, AsmError> { fold_const(&parse_value(anons, s, line)?, env, line) };
     let c = cond.trim();
     if let Some(i) = top_level_find(c, "!=") {
         return Ok(value(&c[..i])? != value(&c[i + 2..])?);
@@ -358,7 +375,10 @@ fn parse_statement(
         if !is_ident(name) {
             return Err(AsmError::new(line, format!("invalid symbol name `{name}`")));
         }
-        return Ok((Some(name.to_string()), Some(Operation::Equ(parse_value(anons, value, line)?))));
+        return Ok((
+            Some(name.to_string()),
+            Some(Operation::Equ(parse_value(anons, value, line)?)),
+        ));
     }
 
     // Otherwise: an optional column-0 label, then a directive or instruction.
@@ -450,7 +470,10 @@ fn parse_directive(
         "fill" => parse_fill(anons, env, rest, line),
         "text" | "tx" => parse_text(anons, rest, line, |c| c),
         "scr" => parse_text(anons, rest, line, screen_code),
-        other => Err(AsmError::new(line, format!("unsupported directive `!{other}`"))),
+        other => Err(AsmError::new(
+            line,
+            format!("unsupported directive `!{other}`"),
+        )),
     }
 }
 
@@ -472,7 +495,8 @@ fn parse_fill(
         None => 0,
         Some(v) => {
             let n = fold_const(&parse_value(anons, v, line)?, env, line)?;
-            u8::try_from(n).map_err(|_| AsmError::new(line, "`!fill` value must be a constant byte"))?
+            u8::try_from(n)
+                .map_err(|_| AsmError::new(line, "`!fill` value must be a constant byte"))?
         }
     };
     Ok(Operation::Bytes(vec![Expr::Num(i64::from(value)); amount]))
@@ -582,7 +606,10 @@ mod tests {
         assert_eq!(asm("lda #$01").expect("imm").bytes, vec![0xA9, 0x01]);
         assert_eq!(asm("lda $10").expect("zp").bytes, vec![0xA5, 0x10]);
         assert_eq!(asm("lda $0400").expect("abs").bytes, vec![0xAD, 0x00, 0x04]);
-        assert_eq!(asm("sta $0400,x").expect("absx").bytes, vec![0x9D, 0x00, 0x04]);
+        assert_eq!(
+            asm("sta $0400,x").expect("absx").bytes,
+            vec![0x9D, 0x00, 0x04]
+        );
         assert_eq!(asm("lda ($20),y").expect("indy").bytes, vec![0xB1, 0x20]);
         assert_eq!(asm("lda ($20,x)").expect("indx").bytes, vec![0xA1, 0x20]);
     }
@@ -593,7 +620,10 @@ mod tests {
         // value is the same but the written width differs.
         assert_eq!(asm("lda $10").expect("zp").bytes, vec![0xA5, 0x10]);
         assert_eq!(asm("lda $0010").expect("abs").bytes, vec![0xAD, 0x10, 0x00]);
-        assert_eq!(asm("sta $0000,x").expect("absx").bytes, vec![0x9D, 0x00, 0x00]);
+        assert_eq!(
+            asm("sta $0000,x").expect("absx").bytes,
+            vec![0x9D, 0x00, 0x00]
+        );
         // Decimal and symbols still decide by value.
         assert_eq!(asm("lda 16").expect("dec").bytes, vec![0xA5, 0x10]);
     }
@@ -627,30 +657,32 @@ mod tests {
 
     #[test]
     fn anonymous_labels_resolve_by_direction() {
-        let a = asm(
-            "*= $1000\n\
+        let a = asm("*= $1000\n\
              \x20       ldx #0\n\
              -      inx\n\
              \x20       bne -\n\
              \x20       jmp +\n\
              \x20       nop\n\
-             +      rts\n",
-        )
+             +      rts\n")
         .expect("anon");
-        assert_eq!(a.bytes, vec![0xA2, 0x00, 0xE8, 0xD0, 0xFD, 0x4C, 0x09, 0x10, 0xEA, 0x60]);
+        assert_eq!(
+            a.bytes,
+            vec![0xA2, 0x00, 0xE8, 0xD0, 0xFD, 0x4C, 0x09, 0x10, 0xEA, 0x60]
+        );
     }
 
     #[test]
     fn nested_anonymous_levels_are_distinct() {
-        let a = asm(
-            "*= $1000\n\
+        let a = asm("*= $1000\n\
              -      lda #1\n\
              \x20       bne -\n\
              --     lda #2\n\
-             \x20       beq --\n",
-        )
+             \x20       beq --\n")
         .expect("nested");
-        assert_eq!(a.bytes, vec![0xA9, 0x01, 0xD0, 0xFC, 0xA9, 0x02, 0xF0, 0xFC]);
+        assert_eq!(
+            a.bytes,
+            vec![0xA9, 0x01, 0xD0, 0xFC, 0xA9, 0x02, 0xF0, 0xFC]
+        );
     }
 
     #[test]
@@ -661,29 +693,25 @@ mod tests {
 
     #[test]
     fn ifdef_skips_undefined_block() {
-        let a = asm(
-            "*= $1000\n\
+        let a = asm("*= $1000\n\
              \x20       lda #1\n\
              !ifdef SCREENSHOT_MODE {\n\
              \x20       lda #2\n\
              }\n\
-             \x20       lda #3\n",
-        )
+             \x20       lda #3\n")
         .expect("ifdef");
         assert_eq!(a.bytes, vec![0xA9, 0x01, 0xA9, 0x03]);
     }
 
     #[test]
     fn ifndef_inline_block_runs_and_defines() {
-        let a = asm(
-            "!ifndef DEBUG { DEBUG = 0 }\n\
+        let a = asm("!ifndef DEBUG { DEBUG = 0 }\n\
              *= $1000\n\
              !if DEBUG = 1 {\n\
              \x20       lda #$ff\n\
              } else {\n\
              \x20       lda #$00\n\
-             }\n",
-        )
+             }\n")
         .expect("ifndef+if-else");
         assert_eq!(a.bytes, vec![0xA9, 0x00]);
         assert_eq!(a.symbols.get("DEBUG"), Some(&0x0000));
@@ -691,34 +719,42 @@ mod tests {
 
     #[test]
     fn if_true_takes_then_branch() {
-        let a = asm(
-            "FLAG = 1\n*= $1000\n\
-             !if FLAG = 1 {\n        lda #$11\n} else {\n        lda #$22\n}\n",
-        )
+        let a = asm("FLAG = 1\n*= $1000\n\
+             !if FLAG = 1 {\n        lda #$11\n} else {\n        lda #$22\n}\n")
         .expect("if-true");
         assert_eq!(a.bytes, vec![0xA9, 0x11]);
     }
 
     #[test]
     fn text_emits_raw_bytes() {
-        assert_eq!(asm("!text \"2064\"").expect("text").bytes, vec![0x32, 0x30, 0x36, 0x34]);
+        assert_eq!(
+            asm("!text \"2064\"").expect("text").bytes,
+            vec![0x32, 0x30, 0x36, 0x34]
+        );
     }
 
     #[test]
     fn scr_converts_to_screen_codes() {
-        assert_eq!(asm("!scr \"sid\"").expect("scr").bytes, vec![0x13, 0x09, 0x04]);
-        assert_eq!(asm("!scr \"a, z\"").expect("scr comma").bytes, vec![0x01, 0x2C, 0x20, 0x1A]);
-        assert_eq!(asm("!scr \"@A`\"").expect("scr edge").bytes, vec![0x00, 0x41, 0x40]);
+        assert_eq!(
+            asm("!scr \"sid\"").expect("scr").bytes,
+            vec![0x13, 0x09, 0x04]
+        );
+        assert_eq!(
+            asm("!scr \"a, z\"").expect("scr comma").bytes,
+            vec![0x01, 0x2C, 0x20, 0x1A]
+        );
+        assert_eq!(
+            asm("!scr \"@A`\"").expect("scr edge").bytes,
+            vec![0x00, 0x41, 0x40]
+        );
     }
 
     #[test]
     fn nested_conditionals() {
-        let a = asm(
-            "A = 1\nB = 0\n*= $1000\n\
+        let a = asm("A = 1\nB = 0\n*= $1000\n\
              !if A = 1 {\n\
              \x20  !if B = 1 {\n        lda #$01\n\x20  } else {\n        lda #$02\n\x20  }\n\
-             }\n",
-        )
+             }\n")
         .expect("nested");
         assert_eq!(a.bytes, vec![0xA9, 0x02]);
     }

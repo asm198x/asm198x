@@ -16,8 +16,8 @@
 use std::collections::BTreeMap;
 
 use super::mos6502::{
-    self, assignment_split, fold_const, is_ident, parse_number, split_data_items, split_first_word,
-    split_top_level, string_literal, BytePrec,
+    self, BytePrec, assignment_split, fold_const, is_ident, parse_number, split_data_items,
+    split_first_word, split_top_level, string_literal,
 };
 use crate::engine::{AsmError, Expr};
 
@@ -169,7 +169,10 @@ fn link(seg_bytes: &BTreeMap<String, Vec<u8>>) -> Result<Vec<u8>, AsmError> {
 fn place(region: &mut [u8], at: usize, bytes: &[u8], name: &str) -> Result<(), AsmError> {
     let end = at + bytes.len();
     if end > region.len() {
-        return Err(AsmError::new(0, format!("segment `{name}` overflows its region")));
+        return Err(AsmError::new(
+            0,
+            format!("segment `{name}` overflows its region"),
+        ));
     }
     region[at..end].copy_from_slice(bytes);
     Ok(())
@@ -258,9 +261,14 @@ fn emit(
                 match slot.kind {
                     isa::OperandKind::Immediate | isa::OperandKind::Address => match slot.bytes {
                         1 => out.push(to_byte(v, line_for_errors)?),
-                        2 => out.extend_from_slice(&u16::try_from(v & 0xFFFF).expect("masked").to_le_bytes()),
+                        2 => out.extend_from_slice(
+                            &u16::try_from(v & 0xFFFF).expect("masked").to_le_bytes(),
+                        ),
                         other => {
-                            return Err(AsmError::new(line_for_errors, format!("unsupported operand width {other}")));
+                            return Err(AsmError::new(
+                                line_for_errors,
+                                format!("unsupported operand width {other}"),
+                            ));
                         }
                     },
                     isa::OperandKind::RelativePc => {
@@ -274,7 +282,10 @@ fn emit(
                         out.push(offset as i8 as u8);
                     }
                     isa::OperandKind::Displacement => {
-                        return Err(AsmError::new(line_for_errors, "displacement operand not valid on 6502"));
+                        return Err(AsmError::new(
+                            line_for_errors,
+                            "displacement operand not valid on 6502",
+                        ));
                     }
                 }
             }
@@ -288,7 +299,10 @@ fn to_byte(v: i64, line: usize) -> Result<u8, AsmError> {
     if (-128..=0xFF).contains(&v) {
         Ok((v & 0xFF) as u8)
     } else {
-        Err(AsmError::new(line, format!("value {v} does not fit in a byte")))
+        Err(AsmError::new(
+            line,
+            format!("value {v} does not fit in a byte"),
+        ))
     }
 }
 
@@ -321,7 +335,10 @@ fn parse(set: &'static isa::InstructionSet, source: &str) -> Result<Parsed, AsmE
         if let Some(eq) = assignment_split(trimmed) {
             let name = trimmed[..eq].trim();
             if !is_ident(name) {
-                return Err(AsmError::new(line, format!("invalid constant name `{name}`")));
+                return Err(AsmError::new(
+                    line,
+                    format!("invalid constant name `{name}`"),
+                ));
             }
             let expr = parse_value(&current_global, &trimmed[eq + 1..], line)?;
             if let Ok(v) = fold_const(&expr, &consts, line) {
@@ -339,9 +356,18 @@ fn parse(set: &'static isa::InstructionSet, source: &str) -> Result<Parsed, AsmE
         if label.is_none() && matches!(kind, Kind::Empty) {
             continue;
         }
-        stmts.push(Stmt { line, seg: seg.clone(), label, kind });
+        stmts.push(Stmt {
+            line,
+            seg: seg.clone(),
+            label,
+            kind,
+        });
     }
-    Ok(Parsed { stmts, label_seg, consts })
+    Ok(Parsed {
+        stmts,
+        label_seg,
+        consts,
+    })
 }
 
 /// Strip a `;` comment, ignoring `;` inside `'c'` or `"..."`.
@@ -372,7 +398,10 @@ fn split_label<'a>(
     };
     if let Some(cheap) = name.strip_prefix('@') {
         if !is_ident(cheap) {
-            return Err(AsmError::new(line, format!("invalid cheap-local label `{name}`")));
+            return Err(AsmError::new(
+                line,
+                format!("invalid cheap-local label `{name}`"),
+            ));
         }
         return Ok((Some(cheap_key(current_global, cheap)), remainder));
     }
@@ -399,9 +428,14 @@ fn parse_op(
     }
     let (mnemonic, operand_text) = split_first_word(rest);
     let mnemonic = mnemonic.to_ascii_uppercase();
-    let operand = mos6502::parse_operand(operand_text, line, &|s, l| parse_value(current_global, s, l))?;
+    let operand = mos6502::parse_operand(operand_text, line, &|s, l| {
+        parse_value(current_global, s, l)
+    })?;
     if set.instruction(&mnemonic).is_none() {
-        return Err(AsmError::new(line, format!("unknown instruction `{mnemonic}`")));
+        return Err(AsmError::new(
+            line,
+            format!("unknown instruction `{mnemonic}`"),
+        ));
     }
     Ok(Kind::Insn { operand, mnemonic })
 }
@@ -417,7 +451,10 @@ fn parse_directive(
         "byte" | "byt" => Ok(Kind::Bytes(parse_data_list(current_global, rest, line)?)),
         "word" | "addr" => Ok(Kind::Words(parse_value_list(current_global, rest, line)?)),
         "res" => parse_res(current_global, consts, rest, line),
-        other => Err(AsmError::new(line, format!("unsupported directive `.{other}`"))),
+        other => Err(AsmError::new(
+            line,
+            format!("unsupported directive `.{other}`"),
+        )),
     }
 }
 

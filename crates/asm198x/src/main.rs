@@ -16,8 +16,12 @@ enum Assembler {
     /// ca65 for the NES — assembled and linked to a `.nes` ROM, handled
     /// separately from the flat-binary dialects.
     Ca65,
-    Pasmo { z80n: bool },
-    Sjasmplus { z80n: bool },
+    Pasmo {
+        z80n: bool,
+    },
+    Sjasmplus {
+        z80n: bool,
+    },
 }
 
 impl Assembler {
@@ -38,9 +42,15 @@ impl Assembler {
             Some("ca65" | "nes") => Ok(Self::Ca65),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
-            Some("pasmo") => Ok(Self::Pasmo { z80n: z80n.unwrap_or(false) }),
-            Some("pasmonext") => Ok(Self::Pasmo { z80n: z80n.unwrap_or(true) }),
-            Some("sjasmplus" | "sjasm") => Ok(Self::Sjasmplus { z80n: z80n.unwrap_or(false) }),
+            Some("pasmo") => Ok(Self::Pasmo {
+                z80n: z80n.unwrap_or(false),
+            }),
+            Some("pasmonext") => Ok(Self::Pasmo {
+                z80n: z80n.unwrap_or(true),
+            }),
+            Some("sjasmplus" | "sjasm") => Ok(Self::Sjasmplus {
+                z80n: z80n.unwrap_or(false),
+            }),
             Some(other) => Err(format!(
                 "unknown dialect `{other}` (try acme, ca65, pasmo, pasmonext, or sjasmplus)"
             )),
@@ -139,7 +149,10 @@ fn run(args: &[String]) -> Result<String, String> {
                 print!("{}", asm198x::listing_z80(&bytes, origin, z80n));
             }
         }
-        return Ok(format!("disassembled {} byte(s) at ${origin:04X}", bytes.len()));
+        return Ok(format!(
+            "disassembled {} byte(s) at ${origin:04X}",
+            bytes.len()
+        ));
     }
 
     let assembler = Assembler::resolve(dialect, target)?;
@@ -151,7 +164,11 @@ fn run(args: &[String]) -> Result<String, String> {
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("nes"));
         std::fs::write(&out_path, &rom)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
-        return Ok(format!("assembled + linked {} byte(s) -> {}", rom.len(), out_path.display()));
+        return Ok(format!(
+            "assembled + linked {} byte(s) -> {}",
+            rom.len(),
+            out_path.display()
+        ));
     }
 
     let assembly = assembler.assemble(&source).map_err(|e| e.to_string())?;

@@ -33,7 +33,12 @@ impl Dialect for Sjasmplus {
         self.z80n.then_some(&isa::z80::NEXT)
     }
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        z80::assemble(&SjasmplusSyntax, self.instruction_set(), self.extension_set(), source)
+        z80::assemble(
+            &SjasmplusSyntax,
+            self.instruction_set(),
+            self.extension_set(),
+            source,
+        )
     }
 }
 
@@ -114,7 +119,10 @@ mod tests {
 
     #[test]
     fn slash_slash_comment() {
-        assert_eq!(asm("ld a, 5  // a comment\n").expect("//").bytes, vec![0x3E, 0x05]);
+        assert_eq!(
+            asm("ld a, 5  // a comment\n").expect("//").bytes,
+            vec![0x3E, 0x05]
+        );
     }
 
     #[test]
