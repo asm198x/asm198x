@@ -59,10 +59,21 @@ impl std::error::Error for AsmError {}
 // Expressions — the shared engine IR
 // ---------------------------------------------------------------------------
 
+/// A binary arithmetic operator. The dialect parser is responsible for
+/// precedence (it builds the tree); the engine only evaluates.
+#[derive(Debug, Clone, Copy)]
+pub(crate) enum BinOp {
+    Add,
+    Sub,
+    Mul,
+    Div,
+}
+
 /// An expression in the shared engine IR. Each dialect parses its own operator
-/// syntax into this tree; the engine evaluates it. The tree grows as dialects
-/// need more (arithmetic, etc.), but stays dialect-agnostic: a `<`/`>` operator
-/// and a `low()`/`high()` function both lower to [`Expr::Lo`]/[`Expr::Hi`].
+/// syntax into this tree; the engine evaluates it. The tree stays dialect-
+/// agnostic: a `<`/`>` operator and a `low()`/`high()` function both lower to
+/// [`Expr::Lo`]/[`Expr::Hi`], and any dialect's `+`/`-`/`*`/`/` lower to
+/// [`Expr::Bin`].
 #[derive(Debug, Clone)]
 pub(crate) enum Expr {
     Num(i64),
@@ -71,6 +82,10 @@ pub(crate) enum Expr {
     Lo(Box<Expr>),
     /// High byte of the inner value.
     Hi(Box<Expr>),
+    /// Negation of the inner value.
+    Neg(Box<Expr>),
+    /// A binary operation on two sub-expressions.
+    Bin(BinOp, Box<Expr>, Box<Expr>),
 }
 
 impl Expr {
@@ -79,6 +94,7 @@ impl Expr {
         symbols: &BTreeMap<String, u16>,
         line: usize,
     ) -> Result<i64, AsmError> {
+        let overflow = || AsmError::new(line, "arithmetic overflow in expression");
         Ok(match self {
             Expr::Num(n) => *n,
             Expr::Sym(s) => i64::from(
@@ -88,6 +104,22 @@ impl Expr {
             ),
             Expr::Lo(e) => e.eval(symbols, line)? & 0xFF,
             Expr::Hi(e) => (e.eval(symbols, line)? >> 8) & 0xFF,
+            Expr::Neg(e) => e.eval(symbols, line)?.checked_neg().ok_or_else(overflow)?,
+            Expr::Bin(op, l, r) => {
+                let a = l.eval(symbols, line)?;
+                let b = r.eval(symbols, line)?;
+                match op {
+                    BinOp::Add => a.checked_add(b).ok_or_else(overflow)?,
+                    BinOp::Sub => a.checked_sub(b).ok_or_else(overflow)?,
+                    BinOp::Mul => a.checked_mul(b).ok_or_else(overflow)?,
+                    BinOp::Div => {
+                        if b == 0 {
+                            return Err(AsmError::new(line, "division by zero in expression"));
+                        }
+                        a.checked_div(b).ok_or_else(overflow)?
+                    }
+                }
+            }
         })
     }
 }

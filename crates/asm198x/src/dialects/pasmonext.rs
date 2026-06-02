@@ -34,7 +34,7 @@
 //! prefix groups.
 
 use crate::dialect::Dialect;
-use crate::engine::{AsmError, Expr, Operation, Statement};
+use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
 
 /// The PasmoNext Z80 dialect.
 pub(crate) struct PasmoNext;
@@ -246,6 +246,11 @@ fn value_tokens(
             let v = literal(expr, line)?;
             Ok(vec![format!("{v:02X}")])
         }
+        // IM's mode (0/1/2) is the literal interrupt mode, in the opcode.
+        "IM" => {
+            let v = literal(expr, line)?;
+            Ok(vec![format!("{v}")])
+        }
         _ => Ok(vec!["n".to_string(), "nn".to_string()]),
     }
 }
@@ -339,19 +344,191 @@ fn parse_list(rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
     rest.split(',').map(|p| parse_value(p, line)).collect()
 }
 
+/// Parse an operand value: an arithmetic expression over numbers, symbols, and
+/// `+`/`-`/`*`/`/` with C-style precedence (`*`/`/` bind tighter than `+`/`-`)
+/// and parentheses, matching pasmo. TODO: `$` as the program counter; bitwise
+/// and shift operators (not yet used by the curriculum).
 fn parse_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
-    let t = raw.trim();
-    // TODO: arithmetic (`label+1`) and `$` as the program counter.
-    let first = t
-        .chars()
-        .next()
-        .ok_or_else(|| AsmError::new(line, "expected a value"))?;
-    if first == '$' || first == '%' || first == '\'' || first.is_ascii_digit() {
-        Ok(Expr::Num(parse_number(t, line)?))
-    } else if is_ident(t) {
-        Ok(Expr::Sym(t.to_string()))
-    } else {
-        Err(AsmError::new(line, format!("cannot parse value `{raw}`")))
+    let tokens = tokenize(raw, line)?;
+    if tokens.is_empty() {
+        return Err(AsmError::new(line, "expected a value"));
+    }
+    let mut parser = ExprParser { tokens, pos: 0, line };
+    let expr = parser.expr()?;
+    if parser.pos != parser.tokens.len() {
+        return Err(AsmError::new(
+            line,
+            format!("unexpected trailing tokens in `{}`", raw.trim()),
+        ));
+    }
+    Ok(expr)
+}
+
+#[derive(Clone)]
+enum Tok {
+    Num(i64),
+    Sym(String),
+    Plus,
+    Minus,
+    Star,
+    Slash,
+    LParen,
+    RParen,
+}
+
+fn tokenize(raw: &str, line: usize) -> Result<Vec<Tok>, AsmError> {
+    let chars: Vec<char> = raw.chars().collect();
+    let mut tokens = Vec::new();
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        match c {
+            ws if ws.is_whitespace() => i += 1,
+            '+' => {
+                tokens.push(Tok::Plus);
+                i += 1;
+            }
+            '-' => {
+                tokens.push(Tok::Minus);
+                i += 1;
+            }
+            '*' => {
+                tokens.push(Tok::Star);
+                i += 1;
+            }
+            '/' => {
+                tokens.push(Tok::Slash);
+                i += 1;
+            }
+            '(' => {
+                tokens.push(Tok::LParen);
+                i += 1;
+            }
+            ')' => {
+                tokens.push(Tok::RParen);
+                i += 1;
+            }
+            '\'' => {
+                // Char literal 'c'.
+                if i + 2 < chars.len() && chars[i + 2] == '\'' {
+                    let s: String = chars[i..=i + 2].iter().collect();
+                    tokens.push(Tok::Num(parse_number(&s, line)?));
+                    i += 3;
+                } else {
+                    return Err(AsmError::new(line, "malformed character literal"));
+                }
+            }
+            // A `$hex`/`%binary`/decimal number: prefix (if any) then alnum.
+            '$' | '%' => {
+                let start = i;
+                i += 1;
+                while i < chars.len() && chars[i].is_ascii_alphanumeric() {
+                    i += 1;
+                }
+                let s: String = chars[start..i].iter().collect();
+                tokens.push(Tok::Num(parse_number(&s, line)?));
+            }
+            d if d.is_ascii_digit() => {
+                let start = i;
+                while i < chars.len() && chars[i].is_ascii_alphanumeric() {
+                    i += 1;
+                }
+                let s: String = chars[start..i].iter().collect();
+                tokens.push(Tok::Num(parse_number(&s, line)?));
+            }
+            // An identifier: letters, digits, `_`, `.` (not starting with a digit).
+            l if l.is_ascii_alphabetic() || l == '_' || l == '.' => {
+                let start = i;
+                while i < chars.len()
+                    && (chars[i].is_ascii_alphanumeric() || chars[i] == '_' || chars[i] == '.')
+                {
+                    i += 1;
+                }
+                tokens.push(Tok::Sym(chars[start..i].iter().collect()));
+            }
+            other => {
+                return Err(AsmError::new(
+                    line,
+                    format!("unexpected character `{other}` in expression"),
+                ));
+            }
+        }
+    }
+    Ok(tokens)
+}
+
+/// A precedence-climbing expression parser: `add_sub` over `mul_div` over
+/// `unary` over `atom`, so `*`/`/` bind tighter than `+`/`-`.
+struct ExprParser {
+    tokens: Vec<Tok>,
+    pos: usize,
+    line: usize,
+}
+
+impl ExprParser {
+    fn expr(&mut self) -> Result<Expr, AsmError> {
+        self.add_sub()
+    }
+
+    fn add_sub(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.mul_div()?;
+        loop {
+            let op = match self.tokens.get(self.pos) {
+                Some(Tok::Plus) => BinOp::Add,
+                Some(Tok::Minus) => BinOp::Sub,
+                _ => break,
+            };
+            self.pos += 1;
+            let right = self.mul_div()?;
+            left = Expr::Bin(op, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn mul_div(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.unary()?;
+        loop {
+            let op = match self.tokens.get(self.pos) {
+                Some(Tok::Star) => BinOp::Mul,
+                Some(Tok::Slash) => BinOp::Div,
+                _ => break,
+            };
+            self.pos += 1;
+            let right = self.unary()?;
+            left = Expr::Bin(op, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn unary(&mut self) -> Result<Expr, AsmError> {
+        if matches!(self.tokens.get(self.pos), Some(Tok::Minus)) {
+            self.pos += 1;
+            return Ok(Expr::Neg(Box::new(self.unary()?)));
+        }
+        self.atom()
+    }
+
+    fn atom(&mut self) -> Result<Expr, AsmError> {
+        let tok = self
+            .tokens
+            .get(self.pos)
+            .cloned()
+            .ok_or_else(|| AsmError::new(self.line, "expected a value"))?;
+        self.pos += 1;
+        match tok {
+            Tok::Num(n) => Ok(Expr::Num(n)),
+            Tok::Sym(s) => Ok(Expr::Sym(s)),
+            Tok::LParen => {
+                let inner = self.expr()?;
+                if matches!(self.tokens.get(self.pos), Some(Tok::RParen)) {
+                    self.pos += 1;
+                    Ok(inner)
+                } else {
+                    Err(AsmError::new(self.line, "expected `)`"))
+                }
+            }
+            _ => Err(AsmError::new(self.line, "expected a value")),
+        }
     }
 }
 
@@ -439,6 +616,30 @@ mod tests {
         assert_eq!(asm("ld b, c").expect("ld b,c").bytes, vec![0x41]);
         assert_eq!(asm("ret c").expect("ret c").bytes, vec![0xD8]);
         assert_eq!(asm("ret nc").expect("ret nc").bytes, vec![0xD0]);
+    }
+
+    #[test]
+    fn arithmetic_respects_c_precedence() {
+        // $5800 + 23*32 = $5800 + 736 = $5AE0 (the figure unit-01 hand-computes).
+        assert_eq!(
+            asm("ld hl, $5800 + 23*32").expect("precedence").bytes,
+            vec![0x21, 0xE0, 0x5A]
+        );
+        // Parentheses override precedence.
+        assert_eq!(
+            asm("ld hl, (1+2)*3").expect("parens").bytes,
+            vec![0x21, 0x09, 0x00]
+        );
+        // Division, and a symbol term.
+        let a = asm("ROW equ 64\n        ld a, ROW / 8\n").expect("div");
+        assert_eq!(a.bytes, vec![0x3E, 0x08]);
+    }
+
+    #[test]
+    fn im_selects_mode_by_literal() {
+        assert_eq!(asm("        im 1\n").expect("im 1").bytes, vec![0xED, 0x56]);
+        assert_eq!(asm("        im 0\n").expect("im 0").bytes, vec![0xED, 0x46]);
+        assert_eq!(asm("        im 2\n").expect("im 2").bytes, vec![0xED, 0x5E]);
     }
 
     #[test]
