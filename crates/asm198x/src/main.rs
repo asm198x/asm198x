@@ -41,7 +41,9 @@ fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match run(&args) {
         Ok(summary) => {
-            println!("{summary}");
+            // Diagnostics go to stderr so stdout carries only real output
+            // (the disassembly listing); assembly writes its bytes to a file.
+            eprintln!("{summary}");
             ExitCode::SUCCESS
         }
         Err(message) => {
@@ -59,6 +61,8 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut input: Option<&str> = None;
     let mut output: Option<PathBuf> = None;
     let mut dialect = Dialect::Mos6502;
+    let mut disassemble = false;
+    let mut origin: u16 = 0;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -72,6 +76,12 @@ fn run(args: &[String]) -> Result<String, String> {
                 let name = args.get(i).ok_or("`--dialect` needs a value")?;
                 dialect = Dialect::parse(name)?;
             }
+            "--disasm" | "--disassemble" => disassemble = true,
+            "--org" => {
+                i += 1;
+                let value = args.get(i).ok_or("`--org` needs an address")?;
+                origin = parse_u16(value)?;
+            }
             flag if flag.starts_with('-') => return Err(format!("unknown flag `{flag}`")),
             path => {
                 if input.is_some() {
@@ -84,6 +94,13 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     let input = input.ok_or("no input file given (try --help)")?;
+
+    if disassemble {
+        let bytes = std::fs::read(input).map_err(|e| format!("cannot read {input}: {e}"))?;
+        print!("{}", asm198x::listing_z80(&bytes, origin));
+        return Ok(format!("disassembled {} byte(s) at ${origin:04X}", bytes.len()));
+    }
+
     let source = std::fs::read_to_string(input).map_err(|e| format!("cannot read {input}: {e}"))?;
     let assembly = dialect.assemble(&source).map_err(|e| e.to_string())?;
     let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
@@ -98,10 +115,21 @@ fn run(args: &[String]) -> Result<String, String> {
     ))
 }
 
+/// Parse an address: `$hhhh`, `0xhhhh`, or decimal.
+fn parse_u16(value: &str) -> Result<u16, String> {
+    let parsed = if let Some(hex) = value.strip_prefix('$').or_else(|| value.strip_prefix("0x")) {
+        u16::from_str_radix(hex, 16)
+    } else {
+        value.parse::<u16>()
+    };
+    parsed.map_err(|_| format!("invalid address `{value}`"))
+}
+
 fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
-     usage: asm198x [--dialect <name>] <input> [-o <output.bin>]\n\n\
+     assemble:    asm198x [--dialect <name>] <input> [-o <output.bin>]\n\
+     disassemble: asm198x --disasm [--org <addr>] <input.bin>   (Z80)\n\n\
      dialects: 6502 (default, ca65/ACME-shaped), pasmo (Z80), pasmonext (Z80)\n\n\
-     Assembles retro CPU source to a flat binary."
+     Assembles retro CPU source to a flat binary, or disassembles one back."
         .to_string()
 }

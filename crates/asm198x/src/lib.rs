@@ -16,8 +16,10 @@
 
 mod dialect;
 mod dialects;
+mod disasm;
 mod engine;
 
+pub use disasm::{disassemble_z80, listing_z80, Line};
 pub use engine::{Assembly, AsmError};
 
 /// Assemble 6502 source into a flat binary, using the (early, ca65/ACME-shaped)
