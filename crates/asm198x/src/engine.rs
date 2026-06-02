@@ -78,6 +78,9 @@ pub(crate) enum BinOp {
 pub(crate) enum Expr {
     Num(i64),
     Sym(String),
+    /// The current location counter (`$` in pasmo/sjasmplus) — the address of
+    /// the statement being assembled.
+    Pc,
     /// Low byte of the inner value.
     Lo(Box<Expr>),
     /// High byte of the inner value.
@@ -89,25 +92,29 @@ pub(crate) enum Expr {
 }
 
 impl Expr {
+    /// Evaluate against the symbol table, with `pc` the address of the current
+    /// statement (the value of [`Expr::Pc`]).
     pub(crate) fn eval(
         &self,
         symbols: &BTreeMap<String, u16>,
+        pc: i64,
         line: usize,
     ) -> Result<i64, AsmError> {
         let overflow = || AsmError::new(line, "arithmetic overflow in expression");
         Ok(match self {
             Expr::Num(n) => *n,
+            Expr::Pc => pc,
             Expr::Sym(s) => i64::from(
                 *symbols
                     .get(s)
                     .ok_or_else(|| AsmError::new(line, format!("undefined symbol `{s}`")))?,
             ),
-            Expr::Lo(e) => e.eval(symbols, line)? & 0xFF,
-            Expr::Hi(e) => (e.eval(symbols, line)? >> 8) & 0xFF,
-            Expr::Neg(e) => e.eval(symbols, line)?.checked_neg().ok_or_else(overflow)?,
+            Expr::Lo(e) => e.eval(symbols, pc, line)? & 0xFF,
+            Expr::Hi(e) => (e.eval(symbols, pc, line)? >> 8) & 0xFF,
+            Expr::Neg(e) => e.eval(symbols, pc, line)?.checked_neg().ok_or_else(overflow)?,
             Expr::Bin(op, l, r) => {
-                let a = l.eval(symbols, line)?;
-                let b = r.eval(symbols, line)?;
+                let a = l.eval(symbols, pc, line)?;
+                let b = r.eval(symbols, pc, line)?;
                 match op {
                     BinOp::Add => a.checked_add(b).ok_or_else(overflow)?,
                     BinOp::Sub => a.checked_sub(b).ok_or_else(overflow)?,
@@ -186,7 +193,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 .label
                 .as_ref()
                 .ok_or_else(|| AsmError::new(s.line, "`equ` needs a label"))?;
-            let v = e.eval(&symbols, s.line)?;
+            let v = e.eval(&symbols, pc, s.line)?;
             let value = u16::try_from(v).map_err(|_| {
                 AsmError::new(s.line, format!("equ value {v} out of range 0..=65535"))
             })?;
@@ -206,7 +213,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
         match &s.op {
             None => {}
             Some(Operation::Org(e)) => {
-                let v = e.eval(&symbols, s.line)?;
+                let v = e.eval(&symbols, pc, s.line)?;
                 if !(0..=0xFFFF).contains(&v) {
                     return Err(AsmError::new(s.line, "origin address out of range"));
                 }
@@ -226,10 +233,12 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
     // Pass 2 — emit.
     let mut bytes: Vec<u8> = Vec::new();
     for s in &statements {
+        // The location counter (`$`) is the address of this statement's start.
+        let pc = origin + bytes.len() as i64;
         match &s.op {
             None => {}
             Some(Operation::Org(e)) => {
-                let target = e.eval(&symbols, s.line)?;
+                let target = e.eval(&symbols, pc, s.line)?;
                 let cur = origin + bytes.len() as i64;
                 if target < cur {
                     return Err(AsmError::new(s.line, "cannot move origin backwards"));
@@ -239,13 +248,13 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
             Some(Operation::Equ(_)) => {} // defines a symbol; emits nothing
             Some(Operation::Bytes(items)) => {
                 for e in items {
-                    let v = e.eval(&symbols, s.line)?;
+                    let v = e.eval(&symbols, pc, s.line)?;
                     bytes.push(to_byte(v, s.line)?);
                 }
             }
             Some(Operation::Words(items)) => {
                 for e in items {
-                    let v = e.eval(&symbols, s.line)?;
+                    let v = e.eval(&symbols, pc, s.line)?;
                     push_word(&mut bytes, v, s.line, set.endianness)?;
                 }
             }
@@ -268,7 +277,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 let next_addr = origin + bytes.len() as i64 + f.len() as i64;
                 bytes.extend_from_slice(f.opcode);
                 for (slot, e) in f.operands.iter().zip(operands.iter()) {
-                    let v = e.eval(&symbols, s.line)?;
+                    let v = e.eval(&symbols, pc, s.line)?;
                     match slot.kind {
                         // Immediates and addresses lay down a value of the
                         // slot's width; only the width matters on the wire, so

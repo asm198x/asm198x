@@ -102,7 +102,10 @@ Gloaming Spectrum curriculum — all 20 units — assembles byte-identical to th
 IX/IY exerciser matches pasmonext too. The **Z80N** (Spectrum Next) extension is
 now in as well — its own `isa` set, gated by target, validated opcode-by-opcode
 against `pasmonext`; base pasmo (plain-Z80 target) rejects it. A spec-driven
-disassembler round-trips standard and Z80N code back to identical bytes.
+disassembler round-trips standard and Z80N code back to identical bytes. The
+location counter `$` (statement-start address) and sjasmplus-style local-label
+scoping (a leading-`.` label scoped under the preceding global) are both in,
+shared across the Z80 dialects and validated against both binaries.
 
 ## Drift triggers
 
@@ -186,3 +189,20 @@ dialects assemble the whole Gloaming curriculum identically. This is the
 multi-dialect-per-CPU stance realised: one CPU spec, one shared syntax core,
 many thin dialect surfaces. Deferred: `$`-as-PC, real local-label scoping,
 sjasm modules/macros.
+
+### 2026-06-02 — `$`-as-PC and local-label scoping landed
+
+Bundled in the two cross-dialect deferrals rather than leaving them per-dialect
+debt — both belong in the shared Z80 core, so every dialect gains them at once.
+**`$` (location counter)** lowers to a new engine `Expr::Pc`, evaluated to the
+statement's start address in both passes; the shared tokenizer emits it for a
+bare `$` and still reads `$hex` as a number. Validated against `pasmonext` and
+`sjasmplus`: `jr $` → `18 FE`, `ld hl,$`, `jp $+3`, `dw $`, `ld bc,$-1` all
+byte-identical. **Local-label scoping** is gated by a new
+`Z80Syntax::scopes_locals()` (default off): a leading-`.` label qualifies to
+`{global}.{local}` under the most recent global, and bare local references
+rewrite to match. sjasmplus turns it on (matching its `.loop`-recurs-per-scope
+behaviour); pasmo leaves it off (a leading-`.` name is an ordinary global, and
+reuse is a duplicate-label error, as the pasmo binary enforces). sjasm modules
+and macros stay deferred — they are sjasm-specific, not a shared-core feature.
+All three dialects still assemble the Gloaming curriculum 20/20 byte-identical.

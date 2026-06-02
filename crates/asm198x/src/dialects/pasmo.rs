@@ -6,9 +6,6 @@
 //! and directives. The `z80n` flag selects the **target** instruction set —
 //! plain Z80 (vanilla pasmo) or the Spectrum Next's Z80N (pasmonext) — which is
 //! a target property, not a syntax one (see `decisions/syntax-stance.md`).
-//!
-//! TODO: `$` as the program counter; real local-label scoping (`.loop` is
-//! currently an ordinary identifier, which is correct only when unique).
 
 use crate::dialect::Dialect;
 use crate::dialects::z80::{self, Z80Syntax};
@@ -95,6 +92,24 @@ mod tests {
         let a = asm("        org $8000\n.loop:  nop\n        jr .loop\n").expect("jr");
         assert_eq!(a.bytes, vec![0x00, 0x18, 0xFD]);
         assert_eq!(a.symbols.get(".loop"), Some(&0x8000));
+    }
+
+    #[test]
+    fn location_counter_is_statement_start() {
+        // `$` is the address of the current statement. Validated byte-for-byte
+        // against the pasmonext binary.
+        let a = asm("        org $8000\n        jr $\n        ld hl,$\n        jp $+3\n        dw $\n        ld bc,$-1\n")
+            .expect("location counter");
+        assert_eq!(
+            a.bytes,
+            vec![0x18, 0xFE, 0x21, 0x02, 0x80, 0xC3, 0x08, 0x80, 0x08, 0x80, 0x01, 0x09, 0x80]
+        );
+    }
+
+    #[test]
+    fn dollar_hex_is_still_a_number() {
+        // `$5800` is a hex literal, not `$` (PC) followed by `5800`.
+        assert_eq!(asm("ld hl, $5800").expect("hex").bytes, vec![0x21, 0x00, 0x58]);
     }
 
     #[test]

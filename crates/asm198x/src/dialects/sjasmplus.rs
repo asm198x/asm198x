@@ -9,10 +9,11 @@
 //!   `NNb`; decimal; `'c'` char.
 //!
 //! Directives and operand resolution are shared. sjasmplus also targets the
-//! Spectrum Next, so it carries the same `z80n` target flag as pasmo.
+//! Spectrum Next, so it carries the same `z80n` target flag as pasmo. Unlike
+//! pasmo, a leading-`.` label is *local*, scoped under the most recent global
+//! label (so `.loop` may recur) — see [`Z80Syntax::scopes_locals`].
 //!
-//! TODO: `$` as the program counter; sjasmplus modules, macros, and `DUP`;
-//! real local-label scoping.
+//! TODO: sjasmplus modules, macros, and `DUP`.
 
 use crate::dialect::Dialect;
 use crate::dialects::z80::{self, Z80Syntax};
@@ -49,6 +50,11 @@ impl Z80Syntax for SjasmplusSyntax {
             (a, b) => a.or(b),
         };
         cut.map_or(line, |i| &line[..i])
+    }
+
+    /// sjasmplus scopes leading-`.` labels under the most recent global label.
+    fn scopes_locals(&self) -> bool {
+        true
     }
 
     /// sjasmplus numbers: hex (`$`/`0x` prefix, `h` suffix), binary (`%`/`0b`
@@ -124,5 +130,34 @@ mod tests {
     #[test]
     fn ds_reserves_bytes() {
         assert_eq!(asm("        ds 3\n").expect("ds").bytes, vec![0, 0, 0]);
+    }
+
+    #[test]
+    fn local_labels_scope_under_the_preceding_global() {
+        // The same `.loop` recurs under two globals; each `jr .loop` binds to
+        // its own scope. Validated byte-for-byte against the sjasmplus binary.
+        let src = "        org $8000\n\
+                   start:\n.loop:  nop\n        jr .loop\n        nop\n\
+                   done:\n.loop:  nop\n        jr .loop\n";
+        let a = asm(src).expect("local scoping");
+        assert_eq!(a.bytes, vec![0x00, 0x18, 0xFD, 0x00, 0x00, 0x18, 0xFD]);
+        // The qualified names are distinct in the symbol table.
+        assert_eq!(a.symbols.get("start.loop"), Some(&0x8000));
+        assert_eq!(a.symbols.get("done.loop"), Some(&0x8004));
+    }
+
+    #[test]
+    fn pasmo_rejects_reused_local_label() {
+        // pasmo treats `.loop` as an ordinary global, so reuse is a duplicate.
+        let src = "start:\n.loop:  nop\ndone:\n.loop:  nop\n";
+        let err = crate::assemble_pasmo(src).expect_err("duplicate");
+        assert!(err.message.contains("duplicate"), "unexpected: {err}");
+    }
+
+    #[test]
+    fn location_counter_is_statement_start() {
+        // `$` is the current statement's address (matches pasmo and the binary).
+        let a = asm("        org $8000\n        jr $\n        ld hl,$\n").expect("pc");
+        assert_eq!(a.bytes, vec![0x18, 0xFE, 0x21, 0x02, 0x80]);
     }
 }

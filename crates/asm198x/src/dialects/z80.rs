@@ -32,6 +32,14 @@ pub(crate) trait Z80Syntax {
     /// Parse a numeric literal token (the dialect's hex/binary/char forms).
     fn parse_number(&self, tok: &str, line: usize) -> Result<i64, AsmError>;
 
+    /// Whether a leading-`.` label is *local* — scoped under the most recent
+    /// global (non-`.`) label, so the same `.loop` may recur in different
+    /// scopes (sjasmplus). Defaults off: a leading-`.` name is then an ordinary
+    /// global identifier (pasmo), and reusing it is a duplicate-label error.
+    fn scopes_locals(&self) -> bool {
+        false
+    }
+
     /// Whether `word` names a directive. Defaults to the common set.
     fn is_directive(&self, word: &str) -> bool {
         is_common_directive(word)
@@ -65,14 +73,34 @@ pub(crate) fn assemble<S: Z80Syntax>(
     // operands (BIT n, IM n, RST n) must be known at parse time to pick the
     // form, so they resolve against this — not the engine's pass-2 symbols.
     let mut consts: BTreeMap<String, i64> = BTreeMap::new();
+    let scoped = syntax.scopes_locals();
+    // The most recent global (non-`.`) label, for qualifying local labels.
+    let mut current_global: Option<String> = None;
     for (i, raw) in source.lines().enumerate() {
         let line = i + 1;
         let code = syntax.strip_comment(raw);
         if code.trim().is_empty() {
             continue;
         }
-        let (label, rest) = split_label(syntax, set, ext, code, line)?;
-        let op = parse_op(syntax, set, ext, rest, line, &consts)?;
+        let (mut label, rest) = split_label(syntax, set, ext, code, line)?;
+        let mut op = parse_op(syntax, set, ext, rest, line, &consts)?;
+        if scoped {
+            // A leading-`.` label is local to the current scope; a plain label
+            // opens a new scope. Update the scope first, so a local reference
+            // on the same line (e.g. `done: jr .loop`) resolves against it.
+            match &label {
+                Some(name) if name.starts_with('.') => {
+                    if let Some(g) = &current_global {
+                        label = Some(format!("{g}{name}"));
+                    }
+                }
+                Some(name) => current_global = Some(name.clone()),
+                None => {}
+            }
+            if let Some(g) = &current_global {
+                op = op.map(|o| qualify_locals(o, g));
+            }
+        }
         if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
             && let Some(v) = eval_const(e, &consts)
         {
@@ -395,6 +423,9 @@ fn literal(expr: &Expr, consts: &BTreeMap<String, i64>, line: usize) -> Result<i
 pub(crate) fn eval_const(expr: &Expr, consts: &BTreeMap<String, i64>) -> Option<i64> {
     match expr {
         Expr::Num(n) => Some(*n),
+        // `$` is the location counter — unknown until the engine's emit pass,
+        // so it can never fold to a parse-time constant.
+        Expr::Pc => None,
         Expr::Sym(s) => consts.get(s).copied(),
         Expr::Lo(e) => Some(eval_const(e, consts)? & 0xFF),
         Expr::Hi(e) => Some((eval_const(e, consts)? >> 8) & 0xFF),
@@ -408,6 +439,37 @@ pub(crate) fn eval_const(expr: &Expr, consts: &BTreeMap<String, i64>) -> Option<
                 BinOp::Mul => a.checked_mul(b),
                 BinOp::Div => (b != 0).then(|| a / b),
             }
+        }
+    }
+}
+
+/// Rewrite every bare local reference (a leading-`.` symbol) in an operation,
+/// qualifying it with the current global scope `g` — so `jr .loop` under global
+/// `start` resolves to `start.loop`. A non-local symbol, or an already-qualified
+/// `global.local`, is left untouched.
+fn qualify_locals(op: Operation, g: &str) -> Operation {
+    match op {
+        Operation::Org(e) => Operation::Org(qualify_expr(e, g)),
+        Operation::Equ(e) => Operation::Equ(qualify_expr(e, g)),
+        Operation::Bytes(v) => Operation::Bytes(v.into_iter().map(|e| qualify_expr(e, g)).collect()),
+        Operation::Words(v) => Operation::Words(v.into_iter().map(|e| qualify_expr(e, g)).collect()),
+        Operation::Instruction { mnemonic, mode, operands } => Operation::Instruction {
+            mnemonic,
+            mode,
+            operands: operands.into_iter().map(|e| qualify_expr(e, g)).collect(),
+        },
+    }
+}
+
+fn qualify_expr(e: Expr, g: &str) -> Expr {
+    match e {
+        Expr::Sym(s) if s.starts_with('.') => Expr::Sym(format!("{g}{s}")),
+        Expr::Sym(_) | Expr::Num(_) | Expr::Pc => e,
+        Expr::Lo(b) => Expr::Lo(Box::new(qualify_expr(*b, g))),
+        Expr::Hi(b) => Expr::Hi(Box::new(qualify_expr(*b, g))),
+        Expr::Neg(b) => Expr::Neg(Box::new(qualify_expr(*b, g))),
+        Expr::Bin(op, l, r) => {
+            Expr::Bin(op, Box::new(qualify_expr(*l, g)), Box::new(qualify_expr(*r, g)))
         }
     }
 }
@@ -546,6 +608,8 @@ fn parse_value<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Expr,
 enum Tok {
     Num(i64),
     Sym(String),
+    /// The location counter `$` (statement-start address).
+    Pc,
     Plus,
     Minus,
     Star,
@@ -597,6 +661,12 @@ fn tokenize<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Vec<Tok>
                 } else {
                     return Err(AsmError::new(line, "malformed character literal"));
                 }
+            }
+            // A bare `$` is the location counter; `$` followed by hex digits is
+            // a number. Disambiguate on the next character.
+            '$' if !chars.get(i + 1).is_some_and(|c| c.is_ascii_alphanumeric()) => {
+                tokens.push(Tok::Pc);
+                i += 1;
             }
             // A number: a prefix sigil ($/%/#) or a digit, then an alnum run.
             '$' | '%' | '#' => {
@@ -697,6 +767,7 @@ impl ExprParser {
         self.pos += 1;
         match tok {
             Tok::Num(n) => Ok(Expr::Num(n)),
+            Tok::Pc => Ok(Expr::Pc),
             Tok::Sym(s) => Ok(Expr::Sym(s)),
             Tok::LParen => {
                 let inner = self.expr()?;
