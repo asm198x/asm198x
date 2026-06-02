@@ -11,7 +11,11 @@ repository.workspace = true
 # until a second CPU makes the seam real — see the umbrella decision record.
 
 [dependencies]
-isa = { path = "../isa" }
+# version (lockstep with the workspace) is required so `cargo package` can
+# verify the manifest — release-plz runs it to compute the release diff, and
+# path deps without a version fail packaging. release-plz keeps it in sync on
+# each bump. Local builds use the path; the version is only for packaging.
+isa = { path = "../isa", version = "0.0.2" }
 
 [lints]
 workspace = true
