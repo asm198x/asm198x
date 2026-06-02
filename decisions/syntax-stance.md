@@ -6,25 +6,39 @@
 
 ## The decision
 
-Each CPU's assembler is **source-compatible with that machine's dominant
-existing dialect**, not a single unified Asm198x syntax. The dialect lives in
-the per-CPU parser front-end; the instruction *encoding* underneath comes from
-the shared [`isa`](../crates/isa) spec.
+Each assembler is **source-compatible with real existing dialects**, not a
+single unified Asm198x syntax. The instruction *encoding* underneath comes from
+the shared [`isa`](../crates/isa) spec; the dialect — directives, literals,
+operators, label/scope rules, macros — lives in a front-end above it.
+
+**Dialect is an axis independent of CPU.** Asm198x supports *multiple
+first-class dialects per CPU*, not one dominant dialect. A dialect front-end
+declares which CPU's `isa` spec it targets; several front-ends may target the
+same spec (e.g. acme and ca65 both emit 6502). One CPU, one spec, many possible
+front-ends.
 
 The goal: real-world source for a machine assembles **unchanged**. Someone with
-a working ca65 6502 project or a sjasmplus Z80 project should be able to point
-Asm198x at it and get the same bytes out, without porting their syntax.
+a working acme C64 project, a ca65 NES project, or a pasmo Spectrum project
+should point Asm198x at it and get the same bytes out, without porting syntax.
 
-## Per-machine dialect targets
+## Dialect targets, prioritised by curriculum
 
-These name the dialect each backend aims to match. The first listed is the
-primary target; others are compatibility aspirations.
+Priority is set by **what Code198x actually consumes**, not by which dialect is
+most popular in the wild. The curriculum's own source is the first body that
+must assemble unchanged. A 2026-06-02 scan of the curriculum settled the list:
 
-| CPU | Primary dialect target | Also consider |
-|-----|------------------------|----------------|
-| 6502 | ca65 (cc65 suite) | ACME, 64tass |
-| Z80 | sjasmplus | pasmo, z80asm |
-| 68000 | vasm (mot syntax) | Devpac/HiSoft |
+| CPU | First-class dialects | Curriculum platform(s) | Also consider |
+|-----|---------------------|------------------------|----------------|
+| 6502 | **acme**, **ca65** | C64 (acme), NES (ca65) | 64tass, dasm |
+| Z80 | **pasmo** (primary), sjasmplus | Spectrum (pasmo) | z80asm |
+| 68000 | **vasm** (mot syntax) | Amiga (vasm) | Devpac/HiSoft |
+
+Both 6502 dialects are first-class: the curriculum uses acme for the C64 and
+ca65 for the NES, so neither is "also consider." For Z80, **pasmo is primary**
+because it is the Spectrum curriculum's assembler; sjasmplus stays a first-class
+second front-end (popular in the wider scene, useful breadth). This corrects an
+earlier version of this record that named sjasmplus primary — the curriculum
+does not use it.
 
 These are targets, not commitments to bug-for-bug parity. Where dialects
 genuinely conflict, document the choice here.
@@ -42,15 +56,29 @@ the *source* is wrong. Keep the source working.
 - **Shared (in `isa`):** opcode encodings, operand layout, cycle counts, flags.
 - **Shared (in the engine):** expression evaluation, symbol table, sections,
   output formats, listing — the dialect-agnostic machinery.
-- **Per-dialect (in each CPU front-end):** operator syntax, directive names and
-  semantics, number/string literal forms, label and scope rules, macro syntax.
+- **Per-dialect (in each dialect front-end):** operator syntax, directive names
+  and semantics, number/string literal forms, label and scope rules, macro
+  syntax. A front-end names the `isa` spec it targets, so a CPU can carry
+  several (acme and ca65 both target the 6502 spec).
+
+Do **not** build a data-driven "describe any dialect as config" engine yet.
+Write two or three real front-ends first; let the shared parts fall out. Only
+extract a declarative dialect descriptor if the variance proves genuinely
+tabular — premature generalisation here is the failure mode to avoid.
 
 ## Current state
 
-The 6502 front-end is an early subset, not yet ca65-compatible. It supports the
-common addressing modes, labels, `.org`/`.byte`/`.word`, and `<`/`>` operators.
-Known gaps before it can claim ca65 compatibility: arithmetic expressions,
-ca65's directive set and scoping, segments, macros, string escapes.
+The existing 6502 front-end is a generic early subset — not yet specific to
+acme or ca65. It supports the common addressing modes, labels,
+`.org`/`.byte`/`.word`, and `<`/`>` operators. Known gaps before it can claim
+compatibility with *any* real dialect: arithmetic expressions, that dialect's
+directive set and scoping, segments, macros, string escapes.
+
+**Active first target: Z80 + pasmo**, to unblock the Spectrum curriculum. This
+is also the move that forces the engine ↔ dialect ↔ spec seam (today the engine
+and the lone 6502 front-end are fused in one crate) while the codebase is still
+small. The work: author the Z80 `isa` spec, split the seam, and write a pasmo
+front-end whose output matches pasmo's bytes on real Spectrum source.
 
 ## Drift triggers
 
@@ -61,3 +89,26 @@ ca65's directive set and scoping, segments, macros, string escapes.
   dialect lives in the per-CPU front-end, encoding and engine stay shared.
 - **"Match this niche assembler instead of the primary target"** — record the
   reason here first; don't silently retarget a backend's dialect.
+- **"One dialect per CPU is enough"** — no; dialect is an axis independent of
+  CPU and the curriculum needs several per CPU (acme *and* ca65 for 6502).
+  Re-read "Dialect targets, prioritised by curriculum."
+- **"Build a generic data-driven dialect engine so any syntax just works"** —
+  not yet. Write real front-ends first; generalise only if the variance proves
+  tabular. See "What is shared vs per-dialect."
+- **"Prioritise the most popular dialect in the scene"** — priority is set by
+  curriculum consumption, not wild popularity. That is why Z80 leads with pasmo,
+  not sjasmplus.
+
+## Log
+
+### 2026-06-02 — Multi-dialect amendment
+
+Reframed from "one dominant dialect per CPU" to "dialect is an axis independent
+of CPU; multiple first-class dialects per CPU, prioritised by curriculum." A
+scan of Code198x showed the curriculum already spans dialects — acme (C64) and
+ca65 (NES) for 6502, pasmo for the Spectrum, vasm for the Amiga — so serving the
+curriculum *requires* several front-ends per spec. Corrected the Z80 primary
+from sjasmplus to **pasmo** (the Spectrum curriculum's assembler); sjasmplus
+stays first-class for breadth. Set the active first target to **Z80 + pasmo**,
+which also forces the engine/dialect/spec seam while the codebase is small.
+Held the line against a premature data-driven dialect engine.
