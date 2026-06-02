@@ -41,9 +41,11 @@ must assemble unchanged. A 2026-06-02 scan of the curriculum settled the list:
 
 | CPU | First-class dialects | Curriculum platform(s) | Also consider |
 |-----|---------------------|------------------------|----------------|
-| 6502 | **acme**, **ca65** | C64 (acme), NES (ca65) | 64tass, dasm |
-| Z80 | **PasmoNext** (primary), sjasmplus | Spectrum (pasmonext) | pasmo, z80asm |
+| 6502 | **acme** ✅, **ca65** ✅ | C64 (acme), NES (ca65) | 64tass, dasm |
+| Z80 | **PasmoNext** ✅, sjasmplus ✅ | Spectrum (pasmonext) | pasmo, z80asm |
 | 68000 | **vasm** (mot syntax) | Amiga (vasm) | Devpac/HiSoft |
+
+(✅ = delivered and curriculum-validated byte-identical against the real tool.)
 
 Both 6502 dialects are first-class: the curriculum uses acme for the C64 and
 ca65 for the NES, so neither is "also consider." For Z80, **PasmoNext is
@@ -96,10 +98,21 @@ value-based zero-page selection, and conditional assembly
 (`!if`/`!ifdef`/`!ifndef` … `{ }` … `else`). **The entire buildable C64
 curriculum — all 80 units across starfield (16) and sid-symphony (64) —
 assembles byte-identical to `acme -f cbm`, with zero miscompiles.** Not yet
-covered (no curriculum use): `!pet`, macros, `!for`/`!zone`. ca65 (the NES
-dialect) is the next 6502 front-end; when it lands, the shared 6502
-operand-resolution lifts into a `dialects::mos6502` core (the pasmo → sjasmplus
-path).
+covered (no curriculum use): `!pet`, macros, `!for`/`!zone`.
+
+The **ca65** front-end is also delivered — the NES curriculum's dialect. The
+shared 6502 operand-resolution and expression parser now live in a
+`dialects::mos6502` core (the pasmo → sjasmplus path realised for 6502), with
+acme and ca65 as thin surfaces over it; the one grammar difference, where `<`/
+`>` bind, is a `BytePrec` flag. ca65 supports `.segment`, `.byte`/`.word`/
+`.res`, `=` constants, `name:` labels, and `@cheap` locals. Because ca65 output
+is linked by ld65, Asm198x includes a **bounded linker** for the one fixed
+`nes.cfg`: it places segments into the NROM layout (`CODE`@`$8000`,
+`VECTORS`@`$FFFA`, zero-page/RAM segments off-file) and emits the 40976-byte
+`.nes` (iNES header + 32K PRG + 8K CHR, fill `$00`). **All 32 buildable NES
+units (dash + neon-nexus) assemble and link byte-identical to `ca65 + ld65`.**
+This is the first link step in Asm198x; it is deliberately minimal (one config,
+no object-file format), scoped to the curriculum — see the Log.
 
 The Z80 backend is delivered and validated. The engine ↔ dialect ↔ spec seam is
 split; the Z80 `isa` spec covers the **complete documented instruction set**
@@ -238,3 +251,33 @@ Retired the generic `.org`/`.byte` placeholder — nothing consumed it and it wa
 never a real dialect. `--dialect 6502`/`mos6502` and `assemble_*`'s 6502 entry
 now route to acme; the `ca65` alias is dropped until that front-end exists
 (mapping it to acme would silently miscompile NES source).
+
+### 2026-06-02 — ca65 (NES) dialect, shared mos6502 core, and a bounded linker
+
+Delivered ca65, the NES curriculum's dialect, in three slices: (1) extracted the
+dialect-agnostic 6502 machinery from acme into a `dialects::mos6502` core
+(operand classification, zero-page-vs-absolute, constant folding, the expression
+parser), parameterised only by `BytePrec` — ACME's `<`/`>` apply to the whole
+expression, ca65's bind tight as unary operators (`>$1234+1` is `$12` vs `$13`,
+both verified against the binaries); (2) the ca65 front-end (`.segment`,
+`.byte`/`.word`/`.res`, `=`, `name:` and `@cheap` locals scoped to the preceding
+global); (3) a **bounded linker**.
+
+**Scope decision (linker).** ca65 emits object files that ld65 links, so a
+byte-identical `.nes` requires a link step — new for a project branded
+"assemblers + disassemblers." Steve approved building it, bounded to the
+curriculum's reality: every NES unit links with the *same* `nes.cfg` (verified:
+all 32 are byte-identical), so the NROM layout is encoded directly rather than
+parsing config files, and there is no object-file format — assemble and link run
+in one in-memory pass over a single source file. Segment bases come from that
+layout (`CODE`@`$8000`, `VECTORS`@`$FFFA`, `ZEROPAGE`@`$00`, `OAM`/`BSS`
+off-file); the ROM is iNES header + 32K PRG + 8K CHR, fill `$00`. If a second
+linker config or multi-object linking ever appears, this is the point to
+generalise (parse the `.cfg`, add a relocatable object step) — not before. The
+umbrella scope (assemblers + disassemblers) now implicitly includes the minimal
+link needed to validate a linked target; revisit the umbrella decision if
+linking grows beyond this.
+
+All 32 buildable NES units (dash + neon-nexus) assemble and link byte-identical
+to `ca65 + ld65`; ACME stays 80/80. Wired as `assemble_ca65` / `--dialect ca65`
+(emitting `.nes`).
