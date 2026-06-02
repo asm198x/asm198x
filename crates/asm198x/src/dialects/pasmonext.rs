@@ -33,6 +33,8 @@
 //! `defs`; and the IM/BIT/SET/RES operand forms that arrive with the CB/ED
 //! prefix groups.
 
+use std::collections::BTreeMap;
+
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
 
@@ -47,6 +49,10 @@ impl Dialect for PasmoNext {
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
         let set = self.instruction_set();
         let mut out = Vec::new();
+        // Constants defined with `equ`, recorded as parsed. Opcode-embedded
+        // operands (BIT n, IM n, RST n) must be known at parse time to pick the
+        // form, so they resolve against this — not the engine's pass-2 symbols.
+        let mut consts: BTreeMap<String, i64> = BTreeMap::new();
         for (i, raw) in source.lines().enumerate() {
             let line = i + 1;
             let code = strip_comment(raw);
@@ -54,7 +60,12 @@ impl Dialect for PasmoNext {
                 continue;
             }
             let (label, rest) = split_label(set, code, line)?;
-            let op = parse_op(set, rest, line)?;
+            let op = parse_op(set, rest, line, &consts)?;
+            if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
+                && let Some(v) = eval_const(e, &consts)
+            {
+                consts.insert(name.clone(), v);
+            }
             if label.is_none() && op.is_none() {
                 continue;
             }
@@ -125,6 +136,7 @@ fn parse_op(
     set: &'static isa::InstructionSet,
     rest: &str,
     line: usize,
+    consts: &BTreeMap<String, i64>,
 ) -> Result<Option<Operation>, AsmError> {
     if rest.is_empty() {
         return Ok(None);
@@ -141,7 +153,7 @@ fn parse_op(
             let insn = set.instruction(&mnemonic).ok_or_else(|| {
                 AsmError::new(line, format!("unknown instruction `{mnemonic}`"))
             })?;
-            let (mode, operand) = resolve(&mnemonic, insn, args, line)?;
+            let (mode, operand) = resolve(&mnemonic, insn, args, line, consts)?;
             Ok(Some(Operation::Instruction {
                 mnemonic,
                 mode,
@@ -167,6 +179,7 @@ fn resolve(
     insn: &isa::Instruction,
     args: &str,
     line: usize,
+    consts: &BTreeMap<String, i64>,
 ) -> Result<(&'static str, Option<Expr>), AsmError> {
     let pieces = split_operands(args);
     let mut candidates: Vec<Vec<String>> = Vec::new();
@@ -175,7 +188,7 @@ fn resolve(
         match classify(piece, line)? {
             Operand::Fixed(token) => candidates.push(vec![token]),
             Operand::Value { expr, paren } => {
-                candidates.push(value_tokens(mnemonic, paren, idx, &expr, line)?);
+                candidates.push(value_tokens(mnemonic, paren, idx, &expr, line, consts)?);
                 exprs.push(expr);
             }
         }
@@ -230,9 +243,10 @@ fn classify(piece: &str, line: usize) -> Result<Operand, AsmError> {
 fn value_tokens(
     mnemonic: &str,
     paren: bool,
-    _index: usize,
+    index: usize,
     expr: &Expr,
     line: usize,
+    consts: &BTreeMap<String, i64>,
 ) -> Result<Vec<String>, AsmError> {
     if paren {
         return Ok(vec!["(n)".to_string(), "(nn)".to_string()]);
@@ -243,24 +257,63 @@ fn value_tokens(
         // RST's target is one of eight fixed addresses, encoded in the opcode
         // and named in the mode label as two hex digits.
         "RST" => {
-            let v = literal(expr, line)?;
+            let v = literal(expr, consts, line)?;
             Ok(vec![format!("{v:02X}")])
         }
         // IM's mode (0/1/2) is the literal interrupt mode, in the opcode.
         "IM" => {
-            let v = literal(expr, line)?;
+            let v = literal(expr, consts, line)?;
+            Ok(vec![format!("{v}")])
+        }
+        // BIT/RES/SET's first operand is the bit number (0..7), named in the
+        // mode label as a decimal digit; the register operand is fixed.
+        "BIT" | "RES" | "SET" if index == 0 => {
+            let v = literal(expr, consts, line)?;
             Ok(vec![format!("{v}")])
         }
         _ => Ok(vec!["n".to_string(), "nn".to_string()]),
     }
 }
 
-/// Evaluate a parse-time literal (for operands encoded in the opcode, like
-/// `RST`). Symbols are not yet known here, so only numbers are accepted.
-fn literal(expr: &Expr, line: usize) -> Result<i64, AsmError> {
+/// Resolve an operand that is encoded *in the opcode* (RST/IM/BIT/RES/SET), so
+/// its value must be known at parse time to pick the form. It may be a number,
+/// an arithmetic expression, or a constant defined earlier with `equ` — but not
+/// a label (an address isn't known until the engine's later passes).
+fn literal(expr: &Expr, consts: &BTreeMap<String, i64>, line: usize) -> Result<i64, AsmError> {
+    eval_const(expr, consts).ok_or_else(|| {
+        AsmError::new(
+            line,
+            "operand must be a constant here (a number, an expression of \
+             constants, or a value defined with `equ` above)",
+        )
+    })
+}
+
+/// Fold an expression to a constant, resolving symbols only against `equ`
+/// constants. Returns `None` if it references an unknown symbol or overflows.
+fn eval_const(expr: &Expr, consts: &BTreeMap<String, i64>) -> Option<i64> {
     match expr {
-        Expr::Num(n) => Ok(*n),
-        _ => Err(AsmError::new(line, "operand must be a literal value")),
+        Expr::Num(n) => Some(*n),
+        Expr::Sym(s) => consts.get(s).copied(),
+        Expr::Lo(e) => Some(eval_const(e, consts)? & 0xFF),
+        Expr::Hi(e) => Some((eval_const(e, consts)? >> 8) & 0xFF),
+        Expr::Neg(e) => eval_const(e, consts)?.checked_neg(),
+        Expr::Bin(op, l, r) => {
+            let a = eval_const(l, consts)?;
+            let b = eval_const(r, consts)?;
+            match op {
+                BinOp::Add => a.checked_add(b),
+                BinOp::Sub => a.checked_sub(b),
+                BinOp::Mul => a.checked_mul(b),
+                BinOp::Div => {
+                    if b == 0 {
+                        None
+                    } else {
+                        a.checked_div(b)
+                    }
+                }
+            }
+        }
     }
 }
 
@@ -337,11 +390,52 @@ fn strip_parens(t: &str) -> Option<&str> {
     Some(inner)
 }
 
+/// Parse a `defb`/`defw` value list. Items are comma-separated; a `"..."`
+/// string expands to one byte per character (its char code), so `defb
+/// "AB", 0` becomes three values. TODO: escape sequences in strings.
 fn parse_list(rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
-    if rest.trim().is_empty() {
+    let rest = rest.trim();
+    if rest.is_empty() {
         return Err(AsmError::new(line, "directive needs at least one value"));
     }
-    rest.split(',').map(|p| parse_value(p, line)).collect()
+    let mut out = Vec::new();
+    for piece in split_data_items(rest) {
+        if let Some(text) = string_literal(piece) {
+            out.extend(text.chars().map(|c| Expr::Num(c as i64)));
+        } else {
+            out.push(parse_value(piece, line)?);
+        }
+    }
+    Ok(out)
+}
+
+/// Split a data list on commas that are not inside a `"..."` string.
+fn split_data_items(s: &str) -> Vec<&str> {
+    let mut out = Vec::new();
+    let mut in_string = false;
+    let mut start = 0;
+    for (i, c) in s.char_indices() {
+        match c {
+            '"' => in_string = !in_string,
+            ',' if !in_string => {
+                out.push(s[start..i].trim());
+                start = i + 1;
+            }
+            _ => {}
+        }
+    }
+    out.push(s[start..].trim());
+    out
+}
+
+/// If `piece` is a `"..."` string literal, return its contents.
+fn string_literal(piece: &str) -> Option<&str> {
+    let p = piece.trim();
+    if p.len() >= 2 && p.starts_with('"') && p.ends_with('"') {
+        Some(&p[1..p.len() - 1])
+    } else {
+        None
+    }
 }
 
 /// Parse an operand value: an arithmetic expression over numbers, symbols, and
@@ -649,10 +743,25 @@ mod tests {
     }
 
     #[test]
+    fn defb_string_expands_to_char_bytes() {
+        assert_eq!(
+            asm("        defb \"AB\", 0\n").expect("defb").bytes,
+            vec![0x41, 0x42, 0x00]
+        );
+    }
+
+    #[test]
+    fn cb_bit_ops_assemble() {
+        assert_eq!(asm("        bit 7,(hl)\n").expect("bit").bytes, vec![0xCB, 0x7E]);
+        assert_eq!(asm("        set 0,a\n").expect("set").bytes, vec![0xCB, 0xC7]);
+        assert_eq!(asm("        rlc b\n").expect("rlc").bytes, vec![0xCB, 0x00]);
+    }
+
+    #[test]
     fn unimplemented_prefix_op_errors_clearly() {
-        // RLC is a CB-prefix op, not yet authored: a clean error, not a
+        // IX/IY (DD/FD) ops are not yet authored: a clean error, not a
         // miscompile. (Indented, as the curriculum writes instructions.)
-        let err = asm("        rlc b\n").expect_err("rlc not yet supported");
-        assert!(err.message.contains("RLC"), "unexpected: {err}");
+        let err = asm("        push ix\n").expect_err("ix not yet supported");
+        assert!(err.message.contains("PUSH"), "unexpected: {err}");
     }
 }
