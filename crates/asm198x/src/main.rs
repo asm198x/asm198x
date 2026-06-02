@@ -13,6 +13,7 @@ use std::process::ExitCode;
 #[derive(Clone, Copy)]
 enum Assembler {
     Mos6502,
+    Acme,
     Pasmo { z80n: bool },
     Sjasmplus { z80n: bool },
 }
@@ -30,6 +31,7 @@ impl Assembler {
             },
         };
         match dialect.map(str::to_ascii_lowercase).as_deref() {
+            Some("acme") => Ok(Self::Acme),
             Some("6502" | "mos6502" | "ca65") => Ok(Self::Mos6502),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
@@ -50,6 +52,7 @@ impl Assembler {
     fn assemble(self, source: &str) -> Result<asm198x::Assembly, asm198x::AsmError> {
         match self {
             Self::Mos6502 => asm198x::assemble_6502(source),
+            Self::Acme => asm198x::assemble_acme(source),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
             Self::Pasmo { z80n: true } => asm198x::assemble_pasmonext(source),
             Self::Sjasmplus { z80n: false } => asm198x::assemble_sjasmplus(source),
@@ -159,7 +162,7 @@ fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
      assemble:    asm198x [--dialect <name>] [--cpu <target>] <input> [-o <out.bin>]\n\
      disassemble: asm198x --disasm [--org <addr>] <input.bin>   (Z80)\n\n\
-     dialects (syntax): 6502 (default, ca65/ACME-shaped), pasmo, pasmonext, sjasmplus\n\
+     dialects (syntax): 6502 (default, generic), acme (C64), pasmo, pasmonext, sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
      \x20                 the dialect\n\n\

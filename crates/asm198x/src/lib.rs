@@ -32,6 +32,16 @@ pub fn assemble_6502(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::Mos6502)
 }
 
+/// Assemble ACME-syntax 6502 source into a flat binary — the C64 curriculum's
+/// dialect (`*=` to set the PC, `!byte`/`!word`/`!fill`, `name = value`).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_acme(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::Acme)
+}
+
 /// Assemble pasmo-syntax Z80 source into a flat binary, targeting a **plain
 /// Z80** (Z80N opcodes are rejected, as vanilla pasmo rejects them).
 ///
