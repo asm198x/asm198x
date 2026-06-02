@@ -40,8 +40,9 @@
 //! DJNZ/RST), stack ops, the accumulator/flag ops, and block-free I/O — **plus
 //! the complete `ED` (extended) group**: block transfer/search (LDIR/LDDR/CPIR
 //! …), block I/O, 16-bit ADC/SBC HL, 16-bit LD (nn), IN/OUT (C), IM, NEG,
-//! RRD/RLD, RETI/RETN. **TODO:** the `CB` (bit/rotate) and `DD`/`FD` (IX/IY)
-//! prefix groups.
+//! RRD/RLD, RETI/RETN — **plus the complete `CB` group**: the rotates/shifts
+//! (RLC/RRC/RL/RR/SLA/SRA/SLL/SRL) and bit operations (BIT/RES/SET) over every
+//! register slot. **TODO:** the `DD`/`FD` (IX/IY) prefix groups.
 
 use crate::{Cycles, Endianness, Form, Instruction, InstructionSet, Operand, OperandKind};
 
@@ -92,6 +93,24 @@ const fn form(
         cycles,
         flags,
         undocumented: false,
+    }
+}
+
+/// Build one undocumented form (e.g. the CB-prefix `SLL`).
+const fn form_u(
+    opcode: &'static [u8],
+    mode: &'static str,
+    operands: &'static [Operand],
+    cycles: Cycles,
+    flags: &'static str,
+) -> Form {
+    Form {
+        opcode,
+        mode,
+        operands,
+        cycles,
+        flags,
+        undocumented: true,
     }
 }
 
@@ -507,6 +526,290 @@ const INSTRUCTIONS: &[Instruction] = &[
     inst!("OUTD", "Block output, decrement", [form(&[0xED, 0xAB], "", NONE, Cycles::fixed(16), "SZHPNC")]),
     inst!("OTIR", "Block output, inc, repeat", [form(&[0xED, 0xB3], "", NONE, cond(16, 5), "SZHPNC")]),
     inst!("OTDR", "Block output, dec, repeat", [form(&[0xED, 0xBB], "", NONE, cond(16, 5), "SZHPNC")]),
+
+    // ============================ CB prefix ============================
+    // Rotates/shifts (x=0) and bit operations (BIT/RES/SET, x=1..3), each over
+    // the eight register slots B C D E H L (HL) A. Register forms cost 8
+    // T-states; the (HL) form costs 15 (12 for BIT). Cross-checked against the
+    // validated Emu198x decoder. SLL (0x30..0x37) is undocumented.
+    inst!("RLC", "Rotate left circular", [
+        form(&[0xCB, 0x00], "B", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x01], "C", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x02], "D", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x03], "E", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x04], "H", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x05], "L", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x06], "(HL)", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xCB, 0x07], "A", NONE, Cycles::fixed(8), "SZHPNC"),
+    ]),
+    inst!("RRC", "Rotate right circular", [
+        form(&[0xCB, 0x08], "B", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x09], "C", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x0A], "D", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x0B], "E", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x0C], "H", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x0D], "L", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x0E], "(HL)", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xCB, 0x0F], "A", NONE, Cycles::fixed(8), "SZHPNC"),
+    ]),
+    inst!("RL", "Rotate left through carry", [
+        form(&[0xCB, 0x10], "B", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x11], "C", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x12], "D", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x13], "E", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x14], "H", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x15], "L", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x16], "(HL)", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xCB, 0x17], "A", NONE, Cycles::fixed(8), "SZHPNC"),
+    ]),
+    inst!("RR", "Rotate right through carry", [
+        form(&[0xCB, 0x18], "B", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x19], "C", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x1A], "D", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x1B], "E", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x1C], "H", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x1D], "L", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x1E], "(HL)", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xCB, 0x1F], "A", NONE, Cycles::fixed(8), "SZHPNC"),
+    ]),
+    inst!("SLA", "Shift left arithmetic", [
+        form(&[0xCB, 0x20], "B", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x21], "C", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x22], "D", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x23], "E", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x24], "H", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x25], "L", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x26], "(HL)", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xCB, 0x27], "A", NONE, Cycles::fixed(8), "SZHPNC"),
+    ]),
+    inst!("SRA", "Shift right arithmetic", [
+        form(&[0xCB, 0x28], "B", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x29], "C", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x2A], "D", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x2B], "E", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x2C], "H", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x2D], "L", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x2E], "(HL)", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xCB, 0x2F], "A", NONE, Cycles::fixed(8), "SZHPNC"),
+    ]),
+    inst!("SLL", "Shift left logical (undocumented)", [
+        form_u(&[0xCB, 0x30], "B", NONE, Cycles::fixed(8), "SZHPNC"),
+        form_u(&[0xCB, 0x31], "C", NONE, Cycles::fixed(8), "SZHPNC"),
+        form_u(&[0xCB, 0x32], "D", NONE, Cycles::fixed(8), "SZHPNC"),
+        form_u(&[0xCB, 0x33], "E", NONE, Cycles::fixed(8), "SZHPNC"),
+        form_u(&[0xCB, 0x34], "H", NONE, Cycles::fixed(8), "SZHPNC"),
+        form_u(&[0xCB, 0x35], "L", NONE, Cycles::fixed(8), "SZHPNC"),
+        form_u(&[0xCB, 0x36], "(HL)", NONE, Cycles::fixed(15), "SZHPNC"),
+        form_u(&[0xCB, 0x37], "A", NONE, Cycles::fixed(8), "SZHPNC"),
+    ]),
+    inst!("SRL", "Shift right logical", [
+        form(&[0xCB, 0x38], "B", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x39], "C", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x3A], "D", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x3B], "E", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x3C], "H", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x3D], "L", NONE, Cycles::fixed(8), "SZHPNC"),
+        form(&[0xCB, 0x3E], "(HL)", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xCB, 0x3F], "A", NONE, Cycles::fixed(8), "SZHPNC"),
+    ]),
+    inst!("BIT", "Test bit", [
+        form(&[0xCB, 0x40], "0,B", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x41], "0,C", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x42], "0,D", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x43], "0,E", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x44], "0,H", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x45], "0,L", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x46], "0,(HL)", NONE, Cycles::fixed(12), "SZHPN"),
+        form(&[0xCB, 0x47], "0,A", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x48], "1,B", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x49], "1,C", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x4A], "1,D", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x4B], "1,E", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x4C], "1,H", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x4D], "1,L", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x4E], "1,(HL)", NONE, Cycles::fixed(12), "SZHPN"),
+        form(&[0xCB, 0x4F], "1,A", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x50], "2,B", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x51], "2,C", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x52], "2,D", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x53], "2,E", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x54], "2,H", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x55], "2,L", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x56], "2,(HL)", NONE, Cycles::fixed(12), "SZHPN"),
+        form(&[0xCB, 0x57], "2,A", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x58], "3,B", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x59], "3,C", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x5A], "3,D", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x5B], "3,E", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x5C], "3,H", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x5D], "3,L", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x5E], "3,(HL)", NONE, Cycles::fixed(12), "SZHPN"),
+        form(&[0xCB, 0x5F], "3,A", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x60], "4,B", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x61], "4,C", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x62], "4,D", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x63], "4,E", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x64], "4,H", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x65], "4,L", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x66], "4,(HL)", NONE, Cycles::fixed(12), "SZHPN"),
+        form(&[0xCB, 0x67], "4,A", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x68], "5,B", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x69], "5,C", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x6A], "5,D", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x6B], "5,E", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x6C], "5,H", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x6D], "5,L", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x6E], "5,(HL)", NONE, Cycles::fixed(12), "SZHPN"),
+        form(&[0xCB, 0x6F], "5,A", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x70], "6,B", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x71], "6,C", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x72], "6,D", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x73], "6,E", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x74], "6,H", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x75], "6,L", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x76], "6,(HL)", NONE, Cycles::fixed(12), "SZHPN"),
+        form(&[0xCB, 0x77], "6,A", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x78], "7,B", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x79], "7,C", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x7A], "7,D", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x7B], "7,E", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x7C], "7,H", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x7D], "7,L", NONE, Cycles::fixed(8), "SZHPN"),
+        form(&[0xCB, 0x7E], "7,(HL)", NONE, Cycles::fixed(12), "SZHPN"),
+        form(&[0xCB, 0x7F], "7,A", NONE, Cycles::fixed(8), "SZHPN"),
+    ]),
+    inst!("RES", "Reset bit", [
+        form(&[0xCB, 0x80], "0,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x81], "0,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x82], "0,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x83], "0,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x84], "0,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x85], "0,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x86], "0,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0x87], "0,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x88], "1,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x89], "1,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x8A], "1,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x8B], "1,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x8C], "1,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x8D], "1,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x8E], "1,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0x8F], "1,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x90], "2,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x91], "2,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x92], "2,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x93], "2,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x94], "2,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x95], "2,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x96], "2,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0x97], "2,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x98], "3,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x99], "3,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x9A], "3,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x9B], "3,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x9C], "3,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x9D], "3,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0x9E], "3,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0x9F], "3,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xA0], "4,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xA1], "4,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xA2], "4,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xA3], "4,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xA4], "4,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xA5], "4,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xA6], "4,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0xA7], "4,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xA8], "5,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xA9], "5,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xAA], "5,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xAB], "5,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xAC], "5,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xAD], "5,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xAE], "5,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0xAF], "5,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xB0], "6,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xB1], "6,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xB2], "6,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xB3], "6,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xB4], "6,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xB5], "6,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xB6], "6,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0xB7], "6,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xB8], "7,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xB9], "7,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xBA], "7,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xBB], "7,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xBC], "7,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xBD], "7,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xBE], "7,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0xBF], "7,A", NONE, Cycles::fixed(8), ""),
+    ]),
+    inst!("SET", "Set bit", [
+        form(&[0xCB, 0xC0], "0,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xC1], "0,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xC2], "0,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xC3], "0,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xC4], "0,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xC5], "0,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xC6], "0,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0xC7], "0,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xC8], "1,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xC9], "1,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xCA], "1,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xCB], "1,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xCC], "1,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xCD], "1,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xCE], "1,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0xCF], "1,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xD0], "2,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xD1], "2,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xD2], "2,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xD3], "2,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xD4], "2,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xD5], "2,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xD6], "2,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0xD7], "2,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xD8], "3,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xD9], "3,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xDA], "3,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xDB], "3,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xDC], "3,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xDD], "3,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xDE], "3,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0xDF], "3,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xE0], "4,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xE1], "4,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xE2], "4,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xE3], "4,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xE4], "4,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xE5], "4,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xE6], "4,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0xE7], "4,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xE8], "5,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xE9], "5,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xEA], "5,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xEB], "5,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xEC], "5,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xED], "5,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xEE], "5,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0xEF], "5,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xF0], "6,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xF1], "6,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xF2], "6,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xF3], "6,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xF4], "6,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xF5], "6,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xF6], "6,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0xF7], "6,A", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xF8], "7,B", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xF9], "7,C", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xFA], "7,D", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xFB], "7,E", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xFC], "7,H", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xFD], "7,L", NONE, Cycles::fixed(8), ""),
+        form(&[0xCB, 0xFE], "7,(HL)", NONE, Cycles::fixed(15), ""),
+        form(&[0xCB, 0xFF], "7,A", NONE, Cycles::fixed(8), ""),
+    ]),
 ];
 
 #[cfg(test)]
@@ -635,5 +938,34 @@ mod tests {
                 }
             }
         }
+    }
+
+    /// The CB group is the full 256-entry second-byte space, present exactly
+    /// once — the completeness + uniqueness gate for the bit/rotate page.
+    #[test]
+    fn cb_group_is_complete_and_unique() {
+        let mut seen = [false; 256];
+        for instruction in SET.instructions {
+            for f in instruction.forms {
+                if f.opcode.first() == Some(&0xCB) {
+                    assert_eq!(f.opcode.len(), 2, "{} {} malformed CB opcode", instruction.mnemonic, f.mode);
+                    let op = f.opcode[1] as usize;
+                    assert!(
+                        !seen[op],
+                        "duplicate CB opcode $CB ${:02X} ({} {})",
+                        op, instruction.mnemonic, f.mode
+                    );
+                    seen[op] = true;
+                }
+            }
+        }
+        for (op, present) in seen.iter().enumerate() {
+            assert!(present, "missing CB opcode $CB ${op:02X}");
+        }
+
+        // Spot-checks against the validated decoder grid.
+        assert_eq!(SET.instruction("BIT").expect("BIT").form("7,(HL)").expect("f").opcode, &[0xCB, 0x7E]);
+        assert_eq!(SET.instruction("SET").expect("SET").form("0,A").expect("f").opcode, &[0xCB, 0xC7]);
+        assert_eq!(SET.instruction("RLC").expect("RLC").form("B").expect("f").opcode, &[0xCB, 0x00]);
     }
 }
