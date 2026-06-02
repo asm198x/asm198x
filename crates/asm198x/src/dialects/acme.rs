@@ -19,6 +19,8 @@
 //! the text directives (`!text`/`!pet`/`!scr`) and conditional assembly
 //! (`!if`/`!ifdef`/`!ifndef`) — tracked in `decisions/syntax-stance.md`.
 
+use std::collections::BTreeMap;
+
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
 
@@ -35,21 +37,248 @@ impl Dialect for Acme {
         // Anonymous `-`/`+` labels need a forward view (a `+` reference resolves
         // to a definition below it), so collect every definition up front.
         let anons = prescan_anons(source);
+        // Split conditional braces into their own units so a recursive walk can
+        // emit one branch and skip the other.
+        let units = tokenize_braces(source);
         let mut out = Vec::new();
-        for (i, raw) in source.lines().enumerate() {
-            let line = i + 1;
-            let code = strip_comment(raw);
-            if code.trim().is_empty() {
-                continue;
-            }
-            let (label, op) = parse_statement(set, &anons, code, line)?;
-            if label.is_none() && op.is_none() {
-                continue;
-            }
-            out.push(Statement { line, label, op });
-        }
+        // Symbols assigned with `name = const` so far, for `!if`/`!ifdef` tests.
+        let mut env: BTreeMap<String, i64> = BTreeMap::new();
+        let mut idx = 0;
+        process_block(set, &anons, &mut env, &units, &mut idx, true, &mut out)?;
         Ok(out)
     }
+}
+
+// ---------------------------------------------------------------------------
+// Conditional assembly (`!if` / `!ifdef` / `!ifndef` … `{ }` … `else { }`)
+// ---------------------------------------------------------------------------
+
+/// One unit of source after `{`/`}` have been split out as standalone tokens.
+struct Unit {
+    line: usize,
+    text: String,
+}
+
+/// Split the source into units, isolating each top-level `{` and `}` (outside
+/// strings) so the conditional walker can treat them as block delimiters. Lines
+/// without braces pass through whole, leading whitespace intact (so column-0
+/// label detection still works).
+fn tokenize_braces(source: &str) -> Vec<Unit> {
+    let mut units = Vec::new();
+    for (i, raw) in source.lines().enumerate() {
+        let line = i + 1;
+        let code = strip_comment(raw);
+        let mut in_char = false;
+        let mut in_str = false;
+        let mut start = 0;
+        let bytes = code.as_bytes();
+        let flush = |seg: &str, units: &mut Vec<Unit>| {
+            if !seg.trim().is_empty() {
+                units.push(Unit { line, text: seg.to_string() });
+            }
+        };
+        for (j, &b) in bytes.iter().enumerate() {
+            match b {
+                b'\'' if !in_str => in_char = !in_char,
+                b'"' if !in_char => in_str = !in_str,
+                b'{' | b'}' if !in_char && !in_str => {
+                    flush(&code[start..j], &mut units);
+                    units.push(Unit { line, text: (b as char).to_string() });
+                    start = j + 1;
+                }
+                _ => {}
+            }
+        }
+        flush(&code[start..], &mut units);
+    }
+    units
+}
+
+/// The kind of a conditional directive and the text it tests.
+enum Conditional {
+    IfDef(String),
+    IfNDef(String),
+    If(String),
+}
+
+fn classify_conditional(text: &str) -> Option<Conditional> {
+    let (word, rest) = split_first_word(text.trim());
+    match word {
+        "!ifdef" => Some(Conditional::IfDef(rest.trim().to_string())),
+        "!ifndef" => Some(Conditional::IfNDef(rest.trim().to_string())),
+        "!if" => Some(Conditional::If(rest.trim().to_string())),
+        _ => None,
+    }
+}
+
+/// Walk units, emitting statements. A conditional emits its taken branch and
+/// recurses (with `emit = false`) through the other so braces stay balanced and
+/// the skipped branch defines no symbols. Returns having consumed this block's
+/// closing `}` (or at end of input for the top level).
+fn process_block(
+    set: &'static isa::InstructionSet,
+    anons: &[AnonDef],
+    env: &mut BTreeMap<String, i64>,
+    units: &[Unit],
+    idx: &mut usize,
+    emit: bool,
+    out: &mut Vec<Statement>,
+) -> Result<(), AsmError> {
+    while *idx < units.len() {
+        let text = units[*idx].text.trim();
+        let line = units[*idx].line;
+        if text == "}" {
+            *idx += 1;
+            return Ok(());
+        }
+        if text == "{" || text == "else" {
+            return Err(AsmError::new(line, format!("unexpected `{text}`")));
+        }
+        if let Some(cond) = classify_conditional(text) {
+            *idx += 1;
+            expect_brace(units, idx, line)?;
+            // A skipped outer branch must not evaluate inner conditions (their
+            // symbols may be undefined), so only test when actually emitting.
+            let taken = if emit {
+                match &cond {
+                    Conditional::IfDef(s) => env.contains_key(s),
+                    Conditional::IfNDef(s) => !env.contains_key(s),
+                    Conditional::If(e) => eval_condition(anons, env, e, line)?,
+                }
+            } else {
+                false
+            };
+            process_block(set, anons, env, units, idx, emit && taken, out)?;
+            if *idx < units.len() && units[*idx].text.trim() == "else" {
+                *idx += 1;
+                expect_brace(units, idx, line)?;
+                process_block(set, anons, env, units, idx, emit && !taken, out)?;
+            }
+            continue;
+        }
+        if emit {
+            let (label, op) = parse_statement(set, anons, env, &units[*idx].text, line)?;
+            // Record constant assignments so later conditions can test them.
+            if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
+                && let Ok(v) = fold_const(e, env, line)
+            {
+                env.insert(name.clone(), v);
+            }
+            if !(label.is_none() && op.is_none()) {
+                out.push(Statement { line, label, op });
+            }
+        }
+        *idx += 1;
+    }
+    Ok(())
+}
+
+fn expect_brace(units: &[Unit], idx: &mut usize, line: usize) -> Result<(), AsmError> {
+    match units.get(*idx) {
+        Some(u) if u.text.trim() == "{" => {
+            *idx += 1;
+            Ok(())
+        }
+        _ => Err(AsmError::new(line, "expected `{` after a conditional")),
+    }
+}
+
+/// Evaluate an `!if` condition: a comparison (`=`, `!=`, `<=`, `>=`) of two
+/// constant expressions, or a bare expression tested for non-zero. Single `<`/
+/// `>` comparisons are not supported (they collide with the low/high-byte
+/// prefixes); the curriculum uses only `=`.
+fn eval_condition(
+    anons: &[AnonDef],
+    env: &BTreeMap<String, i64>,
+    cond: &str,
+    line: usize,
+) -> Result<bool, AsmError> {
+    let value = |s: &str| -> Result<i64, AsmError> {
+        fold_const(&parse_value(anons, s, line)?, env, line)
+    };
+    let c = cond.trim();
+    if let Some(i) = top_level_find(c, "!=") {
+        return Ok(value(&c[..i])? != value(&c[i + 2..])?);
+    }
+    if let Some(i) = top_level_find(c, "<=") {
+        return Ok(value(&c[..i])? <= value(&c[i + 2..])?);
+    }
+    if let Some(i) = top_level_find(c, ">=") {
+        return Ok(value(&c[..i])? >= value(&c[i + 2..])?);
+    }
+    if let Some(i) = top_level_lone_eq(c) {
+        return Ok(value(&c[..i])? == value(&c[i + 1..])?);
+    }
+    Ok(value(c)? != 0)
+}
+
+/// Fold an expression to a constant for conditions, resolving symbols against
+/// the parse-time `env`. Errors on the location counter or an unknown symbol.
+fn fold_const(e: &Expr, env: &BTreeMap<String, i64>, line: usize) -> Result<i64, AsmError> {
+    let overflow = || AsmError::new(line, "arithmetic overflow in condition");
+    Ok(match e {
+        Expr::Num(n) => *n,
+        Expr::Sym(s) => *env
+            .get(s)
+            .ok_or_else(|| AsmError::new(line, format!("`{s}` is not a parse-time constant")))?,
+        Expr::Pc => return Err(AsmError::new(line, "`*` cannot be used in a condition")),
+        Expr::Lo(b) => fold_const(b, env, line)? & 0xFF,
+        Expr::Hi(b) => (fold_const(b, env, line)? >> 8) & 0xFF,
+        Expr::Neg(b) => fold_const(b, env, line)?.checked_neg().ok_or_else(overflow)?,
+        Expr::Bin(op, l, r) => {
+            let a = fold_const(l, env, line)?;
+            let b = fold_const(r, env, line)?;
+            match op {
+                BinOp::Add => a.checked_add(b).ok_or_else(overflow)?,
+                BinOp::Sub => a.checked_sub(b).ok_or_else(overflow)?,
+                BinOp::Mul => a.checked_mul(b).ok_or_else(overflow)?,
+                BinOp::Div if b != 0 => a / b,
+                BinOp::Div => return Err(AsmError::new(line, "division by zero in condition")),
+            }
+        }
+    })
+}
+
+/// Find `pat` at the top level (outside parentheses and strings).
+fn top_level_find(s: &str, pat: &str) -> Option<usize> {
+    let bytes = s.as_bytes();
+    let mut depth: i32 = 0;
+    let (mut in_char, mut in_str) = (false, false);
+    for i in 0..bytes.len() {
+        match bytes[i] {
+            b'\'' if !in_str => in_char = !in_char,
+            b'"' if !in_char => in_str = !in_str,
+            b'(' if !in_char && !in_str => depth += 1,
+            b')' if !in_char && !in_str => depth -= 1,
+            _ if depth == 0 && !in_char && !in_str && s[i..].starts_with(pat) => return Some(i),
+            _ => {}
+        }
+    }
+    None
+}
+
+/// Find a lone top-level `=` (ACME's equality test), skipping `==`/`<=`/`>=`/`!=`.
+fn top_level_lone_eq(s: &str) -> Option<usize> {
+    let bytes = s.as_bytes();
+    let mut depth: i32 = 0;
+    let (mut in_char, mut in_str) = (false, false);
+    for i in 0..bytes.len() {
+        match bytes[i] {
+            b'\'' if !in_str => in_char = !in_char,
+            b'"' if !in_char => in_str = !in_str,
+            b'(' if !in_char && !in_str => depth += 1,
+            b')' if !in_char && !in_str => depth -= 1,
+            b'=' if depth == 0 && !in_char && !in_str => {
+                let prev = i.checked_sub(1).map(|p| bytes[p]);
+                let next = bytes.get(i + 1).copied();
+                if !matches!(prev, Some(b'!' | b'<' | b'>' | b'=')) && next != Some(b'=') {
+                    return Some(i);
+                }
+            }
+            _ => {}
+        }
+    }
+    None
 }
 
 /// Strip a `;` line comment. A `;` inside a `'c'` char literal or `"..."` string
@@ -146,6 +375,7 @@ fn resolve_anon(
 fn parse_statement(
     set: &'static isa::InstructionSet,
     anons: &[AnonDef],
+    env: &BTreeMap<String, i64>,
     code: &str,
     line: usize,
 ) -> Result<(Option<String>, Option<Operation>), AsmError> {
@@ -172,7 +402,7 @@ fn parse_statement(
 
     // Otherwise: an optional column-0 label, then a directive or instruction.
     let (label, rest) = split_label(set, anons, code, line)?;
-    let op = parse_op(set, anons, rest, line)?;
+    let op = parse_op(set, anons, env, rest, line)?;
     Ok((label, op))
 }
 
@@ -239,6 +469,7 @@ fn split_label<'a>(
 fn parse_op(
     set: &'static isa::InstructionSet,
     anons: &[AnonDef],
+    env: &BTreeMap<String, i64>,
     rest: &str,
     line: usize,
 ) -> Result<Option<Operation>, AsmError> {
@@ -254,7 +485,7 @@ fn parse_op(
     let insn = set
         .instruction(&mnemonic)
         .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
-    let (mode, operand) = resolve_mode(insn, operand, line)?;
+    let (mode, operand) = resolve_mode(insn, operand, env, line)?;
     Ok(Some(Operation::Instruction {
         mnemonic,
         mode,
@@ -332,6 +563,7 @@ enum OperandSyntax {
 fn resolve_mode(
     insn: &isa::Instruction,
     operand: OperandSyntax,
+    env: &BTreeMap<String, i64>,
     line: usize,
 ) -> Result<(&'static str, Option<Expr>), AsmError> {
     let resolved = match operand {
@@ -349,21 +581,33 @@ fn resolve_mode(
         OperandSyntax::Indirect(e) => ("indirect", Some(e)),
         OperandSyntax::IndexedIndirect(e) => ("(indirect,x)", Some(e)),
         OperandSyntax::IndirectIndexed(e) => ("(indirect),y", Some(e)),
-        OperandSyntax::Indexed(e, Index::X) => (pick_zp_abs(insn, &e, "zeropage,x", "absolute,x"), Some(e)),
-        OperandSyntax::Indexed(e, Index::Y) => (pick_zp_abs(insn, &e, "zeropage,y", "absolute,y"), Some(e)),
+        OperandSyntax::Indexed(e, Index::X) => (pick_zp_abs(insn, &e, env, "zeropage,x", "absolute,x"), Some(e)),
+        OperandSyntax::Indexed(e, Index::Y) => (pick_zp_abs(insn, &e, env, "zeropage,y", "absolute,y"), Some(e)),
         OperandSyntax::Direct(e) => {
             if insn.form("relative").is_some() {
                 ("relative", Some(e))
             } else {
-                (pick_zp_abs(insn, &e, "zeropage", "absolute"), Some(e))
+                (pick_zp_abs(insn, &e, env, "zeropage", "absolute"), Some(e))
             }
         }
     };
     Ok(resolved)
 }
 
-fn pick_zp_abs(insn: &isa::Instruction, e: &Expr, zp: &'static str, abs: &'static str) -> &'static str {
-    let fits_zero_page = matches!(e, Expr::Num(n) if (0..=0xFF).contains(n));
+/// Choose zero-page when the operand folds to a constant that fits in a byte
+/// (a literal, or a symbol already bound to a low value via `=`) and the
+/// instruction has that form; otherwise absolute. Folding keys off parse-time
+/// constants only — a forward or address symbol stays absolute — so the form
+/// size is stable across passes. This matches ACME, which uses a zero-page
+/// variable's value to pick the short form.
+fn pick_zp_abs(
+    insn: &isa::Instruction,
+    e: &Expr,
+    env: &BTreeMap<String, i64>,
+    zp: &'static str,
+    abs: &'static str,
+) -> &'static str {
+    let fits_zero_page = fold_const(e, env, 0).is_ok_and(|v| (0..=0xFF).contains(&v));
     if fits_zero_page && insn.form(zp).is_some() {
         zp
     } else {
@@ -759,5 +1003,60 @@ mod tests {
         // `- jmp -` on one line is the classic "loop forever" (jump to self).
         let a = asm("*= $1000\n-      jmp -\n").expect("selfloop");
         assert_eq!(a.bytes, vec![0x4C, 0x00, 0x10]);
+    }
+
+    #[test]
+    fn ifdef_skips_undefined_block() {
+        // SCREENSHOT_MODE is undefined, so the guarded block is dropped.
+        let a = asm(
+            "*= $1000\n\
+             \x20       lda #1\n\
+             !ifdef SCREENSHOT_MODE {\n\
+             \x20       lda #2\n\
+             }\n\
+             \x20       lda #3\n",
+        )
+        .expect("ifdef");
+        assert_eq!(a.bytes, vec![0xA9, 0x01, 0xA9, 0x03]);
+    }
+
+    #[test]
+    fn ifndef_inline_block_runs_and_defines() {
+        // The classic ACME default: define a flag if it isn't already.
+        let a = asm(
+            "!ifndef DEBUG { DEBUG = 0 }\n\
+             *= $1000\n\
+             !if DEBUG = 1 {\n\
+             \x20       lda #$ff\n\
+             } else {\n\
+             \x20       lda #$00\n\
+             }\n",
+        )
+        .expect("ifndef+if-else");
+        // DEBUG defaulted to 0, so the else branch emits `lda #$00`.
+        assert_eq!(a.bytes, vec![0xA9, 0x00]);
+        assert_eq!(a.symbols.get("DEBUG"), Some(&0x0000));
+    }
+
+    #[test]
+    fn if_true_takes_then_branch() {
+        let a = asm(
+            "FLAG = 1\n*= $1000\n\
+             !if FLAG = 1 {\n        lda #$11\n} else {\n        lda #$22\n}\n",
+        )
+        .expect("if-true");
+        assert_eq!(a.bytes, vec![0xA9, 0x11]);
+    }
+
+    #[test]
+    fn nested_conditionals() {
+        let a = asm(
+            "A = 1\nB = 0\n*= $1000\n\
+             !if A = 1 {\n\
+             \x20  !if B = 1 {\n        lda #$01\n\x20  } else {\n        lda #$02\n\x20  }\n\
+             }\n",
+        )
+        .expect("nested");
+        assert_eq!(a.bytes, vec![0xA9, 0x02]);
     }
 }
