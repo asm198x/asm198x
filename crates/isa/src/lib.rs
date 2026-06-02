@@ -164,3 +164,4 @@ impl Cycles {
 }
 
 pub mod mos6502;
+pub mod z80;
