@@ -19,7 +19,7 @@ mod dialects;
 mod disasm;
 mod engine;
 
-pub use disasm::{disassemble_z80, listing_z80, Line};
+pub use disasm::{disassemble_6502, disassemble_z80, listing_6502, listing_z80, Line};
 pub use engine::{Assembly, AsmError};
 
 /// Assemble ACME-syntax 6502 source into a flat binary — the C64 curriculum's

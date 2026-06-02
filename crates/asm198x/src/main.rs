@@ -128,12 +128,17 @@ fn run(args: &[String]) -> Result<String, String> {
     let input = input.ok_or("no input file given (try --help)")?;
 
     if disassemble {
-        let z80n = matches!(
-            Assembler::resolve(dialect, target)?,
-            Assembler::Pasmo { z80n: true } | Assembler::Sjasmplus { z80n: true }
-        );
+        let assembler = Assembler::resolve(dialect, target)?;
         let bytes = std::fs::read(input).map_err(|e| format!("cannot read {input}: {e}"))?;
-        print!("{}", asm198x::listing_z80(&bytes, origin, z80n));
+        // A 6502 dialect disassembles to 6502 syntax; otherwise Z80.
+        match assembler {
+            Assembler::Acme | Assembler::Ca65 => {
+                print!("{}", asm198x::listing_6502(&bytes, origin));
+            }
+            Assembler::Pasmo { z80n } | Assembler::Sjasmplus { z80n } => {
+                print!("{}", asm198x::listing_z80(&bytes, origin, z80n));
+            }
+        }
         return Ok(format!("disassembled {} byte(s) at ${origin:04X}", bytes.len()));
     }
 
@@ -175,7 +180,8 @@ fn parse_u16(value: &str) -> Result<u16, String> {
 fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
      assemble:    asm198x [--dialect <name>] [--cpu <target>] <input> [-o <out.bin>]\n\
-     disassemble: asm198x --disasm [--org <addr>] <input.bin>   (Z80)\n\n\
+     disassemble: asm198x --disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
+     \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\n\
      dialects (syntax): acme (C64 6502; also `6502`), pasmo, pasmonext, sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\

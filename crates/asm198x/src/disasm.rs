@@ -8,10 +8,25 @@
 //! umbrella `asm198x-and-shared-isa-spec.md`).
 //!
 //! Decoding is CPU-agnostic; only the *rendering* of a matched form to text is
-//! per-CPU. The Z80 renderer here treats the mode label as an operand template
+//! per-CPU. The Z80 renderer treats the mode label as an operand template
 //! (`A,(IX+d)` with `nn`/`n`/`d`/`e` placeholders), which the pasmo front-end
-//! parses straight back. A 6502 renderer (whose mode labels are addressing-mode
-//! names, not templates) is a later addition.
+//! parses straight back. The 6502 renderer instead maps the mode *name*
+//! (`zeropage,x`, `(indirect),y`, …) to acme/ca65 operand syntax.
+//!
+//! Round-trip holds for a flat region of pure 6502 *code*: each instruction
+//! re-encodes to the bytes it decoded from. Two caveats, both inherent to flat
+//! disassembly rather than this decoder:
+//!
+//! - **Code/data boundaries are unknown.** A binary that interleaves data (the
+//!   C64 BASIC stub, sprite/CHR data, screen text) decodes that data as
+//!   instructions. It still round-trips byte-for-byte *unless* it hits the next
+//!   point.
+//! - **Zero-page vs absolute sizing isn't always recoverable.** An absolute
+//!   instruction addressing `$00xx` re-encodes as the shorter zero-page form.
+//!   Real assembler *code* never emits such an instruction (it picks zero-page
+//!   for low addresses up front), so pure code is safe; only data misread as an
+//!   absolute opcode trips it. Forcing absolute size (acme's `+2`) would close
+//!   this, and is the natural next step if full-binary round-trip is wanted.
 
 /// One disassembled instruction.
 #[derive(Debug, Clone)]
@@ -201,6 +216,83 @@ fn render_operands(mode: &str, values: &[i64], addr: u16, len: usize) -> String 
     out
 }
 
+// ---------------------------------------------------------------------------
+// 6502 disassembly
+// ---------------------------------------------------------------------------
+
+/// Disassemble a flat 6502 binary loaded at `origin`. The text is acme/ca65
+/// instruction syntax; an unrecognised byte becomes a `!byte` datum.
+#[must_use]
+pub fn disassemble_6502(code: &[u8], origin: u16) -> Vec<Line> {
+    let sets: &[&isa::InstructionSet] = &[&isa::mos6502::SET];
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if let Some((mnemonic, form, values, len)) = decode_one(sets, code, pos) {
+            out.push(Line {
+                addr,
+                bytes: code[pos..pos + len].to_vec(),
+                text: render_6502(mnemonic, form, &values, addr, len),
+            });
+            pos += len;
+        } else {
+            out.push(Line {
+                addr,
+                bytes: vec![code[pos]],
+                text: format!("!byte ${:02X}", code[pos]),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render a 6502 disassembly as reassemblable acme source (one per line).
+#[must_use]
+pub fn listing_6502(code: &[u8], origin: u16) -> String {
+    let mut s = format!("        *= ${origin:04X}\n");
+    for line in disassemble_6502(code, origin) {
+        s.push_str("        ");
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s
+}
+
+/// Render a matched 6502 form by mapping its addressing-mode label to operand
+/// syntax. One-byte operands print as `$XX`, two-byte as `$XXXX`; a relative
+/// branch prints its absolute target.
+fn render_6502(mnemonic: &str, form: &isa::Form, values: &[i64], addr: u16, len: usize) -> String {
+    let v = values.first().copied().unwrap_or(0);
+    let lo = (v & 0xFF) as u8;
+    let word = (v & 0xFFFF) as u16;
+    let operand = match form.mode {
+        "implied" => String::new(),
+        "accumulator" => "A".to_string(),
+        "immediate" => format!("#${lo:02X}"),
+        "zeropage" => format!("${lo:02X}"),
+        "zeropage,x" => format!("${lo:02X},X"),
+        "zeropage,y" => format!("${lo:02X},Y"),
+        "absolute" => format!("${word:04X}"),
+        "absolute,x" => format!("${word:04X},X"),
+        "absolute,y" => format!("${word:04X},Y"),
+        "indirect" => format!("(${word:04X})"),
+        "(indirect,x)" => format!("(${lo:02X},X)"),
+        "(indirect),y" => format!("(${lo:02X}),Y"),
+        "relative" => {
+            let target = addr.wrapping_add(len as u16).wrapping_add(v as u16);
+            format!("${target:04X}")
+        }
+        other => other.to_string(),
+    };
+    if operand.is_empty() {
+        mnemonic.to_string()
+    } else {
+        format!("{mnemonic} {operand}")
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -251,6 +343,62 @@ mod tests {
         let original = assemble_pasmonext(source).expect("assemble");
         let listing = listing_z80(&original.bytes, original.origin, true);
         let reassembled = assemble_pasmonext(&listing).expect("reassemble");
+        assert_eq!(reassembled.bytes, original.bytes, "listing was:\n{listing}");
+    }
+
+    fn one_6502(bytes: &[u8]) -> String {
+        let lines = disassemble_6502(bytes, 0x0800);
+        assert_eq!(lines.len(), 1, "expected one instruction, got {lines:?}");
+        lines[0].text.clone()
+    }
+
+    #[test]
+    fn decodes_6502_addressing_modes() {
+        assert_eq!(one_6502(&[0xEA]), "NOP");
+        assert_eq!(one_6502(&[0x0A]), "ASL A");
+        assert_eq!(one_6502(&[0xA9, 0x42]), "LDA #$42");
+        assert_eq!(one_6502(&[0xA5, 0x10]), "LDA $10");
+        assert_eq!(one_6502(&[0xB5, 0x10]), "LDA $10,X");
+        assert_eq!(one_6502(&[0xAD, 0x34, 0x12]), "LDA $1234");
+        assert_eq!(one_6502(&[0x9D, 0x00, 0x04]), "STA $0400,X");
+        assert_eq!(one_6502(&[0x99, 0x00, 0x04]), "STA $0400,Y");
+        assert_eq!(one_6502(&[0x6C, 0x34, 0x12]), "JMP ($1234)");
+        assert_eq!(one_6502(&[0xA1, 0x20]), "LDA ($20,X)");
+        assert_eq!(one_6502(&[0xB1, 0x20]), "LDA ($20),Y");
+    }
+
+    #[test]
+    fn relative_branch_target_is_absolute_6502() {
+        // BNE at $0800, length 2, offset -2 ($FE) -> target $0800.
+        assert_eq!(one_6502(&[0xD0, 0xFE]), "BNE $0800");
+    }
+
+    #[test]
+    fn unknown_byte_becomes_datum_6502() {
+        // $02 is not an official opcode.
+        assert_eq!(one_6502(&[0x02]), "!byte $02");
+    }
+
+    /// Assembler output disassembles to text that reassembles to identical bytes.
+    #[test]
+    fn round_trips_through_acme() {
+        let source = "\
+            *= $0800\n\
+            start:  lda #$00\n\
+                    ldx #$08\n\
+            loop:   sta $0400,x\n\
+                    lda $10\n\
+                    sta $d020\n\
+                    lda ($20),y\n\
+                    lda ($20,x)\n\
+                    jmp ($1234)\n\
+                    asl a\n\
+                    dex\n\
+                    bne loop\n\
+                    rts\n";
+        let original = crate::assemble_acme(source).expect("assemble");
+        let listing = listing_6502(&original.bytes, original.origin);
+        let reassembled = crate::assemble_acme(&listing).expect("reassemble");
         assert_eq!(reassembled.bytes, original.bytes, "listing was:\n{listing}");
     }
 
