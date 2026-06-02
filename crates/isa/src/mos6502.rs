@@ -55,6 +55,7 @@ const fn form(
         opcode,
         mode,
         operands,
+        suffix: &[],
         cycles,
         flags,
         undocumented: false,

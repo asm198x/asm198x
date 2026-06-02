@@ -53,7 +53,7 @@ impl Dialect for Mos6502 {
                 Some(Operation::Instruction {
                     mnemonic,
                     mode,
-                    operand,
+                    operands: operand.into_iter().collect(),
                 })
             };
 

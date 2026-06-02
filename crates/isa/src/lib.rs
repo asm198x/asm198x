@@ -31,6 +31,24 @@ impl InstructionSet {
     pub fn instruction(&self, mnemonic: &str) -> Option<&Instruction> {
         self.instructions.iter().find(|i| i.mnemonic == mnemonic)
     }
+
+    /// Find the form for a mnemonic and mode label, scanning *every* entry with
+    /// that mnemonic. A mnemonic's forms may be split across entries — e.g. the
+    /// Z80 base `LD` and a separate `LD` entry for the IX/IY forms — to keep the
+    /// spec readable; this looks across all of them.
+    #[must_use]
+    pub fn find_form(&self, mnemonic: &str, mode: &str) -> Option<&Form> {
+        self.instructions
+            .iter()
+            .filter(|i| i.mnemonic == mnemonic)
+            .find_map(|i| i.form(mode))
+    }
+
+    /// Whether any entry uses this mnemonic.
+    #[must_use]
+    pub fn has_mnemonic(&self, mnemonic: &str) -> bool {
+        self.instructions.iter().any(|i| i.mnemonic == mnemonic)
+    }
 }
 
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
@@ -69,6 +87,10 @@ pub struct Form {
     pub mode: &'static str,
     /// Operand bytes emitted after the opcode, in order.
     pub operands: &'static [Operand],
+    /// Trailing opcode bytes emitted *after* the operands. Empty for almost
+    /// every form; used by the Z80 `DD CB` / `FD CB` group, whose final opcode
+    /// byte follows the displacement operand (`DD CB <d> <op>`).
+    pub suffix: &'static [u8],
     /// Timing.
     pub cycles: Cycles,
     /// Status flags affected, as a compact string, e.g. `"NZ"` or `"NZCV"`.
@@ -79,10 +101,12 @@ pub struct Form {
 }
 
 impl Form {
-    /// Total encoded length in bytes: opcode bytes plus operand bytes.
+    /// Total encoded length in bytes: opcode bytes, operand bytes, and any
+    /// trailing suffix opcode bytes.
     #[must_use]
     pub fn len(&self) -> usize {
         self.opcode.len()
+            + self.suffix.len()
             + self
                 .operands
                 .iter()
@@ -118,6 +142,9 @@ pub enum OperandKind {
     Address,
     /// A signed, PC-relative displacement (branches).
     RelativePc,
+    /// A signed 8-bit offset added to an index register, e.g. the `d` in the
+    /// Z80 `(IX+d)`. Emitted as one byte; range −128..=127.
+    Displacement,
 }
 
 /// Per-form timing. Extra cycles are conditional and additive.

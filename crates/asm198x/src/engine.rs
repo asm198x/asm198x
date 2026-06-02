@@ -140,11 +140,12 @@ pub(crate) enum Operation {
     /// Emit one word per expression, in the instruction set's endianness.
     Words(Vec<Expr>),
     /// An instruction whose form the dialect has already chosen by `mode`.
-    /// `operand` carries the value to emit, or `None` for operand-less forms.
+    /// `operands` carries one value per operand byte-slot the form declares, in
+    /// order (empty for operand-less forms; two for e.g. Z80 `LD (IX+d),n`).
     Instruction {
         mnemonic: String,
         mode: &'static str,
-        operand: Option<Expr>,
+        operands: Vec<Expr>,
     },
 }
 
@@ -250,15 +251,22 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
             Some(Operation::Instruction {
                 mnemonic,
                 mode,
-                operand,
+                operands,
             }) => {
                 let f = form(set, mnemonic, mode, s.line)?;
+                if operands.len() != f.operands.len() {
+                    return Err(AsmError::new(
+                        s.line,
+                        format!(
+                            "internal: `{mnemonic}` {mode} takes {} operand value(s), got {}",
+                            f.operands.len(),
+                            operands.len()
+                        ),
+                    ));
+                }
                 let next_addr = origin + bytes.len() as i64 + f.len() as i64;
                 bytes.extend_from_slice(f.opcode);
-                for slot in f.operands {
-                    let e = operand
-                        .as_ref()
-                        .ok_or_else(|| AsmError::new(s.line, "internal: missing operand value"))?;
+                for (slot, e) in f.operands.iter().zip(operands.iter()) {
                     let v = e.eval(&symbols, s.line)?;
                     match slot.kind {
                         // Immediates and addresses lay down a value of the
@@ -277,6 +285,16 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                                 }
                             }
                         }
+                        // A signed index displacement, e.g. the `d` in (IX+d).
+                        isa::OperandKind::Displacement => {
+                            if !(-128..=127).contains(&v) {
+                                return Err(AsmError::new(
+                                    s.line,
+                                    format!("displacement {v} out of range (-128..=127)"),
+                                ));
+                            }
+                            bytes.push(v as i8 as u8);
+                        }
                         isa::OperandKind::RelativePc => {
                             let offset = v - next_addr;
                             if !(-128..=127).contains(&offset) {
@@ -291,6 +309,8 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                         }
                     }
                 }
+                // Trailing opcode bytes after the operands (Z80 DD CB / FD CB).
+                bytes.extend_from_slice(f.suffix);
             }
         }
     }
@@ -314,12 +334,16 @@ fn form<'a>(
     mode: &str,
     line: usize,
 ) -> Result<&'a isa::Form, AsmError> {
-    let insn = set
-        .instruction(mnemonic)
-        .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
-    insn.form(mode).ok_or_else(|| {
-        AsmError::new(line, format!("`{mnemonic}` has no {mode} addressing mode"))
-    })
+    if let Some(f) = set.find_form(mnemonic, mode) {
+        Ok(f)
+    } else if set.has_mnemonic(mnemonic) {
+        Err(AsmError::new(
+            line,
+            format!("`{mnemonic}` has no {mode} addressing mode"),
+        ))
+    } else {
+        Err(AsmError::new(line, format!("unknown instruction `{mnemonic}`")))
+    }
 }
 
 fn to_byte(v: i64, line: usize) -> Result<u8, AsmError> {

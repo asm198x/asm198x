@@ -173,14 +173,14 @@ fn parse_op(
         "end" => Ok(None), // entry-point marker; a flat binary ignores it
         _ => {
             let mnemonic = word.to_ascii_uppercase();
-            let insn = set.instruction(&mnemonic).ok_or_else(|| {
-                AsmError::new(line, format!("unknown instruction `{mnemonic}`"))
-            })?;
-            let (mode, operand) = resolve(&mnemonic, insn, args, line, consts)?;
+            if !set.has_mnemonic(&mnemonic) {
+                return Err(AsmError::new(line, format!("unknown instruction `{mnemonic}`")));
+            }
+            let (mode, operands) = resolve(set, &mnemonic, args, line, consts)?;
             Ok(Some(Operation::Instruction {
                 mnemonic,
                 mode,
-                operand,
+                operands,
             }))
         }
     }
@@ -190,47 +190,49 @@ fn parse_op(
 // Operand resolution (dialect syntax -> spec mode label)
 // ---------------------------------------------------------------------------
 
-/// One classified operand: a fixed signature token, or a value that becomes
-/// bytes on the wire (and so offers width-candidate tokens).
+/// One classified operand.
 enum Operand {
+    /// A register, condition, or register-indirect — a fixed signature token.
     Fixed(String),
+    /// A value: an immediate or a `(nn)` address. `paren` marks the memory form.
     Value { expr: Expr, paren: bool },
+    /// An indexed operand `(IX+d)` / `(IY+d)`. `disp` is `None` for a bare
+    /// `(IX)` — which may be either register-indirect (`JP (IX)`) or `(IX+0)`,
+    /// resolved by which form exists.
+    Indexed { reg: &'static str, disp: Option<Expr> },
 }
 
+/// One way an operand can be written into a mode label: the token it
+/// contributes, and the value(s) it emits as bytes (empty if the operand is
+/// consumed into the opcode, e.g. a BIT bit-number).
+type Alternative = (String, Vec<Expr>);
+
+/// Resolve a mnemonic's operands to a spec mode label and the values to emit
+/// (one per the form's operand byte-slot, in order). Each operand offers one or
+/// more [`Alternative`]s; the first combination that names a real form wins, and
+/// that combination's emitted values are returned.
 fn resolve(
+    set: &'static isa::InstructionSet,
     mnemonic: &str,
-    insn: &isa::Instruction,
     args: &str,
     line: usize,
     consts: &BTreeMap<String, i64>,
-) -> Result<(&'static str, Option<Expr>), AsmError> {
+) -> Result<(&'static str, Vec<Expr>), AsmError> {
     let pieces = split_operands(args);
-    let mut candidates: Vec<Vec<String>> = Vec::new();
-    let mut exprs: Vec<Expr> = Vec::new();
+    let mut per_operand: Vec<Vec<Alternative>> = Vec::new();
     for (idx, piece) in pieces.iter().enumerate() {
-        match classify(piece, line)? {
-            Operand::Fixed(token) => candidates.push(vec![token]),
-            Operand::Value { expr, paren } => {
-                candidates.push(value_tokens(mnemonic, paren, idx, &expr, line, consts)?);
-                exprs.push(expr);
-            }
-        }
+        per_operand.push(alternatives(mnemonic, idx, piece, consts, line)?);
     }
 
-    for combo in product(&candidates) {
-        let label = combo.join(",");
-        if let Some(f) = insn.form(&label) {
-            let operand = match exprs.as_slice() {
-                [] => None,
-                [single] => Some(single.clone()),
-                _ => {
-                    return Err(AsmError::new(
-                        line,
-                        format!("`{mnemonic}` with multiple value operands is not yet supported"),
-                    ));
-                }
-            };
-            return Ok((f.mode, operand));
+    for combo in product(&per_operand) {
+        let label = combo
+            .iter()
+            .map(|(token, _)| token.as_str())
+            .collect::<Vec<_>>()
+            .join(",");
+        if let Some(f) = set.find_form(mnemonic, &label) {
+            let emitted = combo.into_iter().flat_map(|(_, values)| values).collect();
+            return Ok((f.mode, emitted));
         }
     }
     Err(AsmError::new(
@@ -239,10 +241,53 @@ fn resolve(
     ))
 }
 
+/// The mode-label/emitted-values alternatives for one operand.
+fn alternatives(
+    mnemonic: &str,
+    idx: usize,
+    piece: &str,
+    consts: &BTreeMap<String, i64>,
+    line: usize,
+) -> Result<Vec<Alternative>, AsmError> {
+    Ok(match classify(piece, line)? {
+        Operand::Fixed(token) => vec![(token, vec![])],
+        Operand::Indexed { reg, disp } => match disp {
+            Some(d) => vec![(format!("({reg}+d)"), vec![d])],
+            // Bare `(IX)`: register-indirect, or `(IX+0)` if only that exists.
+            None => vec![
+                (format!("({reg})"), vec![]),
+                (format!("({reg}+d)"), vec![Expr::Num(0)]),
+            ],
+        },
+        Operand::Value { expr, paren } => {
+            if let Some(token) = embedded_token(mnemonic, paren, idx, &expr, consts, line)? {
+                vec![(token, vec![])] // consumed into the opcode
+            } else {
+                emitted_tokens(mnemonic, paren)
+                    .into_iter()
+                    .map(|token| (token, vec![expr.clone()]))
+                    .collect()
+            }
+        }
+    })
+}
+
 fn classify(piece: &str, line: usize) -> Result<Operand, AsmError> {
     let t = piece.trim();
     if let Some(inner) = strip_parens(t) {
-        let up = inner.trim().to_ascii_uppercase();
+        let inner = inner.trim();
+        if let Some((reg, rest)) = index_register(inner) {
+            let disp = if rest.is_empty() {
+                None
+            } else if let Some(after_plus) = rest.strip_prefix('+') {
+                Some(parse_value(after_plus, line)?)
+            } else {
+                // Starts with '-': parse the whole thing (unary minus).
+                Some(parse_value(rest, line)?)
+            };
+            return Ok(Operand::Indexed { reg, disp });
+        }
+        let up = inner.to_ascii_uppercase();
         if is_indirect_reg(&up) {
             return Ok(Operand::Fixed(format!("({up})")));
         }
@@ -261,40 +306,54 @@ fn classify(piece: &str, line: usize) -> Result<Operand, AsmError> {
     })
 }
 
-/// Candidate signature tokens for a value operand. Width is left ambiguous
-/// (both candidates offered) except where the mnemonic fixes it.
-fn value_tokens(
+/// If `inner` names an index register with an optional displacement —
+/// `IX`, `IY`, `IX+d`, `IY-d` — return the canonical register and the rest
+/// (the displacement text, possibly empty). Guards against symbols that merely
+/// start with "ix"/"iy" by requiring the next char to be `+`, `-`, or nothing.
+fn index_register(inner: &str) -> Option<(&'static str, &str)> {
+    for reg in ["IX", "IY"] {
+        if inner.len() >= 2 && inner[..2].eq_ignore_ascii_case(reg) {
+            let rest = inner[2..].trim_start();
+            if rest.is_empty() || rest.starts_with('+') || rest.starts_with('-') {
+                return Some((reg, rest));
+            }
+        }
+    }
+    None
+}
+
+/// For an operand whose value is encoded *in the opcode* (RST target, IM mode,
+/// BIT/RES/SET bit number), return its mode-label token. Returns `None` for
+/// operands that become bytes on the wire.
+fn embedded_token(
     mnemonic: &str,
     paren: bool,
     index: usize,
     expr: &Expr,
-    line: usize,
     consts: &BTreeMap<String, i64>,
-) -> Result<Vec<String>, AsmError> {
+    line: usize,
+) -> Result<Option<String>, AsmError> {
     if paren {
-        return Ok(vec!["(n)".to_string(), "(nn)".to_string()]);
+        return Ok(None);
+    }
+    let token = match mnemonic {
+        "RST" => format!("{:02X}", literal(expr, consts, line)?),
+        "IM" => format!("{}", literal(expr, consts, line)?),
+        "BIT" | "RES" | "SET" if index == 0 => format!("{}", literal(expr, consts, line)?),
+        _ => return Ok(None),
+    };
+    Ok(Some(token))
+}
+
+/// Candidate signature tokens for a value operand that becomes bytes on the
+/// wire. Width is left ambiguous (both offered) except for relative branches.
+fn emitted_tokens(mnemonic: &str, paren: bool) -> Vec<String> {
+    if paren {
+        return vec!["(n)".to_string(), "(nn)".to_string()];
     }
     match mnemonic {
-        // Relative branches take a PC-relative displacement.
-        "JR" | "DJNZ" => Ok(vec!["e".to_string()]),
-        // RST's target is one of eight fixed addresses, encoded in the opcode
-        // and named in the mode label as two hex digits.
-        "RST" => {
-            let v = literal(expr, consts, line)?;
-            Ok(vec![format!("{v:02X}")])
-        }
-        // IM's mode (0/1/2) is the literal interrupt mode, in the opcode.
-        "IM" => {
-            let v = literal(expr, consts, line)?;
-            Ok(vec![format!("{v}")])
-        }
-        // BIT/RES/SET's first operand is the bit number (0..7), named in the
-        // mode label as a decimal digit; the register operand is fixed.
-        "BIT" | "RES" | "SET" if index == 0 => {
-            let v = literal(expr, consts, line)?;
-            Ok(vec![format!("{v}")])
-        }
-        _ => Ok(vec!["n".to_string(), "nn".to_string()]),
+        "JR" | "DJNZ" => vec!["e".to_string()],
+        _ => vec!["n".to_string(), "nn".to_string()],
     }
 }
 
@@ -340,9 +399,9 @@ fn eval_const(expr: &Expr, consts: &BTreeMap<String, i64>) -> Option<i64> {
     }
 }
 
-/// Cartesian product of per-operand candidate tokens.
-fn product(lists: &[Vec<String>]) -> Vec<Vec<String>> {
-    let mut result = vec![Vec::new()];
+/// Cartesian product of each operand's alternatives.
+fn product(lists: &[Vec<Alternative>]) -> Vec<Vec<Alternative>> {
+    let mut result: Vec<Vec<Alternative>> = vec![Vec::new()];
     for list in lists {
         let mut next = Vec::new();
         for combo in &result {
@@ -790,10 +849,20 @@ mod tests {
     }
 
     #[test]
-    fn unimplemented_prefix_op_errors_clearly() {
-        // IX/IY (DD/FD) ops are not yet authored: a clean error, not a
-        // miscompile. (Indented, as the curriculum writes instructions.)
-        let err = asm("        push ix\n").expect_err("ix not yet supported");
-        assert!(err.message.contains("PUSH"), "unexpected: {err}");
+    fn ix_iy_ops_assemble() {
+        assert_eq!(asm("        push ix\n").expect("push ix").bytes, vec![0xDD, 0xE5]);
+        assert_eq!(asm("        ld a,(ix+5)\n").expect("ld a,(ix+d)").bytes, vec![0xDD, 0x7E, 0x05]);
+        // LD (IX+d),n is the two-operand form: DD 36 <d> <n>.
+        assert_eq!(asm("        ld (ix+5),$0a\n").expect("ld (ix+d),n").bytes, vec![0xDD, 0x36, 0x05, 0x0A]);
+        // DD CB puts the displacement before the trailing opcode byte.
+        assert_eq!(asm("        bit 7,(iy-1)\n").expect("bit (iy+d)").bytes, vec![0xFD, 0xCB, 0xFF, 0x7E]);
+    }
+
+    #[test]
+    fn z80n_op_errors_clearly() {
+        // Z80N extended opcodes (PasmoNext-only, deferred) are not in the spec:
+        // a clean error, not a miscompile.
+        let err = asm("        swapnib\n").expect_err("z80n not yet supported");
+        assert!(err.message.contains("SWAPNIB"), "unexpected: {err}");
     }
 }

@@ -40,9 +40,12 @@
 //! DJNZ/RST), stack ops, the accumulator/flag ops, and block-free I/O — **plus
 //! the complete `ED` (extended) group**: block transfer/search (LDIR/LDDR/CPIR
 //! …), block I/O, 16-bit ADC/SBC HL, 16-bit LD (nn), IN/OUT (C), IM, NEG,
-//! RRD/RLD, RETI/RETN — **plus the complete `CB` group**: the rotates/shifts
-//! (RLC/RRC/RL/RR/SLA/SRA/SLL/SRL) and bit operations (BIT/RES/SET) over every
-//! register slot. **TODO:** the `DD`/`FD` (IX/IY) prefix groups.
+//! RRD/RLD, RETI/RETN — the complete `CB` group (rotates/shifts and BIT/RES/SET
+//! over every register slot), **and the complete `DD`/`FD` (IX/IY) group**:
+//! 16-bit index ops, `(IX+d)`/`(IY+d)` load/store/ALU/INC/DEC, the two-operand
+//! `LD (IX+d),n`, and the `DD CB`/`FD CB` bit/rotate forms. The **documented**
+//! Z80 is complete; the undocumented IXH/IXL half-registers and SLL `(IX+d)` are
+//! omitted, and the Spectrum Next's Z80N opcodes are a separate extension.
 
 use crate::{Cycles, Endianness, Form, Instruction, InstructionSet, Operand, OperandKind};
 
@@ -62,12 +65,18 @@ const REL8: Operand = Operand {
     kind: OperandKind::RelativePc,
     bytes: 1,
 }; // e
+const DISP8: Operand = Operand {
+    kind: OperandKind::Displacement,
+    bytes: 1,
+}; // the d in (IX+d)
 
 const NONE: &[Operand] = &[];
 const ONE_N: &[Operand] = &[IMM8];
 const ONE_NN: &[Operand] = &[IMM16];
 const ONE_ADDR: &[Operand] = &[ADDR16];
 const ONE_E: &[Operand] = &[REL8];
+const ONE_DISP: &[Operand] = &[DISP8];
+const DISP_THEN_N: &[Operand] = &[DISP8, IMM8]; // LD (IX+d),n
 
 /// The Z80 instruction set: the single source of truth for Z80 encoding.
 pub const SET: InstructionSet = InstructionSet {
@@ -90,6 +99,7 @@ const fn form(
         opcode,
         mode,
         operands,
+        suffix: &[],
         cycles,
         flags,
         undocumented: false,
@@ -108,9 +118,30 @@ const fn form_u(
         opcode,
         mode,
         operands,
+        suffix: &[],
         cycles,
         flags,
         undocumented: true,
+    }
+}
+
+/// Build a `DD CB`/`FD CB` form: a two-byte prefix, the displacement operand,
+/// then a trailing opcode byte (`DD CB <d> <op>`).
+const fn form_ddcb(
+    opcode: &'static [u8],
+    suffix: &'static [u8],
+    mode: &'static str,
+    cycles: Cycles,
+    flags: &'static str,
+) -> Form {
+    Form {
+        opcode,
+        mode,
+        operands: ONE_DISP,
+        suffix,
+        cycles,
+        flags,
+        undocumented: false,
     }
 }
 
@@ -810,6 +841,185 @@ const INSTRUCTIONS: &[Instruction] = &[
         form(&[0xCB, 0xFE], "7,(HL)", NONE, Cycles::fixed(15), ""),
         form(&[0xCB, 0xFF], "7,A", NONE, Cycles::fixed(8), ""),
     ]),
+
+    // ===================== DD prefix (IX) / FD prefix (IY) =====================
+    // The index-register group. A mnemonic's IX/IY forms live on their own
+    // entries (find_form scans all entries with a mnemonic), keeping this group
+    // readable. The undocumented IXH/IXL/IYH/IYL half-register ops are omitted,
+    // as is the undocumented SLL (IX+d)/(IY+d). DD CB / FD CB forms carry the
+    // displacement before a trailing opcode byte (see form_ddcb).
+
+    // --- IX (DD) ---
+    inst!("ADD", "Add to IX", [
+        form(&[0xDD, 0x09], "IX,BC",    NONE,     Cycles::fixed(15), "HNC"),
+        form(&[0xDD, 0x19], "IX,DE",    NONE,     Cycles::fixed(15), "HNC"),
+        form(&[0xDD, 0x29], "IX,IX",    NONE,     Cycles::fixed(15), "HNC"),
+        form(&[0xDD, 0x39], "IX,SP",    NONE,     Cycles::fixed(15), "HNC"),
+        form(&[0xDD, 0x86], "A,(IX+d)", ONE_DISP, Cycles::fixed(19), "SZHPNC"),
+    ]),
+    inst!("ADC", "Add with carry, IX", [form(&[0xDD, 0x8E], "A,(IX+d)", ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("SUB", "Subtract, IX",       [form(&[0xDD, 0x96], "(IX+d)",   ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("SBC", "Subtract carry, IX", [form(&[0xDD, 0x9E], "A,(IX+d)", ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("AND", "AND, IX",            [form(&[0xDD, 0xA6], "(IX+d)",   ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("XOR", "XOR, IX",            [form(&[0xDD, 0xAE], "(IX+d)",   ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("OR",  "OR, IX",             [form(&[0xDD, 0xB6], "(IX+d)",   ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("CP",  "Compare, IX",        [form(&[0xDD, 0xBE], "(IX+d)",   ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("INC", "Increment IX", [
+        form(&[0xDD, 0x23], "IX",     NONE,     Cycles::fixed(10), ""),
+        form(&[0xDD, 0x34], "(IX+d)", ONE_DISP, Cycles::fixed(23), "SZHPN"),
+    ]),
+    inst!("DEC", "Decrement IX", [
+        form(&[0xDD, 0x2B], "IX",     NONE,     Cycles::fixed(10), ""),
+        form(&[0xDD, 0x35], "(IX+d)", ONE_DISP, Cycles::fixed(23), "SZHPN"),
+    ]),
+    inst!("PUSH", "Push IX", [form(&[0xDD, 0xE5], "IX", NONE, Cycles::fixed(15), "")]),
+    inst!("POP",  "Pop IX",  [form(&[0xDD, 0xE1], "IX", NONE, Cycles::fixed(14), "")]),
+    inst!("EX",   "Exchange IX", [form(&[0xDD, 0xE3], "(SP),IX", NONE, Cycles::fixed(23), "")]),
+    inst!("JP",   "Jump IX", [form(&[0xDD, 0xE9], "(IX)", NONE, Cycles::fixed(8), "")]),
+    inst!("LD", "Load IX", [
+        form(&[0xDD, 0x21], "IX,nn",    ONE_NN,      Cycles::fixed(14), ""),
+        form(&[0xDD, 0x22], "(nn),IX",  ONE_ADDR,    Cycles::fixed(20), ""),
+        form(&[0xDD, 0x2A], "IX,(nn)",  ONE_ADDR,    Cycles::fixed(20), ""),
+        form(&[0xDD, 0xF9], "SP,IX",    NONE,        Cycles::fixed(10), ""),
+        form(&[0xDD, 0x36], "(IX+d),n", DISP_THEN_N, Cycles::fixed(19), ""),
+        form(&[0xDD, 0x46], "B,(IX+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x4E], "C,(IX+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x56], "D,(IX+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x5E], "E,(IX+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x66], "H,(IX+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x6E], "L,(IX+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x7E], "A,(IX+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x70], "(IX+d),B", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x71], "(IX+d),C", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x72], "(IX+d),D", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x73], "(IX+d),E", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x74], "(IX+d),H", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x75], "(IX+d),L", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xDD, 0x77], "(IX+d),A", ONE_DISP,    Cycles::fixed(19), ""),
+    ]),
+    inst!("RLC", "Rotate left circular (IX+d)",  [form_ddcb(&[0xDD, 0xCB], &[0x06], "(IX+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("RRC", "Rotate right circular (IX+d)", [form_ddcb(&[0xDD, 0xCB], &[0x0E], "(IX+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("RL",  "Rotate left (IX+d)",           [form_ddcb(&[0xDD, 0xCB], &[0x16], "(IX+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("RR",  "Rotate right (IX+d)",          [form_ddcb(&[0xDD, 0xCB], &[0x1E], "(IX+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("SLA", "Shift left arithmetic (IX+d)", [form_ddcb(&[0xDD, 0xCB], &[0x26], "(IX+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("SRA", "Shift right arithmetic (IX+d)",[form_ddcb(&[0xDD, 0xCB], &[0x2E], "(IX+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("SRL", "Shift right logical (IX+d)",   [form_ddcb(&[0xDD, 0xCB], &[0x3E], "(IX+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("BIT", "Test bit (IX+d)", [
+        form_ddcb(&[0xDD, 0xCB], &[0x46], "0,(IX+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xDD, 0xCB], &[0x4E], "1,(IX+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xDD, 0xCB], &[0x56], "2,(IX+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xDD, 0xCB], &[0x5E], "3,(IX+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xDD, 0xCB], &[0x66], "4,(IX+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xDD, 0xCB], &[0x6E], "5,(IX+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xDD, 0xCB], &[0x76], "6,(IX+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xDD, 0xCB], &[0x7E], "7,(IX+d)", Cycles::fixed(20), "SZHPN"),
+    ]),
+    inst!("RES", "Reset bit (IX+d)", [
+        form_ddcb(&[0xDD, 0xCB], &[0x86], "0,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0x8E], "1,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0x96], "2,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0x9E], "3,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0xA6], "4,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0xAE], "5,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0xB6], "6,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0xBE], "7,(IX+d)", Cycles::fixed(23), ""),
+    ]),
+    inst!("SET", "Set bit (IX+d)", [
+        form_ddcb(&[0xDD, 0xCB], &[0xC6], "0,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0xCE], "1,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0xD6], "2,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0xDE], "3,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0xE6], "4,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0xEE], "5,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0xF6], "6,(IX+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xDD, 0xCB], &[0xFE], "7,(IX+d)", Cycles::fixed(23), ""),
+    ]),
+
+    // --- IY (FD): identical to IX with the FD prefix and IY labels ---
+    inst!("ADD", "Add to IY", [
+        form(&[0xFD, 0x09], "IY,BC",    NONE,     Cycles::fixed(15), "HNC"),
+        form(&[0xFD, 0x19], "IY,DE",    NONE,     Cycles::fixed(15), "HNC"),
+        form(&[0xFD, 0x29], "IY,IY",    NONE,     Cycles::fixed(15), "HNC"),
+        form(&[0xFD, 0x39], "IY,SP",    NONE,     Cycles::fixed(15), "HNC"),
+        form(&[0xFD, 0x86], "A,(IY+d)", ONE_DISP, Cycles::fixed(19), "SZHPNC"),
+    ]),
+    inst!("ADC", "Add with carry, IY", [form(&[0xFD, 0x8E], "A,(IY+d)", ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("SUB", "Subtract, IY",       [form(&[0xFD, 0x96], "(IY+d)",   ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("SBC", "Subtract carry, IY", [form(&[0xFD, 0x9E], "A,(IY+d)", ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("AND", "AND, IY",            [form(&[0xFD, 0xA6], "(IY+d)",   ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("XOR", "XOR, IY",            [form(&[0xFD, 0xAE], "(IY+d)",   ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("OR",  "OR, IY",             [form(&[0xFD, 0xB6], "(IY+d)",   ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("CP",  "Compare, IY",        [form(&[0xFD, 0xBE], "(IY+d)",   ONE_DISP, Cycles::fixed(19), "SZHPNC")]),
+    inst!("INC", "Increment IY", [
+        form(&[0xFD, 0x23], "IY",     NONE,     Cycles::fixed(10), ""),
+        form(&[0xFD, 0x34], "(IY+d)", ONE_DISP, Cycles::fixed(23), "SZHPN"),
+    ]),
+    inst!("DEC", "Decrement IY", [
+        form(&[0xFD, 0x2B], "IY",     NONE,     Cycles::fixed(10), ""),
+        form(&[0xFD, 0x35], "(IY+d)", ONE_DISP, Cycles::fixed(23), "SZHPN"),
+    ]),
+    inst!("PUSH", "Push IY", [form(&[0xFD, 0xE5], "IY", NONE, Cycles::fixed(15), "")]),
+    inst!("POP",  "Pop IY",  [form(&[0xFD, 0xE1], "IY", NONE, Cycles::fixed(14), "")]),
+    inst!("EX",   "Exchange IY", [form(&[0xFD, 0xE3], "(SP),IY", NONE, Cycles::fixed(23), "")]),
+    inst!("JP",   "Jump IY", [form(&[0xFD, 0xE9], "(IY)", NONE, Cycles::fixed(8), "")]),
+    inst!("LD", "Load IY", [
+        form(&[0xFD, 0x21], "IY,nn",    ONE_NN,      Cycles::fixed(14), ""),
+        form(&[0xFD, 0x22], "(nn),IY",  ONE_ADDR,    Cycles::fixed(20), ""),
+        form(&[0xFD, 0x2A], "IY,(nn)",  ONE_ADDR,    Cycles::fixed(20), ""),
+        form(&[0xFD, 0xF9], "SP,IY",    NONE,        Cycles::fixed(10), ""),
+        form(&[0xFD, 0x36], "(IY+d),n", DISP_THEN_N, Cycles::fixed(19), ""),
+        form(&[0xFD, 0x46], "B,(IY+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x4E], "C,(IY+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x56], "D,(IY+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x5E], "E,(IY+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x66], "H,(IY+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x6E], "L,(IY+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x7E], "A,(IY+d)", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x70], "(IY+d),B", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x71], "(IY+d),C", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x72], "(IY+d),D", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x73], "(IY+d),E", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x74], "(IY+d),H", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x75], "(IY+d),L", ONE_DISP,    Cycles::fixed(19), ""),
+        form(&[0xFD, 0x77], "(IY+d),A", ONE_DISP,    Cycles::fixed(19), ""),
+    ]),
+    inst!("RLC", "Rotate left circular (IY+d)",  [form_ddcb(&[0xFD, 0xCB], &[0x06], "(IY+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("RRC", "Rotate right circular (IY+d)", [form_ddcb(&[0xFD, 0xCB], &[0x0E], "(IY+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("RL",  "Rotate left (IY+d)",           [form_ddcb(&[0xFD, 0xCB], &[0x16], "(IY+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("RR",  "Rotate right (IY+d)",          [form_ddcb(&[0xFD, 0xCB], &[0x1E], "(IY+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("SLA", "Shift left arithmetic (IY+d)", [form_ddcb(&[0xFD, 0xCB], &[0x26], "(IY+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("SRA", "Shift right arithmetic (IY+d)",[form_ddcb(&[0xFD, 0xCB], &[0x2E], "(IY+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("SRL", "Shift right logical (IY+d)",   [form_ddcb(&[0xFD, 0xCB], &[0x3E], "(IY+d)", Cycles::fixed(23), "SZHPNC")]),
+    inst!("BIT", "Test bit (IY+d)", [
+        form_ddcb(&[0xFD, 0xCB], &[0x46], "0,(IY+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xFD, 0xCB], &[0x4E], "1,(IY+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xFD, 0xCB], &[0x56], "2,(IY+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xFD, 0xCB], &[0x5E], "3,(IY+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xFD, 0xCB], &[0x66], "4,(IY+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xFD, 0xCB], &[0x6E], "5,(IY+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xFD, 0xCB], &[0x76], "6,(IY+d)", Cycles::fixed(20), "SZHPN"),
+        form_ddcb(&[0xFD, 0xCB], &[0x7E], "7,(IY+d)", Cycles::fixed(20), "SZHPN"),
+    ]),
+    inst!("RES", "Reset bit (IY+d)", [
+        form_ddcb(&[0xFD, 0xCB], &[0x86], "0,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0x8E], "1,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0x96], "2,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0x9E], "3,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0xA6], "4,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0xAE], "5,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0xB6], "6,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0xBE], "7,(IY+d)", Cycles::fixed(23), ""),
+    ]),
+    inst!("SET", "Set bit (IY+d)", [
+        form_ddcb(&[0xFD, 0xCB], &[0xC6], "0,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0xCE], "1,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0xD6], "2,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0xDE], "3,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0xE6], "4,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0xEE], "5,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0xF6], "6,(IY+d)", Cycles::fixed(23), ""),
+        form_ddcb(&[0xFD, 0xCB], &[0xFE], "7,(IY+d)", Cycles::fixed(23), ""),
+    ]),
 ];
 
 #[cfg(test)]
@@ -849,16 +1059,21 @@ mod tests {
         }
     }
 
-    /// Each mnemonic appears once, so `SET.instruction()` finds all its forms.
+    /// A mnemonic's forms may span entries (base `LD` and the IX/IY `LD`), but
+    /// no `(mnemonic, mode)` pair may repeat — otherwise `find_form` would be
+    /// ambiguous.
     #[test]
-    fn mnemonics_are_unique() {
+    fn no_duplicate_mnemonic_and_mode() {
         let mut seen = std::collections::BTreeSet::new();
         for instruction in SET.instructions {
-            assert!(
-                seen.insert(instruction.mnemonic),
-                "duplicate mnemonic `{}`",
-                instruction.mnemonic
-            );
+            for f in instruction.forms {
+                assert!(
+                    seen.insert((instruction.mnemonic, f.mode)),
+                    "duplicate (mnemonic, mode): `{}` `{}`",
+                    instruction.mnemonic,
+                    f.mode
+                );
+            }
         }
     }
 
@@ -967,5 +1182,26 @@ mod tests {
         assert_eq!(SET.instruction("BIT").expect("BIT").form("7,(HL)").expect("f").opcode, &[0xCB, 0x7E]);
         assert_eq!(SET.instruction("SET").expect("SET").form("0,A").expect("f").opcode, &[0xCB, 0xC7]);
         assert_eq!(SET.instruction("RLC").expect("RLC").form("B").expect("f").opcode, &[0xCB, 0x00]);
+    }
+
+    /// DD/FD (IX/IY) forms, including the two-operand and DD-CB encodings.
+    #[test]
+    fn index_register_encodings() {
+        // 16-bit and indexed forms (mnemonic forms span entries -> find_form).
+        assert_eq!(SET.find_form("LD", "IX,nn").expect("ld ix,nn").opcode, &[0xDD, 0x21]);
+        assert_eq!(SET.find_form("ADD", "IY,SP").expect("add iy,sp").opcode, &[0xFD, 0x39]);
+        assert_eq!(SET.find_form("JP", "(IX)").expect("jp (ix)").opcode, &[0xDD, 0xE9]);
+
+        // LD (IX+d),n: opcode DD 36, then a displacement and an immediate byte.
+        let ldn = SET.find_form("LD", "(IX+d),n").expect("ld (ix+d),n");
+        assert_eq!(ldn.opcode, &[0xDD, 0x36]);
+        assert_eq!(ldn.operands.len(), 2);
+        assert_eq!(ldn.len(), 4); // DD 36 d n
+
+        // DD CB: prefix, displacement operand, trailing opcode byte.
+        let bit = SET.find_form("BIT", "7,(IY+d)").expect("bit 7,(iy+d)");
+        assert_eq!(bit.opcode, &[0xFD, 0xCB]);
+        assert_eq!(bit.suffix, &[0x7E]);
+        assert_eq!(bit.len(), 4); // FD CB d 7E
     }
 }
