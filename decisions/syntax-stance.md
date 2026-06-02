@@ -80,11 +80,14 @@ acme or ca65. It supports the common addressing modes, labels,
 compatibility with *any* real dialect: arithmetic expressions, that dialect's
 directive set and scoping, segments, macros, string escapes.
 
-The Z80 + PasmoNext backend is the first delivered: the engine ↔ dialect ↔ spec
-seam is split, the Z80 `isa` spec covers the base page and the ED group, and the
-PasmoNext front-end assembles standard-Z80 source. Remaining for full Spectrum
-coverage: the CB (bit/rotate) and DD/FD (IX/IY) prefix groups, and validating
-output byte-for-byte against the `pasmonext` binary on real curriculum source.
+The Z80 + PasmoNext backend is delivered and validated: the engine ↔ dialect ↔
+spec seam is split, the Z80 `isa` spec covers the base page and the ED and CB
+prefix groups, and the PasmoNext front-end handles real source (arithmetic with
+C precedence, `equ` constants, `defb` strings, opcode-embedded operands). **The
+entire Gloaming Spectrum curriculum — all 20 units — assembles byte-identical to
+the `pasmonext` binary, with zero miscompiles.** Remaining: the DD/FD (IX/IY)
+prefix group, which the curriculum does not use (and which needs a multi-operand
+statement model for the lone `LD (IX+d),n` form).
 
 ## Drift triggers
 
