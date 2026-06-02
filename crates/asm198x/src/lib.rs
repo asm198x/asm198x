@@ -30,13 +30,13 @@ pub fn assemble_6502(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::Mos6502)
 }
 
-/// Assemble Z80 source in the pasmo dialect into a flat binary.
+/// Assemble Z80 source in the PasmoNext dialect into a flat binary.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_pasmo_z80(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Pasmo)
+pub fn assemble_pasmonext(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::PasmoNext)
 }
 
 #[cfg(test)]

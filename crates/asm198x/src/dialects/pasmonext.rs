@@ -1,12 +1,18 @@
-//! The pasmo Z80 dialect front-end.
+//! The PasmoNext Z80 dialect front-end.
 //!
-//! pasmo is the Spectrum curriculum's assembler, so it is Asm198x's primary
-//! Z80 dialect (see `decisions/syntax-stance.md`). This front-end targets
-//! [`isa::z80`] and currently covers the **base page** plus the directives real
-//! curriculum source uses: `org`, `equ`, `defb`/`db`, `defw`/`dw`, `end`.
-//! Numbers are `$hex`, `%binary`, decimal, and `'c'` char literals. Labels sit
-//! in column 0 (with or without a trailing `:`); instructions are indented.
-//! Local-style labels beginning with `.` are accepted as ordinary identifiers.
+//! PasmoNext (the ZX Spectrum Next fork of pasmo, invoked as `pasmonext`) is
+//! the Code198x curriculum's assembler, so it is Asm198x's primary Z80 dialect
+//! (see `decisions/syntax-stance.md`). It is a syntactic superset of vanilla
+//! pasmo; for standard Z80 the two are byte-identical, and this front-end
+//! covers that shared core. PasmoNext's Z80N extended opcodes are a deferred
+//! ISA-spec extension — the current curriculum uses only standard Z80.
+//!
+//! This front-end targets [`isa::z80`] and covers the base page and ED group,
+//! plus the directives real curriculum source uses: `org`, `equ`, `defb`/`db`,
+//! `defw`/`dw`, `end`. Numbers are `$hex`, `%binary`, decimal, and `'c'` char
+//! literals. Labels sit in column 0 (with or without a trailing `:`);
+//! instructions are indented. Local-style labels beginning with `.` are
+//! accepted as ordinary identifiers.
 //!
 //! ## Resolving operands to spec mode labels
 //!
@@ -30,10 +36,10 @@
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, Expr, Operation, Statement};
 
-/// The pasmo Z80 dialect.
-pub(crate) struct Pasmo;
+/// The PasmoNext Z80 dialect.
+pub(crate) struct PasmoNext;
 
-impl Dialect for Pasmo {
+impl Dialect for PasmoNext {
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::z80::SET
     }
@@ -385,7 +391,7 @@ fn is_ident(s: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use crate::assemble_pasmo_z80 as asm;
+    use crate::assemble_pasmonext as asm;
 
     #[test]
     fn loads_registers_and_immediates() {
@@ -436,10 +442,16 @@ mod tests {
     }
 
     #[test]
+    fn ed_block_move_assembles() {
+        // LDIR is an ED-prefix op: ED B0.
+        assert_eq!(asm("        ldir\n").expect("ldir").bytes, vec![0xED, 0xB0]);
+    }
+
+    #[test]
     fn unimplemented_prefix_op_errors_clearly() {
-        // LDIR is an ED-prefix op, not yet authored: a clean error, not a
+        // RLC is a CB-prefix op, not yet authored: a clean error, not a
         // miscompile. (Indented, as the curriculum writes instructions.)
-        let err = asm("        ldir\n").expect_err("ldir not yet supported");
-        assert!(err.message.contains("LDIR"), "unexpected: {err}");
+        let err = asm("        rlc b\n").expect_err("rlc not yet supported");
+        assert!(err.message.contains("RLC"), "unexpected: {err}");
     }
 }
