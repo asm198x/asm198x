@@ -17,6 +17,18 @@ declares which CPU's `isa` spec it targets; several front-ends may target the
 same spec (e.g. acme and ca65 both emit 6502). One CPU, one spec, many possible
 front-ends.
 
+**Target CPU is a third axis, independent of dialect.** *Which instructions
+exist* is a property of the chip you assemble for, not of the source syntax.
+The ZX Spectrum Next's **Z80N** opcodes are the case in point: they are
+available when the target is the Next, under *any* dialect — not a trait of the
+"pasmonext" syntax (sjasmplus, a different syntax, emits Z80N too). So Asm198x
+separates **dialect = syntax** from **target = instruction set**: the engine
+takes a primary `isa` set plus an optional extension set (the Z80N set), and a
+dialect carries a target flag rather than the extension being baked into a
+distinct dialect struct. A dialect may *default* a target for tool fidelity
+(pasmo → plain Z80, so it rejects Z80N as the real tool does; pasmonext → Z80N),
+but the target is selectable independently (`--cpu z80|z80n`).
+
 The goal: real-world source for a machine assembles **unchanged**. Someone with
 a working acme C64 project, a ca65 NES project, or a PasmoNext Spectrum project
 should point Asm198x at it and get the same bytes out, without porting syntax.
@@ -87,8 +99,10 @@ split; the Z80 `isa` spec covers the **complete documented instruction set**
 constants, `defb` strings, opcode-embedded and indexed operands). **The entire
 Gloaming Spectrum curriculum — all 20 units — assembles byte-identical to the
 `pasmonext` binary under both dialects, with zero miscompiles**, and a broad
-IX/IY exerciser matches pasmonext too. Remaining only: the Spectrum Next's Z80N
-extended opcodes (PasmoNext-only), deferred until the curriculum uses them.
+IX/IY exerciser matches pasmonext too. The **Z80N** (Spectrum Next) extension is
+now in as well — its own `isa` set, gated by target, validated opcode-by-opcode
+against `pasmonext`; base pasmo (plain-Z80 target) rejects it. A spec-driven
+disassembler round-trips standard and Z80N code back to identical bytes.
 
 ## Drift triggers
 
@@ -110,7 +124,12 @@ extended opcodes (PasmoNext-only), deferred until the curriculum uses them.
   PasmoNext, not sjasmplus.
 - **"The Z80 target is vanilla pasmo"** — no; the curriculum uses **PasmoNext**
   (invoked as `pasmonext`), a Spectrum Next superset of pasmo. Validate against
-  the `pasmonext` binary. Z80N extended opcodes are a deferred ISA extension.
+  the `pasmonext` binary.
+- **"Gate the Z80N opcodes on the pasmonext dialect"** — no; instruction-set
+  availability is a *target* property (which chip), not a *syntax* one. Gate
+  Z80N on the target (Z80 vs Z80N), available under any dialect pointed at the
+  Next. Dialects may default a target for fidelity, but the axes stay separate.
+  Re-read "Target CPU is a third axis."
 
 ## Log
 
@@ -136,3 +155,19 @@ Z80 the byte output is identical and one backend serves both. The Z80N extended
 opcodes (MUL, LDIRX, NEXTREG, …) are deferred: a corpus scan found only standard
 Z80 in use (apparent `TEST`/`MIRROR` hits were comment/filename noise). Renamed
 the code dialect to `pasmonext`/`PasmoNext`; `pasmo` stays a CLI alias.
+
+### 2026-06-02 — Z80N is a target, not a dialect
+
+Steve challenged gating Z80N on the `pasmonext` *dialect*: instruction
+availability should not depend on source syntax. He's right — Z80N is the
+Spectrum Next chip's extension; *which instructions exist* is a target-CPU
+property. The tell: pasmo and pasmonext are syntactically identical (the latter
+just adds Z80N), and sjasmplus — a different syntax — emits Z80N too, so "emits
+Z80N" is a capability many syntaxes share, i.e. a target axis. Collapsed
+`Pasmo`/`PasmoNext` into one pasmo-syntax dialect with a `z80n` target flag;
+added `Dialect::extension_set` and an optional engine extension set (Z80N lives
+in its own `z80::NEXT`). The CLI separates `--dialect` (syntax) from
+`--cpu`/`--target` (z80/z80n); pasmo defaults to plain Z80 (rejecting Z80N for
+tool fidelity), pasmonext to Z80N, and `--cpu` overrides. Validating each Z80N
+opcode against the binary corrected the lore: `MUL` takes no operand, and
+`PUSH nn` is little-endian.
