@@ -403,6 +403,17 @@ mod tests {
     }
 
     #[test]
+    fn round_trips_low_address_absolute() {
+        // A low-address absolute (e.g. from data misread as code) must survive:
+        // the disassembler emits 4-digit `$XXXX`, and acme's width rule keeps it
+        // 16-bit on reassembly rather than collapsing to zero-page.
+        let bytes = vec![0x9D, 0x00, 0x00, 0xAD, 0x10, 0x00, 0x60];
+        let listing = listing_6502(&bytes, 0x0800);
+        let re = crate::assemble_acme(&listing).expect("reassemble");
+        assert_eq!(re.bytes, bytes, "listing:\n{listing}");
+    }
+
+    #[test]
     fn round_trips_z80n_opcodes() {
         let source = "\
             org $8000\n\

@@ -16,7 +16,7 @@
 use std::collections::BTreeMap;
 
 use super::mos6502::{
-    self, fold_const, is_ident, split_first_word, BytePrec,
+    self, fold_const, is_ident, split_first_word, top_level_rfind, BytePrec,
 };
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, Expr, Operation, Statement};
@@ -440,7 +440,8 @@ fn parse_op(
     let insn = set
         .instruction(&mnemonic)
         .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
-    let (mode, operand) = mos6502::resolve_mode(insn, operand, env, line)?;
+    let force_abs = address_forces_absolute(remainder);
+    let (mode, operand) = mos6502::resolve_mode(insn, operand, env, force_abs, line)?;
     Ok(Some(Operation::Instruction {
         mnemonic,
         mode,
@@ -580,6 +581,20 @@ fn parse_value(anons: &[AnonDef], raw: &str, line: usize) -> Result<Expr, AsmErr
     mos6502::parse_expr(raw, line, parse_number, BytePrec::Loose)
 }
 
+/// ACME sizes a hex literal by its written width: a `≥3`-digit hex address
+/// (`$0010`, `$0400`) is 16-bit, forcing absolute addressing even when the value
+/// is low. Detect that on the operand's address part (after stripping a trailing
+/// `,X`/`,Y` index); other forms decide by value.
+fn address_forces_absolute(operand: &str) -> bool {
+    let t = operand.trim();
+    let base = match top_level_rfind(t, ',') {
+        Some(c) => t[..c].trim(),
+        None => t,
+    };
+    base.strip_prefix('$')
+        .is_some_and(|hex| hex.len() >= 3 && hex.bytes().all(|b| b.is_ascii_hexdigit()))
+}
+
 /// ACME numbers: `$hex`, `%binary`, `'c'` char, decimal.
 fn parse_number(tok: &str, line: usize) -> Result<i64, AsmError> {
     let t = tok.trim();
@@ -626,6 +641,17 @@ mod tests {
         assert_eq!(asm("sta $0400,x").expect("absx").bytes, vec![0x9D, 0x00, 0x04]);
         assert_eq!(asm("lda ($20),y").expect("indy").bytes, vec![0xB1, 0x20]);
         assert_eq!(asm("lda ($20,x)").expect("indx").bytes, vec![0xA1, 0x20]);
+    }
+
+    #[test]
+    fn hex_width_forces_absolute() {
+        // `$10` is zero-page; `$0010` is 16-bit (absolute), matching acme — the
+        // value is the same but the written width differs.
+        assert_eq!(asm("lda $10").expect("zp").bytes, vec![0xA5, 0x10]);
+        assert_eq!(asm("lda $0010").expect("abs").bytes, vec![0xAD, 0x10, 0x00]);
+        assert_eq!(asm("sta $0000,x").expect("absx").bytes, vec![0x9D, 0x00, 0x00]);
+        // Decimal and symbols still decide by value.
+        assert_eq!(asm("lda 16").expect("dec").bytes, vec![0xA5, 0x10]);
     }
 
     #[test]

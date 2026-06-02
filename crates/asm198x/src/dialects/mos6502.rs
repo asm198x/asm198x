@@ -42,6 +42,7 @@ pub(crate) fn resolve_mode(
     insn: &isa::Instruction,
     operand: OperandSyntax,
     env: &BTreeMap<String, i64>,
+    force_abs: bool,
     line: usize,
 ) -> Result<(&'static str, Option<Expr>), AsmError> {
     let resolved = match operand {
@@ -59,13 +60,13 @@ pub(crate) fn resolve_mode(
         OperandSyntax::Indirect(e) => ("indirect", Some(e)),
         OperandSyntax::IndexedIndirect(e) => ("(indirect,x)", Some(e)),
         OperandSyntax::IndirectIndexed(e) => ("(indirect),y", Some(e)),
-        OperandSyntax::Indexed(e, Index::X) => (pick_zp_abs(insn, &e, env, "zeropage,x", "absolute,x"), Some(e)),
-        OperandSyntax::Indexed(e, Index::Y) => (pick_zp_abs(insn, &e, env, "zeropage,y", "absolute,y"), Some(e)),
+        OperandSyntax::Indexed(e, Index::X) => (pick_zp_abs(insn, &e, env, force_abs, "zeropage,x", "absolute,x"), Some(e)),
+        OperandSyntax::Indexed(e, Index::Y) => (pick_zp_abs(insn, &e, env, force_abs, "zeropage,y", "absolute,y"), Some(e)),
         OperandSyntax::Direct(e) => {
             if insn.form("relative").is_some() {
                 ("relative", Some(e))
             } else {
-                (pick_zp_abs(insn, &e, env, "zeropage", "absolute"), Some(e))
+                (pick_zp_abs(insn, &e, env, force_abs, "zeropage", "absolute"), Some(e))
             }
         }
     };
@@ -75,15 +76,18 @@ pub(crate) fn resolve_mode(
 /// Choose zero-page when the operand folds to a constant that fits in a byte (a
 /// literal, or a symbol already bound to a low value) and the instruction has
 /// that form; otherwise absolute. A forward or address symbol stays absolute,
-/// keeping form sizes stable across passes.
+/// keeping form sizes stable across passes. `force_abs` skips the zero-page
+/// pick — ACME treats a `≥3`-digit hex literal (`$0010`) as 16-bit even though
+/// its value is low.
 fn pick_zp_abs(
     insn: &isa::Instruction,
     e: &Expr,
     env: &BTreeMap<String, i64>,
+    force_abs: bool,
     zp: &'static str,
     abs: &'static str,
 ) -> &'static str {
-    let fits_zero_page = fold_const(e, env, 0).is_ok_and(|v| (0..=0xFF).contains(&v));
+    let fits_zero_page = !force_abs && fold_const(e, env, 0).is_ok_and(|v| (0..=0xFF).contains(&v));
     if fits_zero_page && insn.form(zp).is_some() {
         zp
     } else {

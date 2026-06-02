@@ -209,7 +209,9 @@ fn resolve(
             let insn = set
                 .instruction(&mnemonic)
                 .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
-            let (mode, operand) = mos6502::resolve_mode(insn, operand, size_env, line)?;
+            // ca65 sizes by value (and an explicit `a:` we don't yet need); the
+            // ACME-style hex-width rule does not apply.
+            let (mode, operand) = mos6502::resolve_mode(insn, operand, size_env, false, line)?;
             let form = insn
                 .form(mode)
                 .ok_or_else(|| AsmError::new(line, format!("`{mnemonic}` has no {mode} form")))?;
