@@ -13,20 +13,17 @@
 //! parses straight back. The 6502 renderer instead maps the mode *name*
 //! (`zeropage,x`, `(indirect),y`, …) to acme/ca65 operand syntax.
 //!
-//! Round-trip holds for a flat region of pure 6502 *code*: each instruction
-//! re-encodes to the bytes it decoded from. Two caveats, both inherent to flat
-//! disassembly rather than this decoder:
+//! Round-trip is byte-exact, even for flat binaries that interleave data. The
+//! 6502 renderer prints absolute operands as 4-digit `$XXXX` and zero-page as
+//! 2-digit `$XX`, and acme's hex-width rule re-encodes each at the same size —
+//! so a low-address absolute (data misread as code, e.g. `$7E $00 $00` →
+//! `ROR $0000,X`) stays 16-bit rather than collapsing to zero-page. The whole
+//! C64 curriculum round-trips assemble → disassemble → reassemble identically.
 //!
-//! - **Code/data boundaries are unknown.** A binary that interleaves data (the
-//!   C64 BASIC stub, sprite/CHR data, screen text) decodes that data as
-//!   instructions. It still round-trips byte-for-byte *unless* it hits the next
-//!   point.
-//! - **Zero-page vs absolute sizing isn't always recoverable.** An absolute
-//!   instruction addressing `$00xx` re-encodes as the shorter zero-page form.
-//!   Real assembler *code* never emits such an instruction (it picks zero-page
-//!   for low addresses up front), so pure code is safe; only data misread as an
-//!   absolute opcode trips it. Forcing absolute size (acme's `+2`) would close
-//!   this, and is the natural next step if full-binary round-trip is wanted.
+//! The one thing flat disassembly inherently cannot do is tell code from data:
+//! embedded data (the C64 BASIC stub, sprite/CHR data, screen text) is shown as
+//! instructions. That affects readability, not correctness — it still
+//! re-encodes to the original bytes.
 
 /// One disassembled instruction.
 #[derive(Debug, Clone)]

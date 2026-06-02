@@ -1,9 +1,9 @@
-; countdown.s — a tiny 6502 example for Asm198x.
+; countdown.s — a tiny 6502 example for Asm198x (ACME syntax).
 ;
 ; Fills $0400..$0407 with zero by counting X down from 8, then returns.
 ; Assemble with:  asm198x examples/countdown.s -o countdown.bin
 
-        .org $0200
+        *= $0200
 
 start:  lda #$00        ; value to store
         ldx #$08        ; loop counter
