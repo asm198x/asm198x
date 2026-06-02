@@ -208,17 +208,22 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                         .ok_or_else(|| AsmError::new(s.line, "internal: missing operand value"))?;
                     let v = e.eval(&symbols, s.line)?;
                     match slot.kind {
-                        isa::OperandKind::Immediate => bytes.push(to_byte(v, s.line)?),
-                        isa::OperandKind::Address => match slot.bytes {
-                            1 => bytes.push(to_byte(v, s.line)?),
-                            2 => push_word(&mut bytes, v, s.line, set.endianness)?,
-                            other => {
-                                return Err(AsmError::new(
-                                    s.line,
-                                    format!("unsupported address width {other}"),
-                                ));
+                        // Immediates and addresses lay down a value of the
+                        // slot's width; only the width matters on the wire, so
+                        // they share a path. (A 6502 immediate is always one
+                        // byte; a Z80 `LD BC,nn` immediate is two.)
+                        isa::OperandKind::Immediate | isa::OperandKind::Address => {
+                            match slot.bytes {
+                                1 => bytes.push(to_byte(v, s.line)?),
+                                2 => push_word(&mut bytes, v, s.line, set.endianness)?,
+                                other => {
+                                    return Err(AsmError::new(
+                                        s.line,
+                                        format!("unsupported operand width {other}"),
+                                    ));
+                                }
                             }
-                        },
+                        }
                         isa::OperandKind::RelativePc => {
                             let offset = v - next_addr;
                             if !(-128..=127).contains(&offset) {
