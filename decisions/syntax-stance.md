@@ -86,11 +86,20 @@ tabular — premature generalisation here is the failure mode to avoid.
 
 ## Current state
 
-The existing 6502 front-end is a generic early subset — not yet specific to
-acme or ca65. It supports the common addressing modes, labels,
-`.org`/`.byte`/`.word`, and `<`/`>` operators. Known gaps before it can claim
-compatibility with *any* real dialect: arithmetic expressions, that dialect's
-directive set and scoping, segments, macros, string escapes.
+The 6502 **acme** front-end is delivered and validated. It is the first real
+6502 dialect (the earlier generic `.org`/`.byte` placeholder has been retired;
+`--dialect 6502` now aliases acme). It covers `*=` (with forward-gap
+zero-fill), `name = expr`, `!byte`/`!word`/`!fill`, `!text`/`!scr` (screen
+codes derived from the binary), arithmetic with C precedence, the `<`/`>`
+low/high-byte prefixes, `*` as the program counter, anonymous `-`/`+` labels,
+value-based zero-page selection, and conditional assembly
+(`!if`/`!ifdef`/`!ifndef` … `{ }` … `else`). **The entire buildable C64
+curriculum — all 80 units across starfield (16) and sid-symphony (64) —
+assembles byte-identical to `acme -f cbm`, with zero miscompiles.** Not yet
+covered (no curriculum use): `!pet`, macros, `!for`/`!zone`. ca65 (the NES
+dialect) is the next 6502 front-end; when it lands, the shared 6502
+operand-resolution lifts into a `dialects::mos6502` core (the pasmo → sjasmplus
+path).
 
 The Z80 backend is delivered and validated. The engine ↔ dialect ↔ spec seam is
 split; the Z80 `isa` spec covers the **complete documented instruction set**
@@ -206,3 +215,26 @@ behaviour); pasmo leaves it off (a leading-`.` name is an ordinary global, and
 reuse is a duplicate-label error, as the pasmo binary enforces). sjasm modules
 and macros stay deferred — they are sjasm-specific, not a shared-core feature.
 All three dialects still assemble the Gloaming curriculum 20/20 byte-identical.
+
+### 2026-06-02 — ACME 6502 dialect delivered; generic placeholder retired
+
+Built the real **acme** front-end (the C64 curriculum's assembler) in five
+validated slices: (1) `*=` PC, `name = expr`, `!byte`/`!word`/`!fill`,
+arithmetic, `<`/`>`, `*`-as-PC; (2) anonymous `-`/`+` labels; (3) `!text` (raw)
+and `!scr` (screen codes derived empirically from the binary); (4) conditional
+assembly (`!if`/`!ifdef`/`!ifndef` … `{ }` … `else`) with a parse-time symbol
+environment; plus value-based zero-page selection (a `= const` low symbol picks
+the short form, matching acme) and constant-folded `!fill` counts. **The whole
+buildable C64 curriculum — 80 units (starfield 16 + sid-symphony 64) — assembles
+byte-identical to `acme -f cbm`.**
+
+ACME operator precedence and the screen-code table were both derived by probing
+the binary, not from memory (the `<`/`>` prefixes bind loosest; lowercase maps
+to uppercase screen codes 1–26). The 6502 operand resolution sits inside
+`acme.rs` for now, to be lifted into a shared `mos6502` core when ca65 lands
+(the pasmo → sjasmplus precedent).
+
+Retired the generic `.org`/`.byte` placeholder — nothing consumed it and it was
+never a real dialect. `--dialect 6502`/`mos6502` and `assemble_*`'s 6502 entry
+now route to acme; the `ca65` alias is dropped until that front-end exists
+(mapping it to acme would silently miscompile NES source).

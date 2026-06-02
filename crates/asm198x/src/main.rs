@@ -12,7 +12,6 @@ use std::process::ExitCode;
 /// are orthogonal; Z80N availability is a target property, not a syntax one.
 #[derive(Clone, Copy)]
 enum Assembler {
-    Mos6502,
     Acme,
     Pasmo { z80n: bool },
     Sjasmplus { z80n: bool },
@@ -26,32 +25,31 @@ impl Assembler {
             Some(t) => match t.to_ascii_lowercase().as_str() {
                 "z80" => Some(false),
                 "z80n" | "next" => Some(true),
-                "6502" => return Ok(Self::Mos6502),
+                "6502" => return Ok(Self::Acme),
                 other => return Err(format!("unknown target `{other}` (try z80 or z80n)")),
             },
         };
         match dialect.map(str::to_ascii_lowercase).as_deref() {
-            Some("acme") => Ok(Self::Acme),
-            Some("6502" | "mos6502" | "ca65") => Ok(Self::Mos6502),
+            // ACME is the default (and only) 6502 dialect today; ca65 is planned.
+            Some("acme" | "6502" | "mos6502") => Ok(Self::Acme),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo { z80n: z80n.unwrap_or(false) }),
             Some("pasmonext") => Ok(Self::Pasmo { z80n: z80n.unwrap_or(true) }),
             Some("sjasmplus" | "sjasm") => Ok(Self::Sjasmplus { z80n: z80n.unwrap_or(false) }),
             Some(other) => {
-                Err(format!("unknown dialect `{other}` (try 6502, pasmo, pasmonext, or sjasmplus)"))
+                Err(format!("unknown dialect `{other}` (try acme, pasmo, pasmonext, or sjasmplus)"))
             }
-            // No --dialect: a Z80 target implies pasmo syntax; otherwise 6502.
+            // No --dialect: a Z80 target implies pasmo syntax; otherwise 6502/acme.
             None => match z80n {
                 Some(z) => Ok(Self::Pasmo { z80n: z }),
-                None => Ok(Self::Mos6502),
+                None => Ok(Self::Acme),
             },
         }
     }
 
     fn assemble(self, source: &str) -> Result<asm198x::Assembly, asm198x::AsmError> {
         match self {
-            Self::Mos6502 => asm198x::assemble_6502(source),
             Self::Acme => asm198x::assemble_acme(source),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
             Self::Pasmo { z80n: true } => asm198x::assemble_pasmonext(source),
@@ -162,7 +160,7 @@ fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
      assemble:    asm198x [--dialect <name>] [--cpu <target>] <input> [-o <out.bin>]\n\
      disassemble: asm198x --disasm [--org <addr>] <input.bin>   (Z80)\n\n\
-     dialects (syntax): 6502 (default, generic), acme (C64), pasmo, pasmonext, sjasmplus\n\
+     dialects (syntax): acme (C64 6502; also `6502`), pasmo, pasmonext, sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
      \x20                 the dialect\n\n\

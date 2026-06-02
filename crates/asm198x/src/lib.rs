@@ -22,16 +22,6 @@ mod engine;
 pub use disasm::{disassemble_z80, listing_z80, Line};
 pub use engine::{Assembly, AsmError};
 
-/// Assemble 6502 source into a flat binary, using the (early, ca65/ACME-shaped)
-/// 6502 dialect.
-///
-/// # Errors
-/// Returns an [`AsmError`] (with source line) on any parse, range, or
-/// symbol-resolution failure.
-pub fn assemble_6502(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Mos6502)
-}
-
 /// Assemble ACME-syntax 6502 source into a flat binary — the C64 curriculum's
 /// dialect (`*=` to set the PC, `!byte`/`!word`/`!fill`, `name = value`).
 ///
@@ -85,75 +75,40 @@ pub fn assemble_sjasmplus_next(source: &str) -> Result<Assembly, AsmError> {
 mod tests {
     use super::*;
 
+    // End-to-end smoke tests over the public API. The per-dialect behaviour is
+    // covered in each dialect module; these just confirm the entry points wire
+    // through the engine correctly.
+
     #[test]
-    fn assembles_countdown_loop() {
+    fn assembles_countdown_loop_via_acme() {
         let source = "\
             ; count down X, storing A across a page\n\
-                    .org $0200\n\
+                    *= $0200\n\
             start:  lda #$00\n\
                     ldx #$08\n\
             loop:   sta $0400,x\n\
                     dex\n\
                     bne loop\n\
                     rts\n";
-        let a = assemble_6502(source).expect("assembles");
+        let a = assemble_acme(source).expect("assembles");
         assert_eq!(a.origin, 0x0200);
         assert_eq!(
             a.bytes,
-            vec![
-                0xA9, 0x00, 0xA2, 0x08, 0x9D, 0x00, 0x04, 0xCA, 0xD0, 0xFA, 0x60
-            ]
+            vec![0xA9, 0x00, 0xA2, 0x08, 0x9D, 0x00, 0x04, 0xCA, 0xD0, 0xFA, 0x60]
         );
         assert_eq!(a.symbols.get("start"), Some(&0x0200));
         assert_eq!(a.symbols.get("loop"), Some(&0x0204));
     }
 
     #[test]
-    fn chooses_zero_page_over_absolute() {
-        let zp = assemble_6502("lda $10").expect("zp");
-        assert_eq!(zp.bytes, vec![0xA5, 0x10]);
-        let abs = assemble_6502("lda $1234").expect("abs");
-        assert_eq!(abs.bytes, vec![0xAD, 0x34, 0x12]); // little-endian
-    }
-
-    #[test]
-    fn indexed_and_immediate() {
-        assert_eq!(
-            assemble_6502("sta $00,x").expect("zpx").bytes,
-            vec![0x95, 0x00]
-        );
-        assert_eq!(
-            assemble_6502("lda #'A'").expect("char").bytes,
-            vec![0xA9, 0x41]
-        );
-        assert_eq!(
-            assemble_6502("lda #%00001111").expect("bin").bytes,
-            vec![0xA9, 0x0F]
-        );
-    }
-
-    #[test]
-    fn high_low_byte_operators() {
-        // `<` takes the low byte, `>` the high byte.
-        assert_eq!(
-            assemble_6502("lda #<$1234").expect("lo").bytes,
-            vec![0xA9, 0x34]
-        );
-        assert_eq!(
-            assemble_6502("ldx #>$1234").expect("hi").bytes,
-            vec![0xA2, 0x12]
-        );
-    }
-
-    #[test]
-    fn rejects_oversized_immediate() {
-        let err = assemble_6502("lda #$1234").expect_err("immediate too big");
-        assert!(err.message.contains("byte"), "unexpected: {err}");
-    }
-
-    #[test]
     fn reports_unknown_instruction_with_line() {
-        let err = assemble_6502("\n    frob $10\n").expect_err("unknown mnemonic");
+        let err = assemble_acme("\n    frob $10\n").expect_err("unknown mnemonic");
         assert_eq!(err.line, 2);
+    }
+
+    #[test]
+    fn z80_entry_points_wire_through() {
+        assert_eq!(assemble_pasmo("ld a, 0").expect("pasmo").bytes, vec![0x3E, 0x00]);
+        assert_eq!(assemble_sjasmplus("ld a, 0").expect("sjasm").bytes, vec![0x3E, 0x00]);
     }
 }
