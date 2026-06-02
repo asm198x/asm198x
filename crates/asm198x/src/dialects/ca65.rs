@@ -15,7 +15,10 @@
 
 use std::collections::BTreeMap;
 
-use super::mos6502::{self, fold_const, is_ident, split_first_word, split_top_level, BytePrec};
+use super::mos6502::{
+    self, assignment_split, fold_const, is_ident, parse_number, split_data_items, split_first_word,
+    split_top_level, string_literal, BytePrec,
+};
 use crate::engine::{AsmError, Expr};
 
 // ---------------------------------------------------------------------------
@@ -356,21 +359,6 @@ fn strip_comment(line: &str) -> &str {
     line
 }
 
-/// A lone `=` (not `==`/`!=`/`<=`/`>=`), used for constant definitions.
-fn assignment_split(trimmed: &str) -> Option<usize> {
-    let bytes = trimmed.as_bytes();
-    for (i, &b) in bytes.iter().enumerate() {
-        if b == b'=' {
-            let prev = i.checked_sub(1).map(|p| bytes[p]);
-            let next = bytes.get(i + 1).copied();
-            if !matches!(prev, Some(b'!' | b'<' | b'>' | b'=')) && next != Some(b'=') {
-                return Some(i);
-            }
-        }
-    }
-    None
-}
-
 /// Split a leading `name:` or `@cheap:` label. Updates `current_global` when a
 /// non-cheap label is defined (cheap locals scope to the preceding global).
 fn split_label<'a>(
@@ -464,7 +452,7 @@ fn parse_data_list(current_global: &str, rest: &str, line: usize) -> Result<Vec<
         return Err(AsmError::new(line, "`.byte` needs a value"));
     }
     let mut out = Vec::new();
-    for piece in split_strings(rest) {
+    for piece in split_data_items(rest) {
         if let Some(text) = string_literal(piece) {
             out.extend(text.bytes().map(|b| Expr::Num(i64::from(b))));
         } else {
@@ -505,44 +493,6 @@ fn parse_value(current_global: &str, raw: &str, line: usize) -> Result<Expr, Asm
 /// A collision-proof symbol key for a cheap local, scoped to its global.
 fn cheap_key(global: &str, name: &str) -> String {
     format!("{global}\u{1}{name}")
-}
-
-/// ca65 numbers: `$hex`, `%binary`, `'c'` char, decimal.
-fn parse_number(tok: &str, line: usize) -> Result<i64, AsmError> {
-    let t = tok.trim();
-    let bad = || AsmError::new(line, format!("invalid number `{tok}`"));
-    if let Some(hex) = t.strip_prefix('$') {
-        i64::from_str_radix(hex, 16).map_err(|_| bad())
-    } else if let Some(bin) = t.strip_prefix('%') {
-        i64::from_str_radix(bin, 2).map_err(|_| bad())
-    } else if t.starts_with('\'') && t.ends_with('\'') && t.chars().count() == 3 {
-        t.chars().nth(1).map(|c| c as i64).ok_or_else(bad)
-    } else {
-        t.parse::<i64>().map_err(|_| bad())
-    }
-}
-
-fn split_strings(s: &str) -> Vec<&str> {
-    let mut out = Vec::new();
-    let mut in_string = false;
-    let mut start = 0;
-    for (i, c) in s.char_indices() {
-        match c {
-            '"' => in_string = !in_string,
-            ',' if !in_string => {
-                out.push(s[start..i].trim());
-                start = i + 1;
-            }
-            _ => {}
-        }
-    }
-    out.push(s[start..].trim());
-    out
-}
-
-fn string_literal(piece: &str) -> Option<&str> {
-    let p = piece.trim();
-    (p.len() >= 2 && p.starts_with('"') && p.ends_with('"')).then(|| &p[1..p.len() - 1])
 }
 
 #[cfg(test)]

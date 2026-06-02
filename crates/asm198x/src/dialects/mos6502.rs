@@ -436,6 +436,64 @@ pub(crate) fn top_level_rfind(s: &str, sep: char) -> Option<usize> {
     found
 }
 
+/// The 6502 numeric literal forms shared by acme and ca65: `$hex`, `%binary`,
+/// `'c'` char, decimal.
+pub(crate) fn parse_number(tok: &str, line: usize) -> Result<i64, AsmError> {
+    let t = tok.trim();
+    let bad = || AsmError::new(line, format!("invalid number `{tok}`"));
+    if let Some(hex) = t.strip_prefix('$') {
+        i64::from_str_radix(hex, 16).map_err(|_| bad())
+    } else if let Some(bin) = t.strip_prefix('%') {
+        i64::from_str_radix(bin, 2).map_err(|_| bad())
+    } else if t.starts_with('\'') && t.ends_with('\'') && t.chars().count() == 3 {
+        t.chars().nth(1).map(|c| c as i64).ok_or_else(bad)
+    } else {
+        t.parse::<i64>().map_err(|_| bad())
+    }
+}
+
+/// The byte index of a lone `=` used as a symbol assignment, or `None`. Skips
+/// the comparison operators `==`/`!=`/`<=`/`>=`. (A leading `*=` is handled by
+/// each dialect before this is reached.)
+pub(crate) fn assignment_split(trimmed: &str) -> Option<usize> {
+    let bytes = trimmed.as_bytes();
+    for (i, &b) in bytes.iter().enumerate() {
+        if b == b'=' {
+            let prev = i.checked_sub(1).map(|p| bytes[p]);
+            let next = bytes.get(i + 1).copied();
+            if !matches!(prev, Some(b'!' | b'<' | b'>' | b'=')) && next != Some(b'=') {
+                return Some(i);
+            }
+        }
+    }
+    None
+}
+
+/// Split a data list on commas that are not inside a `"..."` string.
+pub(crate) fn split_data_items(s: &str) -> Vec<&str> {
+    let mut out = Vec::new();
+    let mut in_string = false;
+    let mut start = 0;
+    for (i, c) in s.char_indices() {
+        match c {
+            '"' => in_string = !in_string,
+            ',' if !in_string => {
+                out.push(s[start..i].trim());
+                start = i + 1;
+            }
+            _ => {}
+        }
+    }
+    out.push(s[start..].trim());
+    out
+}
+
+/// The contents of a `"..."` string literal, or `None` if `piece` is not one.
+pub(crate) fn string_literal(piece: &str) -> Option<&str> {
+    let p = piece.trim();
+    (p.len() >= 2 && p.starts_with('"') && p.ends_with('"')).then(|| &p[1..p.len() - 1])
+}
+
 /// An identifier: letters, digits, `_`, and `.` (so local-style labels like
 /// `.loop` read as ordinary names), not starting with a digit.
 pub(crate) fn is_ident(s: &str) -> bool {

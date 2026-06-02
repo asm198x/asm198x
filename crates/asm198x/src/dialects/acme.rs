@@ -16,7 +16,8 @@
 use std::collections::BTreeMap;
 
 use super::mos6502::{
-    self, fold_const, is_ident, split_first_word, top_level_rfind, BytePrec,
+    self, assignment_split, fold_const, is_ident, parse_number, split_data_items, split_first_word,
+    string_literal, top_level_rfind, BytePrec,
 };
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, Expr, Operation, Statement};
@@ -366,23 +367,6 @@ fn parse_statement(
     Ok((label, op))
 }
 
-/// Find the byte index of a lone `=` used as assignment, or `None`. Skips `==`,
-/// and a `*=` is handled before this is reached.
-fn assignment_split(trimmed: &str) -> Option<usize> {
-    let bytes = trimmed.as_bytes();
-    for (i, &b) in bytes.iter().enumerate() {
-        if b == b'=' {
-            let prev = i.checked_sub(1).map(|p| bytes[p]);
-            let next = bytes.get(i + 1).copied();
-            let part_of_cmp = matches!(prev, Some(b'!' | b'<' | b'>' | b'=')) || next == Some(b'=');
-            if !part_of_cmp {
-                return Some(i);
-            }
-        }
-    }
-    None
-}
-
 /// Split a column-0 label from the rest. A leading-whitespace line has no label.
 /// A column-0 first word that names a known mnemonic or a `!` directive is the
 /// operation, not a label; an all-`-`/all-`+` run is an anonymous label.
@@ -542,31 +526,6 @@ fn screen_code(c: u8) -> u8 {
     }
 }
 
-/// Split a data list on commas that are not inside a `"..."` string.
-fn split_data_items(s: &str) -> Vec<&str> {
-    let mut out = Vec::new();
-    let mut in_string = false;
-    let mut start = 0;
-    for (i, c) in s.char_indices() {
-        match c {
-            '"' => in_string = !in_string,
-            ',' if !in_string => {
-                out.push(s[start..i].trim());
-                start = i + 1;
-            }
-            _ => {}
-        }
-    }
-    out.push(s[start..].trim());
-    out
-}
-
-/// The contents of a `"..."` string literal, or `None` if `piece` is not one.
-fn string_literal(piece: &str) -> Option<&str> {
-    let p = piece.trim();
-    (p.len() >= 2 && p.starts_with('"') && p.ends_with('"')).then(|| &p[1..p.len() - 1])
-}
-
 // ---------------------------------------------------------------------------
 // Value parsing (ACME surface over the shared expression core)
 // ---------------------------------------------------------------------------
@@ -593,21 +552,6 @@ fn address_forces_absolute(operand: &str) -> bool {
     };
     base.strip_prefix('$')
         .is_some_and(|hex| hex.len() >= 3 && hex.bytes().all(|b| b.is_ascii_hexdigit()))
-}
-
-/// ACME numbers: `$hex`, `%binary`, `'c'` char, decimal.
-fn parse_number(tok: &str, line: usize) -> Result<i64, AsmError> {
-    let t = tok.trim();
-    let bad = || AsmError::new(line, format!("invalid number `{tok}`"));
-    if let Some(hex) = t.strip_prefix('$') {
-        i64::from_str_radix(hex, 16).map_err(|_| bad())
-    } else if let Some(bin) = t.strip_prefix('%') {
-        i64::from_str_radix(bin, 2).map_err(|_| bad())
-    } else if t.starts_with('\'') && t.ends_with('\'') && t.chars().count() == 3 {
-        t.chars().nth(1).map(|c| c as i64).ok_or_else(bad)
-    } else {
-        t.parse::<i64>().map_err(|_| bad())
-    }
 }
 
 #[cfg(test)]
