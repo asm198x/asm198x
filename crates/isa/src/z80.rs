@@ -37,8 +37,11 @@
 //! This module is authored in slices. **Landed: the complete unprefixed base
 //! page `0x00..=0xFF`** (less the four prefix bytes) — the load group, 8-bit
 //! and 16-bit arithmetic, INC/DEC, the full control-flow set (JP/CALL/RET/JR/
-//! DJNZ/RST), stack ops, the accumulator/flag ops, and block-free I/O. **TODO:**
-//! the `CB` (bit/rotate), `ED` (extended), and `DD`/`FD` (IX/IY) prefix groups.
+//! DJNZ/RST), stack ops, the accumulator/flag ops, and block-free I/O — **plus
+//! the complete `ED` (extended) group**: block transfer/search (LDIR/LDDR/CPIR
+//! …), block I/O, 16-bit ADC/SBC HL, 16-bit LD (nn), IN/OUT (C), IM, NEG,
+//! RRD/RLD, RETI/RETN. **TODO:** the `CB` (bit/rotate) and `DD`/`FD` (IX/IY)
+//! prefix groups.
 
 use crate::{Cycles, Endianness, Form, Instruction, InstructionSet, Operand, OperandKind};
 
@@ -202,6 +205,20 @@ const INSTRUCTIONS: &[Instruction] = &[
         form(&[0x3A], "A,(nn)",  ONE_ADDR, Cycles::fixed(13), ""),
         // 16-bit register transfer.
         form(&[0xF9], "SP,HL",   NONE,     Cycles::fixed(6),  ""),
+        // ED-prefixed: 16-bit load/store and the I/R registers. (The ED
+        // encodings of LD (nn),HL / LD HL,(nn) are redundant with the shorter
+        // base-page 0x22/0x2A, so they are omitted -- the assembler picks the
+        // short form, as pasmo does.)
+        form(&[0xED, 0x43], "(nn),BC", ONE_ADDR, Cycles::fixed(20), ""),
+        form(&[0xED, 0x4B], "BC,(nn)", ONE_ADDR, Cycles::fixed(20), ""),
+        form(&[0xED, 0x53], "(nn),DE", ONE_ADDR, Cycles::fixed(20), ""),
+        form(&[0xED, 0x5B], "DE,(nn)", ONE_ADDR, Cycles::fixed(20), ""),
+        form(&[0xED, 0x73], "(nn),SP", ONE_ADDR, Cycles::fixed(20), ""),
+        form(&[0xED, 0x7B], "SP,(nn)", ONE_ADDR, Cycles::fixed(20), ""),
+        form(&[0xED, 0x47], "I,A",     NONE,     Cycles::fixed(9),  ""),
+        form(&[0xED, 0x4F], "R,A",     NONE,     Cycles::fixed(9),  ""),
+        form(&[0xED, 0x57], "A,I",     NONE,     Cycles::fixed(9),  "SZHPN"),
+        form(&[0xED, 0x5F], "A,R",     NONE,     Cycles::fixed(9),  "SZHPN"),
     ]),
 
     inst!("EX", "Exchange", [
@@ -248,6 +265,11 @@ const INSTRUCTIONS: &[Instruction] = &[
         form(&[0x8E], "A,(HL)", NONE,  Cycles::fixed(7), "SZHPNC"),
         form(&[0x8F], "A,A",    NONE,  Cycles::fixed(4), "SZHPNC"),
         form(&[0xCE], "A,n",    ONE_N, Cycles::fixed(7), "SZHPNC"),
+        // ED-prefixed 16-bit add-with-carry to HL.
+        form(&[0xED, 0x4A], "HL,BC", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xED, 0x5A], "HL,DE", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xED, 0x6A], "HL,HL", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xED, 0x7A], "HL,SP", NONE, Cycles::fixed(15), "SZHPNC"),
     ]),
     inst!("SUB", "Subtract", [
         form(&[0x90], "B",    NONE,  Cycles::fixed(4), "SZHPNC"),
@@ -271,6 +293,11 @@ const INSTRUCTIONS: &[Instruction] = &[
         form(&[0x9E], "A,(HL)", NONE,  Cycles::fixed(7), "SZHPNC"),
         form(&[0x9F], "A,A",    NONE,  Cycles::fixed(4), "SZHPNC"),
         form(&[0xDE], "A,n",    ONE_N, Cycles::fixed(7), "SZHPNC"),
+        // ED-prefixed 16-bit subtract-with-carry from HL.
+        form(&[0xED, 0x42], "HL,BC", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xED, 0x52], "HL,DE", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xED, 0x62], "HL,HL", NONE, Cycles::fixed(15), "SZHPNC"),
+        form(&[0xED, 0x72], "HL,SP", NONE, Cycles::fixed(15), "SZHPNC"),
     ]),
     inst!("AND", "Logical AND", [
         form(&[0xA0], "B",    NONE,  Cycles::fixed(4), "SZHPNC"),
@@ -421,12 +448,65 @@ const INSTRUCTIONS: &[Instruction] = &[
         form(&[0xFF], "38", NONE, Cycles::fixed(11), ""),
     ]),
 
-    // Block-free I/O and interrupt control.
-    inst!("OUT", "Output to port", [form(&[0xD3], "(n),A", ONE_N, Cycles::fixed(11), "")]),
-    inst!("IN",  "Input from port", [form(&[0xDB], "A,(n)", ONE_N, Cycles::fixed(11), "")]),
+    // I/O (port immediate is base page; port-(C) forms are ED-prefixed).
+    inst!("OUT", "Output to port", [
+        form(&[0xD3],       "(n),A", ONE_N, Cycles::fixed(11), ""),
+        form(&[0xED, 0x41], "(C),B", NONE,  Cycles::fixed(12), ""),
+        form(&[0xED, 0x49], "(C),C", NONE,  Cycles::fixed(12), ""),
+        form(&[0xED, 0x51], "(C),D", NONE,  Cycles::fixed(12), ""),
+        form(&[0xED, 0x59], "(C),E", NONE,  Cycles::fixed(12), ""),
+        form(&[0xED, 0x61], "(C),H", NONE,  Cycles::fixed(12), ""),
+        form(&[0xED, 0x69], "(C),L", NONE,  Cycles::fixed(12), ""),
+        form(&[0xED, 0x79], "(C),A", NONE,  Cycles::fixed(12), ""),
+    ]),
+    inst!("IN", "Input from port", [
+        form(&[0xDB],       "A,(n)", ONE_N, Cycles::fixed(11), ""),
+        form(&[0xED, 0x40], "B,(C)", NONE,  Cycles::fixed(12), "SZHPN"),
+        form(&[0xED, 0x48], "C,(C)", NONE,  Cycles::fixed(12), "SZHPN"),
+        form(&[0xED, 0x50], "D,(C)", NONE,  Cycles::fixed(12), "SZHPN"),
+        form(&[0xED, 0x58], "E,(C)", NONE,  Cycles::fixed(12), "SZHPN"),
+        form(&[0xED, 0x60], "H,(C)", NONE,  Cycles::fixed(12), "SZHPN"),
+        form(&[0xED, 0x68], "L,(C)", NONE,  Cycles::fixed(12), "SZHPN"),
+        form(&[0xED, 0x78], "A,(C)", NONE,  Cycles::fixed(12), "SZHPN"),
+    ]),
     inst!("EXX", "Exchange register set", [form(&[0xD9], "", NONE, Cycles::fixed(4), "")]),
     inst!("DI",  "Disable interrupts", [form(&[0xF3], "", NONE, Cycles::fixed(4), "")]),
     inst!("EI",  "Enable interrupts",  [form(&[0xFB], "", NONE, Cycles::fixed(4), "")]),
+
+    // ============================ ED prefix ============================
+    // Extended group. Opcodes cross-checked against the Fuse/ZEXALL-validated
+    // Emu198x decoder. (16-bit LD/IN/OUT(C)/ADC/SBC ED forms live on their
+    // mnemonics above.) The block-I/O group's flag detail is hardware-fuzzy --
+    // some bits are officially undefined -- but the opcodes are exact and the
+    // assembler ignores flags.
+    inst!("NEG",  "Negate accumulator", [form(&[0xED, 0x44], "", NONE, Cycles::fixed(8), "SZHPNC")]),
+    inst!("RETN", "Return from NMI",     [form(&[0xED, 0x45], "", NONE, Cycles::fixed(14), "")]),
+    inst!("RETI", "Return from interrupt", [form(&[0xED, 0x4D], "", NONE, Cycles::fixed(14), "")]),
+    inst!("RRD",  "Rotate right decimal", [form(&[0xED, 0x67], "", NONE, Cycles::fixed(18), "SZHPN")]),
+    inst!("RLD",  "Rotate left decimal",  [form(&[0xED, 0x6F], "", NONE, Cycles::fixed(18), "SZHPN")]),
+    inst!("IM", "Set interrupt mode", [
+        form(&[0xED, 0x46], "0", NONE, Cycles::fixed(8), ""),
+        form(&[0xED, 0x56], "1", NONE, Cycles::fixed(8), ""),
+        form(&[0xED, 0x5E], "2", NONE, Cycles::fixed(8), ""),
+    ]),
+    // Block transfer / search.
+    inst!("LDI",  "Block load, increment",  [form(&[0xED, 0xA0], "", NONE, Cycles::fixed(16), "HPN")]),
+    inst!("LDD",  "Block load, decrement",  [form(&[0xED, 0xA8], "", NONE, Cycles::fixed(16), "HPN")]),
+    inst!("LDIR", "Block load, inc, repeat", [form(&[0xED, 0xB0], "", NONE, cond(16, 5), "HPN")]),
+    inst!("LDDR", "Block load, dec, repeat", [form(&[0xED, 0xB8], "", NONE, cond(16, 5), "HPN")]),
+    inst!("CPI",  "Block compare, increment", [form(&[0xED, 0xA1], "", NONE, Cycles::fixed(16), "SZHPN")]),
+    inst!("CPD",  "Block compare, decrement", [form(&[0xED, 0xA9], "", NONE, Cycles::fixed(16), "SZHPN")]),
+    inst!("CPIR", "Block compare, inc, repeat", [form(&[0xED, 0xB1], "", NONE, cond(16, 5), "SZHPN")]),
+    inst!("CPDR", "Block compare, dec, repeat", [form(&[0xED, 0xB9], "", NONE, cond(16, 5), "SZHPN")]),
+    // Block I/O (flag detail hardware-fuzzy; opcodes exact).
+    inst!("INI",  "Block input, increment",  [form(&[0xED, 0xA2], "", NONE, Cycles::fixed(16), "SZHPNC")]),
+    inst!("IND",  "Block input, decrement",  [form(&[0xED, 0xAA], "", NONE, Cycles::fixed(16), "SZHPNC")]),
+    inst!("INIR", "Block input, inc, repeat", [form(&[0xED, 0xB2], "", NONE, cond(16, 5), "SZHPNC")]),
+    inst!("INDR", "Block input, dec, repeat", [form(&[0xED, 0xBA], "", NONE, cond(16, 5), "SZHPNC")]),
+    inst!("OUTI", "Block output, increment", [form(&[0xED, 0xA3], "", NONE, Cycles::fixed(16), "SZHPNC")]),
+    inst!("OUTD", "Block output, decrement", [form(&[0xED, 0xAB], "", NONE, Cycles::fixed(16), "SZHPNC")]),
+    inst!("OTIR", "Block output, inc, repeat", [form(&[0xED, 0xB3], "", NONE, cond(16, 5), "SZHPNC")]),
+    inst!("OTDR", "Block output, dec, repeat", [form(&[0xED, 0xBB], "", NONE, cond(16, 5), "SZHPNC")]),
 ];
 
 #[cfg(test)]
@@ -519,5 +599,41 @@ mod tests {
         // CALL cc pays 7 extra T-states when taken; JP cc is a flat 10.
         let call_nz = SET.instruction("CALL").expect("CALL").form("NZ,nn").expect("CALL NZ,nn");
         assert_eq!((call_nz.cycles.base, call_nz.cycles.branch_taken), (10, 7));
+    }
+
+    /// ED-prefixed forms: two-byte opcodes, unique in their second byte, with
+    /// encodings cross-checked against the validated decoder.
+    #[test]
+    fn ed_group_encodings_and_uniqueness() {
+        assert_eq!(
+            SET.instruction("LDIR").expect("LDIR").form("").expect("form").opcode,
+            &[0xED, 0xB0]
+        );
+        assert_eq!(
+            SET.instruction("NEG").expect("NEG").form("").expect("form").opcode,
+            &[0xED, 0x44]
+        );
+        assert_eq!(
+            SET.instruction("IM").expect("IM").form("1").expect("IM 1").opcode,
+            &[0xED, 0x56]
+        );
+        assert_eq!(
+            SET.instruction("SBC").expect("SBC").form("HL,DE").expect("SBC HL,DE").opcode,
+            &[0xED, 0x52]
+        );
+
+        let mut seen = std::collections::BTreeSet::new();
+        for instruction in SET.instructions {
+            for f in instruction.forms {
+                if f.opcode.first() == Some(&0xED) {
+                    assert_eq!(f.opcode.len(), 2, "{} {} malformed ED opcode", instruction.mnemonic, f.mode);
+                    assert!(
+                        seen.insert(f.opcode[1]),
+                        "duplicate ED opcode $ED ${:02X} ({} {})",
+                        f.opcode[1], instruction.mnemonic, f.mode
+                    );
+                }
+            }
+        }
     }
 }
