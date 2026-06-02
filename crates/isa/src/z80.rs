@@ -34,11 +34,11 @@
 //!
 //! ## Coverage
 //!
-//! This module is authored in slices. **Landed: the unprefixed base page
-//! `0x00..=0x7F`** — the load group, 16-bit arithmetic, INC/DEC, relative
-//! jumps, and the accumulator/flag ops. **TODO:** `0x80..=0xFF` (8-bit ALU,
-//! stack, control flow, I/O, `RST`); then the `CB`, `ED`, and `DD`/`FD`
-//! (IX/IY) prefix groups.
+//! This module is authored in slices. **Landed: the complete unprefixed base
+//! page `0x00..=0xFF`** (less the four prefix bytes) — the load group, 8-bit
+//! and 16-bit arithmetic, INC/DEC, the full control-flow set (JP/CALL/RET/JR/
+//! DJNZ/RST), stack ops, the accumulator/flag ops, and block-free I/O. **TODO:**
+//! the `CB` (bit/rotate), `ED` (extended), and `DD`/`FD` (IX/IY) prefix groups.
 
 use crate::{Cycles, Endianness, Form, Instruction, InstructionSet, Operand, OperandKind};
 
@@ -200,10 +200,14 @@ const INSTRUCTIONS: &[Instruction] = &[
         form(&[0x2A], "HL,(nn)", ONE_ADDR, Cycles::fixed(16), ""),
         form(&[0x32], "(nn),A",  ONE_ADDR, Cycles::fixed(13), ""),
         form(&[0x3A], "A,(nn)",  ONE_ADDR, Cycles::fixed(13), ""),
+        // 16-bit register transfer.
+        form(&[0xF9], "SP,HL",   NONE,     Cycles::fixed(6),  ""),
     ]),
 
     inst!("EX", "Exchange", [
-        form(&[0x08], "AF,AF'", NONE, Cycles::fixed(4), ""),
+        form(&[0x08], "AF,AF'",  NONE, Cycles::fixed(4),  ""),
+        form(&[0xEB], "DE,HL",   NONE, Cycles::fixed(4),  ""),
+        form(&[0xE3], "(SP),HL", NONE, Cycles::fixed(19), ""),
     ]),
 
     inst!("DJNZ", "Decrement B and jump if not zero", [
@@ -218,11 +222,99 @@ const INSTRUCTIONS: &[Instruction] = &[
     ]),
 
     inst!("ADD", "Add", [
-        // 16-bit add to HL. (8-bit ADD A,s lands with the 0x80..=0xFF slice.)
+        // 16-bit add to HL: H, N (reset), C; S/Z/P unaffected.
         form(&[0x09], "HL,BC", NONE, Cycles::fixed(11), "HNC"),
         form(&[0x19], "HL,DE", NONE, Cycles::fixed(11), "HNC"),
         form(&[0x29], "HL,HL", NONE, Cycles::fixed(11), "HNC"),
         form(&[0x39], "HL,SP", NONE, Cycles::fixed(11), "HNC"),
+        // 8-bit add to A.
+        form(&[0x80], "A,B",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x81], "A,C",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x82], "A,D",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x83], "A,E",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x84], "A,H",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x85], "A,L",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x86], "A,(HL)", NONE,  Cycles::fixed(7), "SZHPNC"),
+        form(&[0x87], "A,A",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xC6], "A,n",    ONE_N, Cycles::fixed(7), "SZHPNC"),
+    ]),
+    inst!("ADC", "Add with carry", [
+        form(&[0x88], "A,B",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x89], "A,C",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x8A], "A,D",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x8B], "A,E",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x8C], "A,H",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x8D], "A,L",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x8E], "A,(HL)", NONE,  Cycles::fixed(7), "SZHPNC"),
+        form(&[0x8F], "A,A",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xCE], "A,n",    ONE_N, Cycles::fixed(7), "SZHPNC"),
+    ]),
+    inst!("SUB", "Subtract", [
+        form(&[0x90], "B",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x91], "C",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x92], "D",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x93], "E",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x94], "H",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x95], "L",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x96], "(HL)", NONE,  Cycles::fixed(7), "SZHPNC"),
+        form(&[0x97], "A",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xD6], "n",    ONE_N, Cycles::fixed(7), "SZHPNC"),
+    ]),
+    inst!("SBC", "Subtract with carry", [
+        // 8-bit subtract-with-carry from A. (SBC HL,ss is an ED-prefix op.)
+        form(&[0x98], "A,B",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x99], "A,C",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x9A], "A,D",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x9B], "A,E",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x9C], "A,H",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x9D], "A,L",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0x9E], "A,(HL)", NONE,  Cycles::fixed(7), "SZHPNC"),
+        form(&[0x9F], "A,A",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xDE], "A,n",    ONE_N, Cycles::fixed(7), "SZHPNC"),
+    ]),
+    inst!("AND", "Logical AND", [
+        form(&[0xA0], "B",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xA1], "C",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xA2], "D",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xA3], "E",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xA4], "H",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xA5], "L",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xA6], "(HL)", NONE,  Cycles::fixed(7), "SZHPNC"),
+        form(&[0xA7], "A",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xE6], "n",    ONE_N, Cycles::fixed(7), "SZHPNC"),
+    ]),
+    inst!("XOR", "Logical exclusive OR", [
+        form(&[0xA8], "B",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xA9], "C",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xAA], "D",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xAB], "E",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xAC], "H",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xAD], "L",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xAE], "(HL)", NONE,  Cycles::fixed(7), "SZHPNC"),
+        form(&[0xAF], "A",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xEE], "n",    ONE_N, Cycles::fixed(7), "SZHPNC"),
+    ]),
+    inst!("OR", "Logical inclusive OR", [
+        form(&[0xB0], "B",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xB1], "C",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xB2], "D",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xB3], "E",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xB4], "H",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xB5], "L",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xB6], "(HL)", NONE,  Cycles::fixed(7), "SZHPNC"),
+        form(&[0xB7], "A",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xF6], "n",    ONE_N, Cycles::fixed(7), "SZHPNC"),
+    ]),
+    inst!("CP", "Compare with A", [
+        form(&[0xB8], "B",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xB9], "C",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xBA], "D",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xBB], "E",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xBC], "H",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xBD], "L",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xBE], "(HL)", NONE,  Cycles::fixed(7), "SZHPNC"),
+        form(&[0xBF], "A",    NONE,  Cycles::fixed(4), "SZHPNC"),
+        form(&[0xFE], "n",    ONE_N, Cycles::fixed(7), "SZHPNC"),
     ]),
 
     inst!("INC", "Increment", [
@@ -267,23 +359,93 @@ const INSTRUCTIONS: &[Instruction] = &[
     inst!("CCF",  "Complement carry flag",   [form(&[0x3F], "", NONE, Cycles::fixed(4), "HNC")]),
 
     inst!("HALT", "Halt", [form(&[0x76], "", NONE, Cycles::fixed(4), "")]),
+
+    // Stack.
+    inst!("PUSH", "Push register pair", [
+        form(&[0xC5], "BC", NONE, Cycles::fixed(11), ""),
+        form(&[0xD5], "DE", NONE, Cycles::fixed(11), ""),
+        form(&[0xE5], "HL", NONE, Cycles::fixed(11), ""),
+        form(&[0xF5], "AF", NONE, Cycles::fixed(11), ""),
+    ]),
+    inst!("POP", "Pop register pair", [
+        form(&[0xC1], "BC", NONE, Cycles::fixed(10), ""),
+        form(&[0xD1], "DE", NONE, Cycles::fixed(10), ""),
+        form(&[0xE1], "HL", NONE, Cycles::fixed(10), ""),
+        // POP AF loads F from the stack, so every flag is restored.
+        form(&[0xF1], "AF", NONE, Cycles::fixed(10), "SZHPNC"),
+    ]),
+
+    // Control flow.
+    inst!("JP", "Jump", [
+        form(&[0xC3], "nn",    ONE_ADDR, Cycles::fixed(10), ""),
+        form(&[0xE9], "(HL)",  NONE,     Cycles::fixed(4),  ""),
+        form(&[0xC2], "NZ,nn", ONE_ADDR, Cycles::fixed(10), ""),
+        form(&[0xCA], "Z,nn",  ONE_ADDR, Cycles::fixed(10), ""),
+        form(&[0xD2], "NC,nn", ONE_ADDR, Cycles::fixed(10), ""),
+        form(&[0xDA], "C,nn",  ONE_ADDR, Cycles::fixed(10), ""),
+        form(&[0xE2], "PO,nn", ONE_ADDR, Cycles::fixed(10), ""),
+        form(&[0xEA], "PE,nn", ONE_ADDR, Cycles::fixed(10), ""),
+        form(&[0xF2], "P,nn",  ONE_ADDR, Cycles::fixed(10), ""),
+        form(&[0xFA], "M,nn",  ONE_ADDR, Cycles::fixed(10), ""),
+    ]),
+    inst!("CALL", "Call subroutine", [
+        form(&[0xCD], "nn",    ONE_ADDR, Cycles::fixed(17), ""),
+        form(&[0xC4], "NZ,nn", ONE_ADDR, cond(10, 7), ""),
+        form(&[0xCC], "Z,nn",  ONE_ADDR, cond(10, 7), ""),
+        form(&[0xD4], "NC,nn", ONE_ADDR, cond(10, 7), ""),
+        form(&[0xDC], "C,nn",  ONE_ADDR, cond(10, 7), ""),
+        form(&[0xE4], "PO,nn", ONE_ADDR, cond(10, 7), ""),
+        form(&[0xEC], "PE,nn", ONE_ADDR, cond(10, 7), ""),
+        form(&[0xF4], "P,nn",  ONE_ADDR, cond(10, 7), ""),
+        form(&[0xFC], "M,nn",  ONE_ADDR, cond(10, 7), ""),
+    ]),
+    inst!("RET", "Return", [
+        form(&[0xC9], "",   NONE, Cycles::fixed(10), ""),
+        form(&[0xC0], "NZ", NONE, cond(5, 6), ""),
+        form(&[0xC8], "Z",  NONE, cond(5, 6), ""),
+        form(&[0xD0], "NC", NONE, cond(5, 6), ""),
+        form(&[0xD8], "C",  NONE, cond(5, 6), ""),
+        form(&[0xE0], "PO", NONE, cond(5, 6), ""),
+        form(&[0xE8], "PE", NONE, cond(5, 6), ""),
+        form(&[0xF0], "P",  NONE, cond(5, 6), ""),
+        form(&[0xF8], "M",  NONE, cond(5, 6), ""),
+    ]),
+    inst!("RST", "Restart", [
+        form(&[0xC7], "00", NONE, Cycles::fixed(11), ""),
+        form(&[0xCF], "08", NONE, Cycles::fixed(11), ""),
+        form(&[0xD7], "10", NONE, Cycles::fixed(11), ""),
+        form(&[0xDF], "18", NONE, Cycles::fixed(11), ""),
+        form(&[0xE7], "20", NONE, Cycles::fixed(11), ""),
+        form(&[0xEF], "28", NONE, Cycles::fixed(11), ""),
+        form(&[0xF7], "30", NONE, Cycles::fixed(11), ""),
+        form(&[0xFF], "38", NONE, Cycles::fixed(11), ""),
+    ]),
+
+    // Block-free I/O and interrupt control.
+    inst!("OUT", "Output to port", [form(&[0xD3], "(n),A", ONE_N, Cycles::fixed(11), "")]),
+    inst!("IN",  "Input from port", [form(&[0xDB], "A,(n)", ONE_N, Cycles::fixed(11), "")]),
+    inst!("EXX", "Exchange register set", [form(&[0xD9], "", NONE, Cycles::fixed(4), "")]),
+    inst!("DI",  "Disable interrupts", [form(&[0xF3], "", NONE, Cycles::fixed(4), "")]),
+    inst!("EI",  "Enable interrupts",  [form(&[0xFB], "", NONE, Cycles::fixed(4), "")]),
 ];
 
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    /// Every opcode in `0x00..=0x7F` is one base-page instruction, present
-    /// exactly once. This is the completeness + uniqueness gate for the slice:
-    /// a typo or a missing entry fails here. (All forms in this range are
-    /// single-byte; prefixed and `>= 0x80` forms are excluded so the test keeps
-    /// working as later slices land.)
+    /// Every single-byte opcode is one base-page instruction, present exactly
+    /// once — except the four prefix bytes (`CB`, `DD`, `ED`, `FD`), which
+    /// introduce the prefix groups and are never base-page instructions on
+    /// their own. This is the completeness + uniqueness gate: a typo, an
+    /// omission, or a stray prefix opcode fails here. (Multi-byte prefixed
+    /// forms are excluded, so the test keeps working as the prefix slices land.)
     #[test]
-    fn base_page_low_half_is_complete_and_unique() {
-        let mut seen = [false; 0x80];
+    fn base_page_is_complete_and_unique() {
+        const PREFIXES: [u8; 4] = [0xCB, 0xDD, 0xED, 0xFD];
+        let mut seen = [false; 256];
         for instruction in SET.instructions {
             for f in instruction.forms {
-                if f.opcode.len() == 1 && f.opcode[0] < 0x80 {
+                if f.opcode.len() == 1 {
                     let op = f.opcode[0] as usize;
                     assert!(
                         !seen[op],
@@ -295,7 +457,12 @@ mod tests {
             }
         }
         for (op, present) in seen.iter().enumerate() {
-            assert!(present, "missing opcode ${op:02X} in 0x00..=0x7F");
+            let is_prefix = PREFIXES.contains(&(op as u8));
+            assert_eq!(
+                *present, !is_prefix,
+                "opcode ${op:02X}: present={present}, expected present={}",
+                !is_prefix
+            );
         }
     }
 
@@ -338,5 +505,19 @@ mod tests {
 
         let add = SET.instruction("ADD").expect("ADD exists");
         assert_eq!(add.form("HL,DE").expect("ADD HL,DE").opcode, &[0x19]);
+        assert_eq!(add.form("A,B").expect("ADD A,B").opcode, &[0x80]);
+
+        // Upper-half spot-checks.
+        assert_eq!(SET.instruction("JP").expect("JP").form("nn").expect("JP nn").opcode, &[0xC3]);
+        assert_eq!(SET.instruction("CALL").expect("CALL").form("nn").expect("CALL nn").opcode, &[0xCD]);
+        assert_eq!(SET.instruction("RET").expect("RET").form("").expect("RET").opcode, &[0xC9]);
+        assert_eq!(SET.instruction("CP").expect("CP").form("(HL)").expect("CP (HL)").opcode, &[0xBE]);
+        assert_eq!(SET.instruction("PUSH").expect("PUSH").form("AF").expect("PUSH AF").opcode, &[0xF5]);
+        assert_eq!(SET.instruction("RST").expect("RST").form("38").expect("RST 38").opcode, &[0xFF]);
+        assert_eq!(SET.instruction("LD").expect("LD").form("SP,HL").expect("LD SP,HL").opcode, &[0xF9]);
+
+        // CALL cc pays 7 extra T-states when taken; JP cc is a flat 10.
+        let call_nz = SET.instruction("CALL").expect("CALL").form("NZ,nn").expect("CALL NZ,nn");
+        assert_eq!((call_nz.cycles.base, call_nz.cycles.branch_taken), (10, 7));
     }
 }
