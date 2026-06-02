@@ -171,3 +171,18 @@ in its own `z80::NEXT`). The CLI separates `--dialect` (syntax) from
 tool fidelity), pasmonext to Z80N, and `--cpu` overrides. Validating each Z80N
 opcode against the binary corrected the lore: `MUL` takes no operand, and
 `PUSH nn` is little-endian.
+
+### 2026-06-02 — sjasmplus dialect; shared Z80 syntax core
+
+Added **sjasmplus** as the second first-class Z80 dialect — the first genuinely
+*different* syntax (pasmo/pasmonext share a parser). Since the Z80
+mnemonic/operand syntax is identical across assemblers, extracted a shared
+`dialects::z80` core (operand resolution, expression parser, vocabulary, common
+directives, driver) behind a small `Z80Syntax` trait; a dialect now overrides
+only **comment style** and **number formats**. pasmo is a ~40-line surface;
+sjasmplus adds `//` comments and the `$/0x/h` and `%/0b/b` number formats.
+Validated byte-for-byte against the sjasmplus v1.21 binary, and all three
+dialects assemble the whole Gloaming curriculum identically. This is the
+multi-dialect-per-CPU stance realised: one CPU spec, one shared syntax core,
+many thin dialect surfaces. Deferred: `$`-as-PC, real local-label scoping,
+sjasm modules/macros.
