@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.3](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.2...asm198x-v0.0.3) - 2026-06-02
+
+### Fixed
+
+- Give the `isa` path dependency an explicit version requirement so
+  `cargo package` succeeds. release-plz runs `cargo package` to compute the
+  release diff; a path dependency without a version requirement fails it, which
+  blocked release automation. Local builds still resolve `isa` via the path.
+
+### Other
+
+- Enable `git_only` so release-plz reads the previous version from the git tag
+  rather than the (unused, `publish = false`) crates.io registry.
+
 ## [0.0.2](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.1...asm198x-v0.0.2) - 2026-06-01
 
 ### Added
