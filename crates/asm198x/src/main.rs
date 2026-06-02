@@ -14,6 +14,7 @@ use std::process::ExitCode;
 enum Assembler {
     Mos6502,
     Pasmo { z80n: bool },
+    Sjasmplus { z80n: bool },
 }
 
 impl Assembler {
@@ -30,11 +31,14 @@ impl Assembler {
         };
         match dialect.map(str::to_ascii_lowercase).as_deref() {
             Some("6502" | "mos6502" | "ca65") => Ok(Self::Mos6502),
-            // pasmo defaults to plain Z80; pasmonext defaults to Z80N. Either
-            // way an explicit --cpu/--target wins.
+            // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
+            // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo { z80n: z80n.unwrap_or(false) }),
             Some("pasmonext") => Ok(Self::Pasmo { z80n: z80n.unwrap_or(true) }),
-            Some(other) => Err(format!("unknown dialect `{other}` (try 6502, pasmo, or pasmonext)")),
+            Some("sjasmplus" | "sjasm") => Ok(Self::Sjasmplus { z80n: z80n.unwrap_or(false) }),
+            Some(other) => {
+                Err(format!("unknown dialect `{other}` (try 6502, pasmo, pasmonext, or sjasmplus)"))
+            }
             // No --dialect: a Z80 target implies pasmo syntax; otherwise 6502.
             None => match z80n {
                 Some(z) => Ok(Self::Pasmo { z80n: z }),
@@ -48,6 +52,8 @@ impl Assembler {
             Self::Mos6502 => asm198x::assemble_6502(source),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
             Self::Pasmo { z80n: true } => asm198x::assemble_pasmonext(source),
+            Self::Sjasmplus { z80n: false } => asm198x::assemble_sjasmplus(source),
+            Self::Sjasmplus { z80n: true } => asm198x::assemble_sjasmplus_next(source),
         }
     }
 }
@@ -115,7 +121,10 @@ fn run(args: &[String]) -> Result<String, String> {
     let input = input.ok_or("no input file given (try --help)")?;
 
     if disassemble {
-        let z80n = matches!(Assembler::resolve(dialect, target)?, Assembler::Pasmo { z80n: true });
+        let z80n = matches!(
+            Assembler::resolve(dialect, target)?,
+            Assembler::Pasmo { z80n: true } | Assembler::Sjasmplus { z80n: true }
+        );
         let bytes = std::fs::read(input).map_err(|e| format!("cannot read {input}: {e}"))?;
         print!("{}", asm198x::listing_z80(&bytes, origin, z80n));
         return Ok(format!("disassembled {} byte(s) at ${origin:04X}", bytes.len()));
@@ -150,7 +159,7 @@ fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
      assemble:    asm198x [--dialect <name>] [--cpu <target>] <input> [-o <out.bin>]\n\
      disassemble: asm198x --disasm [--org <addr>] <input.bin>   (Z80)\n\n\
-     dialects (syntax): 6502 (default, ca65/ACME-shaped), pasmo, pasmonext\n\
+     dialects (syntax): 6502 (default, ca65/ACME-shaped), pasmo, pasmonext, sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
      \x20                 the dialect\n\n\

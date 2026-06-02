@@ -53,6 +53,24 @@ pub fn assemble_pasmonext(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::Pasmo { z80n: true })
 }
 
+/// Assemble sjasmplus-syntax Z80 source targeting a plain Z80.
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_sjasmplus(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::Sjasmplus { z80n: false })
+}
+
+/// Assemble sjasmplus-syntax Z80 source targeting the ZX Spectrum Next (Z80N).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_sjasmplus_next(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::Sjasmplus { z80n: true })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

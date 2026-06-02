@@ -6,6 +6,9 @@
 
 pub(crate) mod mos6502;
 pub(crate) mod pasmo;
+pub(crate) mod sjasmplus;
+pub(crate) mod z80;
 
 pub(crate) use mos6502::Mos6502;
 pub(crate) use pasmo::Pasmo;
+pub(crate) use sjasmplus::Sjasmplus;
