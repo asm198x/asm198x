@@ -14,9 +14,9 @@
 //!
 //! Implemented so far: `*=`, `name = expr`, `!byte`/`!by`/`!8`,
 //! `!word`/`!wo`/`!16`, `!fill`, arithmetic expressions (`+ - * /` with C
-//! precedence and parentheses), the `<`/`>` low/high-byte prefixes, and `*` as
-//! the program counter in value position. Not yet: anonymous `-`/`+` labels,
-//! the text directives (`!text`/`!pet`/`!scr`), and conditional assembly
+//! precedence and parentheses), the `<`/`>` low/high-byte prefixes, `*` as the
+//! program counter in value position, and anonymous `-`/`+` labels. Not yet:
+//! the text directives (`!text`/`!pet`/`!scr`) and conditional assembly
 //! (`!if`/`!ifdef`/`!ifndef`) — tracked in `decisions/syntax-stance.md`.
 
 use crate::dialect::Dialect;
@@ -32,6 +32,9 @@ impl Dialect for Acme {
 
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
         let set = self.instruction_set();
+        // Anonymous `-`/`+` labels need a forward view (a `+` reference resolves
+        // to a definition below it), so collect every definition up front.
+        let anons = prescan_anons(source);
         let mut out = Vec::new();
         for (i, raw) in source.lines().enumerate() {
             let line = i + 1;
@@ -39,7 +42,7 @@ impl Dialect for Acme {
             if code.trim().is_empty() {
                 continue;
             }
-            let (label, op) = parse_statement(set, code, line)?;
+            let (label, op) = parse_statement(set, &anons, code, line)?;
             if label.is_none() && op.is_none() {
                 continue;
             }
@@ -66,9 +69,83 @@ fn strip_comment(line: &str) -> &str {
     line
 }
 
+// ---------------------------------------------------------------------------
+// Anonymous labels (`-`/`--`/`+`/`++` …)
+// ---------------------------------------------------------------------------
+
+/// One anonymous-label definition: where it sits, its sign and level (the run
+/// length, so `--` is level 2), and the unique synthetic name it binds. The
+/// name carries a leading control char so it can never collide with a real
+/// identifier.
+struct AnonDef {
+    line: usize,
+    sign: char,
+    level: usize,
+    name: String,
+}
+
+/// A column-0 token made entirely of `-` or entirely of `+` is an anonymous
+/// label. Returns its sign and level (run length).
+fn anon_marker(word: &str) -> Option<(char, usize)> {
+    let mut chars = word.chars();
+    let first = chars.next()?;
+    if (first == '-' || first == '+') && word.chars().all(|c| c == first) {
+        Some((first, word.len()))
+    } else {
+        None
+    }
+}
+
+/// Collect every anonymous-label definition in source order, assigning each a
+/// unique synthetic name.
+fn prescan_anons(source: &str) -> Vec<AnonDef> {
+    let mut defs = Vec::new();
+    for (i, raw) in source.lines().enumerate() {
+        let line = i + 1;
+        let code = strip_comment(raw);
+        // A definition sits in column 0 (an indented `-`/`+` is an operator).
+        if code.starts_with([' ', '\t']) {
+            continue;
+        }
+        let (word, _) = split_first_word(code.trim());
+        if let Some((sign, level)) = anon_marker(word) {
+            let name = format!("\u{1}{sign}{level}#{}", defs.len());
+            defs.push(AnonDef { line, sign, level, name });
+        }
+    }
+    defs
+}
+
+/// Resolve an anonymous reference at `ref_line`: the nearest preceding `-`
+/// definition (backward, same line allowed) or the nearest following `+`
+/// definition (forward), at the same level.
+fn resolve_anon(
+    anons: &[AnonDef],
+    sign: char,
+    level: usize,
+    ref_line: usize,
+    line: usize,
+) -> Result<String, AsmError> {
+    let matching = anons.iter().filter(|d| d.sign == sign && d.level == level);
+    let chosen = if sign == '-' {
+        matching.filter(|d| d.line <= ref_line).max_by_key(|d| d.line)
+    } else {
+        matching.filter(|d| d.line >= ref_line).min_by_key(|d| d.line)
+    };
+    chosen.map(|d| d.name.clone()).ok_or_else(|| {
+        let run: String = std::iter::repeat_n(sign, level).collect();
+        AsmError::new(line, format!("no anonymous label `{run}` in that direction"))
+    })
+}
+
+// ---------------------------------------------------------------------------
+// Statement structure
+// ---------------------------------------------------------------------------
+
 /// Reduce one source line to an optional label and an optional operation.
 fn parse_statement(
     set: &'static isa::InstructionSet,
+    anons: &[AnonDef],
     code: &str,
     line: usize,
 ) -> Result<(Option<String>, Option<Operation>), AsmError> {
@@ -78,7 +155,7 @@ fn parse_statement(
     if let Some(rest) = trimmed.strip_prefix('*') {
         let rest = rest.trim_start();
         if let Some(value) = rest.strip_prefix('=') {
-            return Ok((None, Some(Operation::Org(parse_value(value, line)?))));
+            return Ok((None, Some(Operation::Org(parse_value(anons, value, line)?))));
         }
     }
 
@@ -90,12 +167,12 @@ fn parse_statement(
         if !is_ident(name) {
             return Err(AsmError::new(line, format!("invalid symbol name `{name}`")));
         }
-        return Ok((Some(name.to_string()), Some(Operation::Equ(parse_value(value, line)?))));
+        return Ok((Some(name.to_string()), Some(Operation::Equ(parse_value(anons, value, line)?))));
     }
 
     // Otherwise: an optional column-0 label, then a directive or instruction.
-    let (label, rest) = split_label(set, code, line)?;
-    let op = parse_op(set, rest, line)?;
+    let (label, rest) = split_label(set, anons, code, line)?;
+    let op = parse_op(set, anons, rest, line)?;
     Ok((label, op))
 }
 
@@ -119,9 +196,10 @@ fn assignment_split(trimmed: &str) -> Option<usize> {
 
 /// Split a column-0 label from the rest. A leading-whitespace line has no label.
 /// A column-0 first word that names a known mnemonic or a `!` directive is the
-/// operation, not a label; otherwise it is a label (optionally `name:`).
+/// operation, not a label; an all-`-`/all-`+` run is an anonymous label.
 fn split_label<'a>(
     set: &'static isa::InstructionSet,
+    anons: &[AnonDef],
     code: &'a str,
     line: usize,
 ) -> Result<(Option<String>, &'a str), AsmError> {
@@ -130,6 +208,15 @@ fn split_label<'a>(
     }
     let trimmed = code.trim();
     let (word, remainder) = split_first_word(trimmed);
+    // An anonymous `-`/`+` label: bind the synthetic name for this line.
+    if anon_marker(word).is_some() {
+        let name = anons
+            .iter()
+            .find(|d| d.line == line)
+            .map(|d| d.name.clone())
+            .ok_or_else(|| AsmError::new(line, "internal: anonymous label not pre-scanned"))?;
+        return Ok((Some(name), remainder));
+    }
     // A `name:` label.
     if let Some(name) = word.strip_suffix(':') {
         if !is_ident(name) {
@@ -151,6 +238,7 @@ fn split_label<'a>(
 /// Parse the operation part (after any label): a `!` directive or an instruction.
 fn parse_op(
     set: &'static isa::InstructionSet,
+    anons: &[AnonDef],
     rest: &str,
     line: usize,
 ) -> Result<Option<Operation>, AsmError> {
@@ -158,11 +246,11 @@ fn parse_op(
         return Ok(None);
     }
     if let Some(directive) = rest.strip_prefix('!') {
-        return Ok(Some(parse_directive(directive, line)?));
+        return Ok(Some(parse_directive(anons, directive, line)?));
     }
     let (mnemonic, remainder) = split_first_word(rest);
     let mnemonic = mnemonic.to_ascii_uppercase();
-    let operand = parse_operand(remainder, line)?;
+    let operand = parse_operand(anons, remainder, line)?;
     let insn = set
         .instruction(&mnemonic)
         .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
@@ -178,28 +266,28 @@ fn parse_op(
 // Directives
 // ---------------------------------------------------------------------------
 
-fn parse_directive(directive: &str, line: usize) -> Result<Operation, AsmError> {
+fn parse_directive(anons: &[AnonDef], directive: &str, line: usize) -> Result<Operation, AsmError> {
     let (name, rest) = split_first_word(directive);
     match name.to_ascii_lowercase().as_str() {
-        "byte" | "by" | "8" => Ok(Operation::Bytes(parse_list(rest, line)?)),
-        "word" | "wo" | "16" => Ok(Operation::Words(parse_list(rest, line)?)),
-        "fill" => parse_fill(rest, line),
+        "byte" | "by" | "8" => Ok(Operation::Bytes(parse_list(anons, rest, line)?)),
+        "word" | "wo" | "16" => Ok(Operation::Words(parse_list(anons, rest, line)?)),
+        "fill" => parse_fill(anons, rest, line),
         other => Err(AsmError::new(line, format!("unsupported directive `!{other}`"))),
     }
 }
 
 /// `!fill amount [, value]` — `amount` bytes of `value` (default 0). Both must
 /// fold to constants (the size has to be known at parse time).
-fn parse_fill(rest: &str, line: usize) -> Result<Operation, AsmError> {
+fn parse_fill(anons: &[AnonDef], rest: &str, line: usize) -> Result<Operation, AsmError> {
     let mut parts = rest.splitn(2, ',');
     let amount_src = parts.next().unwrap_or("").trim();
-    let amount = match parse_value(amount_src, line)? {
+    let amount = match parse_value(anons, amount_src, line)? {
         Expr::Num(n) if n >= 0 => n as usize,
         _ => return Err(AsmError::new(line, "`!fill` needs a constant byte count")),
     };
     let value = match parts.next() {
         None => 0,
-        Some(v) => match parse_value(v, line)? {
+        Some(v) => match parse_value(anons, v, line)? {
             Expr::Num(n) if (0..=0xFF).contains(&n) => n as u8,
             _ => return Err(AsmError::new(line, "`!fill` value must be a constant byte")),
         },
@@ -207,13 +295,13 @@ fn parse_fill(rest: &str, line: usize) -> Result<Operation, AsmError> {
     Ok(Operation::Bytes(vec![Expr::Num(i64::from(value)); amount]))
 }
 
-fn parse_list(rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
+fn parse_list(anons: &[AnonDef], rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
     if rest.trim().is_empty() {
         return Err(AsmError::new(line, "directive needs at least one value"));
     }
     split_top_level(rest, ',')
         .iter()
-        .map(|p| parse_value(p, line))
+        .map(|p| parse_value(anons, p, line))
         .collect()
 }
 
@@ -283,7 +371,7 @@ fn pick_zp_abs(insn: &isa::Instruction, e: &Expr, zp: &'static str, abs: &'stati
     }
 }
 
-fn parse_operand(raw: &str, line: usize) -> Result<OperandSyntax, AsmError> {
+fn parse_operand(anons: &[AnonDef], raw: &str, line: usize) -> Result<OperandSyntax, AsmError> {
     let t = raw.trim();
     if t.is_empty() {
         return Ok(OperandSyntax::None);
@@ -292,18 +380,18 @@ fn parse_operand(raw: &str, line: usize) -> Result<OperandSyntax, AsmError> {
         return Ok(OperandSyntax::Accumulator);
     }
     if let Some(rest) = t.strip_prefix('#') {
-        return Ok(OperandSyntax::Immediate(parse_value(rest, line)?));
+        return Ok(OperandSyntax::Immediate(parse_value(anons, rest, line)?));
     }
     if t.starts_with('(') {
         let upper = t.to_ascii_uppercase();
         if let Some(inner) = upper.strip_suffix(",X)") {
-            return Ok(OperandSyntax::IndexedIndirect(parse_value(&t[1..inner.len()], line)?));
+            return Ok(OperandSyntax::IndexedIndirect(parse_value(anons, &t[1..inner.len()], line)?));
         }
         if let Some(inner) = upper.strip_suffix("),Y") {
-            return Ok(OperandSyntax::IndirectIndexed(parse_value(&t[1..inner.len()], line)?));
+            return Ok(OperandSyntax::IndirectIndexed(parse_value(anons, &t[1..inner.len()], line)?));
         }
         if let Some(inner) = t.strip_suffix(')') {
-            return Ok(OperandSyntax::Indirect(parse_value(&inner[1..], line)?));
+            return Ok(OperandSyntax::Indirect(parse_value(anons, &inner[1..], line)?));
         }
         return Err(AsmError::new(line, format!("malformed indirect operand `{raw}`")));
     }
@@ -315,9 +403,9 @@ fn parse_operand(raw: &str, line: usize) -> Result<OperandSyntax, AsmError> {
             i if i.eq_ignore_ascii_case("y") => Index::Y,
             _ => return Err(AsmError::new(line, format!("expected `,X` or `,Y` in `{raw}`"))),
         };
-        return Ok(OperandSyntax::Indexed(parse_value(&t[..comma], line)?, index));
+        return Ok(OperandSyntax::Indexed(parse_value(anons, &t[..comma], line)?, index));
     }
-    Ok(OperandSyntax::Direct(parse_value(t, line)?))
+    Ok(OperandSyntax::Direct(parse_value(anons, t, line)?))
 }
 
 // ---------------------------------------------------------------------------
@@ -325,7 +413,13 @@ fn parse_operand(raw: &str, line: usize) -> Result<OperandSyntax, AsmError> {
 // prefixes, parentheses, and `*` as the program counter in value position.
 // ---------------------------------------------------------------------------
 
-fn parse_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
+fn parse_value(anons: &[AnonDef], raw: &str, line: usize) -> Result<Expr, AsmError> {
+    // A bare `-`/`--`/`+`/`++` operand is an anonymous-label reference, not
+    // arithmetic — resolve it before tokenising.
+    let trimmed = raw.trim();
+    if let Some((sign, level)) = anon_marker(trimmed) {
+        return Ok(Expr::Sym(resolve_anon(anons, sign, level, line, line)?));
+    }
     let tokens = tokenize(raw, line)?;
     if tokens.is_empty() {
         return Err(AsmError::new(line, "expected a value"));
@@ -594,7 +688,6 @@ mod tests {
 
     #[test]
     fn addressing_modes_resolve() {
-        // immediate, zp, absolute, absolute,x, (zp),y
         assert_eq!(asm("lda #$01").expect("imm").bytes, vec![0xA9, 0x01]);
         assert_eq!(asm("lda $10").expect("zp").bytes, vec![0xA5, 0x10]);
         assert_eq!(asm("lda $0400").expect("abs").bytes, vec![0xAD, 0x00, 0x04]);
@@ -605,7 +698,6 @@ mod tests {
 
     #[test]
     fn arithmetic_and_byte_operators() {
-        // `<`/`>` apply to the whole expression to their right (ACME-verified).
         assert_eq!(asm("lda #<$1234+1").expect("lo").bytes, vec![0xA9, 0x35]);
         assert_eq!(asm("lda #>$1234+1").expect("hi").bytes, vec![0xA9, 0x12]);
         assert_eq!(asm("lda #1+2*3").expect("prec").bytes, vec![0xA9, 0x07]);
@@ -614,8 +706,6 @@ mod tests {
 
     #[test]
     fn star_is_the_program_counter() {
-        // `*` in value position is the statement address; `*` between values is
-        // multiply. `ldx #<*` at $0801 -> low byte of $0801 = $01.
         let a = asm("*= $0801\n        ldx #<*\n        lda #2*3\n").expect("pc");
         assert_eq!(a.bytes, vec![0xA2, 0x01, 0xA9, 0x06]);
     }
@@ -630,5 +720,44 @@ mod tests {
     fn forward_pc_gap_is_zero_filled() {
         let a = asm("*= $1000\n!byte 1\n*= $1003\n!byte 2\n").expect("gap");
         assert_eq!(a.bytes, vec![0x01, 0x00, 0x00, 0x02]);
+    }
+
+    #[test]
+    fn anonymous_labels_resolve_by_direction() {
+        // `bne -` branches back to the `-` above; `jmp +` jumps forward to the
+        // `+` below. Byte layout verified against the acme binary.
+        let a = asm(
+            "*= $1000\n\
+             \x20       ldx #0\n\
+             -      inx\n\
+             \x20       bne -\n\
+             \x20       jmp +\n\
+             \x20       nop\n\
+             +      rts\n",
+        )
+        .expect("anon");
+        assert_eq!(a.bytes, vec![0xA2, 0x00, 0xE8, 0xD0, 0xFD, 0x4C, 0x09, 0x10, 0xEA, 0x60]);
+    }
+
+    #[test]
+    fn nested_anonymous_levels_are_distinct() {
+        // `--` is a different pool from `-`; `beq --` reaches the `--` def.
+        let a = asm(
+            "*= $1000\n\
+             -      lda #1\n\
+             \x20       bne -\n\
+             --     lda #2\n\
+             \x20       beq --\n",
+        )
+        .expect("nested");
+        // lda#1(2) bne -(-> -4 = $FC) lda#2(2) beq --(-> -4 = $FC)
+        assert_eq!(a.bytes, vec![0xA9, 0x01, 0xD0, 0xFC, 0xA9, 0x02, 0xF0, 0xFC]);
+    }
+
+    #[test]
+    fn self_referencing_backward_label() {
+        // `- jmp -` on one line is the classic "loop forever" (jump to self).
+        let a = asm("*= $1000\n-      jmp -\n").expect("selfloop");
+        assert_eq!(a.bytes, vec![0x4C, 0x00, 0x10]);
     }
 }
