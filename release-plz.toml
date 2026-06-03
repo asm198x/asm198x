@@ -36,3 +36,13 @@ git_only = true
 [[package]]
 name = "isa"
 git_tag_enable = false
+
+# isa-disasm is the same case: no binary, dependency-only. Without this it takes
+# the workspace default (git_tag_enable = true), so release-plz tags it and
+# cargo-dist's release.yml fires on `isa-disasm-vX.Y.Z` and, finding no binary,
+# produces a junk GitHub Release — it already did once (only a dist-manifest.json,
+# and it grabbed the "Latest" badge). Keep it version-bumped in lockstep but
+# untagged; only `asm198x-vX.Y.Z` drives a release.
+[[package]]
+name = "isa-disasm"
+git_tag_enable = false
