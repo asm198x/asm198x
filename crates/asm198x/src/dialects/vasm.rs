@@ -712,14 +712,11 @@ fn resolve_ea(
             let mut ext = Vec::new();
             if let Some(e) = disp {
                 let raw = eval(e, consts, here, line)?;
-                // `label(pc)` (mode 7) means the *distance* to the label, not its
-                // address: the displacement is `label - pc`. A constant `n(pc)`
-                // stays literal. An `d16(An)` displacement is always literal.
-                let d = if *mode == 7 && reloc_sym(e, &ctx.reloc).is_some() {
-                    raw - pc_ext
-                } else {
-                    raw
-                };
+                // `n(pc)`/`label(pc)` (mode 7) name the *target*, not the stored
+                // displacement: the displacement is `target - pc` (vasm treats a
+                // constant the same way as a label). An `d16(An)` displacement is
+                // always literal.
+                let d = if *mode == 7 { raw - pc_ext } else { raw };
                 let d16 = i16::try_from(d)
                     .map_err(|_| AsmError::new(line, format!("displacement {d} out of range")))?;
                 ext.extend_from_slice(&d16.to_be_bytes());

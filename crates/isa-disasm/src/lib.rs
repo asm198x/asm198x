@@ -554,7 +554,7 @@ fn render_m68k(
                 } else {
                     ((field >> 3) & 7, field & 7)
                 };
-                ops.push(render_ea(mode, reg, size, code, &mut ext)?);
+                ops.push(render_ea(mode, reg, size, code, &mut ext, addr, pos)?);
             }
         }
     }
@@ -600,8 +600,18 @@ fn read_be(code: &[u8], off: &mut usize, n: usize) -> Option<i64> {
 }
 
 /// Render an effective address from its decoded (mode, reg), reading any
-/// extension words from `*ext`.
-fn render_ea(mode: u16, reg: u16, size: Size, code: &[u8], ext: &mut usize) -> Option<String> {
+/// extension words from `*ext`. `addr`/`pos` give the instruction's address and
+/// code offset, so a PC-relative displacement can be rendered as its resolved
+/// target (the address of the extension word it sits in, plus the displacement).
+fn render_ea(
+    mode: u16,
+    reg: u16,
+    size: Size,
+    code: &[u8],
+    ext: &mut usize,
+    addr: u32,
+    pos: usize,
+) -> Option<String> {
     Some(match mode {
         0 => format!("d{reg}"),
         1 => format!("a{reg}"),
@@ -626,14 +636,20 @@ fn render_ea(mode: u16, reg: u16, size: Size, code: &[u8], ext: &mut usize) -> O
                 format!("${v:X}")
             }
             2 => {
-                // PC-relative: print the raw displacement so it re-encodes as a
-                // literal `d(pc)` (the assembler stores it directly).
+                // PC-relative: render the resolved target. vasm reads `T(pc)` as
+                // the address T and re-derives the displacement T − (ext-word
+                // address), so a target round-trips where a raw displacement
+                // would not.
+                let ea = addr.wrapping_add((*ext - pos) as u32);
                 let d = read_be(code, ext, 2)? as i16;
-                format!("{d}(pc)")
+                let target = ea.wrapping_add(d as u32);
+                format!("${target:X}(pc)")
             }
             3 => {
+                let ea = addr.wrapping_add((*ext - pos) as u32);
                 let brief = read_be(code, ext, 2)? as u16;
-                format!("{}(pc,{})", (brief & 0xFF) as i8, index_reg(brief))
+                let target = ea.wrapping_add(i32::from((brief & 0xFF) as i8) as u32);
+                format!("${target:X}(pc,{})", index_reg(brief))
             }
             4 => {
                 let n = if matches!(size, Size::L) { 4 } else { 2 };
@@ -1206,6 +1222,17 @@ mod tests {
         assert_eq!(
             one_m68k(&[0x4C, 0xA8, 0x00, 0x20, 0x00, 0x10]),
             "movem.w 16(a0),d5"
+        );
+    }
+
+    #[test]
+    fn m68k_pc_relative_renders_resolved_target() {
+        // move.w $10(pc),d0 at $1000: ext word at $1002, disp $000E -> target
+        // $1010. Rendered as the target so it round-trips (vasm re-derives the
+        // displacement from it).
+        assert_eq!(
+            one_m68k(&[0x30, 0x3A, 0x00, 0x0E]),
+            "move.w $1010(pc),d0"
         );
     }
 

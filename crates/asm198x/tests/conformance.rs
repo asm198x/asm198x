@@ -341,12 +341,7 @@ fn spec_sweep_matches_reference() {
             &|b, o| asm198x::disassemble_68000(b, o),
             &|b, o| asm198x::listing_68000(b, o),
             &reasm,
-            // PC-relative EA modes render as a raw displacement (position-
-            // independent text) while vasm treats `N(pc)` as a target and
-            // recomputes the offset, so they can't be batched. Resolving the
-            // (d,PC) target on render (as the 6809 PCR renderer does) is a
-            // separate narrow item — see decisions/spec-conformance-and-fuzzing.
-            &|t: &str| t.contains("pc"),
+            &|_| false,
             &mut fails,
         );
     } else {

@@ -86,13 +86,20 @@ sweeps caught real decoder/spec bugs, now fixed:
   - The audit assembles the reference with `vasm -no-opt`, so vasm's optimizer
     doesn't transform or delete instructions (it drops `lea (a0),a0` as a no-op).
 
-### Remaining: 68000 PC-relative EA
+### 68000 PC-relative EA — fixed
 
-The sweep skips PC-relative EA modes: the disassembler renders `(d16,PC)` as a
-raw displacement (position-independent text) while vasm treats `N(pc)` as a
-target and recomputes the offset. Resolving the target on render (as the 6809
-PCR renderer does) — and parsing it back in the dialect — is a narrow remaining
-item; PC-relative EA is otherwise covered by the curriculum.
+The disassembler now renders `(d16,PC)`/`(d8,PC,Xn)` as the resolved **target**
+(`$T(pc)`, where `T` is the extension word's address plus the displacement),
+matching how vasm reads `N(pc)` — it takes `T` as the target and re-derives the
+displacement `T − PC`. The assembler was already target-aware for `label(pc)`;
+it now treats a constant `n(pc)` the same way (vasm does), so both halves agree.
+
+Because the target is position-dependent, these instructions are still excluded
+from the *batched* sweep (the two-origin filter drops them, as it does branches —
+batching needs position-independent text). They are covered instead by targeted
+round-trip tests: a decode assertion in `isa-disasm` and a disasm→assemble→bytes
+round-trip in `asm198x`, plus manual confirmation that the disassembly
+re-assembles to identical bytes under both our assembler and vasm.
 
 ## Why this is the right next investment
 

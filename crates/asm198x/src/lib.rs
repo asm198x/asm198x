@@ -221,4 +221,14 @@ mod tests {
             assemble_vasm("\tcmpi.w #1,(a0)\n").expect("cmpi"),
         );
     }
+
+    #[test]
+    fn vasm_pc_relative_round_trips() {
+        // `move.w $10(pc),d0` at origin 0: disassembly renders the resolved
+        // target, which re-assembles to the same bytes (displacement = target −
+        // PC). The disassembler<->assembler PC-relative contract.
+        let bytes = vec![0x30, 0x3A, 0x00, 0x0E];
+        let text = listing_68000(&bytes, 0);
+        assert_eq!(assemble_vasm(&text).expect("reassemble"), bytes);
+    }
 }
