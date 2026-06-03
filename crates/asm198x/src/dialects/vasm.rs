@@ -67,6 +67,11 @@ fn lower<'a>(
         && let [Opnd::Imm(e), dest] = operands
         && let Ok(v) = eval(e, consts, 0, 0)
     {
+        // cmp #0,<ea> → tst <ea> (comparing against zero is a test; drops the
+        // immediate word). Not for An, which tst can't address on the 68000.
+        if mnemonic == "CMP" && v == 0 && !matches!(dest, Opnd::AReg(_) | Opnd::Imm(_)) {
+            return ("TST", Cow::Owned(vec![dest.clone()]));
+        }
         // add/sub of 1..=8 → the quick form.
         if (1..=8).contains(&v) && !matches!(dest, Opnd::Imm(_)) {
             match mnemonic {
