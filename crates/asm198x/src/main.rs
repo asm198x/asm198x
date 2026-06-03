@@ -169,7 +169,11 @@ fn run(args: &[String]) -> Result<String, String> {
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
         std::fs::write(&out_path, &code)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
-        return Ok(format!("assembled {} byte(s) -> {}", code.len(), out_path.display()));
+        return Ok(format!(
+            "assembled {} byte(s) -> {}",
+            code.len(),
+            out_path.display()
+        ));
     }
 
     // ca65 assembles and links to a `.nes` ROM rather than a flat binary.

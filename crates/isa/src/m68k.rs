@@ -94,7 +94,11 @@ pub enum Slot {
     /// A general effective address; its 6-bit field sits at `shift`. With
     /// `dest`, the MOVE destination layout is used (register in the high 3 bits,
     /// mode in the low 3) instead of the normal mode-then-register order.
-    Ea { shift: u8, modes: EaModes, dest: bool },
+    Ea {
+        shift: u8,
+        modes: EaModes,
+        dest: bool,
+    },
     /// A data-register number (3 bits) at `shift`.
     Dn { shift: u8 },
     /// An address-register number (3 bits) at `shift`.
@@ -110,6 +114,12 @@ pub enum Slot {
     BranchW,
     /// A `DBcc` displacement: always a 16-bit extension word.
     DispW,
+    /// An immediate emitted as a full 16-bit extension word (the static bit
+    /// number of `BTST`/`BSET #n,<ea>`), placed before the EA's own extension.
+    ImmWord,
+    /// A register-list mask (`MOVEM`): a 16-bit extension word, reversed when the
+    /// effective address is predecrement.
+    RegList,
 }
 
 /// One concrete encoding shape of a mnemonic.
@@ -144,7 +154,11 @@ use ea::*;
 
 /// Helper: a form with a normal source EA at bits 0–5.
 const fn ea_src(modes: u16) -> Slot {
-    Slot::Ea { shift: 0, modes: EaModes(modes), dest: false }
+    Slot::Ea {
+        shift: 0,
+        modes: EaModes(modes),
+        dest: false,
+    }
 }
 
 pub const SET: Spec = Spec {
@@ -152,12 +166,20 @@ pub const SET: Spec = Spec {
         Insn {
             mnemonic: "RTS",
             summary: "Return from subroutine",
-            forms: &[Form { base: 0x4E75, size: SizeEnc::Fixed(Size::W), operands: &[] }],
+            forms: &[Form {
+                base: 0x4E75,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[],
+            }],
         },
         Insn {
             mnemonic: "NOP",
             summary: "No operation",
-            forms: &[Form { base: 0x4E71, size: SizeEnc::Fixed(Size::W), operands: &[] }],
+            forms: &[Form {
+                base: 0x4E71,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[],
+            }],
         },
         Insn {
             mnemonic: "MOVEQ",
@@ -176,7 +198,11 @@ pub const SET: Spec = Spec {
                 size: SizeEnc::Move,
                 operands: &[
                     ea_src(ALL),
-                    Slot::Ea { shift: 6, modes: EaModes(DATA_ALT | AN), dest: true },
+                    Slot::Ea {
+                        shift: 6,
+                        modes: EaModes(DATA_ALT | AN),
+                        dest: true,
+                    },
                 ],
             }],
         },
@@ -209,142 +235,392 @@ pub const SET: Spec = Spec {
         Insn {
             mnemonic: "BRA",
             summary: "Branch always",
-            forms: &[Form { base: 0x6000, size: SizeEnc::Fixed(Size::W), operands: &[Slot::BranchW] }],
+            forms: &[Form {
+                base: 0x6000,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::BranchW],
+            }],
         },
         Insn {
             mnemonic: "BSR",
             summary: "Branch to subroutine",
-            forms: &[Form { base: 0x6100, size: SizeEnc::Fixed(Size::W), operands: &[Slot::BranchW] }],
+            forms: &[Form {
+                base: 0x6100,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::BranchW],
+            }],
         },
         // --- Conditional branches (condition in bits 8–11) ---
-        Insn { mnemonic: "BEQ", summary: "Branch if equal", forms: BRANCH_EQ },
-        Insn { mnemonic: "BNE", summary: "Branch if not equal", forms: BRANCH_NE },
-        Insn { mnemonic: "BGE", summary: "Branch if greater or equal", forms: BRANCH_GE },
-        Insn { mnemonic: "BLT", summary: "Branch if less than", forms: BRANCH_LT },
-        Insn { mnemonic: "BGT", summary: "Branch if greater than", forms: BRANCH_GT },
-        Insn { mnemonic: "BLE", summary: "Branch if less or equal", forms: BRANCH_LE },
-        Insn { mnemonic: "BMI", summary: "Branch if minus", forms: BRANCH_MI },
-        Insn { mnemonic: "BPL", summary: "Branch if plus", forms: BRANCH_PL },
+        Insn {
+            mnemonic: "BEQ",
+            summary: "Branch if equal",
+            forms: BRANCH_EQ,
+        },
+        Insn {
+            mnemonic: "BNE",
+            summary: "Branch if not equal",
+            forms: BRANCH_NE,
+        },
+        Insn {
+            mnemonic: "BGE",
+            summary: "Branch if greater or equal",
+            forms: BRANCH_GE,
+        },
+        Insn {
+            mnemonic: "BLT",
+            summary: "Branch if less than",
+            forms: BRANCH_LT,
+        },
+        Insn {
+            mnemonic: "BGT",
+            summary: "Branch if greater than",
+            forms: BRANCH_GT,
+        },
+        Insn {
+            mnemonic: "BLE",
+            summary: "Branch if less or equal",
+            forms: BRANCH_LE,
+        },
+        Insn {
+            mnemonic: "BMI",
+            summary: "Branch if minus",
+            forms: BRANCH_MI,
+        },
+        Insn {
+            mnemonic: "BPL",
+            summary: "Branch if plus",
+            forms: BRANCH_PL,
+        },
         // --- Two-operand arithmetic/logic: <ea>,Dn (er) and Dn,<ea> (re) ---
         Insn {
             mnemonic: "SUB",
             summary: "Subtract binary",
             forms: &[
-                Form { base: 0x9000, size: SizeEnc::Std6, operands: &[ea_src(ALL), Slot::Dn { shift: 9 }] },
-                Form { base: 0x9100, size: SizeEnc::Std6, operands: &[Slot::Dn { shift: 9 }, ea_src(MEM_ALT)] },
+                Form {
+                    base: 0x9000,
+                    size: SizeEnc::Std6,
+                    operands: &[ea_src(ALL), Slot::Dn { shift: 9 }],
+                },
+                Form {
+                    base: 0x9100,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 9 }, ea_src(MEM_ALT)],
+                },
             ],
         },
         Insn {
             mnemonic: "AND",
             summary: "Logical AND",
             forms: &[
-                Form { base: 0xC000, size: SizeEnc::Std6, operands: &[ea_src(DATA), Slot::Dn { shift: 9 }] },
-                Form { base: 0xC100, size: SizeEnc::Std6, operands: &[Slot::Dn { shift: 9 }, ea_src(MEM_ALT)] },
+                Form {
+                    base: 0xC000,
+                    size: SizeEnc::Std6,
+                    operands: &[ea_src(DATA), Slot::Dn { shift: 9 }],
+                },
+                Form {
+                    base: 0xC100,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 9 }, ea_src(MEM_ALT)],
+                },
             ],
         },
         Insn {
             mnemonic: "OR",
             summary: "Logical OR",
             forms: &[
-                Form { base: 0x8000, size: SizeEnc::Std6, operands: &[ea_src(DATA), Slot::Dn { shift: 9 }] },
-                Form { base: 0x8100, size: SizeEnc::Std6, operands: &[Slot::Dn { shift: 9 }, ea_src(MEM_ALT)] },
+                Form {
+                    base: 0x8000,
+                    size: SizeEnc::Std6,
+                    operands: &[ea_src(DATA), Slot::Dn { shift: 9 }],
+                },
+                Form {
+                    base: 0x8100,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 9 }, ea_src(MEM_ALT)],
+                },
             ],
         },
         Insn {
             mnemonic: "CMP",
             summary: "Compare",
-            forms: &[Form { base: 0xB000, size: SizeEnc::Std6, operands: &[ea_src(ALL), Slot::Dn { shift: 9 }] }],
+            forms: &[Form {
+                base: 0xB000,
+                size: SizeEnc::Std6,
+                operands: &[ea_src(ALL), Slot::Dn { shift: 9 }],
+            }],
         },
         Insn {
             mnemonic: "EOR",
             summary: "Exclusive OR",
-            forms: &[Form { base: 0xB100, size: SizeEnc::Std6, operands: &[Slot::Dn { shift: 9 }, ea_src(DATA_ALT)] }],
+            forms: &[Form {
+                base: 0xB100,
+                size: SizeEnc::Std6,
+                operands: &[Slot::Dn { shift: 9 }, ea_src(DATA_ALT)],
+            }],
         },
         Insn {
             mnemonic: "MULU",
             summary: "Unsigned multiply",
-            forms: &[Form { base: 0xC0C0, size: SizeEnc::Fixed(Size::W), operands: &[ea_src(DATA), Slot::Dn { shift: 9 }] }],
+            forms: &[Form {
+                base: 0xC0C0,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[ea_src(DATA), Slot::Dn { shift: 9 }],
+            }],
         },
         Insn {
             mnemonic: "DIVU",
             summary: "Unsigned divide",
-            forms: &[Form { base: 0x80C0, size: SizeEnc::Fixed(Size::W), operands: &[ea_src(DATA), Slot::Dn { shift: 9 }] }],
+            forms: &[Form {
+                base: 0x80C0,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[ea_src(DATA), Slot::Dn { shift: 9 }],
+            }],
         },
         // --- Single effective-address operations ---
         Insn {
             mnemonic: "TST",
             summary: "Test (set flags)",
-            forms: &[Form { base: 0x4A00, size: SizeEnc::Std6, operands: &[ea_src(DATA_ALT)] }],
+            forms: &[Form {
+                base: 0x4A00,
+                size: SizeEnc::Std6,
+                operands: &[ea_src(DATA_ALT)],
+            }],
         },
         Insn {
             mnemonic: "CLR",
             summary: "Clear",
-            forms: &[Form { base: 0x4200, size: SizeEnc::Std6, operands: &[ea_src(DATA_ALT)] }],
+            forms: &[Form {
+                base: 0x4200,
+                size: SizeEnc::Std6,
+                operands: &[ea_src(DATA_ALT)],
+            }],
         },
         Insn {
             mnemonic: "NEG",
             summary: "Negate",
-            forms: &[Form { base: 0x4400, size: SizeEnc::Std6, operands: &[ea_src(DATA_ALT)] }],
+            forms: &[Form {
+                base: 0x4400,
+                size: SizeEnc::Std6,
+                operands: &[ea_src(DATA_ALT)],
+            }],
         },
         Insn {
             mnemonic: "NOT",
             summary: "Logical complement",
-            forms: &[Form { base: 0x4600, size: SizeEnc::Std6, operands: &[ea_src(DATA_ALT)] }],
+            forms: &[Form {
+                base: 0x4600,
+                size: SizeEnc::Std6,
+                operands: &[ea_src(DATA_ALT)],
+            }],
         },
         // --- Quick-immediate add/subtract (1–8) ---
         Insn {
             mnemonic: "ADDQ",
             summary: "Add quick",
-            forms: &[Form { base: 0x5000, size: SizeEnc::Std6, operands: &[Slot::Quick3 { shift: 9 }, ea_src(ALT)] }],
+            forms: &[Form {
+                base: 0x5000,
+                size: SizeEnc::Std6,
+                operands: &[Slot::Quick3 { shift: 9 }, ea_src(ALT)],
+            }],
         },
         Insn {
             mnemonic: "SUBQ",
             summary: "Subtract quick",
-            forms: &[Form { base: 0x5100, size: SizeEnc::Std6, operands: &[Slot::Quick3 { shift: 9 }, ea_src(ALT)] }],
+            forms: &[Form {
+                base: 0x5100,
+                size: SizeEnc::Std6,
+                operands: &[Slot::Quick3 { shift: 9 }, ea_src(ALT)],
+            }],
         },
         // --- Register operations ---
         Insn {
             mnemonic: "SWAP",
             summary: "Swap register halves",
-            forms: &[Form { base: 0x4840, size: SizeEnc::Fixed(Size::W), operands: &[Slot::Dn { shift: 0 }] }],
+            forms: &[Form {
+                base: 0x4840,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }],
+            }],
         },
         Insn {
             mnemonic: "EXT",
             summary: "Sign-extend",
-            forms: &[Form { base: 0x4880, size: SizeEnc::WL { shift: 6 }, operands: &[Slot::Dn { shift: 0 }] }],
+            forms: &[Form {
+                base: 0x4880,
+                size: SizeEnc::WL { shift: 6 },
+                operands: &[Slot::Dn { shift: 0 }],
+            }],
         },
         // --- Decrement-and-branch (counter in bits 0–2, 16-bit displacement) ---
         Insn {
             mnemonic: "DBF",
             summary: "Decrement and branch (never on condition)",
-            forms: &[Form { base: 0x51C8, size: SizeEnc::Fixed(Size::W), operands: &[Slot::Dn { shift: 0 }, Slot::DispW] }],
+            forms: &[Form {
+                base: 0x51C8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
         },
         Insn {
             mnemonic: "DBRA",
             summary: "Decrement and branch (alias of DBF)",
-            forms: &[Form { base: 0x51C8, size: SizeEnc::Fixed(Size::W), operands: &[Slot::Dn { shift: 0 }, Slot::DispW] }],
+            forms: &[Form {
+                base: 0x51C8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
         },
         // --- Set-on-condition (byte effective address) ---
         Insn {
             mnemonic: "SNE",
             summary: "Set if not equal",
-            forms: &[Form { base: 0x56C0, size: SizeEnc::Fixed(Size::B), operands: &[ea_src(DATA_ALT)] }],
+            forms: &[Form {
+                base: 0x56C0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
         },
         Insn {
             mnemonic: "SEQ",
             summary: "Set if equal",
-            forms: &[Form { base: 0x57C0, size: SizeEnc::Fixed(Size::B), operands: &[ea_src(DATA_ALT)] }],
+            forms: &[Form {
+                base: 0x57C0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        // --- Logical shifts: #count,Dn (immediate) and Dn,Dn (register) ---
+        Insn {
+            mnemonic: "LSL",
+            summary: "Logical shift left",
+            forms: &[
+                Form {
+                    base: 0xE108,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Quick3 { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xE128,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+            ],
+        },
+        Insn {
+            mnemonic: "LSR",
+            summary: "Logical shift right",
+            forms: &[
+                Form {
+                    base: 0xE008,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Quick3 { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xE028,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+            ],
+        },
+        // --- Bit test/set: #n,<ea> (static) and Dn,<ea> (dynamic) ---
+        Insn {
+            mnemonic: "BTST",
+            summary: "Test a bit",
+            forms: &[
+                Form {
+                    base: 0x0800,
+                    size: SizeEnc::Fixed(Size::B),
+                    operands: &[Slot::ImmWord, ea_src(DATA)],
+                },
+                Form {
+                    base: 0x0100,
+                    size: SizeEnc::Fixed(Size::B),
+                    operands: &[Slot::Dn { shift: 9 }, ea_src(DATA)],
+                },
+            ],
+        },
+        Insn {
+            mnemonic: "BSET",
+            summary: "Test and set a bit",
+            forms: &[
+                Form {
+                    base: 0x08C0,
+                    size: SizeEnc::Fixed(Size::B),
+                    operands: &[Slot::ImmWord, ea_src(DATA_ALT)],
+                },
+                Form {
+                    base: 0x01C0,
+                    size: SizeEnc::Fixed(Size::B),
+                    operands: &[Slot::Dn { shift: 9 }, ea_src(DATA_ALT)],
+                },
+            ],
+        },
+        // --- Move multiple registers (mask word; reversed for predecrement) ---
+        Insn {
+            mnemonic: "MOVEM",
+            summary: "Move multiple registers",
+            forms: &[
+                // store: reglist -> memory
+                Form {
+                    base: 0x4880,
+                    size: SizeEnc::WL { shift: 6 },
+                    operands: &[Slot::RegList, ea_src(MEM_ALT)],
+                },
+                // load: memory -> reglist
+                Form {
+                    base: 0x4C80,
+                    size: SizeEnc::WL { shift: 6 },
+                    operands: &[
+                        ea_src(
+                            ea::AI | ea::PI | ea::DI | ea::IX | ea::AW | ea::AL | ea::PCD | ea::PCX,
+                        ),
+                        Slot::RegList,
+                    ],
+                },
+            ],
         },
     ],
 };
 
 // Conditional-branch forms (one PC-relative target each); the condition lives
 // in bits 8–11 of the base word.
-const BRANCH_EQ: &[Form] = &[Form { base: 0x6700, size: SizeEnc::Fixed(Size::W), operands: &[Slot::BranchW] }];
-const BRANCH_NE: &[Form] = &[Form { base: 0x6600, size: SizeEnc::Fixed(Size::W), operands: &[Slot::BranchW] }];
-const BRANCH_GE: &[Form] = &[Form { base: 0x6C00, size: SizeEnc::Fixed(Size::W), operands: &[Slot::BranchW] }];
-const BRANCH_LT: &[Form] = &[Form { base: 0x6D00, size: SizeEnc::Fixed(Size::W), operands: &[Slot::BranchW] }];
-const BRANCH_GT: &[Form] = &[Form { base: 0x6E00, size: SizeEnc::Fixed(Size::W), operands: &[Slot::BranchW] }];
-const BRANCH_LE: &[Form] = &[Form { base: 0x6F00, size: SizeEnc::Fixed(Size::W), operands: &[Slot::BranchW] }];
-const BRANCH_MI: &[Form] = &[Form { base: 0x6B00, size: SizeEnc::Fixed(Size::W), operands: &[Slot::BranchW] }];
-const BRANCH_PL: &[Form] = &[Form { base: 0x6A00, size: SizeEnc::Fixed(Size::W), operands: &[Slot::BranchW] }];
+const BRANCH_EQ: &[Form] = &[Form {
+    base: 0x6700,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_NE: &[Form] = &[Form {
+    base: 0x6600,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_GE: &[Form] = &[Form {
+    base: 0x6C00,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_LT: &[Form] = &[Form {
+    base: 0x6D00,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_GT: &[Form] = &[Form {
+    base: 0x6E00,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_LE: &[Form] = &[Form {
+    base: 0x6F00,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_MI: &[Form] = &[Form {
+    base: 0x6B00,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_PL: &[Form] = &[Form {
+    base: 0x6A00,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];

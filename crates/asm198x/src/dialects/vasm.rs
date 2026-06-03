@@ -11,9 +11,11 @@
 
 use std::collections::BTreeMap;
 
-use isa::m68k::{self, ea, Size, SizeEnc, Slot};
+use isa::m68k::{self, Size, SizeEnc, Slot, ea};
 
-use super::mos6502::{self, fold_const, is_ident, split_data_items, split_first_word, string_literal};
+use super::mos6502::{
+    self, fold_const, is_ident, split_data_items, split_first_word, string_literal,
+};
 use crate::engine::{AsmError, BinOp, Expr};
 
 /// Evaluate an expression against bound symbols, with `*` (the location counter)
@@ -28,7 +30,9 @@ fn eval(e: &Expr, consts: &BTreeMap<String, i64>, here: i64, line: usize) -> Res
             .ok_or_else(|| AsmError::new(line, format!("undefined symbol `{s}`")))?,
         Expr::Lo(b) => eval(b, consts, here, line)? & 0xFF,
         Expr::Hi(b) => (eval(b, consts, here, line)? >> 8) & 0xFF,
-        Expr::Neg(b) => eval(b, consts, here, line)?.checked_neg().ok_or_else(overflow)?,
+        Expr::Neg(b) => eval(b, consts, here, line)?
+            .checked_neg()
+            .ok_or_else(overflow)?,
         Expr::Bin(op, l, r) => {
             let a = eval(l, consts, here, line)?;
             let b = eval(r, consts, here, line)?;
@@ -83,7 +87,11 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
                 }
             }
             Stmt::Ds(size, count) => out.resize(out.len() + count * size.bytes(), 0),
-            Stmt::Insn { mnemonic, size, operands } => {
+            Stmt::Insn {
+                mnemonic,
+                size,
+                operands,
+            } => {
                 let here = out.len() as i64;
                 let bytes = encode(mnemonic, *size, operands, &consts, here, s.line)?;
                 out.extend_from_slice(&bytes);
@@ -109,12 +117,17 @@ fn encode(
         .instruction(mnemonic)
         .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
     let sz = size.unwrap_or(Size::W);
-    let form = match_form(insn, operands)
-        .ok_or_else(|| AsmError::new(line, format!("`{mnemonic}` has no form for those operands")))?;
+    let form = match_form(insn, operands).ok_or_else(|| {
+        AsmError::new(line, format!("`{mnemonic}` has no form for those operands"))
+    })?;
 
     let mut word = form.base | size_bits(form.size, sz);
     let mut ext: Vec<u8> = Vec::new();
     let mut branch: Option<i64> = None;
+    // MOVEM reverses its register mask when the effective address predecrements.
+    let predec = operands
+        .iter()
+        .any(|o| matches!(o, Opnd::Mem { mode: 4, .. }));
 
     for (slot, op) in form.operands.iter().zip(operands) {
         match (slot, op) {
@@ -123,36 +136,74 @@ fn encode(
             (Slot::Quick8, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
                 if !(-128..=255).contains(&v) {
-                    return Err(AsmError::new(line, format!("quick immediate {v} out of range")));
+                    return Err(AsmError::new(
+                        line,
+                        format!("quick immediate {v} out of range"),
+                    ));
                 }
                 word |= u16::from(v as u8);
             }
             (Slot::Quick3 { shift }, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
                 if !(1..=8).contains(&v) {
-                    return Err(AsmError::new(line, format!("quick immediate {v} must be 1..=8")));
+                    return Err(AsmError::new(
+                        line,
+                        format!("quick immediate {v} must be 1..=8"),
+                    ));
                 }
                 word |= u16::from((v & 7) as u8) << shift; // 8 encodes as 000
+            }
+            (Slot::ImmWord, Opnd::Imm(e)) => {
+                let v = eval(e, consts, here, line)?;
+                ext.extend_from_slice(&(v as u16).to_be_bytes());
+            }
+            (Slot::RegList, _) => {
+                let mask = reglist_mask(op);
+                let mask = if predec { mask.reverse_bits() } else { mask };
+                ext.extend_from_slice(&mask.to_be_bytes());
             }
             (Slot::Ea { shift, dest, .. }, _) => {
                 let (field6, words) = resolve_ea(op, sz, *dest, consts, here, line)?;
                 word |= field6 << shift;
                 ext.extend_from_slice(&words);
             }
-            (Slot::BranchW | Slot::DispW, Opnd::Abs(e)) => branch = Some(eval(e, consts, here, line)?),
+            (Slot::BranchW | Slot::DispW, Opnd::Abs(e)) => {
+                branch = Some(eval(e, consts, here, line)?)
+            }
             // `match_form` guarantees shapes fit, so other pairings can't occur.
             _ => return Err(AsmError::new(line, "internal: operand/slot mismatch")),
         }
     }
 
-    let mut out = word.to_be_bytes().to_vec();
-    out.extend_from_slice(&ext);
     if let Some(target) = branch {
+        // 68000 branch displacement is relative to PC after the opcode word.
         let disp = target - (here + 2);
+        // `.s`/`.b` selects the short form: an 8-bit displacement packed into
+        // the opcode word's low byte, no extension word. Anything else (`.w` or
+        // a bare branch under `-no-opt`) is the 16-bit word form.
+        if matches!(size, Some(Size::B)) {
+            let d = i8::try_from(disp).map_err(|_| {
+                AsmError::new(line, format!("short branch out of range ({disp} bytes)"))
+            })?;
+            if d == 0 {
+                // A zero low byte is the word-form marker; vasm rejects `.s` here.
+                return Err(AsmError::new(
+                    line,
+                    "short branch to the next instruction is not encodable",
+                ));
+            }
+            word |= u16::from(d as u8);
+            return Ok(word.to_be_bytes().to_vec());
+        }
         let d = i16::try_from(disp)
             .map_err(|_| AsmError::new(line, format!("branch out of range ({disp} bytes)")))?;
+        let mut out = word.to_be_bytes().to_vec();
         out.extend_from_slice(&d.to_be_bytes());
+        return Ok(out);
     }
+
+    let mut out = word.to_be_bytes().to_vec();
+    out.extend_from_slice(&ext);
     Ok(out)
 }
 
@@ -162,7 +213,10 @@ fn encode(
 fn match_form<'a>(insn: &'a m68k::Insn, operands: &[Opnd]) -> Option<&'a m68k::Form> {
     insn.forms.iter().find(|f| {
         f.operands.len() == operands.len()
-            && f.operands.iter().zip(operands).all(|(slot, op)| slot_accepts(slot, op))
+            && f.operands
+                .iter()
+                .zip(operands)
+                .all(|(slot, op)| slot_accepts(slot, op))
     })
 }
 
@@ -170,8 +224,10 @@ fn slot_accepts(slot: &Slot, op: &Opnd) -> bool {
     match (slot, op) {
         (Slot::Dn { .. }, Opnd::DReg(_)) => true,
         (Slot::An { .. }, Opnd::AReg(_)) => true,
-        (Slot::Quick8 | Slot::Quick3 { .. }, Opnd::Imm(_)) => true,
+        (Slot::Quick8 | Slot::Quick3 { .. } | Slot::ImmWord, Opnd::Imm(_)) => true,
         (Slot::BranchW | Slot::DispW, Opnd::Abs(_)) => true,
+        // A register list, or a single register treated as a one-entry list.
+        (Slot::RegList, Opnd::RegList(_) | Opnd::DReg(_) | Opnd::AReg(_)) => true,
         (Slot::Ea { modes, .. }, _) => modes.allows(ea_mode_bit(op)),
         _ => false,
     }
@@ -185,6 +241,7 @@ fn ea_mode_bit(op: &Opnd) -> u16 {
         Opnd::Mem { bit, .. } => *bit,
         Opnd::Abs(_) => ea::AL | ea::AW,
         Opnd::Imm(_) => ea::IMM,
+        Opnd::RegList(_) => 0,
     }
 }
 
@@ -199,11 +256,19 @@ fn resolve_ea(
     here: i64,
     line: usize,
 ) -> Result<(u16, Vec<u8>), AsmError> {
-    let field = |mode: u16, reg: u16| if dest { (reg << 3) | mode } else { (mode << 3) | reg };
+    let field = |mode: u16, reg: u16| {
+        if dest {
+            (reg << 3) | mode
+        } else {
+            (mode << 3) | reg
+        }
+    };
     Ok(match op {
         Opnd::DReg(n) => (field(0, u16::from(*n)), vec![]),
         Opnd::AReg(n) => (field(1, u16::from(*n)), vec![]),
-        Opnd::Mem { mode, reg, disp, .. } => {
+        Opnd::Mem {
+            mode, reg, disp, ..
+        } => {
             let mut ext = Vec::new();
             if let Some(e) = disp {
                 let d = eval(e, consts, here, line)?;
@@ -230,14 +295,27 @@ fn resolve_ea(
             };
             (field(7, 4), words)
         }
+        Opnd::RegList(_) => return Err(AsmError::new(line, "internal: register list used as EA")),
     })
 }
 
 fn size_bits(enc: SizeEnc, size: Size) -> u16 {
     match enc {
         SizeEnc::Fixed(_) => 0,
-        SizeEnc::Std6 => (match size { Size::B => 0, Size::W => 1, Size::L => 2 }) << 6,
-        SizeEnc::Move => (match size { Size::B => 1, Size::W => 3, Size::L => 2 }) << 12,
+        SizeEnc::Std6 => {
+            (match size {
+                Size::B => 0,
+                Size::W => 1,
+                Size::L => 2,
+            }) << 6
+        }
+        SizeEnc::Move => {
+            (match size {
+                Size::B => 1,
+                Size::W => 3,
+                Size::L => 2,
+            }) << 12
+        }
         SizeEnc::WL { shift } => u16::from(matches!(size, Size::L)) << shift,
     }
 }
@@ -259,7 +337,11 @@ fn size_of(kind: &Stmt, line: usize) -> Result<usize, AsmError> {
         Stmt::Empty | Stmt::Equ(..) | Stmt::Even => 0,
         Stmt::Dc(size, items) => items.len() * size.bytes(),
         Stmt::Ds(size, count) => count * size.bytes(),
-        Stmt::Insn { mnemonic, size, operands } => {
+        Stmt::Insn {
+            mnemonic,
+            size,
+            operands,
+        } => {
             let insn = m68k::SET
                 .instruction(mnemonic)
                 .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
@@ -273,7 +355,10 @@ fn size_of(kind: &Stmt, line: usize) -> Result<usize, AsmError> {
             for (slot, op) in form.operands.iter().zip(operands) {
                 bytes += match slot {
                     Slot::Dn { .. } | Slot::An { .. } | Slot::Quick8 | Slot::Quick3 { .. } => 0,
-                    Slot::BranchW | Slot::DispW => 2,
+                    // A `.s`/`.b` branch packs its displacement in the opcode
+                    // word; the word form adds a 16-bit extension word.
+                    Slot::BranchW if matches!(size, Some(Size::B)) => 0,
+                    Slot::BranchW | Slot::DispW | Slot::ImmWord | Slot::RegList => 2,
                     Slot::Ea { .. } => ea_ext_len(op, sz),
                 };
             }
@@ -305,6 +390,7 @@ fn ea_ext_len(op: &Opnd, sz: Size) -> usize {
                 2
             }
         }
+        Opnd::RegList(_) => 0,
     }
 }
 
@@ -316,12 +402,19 @@ enum Opnd {
     DReg(u8),
     AReg(u8),
     /// `(An)`, `(An)+`, `-(An)`, `d16(An)`, `d16(PC)`. `bit` is its `ea::` mask.
-    Mem { mode: u8, reg: u8, bit: u16, disp: Option<Expr> },
+    Mem {
+        mode: u8,
+        reg: u8,
+        bit: u16,
+        disp: Option<Expr>,
+    },
     /// A bare absolute address (`.W`/`.L` chosen by value), or — when consumed
     /// by a `BranchW`/`DispW` slot — a branch target expression.
     Abs(Expr),
     /// `#expr`.
     Imm(Expr),
+    /// A `MOVEM` register list as a normal-order mask (d0=bit0 … a7=bit15).
+    RegList(u16),
 }
 
 #[derive(Clone, Copy)]
@@ -347,7 +440,11 @@ enum Stmt {
     Even,
     Dc(DataSize, Vec<Expr>),
     Ds(DataSize, usize),
-    Insn { mnemonic: String, size: Option<Size>, operands: Vec<Opnd> },
+    Insn {
+        mnemonic: String,
+        size: Option<Size>,
+        operands: Vec<Opnd>,
+    },
 }
 
 impl Stmt {
@@ -437,17 +534,28 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
 
     let (mnemonic, size) = split_size(word, line)?;
     let operands = parse_operands(args, line)?;
-    Ok(Stmt::Insn { mnemonic, size, operands })
+    Ok(Stmt::Insn {
+        mnemonic,
+        size,
+        operands,
+    })
 }
 
 fn parse_dcb(sz: &str, args: &str, line: usize) -> Result<Stmt, AsmError> {
     let mut parts = split_operands(args);
-    let count = const_value(parts.first().copied().unwrap_or(""), line, "`dcb` needs a count")?;
+    let count = const_value(
+        parts.first().copied().unwrap_or(""),
+        line,
+        "`dcb` needs a count",
+    )?;
     let value = match parts.len() {
         0 | 1 => 0,
         _ => fold_const(&parse_value(parts.remove(1), line)?, &BTreeMap::new(), line).unwrap_or(0),
     };
-    Ok(Stmt::Dc(data_size(sz, line)?, vec![Expr::Num(value); count]))
+    Ok(Stmt::Dc(
+        data_size(sz, line)?,
+        vec![Expr::Num(value); count],
+    ))
 }
 
 fn const_value(text: &str, line: usize, msg: &str) -> Result<usize, AsmError> {
@@ -469,7 +577,9 @@ fn data_size(suffix: &str, line: usize) -> Result<DataSize, AsmError> {
 fn split_size(word: &str, line: usize) -> Result<(String, Option<Size>), AsmError> {
     if let Some((mnem, sz)) = word.split_once('.') {
         let size = match sz.to_ascii_lowercase().as_str() {
-            "b" => Size::B,
+            // `.s` (short branch) reuses `B`; the branch encoder reads `Some(B)`
+            // as the 8-bit form.
+            "b" | "s" => Size::B,
             "w" => Size::W,
             "l" => Size::L,
             other => return Err(AsmError::new(line, format!("bad size suffix `.{other}`"))),
@@ -485,7 +595,10 @@ fn parse_operands(args: &str, line: usize) -> Result<Vec<Opnd>, AsmError> {
     if args.is_empty() {
         return Ok(Vec::new());
     }
-    split_operands(args).iter().map(|p| parse_operand(p, line)).collect()
+    split_operands(args)
+        .iter()
+        .map(|p| parse_operand(p, line))
+        .collect()
 }
 
 fn parse_operand(text: &str, line: usize) -> Result<Opnd, AsmError> {
@@ -496,7 +609,56 @@ fn parse_operand(text: &str, line: usize) -> Result<Opnd, AsmError> {
     if let Some(reg) = parse_reg(t) {
         return Ok(reg);
     }
+    // A MOVEM register list: `d0-d7/a0-a6` (multi-register; single registers are
+    // already handled above). Detected by `/` or a register-to-register range.
+    if (t.contains('/') || t.contains('-'))
+        && !t.starts_with('-')
+        && let Some(mask) = parse_reglist(t)
+    {
+        return Ok(Opnd::RegList(mask));
+    }
     parse_ea(t, line)
+}
+
+/// The 16-bit mask an operand contributes to a `MOVEM` register list
+/// (d0=bit0 … d7=bit7, a0=bit8 … a7=bit15).
+fn reglist_mask(op: &Opnd) -> u16 {
+    match op {
+        Opnd::DReg(n) => 1 << n,
+        Opnd::AReg(n) => 1 << (8 + n),
+        Opnd::RegList(m) => *m,
+        _ => 0,
+    }
+}
+
+/// Parse a register list (`d0-d3/a0-a1`) into a normal-order mask, or `None` if
+/// any part is not a register or register range.
+fn parse_reglist(t: &str) -> Option<u16> {
+    let mut mask = 0u16;
+    for part in t.split('/') {
+        let part = part.trim();
+        if let Some((a, b)) = part.split_once('-') {
+            let (lo, hi) = (reg_index(a)?, reg_index(b)?);
+            if lo > hi {
+                return None;
+            }
+            for i in lo..=hi {
+                mask |= 1 << i;
+            }
+        } else {
+            mask |= 1 << reg_index(part)?;
+        }
+    }
+    Some(mask)
+}
+
+/// A register's mask-bit index: d0–d7 → 0–7, a0–a7 → 8–15.
+fn reg_index(t: &str) -> Option<u16> {
+    match parse_reg(t.trim()) {
+        Some(Opnd::DReg(n)) => Some(u16::from(n)),
+        Some(Opnd::AReg(n)) => Some(8 + u16::from(n)),
+        _ => None,
+    }
 }
 
 fn parse_reg(t: &str) -> Option<Opnd> {
@@ -519,22 +681,47 @@ fn parse_reg(t: &str) -> Option<Opnd> {
 
 fn parse_ea(t: &str, line: usize) -> Result<Opnd, AsmError> {
     if let Some(inner) = t.strip_prefix("-(").and_then(|s| s.strip_suffix(')')) {
-        return Ok(Opnd::Mem { mode: 4, reg: areg(inner, line)?, bit: ea::PD, disp: None });
+        return Ok(Opnd::Mem {
+            mode: 4,
+            reg: areg(inner, line)?,
+            bit: ea::PD,
+            disp: None,
+        });
     }
     if let Some(inner) = t.strip_prefix('(').and_then(|s| s.strip_suffix(")+")) {
-        return Ok(Opnd::Mem { mode: 3, reg: areg(inner, line)?, bit: ea::PI, disp: None });
+        return Ok(Opnd::Mem {
+            mode: 3,
+            reg: areg(inner, line)?,
+            bit: ea::PI,
+            disp: None,
+        });
     }
     if let Some(inner) = t.strip_prefix('(').and_then(|s| s.strip_suffix(')')) {
-        return Ok(Opnd::Mem { mode: 2, reg: areg(inner, line)?, bit: ea::AI, disp: None });
+        return Ok(Opnd::Mem {
+            mode: 2,
+            reg: areg(inner, line)?,
+            bit: ea::AI,
+            disp: None,
+        });
     }
     // disp(An) / disp(PC)
     if let (Some(open), Some(stripped)) = (t.find('('), t.strip_suffix(')')) {
         let disp = parse_value(&t[..open], line)?;
         let base = stripped[open + 1..].trim();
         if base.eq_ignore_ascii_case("pc") {
-            return Ok(Opnd::Mem { mode: 7, reg: 2, bit: ea::PCD, disp: Some(disp) });
+            return Ok(Opnd::Mem {
+                mode: 7,
+                reg: 2,
+                bit: ea::PCD,
+                disp: Some(disp),
+            });
         }
-        return Ok(Opnd::Mem { mode: 5, reg: areg(base, line)?, bit: ea::DI, disp: Some(disp) });
+        return Ok(Opnd::Mem {
+            mode: 5,
+            reg: areg(base, line)?,
+            bit: ea::DI,
+            disp: Some(disp),
+        });
     }
     Ok(Opnd::Abs(parse_value(t, line)?))
 }
@@ -542,7 +729,10 @@ fn parse_ea(t: &str, line: usize) -> Result<Opnd, AsmError> {
 fn areg(t: &str, line: usize) -> Result<u8, AsmError> {
     match parse_reg(t.trim()) {
         Some(Opnd::AReg(n)) => Ok(n),
-        _ => Err(AsmError::new(line, format!("expected an address register, got `{t}`"))),
+        _ => Err(AsmError::new(
+            line,
+            format!("expected an address register, got `{t}`"),
+        )),
     }
 }
 
