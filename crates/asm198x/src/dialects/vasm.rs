@@ -13,9 +13,7 @@ use std::collections::BTreeMap;
 
 use isa::m68k::{self, Size, SizeEnc, Slot, ea};
 
-use super::mos6502::{
-    self, fold_const, is_ident, split_data_items, split_first_word, string_literal,
-};
+use super::mos6502::{self, is_ident, split_data_items, split_first_word, string_literal};
 use crate::engine::{AsmError, BinOp, Expr};
 
 /// Evaluate an expression against bound symbols, with `*` (the location counter)
@@ -59,7 +57,8 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
     let mut pc: i64 = 0;
     for s in &stmts {
         if let Stmt::Equ(name, e) = &s.kind {
-            if let Ok(v) = fold_const(e, &consts, s.line) {
+            // PC-aware: `len equ *-buffer` resolves `*` to the current location.
+            if let Ok(v) = eval(e, &consts, pc, s.line) {
                 consts.insert(name.clone(), v);
             }
             continue;
@@ -70,7 +69,7 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
         if let Some(label) = &s.label {
             consts.insert(label.clone(), pc);
         }
-        pc += size_of(&s.kind, s.line)? as i64;
+        pc += size_of(&s.kind, &consts, s.line)? as i64;
     }
 
     // Pass 2: emit.
@@ -86,7 +85,17 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
                     push_sized(&mut out, eval(e, &consts, 0, s.line)?, *size);
                 }
             }
-            Stmt::Ds(size, count) => out.resize(out.len() + count * size.bytes(), 0),
+            Stmt::Ds(size, count) => {
+                let n = count_of(count, &consts, s.line)?;
+                out.resize(out.len() + n * size.bytes(), 0);
+            }
+            Stmt::Dcb(size, count, value) => {
+                let n = count_of(count, &consts, s.line)?;
+                let v = eval(value, &consts, 0, s.line)?;
+                for _ in 0..n {
+                    push_sized(&mut out, v, *size);
+                }
+            }
             Stmt::Insn {
                 mnemonic,
                 size,
@@ -279,12 +288,12 @@ fn resolve_ea(
             (field(u16::from(*mode), u16::from(*reg)), ext)
         }
         Opnd::Abs(e) => {
+            // Stage 1 mirrors `vasm -no-opt`: a bare absolute is always (xxx).L.
+            // Shrinking small values to (xxx).W is an optimization, added in
+            // Stage 2; doing it here would also desync pass 1 from pass 2, since
+            // forward labels are unresolved when pass 1 sizes them.
             let v = eval(e, consts, here, line)?;
-            if i16::try_from(v).is_ok() {
-                (field(7, 0), (v as u16).to_be_bytes().to_vec()) // (xxx).W
-            } else {
-                (field(7, 1), (v as u32).to_be_bytes().to_vec()) // (xxx).L
-            }
+            (field(7, 1), (v as u32).to_be_bytes().to_vec()) // (xxx).L
         }
         Opnd::Imm(e) => {
             let v = eval(e, consts, here, line)?;
@@ -332,11 +341,13 @@ fn push_sized(out: &mut Vec<u8>, v: i64, size: DataSize) {
 // Sizing (pass 1) — extension-word counts are fixed by operand shape and size
 // ---------------------------------------------------------------------------
 
-fn size_of(kind: &Stmt, line: usize) -> Result<usize, AsmError> {
+fn size_of(kind: &Stmt, consts: &BTreeMap<String, i64>, line: usize) -> Result<usize, AsmError> {
     Ok(match kind {
         Stmt::Empty | Stmt::Equ(..) | Stmt::Even => 0,
         Stmt::Dc(size, items) => items.len() * size.bytes(),
-        Stmt::Ds(size, count) => count * size.bytes(),
+        Stmt::Ds(size, count) | Stmt::Dcb(size, count, _) => {
+            count_of(count, consts, line)? * size.bytes()
+        }
         Stmt::Insn {
             mnemonic,
             size,
@@ -379,10 +390,8 @@ fn ea_ext_len(op: &Opnd, sz: Size) -> usize {
                 0
             }
         }
-        Opnd::Abs(e) => match fold_const(e, &BTreeMap::new(), 0) {
-            Ok(v) if i16::try_from(v).is_ok() => 2, // (xxx).W
-            _ => 4,                                 // (xxx).L
-        },
+        // A bare absolute is always (xxx).L under `-no-opt` (see `resolve_ea`).
+        Opnd::Abs(_) => 4,
         Opnd::Imm(_) => {
             if matches!(sz, Size::L) {
                 4
@@ -439,7 +448,12 @@ enum Stmt {
     Equ(String, Expr),
     Even,
     Dc(DataSize, Vec<Expr>),
-    Ds(DataSize, usize),
+    /// `ds.x count` — reserve `count` zeroed items. The count is an expression so
+    /// it can reference `equ` constants resolved in pass 1.
+    Ds(DataSize, Expr),
+    /// `dcb.x count,value` — `count` copies of `value` (defaults to 0). Both are
+    /// expressions, resolved in pass 1.
+    Dcb(DataSize, Expr, Expr),
     Insn {
         mnemonic: String,
         size: Option<Size>,
@@ -476,7 +490,70 @@ fn parse(source: &str) -> Result<Vec<Line>, AsmError> {
         }
         out.push(Line { line, label, kind });
     }
+    qualify_local_labels(&mut out);
     Ok(out)
+}
+
+/// Resolve vasm local labels (names starting with `.`) to their enclosing
+/// global label, so the same `.loop` can recur under different routines. Each
+/// local definition and reference is rewritten to `<global>.<local>`, a key no
+/// ordinary identifier collides with. Definition and reference share the global
+/// scope current at their line, so they always agree.
+fn qualify_local_labels(lines: &mut [Line]) {
+    let mut scope = String::new();
+    for l in lines.iter_mut() {
+        // A non-local label (or equ name) opens a new scope for the labels below.
+        if let Some(name) = &l.label
+            && !name.starts_with('.')
+        {
+            scope = name.clone();
+        }
+        if let Some(name) = &mut l.label
+            && name.starts_with('.')
+        {
+            *name = format!("{scope}{name}");
+        }
+        qualify_stmt(&mut l.kind, &scope);
+    }
+}
+
+fn qualify_stmt(kind: &mut Stmt, scope: &str) {
+    match kind {
+        Stmt::Equ(name, e) => {
+            if name.starts_with('.') {
+                *name = format!("{scope}{name}");
+            }
+            qualify_expr(e, scope);
+        }
+        Stmt::Dc(_, items) => items.iter_mut().for_each(|e| qualify_expr(e, scope)),
+        Stmt::Ds(_, count) => qualify_expr(count, scope),
+        Stmt::Dcb(_, count, value) => {
+            qualify_expr(count, scope);
+            qualify_expr(value, scope);
+        }
+        Stmt::Insn { operands, .. } => operands.iter_mut().for_each(|o| qualify_opnd(o, scope)),
+        Stmt::Empty | Stmt::Even => {}
+    }
+}
+
+fn qualify_opnd(op: &mut Opnd, scope: &str) {
+    match op {
+        Opnd::Abs(e) | Opnd::Imm(e) => qualify_expr(e, scope),
+        Opnd::Mem { disp: Some(e), .. } => qualify_expr(e, scope),
+        _ => {}
+    }
+}
+
+fn qualify_expr(e: &mut Expr, scope: &str) {
+    match e {
+        Expr::Sym(s) if s.starts_with('.') => *s = format!("{scope}{s}"),
+        Expr::Lo(b) | Expr::Hi(b) | Expr::Neg(b) => qualify_expr(b, scope),
+        Expr::Bin(_, l, r) => {
+            qualify_expr(l, scope);
+            qualify_expr(r, scope);
+        }
+        _ => {}
+    }
 }
 
 /// Strip a `;` comment, or a whole-line `*`-comment (column 0).
@@ -528,8 +605,7 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
         return Ok(Stmt::Dc(data_size(sz, line)?, parse_data_list(args, line)?));
     }
     if let Some(sz) = lower.strip_prefix("ds") {
-        let n = const_value(args, line, "`ds` needs a constant count")?;
-        return Ok(Stmt::Ds(data_size(sz, line)?, n));
+        return Ok(Stmt::Ds(data_size(sz, line)?, parse_value(args, line)?));
     }
 
     let (mnemonic, size) = split_size(word, line)?;
@@ -542,26 +618,20 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
 }
 
 fn parse_dcb(sz: &str, args: &str, line: usize) -> Result<Stmt, AsmError> {
-    let mut parts = split_operands(args);
-    let count = const_value(
-        parts.first().copied().unwrap_or(""),
-        line,
-        "`dcb` needs a count",
-    )?;
-    let value = match parts.len() {
-        0 | 1 => 0,
-        _ => fold_const(&parse_value(parts.remove(1), line)?, &BTreeMap::new(), line).unwrap_or(0),
+    let parts = split_operands(args);
+    let count = parse_value(parts.first().copied().unwrap_or(""), line)?;
+    let value = match parts.get(1) {
+        Some(v) => parse_value(v, line)?,
+        None => Expr::Num(0),
     };
-    Ok(Stmt::Dc(
-        data_size(sz, line)?,
-        vec![Expr::Num(value); count],
-    ))
+    Ok(Stmt::Dcb(data_size(sz, line)?, count, value))
 }
 
-fn const_value(text: &str, line: usize, msg: &str) -> Result<usize, AsmError> {
-    match fold_const(&parse_value(text, line)?, &BTreeMap::new(), line) {
-        Ok(v) if v >= 0 => Ok(v as usize),
-        _ => Err(AsmError::new(line, msg.to_string())),
+/// Evaluate a `ds`/`dcb` repeat count against the pass-1 symbol table.
+fn count_of(e: &Expr, consts: &BTreeMap<String, i64>, line: usize) -> Result<usize, AsmError> {
+    match eval(e, consts, 0, line)? {
+        v if v >= 0 => Ok(v as usize),
+        v => Err(AsmError::new(line, format!("negative repeat count {v}"))),
     }
 }
 

@@ -230,6 +230,12 @@ pub const SET: Spec = Spec {
                     size: SizeEnc::Std6,
                     operands: &[Slot::Dn { shift: 9 }, ea_src(MEM_ALT)],
                 },
+                // ADDA: an An destination (word/long only, size bit at 8).
+                Form {
+                    base: 0xD0C0,
+                    size: SizeEnc::WL { shift: 8 },
+                    operands: &[ea_src(ALL), Slot::An { shift: 9 }],
+                },
             ],
         },
         Insn {
@@ -306,6 +312,12 @@ pub const SET: Spec = Spec {
                     size: SizeEnc::Std6,
                     operands: &[Slot::Dn { shift: 9 }, ea_src(MEM_ALT)],
                 },
+                // SUBA: an An destination (word/long only, size bit at 8).
+                Form {
+                    base: 0x90C0,
+                    size: SizeEnc::WL { shift: 8 },
+                    operands: &[ea_src(ALL), Slot::An { shift: 9 }],
+                },
             ],
         },
         Insn {
@@ -343,11 +355,19 @@ pub const SET: Spec = Spec {
         Insn {
             mnemonic: "CMP",
             summary: "Compare",
-            forms: &[Form {
-                base: 0xB000,
-                size: SizeEnc::Std6,
-                operands: &[ea_src(ALL), Slot::Dn { shift: 9 }],
-            }],
+            forms: &[
+                Form {
+                    base: 0xB000,
+                    size: SizeEnc::Std6,
+                    operands: &[ea_src(ALL), Slot::Dn { shift: 9 }],
+                },
+                // CMPA: an An destination (word/long only, size bit at 8).
+                Form {
+                    base: 0xB0C0,
+                    size: SizeEnc::WL { shift: 8 },
+                    operands: &[ea_src(ALL), Slot::An { shift: 9 }],
+                },
+            ],
         },
         Insn {
             mnemonic: "EOR",
