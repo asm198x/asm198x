@@ -10,6 +10,10 @@
 # Versioning is lockstep: every workspace crate inherits its version from
 # [workspace.package] in Cargo.toml, so a single bump applies everywhere.
 #
+# Cadence: merge the release PR when a CPU's work lands, so each release maps to
+# roughly one CPU and its changelog stays focused — not after several pile up
+# (which is how v0.0.4 became a wall). See decisions/release-cadence.md.
+#
 # publish = false: we do NOT publish to crates.io (the binary ships via the
 # GitHub Release instead, and the generic `isa` crate name shouldn't be
 # claimed there). git_release_enable = false: cargo-dist owns the GitHub
