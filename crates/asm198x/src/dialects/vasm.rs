@@ -119,78 +119,131 @@ fn drops_zero_disp(
             .is_some_and(|e| eval(e, consts, 0, 0).is_ok_and(|v| v == 0))
 }
 
-/// The net number of relocatable (section-relative) symbols in an expression,
-/// counting `+` references as `+1` and `-` references as `-1`. A degree of `1`
-/// marks a simple relocatable address — eligible for PC-relative addressing.
-fn reloc_degree(e: &Expr, reloc: &BTreeSet<String>) -> i32 {
-    match e {
-        Expr::Sym(s) => i32::from(reloc.contains(s)),
-        Expr::Neg(b) => -reloc_degree(b, reloc),
-        Expr::Bin(BinOp::Add, l, r) => reloc_degree(l, reloc) + reloc_degree(r, reloc),
-        Expr::Bin(BinOp::Sub, l, r) => reloc_degree(l, reloc) - reloc_degree(r, reloc),
-        _ => 0,
-    }
-}
-
 /// Assemble Motorola-syntax 68000 source into a flat big-endian code image with
 /// the optimizer on — matching `vasm -Fbin`'s default (Stage 2).
 ///
 /// # Errors
-/// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
+/// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure, or
+/// if the source uses more than one non-empty section (which `-Fbin` rejects).
 pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
     assemble_with(source, true)
 }
 
 /// Assemble with the optimizer either on (Stage 2, matches `vasm -Fbin`) or off
-/// (Stage 1, matches `vasm -no-opt`).
+/// (Stage 1, matches `vasm -no-opt`), to a flat binary.
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse/range/symbol failure, or if more than one
+/// section carries bytes (a flat binary can hold only one).
+pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, AsmError> {
+    let sections = assemble_core(source, optimize)?;
+    let nonempty: Vec<&SecOut> = sections.iter().filter(|s| !s.bytes.is_empty()).collect();
+    match nonempty.as_slice() {
+        [] => Ok(Vec::new()),
+        [s] => Ok(s.bytes.clone()),
+        _ => Err(AsmError::new(
+            0,
+            "a flat binary holds one section; this source has several (use the executable output)",
+        )),
+    }
+}
+
+/// Assemble to an Amiga hunk executable (`-Fhunkexe -kick1hunks`), optimizer on.
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
-pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, AsmError> {
+pub(crate) fn assemble_exe(source: &str) -> Result<Vec<u8>, AsmError> {
+    let sections = assemble_core(source, true)?;
+    Ok(serialize_hunkexe(&sections))
+}
+
+/// One assembled section: its hunk kind and memory flag, its bytes, and the
+/// 32-bit relocations within it (offset in this section → target section).
+struct SecOut {
+    kind: HunkKind,
+    flag: MemFlag,
+    bytes: Vec<u8>,
+    relocs: Vec<(u32, usize)>,
+}
+
+/// Optimization context shared down the encode/size paths.
+struct Ctx {
+    reloc: BTreeSet<String>,
+    /// Section index each relocatable label belongs to, for PC-relative gating
+    /// (same-section only) and relocation bucketing.
+    sec_of: BTreeMap<String, usize>,
+    optimize: bool,
+}
+
+/// Assemble into per-section byte buffers with their relocations — the shared
+/// core behind both the flat and the hunk-executable serializers.
+fn assemble_core(source: &str, optimize: bool) -> Result<Vec<SecOut>, AsmError> {
     let stmts = parse(source)?;
 
-    // Relocatable symbols (section-relative labels) are eligible for PC-relative
-    // and short-branch optimization; `equ` constants (fixed addresses) are not.
-    let mut reloc: BTreeSet<String> = BTreeSet::new();
+    // Assign every statement to a section. A `section` directive opens one;
+    // bytes emitted before any directive fall into an implicit code section.
+    let mut sec_meta: Vec<(HunkKind, MemFlag)> = Vec::new();
+    let mut sec_idx: Vec<usize> = Vec::with_capacity(stmts.len());
+    let mut cur: Option<usize> = None;
     for s in &stmts {
+        if let Stmt::Section(kind, flag) = &s.kind {
+            sec_meta.push((*kind, *flag));
+            cur = Some(sec_meta.len() - 1);
+        } else if cur.is_none() && stmt_emits(&s.kind) {
+            sec_meta.push((HunkKind::Code, MemFlag::Any));
+            cur = Some(0);
+        }
+        sec_idx.push(cur.unwrap_or(0));
+    }
+    if sec_meta.is_empty() {
+        sec_meta.push((HunkKind::Code, MemFlag::Any));
+    }
+    let nsec = sec_meta.len();
+
+    // Relocatable symbols and the section each lives in.
+    let mut reloc: BTreeSet<String> = BTreeSet::new();
+    let mut sec_of: BTreeMap<String, usize> = BTreeMap::new();
+    for (i, s) in stmts.iter().enumerate() {
         if !matches!(s.kind, Stmt::Equ(..))
             && let Some(label) = &s.label
         {
             reloc.insert(label.clone());
+            sec_of.insert(label.clone(), sec_idx[i]);
         }
     }
-    let ctx = Ctx { reloc, optimize };
+    let ctx = Ctx {
+        reloc,
+        sec_of,
+        optimize,
+    };
 
-    // A relaxable branch (BRA/BSR/Bcc not forced to `.w`) starts short and grows
-    // to word form only when its displacement won't fit in a byte. Growing only
-    // ever increases addresses, so this converges (grow-only fixpoint).
+    // Branch relaxation: relaxable branches start short and grow to word form
+    // when their (intra-section) displacement won't fit a byte. Grow-only, so it
+    // converges. Grows are deferred to a clone so the running per-section pc
+    // tracks `consts` within a round.
     let mut word_branch = vec![false; stmts.len()];
     loop {
-        let consts = layout(&stmts, &ctx, &word_branch)?;
-        // Record grows in a fresh vector and apply them only after the walk: the
-        // running `pc` must track `consts` (built from the round's `word_branch`),
-        // so a branch grown mid-walk must not yet shift later branches' pc.
+        let (consts, _) = layout(&stmts, &sec_idx, nsec, &ctx, &word_branch)?;
         let mut next = word_branch.clone();
-        let mut pc: i64 = 0;
+        let mut pc = vec![0i64; nsec];
         for (i, s) in stmts.iter().enumerate() {
-            if matches!(s.kind, Stmt::Equ(..)) {
+            if matches!(s.kind, Stmt::Equ(..) | Stmt::Section(..)) {
                 continue;
             }
-            if s.kind.aligns() && pc % 2 != 0 {
-                pc += 1;
+            let sec = sec_idx[i];
+            if s.kind.aligns() && pc[sec] % 2 != 0 {
+                pc[sec] += 1;
             }
             if ctx.optimize
                 && !word_branch[i]
                 && let Some(target) = relaxable_branch_target(&s.kind)
             {
-                let disp = eval(target, &consts, pc, s.line)? - (pc + 2);
-                // A short branch can't encode a zero displacement (that bit
-                // pattern is the word form), so 0 grows too.
+                let disp = eval(target, &consts, pc[sec], s.line)? - (pc[sec] + 2);
                 if disp == 0 || i8::try_from(disp).is_err() {
                     next[i] = true;
                 }
             }
-            pc += stmt_size(&s.kind, &ctx, &consts, word_branch[i], s.line)? as i64;
+            pc[sec] += stmt_size(&s.kind, &ctx, &consts, sec, word_branch[i], s.line)? as i64;
         }
         if next == word_branch {
             break;
@@ -198,28 +251,39 @@ pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, Asm
         word_branch = next;
     }
 
-    let consts = layout(&stmts, &ctx, &word_branch)?;
-    let mut out: Vec<u8> = Vec::new();
+    // Emit each section's bytes and relocations.
+    let (consts, _) = layout(&stmts, &sec_idx, nsec, &ctx, &word_branch)?;
+    let mut out: Vec<SecOut> = sec_meta
+        .iter()
+        .map(|&(kind, flag)| SecOut {
+            kind,
+            flag,
+            bytes: Vec::new(),
+            relocs: Vec::new(),
+        })
+        .collect();
     for (i, s) in stmts.iter().enumerate() {
-        if s.kind.aligns() && !out.len().is_multiple_of(2) {
-            out.push(0);
+        let sec = sec_idx[i];
+        let buf = &mut out[sec];
+        if s.kind.aligns() && !buf.bytes.len().is_multiple_of(2) {
+            buf.bytes.push(0);
         }
         match &s.kind {
-            Stmt::Empty | Stmt::Equ(..) | Stmt::Even => {}
+            Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) => {}
             Stmt::Dc(size, items) => {
                 for e in items {
-                    push_sized(&mut out, eval(e, &consts, 0, s.line)?, *size);
+                    push_sized(&mut buf.bytes, eval(e, &consts, 0, s.line)?, *size);
                 }
             }
             Stmt::Ds(size, count) => {
                 let n = count_of(count, &consts, s.line)?;
-                out.resize(out.len() + n * size.bytes(), 0);
+                buf.bytes.resize(buf.bytes.len() + n * size.bytes(), 0);
             }
             Stmt::Dcb(size, count, value) => {
                 let n = count_of(count, &consts, s.line)?;
                 let v = eval(value, &consts, 0, s.line)?;
                 for _ in 0..n {
-                    push_sized(&mut out, v, *size);
+                    push_sized(&mut buf.bytes, v, *size);
                 }
             }
             Stmt::Insn {
@@ -227,48 +291,149 @@ pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, Asm
                 size,
                 operands,
             } => {
-                let here = out.len() as i64;
+                let here = buf.bytes.len() as i64;
                 let size = branch_size(ctx.optimize, &s.kind, size, word_branch[i]);
-                let bytes = encode(mnemonic, size, operands, &ctx, &consts, here, s.line)?;
-                out.extend_from_slice(&bytes);
+                let (bytes, relocs) =
+                    encode(mnemonic, size, operands, &ctx, &consts, sec, here, s.line)?;
+                buf.bytes.extend_from_slice(&bytes);
+                buf.relocs.extend(relocs);
             }
         }
     }
     Ok(out)
 }
 
-/// Optimization context shared down the encode/size paths.
-struct Ctx {
-    reloc: BTreeSet<String>,
-    optimize: bool,
+/// Serialize assembled sections into an AmigaDOS hunk executable, matching
+/// `vasmm68k_mot -Fhunkexe -kick1hunks` for everything the loader consumes
+/// (header, code/data/bss hunks, reloc32 tables). The optional HUNK_SYMBOL
+/// table vasm also writes is debug-only and omitted — see the Stage 3 decision.
+fn serialize_hunkexe(sections: &[SecOut]) -> Vec<u8> {
+    fn push_u32(out: &mut Vec<u8>, v: u32) {
+        out.extend_from_slice(&v.to_be_bytes());
+    }
+    // Each hunk's size in longwords: code/data padded to a longword, bss rounded.
+    let size_longs = |s: &SecOut| -> u32 { ((s.bytes.len() + 3) / 4) as u32 };
+
+    let mut out = Vec::new();
+    // HUNK_HEADER: no resident libraries, then hunk count, first, last, sizes.
+    push_u32(&mut out, 0x3f3);
+    push_u32(&mut out, 0);
+    push_u32(&mut out, sections.len() as u32);
+    push_u32(&mut out, 0);
+    push_u32(&mut out, sections.len() as u32 - 1);
+    for s in sections {
+        push_u32(&mut out, size_longs(s) | s.flag.bits());
+    }
+
+    for s in sections {
+        match s.kind {
+            HunkKind::Bss => {
+                push_u32(&mut out, 0x3eb);
+                push_u32(&mut out, size_longs(s));
+            }
+            HunkKind::Code | HunkKind::Data => {
+                push_u32(
+                    &mut out,
+                    if matches!(s.kind, HunkKind::Code) {
+                        0x3e9
+                    } else {
+                        0x3ea
+                    },
+                );
+                push_u32(&mut out, size_longs(s));
+                let mut data = s.bytes.clone();
+                // Code hunks pad to a longword with NOP (0x4e71); data with zero.
+                while !data.len().is_multiple_of(4) {
+                    if matches!(s.kind, HunkKind::Code) && data.len() % 4 == 2 {
+                        data.extend_from_slice(&[0x4e, 0x71]);
+                    } else {
+                        data.push(0);
+                    }
+                }
+                out.extend_from_slice(&data);
+            }
+        }
+
+        // HUNK_RELOC32: blocks of [count, target hunk, offsets…], target hunks
+        // ascending, offsets ascending, terminated by a zero count.
+        if !s.relocs.is_empty() {
+            push_u32(&mut out, 0x3ec);
+            for target in 0..sections.len() {
+                let mut offs: Vec<u32> = s
+                    .relocs
+                    .iter()
+                    .filter(|(_, t)| *t == target)
+                    .map(|(o, _)| *o)
+                    .collect();
+                if offs.is_empty() {
+                    continue;
+                }
+                offs.sort_unstable();
+                push_u32(&mut out, offs.len() as u32);
+                push_u32(&mut out, target as u32);
+                for o in offs {
+                    push_u32(&mut out, o);
+                }
+            }
+            push_u32(&mut out, 0);
+        }
+
+        push_u32(&mut out, 0x3f2); // HUNK_END
+    }
+    out
 }
 
-/// Walk every statement and bind labels and `equ` constants to addresses, given
-/// the current branch-size decisions. Re-run each relaxation round.
+/// The single relocatable symbol of a degree-1 address expression (`label`,
+/// `label+n`, `label-n`) — the target whose hunk a relocation points into.
+fn reloc_sym<'a>(e: &'a Expr, reloc: &BTreeSet<String>) -> Option<&'a str> {
+    match e {
+        Expr::Sym(s) if reloc.contains(s) => Some(s),
+        Expr::Bin(BinOp::Add, l, r) => reloc_sym(l, reloc).or_else(|| reloc_sym(r, reloc)),
+        Expr::Bin(BinOp::Sub, l, _) => reloc_sym(l, reloc),
+        _ => None,
+    }
+}
+
+/// Whether a statement contributes bytes to its section (so it forces an
+/// implicit code section when none has been opened yet).
+fn stmt_emits(kind: &Stmt) -> bool {
+    matches!(
+        kind,
+        Stmt::Insn { .. } | Stmt::Dc(..) | Stmt::Ds(..) | Stmt::Dcb(..) | Stmt::Even
+    )
+}
+
+/// Walk every statement and bind labels and `equ` constants to their
+/// offset-within-section, given the current branch-size decisions. Returns the
+/// symbol→offset map and each section's total byte length. Re-run per relaxation
+/// round.
 fn layout(
     stmts: &[Line],
+    sec_idx: &[usize],
+    nsec: usize,
     ctx: &Ctx,
     word_branch: &[bool],
-) -> Result<BTreeMap<String, i64>, AsmError> {
+) -> Result<(BTreeMap<String, i64>, Vec<i64>), AsmError> {
     let mut consts: BTreeMap<String, i64> = BTreeMap::new();
-    let mut pc: i64 = 0;
+    let mut pc = vec![0i64; nsec];
     for (i, s) in stmts.iter().enumerate() {
         if let Stmt::Equ(name, e) = &s.kind {
             // PC-aware: `len equ *-buffer` resolves `*` to the current location.
-            if let Ok(v) = eval(e, &consts, pc, s.line) {
+            if let Ok(v) = eval(e, &consts, pc[sec_idx[i]], s.line) {
                 consts.insert(name.clone(), v);
             }
             continue;
         }
-        if s.kind.aligns() && pc % 2 != 0 {
-            pc += 1;
+        let sec = sec_idx[i];
+        if s.kind.aligns() && pc[sec] % 2 != 0 {
+            pc[sec] += 1;
         }
         if let Some(label) = &s.label {
-            consts.insert(label.clone(), pc);
+            consts.insert(label.clone(), pc[sec]);
         }
-        pc += stmt_size(&s.kind, ctx, &consts, word_branch[i], s.line)? as i64;
+        pc[sec] += stmt_size(&s.kind, ctx, &consts, sec, word_branch[i], s.line)? as i64;
     }
-    Ok(consts)
+    Ok((consts, pc))
 }
 
 /// The effective size of a statement's branch. With the optimizer on, a
@@ -313,15 +478,17 @@ fn relaxable_branch_target(kind: &Stmt) -> Option<&Expr> {
 // Encoding
 // ---------------------------------------------------------------------------
 
+#[allow(clippy::too_many_arguments)]
 fn encode(
     mnemonic: &str,
     size: Option<Size>,
     operands: &[Opnd],
     ctx: &Ctx,
     consts: &BTreeMap<String, i64>,
+    cur_sec: usize,
     here: i64,
     line: usize,
-) -> Result<Vec<u8>, AsmError> {
+) -> Result<(Vec<u8>, Vec<(u32, usize)>), AsmError> {
     let (mnemonic, operands) = lower(mnemonic, size, operands, ctx, consts);
     let operands = operands.as_ref();
     let insn = m68k::SET
@@ -334,6 +501,7 @@ fn encode(
 
     let mut word = form.base | size_bits(form.size, sz);
     let mut ext: Vec<u8> = Vec::new();
+    let mut relocs: Vec<(u32, usize)> = Vec::new();
     let mut branch: Option<i64> = None;
     // MOVEM reverses its register mask when the effective address predecrements.
     let predec = operands
@@ -387,9 +555,13 @@ fn encode(
                 // operand's own extension word (after the opcode and any prior
                 // operand's extension words).
                 let pc_ext = here + 2 + ext.len() as i64;
-                let (field6, words) =
-                    resolve_ea(op, sz, *dest, *modes, ctx, consts, pc_ext, here, line)?;
+                let (field6, words, reloc) = resolve_ea(
+                    op, sz, *dest, *modes, ctx, consts, cur_sec, pc_ext, here, line,
+                )?;
                 word |= field6 << shift;
+                if let Some(target_sec) = reloc {
+                    relocs.push((pc_ext as u32, target_sec));
+                }
                 ext.extend_from_slice(&words);
             }
             (Slot::BranchW | Slot::DispW, Opnd::Abs(e)) => {
@@ -418,18 +590,18 @@ fn encode(
                 ));
             }
             word |= u16::from(d as u8);
-            return Ok(word.to_be_bytes().to_vec());
+            return Ok((word.to_be_bytes().to_vec(), relocs));
         }
         let d = i16::try_from(disp)
             .map_err(|_| AsmError::new(line, format!("branch out of range ({disp} bytes)")))?;
         let mut out = word.to_be_bytes().to_vec();
         out.extend_from_slice(&d.to_be_bytes());
-        return Ok(out);
+        return Ok((out, relocs));
     }
 
     let mut out = word.to_be_bytes().to_vec();
     out.extend_from_slice(&ext);
-    Ok(out)
+    Ok((out, relocs))
 }
 
 /// The first form whose slots accept these operand shapes (shape + EA-mode
@@ -471,8 +643,9 @@ fn ea_mode_bit(op: &Opnd) -> u16 {
 }
 
 /// Resolve an operand used as an effective address: its 6-bit field (in normal
-/// or MOVE-destination layout) and its extension-word bytes. `Ok(None)` if the
-/// operand can't be an EA at all.
+/// or MOVE-destination layout), its extension-word bytes, and — if those bytes
+/// are a 32-bit relocatable absolute address — the target section to relocate
+/// into.
 #[allow(clippy::too_many_arguments)]
 fn resolve_ea(
     op: &Opnd,
@@ -481,10 +654,11 @@ fn resolve_ea(
     modes: EaModes,
     ctx: &Ctx,
     consts: &BTreeMap<String, i64>,
+    cur_sec: usize,
     pc_ext: i64,
     here: i64,
     line: usize,
-) -> Result<(u16, Vec<u8>), AsmError> {
+) -> Result<(u16, Vec<u8>, Option<usize>), AsmError> {
     let field = |mode: u16, reg: u16| {
         if dest {
             (reg << 3) | mode
@@ -493,14 +667,14 @@ fn resolve_ea(
         }
     };
     Ok(match op {
-        Opnd::DReg(n) => (field(0, u16::from(*n)), vec![]),
-        Opnd::AReg(n) => (field(1, u16::from(*n)), vec![]),
+        Opnd::DReg(n) => (field(0, u16::from(*n)), vec![], None),
+        Opnd::AReg(n) => (field(1, u16::from(*n)), vec![], None),
         Opnd::Mem {
             mode, reg, disp, ..
         } => {
             // vasm drops a zero `d16(An)` displacement, shortening it to `(An)`.
             if drops_zero_disp(*mode, disp, ctx, consts) {
-                return Ok((field(2, u16::from(*reg)), vec![]));
+                return Ok((field(2, u16::from(*reg)), vec![], None));
             }
             let mut ext = Vec::new();
             if let Some(e) = disp {
@@ -509,15 +683,17 @@ fn resolve_ea(
                     .map_err(|_| AsmError::new(line, format!("displacement {d} out of range")))?;
                 ext.extend_from_slice(&d16.to_be_bytes());
             }
-            (field(u16::from(*mode), u16::from(*reg)), ext)
+            (field(u16::from(*mode), u16::from(*reg)), ext, None)
         }
         Opnd::Abs(e) => {
             let v = eval(e, consts, here, line)?;
-            // With the optimizer on, a reference to a relocatable label in a slot
-            // that accepts PC-relative addressing becomes `(d16,PC)` — shorter
-            // than (xxx).L and position-independent, the Amiga idiom. `vasm`
-            // prefers this over (xxx).W for labels.
-            if ctx.optimize && modes.allows(ea::PCD) && reloc_degree(e, &ctx.reloc) == 1 {
+            let target = reloc_sym(e, &ctx.reloc).and_then(|s| ctx.sec_of.get(s).copied());
+            // A relocatable label in the same section, in a slot that accepts
+            // PC-relative addressing, becomes `(d16,PC)` — shorter than (xxx).L
+            // and position-independent (vasm's preference). Cross-section refs
+            // can't be PC-relative (the hunks load independently), so they stay
+            // (xxx).L with a relocation.
+            if ctx.optimize && modes.allows(ea::PCD) && target == Some(cur_sec) {
                 let disp = v - pc_ext;
                 let d16 = i16::try_from(disp).map_err(|_| {
                     AsmError::new(
@@ -525,11 +701,10 @@ fn resolve_ea(
                         format!("PC-relative displacement {disp} out of range"),
                     )
                 })?;
-                return Ok((field(7, 2), d16.to_be_bytes().to_vec())); // (d16,PC)
+                return Ok((field(7, 2), d16.to_be_bytes().to_vec(), None)); // (d16,PC)
             }
-            // Otherwise a bare absolute is (xxx).L. (Shrinking small constants to
-            // (xxx).W is a further optimization, not yet implemented.)
-            (field(7, 1), (v as u32).to_be_bytes().to_vec())
+            // Otherwise (xxx).L; a relocatable target needs a relocation.
+            (field(7, 1), (v as u32).to_be_bytes().to_vec(), target)
         }
         Opnd::Imm(e) => {
             let v = eval(e, consts, here, line)?;
@@ -538,7 +713,14 @@ fn resolve_ea(
                 Size::W => (v as u16).to_be_bytes().to_vec(),
                 Size::L => (v as u32).to_be_bytes().to_vec(),
             };
-            (field(7, 4), words)
+            // A long immediate holding a relocatable address (`move.l #label,…`)
+            // stores the in-hunk offset and gets relocated at load time.
+            let reloc = if matches!(sz, Size::L) {
+                reloc_sym(e, &ctx.reloc).and_then(|s| ctx.sec_of.get(s).copied())
+            } else {
+                None
+            };
+            (field(7, 4), words, reloc)
         }
         Opnd::RegList(_) => return Err(AsmError::new(line, "internal: register list used as EA")),
     })
@@ -583,11 +765,12 @@ fn stmt_size(
     kind: &Stmt,
     ctx: &Ctx,
     consts: &BTreeMap<String, i64>,
+    cur_sec: usize,
     word_branch: bool,
     line: usize,
 ) -> Result<usize, AsmError> {
     Ok(match kind {
-        Stmt::Empty | Stmt::Equ(..) | Stmt::Even => 0,
+        Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) => 0,
         Stmt::Dc(size, items) => items.len() * size.bytes(),
         Stmt::Ds(size, count) | Stmt::Dcb(size, count, _) => {
             count_of(count, consts, line)? * size.bytes()
@@ -623,7 +806,7 @@ fn stmt_size(
                     | Slot::ImmWord
                     | Slot::RegList
                     | Slot::ImmSized => 2,
-                    Slot::Ea { modes, .. } => ea_ext_len(op, sz, *modes, ctx, consts),
+                    Slot::Ea { modes, .. } => ea_ext_len(op, sz, *modes, ctx, consts, cur_sec),
                 };
             }
             bytes
@@ -639,6 +822,7 @@ fn ea_ext_len(
     modes: EaModes,
     ctx: &Ctx,
     consts: &BTreeMap<String, i64>,
+    cur_sec: usize,
 ) -> usize {
     match op {
         Opnd::DReg(_) | Opnd::AReg(_) => 0,
@@ -650,10 +834,13 @@ fn ea_ext_len(
                 0
             }
         }
-        // A relocatable label in a PC-capable slot becomes `(d16,PC)` (2 bytes);
-        // otherwise a bare absolute is (xxx).L (4 bytes). Mirrors `resolve_ea`.
+        // A same-section relocatable label in a PC-capable slot becomes `(d16,PC)`
+        // (2 bytes); otherwise (xxx).L (4 bytes). Must mirror `resolve_ea`.
         Opnd::Abs(e) => {
-            if ctx.optimize && modes.allows(ea::PCD) && reloc_degree(e, &ctx.reloc) == 1 {
+            let same_sec = reloc_sym(e, &ctx.reloc)
+                .and_then(|s| ctx.sec_of.get(s))
+                .is_some_and(|s| *s == cur_sec);
+            if ctx.optimize && modes.allows(ea::PCD) && same_sec {
                 2
             } else {
                 4
@@ -711,10 +898,39 @@ impl DataSize {
     }
 }
 
+/// A hunk's content kind, from a `section` directive's attribute.
+#[derive(Clone, Copy, PartialEq)]
+enum HunkKind {
+    Code,
+    Data,
+    Bss,
+}
+
+/// A hunk's memory-placement preference, from the `_c`/`_f` attribute suffix.
+#[derive(Clone, Copy)]
+enum MemFlag {
+    Any,
+    Chip,
+    Fast,
+}
+
+impl MemFlag {
+    /// The two-bit memory flag OR-ed into a hunk's size longword in the header.
+    fn bits(self) -> u32 {
+        match self {
+            MemFlag::Any => 0,
+            MemFlag::Chip => 0x4000_0000,
+            MemFlag::Fast => 0x8000_0000,
+        }
+    }
+}
+
 enum Stmt {
     Empty,
     Equ(String, Expr),
     Even,
+    /// `section name,attr` — opens a new hunk of the given kind and memory flag.
+    Section(HunkKind, MemFlag),
     Dc(DataSize, Vec<Expr>),
     /// `ds.x count` — reserve `count` zeroed items. The count is an expression so
     /// it can reference `equ` constants resolved in pass 1.
@@ -800,7 +1016,7 @@ fn qualify_stmt(kind: &mut Stmt, scope: &str) {
             qualify_expr(value, scope);
         }
         Stmt::Insn { operands, .. } => operands.iter_mut().for_each(|o| qualify_opnd(o, scope)),
-        Stmt::Empty | Stmt::Even => {}
+        Stmt::Empty | Stmt::Even | Stmt::Section(..) => {}
     }
 }
 
@@ -862,7 +1078,7 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
         return Ok(Stmt::Even);
     }
     if lower == "section" {
-        return Ok(Stmt::Empty); // Stage 1: a single flat image; sections are Stage 3 layout
+        return Ok(parse_section(args, line));
     }
     if let Some(sz) = lower.strip_prefix("dcb") {
         // dcb.x count,value — reserve `count` items of `value`. Stage 1: treat
@@ -883,6 +1099,32 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
         size,
         operands,
     })
+}
+
+/// Parse `section name,attr`. The attribute names the content kind (`code`,
+/// `data`, `bss`) and, via a `_c`/`_f` suffix, the memory placement (chip/fast).
+/// vasm also accepts the standalone words `chip`/`fast`.
+fn parse_section(args: &str, _line: usize) -> Stmt {
+    let attr = split_operands(args)
+        .get(1)
+        .copied()
+        .unwrap_or("")
+        .to_ascii_lowercase();
+    let kind = if attr.contains("bss") {
+        HunkKind::Bss
+    } else if attr.contains("data") {
+        HunkKind::Data
+    } else {
+        HunkKind::Code
+    };
+    let flag = if attr.contains("_c") || attr.contains("chip") {
+        MemFlag::Chip
+    } else if attr.contains("_f") || attr.contains("fast") {
+        MemFlag::Fast
+    } else {
+        MemFlag::Any
+    };
+    Stmt::Section(kind, flag)
 }
 
 fn parse_dcb(sz: &str, args: &str, line: usize) -> Result<Stmt, AsmError> {

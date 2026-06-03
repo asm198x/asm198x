@@ -61,15 +61,28 @@ pub fn assemble_ca65(source: &str) -> Result<Vec<u8>, AsmError> {
 }
 
 /// Assemble Motorola-syntax 68000 source into a flat big-endian code image
-/// (the Amiga curriculum's `vasm` dialect). Stage 1: raw code, validated
-/// against `vasmm68k_mot -Fbin -no-opt`; the optimizer and Amiga hunk-exe
-/// container are later stages.
+/// (the Amiga curriculum's `vasm` dialect) with the optimizer on — matching
+/// `vasmm68k_mot -Fbin`. Rejects multi-section sources (a flat binary holds one
+/// section); use [`assemble_vasm_exe`] for those.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_vasm(source: &str) -> Result<Vec<u8>, AsmError> {
     dialects::vasm::assemble(source)
+}
+
+/// Assemble Motorola-syntax 68000 source into an Amiga hunk executable —
+/// matching `vasmm68k_mot -Fhunkexe -kick1hunks` for everything the AmigaDOS
+/// loader consumes (header, code/data/bss hunks, reloc32 tables). The optional
+/// debug symbol table is omitted (see the Stage 3 decision in
+/// `decisions/syntax-stance.md`).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_vasm_exe(source: &str) -> Result<Vec<u8>, AsmError> {
+    dialects::vasm::assemble_exe(source)
 }
 
 /// Assemble pasmo-syntax Z80 source into a flat binary, targeting a **plain

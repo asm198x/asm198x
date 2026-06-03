@@ -105,6 +105,7 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut dialect: Option<&str> = None;
     let mut target: Option<&str> = None;
     let mut disassemble = false;
+    let mut exe = false;
     let mut origin: u16 = 0;
     let mut i = 0;
     while i < args.len() {
@@ -123,6 +124,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 target = Some(args.get(i).ok_or("`--target` needs a value")?);
             }
             "--disasm" | "--disassemble" => disassemble = true,
+            "--exe" | "--hunkexe" => exe = true,
             "--org" => {
                 i += 1;
                 let value = args.get(i).ok_or("`--org` needs an address")?;
@@ -163,8 +165,21 @@ fn run(args: &[String]) -> Result<String, String> {
     let assembler = Assembler::resolve(dialect, target)?;
     let source = std::fs::read_to_string(input).map_err(|e| format!("cannot read {input}: {e}"))?;
 
-    // vasm (68000) produces a flat big-endian code image (Stage 1).
+    // vasm (68000): a flat big-endian code image, or an Amiga hunk executable
+    // with `--exe` (the curriculum's `-Fhunkexe` target).
     if let Assembler::Vasm = assembler {
+        if exe {
+            let image = asm198x::assemble_vasm_exe(&source).map_err(|e| e.to_string())?;
+            // vasm's convention: the executable drops the source extension.
+            let out_path = output.unwrap_or_else(|| Path::new(input).with_extension(""));
+            std::fs::write(&out_path, &image)
+                .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+            return Ok(format!(
+                "assembled {} byte(s) -> {}",
+                image.len(),
+                out_path.display()
+            ));
+        }
         let code = asm198x::assemble_vasm(&source).map_err(|e| e.to_string())?;
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
         std::fs::write(&out_path, &code)
