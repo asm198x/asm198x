@@ -72,6 +72,9 @@ pub mod ea {
     pub const MEM_ALT: u16 = AI | PI | PD | DI | IX | AW | AL;
     /// Data addressing: everything readable except An.
     pub const DATA: u16 = DN | AI | PI | PD | DI | IX | AW | AL | PCD | PCX | IMM;
+    /// Data addressing minus immediate — a readable, non-immediate destination,
+    /// e.g. the bit `BTST` tests (you cannot test a bit *in* a literal).
+    pub const DATA_NOIMM: u16 = DN | AI | PI | PD | DI | IX | AW | AL | PCD | PCX;
     /// Alterable: writable destinations (no PC-relative, no immediate).
     pub const ALT: u16 = DN | AN | AI | PI | PD | DI | IX | AW | AL;
     /// Any readable source (alterable + PC-relative + immediate + An).
@@ -240,13 +243,39 @@ pub const SET: Spec = Spec {
                     size: SizeEnc::WL { shift: 8 },
                     operands: &[ea_src(ALL), Slot::An { shift: 9 }],
                 },
-                // ADDI: an immediate into a data-alterable destination.
-                Form {
-                    base: 0x0600,
-                    size: SizeEnc::Std6,
-                    operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
-                },
             ],
+        },
+        // ADDI/SUBI/CMPI are *distinct mnemonics*, not forms of ADD/SUB/CMP:
+        // vasm assembles `add #imm,Dn` to the ADD-with-immediate-EA encoding
+        // ($D03C…) and only `addi` (or `add #imm,<mem>`, which the dialect
+        // aliases) to $06xx. Keeping them separate is what lets the disassembler
+        // render `$06xx` as `addi` so it round-trips.
+        Insn {
+            mnemonic: "ADDI",
+            summary: "Add immediate",
+            forms: &[Form {
+                base: 0x0600,
+                size: SizeEnc::Std6,
+                operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SUBI",
+            summary: "Subtract immediate",
+            forms: &[Form {
+                base: 0x0400,
+                size: SizeEnc::Std6,
+                operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "CMPI",
+            summary: "Compare immediate",
+            forms: &[Form {
+                base: 0x0C00,
+                size: SizeEnc::Std6,
+                operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
+            }],
         },
         Insn {
             mnemonic: "BRA",
@@ -328,12 +357,6 @@ pub const SET: Spec = Spec {
                     size: SizeEnc::WL { shift: 8 },
                     operands: &[ea_src(ALL), Slot::An { shift: 9 }],
                 },
-                // SUBI: an immediate from a data-alterable destination.
-                Form {
-                    base: 0x0400,
-                    size: SizeEnc::Std6,
-                    operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
-                },
             ],
         },
         Insn {
@@ -382,12 +405,6 @@ pub const SET: Spec = Spec {
                     base: 0xB0C0,
                     size: SizeEnc::WL { shift: 8 },
                     operands: &[ea_src(ALL), Slot::An { shift: 9 }],
-                },
-                // CMPI: compare an immediate against a data-alterable destination.
-                Form {
-                    base: 0x0C00,
-                    size: SizeEnc::Std6,
-                    operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
                 },
             ],
         },
@@ -572,12 +589,12 @@ pub const SET: Spec = Spec {
                 Form {
                     base: 0x0800,
                     size: SizeEnc::Fixed(Size::B),
-                    operands: &[Slot::ImmWord, ea_src(DATA)],
+                    operands: &[Slot::ImmWord, ea_src(DATA_NOIMM)],
                 },
                 Form {
                     base: 0x0100,
                     size: SizeEnc::Fixed(Size::B),
-                    operands: &[Slot::Dn { shift: 9 }, ea_src(DATA)],
+                    operands: &[Slot::Dn { shift: 9 }, ea_src(DATA_NOIMM)],
                 },
             ],
         },
@@ -602,11 +619,12 @@ pub const SET: Spec = Spec {
             mnemonic: "MOVEM",
             summary: "Move multiple registers",
             forms: &[
-                // store: reglist -> memory
+                // store: reglist -> memory. Control-alterable plus predecrement
+                // only — *not* postincrement (that is the load form's mode).
                 Form {
                     base: 0x4880,
                     size: SizeEnc::WL { shift: 6 },
-                    operands: &[Slot::RegList, ea_src(MEM_ALT)],
+                    operands: &[Slot::RegList, ea_src(AI | PD | DI | IX | AW | AL)],
                 },
                 // load: memory -> reglist
                 Form {

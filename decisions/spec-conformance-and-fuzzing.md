@@ -64,30 +64,35 @@ Two audit techniques, by spec shape:
 
 ### Covered
 
-`mos6502`, `z80`, `mos65816` (form audit); `mos6809` (sweep). The 6809 sweep
-caught real decoder bugs: invalid indexed postbytes (`$8F`/`$BF`/… — extended
-indirect is exactly `$9F`, and single auto-inc/dec has no indirect form) were
-being decoded as valid.
+`mos6502`, `z80`, `mos65816` (form audit); `mos6809` and `m68k` (sweep). The
+sweeps caught real decoder/spec bugs, now fixed:
 
-### Deferred: the 68000 sweep
+- **6809:** invalid indexed postbytes (`$8F`/`$BF`/… — extended indirect is
+  exactly `$9F`; single auto-inc/dec has no indirect form) decoded as valid.
+- **68000:**
+  - ADDI/SUBI/CMPI are now **distinct mnemonics** (`$06`/`$04`/`$0C`), so they
+    disassemble correctly; `add #imm,Dn` still uses the ADD-with-immediate-EA
+    encoding, and the dialect aliases `add/sub/cmp #imm,<mem>` to the I-form
+    (this alias is what keeps the curriculum byte-identical — the split alone
+    regresses it).
+  - **Size-dependent EA validity:** the decoder rejects An as a byte operand
+    (`MOVE.B a0,d0` is illegal); the BTST EA mask drops immediate (you can't
+    test a bit in a literal); the MOVEM *store* mask drops postincrement (only
+    predecrement is legal for reg→mem).
+  - **MOVEM load extension order:** the register-mask word always follows the
+    opcode, before any EA displacement — the renderer now reads it up front
+    rather than in operand-display order.
+  - **bit ops render sizeless** (vasm rejects `btst.b` on a register).
+  - The audit assembles the reference with `vasm -no-opt`, so vasm's optimizer
+    doesn't transform or delete instructions (it drops `lea (a0),a0` as a no-op).
 
-Running the sweep against vasm surfaced a real **68000 disassembler/spec
-backlog** too large to land alongside this audit (and one fix — splitting
-ADDI/SUBI/CMPI — regresses the curriculum unless the `cmp #imm,<mem>`→CMPI alias
-is handled too). It is its own focused increment. Findings:
+### Remaining: 68000 PC-relative EA
 
-- **ADDI/SUBI/CMPI should be distinct mnemonics** (vasm assembles `add #imm` to
-  the ADD-with-immediate-EA encoding; only `addi` to `$06xx`) — but `cmp
-  #imm,<mem>` is *also* aliased to CMPI, so the split needs the alias too.
-- **The disassembler is too permissive about EA validity**, which is
-  *size-dependent* while our masks are flat: `MOVE.B a0,d0` (An illegal for a
-  byte), `BTST #n,#imm` (immediate illegal as the tested operand). Hardening
-  means size-aware EA masks and rejecting illegal encodings.
-- **(d16,PC) renders as a raw displacement**, not a resolved target the way the
-  6809 PCR renderer does, so it does not round-trip through vasm.
-
-The curriculum round-trip and byte-identity harness keep the 68000 covered
-meanwhile. The `sweep` helper already supports it; re-enable once hardened.
+The sweep skips PC-relative EA modes: the disassembler renders `(d16,PC)` as a
+raw displacement (position-independent text) while vasm treats `N(pc)` as a
+target and recomputes the offset. Resolving the target on render (as the 6809
+PCR renderer does) — and parsing it back in the dialect — is a narrow remaining
+item; PC-relative EA is otherwise covered by the curriculum.
 
 ## Why this is the right next investment
 

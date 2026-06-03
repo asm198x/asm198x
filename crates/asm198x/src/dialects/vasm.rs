@@ -113,6 +113,21 @@ fn lower<'a>(
             return ("LEA", Cow::Owned(vec![mem, Opnd::AReg(*n)]), None);
         }
     }
+    // add/sub/cmp #imm,<memory> → the immediate-form instruction (addi/subi/
+    // cmpi). vasm uses the shorter `<ea>,Dn` form with an immediate EA for a Dn
+    // destination (handled by normal form selection), and adda/lea for An, so
+    // this alias only fires for a genuine memory destination. (No `eval` needed —
+    // it is a structural rewrite, so it also covers a forward immediate.)
+    if let [Opnd::Imm(_), dest] = operands
+        && !matches!(dest, Opnd::DReg(_) | Opnd::AReg(_) | Opnd::Imm(_))
+    {
+        match mnemonic {
+            "ADD" => return ("ADDI", Cow::Borrowed(operands), None),
+            "SUB" => return ("SUBI", Cow::Borrowed(operands), None),
+            "CMP" => return ("CMPI", Cow::Borrowed(operands), None),
+            _ => {}
+        }
+    }
     (mnemonic, Cow::Borrowed(operands), None)
 }
 

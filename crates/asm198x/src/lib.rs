@@ -202,4 +202,23 @@ mod tests {
             vec![0x3E, 0x00]
         );
     }
+
+    #[test]
+    fn vasm_immediate_ops_are_distinct_and_aliased() {
+        // addi/subi/cmpi are their own mnemonics (the $06/$04/$0C encodings).
+        assert_eq!(
+            assemble_vasm("\tsubi.b #16,d0\n").expect("subi"),
+            vec![0x04, 0x00, 0x00, 0x10]
+        );
+        assert_eq!(
+            assemble_vasm("\taddi.w #100,d2\n").expect("addi"),
+            vec![0x06, 0x42, 0x00, 0x64]
+        );
+        // `cmp #imm,<memory>` aliases to cmpi (vasm uses the <ea>,Dn form only
+        // for a data-register destination), so the two assemble identically.
+        assert_eq!(
+            assemble_vasm("\tcmp.w #1,(a0)\n").expect("cmp alias"),
+            assemble_vasm("\tcmpi.w #1,(a0)\n").expect("cmpi"),
+        );
+    }
 }

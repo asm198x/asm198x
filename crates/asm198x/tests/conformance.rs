@@ -313,22 +313,45 @@ fn spec_sweep_matches_reference() {
         eprintln!("SKIP: `lwasm` not on PATH (6809 sweep)");
     }
 
-    // --- 68000 / vasm: deferred to a focused hardening increment ----------
-    // The `sweep` helper is ready and was run against vasm; it surfaced a real
-    // 68000 backlog too large to land cleanly here, so the 68000 sweep is held
-    // back (this audit stays green) and tracked as its own increment. Findings:
-    //   - ADDI/SUBI/CMPI must be *distinct mnemonics* (vasm assembles `add #imm`
-    //     to the ADD-with-immediate-EA encoding, only `addi` to $06xx) — but
-    //     `cmp #imm,<mem>` is *also* aliased to CMPI, so the split needs the
-    //     alias too. Doing only the split regresses the curriculum.
-    //   - The disassembler is too permissive about EA validity, which is
-    //     size-dependent while our masks are not: `MOVE.B a0,d0` ($1008, An
-    //     illegal for a byte), `BTST #n,#imm` (immediate illegal as the tested
-    //     operand). Hardening means size-aware EA masks + rejecting illegal
-    //     encodings.
-    //   - (d16,PC) renders as a raw displacement, not a resolved target like the
-    //     6809 PCR renderer does.
-    // See decisions/spec-conformance-and-fuzzing.md.
+    // --- 68000 / vasm ------------------------------------------------------
+    if have("vasmm68k_mot") {
+        // Every opcode word; canonical extension-word fillers follow.
+        let cands: Vec<Vec<u8>> = (0u32..=0xFFFF)
+            .map(|w| {
+                vec![
+                    (w >> 8) as u8,
+                    w as u8,
+                    0x00, 0x10, 0x00, 0x20, 0x00, 0x30, 0x00, 0x40,
+                ]
+            })
+            .collect();
+        let reasm = |src: &str| {
+            ref_assemble(&tmp, src, "s", |s, o| {
+                let mut c = Command::new("vasmm68k_mot");
+                // `-no-opt`: the audit compares opcodes literally, so vasm must
+                // not transform or delete instructions (e.g. its optimizer drops
+                // `lea (a0),a0` as a redundant no-op).
+                c.args(["-Fbin", "-no-opt", "-quiet", "-o"]).arg(o).arg(s);
+                vec![c]
+            })
+        };
+        checked += sweep(
+            "68000",
+            &cands,
+            &|b, o| asm198x::disassemble_68000(b, o),
+            &|b, o| asm198x::listing_68000(b, o),
+            &reasm,
+            // PC-relative EA modes render as a raw displacement (position-
+            // independent text) while vasm treats `N(pc)` as a target and
+            // recomputes the offset, so they can't be batched. Resolving the
+            // (d,PC) target on render (as the 6809 PCR renderer does) is a
+            // separate narrow item — see decisions/spec-conformance-and-fuzzing.
+            &|t: &str| t.contains("pc"),
+            &mut fails,
+        );
+    } else {
+        eprintln!("SKIP: `vasmm68k_mot` not on PATH (68000 sweep)");
+    }
 
     eprintln!("swept {checked} decodable instructions against the reference tools");
     assert!(

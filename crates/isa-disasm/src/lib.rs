@@ -442,7 +442,9 @@ fn decode_m68k(code: &[u8], pos: usize, addr: u32) -> Option<(String, usize)> {
             let Some(size) = m68k_size(form.size, word) else {
                 continue;
             };
-            // Reject the form if any EA slot decodes to a mode it doesn't allow.
+            // Reject the form if any EA slot decodes to a mode it doesn't allow,
+            // or to An with a byte size (An is never a byte operand on the
+            // 68000 — `move.b a0,d0` is illegal even though An is in the mask).
             let ea_ok = form.operands.iter().all(|slot| {
                 let Slot::Ea { shift, modes, dest } = slot else {
                     return true;
@@ -453,6 +455,9 @@ fn decode_m68k(code: &[u8], pos: usize, addr: u32) -> Option<(String, usize)> {
                 } else {
                     ((field >> 3) & 7, field & 7)
                 };
+                if mode == 1 && size == Size::B {
+                    return false;
+                }
                 modes.allows(ea_bit(mode, reg))
             });
             if !ea_ok {
@@ -482,12 +487,26 @@ fn render_m68k(
     let mut ext = pos + 2; // next extension word offset
     let mut ops: Vec<String> = Vec::new();
     let mut suffix = size_suffix(form.size, size);
+    // The bit ops (btst/bchg/bclr/bset) take no size suffix: the width is
+    // implied by the EA (.l on a data register, .b on memory), and vasm rejects
+    // an explicit `.b` on a register. Sizeless round-trips for both.
+    if matches!(mnemonic.to_ascii_lowercase().as_str(), "btst" | "bchg" | "bclr" | "bset") {
+        suffix = String::new();
+    }
     // Whether any EA in this instruction predecrements (movem mask is reversed).
     let predec = form.operands.iter().any(|slot| {
         matches!(slot, Slot::Ea { shift, dest, .. }
             if { let f = (word >> shift) & 0x3F;
                  let m = if *dest { f & 7 } else { (f >> 3) & 7 }; m == 4 })
     });
+    // MOVEM's register-mask word always follows the opcode immediately, before
+    // any EA extension — even in the load form where the reg list is the second
+    // operand. Read it up front so the EA's displacement reads after it.
+    let movem_mask = if form.operands.iter().any(|s| matches!(s, Slot::RegList)) {
+        Some(read_be(code, &mut ext, 2)? as u16)
+    } else {
+        None
+    };
 
     for slot in form.operands {
         match slot {
@@ -506,11 +525,7 @@ fn render_m68k(
                 ops.push(format!("#{}", read_be(code, &mut ext, n)?));
             }
             Slot::RegList => {
-                if ext + 2 > code.len() {
-                    return None;
-                }
-                let mask = be16(code, ext);
-                ext += 2;
+                let mask = movem_mask?;
                 let mask = if predec { mask.reverse_bits() } else { mask };
                 ops.push(render_reglist(mask));
             }
@@ -1167,6 +1182,38 @@ mod tests {
     fn m68k_short_branch_target_is_absolute() {
         // bne.s at $1000, length 2, disp -8 ($F8) -> target $FFA.
         assert_eq!(one_m68k(&[0x66, 0xF8]), "bne.s $FFA");
+    }
+
+    #[test]
+    fn m68k_immediate_ops_are_distinct_mnemonics() {
+        // $06/$04/$0C are addi/subi/cmpi, not add/sub/cmp.
+        assert_eq!(one_m68k(&[0x06, 0x00, 0x00, 0x10]), "addi.b #16,d0");
+        assert_eq!(one_m68k(&[0x04, 0x00, 0x00, 0x10]), "subi.b #16,d0");
+        assert_eq!(one_m68k(&[0x0C, 0x00, 0x00, 0x10]), "cmpi.b #16,d0");
+    }
+
+    #[test]
+    fn m68k_bit_ops_are_sizeless() {
+        // btst d0,d0 ($0100) is `.l` on a register — rendered sizeless (vasm
+        // rejects `btst.b` on a register).
+        assert_eq!(one_m68k(&[0x01, 0x00]), "btst d0,d0");
+    }
+
+    #[test]
+    fn m68k_movem_load_reads_mask_before_displacement() {
+        // movem.w 16(a0),d5: mask word ($0020 = d5) comes first, then the EA
+        // displacement ($0010 = 16) — not in operand-display order.
+        assert_eq!(
+            one_m68k(&[0x4C, 0xA8, 0x00, 0x20, 0x00, 0x10]),
+            "movem.w 16(a0),d5"
+        );
+    }
+
+    #[test]
+    fn m68k_rejects_byte_on_address_register() {
+        // move.b a0,d0 ($1008) is illegal (An is never a byte operand): decoded
+        // as data, not a bogus instruction.
+        assert_eq!(one_m68k(&[0x10, 0x08]), "dc.w $1008");
     }
 
     fn one_6809(bytes: &[u8]) -> String {

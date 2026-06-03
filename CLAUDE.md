@@ -94,9 +94,10 @@ need the tools installed — and degrading gracefully when one is absent):
   arbiter by reusing the disassemblers (synthesise bytes → disassemble →
   reassemble with the *reference*): every form-based spec's opcode
   (`spec_opcodes_match_reference`: 6502/Z80/65816), an opcode-space sweep for
-  the non-form specs (`spec_sweep_matches_reference`: 6809; 68000 deferred —
-  see the decision), and a seeded differential fuzzer over random programs
-  reassembled by both our asm and the reference (`differential_fuzz`).
+  the non-form specs (`spec_sweep_matches_reference`: 6809 and 68000 — ~33k
+  decodable encodings; 68000 PC-relative EA is the one skipped case, see the
+  decision), and a seeded differential fuzzer over random programs reassembled
+  by both our asm and the reference (`differential_fuzz`).
 
 See [`decisions/spec-conformance-and-fuzzing.md`](decisions/spec-conformance-and-fuzzing.md).
 
