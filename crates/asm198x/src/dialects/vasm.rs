@@ -75,8 +75,10 @@ fn lower<'a>(
                 _ => {}
             }
         }
-        // add.l/sub.l #d16,An → lea d16(An),An (subtraction negates the offset).
-        if matches!(size, Some(Size::L))
+        // add/sub #d16,An → lea d16(An),An (subtraction negates the offset).
+        // vasm prefers `lea` whenever the offset fits a word — always shorter
+        // than `adda.l`, and the same size as (but preferred over) `adda.w`.
+        if !matches!(size, Some(Size::B))
             && let Opnd::AReg(n) = dest
             && let Some(disp_expr) = match mnemonic {
                 "ADD" => Some(e.clone()),
