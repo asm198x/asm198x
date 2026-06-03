@@ -83,6 +83,21 @@ bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs
 The encoding-model taxonomy (fixed slots / field-packed / computed operand) and
 the computed-operand seam are in `../../decisions/packaging-and-cpu-roadmap.md`.
 
+## How correctness is checked
+
+Four layers, each against the real reference assemblers (all `#[ignore]`d — they
+need the tools installed — and degrading gracefully when one is absent):
+
+- **`tests/curriculum`** — curated curriculum programs, byte-identical to the
+  reference tool, plus assemble→disassemble→reassemble round-trip (our own asm).
+- **`tests/conformance`** — every `isa` form's opcode checked against the
+  reference (`spec_opcodes_match_reference`), and a seeded differential fuzzer
+  over random programs reassembled by both our asm and the reference
+  (`differential_fuzz`). It reuses the disassemblers: synthesise bytes →
+  disassemble → reassemble with the *reference*, which becomes the arbiter.
+
+See [`decisions/spec-conformance-and-fuzzing.md`](decisions/spec-conformance-and-fuzzing.md).
+
 ## Build-time discipline
 
 The workspace bakes in the levers that keep builds fast — `default-members`

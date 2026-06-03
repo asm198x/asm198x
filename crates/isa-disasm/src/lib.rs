@@ -272,8 +272,10 @@ fn render_6502(mnemonic: &str, form: &isa::Form, values: &[i64], addr: u16, len:
     let lo = (v & 0xFF) as u8;
     let word = (v & 0xFFFF) as u16;
     let operand = match form.mode {
-        "implied" => String::new(),
-        "accumulator" => "A".to_string(),
+        // Accumulator mode renders as the bare mnemonic: acme rejects `asl a`
+        // (it wants `asl`), and our parser reads the no-operand form as
+        // accumulator where that is the only operand-less form.
+        "implied" | "accumulator" => String::new(),
         "immediate" => format!("#${lo:02X}"),
         "zeropage" => format!("${lo:02X}"),
         "zeropage,x" => format!("${lo:02X},X"),
@@ -1102,7 +1104,8 @@ mod tests {
     #[test]
     fn decodes_6502_addressing_modes() {
         assert_eq!(one_6502(&[0xEA]), "NOP");
-        assert_eq!(one_6502(&[0x0A]), "ASL A");
+        // Accumulator mode renders bare (acme rejects `ASL A`).
+        assert_eq!(one_6502(&[0x0A]), "ASL");
         assert_eq!(one_6502(&[0xA9, 0x42]), "LDA #$42");
         assert_eq!(one_6502(&[0xA5, 0x10]), "LDA $10");
         assert_eq!(one_6502(&[0xB5, 0x10]), "LDA $10,X");
