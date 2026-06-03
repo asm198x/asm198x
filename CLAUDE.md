@@ -57,9 +57,18 @@ curriculum corpus:
   crate docs and `decisions/syntax-stance.md`).
 - **Z80** — `pasmo`/`pasmonext` and `sjasmplus` front-ends over a shared
   `dialects::z80` core, the Z80N target, and a spec-driven Z80 disassembler.
+- **6809** — `lwasm` front-end (`dialects::lwasm`) over the `isa::mos6809` spec.
+  First user of the engine's **computed-operand seam** (`Operation::Encoded` /
+  `Piece`), for CPUs whose operands are computed rather than fixed-width slots.
+  Non-indexed modes (inherent, immediate, direct, extended, short/long relative)
+  plus `org`/`equ`/`fcb`/`fdb`/`rmb` are landed and validated byte-identical
+  against `lwasm --6809 --raw`. Indexed addressing (the postbyte), register-list
+  ops, and the 6809 disassembler are the next increment.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
+The encoding-model taxonomy (fixed slots / field-packed / computed operand) and
+the computed-operand seam are in `../../decisions/packaging-and-cpu-roadmap.md`.
 
 ## Build-time discipline
 

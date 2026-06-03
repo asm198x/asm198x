@@ -19,6 +19,8 @@ enum Assembler {
     /// vasm Motorola-syntax 68000 — a flat big-endian code image (Stage 1),
     /// handled directly in `run` like ca65.
     Vasm,
+    /// lwasm Motorola-syntax 6809 — a flat big-endian binary.
+    Lwasm,
     Pasmo {
         z80n: bool,
     },
@@ -44,6 +46,7 @@ impl Assembler {
             Some("acme" | "6502" | "mos6502") => Ok(Self::Acme),
             Some("ca65" | "nes") => Ok(Self::Ca65),
             Some("vasm" | "68000" | "m68k" | "mot") => Ok(Self::Vasm),
+            Some("lwasm" | "6809") => Ok(Self::Lwasm),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo {
@@ -69,6 +72,7 @@ impl Assembler {
     fn assemble(self, source: &str) -> Result<asm198x::Assembly, asm198x::AsmError> {
         match self {
             Self::Acme => asm198x::assemble_acme(source),
+            Self::Lwasm => asm198x::assemble_lwasm(source),
             // ca65 and vasm produce non-flat output and are handled in `run`.
             Self::Ca65 | Self::Vasm => unreachable!("ca65/vasm handled in run()"),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
@@ -157,6 +161,9 @@ fn run(args: &[String]) -> Result<String, String> {
             Assembler::Vasm => {
                 print!("{}", asm198x::listing_68000(&bytes, u32::from(origin)));
             }
+            Assembler::Lwasm => {
+                return Err("6809 disassembly is not yet supported".into());
+            }
         }
         return Ok(format!(
             "disassembled {} byte(s) at ${origin:04X}",
@@ -234,7 +241,8 @@ fn usage() -> String {
      assemble:    asm198x [--dialect <name>] [--cpu <target>] <input> [-o <out.bin>]\n\
      disassemble: asm198x --disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\n\
-     dialects (syntax): acme (C64 6502; also `6502`), pasmo, pasmonext, sjasmplus\n\
+     dialects (syntax): acme (C64 6502; also `6502`), ca65 (NES), vasm (Amiga\n\
+     \x20                 68000), lwasm (6809), pasmo, pasmonext, sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
      \x20                 the dialect\n\n\

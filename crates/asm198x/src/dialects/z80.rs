@@ -459,6 +459,8 @@ fn qualify_locals(op: Operation, g: &str) -> Operation {
             mode,
             operands: operands.into_iter().map(|e| qualify_expr(e, g)).collect(),
         },
+        // The Z80 dialect never emits pre-encoded instructions.
+        Operation::Encoded(pieces) => Operation::Encoded(pieces),
     }
 }
 

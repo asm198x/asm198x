@@ -92,6 +92,17 @@ pub fn assemble_vasm_exe(source: &str) -> Result<Vec<u8>, AsmError> {
     dialects::vasm::assemble_exe(source)
 }
 
+/// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching
+/// `lwasm --6809 --raw`. Covers inherent, immediate, direct, extended, and
+/// relative (short + long) addressing; indexed addressing is not yet supported.
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_lwasm(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::Lwasm)
+}
+
 /// Assemble pasmo-syntax Z80 source into a flat binary, targeting a **plain
 /// Z80** (Z80N opcodes are rejected, as vanilla pasmo rejects them).
 ///

@@ -183,6 +183,36 @@ pub(crate) enum Operation {
         mode: &'static str,
         operands: Vec<Expr>,
     },
+    /// An instruction the dialect has encoded itself into a sequence of
+    /// [`Piece`]s — literal bytes it computed (opcode, a 6809 postbyte, later an
+    /// 8086 modrm) interleaved with sized values resolved in pass 2. The general
+    /// seam for CPUs whose operands are computed, not fixed-width slots; the
+    /// dialect still reuses this engine's two-pass driver, symbols, and `org`.
+    Encoded(Vec<Piece>),
+}
+
+/// One piece of a dialect-computed instruction encoding.
+pub(crate) enum Piece {
+    /// A byte the dialect already determined (opcode, postbyte, modrm…).
+    Lit(u8),
+    /// A value laid down at `bytes` width (big-/little-endian per the CPU),
+    /// resolved in pass 2. `rel` makes it a branch offset from the following
+    /// address; `signed` range-checks it as signed (an index displacement).
+    Val {
+        expr: Expr,
+        bytes: u8,
+        rel: bool,
+        signed: bool,
+    },
+}
+
+impl Piece {
+    fn len(&self) -> i64 {
+        match self {
+            Piece::Lit(_) => 1,
+            Piece::Val { bytes, .. } => i64::from(*bytes),
+        }
+    }
 }
 
 /// One source line, reduced to an optional label and an optional operation.
@@ -253,6 +283,9 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
             Some(Operation::Words(items)) => pc += 2 * items.len() as i64,
             Some(Operation::Instruction { mnemonic, mode, .. }) => {
                 pc += form(set, ext, mnemonic, mode, s.line)?.len() as i64;
+            }
+            Some(Operation::Encoded(pieces)) => {
+                pc += pieces.iter().map(Piece::len).sum::<i64>();
             }
             Some(Operation::Equ(_)) => {} // handled above
         }
@@ -351,6 +384,26 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 // Trailing opcode bytes after the operands (Z80 DD CB / FD CB).
                 bytes.extend_from_slice(f.suffix);
             }
+            Some(Operation::Encoded(pieces)) => {
+                for piece in pieces {
+                    match piece {
+                        Piece::Lit(b) => bytes.push(*b),
+                        Piece::Val {
+                            expr,
+                            bytes: width,
+                            rel,
+                            signed,
+                        } => {
+                            let raw = expr.eval(&symbols, pc, s.line)?;
+                            // A branch offset is relative to the address that
+                            // follows this value (the next instruction).
+                            let next = origin + bytes.len() as i64 + i64::from(*width);
+                            let v = if *rel { raw - next } else { raw };
+                            emit_value(&mut bytes, v, *width, *rel || *signed, set.endianness, s.line)?;
+                        }
+                    }
+                }
+            }
         }
     }
 
@@ -390,6 +443,43 @@ fn form<'a>(
             format!("unknown instruction `{mnemonic}`"),
         ))
     }
+}
+
+/// Emit a [`Piece::Val`]: `width` bytes of `v` in the CPU's endianness. `signed`
+/// range-checks as two's-complement (branch offsets, index displacements);
+/// otherwise as an unsigned address/immediate (a byte also accepts `-128..=-1`).
+fn emit_value(
+    bytes: &mut Vec<u8>,
+    v: i64,
+    width: u8,
+    signed: bool,
+    endianness: isa::Endianness,
+    line: usize,
+) -> Result<(), AsmError> {
+    let (lo, hi) = match width {
+        1 => (-128, if signed { 127 } else { 0xFF }),
+        2 => (
+            if signed { -32768 } else { 0 },
+            if signed { 32767 } else { 0xFFFF },
+        ),
+        other => {
+            return Err(AsmError::new(line, format!("unsupported value width {other}")));
+        }
+    };
+    if !(lo..=hi).contains(&v) {
+        return Err(AsmError::new(
+            line,
+            format!("value {v} out of range for a {width}-byte operand"),
+        ));
+    }
+    let b = v.to_le_bytes();
+    match (width, endianness) {
+        (1, _) => bytes.push(b[0]),
+        (2, isa::Endianness::Little) => bytes.extend_from_slice(&b[..2]),
+        (2, isa::Endianness::Big) => bytes.extend_from_slice(&[b[1], b[0]]),
+        _ => unreachable!("width validated above"),
+    }
+    Ok(())
 }
 
 fn to_byte(v: i64, line: usize) -> Result<u8, AsmError> {

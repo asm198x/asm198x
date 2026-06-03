@@ -64,14 +64,68 @@ popularity.
 |-----|----------|-------------------|-------|--------|
 | 6502 | C64, NES | acme, ca65 | — | ✅ done |
 | Z80 | Spectrum | pasmo/pasmonext, sjasmplus | — | ✅ done |
-| 68000 | Amiga (ST, Genesis) | vasm (mot) | new field-based core | 🚧 in progress |
-| 6809 | Dragon, CoCo | **lwasm** (validate against the vendored `xroar`); asm6809 | byte-opcode engine carries over; new postbyte addressing | next |
+| 68000 | Amiga (ST, Genesis) | vasm (mot) | new field-based core | ✅ done |
+| 6809 | Dragon, CoCo | **lwasm** | engine seam reused; computed postbyte (indexed) | 🚧 in progress |
 | 65816 | SNES, Apple IIgs | ca65 (already speaks it), 64tass | **extends the `mos6502` core; ca65 front-end exists** | after 6809 |
 | later | 8080/8085, 8086, ARM2 (Archimedes), TMS9900 (TI-99) | TBD | mixed | open |
+
+**6809 progress:** non-indexed modes (inherent, immediate, direct, extended,
+short/long relative) plus `org`/`equ`/`fcb`/`fdb`/`rmb` are landed and validated
+byte-identical against `lwasm --6809 --raw` (in the curriculum harness, as
+representative programs — there is no 6809 curriculum). Remaining for 6809:
+indexed addressing (the postbyte + 0/1/2 extension bytes), the register-list ops
+(`tfr`/`exg`/`pshs`/`puls`), `fcc` strings, and the 6809 disassembler.
 
 Agreed order: **finish 68000 → 6809 → 65816 → reassess.** 65816 is the cheapest
 big win (6502 family + ca65 reuse) but is sequenced after 6809 per the owner's
 priority.
+
+## Encoding models and the computed-operand seam
+
+Adding the 6809 forced a question that will recur for every CPU after it: *how
+does an instruction's operand turn into bytes?* The answer is not one model but a
+small taxonomy, and the engine now has one seam that spans it.
+
+**The taxonomy** (what the roadmap CPUs need):
+
+- **Fixed-width slots** — 6502, Z80. The opcode is one or more fixed bytes; each
+  operand is a slot of known width (`isa::Form { opcode, operands, … }`). The
+  dialect resolves the addressing mode at parse time and hands the engine an
+  `Operation::Instruction { mnemonic, mode, operands }`; the engine emits from
+  the form. Stable instruction *size* without knowing forward symbol values.
+- **Field-packed opcode word** — 68000. Operand fields are packed *into* the
+  opcode word(s) (`isa::m68k`). vasm computes this itself (it also owns layout,
+  relaxation, sections, relocations, the hunk serializer), bypassing the flat
+  engine — the documented "two engines" seam in `syntax-stance.md`.
+- **Computed variable-length operand** — 6809 (indexed postbyte), and ahead:
+  8086 (modrm + prefixes), 65816 (operand width gated by the `m`/`x` processor
+  flags). The opcode is fixed, but the operand bytes are *computed* by the
+  dialect (a postbyte, a modrm, a width that depends on assembler state), not
+  read from a fixed slot.
+
+**The seam (decided, built):** the engine gained
+`Operation::Encoded(Vec<Piece>)`, where a `Piece` is either `Lit(u8)` (a byte the
+dialect already computed — opcode, postbyte, later a modrm) or
+`Val { expr, bytes, rel, signed }` (a value resolved in pass two at a given
+width, optionally a PC-relative branch offset or a signed displacement). A
+dialect whose operands are computed builds the pieces itself and still reuses the
+engine's two-pass driver, symbol table, `org`, and `equ`. This is deliberately
+**general**, not 6809-specific: 65816 and 8086 will emit `Encoded` pieces the
+same way. lwasm is its first consumer and proves it byte-identical.
+
+This kept lwasm a *front-end* (parse → pieces) rather than a second bypass engine
+like vasm. The boundary that matters: a CPU that also needs its own *layout/
+relaxation/relocation* logic (as 68000 did) bypasses the engine; a CPU that only
+needs *computed operands* uses the `Encoded` seam and keeps the shared driver.
+
+**True engine unification is deferred, with a trigger.** There are effectively
+two assembly drivers today — the flat `engine::assemble` (6502, Z80, 6809) and
+vasm's `assemble_core` (68000). Unifying them into one driver is *not* worth it
+yet (one data point). **Reassess when a second CPU needs the
+layout/relaxation/relocation machinery** (a second `assemble_core`-shaped
+backend) — at that point the shared structure is real and provable, not
+speculative. Until then, the `Encoded` seam absorbs the cheaper "computed
+operand" cases without touching the vasm path.
 
 ## Drift triggers
 
@@ -86,3 +140,9 @@ priority.
 - **"Pick the most popular assembler for the new CPU"** — no; dialect choice
   follows Code198x/Emu198x consumption, scanned per CPU (re-read the roadmap
   note).
+- **"Give 6809 (or 65816, 8086) its own assemble engine like vasm"** — no, unless
+  it needs its own layout/relaxation/relocation. Computed operands alone use the
+  shared `Operation::Encoded` seam and keep the two-pass driver.
+- **"Unify the flat engine and vasm's `assemble_core` now"** — not yet; one
+  data point. Reassess only when a *second* CPU needs the layout/relocation
+  machinery, so the shared shape is real rather than speculative.
