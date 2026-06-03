@@ -12,6 +12,7 @@
 //! `-no-opt`. The Amiga hunk-exe container comes later — see
 //! `decisions/syntax-stance.md`.
 
+use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
 
 use isa::m68k::{self, EaModes, Size, SizeEnc, Slot, ea};
@@ -48,29 +49,52 @@ fn eval(e: &Expr, consts: &BTreeMap<String, i64>, here: i64, line: usize) -> Res
     })
 }
 
-/// With the optimizer on, `add`/`sub` of a small immediate (1..=8) becomes the
-/// quick form `addq`/`subq` — two bytes instead of an immediate extension word,
-/// exactly as vasm does. The decision rests only on the (constant) immediate, so
-/// it stays stable across relaxation rounds.
-fn effective_mnemonic<'a>(
+/// Apply vasm's instruction-rewriting optimizations, returning the effective
+/// mnemonic and operands. Both rest only on the (constant) immediate, so they
+/// stay stable across relaxation rounds.
+///
+/// - `add`/`sub` of a small immediate (1..=8) → the quick form `addq`/`subq`.
+/// - `add.l`/`sub.l` of a 16-bit immediate into an address register →
+///   `lea d16(An),An`, which is two bytes shorter than `adda.l #imm`.
+fn lower<'a>(
     mnemonic: &'a str,
-    operands: &[Opnd],
+    size: Option<Size>,
+    operands: &'a [Opnd],
     ctx: &Ctx,
     consts: &BTreeMap<String, i64>,
-) -> &'a str {
+) -> (&'a str, Cow<'a, [Opnd]>) {
     if ctx.optimize
         && let [Opnd::Imm(e), dest] = operands
-        && !matches!(dest, Opnd::Imm(_))
         && let Ok(v) = eval(e, consts, 0, 0)
-        && (1..=8).contains(&v)
     {
-        return match mnemonic {
-            "ADD" => "ADDQ",
-            "SUB" => "SUBQ",
-            other => other,
-        };
+        // add/sub of 1..=8 → the quick form.
+        if (1..=8).contains(&v) && !matches!(dest, Opnd::Imm(_)) {
+            match mnemonic {
+                "ADD" => return ("ADDQ", Cow::Borrowed(operands)),
+                "SUB" => return ("SUBQ", Cow::Borrowed(operands)),
+                _ => {}
+            }
+        }
+        // add.l/sub.l #d16,An → lea d16(An),An (subtraction negates the offset).
+        if matches!(size, Some(Size::L))
+            && let Opnd::AReg(n) = dest
+            && let Some(disp_expr) = match mnemonic {
+                "ADD" => Some(e.clone()),
+                "SUB" => Some(Expr::Neg(Box::new(e.clone()))),
+                _ => None,
+            }
+            && i16::try_from(if mnemonic == "SUB" { -v } else { v }).is_ok()
+        {
+            let mem = Opnd::Mem {
+                mode: 5,
+                reg: *n,
+                bit: ea::DI,
+                disp: Some(disp_expr),
+            };
+            return ("LEA", Cow::Owned(vec![mem, Opnd::AReg(*n)]));
+        }
     }
-    mnemonic
+    (mnemonic, Cow::Borrowed(operands))
 }
 
 /// The net number of relocatable (section-relative) symbols in an expression,
@@ -264,7 +288,8 @@ fn encode(
     here: i64,
     line: usize,
 ) -> Result<Vec<u8>, AsmError> {
-    let mnemonic = effective_mnemonic(mnemonic, operands, ctx, consts);
+    let (mnemonic, operands) = lower(mnemonic, size, operands, ctx, consts);
+    let operands = operands.as_ref();
     let insn = m68k::SET
         .instruction(mnemonic)
         .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
@@ -308,6 +333,15 @@ fn encode(
             (Slot::ImmWord, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
                 ext.extend_from_slice(&(v as u16).to_be_bytes());
+            }
+            (Slot::ImmSized, Opnd::Imm(e)) => {
+                let v = eval(e, consts, here, line)?;
+                match sz {
+                    // A byte immediate rides in the low byte of one word.
+                    Size::B => ext.extend_from_slice(&[0, v as u8]),
+                    Size::W => ext.extend_from_slice(&(v as u16).to_be_bytes()),
+                    Size::L => ext.extend_from_slice(&(v as u32).to_be_bytes()),
+                }
             }
             (Slot::RegList, _) => {
                 let mask = reglist_mask(op);
@@ -381,7 +415,7 @@ fn slot_accepts(slot: &Slot, op: &Opnd) -> bool {
     match (slot, op) {
         (Slot::Dn { .. }, Opnd::DReg(_)) => true,
         (Slot::An { .. }, Opnd::AReg(_)) => true,
-        (Slot::Quick8 | Slot::Quick3 { .. } | Slot::ImmWord, Opnd::Imm(_)) => true,
+        (Slot::Quick8 | Slot::Quick3 { .. } | Slot::ImmWord | Slot::ImmSized, Opnd::Imm(_)) => true,
         (Slot::BranchW | Slot::DispW, Opnd::Abs(_)) => true,
         // A register list, or a single register treated as a one-entry list.
         (Slot::RegList, Opnd::RegList(_) | Opnd::DReg(_) | Opnd::AReg(_)) => true,
@@ -525,7 +559,8 @@ fn stmt_size(
             size,
             operands,
         } => {
-            let mnemonic = effective_mnemonic(mnemonic, operands, ctx, consts);
+            let (mnemonic, operands) = lower(mnemonic, *size, operands, ctx, consts);
+            let operands = operands.as_ref();
             let insn = m68k::SET
                 .instruction(mnemonic)
                 .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
@@ -543,7 +578,13 @@ fn stmt_size(
                     // A `.s`/`.b` branch packs its displacement in the opcode
                     // word; the word form adds a 16-bit extension word.
                     Slot::BranchW if matches!(eff, Some(Size::B)) => 0,
-                    Slot::BranchW | Slot::DispW | Slot::ImmWord | Slot::RegList => 2,
+                    // A long immediate needs two extension words; byte/word, one.
+                    Slot::ImmSized if matches!(sz, Size::L) => 4,
+                    Slot::BranchW
+                    | Slot::DispW
+                    | Slot::ImmWord
+                    | Slot::RegList
+                    | Slot::ImmSized => 2,
                     Slot::Ea { modes, .. } => ea_ext_len(op, sz, *modes, ctx),
                 };
             }
@@ -588,6 +629,7 @@ fn ea_ext_len(op: &Opnd, sz: Size, modes: EaModes, ctx: &Ctx) -> usize {
 // Operands / statements
 // ---------------------------------------------------------------------------
 
+#[derive(Clone)]
 enum Opnd {
     DReg(u8),
     AReg(u8),

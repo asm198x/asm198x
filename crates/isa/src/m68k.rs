@@ -117,6 +117,10 @@ pub enum Slot {
     /// An immediate emitted as a full 16-bit extension word (the static bit
     /// number of `BTST`/`BSET #n,<ea>`), placed before the EA's own extension.
     ImmWord,
+    /// An immediate source sized by the instruction (`ADDI`/`SUBI`/`CMPI`): one
+    /// extension word for byte/word, two for long. Carries no opcode-word bits;
+    /// emitted before the destination EA's extension.
+    ImmSized,
     /// A register-list mask (`MOVEM`): a 16-bit extension word, reversed when the
     /// effective address is predecrement.
     RegList,
@@ -236,6 +240,12 @@ pub const SET: Spec = Spec {
                     size: SizeEnc::WL { shift: 8 },
                     operands: &[ea_src(ALL), Slot::An { shift: 9 }],
                 },
+                // ADDI: an immediate into a data-alterable destination.
+                Form {
+                    base: 0x0600,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
+                },
             ],
         },
         Insn {
@@ -318,6 +328,12 @@ pub const SET: Spec = Spec {
                     size: SizeEnc::WL { shift: 8 },
                     operands: &[ea_src(ALL), Slot::An { shift: 9 }],
                 },
+                // SUBI: an immediate from a data-alterable destination.
+                Form {
+                    base: 0x0400,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
+                },
             ],
         },
         Insn {
@@ -366,6 +382,12 @@ pub const SET: Spec = Spec {
                     base: 0xB0C0,
                     size: SizeEnc::WL { shift: 8 },
                     operands: &[ea_src(ALL), Slot::An { shift: 9 }],
+                },
+                // CMPI: compare an immediate against a data-alterable destination.
+                Form {
+                    base: 0x0C00,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
                 },
             ],
         },
