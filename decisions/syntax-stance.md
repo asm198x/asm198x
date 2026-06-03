@@ -43,10 +43,12 @@ must assemble unchanged. A 2026-06-02 scan of the curriculum settled the list:
 |-----|---------------------|------------------------|----------------|
 | 6502 | **acme** ✅, **ca65** ✅ | C64 (acme), NES (ca65) | 64tass, dasm |
 | Z80 | **PasmoNext** ✅, sjasmplus ✅ | Spectrum (pasmonext) | pasmo, z80asm |
-| 68000 | **vasm** (mot syntax) 🚧 | Amiga (vasm) | Devpac/HiSoft |
+| 68000 | **vasm** (mot syntax) ✅ | Amiga (vasm) | Devpac/HiSoft |
 
 (✅ = delivered and curriculum-validated byte-identical against the real tool.
-🚧 = flat-binary stages byte-identical; multi-section hunk-exe output pending.)
+For vasm, "byte-identical" is the loadable hunk-executable image; vasm's
+optional debug symbol table, written in its internal hash order, is omitted —
+see the 2026-06-03 Stage 3 entry below.)
 
 Both 6502 dialects are first-class: the curriculum uses acme for the C64 and
 ca65 for the NES, so neither is "also consider." For Z80, **PasmoNext is
@@ -313,7 +315,9 @@ matched against the real `vasmm68k_mot` at each:
   references are PC-relative-eligible. `assemble_with(.., false)` keeps the
   Stage-1 `-no-opt` behaviour for comparison.
 
-- **Stage 3 — `-Fhunkexe -kick1hunks` (single-section done).** The shipped
+- **Stage 3 — `-Fhunkexe -kick1hunks` (done).** **All 32 Amiga curriculum
+  units now assemble to hunk executables byte-identical to the loadable image
+  of `vasmm68k_mot -Fhunkexe -kick1hunks`.** The shipped
   artifacts are Amiga hunk executables, byte-identical to `vasm -Fhunkexe
   -kick1hunks` (verified against the committed `signal`/`exodus` binaries). One
   obstacle shapes the target: vasm writes a `HUNK_SYMBOL` debug table in its
@@ -328,11 +332,15 @@ matched against the real `vasmm68k_mot` at each:
   hunk executables byte-identical to the stripped vasm output.** Wired as
   `assemble_vasm_exe` / `--dialect vasm --exe`.
 
-  Remaining: the 11 two-section units (`code` + `chipbss`) need two parser
-  features they're the first to use — bitwise/shift operators (`|`, `<<`) in
-  expressions (safe to add: the 6502 curriculum uses neither) and indexed
-  addressing `d8(An,Xn)` — after which the multi-section container path
-  (two hunks, cross-hunk relocations, a BSS hunk; written but not yet exercised)
-  can be validated.
+  The 11 two-section units (`code` + `chipbss`) drove three further features:
+  bitwise/shift operators (`& | ^ << >>`) added to the shared expression parser
+  with vasm's precedence (shift > `&` > `^` > `|` > `* /` > `+ -`, verified
+  against vasm) — gated to vasm, so the 6502 dialects (which use neither these
+  nor are affected) stay byte-identical; indexed addressing `d8(An,Xn.size)`
+  (brief extension word); the `lea d8(An),An`→`addq`/`subq` rewrite (reverse of
+  `add #d,An`→`lea`); and `label(pc)` encoding the distance `label - pc` rather
+  than the label's absolute offset. The multi-section container (two hunks,
+  cross-hunk `RELOC32`, a BSS hunk) then validated unchanged.
 
-The flat path stays wired as `assemble_vasm` / `--dialect vasm` (`-Fbin`).
+The flat path stays wired as `assemble_vasm` / `--dialect vasm` (`-Fbin`); the
+executable is `assemble_vasm_exe` / `--dialect vasm --exe`.
