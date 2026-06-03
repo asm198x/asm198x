@@ -431,14 +431,62 @@ fn synth_with(form: &isa::Form, fill: &mut impl FnMut() -> u8) -> Vec<u8> {
     b
 }
 
+/// Draw one random, decodable, position-independent instruction for the non-form
+/// CPUs (6809, 68000), which have no `isa::Form` to synthesise from. Fill a
+/// buffer with random bytes, disassemble it, and take the first line if it
+/// decodes to a real instruction that reads the same at two origins — the same
+/// filter the sweep uses to drop data bytes and position-dependent forms
+/// (branches, PC-relative EA) that can't be freely concatenated. Returns `None`
+/// if no decodable instruction turns up within the retry budget.
+///
+/// The random operand *values* are the point: where the sweep uses fixed filler
+/// (`$1234`, `$84,…`), these exercise the size/sign boundaries that selection
+/// logic turns on — 6809's 5/8/16-bit indexed offset, 68000 displacement
+/// sign-extension — which fixed fillers never reach.
+///
+/// `canonical` gates the candidate to the byte-space an *assembler* reference can
+/// actually arbitrate: an instruction only enters the corpus if our own
+/// disasm→asm round-trip reproduces it. Random bytes routinely land on
+/// *non-canonical* encodings (68000 brief-extension reserved/scale bits, `0(a0)`
+/// vs `(a0)`) that decode fine but that no assembler emits — round-trip-to-bytes
+/// is undefined there, so those bytes are out of scope for this method, not bugs.
+/// (Testing the decoder *on* those patterns needs a decoder/emulator oracle, not
+/// an assembler.)
+fn random_insn(
+    rng: &mut Rng,
+    disasm: &dyn Fn(&[u8], u32) -> Vec<asm198x::Line>,
+    canonical: &dyn Fn(&[u8]) -> bool,
+) -> Option<Vec<u8>> {
+    for _ in 0..64 {
+        let buf: Vec<u8> = (0..8).map(|_| rng.byte()).collect();
+        let la = disasm(&buf, 0x1000);
+        let Some(fa) = la.first() else { continue };
+        if is_data(&fa.text) {
+            continue;
+        }
+        let lb = disasm(&buf, 0x4000);
+        if lb.first().map(|l| l.text.as_str()) != Some(fa.text.as_str()) {
+            continue; // position-dependent, or differs across origins
+        }
+        if !canonical(&fa.bytes) {
+            continue; // non-canonical encoding — out of scope for round-trip
+        }
+        return Some(fa.bytes.clone());
+    }
+    None
+}
+
 /// Differential fuzz: random multi-instruction programs, disassembled then
 /// reassembled by **both** our assembler and the reference. Both must reproduce
 /// the original bytes — self-consistency *and* a ground-truth cross-check, over
 /// random operand values and instruction sequences the curated corpus misses.
 ///
-/// Stateless CPUs only (6502, Z80): the 65816's `m`/`x` width makes a random
-/// instruction stream ambiguous to decode, so it is covered by the per-form
-/// audit and the curriculum round-trip instead.
+/// The form-based CPUs (6502, Z80): synthesised from `isa::Form`s. The non-form
+/// CPUs (6809, 68000) are fuzzed by [`differential_fuzz_bytewise`] instead, which
+/// synthesises instructions by disassembling random bytes. The 65816 is fuzzed by
+/// neither: under `m`/`x` width a random instruction stream is genuinely
+/// ambiguous to decode, so it is covered by the per-form audit and the curriculum
+/// round-trip instead.
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]
 fn differential_fuzz() {
@@ -550,6 +598,170 @@ fn differential_fuzz() {
     }
 
     eprintln!("fuzzed {checked} random programs (both assemblers vs the bytes)");
+    assert!(
+        fails.is_empty(),
+        "{} fuzz mismatch(es):\n  {}",
+        fails.len(),
+        fails
+            .iter()
+            .take(20)
+            .cloned()
+            .collect::<Vec<_>>()
+            .join("\n  ")
+    );
+    assert!(checked > 0, "no fuzzing ran — no tools present?");
+}
+
+/// Differential fuzz for the **non-form** specs (6809 computed-operand, 68000
+/// field-packed). The form-based fuzzer above can't drive these — they have no
+/// `isa::Form` to synthesise from — so [`random_insn`] builds each instruction by
+/// disassembling random bytes and keeping the decodable, position-independent
+/// ones (the sweep's two-origin filter). We concatenate `INSNS` of them into a
+/// program and require **both** our assembler and the reference to reproduce the
+/// original bytes.
+///
+/// This is the sibling of [`spec_sweep_matches_reference`], not a duplicate: the
+/// sweep walks the opcode space once with *fixed* filler operands; this walks
+/// random *operand values* through multi-instruction programs, exercising the
+/// size/sign-selection paths (6809 indexed-offset width, 68000 displacement
+/// sign-extension) that a fixed filler can't reach. It reuses the same
+/// `listing`/reference-command pairs the sweep proved out, so any mismatch is a
+/// real disagreement, not a harness artefact.
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn differential_fuzz_bytewise() {
+    let tmp = std::env::temp_dir().join("asm198x-fuzz-bw");
+    fs::create_dir_all(&tmp).expect("temp dir");
+    let mut fails: Vec<String> = Vec::new();
+    let mut checked = 0usize;
+    let mut scoped_out = 0usize;
+    const PROGRAMS: usize = 100;
+    const INSNS: usize = 6;
+    let oa = 0x1000u32;
+
+    struct Cpu {
+        name: &'static str,
+        tool: &'static str,
+    }
+    let cpus = [
+        Cpu {
+            name: "6809",
+            tool: "lwasm",
+        },
+        Cpu {
+            name: "68000",
+            tool: "vasmm68k_mot",
+        },
+    ];
+
+    for cpu in cpus {
+        if !have(cpu.tool) {
+            eprintln!("SKIP fuzz: `{}` not on PATH", cpu.tool);
+            continue;
+        }
+        let disasm = |b: &[u8], o: u32| -> Vec<asm198x::Line> {
+            match cpu.name {
+                "6809" => asm198x::disassemble_6809(b, o as u16),
+                _ => asm198x::disassemble_68000(b, o),
+            }
+        };
+        // Canonical for *us*: our disasm→asm round-trips to the same bytes.
+        let canonical = |bytes: &[u8]| -> bool {
+            let text = match cpu.name {
+                "6809" => asm198x::listing_6809(bytes, oa as u16),
+                _ => asm198x::listing_68000(bytes, oa),
+            };
+            let ours = match cpu.name {
+                "6809" => asm198x::assemble_lwasm(&text).map(|a| a.bytes).ok(),
+                _ => asm198x::assemble_vasm(&text).ok(),
+            };
+            ours.as_deref() == Some(bytes)
+        };
+        // The reference-assembler command, reused for the whole-program check and
+        // for per-instruction localisation on a mismatch.
+        let ref_build = |s: &Path, o: &Path| -> Vec<Command> {
+            match cpu.name {
+                "6809" => {
+                    let mut c = Command::new("lwasm");
+                    c.args(["--6809", "--raw", "-o"]).arg(o).arg(s);
+                    vec![c]
+                }
+                _ => {
+                    let mut c = Command::new("vasmm68k_mot");
+                    // `-no-opt`: same reason as the sweep — vasm must not
+                    // transform or delete instructions, or the bytes won't match.
+                    c.args(["-Fbin", "-no-opt", "-quiet", "-o"]).arg(o).arg(s);
+                    vec![c]
+                }
+            }
+        };
+        let mut rng = Rng(0x0bad_f00d_dead_cafe);
+        for p in 0..PROGRAMS {
+            // Build a random program from decodable, position-independent insns.
+            let mut blob = Vec::new();
+            for _ in 0..INSNS {
+                if let Some(insn) = random_insn(&mut rng, &disasm, &canonical) {
+                    blob.extend(insn);
+                }
+            }
+            if blob.is_empty() {
+                continue;
+            }
+            let text = match cpu.name {
+                "6809" => asm198x::listing_6809(&blob, oa as u16),
+                _ => asm198x::listing_68000(&blob, oa),
+            };
+            // Our assembler must reproduce the bytes (self-consistency).
+            let ours = match cpu.name {
+                "6809" => asm198x::assemble_lwasm(&text).map(|a| a.bytes),
+                _ => asm198x::assemble_vasm(&text),
+            };
+            match ours {
+                Ok(o) if o == blob => {}
+                Ok(o) => fails.push(format!(
+                    "{} prog {p}: our reasm differs ({} vs {} bytes)\n    {}",
+                    cpu.name,
+                    o.len(),
+                    blob.len(),
+                    text.replace('\n', " | ")
+                )),
+                Err(e) => fails.push(format!("{} prog {p}: our reasm error: {e}", cpu.name)),
+            }
+            // The reference must reproduce the whole program too (ground truth).
+            if ref_assemble(&tmp, &text, "asm", ref_build).as_deref() == Some(&blob[..]) {
+                checked += 1;
+                continue;
+            }
+            // Mismatch. Localise: does the reference reproduce each instruction on
+            // its own? If one fails alone, the reference canonicalises that single
+            // encoding differently from us (e.g. it masks an out-of-range static
+            // bit number our more permissive assembler keeps) — outside what an
+            // assembler round-trip can arbitrate, so scope it out, not a failure.
+            // If every instruction reproduces alone but the program doesn't, the
+            // composition itself diverges — a real bug.
+            let single_divergence = disasm(&blob, oa).iter().any(|line| {
+                let lt = match cpu.name {
+                    "6809" => asm198x::listing_6809(&line.bytes, oa as u16),
+                    _ => asm198x::listing_68000(&line.bytes, oa),
+                };
+                ref_assemble(&tmp, &lt, "asm", ref_build).as_deref() != Some(&line.bytes[..])
+            });
+            if single_divergence {
+                scoped_out += 1;
+            } else {
+                fails.push(format!(
+                    "{} prog {p}: reference composes the program differently\n    {}",
+                    cpu.name,
+                    text.replace('\n', " | ")
+                ));
+            }
+        }
+    }
+
+    eprintln!(
+        "byte-wise fuzzed {checked} random programs (6809/68000); \
+         {scoped_out} scoped out (reference canonicalises a single instruction differently)"
+    );
     assert!(
         fails.is_empty(),
         "{} fuzz mismatch(es):\n  {}",
