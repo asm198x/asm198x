@@ -1,0 +1,18 @@
+[package]
+name = "isa-disasm"
+description = "Spec-driven disassemblers (6502, Z80, 68000) for the 198x family, decoding against the `isa` spec. Zero dependencies beyond `isa` + std, so Emu198x can consume it without pulling in the assembler."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+# Depends only on `isa` (itself zero-dep) + std — the same neutral footing as
+# `isa`, so a consumer like Emu198x gets disassembly without the assembler,
+# parser, or CLI. See ../../decisions/why-not-llvm.md and the umbrella
+# asm198x-and-shared-isa-spec.md.
+
+[dependencies]
+isa = { path = "../isa", version = "0.0.3" }
+
+[lints]
+workspace = true

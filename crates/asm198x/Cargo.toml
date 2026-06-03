@@ -16,6 +16,7 @@ repository.workspace = true
 # path deps without a version fail packaging. release-plz keeps it in sync on
 # each bump. Local builds use the path; the version is only for packaging.
 isa = { path = "../isa", version = "0.0.3" }
+isa-disasm = { path = "../isa-disasm", version = "0.0.3" }
 
 [lints]
 workspace = true

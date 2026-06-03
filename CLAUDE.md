@@ -37,11 +37,15 @@ before changing the crate structure or the ISA layer. The load-bearing points:
 Two crates today; split further only when the per-CPU `isa` boundary or
 Emu198x's consumption makes it real.
 
-- [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`,
-  the latter including the Z80N extension set).
+- [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`
+  + `m68k`; the Z80 set includes the Z80N extensions). Zero dependencies.
+- [`crates/isa-disasm`](crates/isa-disasm) — the spec-driven disassemblers
+  (6502, Z80, 68000), decoding against `isa`. Depends only on `isa` + std, so
+  Emu198x can consume disassembly without the assembler. See
+  [`decisions/disassembler-crate.md`](decisions/disassembler-crate.md).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
-  the shared per-CPU cores, the dialect front-ends, and the disassembler) and
-  the `asm198x` CLI.
+  the shared per-CPU cores, the dialect front-ends) and the `asm198x` CLI. It
+  re-exports the disassembler from `isa-disasm`.
 
 Delivered so far, all validated byte-identical against the real tool on the
 curriculum corpus:

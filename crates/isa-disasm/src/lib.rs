@@ -1,11 +1,17 @@
-//! Spec-driven disassembly.
+//! Spec-driven disassembly — a dependency-free crate (only [`isa`] + std).
 //!
-//! The decoder walks the **same** [`isa`] spec the assembler emits from, so the
-//! two are guaranteed consistent: [`decode_one`] matches opcode bytes against
-//! the instruction set and reads the operand bytes, with no hand-written decode
-//! tables. This is the round-trip the authored-spec architecture was justified
-//! by — assemble → disassemble → reassemble reproduces the bytes (see the
-//! umbrella `asm198x-and-shared-isa-spec.md`).
+//! Disassemblers for 6502, Z80, and 68000 that decode against the **same**
+//! [`isa`] spec the assembler emits from, so the two are guaranteed consistent.
+//! This crate carries no assembler, parser, or CLI, so a consumer like Emu198x
+//! can render running code without pulling in the toolchain — see
+//! `../../decisions/disassembler-crate.md`.
+//!
+//! For the byte-opcode CPUs (6502/Z80), [`decode_one`] matches opcode bytes
+//! against the instruction set and reads the operand bytes, with no hand-written
+//! decode tables; the 68000 is field-based (the inverse of its encoder). The
+//! round-trip the authored-spec architecture was justified by — assemble →
+//! disassemble → reassemble reproduces the bytes — is exercised in `asm198x`
+//! (which has the assembler half). See the umbrella `asm198x-and-shared-isa-spec.md`.
 //!
 //! Decoding is CPU-agnostic; only the *rendering* of a matched form to text is
 //! per-CPU. The Z80 renderer treats the mode label as an operand template
@@ -655,10 +661,11 @@ fn render_reglist(mask: u16) -> String {
     groups.join("/")
 }
 
+// Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
+// crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::assemble_pasmonext;
 
     fn one(bytes: &[u8]) -> String {
         let lines = disassemble_z80(bytes, 0x8000, false);
@@ -684,28 +691,6 @@ mod tests {
     fn relative_branch_targets_are_absolute() {
         // JR at $8000, length 2, offset +5 -> target $8007.
         assert_eq!(one(&[0x18, 0x05]), "JR $8007");
-    }
-
-    /// The architectural payoff: every byte sequence the assembler emits
-    /// disassembles to text that reassembles to the identical bytes.
-    #[test]
-    fn round_trips_through_the_assembler() {
-        let source = "\
-            org $8000\n\
-            ld hl, $5800\n\
-            ld a, $07\n\
-            ld (hl), a\n\
-            ldir\n\
-            bit 7, (ix+5)\n\
-            set 0, (iy-1)\n\
-            add a, (ix+3)\n\
-            ld (ix+2), $ff\n\
-            jr $8000\n\
-            ret\n";
-        let original = assemble_pasmonext(source).expect("assemble");
-        let listing = listing_z80(&original.bytes, original.origin, true);
-        let reassembled = assemble_pasmonext(&listing).expect("reassemble");
-        assert_eq!(reassembled.bytes, original.bytes, "listing was:\n{listing}");
     }
 
     fn one_6502(bytes: &[u8]) -> String {
@@ -739,57 +724,6 @@ mod tests {
     fn unknown_byte_becomes_datum_6502() {
         // $02 is not an official opcode.
         assert_eq!(one_6502(&[0x02]), "!byte $02");
-    }
-
-    /// Assembler output disassembles to text that reassembles to identical bytes.
-    #[test]
-    fn round_trips_through_acme() {
-        let source = "\
-            *= $0800\n\
-            start:  lda #$00\n\
-                    ldx #$08\n\
-            loop:   sta $0400,x\n\
-                    lda $10\n\
-                    sta $d020\n\
-                    lda ($20),y\n\
-                    lda ($20,x)\n\
-                    jmp ($1234)\n\
-                    asl a\n\
-                    dex\n\
-                    bne loop\n\
-                    rts\n";
-        let original = crate::assemble_acme(source).expect("assemble");
-        let listing = listing_6502(&original.bytes, original.origin);
-        let reassembled = crate::assemble_acme(&listing).expect("reassemble");
-        assert_eq!(reassembled.bytes, original.bytes, "listing was:\n{listing}");
-    }
-
-    #[test]
-    fn round_trips_low_address_absolute() {
-        // A low-address absolute (e.g. from data misread as code) must survive:
-        // the disassembler emits 4-digit `$XXXX`, and acme's width rule keeps it
-        // 16-bit on reassembly rather than collapsing to zero-page.
-        let bytes = vec![0x9D, 0x00, 0x00, 0xAD, 0x10, 0x00, 0x60];
-        let listing = listing_6502(&bytes, 0x0800);
-        let re = crate::assemble_acme(&listing).expect("reassemble");
-        assert_eq!(re.bytes, bytes, "listing:\n{listing}");
-    }
-
-    #[test]
-    fn round_trips_z80n_opcodes() {
-        let source = "\
-            org $8000\n\
-            swapnib\n\
-            mul\n\
-            add hl, a\n\
-            add hl, $1234\n\
-            nextreg $07, $02\n\
-            push $abcd\n\
-            ldirx\n";
-        let original = assemble_pasmonext(source).expect("assemble");
-        let listing = listing_z80(&original.bytes, original.origin, true);
-        let reassembled = assemble_pasmonext(&listing).expect("reassemble");
-        assert_eq!(reassembled.bytes, original.bytes, "listing was:\n{listing}");
     }
 
     fn one_m68k(bytes: &[u8]) -> String {
@@ -827,51 +761,5 @@ mod tests {
     fn m68k_short_branch_target_is_absolute() {
         // bne.s at $1000, length 2, disp -8 ($F8) -> target $FFA.
         assert_eq!(one_m68k(&[0x66, 0xF8]), "bne.s $FFA");
-    }
-
-    #[test]
-    fn round_trips_m68k_pure_code() {
-        // Pure code (no interleaved data) round-trips through the optimizing
-        // assembler: the disassembly's explicit forms are optimizer-stable.
-        let source = "\
-            \tlea\t$dff000,a5\n\
-            \tmove.l\t(a5),d0\n\
-            \tand.l\td1,d0\n\
-            loop:\n\
-            \taddq.w\t#1,d0\n\
-            \tcmp.w\t#100,d0\n\
-            \tbne.s\tloop\n\
-            \tmovem.l\td0-d3/a0-a1,-(sp)\n\
-            \trts\n";
-        let original = crate::assemble_vasm(source).expect("assemble");
-        let listing = listing_68000(&original, 0);
-        let reassembled = crate::assemble_vasm(&listing).expect("reassemble");
-        assert_eq!(reassembled, original, "listing was:\n{listing}");
-    }
-
-    /// The whole optimized Amiga curriculum round-trips byte-exact when the
-    /// disassembly is reassembled with the optimizer off — the listing captures
-    /// each instruction's *encoded* form explicitly, so `-no-opt` reproduces it.
-    /// (Reassembling with the optimizer on cannot be byte-exact for the data
-    /// interleaved in the code stream: a data word that happens to decode as,
-    /// say, `add #2,d0` would be re-optimized to `addq`.)
-    #[test]
-    fn round_trips_m68k_flat_curriculum() {
-        // A representative flat (single-section) snippet exercising the
-        // optimized forms the curriculum produces.
-        let source = "\
-            \tlea\tdata,a0\n\
-            \tmove.l\t#data,d0\n\
-            \tlea\t8(a0),a0\n\
-            \tadd.l\t#$400,a1\n\
-            \tcmp.w\t#0,d2\n\
-            \tbne.s\tdata\n\
-            data:\n\
-            \tdc.w\t$0180,$0000\n\
-            \tdc.l\t$deadbeef\n";
-        let original = crate::dialects::vasm::assemble_with(source, true).expect("assemble");
-        let listing = listing_68000(&original, 0);
-        let re = crate::dialects::vasm::assemble_with(&listing, false).expect("reassemble");
-        assert_eq!(re, original, "listing was:\n{listing}");
     }
 }

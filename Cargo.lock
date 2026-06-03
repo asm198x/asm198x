@@ -7,8 +7,16 @@ name = "asm198x"
 version = "0.0.3"
 dependencies = [
  "isa",
+ "isa-disasm",
 ]
 
 [[package]]
 name = "isa"
 version = "0.0.3"
+
+[[package]]
+name = "isa-disasm"
+version = "0.0.3"
+dependencies = [
+ "isa",
+]
