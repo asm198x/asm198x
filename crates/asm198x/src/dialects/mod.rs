@@ -9,6 +9,7 @@ pub(crate) mod ca65;
 pub(crate) mod mos6502;
 pub(crate) mod pasmo;
 pub(crate) mod sjasmplus;
+pub(crate) mod vasm;
 pub(crate) mod z80;
 
 pub(crate) use acme::Acme;

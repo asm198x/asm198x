@@ -16,6 +16,9 @@ enum Assembler {
     /// ca65 for the NES — assembled and linked to a `.nes` ROM, handled
     /// separately from the flat-binary dialects.
     Ca65,
+    /// vasm Motorola-syntax 68000 — a flat big-endian code image (Stage 1),
+    /// handled directly in `run` like ca65.
+    Vasm,
     Pasmo {
         z80n: bool,
     },
@@ -40,6 +43,7 @@ impl Assembler {
             // ACME is the default 6502 dialect (C64); ca65 targets the NES.
             Some("acme" | "6502" | "mos6502") => Ok(Self::Acme),
             Some("ca65" | "nes") => Ok(Self::Ca65),
+            Some("vasm" | "68000" | "m68k" | "mot") => Ok(Self::Vasm),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo {
@@ -65,8 +69,8 @@ impl Assembler {
     fn assemble(self, source: &str) -> Result<asm198x::Assembly, asm198x::AsmError> {
         match self {
             Self::Acme => asm198x::assemble_acme(source),
-            // ca65 is linked to a ROM and handled directly in `run`.
-            Self::Ca65 => unreachable!("ca65 is linked in run()"),
+            // ca65 and vasm produce non-flat output and are handled in `run`.
+            Self::Ca65 | Self::Vasm => unreachable!("ca65/vasm handled in run()"),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
             Self::Pasmo { z80n: true } => asm198x::assemble_pasmonext(source),
             Self::Sjasmplus { z80n: false } => asm198x::assemble_sjasmplus(source),
@@ -148,6 +152,7 @@ fn run(args: &[String]) -> Result<String, String> {
             Assembler::Pasmo { z80n } | Assembler::Sjasmplus { z80n } => {
                 print!("{}", asm198x::listing_z80(&bytes, origin, z80n));
             }
+            Assembler::Vasm => return Err("68000 disassembly is not yet implemented".into()),
         }
         return Ok(format!(
             "disassembled {} byte(s) at ${origin:04X}",
@@ -157,6 +162,15 @@ fn run(args: &[String]) -> Result<String, String> {
 
     let assembler = Assembler::resolve(dialect, target)?;
     let source = std::fs::read_to_string(input).map_err(|e| format!("cannot read {input}: {e}"))?;
+
+    // vasm (68000) produces a flat big-endian code image (Stage 1).
+    if let Assembler::Vasm = assembler {
+        let code = asm198x::assemble_vasm(&source).map_err(|e| e.to_string())?;
+        let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
+        std::fs::write(&out_path, &code)
+            .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+        return Ok(format!("assembled {} byte(s) -> {}", code.len(), out_path.display()));
+    }
 
     // ca65 assembles and links to a `.nes` ROM rather than a flat binary.
     if let Assembler::Ca65 = assembler {
