@@ -277,6 +277,40 @@ pub const SET: Spec = Spec {
                 operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
             }],
         },
+        // ORI/ANDI/EORI — the bitwise counterparts of ADDI/SUBI/CMPI, and
+        // distinct mnemonics for the same reason: `or`/`and #imm,Dn` assemble to
+        // the immediate-source EA encoding ($807C/$C07C…), so only `ori`/`andi`
+        // reach $00xx/$02xx. `eor #imm` has no immediate-source form, so vasm
+        // routes it to EORI ($0Axx) — which the disassembler emits, closing the
+        // round-trip without a dialect alias. (The CCR/SR target forms — $003C,
+        // $007C, … — need a dedicated operand slot and are not yet modelled.)
+        Insn {
+            mnemonic: "ORI",
+            summary: "Inclusive-OR immediate",
+            forms: &[Form {
+                base: 0x0000,
+                size: SizeEnc::Std6,
+                operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "ANDI",
+            summary: "AND immediate",
+            forms: &[Form {
+                base: 0x0200,
+                size: SizeEnc::Std6,
+                operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "EORI",
+            summary: "Exclusive-OR immediate",
+            forms: &[Form {
+                base: 0x0A00,
+                size: SizeEnc::Std6,
+                operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
+            }],
+        },
         Insn {
             mnemonic: "BRA",
             summary: "Branch always",

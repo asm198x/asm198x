@@ -1223,6 +1223,16 @@ mod tests {
         assert_eq!(one_m68k(&[0x06, 0x00, 0x00, 0x10]), "addi.b #16,d0");
         assert_eq!(one_m68k(&[0x04, 0x00, 0x00, 0x10]), "subi.b #16,d0");
         assert_eq!(one_m68k(&[0x0C, 0x00, 0x00, 0x10]), "cmpi.b #16,d0");
+        // $00/$02/$0A are the bitwise counterparts ori/andi/eori. These were
+        // absent from the spec — a missing instruction the form-audit, the
+        // sweep, and the curriculum were all structurally blind to (only a
+        // cross-check against an independent decoder surfaced it).
+        assert_eq!(one_m68k(&[0x00, 0x00, 0x00, 0x10]), "ori.b #16,d0");
+        assert_eq!(one_m68k(&[0x02, 0x40, 0x12, 0x34]), "andi.w #4660,d0");
+        assert_eq!(
+            one_m68k(&[0x0A, 0x80, 0x12, 0x34, 0x56, 0x78]),
+            "eori.l #305419896,d0"
+        );
     }
 
     #[test]
