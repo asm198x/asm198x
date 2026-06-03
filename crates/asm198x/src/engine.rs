@@ -98,51 +98,66 @@ pub(crate) enum Expr {
 }
 
 impl Expr {
-    /// Evaluate against the symbol table, with `pc` the address of the current
-    /// statement (the value of [`Expr::Pc`]).
+    /// Evaluate against the engine's `u16` symbol table, with `pc` the address
+    /// of the current statement. A thin wrapper over [`Expr::eval_with`], the
+    /// single evaluator shared by every dialect.
     pub(crate) fn eval(
         &self,
         symbols: &BTreeMap<String, u16>,
         pc: i64,
         line: usize,
     ) -> Result<i64, AsmError> {
-        let overflow = || AsmError::new(line, "arithmetic overflow in expression");
+        self.eval_with(&|s| symbols.get(s).map(|v| i64::from(*v)), Some(pc), line)
+    }
+
+    /// The one expression evaluator, shared by the engine and every dialect.
+    /// `resolve` returns a symbol's value or `None` if it's unknown (or not a
+    /// constant). `pc` is `Some` where the location counter (`*`/`$`) is
+    /// meaningful, `None` in parse-time-constant contexts (where `*` is an
+    /// error). Keeping this the only evaluator means a new operator or rule is
+    /// added in exactly one place.
+    pub(crate) fn eval_with(
+        &self,
+        resolve: &impl Fn(&str) -> Option<i64>,
+        pc: Option<i64>,
+        line: usize,
+    ) -> Result<i64, AsmError> {
         Ok(match self {
             Expr::Num(n) => *n,
-            Expr::Pc => pc,
-            Expr::Sym(s) => i64::from(
-                *symbols
-                    .get(s)
-                    .ok_or_else(|| AsmError::new(line, format!("undefined symbol `{s}`")))?,
-            ),
-            Expr::Lo(e) => e.eval(symbols, pc, line)? & 0xFF,
-            Expr::Hi(e) => (e.eval(symbols, pc, line)? >> 8) & 0xFF,
+            Expr::Pc => pc.ok_or_else(|| AsmError::new(line, "`*` cannot be used here"))?,
+            Expr::Sym(s) => resolve(s)
+                .ok_or_else(|| AsmError::new(line, format!("undefined symbol `{s}`")))?,
+            Expr::Lo(e) => e.eval_with(resolve, pc, line)? & 0xFF,
+            Expr::Hi(e) => (e.eval_with(resolve, pc, line)? >> 8) & 0xFF,
             Expr::Neg(e) => e
-                .eval(symbols, pc, line)?
+                .eval_with(resolve, pc, line)?
                 .checked_neg()
-                .ok_or_else(overflow)?,
+                .ok_or_else(|| AsmError::new(line, "arithmetic overflow in expression"))?,
             Expr::Bin(op, l, r) => {
-                let a = l.eval(symbols, pc, line)?;
-                let b = r.eval(symbols, pc, line)?;
-                match op {
-                    BinOp::Add => a.checked_add(b).ok_or_else(overflow)?,
-                    BinOp::Sub => a.checked_sub(b).ok_or_else(overflow)?,
-                    BinOp::Mul => a.checked_mul(b).ok_or_else(overflow)?,
-                    BinOp::Div => {
-                        if b == 0 {
-                            return Err(AsmError::new(line, "division by zero in expression"));
-                        }
-                        a.checked_div(b).ok_or_else(overflow)?
-                    }
-                    BinOp::And => a & b,
-                    BinOp::Or => a | b,
-                    BinOp::Xor => a ^ b,
-                    BinOp::Shl => a.wrapping_shl(b as u32),
-                    BinOp::Shr => a.wrapping_shr(b as u32),
-                }
+                let a = l.eval_with(resolve, pc, line)?;
+                let b = r.eval_with(resolve, pc, line)?;
+                eval_binop(*op, a, b, line)?
             }
         })
     }
+}
+
+/// Evaluate one binary operator — the single place each operator's semantics
+/// live (shifts wrap; `/` checks for zero; `+ - *` check for overflow).
+pub(crate) fn eval_binop(op: BinOp, a: i64, b: i64, line: usize) -> Result<i64, AsmError> {
+    let overflow = || AsmError::new(line, "arithmetic overflow in expression");
+    Ok(match op {
+        BinOp::Add => a.checked_add(b).ok_or_else(overflow)?,
+        BinOp::Sub => a.checked_sub(b).ok_or_else(overflow)?,
+        BinOp::Mul => a.checked_mul(b).ok_or_else(overflow)?,
+        BinOp::Div if b == 0 => return Err(AsmError::new(line, "division by zero in expression")),
+        BinOp::Div => a.checked_div(b).ok_or_else(overflow)?,
+        BinOp::And => a & b,
+        BinOp::Or => a | b,
+        BinOp::Xor => a ^ b,
+        BinOp::Shl => a.wrapping_shl(b as u32),
+        BinOp::Shr => a.wrapping_shr(b as u32),
+    })
 }
 
 // ---------------------------------------------------------------------------

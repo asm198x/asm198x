@@ -26,38 +26,11 @@ use isa::m68k::{self, EaModes, Size, SizeEnc, Slot, ea};
 use super::mos6502::{self, is_ident, split_data_items, split_first_word, string_literal};
 use crate::engine::{AsmError, BinOp, Expr};
 
-/// Evaluate an expression against bound symbols, with `*` (the location counter)
-/// resolving to `here`. Like the shared `fold_const` but PC-aware.
+/// Evaluate an expression against bound symbols, with `*` (the location
+/// counter) resolving to `here`. A thin PC-aware wrapper over the shared
+/// [`Expr::eval_with`].
 fn eval(e: &Expr, consts: &BTreeMap<String, i64>, here: i64, line: usize) -> Result<i64, AsmError> {
-    let overflow = || AsmError::new(line, "arithmetic overflow in expression");
-    Ok(match e {
-        Expr::Num(n) => *n,
-        Expr::Pc => here,
-        Expr::Sym(s) => *consts
-            .get(s)
-            .ok_or_else(|| AsmError::new(line, format!("undefined symbol `{s}`")))?,
-        Expr::Lo(b) => eval(b, consts, here, line)? & 0xFF,
-        Expr::Hi(b) => (eval(b, consts, here, line)? >> 8) & 0xFF,
-        Expr::Neg(b) => eval(b, consts, here, line)?
-            .checked_neg()
-            .ok_or_else(overflow)?,
-        Expr::Bin(op, l, r) => {
-            let a = eval(l, consts, here, line)?;
-            let b = eval(r, consts, here, line)?;
-            match op {
-                BinOp::Add => a.checked_add(b).ok_or_else(overflow)?,
-                BinOp::Sub => a.checked_sub(b).ok_or_else(overflow)?,
-                BinOp::Mul => a.checked_mul(b).ok_or_else(overflow)?,
-                BinOp::Div if b != 0 => a / b,
-                BinOp::Div => return Err(AsmError::new(line, "division by zero")),
-                BinOp::And => a & b,
-                BinOp::Or => a | b,
-                BinOp::Xor => a ^ b,
-                BinOp::Shl => a.wrapping_shl(b as u32),
-                BinOp::Shr => a.wrapping_shr(b as u32),
-            }
-        }
-    })
+    e.eval_with(&|s| consts.get(s).copied(), Some(here), line)
 }
 
 /// Apply vasm's instruction-rewriting optimizations, returning the effective

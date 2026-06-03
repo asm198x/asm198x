@@ -429,33 +429,11 @@ fn literal(expr: &Expr, consts: &BTreeMap<String, i64>, line: usize) -> Result<i
 }
 
 /// Fold an expression to a constant, resolving symbols only against `equ`
-/// constants. `None` if it references an unknown symbol or overflows.
+/// constants. `None` if it references an unknown symbol or overflows. `$` (the
+/// location counter) is unknown until the engine's emit pass, so it never folds
+/// here (the parse-time-constant context passes no PC).
 pub(crate) fn eval_const(expr: &Expr, consts: &BTreeMap<String, i64>) -> Option<i64> {
-    match expr {
-        Expr::Num(n) => Some(*n),
-        // `$` is the location counter — unknown until the engine's emit pass,
-        // so it can never fold to a parse-time constant.
-        Expr::Pc => None,
-        Expr::Sym(s) => consts.get(s).copied(),
-        Expr::Lo(e) => Some(eval_const(e, consts)? & 0xFF),
-        Expr::Hi(e) => Some((eval_const(e, consts)? >> 8) & 0xFF),
-        Expr::Neg(e) => eval_const(e, consts)?.checked_neg(),
-        Expr::Bin(op, l, r) => {
-            let a = eval_const(l, consts)?;
-            let b = eval_const(r, consts)?;
-            match op {
-                BinOp::Add => a.checked_add(b),
-                BinOp::Sub => a.checked_sub(b),
-                BinOp::Mul => a.checked_mul(b),
-                BinOp::Div => (b != 0).then(|| a / b),
-                BinOp::And => Some(a & b),
-                BinOp::Or => Some(a | b),
-                BinOp::Xor => Some(a ^ b),
-                BinOp::Shl => Some(a.wrapping_shl(b as u32)),
-                BinOp::Shr => Some(a.wrapping_shr(b as u32)),
-            }
-        }
-    }
+    expr.eval_with(&|s| consts.get(s).copied(), None, 0).ok()
 }
 
 /// Rewrite every bare local reference (a leading-`.` symbol) in an operation,

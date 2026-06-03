@@ -108,41 +108,14 @@ fn pick_zp_abs(
 }
 
 /// Fold an expression to a constant, resolving symbols against the parse-time
-/// `env`. Errors on the location counter or an unknown symbol.
+/// `env`. Errors on the location counter or an unknown symbol. A parse-time
+/// constant context, so `*` (PC) is not available.
 pub(crate) fn fold_const(
     e: &Expr,
     env: &BTreeMap<String, i64>,
     line: usize,
 ) -> Result<i64, AsmError> {
-    let overflow = || AsmError::new(line, "arithmetic overflow in expression");
-    Ok(match e {
-        Expr::Num(n) => *n,
-        Expr::Sym(s) => *env
-            .get(s)
-            .ok_or_else(|| AsmError::new(line, format!("`{s}` is not a parse-time constant")))?,
-        Expr::Pc => return Err(AsmError::new(line, "`*` cannot be used here")),
-        Expr::Lo(b) => fold_const(b, env, line)? & 0xFF,
-        Expr::Hi(b) => (fold_const(b, env, line)? >> 8) & 0xFF,
-        Expr::Neg(b) => fold_const(b, env, line)?
-            .checked_neg()
-            .ok_or_else(overflow)?,
-        Expr::Bin(op, l, r) => {
-            let a = fold_const(l, env, line)?;
-            let b = fold_const(r, env, line)?;
-            match op {
-                BinOp::Add => a.checked_add(b).ok_or_else(overflow)?,
-                BinOp::Sub => a.checked_sub(b).ok_or_else(overflow)?,
-                BinOp::Mul => a.checked_mul(b).ok_or_else(overflow)?,
-                BinOp::Div if b != 0 => a / b,
-                BinOp::Div => return Err(AsmError::new(line, "division by zero in expression")),
-                BinOp::And => a & b,
-                BinOp::Or => a | b,
-                BinOp::Xor => a ^ b,
-                BinOp::Shl => a.wrapping_shl(b as u32),
-                BinOp::Shr => a.wrapping_shr(b as u32),
-            }
-        }
-    })
+    e.eval_with(&|s| env.get(s).copied(), None, line)
 }
 
 /// Parse operand structure (immediate, indirect, indexed, direct), delegating
