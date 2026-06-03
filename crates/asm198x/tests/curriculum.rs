@@ -87,6 +87,75 @@ fn ref_bytes(tmp: &Path, out: &Path, mut build: Command) -> Option<Vec<u8>> {
     fs::read(out).ok()
 }
 
+/// Strip the optional `HUNK_SYMBOL` (debug) blocks from a vasm hunk executable,
+/// leaving the loadable image AmigaDOS actually consumes — the parity target,
+/// since we omit the symbol table (its order is vasm's internal hash order).
+/// Returns `None` on any malformed/unrecognised hunk.
+fn strip_hunk_symbols(data: &[u8]) -> Option<Vec<u8>> {
+    let u32at = |o: usize| -> Option<u32> {
+        data.get(o..o + 4)
+            .map(|b| u32::from_be_bytes([b[0], b[1], b[2], b[3]]))
+    };
+    let mut out = Vec::new();
+    let mut i = 0usize;
+    while i < data.len() {
+        match u32at(i)? {
+            0x3f3 => {
+                // HUNK_HEADER: resident-library names (until 0), then hunk sizes.
+                let start = i;
+                i += 4;
+                while u32at(i)? != 0 {
+                    i += 4 + u32at(i)? as usize * 4;
+                }
+                i += 4; // the terminating zero
+                i += 4; // table size
+                let first = u32at(i)?;
+                i += 4;
+                let last = u32at(i)?;
+                i += 4 + (last - first + 1) as usize * 4;
+                out.extend_from_slice(data.get(start..i)?);
+            }
+            tag @ (0x3e9 | 0x3ea) => {
+                // HUNK_CODE / HUNK_DATA: a longword count, then that many words.
+                let _ = tag;
+                let sz = u32at(i + 4)? as usize;
+                let end = i + 8 + sz * 4;
+                out.extend_from_slice(data.get(i..end)?);
+                i = end;
+            }
+            0x3eb => {
+                // HUNK_BSS: a size, no data.
+                out.extend_from_slice(data.get(i..i + 8)?);
+                i += 8;
+            }
+            0x3ec => {
+                // HUNK_RELOC32: [count, target hunk, offsets…] blocks until 0.
+                let start = i;
+                i += 4;
+                while u32at(i)? != 0 {
+                    i += 8 + u32at(i)? as usize * 4;
+                }
+                i += 4;
+                out.extend_from_slice(data.get(start..i)?);
+            }
+            0x3f0 => {
+                // HUNK_SYMBOL: [name-longs, name, value] until 0 — dropped.
+                i += 4;
+                while u32at(i)? != 0 {
+                    i += 4 + u32at(i)? as usize * 4 + 4;
+                }
+                i += 4;
+            }
+            0x3f2 => {
+                out.extend_from_slice(data.get(i..i + 4)?);
+                i += 4;
+            }
+            _ => return None,
+        }
+    }
+    Some(out)
+}
+
 #[test]
 #[ignore = "needs the reference assemblers and the Code198x checkout; run with --ignored"]
 fn curriculum_is_byte_identical() {
@@ -220,6 +289,50 @@ fn curriculum_is_byte_identical() {
         }
     } else {
         eprintln!("SKIP: `sjasmplus` not on PATH");
+    }
+
+    // --- 68000 / vasm (Amiga, signal + exodus) ----------------------------
+    if have("vasmm68k_mot") {
+        let amiga = root.join("code-samples/commodore-amiga/assembly");
+        let files: Vec<_> = main_asms(&amiga.join("signal"))
+            .into_iter()
+            .chain(main_asms(&amiga.join("exodus")))
+            .collect();
+        for file in &files {
+            let src = fs::read_to_string(file).expect("read source");
+            // Hunk executable (every unit): loadable-image parity — compare with
+            // vasm's debug symbol table stripped, which we deliberately omit.
+            let ours_exe = asm198x::assemble_vasm_exe(&src).expect("vasm exe assemble");
+            let exe = tmp.join("ref.exe");
+            let mut cmd = Command::new("vasmm68k_mot");
+            cmd.args(["-Fhunkexe", "-kick1hunks", "-quiet", "-o"])
+                .arg(&exe)
+                .arg(file);
+            match ref_bytes(&tmp, &exe, cmd).and_then(|b| strip_hunk_symbols(&b)) {
+                Some(reference) => {
+                    checked += 1;
+                    if ours_exe != reference {
+                        fails.push(format!("vasm hunkexe: {}", label(file)));
+                    }
+                }
+                None => fails.push(format!("vasm hunkexe reference failed: {}", label(file))),
+            }
+            // Flat -Fbin: only the single-section units build as a flat binary
+            // (our `assemble_vasm` errors on multi-section, as `-Fbin` does).
+            if let Ok(ours_bin) = asm198x::assemble_vasm(&src) {
+                let bin = tmp.join("ref.bin");
+                let mut cmd = Command::new("vasmm68k_mot");
+                cmd.args(["-Fbin", "-quiet", "-o"]).arg(&bin).arg(file);
+                if let Some(reference) = ref_bytes(&tmp, &bin, cmd) {
+                    checked += 1;
+                    if ours_bin != reference {
+                        fails.push(format!("vasm -Fbin: {}", label(file)));
+                    }
+                }
+            }
+        }
+    } else {
+        eprintln!("SKIP: `vasmm68k_mot` not on PATH");
     }
 
     eprintln!("checked {checked} byte-identity comparisons across the curriculum");
