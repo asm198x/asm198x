@@ -200,7 +200,7 @@ pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, Asm
                 operands,
             } => {
                 let here = out.len() as i64;
-                let size = branch_size(size, word_branch[i]);
+                let size = branch_size(&s.kind, size, word_branch[i]);
                 let bytes = encode(mnemonic, size, operands, &ctx, &consts, here, s.line)?;
                 out.extend_from_slice(&bytes);
             }
@@ -243,10 +243,15 @@ fn layout(
     Ok(consts)
 }
 
-/// The effective branch size: word form once grown, otherwise the written size
-/// (`Some(B)` short by default for a relaxable branch).
-fn branch_size(written: &Option<Size>, grown: bool) -> Option<Size> {
-    if grown { Some(Size::W) } else { *written }
+/// The effective size of a statement's branch. A relaxable branch (including a
+/// bare `bra`/`bsr`/`bcc`, which vasm shortens) is short by default and word
+/// once grown; anything else keeps its written size.
+fn branch_size(kind: &Stmt, written: &Option<Size>, grown: bool) -> Option<Size> {
+    if relaxable_branch_target(kind).is_some() {
+        if grown { Some(Size::W) } else { Some(Size::B) }
+    } else {
+        *written
+    }
 }
 
 /// The branch-target expression of a relaxable branch (BRA/BSR/Bcc, not forced
@@ -567,7 +572,7 @@ fn stmt_size(
             let form = match_form(insn, operands).ok_or_else(|| {
                 AsmError::new(line, format!("`{mnemonic}` has no form for those operands"))
             })?;
-            let eff = branch_size(size, word_branch);
+            let eff = branch_size(kind, size, word_branch);
             let sz = eff.unwrap_or(Size::W);
             // Opcode word, plus each slot's extension words (a Quick8 immediate
             // rides in the opcode, so it adds nothing).
