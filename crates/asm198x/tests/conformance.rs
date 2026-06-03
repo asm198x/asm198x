@@ -109,10 +109,19 @@ fn spec_opcodes_match_reference() {
                     Some(r) if r.len() >= 2 => {
                         checked += 1;
                         if r[2..] != bytes[..] {
-                            fails.push(format!("6502 {} {}: ours {:02X?} vs acme {:02X?}", insn.mnemonic, form.mode, bytes, &r[2..]));
+                            fails.push(format!(
+                                "6502 {} {}: ours {:02X?} vs acme {:02X?}",
+                                insn.mnemonic,
+                                form.mode,
+                                bytes,
+                                &r[2..]
+                            ));
                         }
                     }
-                    _ => fails.push(format!("6502 {} {}: acme rejected", insn.mnemonic, form.mode)),
+                    _ => fails.push(format!(
+                        "6502 {} {}: acme rejected",
+                        insn.mnemonic, form.mode
+                    )),
                 }
             }
         }
@@ -135,10 +144,18 @@ fn spec_opcodes_match_reference() {
                     Some(r) => {
                         checked += 1;
                         if r != bytes {
-                            fails.push(format!("Z80 {} {}: ours {:02X?} vs pasmo {:02X?}", insn.mnemonic, form.mode, bytes, r));
+                            fails.push(format!(
+                                "Z80 {} {}: ours {:02X?} vs pasmo {:02X?}",
+                                insn.mnemonic, form.mode, bytes, r
+                            ));
                         }
                     }
-                    None => fails.push(format!("Z80 {} {}: pasmo rejected `{}`", insn.mnemonic, form.mode, text.lines().nth(1).unwrap_or("").trim())),
+                    None => fails.push(format!(
+                        "Z80 {} {}: pasmo rejected `{}`",
+                        insn.mnemonic,
+                        form.mode,
+                        text.lines().nth(1).unwrap_or("").trim()
+                    )),
                 }
             }
         }
@@ -180,10 +197,18 @@ fn spec_opcodes_match_reference() {
                         Some(r) => {
                             checked += 1;
                             if r != bytes {
-                                fails.push(format!("65816 {} {}: ours {:02X?} vs ca65 {:02X?}", insn.mnemonic, form.mode, bytes, r));
+                                fails.push(format!(
+                                    "65816 {} {}: ours {:02X?} vs ca65 {:02X?}",
+                                    insn.mnemonic, form.mode, bytes, r
+                                ));
                             }
                         }
-                        None => fails.push(format!("65816 {} {}: ca65 rejected `{}`", insn.mnemonic, form.mode, text.lines().last().unwrap_or("").trim())),
+                        None => fails.push(format!(
+                            "65816 {} {}: ca65 rejected `{}`",
+                            insn.mnemonic,
+                            form.mode,
+                            text.lines().last().unwrap_or("").trim()
+                        )),
                     }
                 }
             }
@@ -256,11 +281,15 @@ fn sweep(
         match reassemble(&listing(instr, oa)) {
             Some(b) if b == *instr => {}
             Some(b) => {
-                fails.push(format!("{name}: {instr:02X?} -> ref {b:02X?} (disasm `{text}`)"));
+                fails.push(format!(
+                    "{name}: {instr:02X?} -> ref {b:02X?} (disasm `{text}`)"
+                ));
                 break;
             }
             None => {
-                fails.push(format!("{name}: ref rejected {instr:02X?} (disasm `{text}`)"));
+                fails.push(format!(
+                    "{name}: ref rejected {instr:02X?} (disasm `{text}`)"
+                ));
                 break;
             }
         }
@@ -321,7 +350,14 @@ fn spec_sweep_matches_reference() {
                 vec![
                     (w >> 8) as u8,
                     w as u8,
-                    0x00, 0x10, 0x00, 0x20, 0x00, 0x30, 0x00, 0x40,
+                    0x00,
+                    0x10,
+                    0x00,
+                    0x20,
+                    0x00,
+                    0x30,
+                    0x00,
+                    0x40,
                 ]
             })
             .collect();
@@ -353,7 +389,12 @@ fn spec_sweep_matches_reference() {
         fails.is_empty(),
         "{} sweep mismatch(es):\n  {}",
         fails.len(),
-        fails.iter().take(30).cloned().collect::<Vec<_>>().join("\n  ")
+        fails
+            .iter()
+            .take(30)
+            .cloned()
+            .collect::<Vec<_>>()
+            .join("\n  ")
     );
     assert!(checked > 0, "no sweeps ran — no tools present?");
 }
@@ -362,7 +403,10 @@ fn spec_sweep_matches_reference() {
 struct Rng(u64);
 impl Rng {
     fn next_u32(&mut self) -> u32 {
-        self.0 = self.0.wrapping_mul(6364136223846793005).wrapping_add(1442695040888963407);
+        self.0 = self
+            .0
+            .wrapping_mul(6364136223846793005)
+            .wrapping_add(1442695040888963407);
         (self.0 >> 33) as u32
     }
     fn below(&mut self, n: usize) -> usize {
@@ -410,7 +454,16 @@ fn differential_fuzz() {
         name: &'static str,
         tool: &'static str,
     }
-    let cpus = [Cpu { name: "6502", tool: "acme" }, Cpu { name: "Z80", tool: "pasmo" }];
+    let cpus = [
+        Cpu {
+            name: "6502",
+            tool: "acme",
+        },
+        Cpu {
+            name: "Z80",
+            tool: "pasmo",
+        },
+    ];
 
     for cpu in cpus {
         if !have(cpu.tool) {
@@ -418,8 +471,16 @@ fn differential_fuzz() {
             continue;
         }
         let forms: Vec<&isa::Form> = match cpu.name {
-            "6502" => isa::mos6502::SET.instructions.iter().flat_map(|i| i.forms).collect(),
-            _ => isa::z80::SET.instructions.iter().flat_map(|i| i.forms).collect(),
+            "6502" => isa::mos6502::SET
+                .instructions
+                .iter()
+                .flat_map(|i| i.forms)
+                .collect(),
+            _ => isa::z80::SET
+                .instructions
+                .iter()
+                .flat_map(|i| i.forms)
+                .collect(),
         };
         let mut rng = Rng(0x1234_5678_9abc_def0);
         for p in 0..PROGRAMS {
@@ -444,7 +505,12 @@ fn differential_fuzz() {
             };
             match ours {
                 Ok(o) if o == bytes => {}
-                Ok(o) => fails.push(format!("{} prog {p}: our reasm differs ({} vs {} bytes)", cpu.name, o.len(), bytes.len())),
+                Ok(o) => fails.push(format!(
+                    "{} prog {p}: our reasm differs ({} vs {} bytes)",
+                    cpu.name,
+                    o.len(),
+                    bytes.len()
+                )),
                 Err(e) => fails.push(format!("{} prog {p}: our reasm error: {e}", cpu.name)),
             }
             let reference = ref_assemble(&tmp, &text, "src", |src, out| match cpu.name {
@@ -460,11 +526,25 @@ fn differential_fuzz() {
                 }
             });
             // acme prepends a 2-byte load address.
-            let reference = reference.map(|r| if cpu.name == "6502" && r.len() >= 2 { r[2..].to_vec() } else { r });
+            let reference = reference.map(|r| {
+                if cpu.name == "6502" && r.len() >= 2 {
+                    r[2..].to_vec()
+                } else {
+                    r
+                }
+            });
             match reference {
                 Some(r) if r == bytes => checked += 1,
-                Some(r) => fails.push(format!("{} prog {p}: reference reasm differs ({} vs {} bytes)", cpu.name, r.len(), bytes.len())),
-                None => fails.push(format!("{} prog {p}: reference rejected disassembly", cpu.name)),
+                Some(r) => fails.push(format!(
+                    "{} prog {p}: reference reasm differs ({} vs {} bytes)",
+                    cpu.name,
+                    r.len(),
+                    bytes.len()
+                )),
+                None => fails.push(format!(
+                    "{} prog {p}: reference rejected disassembly",
+                    cpu.name
+                )),
             }
         }
     }
@@ -474,7 +554,12 @@ fn differential_fuzz() {
         fails.is_empty(),
         "{} fuzz mismatch(es):\n  {}",
         fails.len(),
-        fails.iter().take(20).cloned().collect::<Vec<_>>().join("\n  ")
+        fails
+            .iter()
+            .take(20)
+            .cloned()
+            .collect::<Vec<_>>()
+            .join("\n  ")
     );
     assert!(checked > 0, "no fuzzing ran — no tools present?");
 }

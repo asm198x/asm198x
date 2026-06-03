@@ -96,28 +96,72 @@ macro_rules! inst {
 /// (`None` for `sta`, which has no immediate form).
 macro_rules! alu816 {
     ($mnemonic:literal, $summary:literal, $base:literal, imm16 = $imm16:literal) => {
-        inst!($mnemonic, $summary, [
-            form(&[$base | 0x09], "immediate16",  ONE_IMM16, Cycles::fixed(3), "NZ"),
-            form(&[$base | 0x12], "(indirect)",   ONE_DP,    Cycles::fixed(5), "NZ"),
-            form(&[$base | 0x07], "[indirect]",   ONE_DP,    Cycles::fixed(6), "NZ"),
-            form(&[$base | 0x17], "[indirect],y", ONE_DP,    Cycles::fixed(6), "NZ"),
-            form(&[$base | 0x0F], "long",         ONE_LONG,  Cycles::fixed(5), "NZ"),
-            form(&[$base | 0x1F], "long,x",       ONE_LONG,  Cycles::fixed(5), "NZ"),
-            form(&[$base | 0x03], "stack,s",      ONE_DP,    Cycles::fixed(4), "NZ"),
-            form(&[$base | 0x13], "(stack,s),y",  ONE_DP,    Cycles::fixed(7), "NZ"),
-        ])
+        inst!(
+            $mnemonic,
+            $summary,
+            [
+                form(
+                    &[$base | 0x09],
+                    "immediate16",
+                    ONE_IMM16,
+                    Cycles::fixed(3),
+                    "NZ"
+                ),
+                form(
+                    &[$base | 0x12],
+                    "(indirect)",
+                    ONE_DP,
+                    Cycles::fixed(5),
+                    "NZ"
+                ),
+                form(
+                    &[$base | 0x07],
+                    "[indirect]",
+                    ONE_DP,
+                    Cycles::fixed(6),
+                    "NZ"
+                ),
+                form(
+                    &[$base | 0x17],
+                    "[indirect],y",
+                    ONE_DP,
+                    Cycles::fixed(6),
+                    "NZ"
+                ),
+                form(&[$base | 0x0F], "long", ONE_LONG, Cycles::fixed(5), "NZ"),
+                form(&[$base | 0x1F], "long,x", ONE_LONG, Cycles::fixed(5), "NZ"),
+                form(&[$base | 0x03], "stack,s", ONE_DP, Cycles::fixed(4), "NZ"),
+                form(
+                    &[$base | 0x13],
+                    "(stack,s),y",
+                    ONE_DP,
+                    Cycles::fixed(7),
+                    "NZ"
+                ),
+            ]
+        )
     };
     // `sta` has the same new modes but no immediate.
     ($mnemonic:literal, $summary:literal, $base:literal, no_imm) => {
-        inst!($mnemonic, $summary, [
-            form(&[$base | 0x12], "(indirect)",   ONE_DP,   Cycles::fixed(5), ""),
-            form(&[$base | 0x07], "[indirect]",   ONE_DP,   Cycles::fixed(6), ""),
-            form(&[$base | 0x17], "[indirect],y", ONE_DP,   Cycles::fixed(6), ""),
-            form(&[$base | 0x0F], "long",         ONE_LONG, Cycles::fixed(5), ""),
-            form(&[$base | 0x1F], "long,x",       ONE_LONG, Cycles::fixed(5), ""),
-            form(&[$base | 0x03], "stack,s",      ONE_DP,   Cycles::fixed(4), ""),
-            form(&[$base | 0x13], "(stack,s),y",  ONE_DP,   Cycles::fixed(7), ""),
-        ])
+        inst!(
+            $mnemonic,
+            $summary,
+            [
+                form(&[$base | 0x12], "(indirect)", ONE_DP, Cycles::fixed(5), ""),
+                form(&[$base | 0x07], "[indirect]", ONE_DP, Cycles::fixed(6), ""),
+                form(
+                    &[$base | 0x17],
+                    "[indirect],y",
+                    ONE_DP,
+                    Cycles::fixed(6),
+                    ""
+                ),
+                form(&[$base | 0x0F], "long", ONE_LONG, Cycles::fixed(5), ""),
+                form(&[$base | 0x1F], "long,x", ONE_LONG, Cycles::fixed(5), ""),
+                form(&[$base | 0x03], "stack,s", ONE_DP, Cycles::fixed(4), ""),
+                form(&[$base | 0x13], "(stack,s),y", ONE_DP, Cycles::fixed(7), ""),
+            ]
+        )
     };
 }
 

@@ -129,8 +129,9 @@ impl Expr {
         Ok(match self {
             Expr::Num(n) => *n,
             Expr::Pc => pc.ok_or_else(|| AsmError::new(line, "`*` cannot be used here"))?,
-            Expr::Sym(s) => resolve(s)
-                .ok_or_else(|| AsmError::new(line, format!("undefined symbol `{s}`")))?,
+            Expr::Sym(s) => {
+                resolve(s).ok_or_else(|| AsmError::new(line, format!("undefined symbol `{s}`")))?
+            }
             Expr::Lo(e) => e.eval_with(resolve, pc, line)? & 0xFF,
             Expr::Hi(e) => (e.eval_with(resolve, pc, line)? >> 8) & 0xFF,
             Expr::Bank(e) => (e.eval_with(resolve, pc, line)? >> 16) & 0xFF,
@@ -432,7 +433,14 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                             // follows this value (the next instruction).
                             let next = origin + bytes.len() as i64 + i64::from(*width);
                             let v = if *rel { raw - next } else { raw };
-                            emit_value(&mut bytes, v, *width, *rel || *signed, set.endianness, s.line)?;
+                            emit_value(
+                                &mut bytes,
+                                v,
+                                *width,
+                                *rel || *signed,
+                                set.endianness,
+                                s.line,
+                            )?;
                         }
                     }
                 }
@@ -499,7 +507,10 @@ fn emit_value(
         2 if signed => (-32768, 32767),
         2 => (-32768, 0xFFFF),
         other => {
-            return Err(AsmError::new(line, format!("unsupported value width {other}")));
+            return Err(AsmError::new(
+                line,
+                format!("unsupported value width {other}"),
+            ));
         }
     };
     if !(lo..=hi).contains(&v) {

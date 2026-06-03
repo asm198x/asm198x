@@ -490,7 +490,10 @@ fn render_m68k(
     // The bit ops (btst/bchg/bclr/bset) take no size suffix: the width is
     // implied by the EA (.l on a data register, .b on memory), and vasm rejects
     // an explicit `.b` on a register. Sizeless round-trips for both.
-    if matches!(mnemonic.to_ascii_lowercase().as_str(), "btst" | "bchg" | "bclr" | "bset") {
+    if matches!(
+        mnemonic.to_ascii_lowercase().as_str(),
+        "btst" | "bchg" | "bclr" | "bset"
+    ) {
         suffix = String::new();
     }
     // Whether any EA in this instruction predecrements (movem mask is reversed).
@@ -744,7 +747,9 @@ pub fn listing_6809(code: &[u8], origin: u16) -> String {
 /// prefixed (`$10`/`$11`) opcode is two bytes and no one-byte opcode is a prefix
 /// byte, so a full-slice match is unambiguous regardless of order.
 fn decode_6809(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> {
-    let matches = |op: &[u8]| !op.is_empty() && code.len() - pos >= op.len() && code[pos..pos + op.len()] == *op;
+    let matches = |op: &[u8]| {
+        !op.is_empty() && code.len() - pos >= op.len() && code[pos..pos + op.len()] == *op
+    };
     for insn in mos6809::SET {
         let m = insn.mnemonic;
         match &insn.kind {
@@ -855,7 +860,11 @@ fn decode_indexed_6809(
             len += 1;
             // A small offset (5-bit range) would re-encode to 5-bit unless the
             // indirect form (no 5-bit) is in play; force 8-bit when not.
-            let force = if !indirect && (-16..=15).contains(&n) { "<" } else { "" };
+            let force = if !indirect && (-16..=15).contains(&n) {
+                "<"
+            } else {
+                ""
+            };
             format!("{force}{n},{reg}")
         }
         0x9 => {
@@ -1021,7 +1030,11 @@ fn decode_65816(
         } else {
             a_width
         };
-        let want_mode = if want == 2 { "immediate16" } else { "immediate" };
+        let want_mode = if want == 2 {
+            "immediate16"
+        } else {
+            "immediate"
+        };
         *cands.iter().find(|(_, f)| f.mode == want_mode)?
     };
 
@@ -1087,7 +1100,11 @@ fn render_816(mn: &str, mode: &str, vals: &[i64], addr: u16, len: usize) -> Stri
             format!("${target:04X}")
         }
         // mvn/mvp operands are [dest, src]; the source is written first.
-        "block-move" => format!("#${:02X},#${:02X}", vals.get(1).copied().unwrap_or(0) & 0xFF, v & 0xFF),
+        "block-move" => format!(
+            "#${:02X},#${:02X}",
+            vals.get(1).copied().unwrap_or(0) & 0xFF,
+            v & 0xFF
+        ),
         other => other.to_string(),
     };
     if operand.is_empty() {
@@ -1230,10 +1247,7 @@ mod tests {
         // move.w $10(pc),d0 at $1000: ext word at $1002, disp $000E -> target
         // $1010. Rendered as the target so it round-trips (vasm re-derives the
         // displacement from it).
-        assert_eq!(
-            one_m68k(&[0x30, 0x3A, 0x00, 0x0E]),
-            "move.w $1010(pc),d0"
-        );
+        assert_eq!(one_m68k(&[0x30, 0x3A, 0x00, 0x0E]), "move.w $1010(pc),d0");
     }
 
     #[test]
@@ -1313,7 +1327,10 @@ mod tests {
         assert_eq!(lines_65816(&[0x22, 0x56, 0x34, 0x12]), vec!["jsl $123456"]);
         // A low long/abs value is force-sized so it can't shrink on re-assembly.
         assert_eq!(lines_65816(&[0xAD, 0x12, 0x00]), vec!["lda a:$0012"]);
-        assert_eq!(lines_65816(&[0xAF, 0x12, 0x00, 0x00]), vec!["lda f:$000012"]);
+        assert_eq!(
+            lines_65816(&[0xAF, 0x12, 0x00, 0x00]),
+            vec!["lda f:$000012"]
+        );
         // block move renders source-first; cop/wdm a bare byte.
         assert_eq!(lines_65816(&[0x54, 0x7F, 0x7E]), vec!["mvn #$7E,#$7F"]);
         assert_eq!(lines_65816(&[0x02, 0x12]), vec!["cop $12"]);
@@ -1328,7 +1345,15 @@ mod tests {
         let lines = lines_65816(&[0xC2, 0x30, 0xE2, 0x20, 0xA9, 0x42, 0xA2, 0x34, 0x12]);
         assert_eq!(
             lines,
-            vec!["rep #$30", ".a16", ".i16", "sep #$20", ".a8", "lda #$42", "ldx #$1234"]
+            vec![
+                "rep #$30",
+                ".a16",
+                ".i16",
+                "sep #$20",
+                ".a8",
+                "lda #$42",
+                "ldx #$1234"
+            ]
         );
     }
 }

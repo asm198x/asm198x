@@ -144,7 +144,9 @@ fn parse_instruction(
                 indexed,
                 extended,
                 width,
-            } => encode_mem(m, imm, direct, indexed, extended, *width, operand, env, line),
+            } => encode_mem(
+                m, imm, direct, indexed, extended, *width, operand, env, line,
+            ),
             Kind::Transfer(opcode) => encode_transfer(m, *opcode, operand, line),
             Kind::Stack { opcode, u_stack } => encode_stack(*opcode, *u_stack, operand, line),
         }
@@ -170,7 +172,9 @@ fn encode_inherent(
     if !operand.trim().is_empty() {
         return Err(AsmError::new(line, format!("`{m}` takes no operand")));
     }
-    Ok(Operation::Encoded(opcode.iter().map(|b| Piece::Lit(*b)).collect()))
+    Ok(Operation::Encoded(
+        opcode.iter().map(|b| Piece::Lit(*b)).collect(),
+    ))
 }
 
 /// A short (`bytes == 1`) or long (`bytes == 2`) PC-relative branch. The engine
@@ -248,7 +252,10 @@ fn encode_mem(
     } else if !extended.is_empty() {
         Ok(encoded(extended, e, 2))
     } else {
-        Err(AsmError::new(line, format!("`{m}` has no addressing mode for `{t}`")))
+        Err(AsmError::new(
+            line,
+            format!("`{m}` has no addressing mode for `{t}`"),
+        ))
     }
 }
 
@@ -321,17 +328,26 @@ fn encode_indexed(
             });
             return Ok(Operation::Encoded(pieces));
         }
-        return Err(AsmError::new(line, format!("`{m}`: not an indexed operand")));
+        return Err(AsmError::new(
+            line,
+            format!("`{m}`: not an indexed operand"),
+        ));
     };
     let left = inner[..c].trim();
     let reg = inner[c + 1..].trim();
 
     let (rbits, auto, pcr) = parse_index_reg(reg, line)?;
     if auto != Auto::None && !left.is_empty() {
-        return Err(AsmError::new(line, "auto-increment/decrement takes no offset"));
+        return Err(AsmError::new(
+            line,
+            "auto-increment/decrement takes no offset",
+        ));
     }
     if indirect && matches!(auto, Auto::Inc1 | Auto::Dec1) {
-        return Err(AsmError::new(line, "no indirect form for single `,R+`/`,-R`"));
+        return Err(AsmError::new(
+            line,
+            "no indirect form for single `,R+`/`,-R`",
+        ));
     }
 
     // The postbyte, before the indirect bit is OR-ed in.
@@ -464,7 +480,10 @@ fn encode_transfer(m: &str, opcode: u8, operand: &str, line: usize) -> Result<Op
             .ok_or_else(|| AsmError::new(line, format!("unknown register `{}`", p.trim())))
     };
     let post = (reg(parts[0])? << 4) | reg(parts[1])?;
-    Ok(Operation::Encoded(vec![Piece::Lit(opcode), Piece::Lit(post)]))
+    Ok(Operation::Encoded(vec![
+        Piece::Lit(opcode),
+        Piece::Lit(post),
+    ]))
 }
 
 /// `pshs`/`puls`/`pshu`/`pulu reg,…` — the opcode then a register bitmask.
@@ -482,7 +501,10 @@ fn encode_stack(
         mask |= mos6809::stack_mask(p.trim(), u_stack)
             .ok_or_else(|| AsmError::new(line, format!("unknown register `{}`", p.trim())))?;
     }
-    Ok(Operation::Encoded(vec![Piece::Lit(opcode), Piece::Lit(mask)]))
+    Ok(Operation::Encoded(vec![
+        Piece::Lit(opcode),
+        Piece::Lit(mask),
+    ]))
 }
 
 /// `fcc` — a string with a self-chosen delimiter (`"text"`, `/text/`, …): one
@@ -498,7 +520,10 @@ fn parse_fcc(operand: &str, line: usize) -> Result<Operation, AsmError> {
         .find(delim)
         .ok_or_else(|| AsmError::new(line, "unterminated `fcc` string"))?;
     Ok(Operation::Bytes(
-        rest[..end].bytes().map(|b| Expr::Num(i64::from(b))).collect(),
+        rest[..end]
+            .bytes()
+            .map(|b| Expr::Num(i64::from(b)))
+            .collect(),
     ))
 }
 
@@ -529,7 +554,10 @@ mod tests {
     fn inherent_and_immediate() {
         assert_eq!(asm("        nop\n").expect("nop").bytes, vec![0x12]);
         assert_eq!(asm("        rts\n").expect("rts").bytes, vec![0x39]);
-        assert_eq!(asm("        lda #$42\n").expect("imm").bytes, vec![0x86, 0x42]);
+        assert_eq!(
+            asm("        lda #$42\n").expect("imm").bytes,
+            vec![0x86, 0x42]
+        );
         // 16-bit immediate.
         assert_eq!(
             asm("        ldx #$1234\n").expect("ldx").bytes,
@@ -540,7 +568,10 @@ mod tests {
     #[test]
     fn direct_and_extended_selection() {
         // Low constant -> direct; high constant -> extended.
-        assert_eq!(asm("        lda $20\n").expect("dir").bytes, vec![0x96, 0x20]);
+        assert_eq!(
+            asm("        lda $20\n").expect("dir").bytes,
+            vec![0x96, 0x20]
+        );
         assert_eq!(
             asm("        lda $1234\n").expect("ext").bytes,
             vec![0xB6, 0x12, 0x34]
@@ -558,7 +589,10 @@ mod tests {
 
     #[test]
     fn big_endian_data() {
-        assert_eq!(asm("        fcb $01,$02\n").expect("fcb").bytes, vec![0x01, 0x02]);
+        assert_eq!(
+            asm("        fcb $01,$02\n").expect("fcb").bytes,
+            vec![0x01, 0x02]
+        );
         // fdb is big-endian.
         assert_eq!(
             asm("        fdb $1234\n").expect("fdb").bytes,
@@ -592,10 +626,22 @@ mod tests {
     #[test]
     fn indexed_offsets_pick_smallest() {
         // No offset, 5-bit, 8-bit, 16-bit — register X (opcode 0xA6).
-        assert_eq!(asm("        lda ,x\n").expect("noff").bytes, vec![0xA6, 0x84]);
-        assert_eq!(asm("        lda 5,x\n").expect("5bit").bytes, vec![0xA6, 0x05]);
-        assert_eq!(asm("        lda -16,x\n").expect("5neg").bytes, vec![0xA6, 0x10]);
-        assert_eq!(asm("        lda 16,x\n").expect("8bit").bytes, vec![0xA6, 0x88, 0x10]);
+        assert_eq!(
+            asm("        lda ,x\n").expect("noff").bytes,
+            vec![0xA6, 0x84]
+        );
+        assert_eq!(
+            asm("        lda 5,x\n").expect("5bit").bytes,
+            vec![0xA6, 0x05]
+        );
+        assert_eq!(
+            asm("        lda -16,x\n").expect("5neg").bytes,
+            vec![0xA6, 0x10]
+        );
+        assert_eq!(
+            asm("        lda 16,x\n").expect("8bit").bytes,
+            vec![0xA6, 0x88, 0x10]
+        );
         assert_eq!(
             asm("        lda $1234,x\n").expect("16bit").bytes,
             vec![0xA6, 0x89, 0x12, 0x34]
@@ -607,10 +653,22 @@ mod tests {
 
     #[test]
     fn indexed_auto_and_accumulator() {
-        assert_eq!(asm("        lda ,x+\n").expect("inc1").bytes, vec![0xA6, 0x80]);
-        assert_eq!(asm("        lda ,x++\n").expect("inc2").bytes, vec![0xA6, 0x81]);
-        assert_eq!(asm("        lda ,-x\n").expect("dec1").bytes, vec![0xA6, 0x82]);
-        assert_eq!(asm("        lda ,--x\n").expect("dec2").bytes, vec![0xA6, 0x83]);
+        assert_eq!(
+            asm("        lda ,x+\n").expect("inc1").bytes,
+            vec![0xA6, 0x80]
+        );
+        assert_eq!(
+            asm("        lda ,x++\n").expect("inc2").bytes,
+            vec![0xA6, 0x81]
+        );
+        assert_eq!(
+            asm("        lda ,-x\n").expect("dec1").bytes,
+            vec![0xA6, 0x82]
+        );
+        assert_eq!(
+            asm("        lda ,--x\n").expect("dec2").bytes,
+            vec![0xA6, 0x83]
+        );
         assert_eq!(asm("        lda a,x\n").expect("a").bytes, vec![0xA6, 0x86]);
         assert_eq!(asm("        lda b,x\n").expect("b").bytes, vec![0xA6, 0x85]);
         assert_eq!(asm("        lda d,x\n").expect("d").bytes, vec![0xA6, 0x8B]);
@@ -618,33 +676,61 @@ mod tests {
 
     #[test]
     fn indexed_indirect_and_pcr() {
-        assert_eq!(asm("        lda [,x]\n").expect("ind").bytes, vec![0xA6, 0x94]);
+        assert_eq!(
+            asm("        lda [,x]\n").expect("ind").bytes,
+            vec![0xA6, 0x94]
+        );
         // Indirect has no 5-bit form: a small offset still uses the 8-bit form.
-        assert_eq!(asm("        lda [5,x]\n").expect("ind8").bytes, vec![0xA6, 0x98, 0x05]);
+        assert_eq!(
+            asm("        lda [5,x]\n").expect("ind8").bytes,
+            vec![0xA6, 0x98, 0x05]
+        );
         assert_eq!(
             asm("        lda [$2000]\n").expect("extind").bytes,
             vec![0xA6, 0x9F, 0x20, 0x00]
         );
         // PCR to a label: 16-bit offset relative to the next instruction.
-        let a = asm("        org $1000\n        leax msg,pcr\n        nop\nmsg fcb 1\n").expect("pcr");
+        let a =
+            asm("        org $1000\n        leax msg,pcr\n        nop\nmsg fcb 1\n").expect("pcr");
         // leax=0x30, postbyte 0x8D, offset = msg($1005) - next($1004) = 1.
         assert_eq!(a.bytes[..4], [0x30, 0x8D, 0x00, 0x01]);
     }
 
     #[test]
     fn transfer_and_stack() {
-        assert_eq!(asm("        tfr a,b\n").expect("tfr").bytes, vec![0x1F, 0x89]);
-        assert_eq!(asm("        exg x,d\n").expect("exg").bytes, vec![0x1E, 0x10]);
-        assert_eq!(asm("        pshs a,b,x\n").expect("pshs").bytes, vec![0x34, 0x16]);
+        assert_eq!(
+            asm("        tfr a,b\n").expect("tfr").bytes,
+            vec![0x1F, 0x89]
+        );
+        assert_eq!(
+            asm("        exg x,d\n").expect("exg").bytes,
+            vec![0x1E, 0x10]
+        );
+        assert_eq!(
+            asm("        pshs a,b,x\n").expect("pshs").bytes,
+            vec![0x34, 0x16]
+        );
         // `d` sets both the A and B bits.
-        assert_eq!(asm("        puls x,y,d\n").expect("puls").bytes, vec![0x35, 0x36]);
+        assert_eq!(
+            asm("        puls x,y,d\n").expect("puls").bytes,
+            vec![0x35, 0x36]
+        );
         // pshu's bit 6 is S, not U.
-        assert_eq!(asm("        pshu a,b,s\n").expect("pshu").bytes, vec![0x36, 0x46]);
+        assert_eq!(
+            asm("        pshu a,b,s\n").expect("pshu").bytes,
+            vec![0x36, 0x46]
+        );
     }
 
     #[test]
     fn fcc_string() {
-        assert_eq!(asm("        fcc \"AB\"\n").expect("dq").bytes, vec![0x41, 0x42]);
-        assert_eq!(asm("        fcc /CD/\n").expect("slash").bytes, vec![0x43, 0x44]);
+        assert_eq!(
+            asm("        fcc \"AB\"\n").expect("dq").bytes,
+            vec![0x41, 0x42]
+        );
+        assert_eq!(
+            asm("        fcc /CD/\n").expect("slash").bytes,
+            vec![0x43, 0x44]
+        );
     }
 }

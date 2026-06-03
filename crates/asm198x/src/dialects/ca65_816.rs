@@ -181,7 +181,10 @@ fn parse_directive(
         "byte" | "byt" => Ok(Some(Operation::Bytes(byte_list(rest, line)?))),
         "word" | "addr" => Ok(Some(Operation::Words(value_list(rest, line)?))),
         "res" => parse_res(rest, env, line),
-        other => Err(AsmError::new(line, format!("unsupported directive `.{other}`"))),
+        other => Err(AsmError::new(
+            line,
+            format!("unsupported directive `.{other}`"),
+        )),
     }
 }
 
@@ -203,7 +206,10 @@ fn parse_res(
             u8::try_from(n).map_err(|_| AsmError::new(line, "`.res` fill must be a byte"))?
         }
     };
-    Ok(Some(Operation::Bytes(vec![Expr::Num(i64::from(fill)); count])))
+    Ok(Some(Operation::Bytes(vec![
+        Expr::Num(i64::from(fill));
+        count
+    ])))
 }
 
 fn byte_list(rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
@@ -320,10 +326,17 @@ fn resolve(
         if let Some(body) = t.strip_suffix(']').and_then(|s| s.strip_prefix('[')) {
             // jmp/jml use [abs]; the ALU ops use [dp].
             let (_f, e) = addr_expr(body, line)?;
-            let mode = if has("[absolute]") { "[absolute]" } else { "[indirect]" };
+            let mode = if has("[absolute]") {
+                "[absolute]"
+            } else {
+                "[indirect]"
+            };
             return Ok((mode, vec![e]));
         }
-        return Err(AsmError::new(line, format!("malformed `[...]` operand `{operand}`")));
+        return Err(AsmError::new(
+            line,
+            format!("malformed `[...]` operand `{operand}`"),
+        ));
     }
 
     // Parenthesised indirect forms.
@@ -359,7 +372,10 @@ fn resolve_block_move(
 ) -> Result<(&'static str, Vec<Expr>), AsmError> {
     let parts = split_top_level(t, ',');
     if parts.len() != 2 {
-        return Err(AsmError::new(line, format!("block move needs two banks: `{operand}`")));
+        return Err(AsmError::new(
+            line,
+            format!("block move needs two banks: `{operand}`"),
+        ));
     }
     let bank = |p: &str| -> Result<Expr, AsmError> {
         let p = p.trim();
@@ -415,10 +431,17 @@ fn resolve_indirect(
     // `(expr)` — `jmp (abs)` indirect, or the `(dp)` indirect.
     if let Some(body) = t.strip_suffix(')').and_then(|s| s.strip_prefix('(')) {
         let (_f, e) = addr_expr(body, line)?;
-        let mode = if has("indirect") { "indirect" } else { "(indirect)" };
+        let mode = if has("indirect") {
+            "indirect"
+        } else {
+            "(indirect)"
+        };
         return Ok((mode, vec![e]));
     }
-    Err(AsmError::new(line, format!("malformed indirect operand `{operand}`")))
+    Err(AsmError::new(
+        line,
+        format!("malformed indirect operand `{operand}`"),
+    ))
 }
 
 /// Map a resolved (size, index) to a spec mode label. ca65 picks the smallest
@@ -441,16 +464,23 @@ fn pick_mode(
     let start = match size {
         Size::Dp => 0,
         Size::Abs => 1,
-        Size::Long => ladder.len().checked_sub(1).filter(|&n| n >= 2).ok_or_else(|| {
-            AsmError::new(line, "long addressing is not available with this index")
-        })?,
+        Size::Long => ladder
+            .len()
+            .checked_sub(1)
+            .filter(|&n| n >= 2)
+            .ok_or_else(|| {
+                AsmError::new(line, "long addressing is not available with this index")
+            })?,
     };
     for &label in &ladder[start..] {
         if has(label) {
             return Ok(label);
         }
     }
-    Err(AsmError::new(line, "no suitable addressing mode for this operand"))
+    Err(AsmError::new(
+        line,
+        "no suitable addressing mode for this operand",
+    ))
 }
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -539,7 +569,10 @@ mod tests {
         assert_eq!(bytes(" jmp [$1234]\n"), vec![0xDC, 0x34, 0x12]);
         assert_eq!(bytes(" jmp ($1234,x)\n"), vec![0x7C, 0x34, 0x12]);
         // A 16-bit (or forward) operand on the long-only jsl widens to long.
-        assert_eq!(bytes("sub = $1234\n jsl sub\n"), vec![0x22, 0x34, 0x12, 0x00]);
+        assert_eq!(
+            bytes("sub = $1234\n jsl sub\n"),
+            vec![0x22, 0x34, 0x12, 0x00]
+        );
     }
 
     #[test]
@@ -554,7 +587,10 @@ mod tests {
         assert_eq!(bytes(" mvn #$7e,#$7f\n"), vec![0x54, 0x7F, 0x7E]);
         assert_eq!(bytes(" mvp #$00,#$01\n"), vec![0x44, 0x01, 0x00]);
         // Bare addresses contribute their bank byte (bits 16-23).
-        assert_eq!(bytes("s = $7e0000\nd = $7f0000\n mvn s,d\n"), vec![0x54, 0x7F, 0x7E]);
+        assert_eq!(
+            bytes("s = $7e0000\nd = $7f0000\n mvn s,d\n"),
+            vec![0x54, 0x7F, 0x7E]
+        );
         // cop/wdm take a bare signature byte (no #).
         assert_eq!(bytes(" cop $12\n"), vec![0x02, 0x12]);
         assert_eq!(bytes(" wdm $34\n"), vec![0x42, 0x34]);
