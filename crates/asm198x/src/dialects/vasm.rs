@@ -127,12 +127,19 @@ fn encode(
                 }
                 word |= u16::from(v as u8);
             }
+            (Slot::Quick3 { shift }, Opnd::Imm(e)) => {
+                let v = eval(e, consts, here, line)?;
+                if !(1..=8).contains(&v) {
+                    return Err(AsmError::new(line, format!("quick immediate {v} must be 1..=8")));
+                }
+                word |= u16::from((v & 7) as u8) << shift; // 8 encodes as 000
+            }
             (Slot::Ea { shift, dest, .. }, _) => {
                 let (field6, words) = resolve_ea(op, sz, *dest, consts, here, line)?;
                 word |= field6 << shift;
                 ext.extend_from_slice(&words);
             }
-            (Slot::BranchW | Slot::DispW, Opnd::Expr(e)) => branch = Some(eval(e, consts, here, line)?),
+            (Slot::BranchW | Slot::DispW, Opnd::Abs(e)) => branch = Some(eval(e, consts, here, line)?),
             // `match_form` guarantees shapes fit, so other pairings can't occur.
             _ => return Err(AsmError::new(line, "internal: operand/slot mismatch")),
         }
@@ -163,9 +170,9 @@ fn slot_accepts(slot: &Slot, op: &Opnd) -> bool {
     match (slot, op) {
         (Slot::Dn { .. }, Opnd::DReg(_)) => true,
         (Slot::An { .. }, Opnd::AReg(_)) => true,
-        (Slot::Quick8, Opnd::Imm(_)) => true,
-        (Slot::BranchW | Slot::DispW, Opnd::Expr(_)) => true,
-        (Slot::Ea { modes, .. }, _) => !matches!(op, Opnd::Expr(_)) && modes.allows(ea_mode_bit(op)),
+        (Slot::Quick8 | Slot::Quick3 { .. }, Opnd::Imm(_)) => true,
+        (Slot::BranchW | Slot::DispW, Opnd::Abs(_)) => true,
+        (Slot::Ea { modes, .. }, _) => modes.allows(ea_mode_bit(op)),
         _ => false,
     }
 }
@@ -178,7 +185,6 @@ fn ea_mode_bit(op: &Opnd) -> u16 {
         Opnd::Mem { bit, .. } => *bit,
         Opnd::Abs(_) => ea::AL | ea::AW,
         Opnd::Imm(_) => ea::IMM,
-        Opnd::Expr(_) => 0,
     }
 }
 
@@ -224,7 +230,6 @@ fn resolve_ea(
             };
             (field(7, 4), words)
         }
-        Opnd::Expr(_) => return Err(AsmError::new(line, "internal: branch operand used as EA")),
     })
 }
 
@@ -233,6 +238,7 @@ fn size_bits(enc: SizeEnc, size: Size) -> u16 {
         SizeEnc::Fixed(_) => 0,
         SizeEnc::Std6 => (match size { Size::B => 0, Size::W => 1, Size::L => 2 }) << 6,
         SizeEnc::Move => (match size { Size::B => 1, Size::W => 3, Size::L => 2 }) << 12,
+        SizeEnc::WL { shift } => u16::from(matches!(size, Size::L)) << shift,
     }
 }
 
@@ -266,7 +272,7 @@ fn size_of(kind: &Stmt, line: usize) -> Result<usize, AsmError> {
             let mut bytes = 2;
             for (slot, op) in form.operands.iter().zip(operands) {
                 bytes += match slot {
-                    Slot::Dn { .. } | Slot::An { .. } | Slot::Quick8 => 0,
+                    Slot::Dn { .. } | Slot::An { .. } | Slot::Quick8 | Slot::Quick3 { .. } => 0,
                     Slot::BranchW | Slot::DispW => 2,
                     Slot::Ea { .. } => ea_ext_len(op, sz),
                 };
@@ -299,7 +305,6 @@ fn ea_ext_len(op: &Opnd, sz: Size) -> usize {
                 2
             }
         }
-        Opnd::Expr(_) => 0,
     }
 }
 
@@ -312,12 +317,11 @@ enum Opnd {
     AReg(u8),
     /// `(An)`, `(An)+`, `-(An)`, `d16(An)`, `d16(PC)`. `bit` is its `ea::` mask.
     Mem { mode: u8, reg: u8, bit: u16, disp: Option<Expr> },
-    /// A bare absolute address (`.W`/`.L` chosen by value).
+    /// A bare absolute address (`.W`/`.L` chosen by value), or — when consumed
+    /// by a `BranchW`/`DispW` slot — a branch target expression.
     Abs(Expr),
     /// `#expr`.
     Imm(Expr),
-    /// A branch target (consumed by a `BranchW`/`DispW` slot).
-    Expr(Expr),
 }
 
 #[derive(Clone, Copy)]
@@ -432,7 +436,7 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
     }
 
     let (mnemonic, size) = split_size(word, line)?;
-    let operands = parse_operands(&mnemonic, args, line)?;
+    let operands = parse_operands(args, line)?;
     Ok(Stmt::Insn { mnemonic, size, operands })
 }
 
@@ -476,23 +480,16 @@ fn split_size(word: &str, line: usize) -> Result<(String, Option<Size>), AsmErro
     }
 }
 
-fn parse_operands(mnemonic: &str, args: &str, line: usize) -> Result<Vec<Opnd>, AsmError> {
+fn parse_operands(args: &str, line: usize) -> Result<Vec<Opnd>, AsmError> {
     let args = args.trim();
     if args.is_empty() {
         return Ok(Vec::new());
     }
-    let branchy = mnemonic.starts_with('B') && mnemonic != "BSET" && mnemonic != "BTST";
-    split_operands(args)
-        .iter()
-        .map(|p| parse_operand(p, branchy, line))
-        .collect()
+    split_operands(args).iter().map(|p| parse_operand(p, line)).collect()
 }
 
-fn parse_operand(text: &str, branchy: bool, line: usize) -> Result<Opnd, AsmError> {
+fn parse_operand(text: &str, line: usize) -> Result<Opnd, AsmError> {
     let t = text.trim();
-    if branchy {
-        return Ok(Opnd::Expr(parse_value(t, line)?));
-    }
     if let Some(rest) = t.strip_prefix('#') {
         return Ok(Opnd::Imm(parse_value(rest, line)?));
     }
