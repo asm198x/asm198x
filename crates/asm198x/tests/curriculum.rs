@@ -369,6 +369,51 @@ fn curriculum_is_byte_identical() {
         eprintln!("SKIP: `lwasm` not on PATH");
     }
 
+    // --- 65816 / ca65 (no curriculum yet — representative programs) --------
+    // The 65816 is a target extension of the 6502 (ca65 syntax). With no SNES
+    // curriculum, we validate representative native-mode programs against
+    // `ca65 --cpu 65816` linked flat (a minimal config placing CODE at $0000,
+    // matching our default origin). Covers the m/x immediate width, all the new
+    // addressing modes, long calls/jumps, and the new instructions.
+    if have("ca65") && have("ld65") {
+        let cfg = tmp.join("flat816.cfg");
+        fs::write(
+            &cfg,
+            "MEMORY { MAIN: start=$0000, size=$10000, fill=no, file=%O; }\n\
+             SEGMENTS { CODE: load=MAIN, type=ro; }\n",
+        )
+        .expect("write 65816 flat config");
+        for (name, src) in CA65_816_PROGRAMS {
+            let ours = asm198x::assemble_ca65_816(src).expect("ca65-816 assemble");
+            let asm = tmp.join("ref816.s");
+            let obj = tmp.join("ref816.o");
+            let bin = tmp.join("ref816.bin");
+            fs::write(&asm, src).expect("write 65816 source");
+            let assembled = Command::new("ca65")
+                .args(["--cpu", "65816"])
+                .arg(&asm)
+                .arg("-o")
+                .arg(&obj)
+                .current_dir(&tmp)
+                .output()
+                .map(|o| o.status.success())
+                .unwrap_or(false);
+            let mut ld = Command::new("ld65");
+            ld.arg("-C").arg(&cfg).arg(&obj).arg("-o").arg(&bin);
+            match (assembled, ref_bytes(&tmp, &bin, ld)) {
+                (true, Some(reference)) => {
+                    checked += 1;
+                    if ours.bytes != reference {
+                        fails.push(format!("ca65-816 assemble: {name}"));
+                    }
+                }
+                _ => fails.push(format!("ca65-816 reference failed: {name}")),
+            }
+        }
+    } else {
+        eprintln!("SKIP: `ca65`/`ld65` not on PATH (65816)");
+    }
+
     eprintln!("checked {checked} byte-identity comparisons across the curriculum");
     assert!(
         fails.is_empty(),
@@ -493,5 +538,87 @@ const LWASM_PROGRAMS: &[(&str, &str)] = &[
          \x20       fcc     /slashes/\n\
          \x20       fdb     hello\n\
          \x20       rts\n",
+    ),
+];
+
+/// Representative 65816 native-mode programs validated byte-for-byte against
+/// `ca65 --cpu 65816` (linked flat). Stand in for a SNES curriculum the 65816
+/// does not yet have. Each is valid ca65 source (`.setcpu`/`.segment` are
+/// no-ops in our flat model).
+const CA65_816_PROGRAMS: &[(&str, &str)] = &[
+    (
+        "mx-and-modes",
+        ".setcpu \"65816\"\n\
+         .segment \"CODE\"\n\
+         \x20       clc\n\
+         \x20       xce\n\
+         \x20       rep     #$30\n\
+         \x20       .a16\n\
+         \x20       .i16\n\
+         \x20       lda     #$1234\n\
+         \x20       ldx     #$5678\n\
+         \x20       sep     #$20\n\
+         \x20       .a8\n\
+         \x20       lda     #$42\n\
+         \x20       lda     $12\n\
+         \x20       lda     $1234\n\
+         \x20       lda     $123456\n\
+         \x20       lda     $123456,x\n\
+         \x20       lda     [$12]\n\
+         \x20       lda     [$12],y\n\
+         \x20       lda     3,s\n\
+         \x20       lda     (3,s),y\n\
+         \x20       lda     ($12)\n\
+         \x20       sta     f:$7e0000\n\
+         \x20       rts\n",
+    ),
+    (
+        "standalone-and-stz",
+        ".setcpu \"65816\"\n\
+         .segment \"CODE\"\n\
+         \x20       xba\n\
+         \x20       tcd\n\
+         \x20       tdc\n\
+         \x20       tcs\n\
+         \x20       txy\n\
+         \x20       phb\n\
+         \x20       plb\n\
+         \x20       phd\n\
+         \x20       phk\n\
+         \x20       phx\n\
+         \x20       ply\n\
+         \x20       wai\n\
+         \x20       inc     a\n\
+         \x20       dec     a\n\
+         \x20       stz     $12\n\
+         \x20       stz     $12,x\n\
+         \x20       stz     $1234\n\
+         \x20       stz     $1234,x\n\
+         \x20       trb     $12\n\
+         \x20       tsb     $1234\n\
+         \x20       rts\n",
+    ),
+    (
+        "jumps-labels-branches",
+        ".setcpu \"65816\"\n\
+         .segment \"CODE\"\n\
+         buffer  = $2000\n\
+         start:\n\
+         \x20       ldx     #$00\n\
+         loop:\n\
+         \x20       lda     buffer,x\n\
+         \x20       sta     dest,x\n\
+         \x20       inx\n\
+         \x20       bne     loop\n\
+         \x20       per     start\n\
+         \x20       brl     start\n\
+         \x20       jml     $018000\n\
+         \x20       jsl     sub\n\
+         \x20       jmp     ($1234,x)\n\
+         \x20       jmp     [$1234]\n\
+         \x20       pea     $abcd\n\
+         \x20       pei     ($12)\n\
+         dest:   .res    16\n\
+         sub:    rts\n",
     ),
 ];

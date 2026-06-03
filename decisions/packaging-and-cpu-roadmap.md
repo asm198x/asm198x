@@ -66,8 +66,22 @@ popularity.
 | Z80 | Spectrum | pasmo/pasmonext, sjasmplus | — | ✅ done |
 | 68000 | Amiga (ST, Genesis) | vasm (mot) | new field-based core | ✅ done |
 | 6809 | Dragon, CoCo | **lwasm** | engine seam reused; computed postbyte (indexed) | ✅ done |
-| 65816 | SNES, Apple IIgs | ca65 (already speaks it), 64tass | **extends the `mos6502` core; ca65 front-end exists** | next |
+| 65816 | SNES, Apple IIgs | **ca65** | **target extension of `mos6502` (like Z80N on Z80)** | 🚧 in progress |
 | later | 8080/8085, 8086, ARM2 (Archimedes), TMS9900 (TI-99) | TBD | mixed | open |
+
+**65816:** native-mode core landed and validated byte-identical against
+`ca65 --cpu 65816` (linked flat; no SNES curriculum yet, so representative
+programs). It is a **target extension** — `isa::mos6502` (primary) +
+`isa::mos65816` (extension), the same mechanism as `z80::NEXT`. Covered: the
+`m`/`x` immediate width (driven by `.a8`/`.a16`/`.i8`/`.i16`), all the new
+addressing modes (long, long,x, `[dp]`, `[dp],y`, stack-relative `n,s`,
+`(n,s),y`, `(dp)`), the `z:`/`a:`/`f:` size forces with value-based default
+sizing and fall-up, long calls/jumps (`jml`/`jsl`/`jmp [abs]`/`jmp (abs,x)`),
+`brl`/`per`/`pea`/`pei`, `stz`/`trb`/`tsb`/`inc a`/`dec a`/`bra`, and the
+register/stack/control instructions. The engine gained 24-bit operands and a
+2-byte PC-relative. Deferred (increment 2): `mvn`/`mvp`, `cop`/`wdm`, the
+disassembler, `.smart` rep/sep width tracking, the `^` bank-byte operator, and
+`@cheap` locals.
 
 **6809:** all addressing modes (inherent, immediate, direct, extended,
 short/long relative, and the full indexed set — 5/8/16-bit offsets, auto
@@ -101,11 +115,18 @@ small taxonomy, and the engine now has one seam that spans it.
   opcode word(s) (`isa::m68k`). vasm computes this itself (it also owns layout,
   relaxation, sections, relocations, the hunk serializer), bypassing the flat
   engine — the documented "two engines" seam in `syntax-stance.md`.
-- **Computed variable-length operand** — 6809 (indexed postbyte), and ahead:
-  8086 (modrm + prefixes), 65816 (operand width gated by the `m`/`x` processor
-  flags). The opcode is fixed, but the operand bytes are *computed* by the
-  dialect (a postbyte, a modrm, a width that depends on assembler state), not
-  read from a fixed slot.
+- **Computed variable-length operand** — 6809 (indexed postbyte), and ahead
+  8086 (modrm + prefixes). The opcode is fixed, but the operand bytes are
+  *computed* by the dialect (a postbyte, a modrm), not read from a fixed slot.
+- **State-selected fixed width** — 65816. The accumulator/index immediate is 8-
+  or 16-bit per the `m`/`x` flags, but each width is a *distinct fixed-slot
+  form* (`"immediate"` / `"immediate16"`, same opcode). The dialect carries the
+  width as parse-time state (from `.a8`/`.a16`/`.i8`/`.i16`) and picks the form;
+  the engine stays form-based. This is **not** the computed-operand seam — the
+  earlier roadmap mis-filed it there. (The seam was the right tool only for
+  genuinely *computed* bytes like the 6809 postbyte.) The two engine additions
+  65816 did need — 24-bit operands and a 2-byte PC-relative — are extensions of
+  the *fixed-slot* path, not the seam.
 
 **The seam (decided, built):** the engine gained
 `Operation::Encoded(Vec<Piece>)`, where a `Piece` is either `Lit(u8)` (a byte the
@@ -114,8 +135,9 @@ dialect already computed — opcode, postbyte, later a modrm) or
 width, optionally a PC-relative branch offset or a signed displacement). A
 dialect whose operands are computed builds the pieces itself and still reuses the
 engine's two-pass driver, symbol table, `org`, and `equ`. This is deliberately
-**general**, not 6809-specific: 65816 and 8086 will emit `Encoded` pieces the
-same way. lwasm is its first consumer and proves it byte-identical.
+**general**, not 6809-specific: 8086 will emit `Encoded` pieces the same way.
+lwasm is its first consumer and proves it byte-identical. (65816, by contrast,
+needed only fixed-slot forms — see the taxonomy above.)
 
 This kept lwasm a *front-end* (parse → pieces) rather than a second bypass engine
 like vasm. The boundary that matters: a CPU that also needs its own *layout/

@@ -21,6 +21,8 @@ enum Assembler {
     Vasm,
     /// lwasm Motorola-syntax 6809 — a flat big-endian binary.
     Lwasm,
+    /// ca65-syntax 65816 (native mode) — a flat little-endian binary.
+    Ca65_816,
     Pasmo {
         z80n: bool,
     },
@@ -47,6 +49,7 @@ impl Assembler {
             Some("ca65" | "nes") => Ok(Self::Ca65),
             Some("vasm" | "68000" | "m68k" | "mot") => Ok(Self::Vasm),
             Some("lwasm" | "6809") => Ok(Self::Lwasm),
+            Some("65816" | "816" | "ca65-816") => Ok(Self::Ca65_816),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo {
@@ -73,6 +76,7 @@ impl Assembler {
         match self {
             Self::Acme => asm198x::assemble_acme(source),
             Self::Lwasm => asm198x::assemble_lwasm(source),
+            Self::Ca65_816 => asm198x::assemble_ca65_816(source),
             // ca65 and vasm produce non-flat output and are handled in `run`.
             Self::Ca65 | Self::Vasm => unreachable!("ca65/vasm handled in run()"),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
@@ -164,6 +168,9 @@ fn run(args: &[String]) -> Result<String, String> {
             Assembler::Lwasm => {
                 print!("{}", asm198x::listing_6809(&bytes, origin));
             }
+            Assembler::Ca65_816 => {
+                return Err("65816 disassembly is not yet supported".into());
+            }
         }
         return Ok(format!(
             "disassembled {} byte(s) at ${origin:04X}",
@@ -242,7 +249,8 @@ fn usage() -> String {
      disassemble: asm198x --disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\n\
      dialects (syntax): acme (C64 6502; also `6502`), ca65 (NES), vasm (Amiga\n\
-     \x20                 68000), lwasm (6809), pasmo, pasmonext, sjasmplus\n\
+     \x20                 68000), lwasm (6809), 65816 (ca65 native), pasmo,\n\
+     \x20                 pasmonext, sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
      \x20                 the dialect\n\n\

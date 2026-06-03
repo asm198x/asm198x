@@ -349,6 +349,8 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                             match slot.bytes {
                                 1 => bytes.push(to_byte(v, s.line)?),
                                 2 => push_word(&mut bytes, v, s.line, set.endianness)?,
+                                // 24-bit address (65816 long addressing).
+                                3 => push_addr24(&mut bytes, v, s.line, set.endianness)?,
                                 other => {
                                     return Err(AsmError::new(
                                         s.line,
@@ -369,15 +371,37 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                         }
                         isa::OperandKind::RelativePc => {
                             let offset = v - next_addr;
-                            if !(-128..=127).contains(&offset) {
-                                return Err(AsmError::new(
-                                    s.line,
-                                    format!(
-                                        "branch target out of range ({offset} bytes; must be -128..=127)"
-                                    ),
-                                ));
+                            match slot.bytes {
+                                1 => {
+                                    if !(-128..=127).contains(&offset) {
+                                        return Err(AsmError::new(
+                                            s.line,
+                                            format!(
+                                                "branch target out of range ({offset} bytes; must be -128..=127)"
+                                            ),
+                                        ));
+                                    }
+                                    bytes.push(offset as i8 as u8);
+                                }
+                                // 16-bit relative (65816 brl/per).
+                                2 => {
+                                    if !(-32768..=32767).contains(&offset) {
+                                        return Err(AsmError::new(
+                                            s.line,
+                                            format!(
+                                                "long branch target out of range ({offset} bytes; must be -32768..=32767)"
+                                            ),
+                                        ));
+                                    }
+                                    push_word(&mut bytes, offset & 0xFFFF, s.line, set.endianness)?;
+                                }
+                                other => {
+                                    return Err(AsmError::new(
+                                        s.line,
+                                        format!("unsupported relative width {other}"),
+                                    ));
+                                }
                             }
-                            bytes.push(offset as i8 as u8);
                         }
                     }
                 }
@@ -521,6 +545,31 @@ fn push_word(
             bytes.push(hi);
             bytes.push(lo);
         }
+    }
+    Ok(())
+}
+
+/// Emit a 24-bit address (the 65816 long-addressing operand).
+fn push_addr24(
+    bytes: &mut Vec<u8>,
+    v: i64,
+    line: usize,
+    endianness: isa::Endianness,
+) -> Result<(), AsmError> {
+    if !(0..=0xFF_FFFF).contains(&v) {
+        return Err(AsmError::new(
+            line,
+            format!("value {v} does not fit in a 24-bit address"),
+        ));
+    }
+    let b = [
+        (v & 0xFF) as u8,
+        ((v >> 8) & 0xFF) as u8,
+        ((v >> 16) & 0xFF) as u8,
+    ];
+    match endianness {
+        isa::Endianness::Little => bytes.extend_from_slice(&b),
+        isa::Endianness::Big => bytes.extend_from_slice(&[b[2], b[1], b[0]]),
     }
     Ok(())
 }

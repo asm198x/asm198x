@@ -6,6 +6,7 @@
 
 pub(crate) mod acme;
 pub(crate) mod ca65;
+pub(crate) mod ca65_816;
 pub(crate) mod lwasm;
 pub(crate) mod mos6502;
 pub(crate) mod pasmo;
@@ -14,6 +15,7 @@ pub(crate) mod vasm;
 pub(crate) mod z80;
 
 pub(crate) use acme::Acme;
+pub(crate) use ca65_816::Ca65_816;
 pub(crate) use lwasm::Lwasm;
 pub(crate) use pasmo::Pasmo;
 pub(crate) use sjasmplus::Sjasmplus;

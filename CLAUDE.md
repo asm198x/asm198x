@@ -66,6 +66,15 @@ curriculum corpus:
   ops (`tfr`/`exg`/`pshs`/`puls`/`pshu`/`pulu`), and `org`/`equ`/`fcb`/`fdb`/
   `fcc`/`rmb` are landed and validated byte-identical against `lwasm --6809
   --raw`, with assemble→disassemble→reassemble round-trip.
+- **65816** — `ca65` syntax (`dialects::ca65_816`) as a **target extension** of
+  the 6502: `isa::mos6502` (primary) + `isa::mos65816` (extension), the
+  `z80::NEXT` mechanism. Native-mode core: the `m`/`x` immediate width
+  (`.a8`/`.a16`/`.i8`/`.i16` → `"immediate"`/`"immediate16"` fixed-slot forms,
+  no `Encoded` seam), all new addressing modes (long, `[dp]`, stack-relative, …),
+  `z:`/`a:`/`f:` size forces with fall-up, long calls/jumps, and the new
+  instructions. Validated byte-identical against `ca65 --cpu 65816` (flat).
+  Deferred: `mvn`/`mvp`, `cop`/`wdm`, the disassembler, `.smart`, `^` bank byte,
+  `@cheap` locals.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.

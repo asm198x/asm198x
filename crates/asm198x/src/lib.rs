@@ -92,6 +92,18 @@ pub fn assemble_vasm_exe(source: &str) -> Result<Vec<u8>, AsmError> {
     dialects::vasm::assemble_exe(source)
 }
 
+/// Assemble ca65-syntax 65816 source (native mode) into a flat binary — the
+/// 65816 as a target extension of the 6502 (`isa::mos6502` + `isa::mos65816`).
+/// Accumulator/index immediate width follows the `.a8`/`.a16`/`.i8`/`.i16`
+/// directives. Matches `ca65 --cpu 65816` linked flat.
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_ca65_816(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::Ca65_816)
+}
+
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching
 /// `lwasm --6809 --raw`. Covers inherent, immediate, direct, extended, and
 /// relative (short + long) addressing; indexed addressing is not yet supported.
