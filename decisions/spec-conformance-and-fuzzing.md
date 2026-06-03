@@ -43,16 +43,51 @@ compatible.
 
 ## Scope
 
-- **Covered:** the form-based specs — `mos6502`, `z80`, `mos65816` (1124 forms
-  audited). These have the largest opcode tables and the highest hand-authoring
-  risk; `mos65816` was authored this cycle and is fully verified.
-- **Deferred:** `mos6809` (`Kind`-based) and `m68k` (field-based) use different
-  spec representations and need their own byte synthesis (or an opcode-space
-  sweep via their disassemblers). Until then they rely on the curriculum
-  round-trip. Add when a sweep-based audit is built.
-- **Fuzzer:** stateless CPUs only (6502, Z80). The 65816's `m`/`x` width makes a
-  random instruction stream ambiguous to decode, so it is covered by the
-  per-form audit and the curriculum round-trip instead.
+Two audit techniques, by spec shape:
+
+- **Form-based audit** (`spec_opcodes_match_reference`) — for the `isa::Form`
+  specs (`mos6502`, `z80`, `mos65816`): iterate every form, synthesise canonical
+  bytes, disassemble, reassemble with the reference. 1124 forms. These have the
+  largest opcode tables and the highest hand-authoring risk; `mos65816` was
+  authored the prior cycle and is fully verified.
+- **Sweep audit** (`spec_sweep_matches_reference`) — for the non-form specs
+  (`mos6809` is `Kind`-based; `m68k` is field-based) there are no forms to
+  iterate, so it sweeps candidate byte sequences through the disassembler,
+  keeps the ones that decode to a **position-independent** instruction (verified
+  by disassembling at two origins — this drops PC-relative branches, which can't
+  be batched), concatenates them, and reassembles the whole blob in one call. It
+  covers the primary opcode space plus, for 6809, the full indexed-postbyte
+  space (~390 instructions). On failure it localises by reassembling each alone.
+- **Fuzzer** (`differential_fuzz`) — stateless CPUs only (6502, Z80). The
+  65816's `m`/`x` width makes a random instruction stream ambiguous to decode,
+  so it is covered by the per-form audit and the curriculum round-trip instead.
+
+### Covered
+
+`mos6502`, `z80`, `mos65816` (form audit); `mos6809` (sweep). The 6809 sweep
+caught real decoder bugs: invalid indexed postbytes (`$8F`/`$BF`/… — extended
+indirect is exactly `$9F`, and single auto-inc/dec has no indirect form) were
+being decoded as valid.
+
+### Deferred: the 68000 sweep
+
+Running the sweep against vasm surfaced a real **68000 disassembler/spec
+backlog** too large to land alongside this audit (and one fix — splitting
+ADDI/SUBI/CMPI — regresses the curriculum unless the `cmp #imm,<mem>`→CMPI alias
+is handled too). It is its own focused increment. Findings:
+
+- **ADDI/SUBI/CMPI should be distinct mnemonics** (vasm assembles `add #imm` to
+  the ADD-with-immediate-EA encoding; only `addi` to `$06xx`) — but `cmp
+  #imm,<mem>` is *also* aliased to CMPI, so the split needs the alias too.
+- **The disassembler is too permissive about EA validity**, which is
+  *size-dependent* while our masks are flat: `MOVE.B a0,d0` (An illegal for a
+  byte), `BTST #n,#imm` (immediate illegal as the tested operand). Hardening
+  means size-aware EA masks and rejecting illegal encodings.
+- **(d16,PC) renders as a raw displacement**, not a resolved target the way the
+  6809 PCR renderer does, so it does not round-trip through vasm.
+
+The curriculum round-trip and byte-identity harness keep the 68000 covered
+meanwhile. The `sweep` helper already supports it; re-enable once hardened.
 
 ## Why this is the right next investment
 
@@ -75,7 +110,8 @@ other directions safer to build on.
   the round-trip only proves self-consistency. It missed the `ASL A` bug. The
   reference must be the arbiter for spec data.
 - **"Add a CPU spec without a conformance audit"** — for a form-based spec, add
-  it to `spec_opcodes_match_reference`. For a new spec shape, note the gap (as
-  6809/68000 are noted) rather than leaving it silently unaudited.
+  it to `spec_opcodes_match_reference`; for a non-form spec, add it to the
+  `spec_sweep_matches_reference` sweep. Never leave a spec silently unaudited —
+  if it can't land green yet (as with 68000), document the backlog explicitly.
 - **"Make the fuzzer nondeterministic for more coverage"** — keep the committed
   seed fixed (reproducible regressions); vary it only in ad-hoc bug hunts.

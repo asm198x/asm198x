@@ -810,9 +810,10 @@ fn decode_indexed_6809(
     let indirect = post & 0x10 != 0;
     let mut ext = String::new();
     let inner = match post & 0x0F {
-        0x0 => format!(",{reg}+"),
+        // Single auto inc/dec has no indirect form (`[,r+]`/`[,-r]` are invalid).
+        0x0 if !indirect => format!(",{reg}+"),
         0x1 => format!(",{reg}++"),
-        0x2 => format!(",-{reg}"),
+        0x2 if !indirect => format!(",-{reg}"),
         0x3 => format!(",--{reg}"),
         0x4 => format!(",{reg}"),
         0x5 => format!("b,{reg}"),
@@ -846,8 +847,10 @@ fn decode_indexed_6809(
             let target = addr.wrapping_add(len as u16).wrapping_add(off as u16);
             format!("${target:04X},pcr")
         }
-        0xF => {
-            // Extended indirect `[addr]` — always indirect, register bits unused.
+        // Extended indirect `[addr]` is exactly $9F: the indirect bit set and
+        // the register field zero. Any other $.F postbyte ($8F, $BF, …) is
+        // reserved.
+        0xF if indirect && post & 0x60 == 0 => {
             let v = be16_at(code, pos + len)?;
             len += 2;
             ext = format!("${v:04X}");

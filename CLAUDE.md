@@ -90,11 +90,13 @@ need the tools installed — and degrading gracefully when one is absent):
 
 - **`tests/curriculum`** — curated curriculum programs, byte-identical to the
   reference tool, plus assemble→disassemble→reassemble round-trip (our own asm).
-- **`tests/conformance`** — every `isa` form's opcode checked against the
-  reference (`spec_opcodes_match_reference`), and a seeded differential fuzzer
-  over random programs reassembled by both our asm and the reference
-  (`differential_fuzz`). It reuses the disassemblers: synthesise bytes →
-  disassemble → reassemble with the *reference*, which becomes the arbiter.
+- **`tests/conformance`** — three checks, all making the reference tool the
+  arbiter by reusing the disassemblers (synthesise bytes → disassemble →
+  reassemble with the *reference*): every form-based spec's opcode
+  (`spec_opcodes_match_reference`: 6502/Z80/65816), an opcode-space sweep for
+  the non-form specs (`spec_sweep_matches_reference`: 6809; 68000 deferred —
+  see the decision), and a seeded differential fuzzer over random programs
+  reassembled by both our asm and the reference (`differential_fuzz`).
 
 See [`decisions/spec-conformance-and-fuzzing.md`](decisions/spec-conformance-and-fuzzing.md).
 
