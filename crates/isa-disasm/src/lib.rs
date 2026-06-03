@@ -264,6 +264,22 @@ pub fn listing_6502(code: &[u8], origin: u16) -> String {
     s
 }
 
+/// Disassemble the single instruction at `addr`, reading its bytes through
+/// `read` (a machine's memory peek), and return its rendered text and byte
+/// length. This is the single-instruction, callback-shaped entry point Emu198x
+/// consumes for its `disasm` debug command — mirroring the
+/// `zilog_z80::disassemble(addr, read)` shape it already uses — where the
+/// slice-based [`disassemble_6502`] serves flat-buffer listings. An undecodable
+/// byte renders as data (`!byte $XX`, length 1), the same as the slice path.
+#[must_use]
+pub fn decode_one_6502(addr: u16, read: impl Fn(u16) -> u8) -> Option<(String, u8)> {
+    // 3 bytes is the longest 6502 instruction; `disassemble_6502` consumes only
+    // the first instruction, so any trailing bytes are ignored.
+    let buf: Vec<u8> = (0..3).map(|i| read(addr.wrapping_add(i))).collect();
+    let line = disassemble_6502(&buf, addr).into_iter().next()?;
+    Some((line.text, line.bytes.len() as u8))
+}
+
 /// Render a matched 6502 form by mapping its addressing-mode label to operand
 /// syntax. One-byte operands print as `$XX`, two-byte as `$XXXX`; a relative
 /// branch prints its absolute target.
@@ -742,6 +758,17 @@ pub fn listing_6809(code: &[u8], origin: u16) -> String {
     s
 }
 
+/// Single-instruction counterpart of [`disassemble_6809`], in the callback shape
+/// Emu198x consumes for `disasm` — see [`decode_one_6502`]. An undecodable byte
+/// renders as data (`fcb $XX`, length 1).
+#[must_use]
+pub fn decode_one_6809(addr: u16, read: impl Fn(u16) -> u8) -> Option<(String, u8)> {
+    // 5 bytes is the longest 6809 instruction (e.g. `$10 $AE $89 nn nn`).
+    let buf: Vec<u8> = (0..5).map(|i| read(addr.wrapping_add(i))).collect();
+    let line = disassemble_6809(&buf, addr).into_iter().next()?;
+    Some((line.text, line.bytes.len() as u8))
+}
+
 /// Decode the one 6809 instruction at `pos`. Opcodes are unique per
 /// (mnemonic, mode), so the first matching entry in the set is the decode; a
 /// prefixed (`$10`/`$11`) opcode is two bytes and no one-byte opcode is a prefix
@@ -1178,6 +1205,23 @@ mod tests {
     fn unknown_byte_becomes_datum_6502() {
         // $02 is not an official opcode.
         assert_eq!(one_6502(&[0x02]), "!byte $02");
+    }
+
+    #[test]
+    fn decode_one_6502_reads_a_single_instruction() {
+        // LDA #$12 then NOP; the callback form returns only the first, with its
+        // byte length, reading through the closure (a machine's memory peek).
+        let mem = [0xA9u8, 0x12, 0xEA];
+        let got = decode_one_6502(0x0800, |a| mem[(a - 0x0800) as usize]);
+        assert_eq!(got, Some(("LDA #$12".to_string(), 2)));
+    }
+
+    #[test]
+    fn decode_one_6809_reads_a_single_instruction() {
+        // NOP ($12) is one byte; the trailing bytes are ignored.
+        let mem = [0x12u8, 0x39, 0x00, 0x00, 0x00];
+        let got = decode_one_6809(0x1000, |a| mem[(a - 0x1000) as usize]);
+        assert_eq!(got, Some(("nop".to_string(), 1)));
     }
 
     fn one_m68k(bytes: &[u8]) -> String {
