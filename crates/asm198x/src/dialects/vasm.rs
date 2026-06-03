@@ -99,6 +99,21 @@ fn lower<'a>(
     (mnemonic, Cow::Borrowed(operands))
 }
 
+/// Whether a `d16(An)` operand (mode 5) has a displacement that resolves to
+/// zero — which the optimizer drops, shortening it to plain `(An)` (mode 2).
+fn drops_zero_disp(
+    mode: u8,
+    disp: &Option<Expr>,
+    ctx: &Ctx,
+    consts: &BTreeMap<String, i64>,
+) -> bool {
+    ctx.optimize
+        && mode == 5
+        && disp
+            .as_ref()
+            .is_some_and(|e| eval(e, consts, 0, 0).is_ok_and(|v| v == 0))
+}
+
 /// The net number of relocatable (section-relative) symbols in an expression,
 /// counting `+` references as `+1` and `-` references as `-1`. A degree of `1`
 /// marks a simple relocatable address — eligible for PC-relative addressing.
@@ -471,6 +486,10 @@ fn resolve_ea(
         Opnd::Mem {
             mode, reg, disp, ..
         } => {
+            // vasm drops a zero `d16(An)` displacement, shortening it to `(An)`.
+            if drops_zero_disp(*mode, disp, ctx, consts) {
+                return Ok((field(2, u16::from(*reg)), vec![]));
+            }
             let mut ext = Vec::new();
             if let Some(e) = disp {
                 let d = eval(e, consts, here, line)?;
@@ -592,7 +611,7 @@ fn stmt_size(
                     | Slot::ImmWord
                     | Slot::RegList
                     | Slot::ImmSized => 2,
-                    Slot::Ea { modes, .. } => ea_ext_len(op, sz, *modes, ctx),
+                    Slot::Ea { modes, .. } => ea_ext_len(op, sz, *modes, ctx, consts),
                 };
             }
             bytes
@@ -602,11 +621,18 @@ fn stmt_size(
 
 /// Extension-word byte count an operand contributes as an effective address —
 /// must match [`resolve_ea`] exactly so the layout and emit passes agree.
-fn ea_ext_len(op: &Opnd, sz: Size, modes: EaModes, ctx: &Ctx) -> usize {
+fn ea_ext_len(
+    op: &Opnd,
+    sz: Size,
+    modes: EaModes,
+    ctx: &Ctx,
+    consts: &BTreeMap<String, i64>,
+) -> usize {
     match op {
         Opnd::DReg(_) | Opnd::AReg(_) => 0,
-        Opnd::Mem { disp, .. } => {
-            if disp.is_some() {
+        Opnd::Mem { mode, disp, .. } => {
+            // A dropped zero `d16(An)` displacement contributes no extension word.
+            if disp.is_some() && !drops_zero_disp(*mode, disp, ctx, consts) {
                 2
             } else {
                 0
