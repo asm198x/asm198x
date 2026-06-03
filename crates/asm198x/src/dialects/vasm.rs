@@ -157,13 +157,17 @@ pub(crate) fn assemble_exe(source: &str) -> Result<Vec<u8>, AsmError> {
     Ok(serialize_hunkexe(&sections))
 }
 
+/// A 32-bit relocation: a byte offset within a section, and the target section
+/// whose load address gets added to the longword stored there.
+type Reloc = (u32, usize);
+
 /// One assembled section: its hunk kind and memory flag, its bytes, and the
-/// 32-bit relocations within it (offset in this section → target section).
+/// 32-bit relocations within it.
 struct SecOut {
     kind: HunkKind,
     flag: MemFlag,
     bytes: Vec<u8>,
-    relocs: Vec<(u32, usize)>,
+    relocs: Vec<Reloc>,
 }
 
 /// Optimization context shared down the encode/size paths.
@@ -312,7 +316,7 @@ fn serialize_hunkexe(sections: &[SecOut]) -> Vec<u8> {
         out.extend_from_slice(&v.to_be_bytes());
     }
     // Each hunk's size in longwords: code/data padded to a longword, bss rounded.
-    let size_longs = |s: &SecOut| -> u32 { ((s.bytes.len() + 3) / 4) as u32 };
+    let size_longs = |s: &SecOut| -> u32 { s.bytes.len().div_ceil(4) as u32 };
 
     let mut out = Vec::new();
     // HUNK_HEADER: no resident libraries, then hunk count, first, last, sizes.
@@ -488,7 +492,7 @@ fn encode(
     cur_sec: usize,
     here: i64,
     line: usize,
-) -> Result<(Vec<u8>, Vec<(u32, usize)>), AsmError> {
+) -> Result<(Vec<u8>, Vec<Reloc>), AsmError> {
     let (mnemonic, operands) = lower(mnemonic, size, operands, ctx, consts);
     let operands = operands.as_ref();
     let insn = m68k::SET
@@ -501,7 +505,7 @@ fn encode(
 
     let mut word = form.base | size_bits(form.size, sz);
     let mut ext: Vec<u8> = Vec::new();
-    let mut relocs: Vec<(u32, usize)> = Vec::new();
+    let mut relocs: Vec<Reloc> = Vec::new();
     let mut branch: Option<i64> = None;
     // MOVEM reverses its register mask when the effective address predecrements.
     let predec = operands
