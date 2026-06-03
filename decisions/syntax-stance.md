@@ -313,11 +313,26 @@ matched against the real `vasmm68k_mot` at each:
   references are PC-relative-eligible. `assemble_with(.., false)` keeps the
   Stage-1 `-no-opt` behaviour for comparison.
 
-- **Stage 3 — `-Fhunkexe -kick1hunks` (pending).** The other 11 curriculum
-  units use multiple sections (`code` + `chipbss`); `-Fbin` rejects them
-  ("sections must not overlap"). The shipped artifacts are Amiga hunk
-  executables, so byte-identity with what learners run needs the hunk container
-  (section layout, relocation hunks, the Kickstart-1 hunk merge). This is the
-  remaining 68000 work.
+- **Stage 3 — `-Fhunkexe -kick1hunks` (single-section done).** The shipped
+  artifacts are Amiga hunk executables, byte-identical to `vasm -Fhunkexe
+  -kick1hunks` (verified against the committed `signal`/`exodus` binaries). One
+  obstacle shapes the target: vasm writes a `HUNK_SYMBOL` debug table in its
+  internal hash order, which the AmigaDOS loader ignores. Reproducing those
+  bytes would mean replicating vasm's symbol hash — brittle and version-tied —
+  so the decision (2026-06-03, Steve) is **loadable-image parity**: match
+  everything the loader consumes (HUNK_HEADER, CODE/DATA/BSS, RELOC32, END) and
+  omit the symbol table. A section-aware core emits per-hunk bytes plus
+  relocations: a relocatable reference is PC-relative only within its own hunk,
+  else `(xxx).L` with a `HUNK_RELOC32` entry; `move.l #label` always relocates.
+  Code hunks pad to a longword with `NOP`. **All 21 single-section units produce
+  hunk executables byte-identical to the stripped vasm output.** Wired as
+  `assemble_vasm_exe` / `--dialect vasm --exe`.
 
-Wired as `assemble_vasm` / `--dialect vasm` (emitting a flat `.bin` today).
+  Remaining: the 11 two-section units (`code` + `chipbss`) need two parser
+  features they're the first to use — bitwise/shift operators (`|`, `<<`) in
+  expressions (safe to add: the 6502 curriculum uses neither) and indexed
+  addressing `d8(An,Xn)` — after which the multi-section container path
+  (two hunks, cross-hunk relocations, a BSS hunk; written but not yet exercised)
+  can be validated.
+
+The flat path stays wired as `assemble_vasm` / `--dialect vasm` (`-Fbin`).
