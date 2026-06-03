@@ -43,9 +43,10 @@ must assemble unchanged. A 2026-06-02 scan of the curriculum settled the list:
 |-----|---------------------|------------------------|----------------|
 | 6502 | **acme** ✅, **ca65** ✅ | C64 (acme), NES (ca65) | 64tass, dasm |
 | Z80 | **PasmoNext** ✅, sjasmplus ✅ | Spectrum (pasmonext) | pasmo, z80asm |
-| 68000 | **vasm** (mot syntax) | Amiga (vasm) | Devpac/HiSoft |
+| 68000 | **vasm** (mot syntax) 🚧 | Amiga (vasm) | Devpac/HiSoft |
 
-(✅ = delivered and curriculum-validated byte-identical against the real tool.)
+(✅ = delivered and curriculum-validated byte-identical against the real tool.
+🚧 = flat-binary stages byte-identical; multi-section hunk-exe output pending.)
 
 Both 6502 dialects are first-class: the curriculum uses acme for the C64 and
 ca65 for the NES, so neither is "also consider." For Z80, **PasmoNext is
@@ -281,3 +282,42 @@ linking grows beyond this.
 All 32 buildable NES units (dash + neon-nexus) assemble and link byte-identical
 to `ca65 + ld65`; ACME stays 80/80. Wired as `assemble_ca65` / `--dialect ca65`
 (emitting `.nes`).
+
+### 2026-06-03 — vasm (68000 / Amiga): field-based core + optimizer
+
+Delivered the 68000 / vasm dialect, the Amiga curriculum's toolchain. The
+68000 needed a new encoding model: where 6502/Z80 are byte-opcode lookups, the
+68000 packs size, registers, and two six-bit effective-address fields into a
+16-bit opcode word followed by 0–4 extension words. The `isa::m68k` spec is
+therefore **field-based** — a base opcode word plus `Slot` bit-field
+descriptors — and the vasm front-end fills those fields. Built in stages,
+matched against the real `vasmm68k_mot` at each:
+
+- **Stage 1 — `-no-opt` (flat binary).** Instruction encoding only. Every Amiga
+  curriculum unit that `vasm -no-opt` can build (20 of 32) is byte-identical.
+  Getting there fixed local-label scoping (`.`-labels scoped to the enclosing
+  global), `.s` short branches, ADDA/SUBA/CMPA (`add …,An`), ADDI/SUBI/CMPI
+  (immediate to memory), `ds`/`dcb` counts as pass-1 expressions, PC-aware
+  `equ` (`len equ *-buf`), and the rule that a bare absolute is `(xxx).L`.
+
+- **Stage 2 — default `-Fbin` (optimizer on).** The mode the shipped artifacts
+  use. **All 21 curriculum units that build as a flat binary are now
+  byte-identical to `vasm -Fbin`.** The optimizer replicates vasm's decisions
+  exactly: PC-relative addressing for in-section label references (kept as
+  `(xxx).L` for fixed constants like `$dff000`); short-branch relaxation via a
+  grow-only fixpoint loop (a bare `bra`/`bsr`/`bcc` is short by default, grown
+  to word only when its displacement overflows a byte); `addq`/`subq` for small
+  immediates; `add/sub #d16,An → lea d16(An),An`; dropping a zero `d16(An)`
+  displacement to `(An)`; and `cmp #0,<ea> → tst <ea>`. Symbol kind
+  (relocatable label vs absolute `equ`) is tracked because only relocatable
+  references are PC-relative-eligible. `assemble_with(.., false)` keeps the
+  Stage-1 `-no-opt` behaviour for comparison.
+
+- **Stage 3 — `-Fhunkexe -kick1hunks` (pending).** The other 11 curriculum
+  units use multiple sections (`code` + `chipbss`); `-Fbin` rejects them
+  ("sections must not overlap"). The shipped artifacts are Amiga hunk
+  executables, so byte-identity with what learners run needs the hunk container
+  (section layout, relocation hunks, the Kickstart-1 hunk merge). This is the
+  remaining 68000 work.
+
+Wired as `assemble_vasm` / `--dialect vasm` (emitting a flat `.bin` today).
