@@ -21,7 +21,7 @@ default-members = ["crates/asm198x"]
 
 [workspace.package]
 edition = "2024"
-version = "0.0.3"
+version = "0.0.4"
 license = "GPL-2.0-or-later"
 repository = "https://github.com/asm198x/asm198x"
 
