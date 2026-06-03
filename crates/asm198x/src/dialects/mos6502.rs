@@ -135,6 +135,11 @@ pub(crate) fn fold_const(
                 BinOp::Mul => a.checked_mul(b).ok_or_else(overflow)?,
                 BinOp::Div if b != 0 => a / b,
                 BinOp::Div => return Err(AsmError::new(line, "division by zero in expression")),
+                BinOp::And => a & b,
+                BinOp::Or => a | b,
+                BinOp::Xor => a ^ b,
+                BinOp::Shl => a.wrapping_shl(b as u32),
+                BinOp::Shr => a.wrapping_shr(b as u32),
             }
         }
     })
@@ -224,7 +229,20 @@ pub(crate) fn parse_expr(
     parse_number: fn(&str, usize) -> Result<i64, AsmError>,
     prec: BytePrec,
 ) -> Result<Expr, AsmError> {
-    let tokens = tokenize(raw, line, parse_number)?;
+    parse_expr_opts(raw, line, parse_number, prec, false)
+}
+
+/// As [`parse_expr`], but `bitwise` enables vasm's bitwise/shift operators
+/// (`& | ^ << >>`) and, with them on, disables the `<`/`>` low/high-byte
+/// prefixes (the 68000 has no such syntax).
+pub(crate) fn parse_expr_opts(
+    raw: &str,
+    line: usize,
+    parse_number: fn(&str, usize) -> Result<i64, AsmError>,
+    prec: BytePrec,
+    bitwise: bool,
+) -> Result<Expr, AsmError> {
+    let tokens = tokenize(raw, line, parse_number, bitwise)?;
     if tokens.is_empty() {
         return Err(AsmError::new(line, "expected a value"));
     }
@@ -256,12 +274,18 @@ enum Tok {
     Hi,
     LParen,
     RParen,
+    And,
+    Or,
+    Xor,
+    Shl,
+    Shr,
 }
 
 fn tokenize(
     raw: &str,
     line: usize,
     parse_number: fn(&str, usize) -> Result<i64, AsmError>,
+    bitwise: bool,
 ) -> Result<Vec<Tok>, AsmError> {
     let chars: Vec<char> = raw.chars().collect();
     let mut tokens = Vec::new();
@@ -286,12 +310,40 @@ fn tokenize(
                 tokens.push(Tok::Slash);
                 i += 1;
             }
+            '<' if bitwise => {
+                if chars.get(i + 1) == Some(&'<') {
+                    tokens.push(Tok::Shl);
+                    i += 2;
+                } else {
+                    return Err(AsmError::new(line, "expected `<<` (shift)"));
+                }
+            }
+            '>' if bitwise => {
+                if chars.get(i + 1) == Some(&'>') {
+                    tokens.push(Tok::Shr);
+                    i += 2;
+                } else {
+                    return Err(AsmError::new(line, "expected `>>` (shift)"));
+                }
+            }
             '<' => {
                 tokens.push(Tok::Lo);
                 i += 1;
             }
             '>' => {
                 tokens.push(Tok::Hi);
+                i += 1;
+            }
+            '&' if bitwise => {
+                tokens.push(Tok::And);
+                i += 1;
+            }
+            '|' if bitwise => {
+                tokens.push(Tok::Or);
+                i += 1;
+            }
+            '^' if bitwise => {
+                tokens.push(Tok::Xor);
                 i += 1;
             }
             '(' => {
@@ -394,11 +446,59 @@ impl ExprParser {
     }
 
     fn mul_div(&mut self) -> Result<Expr, AsmError> {
-        let mut left = self.unary()?;
+        let mut left = self.bit_or()?;
         loop {
             let op = match self.tokens.get(self.pos) {
                 Some(Tok::Star) => BinOp::Mul,
                 Some(Tok::Slash) => BinOp::Div,
+                _ => break,
+            };
+            self.pos += 1;
+            let right = self.bit_or()?;
+            left = Expr::Bin(op, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    // vasm binds bitwise and shift operators tighter than `* /`: `<< >>` highest
+    // among the binaries, then `&`, `^`, `|`. These tokens appear only in vasm
+    // (bitwise) mode, so for 6502 each level falls straight through to `unary`.
+    fn bit_or(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.bit_xor()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::Or)) {
+            self.pos += 1;
+            let right = self.bit_xor()?;
+            left = Expr::Bin(BinOp::Or, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn bit_xor(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.bit_and()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::Xor)) {
+            self.pos += 1;
+            let right = self.bit_and()?;
+            left = Expr::Bin(BinOp::Xor, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn bit_and(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.shift()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::And)) {
+            self.pos += 1;
+            let right = self.shift()?;
+            left = Expr::Bin(BinOp::And, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn shift(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.unary()?;
+        loop {
+            let op = match self.tokens.get(self.pos) {
+                Some(Tok::Shl) => BinOp::Shl,
+                Some(Tok::Shr) => BinOp::Shr,
                 _ => break,
             };
             self.pos += 1;

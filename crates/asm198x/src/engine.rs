@@ -67,6 +67,12 @@ pub(crate) enum BinOp {
     Sub,
     Mul,
     Div,
+    /// Bitwise AND/OR/XOR and left/right shift (vasm `&` `|` `^` `<<` `>>`).
+    And,
+    Or,
+    Xor,
+    Shl,
+    Shr,
 }
 
 /// An expression in the shared engine IR. Each dialect parses its own operator
@@ -128,6 +134,11 @@ impl Expr {
                         }
                         a.checked_div(b).ok_or_else(overflow)?
                     }
+                    BinOp::And => a & b,
+                    BinOp::Or => a | b,
+                    BinOp::Xor => a ^ b,
+                    BinOp::Shl => a.wrapping_shl(b as u32),
+                    BinOp::Shr => a.wrapping_shr(b as u32),
                 }
             }
         })

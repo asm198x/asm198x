@@ -448,6 +448,11 @@ pub(crate) fn eval_const(expr: &Expr, consts: &BTreeMap<String, i64>) -> Option<
                 BinOp::Sub => a.checked_sub(b),
                 BinOp::Mul => a.checked_mul(b),
                 BinOp::Div => (b != 0).then(|| a / b),
+                BinOp::And => Some(a & b),
+                BinOp::Or => Some(a | b),
+                BinOp::Xor => Some(a ^ b),
+                BinOp::Shl => Some(a.wrapping_shl(b as u32)),
+                BinOp::Shr => Some(a.wrapping_shr(b as u32)),
             }
         }
     }

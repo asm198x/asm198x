@@ -1,16 +1,22 @@
-//! The vasm (Motorola syntax) 68000 dialect — Stage 1: the field-based encoder.
+//! The vasm (Motorola syntax) 68000 dialect — the field-based encoder.
 //!
 //! The 68000 is word-oriented and big-endian: an instruction is a 16-bit opcode
 //! word (size, register, and effective-address fields packed in) followed by
 //! 0–4 extension words. This front-end parses Motorola syntax, resolves each
 //! operand to an effective address, and fills the [`isa::m68k`] form's fields.
 //!
-//! It emits a flat code image. With the optimizer on (the default,
-//! [`assemble`]) it matches `vasmm68k_mot -Fbin`: short-branch relaxation,
-//! PC-relative addressing for in-section labels, and `addq`/`subq` for small
-//! immediates. With it off ([`assemble_with`]`(.., false)`) it matches
-//! `-no-opt`. The Amiga hunk-exe container comes later — see
-//! `decisions/syntax-stance.md`.
+//! Three output paths, each byte-identical to the matching `vasmm68k_mot`
+//! invocation across the Amiga curriculum:
+//! - [`assemble_with`]`(.., false)` — `-no-opt` flat binary.
+//! - [`assemble`] — `-Fbin` (optimizer on): short-branch relaxation,
+//!   PC-relative addressing for same-section labels, `addq`/`subq`, the
+//!   `add #d,An`↔`lea`↔`addq` rewrites, zero-displacement dropping, and
+//!   `cmp #0`→`tst`.
+//! - [`assemble_exe`] — `-Fhunkexe -kick1hunks`: the multi-section hunk
+//!   executable (header, code/data/bss hunks, reloc32 tables), matching the
+//!   loadable image and omitting vasm's debug symbol table.
+//!
+//! See `decisions/syntax-stance.md`.
 
 use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet};
@@ -44,6 +50,11 @@ fn eval(e: &Expr, consts: &BTreeMap<String, i64>, here: i64, line: usize) -> Res
                 BinOp::Mul => a.checked_mul(b).ok_or_else(overflow)?,
                 BinOp::Div if b != 0 => a / b,
                 BinOp::Div => return Err(AsmError::new(line, "division by zero")),
+                BinOp::And => a & b,
+                BinOp::Or => a | b,
+                BinOp::Xor => a ^ b,
+                BinOp::Shl => a.wrapping_shl(b as u32),
+                BinOp::Shr => a.wrapping_shr(b as u32),
             }
         }
     })
@@ -55,28 +66,56 @@ fn eval(e: &Expr, consts: &BTreeMap<String, i64>, here: i64, line: usize) -> Res
 ///
 /// - `add`/`sub` of a small immediate (1..=8) → the quick form `addq`/`subq`.
 /// - `add.l`/`sub.l` of a 16-bit immediate into an address register →
-///   `lea d16(An),An`, which is two bytes shorter than `adda.l #imm`.
+///   `lea d16(An),An`, two bytes shorter than `adda.l #imm`.
+/// - `lea d8(An),An` with a small offset → `addq`/`subq` (the reverse), which
+///   is shorter still. The `Option<Size>` is a size override for that case
+///   (`lea` is sizeless but the `addq` it becomes is a long).
 fn lower<'a>(
     mnemonic: &'a str,
     size: Option<Size>,
     operands: &'a [Opnd],
     ctx: &Ctx,
     consts: &BTreeMap<String, i64>,
-) -> (&'a str, Cow<'a, [Opnd]>) {
-    if ctx.optimize
-        && let [Opnd::Imm(e), dest] = operands
+) -> (&'a str, Cow<'a, [Opnd]>, Option<Size>) {
+    if !ctx.optimize {
+        return (mnemonic, Cow::Borrowed(operands), None);
+    }
+    // lea d(An),An with a small offset → addq/subq #d,An (a long).
+    if mnemonic == "LEA"
+        && let [
+            Opnd::Mem {
+                mode: 5,
+                reg,
+                disp: Some(e),
+                ..
+            },
+            Opnd::AReg(n),
+        ] = operands
+        && reg == n
+        && let Ok(v) = eval(e, consts, 0, 0)
+    {
+        if (1..=8).contains(&v) {
+            let ops = vec![Opnd::Imm(e.clone()), Opnd::AReg(*n)];
+            return ("ADDQ", Cow::Owned(ops), Some(Size::L));
+        }
+        if (-8..=-1).contains(&v) {
+            let ops = vec![Opnd::Imm(Expr::Neg(Box::new(e.clone()))), Opnd::AReg(*n)];
+            return ("SUBQ", Cow::Owned(ops), Some(Size::L));
+        }
+    }
+    if let [Opnd::Imm(e), dest] = operands
         && let Ok(v) = eval(e, consts, 0, 0)
     {
         // cmp #0,<ea> → tst <ea> (comparing against zero is a test; drops the
         // immediate word). Not for An, which tst can't address on the 68000.
         if mnemonic == "CMP" && v == 0 && !matches!(dest, Opnd::AReg(_) | Opnd::Imm(_)) {
-            return ("TST", Cow::Owned(vec![dest.clone()]));
+            return ("TST", Cow::Owned(vec![dest.clone()]), None);
         }
         // add/sub of 1..=8 → the quick form.
         if (1..=8).contains(&v) && !matches!(dest, Opnd::Imm(_)) {
             match mnemonic {
-                "ADD" => return ("ADDQ", Cow::Borrowed(operands)),
-                "SUB" => return ("SUBQ", Cow::Borrowed(operands)),
+                "ADD" => return ("ADDQ", Cow::Borrowed(operands), None),
+                "SUB" => return ("SUBQ", Cow::Borrowed(operands), None),
                 _ => {}
             }
         }
@@ -98,10 +137,10 @@ fn lower<'a>(
                 bit: ea::DI,
                 disp: Some(disp_expr),
             };
-            return ("LEA", Cow::Owned(vec![mem, Opnd::AReg(*n)]));
+            return ("LEA", Cow::Owned(vec![mem, Opnd::AReg(*n)]), None);
         }
     }
-    (mnemonic, Cow::Borrowed(operands))
+    (mnemonic, Cow::Borrowed(operands), None)
 }
 
 /// Whether a `d16(An)` operand (mode 5) has a displacement that resolves to
@@ -493,8 +532,9 @@ fn encode(
     here: i64,
     line: usize,
 ) -> Result<(Vec<u8>, Vec<Reloc>), AsmError> {
-    let (mnemonic, operands) = lower(mnemonic, size, operands, ctx, consts);
+    let (mnemonic, operands, size_override) = lower(mnemonic, size, operands, ctx, consts);
     let operands = operands.as_ref();
+    let size = size_override.or(size);
     let insn = m68k::SET
         .instruction(mnemonic)
         .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
@@ -640,6 +680,7 @@ fn ea_mode_bit(op: &Opnd) -> u16 {
         Opnd::DReg(_) => ea::DN,
         Opnd::AReg(_) => ea::AN,
         Opnd::Mem { bit, .. } => *bit,
+        Opnd::Idx { bit, .. } => *bit,
         Opnd::Abs(_) => ea::AL | ea::AW,
         Opnd::Imm(_) => ea::IMM,
         Opnd::RegList(_) => 0,
@@ -682,12 +723,44 @@ fn resolve_ea(
             }
             let mut ext = Vec::new();
             if let Some(e) = disp {
-                let d = eval(e, consts, here, line)?;
+                let raw = eval(e, consts, here, line)?;
+                // `label(pc)` (mode 7) means the *distance* to the label, not its
+                // address: the displacement is `label - pc`. A constant `n(pc)`
+                // stays literal. An `d16(An)` displacement is always literal.
+                let d = if *mode == 7 && reloc_sym(e, &ctx.reloc).is_some() {
+                    raw - pc_ext
+                } else {
+                    raw
+                };
                 let d16 = i16::try_from(d)
                     .map_err(|_| AsmError::new(line, format!("displacement {d} out of range")))?;
                 ext.extend_from_slice(&d16.to_be_bytes());
             }
             (field(u16::from(*mode), u16::from(*reg)), ext, None)
+        }
+        Opnd::Idx {
+            reg,
+            disp,
+            index,
+            long,
+            bit,
+        } => {
+            let d = eval(disp, consts, here, line)?;
+            let d8 = i8::try_from(d)
+                .map_err(|_| AsmError::new(line, format!("index displacement {d} out of range")))?;
+            // Brief extension word: D/A bit, index register, size, then the
+            // 8-bit displacement. Scale (68020+) is always 0 on the 68000.
+            let da = u16::from(*index >= 8) << 15;
+            let ireg = u16::from(*index & 7) << 12;
+            let sz_bit = u16::from(*long) << 11;
+            let word = da | ireg | sz_bit | u16::from(d8 as u8);
+            // Mode 6 (d8,An,Xn); PC-relative index is mode 7, register 3.
+            let (mode, eareg) = if *bit == ea::PCX {
+                (7, 3)
+            } else {
+                (6, u16::from(*reg))
+            };
+            (field(mode, eareg), word.to_be_bytes().to_vec(), None)
         }
         Opnd::Abs(e) => {
             let v = eval(e, consts, here, line)?;
@@ -784,15 +857,16 @@ fn stmt_size(
             size,
             operands,
         } => {
-            let (mnemonic, operands) = lower(mnemonic, *size, operands, ctx, consts);
+            let (mnemonic, operands, size_override) = lower(mnemonic, *size, operands, ctx, consts);
             let operands = operands.as_ref();
+            let written = size_override.or(*size);
             let insn = m68k::SET
                 .instruction(mnemonic)
                 .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
             let form = match_form(insn, operands).ok_or_else(|| {
                 AsmError::new(line, format!("`{mnemonic}` has no form for those operands"))
             })?;
-            let eff = branch_size(ctx.optimize, kind, size, word_branch);
+            let eff = branch_size(ctx.optimize, kind, &written, word_branch);
             let sz = eff.unwrap_or(Size::W);
             // Opcode word, plus each slot's extension words (a Quick8 immediate
             // rides in the opcode, so it adds nothing).
@@ -838,6 +912,8 @@ fn ea_ext_len(
                 0
             }
         }
+        // The brief index extension word.
+        Opnd::Idx { .. } => 2,
         // A same-section relocatable label in a PC-capable slot becomes `(d16,PC)`
         // (2 bytes); otherwise (xxx).L (4 bytes). Must mirror `resolve_ea`.
         Opnd::Abs(e) => {
@@ -875,6 +951,15 @@ enum Opnd {
         reg: u8,
         bit: u16,
         disp: Option<Expr>,
+    },
+    /// Indexed: `d8(An,Xn.size)` (mode 6) or `d8(PC,Xn.size)` (mode 7/reg 3).
+    /// `index` is the index register 0–15 (Dn 0–7, An 8–15); `long` is its size.
+    Idx {
+        reg: u8,
+        disp: Expr,
+        index: u8,
+        long: bool,
+        bit: u16,
     },
     /// A bare absolute address (`.W`/`.L` chosen by value), or — when consumed
     /// by a `BranchW`/`DispW` slot — a branch target expression.
@@ -1026,7 +1111,7 @@ fn qualify_stmt(kind: &mut Stmt, scope: &str) {
 
 fn qualify_opnd(op: &mut Opnd, scope: &str) {
     match op {
-        Opnd::Abs(e) | Opnd::Imm(e) => qualify_expr(e, scope),
+        Opnd::Abs(e) | Opnd::Imm(e) | Opnd::Idx { disp: e, .. } => qualify_expr(e, scope),
         Opnd::Mem { disp: Some(e), .. } => qualify_expr(e, scope),
         _ => {}
     }
@@ -1288,10 +1373,41 @@ fn parse_ea(t: &str, line: usize) -> Result<Opnd, AsmError> {
             disp: None,
         });
     }
-    // disp(An) / disp(PC)
+    // disp(An) / disp(PC) / disp(An,Xn.size) / disp(PC,Xn.size)
     if let (Some(open), Some(stripped)) = (t.find('('), t.strip_suffix(')')) {
         let disp = parse_value(&t[..open], line)?;
         let base = stripped[open + 1..].trim();
+        if let Some((reg_part, index_part)) = base.split_once(',') {
+            // Indexed addressing: an index register, optionally `.w`/`.l`.
+            let (idx_name, long) = match index_part.trim().rsplit_once('.') {
+                Some((r, "l" | "L")) => (r, true),
+                Some((r, "w" | "W")) => (r, false),
+                Some((_, other)) => {
+                    return Err(AsmError::new(line, format!("bad index size `.{other}`")));
+                }
+                None => (index_part.trim(), false),
+            };
+            let index = reg_index(idx_name)
+                .ok_or_else(|| AsmError::new(line, format!("bad index register `{idx_name}`")))?
+                as u8;
+            let reg_part = reg_part.trim();
+            if reg_part.eq_ignore_ascii_case("pc") {
+                return Ok(Opnd::Idx {
+                    reg: 3,
+                    disp,
+                    index,
+                    long,
+                    bit: ea::PCX,
+                });
+            }
+            return Ok(Opnd::Idx {
+                reg: areg(reg_part, line)?,
+                disp,
+                index,
+                long,
+                bit: ea::IX,
+            });
+        }
         if base.eq_ignore_ascii_case("pc") {
             return Ok(Opnd::Mem {
                 mode: 7,
@@ -1325,7 +1441,14 @@ fn areg(t: &str, line: usize) -> Result<u8, AsmError> {
 // ---------------------------------------------------------------------------
 
 fn parse_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
-    mos6502::parse_expr(raw, line, mos6502::parse_number, mos6502::BytePrec::Tight)
+    // vasm has no `<`/`>` byte prefixes; it does have `& | ^ << >>`.
+    mos6502::parse_expr_opts(
+        raw,
+        line,
+        mos6502::parse_number,
+        mos6502::BytePrec::Tight,
+        true,
+    )
 }
 
 fn parse_data_list(rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
