@@ -169,7 +169,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 print!("{}", asm198x::listing_6809(&bytes, origin));
             }
             Assembler::Ca65_816 => {
-                return Err("65816 disassembly is not yet supported".into());
+                print!("{}", asm198x::listing_65816(&bytes, origin));
             }
         }
         return Ok(format!(

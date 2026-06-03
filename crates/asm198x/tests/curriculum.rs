@@ -409,6 +409,14 @@ fn curriculum_is_byte_identical() {
                 }
                 _ => fails.push(format!("ca65-816 reference failed: {name}")),
             }
+            // Disassembler round-trip: assemble -> disassemble -> reassemble. The
+            // disassembler tracks m/x width via rep/sep and emits the matching
+            // .aXX/.iXX directives, so width-switching code reproduces exactly.
+            let listing = asm198x::listing_65816(&ours.bytes, ours.origin);
+            let round = asm198x::assemble_ca65_816(&listing).expect("reassemble").bytes;
+            if round != ours.bytes {
+                fails.push(format!("65816 disasm round-trip: {name}"));
+            }
         }
     } else {
         eprintln!("SKIP: `ca65`/`ld65` not on PATH (65816)");

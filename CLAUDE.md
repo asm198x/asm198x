@@ -40,7 +40,7 @@ Emu198x's consumption makes it real.
 - [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`
   + `m68k`; the Z80 set includes the Z80N extensions). Zero dependencies.
 - [`crates/isa-disasm`](crates/isa-disasm) — the spec-driven disassemblers
-  (6502, Z80, 68000, 6809), decoding against `isa`. Depends only on `isa` + std, so
+  (6502, Z80, 68000, 6809, 65816), decoding against `isa`. Depends only on `isa` + std, so
   Emu198x can consume disassembly without the assembler. See
   [`decisions/disassembler-crate.md`](decisions/disassembler-crate.md).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
@@ -71,10 +71,12 @@ curriculum corpus:
   `z80::NEXT` mechanism. Native-mode core: the `m`/`x` immediate width
   (`.a8`/`.a16`/`.i8`/`.i16` → `"immediate"`/`"immediate16"` fixed-slot forms,
   no `Encoded` seam), all new addressing modes (long, `[dp]`, stack-relative, …),
-  `z:`/`a:`/`f:` size forces with fall-up, long calls/jumps, and the new
-  instructions. Validated byte-identical against `ca65 --cpu 65816` (flat).
-  Deferred: `mvn`/`mvp`, `cop`/`wdm`, the disassembler, `.smart`, `^` bank byte,
-  `@cheap` locals.
+  `z:`/`a:`/`f:` size forces with fall-up, long calls/jumps, the new
+  instructions, `mvn`/`mvp`, `cop`/`wdm`, and the `^` bank-byte operator. The
+  engine carries 24-bit operands and an `i64` symbol table. A spec-driven
+  disassembler tracks `m`/`x` via `rep`/`sep` (emitting `.aXX`/`.iXX`) so
+  width-switching code round-trips. Validated byte-identical against `ca65 --cpu
+  65816` (flat). Deferred: `.smart` and `@cheap` locals (source conveniences).
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.

@@ -880,6 +880,187 @@ fn be16_at(code: &[u8], o: usize) -> Option<u16> {
     Some(u16::from(*code.get(o)?) << 8 | u16::from(*code.get(o + 1)?))
 }
 
+// ---------------------------------------------------------------------------
+// 65816 disassembly (6502 base + the extension, with m/x width tracking)
+// ---------------------------------------------------------------------------
+
+/// Disassemble a flat 65816 native-mode binary loaded at `origin`, rendering
+/// ca65 syntax. Decodes against the 6502 set plus the 65816 extension.
+///
+/// The accumulator/index immediate width is not recoverable from the byte stream
+/// alone, so this tracks it by interpreting `rep`/`sep` as it linearly decodes
+/// (native reset state is 8-bit) and emits the matching `.a8`/`.a16`/`.i8`/`.i16`
+/// directive whenever it changes — so the listing re-assembles byte-exact. Code
+/// whose width is set out of band (no preceding `rep`/`sep`) is the inherent
+/// limit of flat disassembly; it affects only the immediate-width instructions.
+#[must_use]
+pub fn disassemble_65816(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let (mut a, mut i) = (1u8, 1u8); // immediate widths in bytes
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if let Some((mn, mode, vals, len)) = decode_65816(code, pos, addr, a, i) {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: code[pos..pos + len].to_vec(),
+                text: render_816(mn, mode, &vals, addr, len),
+            });
+            // rep clears status bits (→ 16-bit), sep sets them (→ 8-bit);
+            // bit 5 (0x20) is the accumulator width, bit 4 (0x10) the index.
+            if (mn == "REP" || mn == "SEP") && !vals.is_empty() {
+                let to = if mn == "REP" { 2 } else { 1 };
+                if vals[0] & 0x20 != 0 && a != to {
+                    a = to;
+                    out.push(directive_816(addr, if to == 2 { ".a16" } else { ".a8" }));
+                }
+                if vals[0] & 0x10 != 0 && i != to {
+                    i = to;
+                    out.push(directive_816(addr, if to == 2 { ".i16" } else { ".i8" }));
+                }
+            }
+            pos += len;
+        } else {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!(".byte ${:02X}", code[pos]),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render a 65816 disassembly as reassemblable ca65 source.
+#[must_use]
+pub fn listing_65816(code: &[u8], origin: u16) -> String {
+    let mut s = format!("        .org ${origin:04X}\n");
+    for line in disassemble_65816(code, origin) {
+        s.push_str("        ");
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s
+}
+
+/// A width-state directive line — assembler state, so it carries no bytes.
+fn directive_816(addr: u16, text: &str) -> Line {
+    Line {
+        addr: u32::from(addr),
+        bytes: Vec::new(),
+        text: text.to_string(),
+    }
+}
+
+/// Decode one 65816 instruction at `pos` given the current immediate widths.
+/// Opcodes are single bytes; the only ambiguity is the width-variable immediate,
+/// resolved by `a_width`/`i_width`.
+fn decode_65816(
+    code: &[u8],
+    pos: usize,
+    _addr: u16,
+    a_width: u8,
+    i_width: u8,
+) -> Option<(&'static str, &'static str, Vec<i64>, usize)> {
+    let b = *code.get(pos)?;
+    // Candidate forms for this opcode, across the 6502 set and the extension.
+    let mut cands: Vec<(&'static str, &'static isa::Form)> = Vec::new();
+    for set in [&isa::mos6502::SET, &isa::mos65816::SET] {
+        for insn in set.instructions {
+            for form in insn.forms {
+                if form.opcode == [b] {
+                    cands.push((insn.mnemonic, form));
+                }
+            }
+        }
+    }
+    // More than one candidate means an immediate pair (same mnemonic): pick the
+    // 8- or 16-bit form by the relevant width.
+    let (mn, form) = if cands.len() == 1 {
+        cands[0]
+    } else {
+        let want = if matches!(cands[0].0, "LDX" | "LDY" | "CPX" | "CPY") {
+            i_width
+        } else {
+            a_width
+        };
+        let want_mode = if want == 2 { "immediate16" } else { "immediate" };
+        *cands.iter().find(|(_, f)| f.mode == want_mode)?
+    };
+
+    // Read the operand value(s), little-endian; sign-extend PC-relative ones.
+    let mut vals = Vec::new();
+    let mut off = pos + 1;
+    for operand in form.operands {
+        let n = operand.bytes as usize;
+        let mut v: i64 = 0;
+        for k in 0..n {
+            v |= i64::from(*code.get(off + k)?) << (8 * k);
+        }
+        if matches!(operand.kind, isa::OperandKind::RelativePc) {
+            let bits = n * 8;
+            if v & (1 << (bits - 1)) != 0 {
+                v -= 1 << bits;
+            }
+        }
+        vals.push(v);
+        off += n;
+    }
+    Some((mn, form.mode, vals, off - pos))
+}
+
+/// Render a decoded 65816 instruction to ca65 syntax. Where the natural operand
+/// would re-assemble to a smaller addressing mode, an `a:`/`f:` size force pins
+/// it (the ca65 analogue of the 6809 `<`/`>` forces).
+fn render_816(mn: &str, mode: &str, vals: &[i64], addr: u16, len: usize) -> String {
+    let m = mn.to_ascii_lowercase();
+    let v = vals.first().copied().unwrap_or(0);
+    let force_abs = if v < 0x100 { "a:" } else { "" };
+    let force_long = if v < 0x1_0000 { "f:" } else { "" };
+    let operand = match mode {
+        "implied" => String::new(),
+        "accumulator" => "a".to_string(),
+        "immediate" => format!("#${:02X}", v & 0xFF),
+        "immediate16" => format!("#${:04X}", v & 0xFFFF),
+        "signature" => format!("${:02X}", v & 0xFF),
+        "zeropage" => format!("${v:02X}"),
+        "zeropage,x" => format!("${v:02X},x"),
+        "zeropage,y" => format!("${v:02X},y"),
+        "absolute" => format!("{force_abs}${v:04X}"),
+        "absolute,x" => format!("{force_abs}${v:04X},x"),
+        "absolute,y" => format!("{force_abs}${v:04X},y"),
+        "long" => format!("{force_long}${v:06X}"),
+        "long,x" => format!("{force_long}${v:06X},x"),
+        "(indirect)" => format!("(${v:02X})"),
+        "(indirect,x)" => format!("(${v:02X},x)"),
+        "(indirect),y" => format!("(${v:02X}),y"),
+        "[indirect]" => format!("[${v:02X}]"),
+        "[indirect],y" => format!("[${v:02X}],y"),
+        "stack,s" => format!("${v:02X},s"),
+        "(stack,s),y" => format!("(${v:02X},s),y"),
+        "indirect" => format!("(${v:04X})"),
+        "[absolute]" => format!("[${v:04X}]"),
+        "(absolute,x)" => format!("(${v:04X},x)"),
+        "relative" => {
+            let target = addr.wrapping_add(len as u16).wrapping_add(v as u16);
+            format!("${target:04X}")
+        }
+        "relative16" => {
+            let target = addr.wrapping_add(len as u16).wrapping_add(v as u16);
+            format!("${target:04X}")
+        }
+        // mvn/mvp operands are [dest, src]; the source is written first.
+        "block-move" => format!("#${:02X},#${:02X}", vals.get(1).copied().unwrap_or(0) & 0xFF, v & 0xFF),
+        other => other.to_string(),
+    };
+    if operand.is_empty() {
+        m
+    } else {
+        format!("{m} {operand}")
+    }
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]
@@ -1033,5 +1214,41 @@ mod tests {
         assert_eq!(one_6809(&[0x16, 0xFF, 0xFD]), "lbra $1000");
         // conditional long branch is $10-prefixed.
         assert_eq!(one_6809(&[0x10, 0x27, 0xFF, 0xFC]), "lbeq $1000");
+    }
+
+    fn lines_65816(bytes: &[u8]) -> Vec<String> {
+        disassemble_65816(bytes, 0x1000)
+            .into_iter()
+            .map(|l| l.text)
+            .collect()
+    }
+
+    #[test]
+    fn decodes_65816_modes() {
+        // 8-bit by default; the new addressing modes render in ca65 syntax.
+        assert_eq!(lines_65816(&[0xA9, 0x42]), vec!["lda #$42"]);
+        assert_eq!(lines_65816(&[0xAF, 0x56, 0x34, 0x12]), vec!["lda $123456"]);
+        assert_eq!(lines_65816(&[0xA7, 0x12]), vec!["lda [$12]"]);
+        assert_eq!(lines_65816(&[0xA3, 0x03]), vec!["lda $03,s"]);
+        assert_eq!(lines_65816(&[0x22, 0x56, 0x34, 0x12]), vec!["jsl $123456"]);
+        // A low long/abs value is force-sized so it can't shrink on re-assembly.
+        assert_eq!(lines_65816(&[0xAD, 0x12, 0x00]), vec!["lda a:$0012"]);
+        assert_eq!(lines_65816(&[0xAF, 0x12, 0x00, 0x00]), vec!["lda f:$000012"]);
+        // block move renders source-first; cop/wdm a bare byte.
+        assert_eq!(lines_65816(&[0x54, 0x7F, 0x7E]), vec!["mvn #$7E,#$7F"]);
+        assert_eq!(lines_65816(&[0x02, 0x12]), vec!["cop $12"]);
+    }
+
+    #[test]
+    fn tracks_mx_width_and_emits_directives() {
+        // rep #$30 widens both; the following immediate is then 16-bit.
+        let lines = lines_65816(&[0xC2, 0x30, 0xA9, 0x34, 0x12]);
+        assert_eq!(lines, vec!["rep #$30", ".a16", ".i16", "lda #$1234"]);
+        // sep #$20 narrows the accumulator; a 16-bit X immediate stays 16-bit.
+        let lines = lines_65816(&[0xC2, 0x30, 0xE2, 0x20, 0xA9, 0x42, 0xA2, 0x34, 0x12]);
+        assert_eq!(
+            lines,
+            vec!["rep #$30", ".a16", ".i16", "sep #$20", ".a8", "lda #$42", "ldx #$1234"]
+        );
     }
 }

@@ -41,8 +41,8 @@ mod roundtrip_tests;
 // `asm198x` library API and CLI are unchanged.
 pub use engine::{AsmError, Assembly};
 pub use isa_disasm::{
-    Line, disassemble_6502, disassemble_6809, disassemble_68000, disassemble_z80, listing_6502,
-    listing_6809, listing_68000, listing_z80,
+    Line, disassemble_6502, disassemble_6809, disassemble_65816, disassemble_68000,
+    disassemble_z80, listing_6502, listing_6809, listing_65816, listing_68000, listing_z80,
 };
 
 /// Assemble ACME-syntax 6502 source into a flat binary — the C64 curriculum's

@@ -66,22 +66,24 @@ popularity.
 | Z80 | Spectrum | pasmo/pasmonext, sjasmplus | — | ✅ done |
 | 68000 | Amiga (ST, Genesis) | vasm (mot) | new field-based core | ✅ done |
 | 6809 | Dragon, CoCo | **lwasm** | engine seam reused; computed postbyte (indexed) | ✅ done |
-| 65816 | SNES, Apple IIgs | **ca65** | **target extension of `mos6502` (like Z80N on Z80)** | 🚧 in progress |
+| 65816 | SNES, Apple IIgs | **ca65** | **target extension of `mos6502` (like Z80N on Z80)** | ✅ done |
 | later | 8080/8085, 8086, ARM2 (Archimedes), TMS9900 (TI-99) | TBD | mixed | open |
 
-**65816:** native-mode core landed and validated byte-identical against
-`ca65 --cpu 65816` (linked flat; no SNES curriculum yet, so representative
-programs). It is a **target extension** — `isa::mos6502` (primary) +
-`isa::mos65816` (extension), the same mechanism as `z80::NEXT`. Covered: the
-`m`/`x` immediate width (driven by `.a8`/`.a16`/`.i8`/`.i16`), all the new
-addressing modes (long, long,x, `[dp]`, `[dp],y`, stack-relative `n,s`,
-`(n,s),y`, `(dp)`), the `z:`/`a:`/`f:` size forces with value-based default
-sizing and fall-up, long calls/jumps (`jml`/`jsl`/`jmp [abs]`/`jmp (abs,x)`),
-`brl`/`per`/`pea`/`pei`, `stz`/`trb`/`tsb`/`inc a`/`dec a`/`bra`, and the
-register/stack/control instructions. The engine gained 24-bit operands and a
-2-byte PC-relative. Deferred (increment 2): `mvn`/`mvp`, `cop`/`wdm`, the
-disassembler, `.smart` rep/sep width tracking, the `^` bank-byte operator, and
-`@cheap` locals.
+**65816:** the full native-mode instruction set + a spec-driven disassembler,
+all validated byte-identical against `ca65 --cpu 65816` (linked flat; no SNES
+curriculum yet, so representative programs). It is a **target extension** —
+`isa::mos6502` (primary) + `isa::mos65816` (extension), the `z80::NEXT`
+mechanism. Covered: the `m`/`x` immediate width (`.a8`/`.a16`/`.i8`/`.i16`), all
+the new addressing modes (long, long,x, `[dp]`, `[dp],y`, `n,s`, `(n,s),y`,
+`(dp)`), the `z:`/`a:`/`f:` size forces with value-based sizing and fall-up,
+long calls/jumps, `brl`/`per`/`pea`/`pei`, `stz`/`trb`/`tsb`/`inc a`/`bra`, the
+register/stack/control ops, `mvn`/`mvp`, `cop`/`wdm`, and the `^` bank-byte
+operator. The engine gained 24-bit operands, a 2-byte PC-relative, and an `i64`
+symbol table (for 24-bit addresses). The **disassembler** tracks `m`/`x` width
+through `rep`/`sep` and emits the matching width directives, so width-switching
+code round-trips assemble→disassemble→reassemble exactly (its one inherent limit
+is width set out of band, with no preceding `rep`/`sep`). Deferred: `.smart`
+rep/sep width tracking and `@cheap` locals (source-compat conveniences).
 
 **6809:** all addressing modes (inherent, immediate, direct, extended,
 short/long relative, and the full indexed set — 5/8/16-bit offsets, auto
