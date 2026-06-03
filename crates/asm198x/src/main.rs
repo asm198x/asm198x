@@ -162,7 +162,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 print!("{}", asm198x::listing_68000(&bytes, u32::from(origin)));
             }
             Assembler::Lwasm => {
-                return Err("6809 disassembly is not yet supported".into());
+                print!("{}", asm198x::listing_6809(&bytes, origin));
             }
         }
         return Ok(format!(

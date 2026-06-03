@@ -661,6 +661,225 @@ fn render_reglist(mask: u16) -> String {
     groups.join("/")
 }
 
+// ---------------------------------------------------------------------------
+// 6809 disassembly (byte-opcode + computed postbyte: the inverse of lwasm)
+// ---------------------------------------------------------------------------
+
+use isa::mos6809::{self, Kind};
+
+/// Disassemble a flat 6809 big-endian binary loaded at `origin`, rendering
+/// lwasm syntax. A byte matching no known opcode becomes an `fcb` datum.
+#[must_use]
+pub fn disassemble_6809(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if let Some((text, len)) = decode_6809(code, pos, addr) {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: code[pos..pos + len].to_vec(),
+                text,
+            });
+            pos += len;
+        } else {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!("fcb ${:02X}", code[pos]),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render a 6809 disassembly as reassemblable lwasm source (one per line).
+#[must_use]
+pub fn listing_6809(code: &[u8], origin: u16) -> String {
+    let mut s = format!("        org ${origin:04X}\n");
+    for line in disassemble_6809(code, origin) {
+        s.push_str("        ");
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s
+}
+
+/// Decode the one 6809 instruction at `pos`. Opcodes are unique per
+/// (mnemonic, mode), so the first matching entry in the set is the decode; a
+/// prefixed (`$10`/`$11`) opcode is two bytes and no one-byte opcode is a prefix
+/// byte, so a full-slice match is unambiguous regardless of order.
+fn decode_6809(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> {
+    let matches = |op: &[u8]| !op.is_empty() && code.len() - pos >= op.len() && code[pos..pos + op.len()] == *op;
+    for insn in mos6809::SET {
+        let m = insn.mnemonic;
+        match &insn.kind {
+            Kind::Inherent(op) if matches(op) => return Some((m.to_string(), op.len())),
+            Kind::Branch { short, long } => {
+                if matches(short) {
+                    let off = i16::from(*code.get(pos + short.len())? as i8);
+                    let len = short.len() + 1;
+                    let target = addr.wrapping_add(len as u16).wrapping_add(off as u16);
+                    return Some((format!("{m} ${target:04X}"), len));
+                }
+                if matches(long) {
+                    let off = be16_at(code, pos + long.len())? as i16;
+                    let len = long.len() + 2;
+                    let target = addr.wrapping_add(len as u16).wrapping_add(off as u16);
+                    return Some((format!("l{m} ${target:04X}"), len));
+                }
+            }
+            Kind::Mem {
+                imm,
+                direct,
+                indexed,
+                extended,
+                width,
+            } => {
+                if matches(imm) {
+                    let o = pos + imm.len();
+                    let (val, n) = if *width == 2 {
+                        (be16_at(code, o)?, 2)
+                    } else {
+                        (u16::from(*code.get(o)?), 1)
+                    };
+                    let lit = if n == 2 {
+                        format!("#${val:04X}")
+                    } else {
+                        format!("#${val:02X}")
+                    };
+                    return Some((format!("{m} {lit}"), imm.len() + n));
+                }
+                if matches(direct) {
+                    let v = *code.get(pos + direct.len())?;
+                    return Some((format!("{m} ${v:02X}"), direct.len() + 1));
+                }
+                if matches(extended) {
+                    let v = be16_at(code, pos + extended.len())?;
+                    // Force `>` when the address would re-parse as a byte (direct).
+                    let op = if v < 0x100 {
+                        format!(">${v:04X}")
+                    } else {
+                        format!("${v:04X}")
+                    };
+                    return Some((format!("{m} {op}"), extended.len() + 2));
+                }
+                if matches(indexed) {
+                    return decode_indexed_6809(m, indexed.len(), code, pos, addr);
+                }
+            }
+            Kind::Transfer(op) if code.get(pos) == Some(op) => {
+                let post = *code.get(pos + 1)?;
+                let src = mos6809::transfer_reg_name(post >> 4)?;
+                let dst = mos6809::transfer_reg_name(post & 0xF)?;
+                return Some((format!("{m} {src},{dst}"), 2));
+            }
+            Kind::Stack { opcode, u_stack } if code.get(pos) == Some(opcode) => {
+                let regs = render_stack_6809(*code.get(pos + 1)?, *u_stack);
+                return Some((format!("{m} {regs}"), 2));
+            }
+            _ => {}
+        }
+    }
+    None
+}
+
+/// Decode and render a 6809 indexed operand (postbyte + 0/1/2 extension bytes)
+/// into lwasm syntax that re-encodes to the same bytes. Where the natural
+/// rendering would re-assemble to a smaller form, a `<`/`>` size force is added.
+fn decode_indexed_6809(
+    m: &str,
+    opcode_len: usize,
+    code: &[u8],
+    pos: usize,
+    addr: u16,
+) -> Option<(String, usize)> {
+    let post = *code.get(pos + opcode_len)?;
+    let mut len = opcode_len + 1;
+    let reg = mos6809::index_reg_name(post >> 5);
+
+    // bit 7 clear: a 5-bit signed offset embedded in the postbyte.
+    if post & 0x80 == 0 {
+        let off = ((post & 0x1F) as i8) << 3 >> 3; // sign-extend 5 bits
+        return Some((format!("{m} {off},{reg}"), len));
+    }
+
+    let indirect = post & 0x10 != 0;
+    let mut ext = String::new();
+    let inner = match post & 0x0F {
+        0x0 => format!(",{reg}+"),
+        0x1 => format!(",{reg}++"),
+        0x2 => format!(",-{reg}"),
+        0x3 => format!(",--{reg}"),
+        0x4 => format!(",{reg}"),
+        0x5 => format!("b,{reg}"),
+        0x6 => format!("a,{reg}"),
+        0xB => format!("d,{reg}"),
+        0x8 => {
+            let n = i16::from(*code.get(pos + len)? as i8);
+            len += 1;
+            // A small offset (5-bit range) would re-encode to 5-bit unless the
+            // indirect form (no 5-bit) is in play; force 8-bit when not.
+            let force = if !indirect && (-16..=15).contains(&n) { "<" } else { "" };
+            format!("{force}{n},{reg}")
+        }
+        0x9 => {
+            let v = be16_at(code, pos + len)?;
+            len += 2;
+            // A value ≤ 127 would re-encode 5-/8-bit; force 16-bit.
+            let force = if v <= 127 { ">" } else { "" };
+            format!("{force}${v:04X},{reg}")
+        }
+        0xC => {
+            let off = i16::from(*code.get(pos + len)? as i8);
+            len += 1;
+            let target = addr.wrapping_add(len as u16).wrapping_add(off as u16);
+            // 8-bit PCR must be forced (the assembler defaults PCR to 16-bit).
+            format!("<${target:04X},pcr")
+        }
+        0xD => {
+            let off = be16_at(code, pos + len)? as i16;
+            len += 2;
+            let target = addr.wrapping_add(len as u16).wrapping_add(off as u16);
+            format!("${target:04X},pcr")
+        }
+        0xF => {
+            // Extended indirect `[addr]` — always indirect, register bits unused.
+            let v = be16_at(code, pos + len)?;
+            len += 2;
+            ext = format!("${v:04X}");
+            String::new()
+        }
+        _ => return None,
+    };
+    let text = if post & 0x0F == 0xF {
+        format!("[{ext}]")
+    } else if indirect {
+        format!("[{inner}]")
+    } else {
+        inner
+    };
+    Some((format!("{m} {text}"), len))
+}
+
+/// Render a push/pull register bitmask as a register list in bit order.
+fn render_stack_6809(mask: u8, u_stack: bool) -> String {
+    let names = mos6809::stack_regs(u_stack);
+    let mut regs = Vec::new();
+    for (i, name) in names.iter().enumerate() {
+        if mask & (1 << i) != 0 {
+            regs.push(*name);
+        }
+    }
+    regs.join(",")
+}
+
+/// Read a big-endian 16-bit word at `o`, or `None` if it runs past the end.
+fn be16_at(code: &[u8], o: usize) -> Option<u16> {
+    Some(u16::from(*code.get(o)?) << 8 | u16::from(*code.get(o + 1)?))
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]
@@ -761,5 +980,58 @@ mod tests {
     fn m68k_short_branch_target_is_absolute() {
         // bne.s at $1000, length 2, disp -8 ($F8) -> target $FFA.
         assert_eq!(one_m68k(&[0x66, 0xF8]), "bne.s $FFA");
+    }
+
+    fn one_6809(bytes: &[u8]) -> String {
+        let lines = disassemble_6809(bytes, 0x1000);
+        assert_eq!(lines.len(), 1, "expected one instruction, got {lines:?}");
+        lines[0].text.clone()
+    }
+
+    #[test]
+    fn decodes_6809_modes() {
+        assert_eq!(one_6809(&[0x39]), "rts");
+        assert_eq!(one_6809(&[0x86, 0x42]), "lda #$42");
+        assert_eq!(one_6809(&[0x8E, 0x12, 0x34]), "ldx #$1234");
+        assert_eq!(one_6809(&[0x96, 0x20]), "lda $20");
+        assert_eq!(one_6809(&[0xB6, 0x12, 0x34]), "lda $1234");
+        // Extended low address forces `>` so it doesn't collapse to direct.
+        assert_eq!(one_6809(&[0xB6, 0x00, 0x20]), "lda >$0020");
+    }
+
+    #[test]
+    fn decodes_6809_indexed() {
+        assert_eq!(one_6809(&[0xA6, 0x84]), "lda ,x");
+        assert_eq!(one_6809(&[0xA6, 0x05]), "lda 5,x");
+        assert_eq!(one_6809(&[0xA6, 0x10]), "lda -16,x"); // 5-bit -16
+        assert_eq!(one_6809(&[0xA6, 0xA4]), "lda ,y");
+        assert_eq!(one_6809(&[0xA6, 0x80]), "lda ,x+");
+        assert_eq!(one_6809(&[0xA6, 0x81]), "lda ,x++");
+        assert_eq!(one_6809(&[0xA6, 0x83]), "lda ,--x");
+        assert_eq!(one_6809(&[0xA6, 0x86]), "lda a,x");
+        assert_eq!(one_6809(&[0xA6, 0x8B]), "lda d,x");
+        // 8-bit offset within 5-bit range forces `<`; outside it does not.
+        assert_eq!(one_6809(&[0xA6, 0x88, 0x05]), "lda <5,x");
+        assert_eq!(one_6809(&[0xA6, 0x88, 0x64]), "lda 100,x");
+        // 16-bit offset ≤127 forces `>`; a real address does not.
+        assert_eq!(one_6809(&[0xA6, 0x89, 0x12, 0x34]), "lda $1234,x");
+        // Indirect (no 5-bit form) and extended indirect.
+        assert_eq!(one_6809(&[0xA6, 0x94]), "lda [,x]");
+        assert_eq!(one_6809(&[0xA6, 0x98, 0x05]), "lda [5,x]");
+        assert_eq!(one_6809(&[0xA6, 0x9F, 0x20, 0x00]), "lda [$2000]");
+    }
+
+    #[test]
+    fn decodes_6809_registers_and_branches() {
+        assert_eq!(one_6809(&[0x1F, 0x89]), "tfr a,b");
+        assert_eq!(one_6809(&[0x1E, 0x10]), "exg x,d");
+        assert_eq!(one_6809(&[0x34, 0x16]), "pshs a,b,x");
+        assert_eq!(one_6809(&[0x36, 0x46]), "pshu a,b,s");
+        // bra at $1000 len 2, offset -2 -> $1000.
+        assert_eq!(one_6809(&[0x20, 0xFE]), "bra $1000");
+        // lbra at $1000 len 3, offset -3 -> $1000.
+        assert_eq!(one_6809(&[0x16, 0xFF, 0xFD]), "lbra $1000");
+        // conditional long branch is $10-prefixed.
+        assert_eq!(one_6809(&[0x10, 0x27, 0xFF, 0xFC]), "lbeq $1000");
     }
 }

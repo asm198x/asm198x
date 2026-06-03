@@ -65,16 +65,20 @@ popularity.
 | 6502 | C64, NES | acme, ca65 | — | ✅ done |
 | Z80 | Spectrum | pasmo/pasmonext, sjasmplus | — | ✅ done |
 | 68000 | Amiga (ST, Genesis) | vasm (mot) | new field-based core | ✅ done |
-| 6809 | Dragon, CoCo | **lwasm** | engine seam reused; computed postbyte (indexed) | 🚧 in progress |
-| 65816 | SNES, Apple IIgs | ca65 (already speaks it), 64tass | **extends the `mos6502` core; ca65 front-end exists** | after 6809 |
+| 6809 | Dragon, CoCo | **lwasm** | engine seam reused; computed postbyte (indexed) | ✅ done |
+| 65816 | SNES, Apple IIgs | ca65 (already speaks it), 64tass | **extends the `mos6502` core; ca65 front-end exists** | next |
 | later | 8080/8085, 8086, ARM2 (Archimedes), TMS9900 (TI-99) | TBD | mixed | open |
 
-**6809 progress:** non-indexed modes (inherent, immediate, direct, extended,
-short/long relative) plus `org`/`equ`/`fcb`/`fdb`/`rmb` are landed and validated
-byte-identical against `lwasm --6809 --raw` (in the curriculum harness, as
-representative programs — there is no 6809 curriculum). Remaining for 6809:
-indexed addressing (the postbyte + 0/1/2 extension bytes), the register-list ops
-(`tfr`/`exg`/`pshs`/`puls`), `fcc` strings, and the 6809 disassembler.
+**6809:** all addressing modes (inherent, immediate, direct, extended,
+short/long relative, and the full indexed set — 5/8/16-bit offsets, auto
+inc/dec, accumulator offsets, indirect, extended-indirect, PC-relative), the
+register ops (`tfr`/`exg`/`pshs`/`puls`/`pshu`/`pulu`), `org`/`equ`/`fcb`/`fdb`/
+`fcc`/`rmb`, and a spec-driven disassembler with assemble→disassemble→reassemble
+round-trip. Validated byte-identical against `lwasm --6809 --raw` (curriculum
+harness, as representative programs — there is no 6809 curriculum). Deferred
+lwasm-isms: the `'c` char literal (needs a shared-tokenizer change) and PCR
+8-bit auto-selection for *constant* targets (the size depends on the PC, unknown
+at parse time — use `<` to force; labels default to 16-bit, matching lwasm).
 
 Agreed order: **finish 68000 → 6809 → 65816 → reassess.** 65816 is the cheapest
 big win (6502 family + ca65 reuse) but is sequenced after 6809 per the owner's

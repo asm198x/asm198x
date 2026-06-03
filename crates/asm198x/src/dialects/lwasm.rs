@@ -107,6 +107,7 @@ fn parse_op(
         "equ" => Ok(Some(Operation::Equ(value(operand, line)?))),
         "fcb" | ".byte" => Ok(Some(Operation::Bytes(list(operand, line)?))),
         "fdb" | ".word" => Ok(Some(Operation::Words(list(operand, line)?))),
+        "fcc" => Ok(Some(parse_fcc(operand, line)?)),
         "rmb" | ".ds" => parse_rmb(operand, env, line),
         "end" => Ok(None), // marks the end of source; emits nothing
         _ => Ok(Some(parse_instruction(&m, operand, env, line)?)),
@@ -144,6 +145,8 @@ fn parse_instruction(
                 extended,
                 width,
             } => encode_mem(m, imm, direct, indexed, extended, *width, operand, env, line),
+            Kind::Transfer(opcode) => encode_transfer(m, *opcode, operand, line),
+            Kind::Stack { opcode, u_stack } => encode_stack(*opcode, *u_stack, operand, line),
         }
     } else if let Some(stripped) = m.strip_prefix('l')
         && let Some(insn) = mos6809::lookup(stripped)
@@ -207,19 +210,20 @@ fn encode_mem(
     if t.is_empty() {
         return Err(AsmError::new(line, format!("`{m}` requires an operand")));
     }
-    // Indexed addressing (`,R` / `n,R` / `[...]`) computes a postbyte — not yet.
-    let _ = indexed;
-    if t.starts_with('[') || mos6502::top_level_rfind(t, ',').is_some() {
-        return Err(AsmError::new(
-            line,
-            format!("`{m}`: 6809 indexed addressing is not yet supported"),
-        ));
-    }
     if let Some(rest) = t.strip_prefix('#') {
         if imm.is_empty() {
             return Err(AsmError::new(line, format!("`{m}` has no immediate mode")));
         }
         return Ok(encoded(imm, value(rest, line)?, width));
+    }
+    // Indexed addressing (`,R` / `n,R` / `[...]`) — a computed postbyte plus
+    // 0/1/2 extension bytes. Detected before the `<`/`>` direct/extended forces,
+    // since inside an indexed operand `<`/`>` size the offset, not the address.
+    if t.starts_with('[') || mos6502::top_level_rfind(t, ',').is_some() {
+        if indexed.is_empty() {
+            return Err(AsmError::new(line, format!("`{m}` has no indexed mode")));
+        }
+        return encode_indexed(m, indexed, t, env, line);
     }
     if let Some(rest) = t.strip_prefix('<') {
         if direct.is_empty() {
@@ -259,6 +263,243 @@ fn encoded(opcode: &[u8], expr: Expr, width: u8) -> Operation {
         signed: false,
     });
     Operation::Encoded(pieces)
+}
+
+// ---------------------------------------------------------------------------
+// Indexed addressing — the computed postbyte
+// ---------------------------------------------------------------------------
+
+/// An auto-increment / -decrement marker on the index register.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Auto {
+    None,
+    Inc1,
+    Inc2,
+    Dec1,
+    Dec2,
+}
+
+/// The chosen width of an indexed offset: embedded 5-bit, an 8-bit extension, or
+/// a 16-bit extension.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum OffSize {
+    Bits5,
+    Byte,
+    Word,
+}
+
+/// Encode a 6809 indexed operand into the postbyte (+ 0/1/2 extension bytes).
+fn encode_indexed(
+    m: &str,
+    opcode: &[u8],
+    operand: &str,
+    env: &BTreeMap<String, i64>,
+    line: usize,
+) -> Result<Operation, AsmError> {
+    // Indirect operands are wrapped in `[ ]`.
+    let (inner, indirect) = match operand.strip_prefix('[') {
+        Some(rest) => (
+            rest.strip_suffix(']')
+                .ok_or_else(|| AsmError::new(line, format!("unclosed `[` in `{operand}`")))?
+                .trim(),
+            true,
+        ),
+        None => (operand, false),
+    };
+
+    let mut pieces: Vec<Piece> = opcode.iter().map(|b| Piece::Lit(*b)).collect();
+
+    // No top-level comma: only the extended-indirect form `[addr]` is valid.
+    let Some(c) = mos6502::top_level_rfind(inner, ',') else {
+        if indirect {
+            pieces.push(Piece::Lit(0x9F));
+            pieces.push(Piece::Val {
+                expr: value(inner, line)?,
+                bytes: 2,
+                rel: false,
+                signed: false,
+            });
+            return Ok(Operation::Encoded(pieces));
+        }
+        return Err(AsmError::new(line, format!("`{m}`: not an indexed operand")));
+    };
+    let left = inner[..c].trim();
+    let reg = inner[c + 1..].trim();
+
+    let (rbits, auto, pcr) = parse_index_reg(reg, line)?;
+    if auto != Auto::None && !left.is_empty() {
+        return Err(AsmError::new(line, "auto-increment/decrement takes no offset"));
+    }
+    if indirect && matches!(auto, Auto::Inc1 | Auto::Dec1) {
+        return Err(AsmError::new(line, "no indirect form for single `,R+`/`,-R`"));
+    }
+
+    // The postbyte, before the indirect bit is OR-ed in.
+    let mut post: u8;
+    let mut ext: Option<(Expr, u8, bool)> = None; // (expr, width, rel)
+    if pcr {
+        // `n,PCR`: the offset is relative to the following instruction. The size
+        // can't be chosen from the value (it depends on the unknown PC), so it
+        // defaults to 16-bit; `<` forces 8-bit. `>` also gives 16-bit.
+        let (size, expr) = sized_offset(left, env, line, false, true)?;
+        post = if size == OffSize::Byte { 0x8C } else { 0x8D };
+        ext = Some((expr, if size == OffSize::Byte { 1 } else { 2 }, true));
+    } else {
+        let rr = rbits << 5;
+        post = match auto {
+            Auto::Inc1 => 0x80 | rr,
+            Auto::Inc2 => 0x81 | rr,
+            Auto::Dec1 => 0x82 | rr,
+            Auto::Dec2 => 0x83 | rr,
+            Auto::None if left.is_empty() => 0x84 | rr,
+            Auto::None if left.eq_ignore_ascii_case("a") => 0x86 | rr,
+            Auto::None if left.eq_ignore_ascii_case("b") => 0x85 | rr,
+            Auto::None if left.eq_ignore_ascii_case("d") => 0x8B | rr,
+            Auto::None => {
+                // A numeric/symbolic offset: 5-bit embedded, or an 8-/16-bit
+                // extension. Indirect has no 5-bit form (8-bit is the minimum).
+                let (size, expr) = sized_offset(left, env, line, !indirect, false)?;
+                match size {
+                    OffSize::Bits5 => {
+                        let v = fold_const(&expr, env, line)?; // constant by construction
+                        rr | (v as u8 & 0x1F)
+                    }
+                    OffSize::Byte => {
+                        ext = Some((expr, 1, false));
+                        0x88 | rr
+                    }
+                    OffSize::Word => {
+                        ext = Some((expr, 2, false));
+                        0x89 | rr
+                    }
+                }
+            }
+        };
+    }
+
+    if indirect {
+        post |= 0x10;
+    }
+    pieces.push(Piece::Lit(post));
+    if let Some((expr, width, rel)) = ext {
+        pieces.push(Piece::Val {
+            expr,
+            bytes: width,
+            rel,
+            // An 8-bit offset is a signed displacement; a 16-bit one is often a
+            // base address, so it is range-checked across the full width.
+            signed: width == 1,
+        });
+    }
+    Ok(Operation::Encoded(pieces))
+}
+
+/// Parse the register part of an indexed operand: the index register (`x`/`y`/
+/// `u`/`s`), with any auto inc/dec marker, or the PC for `pcr`/`pc`. Returns the
+/// 2-bit register field, the auto marker, and whether it is PC-relative.
+fn parse_index_reg(reg: &str, line: usize) -> Result<(u8, Auto, bool), AsmError> {
+    let r = reg.trim();
+    if r.eq_ignore_ascii_case("pcr") || r.eq_ignore_ascii_case("pc") {
+        return Ok((0, Auto::None, true));
+    }
+    let (name, auto) = if let Some(s) = r.strip_prefix("--") {
+        (s, Auto::Dec2)
+    } else if let Some(s) = r.strip_prefix('-') {
+        (s, Auto::Dec1)
+    } else if let Some(s) = r.strip_suffix("++") {
+        (s, Auto::Inc2)
+    } else if let Some(s) = r.strip_suffix('+') {
+        (s, Auto::Inc1)
+    } else {
+        (r, Auto::None)
+    };
+    let rbits = mos6809::index_reg(name.trim())
+        .ok_or_else(|| AsmError::new(line, format!("unknown index register `{reg}`")))?;
+    Ok((rbits, auto, false))
+}
+
+/// Choose the width of an indexed offset and parse its expression. `<` forces
+/// 8-bit, `>` forces 16-bit. Otherwise a constant picks the smallest fit
+/// (5-bit only when `allow5`); a forward/symbolic offset defaults to 16-bit. For
+/// `pcr` the value can't choose the size (it depends on the PC), so it is 16-bit
+/// unless `<`-forced.
+fn sized_offset(
+    raw: &str,
+    env: &BTreeMap<String, i64>,
+    line: usize,
+    allow5: bool,
+    pcr: bool,
+) -> Result<(OffSize, Expr), AsmError> {
+    let t = raw.trim();
+    if let Some(rest) = t.strip_prefix('>') {
+        return Ok((OffSize::Word, value(rest, line)?));
+    }
+    if let Some(rest) = t.strip_prefix('<') {
+        return Ok((OffSize::Byte, value(rest, line)?));
+    }
+    let e = value(t, line)?;
+    if pcr {
+        return Ok((OffSize::Word, e));
+    }
+    let size = match fold_const(&e, env, line) {
+        Ok(v) if allow5 && (-16..=15).contains(&v) => OffSize::Bits5,
+        Ok(v) if (-128..=127).contains(&v) => OffSize::Byte,
+        _ => OffSize::Word,
+    };
+    Ok((size, e))
+}
+
+// ---------------------------------------------------------------------------
+// Register-list operations
+// ---------------------------------------------------------------------------
+
+/// `tfr`/`exg src,dst` — the opcode then a postbyte of two 4-bit register codes.
+fn encode_transfer(m: &str, opcode: u8, operand: &str, line: usize) -> Result<Operation, AsmError> {
+    let parts = mos6502::split_top_level(operand, ',');
+    if parts.len() != 2 {
+        return Err(AsmError::new(line, format!("`{m}` needs two registers")));
+    }
+    let reg = |p: &str| {
+        mos6809::transfer_reg(p.trim())
+            .ok_or_else(|| AsmError::new(line, format!("unknown register `{}`", p.trim())))
+    };
+    let post = (reg(parts[0])? << 4) | reg(parts[1])?;
+    Ok(Operation::Encoded(vec![Piece::Lit(opcode), Piece::Lit(post)]))
+}
+
+/// `pshs`/`puls`/`pshu`/`pulu reg,…` — the opcode then a register bitmask.
+fn encode_stack(
+    opcode: u8,
+    u_stack: bool,
+    operand: &str,
+    line: usize,
+) -> Result<Operation, AsmError> {
+    if operand.trim().is_empty() {
+        return Err(AsmError::new(line, "push/pull needs at least one register"));
+    }
+    let mut mask = 0u8;
+    for p in mos6502::split_top_level(operand, ',') {
+        mask |= mos6809::stack_mask(p.trim(), u_stack)
+            .ok_or_else(|| AsmError::new(line, format!("unknown register `{}`", p.trim())))?;
+    }
+    Ok(Operation::Encoded(vec![Piece::Lit(opcode), Piece::Lit(mask)]))
+}
+
+/// `fcc` — a string with a self-chosen delimiter (`"text"`, `/text/`, …): one
+/// byte per character, up to the closing delimiter.
+fn parse_fcc(operand: &str, line: usize) -> Result<Operation, AsmError> {
+    let t = operand.trim();
+    let delim = t
+        .chars()
+        .next()
+        .ok_or_else(|| AsmError::new(line, "`fcc` needs a string"))?;
+    let rest = &t[delim.len_utf8()..];
+    let end = rest
+        .find(delim)
+        .ok_or_else(|| AsmError::new(line, "unterminated `fcc` string"))?;
+    Ok(Operation::Bytes(
+        rest[..end].bytes().map(|b| Expr::Num(i64::from(b))).collect(),
+    ))
 }
 
 /// Parse a comma-separated list of value expressions (for `fcb`/`fdb`).
@@ -346,5 +587,64 @@ mod tests {
         assert_eq!(a.origin, 0x2000);
         assert_eq!(a.bytes, vec![0x86, 0x00, 0xB7, 0x10, 0x00, 0x39]);
         assert_eq!(a.symbols.get("start"), Some(&0x2000));
+    }
+
+    #[test]
+    fn indexed_offsets_pick_smallest() {
+        // No offset, 5-bit, 8-bit, 16-bit — register X (opcode 0xA6).
+        assert_eq!(asm("        lda ,x\n").expect("noff").bytes, vec![0xA6, 0x84]);
+        assert_eq!(asm("        lda 5,x\n").expect("5bit").bytes, vec![0xA6, 0x05]);
+        assert_eq!(asm("        lda -16,x\n").expect("5neg").bytes, vec![0xA6, 0x10]);
+        assert_eq!(asm("        lda 16,x\n").expect("8bit").bytes, vec![0xA6, 0x88, 0x10]);
+        assert_eq!(
+            asm("        lda $1234,x\n").expect("16bit").bytes,
+            vec![0xA6, 0x89, 0x12, 0x34]
+        );
+        // Other registers shift the postbyte; Y=+0x20, U=+0x40, S=+0x60.
+        assert_eq!(asm("        lda ,y\n").expect("y").bytes, vec![0xA6, 0xA4]);
+        assert_eq!(asm("        ldx 2,s\n").expect("s").bytes, vec![0xAE, 0x62]);
+    }
+
+    #[test]
+    fn indexed_auto_and_accumulator() {
+        assert_eq!(asm("        lda ,x+\n").expect("inc1").bytes, vec![0xA6, 0x80]);
+        assert_eq!(asm("        lda ,x++\n").expect("inc2").bytes, vec![0xA6, 0x81]);
+        assert_eq!(asm("        lda ,-x\n").expect("dec1").bytes, vec![0xA6, 0x82]);
+        assert_eq!(asm("        lda ,--x\n").expect("dec2").bytes, vec![0xA6, 0x83]);
+        assert_eq!(asm("        lda a,x\n").expect("a").bytes, vec![0xA6, 0x86]);
+        assert_eq!(asm("        lda b,x\n").expect("b").bytes, vec![0xA6, 0x85]);
+        assert_eq!(asm("        lda d,x\n").expect("d").bytes, vec![0xA6, 0x8B]);
+    }
+
+    #[test]
+    fn indexed_indirect_and_pcr() {
+        assert_eq!(asm("        lda [,x]\n").expect("ind").bytes, vec![0xA6, 0x94]);
+        // Indirect has no 5-bit form: a small offset still uses the 8-bit form.
+        assert_eq!(asm("        lda [5,x]\n").expect("ind8").bytes, vec![0xA6, 0x98, 0x05]);
+        assert_eq!(
+            asm("        lda [$2000]\n").expect("extind").bytes,
+            vec![0xA6, 0x9F, 0x20, 0x00]
+        );
+        // PCR to a label: 16-bit offset relative to the next instruction.
+        let a = asm("        org $1000\n        leax msg,pcr\n        nop\nmsg fcb 1\n").expect("pcr");
+        // leax=0x30, postbyte 0x8D, offset = msg($1005) - next($1004) = 1.
+        assert_eq!(a.bytes[..4], [0x30, 0x8D, 0x00, 0x01]);
+    }
+
+    #[test]
+    fn transfer_and_stack() {
+        assert_eq!(asm("        tfr a,b\n").expect("tfr").bytes, vec![0x1F, 0x89]);
+        assert_eq!(asm("        exg x,d\n").expect("exg").bytes, vec![0x1E, 0x10]);
+        assert_eq!(asm("        pshs a,b,x\n").expect("pshs").bytes, vec![0x34, 0x16]);
+        // `d` sets both the A and B bits.
+        assert_eq!(asm("        puls x,y,d\n").expect("puls").bytes, vec![0x35, 0x36]);
+        // pshu's bit 6 is S, not U.
+        assert_eq!(asm("        pshu a,b,s\n").expect("pshu").bytes, vec![0x36, 0x46]);
+    }
+
+    #[test]
+    fn fcc_string() {
+        assert_eq!(asm("        fcc \"AB\"\n").expect("dq").bytes, vec![0x41, 0x42]);
+        assert_eq!(asm("        fcc /CD/\n").expect("slash").bytes, vec![0x43, 0x44]);
     }
 }

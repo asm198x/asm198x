@@ -6,12 +6,12 @@
 
 ## The decision
 
-The spec-driven disassemblers (6502, Z80, 68000) live in a separate crate,
+The spec-driven disassemblers (6502, Z80, 68000, 6809) live in a separate crate,
 [`crates/isa-disasm`](../crates/isa-disasm), depending only on `isa` + std —
 the same neutral footing as `isa` itself. `asm198x` depends on `isa-disasm` and
-**re-exports** it (`disassemble_6502`/`disassemble_z80`/`disassemble_68000`,
-their `listing_*` forms, and `Line`), so the `asm198x` library API and CLI are
-unchanged.
+**re-exports** it (`disassemble_6502`/`disassemble_z80`/`disassemble_68000`/
+`disassemble_6809`, their `listing_*` forms, and `Line`), so the `asm198x`
+library API and CLI are unchanged.
 
 This makes disassembly consumable **without the assembler** — no parser, no
 engine, no CLI, no dialect front-ends. The motivating consumer is **Emu198x**,

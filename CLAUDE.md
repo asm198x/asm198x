@@ -40,7 +40,7 @@ Emu198x's consumption makes it real.
 - [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`
   + `m68k`; the Z80 set includes the Z80N extensions). Zero dependencies.
 - [`crates/isa-disasm`](crates/isa-disasm) — the spec-driven disassemblers
-  (6502, Z80, 68000), decoding against `isa`. Depends only on `isa` + std, so
+  (6502, Z80, 68000, 6809), decoding against `isa`. Depends only on `isa` + std, so
   Emu198x can consume disassembly without the assembler. See
   [`decisions/disassembler-crate.md`](decisions/disassembler-crate.md).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
@@ -57,13 +57,15 @@ curriculum corpus:
   crate docs and `decisions/syntax-stance.md`).
 - **Z80** — `pasmo`/`pasmonext` and `sjasmplus` front-ends over a shared
   `dialects::z80` core, the Z80N target, and a spec-driven Z80 disassembler.
-- **6809** — `lwasm` front-end (`dialects::lwasm`) over the `isa::mos6809` spec.
-  First user of the engine's **computed-operand seam** (`Operation::Encoded` /
-  `Piece`), for CPUs whose operands are computed rather than fixed-width slots.
-  Non-indexed modes (inherent, immediate, direct, extended, short/long relative)
-  plus `org`/`equ`/`fcb`/`fdb`/`rmb` are landed and validated byte-identical
-  against `lwasm --6809 --raw`. Indexed addressing (the postbyte), register-list
-  ops, and the 6809 disassembler are the next increment.
+- **6809** — `lwasm` front-end (`dialects::lwasm`) over the `isa::mos6809` spec,
+  plus a spec-driven 6809 disassembler. First user of the engine's
+  **computed-operand seam** (`Operation::Encoded` / `Piece`), for CPUs whose
+  operands are computed rather than fixed-width slots. All addressing modes
+  (including the full indexed set — the computed postbyte + 0/1/2 extension
+  bytes, auto inc/dec, accumulator offsets, indirect, PC-relative), the register
+  ops (`tfr`/`exg`/`pshs`/`puls`/`pshu`/`pulu`), and `org`/`equ`/`fcb`/`fdb`/
+  `fcc`/`rmb` are landed and validated byte-identical against `lwasm --6809
+  --raw`, with assemble→disassemble→reassemble round-trip.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.

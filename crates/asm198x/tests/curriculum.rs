@@ -358,6 +358,12 @@ fn curriculum_is_byte_identical() {
                 }
                 None => fails.push(format!("lwasm reference failed: {name}")),
             }
+            // Disassembler round-trip: assemble -> disassemble -> reassemble.
+            let listing = asm198x::listing_6809(&ours.bytes, ours.origin);
+            let round = asm198x::assemble_lwasm(&listing).expect("reassemble").bytes;
+            if round != ours.bytes {
+                fails.push(format!("6809 disasm round-trip: {name}"));
+            }
         }
     } else {
         eprintln!("SKIP: `lwasm` not on PATH");
@@ -430,5 +436,62 @@ const LWASM_PROGRAMS: &[(&str, &str)] = &[
          table   fcb     $01,$02,$03\n\
          \x20       fdb     $1234,$5678\n\
          \x20       rmb     4\n",
+    ),
+    (
+        "indexed",
+        "        org     $1000\n\
+         \x20       lda     ,x\n\
+         \x20       lda     0,x\n\
+         \x20       lda     5,x\n\
+         \x20       lda     -16,x\n\
+         \x20       lda     16,x\n\
+         \x20       lda     $1234,x\n\
+         \x20       lda     ,y\n\
+         \x20       ldx     2,s\n\
+         \x20       lda     ,x+\n\
+         \x20       lda     ,x++\n\
+         \x20       lda     ,-x\n\
+         \x20       lda     ,--x\n\
+         \x20       lda     a,x\n\
+         \x20       lda     b,x\n\
+         \x20       lda     d,x\n\
+         \x20       lda     [,x]\n\
+         \x20       lda     [5,x]\n\
+         \x20       lda     [$1234,x]\n\
+         \x20       lda     [,x++]\n\
+         \x20       lda     [d,y]\n\
+         \x20       lda     [$2000]\n\
+         \x20       leax    msg,pcr\n\
+         \x20       sta     ,x++\n\
+         \x20       stb     [d,y]\n\
+         \x20       ldd     ,y\n\
+         msg     fcb     $41\n",
+    ),
+    (
+        "register-ops",
+        "        org     $1000\n\
+         \x20       tfr     a,b\n\
+         \x20       tfr     x,y\n\
+         \x20       tfr     d,u\n\
+         \x20       tfr     pc,s\n\
+         \x20       exg     a,b\n\
+         \x20       exg     x,d\n\
+         \x20       pshs    a\n\
+         \x20       pshs    a,b,x,y\n\
+         \x20       pshs    cc,a,b,dp,x,y,u,pc\n\
+         \x20       puls    pc\n\
+         \x20       puls    a,b,x\n\
+         \x20       pshu    a,b,s\n\
+         \x20       puls    x,y,d\n\
+         \x20       leay    -2,y\n\
+         \x20       rts\n",
+    ),
+    (
+        "strings",
+        "        org     $1000\n\
+         hello   fcc     \"Hello, world\"\n\
+         \x20       fcc     /slashes/\n\
+         \x20       fdb     hello\n\
+         \x20       rts\n",
     ),
 ];

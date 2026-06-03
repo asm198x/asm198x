@@ -456,12 +456,15 @@ fn emit_value(
     endianness: isa::Endianness,
     line: usize,
 ) -> Result<(), AsmError> {
+    // `signed` (branch offsets, signed index displacements) range-checks as
+    // two's-complement. Otherwise the value is an address/immediate/large index
+    // offset, accepted as either-signed across the full width: a 16-bit indexed
+    // offset is often a base address ≥ `$8000` yet a small one may be negative.
     let (lo, hi) = match width {
-        1 => (-128, if signed { 127 } else { 0xFF }),
-        2 => (
-            if signed { -32768 } else { 0 },
-            if signed { 32767 } else { 0xFFFF },
-        ),
+        1 if signed => (-128, 127),
+        1 => (-128, 0xFF),
+        2 if signed => (-32768, 32767),
+        2 => (-32768, 0xFFFF),
         other => {
             return Err(AsmError::new(line, format!("unsupported value width {other}")));
         }

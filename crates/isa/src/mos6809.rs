@@ -36,6 +36,13 @@ pub enum Kind {
         extended: &'static [u8],
         width: u8,
     },
+    /// An inter-register transfer/exchange (`tfr`/`exg`): the opcode, then a
+    /// postbyte packing two 4-bit register codes (`(src << 4) | dst`).
+    Transfer(u8),
+    /// A push/pull of a register set (`pshs`/`puls`/`pshu`/`pulu`): the opcode,
+    /// then a one-byte register bitmask. `u_stack` is true for the U-stack ops
+    /// (`pshu`/`pulu`), where bit 6 of the mask denotes `S` rather than `U`.
+    Stack { opcode: u8, u_stack: bool },
 }
 
 impl Insn {
@@ -70,6 +77,120 @@ impl Insn {
             kind: Kind::Branch { short, long },
         }
     }
+    const fn transfer(mnemonic: &'static str, opcode: u8) -> Self {
+        Insn {
+            mnemonic,
+            kind: Kind::Transfer(opcode),
+        }
+    }
+    const fn stack(mnemonic: &'static str, opcode: u8, u_stack: bool) -> Self {
+        Insn {
+            mnemonic,
+            kind: Kind::Stack { opcode, u_stack },
+        }
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Indexed-addressing and register encodings (the postbyte vocabulary)
+// ---------------------------------------------------------------------------
+
+/// The index-register field (bits 6–5 of an indexed postbyte): `X`=0, `Y`=1,
+/// `U`=2, `S`=3. Returns the field value (not yet shifted).
+#[must_use]
+pub fn index_reg(name: &str) -> Option<u8> {
+    match name.to_ascii_lowercase().as_str() {
+        "x" => Some(0),
+        "y" => Some(1),
+        "u" => Some(2),
+        "s" => Some(3),
+        _ => None,
+    }
+}
+
+/// The name of an index register from its 2-bit field value (the inverse of
+/// [`index_reg`]); used by the disassembler.
+#[must_use]
+pub fn index_reg_name(bits: u8) -> &'static str {
+    match bits & 3 {
+        0 => "x",
+        1 => "y",
+        2 => "u",
+        _ => "s",
+    }
+}
+
+/// The 4-bit register code used in a `tfr`/`exg` postbyte.
+#[must_use]
+pub fn transfer_reg(name: &str) -> Option<u8> {
+    Some(match name.to_ascii_lowercase().as_str() {
+        "d" => 0x0,
+        "x" => 0x1,
+        "y" => 0x2,
+        "u" => 0x3,
+        "s" => 0x4,
+        "pc" => 0x5,
+        "a" => 0x8,
+        "b" => 0x9,
+        "cc" => 0xA,
+        "dp" => 0xB,
+        _ => return None,
+    })
+}
+
+/// The name of a `tfr`/`exg` register from its 4-bit code (inverse of
+/// [`transfer_reg`]); `None` for the undefined codes (6–7, C–F).
+#[must_use]
+pub fn transfer_reg_name(code: u8) -> Option<&'static str> {
+    Some(match code & 0xF {
+        0x0 => "d",
+        0x1 => "x",
+        0x2 => "y",
+        0x3 => "u",
+        0x4 => "s",
+        0x5 => "pc",
+        0x8 => "a",
+        0x9 => "b",
+        0xA => "cc",
+        0xB => "dp",
+        _ => return None,
+    })
+}
+
+/// The push/pull bitmask bit for one register. `u_stack` true (for `pshu`/
+/// `pulu`) makes bit 6 denote `S` instead of `U`. `D` sets both `A` and `B`.
+#[must_use]
+pub fn stack_mask(name: &str, u_stack: bool) -> Option<u8> {
+    let other = if u_stack { "s" } else { "u" };
+    Some(match name.to_ascii_lowercase().as_str() {
+        "cc" => 0x01,
+        "a" => 0x02,
+        "b" => 0x04,
+        "dp" => 0x08,
+        "x" => 0x10,
+        "y" => 0x20,
+        n if n == other => 0x40,
+        "pc" => 0x80,
+        "d" => 0x06,
+        _ => return None,
+    })
+}
+
+/// The register names a push/pull bitmask sets, in bit order (`u_stack` swaps
+/// the bit-6 register to `S`); used by the disassembler. `D` is never produced —
+/// it is emitted as the equivalent `A,B`.
+#[must_use]
+pub fn stack_regs(u_stack: bool) -> [&'static str; 8] {
+    [
+        "cc",
+        "a",
+        "b",
+        "dp",
+        "x",
+        "y",
+        if u_stack { "s" } else { "u" },
+        "pc",
+    ]
 }
 
 /// Look an instruction up by mnemonic (case-insensitive caller).
@@ -185,6 +306,14 @@ pub static SET: &[Insn] = &[
     Insn::inh("lslb", op![0x58]),
     Insn::inh("rola", op![0x49]),
     Insn::inh("rolb", op![0x59]),
+    // --- inter-register transfer / exchange ----------------------------------
+    Insn::transfer("tfr", 0x1F),
+    Insn::transfer("exg", 0x1E),
+    // --- push / pull register sets -------------------------------------------
+    Insn::stack("pshs", 0x34, false),
+    Insn::stack("puls", 0x35, false),
+    Insn::stack("pshu", 0x36, true),
+    Insn::stack("pulu", 0x37, true),
     // --- branches (short opcode, long opcode) --------------------------------
     Insn::branch("bra", op![0x20], op![0x16]),
     Insn::branch("brn", op![0x21], op![0x10, 0x21]),
