@@ -5,13 +5,16 @@
 //! 0–4 extension words. This front-end parses Motorola syntax, resolves each
 //! operand to an effective address, and fills the [`isa::m68k`] form's fields.
 //!
-//! Stage 1 emits a flat code image, validated against `vasmm68k_mot -Fbin
-//! -no-opt`. The size-selection optimizer (PC-relative, short branches) and the
-//! Amiga hunk-exe container come later — see `decisions/syntax-stance.md`.
+//! It emits a flat code image. With the optimizer on (the default,
+//! [`assemble`]) it matches `vasmm68k_mot -Fbin`: short-branch relaxation,
+//! PC-relative addressing for in-section labels, and `addq`/`subq` for small
+//! immediates. With it off ([`assemble_with`]`(.., false)`) it matches
+//! `-no-opt`. The Amiga hunk-exe container comes later — see
+//! `decisions/syntax-stance.md`.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
-use isa::m68k::{self, Size, SizeEnc, Slot, ea};
+use isa::m68k::{self, EaModes, Size, SizeEnc, Slot, ea};
 
 use super::mos6502::{self, is_ident, split_data_items, split_first_word, string_literal};
 use crate::engine::{AsmError, BinOp, Expr};
@@ -45,36 +48,107 @@ fn eval(e: &Expr, consts: &BTreeMap<String, i64>, here: i64, line: usize) -> Res
     })
 }
 
-/// Assemble Motorola-syntax 68000 source into a flat big-endian code image.
+/// With the optimizer on, `add`/`sub` of a small immediate (1..=8) becomes the
+/// quick form `addq`/`subq` — two bytes instead of an immediate extension word,
+/// exactly as vasm does. The decision rests only on the (constant) immediate, so
+/// it stays stable across relaxation rounds.
+fn effective_mnemonic<'a>(
+    mnemonic: &'a str,
+    operands: &[Opnd],
+    ctx: &Ctx,
+    consts: &BTreeMap<String, i64>,
+) -> &'a str {
+    if ctx.optimize
+        && let [Opnd::Imm(e), dest] = operands
+        && !matches!(dest, Opnd::Imm(_))
+        && let Ok(v) = eval(e, consts, 0, 0)
+        && (1..=8).contains(&v)
+    {
+        return match mnemonic {
+            "ADD" => "ADDQ",
+            "SUB" => "SUBQ",
+            other => other,
+        };
+    }
+    mnemonic
+}
+
+/// The net number of relocatable (section-relative) symbols in an expression,
+/// counting `+` references as `+1` and `-` references as `-1`. A degree of `1`
+/// marks a simple relocatable address — eligible for PC-relative addressing.
+fn reloc_degree(e: &Expr, reloc: &BTreeSet<String>) -> i32 {
+    match e {
+        Expr::Sym(s) => i32::from(reloc.contains(s)),
+        Expr::Neg(b) => -reloc_degree(b, reloc),
+        Expr::Bin(BinOp::Add, l, r) => reloc_degree(l, reloc) + reloc_degree(r, reloc),
+        Expr::Bin(BinOp::Sub, l, r) => reloc_degree(l, reloc) - reloc_degree(r, reloc),
+        _ => 0,
+    }
+}
+
+/// Assemble Motorola-syntax 68000 source into a flat big-endian code image with
+/// the optimizer on — matching `vasm -Fbin`'s default (Stage 2).
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
 pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
+    assemble_with(source, true)
+}
+
+/// Assemble with the optimizer either on (Stage 2, matches `vasm -Fbin`) or off
+/// (Stage 1, matches `vasm -no-opt`).
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
+pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, AsmError> {
     let stmts = parse(source)?;
 
-    // Pass 1: size every statement and bind labels and `equ` constants.
-    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
-    let mut pc: i64 = 0;
+    // Relocatable symbols (section-relative labels) are eligible for PC-relative
+    // and short-branch optimization; `equ` constants (fixed addresses) are not.
+    let mut reloc: BTreeSet<String> = BTreeSet::new();
     for s in &stmts {
-        if let Stmt::Equ(name, e) = &s.kind {
-            // PC-aware: `len equ *-buffer` resolves `*` to the current location.
-            if let Ok(v) = eval(e, &consts, pc, s.line) {
-                consts.insert(name.clone(), v);
+        if !matches!(s.kind, Stmt::Equ(..))
+            && let Some(label) = &s.label
+        {
+            reloc.insert(label.clone());
+        }
+    }
+    let ctx = Ctx { reloc, optimize };
+
+    // A relaxable branch (BRA/BSR/Bcc not forced to `.w`) starts short and grows
+    // to word form only when its displacement won't fit in a byte. Growing only
+    // ever increases addresses, so this converges (grow-only fixpoint).
+    let mut word_branch = vec![false; stmts.len()];
+    loop {
+        let consts = layout(&stmts, &ctx, &word_branch)?;
+        let mut grew = false;
+        let mut pc: i64 = 0;
+        for (i, s) in stmts.iter().enumerate() {
+            if matches!(s.kind, Stmt::Equ(..)) {
+                continue;
             }
-            continue;
+            if s.kind.aligns() && pc % 2 != 0 {
+                pc += 1;
+            }
+            if !word_branch[i]
+                && let Some(target) = relaxable_branch_target(&s.kind)
+            {
+                let disp = eval(target, &consts, pc, s.line)? - (pc + 2);
+                if i8::try_from(disp).is_err() {
+                    word_branch[i] = true;
+                    grew = true;
+                }
+            }
+            pc += stmt_size(&s.kind, &ctx, &consts, word_branch[i], s.line)? as i64;
         }
-        if s.kind.aligns() && pc % 2 != 0 {
-            pc += 1;
+        if !grew {
+            break;
         }
-        if let Some(label) = &s.label {
-            consts.insert(label.clone(), pc);
-        }
-        pc += size_of(&s.kind, &consts, s.line)? as i64;
     }
 
-    // Pass 2: emit.
+    let consts = layout(&stmts, &ctx, &word_branch)?;
     let mut out: Vec<u8> = Vec::new();
-    for s in &stmts {
+    for (i, s) in stmts.iter().enumerate() {
         if s.kind.aligns() && !out.len().is_multiple_of(2) {
             out.push(0);
         }
@@ -102,12 +176,79 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
                 operands,
             } => {
                 let here = out.len() as i64;
-                let bytes = encode(mnemonic, *size, operands, &consts, here, s.line)?;
+                let size = branch_size(size, word_branch[i]);
+                let bytes = encode(mnemonic, size, operands, &ctx, &consts, here, s.line)?;
                 out.extend_from_slice(&bytes);
             }
         }
     }
     Ok(out)
+}
+
+/// Optimization context shared down the encode/size paths.
+struct Ctx {
+    reloc: BTreeSet<String>,
+    optimize: bool,
+}
+
+/// Walk every statement and bind labels and `equ` constants to addresses, given
+/// the current branch-size decisions. Re-run each relaxation round.
+fn layout(
+    stmts: &[Line],
+    ctx: &Ctx,
+    word_branch: &[bool],
+) -> Result<BTreeMap<String, i64>, AsmError> {
+    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
+    let mut pc: i64 = 0;
+    for (i, s) in stmts.iter().enumerate() {
+        if let Stmt::Equ(name, e) = &s.kind {
+            // PC-aware: `len equ *-buffer` resolves `*` to the current location.
+            if let Ok(v) = eval(e, &consts, pc, s.line) {
+                consts.insert(name.clone(), v);
+            }
+            continue;
+        }
+        if s.kind.aligns() && pc % 2 != 0 {
+            pc += 1;
+        }
+        if let Some(label) = &s.label {
+            consts.insert(label.clone(), pc);
+        }
+        pc += stmt_size(&s.kind, ctx, &consts, word_branch[i], s.line)? as i64;
+    }
+    Ok(consts)
+}
+
+/// The effective branch size: word form once grown, otherwise the written size
+/// (`Some(B)` short by default for a relaxable branch).
+fn branch_size(written: &Option<Size>, grown: bool) -> Option<Size> {
+    if grown { Some(Size::W) } else { *written }
+}
+
+/// The branch-target expression of a relaxable branch (BRA/BSR/Bcc, not forced
+/// to `.w`), or `None` if the statement isn't one. DBcc has no short form, so it
+/// never relaxes.
+fn relaxable_branch_target(kind: &Stmt) -> Option<&Expr> {
+    let Stmt::Insn {
+        mnemonic,
+        size,
+        operands,
+    } = kind
+    else {
+        return None;
+    };
+    if matches!(size, Some(Size::W | Size::L)) {
+        return None; // explicitly forced to word/long
+    }
+    let insn = m68k::SET.instruction(mnemonic)?;
+    let form = match_form(insn, operands)?;
+    if !form.operands.iter().any(|s| matches!(s, Slot::BranchW)) {
+        return None;
+    }
+    operands.iter().find_map(|o| match o {
+        Opnd::Abs(e) => Some(e),
+        _ => None,
+    })
 }
 
 // ---------------------------------------------------------------------------
@@ -118,10 +259,12 @@ fn encode(
     mnemonic: &str,
     size: Option<Size>,
     operands: &[Opnd],
+    ctx: &Ctx,
     consts: &BTreeMap<String, i64>,
     here: i64,
     line: usize,
 ) -> Result<Vec<u8>, AsmError> {
+    let mnemonic = effective_mnemonic(mnemonic, operands, ctx, consts);
     let insn = m68k::SET
         .instruction(mnemonic)
         .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
@@ -171,8 +314,13 @@ fn encode(
                 let mask = if predec { mask.reverse_bits() } else { mask };
                 ext.extend_from_slice(&mask.to_be_bytes());
             }
-            (Slot::Ea { shift, dest, .. }, _) => {
-                let (field6, words) = resolve_ea(op, sz, *dest, consts, here, line)?;
+            (Slot::Ea { shift, dest, modes }, _) => {
+                // PC-relative displacement, when chosen, is measured from this
+                // operand's own extension word (after the opcode and any prior
+                // operand's extension words).
+                let pc_ext = here + 2 + ext.len() as i64;
+                let (field6, words) =
+                    resolve_ea(op, sz, *dest, *modes, ctx, consts, pc_ext, here, line)?;
                 word |= field6 << shift;
                 ext.extend_from_slice(&words);
             }
@@ -257,11 +405,15 @@ fn ea_mode_bit(op: &Opnd) -> u16 {
 /// Resolve an operand used as an effective address: its 6-bit field (in normal
 /// or MOVE-destination layout) and its extension-word bytes. `Ok(None)` if the
 /// operand can't be an EA at all.
+#[allow(clippy::too_many_arguments)]
 fn resolve_ea(
     op: &Opnd,
     sz: Size,
     dest: bool,
+    modes: EaModes,
+    ctx: &Ctx,
     consts: &BTreeMap<String, i64>,
+    pc_ext: i64,
     here: i64,
     line: usize,
 ) -> Result<(u16, Vec<u8>), AsmError> {
@@ -288,12 +440,24 @@ fn resolve_ea(
             (field(u16::from(*mode), u16::from(*reg)), ext)
         }
         Opnd::Abs(e) => {
-            // Stage 1 mirrors `vasm -no-opt`: a bare absolute is always (xxx).L.
-            // Shrinking small values to (xxx).W is an optimization, added in
-            // Stage 2; doing it here would also desync pass 1 from pass 2, since
-            // forward labels are unresolved when pass 1 sizes them.
             let v = eval(e, consts, here, line)?;
-            (field(7, 1), (v as u32).to_be_bytes().to_vec()) // (xxx).L
+            // With the optimizer on, a reference to a relocatable label in a slot
+            // that accepts PC-relative addressing becomes `(d16,PC)` — shorter
+            // than (xxx).L and position-independent, the Amiga idiom. `vasm`
+            // prefers this over (xxx).W for labels.
+            if ctx.optimize && modes.allows(ea::PCD) && reloc_degree(e, &ctx.reloc) == 1 {
+                let disp = v - pc_ext;
+                let d16 = i16::try_from(disp).map_err(|_| {
+                    AsmError::new(
+                        line,
+                        format!("PC-relative displacement {disp} out of range"),
+                    )
+                })?;
+                return Ok((field(7, 2), d16.to_be_bytes().to_vec())); // (d16,PC)
+            }
+            // Otherwise a bare absolute is (xxx).L. (Shrinking small constants to
+            // (xxx).W is a further optimization, not yet implemented.)
+            (field(7, 1), (v as u32).to_be_bytes().to_vec())
         }
         Opnd::Imm(e) => {
             let v = eval(e, consts, here, line)?;
@@ -341,7 +505,15 @@ fn push_sized(out: &mut Vec<u8>, v: i64, size: DataSize) {
 // Sizing (pass 1) — extension-word counts are fixed by operand shape and size
 // ---------------------------------------------------------------------------
 
-fn size_of(kind: &Stmt, consts: &BTreeMap<String, i64>, line: usize) -> Result<usize, AsmError> {
+/// The byte length of one statement, given the optimizer context and whether a
+/// relaxable branch here has grown to its word form.
+fn stmt_size(
+    kind: &Stmt,
+    ctx: &Ctx,
+    consts: &BTreeMap<String, i64>,
+    word_branch: bool,
+    line: usize,
+) -> Result<usize, AsmError> {
     Ok(match kind {
         Stmt::Empty | Stmt::Equ(..) | Stmt::Even => 0,
         Stmt::Dc(size, items) => items.len() * size.bytes(),
@@ -353,13 +525,15 @@ fn size_of(kind: &Stmt, consts: &BTreeMap<String, i64>, line: usize) -> Result<u
             size,
             operands,
         } => {
+            let mnemonic = effective_mnemonic(mnemonic, operands, ctx, consts);
             let insn = m68k::SET
                 .instruction(mnemonic)
                 .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
             let form = match_form(insn, operands).ok_or_else(|| {
                 AsmError::new(line, format!("`{mnemonic}` has no form for those operands"))
             })?;
-            let sz = size.unwrap_or(Size::W);
+            let eff = branch_size(size, word_branch);
+            let sz = eff.unwrap_or(Size::W);
             // Opcode word, plus each slot's extension words (a Quick8 immediate
             // rides in the opcode, so it adds nothing).
             let mut bytes = 2;
@@ -368,9 +542,9 @@ fn size_of(kind: &Stmt, consts: &BTreeMap<String, i64>, line: usize) -> Result<u
                     Slot::Dn { .. } | Slot::An { .. } | Slot::Quick8 | Slot::Quick3 { .. } => 0,
                     // A `.s`/`.b` branch packs its displacement in the opcode
                     // word; the word form adds a 16-bit extension word.
-                    Slot::BranchW if matches!(size, Some(Size::B)) => 0,
+                    Slot::BranchW if matches!(eff, Some(Size::B)) => 0,
                     Slot::BranchW | Slot::DispW | Slot::ImmWord | Slot::RegList => 2,
-                    Slot::Ea { .. } => ea_ext_len(op, sz),
+                    Slot::Ea { modes, .. } => ea_ext_len(op, sz, *modes, ctx),
                 };
             }
             bytes
@@ -379,8 +553,8 @@ fn size_of(kind: &Stmt, consts: &BTreeMap<String, i64>, line: usize) -> Result<u
 }
 
 /// Extension-word byte count an operand contributes as an effective address —
-/// must match [`resolve_ea`] exactly so pass 1 and pass 2 agree on sizes.
-fn ea_ext_len(op: &Opnd, sz: Size) -> usize {
+/// must match [`resolve_ea`] exactly so the layout and emit passes agree.
+fn ea_ext_len(op: &Opnd, sz: Size, modes: EaModes, ctx: &Ctx) -> usize {
     match op {
         Opnd::DReg(_) | Opnd::AReg(_) => 0,
         Opnd::Mem { disp, .. } => {
@@ -390,8 +564,15 @@ fn ea_ext_len(op: &Opnd, sz: Size) -> usize {
                 0
             }
         }
-        // A bare absolute is always (xxx).L under `-no-opt` (see `resolve_ea`).
-        Opnd::Abs(_) => 4,
+        // A relocatable label in a PC-capable slot becomes `(d16,PC)` (2 bytes);
+        // otherwise a bare absolute is (xxx).L (4 bytes). Mirrors `resolve_ea`.
+        Opnd::Abs(e) => {
+            if ctx.optimize && modes.allows(ea::PCD) && reloc_degree(e, &ctx.reloc) == 1 {
+                2
+            } else {
+                4
+            }
+        }
         Opnd::Imm(_) => {
             if matches!(sz, Size::L) {
                 4
