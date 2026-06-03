@@ -271,6 +271,15 @@ fn resolve(
         return Ok(("accumulator", vec![]));
     }
 
+    // `cop`/`wdm` take a bare signature byte (no `#`).
+    if matches!(mn, "COP" | "WDM") {
+        return Ok(("signature", vec![value(t, line)?]));
+    }
+    // `mvn`/`mvp src,dest` — emitted as opcode, dest-bank, src-bank.
+    if matches!(mn, "MVN" | "MVP") {
+        return resolve_block_move(t, operand, line);
+    }
+
     // Branches: relative (8-bit) or relative-long (16-bit). No other instruction
     // carries a `relative`/`relative16` form, so the presence of one settles it.
     if has("relative16") {
@@ -338,6 +347,30 @@ fn resolve(
     let size = size_of(force, &expr, env, line);
     let mode = pick_mode(&has, size, index, line)?;
     Ok((mode, vec![expr]))
+}
+
+/// Resolve a `mvn`/`mvp src,dest` block move. Each operand is either `#bank`
+/// (an explicit bank byte) or a 24-bit address whose bank (`^`, bits 16–23) is
+/// taken. The encoding order is dest-bank then src-bank.
+fn resolve_block_move(
+    t: &str,
+    operand: &str,
+    line: usize,
+) -> Result<(&'static str, Vec<Expr>), AsmError> {
+    let parts = split_top_level(t, ',');
+    if parts.len() != 2 {
+        return Err(AsmError::new(line, format!("block move needs two banks: `{operand}`")));
+    }
+    let bank = |p: &str| -> Result<Expr, AsmError> {
+        let p = p.trim();
+        match p.strip_prefix('#') {
+            Some(r) => value(r, line),
+            None => Ok(Expr::Bank(Box::new(value(p, line)?))),
+        }
+    };
+    let src = bank(parts[0])?;
+    let dest = bank(parts[1])?;
+    Ok(("block-move", vec![dest, src]))
 }
 
 /// Resolve a `(...)`-shaped operand.
@@ -513,6 +546,22 @@ mod tests {
     fn brl_relative_is_16_bit() {
         // brl to self: offset = -3 (the instruction is 3 bytes).
         assert_eq!(bytes(".org $1000\nl: brl l\n"), vec![0x82, 0xFD, 0xFF]);
+    }
+
+    #[test]
+    fn block_moves_cop_wdm_and_bank_byte() {
+        // mvn src,dest -> opcode, dest-bank, src-bank (order swapped).
+        assert_eq!(bytes(" mvn #$7e,#$7f\n"), vec![0x54, 0x7F, 0x7E]);
+        assert_eq!(bytes(" mvp #$00,#$01\n"), vec![0x44, 0x01, 0x00]);
+        // Bare addresses contribute their bank byte (bits 16-23).
+        assert_eq!(bytes("s = $7e0000\nd = $7f0000\n mvn s,d\n"), vec![0x54, 0x7F, 0x7E]);
+        // cop/wdm take a bare signature byte (no #).
+        assert_eq!(bytes(" cop $12\n"), vec![0x02, 0x12]);
+        assert_eq!(bytes(" wdm $34\n"), vec![0x42, 0x34]);
+        // The `^` bank-byte operator (and 24-bit constants).
+        assert_eq!(bytes("p = $7e1234\n lda #^p\n"), vec![0xA9, 0x7E]);
+        assert_eq!(bytes("p = $7e1234\n lda #>p\n"), vec![0xA9, 0x12]);
+        assert_eq!(bytes("p = $7e1234\n lda #<p\n"), vec![0xA9, 0x34]);
     }
 
     #[test]

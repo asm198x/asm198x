@@ -22,8 +22,10 @@ pub struct Assembly {
     pub origin: u16,
     /// Assembled machine code, contiguous from `origin`.
     pub bytes: Vec<u8>,
-    /// Resolved labels, for listings and debugging.
-    pub symbols: BTreeMap<String, u16>,
+    /// Resolved labels, for listings and debugging. Values are `i64` to hold
+    /// the 65816's 24-bit addresses and bank constants; 8-/16-bit CPUs use the
+    /// low bits only.
+    pub symbols: BTreeMap<String, i64>,
 }
 
 /// An assembly error, with the 1-based source line it occurred on (0 = no
@@ -91,6 +93,8 @@ pub(crate) enum Expr {
     Lo(Box<Expr>),
     /// High byte of the inner value.
     Hi(Box<Expr>),
+    /// Bank byte (bits 16–23) of the inner value — the 65816 `^` operator.
+    Bank(Box<Expr>),
     /// Negation of the inner value.
     Neg(Box<Expr>),
     /// A binary operation on two sub-expressions.
@@ -103,11 +107,11 @@ impl Expr {
     /// single evaluator shared by every dialect.
     pub(crate) fn eval(
         &self,
-        symbols: &BTreeMap<String, u16>,
+        symbols: &BTreeMap<String, i64>,
         pc: i64,
         line: usize,
     ) -> Result<i64, AsmError> {
-        self.eval_with(&|s| symbols.get(s).map(|v| i64::from(*v)), Some(pc), line)
+        self.eval_with(&|s| symbols.get(s).copied(), Some(pc), line)
     }
 
     /// The one expression evaluator, shared by the engine and every dialect.
@@ -129,6 +133,7 @@ impl Expr {
                 .ok_or_else(|| AsmError::new(line, format!("undefined symbol `{s}`")))?,
             Expr::Lo(e) => e.eval_with(resolve, pc, line)? & 0xFF,
             Expr::Hi(e) => (e.eval_with(resolve, pc, line)? >> 8) & 0xFF,
+            Expr::Bank(e) => (e.eval_with(resolve, pc, line)? >> 16) & 0xFF,
             Expr::Neg(e) => e
                 .eval_with(resolve, pc, line)?
                 .checked_neg()
@@ -241,7 +246,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
     let statements = dialect.parse(source)?;
 
     // Pass 1 — assign addresses to labels.
-    let mut symbols: BTreeMap<String, u16> = BTreeMap::new();
+    let mut symbols: BTreeMap<String, i64> = BTreeMap::new();
     let mut pc: i64 = 0;
     let mut origin: Option<i64> = None;
     for s in &statements {
@@ -253,19 +258,23 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 .as_ref()
                 .ok_or_else(|| AsmError::new(s.line, "`equ` needs a label"))?;
             let v = e.eval(&symbols, pc, s.line)?;
-            let value = u16::try_from(v).map_err(|_| {
-                AsmError::new(s.line, format!("equ value {v} out of range 0..=65535"))
-            })?;
-            if symbols.insert(label.clone(), value).is_some() {
+            // Constants may be 24-bit (65816 bank/long addresses).
+            if !(0..=0xFF_FFFF).contains(&v) {
+                return Err(AsmError::new(
+                    s.line,
+                    format!("equ value {v} out of range 0..=16777215"),
+                ));
+            }
+            if symbols.insert(label.clone(), v).is_some() {
                 return Err(AsmError::new(s.line, format!("duplicate label `{label}`")));
             }
             continue;
         }
         if let Some(label) = &s.label {
-            if !(0..=0xFFFF).contains(&pc) {
+            if !(0..=0xFF_FFFF).contains(&pc) {
                 return Err(AsmError::new(s.line, "address out of range"));
             }
-            if symbols.insert(label.clone(), pc as u16).is_some() {
+            if symbols.insert(label.clone(), pc).is_some() {
                 return Err(AsmError::new(s.line, format!("duplicate label `{label}`")));
             }
         }

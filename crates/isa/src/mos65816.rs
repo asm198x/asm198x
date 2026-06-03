@@ -223,4 +223,12 @@ const INSTRUCTIONS: &[Instruction] = &[
     // --- misc control (implied) ----------------------------------------------
     inst!("WAI", "Wait for interrupt",   [form(&[0xCB], "implied", NONE, Cycles::fixed(3), "")]),
     inst!("STP", "Stop the clock",       [form(&[0xDB], "implied", NONE, Cycles::fixed(3), "")]),
+
+    // --- block moves: opcode, then dest-bank, src-bank (note the order) ------
+    inst!("MVN", "Block move next", [form(&[0x54], "block-move", &[DP, DP], Cycles::fixed(7), "")]),
+    inst!("MVP", "Block move previous", [form(&[0x44], "block-move", &[DP, DP], Cycles::fixed(7), "")]),
+
+    // --- co-processor / reserved (a bare signature byte, no `#`) --------------
+    inst!("COP", "Co-processor enable", [form(&[0x02], "signature", ONE_IMM8, Cycles::fixed(7), "")]),
+    inst!("WDM", "Reserved (no-op)",    [form(&[0x42], "signature", ONE_IMM8, Cycles::fixed(2), "")]),
 ];

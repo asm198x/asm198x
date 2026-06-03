@@ -599,6 +599,25 @@ const CA65_816_PROGRAMS: &[(&str, &str)] = &[
          \x20       rts\n",
     ),
     (
+        "block-moves-and-cop",
+        ".setcpu \"65816\"\n\
+         .segment \"CODE\"\n\
+         src     = $7e0000\n\
+         dst     = $7f0000\n\
+         ptr     = $7e1234\n\
+         \x20       mvn     #$7e,#$7f\n\
+         \x20       mvp     #$00,#$01\n\
+         \x20       mvn     src,dst\n\
+         \x20       cop     $12\n\
+         \x20       wdm     $34\n\
+         \x20       .a8\n\
+         \x20       lda     #^ptr\n\
+         \x20       lda     #>ptr\n\
+         \x20       lda     #<ptr\n\
+         \x20       lda     f:ptr\n\
+         \x20       rts\n",
+    ),
+    (
         "jumps-labels-branches",
         ".setcpu \"65816\"\n\
          .segment \"CODE\"\n\

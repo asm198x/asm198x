@@ -107,9 +107,11 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
     // Layout pass: resolve each instruction's mode and size, lay statements out
     // within their segment, and record every label's absolute address.
     let mut offsets: BTreeMap<String, u32> = BTreeMap::new();
-    let mut addr_env: BTreeMap<String, u16> = BTreeMap::new();
+    // Absolute addresses are `i64` to match the engine's expression evaluator;
+    // the NES is 16-bit, so values are masked to a word on emit.
+    let mut addr_env: BTreeMap<String, i64> = BTreeMap::new();
     for (name, value) in &parsed.consts {
-        addr_env.insert(name.clone(), *value as u16);
+        addr_env.insert(name.clone(), *value);
     }
     let mut placed: Vec<(String, u32, usize, Resolved)> = Vec::new(); // (segment, addr, line, item)
     for stmt in parsed.stmts {
@@ -118,7 +120,7 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
         let off = *offsets.entry(stmt.seg.clone()).or_insert(0);
         let addr = info.base + off;
         if let Some(label) = &stmt.label {
-            addr_env.insert(label.clone(), addr as u16);
+            addr_env.insert(label.clone(), i64::from(addr));
         }
         let (resolved, size) = resolve(set, stmt.kind, &size_env, stmt.line)?;
         *offsets.get_mut(&stmt.seg).expect("segment offset") += size as u32;
@@ -232,7 +234,7 @@ fn resolve(
 fn emit(
     item: Resolved,
     addr: u32,
-    env: &BTreeMap<String, u16>,
+    env: &BTreeMap<String, i64>,
     out: &mut Vec<u8>,
     line_for_errors: usize,
 ) -> Result<(), AsmError> {

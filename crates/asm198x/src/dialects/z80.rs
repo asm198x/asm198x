@@ -470,6 +470,7 @@ fn qualify_expr(e: Expr, g: &str) -> Expr {
         Expr::Sym(_) | Expr::Num(_) | Expr::Pc => e,
         Expr::Lo(b) => Expr::Lo(Box::new(qualify_expr(*b, g))),
         Expr::Hi(b) => Expr::Hi(Box::new(qualify_expr(*b, g))),
+        Expr::Bank(b) => Expr::Bank(Box::new(qualify_expr(*b, g))),
         Expr::Neg(b) => Expr::Neg(Box::new(qualify_expr(*b, g))),
         Expr::Bin(op, l, r) => Expr::Bin(
             op,

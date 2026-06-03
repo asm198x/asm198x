@@ -245,6 +245,7 @@ enum Tok {
     Slash,
     Lo,
     Hi,
+    Bank,
     LParen,
     RParen,
     And,
@@ -317,6 +318,11 @@ fn tokenize(
             }
             '^' if bitwise => {
                 tokens.push(Tok::Xor);
+                i += 1;
+            }
+            // Outside bitwise (vasm) mode, `^` is the 65816 bank-byte prefix.
+            '^' => {
+                tokens.push(Tok::Bank);
                 i += 1;
             }
             '(' => {
@@ -396,6 +402,10 @@ impl ExprParser {
                 Some(Tok::Hi) => {
                     self.pos += 1;
                     return Ok(Expr::Hi(Box::new(self.expr()?)));
+                }
+                Some(Tok::Bank) => {
+                    self.pos += 1;
+                    return Ok(Expr::Bank(Box::new(self.expr()?)));
                 }
                 _ => {}
             }
@@ -496,6 +506,10 @@ impl ExprParser {
                 Some(Tok::Hi) => {
                     self.pos += 1;
                     return Ok(Expr::Hi(Box::new(self.unary()?)));
+                }
+                Some(Tok::Bank) => {
+                    self.pos += 1;
+                    return Ok(Expr::Bank(Box::new(self.unary()?)));
                 }
                 _ => {}
             }
