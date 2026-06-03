@@ -154,7 +154,9 @@ fn run(args: &[String]) -> Result<String, String> {
             Assembler::Pasmo { z80n } | Assembler::Sjasmplus { z80n } => {
                 print!("{}", asm198x::listing_z80(&bytes, origin, z80n));
             }
-            Assembler::Vasm => return Err("68000 disassembly is not yet implemented".into()),
+            Assembler::Vasm => {
+                print!("{}", asm198x::listing_68000(&bytes, u32::from(origin)));
+            }
         }
         return Ok(format!(
             "disassembled {} byte(s) at ${origin:04X}",
