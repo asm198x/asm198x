@@ -167,7 +167,10 @@ pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, Asm
     let mut word_branch = vec![false; stmts.len()];
     loop {
         let consts = layout(&stmts, &ctx, &word_branch)?;
-        let mut grew = false;
+        // Record grows in a fresh vector and apply them only after the walk: the
+        // running `pc` must track `consts` (built from the round's `word_branch`),
+        // so a branch grown mid-walk must not yet shift later branches' pc.
+        let mut next = word_branch.clone();
         let mut pc: i64 = 0;
         for (i, s) in stmts.iter().enumerate() {
             if matches!(s.kind, Stmt::Equ(..)) {
@@ -176,20 +179,23 @@ pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, Asm
             if s.kind.aligns() && pc % 2 != 0 {
                 pc += 1;
             }
-            if !word_branch[i]
+            if ctx.optimize
+                && !word_branch[i]
                 && let Some(target) = relaxable_branch_target(&s.kind)
             {
                 let disp = eval(target, &consts, pc, s.line)? - (pc + 2);
-                if i8::try_from(disp).is_err() {
-                    word_branch[i] = true;
-                    grew = true;
+                // A short branch can't encode a zero displacement (that bit
+                // pattern is the word form), so 0 grows too.
+                if disp == 0 || i8::try_from(disp).is_err() {
+                    next[i] = true;
                 }
             }
             pc += stmt_size(&s.kind, &ctx, &consts, word_branch[i], s.line)? as i64;
         }
-        if !grew {
+        if next == word_branch {
             break;
         }
+        word_branch = next;
     }
 
     let consts = layout(&stmts, &ctx, &word_branch)?;
@@ -222,7 +228,7 @@ pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, Asm
                 operands,
             } => {
                 let here = out.len() as i64;
-                let size = branch_size(&s.kind, size, word_branch[i]);
+                let size = branch_size(ctx.optimize, &s.kind, size, word_branch[i]);
                 let bytes = encode(mnemonic, size, operands, &ctx, &consts, here, s.line)?;
                 out.extend_from_slice(&bytes);
             }
@@ -265,11 +271,12 @@ fn layout(
     Ok(consts)
 }
 
-/// The effective size of a statement's branch. A relaxable branch (including a
-/// bare `bra`/`bsr`/`bcc`, which vasm shortens) is short by default and word
-/// once grown; anything else keeps its written size.
-fn branch_size(kind: &Stmt, written: &Option<Size>, grown: bool) -> Option<Size> {
-    if relaxable_branch_target(kind).is_some() {
+/// The effective size of a statement's branch. With the optimizer on, a
+/// relaxable branch (including a bare `bra`/`bsr`/`bcc`, which vasm shortens) is
+/// short by default and word once grown. With it off, every branch keeps its
+/// written size — a bare branch stays word, matching `-no-opt`.
+fn branch_size(optimize: bool, kind: &Stmt, written: &Option<Size>, grown: bool) -> Option<Size> {
+    if optimize && relaxable_branch_target(kind).is_some() {
         if grown { Some(Size::W) } else { Some(Size::B) }
     } else {
         *written
@@ -598,7 +605,7 @@ fn stmt_size(
             let form = match_form(insn, operands).ok_or_else(|| {
                 AsmError::new(line, format!("`{mnemonic}` has no form for those operands"))
             })?;
-            let eff = branch_size(kind, size, word_branch);
+            let eff = branch_size(ctx.optimize, kind, size, word_branch);
             let sz = eff.unwrap_or(Size::W);
             // Opcode word, plus each slot's extension words (a Quick8 immediate
             // rides in the opcode, so it adds nothing).
