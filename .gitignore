@@ -3,3 +3,6 @@
 *.bin
 a.out
 .DS_Store
+
+# Vale synced package
+.vale/
