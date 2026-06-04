@@ -80,6 +80,30 @@ fn round_trips_6502_low_address_absolute() {
     assert_eq!(re.bytes, bytes, "listing:\n{listing}");
 }
 
+/// The extended/BCD arithmetic and CMPM families encode to the exact bytes
+/// vasm emits. Both operand shapes — `Dn,Dn` and `-(An),-(An)` (or `(An)+,(An)+`
+/// for CMPM) — exercise the `AddrIndirect` slot's accept/encode path directly,
+/// independent of the (ignored, tool-dependent) conformance sweep.
+#[test]
+fn encodes_m68k_extended_and_bcd() {
+    let cases: &[(&str, &[u8])] = &[
+        ("\taddx.w\td1,d0\n", &[0xD1, 0x41]),
+        ("\taddx.w\t-(a1),-(a0)\n", &[0xD1, 0x49]),
+        ("\tsubx.w\td1,d0\n", &[0x91, 0x41]),
+        ("\tsubx.w\t-(a1),-(a0)\n", &[0x91, 0x49]),
+        ("\tabcd.b\td1,d0\n", &[0xC1, 0x01]),
+        ("\tabcd.b\t-(a1),-(a0)\n", &[0xC1, 0x09]),
+        ("\tsbcd.b\td1,d0\n", &[0x81, 0x01]),
+        ("\tsbcd.b\t-(a1),-(a0)\n", &[0x81, 0x09]),
+        ("\tcmpm.w\t(a1)+,(a0)+\n", &[0xB1, 0x49]),
+        ("\tcmpm.l\t(a3)+,(a2)+\n", &[0xB5, 0x8B]),
+    ];
+    for (src, want) in cases {
+        let got = assemble_vasm(src).unwrap_or_else(|e| panic!("assemble `{src}`: {e:?}"));
+        assert_eq!(&got, want, "for `{src}`");
+    }
+}
+
 #[test]
 fn round_trips_m68k_pure_code() {
     // Pure code (no interleaved data) round-trips through the optimizing

@@ -386,7 +386,10 @@ fn m68k_var_mask(form: &m68k::Form) -> u16 {
     };
     for slot in form.operands {
         m |= match slot {
-            Slot::Dn { shift } | Slot::An { shift } | Slot::Quick3 { shift } => 0b111 << shift,
+            Slot::Dn { shift }
+            | Slot::An { shift }
+            | Slot::Quick3 { shift }
+            | Slot::AddrIndirect { shift, .. } => 0b111 << shift,
             Slot::Quick8 | Slot::BranchW => 0xFF,
             Slot::Ea { shift, .. } => 0b11_1111 << shift,
             Slot::DispW | Slot::ImmWord | Slot::ImmSized | Slot::RegList => 0,
@@ -542,6 +545,14 @@ fn render_m68k(
         match slot {
             Slot::Dn { shift } => ops.push(format!("d{}", (word >> shift) & 7)),
             Slot::An { shift } => ops.push(format!("a{}", (word >> shift) & 7)),
+            Slot::AddrIndirect { shift, mode } => {
+                let reg = (word >> shift) & 7;
+                ops.push(if *mode == 4 {
+                    format!("-(a{reg})")
+                } else {
+                    format!("(a{reg})+")
+                });
+            }
             Slot::Quick8 => ops.push(format!("#{}", (word & 0xFF) as i8)),
             Slot::Quick3 { shift } => {
                 let v = (word >> shift) & 7;
@@ -1350,6 +1361,23 @@ mod tests {
         assert_eq!(one_m68k(&[0x48, 0x50]), "pea.l (a0)");
         assert_eq!(one_m68k(&[0x4E, 0x58]), "unlk a0");
         assert_eq!(one_m68k(&[0x43, 0x80]), "chk d0,d1");
+    }
+
+    #[test]
+    fn m68k_extended_and_bcd() {
+        // Register form (Dn,Dn) and predecrement form (-(An),-(An)), the mode
+        // bit (3) selecting between them. ADDX/SUBX size-coded; ABCD/SBCD byte;
+        // CMPM postincrement-only ((An)+,(An)+). Bytes are vasm ground truth.
+        assert_eq!(one_m68k(&[0xD1, 0x41]), "addx.w d1,d0");
+        assert_eq!(one_m68k(&[0xD1, 0x49]), "addx.w -(a1),-(a0)");
+        assert_eq!(one_m68k(&[0x91, 0x41]), "subx.w d1,d0");
+        assert_eq!(one_m68k(&[0x91, 0x49]), "subx.w -(a1),-(a0)");
+        assert_eq!(one_m68k(&[0xC1, 0x01]), "abcd.b d1,d0");
+        assert_eq!(one_m68k(&[0xC1, 0x09]), "abcd.b -(a1),-(a0)");
+        assert_eq!(one_m68k(&[0x81, 0x01]), "sbcd.b d1,d0");
+        assert_eq!(one_m68k(&[0x81, 0x09]), "sbcd.b -(a1),-(a0)");
+        assert_eq!(one_m68k(&[0xB1, 0x49]), "cmpm.w (a1)+,(a0)+");
+        assert_eq!(one_m68k(&[0xB5, 0x8B]), "cmpm.l (a3)+,(a2)+");
     }
 
     #[test]

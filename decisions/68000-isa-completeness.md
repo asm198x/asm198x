@@ -29,12 +29,15 @@ Because `m68k::SET` feeds both tools, every missing mnemonic fails twice:
 
 Filling a family lights up assemble + disassemble + cross-check coverage at once.
 
-## Defined today (46)
+## Defined today
 
-`ADD` `ADDI` `ADDQ` `AND` `ANDI` `BEQ` `BGE` `BGT` `BLE` `BLT` `BMI` `BNE` `BPL`
-`BRA` `BSET` `BSR` `BTST` `CLR` `CMP` `CMPI` `DBF` `DBRA` `DIVU` `EOR` `EORI`
-`EXT` `LEA` `LSL` `LSR` `MOVE` `MOVEM` `MOVEQ` `MULU` `NEG` `NOP` `NOT` `OR`
-`ORI` `RTS` `SEQ` `SNE` `SUB` `SUBI` `SUBQ` `SWAP` `TST`
+The authoritative list is `m68k::SET` in `crates/isa/src/m68k.rs` — don't mirror
+it here (it drifts). The starting point was a **46-mnemonic curriculum subset**
+(`ADD` `ADDI` `ADDQ` `AND` `ANDI` `Bcc`×8 `BSET` `BSR` `BTST` `CLR` `CMP` `CMPI`
+`DBF`/`DBRA` `DIVU` `EOR` `EORI` `EXT` `LEA` `LSL` `LSR` `MOVE` `MOVEM` `MOVEQ`
+`MULU` `NEG` `NOP` `NOT` `OR` `ORI` `RTS` `Scc`×2 `SUB` `SUBI` `SUBQ` `SWAP`
+`TST`). The burndown below tracks what's been added since; families 3–6 are
+complete, families 1–2 and 7 have remaining work flagged inline.
 
 ## Burndown (priority order)
 
@@ -47,9 +50,11 @@ for real programs; condition-code variants are mechanical breadth.
 - [~] **2. Data movement** — **done:** `PEA` (control EA), `UNLK` (`An`), `LINK`
       (`An` + `ImmWord` displacement). **Remaining:** `MOVEA`, `EXG`, `MOVEP`,
       `MOVE` to/from `CCR`/`SR`/`USP` — all need new slots.
-- [~] **3. Arithmetic / logic** — **done:** `MULS`, `DIVS` (mirror MULU/DIVU),
-      `NEGX`, `NBCD`, `TAS` (slot-reusing single-EA). **Remaining:** `ADDX`,
-      `SUBX`, `CMPM`, `ABCD`, `SBCD` (reg-reg/predecrement slot work).
+- [x] **3. Arithmetic / logic** — done: `MULS`, `DIVS` (mirror MULU/DIVU),
+      `NEGX`, `NBCD`, `TAS` (slot-reusing single-EA), and `ADDX`/`SUBX`/`CMPM`/
+      `ABCD`/`SBCD` via a new `Slot::AddrIndirect { shift, mode }` (the register
+      number sits in the opcode, no 6-bit EA field) — both `Dn,Dn` and
+      `-(An),-(An)` / `(An)+,(An)+` shapes, byte-identical vs vasm.
 - [x] **4. Bit ops** — `BCHG`, `BCLR` done (mirror BSET; `BSET`/`BTST` already
       present).
 - [x] **5. Shifts / rotates** — register forms (immediate/register count) and the

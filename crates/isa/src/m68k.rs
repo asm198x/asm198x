@@ -127,6 +127,11 @@ pub enum Slot {
     /// A register-list mask (`MOVEM`): a 16-bit extension word, reversed when the
     /// effective address is predecrement.
     RegList,
+    /// An address register named in a fixed indirect addressing mode — the
+    /// register *number* sits in the opcode at `shift` (no 6-bit EA field, no
+    /// extension word), and `mode` is the required EA mode: 4 = `-(An)`
+    /// (`ADDX`/`SUBX`/`ABCD`/`SBCD` predecrement form), 3 = `(An)+` (`CMPM`).
+    AddrIndirect { shift: u8, mode: u8 },
 }
 
 /// One concrete encoding shape of a mnemonic.
@@ -584,6 +589,99 @@ pub const SET: Spec = Spec {
                 base: 0x81C0,
                 size: SizeEnc::Fixed(Size::W),
                 operands: &[ea_src(DATA), Slot::Dn { shift: 9 }],
+            }],
+        },
+        // --- Extended/BCD arithmetic and CMPM ---
+        // Each takes either two data registers (`Dn,Dn`) or two predecrement
+        // address registers (`-(An),-(An)`); the mode bit (3) picks between them.
+        // ADDX/SUBX are size-coded (Std6); ABCD/SBCD are byte-only. CMPM is the
+        // postincrement-only memory compare (`(An)+,(An)+`).
+        Insn {
+            mnemonic: "ADDX",
+            summary: "Add extended",
+            forms: &[
+                Form {
+                    base: 0xD100,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 0 }, Slot::Dn { shift: 9 }],
+                },
+                Form {
+                    base: 0xD108,
+                    size: SizeEnc::Std6,
+                    operands: &[
+                        Slot::AddrIndirect { shift: 0, mode: 4 },
+                        Slot::AddrIndirect { shift: 9, mode: 4 },
+                    ],
+                },
+            ],
+        },
+        Insn {
+            mnemonic: "SUBX",
+            summary: "Subtract extended",
+            forms: &[
+                Form {
+                    base: 0x9100,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 0 }, Slot::Dn { shift: 9 }],
+                },
+                Form {
+                    base: 0x9108,
+                    size: SizeEnc::Std6,
+                    operands: &[
+                        Slot::AddrIndirect { shift: 0, mode: 4 },
+                        Slot::AddrIndirect { shift: 9, mode: 4 },
+                    ],
+                },
+            ],
+        },
+        Insn {
+            mnemonic: "ABCD",
+            summary: "Add decimal with extend",
+            forms: &[
+                Form {
+                    base: 0xC100,
+                    size: SizeEnc::Fixed(Size::B),
+                    operands: &[Slot::Dn { shift: 0 }, Slot::Dn { shift: 9 }],
+                },
+                Form {
+                    base: 0xC108,
+                    size: SizeEnc::Fixed(Size::B),
+                    operands: &[
+                        Slot::AddrIndirect { shift: 0, mode: 4 },
+                        Slot::AddrIndirect { shift: 9, mode: 4 },
+                    ],
+                },
+            ],
+        },
+        Insn {
+            mnemonic: "SBCD",
+            summary: "Subtract decimal with extend",
+            forms: &[
+                Form {
+                    base: 0x8100,
+                    size: SizeEnc::Fixed(Size::B),
+                    operands: &[Slot::Dn { shift: 0 }, Slot::Dn { shift: 9 }],
+                },
+                Form {
+                    base: 0x8108,
+                    size: SizeEnc::Fixed(Size::B),
+                    operands: &[
+                        Slot::AddrIndirect { shift: 0, mode: 4 },
+                        Slot::AddrIndirect { shift: 9, mode: 4 },
+                    ],
+                },
+            ],
+        },
+        Insn {
+            mnemonic: "CMPM",
+            summary: "Compare memory with postincrement",
+            forms: &[Form {
+                base: 0xB108,
+                size: SizeEnc::Std6,
+                operands: &[
+                    Slot::AddrIndirect { shift: 0, mode: 3 },
+                    Slot::AddrIndirect { shift: 9, mode: 3 },
+                ],
             }],
         },
         // --- Single effective-address operations ---
