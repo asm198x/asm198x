@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.5](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.4...asm198x-v0.0.5) - 2026-06-04
+
+### Added
+
+- *(68000)* add MOVEP — base-68000 ISA now complete
+- *(68000)* add CCR/SR/USP moves and immediate-to-CCR/SR
+- *(68000)* add TRAP, MOVEA, and EXG
+- *(68000)* add ADDX/SUBX/ABCD/SBCD/CMPM (extended + BCD arithmetic)
+
+### Other
+
+- apply cargo fmt
+- *(conformance)* extend the differential fuzzer to 6809 and 68000
+
 ## [0.0.4](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.3...asm198x-v0.0.4) - 2026-06-03
 
 ### Added
