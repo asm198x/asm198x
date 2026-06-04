@@ -536,6 +536,25 @@ pub const SET: Spec = Spec {
                 operands: &[ea_src(DATA), Slot::Dn { shift: 9 }],
             }],
         },
+        // Signed multiply/divide — mirror MULU/DIVU (opmode 111 vs 011).
+        Insn {
+            mnemonic: "MULS",
+            summary: "Signed multiply",
+            forms: &[Form {
+                base: 0xC1C0,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[ea_src(DATA), Slot::Dn { shift: 9 }],
+            }],
+        },
+        Insn {
+            mnemonic: "DIVS",
+            summary: "Signed divide",
+            forms: &[Form {
+                base: 0x81C0,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[ea_src(DATA), Slot::Dn { shift: 9 }],
+            }],
+        },
         // --- Single effective-address operations ---
         Insn {
             mnemonic: "TST",
@@ -682,6 +701,105 @@ pub const SET: Spec = Spec {
                 },
             ],
         },
+        // Shifts/rotates (register forms) — mirror LSL/LSR; the type field is
+        // bits 4-3 (00=AS, 01=LS, 10=ROX, 11=RO), direction is bit 8, and bit 5
+        // selects immediate-count (`Quick3`) vs register-count (`Dn`).
+        Insn {
+            mnemonic: "ASR",
+            summary: "Arithmetic shift right",
+            forms: &[
+                Form {
+                    base: 0xE000,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Quick3 { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xE020,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+            ],
+        },
+        Insn {
+            mnemonic: "ASL",
+            summary: "Arithmetic shift left",
+            forms: &[
+                Form {
+                    base: 0xE100,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Quick3 { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xE120,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+            ],
+        },
+        Insn {
+            mnemonic: "ROXR",
+            summary: "Rotate right through extend",
+            forms: &[
+                Form {
+                    base: 0xE010,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Quick3 { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xE030,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+            ],
+        },
+        Insn {
+            mnemonic: "ROXL",
+            summary: "Rotate left through extend",
+            forms: &[
+                Form {
+                    base: 0xE110,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Quick3 { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xE130,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+            ],
+        },
+        Insn {
+            mnemonic: "ROR",
+            summary: "Rotate right",
+            forms: &[
+                Form {
+                    base: 0xE018,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Quick3 { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xE038,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+            ],
+        },
+        Insn {
+            mnemonic: "ROL",
+            summary: "Rotate left",
+            forms: &[
+                Form {
+                    base: 0xE118,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Quick3 { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xE138,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+            ],
+        },
         // --- Bit test/set: #n,<ea> (static) and Dn,<ea> (dynamic) ---
         Insn {
             mnemonic: "BTST",
@@ -710,6 +828,40 @@ pub const SET: Spec = Spec {
                 },
                 Form {
                     base: 0x01C0,
+                    size: SizeEnc::Fixed(Size::B),
+                    operands: &[Slot::Dn { shift: 9 }, ea_src(DATA_ALT)],
+                },
+            ],
+        },
+        // BCHG/BCLR — mirror BSET (cc bits 7-6 = 01/10 vs BSET's 11); alterable
+        // EA only, so DATA_ALT like BSET (BTST is the read-only one).
+        Insn {
+            mnemonic: "BCHG",
+            summary: "Test and change a bit",
+            forms: &[
+                Form {
+                    base: 0x0840,
+                    size: SizeEnc::Fixed(Size::B),
+                    operands: &[Slot::ImmWord, ea_src(DATA_ALT)],
+                },
+                Form {
+                    base: 0x0140,
+                    size: SizeEnc::Fixed(Size::B),
+                    operands: &[Slot::Dn { shift: 9 }, ea_src(DATA_ALT)],
+                },
+            ],
+        },
+        Insn {
+            mnemonic: "BCLR",
+            summary: "Test and clear a bit",
+            forms: &[
+                Form {
+                    base: 0x0880,
+                    size: SizeEnc::Fixed(Size::B),
+                    operands: &[Slot::ImmWord, ea_src(DATA_ALT)],
+                },
+                Form {
+                    base: 0x0180,
                     size: SizeEnc::Fixed(Size::B),
                     operands: &[Slot::Dn { shift: 9 }, ea_src(DATA_ALT)],
                 },

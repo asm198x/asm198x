@@ -1300,6 +1300,23 @@ mod tests {
     }
 
     #[test]
+    fn m68k_mirror_families() {
+        // Families mirroring existing entries: MULS/DIVS (Fixed(W) -> suffixless,
+        // like MULU/DIVU), shifts/rotates (Std6 -> sized), BCHG/BCLR (bit ops
+        // render sizeless). Encodings confirmed byte-identical against vasm.
+        assert_eq!(one_m68k(&[0xC3, 0xC0]), "muls d0,d1");
+        assert_eq!(one_m68k(&[0x83, 0xC0]), "divs d0,d1");
+        assert_eq!(one_m68k(&[0xE2, 0x40]), "asr.w #1,d0");
+        assert_eq!(one_m68k(&[0xE2, 0x60]), "asr.w d1,d0");
+        assert_eq!(one_m68k(&[0xE7, 0x82]), "asl.l #3,d2");
+        assert_eq!(one_m68k(&[0xE2, 0x50]), "roxr.w #1,d0");
+        assert_eq!(one_m68k(&[0xE3, 0xB8]), "rol.l d1,d0");
+        assert_eq!(one_m68k(&[0x08, 0x50, 0x00, 0x05]), "bchg #5,(a0)");
+        assert_eq!(one_m68k(&[0x01, 0x41]), "bchg d0,d1");
+        assert_eq!(one_m68k(&[0x01, 0x90]), "bclr d0,(a0)");
+    }
+
+    #[test]
     fn m68k_movem_load_reads_mask_before_displacement() {
         // movem.w 16(a0),d5: mask word ($0020 = d5) comes first, then the EA
         // displacement ($0010 = 16) — not in operand-display order.

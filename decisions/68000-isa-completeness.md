@@ -48,11 +48,15 @@ for real programs; condition-code variants are mechanical breadth.
       each needs a small new operand slot, so deferred to a follow-up increment.
 - [ ] **2. Data movement** — `MOVEA`, `PEA`, `LINK`, `UNLK`, `EXG`, `MOVEP`,
       `MOVE` to/from `CCR`/`SR`/`USP`.
-- [ ] **3. Arithmetic / logic** — `MULS`, `DIVS`, `ADDX`, `SUBX`, `NEGX`,
-      `CMPM`, `ABCD`, `SBCD`, `NBCD`, `TAS`.
-- [ ] **4. Bit ops** — `BCHG`, `BCLR` (`BSET`/`BTST` already present).
-- [ ] **5. Shifts / rotates** — `ASL`, `ASR`, `ROL`, `ROR`, `ROXL`, `ROXR`
-      (`LSL`/`LSR` present); register, memory, and immediate-count forms.
+- [~] **3. Arithmetic / logic** — **done:** `MULS`, `DIVS` (mirror MULU/DIVU).
+      **Remaining:** `ADDX`, `SUBX`, `NEGX`, `CMPM`, `ABCD`, `SBCD`, `NBCD`,
+      `TAS` (`ADDX`/`SUBX`/`ABCD`/`SBCD`/`CMPM` need reg-reg/predec slot work).
+- [x] **4. Bit ops** — `BCHG`, `BCLR` done (mirror BSET; `BSET`/`BTST` already
+      present).
+- [~] **5. Shifts / rotates** — **done:** `ASL`, `ASR`, `ROL`, `ROR`, `ROXL`,
+      `ROXR` register forms (immediate- and register-count), mirroring LSL/LSR.
+      **Remaining:** the memory-shift-by-1 forms (`$E0C0`…) — also absent for
+      `LSL`/`LSR`, so a shared follow-up.
 - [ ] **6. Condition-code breadth** — remaining `Scc` (have `SEQ`/`SNE`),
       remaining `Bcc` (`BHI`/`BLS`/`BCC`/`BCS`/`BVC`/`BVS`), the `DBcc` variants.
 - [ ] **7. Immediate to CCR/SR** — `ANDI`/`ORI`/`EORI #imm,CCR/SR`
