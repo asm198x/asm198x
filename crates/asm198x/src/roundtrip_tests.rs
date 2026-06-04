@@ -127,6 +127,33 @@ fn encodes_m68k_trap_movea_exg() {
     }
 }
 
+/// CCR/SR/USP control-register moves and the ORI/ANDI/EORI immediate-to-CCR/SR
+/// forms encode to the exact bytes vasm emits (base-68000 forms only; `move
+/// ccr,<ea>` is 68010+ and intentionally unsupported).
+#[test]
+fn encodes_m68k_control_registers() {
+    let cases: &[(&str, &[u8])] = &[
+        ("\tmove\td0,ccr\n", &[0x44, 0xC0]),
+        ("\tmove\t$1000,ccr\n", &[0x44, 0xF9, 0x00, 0x00, 0x10, 0x00]),
+        ("\tmove\t#$12,ccr\n", &[0x44, 0xFC, 0x00, 0x12]),
+        ("\tmove\td0,sr\n", &[0x46, 0xC0]),
+        ("\tmove\tsr,d0\n", &[0x40, 0xC0]),
+        ("\tmove\tsr,$1000\n", &[0x40, 0xF9, 0x00, 0x00, 0x10, 0x00]),
+        ("\tmove\tusp,a0\n", &[0x4E, 0x68]),
+        ("\tmove\ta3,usp\n", &[0x4E, 0x63]),
+        ("\tandi\t#1,ccr\n", &[0x02, 0x3C, 0x00, 0x01]),
+        ("\tori\t#2,ccr\n", &[0x00, 0x3C, 0x00, 0x02]),
+        ("\teori\t#4,ccr\n", &[0x0A, 0x3C, 0x00, 0x04]),
+        ("\tandi\t#$1234,sr\n", &[0x02, 0x7C, 0x12, 0x34]),
+        ("\tori\t#$5678,sr\n", &[0x00, 0x7C, 0x56, 0x78]),
+        ("\teori\t#$00ff,sr\n", &[0x0A, 0x7C, 0x00, 0xFF]),
+    ];
+    for (src, want) in cases {
+        let got = assemble_vasm(src).unwrap_or_else(|e| panic!("assemble `{src}`: {e:?}"));
+        assert_eq!(&got, want, "for `{src}`");
+    }
+}
+
 #[test]
 fn round_trips_m68k_pure_code() {
     // Pure code (no interleaved data) round-trips through the optimizing

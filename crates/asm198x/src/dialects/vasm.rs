@@ -557,6 +557,8 @@ fn encode(
                 }
                 word |= u16::from(v as u8);
             }
+            // Fixed control-register tokens carry no opcode bits or extension.
+            (Slot::Ccr, Opnd::Ccr) | (Slot::Sr, Opnd::Sr) | (Slot::Usp, Opnd::Usp) => {}
             (Slot::Vec4, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
                 if !(0..=15).contains(&v) {
@@ -670,6 +672,7 @@ fn slot_accepts(slot: &Slot, op: &Opnd) -> bool {
             Opnd::Imm(_),
         ) => true,
         (Slot::BranchW | Slot::DispW, Opnd::Abs(_)) => true,
+        (Slot::Ccr, Opnd::Ccr) | (Slot::Sr, Opnd::Sr) | (Slot::Usp, Opnd::Usp) => true,
         // A register list, or a single register treated as a one-entry list.
         (Slot::RegList, Opnd::RegList(_) | Opnd::DReg(_) | Opnd::AReg(_)) => true,
         (Slot::Ea { modes, .. }, _) => modes.allows(ea_mode_bit(op)),
@@ -686,7 +689,8 @@ fn ea_mode_bit(op: &Opnd) -> u16 {
         Opnd::Idx { bit, .. } => *bit,
         Opnd::Abs(_) => ea::AL | ea::AW,
         Opnd::Imm(_) => ea::IMM,
-        Opnd::RegList(_) => 0,
+        // Not effective addresses: never accepted by an EA slot.
+        Opnd::RegList(_) | Opnd::Ccr | Opnd::Sr | Opnd::Usp => 0,
     }
 }
 
@@ -799,7 +803,9 @@ fn resolve_ea(
             };
             (field(7, 4), words, reloc)
         }
-        Opnd::RegList(_) => return Err(AsmError::new(line, "internal: register list used as EA")),
+        Opnd::RegList(_) | Opnd::Ccr | Opnd::Sr | Opnd::Usp => {
+            return Err(AsmError::new(line, "internal: non-EA operand used as EA"));
+        }
     })
 }
 
@@ -878,6 +884,9 @@ fn stmt_size(
                     | Slot::AddrIndirect { .. }
                     | Slot::Quick8
                     | Slot::Vec4
+                    | Slot::Ccr
+                    | Slot::Sr
+                    | Slot::Usp
                     | Slot::Quick3 { .. } => 0,
                     // A `.s`/`.b` branch packs its displacement in the opcode
                     // word; the word form adds a 16-bit extension word.
@@ -938,7 +947,7 @@ fn ea_ext_len(
                 2
             }
         }
-        Opnd::RegList(_) => 0,
+        Opnd::RegList(_) | Opnd::Ccr | Opnd::Sr | Opnd::Usp => 0,
     }
 }
 
@@ -973,6 +982,12 @@ enum Opnd {
     Imm(Expr),
     /// A `MOVEM` register list as a normal-order mask (d0=bit0 … a7=bit15).
     RegList(u16),
+    /// The condition-code register (`ccr`).
+    Ccr,
+    /// The status register (`sr`).
+    Sr,
+    /// The user stack pointer (`usp`).
+    Usp,
 }
 
 #[derive(Clone, Copy)]
@@ -1339,6 +1354,12 @@ fn parse_reg(t: &str) -> Option<Opnd> {
     let t = t.to_ascii_lowercase();
     if t == "sp" {
         return Some(Opnd::AReg(7));
+    }
+    match t.as_str() {
+        "ccr" => return Some(Opnd::Ccr),
+        "sr" => return Some(Opnd::Sr),
+        "usp" => return Some(Opnd::Usp),
+        _ => {}
     }
     if t.len() == 2 {
         let n = t.as_bytes()[1].checked_sub(b'0')?;

@@ -49,10 +49,12 @@ for real programs; condition-code variants are mechanical breadth.
       vector via the new `Slot::Vec4`, packed in the opcode's low nibble).
 - [~] **2. Data movement** — **done:** `PEA` (control EA), `UNLK` (`An`), `LINK`
       (`An` + `ImmWord` displacement), `MOVEA` (An-destination MOVE, listed
-      before MOVE so it wins the decode; no new slot), and `EXG` (three
-      register-pair kinds plus reversed source order; reuses `Dn`/`An`).
-      **Remaining:** `MOVEP` (displacement form, needs a slot), `MOVE` to/from
-      `CCR`/`SR`/`USP` (need new operand kinds + parser support).
+      before MOVE so it wins the decode; no new slot), `EXG` (three register-pair
+      kinds plus reversed source order; reuses `Dn`/`An`), and the control-register
+      moves `MOVE <ea>,CCR` / `MOVE <ea>,SR` / `MOVE SR,<ea>` / `MOVE USP,An` /
+      `MOVE An,USP` (new `Slot::Ccr`/`Sr`/`Usp` + `ccr`/`sr`/`usp` parser tokens;
+      `MOVE CCR,<ea>` is 68010+ and intentionally absent). **Remaining:** `MOVEP`
+      (displacement form — needs a slot that carries `d16(Ay)`).
 - [x] **3. Arithmetic / logic** — done: `MULS`, `DIVS` (mirror MULU/DIVU),
       `NEGX`, `NBCD`, `TAS` (slot-reusing single-EA), and `ADDX`/`SUBX`/`CMPM`/
       `ABCD`/`SBCD` via a new `Slot::AddrIndirect { shift, mode }` (the register
@@ -68,9 +70,11 @@ for real programs; condition-code variants are mechanical breadth.
       `DBcc` variants (mirror BEQ/SEQ/DBF; cc in bits 8–11). Byte-identical vs
       vasm (Scc via the sweep; Bcc/DBcc — position-dependent — via a direct
       assembler check), plus an `m68k_condition_codes` decode test.
-- [ ] **7. Immediate to CCR/SR** — `ANDI`/`ORI`/`EORI #imm,CCR/SR`
-      (`$003C`/`$007C`, …) — the forms the rung-1 ORI/ANDI/EORI work explicitly
-      left unmodelled (need a dedicated CCR/SR operand slot).
+- [x] **7. Immediate to CCR/SR** — done: `ANDI`/`ORI`/`EORI #imm,CCR/SR`
+      (`$x03C`/`$x07C`) via `Slot::Ccr`/`Sr` and a single `ImmWord` (byte in the
+      word's low half for CCR). These occupy the immediate-EA bit pattern, which
+      is illegal as a normal alterable EA, so they never shadow the generic
+      `#imm,<ea>` forms. Byte-identical vs vasm.
 
 ## How to land a family
 

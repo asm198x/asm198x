@@ -393,7 +393,13 @@ fn m68k_var_mask(form: &m68k::Form) -> u16 {
             Slot::Quick8 | Slot::BranchW => 0xFF,
             Slot::Vec4 => 0xF,
             Slot::Ea { shift, .. } => 0b11_1111 << shift,
-            Slot::DispW | Slot::ImmWord | Slot::ImmSized | Slot::RegList => 0,
+            Slot::DispW
+            | Slot::ImmWord
+            | Slot::ImmSized
+            | Slot::RegList
+            | Slot::Ccr
+            | Slot::Sr
+            | Slot::Usp => 0,
         };
     }
     m
@@ -556,6 +562,9 @@ fn render_m68k(
             }
             Slot::Quick8 => ops.push(format!("#{}", (word & 0xFF) as i8)),
             Slot::Vec4 => ops.push(format!("#{}", word & 0xF)),
+            Slot::Ccr => ops.push("ccr".to_string()),
+            Slot::Sr => ops.push("sr".to_string()),
+            Slot::Usp => ops.push("usp".to_string()),
             Slot::Quick3 { shift } => {
                 let v = (word >> shift) & 7;
                 ops.push(format!("#{}", if v == 0 { 8 } else { v }));
@@ -1396,6 +1405,28 @@ mod tests {
         assert_eq!(one_m68k(&[0xC1, 0x41]), "exg d0,d1");
         assert_eq!(one_m68k(&[0xC1, 0x49]), "exg a0,a1");
         assert_eq!(one_m68k(&[0xC1, 0x89]), "exg d0,a1");
+    }
+
+    #[test]
+    fn m68k_control_register_moves() {
+        // CCR/SR/USP moves — rendered suffixless. These occupy the size-field-11
+        // holes of NEGX/NEG/NOT, so they don't shadow those ops.
+        assert_eq!(one_m68k(&[0x44, 0xC0]), "move d0,ccr"); // <ea>,ccr (68000)
+        assert_eq!(one_m68k(&[0x46, 0xC0]), "move d0,sr"); // <ea>,sr
+        assert_eq!(one_m68k(&[0x40, 0xC0]), "move sr,d0"); // sr,<ea>
+        assert_eq!(one_m68k(&[0x4E, 0x68]), "move usp,a0"); // usp,An
+        assert_eq!(one_m68k(&[0x4E, 0x63]), "move a3,usp"); // An,usp
+    }
+
+    #[test]
+    fn m68k_immediate_to_ccr_sr() {
+        // ORI/ANDI/EORI #imm,CCR (byte in the word's low half) and #imm,SR (word).
+        assert_eq!(one_m68k(&[0x00, 0x3C, 0x00, 0x02]), "ori #2,ccr");
+        assert_eq!(one_m68k(&[0x02, 0x3C, 0x00, 0x01]), "andi #1,ccr");
+        assert_eq!(one_m68k(&[0x0A, 0x3C, 0x00, 0x04]), "eori #4,ccr");
+        assert_eq!(one_m68k(&[0x00, 0x7C, 0x56, 0x78]), "ori #22136,sr");
+        assert_eq!(one_m68k(&[0x02, 0x7C, 0x12, 0x34]), "andi #4660,sr");
+        assert_eq!(one_m68k(&[0x0A, 0x7C, 0x00, 0xFF]), "eori #255,sr");
     }
 
     #[test]

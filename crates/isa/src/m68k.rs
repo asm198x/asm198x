@@ -135,6 +135,13 @@ pub enum Slot {
     /// A 4-bit immediate vector packed into the opcode's low nibble (`TRAP #v`,
     /// 0–15). No extension word.
     Vec4,
+    /// The condition-code register operand (`ccr`). A fixed token — no opcode
+    /// bits, no extension word.
+    Ccr,
+    /// The status register operand (`sr`). A fixed token, as [`Slot::Ccr`].
+    Sr,
+    /// The user stack pointer operand (`usp`). A fixed token, as [`Slot::Ccr`].
+    Usp,
 }
 
 /// One concrete encoding shape of a mnemonic.
@@ -308,18 +315,52 @@ pub const SET: Spec = Spec {
         Insn {
             mnemonic: "MOVE",
             summary: "Move data",
-            forms: &[Form {
-                base: 0x0000,
-                size: SizeEnc::Move,
-                operands: &[
-                    ea_src(ALL),
-                    Slot::Ea {
-                        shift: 6,
-                        modes: EaModes(DATA_ALT | AN),
-                        dest: true,
-                    },
-                ],
-            }],
+            forms: &[
+                Form {
+                    base: 0x0000,
+                    size: SizeEnc::Move,
+                    operands: &[
+                        ea_src(ALL),
+                        Slot::Ea {
+                            shift: 6,
+                            modes: EaModes(DATA_ALT | AN),
+                            dest: true,
+                        },
+                    ],
+                },
+                // Control-register moves (always word-wide, no size suffix). The
+                // `$x0C0`/`$x6C0` slots these occupy are the size-field-11 holes
+                // of NEGX/NEG/NOT, so they never collide with those Std6 forms.
+                // `move <ea>,ccr` / `move <ea>,sr` (to-CCR is 68000; `move
+                // ccr,<ea>` from-CCR is 68010+, so it is intentionally absent).
+                Form {
+                    base: 0x44C0,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[ea_src(DATA), Slot::Ccr],
+                },
+                Form {
+                    base: 0x46C0,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[ea_src(DATA), Slot::Sr],
+                },
+                // `move sr,<ea>` — the destination is data-alterable.
+                Form {
+                    base: 0x40C0,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::Sr, ea_src(DATA_ALT)],
+                },
+                // USP moves (privileged): `move usp,An` and `move An,usp`.
+                Form {
+                    base: 0x4E68,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::Usp, Slot::An { shift: 0 }],
+                },
+                Form {
+                    base: 0x4E60,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::An { shift: 0 }, Slot::Usp],
+                },
+            ],
         },
         Insn {
             mnemonic: "LEA",
@@ -392,32 +433,73 @@ pub const SET: Spec = Spec {
         // routes it to EORI ($0Axx) — which the disassembler emits, closing the
         // round-trip without a dialect alias. (The CCR/SR target forms — $003C,
         // $007C, … — need a dedicated operand slot and are not yet modelled.)
+        // ORI/ANDI/EORI carry a status-register variant: the `#imm,<ea>` form
+        // with the immediate-EA bit pattern ($x03C/$x07C) is illegal as a normal
+        // EA (immediate isn't alterable), so it is repurposed for `#imm,CCR`
+        // (byte, low half of the word) and `#imm,SR` (word). Rendered suffixless,
+        // so the size is `Fixed(W)` and the immediate is a single `ImmWord`.
         Insn {
             mnemonic: "ORI",
             summary: "Inclusive-OR immediate",
-            forms: &[Form {
-                base: 0x0000,
-                size: SizeEnc::Std6,
-                operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
-            }],
+            forms: &[
+                Form {
+                    base: 0x0000,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
+                },
+                Form {
+                    base: 0x003C,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::ImmWord, Slot::Ccr],
+                },
+                Form {
+                    base: 0x007C,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::ImmWord, Slot::Sr],
+                },
+            ],
         },
         Insn {
             mnemonic: "ANDI",
             summary: "AND immediate",
-            forms: &[Form {
-                base: 0x0200,
-                size: SizeEnc::Std6,
-                operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
-            }],
+            forms: &[
+                Form {
+                    base: 0x0200,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
+                },
+                Form {
+                    base: 0x023C,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::ImmWord, Slot::Ccr],
+                },
+                Form {
+                    base: 0x027C,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::ImmWord, Slot::Sr],
+                },
+            ],
         },
         Insn {
             mnemonic: "EORI",
             summary: "Exclusive-OR immediate",
-            forms: &[Form {
-                base: 0x0A00,
-                size: SizeEnc::Std6,
-                operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
-            }],
+            forms: &[
+                Form {
+                    base: 0x0A00,
+                    size: SizeEnc::Std6,
+                    operands: &[Slot::ImmSized, ea_src(DATA_ALT)],
+                },
+                Form {
+                    base: 0x0A3C,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::ImmWord, Slot::Ccr],
+                },
+                Form {
+                    base: 0x0A7C,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::ImmWord, Slot::Sr],
+                },
+            ],
         },
         Insn {
             mnemonic: "BRA",
