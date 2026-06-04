@@ -41,8 +41,11 @@ Filling a family lights up assemble + disassemble + cross-check coverage at once
 Highest first — control flow and common data movement make the assembler usable
 for real programs; condition-code variants are mechanical breadth.
 
-- [ ] **1. Control flow** — `JMP`, `JSR`, `RTE`, `RTR`, `TRAP`, `TRAPV`, `CHK`,
-      `STOP`, `RESET`, `ILLEGAL`. (`JMP`/`JSR` take a control-addressing EA.)
+- [~] **1. Control flow** — **done:** `JMP`, `JSR` (control-addressing EA, reusing
+      LEA's), `RTE`, `RTR`, `TRAPV`, `RESET`, `ILLEGAL` — byte-identical vs vasm
+      (conformance sweep + `m68k_control_flow` decode test). **Remaining:** `TRAP`
+      (4-bit vector packed in the opcode), `STOP` (`#imm16`), `CHK` (`<ea>,Dn`) —
+      each needs a small new operand slot, so deferred to a follow-up increment.
 - [ ] **2. Data movement** — `MOVEA`, `PEA`, `LINK`, `UNLK`, `EXG`, `MOVEP`,
       `MOVE` to/from `CCR`/`SR`/`USP`.
 - [ ] **3. Arithmetic / logic** — `MULS`, `DIVS`, `ADDX`, `SUBX`, `NEGX`,

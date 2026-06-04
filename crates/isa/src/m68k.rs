@@ -188,6 +188,73 @@ pub const SET: Spec = Spec {
                 operands: &[],
             }],
         },
+        // --- Control flow (68000-completeness burndown, family 1; see
+        // decisions/68000-isa-completeness.md). JMP/JSR reuse LEA's control-
+        // addressing EA; the no-operand returns mirror RTS. All unsized, so
+        // Fixed(Size::W) — which renders no suffix. ---
+        Insn {
+            mnemonic: "JMP",
+            summary: "Jump",
+            forms: &[Form {
+                base: 0x4EC0,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[ea_src(CONTROL)],
+            }],
+        },
+        Insn {
+            mnemonic: "JSR",
+            summary: "Jump to subroutine",
+            forms: &[Form {
+                base: 0x4E80,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[ea_src(CONTROL)],
+            }],
+        },
+        Insn {
+            mnemonic: "RTE",
+            summary: "Return from exception",
+            forms: &[Form {
+                base: 0x4E73,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[],
+            }],
+        },
+        Insn {
+            mnemonic: "RTR",
+            summary: "Return and restore condition codes",
+            forms: &[Form {
+                base: 0x4E77,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[],
+            }],
+        },
+        Insn {
+            mnemonic: "TRAPV",
+            summary: "Trap on overflow",
+            forms: &[Form {
+                base: 0x4E76,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[],
+            }],
+        },
+        Insn {
+            mnemonic: "RESET",
+            summary: "Reset external devices",
+            forms: &[Form {
+                base: 0x4E70,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[],
+            }],
+        },
+        Insn {
+            mnemonic: "ILLEGAL",
+            summary: "Take the illegal-instruction trap",
+            forms: &[Form {
+                base: 0x4AFC,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[],
+            }],
+        },
         Insn {
             mnemonic: "MOVEQ",
             summary: "Move quick (sign-extended 8-bit to long)",

@@ -1287,6 +1287,19 @@ mod tests {
     }
 
     #[test]
+    fn m68k_control_flow() {
+        // 68000-completeness family 1: JMP/JSR (control-addressing EA) and the
+        // no-operand returns. All unsized — no size suffix.
+        assert_eq!(one_m68k(&[0x4E, 0xD0]), "jmp (a0)");
+        assert_eq!(one_m68k(&[0x4E, 0x90]), "jsr (a0)");
+        assert_eq!(one_m68k(&[0x4E, 0x73]), "rte");
+        assert_eq!(one_m68k(&[0x4E, 0x77]), "rtr");
+        assert_eq!(one_m68k(&[0x4E, 0x76]), "trapv");
+        assert_eq!(one_m68k(&[0x4E, 0x70]), "reset");
+        assert_eq!(one_m68k(&[0x4A, 0xFC]), "illegal");
+    }
+
+    #[test]
     fn m68k_movem_load_reads_mask_before_displacement() {
         // movem.w 16(a0),d5: mask word ($0020 = d5) comes first, then the EA
         // displacement ($0010 = 16) — not in operand-display order.
