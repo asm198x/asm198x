@@ -142,6 +142,11 @@ pub enum Slot {
     Sr,
     /// The user stack pointer operand (`usp`). A fixed token, as [`Slot::Ccr`].
     Usp,
+    /// `MOVEP`'s `d16(Ay)` operand: the address register sits in bits 0–2 (mode
+    /// bits 3–5 are fixed `001` in the base), followed by a mandatory 16-bit
+    /// displacement extension word. Distinct from a general `(d16,An)` EA — there
+    /// is no 6-bit mode field, and the displacement is never dropped when zero.
+    MovepDisp,
 }
 
 /// One concrete encoding shape of a mnemonic.
@@ -1545,6 +1550,29 @@ pub const SET: Spec = Spec {
                         ),
                         Slot::RegList,
                     ],
+                },
+            ],
+        },
+        // MOVEP — move data between a data register and alternate bytes of a
+        // `d16(Ay)` peripheral address. Bit 7 is the direction (0 = mem->reg,
+        // 1 = reg->mem), bit 6 the size (WL). The `001` in bits 3–5 of the base
+        // is the EA-mode marker that keeps these off the dynamic bit ops (whose
+        // An-mode EA is illegal there).
+        Insn {
+            mnemonic: "MOVEP",
+            summary: "Move peripheral data",
+            forms: &[
+                // d16(Ay),Dx
+                Form {
+                    base: 0x0108,
+                    size: SizeEnc::WL { shift: 6 },
+                    operands: &[Slot::MovepDisp, Slot::Dn { shift: 9 }],
+                },
+                // Dx,d16(Ay)
+                Form {
+                    base: 0x0188,
+                    size: SizeEnc::WL { shift: 6 },
+                    operands: &[Slot::Dn { shift: 9 }, Slot::MovepDisp],
                 },
             ],
         },

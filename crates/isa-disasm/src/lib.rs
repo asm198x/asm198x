@@ -390,6 +390,8 @@ fn m68k_var_mask(form: &m68k::Form) -> u16 {
             | Slot::An { shift }
             | Slot::Quick3 { shift }
             | Slot::AddrIndirect { shift, .. } => 0b111 << shift,
+            // MOVEP's Ay sits in bits 0–2 (mode marker 001 is fixed in the base).
+            Slot::MovepDisp => 0b111,
             Slot::Quick8 | Slot::BranchW => 0xFF,
             Slot::Vec4 => 0xF,
             Slot::Ea { shift, .. } => 0b11_1111 << shift,
@@ -565,6 +567,11 @@ fn render_m68k(
             Slot::Ccr => ops.push("ccr".to_string()),
             Slot::Sr => ops.push("sr".to_string()),
             Slot::Usp => ops.push("usp".to_string()),
+            Slot::MovepDisp => {
+                let reg = word & 7;
+                let disp = read_be(code, &mut ext, 2)? as i16;
+                ops.push(format!("{disp}(a{reg})"));
+            }
             Slot::Quick3 { shift } => {
                 let v = (word >> shift) & 7;
                 ops.push(format!("#{}", if v == 0 { 8 } else { v }));
@@ -1427,6 +1434,16 @@ mod tests {
         assert_eq!(one_m68k(&[0x00, 0x7C, 0x56, 0x78]), "ori #22136,sr");
         assert_eq!(one_m68k(&[0x02, 0x7C, 0x12, 0x34]), "andi #4660,sr");
         assert_eq!(one_m68k(&[0x0A, 0x7C, 0x00, 0xFF]), "eori #255,sr");
+    }
+
+    #[test]
+    fn m68k_movep() {
+        // MOVEP — d16(Ay) <-> Dx, both directions and sizes. Bit 7 = direction,
+        // bit 6 = size; the mandatory displacement is a 16-bit extension word.
+        assert_eq!(one_m68k(&[0x01, 0x08, 0x00, 0x00]), "movep.w 0(a0),d0");
+        assert_eq!(one_m68k(&[0x07, 0x4A, 0x00, 0x00]), "movep.l 0(a2),d3");
+        assert_eq!(one_m68k(&[0x01, 0x88, 0x00, 0x08]), "movep.w d0,8(a0)");
+        assert_eq!(one_m68k(&[0x07, 0xCA, 0x00, 0x08]), "movep.l d3,8(a2)");
     }
 
     #[test]

@@ -64,22 +64,23 @@ popularity.
 |-----|----------|-------------------|-------|--------|
 | 6502 | C64, NES | acme, ca65 | — | ✅ done |
 | Z80 | Spectrum | pasmo/pasmonext, sjasmplus | — | ✅ done |
-| 68000 | Amiga (ST, Genesis) | vasm (mot) | new field-based core | ⚠️ curriculum subset (46 mnemonics) — see [68000-isa-completeness](68000-isa-completeness.md) |
+| 68000 | Amiga (ST, Genesis) | vasm (mot) | new field-based core | ✅ done — full base ISA, see [68000-isa-completeness](68000-isa-completeness.md) |
 | 6809 | Dragon, CoCo | **lwasm** | engine seam reused; computed postbyte (indexed) | ✅ done |
 | 65816 | SNES, Apple IIgs | **ca65** | **target extension of `mos6502` (like Z80N on Z80)** | ✅ done |
 | later | 8080/8085, 8086, ARM2 (Archimedes), TMS9900 (TI-99) | TBD | mixed | open |
 
-**What "✅ done" means:** validated byte-identical against the reference tool on
-the curriculum corpus — *not* a proof of full-ISA coverage. The rung-1 cross-check
-against Emu198x's independent decoders made the distinction concrete: the **Z80**
-spec turned out genuinely *complete* (~60 mnemonics, confirmed), but the **68000**
-spec is a **curriculum subset** — 46 mnemonics, missing `JMP`/`JSR`, `MOVEA`,
-`MULS`/`DIVS`, most shifts/rotates, `BCHG`/`BCLR`, `ADDX`/`SUBX`/`CMPM`,
-`LINK`/`UNLK`/`TRAP`, `PEA`, `MOVEP`, most `Scc`, and more. Because `isa::m68k` is
-the *shared* spec, those gaps fail **assembly** (`assemble_vasm` rejects them as
-"unknown instruction"), not just disassembly. 6502/6809/65816 full-ISA
-completeness is not separately audited (no independent decoder to cross-check yet).
-See [68000-isa-completeness](68000-isa-completeness.md) for the 68000 burndown.
+**What "✅ done" means:** validated byte-identical against the reference tool —
+historically on the curriculum corpus, *not* a proof of full-ISA coverage. The
+rung-1 cross-check against Emu198x's independent decoders made the distinction
+concrete: the **Z80** spec was already genuinely *complete* (~60 mnemonics,
+confirmed), while the **68000** spec started as a **curriculum subset** of 46
+mnemonics. Because `isa::m68k` is the *shared* spec, those gaps failed **assembly**
+(`assemble_vasm` rejected them as "unknown instruction"), not just disassembly.
+That gap is now **closed**: the 68000 spec covers the full base ISA, validated
+byte-identical against vasm for both assemble and disassemble and swept over ~41k
+decodable encodings — see [68000-isa-completeness](68000-isa-completeness.md).
+6502/6809/65816 full-ISA completeness is not separately audited (no independent
+decoder to cross-check yet).
 
 **65816:** the full native-mode instruction set + a spec-driven disassembler,
 all validated byte-identical against `ca65 --cpu 65816` (linked flat; no SNES

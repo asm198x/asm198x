@@ -1,6 +1,7 @@
 # 68000 ISA completeness — burndown
 
-**Status:** Active tracking. Asm198x.
+**Status:** ✅ Complete — base-68000 ISA fully modelled (2026-06-04). Kept as a
+record of the gap and how it was closed.
 
 **Date:** 2026-06-04.
 
@@ -8,14 +9,17 @@
 
 `isa::m68k` (`crates/isa/src/m68k.rs`) — the shared 68000 spec consumed by **both**
 the assembler (vasm dialect, `m68k::SET.instruction()`) and the disassembler
-(`isa-disasm`, `decode_m68k` iterates `m68k::SET`) — is a **curriculum subset**:
-46 mnemonics, roughly half the base-68000 ISA. The spec was authored to match the
-Amiga curriculum and validated byte-identical against vasm on that corpus, which
-is why the roadmap read "✅ done." The rung-1 cross-check against Emu198x's
-independent decoder made the gap measurable — see the umbrella
+(`isa-disasm`, `decode_m68k` iterates `m68k::SET`) — began as a **curriculum
+subset**: 46 mnemonics, roughly half the base-68000 ISA. The spec was authored to
+match the Amiga curriculum and validated byte-identical against vasm on that
+corpus, which is why the roadmap read "✅ done." The rung-1 cross-check against
+Emu198x's independent decoder made the gap measurable — see the umbrella
 [`rung1-wiring.md`](../../../decisions/rung1-wiring.md) (2026-06-04 entries).
 
-This record tracks filling the spec out to the full base-68000 ISA.
+All seven families below are now landed: the spec covers the full base-68000
+instruction set, every addition validated byte-identical against vasm
+(assemble + disassemble) and exercised by the conformance sweep (~41k decodable
+instructions). This record tracked filling that gap.
 
 ## Why it matters — it's the *shared* spec
 
@@ -47,14 +51,15 @@ for real programs; condition-code variants are mechanical breadth.
 - [x] **1. Control flow** — done: `JMP`, `JSR`, `RTE`, `RTR`, `TRAPV`, `RESET`,
       `ILLEGAL`, `CHK`, `STOP` (`#imm16` reuses `ImmWord`), and `TRAP` (4-bit
       vector via the new `Slot::Vec4`, packed in the opcode's low nibble).
-- [~] **2. Data movement** — **done:** `PEA` (control EA), `UNLK` (`An`), `LINK`
+- [x] **2. Data movement** — done: `PEA` (control EA), `UNLK` (`An`), `LINK`
       (`An` + `ImmWord` displacement), `MOVEA` (An-destination MOVE, listed
       before MOVE so it wins the decode; no new slot), `EXG` (three register-pair
-      kinds plus reversed source order; reuses `Dn`/`An`), and the control-register
+      kinds plus reversed source order; reuses `Dn`/`An`), the control-register
       moves `MOVE <ea>,CCR` / `MOVE <ea>,SR` / `MOVE SR,<ea>` / `MOVE USP,An` /
       `MOVE An,USP` (new `Slot::Ccr`/`Sr`/`Usp` + `ccr`/`sr`/`usp` parser tokens;
-      `MOVE CCR,<ea>` is 68010+ and intentionally absent). **Remaining:** `MOVEP`
-      (displacement form — needs a slot that carries `d16(Ay)`).
+      `MOVE CCR,<ea>` is 68010+ and intentionally absent), and `MOVEP` (new
+      `Slot::MovepDisp` carrying `d16(Ay)` — Ay in bits 0–2 plus a mandatory
+      displacement word; both directions and sizes).
 - [x] **3. Arithmetic / logic** — done: `MULS`, `DIVS` (mirror MULU/DIVU),
       `NEGX`, `NBCD`, `TAS` (slot-reusing single-EA), and `ADDX`/`SUBX`/`CMPM`/
       `ABCD`/`SBCD` via a new `Slot::AddrIndirect { shift, mode }` (the register
@@ -91,12 +96,19 @@ for real programs; condition-code variants are mechanical breadth.
    cases as warranted. The Emu198x 68000 cross-check's shared surface grows for
    free as the skip count falls.
 
-## Definition of done
+## Definition of done — met
 
 The base-68000 ISA assembles and disassembles byte-identically against vasm, and
 the Emu198x 68000 cross-check's skip count drops to only genuinely
-ambiguous/illegal encodings (not "unimplemented"). At that point the roadmap's
-68000 row returns to a plain ✅.
+ambiguous/illegal encodings (not "unimplemented"). All seven families are landed,
+so the roadmap's 68000 row returns to a plain ✅.
+
+Out of scope (correctly absent from a base-68000 spec): the 68010+ additions
+(`MOVE CCR,<ea>`, `MOVEC`, `MOVES`, `RTD`, `BKPT`), and the 68020+ extensions.
+A known minor gap: an out-of-byte-range immediate to CCR (`andi #$1234,ccr`) is
+not rejected by our assembler the way vasm rejects it — the encoding still places
+the low byte. The conformance sweep never hits this (its synthesized immediates
+are byte-range), and it only affects malformed hand-written source.
 
 ## Provenance
 

@@ -154,6 +154,22 @@ fn encodes_m68k_control_registers() {
     }
 }
 
+/// MOVEP encodes to the exact bytes vasm emits — both directions and sizes,
+/// with the mandatory `d16(Ay)` displacement word.
+#[test]
+fn encodes_m68k_movep() {
+    let cases: &[(&str, &[u8])] = &[
+        ("\tmovep.w\t0(a0),d0\n", &[0x01, 0x08, 0x00, 0x00]),
+        ("\tmovep.l\t0(a2),d3\n", &[0x07, 0x4A, 0x00, 0x00]),
+        ("\tmovep.w\td0,8(a0)\n", &[0x01, 0x88, 0x00, 0x08]),
+        ("\tmovep.l\td3,8(a2)\n", &[0x07, 0xCA, 0x00, 0x08]),
+    ];
+    for (src, want) in cases {
+        let got = assemble_vasm(src).unwrap_or_else(|e| panic!("assemble `{src}`: {e:?}"));
+        assert_eq!(&got, want, "for `{src}`");
+    }
+}
+
 #[test]
 fn round_trips_m68k_pure_code() {
     // Pure code (no interleaved data) round-trips through the optimizing

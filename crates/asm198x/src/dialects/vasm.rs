@@ -559,6 +559,16 @@ fn encode(
             }
             // Fixed control-register tokens carry no opcode bits or extension.
             (Slot::Ccr, Opnd::Ccr) | (Slot::Sr, Opnd::Sr) | (Slot::Usp, Opnd::Usp) => {}
+            (
+                Slot::MovepDisp,
+                Opnd::Mem {
+                    reg, disp: Some(e), ..
+                },
+            ) => {
+                word |= u16::from(*reg);
+                let v = eval(e, consts, here, line)?;
+                ext.extend_from_slice(&(v as i16).to_be_bytes());
+            }
             (Slot::Vec4, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
                 if !(0..=15).contains(&v) {
@@ -673,6 +683,9 @@ fn slot_accepts(slot: &Slot, op: &Opnd) -> bool {
         ) => true,
         (Slot::BranchW | Slot::DispW, Opnd::Abs(_)) => true,
         (Slot::Ccr, Opnd::Ccr) | (Slot::Sr, Opnd::Sr) | (Slot::Usp, Opnd::Usp) => true,
+        // MOVEP's `d16(Ay)`: displacement-indirect (mode 5) with the displacement
+        // present (it is mandatory and never dropped to `(An)`).
+        (Slot::MovepDisp, Opnd::Mem { mode: 5, disp: Some(_), .. }) => true,
         // A register list, or a single register treated as a one-entry list.
         (Slot::RegList, Opnd::RegList(_) | Opnd::DReg(_) | Opnd::AReg(_)) => true,
         (Slot::Ea { modes, .. }, _) => modes.allows(ea_mode_bit(op)),
@@ -897,7 +910,8 @@ fn stmt_size(
                     | Slot::DispW
                     | Slot::ImmWord
                     | Slot::RegList
-                    | Slot::ImmSized => 2,
+                    | Slot::ImmSized
+                    | Slot::MovepDisp => 2,
                     Slot::Ea { modes, .. } => ea_ext_len(op, sz, *modes, ctx, consts, cur_sec),
                 };
             }
