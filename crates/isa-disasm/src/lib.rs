@@ -479,6 +479,17 @@ fn decode_m68k(code: &[u8], pos: usize, addr: u32) -> Option<(String, usize)> {
             if !ea_ok {
                 continue;
             }
+            // A byte-sized immediate (addi.b/ori.b/… #imm) rides in the low byte
+            // of its extension word; the high byte is a fixed-zero field. A
+            // non-zero high byte is not an encoding the reference tool emits, so
+            // the form doesn't match — the bytes are data. In every such form
+            // (`[ImmSized, <ea>]`) the immediate is the first extension word.
+            let imm_ok = size != Size::B
+                || !matches!(form.operands.first(), Some(Slot::ImmSized))
+                || code.get(pos + 2) == Some(&0);
+            if !imm_ok {
+                continue;
+            }
             let fixed = (!mask).count_ones();
             if best.is_none_or(|(_, _, _, b)| fixed > b) {
                 best = Some((insn.mnemonic, form, size, fixed));
