@@ -67,18 +67,62 @@ popularity.
 | 68000 | Amiga (ST, Genesis) | vasm (mot) | new field-based core | ✅ done — full base ISA, see [68000-isa-completeness](68000-isa-completeness.md) |
 | 6809 | Dragon, CoCo | **lwasm** | engine seam reused; computed postbyte (indexed) | ✅ done |
 | 65816 | SNES, Apple IIgs | **ca65** | **target extension of `mos6502` (like Z80N on Z80)** | ✅ done |
-| 68020 | Amiga A1200 (AGA), A3000 | vasm (mot) | extends the base-68000 core | ⏸ deferred — anticipated (A1200 in scope), holding off until an A1200-class need is real |
+| 68020+ | Amiga A1200/CD32 (68EC020), A3000 (030), A4000 (040), accelerators (060) | vasm (mot) | extends the base-68000 core | ⏸ deferred — anticipated (A1200 in scope), holding off until an A1200-class need is real |
 | later | 8080/8085, 8086, ARM2 (Archimedes), TMS9900 (TI-99) | TBD | mixed | open |
 
-**68020 (deferred).** The A1200 (68020, AGA) is in family scope, so a 68020
-target is anticipated — but we are holding off until A1200-class dev/emulation
-actually needs it. The work splits unevenly: the new instructions (bit-field ops,
-32×32 `MULS.L`/`DIVxL.L`, `CAS`/`CAS2`, `PACK`/`UNPK`, `TRAPcc`, `EXTB.L`,
-`Bcc.L`) extend the table and slots much like the base-ISA burndown, but the new
-addressing modes (memory indirect, scaled index, the full multi-word extension
-format) are a substantial EA-decoder rewrite — the part to scope before
-committing. A 68010 step (`MOVE CCR,<ea>`, `MOVEC`, `MOVES`, `RTD`, `BKPT`) is
-small and instruction-only, available cheaply if a 68010 target ever appears.
+### The 68k upward path (deferred)
+
+The A1200 (and CD32) are in family scope, so a 68020-class target is anticipated
+— but we are holding off until A1200-class dev/emulation actually needs it. When
+it comes, this is the shape of the work.
+
+**68020 is the rewrite; 030/040/060 are incremental.** The one large jump is
+68000 → 68020: new addressing modes (memory indirect, scaled index, the full
+multi-word extension format) plus new instructions (bit-field ops, 32×32
+`MULS.L`/`DIVxL.L`, `CAS`/`CAS2`, `PACK`/`UNPK`, `TRAPcc`, `EXTB.L`, `Bcc.L`).
+The addressing-mode change is an **EA-decoder rewrite** — larger than every
+base-ISA gap combined, and the part to scope before committing; the new
+instructions are table/slot work like the base-ISA burndown. After 68020 the
+**integer ISA is largely stable** through 030/040/060 — each step mostly adds
+*system* instructions and removes/traps a few, not new general-purpose codegen:
+
+- **68010** — small, instruction-only (`MOVE CCR,<ea>`, `MOVEC`, `MOVES`, `RTD`,
+  `BKPT`); cheap if a 68010 target ever appears.
+- **68030** — adds PMMU instructions (`PMOVE`/`PTEST`/`PLOAD`/`PFLUSH`); drops
+  68020's `CALLM`/`RTM`.
+- **68040** — adds `MOVE16` and cache ops (`CINV`/`CPUSH`); integrates the FPU.
+- **68060** — superscalar; in *hardware* it drops more to software emulation
+  (64-bit `MULx.L`/`DIVx.L`, `MOVEP`, `CAS2`, `CHK2`/`CMP2`); adds `LPSTOP`,
+  `PLPA`.
+
+**The FPU is its own chunk.** The 68881/68882 coprocessor set — integrated on
+040/060 — is ~50 `Fxxx` instructions with the FP0–FP7 register file, FPCR/FPSR/
+FPIAR, and a distinct extension-word format (rounding/precision encodings). It is
+a self-contained coprocessor ISA, shared across the 040/060 and the external
+coprocessor; size it as a separate piece, not folded into a CPU step.
+
+**EC/LC variants are a required axis, not a detail.** Each chip ships in cut-down
+forms, and the A1200/CD32 stock CPU is itself one of them:
+
+| Variant | FPU | MMU | Other | Amiga use |
+|---------|-----|-----|-------|-----------|
+| 68EC020 | — (020 has none on-chip) | — | **24-bit address bus** (16 MB) | **A1200, CD32 (stock)** |
+| 68EC030 | — | **disabled** | 32-bit bus, caches | accelerators / cost-reduced |
+| 68LC040 | **none** | yes | — | accelerator cards |
+| 68EC040 | **none** | **none** | — | accelerators / embedded |
+| 68LC060 | **none** | yes | — | accelerator cards |
+| 68EC060 | **none** | **none** | — | accelerators / embedded |
+
+For the **assembler**, the variant is mainly a *legal-subset / validation* axis
+over the **same encodings**: an `68EC030` target should reject PMMU instructions,
+an `68LC040`/`68EC040` should reject the `Fxxx` FPU set, an `68EC040` also rejects
+the MMU set. (Whether the real silicon *traps* an absent instruction to software
+is the emulator's concern; the assembler still encodes it for the full chip,
+matching `vasmm68k_mot -m68040` etc. — so the variant gate sits above the shared
+table.) The **EC020's 24-bit address bus** is purely a runtime/emulator behavior
+(address wrapping), not an assembler concern — but it is exactly the stock-A1200
+case, so Emu198x will need it the moment AGA dev targets the real machine.
+
 See [68000-isa-completeness](68000-isa-completeness.md) § Definition of done.
 
 **What "✅ done" means:** validated byte-identical against the reference tool —

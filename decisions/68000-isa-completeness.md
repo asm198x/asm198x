@@ -106,17 +106,16 @@ so the roadmap's 68000 row returns to a plain ✅.
 Absent from this base-68000 spec (by design): the 68010+ additions
 (`MOVE CCR,<ea>`, `MOVEC`, `MOVES`, `RTD`, `BKPT`) and the 68020+ extensions.
 
-**Deferred, not ruled out — the 68020 is anticipated.** The A1200 (68020, AGA) is
-in family scope, so a 68020 target will eventually be needed; Emu198x already
-carries AGA scaffolding. We are holding off until an A1200-class dev/emulation
-need is real. When it comes, the cost is uneven: the new *instructions*
-(bit-field ops, 32×32 `MULS.L`/`DIVxL.L`, `CAS`/`CAS2`, `PACK`/`UNPK`,
-`TRAPcc`, `EXTB.L`, `Bcc.L`, …) are table-and-slot work like this burndown, but
-the new *addressing modes* (memory indirect, scaled index, the full multi-word
-extension format) are a substantial EA-decoder change — larger than all the
-base-ISA gaps combined, and the part to scope carefully. The 68010 step, by
-contrast, is small and instruction-only. See
-[`packaging-and-cpu-roadmap.md`](packaging-and-cpu-roadmap.md) § CPU roadmap.
+**Deferred, not ruled out — the 68020 and beyond are anticipated.** The A1200 and
+CD32 (stock **68EC020**) are in family scope, with the A3000 (030), A4000 (040),
+and 060 accelerators behind them; Emu198x already carries AGA scaffolding. We are
+holding off until an A1200-class dev/emulation need is real. The full upward path,
+the FPU-is-its-own-chunk insight, and — importantly — the **EC/LC variant axis**
+(the stock A1200 is a 68EC020 with a 24-bit address bus; each chip has FPU-less
+`LC` and FPU+MMU-less `EC` cut-downs) are recorded in
+[`packaging-and-cpu-roadmap.md`](packaging-and-cpu-roadmap.md) § The 68k upward
+path. Short version: 68020 is the one rewrite (addressing modes); 030/040/060 are
+incremental; variants are mostly a legal-subset gate over the same encodings.
 
 A known minor gap in the base spec: an out-of-byte-range immediate to CCR
 (`andi #$1234,ccr`) is not rejected by our assembler the way vasm rejects it —
