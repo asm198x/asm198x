@@ -132,6 +132,9 @@ pub enum Slot {
     /// extension word), and `mode` is the required EA mode: 4 = `-(An)`
     /// (`ADDX`/`SUBX`/`ABCD`/`SBCD` predecrement form), 3 = `(An)+` (`CMPM`).
     AddrIndirect { shift: u8, mode: u8 },
+    /// A 4-bit immediate vector packed into the opcode's low nibble (`TRAP #v`,
+    /// 0–15). No extension word.
+    Vec4,
 }
 
 /// One concrete encoding shape of a mnemonic.
@@ -243,6 +246,15 @@ pub const SET: Spec = Spec {
             }],
         },
         Insn {
+            mnemonic: "TRAP",
+            summary: "Trap",
+            forms: &[Form {
+                base: 0x4E40,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Vec4],
+            }],
+        },
+        Insn {
             mnemonic: "RESET",
             summary: "Reset external devices",
             forms: &[Form {
@@ -267,6 +279,30 @@ pub const SET: Spec = Spec {
                 base: 0x7000,
                 size: SizeEnc::Fixed(Size::L),
                 operands: &[Slot::Quick8, Slot::Dn { shift: 9 }],
+            }],
+        },
+        // MOVEA — MOVE with an An destination (word/long only; `movea.b` is
+        // illegal, caught by the An-byte rejection in the decoder). Listed before
+        // MOVE so an An-destination move disassembles as `movea`, the faithful
+        // mnemonic; MOVE keeps An in its destination modes so plain `move ...,An`
+        // source still assembles (vasm accepts it as a movea alias).
+        Insn {
+            mnemonic: "MOVEA",
+            summary: "Move address",
+            forms: &[Form {
+                // Same base as MOVE; the An-only destination EA encodes the
+                // mode-001 field itself, and that restriction is what separates
+                // the two forms during decode.
+                base: 0x0000,
+                size: SizeEnc::Move,
+                operands: &[
+                    ea_src(ALL),
+                    Slot::Ea {
+                        shift: 6,
+                        modes: EaModes(AN),
+                        dest: true,
+                    },
+                ],
             }],
         },
         Insn {
@@ -683,6 +719,38 @@ pub const SET: Spec = Spec {
                     Slot::AddrIndirect { shift: 9, mode: 3 },
                 ],
             }],
+        },
+        // EXG — exchange a full pair of registers (always long; no size suffix).
+        // The opmode field (bits 6–8) names the pair kind: 01000 = Dx,Dy;
+        // 01001 = Ax,Ay; 10001 = Dx,Ay. The first register sits at bit 9, the
+        // second at bit 0. The reversed `Ay,Dx` source order maps to the same
+        // `Dx,Ay` encoding (a fourth, assemble-only form); the Dx,Ay form is
+        // listed first so it wins the decode and renders the canonical order.
+        Insn {
+            mnemonic: "EXG",
+            summary: "Exchange registers",
+            forms: &[
+                Form {
+                    base: 0xC140,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xC148,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::An { shift: 9 }, Slot::An { shift: 0 }],
+                },
+                Form {
+                    base: 0xC188,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::Dn { shift: 9 }, Slot::An { shift: 0 }],
+                },
+                Form {
+                    base: 0xC188,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[Slot::An { shift: 0 }, Slot::Dn { shift: 9 }],
+                },
+            ],
         },
         // --- Single effective-address operations ---
         Insn {

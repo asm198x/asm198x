@@ -104,6 +104,29 @@ fn encodes_m68k_extended_and_bcd() {
     }
 }
 
+/// TRAP (4-bit vector), MOVEA (An destination, word/long), and EXG (three
+/// register-pair kinds plus the reversed `Ay,Dx` source order) encode to the
+/// exact bytes vasm emits.
+#[test]
+fn encodes_m68k_trap_movea_exg() {
+    let cases: &[(&str, &[u8])] = &[
+        ("\ttrap\t#0\n", &[0x4E, 0x40]),
+        ("\ttrap\t#15\n", &[0x4E, 0x4F]),
+        ("\tmovea.w\td0,a1\n", &[0x32, 0x40]),
+        ("\tmovea.l\ta0,a1\n", &[0x22, 0x48]),
+        ("\tmovea.l\t#4,a0\n", &[0x20, 0x7C, 0x00, 0x00, 0x00, 0x04]),
+        ("\texg\td0,d1\n", &[0xC1, 0x41]),
+        ("\texg\ta0,a1\n", &[0xC1, 0x49]),
+        ("\texg\td0,a1\n", &[0xC1, 0x89]),
+        // Reversed source order canonicalizes to the same Dx,Ay encoding.
+        ("\texg\ta1,d0\n", &[0xC1, 0x89]),
+    ];
+    for (src, want) in cases {
+        let got = assemble_vasm(src).unwrap_or_else(|e| panic!("assemble `{src}`: {e:?}"));
+        assert_eq!(&got, want, "for `{src}`");
+    }
+}
+
 #[test]
 fn round_trips_m68k_pure_code() {
     // Pure code (no interleaved data) round-trips through the optimizing

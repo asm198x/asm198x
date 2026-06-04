@@ -44,12 +44,15 @@ complete, families 1–2 and 7 have remaining work flagged inline.
 Highest first — control flow and common data movement make the assembler usable
 for real programs; condition-code variants are mechanical breadth.
 
-- [~] **1. Control flow** — **done:** `JMP`, `JSR`, `RTE`, `RTR`, `TRAPV`,
-      `RESET`, `ILLEGAL`, `CHK`, and `STOP` (`#imm16` reuses `ImmWord`).
-      **Remaining:** `TRAP` (4-bit vector packed in the opcode — needs a new slot).
+- [x] **1. Control flow** — done: `JMP`, `JSR`, `RTE`, `RTR`, `TRAPV`, `RESET`,
+      `ILLEGAL`, `CHK`, `STOP` (`#imm16` reuses `ImmWord`), and `TRAP` (4-bit
+      vector via the new `Slot::Vec4`, packed in the opcode's low nibble).
 - [~] **2. Data movement** — **done:** `PEA` (control EA), `UNLK` (`An`), `LINK`
-      (`An` + `ImmWord` displacement). **Remaining:** `MOVEA`, `EXG`, `MOVEP`,
-      `MOVE` to/from `CCR`/`SR`/`USP` — all need new slots.
+      (`An` + `ImmWord` displacement), `MOVEA` (An-destination MOVE, listed
+      before MOVE so it wins the decode; no new slot), and `EXG` (three
+      register-pair kinds plus reversed source order; reuses `Dn`/`An`).
+      **Remaining:** `MOVEP` (displacement form, needs a slot), `MOVE` to/from
+      `CCR`/`SR`/`USP` (need new operand kinds + parser support).
 - [x] **3. Arithmetic / logic** — done: `MULS`, `DIVS` (mirror MULU/DIVU),
       `NEGX`, `NBCD`, `TAS` (slot-reusing single-EA), and `ADDX`/`SUBX`/`CMPM`/
       `ABCD`/`SBCD` via a new `Slot::AddrIndirect { shift, mode }` (the register

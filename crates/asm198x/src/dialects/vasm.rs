@@ -557,6 +557,13 @@ fn encode(
                 }
                 word |= u16::from(v as u8);
             }
+            (Slot::Vec4, Opnd::Imm(e)) => {
+                let v = eval(e, consts, here, line)?;
+                if !(0..=15).contains(&v) {
+                    return Err(AsmError::new(line, format!("trap vector {v} must be 0..=15")));
+                }
+                word |= (v as u16) & 0xF;
+            }
             (Slot::Quick3 { shift }, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
                 if !(1..=8).contains(&v) {
@@ -658,7 +665,10 @@ fn slot_accepts(slot: &Slot, op: &Opnd) -> bool {
         (Slot::An { .. }, Opnd::AReg(_)) => true,
         // A fixed indirect mode (`-(An)` or `(An)+`) named without displacement.
         (Slot::AddrIndirect { mode, .. }, Opnd::Mem { mode: m, disp: None, .. }) => *mode == *m,
-        (Slot::Quick8 | Slot::Quick3 { .. } | Slot::ImmWord | Slot::ImmSized, Opnd::Imm(_)) => true,
+        (
+            Slot::Quick8 | Slot::Quick3 { .. } | Slot::ImmWord | Slot::ImmSized | Slot::Vec4,
+            Opnd::Imm(_),
+        ) => true,
         (Slot::BranchW | Slot::DispW, Opnd::Abs(_)) => true,
         // A register list, or a single register treated as a one-entry list.
         (Slot::RegList, Opnd::RegList(_) | Opnd::DReg(_) | Opnd::AReg(_)) => true,
@@ -867,6 +877,7 @@ fn stmt_size(
                     | Slot::An { .. }
                     | Slot::AddrIndirect { .. }
                     | Slot::Quick8
+                    | Slot::Vec4
                     | Slot::Quick3 { .. } => 0,
                     // A `.s`/`.b` branch packs its displacement in the opcode
                     // word; the word form adds a 16-bit extension word.
