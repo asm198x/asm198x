@@ -661,12 +661,30 @@ pub const SET: Spec = Spec {
             }],
         },
         Insn {
+            mnemonic: "LINK",
+            summary: "Link and allocate stack frame",
+            forms: &[Form {
+                base: 0x4E50,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::An { shift: 0 }, Slot::ImmWord],
+            }],
+        },
+        Insn {
             mnemonic: "UNLK",
             summary: "Unlink stack frame",
             forms: &[Form {
                 base: 0x4E58,
                 size: SizeEnc::Fixed(Size::W),
                 operands: &[Slot::An { shift: 0 }],
+            }],
+        },
+        Insn {
+            mnemonic: "STOP",
+            summary: "Load status register and stop",
+            forms: &[Form {
+                base: 0x4E72,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::ImmWord],
             }],
         },
         Insn {

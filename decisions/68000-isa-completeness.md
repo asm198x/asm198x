@@ -42,12 +42,11 @@ Highest first — control flow and common data movement make the assembler usabl
 for real programs; condition-code variants are mechanical breadth.
 
 - [~] **1. Control flow** — **done:** `JMP`, `JSR`, `RTE`, `RTR`, `TRAPV`,
-      `RESET`, `ILLEGAL`, and `CHK` (`<ea>,Dn` — turned out slot-reusing, like
-      MULU). **Remaining:** `TRAP` (4-bit vector packed in the opcode) and `STOP`
-      (`#imm16`) — each needs a small new operand slot.
-- [~] **2. Data movement** — **done:** `PEA` (control EA), `UNLK` (`An`).
-      **Remaining:** `MOVEA`, `LINK`, `EXG`, `MOVEP`, `MOVE` to/from
-      `CCR`/`SR`/`USP` — all need new slots.
+      `RESET`, `ILLEGAL`, `CHK`, and `STOP` (`#imm16` reuses `ImmWord`).
+      **Remaining:** `TRAP` (4-bit vector packed in the opcode — needs a new slot).
+- [~] **2. Data movement** — **done:** `PEA` (control EA), `UNLK` (`An`), `LINK`
+      (`An` + `ImmWord` displacement). **Remaining:** `MOVEA`, `EXG`, `MOVEP`,
+      `MOVE` to/from `CCR`/`SR`/`USP` — all need new slots.
 - [~] **3. Arithmetic / logic** — **done:** `MULS`, `DIVS` (mirror MULU/DIVU),
       `NEGX`, `NBCD`, `TAS` (slot-reusing single-EA). **Remaining:** `ADDX`,
       `SUBX`, `CMPM`, `ABCD`, `SBCD` (reg-reg/predecrement slot work).
