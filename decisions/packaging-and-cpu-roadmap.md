@@ -53,6 +53,13 @@ linker (`ld`-style, consuming `.o` files) plus an object format earns its place
 so it's deferred (YAGNI). A `link` subcommand may later wrap the fused step, but
 it reads one source, not objects, until that changes.
 
+Beyond YAGNI, the fused stance is **entailed** by the I/O model: an object format
+is a serialised non-native intermediate, which
+[`assemble-io-model.md`](assemble-io-model.md)'s native-only principle forbids. So
+reopening separate compilation is not a casual add — it means adopting an
+*existing, validatable* object format (ca65 `.o`, ELF, …), its own high-bar
+decision. This section remains the owner; that record explains why it holds.
+
 ### Output containers per platform
 
 The fused step emits the platform's final image. Coverage today (the CLI's output
@@ -266,9 +273,11 @@ operand" cases without touching the vasm path.
   flat at `org` (a sub-choice the umbrella decision owns). Otherwise the
   C64/Spectrum Docker images can't retire: the container *is* the artifact the
   emulator loads. Tracked under § Output containers per platform.
-- **"Pick the most popular assembler for the new CPU"** — no; dialect choice
-  follows Code198x/Emu198x consumption, scanned per CPU (re-read the roadmap
-  note).
+- **"Pick the most popular assembler for the new CPU"** — no; popularity is never
+  the criterion. The gate is **validatability** (a runnable reference to diff
+  against), the priority is Code198x/Emu198x consumption, and the goal is breadth
+  within that — re-anchored from the older "consumption-only" framing by
+  [`assemble-io-model.md`](assemble-io-model.md).
 - **"Give 6809 (or 65816, 8086) its own assemble engine like vasm"** — no, unless
   it needs its own layout/relaxation/relocation. Computed operands alone use the
   shared `Operation::Encoded` seam and keep the two-pass driver.
