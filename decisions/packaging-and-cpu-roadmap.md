@@ -53,6 +53,33 @@ linker (`ld`-style, consuming `.o` files) plus an object format earns its place
 so it's deferred (YAGNI). A `link` subcommand may later wrap the fused step, but
 it reads one source, not objects, until that changes.
 
+### Output containers per platform
+
+The fused step emits the platform's final image. Coverage today (the CLI's output
+dispatch in `crates/asm198x/src/main.rs`):
+
+| Platform | Container | Status |
+|----------|-----------|--------|
+| Amiga | hunk executable (`--exe`, the `-Fhunkexe` target) | ✅ emitted |
+| NES | `.nes` ROM (bounded ld65 config) | ✅ emitted |
+| C64 | `.prg` (CBM, load-address-prefixed) | ⏸ **gap** — emits flat `.bin`, no PRG wrapping |
+| Spectrum | `.sna` snapshot | ⏸ **gap** — emits flat `.bin`, no snapshot |
+
+These two gaps block retiring Code198x's C64/Spectrum Docker build images — the
+*launch* platforms — so they are the highest-leverage output work. Driver and the
+keep-vs-retire decision: umbrella
+[`code198x-dev-tooling-migration.md`](../../../decisions/code198x-dev-tooling-migration.md).
+Scope per gap:
+
+- **C64 `.prg`** — prepend the 2-byte little-endian load address to the flat
+  image (the `acme -f cbm` convention). Small and self-contained.
+- **Spectrum `.sna`** — serialize a 48K (or 128K) snapshot: register block +
+  memory image, loadable directly by an emulator. Larger; a new serializer.
+
+Either gap can instead be closed on the **Emu198x side** (load a flat image at
+`org`; a tape/loader for Spectrum) — the umbrella decision owns that sub-choice,
+not this crate. Neither is started; logged here so they aren't rediscovered.
+
 ## CPU / assembler roadmap
 
 Ordered by **curriculum-priority + reuse leverage** (the same principle that set
@@ -235,6 +262,10 @@ operand" cases without touching the vasm path.
 - **"Build a standalone linker / object-file format now"** — not until a real
   separate-compilation need exists. Linking stays fused, matching the reference
   tools.
+- **"Flat `.bin` is good enough — skip `.prg` / `.sna`"** — only if Emu198x loads
+  flat at `org` (a sub-choice the umbrella decision owns). Otherwise the
+  C64/Spectrum Docker images can't retire: the container *is* the artifact the
+  emulator loads. Tracked under § Output containers per platform.
 - **"Pick the most popular assembler for the new CPU"** — no; dialect choice
   follows Code198x/Emu198x consumption, scanned per CPU (re-read the roadmap
   note).
