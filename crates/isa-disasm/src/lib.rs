@@ -1407,7 +1407,10 @@ mod tests {
         // so it wins the decode). Word/long only; `movea.b` can't be encoded.
         assert_eq!(one_m68k(&[0x32, 0x40]), "movea.w d0,a1");
         assert_eq!(one_m68k(&[0x22, 0x48]), "movea.l a0,a1");
-        assert_eq!(one_m68k(&[0x20, 0x7C, 0x00, 0x00, 0x00, 0x04]), "movea.l #4,a0");
+        assert_eq!(
+            one_m68k(&[0x20, 0x7C, 0x00, 0x00, 0x00, 0x04]),
+            "movea.l #4,a0"
+        );
         // EXG — three register-pair kinds; always long, no suffix.
         assert_eq!(one_m68k(&[0xC1, 0x41]), "exg d0,d1");
         assert_eq!(one_m68k(&[0xC1, 0x49]), "exg a0,a1");

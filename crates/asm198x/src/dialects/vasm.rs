@@ -572,7 +572,10 @@ fn encode(
             (Slot::Vec4, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
                 if !(0..=15).contains(&v) {
-                    return Err(AsmError::new(line, format!("trap vector {v} must be 0..=15")));
+                    return Err(AsmError::new(
+                        line,
+                        format!("trap vector {v} must be 0..=15"),
+                    ));
                 }
                 word |= (v as u16) & 0xF;
             }
@@ -676,7 +679,14 @@ fn slot_accepts(slot: &Slot, op: &Opnd) -> bool {
         (Slot::Dn { .. }, Opnd::DReg(_)) => true,
         (Slot::An { .. }, Opnd::AReg(_)) => true,
         // A fixed indirect mode (`-(An)` or `(An)+`) named without displacement.
-        (Slot::AddrIndirect { mode, .. }, Opnd::Mem { mode: m, disp: None, .. }) => *mode == *m,
+        (
+            Slot::AddrIndirect { mode, .. },
+            Opnd::Mem {
+                mode: m,
+                disp: None,
+                ..
+            },
+        ) => *mode == *m,
         (
             Slot::Quick8 | Slot::Quick3 { .. } | Slot::ImmWord | Slot::ImmSized | Slot::Vec4,
             Opnd::Imm(_),
@@ -685,7 +695,14 @@ fn slot_accepts(slot: &Slot, op: &Opnd) -> bool {
         (Slot::Ccr, Opnd::Ccr) | (Slot::Sr, Opnd::Sr) | (Slot::Usp, Opnd::Usp) => true,
         // MOVEP's `d16(Ay)`: displacement-indirect (mode 5) with the displacement
         // present (it is mandatory and never dropped to `(An)`).
-        (Slot::MovepDisp, Opnd::Mem { mode: 5, disp: Some(_), .. }) => true,
+        (
+            Slot::MovepDisp,
+            Opnd::Mem {
+                mode: 5,
+                disp: Some(_),
+                ..
+            },
+        ) => true,
         // A register list, or a single register treated as a one-entry list.
         (Slot::RegList, Opnd::RegList(_) | Opnd::DReg(_) | Opnd::AReg(_)) => true,
         (Slot::Ea { modes, .. }, _) => modes.allows(ea_mode_bit(op)),
