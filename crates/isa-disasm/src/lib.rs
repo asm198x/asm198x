@@ -1317,6 +1317,19 @@ mod tests {
     }
 
     #[test]
+    fn m68k_condition_codes() {
+        // Condition-code breadth (family 6): Bcc (short form here, target
+        // resolved against origin $1000), Scc (byte EA), DBcc (Dn + word disp).
+        assert_eq!(one_m68k(&[0x62, 0x10]), "bhi.s $1012");
+        assert_eq!(one_m68k(&[0x65, 0x10]), "bcs.s $1012");
+        assert_eq!(one_m68k(&[0x69, 0x10]), "bvs.s $1012");
+        assert_eq!(one_m68k(&[0x52, 0xC0]), "shi.b d0");
+        assert_eq!(one_m68k(&[0x5F, 0xC2]), "sle.b d2");
+        assert_eq!(one_m68k(&[0x52, 0xC8, 0x00, 0x10]), "dbhi d0,$1012");
+        assert_eq!(one_m68k(&[0x5F, 0xC8, 0x00, 0x10]), "dble d0,$1012");
+    }
+
+    #[test]
     fn m68k_movem_load_reads_mask_before_displacement() {
         // movem.w 16(a0),d5: mask word ($0020 = d5) comes first, then the EA
         // displacement ($0010 = 16) — not in operand-display order.

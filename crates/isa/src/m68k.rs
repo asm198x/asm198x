@@ -407,6 +407,37 @@ pub const SET: Spec = Spec {
             summary: "Branch if not equal",
             forms: BRANCH_NE,
         },
+        // Remaining Bcc condition codes (mirror the others; cc in bits 8–11).
+        Insn {
+            mnemonic: "BHI",
+            summary: "Branch if higher",
+            forms: BRANCH_HI,
+        },
+        Insn {
+            mnemonic: "BLS",
+            summary: "Branch if lower or same",
+            forms: BRANCH_LS,
+        },
+        Insn {
+            mnemonic: "BCC",
+            summary: "Branch if carry clear (higher or same)",
+            forms: BRANCH_CC,
+        },
+        Insn {
+            mnemonic: "BCS",
+            summary: "Branch if carry set (lower)",
+            forms: BRANCH_CS,
+        },
+        Insn {
+            mnemonic: "BVC",
+            summary: "Branch if overflow clear",
+            forms: BRANCH_VC,
+        },
+        Insn {
+            mnemonic: "BVS",
+            summary: "Branch if overflow set",
+            forms: BRANCH_VS,
+        },
         Insn {
             mnemonic: "BGE",
             summary: "Branch if greater or equal",
@@ -649,6 +680,143 @@ pub const SET: Spec = Spec {
                 operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
             }],
         },
+        // Remaining DBcc condition codes (mirror DBF; cc in bits 8–11). DBcc
+        // decrements and branches while the condition is false.
+        Insn {
+            mnemonic: "DBT",
+            summary: "Decrement and branch unless true",
+            forms: &[Form {
+                base: 0x50C8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBHI",
+            summary: "Decrement and branch unless higher",
+            forms: &[Form {
+                base: 0x52C8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBLS",
+            summary: "Decrement and branch unless lower or same",
+            forms: &[Form {
+                base: 0x53C8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBCC",
+            summary: "Decrement and branch unless carry clear",
+            forms: &[Form {
+                base: 0x54C8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBCS",
+            summary: "Decrement and branch unless carry set",
+            forms: &[Form {
+                base: 0x55C8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBNE",
+            summary: "Decrement and branch unless not equal",
+            forms: &[Form {
+                base: 0x56C8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBEQ",
+            summary: "Decrement and branch unless equal",
+            forms: &[Form {
+                base: 0x57C8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBVC",
+            summary: "Decrement and branch unless overflow clear",
+            forms: &[Form {
+                base: 0x58C8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBVS",
+            summary: "Decrement and branch unless overflow set",
+            forms: &[Form {
+                base: 0x59C8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBPL",
+            summary: "Decrement and branch unless plus",
+            forms: &[Form {
+                base: 0x5AC8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBMI",
+            summary: "Decrement and branch unless minus",
+            forms: &[Form {
+                base: 0x5BC8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBGE",
+            summary: "Decrement and branch unless greater or equal",
+            forms: &[Form {
+                base: 0x5CC8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBLT",
+            summary: "Decrement and branch unless less than",
+            forms: &[Form {
+                base: 0x5DC8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBGT",
+            summary: "Decrement and branch unless greater than",
+            forms: &[Form {
+                base: 0x5EC8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
+        Insn {
+            mnemonic: "DBLE",
+            summary: "Decrement and branch unless less or equal",
+            forms: &[Form {
+                base: 0x5FC8,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::Dn { shift: 0 }, Slot::DispW],
+            }],
+        },
         // --- Set-on-condition (byte effective address) ---
         Insn {
             mnemonic: "SNE",
@@ -664,6 +832,133 @@ pub const SET: Spec = Spec {
             summary: "Set if equal",
             forms: &[Form {
                 base: 0x57C0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        // Remaining Scc condition codes (mirror SEQ/SNE; cc in bits 8–11).
+        Insn {
+            mnemonic: "ST",
+            summary: "Set always",
+            forms: &[Form {
+                base: 0x50C0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SF",
+            summary: "Set never (clear)",
+            forms: &[Form {
+                base: 0x51C0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SHI",
+            summary: "Set if higher",
+            forms: &[Form {
+                base: 0x52C0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SLS",
+            summary: "Set if lower or same",
+            forms: &[Form {
+                base: 0x53C0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SCC",
+            summary: "Set if carry clear (higher or same)",
+            forms: &[Form {
+                base: 0x54C0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SCS",
+            summary: "Set if carry set (lower)",
+            forms: &[Form {
+                base: 0x55C0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SVC",
+            summary: "Set if overflow clear",
+            forms: &[Form {
+                base: 0x58C0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SVS",
+            summary: "Set if overflow set",
+            forms: &[Form {
+                base: 0x59C0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SPL",
+            summary: "Set if plus",
+            forms: &[Form {
+                base: 0x5AC0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SMI",
+            summary: "Set if minus",
+            forms: &[Form {
+                base: 0x5BC0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SGE",
+            summary: "Set if greater or equal",
+            forms: &[Form {
+                base: 0x5CC0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SLT",
+            summary: "Set if less than",
+            forms: &[Form {
+                base: 0x5DC0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SGT",
+            summary: "Set if greater than",
+            forms: &[Form {
+                base: 0x5EC0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "SLE",
+            summary: "Set if less or equal",
+            forms: &[Form {
+                base: 0x5FC0,
                 size: SizeEnc::Fixed(Size::B),
                 operands: &[ea_src(DATA_ALT)],
             }],
@@ -934,6 +1229,36 @@ const BRANCH_MI: &[Form] = &[Form {
 }];
 const BRANCH_PL: &[Form] = &[Form {
     base: 0x6A00,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_HI: &[Form] = &[Form {
+    base: 0x6200,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_LS: &[Form] = &[Form {
+    base: 0x6300,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_CC: &[Form] = &[Form {
+    base: 0x6400,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_CS: &[Form] = &[Form {
+    base: 0x6500,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_VC: &[Form] = &[Form {
+    base: 0x6800,
+    size: SizeEnc::Fixed(Size::W),
+    operands: &[Slot::BranchW],
+}];
+const BRANCH_VS: &[Form] = &[Form {
+    base: 0x6900,
     size: SizeEnc::Fixed(Size::W),
     operands: &[Slot::BranchW],
 }];

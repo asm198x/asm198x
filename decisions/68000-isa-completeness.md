@@ -57,8 +57,11 @@ for real programs; condition-code variants are mechanical breadth.
       `ROXR` register forms (immediate- and register-count), mirroring LSL/LSR.
       **Remaining:** the memory-shift-by-1 forms (`$E0C0`…) — also absent for
       `LSL`/`LSR`, so a shared follow-up.
-- [ ] **6. Condition-code breadth** — remaining `Scc` (have `SEQ`/`SNE`),
-      remaining `Bcc` (`BHI`/`BLS`/`BCC`/`BCS`/`BVC`/`BVS`), the `DBcc` variants.
+- [x] **6. Condition-code breadth** — done: the 6 remaining `Bcc`
+      (`BHI`/`BLS`/`BCC`/`BCS`/`BVC`/`BVS`), all 14 remaining `Scc`, and all 15
+      `DBcc` variants (mirror BEQ/SEQ/DBF; cc in bits 8–11). Byte-identical vs
+      vasm (Scc via the sweep; Bcc/DBcc — position-dependent — via a direct
+      assembler check), plus an `m68k_condition_codes` decode test.
 - [ ] **7. Immediate to CCR/SR** — `ANDI`/`ORI`/`EORI #imm,CCR/SR`
       (`$003C`/`$007C`, …) — the forms the rung-1 ORI/ANDI/EORI work explicitly
       left unmodelled (need a dedicated CCR/SR operand slot).
