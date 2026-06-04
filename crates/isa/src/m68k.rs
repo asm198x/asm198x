@@ -1033,6 +1033,11 @@ pub const SET: Spec = Spec {
                     size: SizeEnc::Std6,
                     operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
                 },
+                Form {
+                    base: 0xE3C0,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[ea_src(MEM_ALT)],
+                },
             ],
         },
         Insn {
@@ -1048,6 +1053,11 @@ pub const SET: Spec = Spec {
                     base: 0xE028,
                     size: SizeEnc::Std6,
                     operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xE2C0,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[ea_src(MEM_ALT)],
                 },
             ],
         },
@@ -1068,6 +1078,11 @@ pub const SET: Spec = Spec {
                     size: SizeEnc::Std6,
                     operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
                 },
+                Form {
+                    base: 0xE0C0,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[ea_src(MEM_ALT)],
+                },
             ],
         },
         Insn {
@@ -1083,6 +1098,11 @@ pub const SET: Spec = Spec {
                     base: 0xE120,
                     size: SizeEnc::Std6,
                     operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xE1C0,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[ea_src(MEM_ALT)],
                 },
             ],
         },
@@ -1100,6 +1120,11 @@ pub const SET: Spec = Spec {
                     size: SizeEnc::Std6,
                     operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
                 },
+                Form {
+                    base: 0xE4C0,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[ea_src(MEM_ALT)],
+                },
             ],
         },
         Insn {
@@ -1115,6 +1140,11 @@ pub const SET: Spec = Spec {
                     base: 0xE130,
                     size: SizeEnc::Std6,
                     operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xE5C0,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[ea_src(MEM_ALT)],
                 },
             ],
         },
@@ -1132,6 +1162,11 @@ pub const SET: Spec = Spec {
                     size: SizeEnc::Std6,
                     operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
                 },
+                Form {
+                    base: 0xE6C0,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[ea_src(MEM_ALT)],
+                },
             ],
         },
         Insn {
@@ -1147,6 +1182,11 @@ pub const SET: Spec = Spec {
                     base: 0xE138,
                     size: SizeEnc::Std6,
                     operands: &[Slot::Dn { shift: 9 }, Slot::Dn { shift: 0 }],
+                },
+                Form {
+                    base: 0xE7C0,
+                    size: SizeEnc::Fixed(Size::W),
+                    operands: &[ea_src(MEM_ALT)],
                 },
             ],
         },

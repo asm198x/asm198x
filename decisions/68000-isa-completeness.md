@@ -53,10 +53,9 @@ for real programs; condition-code variants are mechanical breadth.
       `SUBX`, `CMPM`, `ABCD`, `SBCD` (reg-reg/predecrement slot work).
 - [x] **4. Bit ops** — `BCHG`, `BCLR` done (mirror BSET; `BSET`/`BTST` already
       present).
-- [~] **5. Shifts / rotates** — **done:** `ASL`, `ASR`, `ROL`, `ROR`, `ROXL`,
-      `ROXR` register forms (immediate- and register-count), mirroring LSL/LSR.
-      **Remaining:** the memory-shift-by-1 forms (`$E0C0`…) — also absent for
-      `LSL`/`LSR`, so a shared follow-up.
+- [x] **5. Shifts / rotates** — register forms (immediate/register count) and the
+      memory-shift-by-1 forms (`$E0C0`…), for all eight (`ASL`/`ASR`/`LSL`/`LSR`/
+      `ROL`/`ROR`/`ROXL`/`ROXR`). Byte-identical vs vasm.
 - [x] **6. Condition-code breadth** — done: the 6 remaining `Bcc`
       (`BHI`/`BLS`/`BCC`/`BCS`/`BVC`/`BVS`), all 14 remaining `Scc`, and all 15
       `DBcc` variants (mirror BEQ/SEQ/DBF; cc in bits 8–11). Byte-identical vs
