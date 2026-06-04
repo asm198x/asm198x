@@ -41,16 +41,16 @@ Filling a family lights up assemble + disassemble + cross-check coverage at once
 Highest first — control flow and common data movement make the assembler usable
 for real programs; condition-code variants are mechanical breadth.
 
-- [~] **1. Control flow** — **done:** `JMP`, `JSR` (control-addressing EA, reusing
-      LEA's), `RTE`, `RTR`, `TRAPV`, `RESET`, `ILLEGAL` — byte-identical vs vasm
-      (conformance sweep + `m68k_control_flow` decode test). **Remaining:** `TRAP`
-      (4-bit vector packed in the opcode), `STOP` (`#imm16`), `CHK` (`<ea>,Dn`) —
-      each needs a small new operand slot, so deferred to a follow-up increment.
-- [ ] **2. Data movement** — `MOVEA`, `PEA`, `LINK`, `UNLK`, `EXG`, `MOVEP`,
-      `MOVE` to/from `CCR`/`SR`/`USP`.
-- [~] **3. Arithmetic / logic** — **done:** `MULS`, `DIVS` (mirror MULU/DIVU).
-      **Remaining:** `ADDX`, `SUBX`, `NEGX`, `CMPM`, `ABCD`, `SBCD`, `NBCD`,
-      `TAS` (`ADDX`/`SUBX`/`ABCD`/`SBCD`/`CMPM` need reg-reg/predec slot work).
+- [~] **1. Control flow** — **done:** `JMP`, `JSR`, `RTE`, `RTR`, `TRAPV`,
+      `RESET`, `ILLEGAL`, and `CHK` (`<ea>,Dn` — turned out slot-reusing, like
+      MULU). **Remaining:** `TRAP` (4-bit vector packed in the opcode) and `STOP`
+      (`#imm16`) — each needs a small new operand slot.
+- [~] **2. Data movement** — **done:** `PEA` (control EA), `UNLK` (`An`).
+      **Remaining:** `MOVEA`, `LINK`, `EXG`, `MOVEP`, `MOVE` to/from
+      `CCR`/`SR`/`USP` — all need new slots.
+- [~] **3. Arithmetic / logic** — **done:** `MULS`, `DIVS` (mirror MULU/DIVU),
+      `NEGX`, `NBCD`, `TAS` (slot-reusing single-EA). **Remaining:** `ADDX`,
+      `SUBX`, `CMPM`, `ABCD`, `SBCD` (reg-reg/predecrement slot work).
 - [x] **4. Bit ops** — `BCHG`, `BCLR` done (mirror BSET; `BSET`/`BTST` already
       present).
 - [~] **5. Shifts / rotates** — **done:** `ASL`, `ASR`, `ROL`, `ROR`, `ROXL`,

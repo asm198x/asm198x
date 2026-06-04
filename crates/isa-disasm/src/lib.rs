@@ -1330,6 +1330,18 @@ mod tests {
     }
 
     #[test]
+    fn m68k_single_operand_extras() {
+        // Slot-reusing single-/two-operand ops: TAS/NBCD (byte), NEGX (sized),
+        // PEA (long, control EA), UNLK (An), CHK (ea,Dn).
+        assert_eq!(one_m68k(&[0x4A, 0xC0]), "tas.b d0");
+        assert_eq!(one_m68k(&[0x40, 0x40]), "negx.w d0");
+        assert_eq!(one_m68k(&[0x48, 0x00]), "nbcd.b d0");
+        assert_eq!(one_m68k(&[0x48, 0x50]), "pea.l (a0)");
+        assert_eq!(one_m68k(&[0x4E, 0x58]), "unlk a0");
+        assert_eq!(one_m68k(&[0x43, 0x80]), "chk d0,d1");
+    }
+
+    #[test]
     fn m68k_movem_load_reads_mask_before_displacement() {
         // movem.w 16(a0),d5: mask word ($0020 = d5) comes first, then the EA
         // displacement ($0010 = 16) — not in operand-display order.

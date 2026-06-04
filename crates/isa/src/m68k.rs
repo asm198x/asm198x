@@ -623,6 +623,61 @@ pub const SET: Spec = Spec {
                 operands: &[ea_src(DATA_ALT)],
             }],
         },
+        // More single-operand ops that reuse existing slots (no new Slot kind).
+        Insn {
+            mnemonic: "NEGX",
+            summary: "Negate with extend",
+            forms: &[Form {
+                base: 0x4000,
+                size: SizeEnc::Std6,
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "NBCD",
+            summary: "Negate BCD with extend",
+            forms: &[Form {
+                base: 0x4800,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "TAS",
+            summary: "Test and set (atomic)",
+            forms: &[Form {
+                base: 0x4AC0,
+                size: SizeEnc::Fixed(Size::B),
+                operands: &[ea_src(DATA_ALT)],
+            }],
+        },
+        Insn {
+            mnemonic: "PEA",
+            summary: "Push effective address",
+            forms: &[Form {
+                base: 0x4840,
+                size: SizeEnc::Fixed(Size::L),
+                operands: &[ea_src(CONTROL)],
+            }],
+        },
+        Insn {
+            mnemonic: "UNLK",
+            summary: "Unlink stack frame",
+            forms: &[Form {
+                base: 0x4E58,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[Slot::An { shift: 0 }],
+            }],
+        },
+        Insn {
+            mnemonic: "CHK",
+            summary: "Check register against bounds",
+            forms: &[Form {
+                base: 0x4180,
+                size: SizeEnc::Fixed(Size::W),
+                operands: &[ea_src(DATA), Slot::Dn { shift: 9 }],
+            }],
+        },
         // --- Quick-immediate add/subtract (1–8) ---
         Insn {
             mnemonic: "ADDQ",
