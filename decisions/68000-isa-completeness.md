@@ -123,6 +123,21 @@ the encoding still places the low byte. The conformance sweep never hits this
 (its synthesized immediates are byte-range), and it only affects malformed
 hand-written source.
 
+A second known gap, on the disassemble side: `disassemble_68000` renders the
+**dynamic** `BTST Dn,#imm` form (opcodes `$013C`…`$0F3C`, mode 7 / reg 4) as
+`dc.w`, but the immediate addressing mode is a *legal* EA for the dynamic `BTST`
+on the 68000 — Musashi's `d68000_btst_r` EA mask is `0xbff` (every mode bar An,
+**including** the immediate bit), and the MC68000 PRM lists immediate among the
+dynamic-`BTST` destination modes (it is the one bit instruction that allows it).
+The spec should name these 8 encodings. The *static* form `BTST #bit,#imm`
+(`$083C`) is correctly absent — Musashi's `btst_s` mask `0xbfb` clears the
+immediate bit, so that one really is illegal. Before adding the dynamic form,
+confirm vasm assembles `btst dN,#imm` so the assemble/disassemble round-trip
+stays byte-exact; if vasm rejects it, document the strictness choice instead.
+Surfaced by the Emu198x rung-1 68000 disasm cross-check (2026-06-04), whose
+hand-written decoder follows the hardware and currently excludes these 8 opcodes
+as a documented spec-side difference.
+
 ## Provenance
 
 Surfaced by the rung-1 cross-check (umbrella `rung1-wiring.md`, 2026-06-03/04) and
