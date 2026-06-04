@@ -67,7 +67,19 @@ popularity.
 | 68000 | Amiga (ST, Genesis) | vasm (mot) | new field-based core | ✅ done — full base ISA, see [68000-isa-completeness](68000-isa-completeness.md) |
 | 6809 | Dragon, CoCo | **lwasm** | engine seam reused; computed postbyte (indexed) | ✅ done |
 | 65816 | SNES, Apple IIgs | **ca65** | **target extension of `mos6502` (like Z80N on Z80)** | ✅ done |
+| 68020 | Amiga A1200 (AGA), A3000 | vasm (mot) | extends the base-68000 core | ⏸ deferred — anticipated (A1200 in scope), holding off until an A1200-class need is real |
 | later | 8080/8085, 8086, ARM2 (Archimedes), TMS9900 (TI-99) | TBD | mixed | open |
+
+**68020 (deferred).** The A1200 (68020, AGA) is in family scope, so a 68020
+target is anticipated — but we are holding off until A1200-class dev/emulation
+actually needs it. The work splits unevenly: the new instructions (bit-field ops,
+32×32 `MULS.L`/`DIVxL.L`, `CAS`/`CAS2`, `PACK`/`UNPK`, `TRAPcc`, `EXTB.L`,
+`Bcc.L`) extend the table and slots much like the base-ISA burndown, but the new
+addressing modes (memory indirect, scaled index, the full multi-word extension
+format) are a substantial EA-decoder rewrite — the part to scope before
+committing. A 68010 step (`MOVE CCR,<ea>`, `MOVEC`, `MOVES`, `RTD`, `BKPT`) is
+small and instruction-only, available cheaply if a 68010 target ever appears.
+See [68000-isa-completeness](68000-isa-completeness.md) § Definition of done.
 
 **What "✅ done" means:** validated byte-identical against the reference tool —
 historically on the curriculum corpus, *not* a proof of full-ISA coverage. The
@@ -109,9 +121,10 @@ lwasm-isms: the `'c` char literal (needs a shared-tokenizer change) and PCR
 8-bit auto-selection for *constant* targets (the size depends on the PC, unknown
 at parse time — use `<` to force; labels default to 16-bit, matching lwasm).
 
-Agreed order: **finish 68000 → 6809 → 65816 → reassess.** 65816 is the cheapest
-big win (6502 family + ca65 reuse) but is sequenced after 6809 per the owner's
-priority.
+Agreed order: **finish 68000 → 6809 → 65816 → reassess.** All three are now done
+(68000 to full base ISA; 6809 and 65816 complete). At the reassess point, the
+open candidates are the deferred **68020** (driven by the A1200, held off for
+now) and the "later" CPUs.
 
 ## Encoding models and the computed-operand seam
 

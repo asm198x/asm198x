@@ -103,12 +103,26 @@ the Emu198x 68000 cross-check's skip count drops to only genuinely
 ambiguous/illegal encodings (not "unimplemented"). All seven families are landed,
 so the roadmap's 68000 row returns to a plain ✅.
 
-Out of scope (correctly absent from a base-68000 spec): the 68010+ additions
-(`MOVE CCR,<ea>`, `MOVEC`, `MOVES`, `RTD`, `BKPT`), and the 68020+ extensions.
-A known minor gap: an out-of-byte-range immediate to CCR (`andi #$1234,ccr`) is
-not rejected by our assembler the way vasm rejects it — the encoding still places
-the low byte. The conformance sweep never hits this (its synthesized immediates
-are byte-range), and it only affects malformed hand-written source.
+Absent from this base-68000 spec (by design): the 68010+ additions
+(`MOVE CCR,<ea>`, `MOVEC`, `MOVES`, `RTD`, `BKPT`) and the 68020+ extensions.
+
+**Deferred, not ruled out — the 68020 is anticipated.** The A1200 (68020, AGA) is
+in family scope, so a 68020 target will eventually be needed; Emu198x already
+carries AGA scaffolding. We are holding off until an A1200-class dev/emulation
+need is real. When it comes, the cost is uneven: the new *instructions*
+(bit-field ops, 32×32 `MULS.L`/`DIVxL.L`, `CAS`/`CAS2`, `PACK`/`UNPK`,
+`TRAPcc`, `EXTB.L`, `Bcc.L`, …) are table-and-slot work like this burndown, but
+the new *addressing modes* (memory indirect, scaled index, the full multi-word
+extension format) are a substantial EA-decoder change — larger than all the
+base-ISA gaps combined, and the part to scope carefully. The 68010 step, by
+contrast, is small and instruction-only. See
+[`packaging-and-cpu-roadmap.md`](packaging-and-cpu-roadmap.md) § CPU roadmap.
+
+A known minor gap in the base spec: an out-of-byte-range immediate to CCR
+(`andi #$1234,ccr`) is not rejected by our assembler the way vasm rejects it —
+the encoding still places the low byte. The conformance sweep never hits this
+(its synthesized immediates are byte-range), and it only affects malformed
+hand-written source.
 
 ## Provenance
 
