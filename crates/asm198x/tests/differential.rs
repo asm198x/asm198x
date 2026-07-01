@@ -268,8 +268,9 @@ const PROBES: &[Probe] = &[
     ok ("vasm", "mnemonic cmpa",         " cmpa.l a0,a1\n"),
     ok ("vasm", "mnemonic adda",         " adda.l a0,a1\n"),
     gap("vasm", "eori form eor #imm",    " eor.w #5,d0\n",   15),
-    gap("vasm", "abs size suffix .w",    " move.w $1234.w,d0\n",     17),
-    gap("vasm", "abs size suffix .l",    " move.l $12345678.l,d0\n", 17),
+    ok ("vasm", "abs size suffix .w",    " move.w $1234.w,d0\n"),
+    ok ("vasm", "abs size suffix .l",    " move.l $12345678.l,d0\n"),
+    ok ("vasm", "abs .l forces long",    " move.w $1234.l,d0\n"),
 
     // ---- ca65-816 / 65816 ---------------------------------------------------
     ok ("ca65-816", "imm / dp / long",   " lda #$12\n lda $12\n lda $123456\n"),

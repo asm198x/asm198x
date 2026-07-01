@@ -728,6 +728,8 @@ fn ea_mode_bit(op: &Opnd) -> u16 {
         Opnd::Mem { bit, .. } => *bit,
         Opnd::Idx { bit, .. } => *bit,
         Opnd::Abs(_) => ea::AL | ea::AW,
+        Opnd::AbsW(_) => ea::AW,
+        Opnd::AbsL(_) => ea::AL,
         Opnd::Imm(_) => ea::IMM,
         // Not effective addresses: never accepted by an EA slot.
         Opnd::RegList(_) | Opnd::Ccr | Opnd::Sr | Opnd::Usp => 0,
@@ -825,6 +827,16 @@ fn resolve_ea(
                 return Ok((field(7, 2), d16.to_be_bytes().to_vec(), None)); // (d16,PC)
             }
             // Otherwise (xxx).L; a relocatable target needs a relocation.
+            (field(7, 1), (v as u32).to_be_bytes().to_vec(), target)
+        }
+        // Explicit `.w`/`.l` size forces — no auto-sizing or PC-relative rewrite.
+        Opnd::AbsW(e) => {
+            let v = eval(e, consts, here, line)?;
+            (field(7, 0), (v as u16).to_be_bytes().to_vec(), None)
+        }
+        Opnd::AbsL(e) => {
+            let v = eval(e, consts, here, line)?;
+            let target = reloc_sym(e, &ctx.reloc).and_then(|s| ctx.sec_of.get(s).copied());
             (field(7, 1), (v as u32).to_be_bytes().to_vec(), target)
         }
         Opnd::Imm(e) => {
@@ -981,6 +993,8 @@ fn ea_ext_len(
                 4
             }
         }
+        Opnd::AbsW(_) => 2,
+        Opnd::AbsL(_) => 4,
         Opnd::Imm(_) => {
             if matches!(sz, Size::L) {
                 4
@@ -1019,6 +1033,11 @@ enum Opnd {
     /// A bare absolute address (`.W`/`.L` chosen by value), or — when consumed
     /// by a `BranchW`/`DispW` slot — a branch target expression.
     Abs(Expr),
+    /// An absolute address with an explicit `.w` size force — always `(xxx).W`.
+    AbsW(Expr),
+    /// An absolute address with an explicit `.l` size force — always `(xxx).L`,
+    /// never PC-relative-optimised (unlike the auto [`Abs`](Self::Abs)).
+    AbsL(Expr),
     /// `#expr`.
     Imm(Expr),
     /// A `MOVEM` register list as a normal-order mask (d0=bit0 … a7=bit15).
@@ -1172,7 +1191,9 @@ fn qualify_stmt(kind: &mut Stmt, scope: &str) {
 
 fn qualify_opnd(op: &mut Opnd, scope: &str) {
     match op {
-        Opnd::Abs(e) | Opnd::Imm(e) | Opnd::Idx { disp: e, .. } => qualify_expr(e, scope),
+        Opnd::Abs(e) | Opnd::AbsW(e) | Opnd::AbsL(e) | Opnd::Imm(e) | Opnd::Idx { disp: e, .. } => {
+            qualify_expr(e, scope)
+        }
         Opnd::Mem { disp: Some(e), .. } => qualify_expr(e, scope),
         _ => {}
     }
@@ -1504,6 +1525,13 @@ fn parse_ea(t: &str, line: usize) -> Result<Opnd, AsmError> {
             bit: ea::DI,
             disp: Some(disp),
         });
+    }
+    // An absolute address with an explicit size force: `expr.w` / `expr.l`.
+    if let Some(base) = t.strip_suffix(".w").or_else(|| t.strip_suffix(".W")) {
+        return Ok(Opnd::AbsW(parse_value(base, line)?));
+    }
+    if let Some(base) = t.strip_suffix(".l").or_else(|| t.strip_suffix(".L")) {
+        return Ok(Opnd::AbsL(parse_value(base, line)?));
     }
     Ok(Opnd::Abs(parse_value(t, line)?))
 }
