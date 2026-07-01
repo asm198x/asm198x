@@ -1423,6 +1423,21 @@ fn parse_ea(t: &str, line: usize) -> Result<Opnd, AsmError> {
         });
     }
     if let Some(inner) = t.strip_prefix('(').and_then(|s| s.strip_suffix(')')) {
+        // New-style parenthesised EA — `(d,An)`, `(d,An,Xn.size)`, `(An,Xn.size)`
+        // — where the whole effective address sits inside the parentheses.
+        // Rewrite it to the equivalent old-style `d(An…)` and re-dispatch, so
+        // the displacement/index/PC handling below is reused, not duplicated.
+        if let Some((first, rest)) = inner.split_once(',') {
+            let (first, rest) = (first.trim(), rest.trim());
+            let rewritten = if matches!(parse_reg(first), Some(Opnd::AReg(_))) {
+                // Base register first: an implicit zero displacement.
+                format!("0({inner})")
+            } else {
+                // Displacement first.
+                format!("{first}({rest})")
+            };
+            return parse_ea(&rewritten, line);
+        }
         return Ok(Opnd::Mem {
             mode: 2,
             reg: areg(inner, line)?,
