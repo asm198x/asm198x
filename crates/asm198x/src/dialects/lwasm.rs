@@ -543,7 +543,16 @@ fn list(operand: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
 /// shared 6502 expression core. The `<`/`>` direct/extended forces are stripped
 /// by the caller before this, so they never reach the byte-prefix paths.
 fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
-    mos6502::parse_expr_opts(raw, line, mos6502::parse_number, BytePrec::Tight, true)
+    mos6502::parse_expr(
+        raw,
+        line,
+        mos6502::parse_number,
+        mos6502::ExprOpts {
+            prec: BytePrec::Tight,
+            byte_prefix: false,
+            caret: mos6502::Caret::Xor,
+        },
+    )
 }
 
 #[cfg(test)]

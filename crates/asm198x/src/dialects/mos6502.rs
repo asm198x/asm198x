@@ -194,28 +194,44 @@ pub(crate) enum BytePrec {
     Tight,
 }
 
+/// What a bare `^` means in a dialect's expressions.
+#[derive(Clone, Copy, PartialEq)]
+pub(crate) enum Caret {
+    /// Binary bitwise XOR only (acme, 6809, 68000).
+    Xor,
+    /// Binary XOR *and* a unary 65816 bank-byte prefix (ca65), the role chosen
+    /// by position: a leading `^x` is the bank byte, `a^b` is XOR.
+    BankOrXor,
+    /// `^` is not a recognised expression operator. ACME uses it for
+    /// exponentiation (`5^3` = 125) — not yet supported — so it is rejected
+    /// rather than silently mistaken for XOR.
+    Reject,
+}
+
+/// Expression-syntax knobs that vary by dialect. The bitwise/shift operators
+/// `& | << >>` are available in every dialect (the engine AST supports them);
+/// these knobs only vary the `<`/`>` byte-prefix behaviour and what `^` means.
+#[derive(Clone, Copy)]
+pub(crate) struct ExprOpts {
+    /// Where the `<`/`>` byte-extraction operators sit in precedence.
+    pub prec: BytePrec,
+    /// `<`/`>` are low/high-byte prefixes (the 6502 family). When false
+    /// (68000/6809) a lone `<`/`>` is not a byte operator — though the `<<`/`>>`
+    /// shifts still parse.
+    pub byte_prefix: bool,
+    /// What `^` means.
+    pub caret: Caret,
+}
+
 /// Parse a value expression. `parse_number` lexes the dialect's numeric literal
-/// forms; `prec` places the `<`/`>` operators.
+/// forms; `opts` selects the dialect's operator syntax.
 pub(crate) fn parse_expr(
     raw: &str,
     line: usize,
     parse_number: fn(&str, usize) -> Result<i64, AsmError>,
-    prec: BytePrec,
+    opts: ExprOpts,
 ) -> Result<Expr, AsmError> {
-    parse_expr_opts(raw, line, parse_number, prec, false)
-}
-
-/// As [`parse_expr`], but `bitwise` enables vasm's bitwise/shift operators
-/// (`& | ^ << >>`) and, with them on, disables the `<`/`>` low/high-byte
-/// prefixes (the 68000 has no such syntax).
-pub(crate) fn parse_expr_opts(
-    raw: &str,
-    line: usize,
-    parse_number: fn(&str, usize) -> Result<i64, AsmError>,
-    prec: BytePrec,
-    bitwise: bool,
-) -> Result<Expr, AsmError> {
-    let tokens = tokenize(raw, line, parse_number, bitwise)?;
+    let tokens = tokenize(raw, line, parse_number, opts)?;
     if tokens.is_empty() {
         return Err(AsmError::new(line, "expected a value"));
     }
@@ -223,7 +239,8 @@ pub(crate) fn parse_expr_opts(
         tokens,
         pos: 0,
         line,
-        prec,
+        prec: opts.prec,
+        caret: opts.caret,
     };
     let expr = parser.expr()?;
     if parser.pos != parser.tokens.len() {
@@ -245,7 +262,6 @@ enum Tok {
     Slash,
     Lo,
     Hi,
-    Bank,
     LParen,
     RParen,
     And,
@@ -259,7 +275,7 @@ fn tokenize(
     raw: &str,
     line: usize,
     parse_number: fn(&str, usize) -> Result<i64, AsmError>,
-    bitwise: bool,
+    opts: ExprOpts,
 ) -> Result<Vec<Tok>, AsmError> {
     let chars: Vec<char> = raw.chars().collect();
     let mut tokens = Vec::new();
@@ -284,45 +300,44 @@ fn tokenize(
                 tokens.push(Tok::Slash);
                 i += 1;
             }
-            '<' if bitwise => {
+            // `<<`/`>>` are shifts everywhere; a lone `<`/`>` is a low/high-byte
+            // prefix only where `byte_prefix` is on (the 6502 family), otherwise
+            // it must have been the start of a shift.
+            '<' => {
                 if chars.get(i + 1) == Some(&'<') {
                     tokens.push(Tok::Shl);
                     i += 2;
+                } else if opts.byte_prefix {
+                    tokens.push(Tok::Lo);
+                    i += 1;
                 } else {
                     return Err(AsmError::new(line, "expected `<<` (shift)"));
                 }
             }
-            '>' if bitwise => {
+            '>' => {
                 if chars.get(i + 1) == Some(&'>') {
                     tokens.push(Tok::Shr);
                     i += 2;
+                } else if opts.byte_prefix {
+                    tokens.push(Tok::Hi);
+                    i += 1;
                 } else {
                     return Err(AsmError::new(line, "expected `>>` (shift)"));
                 }
             }
-            '<' => {
-                tokens.push(Tok::Lo);
-                i += 1;
-            }
-            '>' => {
-                tokens.push(Tok::Hi);
-                i += 1;
-            }
-            '&' if bitwise => {
+            '&' => {
                 tokens.push(Tok::And);
                 i += 1;
             }
-            '|' if bitwise => {
+            '|' => {
                 tokens.push(Tok::Or);
                 i += 1;
             }
-            '^' if bitwise => {
+            // One `^` token; the parser reads it as XOR (binary) or, in a `ca65`
+            // dialect, as the bank-byte prefix when it leads a term. Dialects
+            // where `^` means something else (ACME: exponentiation) reject it.
+            '^' if !matches!(opts.caret, Caret::Reject) => {
                 tokens.push(Tok::Xor);
-                i += 1;
-            }
-            // Outside bitwise (vasm) mode, `^` is the 65816 bank-byte prefix.
-            '^' => {
-                tokens.push(Tok::Bank);
                 i += 1;
             }
             '(' => {
@@ -388,6 +403,7 @@ struct ExprParser {
     pos: usize,
     line: usize,
     prec: BytePrec,
+    caret: Caret,
 }
 
 impl ExprParser {
@@ -402,10 +418,6 @@ impl ExprParser {
                 Some(Tok::Hi) => {
                     self.pos += 1;
                     return Ok(Expr::Hi(Box::new(self.expr()?)));
-                }
-                Some(Tok::Bank) => {
-                    self.pos += 1;
-                    return Ok(Expr::Bank(Box::new(self.expr()?)));
                 }
                 _ => {}
             }
@@ -507,7 +519,9 @@ impl ExprParser {
                     self.pos += 1;
                     return Ok(Expr::Hi(Box::new(self.unary()?)));
                 }
-                Some(Tok::Bank) => {
+                // In a ca65 dialect a leading `^` is the bank-byte prefix (as a
+                // binary operator it is XOR, handled at `bit_xor`).
+                Some(Tok::Xor) if self.caret == Caret::BankOrXor => {
                     self.pos += 1;
                     return Ok(Expr::Bank(Box::new(self.unary()?)));
                 }
@@ -671,7 +685,12 @@ mod tests {
 
     fn eval(raw: &str, prec: BytePrec) -> i64 {
         let env = BTreeMap::new();
-        fold_const(&parse_expr(raw, 1, num, prec).expect("parse"), &env, 1).expect("fold")
+        let opts = ExprOpts {
+            prec,
+            byte_prefix: true,
+            caret: Caret::Xor,
+        };
+        fold_const(&parse_expr(raw, 1, num, opts).expect("parse"), &env, 1).expect("fold")
     }
 
     #[test]

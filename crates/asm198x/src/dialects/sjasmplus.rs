@@ -57,6 +57,11 @@ impl Z80Syntax for SjasmplusSyntax {
         cut.map_or(line, |i| &line[..i])
     }
 
+    /// sjasmplus has the `^` bitwise-XOR operator (pasmo does not).
+    fn has_xor_operator(&self) -> bool {
+        true
+    }
+
     /// sjasmplus scopes leading-`.` labels under the most recent global label.
     fn scopes_locals(&self) -> bool {
         true

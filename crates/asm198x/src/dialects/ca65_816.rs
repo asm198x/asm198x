@@ -238,7 +238,16 @@ fn value_list(rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
 }
 
 fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
-    mos6502::parse_expr(raw, line, parse_number, BytePrec::Tight)
+    mos6502::parse_expr(
+        raw,
+        line,
+        parse_number,
+        mos6502::ExprOpts {
+            prec: BytePrec::Tight,
+            byte_prefix: true,
+            caret: mos6502::Caret::BankOrXor,
+        },
+    )
 }
 
 // ---------------------------------------------------------------------------

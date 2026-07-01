@@ -45,6 +45,12 @@ pub(crate) trait Z80Syntax {
         is_common_directive(word)
     }
 
+    /// Whether `^` is the bitwise-XOR operator. sjasmplus has it; pasmo does
+    /// not (and rejects `^`), so it defaults off to match pasmo.
+    fn has_xor_operator(&self) -> bool {
+        false
+    }
+
     /// Parse a directive into an operation (`None` for ones that emit nothing,
     /// like `end`). Defaults to the common set.
     fn parse_directive(
@@ -644,6 +650,11 @@ enum Tok {
     Minus,
     Star,
     Slash,
+    And,
+    Or,
+    Xor,
+    Shl,
+    Shr,
     LParen,
     RParen,
 }
@@ -674,6 +685,28 @@ fn tokenize<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Vec<Tok>
             '/' => {
                 tokens.push(Tok::Slash);
                 i += 1;
+            }
+            '&' => {
+                tokens.push(Tok::And);
+                i += 1;
+            }
+            '|' => {
+                tokens.push(Tok::Or);
+                i += 1;
+            }
+            // sjasmplus has `^` (XOR); pasmo does not, so it falls through to the
+            // unknown-character error there.
+            '^' if syntax.has_xor_operator() => {
+                tokens.push(Tok::Xor);
+                i += 1;
+            }
+            '<' if chars.get(i + 1) == Some(&'<') => {
+                tokens.push(Tok::Shl);
+                i += 2;
+            }
+            '>' if chars.get(i + 1) == Some(&'>') => {
+                tokens.push(Tok::Shr);
+                i += 2;
             }
             '(' => {
                 tokens.push(Tok::LParen);
@@ -747,7 +780,56 @@ struct ExprParser {
 
 impl ExprParser {
     fn expr(&mut self) -> Result<Expr, AsmError> {
-        self.add_sub()
+        self.bit_or()
+    }
+
+    // Bitwise and shift operators, C-style: `|` loosest, then `^`, `&`, then the
+    // shifts, all looser than `+`/`-` (so `1+2<<1` is `(1+2)<<1`). This matches
+    // sjasmplus; pasmo binds its shifts tighter than additive, a divergence that
+    // only shows on unparenthesised mixed expressions.
+    fn bit_or(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.bit_xor()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::Or)) {
+            self.pos += 1;
+            let right = self.bit_xor()?;
+            left = Expr::Bin(BinOp::Or, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn bit_xor(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.bit_and()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::Xor)) {
+            self.pos += 1;
+            let right = self.bit_and()?;
+            left = Expr::Bin(BinOp::Xor, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn bit_and(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.shift()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::And)) {
+            self.pos += 1;
+            let right = self.shift()?;
+            left = Expr::Bin(BinOp::And, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn shift(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.add_sub()?;
+        loop {
+            let op = match self.tokens.get(self.pos) {
+                Some(Tok::Shl) => BinOp::Shl,
+                Some(Tok::Shr) => BinOp::Shr,
+                _ => break,
+            };
+            self.pos += 1;
+            let right = self.add_sub()?;
+            left = Expr::Bin(op, Box::new(left), Box::new(right));
+        }
+        Ok(left)
     }
 
     fn add_sub(&mut self) -> Result<Expr, AsmError> {

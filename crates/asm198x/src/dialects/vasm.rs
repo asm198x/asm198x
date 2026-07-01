@@ -1499,12 +1499,15 @@ fn areg(t: &str, line: usize) -> Result<u8, AsmError> {
 
 fn parse_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
     // vasm has no `<`/`>` byte prefixes; it does have `& | ^ << >>`.
-    mos6502::parse_expr_opts(
+    mos6502::parse_expr(
         raw,
         line,
         mos6502::parse_number,
-        mos6502::BytePrec::Tight,
-        true,
+        mos6502::ExprOpts {
+            prec: mos6502::BytePrec::Tight,
+            byte_prefix: false,
+            caret: mos6502::Caret::Xor,
+        },
     )
 }
 

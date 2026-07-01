@@ -530,7 +530,16 @@ fn parse_value(current_global: &str, raw: &str, line: usize) -> Result<Expr, Asm
     {
         return Ok(Expr::Sym(cheap_key(current_global, cheap)));
     }
-    mos6502::parse_expr(t, line, parse_number, BytePrec::Tight)
+    mos6502::parse_expr(
+        t,
+        line,
+        parse_number,
+        mos6502::ExprOpts {
+            prec: BytePrec::Tight,
+            byte_prefix: true,
+            caret: mos6502::Caret::BankOrXor,
+        },
+    )
 }
 
 /// A collision-proof symbol key for a cheap local, scoped to its global.

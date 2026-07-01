@@ -561,7 +561,18 @@ fn parse_value(anons: &[AnonDef], raw: &str, line: usize) -> Result<Expr, AsmErr
     if let Some((sign, level)) = anon_marker(trimmed) {
         return Ok(Expr::Sym(resolve_anon(anons, sign, level, line, line)?));
     }
-    mos6502::parse_expr(raw, line, parse_number, BytePrec::Loose)
+    mos6502::parse_expr(
+        raw,
+        line,
+        parse_number,
+        mos6502::ExprOpts {
+            prec: BytePrec::Loose,
+            byte_prefix: true,
+            // ACME's `^` is exponentiation, not XOR (its XOR is the `XOR`/`EOR`
+            // keyword) — reject `^` rather than mis-encode it.
+            caret: mos6502::Caret::Reject,
+        },
+    )
 }
 
 /// ACME sizes a hex literal by its written width: a `≥3`-digit hex address
