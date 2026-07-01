@@ -474,6 +474,8 @@ fn qualify_locals(op: Operation, g: &str) -> Operation {
         // The Z80 dialect never emits pre-encoded instructions.
         Operation::Encoded(pieces) => Operation::Encoded(pieces),
         Operation::Entry(e) => Operation::Entry(qualify_expr(e, g)),
+        // No sub-expressions to qualify (the acme-only align carries constants).
+        align @ Operation::Align { .. } => align,
     }
 }
 

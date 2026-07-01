@@ -203,7 +203,7 @@ const PROBES: &[Probe] = &[
     ok ("acme", "operator <<",           " lda #1<<3\n"),
     ok ("acme", "operator >>",           " lda #16>>2\n"),
     ok ("acme", "directive !pet",        " !pet \"hi\"\n"),
-    gap("acme", "directive !align",      " !align 255,0\n lda #1\n", 26),
+    ok ("acme", "directive !align",      " !align 255,0\n lda #1\n"),
     ok ("acme", "directive !zone",       " !zone main\n rts\n"),
     gap("acme", "directive !set",        " !set n=5\n lda #n\n", 26),
 

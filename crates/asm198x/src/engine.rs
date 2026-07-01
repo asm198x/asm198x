@@ -232,6 +232,12 @@ pub(crate) enum Operation {
     /// bytes; surfaced on [`Assembly::start`] for containers that carry a start
     /// address (e.g. a Spectrum `.sna` snapshot). A flat binary ignores it.
     Entry(Expr),
+    /// Advance the program counter to the next address where `pc & andmask ==
+    /// value`, filling the gap with `fill` (ACME's `!align andmask, value
+    /// [, fill]`). The pad count is PC-dependent, so it is resolved in the
+    /// engine passes; `andmask`/`value`/`fill` are folded to constants by the
+    /// dialect. The pad is `(value - pc) & andmask`.
+    Align { andmask: i64, value: i64, fill: u8 },
 }
 
 /// One piece of a dialect-computed instruction encoding.
@@ -331,7 +337,8 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 Operation::Bytes(_)
                 | Operation::Words(_)
                 | Operation::Instruction { .. }
-                | Operation::Encoded(_),
+                | Operation::Encoded(_)
+                | Operation::Align { .. },
             ) if require_origin && origin.is_none() => {
                 return Err(AsmError::new(
                     s.line,
@@ -348,6 +355,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
             }
             Some(Operation::Equ(_)) => {}   // handled above
             Some(Operation::Entry(_)) => {} // records a start address; emits nothing
+            Some(Operation::Align { andmask, value, .. }) => pc += (value - pc) & andmask,
         }
     }
     let origin = origin.unwrap_or(0);
@@ -375,6 +383,14 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                     return Err(AsmError::new(s.line, "entry address out of range"));
                 }
                 start = Some(v as u16);
+            }
+            Some(Operation::Align {
+                andmask,
+                value,
+                fill,
+            }) => {
+                let pad = (value - pc) & andmask;
+                bytes.extend(std::iter::repeat_n(*fill, pad as usize));
             }
             Some(Operation::Bytes(items)) => {
                 for e in items {

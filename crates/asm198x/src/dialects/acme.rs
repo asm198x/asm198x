@@ -11,7 +11,7 @@
 //! Encoding comes from [`isa::mos6502`]; the two-pass engine and byte emission
 //! live in [`crate::engine`]. See `decisions/syntax-stance.md`.
 //!
-//! Not yet covered (no curriculum use): `!align`, `!set`, macros, and `!for`.
+//! Not yet covered (no curriculum use): `!set`, macros, and `!for`.
 //! `!zone` is accepted but inert (no `.`-local scoping yet).
 
 use std::collections::BTreeMap;
@@ -475,6 +475,7 @@ fn parse_directive(
         "byte" | "by" | "8" => Ok(Operation::Bytes(parse_list(anons, rest, line)?)),
         "word" | "wo" | "16" => Ok(Operation::Words(parse_list(anons, rest, line)?)),
         "fill" => parse_fill(anons, env, rest, line),
+        "align" => parse_align(anons, env, rest, line),
         "text" | "tx" => parse_text(anons, rest, line, |c| c),
         "scr" => parse_text(anons, rest, line, screen_code),
         "pet" => parse_text(anons, rest, line, petscii),
@@ -512,6 +513,41 @@ fn parse_fill(
         }
     };
     Ok(Operation::Bytes(vec![Expr::Num(i64::from(value)); amount]))
+}
+
+/// `!align andmask, value [, fill]` — advance the PC to the next address where
+/// `pc & andmask == value`, filling with `fill` (default `$EA`, ACME's). `andmask`
+/// and `value` are required; all three fold against the parse-time `env`. The pad
+/// is PC-dependent, so the count is computed by the engine (`Operation::Align`),
+/// not here.
+fn parse_align(
+    anons: &[AnonDef],
+    env: &BTreeMap<String, i64>,
+    rest: &str,
+    line: usize,
+) -> Result<Operation, AsmError> {
+    let parts = mos6502::split_top_level(rest, ',');
+    if parts.len() < 2 || parts.len() > 3 {
+        return Err(AsmError::new(
+            line,
+            "`!align` takes `andmask, value [, fill]`",
+        ));
+    }
+    let andmask = fold_const(&parse_value(anons, &parts[0], line)?, env, line)?;
+    let value = fold_const(&parse_value(anons, &parts[1], line)?, env, line)?;
+    let fill = match parts.get(2) {
+        None => 0xEA, // ACME's default fill byte
+        Some(v) => {
+            let n = fold_const(&parse_value(anons, v, line)?, env, line)?;
+            u8::try_from(n)
+                .map_err(|_| AsmError::new(line, "`!align` fill must be a constant byte"))?
+        }
+    };
+    Ok(Operation::Align {
+        andmask,
+        value,
+        fill,
+    })
 }
 
 fn parse_list(anons: &[AnonDef], rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
@@ -799,6 +835,26 @@ mod tests {
             asm("!pet \"ABab@[]\"").expect("pet").bytes,
             vec![0xC1, 0xC2, 0x41, 0x42, 0x40, 0x5B, 0x5D]
         );
+    }
+
+    #[test]
+    fn align_pads_to_boundary_with_default_and_custom_fill() {
+        // Byte-for-byte against acme. After `lda #1` at $1000 (pc=$1002):
+        //   !align 7,0 pads 6 bytes to $1008, default fill $EA.
+        let a = asm("*= $1000\n lda #1\n!align 7,0\n nop\n").expect("align");
+        assert_eq!(
+            a.bytes,
+            vec![0xA9, 0x01, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA, 0xEA]
+        );
+        // A custom fill byte.
+        let b = asm("*= $1000\n lda #1\n!align 7,0,$ff\n nop\n").expect("align fill");
+        assert_eq!(
+            b.bytes,
+            vec![0xA9, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xEA]
+        );
+        // Already aligned ((pc & 3) == 2 at $1002): no padding.
+        let c = asm("*= $1000\n lda #1\n!align 3,2\n nop\n").expect("aligned");
+        assert_eq!(c.bytes, vec![0xA9, 0x01, 0xEA]);
     }
 
     #[test]
