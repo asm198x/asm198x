@@ -17,7 +17,7 @@
 
 use crate::dialect::Dialect;
 use crate::dialects::z80::{self, Z80Syntax};
-use crate::engine::{AsmError, Statement};
+use crate::engine::{AsmError, Operation, Statement};
 
 /// The sjasmplus Z80 dialect. `z80n` selects the target instruction set
 /// (sjasmplus emits Z80N when targeting the Next).
@@ -60,6 +60,26 @@ impl Z80Syntax for SjasmplusSyntax {
     /// sjasmplus has the `^` bitwise-XOR operator (pasmo does not).
     fn has_xor_operator(&self) -> bool {
         true
+    }
+
+    /// sjasmplus adds `byte` as a spelling of `db` (pasmo has neither).
+    fn is_directive(&self, word: &str) -> bool {
+        word.eq_ignore_ascii_case("byte") || z80::is_common_directive(word)
+    }
+
+    /// `byte` is `db`; everything else is the shared common set.
+    fn parse_directive(
+        &self,
+        word: &str,
+        args: &str,
+        line: usize,
+    ) -> Result<Option<Operation>, AsmError> {
+        let word = if word.eq_ignore_ascii_case("byte") {
+            "db"
+        } else {
+            word
+        };
+        z80::common_directive(self, word, args, line)
     }
 
     /// sjasmplus scopes leading-`.` labels under the most recent global label.
@@ -144,6 +164,20 @@ mod tests {
     #[test]
     fn ds_reserves_bytes() {
         assert_eq!(asm("        ds 3\n").expect("ds").bytes, vec![0, 0, 0]);
+    }
+
+    #[test]
+    fn byte_is_db() {
+        // sjasmplus's `byte` behaves exactly like `db` — values and strings.
+        // Byte-for-byte against `sjasmplus --raw`.
+        assert_eq!(
+            asm("        byte 1,2,$ff\n").expect("byte vals").bytes,
+            vec![0x01, 0x02, 0xFF]
+        );
+        assert_eq!(
+            asm("        byte \"AB\"\n").expect("byte str").bytes,
+            vec![0x41, 0x42]
+        );
     }
 
     #[test]
