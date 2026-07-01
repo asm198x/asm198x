@@ -67,7 +67,7 @@ impl Z80Syntax for SjasmplusSyntax {
         true
     }
 
-    /// sjasmplus numbers: hex (`$`/`0x` prefix, `h` suffix), binary (`%`/`0b`
+    /// sjasmplus numbers: hex (`$`/`0x`/`#` prefix, `h` suffix), binary (`%`/`0b`
     /// prefix, `b` suffix), `'c'` char, decimal.
     fn parse_number(&self, tok: &str, line: usize) -> Result<i64, AsmError> {
         let t = tok.trim();
@@ -76,11 +76,12 @@ impl Z80Syntax for SjasmplusSyntax {
         if t.starts_with('\'') && t.ends_with('\'') && t.chars().count() == 3 {
             return t.chars().nth(1).map(|c| c as i64).ok_or_else(bad);
         }
-        // Hex: $ or 0x prefix, or h suffix.
+        // Hex: $, 0x, or # prefix, or h suffix.
         if let Some(hex) = t
             .strip_prefix('$')
             .or_else(|| t.strip_prefix("0x"))
             .or_else(|| t.strip_prefix("0X"))
+            .or_else(|| t.strip_prefix('#'))
         {
             return i64::from_str_radix(hex, 16).map_err(|_| bad());
         }

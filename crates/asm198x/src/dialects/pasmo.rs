@@ -42,18 +42,31 @@ impl Z80Syntax for PasmoSyntax {
         line.find(';').map_or(line, |idx| &line[..idx])
     }
 
-    /// pasmo numbers: `$hex`, `%binary`, `'c'` char, decimal.
+    /// pasmo numbers: `$hex`/`0xhex`, `%binary`, `'c'` char, decimal, and the
+    /// radix *suffixes* `h` (hex), `b` (binary), `o`/`q` (octal).
     fn parse_number(&self, tok: &str, line: usize) -> Result<i64, AsmError> {
         let t = tok.trim();
         let bad = || AsmError::new(line, format!("invalid number `{tok}`"));
-        if let Some(hex) = t.strip_prefix('$') {
+        if let Some(hex) = t
+            .strip_prefix('$')
+            .or_else(|| t.strip_prefix("0x"))
+            .or_else(|| t.strip_prefix("0X"))
+        {
             i64::from_str_radix(hex, 16).map_err(|_| bad())
         } else if let Some(bin) = t.strip_prefix('%') {
             i64::from_str_radix(bin, 2).map_err(|_| bad())
         } else if t.starts_with('\'') && t.ends_with('\'') && t.chars().count() == 3 {
             t.chars().nth(1).map(|c| c as i64).ok_or_else(bad)
         } else {
-            t.parse::<i64>().map_err(|_| bad())
+            // A trailing radix letter (`h`/`b`/`o`/`q`) selects the base;
+            // otherwise the token is decimal.
+            let (body, radix) = match t.chars().last() {
+                Some('h' | 'H') => (&t[..t.len() - 1], 16),
+                Some('b' | 'B') => (&t[..t.len() - 1], 2),
+                Some('o' | 'O' | 'q' | 'Q') => (&t[..t.len() - 1], 8),
+                _ => (t, 10),
+            };
+            i64::from_str_radix(body, radix).map_err(|_| bad())
         }
     }
 }
