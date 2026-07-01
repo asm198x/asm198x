@@ -156,6 +156,13 @@ fn read_operands(form: &isa::Form, rest: &[u8], endianness: isa::Endianness) -> 
                 }
                 _ => {}
             },
+            // A big-endian 16-bit immediate (Z80N `push nn`): high byte first,
+            // regardless of the set's little-endian default.
+            isa::OperandKind::ImmediateBe => {
+                let (hi, lo) = (rest[off], rest[off + 1]);
+                values.push(i64::from(u16::from(lo) | (u16::from(hi) << 8)));
+                off += 2;
+            }
         }
     }
     values

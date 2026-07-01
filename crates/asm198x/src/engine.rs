@@ -369,6 +369,11 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                                 }
                             }
                         }
+                        // A big-endian immediate (Z80N `push nn`): high byte
+                        // first, regardless of the set's little-endian default.
+                        isa::OperandKind::ImmediateBe => {
+                            push_word(&mut bytes, v, s.line, isa::Endianness::Big)?;
+                        }
                         // A signed index displacement, e.g. the `d` in (IX+d).
                         isa::OperandKind::Displacement => {
                             if !(-128..=127).contains(&v) {

@@ -48,6 +48,10 @@ fn synth(form: &isa::Form) -> Vec<u8> {
                 b.extend(std::iter::repeat_n(0x00, usize::from(op.bytes) - 1));
             }
             isa::OperandKind::Displacement => b.push(0x05),
+            // Big-endian 16-bit immediate (Z80N `push nn`): $1234 high byte
+            // first. Not reached today (this sweep walks the base Z80 set, not
+            // the NEXT extension), but kept correct for when it is.
+            isa::OperandKind::ImmediateBe => b.extend_from_slice(&[0x12, 0x34]),
             isa::OperandKind::Immediate | isa::OperandKind::Address => {
                 // $12 / $1234 / $123456, little-endian.
                 let bytes: &[u8] = match op.bytes {

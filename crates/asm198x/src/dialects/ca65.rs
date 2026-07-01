@@ -261,7 +261,11 @@ fn emit(
             for (slot, e) in form.operands.iter().zip(operands.iter()) {
                 let v = e.eval(env, pc, line_for_errors)?;
                 match slot.kind {
-                    isa::OperandKind::Immediate | isa::OperandKind::Address => match slot.bytes {
+                    // `ImmediateBe` is Z80N-only; ca65 is 6502/NES, so it never
+                    // reaches here, but the match must stay exhaustive.
+                    isa::OperandKind::Immediate
+                    | isa::OperandKind::ImmediateBe
+                    | isa::OperandKind::Address => match slot.bytes {
                         1 => out.push(to_byte(v, line_for_errors)?),
                         2 => out.extend_from_slice(
                             &u16::try_from(v & 0xFFFF).expect("masked").to_le_bytes(),

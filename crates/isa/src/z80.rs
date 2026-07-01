@@ -69,10 +69,15 @@ const DISP8: Operand = Operand {
     kind: OperandKind::Displacement,
     bytes: 1,
 }; // the d in (IX+d)
+const IMM16_BE: Operand = Operand {
+    kind: OperandKind::ImmediateBe,
+    bytes: 2,
+}; // the big-endian nn of Z80N `push nn`
 
 const NONE: &[Operand] = &[];
 const ONE_N: &[Operand] = &[IMM8];
 const ONE_NN: &[Operand] = &[IMM16];
+const ONE_NN_BE: &[Operand] = &[IMM16_BE]; // Z80N `push nn`
 const ONE_ADDR: &[Operand] = &[ADDR16];
 const ONE_E: &[Operand] = &[REL8];
 const ONE_DISP: &[Operand] = &[DISP8];
@@ -1028,10 +1033,10 @@ const TWO_N: &[Operand] = &[IMM8, IMM8]; // NEXTREG reg,val
 
 /// The ZX Spectrum Next's **Z80N** extended opcodes — all ED-prefixed. These
 /// are an extension set, available when targeting the Next; standard-Z80
-/// assembly does not see them. Every encoding here was cross-checked against
-/// the `pasmonext` binary — including two surprises: `MUL` takes no operands
-/// (it is implicitly `D*E`), and `PUSH nn`'s immediate is little-endian like
-/// every other Z80 word, not big-endian as some references claim.
+/// assembly does not see them. One surprise the reference tools and the Next
+/// documentation agree on: `PUSH nn`'s immediate is stored **big-endian** (high
+/// byte first) — the only big-endian operand in the whole Z80/Z80N set — so it
+/// uses [`IMM16_BE`], not the usual little-endian `IMM16`.
 pub const NEXT: InstructionSet = InstructionSet {
     cpu: "Zilog Z80N",
     endianness: Endianness::Little,
@@ -1057,7 +1062,7 @@ const NEXT_INSTRUCTIONS: &[Instruction] = &[
         form(&[0xED, 0x35], "DE,nn", ONE_NN, Cycles::fixed(16), ""),
         form(&[0xED, 0x36], "BC,nn", ONE_NN, Cycles::fixed(16), ""),
     ]),
-    inst!("PUSH", "Push a 16-bit immediate", [form(&[0xED, 0x8A], "nn", ONE_NN, Cycles::fixed(23), "")]),
+    inst!("PUSH", "Push a 16-bit immediate", [form(&[0xED, 0x8A], "nn", ONE_NN_BE, Cycles::fixed(23), "")]),
     inst!("OUTINB", "Output (HL) to port (C), inc HL",   [form(&[0xED, 0x90], "", NONE, Cycles::fixed(16), "")]),
     inst!("NEXTREG", "Set a Next hardware register", [
         form(&[0xED, 0x91], "n,n", TWO_N, Cycles::fixed(20), ""),

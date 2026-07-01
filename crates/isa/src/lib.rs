@@ -137,6 +137,10 @@ pub struct Operand {
 pub enum OperandKind {
     /// A literal value (immediate).
     Immediate,
+    /// A big-endian immediate — laid down high byte first regardless of the
+    /// instruction set's [`Endianness`]. The Z80N `push nn` (`ED 8A`) special
+    /// case: uniquely in the Z80 set its 16-bit operand is stored big-endian.
+    ImmediateBe,
     /// An absolute address or zero-page offset — distinguished by `bytes`.
     Address,
     /// A signed, PC-relative displacement (branches).
