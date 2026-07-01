@@ -71,6 +71,7 @@ fn tool(dialect: &str) -> &'static str {
         "acme" => "acme",
         "pasmo" => "pasmo",
         "sjasmplus" => "sjasmplus",
+        "z80n" => "sjasmplus",
         "lwasm" => "lwasm",
         "vasm" => "vasmm68k_mot",
         "ca65-816" => "ca65",
@@ -110,9 +111,15 @@ fn reference(tmp: &Path, dialect: &str, body: &str) -> Option<Vec<u8>> {
             run(vec![c])?;
             fs::read(&out).ok()
         }
-        "sjasmplus" => {
+        "sjasmplus" | "z80n" => {
+            // Z80N opcodes are gated behind a device selection in sjasmplus.
             let src = tmp.join("ref.asm");
-            fs::write(&src, body).ok()?;
+            let source = if dialect == "z80n" {
+                format!("\tDEVICE ZXSPECTRUMNEXT\n{body}")
+            } else {
+                body.to_string()
+            };
+            fs::write(&src, source).ok()?;
             let mut c = Command::new("sjasmplus");
             c.arg("--nologo")
                 .arg(format!("--raw={}", out.display()))
@@ -167,6 +174,7 @@ fn ours(dialect: &str, body: &str) -> Option<Vec<u8>> {
         "acme" => asm198x::assemble_acme(body).ok().map(|a| a.bytes),
         "pasmo" => asm198x::assemble_pasmo(body).ok().map(|a| a.bytes),
         "sjasmplus" => asm198x::assemble_sjasmplus(body).ok().map(|a| a.bytes),
+        "z80n" => asm198x::assemble_sjasmplus_next(body).ok().map(|a| a.bytes),
         "lwasm" => asm198x::assemble_lwasm(body).ok().map(|a| a.bytes),
         "vasm" => asm198x::assemble_vasm(body).ok(),
         "ca65-816" => asm198x::assemble_ca65_816(body).ok().map(|a| a.bytes),
@@ -216,6 +224,17 @@ const PROBES: &[Probe] = &[
     gap("sjasmplus", "operator <<",      " ld a,1<<2\n",   20),
     gap("sjasmplus", "operator &",       " ld a,5 & 3\n",  20),
     gap("sjasmplus", "directive byte",   " byte 1,2\n",    26),
+
+    // ---- z80n (Spectrum Next extension ISA), sjasmplus reference -------------
+    ok ("z80n", "swapnib / mirror",      " swapnib\n mirror a\n"),
+    ok ("z80n", "barrel shifts",         " bsla de,b\n bsrl de,b\n brlc de,b\n"),
+    ok ("z80n", "add rr,a / add rr,nn",  " add hl,a\n add de,a\n add hl,$1234\n"),
+    ok ("z80n", "nextreg n,n / n,a",     " nextreg $12,$34\n nextreg $07,a\n"),
+    ok ("z80n", "test n / outinb",       " test 5\n outinb\n"),
+    ok ("z80n", "block loads",           " ldix\n ldirx\n lddx\n lddrx\n ldpirx\n ldws\n"),
+    ok ("z80n", "pixel ops",             " pixeldn\n pixelad\n setae\n"),
+    gap("z80n", "push nn (big-endian)",  " push $1234\n", 27),
+    gap("z80n", "mul d,e mnemonic",      " mul d,e\n",    28),
 
     // ---- lwasm / 6809 -------------------------------------------------------
     ok ("lwasm", "indexed modes",        " lda ,x\n lda 5,y\n lda ,-u\n lda [,s++]\n"),
