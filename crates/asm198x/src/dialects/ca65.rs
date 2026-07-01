@@ -60,6 +60,10 @@ enum Kind {
     Empty,
     Bytes(Vec<Expr>),
     Words(Vec<Expr>),
+    /// `.dbyt` — 16-bit values emitted **big-endian** (high byte first).
+    DBytes(Vec<Expr>),
+    /// `.dword` — 32-bit values emitted little-endian.
+    DWords(Vec<Expr>),
     /// `.res count [, fill]` — `count` bytes of `fill`.
     Res(usize, u8),
     Insn {
@@ -188,6 +192,8 @@ enum Resolved {
     Nothing,
     Bytes(Vec<Expr>),
     Words(Vec<Expr>),
+    DBytes(Vec<Expr>),
+    DWords(Vec<Expr>),
     Fill(usize, u8),
     Insn {
         form: &'static isa::Form,
@@ -211,6 +217,14 @@ fn resolve(
         Kind::Words(v) => {
             let n = v.len() * 2;
             (Resolved::Words(v), n)
+        }
+        Kind::DBytes(v) => {
+            let n = v.len() * 2;
+            (Resolved::DBytes(v), n)
+        }
+        Kind::DWords(v) => {
+            let n = v.len() * 4;
+            (Resolved::DWords(v), n)
         }
         Kind::Res(count, fill) => (Resolved::Fill(count, fill), count),
         Kind::Insn { operand, mnemonic } => {
@@ -252,6 +266,20 @@ fn emit(
             for e in &exprs {
                 let v = e.eval(env, pc, line_for_errors)?;
                 let w = u16::try_from(v & 0xFFFF).expect("masked");
+                out.extend_from_slice(&w.to_le_bytes());
+            }
+        }
+        Resolved::DBytes(exprs) => {
+            for e in &exprs {
+                let v = e.eval(env, pc, line_for_errors)?;
+                let w = u16::try_from(v & 0xFFFF).expect("masked");
+                out.extend_from_slice(&w.to_be_bytes());
+            }
+        }
+        Resolved::DWords(exprs) => {
+            for e in &exprs {
+                let v = e.eval(env, pc, line_for_errors)?;
+                let w = u32::try_from(v & 0xFFFF_FFFF).expect("masked");
                 out.extend_from_slice(&w.to_le_bytes());
             }
         }
@@ -456,6 +484,9 @@ fn parse_directive(
     match name.to_ascii_lowercase().as_str() {
         "byte" | "byt" => Ok(Kind::Bytes(parse_data_list(current_global, rest, line)?)),
         "word" | "addr" => Ok(Kind::Words(parse_value_list(current_global, rest, line)?)),
+        "dbyt" => Ok(Kind::DBytes(parse_value_list(current_global, rest, line)?)),
+        "dword" => Ok(Kind::DWords(parse_value_list(current_global, rest, line)?)),
+        "asciiz" => Ok(Kind::Bytes(parse_asciiz(current_global, rest, line)?)),
         "res" => parse_res(current_global, consts, rest, line),
         other => Err(AsmError::new(
             line,
@@ -502,6 +533,14 @@ fn parse_data_list(current_global: &str, rest: &str, line: usize) -> Result<Vec<
             out.push(parse_value(current_global, piece, line)?);
         }
     }
+    Ok(out)
+}
+
+/// `.asciiz` list: like `.byte` with strings, but a single terminating `$00` is
+/// appended after the last item (ca65 emits one NUL for the whole directive).
+fn parse_asciiz(current_global: &str, rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
+    let mut out = parse_data_list(current_global, rest, line)?;
+    out.push(Expr::Num(0));
     Ok(out)
 }
 
@@ -595,6 +634,19 @@ counter: .res 1\n\
         let r = rom(src);
         // sta zp = $85 $00 (counter at $00), not abs $8D.
         assert_eq!(&r[16..18], &[0x85, 0x00]);
+    }
+
+    #[test]
+    fn dword_dbyt_asciiz_match_reference_bytes() {
+        // Byte-for-byte against `ca65 --cpu 6502` + `ld65 -t none`:
+        //   .dword $12345678 -> 78 56 34 12 (32-bit little-endian)
+        //   .dbyt  $1234     -> 12 34       (16-bit big-endian)
+        //   .asciiz "hi"     -> 68 69 00    (string + one terminating NUL)
+        let r = rom(".segment \"CODE\"\n.dword $12345678\n.dbyt $1234\n.asciiz \"hi\"\n");
+        assert_eq!(
+            &r[16..25],
+            &[0x78, 0x56, 0x34, 0x12, 0x12, 0x34, 0x68, 0x69, 0x00]
+        );
     }
 
     #[test]
