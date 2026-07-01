@@ -8,9 +8,8 @@
 //! loop — see `decisions/asm198x-and-shared-isa-spec.md`.
 //!
 //! The types here describe **fixed-opcode-byte** CPUs (6502, Z80 and its
-//! prefixes). Variable-field encodings (68000-class: an opcode word with
-//! operand fields packed into it) will extend [`Form`] with a pattern/mask
-//! variant when that backend is built; deliberately not modelled yet.
+//! prefixes) as well as **field-based** variable-length encodings (68000-class
+//! in [`m68k`]) and computed-operand CPUs (6809 in [`mos6809`]).
 //!
 //! Everything is `&'static` data so a whole instruction set is a compile-time
 //! constant: zero dependencies, no allocation, diffable in review.
