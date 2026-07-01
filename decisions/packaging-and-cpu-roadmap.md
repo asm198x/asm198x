@@ -70,18 +70,23 @@ dispatch in `crates/asm198x/src/main.rs`):
 | Amiga | hunk executable (`--exe`, the `-Fhunkexe` target) | ✅ emitted |
 | NES | `.nes` ROM (bounded ld65 config) | ✅ emitted |
 | C64 | `.prg` (CBM, load-address-prefixed) | ⏸ **gap** — emits flat `.bin`, no PRG wrapping |
-| Spectrum | `.sna` snapshot | ⏸ **gap** — emits flat `.bin`, no snapshot |
+| Spectrum | `.sna` snapshot (48K) | ✅ emitted (`--sna`, #31) |
 
-These two gaps block retiring Code198x's C64/Spectrum Docker build images — the
-*launch* platforms — so they are the highest-leverage output work. Driver and the
+The C64 gap still blocks retiring that Docker build image — a *launch* platform —
+so it is now the highest-leverage remaining output work. Driver and the
 keep-vs-retire decision: umbrella
 [`code198x-dev-tooling-migration.md`](../../../decisions/code198x-dev-tooling-migration.md).
-Scope per gap:
+Scope:
 
 - **C64 `.prg`** — prepend the 2-byte little-endian load address to the flat
   image (the `acme -f cbm` convention). Small and self-contained.
-- **Spectrum `.sna`** — serialize a 48K (or 128K) snapshot: register block +
-  memory image, loadable directly by an emulator. Larger; a new serializer.
+- **Spectrum `.sna`** — done (#31). `--sna` serializes a 48K snapshot: a 27-byte
+  register block (pasmo's defaults — IFF2 set, IM 1, white border, SP `$FFFC`
+  with the `end`-directive entry point pushed) plus a 48K RAM image (code at
+  `org`, attribute map defaulted to `$38`). Byte-identical to `pasmo --sna` across
+  the buildable Spectrum sample corpus (92/92). The engine gained an
+  `Operation::Entry` + `Assembly::start` to carry the entry point. 128K remains a
+  later add if a unit needs paging.
 
 Either gap can instead be closed on the **Emu198x side** (load a flat image at
 `org`; a tape/loader for Spectrum) — the umbrella decision owns that sub-choice,

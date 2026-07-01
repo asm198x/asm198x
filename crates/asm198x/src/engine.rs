@@ -26,6 +26,10 @@ pub struct Assembly {
     /// the 65816's 24-bit addresses and bank constants; 8-/16-bit CPUs use the
     /// low bits only.
     pub symbols: BTreeMap<String, i64>,
+    /// The program's entry point, if an `end <addr>` directive gave one. Used by
+    /// containers that carry a start address (a Spectrum `.sna`); `None` for a
+    /// plain flat binary.
+    pub start: Option<u16>,
 }
 
 /// An assembly error, with the 1-based source line it occurred on (0 = no
@@ -224,6 +228,10 @@ pub(crate) enum Operation {
     /// seam for CPUs whose operands are computed, not fixed-width slots; the
     /// dialect still reuses this engine's two-pass driver, symbols, and `org`.
     Encoded(Vec<Piece>),
+    /// Record the program's entry point (the `end <addr>` directive). Emits no
+    /// bytes; surfaced on [`Assembly::start`] for containers that carry a start
+    /// address (e.g. a Spectrum `.sna` snapshot). A flat binary ignores it.
+    Entry(Expr),
 }
 
 /// One piece of a dialect-computed instruction encoding.
@@ -326,12 +334,14 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
             Some(Operation::Encoded(pieces)) => {
                 pc += pieces.iter().map(Piece::len).sum::<i64>();
             }
-            Some(Operation::Equ(_)) => {} // handled above
+            Some(Operation::Equ(_)) => {}   // handled above
+            Some(Operation::Entry(_)) => {} // records a start address; emits nothing
         }
     }
     let origin = origin.unwrap_or(0);
 
     // Pass 2 — emit.
+    let mut start: Option<u16> = None;
     let mut bytes: Vec<u8> = Vec::new();
     for s in &statements {
         // The location counter (`$`) is the address of this statement's start.
@@ -347,6 +357,13 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 bytes.resize(bytes.len() + (target - cur) as usize, 0);
             }
             Some(Operation::Equ(_)) => {} // defines a symbol; emits nothing
+            Some(Operation::Entry(e)) => {
+                let v = e.eval(&symbols, pc, s.line)?;
+                if !(0..=0xFFFF).contains(&v) {
+                    return Err(AsmError::new(s.line, "entry address out of range"));
+                }
+                start = Some(v as u16);
+            }
             Some(Operation::Bytes(items)) => {
                 for e in items {
                     let v = e.eval(&symbols, pc, s.line)?;
@@ -490,6 +507,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
         origin: origin as u16,
         bytes,
         symbols,
+        start,
     })
 }
 

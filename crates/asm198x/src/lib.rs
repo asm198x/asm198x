@@ -35,6 +35,7 @@ mod dialects;
 mod engine;
 #[cfg(test)]
 mod roundtrip_tests;
+mod sna;
 
 // Disassembly lives in the dependency-free `isa-disasm` crate (only `isa` +
 // std) so Emu198x can consume it without the assembler; re-exported here so the
@@ -44,6 +45,7 @@ pub use isa_disasm::{
     Line, disassemble_6502, disassemble_6809, disassemble_65816, disassemble_68000,
     disassemble_z80, listing_6502, listing_6809, listing_65816, listing_68000, listing_z80,
 };
+pub use sna::sna_48k;
 
 /// Assemble ACME-syntax 6502 source into a flat binary — the C64 curriculum's
 /// dialect (`*=` to set the PC, `!byte`/`!word`/`!fill`, `name = value`).

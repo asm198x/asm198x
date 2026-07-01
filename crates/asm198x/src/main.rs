@@ -114,6 +114,7 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut target: Option<&str> = None;
     let mut disassemble = false;
     let mut exe = false;
+    let mut sna = false;
     let mut origin: u16 = 0;
     let mut i = 0;
     while i < args.len() {
@@ -133,6 +134,7 @@ fn run(args: &[String]) -> Result<String, String> {
             }
             "--disasm" | "--disassemble" => disassemble = true,
             "--exe" | "--hunkexe" => exe = true,
+            "--sna" => sna = true,
             "--org" => {
                 i += 1;
                 let value = args.get(i).ok_or("`--org` needs an address")?;
@@ -224,6 +226,29 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     let assembly = assembler.assemble(&source).map_err(|e| e.to_string())?;
+
+    // `--sna`: wrap the assembled Spectrum program in a 48K snapshot rather than
+    // writing a flat binary. Only the Z80/Spectrum dialects carry an entry point.
+    if sna {
+        if !matches!(
+            assembler,
+            Assembler::Pasmo { .. } | Assembler::Sjasmplus { .. }
+        ) {
+            return Err(
+                "`--sna` is only for the Spectrum Z80 dialects (pasmo/pasmonext/sjasmplus)".into(),
+            );
+        }
+        let image = asm198x::sna_48k(&assembly).map_err(|e| e.to_string())?;
+        let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("sna"));
+        std::fs::write(&out_path, &image)
+            .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+        return Ok(format!(
+            "assembled {} byte(s) -> {} (48K snapshot)",
+            image.len(),
+            out_path.display(),
+        ));
+    }
+
     let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
     std::fs::write(&out_path, &assembly.bytes)
         .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
@@ -249,6 +274,8 @@ fn parse_u16(value: &str) -> Result<u16, String> {
 fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
      assemble:    asm198x [--dialect <name>] [--cpu <target>] <input> [-o <out.bin>]\n\
+     snapshot:    asm198x --dialect pasmonext --sna <input> [-o <out.sna>]\n\
+     \x20            (Spectrum Z80 only; needs `end <addr>` for the entry point)\n\
      disassemble: asm198x --disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\n\
      dialects (syntax): acme (C64 6502; also `6502`), ca65 (NES), vasm (Amiga\n\

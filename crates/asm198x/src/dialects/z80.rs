@@ -227,7 +227,10 @@ pub(crate) fn common_directive<S: Z80Syntax>(
             };
             Some(Operation::Bytes(vec![Expr::Num(0); count]))
         }
-        "end" => None, // entry-point marker; a flat binary ignores it
+        // `end [addr]` marks the entry point. A flat binary ignores it, but a
+        // `.sna` snapshot needs the start address — capture it when given.
+        "end" if args.trim().is_empty() => None,
+        "end" => Some(Operation::Entry(parse_value(syntax, args, line)?)),
         other => return Err(AsmError::new(line, format!("unknown directive `{other}`"))),
     })
 }
@@ -467,6 +470,7 @@ fn qualify_locals(op: Operation, g: &str) -> Operation {
         },
         // The Z80 dialect never emits pre-encoded instructions.
         Operation::Encoded(pieces) => Operation::Encoded(pieces),
+        Operation::Entry(e) => Operation::Entry(qualify_expr(e, g)),
     }
 }
 
