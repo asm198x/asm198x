@@ -11,7 +11,8 @@
 //! Encoding comes from [`isa::mos6502`]; the two-pass engine and byte emission
 //! live in [`crate::engine`]. See `decisions/syntax-stance.md`.
 //!
-//! Not yet covered (no curriculum use): `!pet`, macros, and `!for`/`!zone`.
+//! Not yet covered (no curriculum use): `!align`, `!set`, macros, and `!for`.
+//! `!zone` is accepted but inert (no `.`-local scoping yet).
 
 use std::collections::BTreeMap;
 
@@ -470,6 +471,11 @@ fn parse_directive(
         "fill" => parse_fill(anons, env, rest, line),
         "text" | "tx" => parse_text(anons, rest, line, |c| c),
         "scr" => parse_text(anons, rest, line, screen_code),
+        "pet" => parse_text(anons, rest, line, petscii),
+        // `!zone [title]` starts a new local-label scope. This dialect has no
+        // `.`-local labels yet, so a zone has no effect on the bytes — accept it
+        // and emit nothing. (The `!zone name { … }` block form is not covered.)
+        "zone" | "zn" => Ok(Operation::Bytes(Vec::new())),
         other => Err(AsmError::new(
             line,
             format!("unsupported directive `!{other}`"),
@@ -534,6 +540,18 @@ fn parse_text(
         }
     }
     Ok(Operation::Bytes(bytes))
+}
+
+/// ACME's `!pet` conversion: ASCII to PETSCII (the default, unshifted set). The
+/// two swap letter case relative to each other — ASCII `A`–`Z` become `$C1`–`$DA`
+/// and ASCII `a`–`z` become `$41`–`$5A`; everything else passes through. Derived
+/// from the acme binary (`!pet "ABab" -> C1 C2 41 42`).
+fn petscii(c: u8) -> u8 {
+    match c {
+        b'A'..=b'Z' => c + 0x80,
+        b'a'..=b'z' => c - 0x20,
+        _ => c,
+    }
 }
 
 /// ACME's `!scr` conversion: ASCII to C64 screen codes. Lowercase maps to the
@@ -742,6 +760,24 @@ mod tests {
             asm("!text \"2064\"").expect("text").bytes,
             vec![0x32, 0x30, 0x36, 0x34]
         );
+    }
+
+    #[test]
+    fn pet_converts_to_petscii() {
+        // Byte-for-byte against acme: !pet swaps letter case into PETSCII,
+        // passing other characters through.
+        assert_eq!(
+            asm("!pet \"ABab@[]\"").expect("pet").bytes,
+            vec![0xC1, 0xC2, 0x41, 0x42, 0x40, 0x5B, 0x5D]
+        );
+    }
+
+    #[test]
+    fn zone_emits_nothing() {
+        // `!zone` (bare and titled) is inert here: it only scopes `.`-locals,
+        // which this dialect does not have. Matches acme's bytes (a901 a902).
+        let a = asm("*= $1000\n!zone\n        lda #1\n!zone foo\n        lda #2\n").expect("zone");
+        assert_eq!(a.bytes, vec![0xA9, 0x01, 0xA9, 0x02]);
     }
 
     #[test]
