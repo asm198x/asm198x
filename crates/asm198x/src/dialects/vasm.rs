@@ -50,6 +50,16 @@ fn lower<'a>(
     ctx: &Ctx,
     consts: &BTreeMap<String, i64>,
 ) -> (&'a str, Cow<'a, [Opnd]>, Option<Size>) {
+    // adda/suba/cmpa are the address-register-destination spellings of add/sub/
+    // cmp; the spec encodes those forms under the base mnemonic (form selection
+    // picks the An-destination form). Alias them when the destination is an An,
+    // as vasm requires — `adda d0,d1` stays unknown, matching vasm's rejection.
+    let mnemonic = match (mnemonic, operands.last()) {
+        ("ADDA", Some(Opnd::AReg(_))) => "ADD",
+        ("SUBA", Some(Opnd::AReg(_))) => "SUB",
+        ("CMPA", Some(Opnd::AReg(_))) => "CMP",
+        _ => mnemonic,
+    };
     if !ctx.optimize {
         return (mnemonic, Cow::Borrowed(operands), None);
     }
