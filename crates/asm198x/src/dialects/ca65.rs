@@ -341,10 +341,82 @@ fn to_byte(v: i64, line: usize) -> Result<u8, AsmError> {
 }
 
 // ---------------------------------------------------------------------------
+// Anonymous labels (`:` defines, `:-`/`:+` refer)
+// ---------------------------------------------------------------------------
+
+/// One anonymous-label definition: the line it sits on and the unique synthetic
+/// name it binds. The name carries a leading control char so it can never
+/// collide with a real identifier.
+struct AnonDef {
+    line: usize,
+    name: String,
+}
+
+/// Collect every anonymous label (a line whose label token is a bare `:`) in
+/// source order, assigning each a unique synthetic name. ca65 keeps a single
+/// ordered stream — unlike acme's per-level `-`/`+` runs.
+fn prescan_anons(source: &str) -> Vec<AnonDef> {
+    let mut defs = Vec::new();
+    for (i, raw) in source.lines().enumerate() {
+        let line = i + 1;
+        let (word, _) = split_first_word(strip_comment(raw).trim());
+        if word == ":" {
+            defs.push(AnonDef {
+                line,
+                name: format!("\u{1}:#{}", defs.len()),
+            });
+        }
+    }
+    defs
+}
+
+/// Resolve a `:`-anonymous reference: `sign` is `-` (backward) or `+` (forward)
+/// and `level` is the run length (`:--` is 2). Backward counts the anonymous
+/// labels at or before `ref_line` from the end; forward counts those strictly
+/// after `ref_line` from the start.
+fn resolve_anon(
+    anons: &[AnonDef],
+    sign: char,
+    level: usize,
+    ref_line: usize,
+    line: usize,
+) -> Result<String, AsmError> {
+    let chosen = if sign == '-' {
+        anons
+            .iter()
+            .filter(|d| d.line <= ref_line)
+            .nth_back(level - 1)
+    } else {
+        anons.iter().filter(|d| d.line > ref_line).nth(level - 1)
+    };
+    chosen.map(|d| d.name.clone()).ok_or_else(|| {
+        let run: String = std::iter::repeat_n(sign, level).collect();
+        AsmError::new(
+            line,
+            format!("no anonymous label `:{run}` in that direction"),
+        )
+    })
+}
+
+/// A `:`-anonymous reference token (`:-`, `:--`, `:+`, `:++`, …): its sign and
+/// run length. `:` alone (no run) is a definition, not a reference.
+fn anon_ref(tok: &str) -> Option<(char, usize)> {
+    let rest = tok.strip_prefix(':')?;
+    let mut chars = rest.chars();
+    let first = chars.next()?;
+    if (first == '-' || first == '+') && rest.chars().all(|c| c == first) {
+        Some((first, rest.len()))
+    } else {
+        None
+    }
+}
+
+// ---------------------------------------------------------------------------
 // Parsing
 // ---------------------------------------------------------------------------
 
 fn parse(set: &'static isa::InstructionSet, source: &str) -> Result<Parsed, AsmError> {
+    let anons = prescan_anons(source);
     let mut stmts = Vec::new();
     let mut label_seg: BTreeMap<String, String> = BTreeMap::new();
     let mut consts: BTreeMap<String, i64> = BTreeMap::new();
@@ -374,19 +446,19 @@ fn parse(set: &'static isa::InstructionSet, source: &str) -> Result<Parsed, AsmE
                     format!("invalid constant name `{name}`"),
                 ));
             }
-            let expr = parse_value(&current_global, &trimmed[eq + 1..], line)?;
+            let expr = parse_value(&anons, &current_global, &trimmed[eq + 1..], line)?;
             if let Ok(v) = fold_const(&expr, &consts, line) {
                 consts.insert(name.to_string(), v);
             }
             continue;
         }
 
-        // An optional `name:` / `@cheap:` label, then an optional operation.
-        let (label, rest) = split_label(line, &mut current_global, trimmed)?;
+        // An optional `name:` / `@cheap:` / `:` label, then an optional operation.
+        let (label, rest) = split_label(&anons, line, &mut current_global, trimmed)?;
         if let Some(name) = &label {
             label_seg.insert(name.clone(), seg.clone());
         }
-        let kind = parse_op(set, &current_global, &consts, rest, line)?;
+        let kind = parse_op(set, &anons, &current_global, &consts, rest, line)?;
         if label.is_none() && matches!(kind, Kind::Empty) {
             continue;
         }
@@ -419,14 +491,25 @@ fn strip_comment(line: &str) -> &str {
     line
 }
 
-/// Split a leading `name:` or `@cheap:` label. Updates `current_global` when a
-/// non-cheap label is defined (cheap locals scope to the preceding global).
+/// Split a leading `name:`, `@cheap:`, or bare `:` (anonymous) label. Updates
+/// `current_global` when a non-cheap named label is defined (cheap locals scope
+/// to the preceding global).
 fn split_label<'a>(
+    anons: &[AnonDef],
     line: usize,
     current_global: &mut String,
     trimmed: &'a str,
 ) -> Result<(Option<String>, &'a str), AsmError> {
     let (word, remainder) = split_first_word(trimmed);
+    // A bare `:` is an anonymous label; its synthetic name is pre-scanned.
+    if word == ":" {
+        let name = anons
+            .iter()
+            .find(|d| d.line == line)
+            .map(|d| d.name.clone())
+            .ok_or_else(|| AsmError::new(line, "internal: anonymous label not pre-scanned"))?;
+        return Ok((Some(name), remainder));
+    }
     let Some(name) = word.strip_suffix(':') else {
         return Ok((None, trimmed));
     };
@@ -448,6 +531,7 @@ fn split_label<'a>(
 
 fn parse_op(
     set: &'static isa::InstructionSet,
+    anons: &[AnonDef],
     current_global: &str,
     consts: &BTreeMap<String, i64>,
     rest: &str,
@@ -458,12 +542,12 @@ fn parse_op(
         return Ok(Kind::Empty);
     }
     if let Some(directive) = rest.strip_prefix('.') {
-        return parse_directive(current_global, consts, directive, line);
+        return parse_directive(anons, current_global, consts, directive, line);
     }
     let (mnemonic, operand_text) = split_first_word(rest);
     let mnemonic = mnemonic.to_ascii_uppercase();
     let operand = mos6502::parse_operand(operand_text, line, &|s, l| {
-        parse_value(current_global, s, l)
+        parse_value(anons, current_global, s, l)
     })?;
     if set.instruction(&mnemonic).is_none() {
         return Err(AsmError::new(
@@ -475,6 +559,7 @@ fn parse_op(
 }
 
 fn parse_directive(
+    anons: &[AnonDef],
     current_global: &str,
     consts: &BTreeMap<String, i64>,
     directive: &str,
@@ -482,12 +567,37 @@ fn parse_directive(
 ) -> Result<Kind, AsmError> {
     let (name, rest) = split_first_word(directive);
     match name.to_ascii_lowercase().as_str() {
-        "byte" | "byt" => Ok(Kind::Bytes(parse_data_list(current_global, rest, line)?)),
-        "word" | "addr" => Ok(Kind::Words(parse_value_list(current_global, rest, line)?)),
-        "dbyt" => Ok(Kind::DBytes(parse_value_list(current_global, rest, line)?)),
-        "dword" => Ok(Kind::DWords(parse_value_list(current_global, rest, line)?)),
-        "asciiz" => Ok(Kind::Bytes(parse_asciiz(current_global, rest, line)?)),
-        "res" => parse_res(current_global, consts, rest, line),
+        "byte" | "byt" => Ok(Kind::Bytes(parse_data_list(
+            anons,
+            current_global,
+            rest,
+            line,
+        )?)),
+        "word" | "addr" => Ok(Kind::Words(parse_value_list(
+            anons,
+            current_global,
+            rest,
+            line,
+        )?)),
+        "dbyt" => Ok(Kind::DBytes(parse_value_list(
+            anons,
+            current_global,
+            rest,
+            line,
+        )?)),
+        "dword" => Ok(Kind::DWords(parse_value_list(
+            anons,
+            current_global,
+            rest,
+            line,
+        )?)),
+        "asciiz" => Ok(Kind::Bytes(parse_asciiz(
+            anons,
+            current_global,
+            rest,
+            line,
+        )?)),
+        "res" => parse_res(anons, current_global, consts, rest, line),
         other => Err(AsmError::new(
             line,
             format!("unsupported directive `.{other}`"),
@@ -498,6 +608,7 @@ fn parse_directive(
 /// `.res count [, fill]`. `count` must fold to a constant (a literal expression
 /// or a `=` constant such as `NUM_ENEMIES`); `fill` defaults to 0.
 fn parse_res(
+    anons: &[AnonDef],
     current_global: &str,
     consts: &BTreeMap<String, i64>,
     rest: &str,
@@ -505,14 +616,18 @@ fn parse_res(
 ) -> Result<Kind, AsmError> {
     let mut parts = rest.splitn(2, ',');
     let count_src = parts.next().unwrap_or("").trim();
-    let count = fold_const(&parse_value(current_global, count_src, line)?, consts, line)
-        .map_err(|_| AsmError::new(line, "`.res` count must be a constant"))?;
+    let count = fold_const(
+        &parse_value(anons, current_global, count_src, line)?,
+        consts,
+        line,
+    )
+    .map_err(|_| AsmError::new(line, "`.res` count must be a constant"))?;
     let count = usize::try_from(count)
         .map_err(|_| AsmError::new(line, "`.res` count must be non-negative"))?;
     let fill = match parts.next() {
         None => 0,
         Some(v) => {
-            let n = fold_const(&parse_value(current_global, v, line)?, consts, line)?;
+            let n = fold_const(&parse_value(anons, current_global, v, line)?, consts, line)?;
             u8::try_from(n).map_err(|_| AsmError::new(line, "`.res` fill must be a byte"))?
         }
     };
@@ -520,7 +635,12 @@ fn parse_res(
 }
 
 /// `.byte` list: `"..."` strings expand to raw ASCII bytes; values are bytes.
-fn parse_data_list(current_global: &str, rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
+fn parse_data_list(
+    anons: &[AnonDef],
+    current_global: &str,
+    rest: &str,
+    line: usize,
+) -> Result<Vec<Expr>, AsmError> {
     let rest = rest.trim();
     if rest.is_empty() {
         return Err(AsmError::new(line, "`.byte` needs a value"));
@@ -530,7 +650,7 @@ fn parse_data_list(current_global: &str, rest: &str, line: usize) -> Result<Vec<
         if let Some(text) = string_literal(piece) {
             out.extend(text.bytes().map(|b| Expr::Num(i64::from(b))));
         } else {
-            out.push(parse_value(current_global, piece, line)?);
+            out.push(parse_value(anons, current_global, piece, line)?);
         }
     }
     Ok(out)
@@ -538,20 +658,30 @@ fn parse_data_list(current_global: &str, rest: &str, line: usize) -> Result<Vec<
 
 /// `.asciiz` list: like `.byte` with strings, but a single terminating `$00` is
 /// appended after the last item (ca65 emits one NUL for the whole directive).
-fn parse_asciiz(current_global: &str, rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
-    let mut out = parse_data_list(current_global, rest, line)?;
+fn parse_asciiz(
+    anons: &[AnonDef],
+    current_global: &str,
+    rest: &str,
+    line: usize,
+) -> Result<Vec<Expr>, AsmError> {
+    let mut out = parse_data_list(anons, current_global, rest, line)?;
     out.push(Expr::Num(0));
     Ok(out)
 }
 
-fn parse_value_list(current_global: &str, rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
+fn parse_value_list(
+    anons: &[AnonDef],
+    current_global: &str,
+    rest: &str,
+    line: usize,
+) -> Result<Vec<Expr>, AsmError> {
     let rest = rest.trim();
     if rest.is_empty() {
         return Err(AsmError::new(line, "directive needs a value"));
     }
     split_top_level(rest, ',')
         .iter()
-        .map(|p| parse_value(current_global, p, line))
+        .map(|p| parse_value(anons, current_global, p, line))
         .collect()
 }
 
@@ -559,11 +689,19 @@ fn parse_value_list(current_global: &str, rest: &str, line: usize) -> Result<Vec
 // Value parsing over the shared expression core
 // ---------------------------------------------------------------------------
 
-/// Parse a ca65 value. A bare `@cheap` operand is a cheap-local reference scoped
-/// to the current global; otherwise it is an expression with `<`/`>` binding
-/// tight ([`BytePrec::Tight`]).
-fn parse_value(current_global: &str, raw: &str, line: usize) -> Result<Expr, AsmError> {
+/// Parse a ca65 value. A bare `:-`/`:+` run is an anonymous-label reference; a
+/// bare `@cheap` operand is a cheap-local reference scoped to the current global;
+/// otherwise it is an expression with `<`/`>` binding tight ([`BytePrec::Tight`]).
+fn parse_value(
+    anons: &[AnonDef],
+    current_global: &str,
+    raw: &str,
+    line: usize,
+) -> Result<Expr, AsmError> {
     let t = raw.trim();
+    if let Some((sign, level)) = anon_ref(t) {
+        return Ok(Expr::Sym(resolve_anon(anons, sign, level, line, line)?));
+    }
     if let Some(cheap) = t.strip_prefix('@')
         && is_ident(cheap)
     {
@@ -634,6 +772,37 @@ counter: .res 1\n\
         let r = rom(src);
         // sta zp = $85 $00 (counter at $00), not abs $8D.
         assert_eq!(&r[16..18], &[0x85, 0x00]);
+    }
+
+    #[test]
+    fn anonymous_labels_resolve_by_direction() {
+        // Byte-for-byte against ca65 + ld65 -t none. CODE at $8000:
+        //   ldx #0 / : inx / bne :- / jmp :+ / nop / : rts
+        let src = "\
+.segment \"CODE\"\n\
+    ldx #0\n\
+:   inx\n\
+    bne :-\n\
+    jmp :+\n\
+    nop\n\
+:   rts\n";
+        let r = rom(src);
+        assert_eq!(
+            &r[16..26],
+            &[0xA2, 0x00, 0xE8, 0xD0, 0xFD, 0x4C, 0x09, 0x80, 0xEA, 0x60]
+        );
+    }
+
+    #[test]
+    fn anonymous_label_multi_distance() {
+        // `:--` counts two anonymous labels back. ca65 + ld65: ea ea 4c 00 80.
+        let src = "\
+.segment \"CODE\"\n\
+:   nop\n\
+:   nop\n\
+    jmp :--\n";
+        let r = rom(src);
+        assert_eq!(&r[16..21], &[0xEA, 0xEA, 0x4C, 0x00, 0x80]);
     }
 
     #[test]
