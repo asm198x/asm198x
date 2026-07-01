@@ -69,17 +69,19 @@ dispatch in `crates/asm198x/src/main.rs`):
 |----------|-----------|--------|
 | Amiga | hunk executable (`--exe`, the `-Fhunkexe` target) | ✅ emitted |
 | NES | `.nes` ROM (bounded ld65 config) | ✅ emitted |
-| C64 | `.prg` (CBM, load-address-prefixed) | ⏸ **gap** — emits flat `.bin`, no PRG wrapping |
+| C64 | `.prg` (CBM, load-address-prefixed) | ✅ emitted (`--prg`, #35) |
 | Spectrum | `.sna` snapshot (48K) | ✅ emitted (`--sna`, #31) |
 
-The C64 gap still blocks retiring that Docker build image — a *launch* platform —
-so it is now the highest-leverage remaining output work. Driver and the
-keep-vs-retire decision: umbrella
+Both launch-platform output containers now exist, so the C64/Spectrum Docker
+build images can retire on the assembler side (their remaining hold is
+assembler-coverage gaps, not the container). Driver and the keep-vs-retire
+decision: umbrella
 [`code198x-dev-tooling-migration.md`](../../../decisions/code198x-dev-tooling-migration.md).
-Scope:
+What each does:
 
-- **C64 `.prg`** — prepend the 2-byte little-endian load address to the flat
-  image (the `acme -f cbm` convention). Small and self-contained.
+- **C64 `.prg`** — done (#35). `--prg` prepends the 2-byte little-endian load
+  address (the origin) to the flat image — the `acme -f cbm` convention.
+  Byte-identical to `acme -f cbm` across the buildable C64 sample corpus.
 - **Spectrum `.sna`** — done (#31). `--sna` serializes a 48K snapshot: a 27-byte
   register block (pasmo's defaults — IFF2 set, IM 1, white border, SP `$FFFC`
   with the `end`-directive entry point pushed) plus a 48K RAM image (code at

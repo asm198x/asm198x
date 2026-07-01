@@ -115,6 +115,7 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut disassemble = false;
     let mut exe = false;
     let mut sna = false;
+    let mut prg = false;
     let mut origin: u16 = 0;
     let mut i = 0;
     while i < args.len() {
@@ -135,6 +136,7 @@ fn run(args: &[String]) -> Result<String, String> {
             "--disasm" | "--disassemble" => disassemble = true,
             "--exe" | "--hunkexe" => exe = true,
             "--sna" => sna = true,
+            "--prg" => prg = true,
             "--org" => {
                 i += 1;
                 let value = args.get(i).ok_or("`--org` needs an address")?;
@@ -249,6 +251,23 @@ fn run(args: &[String]) -> Result<String, String> {
         ));
     }
 
+    // `--prg`: wrap the assembled C64 program in a `.prg` (load-address prefix).
+    if prg {
+        if !matches!(assembler, Assembler::Acme) {
+            return Err("`--prg` is only for the C64 dialect (acme)".into());
+        }
+        let image = asm198x::prg(&assembly);
+        let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("prg"));
+        std::fs::write(&out_path, &image)
+            .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+        return Ok(format!(
+            "assembled {} byte(s) -> {} (load ${:04X})",
+            image.len(),
+            out_path.display(),
+            assembly.origin,
+        ));
+    }
+
     let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
     std::fs::write(&out_path, &assembly.bytes)
         .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
@@ -276,6 +295,8 @@ fn usage() -> String {
      assemble:    asm198x [--dialect <name>] [--cpu <target>] <input> [-o <out.bin>]\n\
      snapshot:    asm198x --dialect pasmonext --sna <input> [-o <out.sna>]\n\
      \x20            (Spectrum Z80 only; needs `end <addr>` for the entry point)\n\
+     C64 program: asm198x --dialect acme --prg <input> [-o <out.prg>]\n\
+     \x20            (prepends the 2-byte load address)\n\
      disassemble: asm198x --disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\n\
      dialects (syntax): acme (C64 6502; also `6502`), ca65 (NES), vasm (Amiga\n\

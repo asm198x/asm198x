@@ -33,6 +33,7 @@
 mod dialect;
 mod dialects;
 mod engine;
+mod prg;
 #[cfg(test)]
 mod roundtrip_tests;
 mod sna;
@@ -45,6 +46,7 @@ pub use isa_disasm::{
     Line, disassemble_6502, disassemble_6809, disassemble_65816, disassemble_68000,
     disassemble_z80, listing_6502, listing_6809, listing_65816, listing_68000, listing_z80,
 };
+pub use prg::prg;
 pub use sna::sna_48k;
 
 /// Assemble ACME-syntax 6502 source into a flat binary — the C64 curriculum's
