@@ -26,7 +26,7 @@ use super::mos6502::{
     split_top_level, string_literal, top_level_rfind,
 };
 use crate::dialect::Dialect;
-use crate::engine::{AsmError, Expr, Operation, Statement};
+use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
 
 /// The ca65 65816 dialect.
 pub(crate) struct Ca65_816;
@@ -180,6 +180,33 @@ fn parse_directive(
         "org" => Ok(Some(Operation::Org(value(rest, line)?))),
         "byte" | "byt" => Ok(Some(Operation::Bytes(byte_list(rest, line)?))),
         "word" | "addr" => Ok(Some(Operation::Words(value_list(rest, line)?))),
+        // `.dword` — 32-bit little-endian. Emitted as width-4 computed pieces so
+        // symbolic values resolve in pass two (the 65816 is little-endian).
+        "dword" => Ok(Some(Operation::Encoded(
+            value_list(rest, line)?
+                .into_iter()
+                .map(|expr| Piece::Val {
+                    expr,
+                    bytes: 4,
+                    rel: false,
+                    signed: false,
+                })
+                .collect(),
+        ))),
+        // `.dbyt` — 16-bit big-endian (high byte first), independent of the CPU's
+        // little-endianness, so lay each value down as `[Hi, Lo]` bytes.
+        "dbyt" => Ok(Some(Operation::Bytes(
+            value_list(rest, line)?
+                .into_iter()
+                .flat_map(|e| [Expr::Hi(Box::new(e.clone())), Expr::Lo(Box::new(e))])
+                .collect(),
+        ))),
+        // `.asciiz` — a `.byte` string list with one terminating $00.
+        "asciiz" => {
+            let mut out = byte_list(rest, line)?;
+            out.push(Expr::Num(0));
+            Ok(Some(Operation::Bytes(out)))
+        }
         "res" => parse_res(rest, env, line),
         other => Err(AsmError::new(
             line,
@@ -549,6 +576,18 @@ mod tests {
         assert_eq!(bytes(".i16\n ldx #1\n"), vec![0xA2, 0x01, 0x00]);
         // rep/sep immediates are always 8-bit.
         assert_eq!(bytes(".a16\n .i16\n rep #$30\n"), vec![0xC2, 0x30]);
+    }
+
+    #[test]
+    fn dword_dbyt_asciiz_match_reference_bytes() {
+        // Byte-for-byte against `ca65 --cpu 65816` + ld65:
+        //   .dword $12345678 -> 78 56 34 12 (32-bit little-endian)
+        //   .dbyt  $1234     -> 12 34       (16-bit big-endian)
+        //   .asciiz "hi"     -> 68 69 00
+        assert_eq!(
+            bytes(" .dword $12345678\n .dbyt $1234\n .asciiz \"hi\"\n"),
+            vec![0x78, 0x56, 0x34, 0x12, 0x12, 0x34, 0x68, 0x69, 0x00]
+        );
     }
 
     #[test]

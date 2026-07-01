@@ -198,9 +198,9 @@ const PROBES: &[Probe] = &[
     gap("acme", "operator ^ (power)",    " lda #5^3\n", 30),
     ok ("acme", "operator <<",           " lda #1<<3\n"),
     ok ("acme", "operator >>",           " lda #16>>2\n"),
-    gap("acme", "directive !pet",        " !pet \"hi\"\n",     26),
+    ok ("acme", "directive !pet",        " !pet \"hi\"\n"),
     gap("acme", "directive !align",      " !align 255,0\n lda #1\n", 26),
-    gap("acme", "directive !zone",       " !zone main\n rts\n", 26),
+    ok ("acme", "directive !zone",       " !zone main\n rts\n"),
     gap("acme", "directive !set",        " !set n=5\n lda #n\n", 26),
 
     // ---- pasmo / z80 --------------------------------------------------------
@@ -225,7 +225,7 @@ const PROBES: &[Probe] = &[
     ok ("sjasmplus", "operator <<",      " ld a,1<<2\n"),
     ok ("sjasmplus", "operator &",       " ld a,5 & 3\n"),
     ok ("sjasmplus", "operator ^",       " ld a,6 ^ 3\n"),
-    gap("sjasmplus", "directive byte",   " byte 1,2\n",    26),
+    ok ("sjasmplus", "directive byte",   " byte 1,2\n"),
 
     // ---- z80n (Spectrum Next extension ISA), sjasmplus reference -------------
     ok ("z80n", "swapnib / mirror",      " swapnib\n mirror a\n"),
@@ -249,9 +249,9 @@ const PROBES: &[Probe] = &[
     ok ("lwasm", "instruction cmps",     " cmps ,y\n"),
     ok ("lwasm", "instruction swi2",     " swi2\n"),
     ok ("lwasm", "instruction swi3",     " swi3\n"),
-    gap("lwasm", "directive fill",       " fill 0,4\n",     26),
-    gap("lwasm", "directive zmb",        " zmb 4\n",        26),
-    gap("lwasm", "directive fqb",        " fqb $12345678\n", 26),
+    ok ("lwasm", "directive fill",       " fill 0,4\n"),
+    ok ("lwasm", "directive zmb",        " zmb 4\n"),
+    ok ("lwasm", "directive fqb",        " fqb $12345678\n"),
 
     // ---- vasm / 68000 -------------------------------------------------------
     ok ("vasm", "moveq / move.l imm",    " moveq #1,d0\n move.l #$12345678,d0\n"),
@@ -284,9 +284,9 @@ const PROBES: &[Probe] = &[
     ok ("ca65-816", "operator <<",       " lda #1<<3\n"),
     ok ("ca65-816", "operator ^ (xor)",  " lda #5^1\n"),
     ok ("ca65-816", "instruction rtl",   " rtl\n"),
-    gap("ca65-816", "directive .dword",  " .dword $12345678\n", 26),
-    gap("ca65-816", "directive .dbyt",   " .dbyt $1234\n",      26),
-    gap("ca65-816", "directive .asciiz", " .asciiz \"hi\"\n",   26),
+    ok ("ca65-816", "directive .dword",  " .dword $12345678\n"),
+    ok ("ca65-816", "directive .dbyt",   " .dbyt $1234\n"),
+    ok ("ca65-816", "directive .asciiz", " .asciiz \"hi\"\n"),
 ];
 
 #[test]
