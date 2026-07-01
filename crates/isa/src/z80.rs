@@ -1053,7 +1053,13 @@ const NEXT_INSTRUCTIONS: &[Instruction] = &[
     inst!("BSRL",    "Barrel shift right logical",     [form(&[0xED, 0x2A], "DE,B", NONE, Cycles::fixed(8),  "")]),
     inst!("BSRF",    "Barrel shift right feed",        [form(&[0xED, 0x2B], "DE,B", NONE, Cycles::fixed(8),  "")]),
     inst!("BRLC",    "Barrel rotate left circular",    [form(&[0xED, 0x2C], "DE,B", NONE, Cycles::fixed(8),  "")]),
-    inst!("MUL",     "8x8 multiply D*E into DE",       [form(&[0xED, 0x30], "",     NONE, Cycles::fixed(8),  "")]),
+    // MUL is implicitly D*E; the reference tools accept the operands spelled
+    // out (`mul d,e` or `mul de`) as well as the bare mnemonic. All one opcode.
+    inst!("MUL",     "8x8 multiply D*E into DE",       [
+        form(&[0xED, 0x30], "",    NONE, Cycles::fixed(8),  ""),
+        form(&[0xED, 0x30], "D,E", NONE, Cycles::fixed(8),  ""),
+        form(&[0xED, 0x30], "DE",  NONE, Cycles::fixed(8),  ""),
+    ]),
     inst!("ADD", "Add (Z80N)", [
         form(&[0xED, 0x31], "HL,A",  NONE,   Cycles::fixed(8),  ""),
         form(&[0xED, 0x32], "DE,A",  NONE,   Cycles::fixed(8),  ""),

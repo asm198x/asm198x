@@ -236,7 +236,7 @@ const PROBES: &[Probe] = &[
     ok ("z80n", "block loads",           " ldix\n ldirx\n lddx\n lddrx\n ldpirx\n ldws\n"),
     ok ("z80n", "pixel ops",             " pixeldn\n pixelad\n setae\n"),
     ok ("z80n", "push nn (big-endian)",  " push $1234\n"),
-    gap("z80n", "mul d,e mnemonic",      " mul d,e\n",    28),
+    ok ("z80n", "mul d,e mnemonic",      " mul d,e\n"),
 
     // ---- lwasm / 6809 -------------------------------------------------------
     ok ("lwasm", "indexed modes",        " lda ,x\n lda 5,y\n lda ,-u\n lda [,s++]\n"),
