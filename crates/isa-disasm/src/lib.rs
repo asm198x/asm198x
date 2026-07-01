@@ -1303,6 +1303,17 @@ mod tests {
     }
 
     #[test]
+    fn m68k_dynamic_btst_immediate_decodes() {
+        // Dynamic `BTST Dn,#imm` (immediate is a legal EA for this bit op only);
+        // previously rendered as dc.w. The byte value rides the low half of a
+        // word extension. Byte-identical assemble/disassemble vs vasm.
+        assert_eq!(one_m68k(&[0x01, 0x3C, 0x00, 0x12]), "btst d0,#18");
+        assert_eq!(one_m68k(&[0x0F, 0x3C, 0x00, 0xAA]), "btst d7,#170");
+        // The static form `BTST #bit,#imm` ($083C) stays illegal — data.
+        assert_eq!(one_m68k(&[0x08, 0x3C]), "dc.w $083C");
+    }
+
+    #[test]
     fn m68k_short_branch_target_is_absolute() {
         // bne.s at $1000, length 2, disp -8 ($F8) -> target $FFA.
         assert_eq!(one_m68k(&[0x66, 0xF8]), "bne.s $FFA");

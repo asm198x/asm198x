@@ -1466,15 +1466,23 @@ pub const SET: Spec = Spec {
             mnemonic: "BTST",
             summary: "Test a bit",
             forms: &[
+                // Static `BTST #bit,<ea>` — immediate destination is illegal
+                // (Musashi `btst_s` mask `0xbfb` clears the immediate bit).
                 Form {
                     base: 0x0800,
                     size: SizeEnc::Fixed(Size::B),
                     operands: &[Slot::ImmWord, ea_src(DATA_NOIMM)],
                 },
+                // Dynamic `BTST Dn,<ea>` — alone among the bit ops, this reads
+                // its destination, so an immediate is a legal EA: `btst dN,#imm`
+                // tests a bit of a literal (Musashi `btst_r` mask `0xbff`
+                // includes the immediate bit; the MC68000 PRM lists it). Hence
+                // `DATA` (= `DATA_NOIMM | IMM`) rather than the bit ops' usual
+                // `DATA_NOIMM`.
                 Form {
                     base: 0x0100,
                     size: SizeEnc::Fixed(Size::B),
-                    operands: &[Slot::Dn { shift: 9 }, ea_src(DATA_NOIMM)],
+                    operands: &[Slot::Dn { shift: 9 }, ea_src(DATA)],
                 },
             ],
         },
