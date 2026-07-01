@@ -205,7 +205,7 @@ const PROBES: &[Probe] = &[
     ok ("acme", "directive !pet",        " !pet \"hi\"\n"),
     ok ("acme", "directive !align",      " !align 255,0\n lda #1\n"),
     ok ("acme", "directive !zone",       " !zone main\n rts\n"),
-    gap("acme", "directive !set",        " !set n=5\n lda #n\n", 26),
+    ok ("acme", "directive !set",        " !set n=5\n lda #n\n"),
 
     // ---- pasmo / z80 --------------------------------------------------------
     ok ("pasmo", "hex $ / binary %",     " ld a,$10\n ld b,%1010\n"),

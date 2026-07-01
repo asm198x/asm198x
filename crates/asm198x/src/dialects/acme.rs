@@ -11,10 +11,10 @@
 //! Encoding comes from [`isa::mos6502`]; the two-pass engine and byte emission
 //! live in [`crate::engine`]. See `decisions/syntax-stance.md`.
 //!
-//! Not yet covered (no curriculum use): `!set`, macros, and `!for`.
+//! Not yet covered (no curriculum use): macros and `!for`.
 //! `!zone` is accepted but inert (no `.`-local scoping yet).
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::mos6502::{
     self, BytePrec, assignment_split, fold_const, is_ident, parse_number, split_data_items,
@@ -43,8 +43,22 @@ impl Dialect for Acme {
         let units = tokenize_braces(source);
         let mut out = Vec::new();
         let mut env: BTreeMap<String, i64> = BTreeMap::new();
+        // Names bound by `!set` (a *reassignable* variable). They live in `env`
+        // like `=` constants, but are additionally marked here so each use is
+        // baked to the value current at that point (reassignment can't be a
+        // single pass-2 symbol).
+        let mut set_names: BTreeSet<String> = BTreeSet::new();
         let mut idx = 0;
-        process_block(set, &anons, &mut env, &units, &mut idx, true, &mut out)?;
+        process_block(
+            set,
+            &anons,
+            &mut env,
+            &mut set_names,
+            &units,
+            &mut idx,
+            true,
+            &mut out,
+        )?;
         Ok(out)
     }
 }
@@ -222,6 +236,7 @@ fn process_block(
     set: &'static isa::InstructionSet,
     anons: &[AnonDef],
     env: &mut BTreeMap<String, i64>,
+    set_names: &mut BTreeSet<String>,
     units: &[Unit],
     idx: &mut usize,
     emit: bool,
@@ -249,16 +264,30 @@ fn process_block(
             } else {
                 false
             };
-            process_block(set, anons, env, units, idx, emit && taken, out)?;
+            process_block(set, anons, env, set_names, units, idx, emit && taken, out)?;
             if *idx < units.len() && units[*idx].text.trim() == "else" {
                 *idx += 1;
                 expect_brace(units, idx, line)?;
-                process_block(set, anons, env, units, idx, emit && !taken, out)?;
+                process_block(set, anons, env, set_names, units, idx, emit && !taken, out)?;
             }
+            continue;
+        }
+        // `!set name = expr` binds or rebinds a variable, folded now against the
+        // current `env`. It emits nothing; later uses are baked to this value.
+        if split_first_word(text).0 == "!set" {
+            if emit {
+                let (name, value) = parse_set(anons, env, text, line)?;
+                env.insert(name.clone(), value);
+                set_names.insert(name);
+            }
+            *idx += 1;
             continue;
         }
         if emit {
             let (label, op) = parse_statement(set, anons, env, &units[*idx].text, line)?;
+            // Bake `!set` variables to their current value (a rebindable var
+            // can't be one pass-2 symbol); real labels/constants stay symbolic.
+            let op = op.map(|o| bake_set_vars(o, env, set_names));
             if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
                 && let Ok(v) = fold_const(e, env, line)
             {
@@ -271,6 +300,73 @@ fn process_block(
         *idx += 1;
     }
     Ok(())
+}
+
+/// Parse `!set name = expr`, folding `expr` against the current `env`.
+fn parse_set(
+    anons: &[AnonDef],
+    env: &BTreeMap<String, i64>,
+    text: &str,
+    line: usize,
+) -> Result<(String, i64), AsmError> {
+    let rest = split_first_word(text).1.trim();
+    let eq =
+        assignment_split(rest).ok_or_else(|| AsmError::new(line, "`!set` needs `name = value`"))?;
+    let name = rest[..eq].trim();
+    if !is_ident(name) {
+        return Err(AsmError::new(line, format!("invalid `!set` name `{name}`")));
+    }
+    let value = fold_const(&parse_value(anons, &rest[eq + 1..], line)?, env, line)?;
+    Ok((name.to_string(), value))
+}
+
+/// Replace every reference to a `!set` variable in `op` with its current value,
+/// leaving real labels and `=` constants symbolic (resolved in pass two).
+fn bake_set_vars(
+    op: Operation,
+    env: &BTreeMap<String, i64>,
+    set_names: &BTreeSet<String>,
+) -> Operation {
+    if set_names.is_empty() {
+        return op;
+    }
+    let bake = |e: Expr| bake_expr(e, env, set_names);
+    match op {
+        Operation::Org(e) => Operation::Org(bake(e)),
+        Operation::Equ(e) => Operation::Equ(bake(e)),
+        Operation::Bytes(v) => Operation::Bytes(v.into_iter().map(bake).collect()),
+        Operation::Words(v) => Operation::Words(v.into_iter().map(bake).collect()),
+        Operation::Instruction {
+            mnemonic,
+            mode,
+            operands,
+        } => Operation::Instruction {
+            mnemonic,
+            mode,
+            operands: operands.into_iter().map(bake).collect(),
+        },
+        // acme never emits pre-encoded instructions, entry points, or aligns
+        // carrying set-var expressions.
+        other => other,
+    }
+}
+
+/// Recursively substitute `!set` variable symbols with their current numeric
+/// value; other symbols pass through.
+fn bake_expr(e: Expr, env: &BTreeMap<String, i64>, set_names: &BTreeSet<String>) -> Expr {
+    match e {
+        Expr::Sym(s) if set_names.contains(&s) => Expr::Num(env.get(&s).copied().unwrap_or(0)),
+        Expr::Lo(inner) => Expr::Lo(Box::new(bake_expr(*inner, env, set_names))),
+        Expr::Hi(inner) => Expr::Hi(Box::new(bake_expr(*inner, env, set_names))),
+        Expr::Bank(inner) => Expr::Bank(Box::new(bake_expr(*inner, env, set_names))),
+        Expr::Neg(inner) => Expr::Neg(Box::new(bake_expr(*inner, env, set_names))),
+        Expr::Bin(op, l, r) => Expr::Bin(
+            op,
+            Box::new(bake_expr(*l, env, set_names)),
+            Box::new(bake_expr(*r, env, set_names)),
+        ),
+        other => other,
+    }
 }
 
 fn expect_brace(units: &[Unit], idx: &mut usize, line: usize) -> Result<(), AsmError> {
@@ -835,6 +931,20 @@ mod tests {
             asm("!pet \"ABab@[]\"").expect("pet").bytes,
             vec![0xC1, 0xC2, 0x41, 0x42, 0x40, 0x5B, 0x5D]
         );
+    }
+
+    #[test]
+    fn set_is_a_reassignable_variable() {
+        // Byte-for-byte against acme. A `!set` variable takes the value current
+        // at each use, so reassignment gives each `lda #n` its own value.
+        let a = asm("*= $c000\n!set n=5\n lda #n\n!set n=7\n lda #n\n").expect("reassign");
+        assert_eq!(a.bytes, vec![0xA9, 0x05, 0xA9, 0x07]);
+        // Folds an expression of constants at the `!set`, and bakes into data.
+        let b = asm("BASE = 10\n!set n=BASE+2\n!byte n, n*2\n").expect("expr");
+        assert_eq!(b.bytes, vec![0x0C, 0x18]);
+        // `<`/`>` byte operators apply to a baked set-var.
+        let c = asm("!set p=$1234\n lda #<p\n ldx #>p\n").expect("byte ops");
+        assert_eq!(c.bytes, vec![0xA9, 0x34, 0xA2, 0x12]);
     }
 
     #[test]
