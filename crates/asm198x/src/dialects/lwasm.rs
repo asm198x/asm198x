@@ -108,14 +108,17 @@ fn parse_op(
         "fcb" | ".byte" => Ok(Some(Operation::Bytes(list(operand, line)?))),
         "fdb" | ".word" => Ok(Some(Operation::Words(list(operand, line)?))),
         "fcc" => Ok(Some(parse_fcc(operand, line)?)),
-        "rmb" | ".ds" => parse_rmb(operand, env, line),
+        "fqb" => Ok(Some(parse_fqb(operand, line)?)),
+        "rmb" | ".ds" | "zmb" => parse_rmb(operand, env, line),
+        "fill" => parse_fill(operand, env, line),
         "end" => Ok(None), // marks the end of source; emits nothing
         _ => Ok(Some(parse_instruction(&m, operand, env, line)?)),
     }
 }
 
-/// `rmb count` — reserve `count` bytes, zero-filled (the flat-output behaviour).
-/// `count` folds against the parse-time env so the size is known in pass one.
+/// `rmb count` / `zmb count` — reserve/zero `count` bytes, zero-filled (the
+/// flat-output behaviour). `count` folds against the parse-time env so the size
+/// is known in pass one.
 fn parse_rmb(
     operand: &str,
     env: &BTreeMap<String, i64>,
@@ -125,6 +128,45 @@ fn parse_rmb(
     let n = usize::try_from(n)
         .map_err(|_| AsmError::new(line, "`rmb` count must be a non-negative constant"))?;
     Ok(Some(Operation::Bytes(vec![Expr::Num(0); n])))
+}
+
+/// `fill value,count` — `count` copies of `value` (lwasm's order is value first,
+/// then count; both are required). Both fold against the parse-time env so the
+/// size and fill are known in pass one.
+fn parse_fill(
+    operand: &str,
+    env: &BTreeMap<String, i64>,
+    line: usize,
+) -> Result<Option<Operation>, AsmError> {
+    let parts = mos6502::split_top_level(operand, ',');
+    if parts.len() != 2 {
+        return Err(AsmError::new(line, "`fill` needs `value,count`"));
+    }
+    let fill = fold_const(&value(parts[0].trim(), line)?, env, line)?;
+    let fill = u8::try_from(fill & 0xFF).expect("masked");
+    let count = fold_const(&value(parts[1].trim(), line)?, env, line)?;
+    let count = usize::try_from(count)
+        .map_err(|_| AsmError::new(line, "`fill` count must be a non-negative constant"))?;
+    Ok(Some(Operation::Bytes(vec![
+        Expr::Num(i64::from(fill));
+        count
+    ])))
+}
+
+/// `fqb value[,value…]` — "form quad byte": each value as a 32-bit big-endian
+/// word. Emitted through the engine's computed-operand seam so symbolic values
+/// resolve in pass two.
+fn parse_fqb(operand: &str, line: usize) -> Result<Operation, AsmError> {
+    let pieces = list(operand, line)?
+        .into_iter()
+        .map(|expr| Piece::Val {
+            expr,
+            bytes: 4,
+            rel: false,
+            signed: false,
+        })
+        .collect();
+    Ok(Operation::Encoded(pieces))
 }
 
 /// Encode one instruction into `Operation::Encoded` pieces.
@@ -606,6 +648,22 @@ mod tests {
         assert_eq!(
             asm("        fdb $1234\n").expect("fdb").bytes,
             vec![0x12, 0x34]
+        );
+    }
+
+    #[test]
+    fn fill_zmb_fqb_match_reference_bytes() {
+        // Byte-for-byte against `lwasm --6809 --raw`:
+        //   fill $ff,3 -> ff ff ff   (lwasm order is value,count)
+        //   zmb 2      -> 00 00
+        //   fqb $12345678 -> 12 34 56 78  (32-bit big-endian)
+        let a = asm("        fcb $aa\n        fill $ff,3\n        zmb 2\n        fqb $12345678\n        fcb $bb\n")
+            .expect("fill/zmb/fqb");
+        assert_eq!(
+            a.bytes,
+            vec![
+                0xAA, 0xFF, 0xFF, 0xFF, 0x00, 0x00, 0x12, 0x34, 0x56, 0x78, 0xBB
+            ]
         );
     }
 

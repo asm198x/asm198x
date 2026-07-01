@@ -511,6 +511,8 @@ fn emit_value(
         1 => (-128, 0xFF),
         2 if signed => (-32768, 32767),
         2 => (-32768, 0xFFFF),
+        4 if signed => (i64::from(i32::MIN), i64::from(i32::MAX)),
+        4 => (i64::from(i32::MIN), i64::from(u32::MAX)),
         other => {
             return Err(AsmError::new(
                 line,
@@ -529,6 +531,8 @@ fn emit_value(
         (1, _) => bytes.push(b[0]),
         (2, isa::Endianness::Little) => bytes.extend_from_slice(&b[..2]),
         (2, isa::Endianness::Big) => bytes.extend_from_slice(&[b[1], b[0]]),
+        (4, isa::Endianness::Little) => bytes.extend_from_slice(&b[..4]),
+        (4, isa::Endianness::Big) => bytes.extend_from_slice(&[b[3], b[2], b[1], b[0]]),
         _ => unreachable!("width validated above"),
     }
     Ok(())
