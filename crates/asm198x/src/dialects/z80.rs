@@ -52,17 +52,20 @@ pub(crate) trait Z80Syntax {
     }
 
     /// Parse a directive into an operation (`None` for ones that emit nothing,
-    /// like `end`). Defaults to the common set.
+    /// like `end`). Defaults to the common set. `consts` holds the `equ` values
+    /// known so far, so a directive like `ds` can fold a constant-expression
+    /// count (`ds MAX*2`) at parse time.
     fn parse_directive(
         &self,
         word: &str,
         args: &str,
         line: usize,
+        consts: &BTreeMap<String, i64>,
     ) -> Result<Option<Operation>, AsmError>
     where
         Self: Sized,
     {
-        common_directive(self, word, args, line)
+        common_directive(self, word, args, line, consts)
     }
 }
 
@@ -174,7 +177,7 @@ fn parse_op<S: Z80Syntax>(
     }
     let (word, args) = split_first_word(rest);
     if syntax.is_directive(word) {
-        return syntax.parse_directive(word, args, line);
+        return syntax.parse_directive(word, args, line, consts);
     }
     let mnemonic = word.to_ascii_uppercase();
     if !has_mnemonic(set, ext, &mnemonic) {
@@ -203,12 +206,14 @@ pub(crate) fn is_common_directive(word: &str) -> bool {
     )
 }
 
-/// Parse a common directive. `defs`/`ds` reserve a literal number of zero bytes.
+/// Parse a common directive. `defs`/`ds` reserve a constant-folded number of
+/// zero bytes (a literal or an expression of `equ` constants).
 pub(crate) fn common_directive<S: Z80Syntax>(
     syntax: &S,
     word: &str,
     args: &str,
     line: usize,
+    consts: &BTreeMap<String, i64>,
 ) -> Result<Option<Operation>, AsmError> {
     Ok(match word.to_ascii_lowercase().as_str() {
         "org" => Some(Operation::Org(parse_value(syntax, args, line)?)),
@@ -216,15 +221,13 @@ pub(crate) fn common_directive<S: Z80Syntax>(
         "defb" | "db" | "defm" | "dm" => Some(Operation::Bytes(parse_list(syntax, args, line)?)),
         "defw" | "dw" => Some(Operation::Words(parse_list(syntax, args, line)?)),
         "defs" | "ds" => {
-            let count = match parse_value(syntax, args, line)? {
-                Expr::Num(n) if n >= 0 => n as usize,
-                _ => {
-                    return Err(AsmError::new(
-                        line,
-                        "`ds`/`defs` needs a literal byte count",
-                    ));
-                }
-            };
+            // The count must be known at parse time (it sets the statement's
+            // size), but it need not be a bare literal — fold any expression of
+            // `equ` constants, e.g. `ds MAX_TORCHES * 2`.
+            let count = literal(&parse_value(syntax, args, line)?, consts, line)?;
+            let count = usize::try_from(count).map_err(|_| {
+                AsmError::new(line, "`ds`/`defs` count must be a non-negative constant")
+            })?;
             Some(Operation::Bytes(vec![Expr::Num(0); count]))
         }
         // `end [addr]` marks the entry point. A flat binary ignores it, but a

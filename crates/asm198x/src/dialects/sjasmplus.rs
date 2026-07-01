@@ -15,6 +15,8 @@
 //!
 //! TODO: sjasmplus modules, macros, and `DUP`.
 
+use std::collections::BTreeMap;
+
 use crate::dialect::Dialect;
 use crate::dialects::z80::{self, Z80Syntax};
 use crate::engine::{AsmError, Operation, Statement};
@@ -73,13 +75,14 @@ impl Z80Syntax for SjasmplusSyntax {
         word: &str,
         args: &str,
         line: usize,
+        consts: &BTreeMap<String, i64>,
     ) -> Result<Option<Operation>, AsmError> {
         let word = if word.eq_ignore_ascii_case("byte") {
             "db"
         } else {
             word
         };
-        z80::common_directive(self, word, args, line)
+        z80::common_directive(self, word, args, line, consts)
     }
 
     /// sjasmplus scopes leading-`.` labels under the most recent global label.

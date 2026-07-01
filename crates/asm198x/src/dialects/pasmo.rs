@@ -203,6 +203,17 @@ mod tests {
     }
 
     #[test]
+    fn ds_count_folds_a_constant_expression() {
+        // `ds`/`defs` accepts a literal or an expression of `equ` constants
+        // (e.g. `ds MAX*2`), not only a bare number — matching pasmo (#34).
+        assert_eq!(asm("        ds 3\n").expect("literal").bytes, vec![0, 0, 0]);
+        let a = asm("MAX equ 2\n        defs MAX*2\n").expect("expr count");
+        assert_eq!(a.bytes, vec![0, 0, 0, 0]);
+        // A non-constant (undefined symbol) count is still an error.
+        assert!(asm("        ds nope\n").is_err());
+    }
+
+    #[test]
     fn cb_bit_ops_assemble() {
         assert_eq!(
             asm("        bit 7,(hl)\n").expect("bit").bytes,
