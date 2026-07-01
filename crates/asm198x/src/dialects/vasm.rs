@@ -60,6 +60,16 @@ fn lower<'a>(
         ("CMPA", Some(Opnd::AReg(_))) => "CMP",
         _ => mnemonic,
     };
+    // eor #imm,<ea> is always eori: unlike and/or (whose source can be an
+    // immediate EA), eor's source is always a data register, so there is no
+    // eor-immediate encoding. Holds for a Dn *or* memory destination (not An),
+    // and regardless of optimization — it is a requirement, not an optimization.
+    if let [Opnd::Imm(_), dest] = operands
+        && mnemonic == "EOR"
+        && !matches!(dest, Opnd::AReg(_) | Opnd::Imm(_))
+    {
+        return ("EORI", Cow::Borrowed(operands), None);
+    }
     if !ctx.optimize {
         return (mnemonic, Cow::Borrowed(operands), None);
     }
@@ -135,6 +145,11 @@ fn lower<'a>(
             "ADD" => return ("ADDI", Cow::Borrowed(operands), None),
             "SUB" => return ("SUBI", Cow::Borrowed(operands), None),
             "CMP" => return ("CMPI", Cow::Borrowed(operands), None),
+            // and/or of an immediate into memory: no Dn operand, so the
+            // immediate form. (For a Dn destination the immediate is a valid
+            // source EA — the plain and/or form — so this excludes it.)
+            "AND" => return ("ANDI", Cow::Borrowed(operands), None),
+            "OR" => return ("ORI", Cow::Borrowed(operands), None),
             _ => {}
         }
     }
