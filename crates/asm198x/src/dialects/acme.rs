@@ -31,6 +31,12 @@ impl Dialect for Acme {
         &isa::mos6502::SET
     }
 
+    /// ACME requires `*=` before any code or data (it rejects an implicit
+    /// origin), so a forgotten `*=` errors rather than assembling at `$0000`.
+    fn requires_explicit_origin(&self) -> bool {
+        true
+    }
+
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
         let set = self.instruction_set();
         let anons = prescan_anons(source);
@@ -609,7 +615,30 @@ fn address_forces_absolute(operand: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use crate::assemble_acme as asm;
+    use crate::{AsmError, Assembly, assemble_acme};
+
+    /// Assemble ACME source, giving it a default origin when it declares none —
+    /// so the byte-output tests below needn't each set `*=`. (ACME requires `*=`
+    /// before code/data; a source that sets its own origin starts with `*` and
+    /// passes straight through. The requirement itself is covered by
+    /// `emitting_without_an_origin_is_an_error`.)
+    fn asm(src: &str) -> Result<Assembly, AsmError> {
+        let sets_origin = src.lines().any(|l| l.trim_start().starts_with('*'));
+        if sets_origin {
+            assemble_acme(src)
+        } else {
+            assemble_acme(&format!("*= $c000\n{src}"))
+        }
+    }
+
+    #[test]
+    fn emitting_without_an_origin_is_an_error() {
+        // ACME rejects code or data before `*=` ("Program counter undefined").
+        let err = assemble_acme(" lda #1\n").expect_err("no origin");
+        assert!(err.message.contains("program counter undefined"));
+        // A symbol definition alone (no emission) is fine.
+        assert!(assemble_acme("border = $d020\n").is_ok());
+    }
 
     #[test]
     fn sets_pc_and_emits_bytes() {

@@ -171,7 +171,11 @@ fn reference(tmp: &Path, dialect: &str, body: &str) -> Option<Vec<u8>> {
 /// Assemble `body` with our library; `None` if we reject it.
 fn ours(dialect: &str, body: &str) -> Option<Vec<u8>> {
     match dialect {
-        "acme" => asm198x::assemble_acme(body).ok().map(|a| a.bytes),
+        // ACME requires `*=` before code/data, so give `ours` the same `$0000`
+        // origin the reference gets (both assemble at our fixed origin).
+        "acme" => asm198x::assemble_acme(&format!("* = $0000\n{body}"))
+            .ok()
+            .map(|a| a.bytes),
         "pasmo" => asm198x::assemble_pasmo(body).ok().map(|a| a.bytes),
         "sjasmplus" => asm198x::assemble_sjasmplus(body).ok().map(|a| a.bytes),
         "z80n" => asm198x::assemble_sjasmplus_next(body).ok().map(|a| a.bytes),

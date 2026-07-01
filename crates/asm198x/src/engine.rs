@@ -284,6 +284,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
     let statements = dialect.parse(source)?;
 
     // Pass 1 — assign addresses to labels.
+    let require_origin = dialect.requires_explicit_origin();
     let mut symbols: BTreeMap<String, i64> = BTreeMap::new();
     let mut pc: i64 = 0;
     let mut origin: Option<i64> = None;
@@ -325,6 +326,17 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 }
                 pc = v;
                 origin.get_or_insert(v);
+            }
+            Some(
+                Operation::Bytes(_)
+                | Operation::Words(_)
+                | Operation::Instruction { .. }
+                | Operation::Encoded(_),
+            ) if require_origin && origin.is_none() => {
+                return Err(AsmError::new(
+                    s.line,
+                    "program counter undefined — set an origin (`*=`) before any code or data",
+                ));
             }
             Some(Operation::Bytes(items)) => pc += items.len() as i64,
             Some(Operation::Words(items)) => pc += 2 * items.len() as i64,

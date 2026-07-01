@@ -28,4 +28,13 @@ pub(crate) trait Dialect {
     /// # Errors
     /// Returns an [`AsmError`] on any tokenising or mode-resolution failure.
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError>;
+
+    /// Whether emitting bytes before any origin is set is an error. ACME's `*=`
+    /// is mandatory before code or data — it rejects an implicit origin with
+    /// "Program counter undefined" — so a forgotten `*=` fails loudly rather than
+    /// silently assembling at `$0000`. Off by default: a flat binary at origin 0
+    /// is a legitimate default for the Z80/6809 tools (`org` optional).
+    fn requires_explicit_origin(&self) -> bool {
+        false
+    }
 }
