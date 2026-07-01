@@ -267,6 +267,7 @@ const INSTRUCTIONS: &[Instruction] = &[
     // --- misc control (implied) ----------------------------------------------
     inst!("WAI", "Wait for interrupt",   [form(&[0xCB], "implied", NONE, Cycles::fixed(3), "")]),
     inst!("STP", "Stop the clock",       [form(&[0xDB], "implied", NONE, Cycles::fixed(3), "")]),
+    inst!("RTL", "Return from subroutine long", [form(&[0x6B], "implied", NONE, Cycles::fixed(6), "")]),
 
     // --- block moves: opcode, then dest-bank, src-bank (note the order) ------
     inst!("MVN", "Block move next", [form(&[0x54], "block-move", &[DP, DP], Cycles::fixed(7), "")]),
