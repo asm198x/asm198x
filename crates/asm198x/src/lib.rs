@@ -39,7 +39,7 @@ mod roundtrip_tests;
 // Disassembly lives in the dependency-free `isa-disasm` crate (only `isa` +
 // std) so Emu198x can consume it without the assembler; re-exported here so the
 // `asm198x` library API and CLI are unchanged.
-pub use engine::{AsmError, Assembly};
+pub use engine::{AsmError, Assembly, Warning};
 pub use isa_disasm::{
     Line, disassemble_6502, disassemble_6809, disassemble_65816, disassemble_68000,
     disassemble_z80, listing_6502, listing_6809, listing_65816, listing_68000, listing_z80,
@@ -77,6 +77,19 @@ pub fn assemble_ca65(source: &str) -> Result<Vec<u8>, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_vasm(source: &str) -> Result<Vec<u8>, AsmError> {
     dialects::vasm::assemble(source)
+}
+
+/// As [`assemble_vasm`], but also returns any non-fatal [`Warning`]s raised
+/// while assembling (e.g. an out-of-range immediate to CCR/SR, which vasm warns
+/// on but still encodes). The returned bytes are identical to [`assemble_vasm`];
+/// the warnings are advisory, so callers that only need bytes can use the
+/// simpler function.
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_vasm_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError> {
+    dialects::vasm::assemble_warned(source)
 }
 
 /// Assemble Motorola-syntax 68000 source into an Amiga hunk executable —
@@ -220,6 +233,26 @@ mod tests {
             assemble_vasm("\tcmp.w #1,(a0)\n").expect("cmp alias"),
             assemble_vasm("\tcmpi.w #1,(a0)\n").expect("cmpi"),
         );
+    }
+
+    #[test]
+    fn vasm_out_of_range_ccr_sr_immediate_warns_not_errors() {
+        // vasm warns (2037) but still assembles an out-of-range immediate to
+        // CCR (byte) / SR (word); asm198x mirrors that — same bytes, plus a
+        // non-fatal warning. In-range immediates warn about nothing.
+        let (bytes, warns) = assemble_vasm_warned("\tandi #$1234,ccr\n").expect("ccr");
+        assert_eq!(bytes, vec![0x02, 0x3C, 0x12, 0x34]); // byte-identical to vasm
+        assert_eq!(warns.len(), 1);
+        assert_eq!(warns[0].line, 1);
+        assert!(warns[0].message.contains("out of range"));
+
+        let (bytes, warns) = assemble_vasm_warned("\tandi #$12345,sr\n").expect("sr");
+        assert_eq!(bytes, vec![0x02, 0x7C, 0x23, 0x45]);
+        assert_eq!(warns.len(), 1);
+
+        // In range: CCR byte ($FF) and SR word ($FFFF) raise no warning.
+        let (_, warns) = assemble_vasm_warned("\tandi #$ff,ccr\n\tandi #$ffff,sr\n").expect("ok");
+        assert!(warns.is_empty());
     }
 
     #[test]

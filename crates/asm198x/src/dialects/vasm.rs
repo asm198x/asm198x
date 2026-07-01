@@ -24,7 +24,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use isa::m68k::{self, EaModes, Size, SizeEnc, Slot, ea};
 
 use super::mos6502::{self, is_ident, split_data_items, split_first_word, string_literal};
-use crate::engine::{AsmError, BinOp, Expr};
+use crate::engine::{AsmError, BinOp, Expr, Warning};
 
 /// Evaluate an expression against bound symbols, with `*` (the location
 /// counter) resolving to `here`. A thin PC-aware wrapper over the shared
@@ -181,6 +181,19 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
     assemble_with(source, true)
 }
 
+/// As [`assemble`], but also returns any non-fatal [`Warning`]s (e.g. an
+/// out-of-range immediate to CCR/SR). The bytes are identical to [`assemble`].
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure, or
+/// if the source uses more than one non-empty section.
+pub(crate) fn assemble_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError> {
+    let mut warnings = Vec::new();
+    let sections = assemble_core(source, true, &mut warnings)?;
+    let bytes = flatten_one_section(&sections)?;
+    Ok((bytes, warnings))
+}
+
 /// Assemble with the optimizer either on (Stage 2, matches `vasm -Fbin`) or off
 /// (Stage 1, matches `vasm -no-opt`), to a flat binary.
 ///
@@ -188,7 +201,14 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
 /// Returns an [`AsmError`] on any parse/range/symbol failure, or if more than one
 /// section carries bytes (a flat binary can hold only one).
 pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, AsmError> {
-    let sections = assemble_core(source, optimize)?;
+    let mut warnings = Vec::new();
+    let sections = assemble_core(source, optimize, &mut warnings)?;
+    flatten_one_section(&sections)
+}
+
+/// Reduce assembled sections to a single flat binary's bytes: empty is empty,
+/// one section is its bytes, and more than one is an error (`-Fbin` holds one).
+fn flatten_one_section(sections: &[SecOut]) -> Result<Vec<u8>, AsmError> {
     let nonempty: Vec<&SecOut> = sections.iter().filter(|s| !s.bytes.is_empty()).collect();
     match nonempty.as_slice() {
         [] => Ok(Vec::new()),
@@ -205,7 +225,10 @@ pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, Asm
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
 pub(crate) fn assemble_exe(source: &str) -> Result<Vec<u8>, AsmError> {
-    let sections = assemble_core(source, true)?;
+    // The hunk-exe path discards warnings for now (the CLI surfaces them on the
+    // flat path via `assemble_warned`); the bytes are unaffected either way.
+    let mut warnings = Vec::new();
+    let sections = assemble_core(source, true, &mut warnings)?;
     Ok(serialize_hunkexe(&sections))
 }
 
@@ -233,7 +256,11 @@ struct Ctx {
 
 /// Assemble into per-section byte buffers with their relocations — the shared
 /// core behind both the flat and the hunk-executable serializers.
-fn assemble_core(source: &str, optimize: bool) -> Result<Vec<SecOut>, AsmError> {
+fn assemble_core(
+    source: &str,
+    optimize: bool,
+    warnings: &mut Vec<Warning>,
+) -> Result<Vec<SecOut>, AsmError> {
     let stmts = parse(source)?;
 
     // Assign every statement to a section. A `section` directive opens one;
@@ -349,8 +376,9 @@ fn assemble_core(source: &str, optimize: bool) -> Result<Vec<SecOut>, AsmError> 
             } => {
                 let here = buf.bytes.len() as i64;
                 let size = branch_size(ctx.optimize, &s.kind, size, word_branch[i]);
-                let (bytes, relocs) =
-                    encode(mnemonic, size, operands, &ctx, &consts, sec, here, s.line)?;
+                let (bytes, relocs) = encode(
+                    mnemonic, size, operands, &ctx, &consts, sec, here, s.line, warnings,
+                )?;
                 buf.bytes.extend_from_slice(&bytes);
                 buf.relocs.extend(relocs);
             }
@@ -544,6 +572,7 @@ fn encode(
     cur_sec: usize,
     here: i64,
     line: usize,
+    warnings: &mut Vec<Warning>,
 ) -> Result<(Vec<u8>, Vec<Reloc>), AsmError> {
     let (mnemonic, operands, size_override) = lower(mnemonic, size, operands, ctx, consts);
     let operands = operands.as_ref();
@@ -616,6 +645,17 @@ fn encode(
             }
             (Slot::ImmWord, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
+                // `#imm,CCR` (byte) / `#imm,SR` (word) carry the operand in a
+                // word extension. An out-of-range immediate isn't fatal — vasm
+                // emits the low half and warns (2037). Mirror that advisory; the
+                // bytes stay byte-identical either way.
+                let targets_ccr = form.operands.iter().any(|s| matches!(s, Slot::Ccr));
+                let targets_sr = form.operands.iter().any(|s| matches!(s, Slot::Sr));
+                if (targets_ccr && !(-128..=255).contains(&v))
+                    || (targets_sr && !(-32768..=65535).contains(&v))
+                {
+                    warnings.push(Warning::new(line, "immediate operand out of range"));
+                }
                 ext.extend_from_slice(&(v as u16).to_be_bytes());
             }
             (Slot::ImmSized, Opnd::Imm(e)) => {

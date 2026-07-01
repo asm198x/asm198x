@@ -196,7 +196,10 @@ fn run(args: &[String]) -> Result<String, String> {
                 out_path.display()
             ));
         }
-        let code = asm198x::assemble_vasm(&source).map_err(|e| e.to_string())?;
+        let (code, warnings) = asm198x::assemble_vasm_warned(&source).map_err(|e| e.to_string())?;
+        for w in &warnings {
+            eprintln!("asm198x: {input}: {w}");
+        }
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
         std::fs::write(&out_path, &code)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;

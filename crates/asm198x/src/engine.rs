@@ -57,6 +57,35 @@ impl fmt::Display for AsmError {
 
 impl std::error::Error for AsmError {}
 
+/// A non-fatal assembly advisory, with the 1-based source line it applies to
+/// (0 = no specific line). Reference assemblers assemble *and* flag questionable
+/// source (e.g. an immediate too wide for its operand); a `Warning` carries that
+/// signal without failing the assembly. The bytes are still produced.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct Warning {
+    pub line: usize,
+    pub message: String,
+}
+
+impl Warning {
+    pub(crate) fn new(line: usize, message: impl Into<String>) -> Self {
+        Self {
+            line,
+            message: message.into(),
+        }
+    }
+}
+
+impl fmt::Display for Warning {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        if self.line == 0 {
+            write!(f, "warning: {}", self.message)
+        } else {
+            write!(f, "line {}: warning: {}", self.line, self.message)
+        }
+    }
+}
+
 // ---------------------------------------------------------------------------
 // Expressions — the shared engine IR
 // ---------------------------------------------------------------------------
