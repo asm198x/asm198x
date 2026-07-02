@@ -7,12 +7,14 @@
 //! 6502 lacks — the 65C02 additions the HuC6280 inherits, the Rockwell bit
 //! instructions (`rmb`/`smb`/`bbr`/`bbs`), and the HuC6280-specific instructions.
 //!
-//! This module holds the **fixed-slot** forms — everything whose encoding is an
-//! opcode plus fixed-width operand slots. The HuC6280's exotic forms (the
-//! block transfers `tii`/`tdd`/`tia`/`tai`/`tin`, `st0`–`st2`, `tam`/`tma`,
-//! `tst`, `bsr`) are computed-operand / multi-field encodings that the engine
-//! lays down through the `Operation::Encoded` seam; they are added in a later
-//! increment (see `decisions/huc6280-addition.md`).
+//! Every HuC6280 encoding is an opcode plus fixed-width operand slots, so the
+//! whole set — including the instructions the manual calls exotic — lives in
+//! the fixed-slot [`Form`] model. The block transfers (`tii`/`tdd`/`tia`/`tai`/
+//! `tin`) are an opcode followed by three 16-bit little-endian words
+//! (source, destination, length); `tst` is an immediate mask plus a memory
+//! operand; `st0`–`st2`, `tam`, `tma` take one immediate; `bsr` is an 8-bit
+//! relative like `bra`. None need the engine's computed-operand seam — a
+//! multi-operand `Form` lays them all down (see `decisions/huc6280-addition.md`).
 //!
 //! **Provenance.** Authored from the manufacturer's *HuC6280 CMOS 8-bit
 //! Microprocessor Software Manual* (in the primary library at
@@ -46,6 +48,11 @@ const ONE_ABS: &[Operand] = &[ABS];
 const ONE_REL: &[Operand] = &[REL];
 /// `bbr`/`bbs`: a zero-page byte to test, then a PC-relative branch target.
 const DP_REL: &[Operand] = &[DP, REL];
+/// `tst #imm, <mem>`: an immediate test mask, then the memory operand.
+const IMM_DP: &[Operand] = &[IMM8, DP];
+const IMM_ABS: &[Operand] = &[IMM8, ABS];
+/// Block transfer `tii src, dst, len`: three 16-bit little-endian words.
+const BLOCK: &[Operand] = &[ABS, ABS, ABS];
 
 /// The HuC6280 extension set: what the 6502 set lacks. Fixed-slot forms only.
 pub const SET: InstructionSet = InstructionSet {
@@ -182,6 +189,33 @@ const INSTRUCTIONS: &[Instruction] = &[
     inst!("CMP", "Compare accumulator",      [form(&[0xD2], "(indirect)", ONE_DP, Cycles::fixed(7), "NZC")]),
     inst!("SBC", "Subtract with carry",      [form(&[0xF2], "(indirect)", ONE_DP, Cycles::fixed(7), "NZCV")]),
 
+    // --- HuC6280 I/O + MMU stores: opcode plus one immediate ----------------
+    // ST0-2 write the VDC port strobe/data; TAM/TMA map/read the MMU registers.
+    inst!("ST0", "Store immediate to VDC address register", [form(&[0x03], "immediate", ONE_IMM8, Cycles::fixed(4), "")]),
+    inst!("ST1", "Store immediate to VDC data (low)",        [form(&[0x13], "immediate", ONE_IMM8, Cycles::fixed(4), "")]),
+    inst!("ST2", "Store immediate to VDC data (high)",       [form(&[0x23], "immediate", ONE_IMM8, Cycles::fixed(4), "")]),
+    inst!("TAM", "Transfer A to MMU register",               [form(&[0x53], "immediate", ONE_IMM8, Cycles::fixed(5), "")]),
+    inst!("TMA", "Transfer MMU register to A",               [form(&[0x43], "immediate", ONE_IMM8, Cycles::fixed(4), "NZ")]),
+
+    // --- HuC6280 TST: AND a memory byte with an immediate mask, set flags ----
+    inst!("TST", "Test memory bits against immediate", [
+        form(&[0x83], "immediate,zeropage",   IMM_DP,  Cycles::fixed(7), "NZV"),
+        form(&[0x93], "immediate,absolute",   IMM_ABS, Cycles::fixed(8), "NZV"),
+        form(&[0xA3], "immediate,zeropage,x", IMM_DP,  Cycles::fixed(7), "NZV"),
+        form(&[0xB3], "immediate,absolute,x", IMM_ABS, Cycles::fixed(8), "NZV"),
+    ]),
+
+    // --- HuC6280 BSR: branch to subroutine (8-bit relative, like BRA) --------
+    inst!("BSR", "Branch to subroutine", [form(&[0x44], "relative", ONE_REL, Cycles::branch(8), "")]),
+
+    // --- HuC6280 block transfers: opcode + src, dst, len (three 16-bit LE) ---
+    // Bytes: opcode, src-lo, src-hi, dst-lo, dst-hi, len-lo, len-hi.
+    inst!("TII", "Block transfer, increment src + dst",  [form(&[0x73], "block", BLOCK, Cycles::fixed(17), "")]),
+    inst!("TDD", "Block transfer, decrement src + dst",  [form(&[0xC3], "block", BLOCK, Cycles::fixed(17), "")]),
+    inst!("TIN", "Block transfer, increment src, fixed dst", [form(&[0xD3], "block", BLOCK, Cycles::fixed(17), "")]),
+    inst!("TIA", "Block transfer, increment src, alternate dst", [form(&[0xE3], "block", BLOCK, Cycles::fixed(17), "")]),
+    inst!("TAI", "Block transfer, alternate src, increment dst", [form(&[0xF3], "block", BLOCK, Cycles::fixed(17), "")]),
+
     // --- Rockwell RMB0-7 / SMB0-7: reset/set a memory bit (zero-page) --------
     bit_zp!("RMB0", 0x07), bit_zp!("RMB1", 0x17), bit_zp!("RMB2", 0x27), bit_zp!("RMB3", 0x37),
     bit_zp!("RMB4", 0x47), bit_zp!("RMB5", 0x57), bit_zp!("RMB6", 0x67), bit_zp!("RMB7", 0x77),
@@ -217,6 +251,35 @@ mod tests {
         assert_eq!(op("SMB7", "zeropage"), Some(&[0xF7][..]));
         assert_eq!(op("BBR0", "zeropage,relative"), Some(&[0x0F][..]));
         assert_eq!(op("BBS7", "zeropage,relative"), Some(&[0xFF][..]));
+        // HuC6280 exotic forms (fixed-slot).
+        assert_eq!(op("ST0", "immediate"), Some(&[0x03][..]));
+        assert_eq!(op("TAM", "immediate"), Some(&[0x53][..]));
+        assert_eq!(op("TMA", "immediate"), Some(&[0x43][..]));
+        assert_eq!(op("TST", "immediate,zeropage"), Some(&[0x83][..]));
+        assert_eq!(op("TST", "immediate,absolute,x"), Some(&[0xB3][..]));
+        assert_eq!(op("BSR", "relative"), Some(&[0x44][..]));
+        assert_eq!(op("TII", "block"), Some(&[0x73][..]));
+        assert_eq!(op("TAI", "block"), Some(&[0xF3][..]));
+    }
+
+    /// The block transfers carry three 16-bit operands (src, dst, len), so the
+    /// whole encoding is opcode + 6 bytes = 7 bytes.
+    #[test]
+    fn block_transfer_is_seven_bytes() {
+        let f = SET.find_form("TII", "block").expect("tii");
+        assert_eq!(f.operands.len(), 3);
+        assert!(f.operands.iter().all(|o| o.bytes == 2));
+        assert_eq!(f.len(), 7); // opcode + 3 * 16-bit
+    }
+
+    /// `tst` carries two operands: the immediate mask, then the memory operand.
+    #[test]
+    fn tst_has_immediate_then_memory() {
+        let f = SET.find_form("TST", "immediate,absolute").expect("tst abs");
+        assert_eq!(f.operands.len(), 2);
+        assert_eq!(f.operands[0].kind, OperandKind::Immediate);
+        assert_eq!(f.operands[1].kind, OperandKind::Address);
+        assert_eq!(f.len(), 4); // opcode + imm + 16-bit addr
     }
 
     /// `bbr`/`bbs` carry two operands: the tested zero-page byte, then the

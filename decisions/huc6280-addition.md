@@ -31,10 +31,15 @@ reference.
    (implied register ops `sax`/`say`/`sxy`/`cla`/`clx`/`cly`/`csl`/`csh`/`set`,
    and everything that fits the existing single-operand form model). Conformance
    for this slice.
-2. **Exotic forms** — `st0`/`st1`/`st2` (`#imm`), `tam`/`tma`, `tst`, `bsr`
-   (relative), and the block transfers `tii`/`tdd`/`tia`/`tai`/`tin` — 7-byte,
-   three 16-bit operands, which need the engine's computed-operand seam
-   (`Operation::Encoded`/`Piece`, as 6809 uses) rather than a fixed slot.
+2. **Exotic forms** — `st0`/`st1`/`st2` (`#imm`), `tam`/`tma`, `tst`
+   (`#imm` + memory), `bsr` (relative), and the block transfers
+   `tii`/`tdd`/`tia`/`tai`/`tin` (opcode + three 16-bit little-endian words:
+   source, destination, length). Probing `ca65 --cpu huc6280` confirmed every
+   one is a fixed-width layout, so they land as multi-operand fixed-slot `Form`s
+   — **no** computed-operand seam (`Operation::Encoded`/`Piece`) needed. The
+   initial plan expected the block transfers to need the seam; the byte probe
+   showed a plain 7-byte fixed encoding instead. Spec-side conformance for this
+   slice; dialect parsing of the multi-operand syntax is Phase 3.
 3. **Disassembler + full conformance sweep.**
 
 ## Provenance
