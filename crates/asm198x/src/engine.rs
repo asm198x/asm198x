@@ -263,17 +263,21 @@ pub(crate) enum Piece {
         rel: bool,
         signed: bool,
     },
-    /// A value packed into `bytes` bytes (in the CPU's endianness), range-checked
-    /// in pass 2 against `min..=max`, then masked to `mask` and OR-ed with
-    /// `or_bits`. `expr` carries the raw (possibly `Pc`-relative) value, so the
-    /// check sees the real number before the low bits are masked out and the high
-    /// mode flags are set. This is the 2650's relative / page-zero / absolute
-    /// operand, where the low bits are a displacement or address and the high
-    /// bits carry indirect and index-control flags. `what` names the field in the
-    /// range error.
+    /// A value packed into `bytes` bytes (in the CPU's endianness), resolved in
+    /// pass 2. `expr` carries the raw (possibly `Pc`-relative) value. It is first
+    /// divided by `scale` — which must divide it exactly, else a range error
+    /// (the PDP-11's word-scaled branch, whose byte distance must be even —
+    /// `asl`'s "jump distance is odd"); `scale` of 1 is the plain case. The
+    /// scaled value is range-checked against `min..=max`, then masked to `mask`
+    /// and OR-ed with `or_bits`. So the check sees the real number before the low
+    /// bits are masked out and the high mode flags are set. This is the 2650's
+    /// relative / page-zero / absolute operand (low bits a displacement or
+    /// address, high bits indirect and index-control flags) and the PDP-11's
+    /// word-scaled branch / `SOB` offset. `what` names the field in the error.
     Packed {
         expr: Expr,
         bytes: u8,
+        scale: i64,
         min: i64,
         max: i64,
         mask: u32,
@@ -554,13 +558,21 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                         Piece::Packed {
                             expr,
                             bytes: width,
+                            scale,
                             min,
                             max,
                             mask,
                             or_bits,
                             what,
                         } => {
-                            let v = expr.eval(&symbols, pc, s.line)?;
+                            let raw = expr.eval(&symbols, pc, s.line)?;
+                            if *scale != 1 && raw % *scale != 0 {
+                                return Err(AsmError::new(
+                                    s.line,
+                                    format!("{what} ({raw}) is not a multiple of {scale}"),
+                                ));
+                            }
+                            let v = raw / *scale;
                             if !(*min..=*max).contains(&v) {
                                 return Err(AsmError::new(
                                     s.line,

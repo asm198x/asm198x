@@ -2349,6 +2349,210 @@ fn render_tms7000(mn: &str, form: &isa::Form, vals: &[i64], addr: u16, len: usiz
     }
 }
 
+// ---------------------------------------------------------------------------
+// DEC PDP-11
+// ---------------------------------------------------------------------------
+
+/// Disassemble a flat PDP-11 binary loaded at `origin`. The PDP-11 is
+/// **little-endian** with 16-bit words; each instruction is one opcode word plus
+/// 0–2 extension words (index displacements, immediates, absolute addresses, or
+/// PC-relative displacements). Undecodable words render as `word` data, a
+/// trailing odd byte as `byte`.
+#[must_use]
+pub fn disassemble_pdp11(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if pos + 1 >= code.len() {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!("byte 0x{:02X}", code[pos]),
+            });
+            pos += 1;
+            continue;
+        }
+        let word = u16::from_le_bytes([code[pos], code[pos + 1]]);
+        match decode_pdp11(code, pos, addr) {
+            Some((text, len)) => {
+                out.push(Line {
+                    addr: u32::from(addr),
+                    bytes: code[pos..pos + len].to_vec(),
+                    text,
+                });
+                pos += len;
+            }
+            None => {
+                out.push(Line {
+                    addr: u32::from(addr),
+                    bytes: code[pos..pos + 2].to_vec(),
+                    text: format!("word 0x{word:04X}"),
+                });
+                pos += 2;
+            }
+        }
+    }
+    out
+}
+
+/// Render a PDP-11 disassembly as reassemblable `asl` source.
+#[must_use]
+pub fn listing_pdp11(code: &[u8], origin: u16) -> String {
+    let mut s = format!("\tcpu MICROPDP-11/93\n\torg 0x{origin:04X}\n");
+    for line in disassemble_pdp11(code, origin) {
+        s.push('\t');
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s.push_str("\tend\n");
+    s
+}
+
+/// Render one operand from its 6-bit field, reading an extension word from
+/// `code` at byte offset `ext_off` when the mode needs one. Returns the operand
+/// text and the number of extension words consumed (0 or 1), or `None` if the
+/// needed word runs past the buffer.
+///
+/// `instr_addr` is the opcode word's address and `ext_ord` the 0-based index of
+/// this operand's extension word among the instruction's — together they place
+/// the PC-relative base (the address just past this word). `imm_ok` says whether
+/// `asl` accepts immediate mode (`#n`) here: it only does in a *source* field,
+/// so in a destination field the same encoding (mode 2, reg 7) is rendered as
+/// the raw `(pc)+` (no extension word — the value becomes the next datum), which
+/// `asl` accepts anywhere.
+fn pdp11_read_ea(
+    code: &[u8],
+    ext_off: usize,
+    field: u16,
+    instr_addr: u16,
+    ext_ord: usize,
+    imm_ok: bool,
+) -> Option<(String, usize)> {
+    let (mode, reg) = (field >> 3, field & 7);
+    // Which reg-7 / index modes carry an extension word here.
+    let has_ext = match mode {
+        6 | 7 => true,
+        3 if reg == 7 => true,
+        2 if reg == 7 => imm_ok,
+        _ => false,
+    };
+    if has_ext && ext_off + 2 > code.len() {
+        return None;
+    }
+    let ext = || u16::from_le_bytes([code[ext_off], code[ext_off + 1]]);
+
+    if reg == 7 {
+        match mode {
+            2 if imm_ok => return Some((format!("#0x{:04X}", ext()), 1)),
+            3 => return Some((format!("@#0x{:04X}", ext()), 1)),
+            6 | 7 => {
+                // Relative: base = the address just past this extension word.
+                let base = instr_addr.wrapping_add(4 + 2 * ext_ord as u16);
+                let target = base.wrapping_add(ext());
+                let s = if mode == 6 {
+                    format!("0x{target:04X}")
+                } else {
+                    format!("@0x{target:04X}")
+                };
+                return Some((s, 1));
+            }
+            _ => {} // modes 0,1,4,5 (and 2 when !imm_ok) fall through to r7 forms
+        }
+    }
+    let r = format!("r{reg}");
+    let s = match mode {
+        0 => r,
+        1 => format!("({r})"),
+        2 => format!("({r})+"),
+        3 => format!("@({r})+"),
+        4 => format!("-({r})"),
+        5 => format!("@-({r})"),
+        6 => return Some((format!("0x{:04X}({r})", ext()), 1)),
+        7 => return Some((format!("@0x{:04X}({r})", ext()), 1)),
+        _ => unreachable!(),
+    };
+    Some((s, 0))
+}
+
+/// Whether `asl` accepts immediate mode (`#n`) in a single-operand instruction's
+/// operand — true only for the ops whose operand is an ISA *source* field
+/// (`JMP`'s address, the previous-space / status *reads*), false for the
+/// read-modify-write and store ops.
+fn pdp11_single_imm_ok(mn: &str) -> bool {
+    matches!(mn, "JMP" | "MFPI" | "MFPD" | "MTPS" | "CSM")
+}
+
+/// Decode one PDP-11 instruction at byte offset `pos`, `instr_addr` its load
+/// address. Returns the reassemblable text and the total byte length, or `None`
+/// for an undecodable / illegal word (rendered as `word` data by the caller).
+fn decode_pdp11(code: &[u8], pos: usize, instr_addr: u16) -> Option<(String, usize)> {
+    use isa::pdp11::Class;
+    let word = u16::from_le_bytes([code[pos], code[pos + 1]]);
+    let insn = isa::pdp11::decode(word)?;
+    let mn = insn.mnemonic.to_ascii_lowercase();
+
+    // Read an operand at the running extension-word cursor, advancing it.
+    let mut ord = 0usize;
+    let mut off = pos + 2;
+    let mut read = |field: u16, imm_ok: bool| -> Option<String> {
+        let (s, w) = pdp11_read_ea(code, off, field, instr_addr, ord, imm_ok)?;
+        ord += w;
+        off += 2 * w;
+        Some(s)
+    };
+
+    let text = match insn.class {
+        Class::Double => {
+            let (src, dst) = ((word >> 6) & 0x3F, word & 0x3F);
+            let dst_imm_ok = matches!(insn.mnemonic, "CMP" | "BIT" | "CMPB" | "BITB");
+            let s = read(src, true)?;
+            let d = read(dst, dst_imm_ok)?;
+            format!("{mn} {s},{d}")
+        }
+        Class::Single => {
+            let dst = word & 0x3F;
+            // JMP / WRTLCK on a register (mode 0) are illegal — `asl` rejects them.
+            if matches!(insn.mnemonic, "JMP" | "WRTLCK") && dst >> 3 == 0 {
+                return None;
+            }
+            let d = read(dst, pdp11_single_imm_ok(insn.mnemonic))?;
+            format!("{mn} {d}")
+        }
+        Class::Jsr => {
+            let (reg, dst) = ((word >> 6) & 7, word & 0x3F);
+            let d = read(dst, true)?;
+            format!("{mn} r{reg},{d}")
+        }
+        Class::RegSrc => {
+            let (reg, src) = ((word >> 6) & 7, word & 0x3F);
+            let s = read(src, true)?;
+            format!("{mn} {s},r{reg}")
+        }
+        Class::Xor => {
+            let (reg, dst) = ((word >> 6) & 7, word & 0x3F);
+            let d = read(dst, false)?;
+            format!("{mn} r{reg},{d}")
+        }
+        Class::Rts => format!("{mn} r{}", word & 7),
+        Class::Branch => {
+            let off8 = i32::from(word & 0xFF) - if word & 0x80 != 0 { 256 } else { 0 };
+            let target = instr_addr.wrapping_add(2).wrapping_add((2 * off8) as u16);
+            format!("{mn} 0x{target:04X}")
+        }
+        Class::Sob => {
+            let (reg, off6) = ((word >> 6) & 7, word & 0x3F);
+            let target = instr_addr.wrapping_add(2).wrapping_sub(2 * off6);
+            format!("{mn} r{reg},0x{target:04X}")
+        }
+        Class::Trap => format!("{mn} 0x{:02X}", word & 0xFF),
+        Class::Mark => format!("{mn} 0x{:02X}", word & 0x3F),
+        Class::Spl => format!("{mn} {}", word & 7),
+        Class::NoArg => mn,
+    };
+    Some((text, off - pos))
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]

@@ -203,6 +203,7 @@ pub mod m68k;
 pub mod mos6502;
 pub mod mos65816;
 pub mod mos6809;
+pub mod pdp11;
 pub mod s2650;
 pub mod scmp;
 pub mod sm83;
