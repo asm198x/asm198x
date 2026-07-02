@@ -1597,6 +1597,103 @@ fn render_i8080(mnemonic: &str, mode: &str, values: &[i64]) -> String {
     format!("{m} {out}")
 }
 
+// ---------------------------------------------------------------------------
+// Motorola 6800 disassembly — single-byte opcodes, big-endian, Motorola syntax
+// ---------------------------------------------------------------------------
+
+/// Disassemble a flat 6800 binary loaded at `origin`, rendering `asl` Motorola
+/// syntax. Single-byte opcodes; 16-bit operands are big-endian. Branches are
+/// PC-relative, so the listing carries its origin. Unknown bytes become `fcb`.
+#[must_use]
+pub fn disassemble_m6800(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if let Some((mn, mode, vals, len)) = decode_m6800(code, pos) {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: code[pos..pos + len].to_vec(),
+                text: render_m6800(mn, mode, &vals, addr, len),
+            });
+            pos += len;
+        } else {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!("fcb ${:02X}", code[pos]),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render a 6800 disassembly as reassemblable `asl` source (Motorola syntax).
+#[must_use]
+pub fn listing_m6800(code: &[u8], origin: u16) -> String {
+    let mut s = format!("\tcpu 6800\n\torg ${origin:04X}\n");
+    for line in disassemble_m6800(code, origin) {
+        s.push('\t');
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s.push_str("\tend\n");
+    s
+}
+
+fn decode_m6800(code: &[u8], pos: usize) -> Option<(&'static str, &'static str, Vec<i64>, usize)> {
+    let b = *code.get(pos)?;
+    let (mn, form) = isa::m6800::SET
+        .instructions
+        .iter()
+        .flat_map(|insn| insn.forms.iter().map(move |f| (insn.mnemonic, f)))
+        .find(|(_, f)| f.opcode == [b])?;
+
+    let mut vals = Vec::new();
+    let mut off = pos + 1;
+    for operand in form.operands {
+        let n = operand.bytes as usize;
+        // 6800 is big-endian: high byte first.
+        let mut v: i64 = 0;
+        for k in 0..n {
+            v = (v << 8) | i64::from(*code.get(off + k)?);
+        }
+        if matches!(operand.kind, isa::OperandKind::RelativePc) && v & 0x80 != 0 {
+            v -= 0x100;
+        }
+        vals.push(v);
+        off += n;
+    }
+    Some((mn, form.mode, vals, off - pos))
+}
+
+/// Render a decoded 6800 instruction to Motorola `asl` syntax. The mode label
+/// selects the operand shape; an immediate's width comes from the instruction
+/// length (2 bytes ⇒ 8-bit, 3 ⇒ 16-bit).
+fn render_m6800(mnemonic: &str, mode: &str, values: &[i64], addr: u16, len: usize) -> String {
+    let m = mnemonic.to_ascii_lowercase();
+    let v = values.first().copied().unwrap_or(0);
+    let operand = match mode {
+        "inherent" => String::new(),
+        "immediate" if len == 3 => format!("#${:04X}", v & 0xFFFF),
+        "immediate" => format!("#${:02X}", v & 0xFF),
+        "direct" => format!("${:02X}", v & 0xFF),
+        "extended" => format!("${:04X}", v & 0xFFFF),
+        "indexed" => format!("${:02X},x", v & 0xFF),
+        "relative" => {
+            let target = addr.wrapping_add(len as u16).wrapping_add(v as u16);
+            format!("${target:04X}")
+        }
+        other => other.to_string(),
+    };
+    if operand.is_empty() {
+        m
+    } else {
+        format!("{m} {operand}")
+    }
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]

@@ -7,9 +7,34 @@
 //! `asm198x-and-shared-isa-spec.md`.
 
 use crate::{
-    assemble_acme, assemble_i8080, assemble_pasmonext, assemble_rgbasm, assemble_vasm,
-    listing_6502, listing_68000, listing_i8080, listing_sm83, listing_z80,
+    assemble_acme, assemble_i8080, assemble_m6800, assemble_pasmonext, assemble_rgbasm,
+    assemble_vasm, listing_6502, listing_68000, listing_i8080, listing_m6800, listing_sm83,
+    listing_z80,
 };
+
+#[test]
+fn round_trips_m6800_through_asl_syntax() {
+    // Motorola syntax, big-endian, all six addressing modes.
+    let source = "\
+        \torg $0100\n\
+        start:\n\
+        \tldx #$1234\n\
+        \tldaa #$42\n\
+        \tstaa $80\n\
+        \tldab $2000\n\
+        \tadda $05,x\n\
+        \tinx\n\
+        \tcmpa #$00\n\
+        \tbne start\n\
+        \tjsr $05,x\n\
+        \tjmp $3000\n\
+        \tclra\n\
+        \trts\n";
+    let original = assemble_m6800(source).expect("assemble");
+    let listing = listing_m6800(&original.bytes, original.origin);
+    let re = assemble_m6800(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
 
 #[test]
 fn round_trips_i8080_through_asl_syntax() {

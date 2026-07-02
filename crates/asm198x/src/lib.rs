@@ -44,9 +44,9 @@ mod sna;
 pub use engine::{AsmError, Assembly, Warning};
 pub use isa_disasm::{
     Line, disassemble_6502, disassemble_6809, disassemble_65816, disassemble_68000,
-    disassemble_huc6280, disassemble_i8080, disassemble_sm83, disassemble_z80, listing_6502,
-    listing_6809, listing_65816, listing_68000, listing_huc6280, listing_i8080, listing_sm83,
-    listing_z80,
+    disassemble_huc6280, disassemble_i8080, disassemble_m6800, disassemble_sm83, disassemble_z80,
+    listing_6502, listing_6809, listing_65816, listing_68000, listing_huc6280, listing_i8080,
+    listing_m6800, listing_sm83, listing_z80,
 };
 pub use prg::prg;
 pub use sna::sna_48k;
@@ -158,6 +158,17 @@ pub fn assemble_rgbasm(source: &str) -> Result<Assembly, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_i8080(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::I8080)
+}
+
+/// Assemble Motorola-syntax 6800 source into a flat big-endian binary at the
+/// `org`, over [`isa::m6800`]. Motorola `$`-hex, `#` immediate, `$nn,X` indexed,
+/// direct-vs-extended by size (or a `>`/`<` force). Matches `asl` (`cpu 6800`).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_m6800(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::M6800)
 }
 
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching
