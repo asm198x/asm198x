@@ -210,3 +210,4 @@ pub mod sm83;
 pub mod tms7000;
 pub mod tms9900;
 pub mod z80;
+pub mod z8000;

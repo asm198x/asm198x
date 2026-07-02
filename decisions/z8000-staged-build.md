@@ -53,8 +53,12 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
 
 ## Increment plan
 
-1. **Dyadic word/byte core** (this increment): the family above across R / IM /
-   IR / DA / X. Establishes the addressing-mode parser + the field decoder.
+1. **Dyadic word/byte core** — ✅ **landed (2026-07-02).** The family above
+   across R / IM / IR / DA / X, plus the `LD`/`LDB` store forms. Established the
+   addressing-mode parser + the field decoder + the opcode-space sweep.
+   Byte-identical to `asl` (`cpu Z8002`). (Correction from first probe: `ADC` is
+   operation `0x1A`, `SBC` `0x1B`; byte immediates replicate the byte into both
+   halves of the word.)
 2. **Long dyadic + `LDL`/`LDA`/`LDR`/`CLR`/`EX`** — the long-size opcodes
    (`LDL = 0x94`, `ADDL`, …) and the load variants.
 3. **Program control** — `JP cc,dst`, `CALL`, `JR cc`, `DJNZ`, `CALR`, `RET cc`

@@ -2708,6 +2708,153 @@ fn decode_tms9900(code: &[u8], pos: usize, instr_addr: u16) -> Option<(String, u
     Some((text, 2))
 }
 
+// ---------------------------------------------------------------------------
+// Zilog Z8000 (non-segmented Z8002) — built as increments; see
+// `decisions/z8000-staged-build.md`. Increment 1: the dyadic family.
+// ---------------------------------------------------------------------------
+
+/// Disassemble a flat Z8000 (non-segmented) binary loaded at `origin`. The
+/// Z8000 is **big-endian** with 16-bit words. Instruction groups not yet
+/// implemented (and undecodable words) render as `word` data.
+#[must_use]
+pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if pos + 1 >= code.len() {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!("byte 0{:02X}H", code[pos]),
+            });
+            pos += 1;
+            continue;
+        }
+        let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
+        match decode_z8000(code, pos) {
+            Some((text, len)) => {
+                out.push(Line {
+                    addr: u32::from(addr),
+                    bytes: code[pos..pos + len].to_vec(),
+                    text,
+                });
+                pos += len;
+            }
+            None => {
+                out.push(Line {
+                    addr: u32::from(addr),
+                    bytes: code[pos..pos + 2].to_vec(),
+                    text: format!("word 0{word:04X}H"),
+                });
+                pos += 2;
+            }
+        }
+    }
+    out
+}
+
+/// Render a Z8000 disassembly as reassemblable `asl` source.
+#[must_use]
+pub fn listing_z8000(code: &[u8], origin: u16) -> String {
+    let mut s = format!("\tcpu Z8002\n\torg 0{origin:04X}H\n");
+    for line in disassemble_z8000(code, origin) {
+        s.push('\t');
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s.push_str("\tend\n");
+    s
+}
+
+/// A Z8000 register name: word `rN`, or byte `rhN` (0–7) / `rlN` (8–15).
+fn z8000_reg(n: u16, byte: bool) -> String {
+    if !byte {
+        format!("r{n}")
+    } else if n < 8 {
+        format!("rh{n}")
+    } else {
+        format!("rl{}", n - 8)
+    }
+}
+
+/// Decode one Z8000 dyadic instruction at byte offset `pos`. Returns the
+/// reassemblable text and total byte length, or `None` for a word this
+/// increment doesn't decode (rendered as `word` data by the caller).
+fn decode_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+    let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
+    let (top, second) = ((word >> 8) as u8, word & 0xFF);
+    let mm = u16::from(top >> 6);
+    let insn = isa::z8000::decode_dyadic(top, mm as u8)?;
+    let mn = insn.mnemonic.to_ascii_lowercase();
+    let byte = insn.byte;
+    let ext = || -> Option<u16> {
+        if pos + 4 > code.len() {
+            return None;
+        }
+        Some(u16::from_be_bytes([code[pos + 2], code[pos + 3]]))
+    };
+
+    if insn.store {
+        // Register → memory. Second byte: pointer/index high, source reg low.
+        let (field, srcreg) = (second >> 4, second & 0xF);
+        let src = z8000_reg(srcreg, byte);
+        return match mm {
+            0 => {
+                if field == 0 {
+                    return None; // @R0 is not a legal pointer
+                }
+                Some((format!("{mn} @r{field},{src}"), 2))
+            }
+            1 => {
+                let addr = ext()?;
+                let dst = if field == 0 {
+                    format!("0{addr:04X}H")
+                } else {
+                    format!("0{addr:04X}H(r{field})")
+                };
+                Some((format!("{mn} {dst},{src}"), 4))
+            }
+            _ => None,
+        };
+    }
+
+    // Source into register. Second byte: source field high, dest reg low.
+    let (field, dstreg) = (second >> 4, second & 0xF);
+    let dst = z8000_reg(dstreg, byte);
+    match mm {
+        2 => Some((format!("{mn} {dst},{}", z8000_reg(field, byte)), 2)),
+        0 => {
+            if field == 0 {
+                // Immediate; a byte op replicates the byte into both halves, so a
+                // word whose halves differ is not a canonical byte immediate.
+                let imm = ext()?;
+                let src = if byte {
+                    if imm >> 8 != imm & 0xFF {
+                        return None;
+                    }
+                    format!("#0{:02X}H", imm & 0xFF)
+                } else {
+                    format!("#0{imm:04X}H")
+                };
+                Some((format!("{mn} {dst},{src}"), 4))
+            } else {
+                Some((format!("{mn} {dst},@r{field}"), 2))
+            }
+        }
+        1 => {
+            let addr = ext()?;
+            let src = if field == 0 {
+                format!("0{addr:04X}H")
+            } else {
+                format!("0{addr:04X}H(r{field})")
+            };
+            Some((format!("{mn} {dst},{src}"), 4))
+        }
+        _ => None,
+    }
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]

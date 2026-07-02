@@ -25,6 +25,7 @@ pub(crate) mod tms7000;
 pub(crate) mod tms9900;
 pub(crate) mod vasm;
 pub(crate) mod z80;
+pub(crate) mod z8000;
 
 pub(crate) use acme::Acme;
 pub(crate) use ca65_816::Ca65_816;
@@ -43,3 +44,4 @@ pub(crate) use scmp::Scmp;
 pub(crate) use sjasmplus::Sjasmplus;
 pub(crate) use tms7000::Tms7000;
 pub(crate) use tms9900::Tms9900;
+pub(crate) use z8000::Z8000;
