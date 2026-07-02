@@ -17,7 +17,7 @@
 
 use std::collections::BTreeMap;
 
-use crate::dialect::Dialect;
+use crate::dialect::{Dialect, Oversize};
 use crate::dialects::z80::{self, Z80Syntax};
 use crate::engine::{AsmError, Operation, Statement};
 
@@ -41,6 +41,10 @@ impl Dialect for Sjasmplus {
             self.extension_set(),
             source,
         )
+    }
+    /// sjasmplus truncates an over-range byte to its low 8 bits and warns.
+    fn oversized_byte_policy(&self) -> Oversize {
+        Oversize::TruncateWarn
     }
 }
 
@@ -167,6 +171,18 @@ mod tests {
     #[test]
     fn ds_reserves_bytes() {
         assert_eq!(asm("        ds 3\n").expect("ds").bytes, vec![0, 0, 0]);
+    }
+
+    #[test]
+    fn oversized_byte_truncates_with_a_warning() {
+        // sjasmplus keeps the low 8 bits and warns (byte-identical to sjasmplus:
+        // `ld a,$1234` -> 3e 34, one warning).
+        let a = asm("        ld a,$1234\n").expect("truncate");
+        assert_eq!(a.bytes, vec![0x3E, 0x34]);
+        assert_eq!(a.warnings.len(), 1);
+        assert!(a.warnings[0].message.contains("truncated"));
+        // In range: no warning.
+        assert!(asm("        ld a,$12\n").expect("ok").warnings.is_empty());
     }
 
     #[test]

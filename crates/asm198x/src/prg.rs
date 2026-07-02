@@ -30,6 +30,7 @@ mod tests {
             bytes: vec![0xA9, 0x01, 0x8D, 0x20, 0xD0, 0x60],
             symbols: std::collections::BTreeMap::new(),
             start: None,
+            warnings: Vec::new(),
         };
         assert_eq!(
             prg(&asm),

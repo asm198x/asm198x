@@ -228,6 +228,9 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     let assembly = assembler.assemble(&source).map_err(|e| e.to_string())?;
+    for w in &assembly.warnings {
+        eprintln!("asm198x: {input}: {w}");
+    }
 
     // `--sna`: wrap the assembled Spectrum program in a 48K snapshot rather than
     // writing a flat binary. Only the Z80/Spectrum dialects carry an entry point.

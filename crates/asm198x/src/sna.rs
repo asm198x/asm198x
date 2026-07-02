@@ -96,6 +96,7 @@ mod tests {
             bytes,
             symbols: std::collections::BTreeMap::new(),
             start,
+            warnings: Vec::new(),
         }
     }
 

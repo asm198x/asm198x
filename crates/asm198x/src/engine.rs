@@ -13,7 +13,7 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
-use crate::dialect::Dialect;
+use crate::dialect::{Dialect, Oversize};
 
 /// The result of a successful assembly: where it loads and the bytes to load.
 #[derive(Debug, Clone)]
@@ -30,6 +30,9 @@ pub struct Assembly {
     /// containers that carry a start address (a Spectrum `.sna`); `None` for a
     /// plain flat binary.
     pub start: Option<u16>,
+    /// Non-fatal advisories raised during assembly (e.g. a byte truncated to fit
+    /// its operand, sjasmplus-style). Empty for dialects that don't warn.
+    pub warnings: Vec<Warning>,
 }
 
 /// An assembly error, with the 1-based source line it occurred on (0 = no
@@ -368,6 +371,8 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
     let origin = origin.unwrap_or(0);
 
     // Pass 2 — emit.
+    let byte_policy = dialect.oversized_byte_policy();
+    let mut warnings: Vec<Warning> = Vec::new();
     let mut start: Option<u16> = None;
     let mut bytes: Vec<u8> = Vec::new();
     for s in &statements {
@@ -402,7 +407,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
             Some(Operation::Bytes(items)) => {
                 for e in items {
                     let v = e.eval(&symbols, pc, s.line)?;
-                    bytes.push(to_byte(v, s.line)?);
+                    emit_byte(&mut bytes, v, byte_policy, &mut warnings, s.line)?;
                 }
             }
             Some(Operation::Words(items)) => {
@@ -438,7 +443,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                         // byte; a Z80 `LD BC,nn` immediate is two.)
                         isa::OperandKind::Immediate | isa::OperandKind::Address => {
                             match slot.bytes {
-                                1 => bytes.push(to_byte(v, s.line)?),
+                                1 => emit_byte(&mut bytes, v, byte_policy, &mut warnings, s.line)?,
                                 2 => push_word(&mut bytes, v, s.line, set.endianness)?,
                                 // 24-bit address (65816 long addressing).
                                 3 => push_addr24(&mut bytes, v, s.line, set.endianness)?,
@@ -543,6 +548,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
         bytes,
         symbols,
         start,
+        warnings,
     })
 }
 
@@ -620,17 +626,33 @@ fn emit_value(
     Ok(())
 }
 
-fn to_byte(v: i64, line: usize) -> Result<u8, AsmError> {
-    if (0..=0xFF).contains(&v) {
-        Ok(v as u8)
-    } else if (-128..=-1).contains(&v) {
-        Ok(v as i8 as u8)
-    } else {
-        Err(AsmError::new(
-            line,
-            format!("value {v} does not fit in a byte"),
-        ))
+/// Emit a byte value, applying the dialect's over-range `policy`. A value in
+/// `-128..=255` fits and is emitted as-is; beyond that, the policy decides —
+/// error, silently keep the low 8 bits (pasmo), or keep them with a warning
+/// (sjasmplus).
+fn emit_byte(
+    bytes: &mut Vec<u8>,
+    v: i64,
+    policy: Oversize,
+    warnings: &mut Vec<Warning>,
+    line: usize,
+) -> Result<(), AsmError> {
+    if !(-128..=0xFF).contains(&v) {
+        match policy {
+            Oversize::Error => {
+                return Err(AsmError::new(
+                    line,
+                    format!("value {v} does not fit in a byte"),
+                ));
+            }
+            Oversize::Truncate => {}
+            Oversize::TruncateWarn => {
+                warnings.push(Warning::new(line, format!("value {v} truncated to a byte")));
+            }
+        }
     }
+    bytes.push((v & 0xFF) as u8);
+    Ok(())
 }
 
 fn push_word(

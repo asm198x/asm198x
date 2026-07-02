@@ -7,7 +7,7 @@
 //! plain Z80 (vanilla pasmo) or the Spectrum Next's Z80N (pasmonext) — which is
 //! a target property, not a syntax one (see `decisions/syntax-stance.md`).
 
-use crate::dialect::Dialect;
+use crate::dialect::{Dialect, Oversize};
 use crate::dialects::z80::{self, Z80Syntax};
 use crate::engine::{AsmError, Statement};
 
@@ -31,6 +31,10 @@ impl Dialect for Pasmo {
             self.extension_set(),
             source,
         )
+    }
+    /// pasmo silently truncates an over-range byte to its low 8 bits.
+    fn oversized_byte_policy(&self) -> Oversize {
+        Oversize::Truncate
     }
 }
 
@@ -74,6 +78,22 @@ impl Z80Syntax for PasmoSyntax {
 #[cfg(test)]
 mod tests {
     use crate::assemble_pasmonext as asm;
+
+    #[test]
+    fn oversized_byte_truncates_silently() {
+        // pasmo keeps the low 8 bits of an over-range byte immediate and does
+        // not warn (byte-identical to pasmo: `ld a,$1234` -> 3e 34).
+        let a = crate::assemble_pasmo("        ld a,$1234\n").expect("truncate");
+        assert_eq!(a.bytes, vec![0x3E, 0x34]);
+        assert!(a.warnings.is_empty());
+        // `defb` truncates too.
+        assert_eq!(
+            crate::assemble_pasmo("        defb $1234\n")
+                .expect("defb")
+                .bytes,
+            vec![0x34]
+        );
+    }
 
     #[test]
     fn loads_registers_and_immediates() {

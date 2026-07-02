@@ -11,6 +11,17 @@
 
 use crate::engine::{AsmError, Statement};
 
+/// What a dialect does with a value too large for the byte operand it's emitted
+/// into. The 6502/6809 assemblers (ACME, ca65, lwasm) treat it as an error; the
+/// Z80 ones accept it and keep the low 8 bits — pasmo silently, sjasmplus with a
+/// non-fatal warning.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Oversize {
+    Error,
+    Truncate,
+    TruncateWarn,
+}
+
 pub(crate) trait Dialect {
     /// The primary instruction set this dialect assembles against.
     fn instruction_set(&self) -> &'static isa::InstructionSet;
@@ -36,5 +47,13 @@ pub(crate) trait Dialect {
     /// is a legitimate default for the Z80/6809 tools (`org` optional).
     fn requires_explicit_origin(&self) -> bool {
         false
+    }
+
+    /// How to handle a value that overflows a **byte** operand (an 8-bit
+    /// immediate or a `defb`-style byte). Defaults to [`Oversize::Error`]; the
+    /// Z80 dialects override to truncate (pasmo silently, sjasmplus with a
+    /// warning), matching their reference tools.
+    fn oversized_byte_policy(&self) -> Oversize {
+        Oversize::Error
     }
 }
