@@ -260,6 +260,28 @@ mod tests {
     }
 
     #[test]
+    fn vasm_out_of_range_immediates_warn_and_match_vasm() {
+        // vasm warns (not errors) on an over-range immediate and keeps the low
+        // bits; asm198x mirrors that — same bytes, plus a non-fatal warning.
+        // (Previously asm198x errored on moveq/addq/trap and masked byte moves.)
+        let cases: &[(&str, &[u8])] = &[
+            ("\tmove.b #$1234,d0\n", &[0x10, 0x3C, 0x12, 0x34]),
+            ("\tmoveq #$1FF,d0\n", &[0x70, 0xFF]),
+            ("\taddq.w #9,d0\n", &[0x52, 0x40]),
+            ("\ttrap #16\n", &[0x4E, 0x50]),
+        ];
+        for (src, want) in cases {
+            let (bytes, warns) = assemble_vasm_warned(src).expect(src);
+            assert_eq!(bytes, *want, "bytes for {src:?}");
+            assert_eq!(warns.len(), 1, "one warning for {src:?}");
+        }
+        // In-range forms of the same instructions raise no warning.
+        let (_, warns) =
+            assemble_vasm_warned("\tmoveq #5,d0\n\taddq.w #3,d0\n\ttrap #7\n").expect("ok");
+        assert!(warns.is_empty());
+    }
+
+    #[test]
     fn vasm_pc_relative_round_trips() {
         // `move.w $10(pc),d0` at origin 0: disassembly renders the resolved
         // target, which re-assembles to the same bytes (displacement = target −

@@ -603,11 +603,10 @@ fn encode(
             }
             (Slot::Quick8, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
+                // `moveq` holds a signed byte; vasm warns (not errors) beyond a
+                // byte and keeps the low 8 bits.
                 if !(-128..=255).contains(&v) {
-                    return Err(AsmError::new(
-                        line,
-                        format!("quick immediate {v} out of range"),
-                    ));
+                    warnings.push(Warning::new(line, "immediate operand out of range"));
                 }
                 word |= u16::from(v as u8);
             }
@@ -625,23 +624,21 @@ fn encode(
             }
             (Slot::Vec4, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
+                // A trap vector is 4 bits (0..15); vasm warns (not errors) beyond
+                // and lets the value spill into the low byte of the opcode word.
                 if !(0..=15).contains(&v) {
-                    return Err(AsmError::new(
-                        line,
-                        format!("trap vector {v} must be 0..=15"),
-                    ));
+                    warnings.push(Warning::new(line, "immediate operand out of range"));
                 }
-                word |= (v as u16) & 0xF;
+                word |= (v as u16) & 0xFF;
             }
             (Slot::Quick3 { shift }, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
+                // `addq`/`subq` count is 1..8 (8 encodes as 000); vasm warns (not
+                // errors) outside that and keeps the low 3 bits.
                 if !(1..=8).contains(&v) {
-                    return Err(AsmError::new(
-                        line,
-                        format!("quick immediate {v} must be 1..=8"),
-                    ));
+                    warnings.push(Warning::new(line, "immediate operand out of range"));
                 }
-                word |= u16::from((v & 7) as u8) << shift; // 8 encodes as 000
+                word |= u16::from((v & 7) as u8) << shift;
             }
             (Slot::ImmWord, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
@@ -660,9 +657,22 @@ fn encode(
             }
             (Slot::ImmSized, Opnd::Imm(e)) => {
                 let v = eval(e, consts, here, line)?;
+                // An out-of-range immediate isn't fatal in vasm — it warns and
+                // keeps the low `size` bytes. A byte immediate normally rides
+                // zero-extended in one word (`#-1` -> `00ff`); when it overflows
+                // a byte, vasm keeps the raw low word instead (`#$1234` -> `1234`).
+                let (lo, hi): (i64, i64) = match sz {
+                    Size::B => (-128, 255),
+                    Size::W => (-32768, 65535),
+                    Size::L => (i64::from(i32::MIN), i64::from(u32::MAX)),
+                };
+                let in_range = (lo..=hi).contains(&v);
+                if !in_range {
+                    warnings.push(Warning::new(line, "immediate operand out of range"));
+                }
                 match sz {
-                    // A byte immediate rides in the low byte of one word.
-                    Size::B => ext.extend_from_slice(&[0, v as u8]),
+                    Size::B if in_range => ext.extend_from_slice(&[0, v as u8]),
+                    Size::B => ext.extend_from_slice(&(v as u16).to_be_bytes()),
                     Size::W => ext.extend_from_slice(&(v as u16).to_be_bytes()),
                     Size::L => ext.extend_from_slice(&(v as u32).to_be_bytes()),
                 }
@@ -678,7 +688,7 @@ fn encode(
                 // operand's extension words).
                 let pc_ext = here + 2 + ext.len() as i64;
                 let (field6, words, reloc) = resolve_ea(
-                    op, sz, *dest, *modes, ctx, consts, cur_sec, pc_ext, here, line,
+                    op, sz, *dest, *modes, ctx, consts, cur_sec, pc_ext, here, line, warnings,
                 )?;
                 word |= field6 << shift;
                 if let Some(target_sec) = reloc {
@@ -807,6 +817,7 @@ fn resolve_ea(
     pc_ext: i64,
     here: i64,
     line: usize,
+    warnings: &mut Vec<Warning>,
 ) -> Result<(u16, Vec<u8>, Option<usize>), AsmError> {
     let field = |mode: u16, reg: u16| {
         if dest {
@@ -896,8 +907,22 @@ fn resolve_ea(
         }
         Opnd::Imm(e) => {
             let v = eval(e, consts, here, line)?;
+            // Out-of-range isn't fatal in vasm — it warns and keeps the low
+            // `size` bytes. A byte immediate rides zero-extended in one word
+            // (`#-1` -> `00ff`); when it overflows a byte, vasm keeps the raw
+            // low word instead (`#$1234` -> `1234`).
+            let (lo, hi): (i64, i64) = match sz {
+                Size::B => (-128, 255),
+                Size::W => (-32768, 65535),
+                Size::L => (i64::from(i32::MIN), i64::from(u32::MAX)),
+            };
+            let in_range = (lo..=hi).contains(&v);
+            if !in_range {
+                warnings.push(Warning::new(line, "immediate operand out of range"));
+            }
             let words = match sz {
-                Size::B => vec![0, (v as u8)],
+                Size::B if in_range => vec![0, v as u8],
+                Size::B => (v as u16).to_be_bytes().to_vec(),
                 Size::W => (v as u16).to_be_bytes().to_vec(),
                 Size::L => (v as u32).to_be_bytes().to_vec(),
             };
