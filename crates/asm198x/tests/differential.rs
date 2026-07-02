@@ -56,6 +56,12 @@ const fn ok(dialect: &'static str, note: &'static str, body: &'static str) -> Pr
         gap: None,
     }
 }
+// Currently unused: every tracked parser gap has been closed (the last batch —
+// acme `!pet`/`!align`/`!zone`/`!set`, ca65 `.dword`/`.dbyt`/`.asciiz`,
+// sjasmplus `byte`, lwasm `fill`/`zmb`/`fqb` — was issue #26). Kept so the next
+// discovered gap is a one-line `gap(...)` entry rather than re-deriving the
+// ledger's vocabulary.
+#[allow(dead_code)]
 const fn gap(dialect: &'static str, note: &'static str, body: &'static str, issue: u32) -> Probe {
     Probe {
         dialect,
