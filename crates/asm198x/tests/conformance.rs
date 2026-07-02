@@ -221,6 +221,60 @@ fn spec_opcodes_match_reference() {
         eprintln!("SKIP: `ca65`/`ld65` not on PATH (65816)");
     }
 
+    // --- HuC6280 / ca65 (6502 base + the extension) ------------------------
+    if have("ca65") && have("ld65") {
+        let cfg = tmp.join("flatpce.cfg");
+        fs::write(
+            &cfg,
+            "MEMORY { MAIN: start=$0000, size=$10000, fill=no, file=%O; }\n\
+             SEGMENTS { CODE: load=MAIN, type=ro; }\n",
+        )
+        .expect("config");
+        let sets: [&isa::InstructionSet; 2] = [&isa::mos6502::SET, &isa::huc6280::SET];
+        for set in sets {
+            for insn in set.instructions {
+                for form in insn.forms {
+                    let mut bytes = synth(form);
+                    // `tma` reads one MMU register, so ca65 requires a
+                    // single-bit operand; the generic `$12` filler (two bits)
+                    // is rejected. Use `$02` — the opcode is still verified.
+                    // (`tam` may set several at once, so multi-bit is fine.)
+                    if insn.mnemonic == "TMA" {
+                        bytes[1] = 0x02;
+                    }
+                    let text = asm198x::listing_huc6280(&bytes, 0x0000);
+                    let reference = ref_assemble(&tmp, &text, "s", |src, out| {
+                        let obj = src.with_extension("o");
+                        let mut a = Command::new("ca65");
+                        a.args(["--cpu", "huc6280"]).arg(src).arg("-o").arg(&obj);
+                        let mut l = Command::new("ld65");
+                        l.arg("-C").arg(&cfg).arg(&obj).arg("-o").arg(out);
+                        vec![a, l]
+                    });
+                    match reference {
+                        Some(r) => {
+                            checked += 1;
+                            if r != bytes {
+                                fails.push(format!(
+                                    "huc6280 {} {}: ours {:02X?} vs ca65 {:02X?}",
+                                    insn.mnemonic, form.mode, bytes, r
+                                ));
+                            }
+                        }
+                        None => fails.push(format!(
+                            "huc6280 {} {}: ca65 rejected `{}`",
+                            insn.mnemonic,
+                            form.mode,
+                            text.lines().last().unwrap_or("").trim()
+                        )),
+                    }
+                }
+            }
+        }
+    } else {
+        eprintln!("SKIP: `ca65`/`ld65` not on PATH (huc6280)");
+    }
+
     eprintln!("audited {checked} spec forms against the reference tools");
     assert!(
         fails.is_empty(),

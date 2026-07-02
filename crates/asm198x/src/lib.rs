@@ -44,7 +44,8 @@ mod sna;
 pub use engine::{AsmError, Assembly, Warning};
 pub use isa_disasm::{
     Line, disassemble_6502, disassemble_6809, disassemble_65816, disassemble_68000,
-    disassemble_z80, listing_6502, listing_6809, listing_65816, listing_68000, listing_z80,
+    disassemble_huc6280, disassemble_z80, listing_6502, listing_6809, listing_65816, listing_68000,
+    listing_huc6280, listing_z80,
 };
 pub use prg::prg;
 pub use sna::sna_48k;
@@ -119,6 +120,20 @@ pub fn assemble_vasm_exe(source: &str) -> Result<Vec<u8>, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_ca65_816(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::Ca65_816)
+}
+
+/// Assemble ca65-syntax HuC6280 source into a flat little-endian binary — the
+/// HuC6280 (PC Engine / TurboGrafx-16 CPU) as a target extension of the 6502
+/// (`isa::mos6502` + `isa::huc6280`), mirroring the 65816 mechanism. Covers the
+/// 65C02 additions, the Rockwell bit ops, and the HuC6280-specific instructions
+/// (`st0`–`st2`, `tam`/`tma`, `tst`, `bsr`, and the block transfers). Matches
+/// `ca65 --cpu huc6280` linked flat.
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_ca65_huc6280(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::Ca65Huc6280)
 }
 
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching

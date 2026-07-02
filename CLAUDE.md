@@ -38,10 +38,12 @@ Two crates today; split further only when the per-CPU `isa` boundary or
 Emu198x's consumption makes it real.
 
 - [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`
-  + `m68k`; the Z80 set includes the Z80N extensions). Zero dependencies.
+  + `m68k` + `mos6809` + `mos65816` + `huc6280`; the Z80 set includes the Z80N
+  extensions, and `huc6280` is a 65C02-superset extension over `mos6502`). Zero
+  dependencies.
 - [`crates/isa-disasm`](crates/isa-disasm) — the spec-driven disassemblers
-  (6502, Z80, 68000, 6809, 65816), decoding against `isa`. Depends only on `isa` + std, so
-  Emu198x can consume disassembly without the assembler. See
+  (6502, Z80, 68000, 6809, 65816, HuC6280), decoding against `isa`. Depends only
+  on `isa` + std, so Emu198x can consume disassembly without the assembler. See
   [`decisions/disassembler-crate.md`](decisions/disassembler-crate.md).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
   the shared per-CPU cores, the dialect front-ends) and the `asm198x` CLI. It
@@ -77,6 +79,17 @@ curriculum corpus:
   disassembler tracks `m`/`x` via `rep`/`sep` (emitting `.aXX`/`.iXX`) so
   width-switching code round-trips. Validated byte-identical against `ca65 --cpu
   65816` (flat). Deferred: `.smart` and `@cheap` locals (source conveniences).
+- **HuC6280** — `ca65` syntax (`dialects::ca65_huc6280`, `--cpu huc6280`, also
+  `pce`) as a **target extension** of the 6502: `isa::mos6502` (primary) +
+  `isa::huc6280` (extension, the 65816 pattern). The PC Engine / TurboGrafx-16
+  CPU is a 65C02 superset, so the extension carries the 65C02 additions, the
+  Rockwell bit ops (`rmb`/`smb`/`bbr`/`bbs`), and the HuC6280-specific
+  instructions — `st0`–`st2`, `tam`/`tma`, `tst`, `bsr`, and the block transfers
+  `tii`/`tdd`/`tin`/`tia`/`tai`. Every form is fixed-slot (the block transfers
+  are opcode + three 16-bit little-endian words, so no `Encoded` seam is
+  needed); `z:`/`a:` size forces round-trip low absolutes. A spec-driven
+  disassembler (extension searched first) reassembles byte-exact. Validated
+  byte-identical against `ca65 --cpu huc6280` across all 1358 audited spec forms.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.

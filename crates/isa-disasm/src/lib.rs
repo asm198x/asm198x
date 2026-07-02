@@ -1188,6 +1188,164 @@ fn render_816(mn: &str, mode: &str, vals: &[i64], addr: u16, len: usize) -> Stri
     }
 }
 
+// ---------------------------------------------------------------------------
+// HuC6280 disassembly (6502 base + the HuC6280 extension)
+// ---------------------------------------------------------------------------
+
+/// Disassemble a flat HuC6280 (PC Engine) binary loaded at `origin`, rendering
+/// ca65 syntax. Decodes against the 6502 set plus the HuC6280 extension, the
+/// extension winning any opcode that both define. Unlike the 65816 there is no
+/// width-variable immediate, so every opcode decodes to one fixed form.
+#[must_use]
+pub fn disassemble_huc6280(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if let Some((mn, mode, vals, len)) = decode_huc6280(code, pos) {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: code[pos..pos + len].to_vec(),
+                text: render_huc6280(mn, mode, &vals, addr, len),
+            });
+            pos += len;
+        } else {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!(".byte ${:02X}", code[pos]),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render a HuC6280 disassembly as reassemblable ca65 source.
+#[must_use]
+pub fn listing_huc6280(code: &[u8], origin: u16) -> String {
+    let mut s = format!("        .org ${origin:04X}\n");
+    for line in disassemble_huc6280(code, origin) {
+        s.push_str("        ");
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s
+}
+
+/// Decode one HuC6280 instruction at `pos`. The extension is searched first so
+/// its forms win any opcode the base 6502 set also carries.
+fn decode_huc6280(
+    code: &[u8],
+    pos: usize,
+) -> Option<(&'static str, &'static str, Vec<i64>, usize)> {
+    let b = *code.get(pos)?;
+    let (mn, form) = [&isa::huc6280::SET, &isa::mos6502::SET]
+        .into_iter()
+        .flat_map(|set| set.instructions.iter())
+        .flat_map(|insn| insn.forms.iter().map(move |f| (insn.mnemonic, f)))
+        .find(|(_, f)| f.opcode == [b])?;
+
+    // Read the operand value(s), little-endian; sign-extend PC-relative ones.
+    let mut vals = Vec::new();
+    let mut off = pos + 1;
+    for operand in form.operands {
+        let n = operand.bytes as usize;
+        let mut v: i64 = 0;
+        for k in 0..n {
+            v |= i64::from(*code.get(off + k)?) << (8 * k);
+        }
+        if matches!(operand.kind, isa::OperandKind::RelativePc) {
+            let bits = n * 8;
+            if v & (1 << (bits - 1)) != 0 {
+                v -= 1 << bits;
+            }
+        }
+        vals.push(v);
+        off += n;
+    }
+    Some((mn, form.mode, vals, off - pos))
+}
+
+/// Render a decoded HuC6280 instruction to ca65 syntax. A low-address `absolute`
+/// operand takes an `a:` force so it re-assembles to the absolute form rather
+/// than zero-page (the same pin the 65816 renderer uses).
+fn render_huc6280(mn: &str, mode: &str, vals: &[i64], addr: u16, len: usize) -> String {
+    let m = mn.to_ascii_lowercase();
+    let v = vals.first().copied().unwrap_or(0);
+    // Force absolute when a 16-bit operand would otherwise fold to zero-page.
+    let abs = |val: i64| -> String {
+        let force = if (0..0x100).contains(&val) { "a:" } else { "" };
+        format!("{force}${:04X}", val & 0xFFFF)
+    };
+    let branch = |off: i64| addr.wrapping_add(len as u16).wrapping_add(off as u16);
+    let operand = match mode {
+        "implied" => String::new(),
+        "accumulator" => "a".to_string(),
+        "immediate" => format!("#${:02X}", v & 0xFF),
+        "zeropage" => format!("${:02X}", v & 0xFF),
+        "zeropage,x" => format!("${:02X},x", v & 0xFF),
+        "zeropage,y" => format!("${:02X},y", v & 0xFF),
+        "absolute" => abs(v),
+        "absolute,x" => format!("{},x", abs(v)),
+        "absolute,y" => format!("{},y", abs(v)),
+        "indirect" => format!("(${:04X})", v & 0xFFFF),
+        "(absolute,x)" => format!("(${:04X},x)", v & 0xFFFF),
+        "(indirect)" => format!("(${:02X})", v & 0xFF),
+        "(indirect,x)" => format!("(${:02X},x)", v & 0xFF),
+        "(indirect),y" => format!("(${:02X}),y", v & 0xFF),
+        "relative" => format!("${:04X}", branch(v)),
+        // bbr/bbs: `<zp>, <target>` — the second operand is the relative offset.
+        "zeropage,relative" => format!(
+            "${:02X}, ${:04X}",
+            v & 0xFF,
+            branch(vals.get(1).copied().unwrap_or(0))
+        ),
+        // tst: `#<mask>, <mem>`.
+        "immediate,zeropage" => {
+            format!(
+                "#${:02X}, ${:02X}",
+                v & 0xFF,
+                vals.get(1).copied().unwrap_or(0) & 0xFF
+            )
+        }
+        "immediate,zeropage,x" => {
+            format!(
+                "#${:02X}, ${:02X},x",
+                v & 0xFF,
+                vals.get(1).copied().unwrap_or(0) & 0xFF
+            )
+        }
+        "immediate,absolute" => {
+            format!(
+                "#${:02X}, {}",
+                v & 0xFF,
+                abs(vals.get(1).copied().unwrap_or(0))
+            )
+        }
+        "immediate,absolute,x" => {
+            format!(
+                "#${:02X}, {},x",
+                v & 0xFF,
+                abs(vals.get(1).copied().unwrap_or(0))
+            )
+        }
+        // Block transfers: `<src>, <dst>, <len>`, all 16-bit.
+        "block" => format!(
+            "${:04X}, ${:04X}, ${:04X}",
+            v & 0xFFFF,
+            vals.get(1).copied().unwrap_or(0) & 0xFFFF,
+            vals.get(2).copied().unwrap_or(0) & 0xFFFF
+        ),
+        other => other.to_string(),
+    };
+    if operand.is_empty() {
+        m
+    } else {
+        format!("{m} {operand}")
+    }
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]

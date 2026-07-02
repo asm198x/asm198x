@@ -1,6 +1,6 @@
 # HuC6280 (PC Engine) — assembler + disassembler
 
-**Status:** in progress (2026-07-02). **Issue:** #9.
+**Status:** complete (2026-07-02). **Issue:** #9.
 
 Add the Hudson HuC6280 — the PC Engine / TurboGrafx-16 CPU — as the next CPU
 after the 6502/Z80/68000/6809/65816 set. Picked over the other CPU ideas
@@ -40,7 +40,18 @@ reference.
    initial plan expected the block transfers to need the seam; the byte probe
    showed a plain 7-byte fixed encoding instead. Spec-side conformance for this
    slice; dialect parsing of the multi-operand syntax is Phase 3.
-3. **Disassembler + full conformance sweep.**
+3. **Disassembler + full conformance sweep.** Done: `dialects::ca65_huc6280`
+   (a flat ca65 front-end over `isa::mos6502` + `isa::huc6280`, with `z:`/`a:`
+   size forces), `isa_disasm::disassemble_huc6280`/`listing_huc6280` (extension
+   searched first so its forms win any shared opcode), the CLI `--cpu huc6280`
+   (also `pce`), and the HuC6280 arm of `spec_opcodes_match_reference`. The
+   sweep is byte-identical against `ca65 --cpu huc6280` across all 1358 audited
+   forms. One quirk worth recording: `ca65` requires a **single-bit** operand
+   for `tma` (it reads exactly one MMU register), so the generic `$12` synth
+   filler is rejected there — the sweep uses `$02` for `tma`; the opcode is
+   still verified. The base 6502 spec carries no undocumented opcodes, so the
+   feared NMOS-slot-vs-extension collision never arises — the tie-break
+   (extension wins) is defensive only.
 
 ## Provenance
 
