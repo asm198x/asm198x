@@ -109,6 +109,7 @@ popularity.
 | 6809 | Dragon, CoCo | **lwasm** | engine seam reused; computed postbyte (indexed) | ✅ done |
 | 65816 | SNES, Apple IIgs | **ca65** | **target extension of `mos6502` (like Z80N on Z80)** | ✅ done |
 | HuC6280 | PC Engine / TurboGrafx-16 | **ca65** (`--cpu huc6280`) | **65C02-superset extension of `mos6502` (65816 pattern); every form is fixed-slot — even the block transfers (opcode + three 16-bit words), so no computed-operand seam needed** | ✅ done — see [huc6280-addition](huc6280-addition.md) (#9) |
+| SM83 | Game Boy / Game Boy Color (LR35902) | **rgbasm** (`--cpu rgbasm`; also `sm83`/`gb`) | **fresh fixed-slot spec (`isa::sm83`) — 8080-derived, Z80-flavoured but neither, so *not* a Z80 extension; single-byte main page + CB page** | ✅ done — see [sm83-addition](sm83-addition.md) (#8) |
 | 68020+ | Amiga A1200/CD32 (68EC020), A3000 (030), A4000 (040), accelerators (060) | vasm (mot) | extends the base-68000 core | ⏸ deferred — anticipated (A1200 in scope), holding off until an A1200-class need is real |
 | later | 8080/8085, 8086, ARM2 (Archimedes), TMS9900 (TI-99) | TBD | mixed | open |
 
