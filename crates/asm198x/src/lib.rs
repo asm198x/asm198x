@@ -44,8 +44,9 @@ mod sna;
 pub use engine::{AsmError, Assembly, Warning};
 pub use isa_disasm::{
     Line, disassemble_6502, disassemble_6809, disassemble_65816, disassemble_68000,
-    disassemble_huc6280, disassemble_sm83, disassemble_z80, listing_6502, listing_6809,
-    listing_65816, listing_68000, listing_huc6280, listing_sm83, listing_z80,
+    disassemble_huc6280, disassemble_i8080, disassemble_sm83, disassemble_z80, listing_6502,
+    listing_6809, listing_65816, listing_68000, listing_huc6280, listing_i8080, listing_sm83,
+    listing_z80,
 };
 pub use prg::prg;
 pub use sna::sna_48k;
@@ -146,6 +147,17 @@ pub fn assemble_ca65_huc6280(source: &str) -> Result<Assembly, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_rgbasm(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::Rgbasm)
+}
+
+/// Assemble Intel-syntax 8080 source into a flat binary at the `org` — the
+/// classic `MOV`/`MVI`/`LXI` mnemonics with radix-suffixed numbers (`42H`),
+/// over [`isa::i8080`]. Matches `asl` (`cpu 8080`).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_i8080(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::I8080)
 }
 
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching

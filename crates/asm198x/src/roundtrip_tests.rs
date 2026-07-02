@@ -7,9 +7,33 @@
 //! `asm198x-and-shared-isa-spec.md`.
 
 use crate::{
-    assemble_acme, assemble_pasmonext, assemble_rgbasm, assemble_vasm, listing_6502, listing_68000,
-    listing_sm83, listing_z80,
+    assemble_acme, assemble_i8080, assemble_pasmonext, assemble_rgbasm, assemble_vasm,
+    listing_6502, listing_68000, listing_i8080, listing_sm83, listing_z80,
 };
+
+#[test]
+fn round_trips_i8080_through_asl_syntax() {
+    // Intel mnemonics, radix-suffixed numbers, absolute jumps (position-
+    // independent, so origin choice is free).
+    let source = "\
+        \torg 100h\n\
+        start:\n\
+        \tlxi h,1234h\n\
+        \tmvi a,42h\n\
+        \tmov m,a\n\
+        \tinx h\n\
+        \tadd b\n\
+        \tcpi 0ffh\n\
+        \tjnz start\n\
+        \tlda 2000h\n\
+        \tpush psw\n\
+        \trst 7\n\
+        \tret\n";
+    let original = assemble_i8080(source).expect("assemble");
+    let listing = listing_i8080(&original.bytes, original.origin);
+    let re = assemble_i8080(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
 
 #[test]
 fn round_trips_sm83_through_rgbasm() {

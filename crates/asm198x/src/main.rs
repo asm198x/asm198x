@@ -27,6 +27,8 @@ enum Assembler {
     Ca65Huc6280,
     /// rgbasm-syntax SM83 (Game Boy) — a flat binary.
     Rgbasm,
+    /// Intel-syntax 8080 — a flat binary.
+    I8080,
     Pasmo {
         z80n: bool,
     },
@@ -56,6 +58,7 @@ impl Assembler {
             Some("65816" | "816" | "ca65-816") => Ok(Self::Ca65_816),
             Some("huc6280" | "pce" | "pc-engine") => Ok(Self::Ca65Huc6280),
             Some("rgbasm" | "sm83" | "gb" | "gameboy" | "game-boy") => Ok(Self::Rgbasm),
+            Some("8080" | "i8080" | "intel8080") => Ok(Self::I8080),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo {
@@ -85,6 +88,7 @@ impl Assembler {
             Self::Ca65_816 => asm198x::assemble_ca65_816(source),
             Self::Ca65Huc6280 => asm198x::assemble_ca65_huc6280(source),
             Self::Rgbasm => asm198x::assemble_rgbasm(source),
+            Self::I8080 => asm198x::assemble_i8080(source),
             // ca65 and vasm produce non-flat output and are handled in `run`.
             Self::Ca65 | Self::Vasm => unreachable!("ca65/vasm handled in run()"),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
@@ -188,6 +192,9 @@ fn run(args: &[String]) -> Result<String, String> {
             }
             Assembler::Rgbasm => {
                 print!("{}", asm198x::listing_sm83(&bytes, origin));
+            }
+            Assembler::I8080 => {
+                print!("{}", asm198x::listing_i8080(&bytes, origin));
             }
         }
         return Ok(format!(
@@ -319,7 +326,8 @@ fn usage() -> String {
      dialects (syntax): acme (C64 6502; also `6502`), ca65 (NES), vasm (Amiga\n\
      \x20                 68000), lwasm (6809), 65816 (ca65 native), huc6280\n\
      \x20                 (PC Engine ca65; also `pce`), rgbasm (Game Boy SM83;\n\
-     \x20                 also `sm83`/`gb`), pasmo, pasmonext, sjasmplus\n\
+     \x20                 also `sm83`/`gb`), 8080 (Intel syntax), pasmo,\n\
+     \x20                 pasmonext, sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
      \x20                 the dialect\n\n\

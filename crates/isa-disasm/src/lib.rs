@@ -1497,6 +1497,106 @@ fn signed_hex(d: i64, lead: &str) -> String {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Intel 8080 disassembly — single-byte opcodes, Intel mnemonics
+// ---------------------------------------------------------------------------
+
+/// Disassemble a flat 8080 binary loaded at `origin`, rendering `asl` Intel
+/// syntax. Every opcode is a single byte; jumps/calls are absolute, so the
+/// output is position-independent. An unknown byte becomes a `db` datum.
+#[must_use]
+pub fn disassemble_i8080(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if let Some((mn, mode, vals, len)) = decode_i8080(code, pos) {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: code[pos..pos + len].to_vec(),
+                text: render_i8080(mn, mode, &vals),
+            });
+            pos += len;
+        } else {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!("db 0{:02X}H", code[pos]),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render an 8080 disassembly as reassemblable `asl` source (Intel syntax).
+#[must_use]
+pub fn listing_i8080(code: &[u8], origin: u16) -> String {
+    let mut s = format!("\tcpu 8080\n\torg 0{origin:04X}H\n");
+    for line in disassemble_i8080(code, origin) {
+        s.push('\t');
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s.push_str("\tend\n");
+    s
+}
+
+fn decode_i8080(code: &[u8], pos: usize) -> Option<(&'static str, &'static str, Vec<i64>, usize)> {
+    let b = *code.get(pos)?;
+    let (mn, form) = isa::i8080::SET
+        .instructions
+        .iter()
+        .flat_map(|insn| insn.forms.iter().map(move |f| (insn.mnemonic, f)))
+        .find(|(_, f)| f.opcode == [b])?;
+
+    let mut vals = Vec::new();
+    let mut off = pos + 1;
+    for operand in form.operands {
+        let n = operand.bytes as usize;
+        let mut v: i64 = 0;
+        for k in 0..n {
+            v |= i64::from(*code.get(off + k)?) << (8 * k);
+        }
+        vals.push(v);
+        off += n;
+    }
+    Some((mn, form.mode, vals, off - pos))
+}
+
+/// Render a decoded 8080 instruction to Intel syntax, substituting the `N`/`NN`
+/// placeholders with `H`-suffix hex. A leading `0` keeps every literal
+/// digit-first (asl rejects a hex literal that starts with a letter). `rst`'s
+/// vector number is the mode label itself; registers pass through verbatim.
+fn render_i8080(mnemonic: &str, mode: &str, values: &[i64]) -> String {
+    let m = mnemonic.to_ascii_lowercase();
+    if mode.is_empty() {
+        return m;
+    }
+    if mnemonic == "RST" {
+        return format!("{m} {mode}");
+    }
+    let bytes = mode.as_bytes();
+    let mut out = String::new();
+    let mut vi = 0;
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i..].starts_with(b"NN") {
+            out.push_str(&format!("0{:04X}H", values[vi] as u16));
+            vi += 1;
+            i += 2;
+        } else if bytes[i] == b'N' {
+            out.push_str(&format!("0{:02X}H", values[vi] as u8));
+            vi += 1;
+            i += 1;
+        } else {
+            out.push(bytes[i] as char);
+            i += 1;
+        }
+    }
+    format!("{m} {out}")
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]
