@@ -44,10 +44,10 @@ mod sna;
 pub use engine::{AsmError, Assembly, Warning};
 pub use isa_disasm::{
     Line, disassemble_1802, disassemble_6502, disassemble_6809, disassemble_8048,
-    disassemble_65816, disassemble_68000, disassemble_huc6280, disassemble_i8080,
+    disassemble_65816, disassemble_68000, disassemble_f8, disassemble_huc6280, disassemble_i8080,
     disassemble_m6800, disassemble_scmp, disassemble_sm83, disassemble_z80, listing_1802,
-    listing_6502, listing_6809, listing_8048, listing_65816, listing_68000, listing_huc6280,
-    listing_i8080, listing_m6800, listing_scmp, listing_sm83, listing_z80,
+    listing_6502, listing_6809, listing_8048, listing_65816, listing_68000, listing_f8,
+    listing_huc6280, listing_i8080, listing_m6800, listing_scmp, listing_sm83, listing_z80,
 };
 pub use prg::prg;
 pub use sna::sna_48k;
@@ -205,6 +205,19 @@ pub fn assemble_8048(source: &str) -> Result<Assembly, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_scmp(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::Scmp)
+}
+
+/// Assemble asl-syntax Fairchild F8 (3850) source into a flat binary at the
+/// `org`, over [`isa::f8`]. Intel `H`-suffix numbers; scratchpad register forms
+/// (`S`/`I`/`D` = 12/13/14), 4-bit immediate loads/ports, big-endian 16-bit
+/// addresses, and relative branches (measured from the offset byte, emitted via
+/// the computed-operand seam). Matches `asl` (`cpu F3850`).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_f8(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::F8)
 }
 
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching

@@ -39,11 +39,11 @@ Emu198x's consumption makes it real.
 
 - [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`
   + `m68k` + `mos6809` + `mos65816` + `huc6280` + `sm83` + `i8080` + `m6800` +
-  `cdp1802` + `i8048` + `scmp`; the Z80 set
+  `cdp1802` + `i8048` + `scmp` + `f8`; the Z80 set
   includes the Z80N extensions, `huc6280` is a 65C02-superset extension over
-  `mos6502`, and `sm83`/`i8080`/`cdp1802`/`i8048`/`scmp` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809). Zero dependencies.
+  `mos6502`, and `sm83`/`i8080`/`cdp1802`/`i8048`/`scmp`/`f8` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809). Zero dependencies.
 - [`crates/isa-disasm`](crates/isa-disasm) — the spec-driven disassemblers
-  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048, SC/MP), decoding against `isa`.
+  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048, SC/MP, F8), decoding against `isa`.
   Depends only on `isa` + std, so Emu198x can consume disassembly without the
   assembler. See [`decisions/disassembler-crate.md`](decisions/disassembler-crate.md).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
@@ -161,6 +161,21 @@ curriculum corpus:
   slot, so `@` is pointer-1..3 only. `asl`'s SC/MP mode uses **C-style numbers**
   (`0x..` hex), so this is the first dialect with a `0x` lexer. Validated
   byte-identical against `asl` (`cpu SC/MP`) across every form.
+- **F8** — Fairchild F8 (3850) syntax (`dialects::f8`, `--cpu f8`, also `3850`/
+  `f3850`/`channelf`) over a fresh standalone `isa::f8` spec. The CPU of the
+  **Fairchild Channel F** (1976, the first ROM-cartridge console). **Big-endian**
+  (the 16-bit `PI`/`JMP`/`DCI` address), Intel `H`-suffix numbers (reusing the
+  8080 lexer). The scratchpad ops (`DS`/`AS`/`ASD`/`XS`/`NS`) and register moves
+  (`LR A,r` / `LR r,A`) pack a 4-bit register field into the opcode nibble
+  (0–11 direct; `S`/`I`/`D` = 12/13/14 reaching the `ISAR`-pointed register) —
+  the 1802/SC-MP idiom; `LIS`/`INS`/`OUTS` (0–15) and `LISU`/`LISL` (0–7) pack a
+  value the same way. The novel part is the **relative branch**: the F8 measures
+  the signed offset from the *offset byte itself* (one past the opcode), so
+  branches (`BT`/`BF` with a test mask, the named `BR`/`BP`/`BC`/`BZ`/`BM`/`BNC`/
+  `BNZ`/`BNO`, and `BR7`) ride the **computed-operand seam** (the 6809 tool) with
+  a `target + 1` correction against the engine's end-of-instruction `rel` base —
+  still **zero engine changes**. `CLR` is a dialect alias for `LIS 0`. Validated
+  byte-identical against `asl` (`cpu F3850`) across every spec form.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
@@ -177,7 +192,7 @@ need the tools installed — and degrading gracefully when one is absent):
 - **`tests/conformance`** — three checks, all making the reference tool the
   arbiter by reusing the disassemblers (synthesise bytes → disassemble →
   reassemble with the *reference*): every form-based spec's opcode
-  (`spec_opcodes_match_reference`: 6502/Z80/65816/HuC6280/SM83/8080/6800/1802/8048/SC-MP), an opcode-space sweep for
+  (`spec_opcodes_match_reference`: 6502/Z80/65816/HuC6280/SM83/8080/6800/1802/8048/SC-MP/F8), an opcode-space sweep for
   the non-form specs (`spec_sweep_matches_reference`: 6809 and 68000 — ~33k
   decodable encodings), and a seeded differential fuzzer over random programs
   reassembled by both our asm and the reference (`differential_fuzz`).

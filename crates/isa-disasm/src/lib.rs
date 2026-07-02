@@ -1955,6 +1955,95 @@ fn render_scmp(mnemonic: &str, mode: &str, values: &[i64]) -> String {
     }
 }
 
+/// Disassemble a Fairchild F8 (3850) program.
+#[must_use]
+pub fn disassemble_f8(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if let Some((mn, mode, vals, len)) = decode_f8(code, pos) {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: code[pos..pos + len].to_vec(),
+                text: render_f8(mn, mode, &vals, addr),
+            });
+            pos += len;
+        } else {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!("db 0{:02X}H", code[pos]),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render an F8 disassembly as reassemblable `asl` source.
+#[must_use]
+pub fn listing_f8(code: &[u8], origin: u16) -> String {
+    let mut s = format!("\tcpu F3850\n\torg 0{origin:04X}H\n");
+    for line in disassemble_f8(code, origin) {
+        s.push('\t');
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s.push_str("\tend\n");
+    s
+}
+
+fn decode_f8(code: &[u8], pos: usize) -> Option<(&'static str, &'static str, Vec<i64>, usize)> {
+    let b = *code.get(pos)?;
+    let (mn, form) = isa::f8::SET
+        .instructions
+        .iter()
+        .flat_map(|insn| insn.forms.iter().map(move |f| (insn.mnemonic, f)))
+        .find(|(_, f)| f.opcode == [b])?;
+
+    let mut vals = Vec::new();
+    let mut off = pos + 1;
+    for operand in form.operands {
+        // F8 lays multi-byte operands (the 16-bit address) big-endian.
+        let w = operand.bytes as usize;
+        let mut v: i64 = 0;
+        for k in 0..w {
+            v = (v << 8) | i64::from(*code.get(off + k)?);
+        }
+        vals.push(v);
+        off += w;
+    }
+    Some((mn, form.mode, vals, off - pos))
+}
+
+/// Render a decoded F8 instruction to `asl` syntax. Branches (`BT`/`BF`/`BR7`)
+/// resolve their signed offset — measured from the offset byte, one past the
+/// opcode — to an absolute target. Every other mode label *is* the operand text
+/// (register nibble, `LR d,s`, `LIS n`, shift count), bar the `imm`/`port` byte
+/// and the 16-bit `abs`.
+fn render_f8(mnemonic: &str, mode: &str, values: &[i64], addr: u16) -> String {
+    let m = mnemonic.to_ascii_lowercase();
+    let v = values.first().copied().unwrap_or(0);
+    match mnemonic {
+        "BR7" => {
+            let target = addr.wrapping_add(1).wrapping_add(v as i8 as u16);
+            return format!("br7 0{target:04X}H");
+        }
+        "BT" | "BF" => {
+            let target = addr.wrapping_add(1).wrapping_add(v as i8 as u16);
+            return format!("{m} {mode},0{target:04X}H");
+        }
+        _ => {}
+    }
+    match mode {
+        "" => m,
+        "imm" | "port" => format!("{m} 0{:02X}H", v & 0xFF),
+        "abs" => format!("{m} 0{:04X}H", v & 0xFFFF),
+        _ => format!("{m} {mode}"),
+    }
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]

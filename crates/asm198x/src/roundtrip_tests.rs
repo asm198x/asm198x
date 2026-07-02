@@ -7,10 +7,10 @@
 //! `asm198x-and-shared-isa-spec.md`.
 
 use crate::{
-    assemble_1802, assemble_8048, assemble_acme, assemble_i8080, assemble_m6800,
+    assemble_1802, assemble_8048, assemble_acme, assemble_f8, assemble_i8080, assemble_m6800,
     assemble_pasmonext, assemble_rgbasm, assemble_scmp, assemble_vasm, listing_1802, listing_6502,
-    listing_8048, listing_68000, listing_i8080, listing_m6800, listing_scmp, listing_sm83,
-    listing_z80,
+    listing_8048, listing_68000, listing_f8, listing_i8080, listing_m6800, listing_scmp,
+    listing_sm83, listing_z80,
 };
 
 #[test]
@@ -108,6 +108,43 @@ fn round_trips_scmp_through_asl_syntax() {
     let original = assemble_scmp(source).expect("assemble");
     let listing = listing_scmp(&original.bytes, original.origin);
     let re = assemble_scmp(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
+fn round_trips_f8_through_asl_syntax() {
+    // Scratchpad register nibble (incl. S/I/D), immediate loads, big-endian
+    // 16-bit address, every branch shape (named, masked BT/BF, BR7) with forward
+    // and backward targets, I/O, and shifts.
+    let source = "\
+        \torg 0100h\n\
+        start:\n\
+        \tlisu 4\n\
+        \tlisl 0\n\
+        \tlr a,ku\n\
+        \tli 55h\n\
+        loop:\n\
+        \tas 1\n\
+        \tns d\n\
+        \tlr d,a\n\
+        \tbf 6,loop\n\
+        \tbnz loop\n\
+        \tci 10h\n\
+        \tdci 1234h\n\
+        \tlm\n\
+        \txs s\n\
+        \tbr7 loop\n\
+        \tbt 1,done\n\
+        \tout 0\n\
+        \tjmp start\n\
+        done:\n\
+        \tsl 4\n\
+        \tsr\n\
+        \tclr\n\
+        \tpop\n";
+    let original = assemble_f8(source).expect("assemble");
+    let listing = listing_f8(&original.bytes, original.origin);
+    let re = assemble_f8(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
 
