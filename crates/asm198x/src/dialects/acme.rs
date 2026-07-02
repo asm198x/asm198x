@@ -232,6 +232,10 @@ fn classify_conditional(text: &str) -> Option<Conditional> {
 /// recurses (with `emit = false`) through the other so braces stay balanced and
 /// the skipped branch defines no symbols. Returns having consumed this block's
 /// closing `}` (or at end of input for the top level).
+// The recursion threads eight distinct pieces of mutable state (env, set-names,
+// index, output, …); bundling them into a context struct would obscure more than
+// it helps, so the arg count is accepted here.
+#[allow(clippy::too_many_arguments)]
 fn process_block(
     set: &'static isa::InstructionSet,
     anons: &[AnonDef],
@@ -629,8 +633,8 @@ fn parse_align(
             "`!align` takes `andmask, value [, fill]`",
         ));
     }
-    let andmask = fold_const(&parse_value(anons, &parts[0], line)?, env, line)?;
-    let value = fold_const(&parse_value(anons, &parts[1], line)?, env, line)?;
+    let andmask = fold_const(&parse_value(anons, parts[0], line)?, env, line)?;
+    let value = fold_const(&parse_value(anons, parts[1], line)?, env, line)?;
     let fill = match parts.get(2) {
         None => 0xEA, // ACME's default fill byte
         Some(v) => {
