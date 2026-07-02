@@ -302,6 +302,7 @@ fn relative(opcode: u8, args: &str, line: usize) -> Result<Operation, AsmError> 
         Piece::Packed {
             expr: disp,
             bytes: 1,
+            scale: 1,
             min: -64,
             max: 63,
             mask: 0x7F,
@@ -322,6 +323,7 @@ fn zero_relative(opcode: u8, args: &str, line: usize) -> Result<Operation, AsmEr
         Piece::Packed {
             expr: target,
             bytes: 1,
+            scale: 1,
             min: 0,
             max: 63,
             mask: 0x7F,
@@ -389,6 +391,7 @@ fn absolute(
         Piece::Packed {
             expr: target,
             bytes: 2,
+            scale: 1,
             min: 0,
             max,
             mask: max as u32,

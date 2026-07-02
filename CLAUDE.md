@@ -39,11 +39,11 @@ Emu198x's consumption makes it real.
 
 - [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`
   + `m68k` + `mos6809` + `mos65816` + `huc6280` + `sm83` + `i8080` + `m6800` +
-  `cdp1802` + `i8048` + `scmp` + `f8` + `s2650` + `tms7000`; the Z80 set
+  `cdp1802` + `i8048` + `scmp` + `f8` + `s2650` + `tms7000` + `pdp11` + `tms9900`; the Z80 set
   includes the Z80N extensions, `huc6280` is a 65C02-superset extension over
-  `mos6502`, and `sm83`/`i8080`/`cdp1802`/`i8048`/`scmp`/`f8`/`s2650`/`tms7000` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809). Zero dependencies.
+  `mos6502`, and `sm83`/`i8080`/`cdp1802`/`i8048`/`scmp`/`f8`/`s2650`/`tms7000`/`pdp11`/`tms9900` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809, `pdp11`/`tms9900` bespoke field-packed tables rather than the `Form` model). Zero dependencies.
 - [`crates/isa-disasm`](crates/isa-disasm) — the spec-driven disassemblers
-  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048, SC/MP, F8, 2650, TMS7000), decoding against `isa`.
+  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048, SC/MP, F8, 2650, TMS7000, PDP-11, TMS9900), decoding against `isa`.
   Depends only on `isa` + std, so Emu198x can consume disassembly without the
   assembler. See [`decisions/disassembler-crate.md`](decisions/disassembler-crate.md).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
@@ -226,6 +226,58 @@ curriculum corpus:
   standard 8-bit) bar `TRAP n` (a single computed `0xFF−n` byte) — **zero engine
   changes**. Validated byte-identical against `asl` (`cpu TMS70C00`) across every
   spec form. The largest single CPU in the family.
+- **PDP-11** — DEC PDP-11 syntax (`dialects::pdp11`, `--cpu pdp11`, also
+  `lsi11`) over a fresh standalone `isa::pdp11` spec. The 16-bit minicomputer
+  that anchored Unix and C, and the family's first **16-bit** CPU.
+  **Little-endian**, decimal-default numbers (`0x` hex), registers `r0`–`r7`
+  (`sp`/`pc`). Unlike the fixed-opcode-byte specs, the PDP-11 packs its operands
+  as **6-bit `mode<<3|reg` fields inside the opcode word**, so `isa::pdp11` is a
+  **bespoke table** (mnemonic + base opcode + a `Class` fixing the field layout),
+  keyed by both the dialect and a **field-based disassembler** — the m68k
+  approach, but riding the **computed-operand seam** rather than a full engine
+  bypass. Each instruction is one opcode word plus 0–2 extension words: the
+  opcode word is usually two literal bytes (the fields resolve at parse time),
+  while the branch / `SOB` / `EMT` / `TRAP` / `MARK` / `SPL` classes pack a
+  range-checked operand into the word via `Piece::Packed`; extension words (index
+  displacements, immediates, absolute addresses) are plain 16-bit `Piece::Val`s,
+  and a PC-relative operand (`addr`/`@addr`) is a `Val` with `rel` set so the
+  engine lays down `target - PC_after` exactly as the hardware computes it. All
+  eight addressing modes (`Rn`, `(Rn)`, `(Rn)+`, `@(Rn)+`, `-(Rn)`, `@-(Rn)`,
+  `X(Rn)`, `@X(Rn)`, plus PC forms `#n`, `@#n`, relative `addr`, relative-deferred
+  `@addr`), the complete integer set (double/single-operand word+byte ops, the
+  word-scaled conditional branches, EIS `MUL`/`DIV`/`ASH`/`ASHC`, `XOR`, `SOB`,
+  `JSR`/`RTS`/`JMP`, `MARK`/`SPL`, the J-11 `MTPS`/`MFPS`/`MFPI`/`MTPI`/`MFPD`/
+  `MTPD`/`CSM`/`TSTSET`/`WRTLCK`, the traps, and the condition-code ops). The one
+  engine addition the PDP-11 needed: a **`scale` on `Piece::Packed`** for the
+  word-scaled branch (the byte distance must be even — `asl`'s "jump distance is
+  odd"), the analogue of the 2650's `Packed` addition. Validated byte-identical
+  against `asl` (`cpu MICROPDP-11/93`, its most complete integer model) by a full
+  opcode-space sweep (~93k decodable words) plus a position-dependent round-trip.
+  The FP11 floating-point set is a separate coprocessor ISA (the analogue of the
+  m68k FPU), out of scope for the integer CPU. The first 16-bit and largest
+  single CPU in the family.
+- **TMS9900** — TI TMS9900 syntax (`dialects::tms9900`, `--cpu tms9900`, also
+  `9900`/`ti99`) over a fresh standalone `isa::tms9900` spec. The 16-bit CPU of
+  the **TI-99/4A** and the first Wave-C CPU. **Big-endian**, Intel `h`-suffix hex
+  (reusing the 8080 lexer), registers `r0`–`r15`. Its defining trait is the
+  **workspace-register model** — the sixteen general registers live in RAM,
+  pointed to by the workspace pointer `WP`. Like the PDP-11 it packs operands as
+  **fields inside the opcode word**, so `isa::tms9900` is a **bespoke table**
+  (mnemonic + base + a `Class` fixing the field layout) keyed by both the dialect
+  and a field-based disassembler, riding the **computed-operand seam** — the nine
+  TMS9900 instruction formats map onto the `Class` variants (dual-general
+  `MOV`/`A`/… with the shared general-addressing `Rn`/`*Rn`/`@addr`/`@addr(Rn)`/
+  `*Rn+` T-field; the word-scaled jumps + CRU-bit ops; dual register-destination
+  `COC`/`XOR`/`MPY`/`DIV`/`XOP`; CRU multi-bit `LDCR`/`STCR`; shifts; single
+  general; control; immediate `LI`/`LWPI`/…). A symbolic/indexed operand appends
+  one **absolute** address word (no PC-relative form — only jumps are relative),
+  laid down as a `Piece::Val`; the jump/CRU classes pack a range-checked
+  displacement into the word via `Piece::Packed` (jumps reuse the PDP-11 `scale:2`
+  even-distance check). **Zero engine changes** beyond that shared `scale`.
+  Validated byte-identical against `asl` (`cpu TMS9900`) by a full opcode-space
+  sweep (~64k decodable words) plus a position-dependent round-trip. The
+  TMS9995 / TMS99105 supersets (extra instructions) are out of scope; this is the
+  base-9900 set the TI-99/4A uses. Closes #10.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
@@ -243,8 +295,9 @@ need the tools installed — and degrading gracefully when one is absent):
   arbiter by reusing the disassemblers (synthesise bytes → disassemble →
   reassemble with the *reference*): every form-based spec's opcode
   (`spec_opcodes_match_reference`: 6502/Z80/65816/HuC6280/SM83/8080/6800/1802/8048/8039/SC-MP/F8/2650/TMS7000), an opcode-space sweep for
-  the non-form specs (`spec_sweep_matches_reference`: 6809 and 68000 — ~33k
-  decodable encodings), and a seeded differential fuzzer over random programs
+  the non-form specs (`spec_sweep_matches_reference`: 6809, 68000, and the
+  field-packed PDP-11 and TMS9900 — ~190k decodable encodings), and a seeded
+  differential fuzzer over random programs
   reassembled by both our asm and the reference (`differential_fuzz`).
   Position-dependent instructions (branches, PC-relative EA) can't be batched, so
   they have targeted round-trip tests instead.

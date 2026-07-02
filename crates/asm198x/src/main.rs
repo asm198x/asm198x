@@ -46,6 +46,10 @@ enum Assembler {
     S2650,
     /// asl-syntax TI TMS7000 — a flat big-endian binary.
     Tms7000,
+    /// asl-syntax DEC PDP-11 — a flat little-endian binary.
+    Pdp11,
+    /// asl-syntax TI TMS9900 — a flat big-endian binary.
+    Tms9900,
     Pasmo {
         z80n: bool,
     },
@@ -96,6 +100,8 @@ impl Assembler {
             Some("f8" | "3850" | "f3850" | "channelf" | "channel-f") => Ok(Self::F8),
             Some("2650" | "s2650" | "signetics2650") => Ok(Self::S2650),
             Some("tms7000" | "7000" | "tms70c00") => Ok(Self::Tms7000),
+            Some("pdp11" | "pdp-11" | "lsi11" | "lsi-11") => Ok(Self::Pdp11),
+            Some("tms9900" | "9900" | "ti99") => Ok(Self::Tms9900),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo {
@@ -134,6 +140,8 @@ impl Assembler {
             Self::F8 => asm198x::assemble_f8(source),
             Self::S2650 => asm198x::assemble_2650(source),
             Self::Tms7000 => asm198x::assemble_tms7000(source),
+            Self::Pdp11 => asm198x::assemble_pdp11(source),
+            Self::Tms9900 => asm198x::assemble_tms9900(source),
             // ca65 and vasm produce non-flat output and are handled in `run`.
             Self::Ca65 | Self::Vasm => unreachable!("ca65/vasm handled in run()"),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
@@ -261,6 +269,12 @@ fn run(args: &[String]) -> Result<String, String> {
             }
             Assembler::Tms7000 => {
                 print!("{}", asm198x::listing_tms7000(&bytes, origin));
+            }
+            Assembler::Pdp11 => {
+                print!("{}", asm198x::listing_pdp11(&bytes, origin));
+            }
+            Assembler::Tms9900 => {
+                print!("{}", asm198x::listing_tms9900(&bytes, origin));
             }
         }
         return Ok(format!(

@@ -683,7 +683,12 @@ fn spec_opcodes_match_reference() {
 /// Whether a disassembled line is a data fallback (not a decoded instruction).
 fn is_data(text: &str) -> bool {
     let t = text.trim_start();
-    t.starts_with("fcb") || t.starts_with("dc.") || t.starts_with(".byte") || t.starts_with("defb")
+    t.starts_with("fcb")
+        || t.starts_with("dc.")
+        || t.starts_with(".byte")
+        || t.starts_with("defb")
+        || t.starts_with("word ")
+        || t.starts_with("byte ")
 }
 
 /// Sweep-based audit for the specs that are not form-based (`mos6809` is
@@ -835,6 +840,66 @@ fn spec_sweep_matches_reference() {
         );
     } else {
         eprintln!("SKIP: `vasmm68k_mot` not on PATH (68000 sweep)");
+    }
+
+    // --- DEC PDP-11 / asl + p2bin ------------------------------------------
+    if have("asl") && have("p2bin") {
+        // Every opcode word (little-endian), with canonical little-endian
+        // extension-word fillers for the modes that carry them.
+        let cands: Vec<Vec<u8>> = (0u32..=0xFFFF)
+            .map(|w| vec![w as u8, (w >> 8) as u8, 0x10, 0x00, 0x20, 0x00, 0x30, 0x00])
+            .collect();
+        let reasm = |src: &str| {
+            ref_assemble(&tmp, src, "asm", |s, o| {
+                let obj = s.with_extension("p");
+                let mut a = Command::new("asl");
+                a.arg("-q").arg(s).arg("-o").arg(&obj);
+                let mut b = Command::new("p2bin");
+                b.arg(&obj).arg(o);
+                vec![a, b]
+            })
+        };
+        checked += sweep(
+            "PDP-11",
+            &cands,
+            &|b, o| asm198x::disassemble_pdp11(b, o as u16),
+            &|b, o| asm198x::listing_pdp11(b, o as u16),
+            &reasm,
+            &|_| false,
+            &mut fails,
+        );
+    } else {
+        eprintln!("SKIP: `asl`/`p2bin` not on PATH (PDP-11 sweep)");
+    }
+
+    // --- TI TMS9900 / asl + p2bin ------------------------------------------
+    if have("asl") && have("p2bin") {
+        // Every opcode word (big-endian), with canonical big-endian
+        // extension-word fillers for the symbolic-address modes.
+        let cands: Vec<Vec<u8>> = (0u32..=0xFFFF)
+            .map(|w| vec![(w >> 8) as u8, w as u8, 0x10, 0x00, 0x20, 0x00, 0x30, 0x00])
+            .collect();
+        let reasm = |src: &str| {
+            ref_assemble(&tmp, src, "asm", |s, o| {
+                let obj = s.with_extension("p");
+                let mut a = Command::new("asl");
+                a.arg("-q").arg(s).arg("-o").arg(&obj);
+                let mut b = Command::new("p2bin");
+                b.arg(&obj).arg(o);
+                vec![a, b]
+            })
+        };
+        checked += sweep(
+            "TMS9900",
+            &cands,
+            &|b, o| asm198x::disassemble_tms9900(b, o as u16),
+            &|b, o| asm198x::listing_tms9900(b, o as u16),
+            &reasm,
+            &|_| false,
+            &mut fails,
+        );
+    } else {
+        eprintln!("SKIP: `asl`/`p2bin` not on PATH (TMS9900 sweep)");
     }
 
     eprintln!("swept {checked} decodable instructions against the reference tools");

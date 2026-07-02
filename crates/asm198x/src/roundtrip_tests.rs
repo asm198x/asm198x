@@ -8,10 +8,10 @@
 
 use crate::{
     assemble_1802, assemble_2650, assemble_8039, assemble_8048, assemble_acme, assemble_f8,
-    assemble_i8080, assemble_m6800, assemble_pasmonext, assemble_rgbasm, assemble_scmp,
-    assemble_tms7000, assemble_vasm, listing_1802, listing_2650, listing_6502, listing_8048,
-    listing_68000, listing_f8, listing_i8080, listing_m6800, listing_scmp, listing_sm83,
-    listing_tms7000, listing_z80,
+    assemble_i8080, assemble_m6800, assemble_pasmonext, assemble_pdp11, assemble_rgbasm,
+    assemble_scmp, assemble_tms7000, assemble_tms9900, assemble_vasm, listing_1802, listing_2650,
+    listing_6502, listing_8048, listing_68000, listing_f8, listing_i8080, listing_m6800,
+    listing_pdp11, listing_scmp, listing_sm83, listing_tms7000, listing_tms9900, listing_z80,
 };
 
 #[test]
@@ -134,6 +134,93 @@ fn round_trips_8039_romless_mcs48() {
     let original = assemble_8039(source).expect("assemble");
     let listing = listing_8048(&original.bytes, original.origin);
     let re = assemble_8039(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
+fn round_trips_tms9900_through_asl_syntax() {
+    // The position-dependent instructions the opcode sweep can't batch — the
+    // word-scaled jumps (forward and backward) — plus a spread of formats and
+    // general-addressing modes, symbolic addresses, immediates, shifts, CRU,
+    // and the workspace-context ops.
+    let source = "\
+        \torg 0100h\n\
+        start:\n\
+        \tli r0,0abcdh\n\
+        \tmov r1,r2\n\
+        \tmov @0300h,r3\n\
+        \tmov @0300h(r4),r5\n\
+        \ta *r6+,@0400h\n\
+        \tmovb r7,*r8\n\
+        \tcoc r9,r10\n\
+        \tmpy r1,r2\n\
+        \txop @0500h,3\n\
+        \tldcr r1,8\n\
+        \tsla r2,4\n\
+        \tclr r3\n\
+        \tinc @count\n\
+        loop:\n\
+        \tdec r0\n\
+        \tjne loop\n\
+        \tjeq done\n\
+        \tsbo 5\n\
+        \ttb -3\n\
+        \tbl @sub\n\
+        \tjmp start\n\
+        sub:\n\
+        \tb *r11\n\
+        done:\n\
+        \tlwpi 8300h\n\
+        \tlimi 2\n\
+        \trtwp\n\
+        count:\tword 0\n";
+    let original = assemble_tms9900(source).expect("assemble");
+    let listing = listing_tms9900(&original.bytes, original.origin);
+    let re = assemble_tms9900(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
+fn round_trips_pdp11_through_asl_syntax() {
+    // The position-dependent instructions the opcode sweep can't batch: the
+    // word-scaled conditional branches (forward and backward), SOB, JSR, and the
+    // PC-relative / relative-deferred memory operands — plus a spread of
+    // addressing modes and the EIS / trap / condition-code ops.
+    let source = "\
+        \torg 0x1000\n\
+        start:\n\
+        \tmov r1,r0\n\
+        \tmov (r2)+,-(r3)\n\
+        \tmov 4(r1),@6(r2)\n\
+        \tmov #0x1234,r0\n\
+        \tmov @#0x2000,r5\n\
+        \tmov msg,r0\n\
+        \tmov @msg,r1\n\
+        \tclr count\n\
+        \tmul r2,r1\n\
+        \txor r1,(r4)\n\
+        loop:\n\
+        \tinc count\n\
+        \tjsr pc,sub\n\
+        \tsob r0,loop\n\
+        \tbne loop\n\
+        \tbr done\n\
+        sub:\n\
+        \ttst count\n\
+        \tbeq back\n\
+        \trts pc\n\
+        back:\n\
+        \tbr start\n\
+        done:\n\
+        \tmark 2\n\
+        \temt 0x10\n\
+        \tccc\n\
+        \thalt\n\
+        count:\tword 0\n\
+        msg:\tbyte 0x48, 0x49\n";
+    let original = assemble_pdp11(source).expect("assemble");
+    let listing = listing_pdp11(&original.bytes, original.origin);
+    let re = assemble_pdp11(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
 
