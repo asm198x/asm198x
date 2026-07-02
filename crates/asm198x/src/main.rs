@@ -33,6 +33,8 @@ enum Assembler {
     M6800,
     /// asl-syntax RCA CDP1802 (COSMAC) — a flat big-endian binary.
     Cdp1802,
+    /// asl-syntax Intel 8048 (MCS-48) — a flat binary.
+    I8048,
     Pasmo {
         z80n: bool,
     },
@@ -45,15 +47,21 @@ impl Assembler {
     fn resolve(dialect: Option<&str>, target: Option<&str>) -> Result<Self, String> {
         // The Z80 target, if one was given explicitly via --cpu/--target.
         let z80n = match target {
-            None => None,
-            Some(t) => match t.to_ascii_lowercase().as_str() {
-                "z80" => Some(false),
-                "z80n" | "next" => Some(true),
-                "6502" => return Ok(Self::Acme),
-                other => return Err(format!("unknown target `{other}` (try z80 or z80n)")),
-            },
+            Some(t) if t.eq_ignore_ascii_case("z80") => Some(false),
+            Some(t) if t.eq_ignore_ascii_case("z80n") || t.eq_ignore_ascii_case("next") => {
+                Some(true)
+            }
+            _ => None,
         };
-        match dialect.map(str::to_ascii_lowercase).as_deref() {
+        // A non-Z80 `--cpu` names a single-dialect chip directly (`8048`, `6800`,
+        // `1802`, `8080`, `6502`, …): use it as the dialect when no explicit
+        // `--dialect` was given. Z80 variants are handled via `z80n` above.
+        let chip =
+            target.filter(|t| !matches!(t.to_ascii_lowercase().as_str(), "z80" | "z80n" | "next"));
+        let key = dialect
+            .map(str::to_ascii_lowercase)
+            .or_else(|| chip.map(str::to_ascii_lowercase));
+        match key.as_deref() {
             // ACME is the default 6502 dialect (C64); ca65 targets the NES.
             Some("acme" | "6502" | "mos6502") => Ok(Self::Acme),
             Some("ca65" | "nes") => Ok(Self::Ca65),
@@ -65,6 +73,7 @@ impl Assembler {
             Some("8080" | "i8080" | "intel8080") => Ok(Self::I8080),
             Some("6800" | "m6800") => Ok(Self::M6800),
             Some("1802" | "cdp1802" | "cosmac") => Ok(Self::Cdp1802),
+            Some("8048" | "i8048" | "mcs48" | "mcs-48") => Ok(Self::I8048),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo {
@@ -97,6 +106,7 @@ impl Assembler {
             Self::I8080 => asm198x::assemble_i8080(source),
             Self::M6800 => asm198x::assemble_m6800(source),
             Self::Cdp1802 => asm198x::assemble_1802(source),
+            Self::I8048 => asm198x::assemble_8048(source),
             // ca65 and vasm produce non-flat output and are handled in `run`.
             Self::Ca65 | Self::Vasm => unreachable!("ca65/vasm handled in run()"),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
@@ -209,6 +219,9 @@ fn run(args: &[String]) -> Result<String, String> {
             }
             Assembler::Cdp1802 => {
                 print!("{}", asm198x::listing_1802(&bytes, origin));
+            }
+            Assembler::I8048 => {
+                print!("{}", asm198x::listing_8048(&bytes, origin));
             }
         }
         return Ok(format!(
@@ -341,7 +354,8 @@ fn usage() -> String {
      \x20                 68000), lwasm (6809), 65816 (ca65 native), huc6280\n\
      \x20                 (PC Engine ca65; also `pce`), rgbasm (Game Boy SM83;\n\
      \x20                 also `sm83`/`gb`), 8080 (Intel syntax), 6800\n\
-     \x20                 (Motorola syntax), 1802 (COSMAC), pasmo, pasmonext,\n\
+     \x20                 (Motorola syntax), 1802 (COSMAC), 8048 (MCS-48),\n\
+     \x20                 pasmo, pasmonext,\n\
      \x20                 sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\

@@ -7,9 +7,9 @@
 //! `asm198x-and-shared-isa-spec.md`.
 
 use crate::{
-    assemble_1802, assemble_acme, assemble_i8080, assemble_m6800, assemble_pasmonext,
-    assemble_rgbasm, assemble_vasm, listing_1802, listing_6502, listing_68000, listing_i8080,
-    listing_m6800, listing_sm83, listing_z80,
+    assemble_1802, assemble_8048, assemble_acme, assemble_i8080, assemble_m6800,
+    assemble_pasmonext, assemble_rgbasm, assemble_vasm, listing_1802, listing_6502, listing_8048,
+    listing_68000, listing_i8080, listing_m6800, listing_sm83, listing_z80,
 };
 
 #[test]
@@ -56,6 +56,31 @@ fn round_trips_m6800_through_asl_syntax() {
     let original = assemble_m6800(source).expect("assemble");
     let listing = listing_m6800(&original.bytes, original.origin);
     let re = assemble_m6800(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
+fn round_trips_8048_through_asl_syntax() {
+    // Register/keyword forms, an immediate, a page-relative conditional jump,
+    // DJNZ, and the computed-opcode JMP/CALL.
+    let source = "\
+        \torg 100h\n\
+        start:\n\
+        \tmov a,#42h\n\
+        \tmov r0,#0ffh\n\
+        \tadd a,r7\n\
+        \tanl a,#0fh\n\
+        \tinc @r0\n\
+        \tmovx @r1,a\n\
+        \tjz start\n\
+        \tdjnz r3,start\n\
+        \tsel rb1\n\
+        \tcall 200h\n\
+        \tjmp start\n\
+        \tret\n";
+    let original = assemble_8048(source).expect("assemble");
+    let listing = listing_8048(&original.bytes, original.origin);
+    let re = assemble_8048(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
 

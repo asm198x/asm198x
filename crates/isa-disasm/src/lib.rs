@@ -1779,6 +1779,103 @@ fn render_1802(mnemonic: &str, mode: &str, values: &[i64], addr: u16) -> String 
     }
 }
 
+/// Disassemble an Intel 8048 (MCS-48) program.
+///
+/// Spec forms decode by opcode; the two `JMP`/`CALL` opcode families (11-bit
+/// absolute, high 3 bits packed into the opcode) are handled directly, since
+/// they are not spec forms.
+#[must_use]
+pub fn disassemble_8048(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        let b = code[pos];
+        if let Some((mn, mode, vals, len)) = decode_8048(code, pos) {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: code[pos..pos + len].to_vec(),
+                text: render_8048(mn, mode, &vals, addr),
+            });
+            pos += len;
+        } else if (b & 0x1F == 0x04 || b & 0x1F == 0x14) && pos + 1 < code.len() {
+            // JMP (…00100) / CALL (…10100): opcode carries address bits 10-8.
+            let mn = if b & 0x1F == 0x04 { "jmp" } else { "call" };
+            let target = ((u16::from(b) >> 5) & 0x07) << 8 | u16::from(code[pos + 1]);
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![b, code[pos + 1]],
+                text: format!("{mn} 0{target:04X}H"),
+            });
+            pos += 2;
+        } else {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![b],
+                text: format!("db 0{b:02X}H"),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render an 8048 disassembly as reassemblable `asl` source.
+#[must_use]
+pub fn listing_8048(code: &[u8], origin: u16) -> String {
+    let mut s = format!("\tcpu 8048\n\torg 0{origin:04X}H\n");
+    for line in disassemble_8048(code, origin) {
+        s.push('\t');
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s.push_str("\tend\n");
+    s
+}
+
+fn decode_8048(code: &[u8], pos: usize) -> Option<(&'static str, &'static str, Vec<i64>, usize)> {
+    let b = *code.get(pos)?;
+    let (mn, form) = isa::i8048::SET
+        .instructions
+        .iter()
+        .flat_map(|insn| insn.forms.iter().map(move |f| (insn.mnemonic, f)))
+        .find(|(_, f)| f.opcode == [b])?;
+
+    let mut vals = Vec::new();
+    let mut off = pos + 1;
+    for operand in form.operands {
+        // Every 8048 operand is a single byte.
+        vals.push(i64::from(*code.get(off)?));
+        off += operand.bytes as usize;
+    }
+    Some((mn, form.mode, vals, off - pos))
+}
+
+/// Render a decoded 8048 instruction to `asl` syntax. The mode label is the
+/// operand template: `rel`/`…,rel` are page-relative jumps (the byte is the low
+/// 8 bits of the same-page target), `#N` is an 8-bit immediate, and anything
+/// else is fixed operand text.
+fn render_8048(mnemonic: &str, mode: &str, values: &[i64], addr: u16) -> String {
+    let m = mnemonic.to_ascii_lowercase();
+    let v = values.first().copied().unwrap_or(0);
+    if mode.is_empty() {
+        return m;
+    }
+    if mode == "rel" {
+        let target = (addr & 0xFF00) | (v as u16 & 0xFF);
+        return format!("{m} 0{target:04X}H");
+    }
+    if let Some(reg) = mode.strip_suffix(",rel") {
+        let target = (addr & 0xFF00) | (v as u16 & 0xFF);
+        return format!("{m} {reg},0{target:04X}H");
+    }
+    if mode.contains("#N") {
+        let imm = format!("#0{:02X}H", v & 0xFF);
+        return format!("{m} {}", mode.replace("#N", &imm));
+    }
+    format!("{m} {mode}")
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]
