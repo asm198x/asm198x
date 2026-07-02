@@ -193,6 +193,7 @@ impl Cycles {
     }
 }
 
+pub mod huc6280;
 pub mod m68k;
 pub mod mos6502;
 pub mod mos65816;
