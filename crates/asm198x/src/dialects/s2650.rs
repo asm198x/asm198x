@@ -283,11 +283,11 @@ fn resolve(
 }
 
 /// Relative addressing: a 7-bit signed displacement from the following
-/// instruction (`target - (pc + 2)`), bit 7 the indirect flag.
+/// instruction (`target - (pc + 2)`, range `-64..=63`), bit 7 the indirect flag.
 fn relative(opcode: u8, args: &str, line: usize) -> Result<Operation, AsmError> {
     let (indirect, target) = strip_indirect(args);
     let target = value(target, line)?;
-    // (target - (Pc + 2)) & 0x7F, then OR the indirect bit.
+    // The raw displacement; the engine range-checks it before masking to 7 bits.
     let disp = Expr::Bin(
         BinOp::Sub,
         Box::new(target),
@@ -297,39 +297,43 @@ fn relative(opcode: u8, args: &str, line: usize) -> Result<Operation, AsmError> 
             Box::new(Expr::Num(2)),
         )),
     );
-    let mut expr = Expr::Bin(BinOp::And, Box::new(disp), Box::new(Expr::Num(0x7F)));
-    if indirect {
-        expr = Expr::Bin(BinOp::Or, Box::new(expr), Box::new(Expr::Num(0x80)));
-    }
     Ok(Operation::Encoded(vec![
         Piece::Lit(opcode),
-        Piece::Val {
-            expr,
+        Piece::Packed {
+            expr: disp,
             bytes: 1,
-            rel: false,
-            signed: false,
+            min: -64,
+            max: 63,
+            mask: 0x7F,
+            or_bits: indirect_bit(indirect),
+            what: "branch displacement",
         },
     ]))
 }
 
 /// Page-zero relative addressing (`ZBRR`/`ZBSR`): the displacement byte is the
-/// target's low 7 bits (base address 0), bit 7 the indirect flag.
+/// target itself (base address 0), a 6-bit value `0..=63`, bit 7 the indirect
+/// flag.
 fn zero_relative(opcode: u8, args: &str, line: usize) -> Result<Operation, AsmError> {
     let (indirect, target) = strip_indirect(args);
     let target = value(target, line)?;
-    let mut expr = Expr::Bin(BinOp::And, Box::new(target), Box::new(Expr::Num(0x7F)));
-    if indirect {
-        expr = Expr::Bin(BinOp::Or, Box::new(expr), Box::new(Expr::Num(0x80)));
-    }
     Ok(Operation::Encoded(vec![
         Piece::Lit(opcode),
-        Piece::Val {
-            expr,
+        Piece::Packed {
+            expr: target,
             bytes: 1,
-            rel: false,
-            signed: false,
+            min: 0,
+            max: 63,
+            mask: 0x7F,
+            or_bits: indirect_bit(indirect),
+            what: "ZBRR/ZBSR target",
         },
     ]))
+}
+
+/// The indirect flag as bit 7 of a relative displacement byte.
+fn indirect_bit(indirect: bool) -> u32 {
+    if indirect { 0x80 } else { 0 }
 }
 
 /// Absolute addressing: a 15-bit big-endian address, bit 15 indirect, bits
@@ -349,8 +353,8 @@ fn absolute(
 
     // Indexing forces register 3 in the opcode and R0 as the operand register,
     // and is only valid for the memory-reference absolute ops (not branches).
-    let (opcode, ctrl) = match index {
-        None => (opcode, 0i64),
+    let (opcode, ctrl_bits) = match index {
+        None => (opcode, 0u32),
         Some(ix) => {
             if !is_memref_abs(mn) {
                 return Err(AsmError::new(
@@ -368,29 +372,28 @@ fn absolute(
                 .find_form(mn, "r3")
                 .ok_or_else(|| AsmError::new(line, format!("`{mn}` has no indexed form")))?
                 .opcode[0];
-            let ctrl = match ix {
+            let ctrl: u32 = match ix {
                 Index::Inc => 1,
                 Index::Dec => 2,
                 Index::Plain => 3,
-            } << 13;
-            (op3, ctrl)
+            };
+            (op3, ctrl << 13)
         }
     };
-    let addr_mask = if index.is_some() { 0x1FFF } else { 0x7FFF };
-    let mut expr = Expr::Bin(BinOp::And, Box::new(target), Box::new(Expr::Num(addr_mask)));
-    if ctrl != 0 {
-        expr = Expr::Bin(BinOp::Or, Box::new(expr), Box::new(Expr::Num(ctrl)));
-    }
-    if indirect {
-        expr = Expr::Bin(BinOp::Or, Box::new(expr), Box::new(Expr::Num(0x8000)));
-    }
+    // The memory-reference ops carry a 13-bit direct address (the high two bits
+    // are the index control); branches carry a full 15-bit address.
+    let max: i64 = if is_memref_abs(mn) { 0x1FFF } else { 0x7FFF };
+    let or_bits = ctrl_bits | if indirect { 0x8000 } else { 0 };
     Ok(Operation::Encoded(vec![
         Piece::Lit(opcode),
-        Piece::Val {
-            expr,
+        Piece::Packed {
+            expr: target,
             bytes: 2,
-            rel: false,
-            signed: false,
+            min: 0,
+            max,
+            mask: max as u32,
+            or_bits,
+            what: "address",
         },
     ]))
 }
@@ -505,6 +508,24 @@ mod tests {
         assert_eq!(bytes(" org $10\nl: bctr,un l\n"), vec![0x1B, 0x7E]);
         // Indirect relative sets bit 7.
         assert_eq!(bytes(" lodr,r0 *$08\n"), vec![0x08, 0x86]);
+    }
+
+    #[test]
+    fn out_of_range_operands_error() {
+        // Relative displacement is 7-bit signed (-64..=63 from the following
+        // instruction). At org $0100 the base is $0102.
+        assert!(asm(" org $0100\n bctr,un $0141\n").is_ok()); // +63
+        assert!(asm(" org $0100\n bctr,un $0142\n").is_err()); // +64
+        assert!(asm(" org $0100\n bctr,un $00c2\n").is_ok()); // -64
+        assert!(asm(" org $0100\n bctr,un $00c1\n").is_err()); // -65
+        // ZBRR page-0 target is 0..=63.
+        assert!(asm(" zbrr $3f\n").is_ok());
+        assert!(asm(" zbrr $40\n").is_err());
+        // Memory-reference absolute is a 13-bit direct address; branches 15-bit.
+        assert!(asm(" loda,r0 $1fff\n").is_ok());
+        assert!(asm(" loda,r0 $2000\n").is_err());
+        assert!(asm(" bcta,un $7fff\n").is_ok());
+        assert!(asm(" bcta,un $8000\n").is_err());
     }
 
     #[test]

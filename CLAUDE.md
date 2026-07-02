@@ -202,8 +202,12 @@ curriculum corpus:
   `ANDZ,R0` illegal (the `NOP`/`HALT` slots), `ZBRR`/`ZBSR` page-zero relative,
   `BXA`/`BSXA` the indexed-absolute (`BCFA,UN`/`BSFA,UN`) aliases. A spec-driven
   disassembler decodes the index/indirect bits and round-trips. Validated
-  byte-identical against `asl` (`cpu 2650`) across every spec form. Deferred: the
-  relative-range check (out-of-range displacements wrap rather than error).
+  byte-identical against `asl` (`cpu 2650`) across every spec form, and its
+  operand ranges match `asl` exactly — the relative (`-64..=63`), page-zero
+  (`0..=63`), and 13-/15-bit absolute ranges are all range-checked in pass 2, via
+  the engine's `Piece::Packed` (a range-checked value masked to the low bits with
+  the mode flags OR-ed into the top — the one small engine addition the 2650
+  needed).
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.

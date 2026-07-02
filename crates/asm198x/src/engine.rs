@@ -263,6 +263,23 @@ pub(crate) enum Piece {
         rel: bool,
         signed: bool,
     },
+    /// A value packed into `bytes` bytes (in the CPU's endianness), range-checked
+    /// in pass 2 against `min..=max`, then masked to `mask` and OR-ed with
+    /// `or_bits`. `expr` carries the raw (possibly `Pc`-relative) value, so the
+    /// check sees the real number before the low bits are masked out and the high
+    /// mode flags are set. This is the 2650's relative / page-zero / absolute
+    /// operand, where the low bits are a displacement or address and the high
+    /// bits carry indirect and index-control flags. `what` names the field in the
+    /// range error.
+    Packed {
+        expr: Expr,
+        bytes: u8,
+        min: i64,
+        max: i64,
+        mask: u32,
+        or_bits: u32,
+        what: &'static str,
+    },
 }
 
 impl Piece {
@@ -270,6 +287,7 @@ impl Piece {
         match self {
             Piece::Lit(_) => 1,
             Piece::Val { bytes, .. } => i64::from(*bytes),
+            Piece::Packed { bytes, .. } => i64::from(*bytes),
         }
     }
 }
@@ -532,6 +550,25 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                                 set.endianness,
                                 s.line,
                             )?;
+                        }
+                        Piece::Packed {
+                            expr,
+                            bytes: width,
+                            min,
+                            max,
+                            mask,
+                            or_bits,
+                            what,
+                        } => {
+                            let v = expr.eval(&symbols, pc, s.line)?;
+                            if !(*min..=*max).contains(&v) {
+                                return Err(AsmError::new(
+                                    s.line,
+                                    format!("{what} out of range ({v}; must be {min}..={max})"),
+                                ));
+                            }
+                            let packed = i64::from((v as u32 & *mask) | *or_bits);
+                            emit_value(&mut bytes, packed, *width, false, set.endianness, s.line)?;
                         }
                     }
                 }

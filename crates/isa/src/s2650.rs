@@ -17,10 +17,11 @@
 //! - **R** — relative: opcode + a **7-bit signed** displacement (`−64..+63`)
 //!   measured from the following instruction, with bit 7 the **indirect** flag
 //!   (`*`). Emitted via the computed-operand seam.
-//! - **A** — absolute: opcode + a **15-bit** address (big-endian), bit 15 the
-//!   indirect flag, and bits 14-13 an **index control** (`,R3` / `,R3,+` /
-//!   `,R3,-`) — indexing forces the register field to R3 and the operand to R0.
-//!   Emitted via the seam.
+//! - **A** — absolute: opcode + a big-endian address — **13-bit** for the
+//!   memory-reference ops (bits 14-13 are an **index control**, `,R3` / `,R3,+`
+//!   / `,R3,-`, forcing the register field to R3 and the operand to R0) or
+//!   **15-bit** for branches; bit 15 is the indirect flag. Emitted via the seam,
+//!   range-checked in pass 2.
 //!
 //! The register (`Z`) forms have documented quirks the dialect handles: `LODZ,R0`
 //! is redundant and `asl` encodes it as `IORZ,R0` (`0x60`); `STRZ,R0` (`0xC0`)

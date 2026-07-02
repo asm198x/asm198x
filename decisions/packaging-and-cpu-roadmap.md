@@ -244,10 +244,14 @@ small taxonomy, and the engine now has one seam that spans it.
   the *fixed-slot* path, not the seam.
 
 **The seam (decided, built):** the engine gained
-`Operation::Encoded(Vec<Piece>)`, where a `Piece` is either `Lit(u8)` (a byte the
-dialect already computed — opcode, postbyte, later a modrm) or
+`Operation::Encoded(Vec<Piece>)`, where a `Piece` is one of `Lit(u8)` (a byte the
+dialect already computed — opcode, postbyte, later a modrm),
 `Val { expr, bytes, rel, signed }` (a value resolved in pass two at a given
-width, optionally a PC-relative branch offset or a signed displacement). A
+width, optionally a PC-relative branch offset or a signed displacement), or
+`Packed { expr, bytes, min, max, mask, or_bits, what }` (a value range-checked in
+pass two, then masked to the low bits with mode flags OR-ed into the top — the
+2650's relative / page-zero / absolute operands, whose sub-byte address and
+displacement fields must be validated against the reference's exact limits). A
 dialect whose operands are computed builds the pieces itself and still reuses the
 engine's two-pass driver, symbol table, `org`, and `equ`. This is deliberately
 **general**, not 6809-specific: 8086 will emit `Encoded` pieces the same way.
