@@ -29,7 +29,15 @@ use crate::dialect::Dialect;
 use crate::engine::{AsmError, BinOp, Expr, Operation, Piece, Statement};
 
 /// The Intel 8048 (MCS-48) dialect.
-pub(crate) struct I8048;
+///
+/// `romless` selects the ROM-less parts (8035/8039/8040 and their CMOS kin),
+/// which share the 8048's encoding but forbid the four BUS-port instructions
+/// (`ORL`/`ANL BUS,#data`, `OUTL BUS,A`, `INS A,BUS`) — on a ROM-less part the
+/// bus is committed to fetching external program memory. `asl` enforces the same
+/// restriction for `cpu 8039`.
+pub(crate) struct I8048 {
+    pub(crate) romless: bool,
+}
 
 impl Dialect for I8048 {
     fn instruction_set(&self) -> &'static isa::InstructionSet {
@@ -62,7 +70,7 @@ impl Dialect for I8048 {
             let op = if rest.is_empty() {
                 None
             } else {
-                parse_op(set, rest, &consts, line)?
+                parse_op(set, rest, self.romless, &consts, line)?
             };
             if label.is_some() || op.is_some() {
                 out.push(Statement { line, label, op });
@@ -120,6 +128,7 @@ fn split_label(code: &str) -> (Option<String>, &str) {
 fn parse_op(
     set: &'static isa::InstructionSet,
     rest: &str,
+    romless: bool,
     consts: &BTreeMap<String, i64>,
     line: usize,
 ) -> Result<Option<Operation>, AsmError> {
@@ -130,7 +139,7 @@ fn parse_op(
         "db" | "dc" | "byte" => Operation::Bytes(byte_list(args, line)?),
         "dw" | "word" => Operation::Words(value_list(args, line)?),
         "ds" | "rmb" => parse_ds(args, consts, line)?,
-        _ => resolve(set, &word.to_ascii_uppercase(), args, line)?,
+        _ => resolve(set, &word.to_ascii_uppercase(), args, romless, line)?,
     };
     Ok(Some(op))
 }
@@ -191,6 +200,7 @@ fn resolve(
     set: &'static isa::InstructionSet,
     mn: &str,
     args: &str,
+    romless: bool,
     line: usize,
 ) -> Result<Operation, AsmError> {
     if mn == "JMP" || mn == "CALL" {
@@ -221,6 +231,16 @@ fn resolve(
         }
     }
     let label = tokens.join(",");
+    if romless && is_bus_op(mn, &label) {
+        return Err(AsmError::new(
+            line,
+            format!(
+                "`{mn} {}` is not available on ROM-less MCS-48 parts (8035/8039/8040): \
+                 the bus is reserved for external program memory",
+                args.trim()
+            ),
+        ));
+    }
     let f = insn
         .form(&label)
         .ok_or_else(|| AsmError::new(line, format!("`{mn}` has no form for `{}`", args.trim())))?;
@@ -272,6 +292,16 @@ fn jump(mn: &str, args: &str, line: usize) -> Result<Operation, AsmError> {
     ]))
 }
 
+/// The four BUS-port instructions the ROM-less parts forbid (the bus is busy
+/// fetching external program memory): `ORL`/`ANL BUS,#data`, `OUTL BUS,A`,
+/// `INS A,BUS`. Keyed by `(mnemonic, mode label)`.
+fn is_bus_op(mn: &str, label: &str) -> bool {
+    matches!(
+        (mn, label),
+        ("ORL", "bus,#N") | ("ANL", "bus,#N") | ("OUTL", "bus,a") | ("INS", "a,bus")
+    )
+}
+
 /// The 8048 fixed operand keywords: the accumulator, ports, registers, control
 /// bits — anything that is part of the instruction identity rather than a value.
 fn is_keyword(s: &str) -> bool {
@@ -314,7 +344,7 @@ fn is_keyword(s: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use crate::assemble_8048 as asm;
+    use crate::{assemble_8039, assemble_8048 as asm};
 
     fn bytes(src: &str) -> Vec<u8> {
         asm(src).expect("assemble").bytes
@@ -358,5 +388,48 @@ mod tests {
         assert_eq!(bytes(" org 100h\n jz 150h\n"), vec![0xC6, 0x50]);
         assert_eq!(bytes(" org 100h\n jb7 1aah\n"), vec![0xF2, 0xAA]);
         assert_eq!(bytes(" org 100h\n djnz r3,150h\n"), vec![0xEB, 0x50]);
+    }
+
+    #[test]
+    fn romless_shares_the_8048_encoding() {
+        // Every non-BUS instruction encodes identically on the ROM-less parts.
+        for src in [
+            " add a,r7\n",
+            " mov a,#42h\n",
+            " orl p1,#5\n",
+            " anl p2,#5\n",
+            " outl p1,a\n",
+            " movx @r0,a\n",
+            " movp a,@a\n",
+            " sel mb1\n",
+            " org 100h\n jz 150h\n",
+            " jmp 7ffh\n",
+        ] {
+            assert_eq!(
+                assemble_8039(src).expect("8039 assemble").bytes,
+                asm(src).expect("8048 assemble").bytes,
+                "8039 vs 8048 differ for `{}`",
+                src.trim()
+            );
+        }
+    }
+
+    #[test]
+    fn romless_forbids_the_bus_port_ops() {
+        // The bus is committed to fetching external program memory (asl agrees).
+        for src in [
+            " orl bus,#55h\n",
+            " anl bus,#0fh\n",
+            " outl bus,a\n",
+            " ins a,bus\n",
+        ] {
+            assert!(
+                assemble_8039(src).is_err(),
+                "ROM-less part should reject `{}`",
+                src.trim()
+            );
+            // ...but the full 8048 still accepts it.
+            assert!(asm(src).is_ok(), "8048 should accept `{}`", src.trim());
+        }
     }
 }

@@ -7,10 +7,10 @@
 //! `asm198x-and-shared-isa-spec.md`.
 
 use crate::{
-    assemble_1802, assemble_8048, assemble_acme, assemble_f8, assemble_i8080, assemble_m6800,
-    assemble_pasmonext, assemble_rgbasm, assemble_scmp, assemble_vasm, listing_1802, listing_6502,
-    listing_8048, listing_68000, listing_f8, listing_i8080, listing_m6800, listing_scmp,
-    listing_sm83, listing_z80,
+    assemble_1802, assemble_8039, assemble_8048, assemble_acme, assemble_f8, assemble_i8080,
+    assemble_m6800, assemble_pasmonext, assemble_rgbasm, assemble_scmp, assemble_vasm,
+    listing_1802, listing_6502, listing_8048, listing_68000, listing_f8, listing_i8080,
+    listing_m6800, listing_scmp, listing_sm83, listing_z80,
 };
 
 #[test]
@@ -108,6 +108,31 @@ fn round_trips_scmp_through_asl_syntax() {
     let original = assemble_scmp(source).expect("assemble");
     let listing = listing_scmp(&original.bytes, original.origin);
     let re = assemble_scmp(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
+fn round_trips_8039_romless_mcs48() {
+    // The ROM-less parts share the 8048 encoding and disassembler; a program of
+    // 8039-legal instructions (no BUS-port ops) round-trips through assemble_8039.
+    let source = "\
+        \torg 100h\n\
+        start:\n\
+        \tmov a,#42h\n\
+        \tadd a,r7\n\
+        \torl p1,#0fh\n\
+        \toutl p2,a\n\
+        \tmovx @r0,a\n\
+        \tinc @r1\n\
+        \tjz start\n\
+        \tdjnz r3,start\n\
+        \tsel mb1\n\
+        \tcall 200h\n\
+        \tjmp start\n\
+        \tret\n";
+    let original = assemble_8039(source).expect("assemble");
+    let listing = listing_8048(&original.bytes, original.origin);
+    let re = assemble_8039(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
 

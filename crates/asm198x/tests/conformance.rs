@@ -464,6 +464,57 @@ fn spec_opcodes_match_reference() {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (8048)");
     }
 
+    // --- ROM-less MCS-48 (8035/8039/8040) / asl + p2bin --------------------
+    // The ROM-less parts share the 8048 encoding; the arbiter (`cpu 8039`)
+    // agrees form-for-form, except the four BUS-port ops it forbids (the bus is
+    // committed to external program fetch) — those we skip, matching the
+    // dialect's own rejection (see `dialects::i8048`).
+    if have("asl") && have("p2bin") {
+        let bus_op = |mn: &str, mode: &str| {
+            matches!(
+                (mn, mode),
+                ("ORL", "bus,#N") | ("ANL", "bus,#N") | ("OUTL", "bus,a") | ("INS", "a,bus")
+            )
+        };
+        for insn in isa::i8048::SET.instructions {
+            for form in insn.forms {
+                if bus_op(insn.mnemonic, form.mode) {
+                    continue;
+                }
+                let bytes = synth(form);
+                // Retarget the listing header at the ROM-less part.
+                let text = asm198x::listing_8048(&bytes, 0x0000).replace("cpu 8048", "cpu 8039");
+                let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
+                    let obj = src.with_extension("p");
+                    let mut a = Command::new("asl");
+                    a.arg("-q").arg(src).arg("-o").arg(&obj);
+                    let mut b = Command::new("p2bin");
+                    b.arg(&obj).arg(out);
+                    vec![a, b]
+                });
+                match reference {
+                    Some(r) => {
+                        checked += 1;
+                        if r != bytes {
+                            fails.push(format!(
+                                "8039 {} {}: ours {:02X?} vs asl {:02X?}",
+                                insn.mnemonic, form.mode, bytes, r
+                            ));
+                        }
+                    }
+                    None => fails.push(format!(
+                        "8039 {} {}: asl rejected `{}`",
+                        insn.mnemonic,
+                        form.mode,
+                        text.lines().nth(2).unwrap_or("").trim()
+                    )),
+                }
+            }
+        }
+    } else {
+        eprintln!("SKIP: `asl`/`p2bin` not on PATH (8039)");
+    }
+
     // --- National SC/MP (INS8060) / asl + p2bin ----------------------------
     if have("asl") && have("p2bin") {
         for insn in isa::scmp::SET.instructions {

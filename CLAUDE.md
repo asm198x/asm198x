@@ -149,6 +149,16 @@ curriculum corpus:
   deferred same-page nicety as the 1802.) This addition also made `--cpu` accept
   the single-dialect chips directly (`--cpu 8048`/`6800`/`1802`/`8080`), matching
   the documented flag.
+  - **ROM-less MCS-48 kin** (`--cpu 8035`/`8039`/`8040`, incl. CMOS `80c35`/
+    `80c39`/`80c40`) — same `isa::i8048` encoding, no new spec. The one real
+    difference: the ROM-less parts commit the bus to fetching external program
+    memory, so the four **BUS-port instructions** (`ORL`/`ANL BUS,#`, `OUTL
+    BUS,A`, `INS A,BUS`) are rejected (`assemble_8039`, `I8048 { romless }`).
+    `asl` (`cpu 8039`) enforces the same restriction; validated byte-identical
+    against it across every non-BUS form. The ROM'd larger parts (`8049`/`8050`/
+    `80c48`/`80c49`) are plain aliases of the full 8048. The 8021/8022 (reduced
+    ISA) and 8041/8042 (UPI) are deliberately *not* aliased — they are different
+    instruction sets.
 - **SC/MP** — National Semiconductor INS8060 syntax (`dialects::scmp`,
   `--cpu scmp`, also `sc/mp`/`ins8060`) over a fresh standalone `isa::scmp`
   spec. All fixed-slot, **zero engine changes**. The interesting part is the
@@ -192,7 +202,7 @@ need the tools installed — and degrading gracefully when one is absent):
 - **`tests/conformance`** — three checks, all making the reference tool the
   arbiter by reusing the disassemblers (synthesise bytes → disassemble →
   reassemble with the *reference*): every form-based spec's opcode
-  (`spec_opcodes_match_reference`: 6502/Z80/65816/HuC6280/SM83/8080/6800/1802/8048/SC-MP/F8), an opcode-space sweep for
+  (`spec_opcodes_match_reference`: 6502/Z80/65816/HuC6280/SM83/8080/6800/1802/8048/8039/SC-MP/F8), an opcode-space sweep for
   the non-form specs (`spec_sweep_matches_reference`: 6809 and 68000 — ~33k
   decodable encodings), and a seeded differential fuzzer over random programs
   reassembled by both our asm and the reference (`differential_fuzz`).

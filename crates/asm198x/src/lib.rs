@@ -192,7 +192,20 @@ pub fn assemble_1802(source: &str) -> Result<Assembly, AsmError> {
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_8048(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::I8048)
+    engine::assemble(source, &dialects::I8048 { romless: false })
+}
+
+/// Assemble asl-syntax ROM-less MCS-48 source (8035/8039/8040 and CMOS kin) into
+/// a flat binary at the `org`, over [`isa::i8048`]. Identical to
+/// [`assemble_8048`] except the four BUS-port instructions (`ORL`/`ANL BUS,#`,
+/// `OUTL BUS,A`, `INS A,BUS`) are rejected — on a ROM-less part the bus fetches
+/// external program memory. Matches `asl` (`cpu 8039`).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure, or a BUS-port instruction.
+pub fn assemble_8039(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::I8048 { romless: true })
 }
 
 /// Assemble asl-syntax National SC/MP (INS8060) source into a flat binary at the

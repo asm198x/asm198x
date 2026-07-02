@@ -33,8 +33,11 @@ enum Assembler {
     M6800,
     /// asl-syntax RCA CDP1802 (COSMAC) — a flat big-endian binary.
     Cdp1802,
-    /// asl-syntax Intel 8048 (MCS-48) — a flat binary.
-    I8048,
+    /// asl-syntax Intel 8048 (MCS-48) — a flat binary. `romless` selects the
+    /// 8035/8039/8040 kin, which forbid the four BUS-port instructions.
+    I8048 {
+        romless: bool,
+    },
     /// asl-syntax National SC/MP (INS8060) — a flat binary.
     Scmp,
     /// asl-syntax Fairchild F8 (3850) — a flat big-endian binary.
@@ -77,7 +80,14 @@ impl Assembler {
             Some("8080" | "i8080" | "intel8080") => Ok(Self::I8080),
             Some("6800" | "m6800") => Ok(Self::M6800),
             Some("1802" | "cdp1802" | "cosmac") => Ok(Self::Cdp1802),
-            Some("8048" | "i8048" | "mcs48" | "mcs-48") => Ok(Self::I8048),
+            // The ROM'd MCS-48 parts share the 8048's full set; the ROM-less kin
+            // (8035/8039/8040, incl. CMOS) forbid the four BUS-port instructions.
+            Some("8048" | "i8048" | "mcs48" | "mcs-48" | "8049" | "8050" | "80c48" | "80c49") => {
+                Ok(Self::I8048 { romless: false })
+            }
+            Some("8035" | "8039" | "8040" | "80c35" | "80c39" | "80c40") => {
+                Ok(Self::I8048 { romless: true })
+            }
             Some("scmp" | "sc/mp" | "ins8060") => Ok(Self::Scmp),
             Some("f8" | "3850" | "f3850" | "channelf" | "channel-f") => Ok(Self::F8),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
@@ -112,7 +122,8 @@ impl Assembler {
             Self::I8080 => asm198x::assemble_i8080(source),
             Self::M6800 => asm198x::assemble_m6800(source),
             Self::Cdp1802 => asm198x::assemble_1802(source),
-            Self::I8048 => asm198x::assemble_8048(source),
+            Self::I8048 { romless: false } => asm198x::assemble_8048(source),
+            Self::I8048 { romless: true } => asm198x::assemble_8039(source),
             Self::Scmp => asm198x::assemble_scmp(source),
             Self::F8 => asm198x::assemble_f8(source),
             // ca65 and vasm produce non-flat output and are handled in `run`.
@@ -228,7 +239,7 @@ fn run(args: &[String]) -> Result<String, String> {
             Assembler::Cdp1802 => {
                 print!("{}", asm198x::listing_1802(&bytes, origin));
             }
-            Assembler::I8048 => {
+            Assembler::I8048 { .. } => {
                 print!("{}", asm198x::listing_8048(&bytes, origin));
             }
             Assembler::Scmp => {
@@ -368,9 +379,10 @@ fn usage() -> String {
      \x20                 68000), lwasm (6809), 65816 (ca65 native), huc6280\n\
      \x20                 (PC Engine ca65; also `pce`), rgbasm (Game Boy SM83;\n\
      \x20                 also `sm83`/`gb`), 8080 (Intel syntax), 6800\n\
-     \x20                 (Motorola syntax), 1802 (COSMAC), 8048 (MCS-48),\n\
-     \x20                 scmp (SC/MP), f8 (Fairchild F8; also `3850`/\n\
-     \x20                 `channelf`), pasmo, pasmonext, sjasmplus\n\
+     \x20                 (Motorola syntax), 1802 (COSMAC), 8048 (MCS-48;\n\
+     \x20                 ROM-less kin `8035`/`8039`/`8040`), scmp (SC/MP),\n\
+     \x20                 f8 (Fairchild F8; also `3850`/`channelf`), pasmo,\n\
+     \x20                 pasmonext, sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
      \x20                 the dialect\n\n\
