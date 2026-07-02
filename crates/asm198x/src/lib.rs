@@ -45,9 +45,9 @@ pub use engine::{AsmError, Assembly, Warning};
 pub use isa_disasm::{
     Line, disassemble_1802, disassemble_6502, disassemble_6809, disassemble_8048,
     disassemble_65816, disassemble_68000, disassemble_huc6280, disassemble_i8080,
-    disassemble_m6800, disassemble_sm83, disassemble_z80, listing_1802, listing_6502, listing_6809,
-    listing_8048, listing_65816, listing_68000, listing_huc6280, listing_i8080, listing_m6800,
-    listing_sm83, listing_z80,
+    disassemble_m6800, disassemble_scmp, disassemble_sm83, disassemble_z80, listing_1802,
+    listing_6502, listing_6809, listing_8048, listing_65816, listing_68000, listing_huc6280,
+    listing_i8080, listing_m6800, listing_scmp, listing_sm83, listing_z80,
 };
 pub use prg::prg;
 pub use sna::sna_48k;
@@ -193,6 +193,18 @@ pub fn assemble_1802(source: &str) -> Result<Assembly, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_8048(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::I8048)
+}
+
+/// Assemble asl-syntax National SC/MP (INS8060) source into a flat binary at the
+/// `org`, over [`isa::scmp`]. C-style numbers (`0x..` hex); `disp(ptr)` /
+/// `@disp(ptr)` memory references (the literal `e` selects the E-register
+/// index), pointer-exchange, and immediate forms. Matches `asl` (`cpu SC/MP`).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_scmp(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::Scmp)
 }
 
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching

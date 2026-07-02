@@ -1876,6 +1876,85 @@ fn render_8048(mnemonic: &str, mode: &str, values: &[i64], addr: u16) -> String 
     format!("{m} {mode}")
 }
 
+/// Disassemble a National SC/MP (INS8060) program.
+#[must_use]
+pub fn disassemble_scmp(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if let Some((mn, mode, vals, len)) = decode_scmp(code, pos) {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: code[pos..pos + len].to_vec(),
+                text: render_scmp(mn, mode, &vals),
+            });
+            pos += len;
+        } else {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!("db 0x{:02X}", code[pos]),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render an SC/MP disassembly as reassemblable `asl` source.
+#[must_use]
+pub fn listing_scmp(code: &[u8], origin: u16) -> String {
+    let mut s = format!("\tcpu SC/MP\n\torg 0x{origin:04X}\n");
+    for line in disassemble_scmp(code, origin) {
+        s.push('\t');
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s.push_str("\tend\n");
+    s
+}
+
+fn decode_scmp(code: &[u8], pos: usize) -> Option<(&'static str, &'static str, Vec<i64>, usize)> {
+    let b = *code.get(pos)?;
+    let (mn, form) = isa::scmp::SET
+        .instructions
+        .iter()
+        .flat_map(|insn| insn.forms.iter().map(move |f| (insn.mnemonic, f)))
+        .find(|(_, f)| f.opcode == [b])?;
+
+    let mut vals = Vec::new();
+    let mut off = pos + 1;
+    for operand in form.operands {
+        vals.push(i64::from(*code.get(off)?));
+        off += operand.bytes as usize;
+    }
+    Some((mn, form.mode, vals, off - pos))
+}
+
+/// Render a decoded SC/MP instruction to `asl` syntax. Mode `""` is inherent,
+/// `"imm"` an immediate byte, and a bare `"0".."3"`/`"@1".."@3"` is a pointer
+/// form — an operand-less pointer exchange, or a `disp(ptr)` memory reference
+/// where the byte `0x80` renders as the literal `e` (the E-register index).
+fn render_scmp(mnemonic: &str, mode: &str, values: &[i64]) -> String {
+    let m = mnemonic.to_ascii_lowercase();
+    if mode.is_empty() {
+        return m;
+    }
+    if mode == "imm" {
+        return format!("{m} 0x{:02X}", values.first().copied().unwrap_or(0) & 0xFF);
+    }
+    let at = if mode.starts_with('@') { "@" } else { "" };
+    let ptr = mode.trim_start_matches('@');
+    match values.first() {
+        // Pointer exchange: no displacement byte.
+        None => format!("{m} {ptr}"),
+        // Memory reference: 0x80 selects the E register; else signed displacement.
+        Some(&v) if v & 0xFF == 0x80 => format!("{m} {at}e({ptr})"),
+        Some(&v) => format!("{m} {at}{}({ptr})", v as u8 as i8),
+    }
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]

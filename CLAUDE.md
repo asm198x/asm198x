@@ -39,11 +39,11 @@ Emu198x's consumption makes it real.
 
 - [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`
   + `m68k` + `mos6809` + `mos65816` + `huc6280` + `sm83` + `i8080` + `m6800` +
-  `cdp1802` + `i8048`; the Z80 set
+  `cdp1802` + `i8048` + `scmp`; the Z80 set
   includes the Z80N extensions, `huc6280` is a 65C02-superset extension over
-  `mos6502`, and `sm83`/`i8080`/`cdp1802`/`i8048` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809). Zero dependencies.
+  `mos6502`, and `sm83`/`i8080`/`cdp1802`/`i8048`/`scmp` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809). Zero dependencies.
 - [`crates/isa-disasm`](crates/isa-disasm) — the spec-driven disassemblers
-  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048), decoding against `isa`.
+  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048, SC/MP), decoding against `isa`.
   Depends only on `isa` + std, so Emu198x can consume disassembly without the
   assembler. See [`decisions/disassembler-crate.md`](decisions/disassembler-crate.md).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
@@ -149,6 +149,18 @@ curriculum corpus:
   deferred same-page nicety as the 1802.) This addition also made `--cpu` accept
   the single-dialect chips directly (`--cpu 8048`/`6800`/`1802`/`8080`), matching
   the documented flag.
+- **SC/MP** — National Semiconductor INS8060 syntax (`dialects::scmp`,
+  `--cpu scmp`, also `sc/mp`/`ins8060`) over a fresh standalone `isa::scmp`
+  spec. All fixed-slot, **zero engine changes**. The interesting part is the
+  addressing: memory is reached through a **pointer register + signed 8-bit
+  displacement** — `disp(ptr)` / `@disp(ptr)` — with the pointer (0..3) and the
+  `@` auto-index bit resolved at parse time into the form (modes `"0"`..`"3"`,
+  `"@1"`..`"@3"`, like the 1802 register nibble), the displacement laid down as
+  the following byte. The literal `e` is the E-register index (displacement byte
+  `0x80`); the ALU immediates (`LDI`/`ANI`/…) occupy the auto-index-`P0` opcode
+  slot, so `@` is pointer-1..3 only. `asl`'s SC/MP mode uses **C-style numbers**
+  (`0x..` hex), so this is the first dialect with a `0x` lexer. Validated
+  byte-identical against `asl` (`cpu SC/MP`) across every form.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
@@ -165,7 +177,7 @@ need the tools installed — and degrading gracefully when one is absent):
 - **`tests/conformance`** — three checks, all making the reference tool the
   arbiter by reusing the disassemblers (synthesise bytes → disassemble →
   reassemble with the *reference*): every form-based spec's opcode
-  (`spec_opcodes_match_reference`: 6502/Z80/65816/HuC6280/SM83/8080/6800/1802/8048), an opcode-space sweep for
+  (`spec_opcodes_match_reference`: 6502/Z80/65816/HuC6280/SM83/8080/6800/1802/8048/SC-MP), an opcode-space sweep for
   the non-form specs (`spec_sweep_matches_reference`: 6809 and 68000 — ~33k
   decodable encodings), and a seeded differential fuzzer over random programs
   reassembled by both our asm and the reference (`differential_fuzz`).

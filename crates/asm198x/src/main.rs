@@ -35,6 +35,8 @@ enum Assembler {
     Cdp1802,
     /// asl-syntax Intel 8048 (MCS-48) — a flat binary.
     I8048,
+    /// asl-syntax National SC/MP (INS8060) — a flat binary.
+    Scmp,
     Pasmo {
         z80n: bool,
     },
@@ -74,6 +76,7 @@ impl Assembler {
             Some("6800" | "m6800") => Ok(Self::M6800),
             Some("1802" | "cdp1802" | "cosmac") => Ok(Self::Cdp1802),
             Some("8048" | "i8048" | "mcs48" | "mcs-48") => Ok(Self::I8048),
+            Some("scmp" | "sc/mp" | "ins8060") => Ok(Self::Scmp),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo {
@@ -107,6 +110,7 @@ impl Assembler {
             Self::M6800 => asm198x::assemble_m6800(source),
             Self::Cdp1802 => asm198x::assemble_1802(source),
             Self::I8048 => asm198x::assemble_8048(source),
+            Self::Scmp => asm198x::assemble_scmp(source),
             // ca65 and vasm produce non-flat output and are handled in `run`.
             Self::Ca65 | Self::Vasm => unreachable!("ca65/vasm handled in run()"),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
@@ -222,6 +226,9 @@ fn run(args: &[String]) -> Result<String, String> {
             }
             Assembler::I8048 => {
                 print!("{}", asm198x::listing_8048(&bytes, origin));
+            }
+            Assembler::Scmp => {
+                print!("{}", asm198x::listing_scmp(&bytes, origin));
             }
         }
         return Ok(format!(
@@ -355,7 +362,7 @@ fn usage() -> String {
      \x20                 (PC Engine ca65; also `pce`), rgbasm (Game Boy SM83;\n\
      \x20                 also `sm83`/`gb`), 8080 (Intel syntax), 6800\n\
      \x20                 (Motorola syntax), 1802 (COSMAC), 8048 (MCS-48),\n\
-     \x20                 pasmo, pasmonext,\n\
+     \x20                 scmp (SC/MP), pasmo, pasmonext,\n\
      \x20                 sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\

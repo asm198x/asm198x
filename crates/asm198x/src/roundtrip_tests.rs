@@ -8,8 +8,9 @@
 
 use crate::{
     assemble_1802, assemble_8048, assemble_acme, assemble_i8080, assemble_m6800,
-    assemble_pasmonext, assemble_rgbasm, assemble_vasm, listing_1802, listing_6502, listing_8048,
-    listing_68000, listing_i8080, listing_m6800, listing_sm83, listing_z80,
+    assemble_pasmonext, assemble_rgbasm, assemble_scmp, assemble_vasm, listing_1802, listing_6502,
+    listing_8048, listing_68000, listing_i8080, listing_m6800, listing_scmp, listing_sm83,
+    listing_z80,
 };
 
 #[test]
@@ -81,6 +82,32 @@ fn round_trips_8048_through_asl_syntax() {
     let original = assemble_8048(source).expect("assemble");
     let listing = listing_8048(&original.bytes, original.origin);
     let re = assemble_8048(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
+fn round_trips_scmp_through_asl_syntax() {
+    // Inherent, pointer exchange, all memory-reference shapes (@, negative
+    // displacement, the E-register index), immediates, and a transfer.
+    let source = "\
+        \torg 0x0100\n\
+        start:\n\
+        \tldi 0x2A\n\
+        \txpah 1\n\
+        \txpal 1\n\
+        \tld 5(1)\n\
+        \tld @-1(2)\n\
+        \tst e(1)\n\
+        \tand 0x0f(1)\n\
+        \tadd @3(3)\n\
+        \tild 0(1)\n\
+        \tjnz -2(0)\n\
+        \tdly 0xFF\n\
+        \txppc 3\n\
+        \thalt\n";
+    let original = assemble_scmp(source).expect("assemble");
+    let listing = listing_scmp(&original.bytes, original.origin);
+    let re = assemble_scmp(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
 
