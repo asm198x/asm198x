@@ -275,6 +275,47 @@ fn spec_opcodes_match_reference() {
         eprintln!("SKIP: `ca65`/`ld65` not on PATH (huc6280)");
     }
 
+    // --- SM83 / rgbasm + rgblink (Game Boy) --------------------------------
+    if have("rgbasm") && have("rgblink") {
+        for insn in isa::sm83::SET.instructions {
+            for form in insn.forms {
+                let bytes = synth(form);
+                let text = asm198x::listing_sm83(&bytes, 0x0000);
+                let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
+                    let obj = src.with_extension("o");
+                    let mut a = Command::new("rgbasm");
+                    a.arg("-o").arg(&obj).arg(src);
+                    let mut l = Command::new("rgblink");
+                    l.arg("-o").arg(out).arg(&obj);
+                    vec![a, l]
+                });
+                match reference {
+                    // rgblink pads the ROM, so compare only the emitted prefix.
+                    Some(r) if r.len() >= bytes.len() => {
+                        checked += 1;
+                        if r[..bytes.len()] != bytes[..] {
+                            fails.push(format!(
+                                "sm83 {} {}: ours {:02X?} vs rgbasm {:02X?}",
+                                insn.mnemonic,
+                                form.mode,
+                                bytes,
+                                &r[..bytes.len()]
+                            ));
+                        }
+                    }
+                    _ => fails.push(format!(
+                        "sm83 {} {}: rgbasm rejected `{}`",
+                        insn.mnemonic,
+                        form.mode,
+                        text.lines().last().unwrap_or("").trim()
+                    )),
+                }
+            }
+        }
+    } else {
+        eprintln!("SKIP: `rgbasm`/`rgblink` not on PATH (sm83)");
+    }
+
     eprintln!("audited {checked} spec forms against the reference tools");
     assert!(
         fails.is_empty(),

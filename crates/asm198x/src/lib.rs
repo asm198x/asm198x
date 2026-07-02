@@ -44,8 +44,8 @@ mod sna;
 pub use engine::{AsmError, Assembly, Warning};
 pub use isa_disasm::{
     Line, disassemble_6502, disassemble_6809, disassemble_65816, disassemble_68000,
-    disassemble_huc6280, disassemble_z80, listing_6502, listing_6809, listing_65816, listing_68000,
-    listing_huc6280, listing_z80,
+    disassemble_huc6280, disassemble_sm83, disassemble_z80, listing_6502, listing_6809,
+    listing_65816, listing_68000, listing_huc6280, listing_sm83, listing_z80,
 };
 pub use prg::prg;
 pub use sna::sna_48k;

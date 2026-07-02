@@ -1346,6 +1346,157 @@ fn render_huc6280(mn: &str, mode: &str, vals: &[i64], addr: u16, len: usize) -> 
     }
 }
 
+// ---------------------------------------------------------------------------
+// SM83 (Game Boy) disassembly — single-byte main page + the CB page
+// ---------------------------------------------------------------------------
+
+/// Disassemble a flat SM83 binary loaded at `origin`, rendering rgbasm syntax.
+/// The main page is single-byte; `CB` is a two-byte prefix and `STOP` is the
+/// two-byte `10 00`. Unknown bytes fall back to `db`.
+#[must_use]
+pub fn disassemble_sm83(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if let Some((mn, mode, vals, len)) = decode_sm83(code, pos) {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: code[pos..pos + len].to_vec(),
+                text: render_sm83(mn, mode, &vals, addr, len),
+            });
+            pos += len;
+        } else {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!("db ${:02X}", code[pos]),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render an SM83 disassembly as reassemblable rgbasm source.
+#[must_use]
+pub fn listing_sm83(code: &[u8], origin: u16) -> String {
+    let mut s = String::from("SECTION \"code\", ROM0[$0000]\n");
+    for line in disassemble_sm83(code, origin) {
+        s.push_str("    ");
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s
+}
+
+/// Decode one SM83 instruction at `pos`. Matches the opcode (one byte, or the
+/// `CB`/`STOP` two-byte forms) against the spec, then reads operand bytes.
+fn decode_sm83(code: &[u8], pos: usize) -> Option<(&'static str, &'static str, Vec<i64>, usize)> {
+    let b0 = *code.get(pos)?;
+    let b1 = code.get(pos + 1).copied();
+    // An opcode matches if its bytes match the stream. Two-byte opcodes (CB <op>
+    // and STOP = 10 00) are tried first so they win over any one-byte form.
+    let matches = |op: &[u8]| match op {
+        [x, y] => *x == b0 && b1 == Some(*y),
+        [x] => *x == b0,
+        _ => false,
+    };
+    let forms = || {
+        isa::sm83::SET
+            .instructions
+            .iter()
+            .flat_map(|insn| insn.forms.iter().map(move |f| (insn.mnemonic, f)))
+    };
+    let (mn, form) = forms()
+        .find(|(_, f)| f.opcode.len() == 2 && matches(f.opcode))
+        .or_else(|| forms().find(|(_, f)| f.opcode.len() == 1 && matches(f.opcode)))?;
+
+    let mut vals = Vec::new();
+    let mut off = pos + form.opcode.len();
+    for operand in form.operands {
+        let n = operand.bytes as usize;
+        let mut v: i64 = 0;
+        for k in 0..n {
+            v |= i64::from(*code.get(off + k)?) << (8 * k);
+        }
+        if matches!(
+            operand.kind,
+            isa::OperandKind::RelativePc | isa::OperandKind::Displacement
+        ) {
+            let bits = n * 8;
+            if v & (1 << (bits - 1)) != 0 {
+                v -= 1 << bits;
+            }
+        }
+        vals.push(v);
+        off += n;
+    }
+    Some((mn, form.mode, vals, off - pos))
+}
+
+/// Render a decoded SM83 instruction to rgbasm syntax by substituting the
+/// upper-case placeholders in the mode label (`NN`/`N` immediates, `E` a `jr`
+/// target, `+D`/`D` a signed `sp` displacement). Lower-case register text passes
+/// through verbatim.
+fn render_sm83(mnemonic: &str, mode: &str, values: &[i64], addr: u16, len: usize) -> String {
+    let m = mnemonic.to_ascii_lowercase();
+    if mode.is_empty() {
+        return m;
+    }
+    // RST's target is the mode label as hex digits.
+    if mnemonic == "RST" {
+        return format!("{m} ${mode}");
+    }
+    let bytes = mode.as_bytes();
+    let mut out = String::new();
+    let mut vi = 0;
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i..].starts_with(b"NN") {
+            out.push_str(&format!("${:04X}", values[vi] as u16));
+            vi += 1;
+            i += 2;
+        } else if bytes[i] == b'+' && bytes.get(i + 1) == Some(&b'D') {
+            let d = values[vi];
+            vi += 1;
+            i += 2;
+            out.push_str(&signed_hex(d, "+"));
+        } else if bytes[i] == b'N' {
+            out.push_str(&format!("${:02X}", values[vi] as u8));
+            vi += 1;
+            i += 1;
+        } else if bytes[i] == b'D' {
+            let d = values[vi];
+            vi += 1;
+            i += 1;
+            out.push_str(&signed_hex(d, ""));
+        } else if bytes[i] == b'E' {
+            let target = addr
+                .wrapping_add(len as u16)
+                .wrapping_add(values[vi] as u16);
+            out.push_str(&format!("${target:04X}"));
+            vi += 1;
+            i += 1;
+        } else {
+            out.push(bytes[i] as char);
+            i += 1;
+        }
+    }
+    format!("{m} {out}")
+}
+
+/// A signed byte as `<lead>$XX` (positive) or `-$XX` (negative), for the `sp`
+/// displacement ops. `lead` is `"+"` inside a `sp+D` context, empty for a bare
+/// operand.
+fn signed_hex(d: i64, lead: &str) -> String {
+    if d < 0 {
+        format!("-${:02X}", (-d) as u8)
+    } else {
+        format!("{lead}${:02X}", d as u8)
+    }
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]
