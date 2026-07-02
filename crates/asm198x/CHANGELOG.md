@@ -7,6 +7,61 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.6](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.5...asm198x-v0.0.6) - 2026-07-02
+
+### Added
+
+- add TI TMS7000 — Wave B, the family's largest single CPU
+- *(2650)* range-check relative/page-zero/absolute operands like asl
+- add Signetics 2650 — Wave B, four addressing modes via the seam
+- add ROM-less MCS-48 kin (8035/8039/8040) as an 8048 variant
+- add Fairchild F8 (3850) — Wave B, offset-byte-relative branches
+- add National SC/MP (INS8060) — Wave B, pointer+displacement addressing
+- add Intel 8048 (MCS-48) — first Wave-B CPU, three tools one chip
+- add RCA CDP1802 (COSMAC) — ninth CPU, zero engine changes
+- add the Motorola 6800 (roadmap Wave A)
+- add the Intel 8080 (Wave A of the CPU-coverage roadmap)
+- *(asm)* accept rgbasm `@` current-PC symbol (#8 follow-up)
+- *(asm)* rgbasm (Game Boy SM83) assemble dialect ([#8](https://github.com/asm198x/asm198x/pull/8))
+- *(isa,disasm)* add the SM83 (Game Boy) spec + disassembler ([#8](https://github.com/asm198x/asm198x/pull/8))
+- *(asm)* HuC6280 assembler + disassembler dialect (#9 phase 3)
+- *(z80)* truncate out-of-range byte immediates; warning channel in the engine
+- *(vasm)* warn (not error) on out-of-range immediates, matching vasm
+- *(acme)* add the !set reassignable variable
+- *(acme)* add the !align directive
+- *(c64)* emit .prg output (--prg)
+- *(spectrum)* emit 48K .sna snapshots (--sna)
+- *(ca65-816)* add .dword/.dbyt/.asciiz; mark #26 differential gaps closed
+- *(asm)* non-fatal warning channel; warn on out-of-range CCR/SR immediate
+- *(ca65)* support anonymous labels (: / :- / :+)
+- *(acme)* accept the !pet and !zone directives
+- *(sjasmplus)* accept the byte directive (a db alias)
+- *(lwasm)* add fill, zmb, and fqb directives
+- *(ca65)* add .dword, .dbyt, and .asciiz directives
+- *(isa)* add 6809 andcc/orcc/cmpu/cmps/swi2/swi3 and 65816 rtl
+
+### Fixed
+
+- *(ci)* clear the clippy errors breaking the Clippy job
+- *(ca65)* clearer error for a segment outside the NES config
+- *(acme)* correct operator precedence; add ^ power and XOR/EOR keyword
+- *(acme)* require an explicit origin before code or data
+- *(z80)* fold a constant-expression ds/defs count
+- *(vasm)* assemble eor/and/or with an immediate operand
+- *(vasm)* parse absolute-address size suffixes .w/.l
+- *(z80)* accept radix number formats (0x, h/b/o/q suffix, # prefix)
+- *(z80n)* accept mul operands (mul d,e / mul de)
+- *(vasm)* accept adda/suba/cmpa mnemonics
+- *(vasm)* parse new-style parenthesised 68k effective addresses
+- *(dialects)* parse bitwise & shift operators in expressions
+- *(z80n)* encode PUSH nn immediate big-endian
+
+### Other
+
+- *(differential)* note the ledger is gap-free, silence dead `gap`
+- *(differential)* cover the Z80N extension ISA vs sjasmplus
+- add source-direction differential audit (reference accepts, we reject)
+
 ## [0.0.5](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.4...asm198x-v0.0.5) - 2026-06-04
 
 ### Added
