@@ -9,9 +9,9 @@
 use crate::{
     assemble_1802, assemble_2650, assemble_8039, assemble_8048, assemble_acme, assemble_f8,
     assemble_i8080, assemble_m6800, assemble_pasmonext, assemble_pdp11, assemble_rgbasm,
-    assemble_scmp, assemble_tms7000, assemble_vasm, listing_1802, listing_2650, listing_6502,
-    listing_8048, listing_68000, listing_f8, listing_i8080, listing_m6800, listing_pdp11,
-    listing_scmp, listing_sm83, listing_tms7000, listing_z80,
+    assemble_scmp, assemble_tms7000, assemble_tms9900, assemble_vasm, listing_1802, listing_2650,
+    listing_6502, listing_8048, listing_68000, listing_f8, listing_i8080, listing_m6800,
+    listing_pdp11, listing_scmp, listing_sm83, listing_tms7000, listing_tms9900, listing_z80,
 };
 
 #[test]
@@ -134,6 +134,49 @@ fn round_trips_8039_romless_mcs48() {
     let original = assemble_8039(source).expect("assemble");
     let listing = listing_8048(&original.bytes, original.origin);
     let re = assemble_8039(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
+fn round_trips_tms9900_through_asl_syntax() {
+    // The position-dependent instructions the opcode sweep can't batch — the
+    // word-scaled jumps (forward and backward) — plus a spread of formats and
+    // general-addressing modes, symbolic addresses, immediates, shifts, CRU,
+    // and the workspace-context ops.
+    let source = "\
+        \torg 0100h\n\
+        start:\n\
+        \tli r0,0abcdh\n\
+        \tmov r1,r2\n\
+        \tmov @0300h,r3\n\
+        \tmov @0300h(r4),r5\n\
+        \ta *r6+,@0400h\n\
+        \tmovb r7,*r8\n\
+        \tcoc r9,r10\n\
+        \tmpy r1,r2\n\
+        \txop @0500h,3\n\
+        \tldcr r1,8\n\
+        \tsla r2,4\n\
+        \tclr r3\n\
+        \tinc @count\n\
+        loop:\n\
+        \tdec r0\n\
+        \tjne loop\n\
+        \tjeq done\n\
+        \tsbo 5\n\
+        \ttb -3\n\
+        \tbl @sub\n\
+        \tjmp start\n\
+        sub:\n\
+        \tb *r11\n\
+        done:\n\
+        \tlwpi 8300h\n\
+        \tlimi 2\n\
+        \trtwp\n\
+        count:\tword 0\n";
+    let original = assemble_tms9900(source).expect("assemble");
+    let listing = listing_tms9900(&original.bytes, original.origin);
+    let re = assemble_tms9900(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
 

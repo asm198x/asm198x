@@ -46,9 +46,10 @@ pub use isa_disasm::{
     Line, disassemble_1802, disassemble_2650, disassemble_6502, disassemble_6809, disassemble_8048,
     disassemble_65816, disassemble_68000, disassemble_f8, disassemble_huc6280, disassemble_i8080,
     disassemble_m6800, disassemble_pdp11, disassemble_scmp, disassemble_sm83, disassemble_tms7000,
-    disassemble_z80, listing_1802, listing_2650, listing_6502, listing_6809, listing_8048,
-    listing_65816, listing_68000, listing_f8, listing_huc6280, listing_i8080, listing_m6800,
-    listing_pdp11, listing_scmp, listing_sm83, listing_tms7000, listing_z80,
+    disassemble_tms9900, disassemble_z80, listing_1802, listing_2650, listing_6502, listing_6809,
+    listing_8048, listing_65816, listing_68000, listing_f8, listing_huc6280, listing_i8080,
+    listing_m6800, listing_pdp11, listing_scmp, listing_sm83, listing_tms7000, listing_tms9900,
+    listing_z80,
 };
 pub use prg::prg;
 pub use sna::sna_48k;
@@ -273,6 +274,19 @@ pub fn assemble_tms7000(source: &str) -> Result<Assembly, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_pdp11(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::Pdp11)
+}
+
+/// Assemble asl-syntax TI TMS9900 source into a flat **big-endian** binary at
+/// the `org`, over [`isa::tms9900`]. Intel `h`-hex, registers `r0`–`r15`, and
+/// the general-addressing modes (`Rn`, `*Rn`, `@addr`, `@addr(Rn)`, `*Rn+`).
+/// Covers the base TMS9900 integer set (the TI-99/4A CPU); the TMS9995 /
+/// TMS99105 supersets are out of scope. Matches `asl` (`cpu TMS9900`).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_tms9900(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::Tms9900)
 }
 
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching

@@ -2553,6 +2553,161 @@ fn decode_pdp11(code: &[u8], pos: usize, instr_addr: u16) -> Option<(String, usi
     Some((text, off - pos))
 }
 
+// ---------------------------------------------------------------------------
+// TI TMS9900
+// ---------------------------------------------------------------------------
+
+/// Disassemble a flat TMS9900 binary loaded at `origin`. The TMS9900 is
+/// **big-endian** with 16-bit words; each instruction is one opcode word plus
+/// 0–2 extension words (symbolic addresses, immediates). Undecodable words
+/// render as `word` data, a trailing odd byte as `byte`.
+#[must_use]
+pub fn disassemble_tms9900(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if pos + 1 >= code.len() {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!("byte 0{:02X}H", code[pos]),
+            });
+            pos += 1;
+            continue;
+        }
+        let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
+        match decode_tms9900(code, pos, addr) {
+            Some((text, len)) => {
+                out.push(Line {
+                    addr: u32::from(addr),
+                    bytes: code[pos..pos + len].to_vec(),
+                    text,
+                });
+                pos += len;
+            }
+            None => {
+                out.push(Line {
+                    addr: u32::from(addr),
+                    bytes: code[pos..pos + 2].to_vec(),
+                    text: format!("word 0{word:04X}H"),
+                });
+                pos += 2;
+            }
+        }
+    }
+    out
+}
+
+/// Render a TMS9900 disassembly as reassemblable `asl` source.
+#[must_use]
+pub fn listing_tms9900(code: &[u8], origin: u16) -> String {
+    let mut s = format!("\tcpu TMS9900\n\torg 0{origin:04X}H\n");
+    for line in disassemble_tms9900(code, origin) {
+        s.push('\t');
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s.push_str("\tend\n");
+    s
+}
+
+/// Render a general-addressing operand from its 2-bit `T` mode and 4-bit
+/// register, reading an absolute address word from `code` at `ext_off` for the
+/// symbolic / indexed modes. Returns the text and extension words consumed
+/// (0 or 1), or `None` if a needed word runs past the buffer.
+fn tms9900_general(code: &[u8], ext_off: usize, t: u16, reg: u16) -> Option<(String, usize)> {
+    Some(match t {
+        0 => (format!("r{reg}"), 0),
+        1 => (format!("*r{reg}"), 0),
+        3 => (format!("*r{reg}+"), 0),
+        _ => {
+            if ext_off + 2 > code.len() {
+                return None;
+            }
+            let addr = u16::from_be_bytes([code[ext_off], code[ext_off + 1]]);
+            let s = if reg == 0 {
+                format!("@0{addr:04X}H")
+            } else {
+                format!("@0{addr:04X}H(r{reg})")
+            };
+            (s, 1)
+        }
+    })
+}
+
+/// Decode one TMS9900 instruction at byte offset `pos`, `instr_addr` its load
+/// address. Returns the reassemblable text and total byte length, or `None` for
+/// an undecodable word (rendered as `word` data by the caller).
+fn decode_tms9900(code: &[u8], pos: usize, instr_addr: u16) -> Option<(String, usize)> {
+    use isa::tms9900::Class;
+    let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
+    let insn = isa::tms9900::decode(word)?;
+    let mn = insn.mnemonic.to_ascii_lowercase();
+    // A 16-bit big-endian word at extension slot `ord`.
+    let ext_word = |ord: usize| -> Option<u16> {
+        let off = pos + 2 + 2 * ord;
+        if off + 2 > code.len() {
+            return None;
+        }
+        Some(u16::from_be_bytes([code[off], code[off + 1]]))
+    };
+
+    let text = match insn.class {
+        Class::DualGeneral => {
+            let (td, d) = ((word >> 10) & 3, (word >> 6) & 0xF);
+            let (ts, s) = ((word >> 4) & 3, word & 0xF);
+            let (src, sw) = tms9900_general(code, pos + 2, ts, s)?;
+            let (dst, dw) = tms9900_general(code, pos + 2 + 2 * sw, td, d)?;
+            return Some((format!("{mn} {src},{dst}"), 2 + 2 * (sw + dw)));
+        }
+        Class::DualRegDst => {
+            let d = (word >> 6) & 0xF;
+            let (src, sw) = tms9900_general(code, pos + 2, (word >> 4) & 3, word & 0xF)?;
+            return Some((format!("{mn} {src},r{d}"), 2 + 2 * sw));
+        }
+        Class::Xop => {
+            let n = (word >> 6) & 0xF;
+            let (src, sw) = tms9900_general(code, pos + 2, (word >> 4) & 3, word & 0xF)?;
+            return Some((format!("{mn} {src},{n}"), 2 + 2 * sw));
+        }
+        Class::CruMulti => {
+            let c = (word >> 6) & 0xF;
+            let count = if c == 0 { 16 } else { c };
+            let (src, sw) = tms9900_general(code, pos + 2, (word >> 4) & 3, word & 0xF)?;
+            return Some((format!("{mn} {src},{count}"), 2 + 2 * sw));
+        }
+        Class::Shift => {
+            let (c, w) = ((word >> 4) & 0xF, word & 0xF);
+            format!("{mn} r{w},{c}")
+        }
+        Class::SingleGeneral => {
+            let (src, sw) = tms9900_general(code, pos + 2, (word >> 4) & 3, word & 0xF)?;
+            return Some((format!("{mn} {src}"), 2 + 2 * sw));
+        }
+        Class::Control => mn,
+        Class::ImmReg => {
+            let imm = ext_word(0)?;
+            return Some((format!("{mn} r{},0{imm:04X}H", word & 0xF), 4));
+        }
+        Class::ImmOnly => {
+            let imm = ext_word(0)?;
+            return Some((format!("{mn} 0{imm:04X}H"), 4));
+        }
+        Class::StoreReg => format!("{mn} r{}", word & 0xF),
+        Class::Jump => {
+            let off = i32::from(word & 0xFF) - if word & 0x80 != 0 { 256 } else { 0 };
+            let target = instr_addr.wrapping_add(2).wrapping_add((2 * off) as u16);
+            format!("{mn} 0{target:04X}H")
+        }
+        Class::Cru => {
+            let disp = i32::from(word & 0xFF) - if word & 0x80 != 0 { 256 } else { 0 };
+            format!("{mn} {disp}")
+        }
+    };
+    Some((text, 2))
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]

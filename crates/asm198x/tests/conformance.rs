@@ -872,6 +872,36 @@ fn spec_sweep_matches_reference() {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (PDP-11 sweep)");
     }
 
+    // --- TI TMS9900 / asl + p2bin ------------------------------------------
+    if have("asl") && have("p2bin") {
+        // Every opcode word (big-endian), with canonical big-endian
+        // extension-word fillers for the symbolic-address modes.
+        let cands: Vec<Vec<u8>> = (0u32..=0xFFFF)
+            .map(|w| vec![(w >> 8) as u8, w as u8, 0x10, 0x00, 0x20, 0x00, 0x30, 0x00])
+            .collect();
+        let reasm = |src: &str| {
+            ref_assemble(&tmp, src, "asm", |s, o| {
+                let obj = s.with_extension("p");
+                let mut a = Command::new("asl");
+                a.arg("-q").arg(s).arg("-o").arg(&obj);
+                let mut b = Command::new("p2bin");
+                b.arg(&obj).arg(o);
+                vec![a, b]
+            })
+        };
+        checked += sweep(
+            "TMS9900",
+            &cands,
+            &|b, o| asm198x::disassemble_tms9900(b, o as u16),
+            &|b, o| asm198x::listing_tms9900(b, o as u16),
+            &reasm,
+            &|_| false,
+            &mut fails,
+        );
+    } else {
+        eprintln!("SKIP: `asl`/`p2bin` not on PATH (TMS9900 sweep)");
+    }
+
     eprintln!("swept {checked} decodable instructions against the reference tools");
     assert!(
         fails.is_empty(),
