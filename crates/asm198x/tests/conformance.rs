@@ -589,6 +589,50 @@ fn spec_opcodes_match_reference() {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (F8)");
     }
 
+    // --- Signetics 2650 / asl + p2bin --------------------------------------
+    if have("asl") && have("p2bin") {
+        for insn in isa::s2650::SET.instructions {
+            for form in insn.forms {
+                let mut bytes = synth(form);
+                // The 2650 is big-endian; `synth` fills little-endian, so swap
+                // the 2-byte absolute operand. (Big-endian also keeps the address
+                // in the memory-reference ops' 13-bit direct range.)
+                if form.operands.first().map(|o| o.kind) == Some(isa::OperandKind::Address) {
+                    let p = form.opcode.len();
+                    bytes.swap(p, p + 1);
+                }
+                let text = asm198x::listing_2650(&bytes, 0x0000);
+                let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
+                    let obj = src.with_extension("p");
+                    let mut a = Command::new("asl");
+                    a.arg("-q").arg(src).arg("-o").arg(&obj);
+                    let mut b = Command::new("p2bin");
+                    b.arg(&obj).arg(out);
+                    vec![a, b]
+                });
+                match reference {
+                    Some(r) => {
+                        checked += 1;
+                        if r != bytes {
+                            fails.push(format!(
+                                "2650 {} {}: ours {:02X?} vs asl {:02X?}",
+                                insn.mnemonic, form.mode, bytes, r
+                            ));
+                        }
+                    }
+                    None => fails.push(format!(
+                        "2650 {} {}: asl rejected `{}`",
+                        insn.mnemonic,
+                        form.mode,
+                        text.lines().nth(2).unwrap_or("").trim()
+                    )),
+                }
+            }
+        }
+    } else {
+        eprintln!("SKIP: `asl`/`p2bin` not on PATH (2650)");
+    }
+
     eprintln!("audited {checked} spec forms against the reference tools");
     assert!(
         fails.is_empty(),

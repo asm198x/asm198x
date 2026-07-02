@@ -7,10 +7,10 @@
 //! `asm198x-and-shared-isa-spec.md`.
 
 use crate::{
-    assemble_1802, assemble_8039, assemble_8048, assemble_acme, assemble_f8, assemble_i8080,
-    assemble_m6800, assemble_pasmonext, assemble_rgbasm, assemble_scmp, assemble_vasm,
-    listing_1802, listing_6502, listing_8048, listing_68000, listing_f8, listing_i8080,
-    listing_m6800, listing_scmp, listing_sm83, listing_z80,
+    assemble_1802, assemble_2650, assemble_8039, assemble_8048, assemble_acme, assemble_f8,
+    assemble_i8080, assemble_m6800, assemble_pasmonext, assemble_rgbasm, assemble_scmp,
+    assemble_vasm, listing_1802, listing_2650, listing_6502, listing_8048, listing_68000,
+    listing_f8, listing_i8080, listing_m6800, listing_scmp, listing_sm83, listing_z80,
 };
 
 #[test]
@@ -133,6 +133,48 @@ fn round_trips_8039_romless_mcs48() {
     let original = assemble_8039(source).expect("assemble");
     let listing = listing_8048(&original.bytes, original.origin);
     let re = assemble_8039(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
+fn round_trips_2650_through_asl_syntax() {
+    // Register / immediate / relative (indirect) / absolute (indirect + indexed)
+    // addressing, condition and register branches, ZBRR page-0 relative, I/O,
+    // and program-status ops.
+    let source = "\
+        \torg $0000\n\
+        back:\n\
+        \tnop\n\
+        \tlodi,r0 $42\n\
+        \tlodz r1\n\
+        \taddz r2\n\
+        \tcomi,r0 $10\n\
+        \tlodr,r0 back\n\
+        \tstrr,r1 *back\n\
+        \tbctr,eq back\n\
+        \tbcfr,gt back\n\
+        \tbrnr,r1 back\n\
+        \tzbrr $05\n\
+        \tloda,r1 $1234\n\
+        \tloda,r0 *$1234\n\
+        \tloda,r0 $0100,r3\n\
+        \tadda,r0 $0100,r3,+\n\
+        \tstra,r0 $0100,r3,-\n\
+        \trrr,r0\n\
+        \tbcta,un start\n\
+        \tbsta,un start\n\
+        \tbxa $2000\n\
+        \tredc,r0\n\
+        \twrte,r0 $05\n\
+        \tcpsl $01\n\
+        \ttmi,r0 $0f\n\
+        \tlpsu\n\
+        start:\n\
+        \tretc,un\n\
+        \thalt\n";
+    let original = assemble_2650(source).expect("assemble");
+    let listing = listing_2650(&original.bytes, original.origin);
+    let re = assemble_2650(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
 

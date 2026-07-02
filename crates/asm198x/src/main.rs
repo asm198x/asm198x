@@ -42,6 +42,8 @@ enum Assembler {
     Scmp,
     /// asl-syntax Fairchild F8 (3850) — a flat big-endian binary.
     F8,
+    /// asl-syntax Signetics 2650 — a flat big-endian binary.
+    S2650,
     Pasmo {
         z80n: bool,
     },
@@ -90,6 +92,7 @@ impl Assembler {
             }
             Some("scmp" | "sc/mp" | "ins8060") => Ok(Self::Scmp),
             Some("f8" | "3850" | "f3850" | "channelf" | "channel-f") => Ok(Self::F8),
+            Some("2650" | "s2650" | "signetics2650") => Ok(Self::S2650),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo {
@@ -126,6 +129,7 @@ impl Assembler {
             Self::I8048 { romless: true } => asm198x::assemble_8039(source),
             Self::Scmp => asm198x::assemble_scmp(source),
             Self::F8 => asm198x::assemble_f8(source),
+            Self::S2650 => asm198x::assemble_2650(source),
             // ca65 and vasm produce non-flat output and are handled in `run`.
             Self::Ca65 | Self::Vasm => unreachable!("ca65/vasm handled in run()"),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
@@ -247,6 +251,9 @@ fn run(args: &[String]) -> Result<String, String> {
             }
             Assembler::F8 => {
                 print!("{}", asm198x::listing_f8(&bytes, origin));
+            }
+            Assembler::S2650 => {
+                print!("{}", asm198x::listing_2650(&bytes, origin));
             }
         }
         return Ok(format!(
@@ -381,8 +388,8 @@ fn usage() -> String {
      \x20                 also `sm83`/`gb`), 8080 (Intel syntax), 6800\n\
      \x20                 (Motorola syntax), 1802 (COSMAC), 8048 (MCS-48;\n\
      \x20                 ROM-less kin `8035`/`8039`/`8040`), scmp (SC/MP),\n\
-     \x20                 f8 (Fairchild F8; also `3850`/`channelf`), pasmo,\n\
-     \x20                 pasmonext, sjasmplus\n\
+     \x20                 f8 (Fairchild F8; also `3850`/`channelf`), 2650\n\
+     \x20                 (Signetics 2650), pasmo, pasmonext, sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
      \x20                 the dialect\n\n\

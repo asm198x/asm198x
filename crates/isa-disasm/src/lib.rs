@@ -2044,6 +2044,146 @@ fn render_f8(mnemonic: &str, mode: &str, values: &[i64], addr: u16) -> String {
     }
 }
 
+/// Disassemble a Signetics 2650 program.
+#[must_use]
+pub fn disassemble_2650(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if let Some((mn, mode, kind, value, len)) = decode_2650(code, pos) {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: code[pos..pos + len].to_vec(),
+                text: render_2650(mn, mode, kind, value, addr),
+            });
+            pos += len;
+        } else {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!("db ${:02X}", code[pos]),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render a 2650 disassembly as reassemblable `asl` source.
+#[must_use]
+pub fn listing_2650(code: &[u8], origin: u16) -> String {
+    let mut s = format!("\tcpu 2650\n\torg ${origin:04X}\n");
+    for line in disassemble_2650(code, origin) {
+        s.push('\t');
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s.push_str("\tend\n");
+    s
+}
+
+fn decode_2650(
+    code: &[u8],
+    pos: usize,
+) -> Option<(
+    &'static str,
+    &'static str,
+    Option<isa::OperandKind>,
+    i64,
+    usize,
+)> {
+    let b = *code.get(pos)?;
+    let (mn, form) = isa::s2650::SET
+        .instructions
+        .iter()
+        .flat_map(|insn| insn.forms.iter().map(move |f| (insn.mnemonic, f)))
+        .find(|(_, f)| f.opcode == [b])?;
+    let kind = form.operands.first().map(|o| o.kind);
+    let (value, len) = match kind {
+        None => (0, 1),
+        Some(isa::OperandKind::Immediate | isa::OperandKind::RelativePc) => {
+            (i64::from(*code.get(pos + 1)?), 2)
+        }
+        Some(isa::OperandKind::Address) => {
+            let hi = i64::from(*code.get(pos + 1)?);
+            let lo = i64::from(*code.get(pos + 2)?);
+            ((hi << 8) | lo, 3)
+        }
+        _ => (0, 1),
+    };
+    Some((mn, form.mode, kind, value, len))
+}
+
+/// Render a decoded 2650 instruction to `asl` syntax. The mode label is the
+/// register (`r0`-`r3`) or condition (`eq`/`gt`/`lt`/`un`); relative operands
+/// resolve their 7-bit signed displacement (bit 7 = indirect `*`) to an absolute
+/// target; absolute operands carry bit 15 = indirect and, for the memory-
+/// reference ops, bits 14-13 = the `,r3` index control.
+fn render_2650(
+    mnemonic: &str,
+    mode: &str,
+    kind: Option<isa::OperandKind>,
+    value: i64,
+    addr: u16,
+) -> String {
+    let m = mnemonic.to_ascii_lowercase();
+    let sel = if mode.is_empty() {
+        String::new()
+    } else {
+        format!(",{mode}")
+    };
+    match kind {
+        None => format!("{m}{sel}"),
+        Some(isa::OperandKind::Immediate) => format!("{m}{sel} ${:02X}", value & 0xFF),
+        Some(isa::OperandKind::RelativePc) => {
+            let byte = value as u8;
+            let star = if byte & 0x80 != 0 { "*" } else { "" };
+            let d7 = byte & 0x7F;
+            let signed = if d7 >= 0x40 {
+                i32::from(d7) - 0x80
+            } else {
+                i32::from(d7)
+            };
+            let target = addr.wrapping_add(2).wrapping_add(signed as u16);
+            format!("{m}{sel} {star}${target:04X}")
+        }
+        Some(isa::OperandKind::Address) => {
+            let w = value as u16;
+            let star = if w & 0x8000 != 0 { "*" } else { "" };
+            let memref = is_memref_abs_mn(mnemonic);
+            if memref && mode == "r3" {
+                let ctrl = (w >> 13) & 3;
+                let a = w & 0x1FFF;
+                if ctrl == 0 {
+                    format!("{m},r3 {star}${a:04X}")
+                } else {
+                    let auto = match ctrl {
+                        1 => ",+",
+                        2 => ",-",
+                        _ => "",
+                    };
+                    format!("{m},r0 {star}${a:04X},r3{auto}")
+                }
+            } else {
+                let a = w & 0x7FFF;
+                format!("{m}{sel} {star}${a:04X}")
+            }
+        }
+        _ => m,
+    }
+}
+
+/// The memory-reference absolute mnemonics support `,r3` indexing (a copy of the
+/// dialect's predicate; kept here so the dependency-free disassembler needs no
+/// dialect dependency).
+fn is_memref_abs_mn(mn: &str) -> bool {
+    matches!(
+        mn,
+        "LODA" | "STRA" | "ADDA" | "SUBA" | "ANDA" | "IORA" | "EORA" | "COMA"
+    )
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]
