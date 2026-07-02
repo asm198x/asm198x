@@ -202,10 +202,11 @@ pub(crate) enum Caret {
     /// Binary XOR *and* a unary 65816 bank-byte prefix (ca65), the role chosen
     /// by position: a leading `^x` is the bank byte, `a^b` is XOR.
     BankOrXor,
-    /// `^` is not a recognised expression operator. ACME uses it for
-    /// exponentiation (`5^3` = 125) — not yet supported — so it is rejected
-    /// rather than silently mistaken for XOR.
-    Reject,
+    /// `^` is exponentiation, not XOR (ACME: `5^3` = 125). Selecting this also
+    /// switches the expression grammar to ACME's — its bitwise/shift operators
+    /// bind *looser* than arithmetic, and bitwise XOR is the keyword `XOR`
+    /// (alias `EOR`). See [`ExprParser::acme_or`].
+    Power,
 }
 
 /// Expression-syntax knobs that vary by dialect. The bitwise/shift operators
@@ -269,6 +270,8 @@ enum Tok {
     Xor,
     Shl,
     Shr,
+    /// Exponentiation (`^` in ACME, where it is *not* XOR).
+    Pow,
 }
 
 fn tokenize(
@@ -333,11 +336,13 @@ fn tokenize(
                 tokens.push(Tok::Or);
                 i += 1;
             }
-            // One `^` token; the parser reads it as XOR (binary) or, in a `ca65`
-            // dialect, as the bank-byte prefix when it leads a term. Dialects
-            // where `^` means something else (ACME: exponentiation) reject it.
-            '^' if !matches!(opts.caret, Caret::Reject) => {
-                tokens.push(Tok::Xor);
+            // `^` is XOR (or, in ca65, the bank-byte prefix when it leads a
+            // term) in most dialects, but exponentiation in ACME.
+            '^' => {
+                tokens.push(match opts.caret {
+                    Caret::Power => Tok::Pow,
+                    Caret::Xor | Caret::BankOrXor => Tok::Xor,
+                });
                 i += 1;
             }
             '(' => {
@@ -385,7 +390,18 @@ fn tokenize(
                 {
                     i += 1;
                 }
-                tokens.push(Tok::Sym(chars[start..i].iter().collect()));
+                let word: String = chars[start..i].iter().collect();
+                // ACME spells bitwise XOR as the keyword `XOR` (alias `EOR`);
+                // `^` is exponentiation there. Elsewhere these are ordinary
+                // symbols. (`EOR` the mnemonic never reaches here — the operand
+                // text is parsed after the mnemonic is split off.)
+                if opts.caret == Caret::Power
+                    && (word.eq_ignore_ascii_case("xor") || word.eq_ignore_ascii_case("eor"))
+                {
+                    tokens.push(Tok::Xor);
+                } else {
+                    tokens.push(Tok::Sym(word));
+                }
             }
             other => {
                 return Err(AsmError::new(
@@ -422,7 +438,106 @@ impl ExprParser {
                 _ => {}
             }
         }
-        self.add_sub()
+        // ACME's precedence differs from the vasm-style ladder used by the other
+        // 6502-family dialects: its bitwise/shift operators bind *looser* than
+        // arithmetic, and `^` is exponentiation (tightest). Use ACME's ladder
+        // when `^` means power; otherwise the shared one.
+        if self.caret == Caret::Power {
+            self.acme_or()
+        } else {
+            self.add_sub()
+        }
+    }
+
+    // ---- ACME precedence ladder (loosest first): `|`, keyword `XOR`/`EOR`,
+    // `&`, `<< >>`, `+ -`, `* /`, `^` (power). Verified against the acme binary.
+
+    fn acme_or(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.acme_xor()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::Or)) {
+            self.pos += 1;
+            let right = self.acme_xor()?;
+            left = Expr::Bin(BinOp::Or, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn acme_xor(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.acme_and()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::Xor)) {
+            self.pos += 1;
+            let right = self.acme_and()?;
+            left = Expr::Bin(BinOp::Xor, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn acme_and(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.acme_shift()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::And)) {
+            self.pos += 1;
+            let right = self.acme_shift()?;
+            left = Expr::Bin(BinOp::And, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn acme_shift(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.acme_add_sub()?;
+        loop {
+            let op = match self.tokens.get(self.pos) {
+                Some(Tok::Shl) => BinOp::Shl,
+                Some(Tok::Shr) => BinOp::Shr,
+                _ => break,
+            };
+            self.pos += 1;
+            let right = self.acme_add_sub()?;
+            left = Expr::Bin(op, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn acme_add_sub(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.acme_mul_div()?;
+        loop {
+            let op = match self.tokens.get(self.pos) {
+                Some(Tok::Plus) => BinOp::Add,
+                Some(Tok::Minus) => BinOp::Sub,
+                _ => break,
+            };
+            self.pos += 1;
+            let right = self.acme_mul_div()?;
+            left = Expr::Bin(op, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn acme_mul_div(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.acme_power()?;
+        loop {
+            let op = match self.tokens.get(self.pos) {
+                Some(Tok::Star) => BinOp::Mul,
+                Some(Tok::Slash) => BinOp::Div,
+                _ => break,
+            };
+            self.pos += 1;
+            let right = self.acme_power()?;
+            left = Expr::Bin(op, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    /// `^` exponentiation — tightest binary, right-associative (`2^3^2` =
+    /// `2^(3^2)` = 512).
+    fn acme_power(&mut self) -> Result<Expr, AsmError> {
+        let base = self.unary()?;
+        if matches!(self.tokens.get(self.pos), Some(Tok::Pow)) {
+            self.pos += 1;
+            let exp = self.acme_power()?;
+            Ok(Expr::Bin(BinOp::Pow, Box::new(base), Box::new(exp)))
+        } else {
+            Ok(base)
+        }
     }
 
     fn add_sub(&mut self) -> Result<Expr, AsmError> {

@@ -108,6 +108,8 @@ pub(crate) enum BinOp {
     Xor,
     Shl,
     Shr,
+    /// Exponentiation (ACME's `^`): `a` raised to the power `b`.
+    Pow,
 }
 
 /// An expression in the shared engine IR. Each dialect parses its own operator
@@ -196,6 +198,11 @@ pub(crate) fn eval_binop(op: BinOp, a: i64, b: i64, line: usize) -> Result<i64, 
         BinOp::Xor => a ^ b,
         BinOp::Shl => a.wrapping_shl(b as u32),
         BinOp::Shr => a.wrapping_shr(b as u32),
+        BinOp::Pow => {
+            let exp = u32::try_from(b)
+                .map_err(|_| AsmError::new(line, "negative exponent in expression"))?;
+            a.checked_pow(exp).ok_or_else(overflow)?
+        }
     })
 }
 

@@ -724,9 +724,10 @@ fn parse_value(anons: &[AnonDef], raw: &str, line: usize) -> Result<Expr, AsmErr
         mos6502::ExprOpts {
             prec: BytePrec::Loose,
             byte_prefix: true,
-            // ACME's `^` is exponentiation, not XOR (its XOR is the `XOR`/`EOR`
-            // keyword) — reject `^` rather than mis-encode it.
-            caret: mos6502::Caret::Reject,
+            // ACME's `^` is exponentiation and its XOR is the `XOR`/`EOR`
+            // keyword; `Power` also selects ACME's precedence ladder (bitwise/
+            // shift looser than arithmetic).
+            caret: mos6502::Caret::Power,
         },
     )
 }
@@ -930,6 +931,36 @@ mod tests {
         assert_eq!(
             asm("!pet \"ABab@[]\"").expect("pet").bytes,
             vec![0xC1, 0xC2, 0x41, 0x42, 0x40, 0x5B, 0x5D]
+        );
+    }
+
+    #[test]
+    fn caret_is_exponentiation_and_xor_is_the_keyword() {
+        // ACME's `^` is power (right-assoc, tighter than `* /`), and bitwise XOR
+        // is the keyword `XOR`/`EOR`. All byte-identical to acme.
+        assert_eq!(asm("!word 5^3\n").expect("pow").bytes, vec![125, 0]);
+        assert_eq!(asm("!word 2^8\n").expect("pow16").bytes, vec![0, 1]); // 256
+        assert_eq!(asm("!word 2^3^2\n").expect("rassoc").bytes, vec![0, 2]); // 512
+        assert_eq!(asm("!word 2*3^2\n").expect("prec").bytes, vec![18, 0]);
+        assert_eq!(asm("!word 5 XOR 1\n").expect("xor").bytes, vec![4, 0]);
+        assert_eq!(asm("!word 5 eor 1\n").expect("eor lc").bytes, vec![4, 0]);
+    }
+
+    #[test]
+    fn bitwise_and_shift_bind_looser_than_arithmetic() {
+        // ACME binds `& | << >>` looser than `+ - * /` (unlike the vasm ladder).
+        // Byte-identical to acme.
+        assert_eq!(asm("!word 1 & 3 + 1\n").expect("and").bytes, vec![0, 0]); // 1&(3+1)
+        assert_eq!(asm("!word 1 << 2 + 1\n").expect("shl").bytes, vec![8, 0]); // 1<<(2+1)
+        assert_eq!(asm("!word 2 * 3 & 4\n").expect("mul-and").bytes, vec![4, 0]); // (2*3)&4
+        // & tighter than XOR tighter than |.
+        assert_eq!(
+            asm("!word 6 & 3 XOR 1\n").expect("and-xor").bytes,
+            vec![3, 0]
+        );
+        assert_eq!(
+            asm("!word 1 | 2 XOR 3\n").expect("xor-or").bytes,
+            vec![1, 0]
         );
     }
 
