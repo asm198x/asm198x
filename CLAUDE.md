@@ -38,11 +38,12 @@ Two crates today; split further only when the per-CPU `isa` boundary or
 Emu198x's consumption makes it real.
 
 - [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`
-  + `m68k` + `mos6809` + `mos65816` + `huc6280` + `sm83` + `i8080` + `m6800`; the Z80 set
+  + `m68k` + `mos6809` + `mos65816` + `huc6280` + `sm83` + `i8080` + `m6800` +
+  `cdp1802`; the Z80 set
   includes the Z80N extensions, `huc6280` is a 65C02-superset extension over
-  `mos6502`, and `sm83`/`i8080` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809). Zero dependencies.
+  `mos6502`, and `sm83`/`i8080`/`cdp1802` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809). Zero dependencies.
 - [`crates/isa-disasm`](crates/isa-disasm) — the spec-driven disassemblers
-  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800), decoding against `isa`.
+  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802), decoding against `isa`.
   Depends only on `isa` + std, so Emu198x can consume disassembly without the
   assembler. See [`decisions/disassembler-crate.md`](decisions/disassembler-crate.md).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
@@ -117,6 +118,21 @@ curriculum corpus:
   direct-vs-extended by size or a `>`/`<` force, exactly as the 6502 chooses
   zero-page vs absolute — so it reuses the shared `$`-hex lexer. Validated
   byte-identical against `asl` (`cpu 6800`) across every form.
+- **CDP1802** — RCA COSMAC, Intel-`H`-suffix syntax (`dialects::cdp1802`,
+  `--cpu 1802`, also `cdp1802`/`cosmac`) over a fresh standalone `isa::cdp1802`
+  spec. **Big-endian** (the two-byte long-branch address). Landed with **zero
+  engine changes**: the register ops
+  pack the register number 0..15 into the opcode's low nibble (`INC 3` = `0x13`,
+  enumerated one form per register keyed by the number as its mode label, no
+  operand byte); the **page-relative short branch** (`0x30`–`0x3F`) — the roadmap
+  footnoted it as needing the computed-operand seam — turned out to need only
+  `Expr::Lo(target)` as a plain
+  one-byte operand (the low byte replaces the PC's low 8 bits), so it stayed pure
+  Tier 0. Inherent / immediate / long-branch round out the map.
+  The dialect reuses the 8080's Intel number lexer. Validated byte-identical
+  against `asl` (`cpu 1802`) across every form. (Deferred nicety: the dialect
+  does not yet enforce `asl`'s same-page check on short branches — it needs the
+  resolved address at parse time.)
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
@@ -133,7 +149,7 @@ need the tools installed — and degrading gracefully when one is absent):
 - **`tests/conformance`** — three checks, all making the reference tool the
   arbiter by reusing the disassemblers (synthesise bytes → disassemble →
   reassemble with the *reference*): every form-based spec's opcode
-  (`spec_opcodes_match_reference`: 6502/Z80/65816/HuC6280/SM83/8080/6800), an opcode-space sweep for
+  (`spec_opcodes_match_reference`: 6502/Z80/65816/HuC6280/SM83/8080/6800/1802), an opcode-space sweep for
   the non-form specs (`spec_sweep_matches_reference`: 6809 and 68000 — ~33k
   decodable encodings), and a seeded differential fuzzer over random programs
   reassembled by both our asm and the reference (`differential_fuzz`).

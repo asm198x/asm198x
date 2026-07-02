@@ -7,10 +7,33 @@
 //! `asm198x-and-shared-isa-spec.md`.
 
 use crate::{
-    assemble_acme, assemble_i8080, assemble_m6800, assemble_pasmonext, assemble_rgbasm,
-    assemble_vasm, listing_6502, listing_68000, listing_i8080, listing_m6800, listing_sm83,
-    listing_z80,
+    assemble_1802, assemble_acme, assemble_i8080, assemble_m6800, assemble_pasmonext,
+    assemble_rgbasm, assemble_vasm, listing_1802, listing_6502, listing_68000, listing_i8080,
+    listing_m6800, listing_sm83, listing_z80,
 };
+
+#[test]
+fn round_trips_1802_through_asl_syntax() {
+    // Register ops, immediates, both branch shapes, big-endian long branch.
+    let source = "\
+        \torg 1000h\n\
+        start:\n\
+        \tldi 42h\n\
+        \tplo 3\n\
+        \tphi 3\n\
+        \tsex 2\n\
+        \tinc 3\n\
+        \tglo 3\n\
+        \tani 0fh\n\
+        \tbnz start\n\
+        \tout 4\n\
+        \tlbr start\n\
+        \tidl\n";
+    let original = assemble_1802(source).expect("assemble");
+    let listing = listing_1802(&original.bytes, original.origin);
+    let re = assemble_1802(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
 
 #[test]
 fn round_trips_m6800_through_asl_syntax() {

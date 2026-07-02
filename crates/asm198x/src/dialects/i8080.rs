@@ -203,7 +203,7 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
 /// octal, `nnD`/bare decimal, and a `'c'` character literal. A hex literal
 /// starts with a digit (the shared tokenizer guarantees it — a letter-leading
 /// token lexes as a symbol).
-fn parse_number_intel(tok: &str, line: usize) -> Result<i64, AsmError> {
+pub(crate) fn parse_number_intel(tok: &str, line: usize) -> Result<i64, AsmError> {
     let t = tok.trim();
     let bad = || AsmError::new(line, format!("invalid number `{tok}`"));
     if t.starts_with('\'') && t.ends_with('\'') && t.chars().count() == 3 {

@@ -1694,6 +1694,91 @@ fn render_m6800(mnemonic: &str, mode: &str, values: &[i64], addr: u16, len: usiz
     }
 }
 
+// ---------------------------------------------------------------------------
+// RCA CDP1802 (COSMAC) disassembly — single-byte opcodes, big-endian
+// ---------------------------------------------------------------------------
+
+/// Disassemble a flat CDP1802 binary loaded at `origin`, rendering `asl` syntax.
+/// Register ops carry the register number in the opcode low nibble; the short
+/// branch's operand byte is the low byte of a same-page target, reconstructed
+/// against the instruction's page. Unknown bytes become `db`.
+#[must_use]
+pub fn disassemble_1802(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if let Some((mn, mode, vals, len)) = decode_1802(code, pos) {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: code[pos..pos + len].to_vec(),
+                text: render_1802(mn, mode, &vals, addr),
+            });
+            pos += len;
+        } else {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!("db 0{:02X}H", code[pos]),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render a CDP1802 disassembly as reassemblable `asl` source.
+#[must_use]
+pub fn listing_1802(code: &[u8], origin: u16) -> String {
+    let mut s = format!("\tcpu 1802\n\torg 0{origin:04X}H\n");
+    for line in disassemble_1802(code, origin) {
+        s.push('\t');
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s.push_str("\tend\n");
+    s
+}
+
+fn decode_1802(code: &[u8], pos: usize) -> Option<(&'static str, &'static str, Vec<i64>, usize)> {
+    let b = *code.get(pos)?;
+    let (mn, form) = isa::cdp1802::SET
+        .instructions
+        .iter()
+        .flat_map(|insn| insn.forms.iter().map(move |f| (insn.mnemonic, f)))
+        .find(|(_, f)| f.opcode == [b])?;
+
+    let mut vals = Vec::new();
+    let mut off = pos + 1;
+    for operand in form.operands {
+        let n = operand.bytes as usize;
+        // Big-endian.
+        let mut v: i64 = 0;
+        for k in 0..n {
+            v = (v << 8) | i64::from(*code.get(off + k)?);
+        }
+        vals.push(v);
+        off += n;
+    }
+    Some((mn, form.mode, vals, off - pos))
+}
+
+/// Render a decoded CDP1802 instruction to `asl` syntax. The known mode labels
+/// (`inherent`/`immediate`/`short`/`long`) select the operand shape; any other
+/// label is a register op whose mode label *is* the register number.
+fn render_1802(mnemonic: &str, mode: &str, values: &[i64], addr: u16) -> String {
+    let m = mnemonic.to_ascii_lowercase();
+    let v = values.first().copied().unwrap_or(0);
+    match mode {
+        "inherent" => m,
+        "immediate" => format!("{m} 0{:02X}H", v & 0xFF),
+        // Short branch: the low byte on the instruction's page.
+        "short" => format!("{m} 0{:04X}H", (addr & 0xFF00) | (v as u16 & 0xFF)),
+        "long" => format!("{m} 0{:04X}H", v & 0xFFFF),
+        reg => format!("{m} {reg}"),
+    }
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]

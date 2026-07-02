@@ -390,6 +390,43 @@ fn spec_opcodes_match_reference() {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (6800)");
     }
 
+    // --- RCA CDP1802 / asl + p2bin -----------------------------------------
+    if have("asl") && have("p2bin") {
+        for insn in isa::cdp1802::SET.instructions {
+            for form in insn.forms {
+                let bytes = synth(form);
+                let text = asm198x::listing_1802(&bytes, 0x0000);
+                let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
+                    let obj = src.with_extension("p");
+                    let mut a = Command::new("asl");
+                    a.arg("-q").arg(src).arg("-o").arg(&obj);
+                    let mut b = Command::new("p2bin");
+                    b.arg(&obj).arg(out);
+                    vec![a, b]
+                });
+                match reference {
+                    Some(r) => {
+                        checked += 1;
+                        if r != bytes {
+                            fails.push(format!(
+                                "1802 {} {}: ours {:02X?} vs asl {:02X?}",
+                                insn.mnemonic, form.mode, bytes, r
+                            ));
+                        }
+                    }
+                    None => fails.push(format!(
+                        "1802 {} {}: asl rejected `{}`",
+                        insn.mnemonic,
+                        form.mode,
+                        text.lines().nth(2).unwrap_or("").trim()
+                    )),
+                }
+            }
+        }
+    } else {
+        eprintln!("SKIP: `asl`/`p2bin` not on PATH (1802)");
+    }
+
     eprintln!("audited {checked} spec forms against the reference tools");
     assert!(
         fails.is_empty(),
