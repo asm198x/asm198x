@@ -206,4 +206,5 @@ pub mod mos6809;
 pub mod s2650;
 pub mod scmp;
 pub mod sm83;
+pub mod tms7000;
 pub mod z80;

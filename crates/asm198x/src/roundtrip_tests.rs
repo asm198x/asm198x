@@ -9,8 +9,9 @@
 use crate::{
     assemble_1802, assemble_2650, assemble_8039, assemble_8048, assemble_acme, assemble_f8,
     assemble_i8080, assemble_m6800, assemble_pasmonext, assemble_rgbasm, assemble_scmp,
-    assemble_vasm, listing_1802, listing_2650, listing_6502, listing_8048, listing_68000,
-    listing_f8, listing_i8080, listing_m6800, listing_scmp, listing_sm83, listing_z80,
+    assemble_tms7000, assemble_vasm, listing_1802, listing_2650, listing_6502, listing_8048,
+    listing_68000, listing_f8, listing_i8080, listing_m6800, listing_scmp, listing_sm83,
+    listing_tms7000, listing_z80,
 };
 
 #[test]
@@ -133,6 +134,46 @@ fn round_trips_8039_romless_mcs48() {
     let original = assemble_8039(source).expect("assemble");
     let listing = listing_8048(&original.bytes, original.origin);
     let re = assemble_8039(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
+fn round_trips_tms7000_through_asl_syntax() {
+    // Dual-operand ALU across addressing modes, the special MOV forms,
+    // single-register ops, peripheral + extended addressing, MOVD, the
+    // bit-test-and-jump / DJNZ relative ops, jumps, TRAP, and implied ops.
+    let source = "\
+        \torg 0\n\
+        start:\n\
+        \tmov %42h,a\n\
+        \tmov r5,r6\n\
+        \tmov a,b\n\
+        \tmov a,r5\n\
+        \tadd r5,a\n\
+        \tcmp %0ffh,a\n\
+        \tinc a\n\
+        \tclr r200\n\
+        \tmovp p6,a\n\
+        \tandp %0fh,p6\n\
+        \tlda @2000h\n\
+        \tlda *r5\n\
+        \tbr @1234h(b)\n\
+        \tmovd %1234h,r4\n\
+        \tmovd r2,r4\n\
+        loop:\n\
+        \tbtjo %1,a,loop\n\
+        \tbtjop a,p6,loop\n\
+        \tdjnz a,loop\n\
+        \tdjnz r5,loop\n\
+        \tjmp start\n\
+        \tjz loop\n\
+        \ttrap 5\n\
+        \tpush st\n\
+        \teint\n\
+        \tnop\n";
+    let original = assemble_tms7000(source).expect("assemble");
+    let listing = listing_tms7000(&original.bytes, original.origin);
+    let re = assemble_tms7000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
 

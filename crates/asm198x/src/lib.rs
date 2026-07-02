@@ -45,10 +45,10 @@ pub use engine::{AsmError, Assembly, Warning};
 pub use isa_disasm::{
     Line, disassemble_1802, disassemble_2650, disassemble_6502, disassemble_6809, disassemble_8048,
     disassemble_65816, disassemble_68000, disassemble_f8, disassemble_huc6280, disassemble_i8080,
-    disassemble_m6800, disassemble_scmp, disassemble_sm83, disassemble_z80, listing_1802,
-    listing_2650, listing_6502, listing_6809, listing_8048, listing_65816, listing_68000,
-    listing_f8, listing_huc6280, listing_i8080, listing_m6800, listing_scmp, listing_sm83,
-    listing_z80,
+    disassemble_m6800, disassemble_scmp, disassemble_sm83, disassemble_tms7000, disassemble_z80,
+    listing_1802, listing_2650, listing_6502, listing_6809, listing_8048, listing_65816,
+    listing_68000, listing_f8, listing_huc6280, listing_i8080, listing_m6800, listing_scmp,
+    listing_sm83, listing_tms7000, listing_z80,
 };
 pub use prg::prg;
 pub use sna::sna_48k;
@@ -245,6 +245,19 @@ pub fn assemble_f8(source: &str) -> Result<Assembly, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_2650(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::S2650)
+}
+
+/// Assemble asl-syntax TI TMS7000 source into a flat binary at the `org`, over
+/// [`isa::tms7000`]. Intel `H`-hex; operands classified by prefix (`A`/`B`,
+/// `%n` immediate, `Rn` register file, `Pn` peripheral, `@nnnn` direct, `*Rn`
+/// indirect, `@nnnn(B)` indexed). Standard 8-bit relative jumps; `TRAP n`
+/// encodes as `0xFF - n`. Matches `asl` (`cpu TMS70C00`).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_tms7000(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::Tms7000)
 }
 
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching

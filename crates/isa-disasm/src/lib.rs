@@ -2184,6 +2184,171 @@ fn is_memref_abs_mn(mn: &str) -> bool {
     )
 }
 
+/// Disassemble a TI TMS7000 program.
+#[must_use]
+pub fn disassemble_tms7000(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        let b = code[pos];
+        if b >= 0xE8 {
+            // TRAP n occupies 0xE8..=0xFF as 0xFF - n; not a spec form.
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![b],
+                text: format!("trap {}", 0xFF - b),
+            });
+            pos += 1;
+        } else if let Some((mn, form, vals, len)) = decode_tms7000(code, pos) {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: code[pos..pos + len].to_vec(),
+                text: render_tms7000(mn, form, &vals, addr, len),
+            });
+            pos += len;
+        } else {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![b],
+                text: format!("db 0{b:02X}H"),
+            });
+            pos += 1;
+        }
+    }
+    out
+}
+
+/// Render a TMS7000 disassembly as reassemblable `asl` source.
+#[must_use]
+pub fn listing_tms7000(code: &[u8], origin: u16) -> String {
+    let mut s = format!("\tcpu TMS70C00\n\torg 0{origin:04X}H\n");
+    for line in disassemble_tms7000(code, origin) {
+        s.push('\t');
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s.push_str("\tend\n");
+    s
+}
+
+fn decode_tms7000(
+    code: &[u8],
+    pos: usize,
+) -> Option<(&'static str, &'static isa::Form, Vec<i64>, usize)> {
+    let b = *code.get(pos)?;
+    let (mn, form) = isa::tms7000::SET
+        .instructions
+        .iter()
+        .flat_map(|insn| insn.forms.iter().map(move |f| (insn.mnemonic, f)))
+        .find(|(_, f)| f.opcode == [b])?;
+    let mut vals = Vec::new();
+    let mut off = pos + 1;
+    for operand in form.operands {
+        match operand.bytes {
+            2 => {
+                let hi = i64::from(*code.get(off)?);
+                let lo = i64::from(*code.get(off + 1)?);
+                vals.push((hi << 8) | lo);
+                off += 2;
+            }
+            _ => {
+                vals.push(i64::from(*code.get(off)?));
+                off += 1;
+            }
+        }
+    }
+    Some((mn, form, vals, off - pos))
+}
+
+fn tms_reg(v: i64) -> String {
+    format!("r{}", v & 0xFF)
+}
+fn tms_per(v: i64) -> String {
+    format!("p{}", v & 0xFF)
+}
+fn tms_imm(v: i64) -> String {
+    format!("%0{:02X}H", v & 0xFF)
+}
+fn tms_word(v: i64) -> String {
+    format!("0{:04X}H", v & 0xFFFF)
+}
+
+/// Render the operand text (no mnemonic, no trailing jump target) for a mode.
+fn tms_operands(mn: &str, mode: &str, vals: &[i64]) -> String {
+    let v0 = vals.first().copied().unwrap_or(0);
+    let v1 = vals.get(1).copied().unwrap_or(0);
+    if mn == "MOVD" {
+        return match mode {
+            "%n,rn" => format!("%{},{}", tms_word(v0), tms_reg(v1)),
+            "%n(b),rn" => format!("%{}(b),{}", tms_word(v0), tms_reg(v1)),
+            "rn,rn" => format!("{},{}", tms_reg(v0), tms_reg(v1)),
+            _ => mode.to_string(),
+        };
+    }
+    match mode {
+        "a" | "b" | "st" | "b,a" | "a,b" => mode.to_string(),
+        "rn" => tms_reg(v0),
+        "rn,a" => format!("{},a", tms_reg(v0)),
+        "%n,a" => format!("{},a", tms_imm(v0)),
+        "rn,b" => format!("{},b", tms_reg(v0)),
+        "rn,rn" => format!("{},{}", tms_reg(v0), tms_reg(v1)),
+        "%n,b" => format!("{},b", tms_imm(v0)),
+        "%n,rn" => format!("{},{}", tms_imm(v0), tms_reg(v1)),
+        "a,rn" => format!("a,{}", tms_reg(v0)),
+        "b,rn" => format!("b,{}", tms_reg(v0)),
+        "pn,a" => format!("{},a", tms_per(v0)),
+        "pn,b" => format!("{},b", tms_per(v0)),
+        "a,pn" => format!("a,{}", tms_per(v0)),
+        "b,pn" => format!("b,{}", tms_per(v0)),
+        "%n,pn" => format!("{},{}", tms_imm(v0), tms_per(v1)),
+        "@" => format!("@{}", tms_word(v0)),
+        "*" => format!("*{}", tms_reg(v0)),
+        "@(b)" => format!("@{}(b)", tms_word(v0)),
+        other => other.to_string(),
+    }
+}
+
+/// Render a decoded TMS7000 instruction to `asl` syntax. Operand flavour comes
+/// from the mode label (register / immediate / peripheral / address); a trailing
+/// `RelativePc` operand (the bit-test-and-jump and `DJNZ` ops) resolves to an
+/// absolute target, as do the plain conditional jumps.
+fn render_tms7000(mn: &str, form: &isa::Form, vals: &[i64], addr: u16, len: usize) -> String {
+    let m = mn.to_ascii_lowercase();
+    let has_rel = form
+        .operands
+        .last()
+        .is_some_and(|o| o.kind == isa::OperandKind::RelativePc);
+
+    // A plain conditional jump: an empty mode with a single relative operand.
+    // (DJNZ A/B also has a lone relative operand, but its mode is "a"/"b".)
+    if has_rel && form.operands.len() == 1 && form.mode.is_empty() {
+        let target = addr
+            .wrapping_add(len as u16)
+            .wrapping_add(vals[0] as i8 as u16);
+        return format!("{m} {}", tms_word(i64::from(target)));
+    }
+    // No operands: implied, or a fixed keyword operand (a / b / st).
+    if form.operands.is_empty() {
+        return if form.mode.is_empty() {
+            m
+        } else {
+            format!("{m} {}", form.mode)
+        };
+    }
+
+    let n_data = form.operands.len() - usize::from(has_rel);
+    let operands = tms_operands(mn, form.mode, &vals[..n_data]);
+    if has_rel {
+        let target = addr
+            .wrapping_add(len as u16)
+            .wrapping_add(vals[n_data] as i8 as u16);
+        format!("{m} {operands},{}", tms_word(i64::from(target)))
+    } else {
+        format!("{m} {operands}")
+    }
+}
+
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
 // crate, which has the assembler; here we test decode + render in isolation.
 #[cfg(test)]

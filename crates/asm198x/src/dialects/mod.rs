@@ -20,6 +20,7 @@ pub(crate) mod rgbasm;
 pub(crate) mod s2650;
 pub(crate) mod scmp;
 pub(crate) mod sjasmplus;
+pub(crate) mod tms7000;
 pub(crate) mod vasm;
 pub(crate) mod z80;
 
@@ -37,3 +38,4 @@ pub(crate) use rgbasm::Rgbasm;
 pub(crate) use s2650::S2650;
 pub(crate) use scmp::Scmp;
 pub(crate) use sjasmplus::Sjasmplus;
+pub(crate) use tms7000::Tms7000;

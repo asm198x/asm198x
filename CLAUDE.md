@@ -39,11 +39,11 @@ Emu198x's consumption makes it real.
 
 - [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`
   + `m68k` + `mos6809` + `mos65816` + `huc6280` + `sm83` + `i8080` + `m6800` +
-  `cdp1802` + `i8048` + `scmp` + `f8` + `s2650`; the Z80 set
+  `cdp1802` + `i8048` + `scmp` + `f8` + `s2650` + `tms7000`; the Z80 set
   includes the Z80N extensions, `huc6280` is a 65C02-superset extension over
-  `mos6502`, and `sm83`/`i8080`/`cdp1802`/`i8048`/`scmp`/`f8`/`s2650` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809). Zero dependencies.
+  `mos6502`, and `sm83`/`i8080`/`cdp1802`/`i8048`/`scmp`/`f8`/`s2650`/`tms7000` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809). Zero dependencies.
 - [`crates/isa-disasm`](crates/isa-disasm) — the spec-driven disassemblers
-  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048, SC/MP, F8, 2650), decoding against `isa`.
+  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048, SC/MP, F8, 2650, TMS7000), decoding against `isa`.
   Depends only on `isa` + std, so Emu198x can consume disassembly without the
   assembler. See [`decisions/disassembler-crate.md`](decisions/disassembler-crate.md).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
@@ -208,6 +208,24 @@ curriculum corpus:
   the engine's `Piece::Packed` (a range-checked value masked to the low bits with
   the mode flags OR-ed into the top — the one small engine addition the 2650
   needed).
+- **TMS7000** — TI TMS7000 syntax (`dialects::tms7000`, `--cpu tms7000`, also
+  `7000`/`tms70c00`) over a fresh standalone `isa::tms7000` spec. An 8-bit
+  microcontroller family with a 256-byte **register file** (`R0`–`R255`, `A`=R0,
+  `B`=R1) and a 256-byte **peripheral file** (`P0`–`P255`). **Big-endian**, Intel
+  `H`-suffix hex (reusing the 8080 lexer), `$` the location counter. The opcode
+  map is exceptionally regular: dual-operand instructions encode as
+  `(addressing_mode << 4) | operation` — operation the low nibble
+  (`MOV`=2…`DSB`=F), addressing the high nibble (`Rn,A`=1, `%n,A`=2, `Rn,B`=3,
+  `Rn,Rn`=4, `%n,B`=5, `B,A`=6, `%n,Rn`=7). High 8/9/A carry the peripheral ops
+  (`MOVP`/`ANDP`/…) and the extended-addressing ops (`LDA`/`STA`/`BR`/`CALL`/
+  `CMPA`/`MOVD` in `@nnnn` / `*Rn` / `@nnnn(B)` forms); B/C/D the single-register
+  ops on `A`/`B`/`Rn`; E0–E7 the relative jumps; `0xFF−n` the 24 traps. The
+  dialect classifies each operand by prefix (`A`/`B`, `%n`, `Rn`, `Pn`, `@`, `*`)
+  and drives both spec-form selection and disassembly rendering off the mode
+  label. Everything is a fixed-slot `Operation::Instruction` (relative offsets are
+  standard 8-bit) bar `TRAP n` (a single computed `0xFF−n` byte) — **zero engine
+  changes**. Validated byte-identical against `asl` (`cpu TMS70C00`) across every
+  spec form. The largest single CPU in the family.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
@@ -224,7 +242,7 @@ need the tools installed — and degrading gracefully when one is absent):
 - **`tests/conformance`** — three checks, all making the reference tool the
   arbiter by reusing the disassemblers (synthesise bytes → disassemble →
   reassemble with the *reference*): every form-based spec's opcode
-  (`spec_opcodes_match_reference`: 6502/Z80/65816/HuC6280/SM83/8080/6800/1802/8048/8039/SC-MP/F8/2650), an opcode-space sweep for
+  (`spec_opcodes_match_reference`: 6502/Z80/65816/HuC6280/SM83/8080/6800/1802/8048/8039/SC-MP/F8/2650/TMS7000), an opcode-space sweep for
   the non-form specs (`spec_sweep_matches_reference`: 6809 and 68000 — ~33k
   decodable encodings), and a seeded differential fuzzer over random programs
   reassembled by both our asm and the reference (`differential_fuzz`).
