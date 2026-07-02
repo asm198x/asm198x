@@ -259,6 +259,7 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
             prec: BytePrec::Tight,
             byte_prefix: false,
             caret: Caret::Xor,
+            at_is_pc: true,
         },
     )
 }
@@ -580,6 +581,17 @@ mod tests {
             bytes("SECTION \"c\", ROM0[$0]\nl:\n jr nz, l\n jr l\n"),
             vec![0x20, 0xFE, 0x18, 0xFC]
         );
+    }
+
+    #[test]
+    fn current_pc_symbol() {
+        // rgbasm spells the program counter `@`. Byte-identical to rgbasm at
+        // origin 0: `jr @` self-loops (-2), `jp @`/`ld hl,@` take address 0.
+        assert_eq!(bytes(" jr @\n"), vec![0x18, 0xFE]);
+        assert_eq!(bytes(" jp @\n"), vec![0xC3, 0x00, 0x00]);
+        assert_eq!(bytes(" ld hl, @\n"), vec![0x21, 0x00, 0x00]);
+        // `@+4` from the jr at 0 (len 2) → offset +2.
+        assert_eq!(bytes(" jr @+4\n nop\n nop\n"), vec![0x18, 0x02, 0x00, 0x00]);
     }
 
     #[test]

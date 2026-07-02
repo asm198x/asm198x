@@ -743,6 +743,7 @@ fn parse_value(
             prec: BytePrec::Tight,
             byte_prefix: true,
             caret: mos6502::Caret::BankOrXor,
+            at_is_pc: false,
         },
     )
 }

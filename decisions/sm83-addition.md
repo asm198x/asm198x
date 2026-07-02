@@ -56,9 +56,11 @@ byte-for-byte against `rgbasm`.
 
 - The Game Boy is not a current Code198x/Emu198x platform; this is a capability
   addition (issue #8), not a curriculum-driven one.
-- rgbasm's `@` (current-PC) symbol is not yet accepted in expressions (the shared
-  6502-family parser uses `*`); labels cover the common case. A follow-up if a
-  real source needs it.
+- rgbasm's `@` (current-PC) symbol is accepted in expressions via the shared
+  parser's `at_is_pc` `ExprOpts` knob — `@` tokenises as the PC atom that the
+  other 6502-family dialects spell `*` (ca65 keeps `@` for cheap-local labels,
+  so the knob is off everywhere except rgbasm). Byte-identical to rgbasm for
+  `jr @`, `jp @`, `ld hl,@`, `@+n`, etc.
 - Output is a flat binary at the section origin. Full RGBDS linking (multiple
   banks, `rgbfix` headers/checksums) is out of scope — the same flat-vs-linked
   stance the other dialects take.

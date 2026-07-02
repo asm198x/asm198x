@@ -593,6 +593,7 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
             prec: BytePrec::Tight,
             byte_prefix: false,
             caret: mos6502::Caret::Xor,
+            at_is_pc: false,
         },
     )
 }

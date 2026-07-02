@@ -222,6 +222,11 @@ pub(crate) struct ExprOpts {
     pub byte_prefix: bool,
     /// What `^` means.
     pub caret: Caret,
+    /// Whether `@` is the program-counter symbol (rgbasm). The 6502-family
+    /// dialects spell the PC `*`; ca65 uses `@` for cheap-local labels instead,
+    /// so this is off by default and only rgbasm turns it on. When on, `@`
+    /// tokenises exactly like `*` (a PC atom).
+    pub at_is_pc: bool,
 }
 
 /// Parse a value expression. `parse_number` lexes the dialect's numeric literal
@@ -296,6 +301,12 @@ fn tokenize(
                 i += 1;
             }
             '*' => {
+                tokens.push(Tok::Star);
+                i += 1;
+            }
+            // rgbasm spells the program counter `@`; it tokenises as a PC atom,
+            // the same node `*` produces for the other dialects.
+            '@' if opts.at_is_pc => {
                 tokens.push(Tok::Star);
                 i += 1;
             }
@@ -804,6 +815,7 @@ mod tests {
             prec,
             byte_prefix: true,
             caret: Caret::Xor,
+            at_is_pc: false,
         };
         fold_const(&parse_expr(raw, 1, num, opts).expect("parse"), &env, 1).expect("fold")
     }

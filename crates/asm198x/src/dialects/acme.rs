@@ -728,6 +728,7 @@ fn parse_value(anons: &[AnonDef], raw: &str, line: usize) -> Result<Expr, AsmErr
             // keyword; `Power` also selects ACME's precedence ladder (bitwise/
             // shift looser than arithmetic).
             caret: mos6502::Caret::Power,
+            at_is_pc: false,
         },
     )
 }
