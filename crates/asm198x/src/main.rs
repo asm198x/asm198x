@@ -25,6 +25,8 @@ enum Assembler {
     Ca65_816,
     /// ca65-syntax HuC6280 (PC Engine) — a flat little-endian binary.
     Ca65Huc6280,
+    /// rgbasm-syntax SM83 (Game Boy) — a flat binary.
+    Rgbasm,
     Pasmo {
         z80n: bool,
     },
@@ -53,6 +55,7 @@ impl Assembler {
             Some("lwasm" | "6809") => Ok(Self::Lwasm),
             Some("65816" | "816" | "ca65-816") => Ok(Self::Ca65_816),
             Some("huc6280" | "pce" | "pc-engine") => Ok(Self::Ca65Huc6280),
+            Some("rgbasm" | "sm83" | "gb" | "gameboy" | "game-boy") => Ok(Self::Rgbasm),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo {
@@ -81,6 +84,7 @@ impl Assembler {
             Self::Lwasm => asm198x::assemble_lwasm(source),
             Self::Ca65_816 => asm198x::assemble_ca65_816(source),
             Self::Ca65Huc6280 => asm198x::assemble_ca65_huc6280(source),
+            Self::Rgbasm => asm198x::assemble_rgbasm(source),
             // ca65 and vasm produce non-flat output and are handled in `run`.
             Self::Ca65 | Self::Vasm => unreachable!("ca65/vasm handled in run()"),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
@@ -181,6 +185,9 @@ fn run(args: &[String]) -> Result<String, String> {
             }
             Assembler::Ca65Huc6280 => {
                 print!("{}", asm198x::listing_huc6280(&bytes, origin));
+            }
+            Assembler::Rgbasm => {
+                print!("{}", asm198x::listing_sm83(&bytes, origin));
             }
         }
         return Ok(format!(
@@ -311,8 +318,8 @@ fn usage() -> String {
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\n\
      dialects (syntax): acme (C64 6502; also `6502`), ca65 (NES), vasm (Amiga\n\
      \x20                 68000), lwasm (6809), 65816 (ca65 native), huc6280\n\
-     \x20                 (PC Engine ca65; also `pce`), pasmo, pasmonext,\n\
-     \x20                 sjasmplus\n\
+     \x20                 (PC Engine ca65; also `pce`), rgbasm (Game Boy SM83;\n\
+     \x20                 also `sm83`/`gb`), pasmo, pasmonext, sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
      \x20                 the dialect\n\n\

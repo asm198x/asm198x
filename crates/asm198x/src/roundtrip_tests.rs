@@ -7,8 +7,40 @@
 //! `asm198x-and-shared-isa-spec.md`.
 
 use crate::{
-    assemble_acme, assemble_pasmonext, assemble_vasm, listing_6502, listing_68000, listing_z80,
+    assemble_acme, assemble_pasmonext, assemble_rgbasm, assemble_vasm, listing_6502, listing_68000,
+    listing_sm83, listing_z80,
 };
+
+#[test]
+fn round_trips_sm83_through_rgbasm() {
+    // A spread of SM83-specific and shared forms: high-page loads, HL+/-, the
+    // signed SP ops, CB bit ops, relative and absolute jumps.
+    let source = "\
+        SECTION \"code\", ROM0[$0150]\n\
+        start:\n\
+            ld hl, $c000\n\
+            ld a, $42\n\
+            ld [hl+], a\n\
+            ldh [$ff47], a\n\
+            ldh a, [$ff44]\n\
+            ld hl, sp+4\n\
+            add sp, -2\n\
+            swap a\n\
+            bit 7, [hl]\n\
+            set 0, b\n\
+            res 3, a\n\
+            rst $38\n\
+        .loop:\n\
+            sub b\n\
+            cp $10\n\
+            jr nz, .loop\n\
+            jp start\n\
+            ret\n";
+    let original = assemble_rgbasm(source).expect("assemble");
+    let listing = listing_sm83(&original.bytes, original.origin);
+    let re = assemble_rgbasm(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
 
 #[test]
 fn round_trips_z80_through_pasmonext() {

@@ -136,6 +136,18 @@ pub fn assemble_ca65_huc6280(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::Ca65Huc6280)
 }
 
+/// Assemble rgbasm-syntax SM83 (Game Boy) source into a flat binary at the
+/// section's origin — the RGBDS dialect over [`isa::sm83`]. Covers the full
+/// documented instruction set, `SECTION`/`db`/`dw`/`ds`/`EQU`, and `.local`
+/// labels. Matches `rgbasm`/`rgblink` for the emitted bytes.
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_rgbasm(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::Rgbasm)
+}
+
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching
 /// `lwasm --6809 --raw`. Covers inherent, immediate, direct, extended, and
 /// relative (short + long) addressing; indexed addressing is not yet supported.

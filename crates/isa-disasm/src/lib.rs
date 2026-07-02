@@ -1381,7 +1381,7 @@ pub fn disassemble_sm83(code: &[u8], origin: u16) -> Vec<Line> {
 /// Render an SM83 disassembly as reassemblable rgbasm source.
 #[must_use]
 pub fn listing_sm83(code: &[u8], origin: u16) -> String {
-    let mut s = String::from("SECTION \"code\", ROM0[$0000]\n");
+    let mut s = format!("SECTION \"code\", ROM0[${origin:04X}]\n");
     for line in disassemble_sm83(code, origin) {
         s.push_str("    ");
         s.push_str(&line.text);
