@@ -32,6 +32,22 @@ const CHR_SIZE: usize = 0x2000;
 const HEADER_SIZE: usize = 0x10;
 const FILL: u8 = 0x00;
 
+/// The segments the fixed NES (NROM) config defines: name, base address, and
+/// whether the segment contributes bytes to the ROM file. This is the single
+/// source of truth — `seg_info` looks up here, and a rejected `.segment` lists
+/// these names. It mirrors the curriculum's `nes.cfg`; a segment outside it
+/// (e.g. `RODATA`) is rejected here for the same reason `ld65` rejects it with
+/// that config — there is no memory area to place it in.
+const NES_SEGMENTS: &[(&str, u32, bool)] = &[
+    ("ZEROPAGE", 0x0000, false),
+    ("OAM", 0x0200, false),
+    ("BSS", 0x0300, false),
+    ("HEADER", 0x0000, true),
+    ("CODE", 0x8000, true),
+    ("VECTORS", 0xFFFA, true),
+    ("CHARS", 0x0000, true),
+];
+
 /// The base address of a segment, and whether it contributes bytes to the ROM.
 struct SegInfo {
     base: u32,
@@ -39,17 +55,19 @@ struct SegInfo {
 }
 
 fn seg_info(seg: &str) -> Option<SegInfo> {
-    let (base, in_file) = match seg {
-        "ZEROPAGE" => (0x0000, false),
-        "OAM" => (0x0200, false),
-        "BSS" => (0x0300, false),
-        "HEADER" => (0x0000, true),
-        "CODE" => (0x8000, true),
-        "VECTORS" => (0xFFFA, true),
-        "CHARS" => (0x0000, true),
-        _ => return None,
-    };
-    Some(SegInfo { base, in_file })
+    NES_SEGMENTS
+        .iter()
+        .find(|(name, _, _)| *name == seg)
+        .map(|&(_, base, in_file)| SegInfo { base, in_file })
+}
+
+/// The valid segment names, for a rejection message.
+fn known_segments() -> String {
+    NES_SEGMENTS
+        .iter()
+        .map(|(name, _, _)| *name)
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 // ---------------------------------------------------------------------------
@@ -119,8 +137,18 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
     }
     let mut placed: Vec<(String, u32, usize, Resolved)> = Vec::new(); // (segment, addr, line, item)
     for stmt in parsed.stmts {
-        let info = seg_info(&stmt.seg)
-            .ok_or_else(|| AsmError::new(stmt.line, format!("unknown segment `{}`", stmt.seg)))?;
+        let info = seg_info(&stmt.seg).ok_or_else(|| {
+            AsmError::new(
+                stmt.line,
+                format!(
+                    "segment `{}` is not in the NES config (valid: {}); this assembler \
+                     links the curriculum's fixed NROM layout, which — like `ld65` with \
+                     its `nes.cfg` — has no memory area for other segments",
+                    stmt.seg,
+                    known_segments()
+                ),
+            )
+        })?;
         let off = *offsets.entry(stmt.seg.clone()).or_insert(0);
         let addr = info.base + off;
         if let Some(label) = &stmt.label {
@@ -736,6 +764,21 @@ mod tests {
     fn rom_has_nrom_shape() {
         let r = rom(".segment \"CODE\"\nrts\n");
         assert_eq!(r.len(), 16 + 0x8000 + 0x2000);
+    }
+
+    #[test]
+    fn segment_outside_the_nes_config_is_rejected_with_help() {
+        // `RODATA` has no memory area in the curriculum's `nes.cfg`, so `ld65`
+        // rejects it — and so do we. The message names the valid segments
+        // rather than a bare "unknown segment".
+        let err = assemble(".segment \"RODATA\"\n .byte 1\n").expect_err("rejected");
+        let msg = err.to_string();
+        assert!(msg.contains("RODATA"), "got `{msg}`");
+        assert!(msg.contains("not in the NES config"), "got `{msg}`");
+        assert!(
+            msg.contains("CODE") && msg.contains("VECTORS"),
+            "got `{msg}`"
+        );
     }
 
     #[test]
