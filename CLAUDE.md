@@ -39,11 +39,11 @@ Emu198x's consumption makes it real.
 
 - [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`
   + `m68k` + `mos6809` + `mos65816` + `huc6280` + `sm83` + `i8080` + `m6800` +
-  `cdp1802` + `i8048` + `scmp` + `f8` + `s2650` + `tms7000` + `pdp11` + `tms9900`; the Z80 set
+  `cdp1802` + `i8048` + `scmp` + `f8` + `s2650` + `tms7000` + `pdp11` + `tms9900` + `z8000`; the Z80 set
   includes the Z80N extensions, `huc6280` is a 65C02-superset extension over
-  `mos6502`, and `sm83`/`i8080`/`cdp1802`/`i8048`/`scmp`/`f8`/`s2650`/`tms7000`/`pdp11`/`tms9900` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809, `pdp11`/`tms9900` bespoke field-packed tables rather than the `Form` model). Zero dependencies.
+  `mos6502`, and `sm83`/`i8080`/`cdp1802`/`i8048`/`scmp`/`f8`/`s2650`/`tms7000`/`pdp11`/`tms9900`/`z8000` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809, `pdp11`/`tms9900`/`z8000` bespoke field-packed tables rather than the `Form` model — `z8000` built as verified increments). Zero dependencies.
 - [`crates/isa-disasm`](crates/isa-disasm) — the spec-driven disassemblers
-  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048, SC/MP, F8, 2650, TMS7000, PDP-11, TMS9900), decoding against `isa`.
+  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048, SC/MP, F8, 2650, TMS7000, PDP-11, TMS9900, Z8000), decoding against `isa`.
   Depends only on `isa` + std, so Emu198x can consume disassembly without the
   assembler. See [`decisions/disassembler-crate.md`](decisions/disassembler-crate.md).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
@@ -278,6 +278,24 @@ curriculum corpus:
   sweep (~64k decodable words) plus a position-dependent round-trip. The
   TMS9995 / TMS99105 supersets (extra instructions) are out of scope; this is the
   base-9900 set the TI-99/4A uses. Closes #10.
+- **Z8000** (in progress) — Zilog Z8000 syntax (`dialects::z8000`, `--cpu z8000`,
+  also `z8001`/`z8002`) over a fresh standalone `isa::z8000` spec. The family's
+  **largest ISA** (110 instruction types, eight addressing modes, word/byte/long,
+  segmented Z8001 / non-segmented Z8002), so — unlike the one-shot CPUs — it is
+  built as **sweep-verified increments** (see
+  [`decisions/z8000-staged-build.md`](decisions/z8000-staged-build.md)): groups
+  not yet decoded fall to `word` data, so a partial decoder is always
+  self-consistent and each increment proves its group byte-identical without
+  disturbing the rest. **Big-endian**, Intel `h`-hex, word regs `r0`–`r15` /
+  byte `rh`/`rl`. Another **bespoke field-packed table** on the seam (like the
+  PDP-11). **Increment 1 landed:** the dyadic arithmetic / logic / load family
+  (`ADD`/`SUB`/`OR`/`AND`/`XOR`/`CP`/`LD` + `ADC`/`SBC` + byte forms) across the
+  register / immediate / indirect / direct / indexed modes, plus the `LD` store
+  forms — the `MM ooooo b | ssss dddd` first word, a zero source field selecting
+  IM/DA vs IR/X, byte immediates replicated into both halves. Validated
+  byte-identical against `asl` (`cpu Z8002`) by the opcode-space sweep (~64k
+  words) + a round-trip. Remaining increments (long, program control, shifts,
+  bit, block/IO, segmented Z8001) tracked in the decision record.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
@@ -296,8 +314,8 @@ need the tools installed — and degrading gracefully when one is absent):
   reassemble with the *reference*): every form-based spec's opcode
   (`spec_opcodes_match_reference`: 6502/Z80/65816/HuC6280/SM83/8080/6800/1802/8048/8039/SC-MP/F8/2650/TMS7000), an opcode-space sweep for
   the non-form specs (`spec_sweep_matches_reference`: 6809, 68000, and the
-  field-packed PDP-11 and TMS9900 — ~190k decodable encodings), and a seeded
-  differential fuzzer over random programs
+  field-packed PDP-11, TMS9900, and Z8000 — ~250k decodable encodings), and a
+  seeded differential fuzzer over random programs
   reassembled by both our asm and the reference (`differential_fuzz`).
   Position-dependent instructions (branches, PC-relative EA) can't be batched, so
   they have targeted round-trip tests instead.

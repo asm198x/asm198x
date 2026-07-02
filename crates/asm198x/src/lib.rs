@@ -46,10 +46,10 @@ pub use isa_disasm::{
     Line, disassemble_1802, disassemble_2650, disassemble_6502, disassemble_6809, disassemble_8048,
     disassemble_65816, disassemble_68000, disassemble_f8, disassemble_huc6280, disassemble_i8080,
     disassemble_m6800, disassemble_pdp11, disassemble_scmp, disassemble_sm83, disassemble_tms7000,
-    disassemble_tms9900, disassemble_z80, listing_1802, listing_2650, listing_6502, listing_6809,
-    listing_8048, listing_65816, listing_68000, listing_f8, listing_huc6280, listing_i8080,
-    listing_m6800, listing_pdp11, listing_scmp, listing_sm83, listing_tms7000, listing_tms9900,
-    listing_z80,
+    disassemble_tms9900, disassemble_z80, disassemble_z8000, listing_1802, listing_2650,
+    listing_6502, listing_6809, listing_8048, listing_65816, listing_68000, listing_f8,
+    listing_huc6280, listing_i8080, listing_m6800, listing_pdp11, listing_scmp, listing_sm83,
+    listing_tms7000, listing_tms9900, listing_z80, listing_z8000,
 };
 pub use prg::prg;
 pub use sna::sna_48k;
@@ -287,6 +287,20 @@ pub fn assemble_pdp11(source: &str) -> Result<Assembly, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_tms9900(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::Tms9900)
+}
+
+/// Assemble asl-syntax Zilog Z8000 (non-segmented Z8002) source into a flat
+/// **big-endian** binary at the `org`, over [`isa::z8000`]. Intel `h`-hex, word
+/// registers `r0`–`r15`, byte `rh`/`rl`. Built as sweep-verified increments;
+/// **increment 1** covers the dyadic arithmetic / logic / load family across the
+/// register, immediate, indirect, direct, and indexed modes. Matches `asl`
+/// (`cpu Z8002`).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_z8000(source: &str) -> Result<Assembly, AsmError> {
+    engine::assemble(source, &dialects::Z8000)
 }
 
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching

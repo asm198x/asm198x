@@ -902,6 +902,38 @@ fn spec_sweep_matches_reference() {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (TMS9900 sweep)");
     }
 
+    // --- Zilog Z8000 / asl + p2bin (non-segmented Z8002) -------------------
+    // Increment 1 (the dyadic family); groups not yet decoded fall to `word`
+    // data and are skipped. See decisions/z8000-staged-build.md.
+    if have("asl") && have("p2bin") {
+        // Every opcode word (big-endian), with a canonical big-endian
+        // extension-word filler for the immediate / direct / indexed modes.
+        let cands: Vec<Vec<u8>> = (0u32..=0xFFFF)
+            .map(|w| vec![(w >> 8) as u8, w as u8, 0x12, 0x34])
+            .collect();
+        let reasm = |src: &str| {
+            ref_assemble(&tmp, src, "asm", |s, o| {
+                let obj = s.with_extension("p");
+                let mut a = Command::new("asl");
+                a.arg("-q").arg(s).arg("-o").arg(&obj);
+                let mut b = Command::new("p2bin");
+                b.arg(&obj).arg(o);
+                vec![a, b]
+            })
+        };
+        checked += sweep(
+            "Z8000",
+            &cands,
+            &|b, o| asm198x::disassemble_z8000(b, o as u16),
+            &|b, o| asm198x::listing_z8000(b, o as u16),
+            &reasm,
+            &|_| false,
+            &mut fails,
+        );
+    } else {
+        eprintln!("SKIP: `asl`/`p2bin` not on PATH (Z8000 sweep)");
+    }
+
     eprintln!("swept {checked} decodable instructions against the reference tools");
     assert!(
         fails.is_empty(),

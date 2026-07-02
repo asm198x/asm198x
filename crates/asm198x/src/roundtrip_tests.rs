@@ -9,9 +9,10 @@
 use crate::{
     assemble_1802, assemble_2650, assemble_8039, assemble_8048, assemble_acme, assemble_f8,
     assemble_i8080, assemble_m6800, assemble_pasmonext, assemble_pdp11, assemble_rgbasm,
-    assemble_scmp, assemble_tms7000, assemble_tms9900, assemble_vasm, listing_1802, listing_2650,
-    listing_6502, listing_8048, listing_68000, listing_f8, listing_i8080, listing_m6800,
-    listing_pdp11, listing_scmp, listing_sm83, listing_tms7000, listing_tms9900, listing_z80,
+    assemble_scmp, assemble_tms7000, assemble_tms9900, assemble_vasm, assemble_z8000, listing_1802,
+    listing_2650, listing_6502, listing_8048, listing_68000, listing_f8, listing_i8080,
+    listing_m6800, listing_pdp11, listing_scmp, listing_sm83, listing_tms7000, listing_tms9900,
+    listing_z80, listing_z8000,
 };
 
 #[test]
@@ -134,6 +135,41 @@ fn round_trips_8039_romless_mcs48() {
     let original = assemble_8039(source).expect("assemble");
     let listing = listing_8048(&original.bytes, original.origin);
     let re = assemble_8039(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
+fn round_trips_z8000_dyadic_through_asl_syntax() {
+    // Increment 1: the dyadic family across every addressing mode and size,
+    // plus the LD store forms. (No position-dependent ops yet — the opcode
+    // sweep already covers the group; this guards our own round-trip.)
+    let source = "\
+        \torg 0\n\
+        \tadd r1,r2\n\
+        \tadd r1,#1234h\n\
+        \tadd r1,@r2\n\
+        \tadd r1,1234h\n\
+        \tadd r1,1234h(r2)\n\
+        \tsub r3,r4\n\
+        \tand r5,r6\n\
+        \tcp r7,#0ah\n\
+        \taddb rl1,rl2\n\
+        \tcpb rh0,#0ffh\n\
+        \tadc r8,r9\n\
+        \tsbc r10,r11\n\
+        \tld r1,r2\n\
+        \tld r1,@r3\n\
+        \tld r1,2000h\n\
+        \tld r1,2000h(r4)\n\
+        \tldb rl5,rh6\n\
+        \tld @r2,r1\n\
+        \tld 3000h,r1\n\
+        \tld 3000h(r5),r1\n\
+        \tldb @r7,rl1\n\
+        \tldb 4000h,rl1\n";
+    let original = assemble_z8000(source).expect("assemble");
+    let listing = listing_z8000(&original.bytes, original.origin);
+    let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
 
