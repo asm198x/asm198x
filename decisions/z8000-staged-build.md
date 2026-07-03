@@ -162,7 +162,25 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
    over all 32** (byte-identical to `asl`) plus a comprehensive round-trip guard
    the group. `cpu Z8002`. (`RLDB`/`RRDB` rotate-digit are *not* repeat
    instructions and are deferred to a later increment.)
-10. **I/O** — `IN`/`OUT`/`INIR`/`OTIR`/`SIN`/`SOUT`/… (privileged).
+10. **I/O** — ✅ **landed (2026-07-03).** The full privileged I/O group (44
+    instructions): simple `IN`/`OUT`/`SIN`/`SOUT` (+ byte), block input
+    `INI`/`INIR`/`IND`/`INDR` (+ byte), block output `OUTI`/`OTIR`/`OUTD`/`OTDR`
+    (+ byte), and the special-I/O block versions `SINI`/… and `SOUTI`/… (+ byte).
+    Two tables — a `SimpleIo` and a `BlockIo`. Everything is `MM` = 00. Simple
+    I/O has a **direct**-port form (top `0x3B` word / `0x3A` byte, word 1 =
+    `reg << 4 | sub`, `sub` = `IN` 4 / `SIN` 5 / `OUT` 6 / `SOUT` 7, then a port
+    address word) and — for `IN`/`OUT` only — an **indirect** `@Rn`-port form
+    (its own top byte `0x3D`/`0x3C`/`0x3F`/`0x3E`, word 1 = `port << 4 | reg`).
+    Block I/O reuses the block/string two-word **Load** shape (`@Rd, @Rs, Rc`) at
+    top `0x3B`/`0x3A`; the second byte's low nibble separates them (4–7 direct
+    simple I/O, 0–3/8–B block I/O). The key operational discovery: **`asl`
+    silently drops privileged instructions unless `SUPMODE ON` is set**, so
+    `listing_z8000` now emits `supmode on` (harmless for every other
+    instruction, and the dialect ignores the directive). Simple I/O is
+    opcode-sweep-verified (with the `supmode on` header); the block-I/O forms
+    fall to data there (word-2 zero top nibble) so a direct differential over all
+    44 plus a round-trip guard the group. R0 is rejected as an indirect port (it
+    is not a legal base). `cpu Z8002`.
 11. **CPU control** — `NOP`/`HALT`/`EI`/`DI`/`LDCTL`/`LDPS`/`MSET`/flag ops.
 12. **Segmented Z8001** — widen DA/X/RA address operands to segmented addresses
     as a target-extension over the non-segmented base (the 65816-over-6502

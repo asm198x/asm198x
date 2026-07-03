@@ -2740,6 +2740,7 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
             .or_else(|| decode_bit_z8000(code, pos))
             .or_else(|| decode_muldiv_z8000(code, pos))
             .or_else(|| decode_block_z8000(code, pos))
+            .or_else(|| decode_io_z8000(code, pos))
             .or_else(|| decode_z8000(code, pos))
         {
             Some((text, len)) => {
@@ -2766,7 +2767,9 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
 /// Render a Z8000 disassembly as reassemblable `asl` source.
 #[must_use]
 pub fn listing_z8000(code: &[u8], origin: u16) -> String {
-    let mut s = format!("\tcpu Z8002\n\torg 0{origin:04X}H\n");
+    // `supmode on` lets `asl` assemble the privileged I/O group; harmless for
+    // every other instruction.
+    let mut s = format!("\tcpu Z8002\n\tsupmode on\n\torg 0{origin:04X}H\n");
     for line in disassemble_z8000(code, origin) {
         s.push('\t');
         s.push_str(&line.text);
@@ -3182,6 +3185,79 @@ fn decode_block_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
         BlockShape::Translate => format!("{mn} @r{field1},@r{field2},r{count}"),
     };
     Some((text, 4))
+}
+
+/// Decode one Z8000 I/O instruction (simple `IN`/`OUT`/`SIN`/`SOUT` + byte, or
+/// the block-I/O repeat group) at `pos`, or `None`. All are `MM` = 00: top
+/// `0x3B`/`0x3A` is a direct-port simple I/O (word-1 low nibble 4–7) or block
+/// I/O (a two-word Load form, low nibble 0–3/8–B); `0x3C`–`0x3F` is an indirect
+/// (`@Rn`-port) simple I/O.
+fn decode_io_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+    use isa::z8000::Size;
+    let top = code[pos];
+    match top {
+        0x3A | 0x3B => {
+            let size = if top == 0x3B { Size::Word } else { Size::Byte };
+            let second = code[pos + 1];
+            let low = second & 0xF;
+            if (4..=7).contains(&low) {
+                // Direct-port simple I/O: register in the high nibble, then a
+                // port address word.
+                if pos + 4 > code.len() {
+                    return None;
+                }
+                let sio = isa::z8000::simple_io_direct(size, low)?;
+                let reg = z8000_reg(u16::from(second >> 4), size);
+                let port = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
+                let mn = sio.mnemonic.to_ascii_lowercase();
+                let text = if sio.input {
+                    format!("{mn} {reg},0{port:04X}H")
+                } else {
+                    format!("{mn} 0{port:04X}H,{reg}")
+                };
+                Some((text, 4))
+            } else {
+                // Block I/O: a two-word Load form (`@Rd, @Rs, Rc`).
+                if pos + 4 > code.len() {
+                    return None;
+                }
+                let word2 = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
+                if word2 >> 12 != 0 {
+                    return None;
+                }
+                let bio = isa::z8000::block_io_decode(size, low, (word2 & 0xF) as u8)?;
+                let src = u16::from(second >> 4);
+                let dst = (word2 >> 4) & 0xF;
+                let count = (word2 >> 8) & 0xF;
+                Some((
+                    format!(
+                        "{} @r{dst},@r{src},r{count}",
+                        bio.mnemonic.to_ascii_lowercase()
+                    ),
+                    4,
+                ))
+            }
+        }
+        // Indirect (`@Rn`-port) simple I/O: port in the high nibble, register in
+        // the low.
+        0x3C..=0x3F => {
+            let sio = isa::z8000::simple_io_indirect(top)?;
+            let second = code[pos + 1];
+            let port = u16::from(second >> 4);
+            if port == 0 {
+                return None; // R0 is not a legal base register
+            }
+            let reg = z8000_reg(u16::from(second & 0xF), sio.size);
+            let mn = sio.mnemonic.to_ascii_lowercase();
+            let text = if sio.input {
+                format!("{mn} {reg},@r{port}")
+            } else {
+                format!("{mn} @r{port},{reg}")
+            };
+            Some((text, 2))
+        }
+        _ => None,
+    }
 }
 
 /// Decode one Z8000 dyadic instruction at byte offset `pos`. Returns the

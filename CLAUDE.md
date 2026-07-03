@@ -330,8 +330,12 @@ curriculum corpus:
   forms (top bytes 0xBB/0xBA/0xB8) with four operand shapes and a control nibble
   that is a single/repeat marker or a condition code; not sweepable (word 2's top
   nibble is always zero, unlike the filler), so guarded by a direct differential
-  over all 32 plus round-trip. Remaining increments (`LDR`, I/O, CPU control,
-  segmented Z8001) tracked in the decision record.
+  over all 32 plus round-trip. Then **increment 10 — I/O:** the 44-op privileged
+  group (`IN`/`OUT`/`SIN`/`SOUT` + block-I/O `INI`/…/`SOTDRB`) — `SimpleIo` +
+  `BlockIo` tables at MM=00 (top 0x3A–0x3F); the key wrinkle is that `asl` drops
+  privileged instructions unless `supmode on`, so `listing_z8000` now emits it.
+  Remaining increments (`LDR`, CPU control, segmented Z8001) tracked in the
+  decision record.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
