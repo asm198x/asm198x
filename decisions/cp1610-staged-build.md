@@ -2,11 +2,12 @@
 
 **Status:** 🚧 **In progress (started 2026-07-03).** The GI CP1610 (Mattel
 Intellivision CPU) is built as sweep-verified increments, like the Z8000.
-**Increments 1–4** — the single-decle register / implied groups, the
-register-only shift / rotate group, the two-decle relative branches, and the
-memory / immediate addressing modes — have landed, byte-identical to `asl`
-(`cpu CP-1600`). Remaining: `JUMP`/`JSR` and the `SDBD` double-byte immediate.
-Closes the CP1610 half of asm198x/asm198x#11 when complete.
+**Increments 1–5** — the single-decle register / implied groups, the
+register-only shift / rotate group, the two-decle relative branches, the memory
+/ immediate addressing modes, and `JUMP`/`JSR` (with the engine word-addressing
+that makes label targets correct) — have landed, byte-identical to `asl`
+(`cpu CP-1600`). Remaining: only the `SDBD` double-byte immediate. Closes the
+CP1610 half of asm198x/asm198x#11 when complete.
 
 ## The decle: 10-bit, but byte-aligned
 
@@ -22,10 +23,11 @@ for that reason. On investigation the framing was wrong:
 
 So the output is byte-aligned and the existing byte-oriented engine handles it
 directly. This is the **TMS9900 / PDP-11 field-packed pattern**, not a sub-byte
-build. `asl` addresses in *decles* (word units), which will matter for the
-PC-relative branch displacements (a later increment); increment 1 has no
-address-dependent operands, so it is unaffected. The genuinely sub-byte machines
-(HP-Saturn nibble, SM5xx 4-bit) stay in Wave E. See the umbrella
+build. The one twist is that `asl` addresses in *decles* (word units), so a label
+is a decle number, not a byte offset — the engine gained an `addr_unit` for this
+(2 for the CP1610, 1 everywhere else) in increment 5, once absolute-address
+operands made it load-bearing (see increment 5 below). The genuinely sub-byte
+machines (HP-Saturn nibble, SM5xx 4-bit) stay in Wave E. See the umbrella
 [`asm198x-cpu-coverage-roadmap.md`](../../decisions/asm198x-cpu-coverage-roadmap.md)
 § Wave E for the reclassification.
 
@@ -97,9 +99,24 @@ directive on the way back in. (The accepted CPU spelling is also fussy:
    (absolute address / literal, stored with no scaling), so — unlike the branches
    — they *are* covered by the sweep, whose CP1610 candidates gained a filler
    extension word.
-5. **`JUMP` / `JSR`** — the jump family (`J`/`JE`/`JD`, `JSR`/`JSRE`/`JSRD`), a
-   three-decle encoding (`0x0004` prefix, then a register/interrupt/address word
-   pair) distinct from everything else.
+5. **`JUMP` / `JSR` + word-addressing** — ✅ **landed (2026-07-03).** The jump
+   family (`J`/`JE`/`JD`, `JSR`/`JSRE`/`JSRD`): a three-decle encoding — `0x0004`,
+   then a word carrying the return register (`rr`: R4–R6 = 0–2, or 3 for plain
+   `J`) in bits 9:8, the interrupt action (`ii`: none/E/D = 0/1/2) in bits 1:0,
+   and `addr >> 10` in bits 7:2; then a word with `addr & 0x3FF`. The address is
+   split with `Shr`/`And`/`Shl`/`Or` [`Expr`]s emitted as two value words — no new
+   engine `Piece`. This increment also fixed a **latent addressing bug**: `asl`'s
+   CP-1600 is **word-addressed** (a label is a decle number), but the engine was
+   byte-addressed, so any absolute-address operand referencing a label — direct
+   memory (increment 4) *and* the new jumps — came out 2× too large (literals were
+   fine; the differentials happened to use them). The fix is an engine
+   `addr_unit` (bytes per address unit; 1 everywhere, 2 for the CP1610): the
+   location counter advances in decles, so labels, `org`, and absolute operands
+   match `asl`. `Piece::Branch` was reworked to the unit-based counter (dropping
+   its byte-distance `scale`), and the disassembler is decle-addressed. Jumps are
+   position-independent but the `0x0004`-prefixed three-decle form is longer than
+   the sweep's candidate, so they are covered by a differential (literals + labels)
+   and a round-trip, not the sweep.
 6. **`SDBD` double-byte immediate** — the stateful prefix: after `SDBD`, the next
    immediate is emitted as **two low-byte-first decles** (`0x1234` → `0x0034`,
    `0x0012`), so both the dialect and the disassembler must track the preceding

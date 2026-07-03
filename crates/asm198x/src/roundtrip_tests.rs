@@ -694,6 +694,36 @@ fn round_trips_cp1610_memory_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_cp1610_jumps_and_labels_through_asl_syntax() {
+    // Increment 5: the JUMP / JSR family (three-decle absolute form), plus
+    // label-based direct addressing and branches — the case that exercises the
+    // engine's word-addressing (a CP1610 label is a decle number, not a byte
+    // offset), so a label target resolves to the same address `asl` computes.
+    let source = "\
+        \torg 0\n\
+        \tj entry\n\
+        \tje entry\n\
+        \tjsr r4,entry\n\
+        \tjsre r5,entry\n\
+        \tjsrd r6,entry\n\
+        entry:\n\
+        \tmvi data,r0\n\
+        \tmvo r1,data\n\
+        \tadd data,r2\n\
+        loop:\n\
+        \tdecr r0\n\
+        \tbneq loop\n\
+        \tjsr r5,entry\n\
+        \tb loop\n\
+        data:\n\
+        \tnop\n";
+    let original = assemble_cp1610(source).expect("assemble");
+    let listing = listing_cp1610(&original.bytes, original.origin);
+    let re = assemble_cp1610(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_cp1610_shifts_through_asl_syntax() {
     // Increment 2: the register-only shift / rotate group — every mnemonic across
     // both the once and twice counts and the R0–R3 register range.

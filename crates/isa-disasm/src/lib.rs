@@ -2722,7 +2722,9 @@ pub fn disassemble_cp1610(code: &[u8], origin: u16) -> Vec<Line> {
     let mut out = Vec::new();
     let mut pos = 0;
     while pos < code.len() {
-        let addr = origin.wrapping_add(pos as u16);
+        // The CP1610 is word-addressed: each decle is two bytes, so the address
+        // advances by one per two bytes consumed.
+        let addr = origin.wrapping_add((pos / 2) as u16);
         if pos + 1 >= code.len() {
             out.push(Line {
                 addr: u32::from(addr),
@@ -2788,12 +2790,12 @@ fn decode_cp1610(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> 
             return None; // magnitude word runs past the buffer
         }
         let mag = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
-        // Byte address after both decles; each decle is two bytes.
-        let pc = addr.wrapping_add(4);
+        // Decle address two words past the opcode; backward is biased by one.
+        let pc = addr.wrapping_add(2);
         let target = if word & 0x20 != 0 {
-            pc.wrapping_sub(mag.wrapping_mul(2)).wrapping_sub(2)
+            pc.wrapping_sub(mag).wrapping_sub(1)
         } else {
-            pc.wrapping_add(mag.wrapping_mul(2))
+            pc.wrapping_add(mag)
         };
         let text = if word & 0x10 != 0 {
             format!("bext 0{target:04X}H,{}", word & 0xF)
@@ -2852,6 +2854,30 @@ fn decode_cp1610(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> 
                 Some((format!("{mn}i 0{imm:04X}H,r{reg}"), 4))
             }
         };
+    }
+
+    // Jump / call prefix (0x0004): a three-decle form. The second decle carries
+    // the return register (bits 9:8), interrupt action (bits 1:0), and the address
+    // high six bits (bits 7:2); the third carries the low ten bits.
+    if word == 0x0004 {
+        if pos + 6 > code.len() {
+            return None; // the two following decles run past the buffer
+        }
+        let d2 = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
+        let d3 = u16::from_be_bytes([code[pos + 4], code[pos + 5]]);
+        let target = (((d2 >> 2) & 0x3F) << 10) | (d3 & 0x3FF);
+        let (rr, ii) = ((d2 >> 8) & 3, d2 & 3);
+        if ii > 2 {
+            return None; // no interrupt action encodes as 3
+        }
+        let text = if rr == 3 {
+            let mn = ["j", "je", "jd"][ii as usize];
+            format!("{mn} 0{target:04X}H")
+        } else {
+            let mn = ["jsr", "jsre", "jsrd"][ii as usize];
+            format!("{mn} r{},0{target:04X}H", rr + 4)
+        };
+        return Some((text, 6));
     }
 
     let insn = isa::cp1610::decode(word)?;

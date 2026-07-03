@@ -10,8 +10,13 @@
 //! **Increment 3** adds the two-decle relative branches: `Bcc`/`BEXT`/`NOPP`
 //! emit a [`Piece::Branch`], whose opcode word takes a direction bit from the
 //! sign of the displacement (forward `EA = PC + d`, backward `EA = PC − d − 1`).
-//! All ride the engine's computed-operand seam ([`Operation::Encoded`]). Later
-//! increments add the memory / immediate modes and `SDBD`.
+//! **Increment 4** adds the memory / immediate addressing modes. **Increment 5**
+//! adds `JUMP`/`JSR` (a three-decle absolute form whose address is split across
+//! two words) and makes the engine **word-addressed** for this dialect
+//! ([`addr_unit`](Dialect::addr_unit) = 2), so a label is a decle number and an
+//! absolute-address operand matches `asl`. All ride the engine's
+//! computed-operand seam ([`Operation::Encoded`]). The `SDBD` double-byte
+//! immediate is the last increment.
 //!
 //! Validated byte-identical against `asl` (`cpu CP-1600`).
 
@@ -23,7 +28,7 @@ use super::mos6502::{
     split_top_level, string_literal,
 };
 use crate::dialect::Dialect;
-use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
+use crate::engine::{AsmError, BinOp, Expr, Operation, Piece, Statement};
 use isa::cp1610::{Class, Insn};
 
 /// The GI CP1610 dialect.
@@ -32,6 +37,12 @@ pub(crate) struct Cp1610;
 impl Dialect for Cp1610 {
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::cp1610::SET
+    }
+
+    /// The CP1610 is word-addressed: each decle is two bytes, and `asl` counts
+    /// addresses in decles, so a label advances by one per two emitted bytes.
+    fn addr_unit(&self) -> i64 {
+        2
     }
 
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
@@ -172,13 +183,13 @@ fn word_lit(w: u16) -> [Piece; 2] {
 
 /// A CP1610 branch piece: a two-decle relative branch whose opcode word takes a
 /// direction bit (`0x20`) from the sign of the displacement. `base` is the opcode
-/// with that bit clear; `unit` is 2 (bytes per decle).
+/// with that bit clear; the decle displacement comes straight from the
+/// word-addressed location counter.
 fn branch(target: Expr, base: u16) -> Piece {
     Piece::Branch {
         target,
         base,
         dir_bit: 0x20,
-        unit: 2,
         what: "branch",
     }
 }
@@ -217,6 +228,9 @@ fn encode(mn: &str, args: &str, line: usize) -> Result<Operation, AsmError> {
             value(target, line)?,
             0x200 | u16::from(cond),
         )]));
+    }
+    if let Some(op) = encode_jump(mn, args, line)? {
+        return Ok(op);
     }
     if let Some(op) = encode_mem(mn, args, line)? {
         return Ok(op);
@@ -299,6 +313,69 @@ fn reg(tok: &str, max: u16, line: usize) -> Result<u16, AsmError> {
         .and_then(|n| n.parse::<u16>().ok())
         .filter(|&n| n <= max);
     n.ok_or_else(|| AsmError::new(line, format!("expected register r0..r{max}, got `{tok}`")))
+}
+
+fn bin(op: BinOp, a: Expr, b: Expr) -> Expr {
+    Expr::Bin(op, Box::new(a), Box::new(b))
+}
+
+/// Encode a `J`/`JE`/`JD` jump or `JSR`/`JSRE`/`JSRD` call, or `None` if `mn` is
+/// neither. The three-decle form is `0x0004`, then a word carrying the return
+/// register (`rr`: R4–R6 = 0–2, or 3 for a plain `J`) in bits `9:8`, the
+/// interrupt action (`ii`: none / enable / disable = 0 / 1 / 2) in bits `1:0`,
+/// and the address's high six bits (`addr >> 10`) in bits `7:2`; then a word with
+/// the low ten bits (`addr & 0x3FF`). Both address words are built as expressions
+/// so a forward label resolves in pass two.
+fn encode_jump(mn: &str, args: &str, line: usize) -> Result<Option<Operation>, AsmError> {
+    let (is_call, ii): (bool, u16) = match mn.to_ascii_uppercase().as_str() {
+        "J" => (false, 0),
+        "JE" => (false, 1),
+        "JD" => (false, 2),
+        "JSR" => (true, 0),
+        "JSRE" => (true, 1),
+        "JSRD" => (true, 2),
+        _ => return Ok(None),
+    };
+    let (rr, addr) = if is_call {
+        // `JSR Rr, addr` — the return register is R4–R6 (rr 0–2).
+        let ops = split_top_level(args.trim(), ',');
+        let [r, a] = ops.as_slice() else {
+            return Err(AsmError::new(
+                line,
+                format!("`{mn}` takes a register and an address"),
+            ));
+        };
+        let n = reg(r, 7, line)?;
+        if !(4..=6).contains(&n) {
+            return Err(AsmError::new(
+                line,
+                "`JSR` return register must be r4, r5 or r6",
+            ));
+        }
+        (n - 4, value(a, line)?)
+    } else {
+        // `J addr` — no return register; rr is 3.
+        (3, value(one_str(args, mn, line)?, line)?)
+    };
+    let regint = (rr << 8) | ii;
+    // decle2 = regint | ((addr >> 10) & 0x3F) << 2
+    let hi = bin(
+        BinOp::Shl,
+        bin(
+            BinOp::And,
+            bin(BinOp::Shr, addr.clone(), Expr::Num(10)),
+            Expr::Num(0x3F),
+        ),
+        Expr::Num(2),
+    );
+    let decle2 = bin(BinOp::Or, Expr::Num(i64::from(regint)), hi);
+    let decle3 = bin(BinOp::And, addr, Expr::Num(0x3FF));
+    Ok(Some(Operation::Encoded(vec![
+        Piece::Lit(0x00),
+        Piece::Lit(0x04),
+        ext_word(decle2),
+        ext_word(decle3),
+    ])))
 }
 
 /// A plain 16-bit extension word — a direct address or an immediate, in the
