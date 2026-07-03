@@ -2784,6 +2784,14 @@ fn decode_cp1610(word: u16) -> Option<(String, usize)> {
         Class::RegUnary => format!("{mn} r{}", word & 7),
         Class::GetStatus => format!("{mn} r{}", word & 3),
         Class::RegReg => format!("{mn} r{},r{}", (word >> 3) & 7, word & 7),
+        Class::Shift => {
+            // Count is once (bit 2 clear) or twice (set); once is written bare.
+            if word & 0x4 != 0 {
+                format!("{mn} r{},2", word & 3)
+            } else {
+                format!("{mn} r{}", word & 3)
+            }
+        }
     };
     Some((text, 2))
 }
