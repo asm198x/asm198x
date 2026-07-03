@@ -2767,14 +2767,15 @@ pub fn listing_z8000(code: &[u8], origin: u16) -> String {
     s
 }
 
-/// A Z8000 register name: word `rN`, or byte `rhN` (0–7) / `rlN` (8–15).
-fn z8000_reg(n: u16, byte: bool) -> String {
-    if !byte {
-        format!("r{n}")
-    } else if n < 8 {
-        format!("rh{n}")
-    } else {
-        format!("rl{}", n - 8)
+/// A Z8000 register name for a given operand [`Size`]: `rN` (word/address),
+/// `rhN`/`rlN` (byte), or `rrN` (long).
+fn z8000_reg(n: u16, size: isa::z8000::Size) -> String {
+    use isa::z8000::Size;
+    match size {
+        Size::Byte if n < 8 => format!("rh{n}"),
+        Size::Byte => format!("rl{}", n - 8),
+        Size::Long => format!("rr{n}"),
+        Size::Word | Size::Address => format!("r{n}"),
     }
 }
 
@@ -2782,77 +2783,72 @@ fn z8000_reg(n: u16, byte: bool) -> String {
 /// reassemblable text and total byte length, or `None` for a word this
 /// increment doesn't decode (rendered as `word` data by the caller).
 fn decode_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+    use isa::z8000::{DA, IM, IR, R, Size, X};
     let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
     let (top, second) = ((word >> 8) as u8, word & 0xFF);
-    let mm = u16::from(top >> 6);
-    let insn = isa::z8000::decode_dyadic(top, mm as u8)?;
+    let field = second >> 4;
+    let insn = isa::z8000::decode(top, field)?;
     let mn = insn.mnemonic.to_ascii_lowercase();
-    let byte = insn.byte;
-    let ext = || -> Option<u16> {
-        if pos + 4 > code.len() {
-            return None;
-        }
-        Some(u16::from_be_bytes([code[pos + 2], code[pos + 3]]))
+    let mode = isa::z8000::mode_of(top >> 6, field);
+    let reg = second & 0xF; // dest reg (load) or source reg (store)
+
+    // Long operands are register pairs, so their register numbers must be even;
+    // an odd field is not a canonical encoding (the low-nibble register always,
+    // and the high-nibble register too when it is itself a long register in R
+    // mode). `asl` rejects the odd forms, so decode them as data.
+    if insn.size == Size::Long && (reg % 2 == 1 || (mode == R && field % 2 == 1)) {
+        return None;
+    }
+
+    // Read the extension word(s): a 16-bit address / immediate, or a 32-bit long
+    // immediate. Returns the rendered source text and the total instruction len.
+    let addr16 = || -> Option<u16> {
+        (pos + 4 <= code.len()).then(|| u16::from_be_bytes([code[pos + 2], code[pos + 3]]))
     };
 
     if insn.store {
-        // Register → memory. Second byte: pointer/index high, source reg low.
-        let (field, srcreg) = (second >> 4, second & 0xF);
-        let src = z8000_reg(srcreg, byte);
-        return match mm {
-            0 => {
-                if field == 0 {
-                    return None; // @R0 is not a legal pointer
-                }
-                Some((format!("{mn} @r{field},{src}"), 2))
-            }
-            1 => {
-                let addr = ext()?;
-                let dst = if field == 0 {
-                    format!("0{addr:04X}H")
-                } else {
-                    format!("0{addr:04X}H(r{field})")
-                };
-                Some((format!("{mn} {dst},{src}"), 4))
-            }
-            _ => None,
+        // Register → memory: `field` is the pointer/index, `reg` the source.
+        let src = z8000_reg(reg, insn.size);
+        let dst = match mode {
+            IR => format!("@r{field}"),
+            DA => format!("0{:04X}H", addr16()?),
+            X => format!("0{:04X}H(r{field})", addr16()?),
+            _ => return None,
         };
+        let len = if mode == IR { 2 } else { 4 };
+        return Some((format!("{mn} {dst},{src}"), len));
     }
 
-    // Source into register. Second byte: source field high, dest reg low.
-    let (field, dstreg) = (second >> 4, second & 0xF);
-    let dst = z8000_reg(dstreg, byte);
-    match mm {
-        2 => Some((format!("{mn} {dst},{}", z8000_reg(field, byte)), 2)),
-        0 => {
-            if field == 0 {
-                // Immediate; a byte op replicates the byte into both halves, so a
-                // word whose halves differ is not a canonical byte immediate.
-                let imm = ext()?;
-                let src = if byte {
-                    if imm >> 8 != imm & 0xFF {
-                        return None;
-                    }
-                    format!("#0{:02X}H", imm & 0xFF)
-                } else {
-                    format!("#0{imm:04X}H")
-                };
-                Some((format!("{mn} {dst},{src}"), 4))
-            } else {
-                Some((format!("{mn} {dst},@r{field}"), 2))
+    // Source into register: `field` is the source field, `reg` the destination.
+    let dst = z8000_reg(reg, insn.size);
+    let (src, len) = match mode {
+        R => (z8000_reg(field, insn.size), 2),
+        IR => (format!("@r{field}"), 2),
+        DA => (format!("0{:04X}H", addr16()?), 4),
+        X => (format!("0{:04X}H(r{field})", addr16()?), 4),
+        IM => match insn.size {
+            Size::Byte => {
+                // Byte immediates replicate the byte; halves that differ are not
+                // a canonical encoding, so treat as data.
+                let imm = addr16()?;
+                if imm >> 8 != imm & 0xFF {
+                    return None;
+                }
+                (format!("#0{:02X}H", imm & 0xFF), 4)
             }
-        }
-        1 => {
-            let addr = ext()?;
-            let src = if field == 0 {
-                format!("0{addr:04X}H")
-            } else {
-                format!("0{addr:04X}H(r{field})")
-            };
-            Some((format!("{mn} {dst},{src}"), 4))
-        }
-        _ => None,
-    }
+            Size::Long => {
+                if pos + 6 > code.len() {
+                    return None;
+                }
+                let hi = u32::from(addr16()?);
+                let lo = u32::from(u16::from_be_bytes([code[pos + 4], code[pos + 5]]));
+                (format!("#0{:08X}H", (hi << 16) | lo), 6)
+            }
+            _ => (format!("#0{:04X}H", addr16()?), 4),
+        },
+        _ => return None,
+    };
+    Some((format!("{mn} {dst},{src}"), len))
 }
 
 // Round-trip tests (assemble → disassemble → reassemble) live in the `asm198x`
