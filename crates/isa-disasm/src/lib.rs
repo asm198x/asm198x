@@ -2742,6 +2742,7 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
             .or_else(|| decode_block_z8000(code, pos))
             .or_else(|| decode_io_z8000(code, pos))
             .or_else(|| decode_control_z8000(code, pos))
+            .or_else(|| decode_misc_z8000(code, pos, addr))
             .or_else(|| decode_z8000(code, pos))
         {
             Some((text, len)) => {
@@ -3365,6 +3366,54 @@ fn decode_control_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
             Some((text, 4))
         }
         _ => None,
+    }
+}
+
+/// Decode one Z8000 miscellaneous instruction (`TCC`/`TCCB`, `LDK`, `RLDB`/
+/// `RRDB`, `LDR`/`LDRB`/`LDRL`) at `pos`, `addr` its load address (for the
+/// PC-relative `LDR` target), or `None`.
+fn decode_misc_z8000(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> {
+    use isa::z8000::{MiscKind, Size};
+    let (m, store) = isa::z8000::misc_decode(code[pos])?;
+    let second = code[pos + 1];
+    let (hi, low) = (u16::from(second >> 4), u16::from(second & 0xF));
+    let mn = m.mnemonic.to_ascii_lowercase();
+    match m.kind {
+        // Register in the high nibble, condition code in the low (omitted when
+        // "always").
+        MiscKind::Tcc => {
+            let reg = z8000_reg(hi, m.size);
+            let text = match isa::z8000::cc_name(low as u8) {
+                Some(c) => format!("{mn} {c},{reg}"),
+                None => format!("{mn} {reg}"),
+            };
+            Some((text, 2))
+        }
+        MiscKind::Ldk => Some((format!("{mn} r{hi},#{low}"), 2)),
+        // Source in the high nibble, destination in the low (byte registers).
+        MiscKind::Rotdig => Some((
+            format!(
+                "{mn} {},{}",
+                z8000_reg(low, Size::Byte),
+                z8000_reg(hi, Size::Byte)
+            ),
+            2,
+        )),
+        // Register in the low nibble, then a signed `target − (PC + 4)` offset.
+        MiscKind::Ldr => {
+            if pos + 4 > code.len() {
+                return None;
+            }
+            let reg = z8000_reg(low, m.size);
+            let off = i16::from_be_bytes([code[pos + 2], code[pos + 3]]);
+            let target = addr.wrapping_add(4).wrapping_add(off as u16);
+            let text = if store {
+                format!("{mn} 0{target:04X}H,{reg}")
+            } else {
+                format!("{mn} {reg},0{target:04X}H")
+            };
+            Some((text, 4))
+        }
     }
 }
 

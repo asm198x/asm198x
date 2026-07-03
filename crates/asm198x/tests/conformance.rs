@@ -903,9 +903,10 @@ fn spec_sweep_matches_reference() {
     }
 
     // --- Zilog Z8000 / asl + p2bin (non-segmented Z8002) -------------------
-    // Increments 1–11 (dyadic, program control, single-operand, stack, shifts /
-    // rotates / sign-extends, bit ops, multiply / divide, block / string, I/O,
-    // CPU control);
+    // The full non-segmented Z8002 instruction set (dyadic, program control,
+    // single-operand, stack, shifts / rotates / sign-extends, bit ops, multiply
+    // / divide, block / string, I/O, CPU control, and the TCC / LDK / RLDB /
+    // RRDB / LDR cleanup);
     // groups not yet decoded fall to `word` data and are skipped. Shifts, the
     // dynamic bit form, the long mul/div immediates, and every block / string /
     // block-I/O op (its two-word form's second word has a zero top nibble the

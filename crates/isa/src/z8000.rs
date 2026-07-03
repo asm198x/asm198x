@@ -1484,6 +1484,91 @@ pub fn word_ctrl_name(code: u8) -> Option<&'static str> {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Cleanup (increment 12-prep): TCC / LDK / RLDB / RRDB / LDR — the last
+// non-segmented instructions, each a small one-off shape.
+// ---------------------------------------------------------------------------
+
+/// The shape of a "miscellaneous" instruction — each is a distinct one-off,
+/// keyed on decode by its top byte.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum MiscKind {
+    /// `TCC`/`TCCB cc, Rd` — top `0xAF` word / `0xAE` byte, `reg << 4 | cc`
+    /// (`cc` defaults to 8 = *always*, then omitted).
+    Tcc,
+    /// `LDK Rd, #n` — `0xBD`, `reg << 4 | n` (`n` 0–15, into a word register).
+    Ldk,
+    /// `RLDB`/`RRDB Rd, Rs` — rotate digit, top `0xBE` (`RLDB`) / `0xBC`
+    /// (`RRDB`), `src << 4 | dst` (byte registers).
+    Rotdig,
+    /// `LDR`/`LDRB`/`LDRL Rd, addr` (and the `addr, Rs` store) — a PC-relative
+    /// load, `reg` in the low nibble then a signed 16-bit `target − (PC + 4)`
+    /// offset word. The load top byte is per size; the store form is `top | 2`.
+    Ldr,
+}
+
+/// One miscellaneous instruction.
+pub struct Misc {
+    pub mnemonic: &'static str,
+    pub kind: MiscKind,
+    pub size: Size,
+    /// The (load, for `LDR`) top byte.
+    pub top: u8,
+    pub summary: &'static str,
+}
+
+use MiscKind::{Ldk, Ldr, Rotdig, Tcc};
+
+const fn misc(
+    mnemonic: &'static str,
+    kind: MiscKind,
+    size: Size,
+    top: u8,
+    summary: &'static str,
+) -> Misc {
+    Misc {
+        mnemonic,
+        kind,
+        size,
+        top,
+        summary,
+    }
+}
+
+/// The miscellaneous instructions (final non-segmented cleanup).
+pub const MISC: &[Misc] = &[
+    misc("TCC", Tcc, Word, 0xAF, "Test condition code"),
+    misc("TCCB", Tcc, Byte, 0xAE, "Test condition code byte"),
+    misc("LDK", Ldk, Word, 0xBD, "Load constant"),
+    misc("RLDB", Rotdig, Byte, 0xBE, "Rotate left digit"),
+    misc("RRDB", Rotdig, Byte, 0xBC, "Rotate right digit"),
+    misc("LDR", Ldr, Word, 0x31, "Load relative"),
+    misc("LDRB", Ldr, Byte, 0x30, "Load relative byte"),
+    misc("LDRL", Ldr, Long, 0x35, "Load relative long"),
+];
+
+/// Find a miscellaneous instruction by mnemonic (case-insensitive).
+#[must_use]
+pub fn misc_lookup(mnemonic: &str) -> Option<&'static Misc> {
+    MISC.iter()
+        .find(|m| m.mnemonic.eq_ignore_ascii_case(mnemonic))
+}
+
+/// Decode a miscellaneous instruction from its top byte, returning the entry and
+/// whether it is the store form (`LDR` only).
+#[must_use]
+pub fn misc_decode(top: u8) -> Option<(&'static Misc, bool)> {
+    MISC.iter().find_map(|m| {
+        if m.top == top {
+            Some((m, false))
+        } else if matches!(m.kind, MiscKind::Ldr) && m.top | 2 == top {
+            Some((m, true))
+        } else {
+            None
+        }
+    })
+}
+
 /// Operand size, which fixes register naming and immediate width.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Size {
