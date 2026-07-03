@@ -92,14 +92,46 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
    (pointer leads a push, trails a pop). `PUSH #imm` is a special opcode
    (`base6` 0x0D, low nibble 9). `PUSHL`/`POPL` are long; only `PUSH` has an
    immediate form.
-6. **Shifts / rotates** — `SLA`/`SRA`/`SLL`/`SRL` (a signed count word, `+`
-   left / `−` right) and `RL`/`RR`/`RLC`/`RRC` (count 1–2 packed in the low
-   nibble). `EXTS` folds in here too.
-6. **Bit** — `BIT`/`SET`/`RES`, static and dynamic.
-7. **Multiply / divide, block, string, I/O, CPU control** — the remainder.
-8. **Segmented Z8001** — widen DA/X/RA address operands to segmented addresses
-   as a target-extension over the non-segmented base.
+6. **Shifts / rotates** (+ `EXTS`) — the format is already decoded against
+   `asl` (see the note below); this should be a quick increment.
+7. **Bit** — `BIT`/`SET`/`RES`, static and dynamic.
+8. **Multiply / divide** — `MULT`/`MULTL`/`DIV`/`DIVL`.
+9. **Block / string** — `LDIR`/`LDDR`/`CPIR`/`CPD`/`TR*`/… (the repeat group).
+10. **I/O** — `IN`/`OUT`/`INIR`/`OTIR`/`SIN`/`SOUT`/… (privileged).
+11. **CPU control** — `NOP`/`HALT`/`EI`/`DI`/`LDCTL`/`LDPS`/`MSET`/flag ops.
+12. **Segmented Z8001** — widen DA/X/RA address operands to segmented addresses
+    as a target-extension over the non-segmented base (the 65816-over-6502
+    pattern). Not new instructions — touches every memory-addressing op.
 
-Each step: probe `asl` for the group's exact encodings, add the `Class` +
-table rows + dialect arm + decoder arm, extend the round-trip test, keep the
-sweep green, commit.
+Each step: probe `asl` for the group's exact encodings, add the table rows +
+dialect arm + decoder arm, extend the round-trip test, keep the sweep green,
+commit.
+
+## Increment 6 — shifts / rotates, encoding pre-decoded (2026-07-03)
+
+Probed against `asl` (`cpu Z8002`) so the next session can skip re-probing.
+The **shift** ops share a first word `MM base6 | reg << 4 | subop`, then a
+**16-bit signed count word**: positive = left, negative = right (so `SLA`/`SRA`
+are the *same* opcode, distinguished by the count's sign — the dialect emits
+`+n` for `SLA`, `−n` for `SRA`; likewise `SLL`/`SRL`). Word `base6` = `0x33`,
+byte = `0x32`, long = `0x33` with a distinct subop. `reg` is the high nibble.
+Verified encodings:
+
+- `sla r1,#4` → `B319 0004`; `sra r1,#4` → `B319 FFFC` (subop `9`, arithmetic).
+- `sll r1,#4` → `B311 0004`; `srl r1,#4` → `B311 FFFC` (subop `1`, logical).
+- `slab rl1,#3` → `B299 0003` (byte, `base6 0x32`, subop `9`).
+- `sllb rl1,#3` → `B291 0003` (byte, subop `1`).
+- `slal rr2,#8` → `B32D 0008` (long, subop `0xD`; `SLLL`/`SRLL` likely subop `5`
+  — confirm by probe).
+
+The **rotate** ops (`RL`/`RR`/`RLC`/`RRC`) take **no count word**; the count
+(1 or 2) and the rotate type pack into the low nibble as `type·4 + (count−1)·2`,
+with `RL 0`, `RR 1`, `RLC 2`, `RRC 3`. `base6 0x33` word / `0x32` byte, `reg` the
+high nibble. Verified: `rl r1,#1` → `B310`, `rr r1,#2` → `B316`,
+`rlc r1,#1` → `B318`, `rrc r1,#2` → `B31E`.
+
+Note the base6 `0x32`/`0x33` sits in the same top-byte family as other ops, so
+the shift/rotate decode keys on `base6` + subop; watch the low-nibble overlap
+with the byte-vs-word `base6` (`0x32` byte, `0x33` word) and the register-field
+placement (high nibble, unlike the dyadic low nibble). `EXTS`/`EXTSB`/`EXTSL`
+(sign-extend) were seen at top byte `0xB1` — a separate small format to probe.
