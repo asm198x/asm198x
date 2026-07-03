@@ -16,8 +16,10 @@
 //! (increment 8: `MULT`/`MULTL`/`DIV`/`DIVL`), the **block / string** repeat
 //! group (increment 9: `LDx`/`CPx`/`CPSx`/`TRxB`/`TRTxB`), the privileged
 //! **I/O** group (increment 10: `IN`/`OUT`/`SIN`/`SOUT` + the block-I/O repeat
-//! ops, `asl` needing `supmode on`), and the **CPU-control** group (increment
-//! 11: `NOP`/`HALT`/`EI`/`DI`/`IRET`/`LDCTL`/`LDPS`/`MSET`/`SETFLG`/`SC`/…).
+//! ops, `asl` needing `supmode on`), the **CPU-control** group (increment 11:
+//! `NOP`/`HALT`/`EI`/`DI`/`IRET`/`LDCTL`/`LDPS`/`MSET`/`SETFLG`/`SC`/…), and the
+//! **cleanup** one-offs (`TCC`/`TCCB`, `LDK`, `RLDB`/`RRDB`, the PC-relative
+//! `LDR`/`LDRB`/`LDRL`) — the complete non-segmented Z8002 instruction set.
 //!
 //! A dyadic instruction packs its operands as fields in the opcode word, emitted
 //! through the engine's computed-operand seam ([`Operation::Encoded`]): a
@@ -157,6 +159,8 @@ fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
                 encode_block_io(bio, args, line)?
             } else if let Some(c) = isa::z8000::control_lookup(&mn) {
                 encode_control(c, args, line)?
+            } else if let Some(m) = isa::z8000::misc_lookup(&mn) {
+                encode_misc(m, args, line)?
             } else {
                 encode(&mn, args, line)?
             }
@@ -230,6 +234,17 @@ fn ext_word(expr: Expr) -> Piece {
         expr,
         bytes: 2,
         rel: false,
+        signed: false,
+    }
+}
+
+/// A PC-relative offset word (`LDR`): the engine lays down `target − (PC + 4)`,
+/// range-checked as a signed 16-bit value.
+fn rel_word(expr: Expr) -> Piece {
+    Piece::Val {
+        expr,
+        bytes: 2,
+        rel: true,
         signed: false,
     }
 }
@@ -648,6 +663,82 @@ fn encode_muldiv(md: &isa::z8000::MulDiv, args: &str, line: usize) -> Result<Ope
     let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | dest));
     pieces.extend(ext);
     Ok(Operation::Encoded(pieces))
+}
+
+/// Encode a miscellaneous instruction (`TCC`/`TCCB`, `LDK`, `RLDB`/`RRDB`,
+/// `LDR`/`LDRB`/`LDRL`) — the last non-segmented instructions, each a one-off.
+fn encode_misc(m: &isa::z8000::Misc, args: &str, line: usize) -> Result<Operation, AsmError> {
+    use isa::z8000::MiscKind;
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let err = |t: &str| AsmError::new(line, format!("`{}` {t}", m.mnemonic));
+    let top = u16::from(m.top);
+
+    match m.kind {
+        MiscKind::Tcc => {
+            // `tcc [cc,] Rd` — an optional leading condition, register last.
+            let (cc, reg_s) = match ops.as_slice() {
+                [r] => (8u16, *r),
+                [c, r] => (
+                    u16::from(isa::z8000::cc_value(c).ok_or_else(|| err("unknown condition"))?),
+                    *r,
+                ),
+                _ => return Err(err("takes [cc,] a register")),
+            };
+            let reg = size_reg(reg_s, m.size).ok_or_else(|| err("needs a register"))?;
+            Ok(Operation::Encoded(Vec::from(word_lit(
+                (top << 8) | (reg << 4) | cc,
+            ))))
+        }
+        MiscKind::Ldk => {
+            let [r, k] = ops.as_slice() else {
+                return Err(err("takes a register and #n"));
+            };
+            let reg = word_reg(r).ok_or_else(|| err("needs a word register"))?;
+            let n = fold_const(
+                &value(k.trim_start_matches('#'), line)?,
+                &BTreeMap::new(),
+                line,
+            )?;
+            if !(0..=15).contains(&n) {
+                return Err(err("constant must be 0..=15"));
+            }
+            Ok(Operation::Encoded(Vec::from(word_lit(
+                (top << 8) | (reg << 4) | n as u16,
+            ))))
+        }
+        MiscKind::Rotdig => {
+            let [d, s] = ops.as_slice() else {
+                return Err(err("takes two byte registers"));
+            };
+            let dst = byte_reg(d).ok_or_else(|| err("needs a byte register"))?;
+            let src = byte_reg(s).ok_or_else(|| err("needs a byte register"))?;
+            Ok(Operation::Encoded(Vec::from(word_lit(
+                (top << 8) | (src << 4) | dst,
+            ))))
+        }
+        MiscKind::Ldr => {
+            let [a, b] = ops.as_slice() else {
+                return Err(err("takes a register and an address"));
+            };
+            // A leading register is a load (reg <- addr); else a store.
+            let (reg, addr_s, store) = match size_reg(a, m.size) {
+                Some(r) => (r, *b, false),
+                None => (
+                    size_reg(b, m.size).ok_or_else(|| err("needs a register"))?,
+                    *a,
+                    true,
+                ),
+            };
+            let word_top = if store { top | 2 } else { top };
+            let mut pieces = Vec::from(word_lit((word_top << 8) | reg));
+            pieces.push(rel_word(value(addr_s, line)?));
+            Ok(Operation::Encoded(pieces))
+        }
+    }
 }
 
 /// Encode a CPU-control instruction (`NOP`/`HALT`/`EI`/`DI`/`IRET`/`LDCTL`/

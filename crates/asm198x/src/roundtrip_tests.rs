@@ -498,6 +498,40 @@ fn round_trips_z8000_cpu_control_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_z8000_misc_through_asl_syntax() {
+    // Cleanup increment: the last non-segmented instructions. TCC/LDK/RLDB/RRDB
+    // are position-independent (opcode-sweep-verified); the PC-relative LDR forms
+    // are position-dependent, so this round-trip is their guard.
+    let source = "\
+        \torg 0100h\n\
+        \ttcc eq,r1\n\
+        \ttcc r4\n\
+        \ttccb ne,rl1\n\
+        \ttccb rh0\n\
+        \tldk r1,#5\n\
+        \tldk r3,#15\n\
+        \trldb rl1,rl2\n\
+        \trrdb rh0,rh1\n\
+        \trldb rl7,rh3\n\
+        back:\n\
+        \tldr r1,back\n\
+        \tldr r15,back\n\
+        \tldrb rl1,back\n\
+        \tldrl rr2,back\n\
+        \tldr back,r1\n\
+        \tldrb back,rl1\n\
+        \tldrl back,rr2\n\
+        \tldr r3,fwd\n\
+        \tnop\n\
+        fwd:\n\
+        \tnop\n";
+    let original = assemble_z8000(source).expect("assemble");
+    let listing = listing_z8000(&original.bytes, original.origin);
+    let re = assemble_z8000(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_z8000_control_through_asl_syntax() {
     // Increment 3: program control — the position-dependent JR / DJNZ / CALR
     // the opcode sweep can't batch, plus JP / CALL / RET with condition codes.

@@ -199,16 +199,25 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
     low nibbles (1/3/5/7/9) never collide. **All are position-independent, so the
     group is fully opcode-sweep-verified** (plus a direct differential and
     round-trip). `cpu Z8002`.
+**Cleanup (the last non-segmented instructions)** — ✅ **landed
+(2026-07-03).** `TCC`/`TCCB` (test condition code — top `0xAF`/`0xAE`,
+`reg << 4 | cc`, `cc` default 8 = *always*), `LDK` (load 4-bit constant —
+`0xBD`, `reg << 4 | n`), `RLDB`/`RRDB` (rotate digit — top `0xBE`/`0xBC`,
+`src << 4 | dst`, byte only; *not* a repeat instruction, so held back from
+increment 9), and the PC-relative `LDR`/`LDRB`/`LDRL` (+ store) — the load top
+byte is per size (`0x30`/`0x31`/`0x35`) with `| 2` for the store, the register
+in the **low** nibble, then a signed 16-bit `target − (PC + 4)` offset word (the
+engine's `rel` `Piece::Val`, the relative seam footnoted since increment 2). A
+single `Misc` table + `MiscKind`. TCC / LDK / RLDB / RRDB are position-
+independent and opcode-sweep-verified; `LDR` is position-dependent (dropped by
+the sweep's two-origin filter) so a targeted round-trip guards it. **This
+completes the entire non-segmented Z8002 instruction set** — byte-identical to
+`asl` (`cpu Z8002`).
+
 12. **Segmented Z8001** — widen DA/X/RA address operands to segmented addresses
     as a target-extension over the non-segmented base (the 65816-over-6502
-    pattern). Not new instructions — touches every memory-addressing op.
-
-**Deferred miscellany (a cleanup pass before or alongside Z8001):** `TCC`/`TCCB`
-(test condition code, ALU-flavoured), `LDK` (load 4-bit constant), the
-PC-relative `LDR`/`LDRB`/`LDRL` (needs the relative seam, footnoted since
-increment 2), and `RLDB`/`RRDB` (rotate digit — not a repeat instruction, noted
-in increment 9). These decode as `word` data today and can land as a small
-final increment.
+    pattern). Not new instructions — touches every memory-addressing op. Now the
+    only remaining work, with the full Z8002 instruction set complete beneath it.
 
 Each step: probe `asl` for the group's exact encodings, add the table rows +
 dialect arm + decoder arm, extend the round-trip test, keep the sweep green,
