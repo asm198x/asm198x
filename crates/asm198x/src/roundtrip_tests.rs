@@ -694,6 +694,37 @@ fn round_trips_cp1610_memory_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_cp1610_sdbd_double_byte_through_asl_syntax() {
+    // Increment 6: the `SDBD` prefix makes the *next* immediate a two-decle,
+    // low-byte-first value. Covers each immediate mnemonic under `SDBD`, plus the
+    // cases that must *not* split — a bare immediate, a direct address after
+    // `SDBD`, and a register op after `SDBD` (which wastes the prefix).
+    let source = "\
+        \torg 0\n\
+        \tsdbd\n\
+        \tmvii 1234h,r0\n\
+        \tsdbd\n\
+        \taddi 0ABCDh,r1\n\
+        \tsdbd\n\
+        \tsubi 5678h,r2\n\
+        \tsdbd\n\
+        \tcmpi 0FF00h,r3\n\
+        \tsdbd\n\
+        \tandi 1234h,r0\n\
+        \tsdbd\n\
+        \txori 0AAAAh,r7\n\
+        \tmvii 1234h,r4\n\
+        \tsdbd\n\
+        \tmovr r0,r1\n\
+        \tsdbd\n\
+        \tmvi 1234h,r0\n";
+    let original = assemble_cp1610(source).expect("assemble");
+    let listing = listing_cp1610(&original.bytes, original.origin);
+    let re = assemble_cp1610(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_cp1610_jumps_and_labels_through_asl_syntax() {
     // Increment 5: the JUMP / JSR family (three-decle absolute form), plus
     // label-based direct addressing and branches — the case that exercises the

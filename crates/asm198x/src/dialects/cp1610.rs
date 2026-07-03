@@ -14,9 +14,11 @@
 //! adds `JUMP`/`JSR` (a three-decle absolute form whose address is split across
 //! two words) and makes the engine **word-addressed** for this dialect
 //! ([`addr_unit`](Dialect::addr_unit) = 2), so a label is a decle number and an
-//! absolute-address operand matches `asl`. All ride the engine's
-//! computed-operand seam ([`Operation::Encoded`]). The `SDBD` double-byte
-//! immediate is the last increment.
+//! absolute-address operand matches `asl`. **Increment 6** adds the stateful
+//! `SDBD` prefix: after it, the next immediate is emitted as two low-byte-first
+//! decles (tracked by an `after_sdbd` flag through the parse loop). All ride the
+//! engine's computed-operand seam ([`Operation::Encoded`]) — the CP1610 is
+//! **complete**.
 //!
 //! Validated byte-identical against `asl` (`cpu CP-1600`).
 
@@ -48,6 +50,10 @@ impl Dialect for Cp1610 {
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
         let mut out = Vec::new();
         let mut consts: BTreeMap<String, i64> = BTreeMap::new();
+        // Whether the previous instruction was `SDBD` — it makes the *next*
+        // immediate a two-decle (low-byte-first) value. Set by an `SDBD`, cleared
+        // by any other instruction or directive; a label-only line leaves it be.
+        let mut after_sdbd = false;
 
         for (i, raw) in source.lines().enumerate() {
             let line = i + 1;
@@ -70,7 +76,10 @@ impl Dialect for Cp1610 {
             let op = if rest.is_empty() {
                 None
             } else {
-                parse_op(rest, line)?
+                let (word, _) = split_first_word(rest);
+                let op = parse_op(rest, line, after_sdbd)?;
+                after_sdbd = word.eq_ignore_ascii_case("sdbd");
+                op
             };
             if label.is_some() || op.is_some() {
                 out.push(Statement { line, label, op });
@@ -125,14 +134,14 @@ fn split_label(code: &str) -> (Option<String>, &str) {
     }
 }
 
-fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
+fn parse_op(rest: &str, line: usize, after_sdbd: bool) -> Result<Option<Operation>, AsmError> {
     let (word, args) = split_first_word(rest);
     let op = match word.to_ascii_lowercase().as_str() {
         "cpu" | "end" | "title" | "page" | "name" | "listing" | "relaxed" => return Ok(None),
         "org" => Operation::Org(value(args, line)?),
         "byte" | "db" | "dc.b" => Operation::Bytes(byte_list(args, line)?),
         "word" | "data" | "dw" | "dc.w" => Operation::Words(value_list(args, line)?),
-        _ => encode(&word.to_ascii_uppercase(), args, line)?,
+        _ => encode(&word.to_ascii_uppercase(), args, line, after_sdbd)?,
     };
     Ok(Some(op))
 }
@@ -194,7 +203,7 @@ fn branch(target: Expr, base: u16) -> Piece {
     }
 }
 
-fn encode(mn: &str, args: &str, line: usize) -> Result<Operation, AsmError> {
+fn encode(mn: &str, args: &str, line: usize, after_sdbd: bool) -> Result<Operation, AsmError> {
     // Branches are multi-word with a computed, sign-directed target, so they are
     // handled ahead of the single-decle table.
     if mn.eq_ignore_ascii_case("NOPP") {
@@ -232,7 +241,7 @@ fn encode(mn: &str, args: &str, line: usize) -> Result<Operation, AsmError> {
     if let Some(op) = encode_jump(mn, args, line)? {
         return Ok(op);
     }
-    if let Some(op) = encode_mem(mn, args, line)? {
+    if let Some(op) = encode_mem(mn, args, line, after_sdbd)? {
         return Ok(op);
     }
 
@@ -408,7 +417,12 @@ fn ptr_reg(tok: &str, line: usize) -> Result<u16, AsmError> {
 /// following address word), `@` = indirect `@R1`–`@R6` (`mm=1..6`), `I` =
 /// immediate (`mm=7`, a following value word). `MVO` is a store, so its register
 /// operand comes first; the loads/ALU ops take the register last.
-fn encode_mem(mn: &str, args: &str, line: usize) -> Result<Option<Operation>, AsmError> {
+fn encode_mem(
+    mn: &str,
+    args: &str,
+    line: usize,
+    after_sdbd: bool,
+) -> Result<Option<Operation>, AsmError> {
     let upper = mn.to_ascii_uppercase();
     // `PSHR`/`PULR` are the R6-stack aliases of `MVO@ Rs,R6` / `MVI@ R6,Rd`.
     if upper == "PSHR" || upper == "PULR" {
@@ -464,11 +478,23 @@ fn encode_mem(mn: &str, args: &str, line: usize) -> Result<Option<Operation>, As
             }
             // `MNI imm, Rd`.
             let r = reg(b, 7, line)?;
-            vec![
+            let imm = value(a, line)?;
+            let mut v = vec![
                 Piece::Lit((fam.base >> 8) as u8),
                 Piece::Lit((fam.base | (7 << 3) | r) as u8),
-                ext_word(value(a, line)?),
-            ]
+            ];
+            if after_sdbd {
+                // Under `SDBD` the immediate is two decles, low byte first.
+                v.push(ext_word(bin(BinOp::And, imm.clone(), Expr::Num(0xFF))));
+                v.push(ext_word(bin(
+                    BinOp::And,
+                    bin(BinOp::Shr, imm, Expr::Num(8)),
+                    Expr::Num(0xFF),
+                )));
+            } else {
+                v.push(ext_word(imm));
+            }
+            v
         }
     };
     Ok(Some(Operation::Encoded(pieces)))
