@@ -793,6 +793,337 @@ pub fn muldiv_decode(top: u8) -> Option<&'static MulDiv> {
     MULDIV.iter().find(|m| m.base6 == base6)
 }
 
+// ---------------------------------------------------------------------------
+// Block / string (increment 9): LDx / CPx / CPSx / TRxB / TRTxB (repeat group)
+// ---------------------------------------------------------------------------
+
+/// The operand shape of a block / string instruction. Every one is a **two-word**
+/// form at `MM` = 10: word 1 is `TOP | pointer << 4 | op_nib`, word 2 is
+/// `count << 8 | pointer-or-register << 4 | ctrl` (word 2's top nibble is always
+/// zero). The shape fixes which word holds the source vs destination pointer and
+/// whether a condition code rides the control nibble.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum BlockShape {
+    /// `LDx  @Rd, @Rs, Rc` — source pointer in word 1, dest pointer in word 2;
+    /// the control nibble is a fixed single/repeat marker.
+    Load,
+    /// `CPx  Rr, @Rs, Rc, cc` — source pointer in word 1, a data **register** in
+    /// word 2, the condition code in the control nibble.
+    Compare,
+    /// `CPSx @Rd, @Rs, Rc, cc` — like [`Load`](BlockShape::Load) but the control
+    /// nibble is a condition code.
+    CompareString,
+    /// `TRxB / TRTxB @Rd, @Rs, Rc` — dest pointer in word 1, source pointer in
+    /// word 2 (the reverse of `LDx`); byte only, R1 (`RH1`) implied.
+    Translate,
+}
+
+/// One block / string instruction.
+pub struct Block {
+    pub mnemonic: &'static str,
+    /// `0x3B` word / `0x3A` byte (`LDx`/`CPx`/`CPSx`), `0x38` (`TRxB`/`TRTxB`).
+    pub base6: u8,
+    /// Word 1's low nibble — identifies the operation, direction, and (for
+    /// `CPx`/`CPSx`) the repeat bit.
+    pub op_nib: u8,
+    /// Word 2's low nibble for the fixed-control shapes ([`Load`](BlockShape::Load)
+    /// single/repeat, [`Translate`](BlockShape::Translate)); the condition-carrying
+    /// shapes read a condition code here instead.
+    pub ctrl: u8,
+    pub shape: BlockShape,
+    /// The data register's size for [`Compare`](BlockShape::Compare); word / byte
+    /// otherwise selects only the top byte.
+    pub size: Size,
+    pub summary: &'static str,
+}
+
+impl Block {
+    /// Whether the control nibble carries a condition code (`CPx`/`CPSx`) rather
+    /// than a fixed value.
+    #[must_use]
+    pub fn has_cc(&self) -> bool {
+        matches!(self.shape, BlockShape::Compare | BlockShape::CompareString)
+    }
+}
+
+use BlockShape::{Compare, CompareString, Load, Translate};
+
+const fn blk(
+    mnemonic: &'static str,
+    base6: u8,
+    op_nib: u8,
+    ctrl: u8,
+    shape: BlockShape,
+    size: Size,
+    summary: &'static str,
+) -> Block {
+    Block {
+        mnemonic,
+        base6,
+        op_nib,
+        ctrl,
+        shape,
+        size,
+        summary,
+    }
+}
+
+/// The block / string instructions (increment 9).
+pub const BLOCK: &[Block] = &[
+    // Block move (word 0x3B / byte 0x3A): control nibble 8 single, 0 repeat.
+    blk("LDI", 0x3B, 1, 8, Load, Word, "Load and increment"),
+    blk("LDIR", 0x3B, 1, 0, Load, Word, "Load, increment and repeat"),
+    blk("LDD", 0x3B, 9, 8, Load, Word, "Load and decrement"),
+    blk("LDDR", 0x3B, 9, 0, Load, Word, "Load, decrement and repeat"),
+    blk("LDIB", 0x3A, 1, 8, Load, Byte, "Load byte and increment"),
+    blk(
+        "LDIRB",
+        0x3A,
+        1,
+        0,
+        Load,
+        Byte,
+        "Load byte, increment and repeat",
+    ),
+    blk("LDDB", 0x3A, 9, 8, Load, Byte, "Load byte and decrement"),
+    blk(
+        "LDDRB",
+        0x3A,
+        9,
+        0,
+        Load,
+        Byte,
+        "Load byte, decrement and repeat",
+    ),
+    // Block compare: control nibble is the condition code.
+    blk("CPI", 0x3B, 0, 0, Compare, Word, "Compare and increment"),
+    blk(
+        "CPIR",
+        0x3B,
+        4,
+        0,
+        Compare,
+        Word,
+        "Compare, increment and repeat",
+    ),
+    blk("CPD", 0x3B, 8, 0, Compare, Word, "Compare and decrement"),
+    blk(
+        "CPDR",
+        0x3B,
+        0xC,
+        0,
+        Compare,
+        Word,
+        "Compare, decrement and repeat",
+    ),
+    blk(
+        "CPIB",
+        0x3A,
+        0,
+        0,
+        Compare,
+        Byte,
+        "Compare byte and increment",
+    ),
+    blk(
+        "CPIRB",
+        0x3A,
+        4,
+        0,
+        Compare,
+        Byte,
+        "Compare byte, increment and repeat",
+    ),
+    blk(
+        "CPDB",
+        0x3A,
+        8,
+        0,
+        Compare,
+        Byte,
+        "Compare byte and decrement",
+    ),
+    blk(
+        "CPDRB",
+        0x3A,
+        0xC,
+        0,
+        Compare,
+        Byte,
+        "Compare byte, decrement and repeat",
+    ),
+    // Compare string: control nibble is the condition code.
+    blk(
+        "CPSI",
+        0x3B,
+        2,
+        0,
+        CompareString,
+        Word,
+        "Compare string and increment",
+    ),
+    blk(
+        "CPSIR",
+        0x3B,
+        6,
+        0,
+        CompareString,
+        Word,
+        "Compare string, increment and repeat",
+    ),
+    blk(
+        "CPSD",
+        0x3B,
+        0xA,
+        0,
+        CompareString,
+        Word,
+        "Compare string and decrement",
+    ),
+    blk(
+        "CPSDR",
+        0x3B,
+        0xE,
+        0,
+        CompareString,
+        Word,
+        "Compare string, decrement and repeat",
+    ),
+    blk(
+        "CPSIB",
+        0x3A,
+        2,
+        0,
+        CompareString,
+        Byte,
+        "Compare string byte and increment",
+    ),
+    blk(
+        "CPSIRB",
+        0x3A,
+        6,
+        0,
+        CompareString,
+        Byte,
+        "Compare string byte, increment and repeat",
+    ),
+    blk(
+        "CPSDB",
+        0x3A,
+        0xA,
+        0,
+        CompareString,
+        Byte,
+        "Compare string byte and decrement",
+    ),
+    blk(
+        "CPSDRB",
+        0x3A,
+        0xE,
+        0,
+        CompareString,
+        Byte,
+        "Compare string byte, decrement and repeat",
+    ),
+    // Translate (byte only, 0x38): control nibble 0.
+    blk(
+        "TRIB",
+        0x38,
+        0,
+        0,
+        Translate,
+        Byte,
+        "Translate and increment",
+    ),
+    blk(
+        "TRIRB",
+        0x38,
+        4,
+        0,
+        Translate,
+        Byte,
+        "Translate, increment and repeat",
+    ),
+    blk(
+        "TRDB",
+        0x38,
+        8,
+        0,
+        Translate,
+        Byte,
+        "Translate and decrement",
+    ),
+    blk(
+        "TRDRB",
+        0x38,
+        0xC,
+        0,
+        Translate,
+        Byte,
+        "Translate, decrement and repeat",
+    ),
+    // Translate and test (byte only): repeat forms carry control nibble 0xE.
+    blk(
+        "TRTIB",
+        0x38,
+        2,
+        0,
+        Translate,
+        Byte,
+        "Translate and test, increment",
+    ),
+    blk(
+        "TRTIRB",
+        0x38,
+        6,
+        0xE,
+        Translate,
+        Byte,
+        "Translate and test, increment and repeat",
+    ),
+    blk(
+        "TRTDB",
+        0x38,
+        0xA,
+        0,
+        Translate,
+        Byte,
+        "Translate and test, decrement",
+    ),
+    blk(
+        "TRTDRB",
+        0x38,
+        0xE,
+        0xE,
+        Translate,
+        Byte,
+        "Translate and test, decrement and repeat",
+    ),
+];
+
+/// Find a block / string instruction by mnemonic (case-insensitive).
+#[must_use]
+pub fn block_lookup(mnemonic: &str) -> Option<&'static Block> {
+    BLOCK
+        .iter()
+        .find(|b| b.mnemonic.eq_ignore_ascii_case(mnemonic))
+}
+
+/// Decode a block / string instruction from its opcode top byte, word-1 low
+/// nibble (`op_nib`), and word-2 low nibble (`ctrl`), or `None`. Requires
+/// `MM` = 10; the condition-carrying shapes match any control nibble (it is the
+/// code), the fixed-control shapes require an exact match.
+#[must_use]
+pub fn block_decode(top: u8, op_nib: u8, ctrl: u8) -> Option<&'static Block> {
+    if top >> 6 != 2 {
+        return None;
+    }
+    let base6 = top & 0x3F;
+    BLOCK
+        .iter()
+        .find(|b| b.base6 == base6 && b.op_nib == op_nib && (b.has_cc() || b.ctrl == ctrl))
+}
+
 /// Operand size, which fixes register naming and immediate width.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Size {

@@ -351,6 +351,53 @@ fn round_trips_z8000_muldiv_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_z8000_block_through_asl_syntax() {
+    // Increment 9: the block / string repeat group. Every one is a two-word form
+    // whose word 2 has a zero top nibble, so the opcode sweep's fixed filler
+    // (top nibble 1) drops them all to data — this round-trip over all 32 is the
+    // primary in-repo guard (the direct differential covers the byte values).
+    let source = "\
+        \torg 0\n\
+        \tldi @r4,@r5,r6\n\
+        \tldir @r4,@r5,r6\n\
+        \tldd @r7,@r8,r9\n\
+        \tlddr @r7,@r8,r9\n\
+        \tldib @r4,@r5,r6\n\
+        \tldirb @r4,@r5,r6\n\
+        \tlddb @r7,@r8,r9\n\
+        \tlddrb @r7,@r8,r9\n\
+        \tcpi r1,@r2,r3,eq\n\
+        \tcpir r1,@r2,r3,ne\n\
+        \tcpd r4,@r5,r6,gt\n\
+        \tcpdr r7,@r8,r9,ov\n\
+        \tcpi r1,@r2,r3\n\
+        \tcpib rl1,@r2,r3,eq\n\
+        \tcpirb rh3,@r4,r5,ne\n\
+        \tcpdb rl7,@r8,r9,lt\n\
+        \tcpdrb rh0,@r2,r3,c\n\
+        \tcpsi @r1,@r2,r3,eq\n\
+        \tcpsir @r4,@r5,r6,ne\n\
+        \tcpsd @r7,@r8,r9,pl\n\
+        \tcpsdr @r10,@r11,r12,mi\n\
+        \tcpsib @r1,@r2,r3,eq\n\
+        \tcpsirb @r4,@r5,r6,ne\n\
+        \tcpsdb @r7,@r8,r9,ge\n\
+        \tcpsdrb @r13,@r14,r15,le\n\
+        \ttrib @r4,@r5,r6\n\
+        \ttrirb @r4,@r5,r6\n\
+        \ttrdb @r7,@r8,r9\n\
+        \ttrdrb @r7,@r8,r9\n\
+        \ttrtib @r4,@r5,r6\n\
+        \ttrtirb @r4,@r5,r6\n\
+        \ttrtdb @r7,@r8,r9\n\
+        \ttrtdrb @r7,@r8,r9\n";
+    let original = assemble_z8000(source).expect("assemble");
+    let listing = listing_z8000(&original.bytes, original.origin);
+    let re = assemble_z8000(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_z8000_control_through_asl_syntax() {
     // Increment 3: program control — the position-dependent JR / DJNZ / CALR
     // the opcode sweep can't batch, plus JP / CALL / RET with condition codes.

@@ -12,8 +12,9 @@
 //! ops (increment 5: `PUSH`/`POP`/`PUSHL`/`POPL`), the **shifts / rotates /
 //! sign-extends** (increment 6: `SLA`/`SRA`/`SLL`/`SRL` + byte/long, `RL`/`RR`/
 //! `RLC`/`RRC` + byte, `EXTSB`/`EXTS`/`EXTSL`), the **bit ops** (increment 7:
-//! `BIT`/`SET`/`RES` + byte, static and dynamic), and **multiply / divide**
-//! (increment 8: `MULT`/`MULTL`/`DIV`/`DIVL`).
+//! `BIT`/`SET`/`RES` + byte, static and dynamic), **multiply / divide**
+//! (increment 8: `MULT`/`MULTL`/`DIV`/`DIVL`), and the **block / string** repeat
+//! group (increment 9: `LDx`/`CPx`/`CPSx`/`TRxB`/`TRTxB`).
 //!
 //! A dyadic instruction packs its operands as fields in the opcode word, emitted
 //! through the engine's computed-operand seam ([`Operation::Encoded`]): a
@@ -145,6 +146,8 @@ fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
                 encode_bit(b, args, line)?
             } else if let Some(md) = isa::z8000::muldiv_lookup(&mn) {
                 encode_muldiv(md, args, line)?
+            } else if let Some(blk) = isa::z8000::block_lookup(&mn) {
+                encode_block(blk, args, line)?
             } else {
                 encode(&mn, args, line)?
             }
@@ -635,6 +638,78 @@ fn encode_muldiv(md: &isa::z8000::MulDiv, args: &str, line: usize) -> Result<Ope
     let top = (mm(mode) << 6) | u16::from(md.base6);
     let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | dest));
     pieces.extend(ext);
+    Ok(Operation::Encoded(pieces))
+}
+
+/// Parse an `@Rn` pointer to a nonzero word register (`R0` is not a legal base).
+fn ptr_reg(tok: &str) -> Option<u16> {
+    tok.trim()
+        .strip_prefix('@')
+        .and_then(word_reg)
+        .filter(|&r| r != 0)
+}
+
+/// Encode a block / string instruction (`LDx`/`CPx`/`CPSx`/`TRxB`/`TRTxB`). A
+/// two-word form: word 1 holds one pointer and the operation nibble, word 2 the
+/// count register, the other pointer / data register, and the control nibble
+/// (a single/repeat marker, or — for `CPx`/`CPSx` — a condition code).
+fn encode_block(b: &isa::z8000::Block, args: &str, line: usize) -> Result<Operation, AsmError> {
+    use isa::z8000::BlockShape;
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let has_cc = b.has_cc();
+    let (first, src_s, count_s, cc_opt) = match ops.as_slice() {
+        [a, s, c] => (*a, *s, *c, None),
+        [a, s, c, cc] if has_cc => (*a, *s, *c, Some(*cc)),
+        _ => {
+            return Err(AsmError::new(
+                line,
+                format!("`{}` operand count", b.mnemonic),
+            ));
+        }
+    };
+    let src = ptr_reg(src_s)
+        .ok_or_else(|| AsmError::new(line, format!("`{}` needs an @Rn source", b.mnemonic)))?;
+    let count = word_reg(count_s)
+        .ok_or_else(|| AsmError::new(line, format!("`{}` needs a count register", b.mnemonic)))?;
+    let cc = match cc_opt {
+        Some(c) => u16::from(
+            isa::z8000::cc_value(c)
+                .ok_or_else(|| AsmError::new(line, format!("unknown condition `{c}`")))?,
+        ),
+        None => 8, // "always"
+    };
+
+    let (w1_field, w2_field) = match b.shape {
+        BlockShape::Load | BlockShape::CompareString => {
+            let dst = ptr_reg(first).ok_or_else(|| {
+                AsmError::new(line, format!("`{}` needs an @Rn destination", b.mnemonic))
+            })?;
+            (src, dst)
+        }
+        BlockShape::Compare => {
+            let reg = size_reg(first, b.size).ok_or_else(|| {
+                AsmError::new(line, format!("`{}` needs a data register", b.mnemonic))
+            })?;
+            (src, reg)
+        }
+        BlockShape::Translate => {
+            let dst = ptr_reg(first).ok_or_else(|| {
+                AsmError::new(line, format!("`{}` needs an @Rn destination", b.mnemonic))
+            })?;
+            (dst, src)
+        }
+    };
+
+    let ctrl = if has_cc { cc } else { u16::from(b.ctrl) };
+    let top = (2u16 << 6) | u16::from(b.base6); // MM = 10
+    let word1 = (top << 8) | (w1_field << 4) | u16::from(b.op_nib);
+    let word2 = (count << 8) | (w2_field << 4) | ctrl;
+    let mut pieces = Vec::from(word_lit(word1));
+    pieces.extend(word_lit(word2));
     Ok(Operation::Encoded(pieces))
 }
 

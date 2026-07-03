@@ -2739,6 +2739,7 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
             .or_else(|| decode_exts_z8000(code, pos))
             .or_else(|| decode_bit_z8000(code, pos))
             .or_else(|| decode_muldiv_z8000(code, pos))
+            .or_else(|| decode_block_z8000(code, pos))
             .or_else(|| decode_z8000(code, pos))
         {
             Some((text, len)) => {
@@ -3139,6 +3140,48 @@ fn decode_muldiv_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
         _ => return None,
     };
     Some((format!("{mn} {dst},{src}"), len))
+}
+
+/// Decode one Z8000 block / string instruction (`LDx`/`CPx`/`CPSx`/`TRxB`/
+/// `TRTxB`) at `pos`, or `None`. A two-word form: word 1 carries one pointer and
+/// the operation nibble, word 2 the count register, the other pointer / data
+/// register, and the control nibble. Word 2's top nibble must be zero.
+fn decode_block_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+    use isa::z8000::BlockShape;
+    if pos + 4 > code.len() {
+        return None;
+    }
+    let (top, w1_second) = (code[pos], code[pos + 1]);
+    let word2 = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
+    if word2 >> 12 != 0 {
+        return None; // word 2's top nibble is always zero
+    }
+    let op_nib = w1_second & 0xF;
+    let ctrl = (word2 & 0xF) as u8;
+    let b = isa::z8000::block_decode(top, op_nib, ctrl)?;
+    let field1 = u16::from(w1_second >> 4); // word 1's pointer
+    let field2 = (word2 >> 4) & 0xF; // word 2's pointer / data register
+    let count = (word2 >> 8) & 0xF;
+    let mn = b.mnemonic.to_ascii_lowercase();
+    let cc = if b.has_cc() {
+        isa::z8000::cc_name(ctrl).map_or_else(String::new, |n| format!(",{n}"))
+    } else {
+        String::new()
+    };
+
+    let text = match b.shape {
+        // Source in word 1, destination pointer in word 2.
+        BlockShape::Load | BlockShape::CompareString => {
+            format!("{mn} @r{field2},@r{field1},r{count}{cc}")
+        }
+        // Source in word 1, data register in word 2.
+        BlockShape::Compare => {
+            format!("{mn} {},@r{field1},r{count}{cc}", z8000_reg(field2, b.size))
+        }
+        // Destination in word 1, source in word 2 (the reverse of `LDx`).
+        BlockShape::Translate => format!("{mn} @r{field1},@r{field2},r{count}"),
+    };
+    Some((text, 4))
 }
 
 /// Decode one Z8000 dyadic instruction at byte offset `pos`. Returns the
