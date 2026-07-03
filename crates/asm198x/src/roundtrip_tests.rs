@@ -398,6 +398,66 @@ fn round_trips_z8000_block_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_z8000_io_through_asl_syntax() {
+    // Increment 10: the privileged I/O group. Simple IN/OUT/SIN/SOUT (direct and
+    // @Rn-port, word/byte) plus the 32 block-I/O ops. The block-I/O forms fall
+    // to data in the opcode sweep (word 2's zero top nibble); this round-trip
+    // over all 44 guards them, and confirms the `supmode on` header round-trips.
+    let source = "\
+        \torg 0\n\
+        \tin r1,1234h\n\
+        \tinb rl1,1234h\n\
+        \tin r1,@r2\n\
+        \tinb rl1,@r2\n\
+        \tout 1234h,r1\n\
+        \toutb 1234h,rl1\n\
+        \tout @r2,r1\n\
+        \toutb @r2,rl1\n\
+        \tsin r1,1234h\n\
+        \tsinb rl1,1234h\n\
+        \tsout 1234h,r1\n\
+        \tsoutb 1234h,rl1\n\
+        \tin r0,5678h\n\
+        \tin r15,@r14\n\
+        \tini @r1,@r2,r3\n\
+        \tinir @r1,@r2,r3\n\
+        \tind @r4,@r5,r6\n\
+        \tindr @r4,@r5,r6\n\
+        \tinib @r1,@r2,r3\n\
+        \tinirb @r1,@r2,r3\n\
+        \tindb @r4,@r5,r6\n\
+        \tindrb @r4,@r5,r6\n\
+        \touti @r1,@r2,r3\n\
+        \totir @r1,@r2,r3\n\
+        \toutd @r4,@r5,r6\n\
+        \totdr @r4,@r5,r6\n\
+        \toutib @r1,@r2,r3\n\
+        \totirb @r1,@r2,r3\n\
+        \toutdb @r4,@r5,r6\n\
+        \totdrb @r4,@r5,r6\n\
+        \tsini @r1,@r2,r3\n\
+        \tsinir @r1,@r2,r3\n\
+        \tsind @r4,@r5,r6\n\
+        \tsindr @r4,@r5,r6\n\
+        \tsinib @r1,@r2,r3\n\
+        \tsinirb @r1,@r2,r3\n\
+        \tsindb @r4,@r5,r6\n\
+        \tsindrb @r4,@r5,r6\n\
+        \tsouti @r1,@r2,r3\n\
+        \tsotir @r1,@r2,r3\n\
+        \tsoutd @r4,@r5,r6\n\
+        \tsotdr @r4,@r5,r6\n\
+        \tsoutib @r1,@r2,r3\n\
+        \tsotirb @r1,@r2,r3\n\
+        \tsoutdb @r4,@r5,r6\n\
+        \tsotdrb @r4,@r5,r6\n";
+    let original = assemble_z8000(source).expect("assemble");
+    let listing = listing_z8000(&original.bytes, original.origin);
+    let re = assemble_z8000(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_z8000_control_through_asl_syntax() {
     // Increment 3: program control — the position-dependent JR / DJNZ / CALR
     // the opcode sweep can't batch, plus JP / CALL / RET with condition codes.

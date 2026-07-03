@@ -1124,6 +1124,250 @@ pub fn block_decode(top: u8, op_nib: u8, ctrl: u8) -> Option<&'static Block> {
         .find(|b| b.base6 == base6 && b.op_nib == op_nib && (b.has_cc() || b.ctrl == ctrl))
 }
 
+// ---------------------------------------------------------------------------
+// I/O (increment 10): IN / OUT / SIN / SOUT + the block-I/O repeat group
+// ---------------------------------------------------------------------------
+//
+// All privileged (`asl` needs `SUPMODE ON`). Everything is `MM` = 00. Simple
+// I/O has a **direct**-port form (top `0x3B` word / `0x3A` byte, word 1 =
+// `reg << 4 | sub`, then a port address word) and — for `IN`/`OUT` only — an
+// **indirect** `@Rn`-port form (its own top byte, word 1 = `port << 4 | reg`).
+// Block I/O reuses the block/string two-word Load shape at top `0x3B`/`0x3A`;
+// the second byte's low nibble tells them apart (4–7 direct simple I/O,
+// 0–3/8–B block I/O).
+
+/// One simple I/O instruction (`IN`/`OUT`/`SIN`/`SOUT` + byte).
+pub struct SimpleIo {
+    pub mnemonic: &'static str,
+    pub size: Size,
+    /// The register is the data destination, so the operand order is `reg, port`
+    /// (`IN`/`SIN`); otherwise `port, reg` (`OUT`/`SOUT`).
+    pub input: bool,
+    /// The direct-port sub-opcode (word 1's low nibble): `IN` 4, `SIN` 5, `OUT`
+    /// 6, `SOUT` 7. The direct top byte is `0x3B` word / `0x3A` byte.
+    pub direct_sub: u8,
+    /// The top byte of the indirect (`@Rn` port) form, or `None` — special I/O
+    /// (`SIN`/`SOUT`) has no indirect form.
+    pub indirect_top: Option<u8>,
+    pub summary: &'static str,
+}
+
+/// The direct-port top byte for a size (`0x3B` word / `0x3A` byte).
+#[must_use]
+pub fn io_direct_top(size: Size) -> u8 {
+    if matches!(size, Size::Byte) {
+        0x3A
+    } else {
+        0x3B
+    }
+}
+
+/// The simple I/O instructions (increment 10).
+pub const SIMPLE_IO: &[SimpleIo] = &[
+    SimpleIo {
+        mnemonic: "IN",
+        size: Size::Word,
+        input: true,
+        direct_sub: 4,
+        indirect_top: Some(0x3D),
+        summary: "Input",
+    },
+    SimpleIo {
+        mnemonic: "INB",
+        size: Size::Byte,
+        input: true,
+        direct_sub: 4,
+        indirect_top: Some(0x3C),
+        summary: "Input byte",
+    },
+    SimpleIo {
+        mnemonic: "SIN",
+        size: Size::Word,
+        input: true,
+        direct_sub: 5,
+        indirect_top: None,
+        summary: "Special input",
+    },
+    SimpleIo {
+        mnemonic: "SINB",
+        size: Size::Byte,
+        input: true,
+        direct_sub: 5,
+        indirect_top: None,
+        summary: "Special input byte",
+    },
+    SimpleIo {
+        mnemonic: "OUT",
+        size: Size::Word,
+        input: false,
+        direct_sub: 6,
+        indirect_top: Some(0x3F),
+        summary: "Output",
+    },
+    SimpleIo {
+        mnemonic: "OUTB",
+        size: Size::Byte,
+        input: false,
+        direct_sub: 6,
+        indirect_top: Some(0x3E),
+        summary: "Output byte",
+    },
+    SimpleIo {
+        mnemonic: "SOUT",
+        size: Size::Word,
+        input: false,
+        direct_sub: 7,
+        indirect_top: None,
+        summary: "Special output",
+    },
+    SimpleIo {
+        mnemonic: "SOUTB",
+        size: Size::Byte,
+        input: false,
+        direct_sub: 7,
+        indirect_top: None,
+        summary: "Special output byte",
+    },
+];
+
+/// Find a simple I/O instruction by mnemonic (case-insensitive).
+#[must_use]
+pub fn simple_io_lookup(mnemonic: &str) -> Option<&'static SimpleIo> {
+    SIMPLE_IO
+        .iter()
+        .find(|i| i.mnemonic.eq_ignore_ascii_case(mnemonic))
+}
+
+/// Decode a direct-port simple I/O instruction from its size and sub-opcode.
+#[must_use]
+pub fn simple_io_direct(size: Size, sub: u8) -> Option<&'static SimpleIo> {
+    SIMPLE_IO
+        .iter()
+        .find(|i| i.size == size && i.direct_sub == sub)
+}
+
+/// Decode an indirect-port (`@Rn`) simple I/O instruction from its top byte.
+#[must_use]
+pub fn simple_io_indirect(top: u8) -> Option<&'static SimpleIo> {
+    SIMPLE_IO.iter().find(|i| i.indirect_top == Some(top))
+}
+
+/// One block-I/O instruction (`INI`/`OUTI`/…, special `SINI`/… + byte). A
+/// two-word Load-shaped form (`@Rd, @Rs, Rc`) at top `0x3B` word / `0x3A` byte.
+pub struct BlockIo {
+    pub mnemonic: &'static str,
+    pub size: Size,
+    /// Word 1's low nibble: `IN` 0, `SIN` 1, `OUT` 2, `SOUT` 3, `+8` to
+    /// decrement.
+    pub op_nib: u8,
+    /// Word 2's low nibble: 8 single, 0 repeat.
+    pub ctrl: u8,
+    pub summary: &'static str,
+}
+
+const fn bio(
+    mnemonic: &'static str,
+    size: Size,
+    op_nib: u8,
+    ctrl: u8,
+    summary: &'static str,
+) -> BlockIo {
+    BlockIo {
+        mnemonic,
+        size,
+        op_nib,
+        ctrl,
+        summary,
+    }
+}
+
+/// The block-I/O instructions (increment 10).
+pub const BLOCK_IO: &[BlockIo] = &[
+    // Block input (op_nib 0 / decrement 8), single ctrl 8 / repeat ctrl 0.
+    bio("INI", Word, 0, 8, "Input and increment"),
+    bio("INIR", Word, 0, 0, "Input, increment and repeat"),
+    bio("IND", Word, 8, 8, "Input and decrement"),
+    bio("INDR", Word, 8, 0, "Input, decrement and repeat"),
+    bio("INIB", Byte, 0, 8, "Input byte and increment"),
+    bio("INIRB", Byte, 0, 0, "Input byte, increment and repeat"),
+    bio("INDB", Byte, 8, 8, "Input byte and decrement"),
+    bio("INDRB", Byte, 8, 0, "Input byte, decrement and repeat"),
+    // Block output (op_nib 2 / decrement A).
+    bio("OUTI", Word, 2, 8, "Output and increment"),
+    bio("OTIR", Word, 2, 0, "Output, increment and repeat"),
+    bio("OUTD", Word, 0xA, 8, "Output and decrement"),
+    bio("OTDR", Word, 0xA, 0, "Output, decrement and repeat"),
+    bio("OUTIB", Byte, 2, 8, "Output byte and increment"),
+    bio("OTIRB", Byte, 2, 0, "Output byte, increment and repeat"),
+    bio("OUTDB", Byte, 0xA, 8, "Output byte and decrement"),
+    bio("OTDRB", Byte, 0xA, 0, "Output byte, decrement and repeat"),
+    // Special block input (op_nib 1 / decrement 9).
+    bio("SINI", Word, 1, 8, "Special input and increment"),
+    bio("SINIR", Word, 1, 0, "Special input, increment and repeat"),
+    bio("SIND", Word, 9, 8, "Special input and decrement"),
+    bio("SINDR", Word, 9, 0, "Special input, decrement and repeat"),
+    bio("SINIB", Byte, 1, 8, "Special input byte and increment"),
+    bio(
+        "SINIRB",
+        Byte,
+        1,
+        0,
+        "Special input byte, increment and repeat",
+    ),
+    bio("SINDB", Byte, 9, 8, "Special input byte and decrement"),
+    bio(
+        "SINDRB",
+        Byte,
+        9,
+        0,
+        "Special input byte, decrement and repeat",
+    ),
+    // Special block output (op_nib 3 / decrement B).
+    bio("SOUTI", Word, 3, 8, "Special output and increment"),
+    bio("SOTIR", Word, 3, 0, "Special output, increment and repeat"),
+    bio("SOUTD", Word, 0xB, 8, "Special output and decrement"),
+    bio(
+        "SOTDR",
+        Word,
+        0xB,
+        0,
+        "Special output, decrement and repeat",
+    ),
+    bio("SOUTIB", Byte, 3, 8, "Special output byte and increment"),
+    bio(
+        "SOTIRB",
+        Byte,
+        3,
+        0,
+        "Special output byte, increment and repeat",
+    ),
+    bio("SOUTDB", Byte, 0xB, 8, "Special output byte and decrement"),
+    bio(
+        "SOTDRB",
+        Byte,
+        0xB,
+        0,
+        "Special output byte, decrement and repeat",
+    ),
+];
+
+/// Find a block-I/O instruction by mnemonic (case-insensitive).
+#[must_use]
+pub fn block_io_lookup(mnemonic: &str) -> Option<&'static BlockIo> {
+    BLOCK_IO
+        .iter()
+        .find(|b| b.mnemonic.eq_ignore_ascii_case(mnemonic))
+}
+
+/// Decode a block-I/O instruction from its size, word-1 low nibble, and word-2
+/// low nibble.
+#[must_use]
+pub fn block_io_decode(size: Size, op_nib: u8, ctrl: u8) -> Option<&'static BlockIo> {
+    BLOCK_IO
+        .iter()
+        .find(|b| b.size == size && b.op_nib == op_nib && b.ctrl == ctrl)
+}
+
 /// Operand size, which fixes register naming and immediate width.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Size {

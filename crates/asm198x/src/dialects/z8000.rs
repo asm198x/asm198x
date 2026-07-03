@@ -13,8 +13,10 @@
 //! sign-extends** (increment 6: `SLA`/`SRA`/`SLL`/`SRL` + byte/long, `RL`/`RR`/
 //! `RLC`/`RRC` + byte, `EXTSB`/`EXTS`/`EXTSL`), the **bit ops** (increment 7:
 //! `BIT`/`SET`/`RES` + byte, static and dynamic), **multiply / divide**
-//! (increment 8: `MULT`/`MULTL`/`DIV`/`DIVL`), and the **block / string** repeat
-//! group (increment 9: `LDx`/`CPx`/`CPSx`/`TRxB`/`TRTxB`).
+//! (increment 8: `MULT`/`MULTL`/`DIV`/`DIVL`), the **block / string** repeat
+//! group (increment 9: `LDx`/`CPx`/`CPSx`/`TRxB`/`TRTxB`), and the privileged
+//! **I/O** group (increment 10: `IN`/`OUT`/`SIN`/`SOUT` + the block-I/O repeat
+//! ops, `asl` needing `supmode on`).
 //!
 //! A dyadic instruction packs its operands as fields in the opcode word, emitted
 //! through the engine's computed-operand seam ([`Operation::Encoded`]): a
@@ -126,7 +128,7 @@ fn split_label(code: &str) -> (Option<String>, &str) {
 fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
     let (word, args) = split_first_word(rest);
     let op = match word.to_ascii_lowercase().as_str() {
-        "cpu" | "end" | "title" | "page" | "name" | "listing" => return Ok(None),
+        "cpu" | "end" | "title" | "page" | "name" | "listing" | "supmode" => return Ok(None),
         "org" | "aorg" | "rorg" => Operation::Org(value(args, line)?),
         "byte" | "db" | "dc.b" => Operation::Bytes(byte_list(args, line)?),
         "word" | "dw" | "dc.w" => Operation::Words(value_list(args, line)?),
@@ -148,6 +150,10 @@ fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
                 encode_muldiv(md, args, line)?
             } else if let Some(blk) = isa::z8000::block_lookup(&mn) {
                 encode_block(blk, args, line)?
+            } else if let Some(sio) = isa::z8000::simple_io_lookup(&mn) {
+                encode_simple_io(sio, args, line)?
+            } else if let Some(bio) = isa::z8000::block_io_lookup(&mn) {
+                encode_block_io(bio, args, line)?
             } else {
                 encode(&mn, args, line)?
             }
@@ -638,6 +644,89 @@ fn encode_muldiv(md: &isa::z8000::MulDiv, args: &str, line: usize) -> Result<Ope
     let top = (mm(mode) << 6) | u16::from(md.base6);
     let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | dest));
     pieces.extend(ext);
+    Ok(Operation::Encoded(pieces))
+}
+
+/// Encode a simple I/O instruction (`IN`/`OUT`/`SIN`/`SOUT` + byte). The port is
+/// either a direct address (word 1 = `reg << 4 | sub`, then an address word) or
+/// an `@Rn` register (its own top byte, word 1 = `port << 4 | reg`); `SIN`/`SOUT`
+/// have only the direct form. The register leads for `IN`/`SIN`, trails for
+/// `OUT`/`SOUT`.
+fn encode_simple_io(
+    sio: &isa::z8000::SimpleIo,
+    args: &str,
+    line: usize,
+) -> Result<Operation, AsmError> {
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let [a, b] = match ops.as_slice() {
+        [a, b] => [*a, *b],
+        _ => {
+            return Err(AsmError::new(
+                line,
+                format!("`{}` takes two operands", sio.mnemonic),
+            ));
+        }
+    };
+    let (reg_s, port_s) = if sio.input { (a, b) } else { (b, a) };
+    let reg = size_reg(reg_s, sio.size)
+        .ok_or_else(|| AsmError::new(line, format!("`{}` needs a data register", sio.mnemonic)))?;
+
+    if port_s.starts_with('@') {
+        let port = ptr_reg(port_s)
+            .ok_or_else(|| AsmError::new(line, format!("`{}` bad @Rn port", sio.mnemonic)))?;
+        let top = sio.indirect_top.ok_or_else(|| {
+            AsmError::new(line, format!("`{}` has no @Rn port form", sio.mnemonic))
+        })?;
+        Ok(Operation::Encoded(Vec::from(word_lit(
+            (u16::from(top) << 8) | (port << 4) | reg,
+        ))))
+    } else {
+        let top = isa::z8000::io_direct_top(sio.size);
+        let word1 = (u16::from(top) << 8) | (reg << 4) | u16::from(sio.direct_sub);
+        let mut pieces = Vec::from(word_lit(word1));
+        pieces.push(ext_word(value(port_s, line)?));
+        Ok(Operation::Encoded(pieces))
+    }
+}
+
+/// Encode a block-I/O instruction (`INI`/`OUTI`/…, special `SINI`/… + byte). A
+/// two-word Load-shaped form `@Rd, @Rs, Rc`: source in word 1, dest and count in
+/// word 2, the single/repeat marker in the control nibble.
+fn encode_block_io(
+    bio: &isa::z8000::BlockIo,
+    args: &str,
+    line: usize,
+) -> Result<Operation, AsmError> {
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let [dst_s, src_s, count_s] = match ops.as_slice() {
+        [a, b, c] => [*a, *b, *c],
+        _ => {
+            return Err(AsmError::new(
+                line,
+                format!("`{}` takes three operands", bio.mnemonic),
+            ));
+        }
+    };
+    let dst = ptr_reg(dst_s).ok_or_else(|| {
+        AsmError::new(line, format!("`{}` needs an @Rn destination", bio.mnemonic))
+    })?;
+    let src = ptr_reg(src_s)
+        .ok_or_else(|| AsmError::new(line, format!("`{}` needs an @Rn source", bio.mnemonic)))?;
+    let count = word_reg(count_s)
+        .ok_or_else(|| AsmError::new(line, format!("`{}` needs a count register", bio.mnemonic)))?;
+    let top = isa::z8000::io_direct_top(bio.size);
+    let word1 = (u16::from(top) << 8) | (src << 4) | u16::from(bio.op_nib);
+    let word2 = (count << 8) | (dst << 4) | u16::from(bio.ctrl);
+    let mut pieces = Vec::from(word_lit(word1));
+    pieces.extend(word_lit(word2));
     Ok(Operation::Encoded(pieces))
 }
 
