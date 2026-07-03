@@ -186,6 +186,31 @@ fn round_trips_z8000_dyadic_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_z8000_stack_through_asl_syntax() {
+    // Increment 5: PUSH/POP/PUSHL/POPL across the value operand's modes, plus
+    // the special PUSH immediate.
+    let source = "\
+        \torg 0\n\
+        \tpush @r15,r1\n\
+        \tpush @r15,@r2\n\
+        \tpush @r15,1234h\n\
+        \tpush @r15,1234h(r3)\n\
+        \tpush @r15,#5678h\n\
+        \tpushl @r14,rr2\n\
+        \tpushl @r14,@r3\n\
+        \tpop r1,@r15\n\
+        \tpop @r2,@r15\n\
+        \tpop 2000h,@r15\n\
+        \tpop 2000h(r4),@r15\n\
+        \tpopl rr2,@r14\n\
+        \tpopl @r3,@r14\n";
+    let original = assemble_z8000(source).expect("assemble");
+    let listing = listing_z8000(&original.bytes, original.origin);
+    let re = assemble_z8000(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_z8000_single_operand_through_asl_syntax() {
     // Increment 4: single-operand ALU across every addressing mode and size.
     let source = "\

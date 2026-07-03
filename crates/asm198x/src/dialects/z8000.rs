@@ -7,8 +7,9 @@
 //! `decisions/z8000-staged-build.md`); this covers the **dyadic family**
 //! (increments 1–2: arithmetic / logic / compare / load / exchange /
 //! load-address), **program control** (increment 3: `JP`/`CALL`/`JR`/`RET`/
-//! `DJNZ`/`CALR` with condition codes), and the **single-operand ALU**
-//! (increment 4: `CLR`/`COM`/`NEG`/`TEST`/`TSET`, `INC`/`DEC`).
+//! `DJNZ`/`CALR` with condition codes), the **single-operand ALU**
+//! (increment 4: `CLR`/`COM`/`NEG`/`TEST`/`TSET`, `INC`/`DEC`), and the **stack**
+//! ops (increment 5: `PUSH`/`POP`/`PUSHL`/`POPL`).
 //!
 //! A dyadic instruction packs its operands as fields in the opcode word, emitted
 //! through the engine's computed-operand seam ([`Operation::Encoded`]): a
@@ -130,6 +131,8 @@ fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
                 encode_ctl(ctl, args, line)?
             } else if let Some(m) = isa::z8000::mono_lookup(&mn) {
                 encode_mono(m, args, line)?
+            } else if let Some(s) = isa::z8000::stack_lookup(&mn) {
+                encode_stack(s, args, line)?
             } else {
                 encode(&mn, args, line)?
             }
@@ -369,6 +372,68 @@ fn encode_mono(m: &isa::z8000::Mono, args: &str, line: usize) -> Result<Operatio
     // Every mode above is R/IR/DA/X — all legal for a single-operand op.
     let top = (mm(mode) << 6) | u16::from(m.base6);
     let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | low));
+    pieces.extend(ext);
+    Ok(Operation::Encoded(pieces))
+}
+
+/// Encode a stack instruction (`PUSH`/`POP`/`PUSHL`/`POPL`). Syntax is
+/// `PUSH @Rsp, src` and `POP dst, @Rsp` — the stack pointer leads for a push and
+/// trails for a pop. The pointer is the second byte's high nibble, the value
+/// operand's field the low nibble.
+fn encode_stack(s: &isa::z8000::Stack, args: &str, line: usize) -> Result<Operation, AsmError> {
+    use isa::z8000::{DA, IR, R, X};
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|t| t.trim())
+        .filter(|t| !t.is_empty())
+        .collect();
+    let [a, b] = match ops.as_slice() {
+        [a, b] => [*a, *b],
+        _ => {
+            return Err(AsmError::new(
+                line,
+                format!("`{}` takes two operands", s.mnemonic),
+            ));
+        }
+    };
+    // The stack pointer is `@Rsp`; it leads a push and trails a pop.
+    let (sp_tok, val_tok) = if s.push { (a, b) } else { (b, a) };
+    let sp = sp_tok
+        .strip_prefix('@')
+        .and_then(word_reg)
+        .filter(|&r| r != 0) // R0 cannot be a stack pointer
+        .ok_or_else(|| {
+            AsmError::new(
+                line,
+                format!("`{}` needs an @Rn stack pointer (not R0)", s.mnemonic),
+            )
+        })?;
+
+    let val = operand(val_tok, s.size, line)?;
+
+    // PUSH #imm is a special opcode (base6 0x0D, low nibble 9).
+    if let Operand::Imm(e) = &val {
+        if !s.has_imm {
+            return Err(AsmError::new(
+                line,
+                format!("`{}` has no immediate form", s.mnemonic),
+            ));
+        }
+        let top = u16::from(isa::z8000::PUSH_IMM_BASE6); // MM = 0
+        let mut pieces = Vec::from(word_lit((top << 8) | (sp << 4) | 9));
+        pieces.push(ext_word(e.clone()));
+        return Ok(Operation::Encoded(pieces));
+    }
+
+    let (mode, field, ext): (u8, u16, Option<Piece>) = match val {
+        Operand::Reg(r) => (R, r, None),
+        Operand::Ir(p) => (IR, p, None),
+        Operand::Da(e) => (DA, 0, Some(ext_word(e))),
+        Operand::Indexed(e, i) => (X, i, Some(ext_word(e))),
+        Operand::Imm(_) => unreachable!("handled above"),
+    };
+    let top = (mm(mode) << 6) | u16::from(s.base6);
+    let mut pieces = Vec::from(word_lit((top << 8) | (sp << 4) | field));
     pieces.extend(ext);
     Ok(Operation::Encoded(pieces))
 }

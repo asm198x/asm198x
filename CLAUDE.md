@@ -306,8 +306,10 @@ curriculum corpus:
   **increment 4 — single-operand ALU:** `CLR`/`COM`/`NEG`/`TEST`/`TSET` (+ byte)
   and `INC`/`DEC` (+ byte, count 1–16), a separate `Mono` table where the operand
   is the second byte's high nibble and the low nibble is a fixed sub-opcode or a
-  count. Remaining increments (`PUSH`/`POP`, shifts, bit, `LDR`, mul/div,
-  block/IO, segmented Z8001) tracked in the decision record.
+  count. Then **increment 5 — stack:** `PUSH`/`POP`/`PUSHL`/`POPL` (a `Stack`
+  table; the pointer leads a push and trails a pop, `PUSH #imm` a special
+  opcode). Remaining increments (shifts, bit, `LDR`, mul/div, block/IO, segmented
+  Z8001) tracked in the decision record.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.

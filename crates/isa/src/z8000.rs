@@ -352,6 +352,80 @@ pub fn mono_decode(top: u8, low: u8) -> Option<&'static Mono> {
         .find(|m| m.base6 == base6 && (m.count || m.subop == low))
 }
 
+// ---------------------------------------------------------------------------
+// Stack (increment 5): PUSH / POP / PUSHL / POPL
+// ---------------------------------------------------------------------------
+
+/// A stack instruction. `PUSH @Rsp, src` / `POP dst, @Rsp`: the stack-pointer
+/// register is the second byte's **high** nibble and the value operand's field
+/// the **low** nibble, with `MM` selecting the value's addressing mode (R / IR /
+/// DA / X). `PUSH` additionally has an immediate form encoded specially at
+/// `base6` 0x0D with low nibble 9.
+pub struct Stack {
+    pub mnemonic: &'static str,
+    pub base6: u8,
+    pub size: Size,
+    /// `PUSH`/`PUSHL` (source → stack) vs `POP`/`POPL` (stack → destination).
+    pub push: bool,
+    /// Has an immediate source form (`PUSH` only).
+    pub has_imm: bool,
+    pub summary: &'static str,
+}
+
+/// The `base6` of the special `PUSH @Rsp, #imm` form (low nibble 9).
+pub const PUSH_IMM_BASE6: u8 = 0x0D;
+
+/// The stack instructions (increment 5).
+pub const STACK: &[Stack] = &[
+    Stack {
+        mnemonic: "PUSH",
+        base6: 0x13,
+        size: Size::Word,
+        push: true,
+        has_imm: true,
+        summary: "Push",
+    },
+    Stack {
+        mnemonic: "PUSHL",
+        base6: 0x11,
+        size: Size::Long,
+        push: true,
+        has_imm: false,
+        summary: "Push long",
+    },
+    Stack {
+        mnemonic: "POP",
+        base6: 0x17,
+        size: Size::Word,
+        push: false,
+        has_imm: false,
+        summary: "Pop",
+    },
+    Stack {
+        mnemonic: "POPL",
+        base6: 0x15,
+        size: Size::Long,
+        push: false,
+        has_imm: false,
+        summary: "Pop long",
+    },
+];
+
+/// Find a stack instruction by mnemonic (case-insensitive).
+#[must_use]
+pub fn stack_lookup(mnemonic: &str) -> Option<&'static Stack> {
+    STACK
+        .iter()
+        .find(|s| s.mnemonic.eq_ignore_ascii_case(mnemonic))
+}
+
+/// Decode the stack instruction for opcode top byte `top`, or `None`.
+#[must_use]
+pub fn stack_decode(top: u8) -> Option<&'static Stack> {
+    let base6 = top & 0x3F;
+    STACK.iter().find(|s| s.base6 == base6)
+}
+
 /// Operand size, which fixes register naming and immediate width.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Size {

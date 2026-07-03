@@ -85,7 +85,16 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
    `TSET 6`, `CLR 8`) or `count − 1` (`INC`/`DEC`). R / IR / DA / X modes (no
    immediate). `PUSH`/`POP`/`PUSHL`/`POPL` and `EXTS` move to increment 5 (they
    have their own two-operand / sign-extend formats).
-5. **Shifts / rotates** — `SLA`/`SRA`/`SLL`/`SRL`/`RL`/`RR`/`RLC`/`RRC` (count).
+5. **Stack** — ✅ **landed (2026-07-03).** `PUSH`/`POP`/`PUSHL`/`POPL`. A
+   separate `Stack` table: the stack-pointer register is the second byte's high
+   nibble and the value operand's field the low nibble, `MM` selecting the
+   value's mode (R / IR / DA / X). Syntax is `PUSH @Rsp, src` / `POP dst, @Rsp`
+   (pointer leads a push, trails a pop). `PUSH #imm` is a special opcode
+   (`base6` 0x0D, low nibble 9). `PUSHL`/`POPL` are long; only `PUSH` has an
+   immediate form.
+6. **Shifts / rotates** — `SLA`/`SRA`/`SLL`/`SRL` (a signed count word, `+`
+   left / `−` right) and `RL`/`RR`/`RLC`/`RRC` (count 1–2 packed in the low
+   nibble). `EXTS` folds in here too.
 6. **Bit** — `BIT`/`SET`/`RES`, static and dynamic.
 7. **Multiply / divide, block, string, I/O, CPU control** — the remainder.
 8. **Segmented Z8001** — widen DA/X/RA address operands to segmented addresses
