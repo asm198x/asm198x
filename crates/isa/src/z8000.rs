@@ -1368,6 +1368,122 @@ pub fn block_io_decode(size: Size, op_nib: u8, ctrl: u8) -> Option<&'static Bloc
         .find(|b| b.size == size && b.op_nib == op_nib && b.ctrl == ctrl)
 }
 
+// ---------------------------------------------------------------------------
+// CPU control (increment 11): NOP / HALT / EI / DI / IRET / LDCTL / LDPS /
+// MSET / MRES / MBIT / MREQ / SETFLG / RESFLG / COMFLG / SC
+// ---------------------------------------------------------------------------
+
+/// The shape of a CPU-control instruction — each sub-group has its own encoding,
+/// keyed by a distinct top byte on decode.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum ControlKind {
+    /// A fixed two-byte word with no operand (`NOP` 0x8D07, `HALT` 0x7A00,
+    /// `IRET` 0x7B00, `MSET` 0x7B08, `MRES` 0x7B09, `MBIT` 0x7B0A).
+    Fixed(u16),
+    /// `MREQ Rd` — `0x7B00 | reg << 4 | 0x0D`.
+    Mreq,
+    /// `SETFLG`/`RESFLG`/`COMFLG flags` — top `0x8D`, `flag-mask << 4 | subop`
+    /// (`SETFLG` 1, `RESFLG` 3, `COMFLG` 5).
+    Flag(u8),
+    /// `EI`/`DI vi[,nvi]` — top `0x7C`; the boolean is enable (`EI`).
+    Intr(bool),
+    /// `LDCTL`/`LDCTLB` — a register and a control register. Word (`0x7D`,
+    /// `FCW`/`REFRESH`/`PSAP`/`NSP`) or byte (`0x8C`, `FLAGS` only).
+    Ldctl(Size),
+    /// `LDPS src` — load program status from an `IR`/`DA`/`X` memory operand
+    /// (top `0x39` indirect, `0x79` direct/indexed).
+    Ldps,
+    /// `SC #n` — system call, `0x7F00 | n` (`n` 0–255).
+    Sc,
+}
+
+/// One CPU-control instruction.
+pub struct Control {
+    pub mnemonic: &'static str,
+    pub kind: ControlKind,
+    pub summary: &'static str,
+}
+
+use ControlKind::{Fixed, Flag, Intr, Ldctl, Ldps, Mreq, Sc};
+
+const fn ctrl(mnemonic: &'static str, kind: ControlKind, summary: &'static str) -> Control {
+    Control {
+        mnemonic,
+        kind,
+        summary,
+    }
+}
+
+/// The CPU-control instructions (increment 11).
+pub const CONTROLS: &[Control] = &[
+    ctrl("NOP", Fixed(0x8D07), "No operation"),
+    ctrl("HALT", Fixed(0x7A00), "Halt"),
+    ctrl("IRET", Fixed(0x7B00), "Interrupt return"),
+    ctrl("MSET", Fixed(0x7B08), "Multi-micro set"),
+    ctrl("MRES", Fixed(0x7B09), "Multi-micro reset"),
+    ctrl("MBIT", Fixed(0x7B0A), "Test multi-micro bit"),
+    ctrl("MREQ", Mreq, "Multi-micro request"),
+    ctrl("SETFLG", Flag(1), "Set flags"),
+    ctrl("RESFLG", Flag(3), "Reset flags"),
+    ctrl("COMFLG", Flag(5), "Complement flags"),
+    ctrl("EI", Intr(true), "Enable interrupt"),
+    ctrl("DI", Intr(false), "Disable interrupt"),
+    ctrl("LDCTL", Ldctl(Size::Word), "Load control register"),
+    ctrl("LDCTLB", Ldctl(Size::Byte), "Load control register byte"),
+    ctrl("LDPS", Ldps, "Load program status"),
+    ctrl("SC", Sc, "System call"),
+];
+
+/// Find a CPU-control instruction by mnemonic (case-insensitive).
+#[must_use]
+pub fn control_lookup(mnemonic: &str) -> Option<&'static Control> {
+    CONTROLS
+        .iter()
+        .find(|c| c.mnemonic.eq_ignore_ascii_case(mnemonic))
+}
+
+/// The bit for a flag name (`C` 8, `Z` 4, `S` 2, `P`/`V` 1), or `None`.
+#[must_use]
+pub fn flag_bit(name: &str) -> Option<u8> {
+    match name.trim().to_ascii_lowercase().as_str() {
+        "c" => Some(8),
+        "z" => Some(4),
+        "s" => Some(2),
+        "p" | "v" => Some(1),
+        _ => None,
+    }
+}
+
+/// The flag `(bit, canonical-name)` pairs in `C,Z,S,P` order, for rendering a
+/// flag mask.
+pub const FLAG_BITS: &[(u8, &str)] = &[(8, "c"), (4, "z"), (2, "s"), (1, "p")];
+
+/// The 4-bit control-register code for a word control-register name (`FCW` 2,
+/// `REFRESH` 3, `PSAP`/`PSAPOFF` 5, `NSP`/`NSPOFF` 7), or `None`. (The segmented
+/// `PSAPSEG` 4 / `NSPSEG` 6 are Z8001-only and absent here.)
+#[must_use]
+pub fn word_ctrl_code(name: &str) -> Option<u8> {
+    match name.trim().to_ascii_lowercase().as_str() {
+        "fcw" => Some(2),
+        "refresh" => Some(3),
+        "psap" | "psapoff" => Some(5),
+        "nsp" | "nspoff" => Some(7),
+        _ => None,
+    }
+}
+
+/// The canonical word control-register name for a code, or `None`.
+#[must_use]
+pub fn word_ctrl_name(code: u8) -> Option<&'static str> {
+    match code {
+        2 => Some("fcw"),
+        3 => Some("refresh"),
+        5 => Some("psap"),
+        7 => Some("nsp"),
+        _ => None,
+    }
+}
+
 /// Operand size, which fixes register naming and immediate width.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Size {

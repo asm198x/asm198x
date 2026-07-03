@@ -2741,6 +2741,7 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
             .or_else(|| decode_muldiv_z8000(code, pos))
             .or_else(|| decode_block_z8000(code, pos))
             .or_else(|| decode_io_z8000(code, pos))
+            .or_else(|| decode_control_z8000(code, pos))
             .or_else(|| decode_z8000(code, pos))
         {
             Some((text, len)) => {
@@ -3255,6 +3256,113 @@ fn decode_io_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
                 format!("{mn} @r{port},{reg}")
             };
             Some((text, 2))
+        }
+        _ => None,
+    }
+}
+
+/// Render a Z8000 flag mask (`SETFLG`/`RESFLG`/`COMFLG`) in canonical `C,Z,S,P`
+/// order.
+fn z8000_flags(mask: u8) -> String {
+    isa::z8000::FLAG_BITS
+        .iter()
+        .filter(|(bit, _)| mask & bit != 0)
+        .map(|(_, n)| *n)
+        .collect::<Vec<_>>()
+        .join(",")
+}
+
+/// Decode one Z8000 CPU-control instruction (`NOP`/`HALT`/`EI`/`DI`/`IRET`/
+/// `LDCTL`/`LDPS`/`MSET`/`MRES`/`MBIT`/`MREQ`/`SETFLG`/`RESFLG`/`COMFLG`/`SC`) at
+/// `pos`, or `None`. Each sub-group has a distinct top byte.
+fn decode_control_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+    use isa::z8000::Size;
+    let (top, second) = (code[pos], code[pos + 1]);
+    let (hi, low) = (u16::from(second >> 4), second & 0xF);
+    match top {
+        0x7A => (second == 0).then(|| ("halt".to_string(), 2)),
+        0x7B => match second {
+            0x00 => Some(("iret".to_string(), 2)),
+            0x08 => Some(("mset".to_string(), 2)),
+            0x09 => Some(("mres".to_string(), 2)),
+            0x0A => Some(("mbit".to_string(), 2)),
+            _ if low == 0xD => Some((format!("mreq r{hi}"), 2)),
+            _ => None,
+        },
+        // EI / DI: bit 2 is enable; the low two bits mark the *excluded*
+        // interrupts (bit 1 = vi, bit 0 = nvi). Both excluded / high bits set
+        // are not canonical.
+        0x7C => {
+            if second & 0xF8 != 0 || second & 3 == 3 {
+                return None;
+            }
+            let mn = if second & 4 != 0 { "ei" } else { "di" };
+            let mut ints = Vec::new();
+            if second & 2 == 0 {
+                ints.push("vi");
+            }
+            if second & 1 == 0 {
+                ints.push("nvi");
+            }
+            Some((format!("{mn} {}", ints.join(",")), 2))
+        }
+        // LDCTL word: register in the high nibble, control-register code (with a
+        // store bit) in the low.
+        0x7D => {
+            let name = isa::z8000::word_ctrl_name(low & 7)?;
+            let reg = format!("r{hi}");
+            let text = if low & 8 != 0 {
+                format!("ldctl {name},{reg}")
+            } else {
+                format!("ldctl {reg},{name}")
+            };
+            Some((text, 2))
+        }
+        0x7F => Some((format!("sc #0{second:02X}H"), 2)),
+        // LDCTLB byte: FLAGS only (low nibble 1 load / 9 store).
+        0x8C => {
+            let store = match low {
+                1 => false,
+                9 => true,
+                _ => return None,
+            };
+            let reg = z8000_reg(hi, Size::Byte);
+            let text = if store {
+                format!("ldctlb flags,{reg}")
+            } else {
+                format!("ldctlb {reg},flags")
+            };
+            Some((text, 2))
+        }
+        // Flag ops (subop 1/3/5) and NOP (subop 7, mask 0) share top 0x8D.
+        0x8D => {
+            let mask = second >> 4;
+            match low {
+                7 => (mask == 0).then(|| ("nop".to_string(), 2)),
+                1 | 3 | 5 if mask != 0 => {
+                    let mn = match low {
+                        1 => "setflg",
+                        3 => "resflg",
+                        _ => "comflg",
+                    };
+                    Some((format!("{mn} {}", z8000_flags(mask)), 2))
+                }
+                _ => None,
+            }
+        }
+        // LDPS: indirect (`@Rn`) at 0x39, direct / indexed at 0x79.
+        0x39 => (low == 0 && hi != 0).then(|| (format!("ldps @r{hi}"), 2)),
+        0x79 => {
+            if low != 0 || pos + 4 > code.len() {
+                return None;
+            }
+            let addr = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
+            let text = if hi == 0 {
+                format!("ldps 0{addr:04X}H")
+            } else {
+                format!("ldps 0{addr:04X}H(r{hi})")
+            };
+            Some((text, 4))
         }
         _ => None,
     }

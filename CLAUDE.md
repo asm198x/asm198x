@@ -334,8 +334,13 @@ curriculum corpus:
   group (`IN`/`OUT`/`SIN`/`SOUT` + block-I/O `INI`/…/`SOTDRB`) — `SimpleIo` +
   `BlockIo` tables at MM=00 (top 0x3A–0x3F); the key wrinkle is that `asl` drops
   privileged instructions unless `supmode on`, so `listing_z8000` now emits it.
-  Remaining increments (`LDR`, CPU control, segmented Z8001) tracked in the
-  decision record.
+  Then **increment 11 — CPU control:** 16 status/control ops (`NOP`/`HALT`/`EI`/
+  `DI`/`IRET`/`LDCTL`/`LDPS`/`MSET`/…/`SETFLG`/`SC`) — a `Control` table +
+  `ControlKind`, each sub-group keyed by a distinct top byte (0x7A–0x8D, 0x39/
+  0x79); `NOP` is `0x8D07` on the flag-ops page, and the 0x8C/0x8D pages are
+  shared with the increment-4 single-ops (disambiguated by the low nibble). Fully
+  sweep-verified. Remaining: a cleanup increment (`TCC`/`TCCB`, `LDK`, `LDR`,
+  `RLDB`/`RRDB`) then segmented Z8001 — tracked in the decision record.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
