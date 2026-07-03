@@ -186,6 +186,34 @@ fn round_trips_z8000_dyadic_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_z8000_single_operand_through_asl_syntax() {
+    // Increment 4: single-operand ALU across every addressing mode and size.
+    let source = "\
+        \torg 0\n\
+        \tclr r1\n\
+        \tclr @r2\n\
+        \tclr 1234h\n\
+        \tclr 1234h(r3)\n\
+        \tclrb rl1\n\
+        \tcom r5\n\
+        \tneg @r4\n\
+        \ttest 2000h\n\
+        \ttset r6\n\
+        \tnegb rl2\n\
+        \ttestb rh0\n\
+        \tinc r1\n\
+        \tinc r1,#8\n\
+        \tinc @r2,#16\n\
+        \tdec r3,#3\n\
+        \tincb rl1,#2\n\
+        \tdecb rl4\n";
+    let original = assemble_z8000(source).expect("assemble");
+    let listing = listing_z8000(&original.bytes, original.origin);
+    let re = assemble_z8000(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_z8000_control_through_asl_syntax() {
     // Increment 3: program control — the position-dependent JR / DJNZ / CALR
     // the opcode sweep can't batch, plus JP / CALL / RET with condition codes.

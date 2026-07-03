@@ -200,6 +200,158 @@ const CC: &[(&str, u8)] = &[
     ("uge", 15),
 ];
 
+// ---------------------------------------------------------------------------
+// Single-operand ALU (increment 4): CLR / COM / NEG / TEST / TSET / INC / DEC
+// ---------------------------------------------------------------------------
+
+/// A single-general-operand instruction. Its first word is
+/// `MM base6 | field << 4 | low`: the operand register/pointer/index is the
+/// **high** nibble of the second byte, and the **low** nibble is either a fixed
+/// sub-opcode (`CLR`/`COM`/…) or `count − 1` (`INC`/`DEC`, count 1–16). The
+/// operand uses R / IR / DA / X addressing (no immediate).
+pub struct Mono {
+    pub mnemonic: &'static str,
+    pub base6: u8,
+    /// Fixed low nibble for the sub-opcode ops; ignored when `count`.
+    pub subop: u8,
+    pub size: Size,
+    /// The low nibble is a `count − 1` operand (`INC`/`DEC`), not a sub-opcode.
+    pub count: bool,
+    pub summary: &'static str,
+}
+
+/// The single-operand ALU instructions (increment 4).
+pub const MONO: &[Mono] = &[
+    Mono {
+        mnemonic: "COM",
+        base6: 0x0D,
+        subop: 0,
+        size: Size::Word,
+        count: false,
+        summary: "Complement",
+    },
+    Mono {
+        mnemonic: "COMB",
+        base6: 0x0C,
+        subop: 0,
+        size: Size::Byte,
+        count: false,
+        summary: "Complement byte",
+    },
+    Mono {
+        mnemonic: "NEG",
+        base6: 0x0D,
+        subop: 2,
+        size: Size::Word,
+        count: false,
+        summary: "Negate",
+    },
+    Mono {
+        mnemonic: "NEGB",
+        base6: 0x0C,
+        subop: 2,
+        size: Size::Byte,
+        count: false,
+        summary: "Negate byte",
+    },
+    Mono {
+        mnemonic: "TEST",
+        base6: 0x0D,
+        subop: 4,
+        size: Size::Word,
+        count: false,
+        summary: "Test",
+    },
+    Mono {
+        mnemonic: "TESTB",
+        base6: 0x0C,
+        subop: 4,
+        size: Size::Byte,
+        count: false,
+        summary: "Test byte",
+    },
+    Mono {
+        mnemonic: "TSET",
+        base6: 0x0D,
+        subop: 6,
+        size: Size::Word,
+        count: false,
+        summary: "Test and set",
+    },
+    Mono {
+        mnemonic: "TSETB",
+        base6: 0x0C,
+        subop: 6,
+        size: Size::Byte,
+        count: false,
+        summary: "Test and set byte",
+    },
+    Mono {
+        mnemonic: "CLR",
+        base6: 0x0D,
+        subop: 8,
+        size: Size::Word,
+        count: false,
+        summary: "Clear",
+    },
+    Mono {
+        mnemonic: "CLRB",
+        base6: 0x0C,
+        subop: 8,
+        size: Size::Byte,
+        count: false,
+        summary: "Clear byte",
+    },
+    Mono {
+        mnemonic: "INC",
+        base6: 0x29,
+        subop: 0,
+        size: Size::Word,
+        count: true,
+        summary: "Increment",
+    },
+    Mono {
+        mnemonic: "INCB",
+        base6: 0x28,
+        subop: 0,
+        size: Size::Byte,
+        count: true,
+        summary: "Increment byte",
+    },
+    Mono {
+        mnemonic: "DEC",
+        base6: 0x2B,
+        subop: 0,
+        size: Size::Word,
+        count: true,
+        summary: "Decrement",
+    },
+    Mono {
+        mnemonic: "DECB",
+        base6: 0x2A,
+        subop: 0,
+        size: Size::Byte,
+        count: true,
+        summary: "Decrement byte",
+    },
+];
+
+/// Find a single-operand instruction by mnemonic (case-insensitive).
+#[must_use]
+pub fn mono_lookup(mnemonic: &str) -> Option<&'static Mono> {
+    MONO.iter()
+        .find(|m| m.mnemonic.eq_ignore_ascii_case(mnemonic))
+}
+
+/// Decode the single-operand instruction for opcode top byte `top` and the
+/// second byte's low nibble `low` (a sub-opcode, or a count field), or `None`.
+#[must_use]
+pub fn mono_decode(top: u8, low: u8) -> Option<&'static Mono> {
+    let base6 = top & 0x3F;
+    MONO.iter()
+        .find(|m| m.base6 == base6 && (m.count || m.subop == low))
+}
+
 /// Operand size, which fixes register naming and immediate width.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Size {

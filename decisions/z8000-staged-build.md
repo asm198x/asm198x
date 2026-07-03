@@ -78,7 +78,13 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
    sweep-verified; the relative `JR`/`DJNZ`/`CALR` (position-dependent, dropped
    by the sweep) have a targeted round-trip. `LDR` (PC-relative load) is deferred
    to the relative-data / single-operand increment.
-4. **Single-operand** — `INC`/`DEC`/`NEG`/`COM`/`TEST`/`PUSH`/`POP`/`CLR`.
+4. **Single-operand ALU** — ✅ **landed (2026-07-03).** `CLR`/`COM`/`NEG`/
+   `TEST`/`TSET` (+ byte) and `INC`/`DEC` (+ byte, count 1–16). A separate `Mono`
+   table: the operand register/pointer/index is the second byte's **high**
+   nibble, the low nibble a fixed sub-opcode (`COM 0`, `NEG 2`, `TEST 4`,
+   `TSET 6`, `CLR 8`) or `count − 1` (`INC`/`DEC`). R / IR / DA / X modes (no
+   immediate). `PUSH`/`POP`/`PUSHL`/`POPL` and `EXTS` move to increment 5 (they
+   have their own two-operand / sign-extend formats).
 5. **Shifts / rotates** — `SLA`/`SRA`/`SLL`/`SRL`/`RL`/`RR`/`RLC`/`RRC` (count).
 6. **Bit** — `BIT`/`SET`/`RES`, static and dynamic.
 7. **Multiply / divide, block, string, I/O, CPU control** — the remainder.

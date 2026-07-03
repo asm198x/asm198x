@@ -2732,7 +2732,10 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
             continue;
         }
         let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
-        match decode_ctl_z8000(code, pos, addr).or_else(|| decode_z8000(code, pos)) {
+        match decode_ctl_z8000(code, pos, addr)
+            .or_else(|| decode_mono_z8000(code, pos))
+            .or_else(|| decode_z8000(code, pos))
+        {
             Some((text, len)) => {
                 out.push(Line {
                     addr: u32::from(addr),
@@ -2861,6 +2864,40 @@ fn decode_ctl_z8000(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize
             };
             Some((format!("{mn} {pre}{dst}"), len))
         }
+    }
+}
+
+/// Decode one Z8000 single-operand ALU instruction (`CLR`/`COM`/`NEG`/`TEST`/
+/// `TSET`, `INC`/`DEC`) at `pos`, or `None`. The operand is the second byte's
+/// high nibble; the low nibble is a sub-opcode or a count.
+fn decode_mono_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+    use isa::z8000::{DA, IR, R, X, mode_of};
+    let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
+    let (top, second) = ((word >> 8) as u8, word & 0xFF);
+    let (field, low) = (second >> 4, (second & 0xF) as u8);
+    let m = isa::z8000::mono_decode(top, low)?;
+    let mn = m.mnemonic.to_ascii_lowercase();
+    let mode = mode_of(top >> 6, field);
+
+    let (operand, len) = match mode {
+        R => (z8000_reg(field, m.size), 2),
+        IR => (format!("@r{field}"), 2),
+        DA => {
+            let a = (pos + 4 <= code.len())
+                .then(|| u16::from_be_bytes([code[pos + 2], code[pos + 3]]))?;
+            (format!("0{a:04X}H"), 4)
+        }
+        X => {
+            let a = (pos + 4 <= code.len())
+                .then(|| u16::from_be_bytes([code[pos + 2], code[pos + 3]]))?;
+            (format!("0{a:04X}H(r{field})"), 4)
+        }
+        _ => return None, // IM is not a valid single-operand mode
+    };
+    if m.count {
+        Some((format!("{mn} {operand},#{}", u16::from(low) + 1), len))
+    } else {
+        Some((format!("{mn} {operand}"), len))
     }
 }
 

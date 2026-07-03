@@ -302,9 +302,12 @@ curriculum corpus:
   formats diverge from the dyadic layout) + a shared condition-code table; the
   relative jumps reuse the PDP-11 word-scaled `Piece::Packed`. Validated
   byte-identical against `asl` (`cpu Z8002`) by the opcode-space sweep (~64k
-  words; the position-dependent relative jumps have a targeted round-trip).
-  Remaining increments (shifts, bit, single-operand, `LDR`, block/IO, segmented
-  Z8001) tracked in the decision record.
+  words; the position-dependent relative jumps have a targeted round-trip). Then
+  **increment 4 — single-operand ALU:** `CLR`/`COM`/`NEG`/`TEST`/`TSET` (+ byte)
+  and `INC`/`DEC` (+ byte, count 1–16), a separate `Mono` table where the operand
+  is the second byte's high nibble and the low nibble is a fixed sub-opcode or a
+  count. Remaining increments (`PUSH`/`POP`, shifts, bit, `LDR`, mul/div,
+  block/IO, segmented Z8001) tracked in the decision record.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.

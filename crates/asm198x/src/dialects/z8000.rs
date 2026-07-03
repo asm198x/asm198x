@@ -6,8 +6,9 @@
 //! `rr0`–`rr14`. Built as sweep-verified increments (see
 //! `decisions/z8000-staged-build.md`); this covers the **dyadic family**
 //! (increments 1–2: arithmetic / logic / compare / load / exchange /
-//! load-address) and **program control** (increment 3: `JP`/`CALL`/`JR`/`RET`/
-//! `DJNZ`/`CALR` with condition codes).
+//! load-address), **program control** (increment 3: `JP`/`CALL`/`JR`/`RET`/
+//! `DJNZ`/`CALR` with condition codes), and the **single-operand ALU**
+//! (increment 4: `CLR`/`COM`/`NEG`/`TEST`/`TSET`, `INC`/`DEC`).
 //!
 //! A dyadic instruction packs its operands as fields in the opcode word, emitted
 //! through the engine's computed-operand seam ([`Operation::Encoded`]): a
@@ -127,6 +128,8 @@ fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
             let mn = other.to_ascii_uppercase();
             if let Some(ctl) = isa::z8000::ctl_lookup(&mn) {
                 encode_ctl(ctl, args, line)?
+            } else if let Some(m) = isa::z8000::mono_lookup(&mn) {
+                encode_mono(m, args, line)?
             } else {
                 encode(&mn, args, line)?
             }
@@ -312,6 +315,62 @@ fn add(a: Expr, b: Expr) -> Expr {
 }
 fn sub(a: Expr, b: Expr) -> Expr {
     Expr::Bin(BinOp::Sub, Box::new(a), Box::new(b))
+}
+
+/// Encode a single-operand ALU instruction (`CLR`/`COM`/`NEG`/`TEST`/`TSET` and
+/// `INC`/`DEC`). The operand register/pointer/index is the second byte's high
+/// nibble; the low nibble is a fixed sub-opcode or `count − 1`.
+fn encode_mono(m: &isa::z8000::Mono, args: &str, line: usize) -> Result<Operation, AsmError> {
+    use isa::z8000::{DA, IR, R, X};
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+
+    // The low nibble: a count − 1 (INC/DEC, default 1) or the fixed sub-opcode.
+    let (operand_str, low) = match (m.count, ops.as_slice()) {
+        (false, [o]) => (*o, u16::from(m.subop)),
+        (true, [o]) => (*o, 0), // count 1
+        (true, [o, c]) => {
+            let n = fold_const(
+                &value(c.trim_start_matches('#'), line)?,
+                &BTreeMap::new(),
+                line,
+            )?;
+            if !(1..=16).contains(&n) {
+                return Err(AsmError::new(
+                    line,
+                    format!("`{}` count must be 1..=16", m.mnemonic),
+                ));
+            }
+            (*o, (n - 1) as u16)
+        }
+        _ => {
+            return Err(AsmError::new(
+                line,
+                format!("`{}` takes one operand", m.mnemonic),
+            ));
+        }
+    };
+
+    let (mode, field, ext): (u8, u16, Option<Piece>) = match operand(operand_str, m.size, line)? {
+        Operand::Reg(r) => (R, r, None),
+        Operand::Ir(p) => (IR, p, None),
+        Operand::Da(e) => (DA, 0, Some(ext_word(e))),
+        Operand::Indexed(e, i) => (X, i, Some(ext_word(e))),
+        Operand::Imm(_) => {
+            return Err(AsmError::new(
+                line,
+                format!("`{}` cannot take an immediate", m.mnemonic),
+            ));
+        }
+    };
+    // Every mode above is R/IR/DA/X — all legal for a single-operand op.
+    let top = (mm(mode) << 6) | u16::from(m.base6);
+    let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | low));
+    pieces.extend(ext);
+    Ok(Operation::Encoded(pieces))
 }
 
 /// Encode a program-control instruction (`JP`/`CALL`/`JR`/`RET`/`DJNZ`/`CALR`).
