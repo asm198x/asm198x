@@ -9,10 +9,10 @@
 use crate::{
     assemble_1802, assemble_2650, assemble_8039, assemble_8048, assemble_acme, assemble_f8,
     assemble_i8080, assemble_m6800, assemble_pasmonext, assemble_pdp11, assemble_rgbasm,
-    assemble_scmp, assemble_tms7000, assemble_tms9900, assemble_vasm, assemble_z8000, listing_1802,
-    listing_2650, listing_6502, listing_8048, listing_68000, listing_f8, listing_i8080,
-    listing_m6800, listing_pdp11, listing_scmp, listing_sm83, listing_tms7000, listing_tms9900,
-    listing_z80, listing_z8000,
+    assemble_scmp, assemble_tms7000, assemble_tms9900, assemble_vasm, assemble_z8000,
+    assemble_z8001, listing_1802, listing_2650, listing_6502, listing_8048, listing_68000,
+    listing_f8, listing_i8080, listing_m6800, listing_pdp11, listing_scmp, listing_sm83,
+    listing_tms7000, listing_tms9900, listing_z80, listing_z8000, listing_z8001,
 };
 
 #[test]
@@ -528,6 +528,56 @@ fn round_trips_z8000_misc_through_asl_syntax() {
     let original = assemble_z8000(source).expect("assemble");
     let listing = listing_z8000(&original.bytes, original.origin);
     let re = assemble_z8000(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
+fn round_trips_z8001_segmented_through_asl_syntax() {
+    // Increment 12: the segmented Z8001 target-extension. `<<seg>>offset` direct
+    // and indexed addresses (a two-word long-form operand), `@RRn` long-pair
+    // pointers, `LDA` into a long pair, the block-I/O mixed pointers (memory
+    // `@RR`, I/O `@R`), I/O left unchanged, and the segmented `LDCTL` control
+    // registers (`PSAP`/`NSP` split into `PSAPSEG`/`PSAPOFF`/`NSPSEG`/`NSPOFF`).
+    let source = "\
+        \torg 0\n\
+        \tld r1,<<5>>1234h\n\
+        \tld r1,<<5>>1234h(r3)\n\
+        \tld r1,@rr2\n\
+        \tld <<5>>1234h,r1\n\
+        \tldb rl1,<<5>>1234h(r3)\n\
+        \tldl rr2,<<5>>1234h\n\
+        \tadd r1,<<7>>5678h\n\
+        \tsub r2,@rr4\n\
+        \tclr <<5>>1234h\n\
+        \tclr @rr2\n\
+        \tpush @rr14,r1\n\
+        \tpush @rr14,<<5>>1234h\n\
+        \tpop r1,@rr14\n\
+        \tlda rr2,<<5>>1234h\n\
+        \tlda rr4,<<0>>0(r5)\n\
+        \tldps <<5>>1234h\n\
+        \tldps @rr2\n\
+        \tjp <<5>>1234h\n\
+        \tjp eq,@rr2\n\
+        \tcall <<5>>1234h\n\
+        \tmult rr2,<<5>>1234h\n\
+        \tbit <<5>>1234h,#3\n\
+        \tbit @rr2,#3\n\
+        \tldir @rr4,@rr2,r3\n\
+        \tcpi r1,@rr2,r3,eq\n\
+        \tini @rr2,@r4,r3\n\
+        \touti @r2,@rr4,r3\n\
+        \tsind @rr6,@r8,r9\n\
+        \tin r1,1234h\n\
+        \tin r1,@r2\n\
+        \tldctl r0,psapseg\n\
+        \tldctl r1,psapoff\n\
+        \tldctl r2,nspseg\n\
+        \tldctl r3,nspoff\n\
+        \tldctl nspoff,r4\n";
+    let original = assemble_z8001(source).expect("assemble");
+    let listing = listing_z8001(&original.bytes, original.origin);
+    let re = assemble_z8001(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
 

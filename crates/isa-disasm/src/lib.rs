@@ -2713,11 +2713,23 @@ fn decode_tms9900(code: &[u8], pos: usize, instr_addr: u16) -> Option<(String, u
 // `decisions/z8000-staged-build.md`. Increment 1: the dyadic family.
 // ---------------------------------------------------------------------------
 
-/// Disassemble a flat Z8000 (non-segmented) binary loaded at `origin`. The
+/// Disassemble a flat Z8000 (non-segmented Z8002) binary loaded at `origin`. The
 /// Z8000 is **big-endian** with 16-bit words. Instruction groups not yet
 /// implemented (and undecodable words) render as `word` data.
 #[must_use]
 pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
+    disassemble_z8000_impl(code, origin, false)
+}
+
+/// Disassemble a flat **segmented Z8001** binary — like [`disassemble_z8000`]
+/// but with segmented memory operands (`<<seg>>offset` addresses, `@RRn`
+/// pointers).
+#[must_use]
+pub fn disassemble_z8001(code: &[u8], origin: u16) -> Vec<Line> {
+    disassemble_z8000_impl(code, origin, true)
+}
+
+fn disassemble_z8000_impl(code: &[u8], origin: u16, seg: bool) -> Vec<Line> {
     let mut out = Vec::new();
     let mut pos = 0;
     while pos < code.len() {
@@ -2732,18 +2744,18 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
             continue;
         }
         let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
-        match decode_ctl_z8000(code, pos, addr)
-            .or_else(|| decode_mono_z8000(code, pos))
-            .or_else(|| decode_stack_z8000(code, pos))
+        match decode_ctl_z8000(code, pos, addr, seg)
+            .or_else(|| decode_mono_z8000(code, pos, seg))
+            .or_else(|| decode_stack_z8000(code, pos, seg))
             .or_else(|| decode_shift_z8000(code, pos))
             .or_else(|| decode_exts_z8000(code, pos))
-            .or_else(|| decode_bit_z8000(code, pos))
-            .or_else(|| decode_muldiv_z8000(code, pos))
-            .or_else(|| decode_block_z8000(code, pos))
-            .or_else(|| decode_io_z8000(code, pos))
-            .or_else(|| decode_control_z8000(code, pos))
+            .or_else(|| decode_bit_z8000(code, pos, seg))
+            .or_else(|| decode_muldiv_z8000(code, pos, seg))
+            .or_else(|| decode_block_z8000(code, pos, seg))
+            .or_else(|| decode_io_z8000(code, pos, seg))
+            .or_else(|| decode_control_z8000(code, pos, seg))
             .or_else(|| decode_misc_z8000(code, pos, addr))
-            .or_else(|| decode_z8000(code, pos))
+            .or_else(|| decode_z8000(code, pos, seg))
         {
             Some((text, len)) => {
                 out.push(Line {
@@ -2766,19 +2778,72 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
     out
 }
 
-/// Render a Z8000 disassembly as reassemblable `asl` source.
+/// Render a non-segmented Z8002 disassembly as reassemblable `asl` source.
 #[must_use]
 pub fn listing_z8000(code: &[u8], origin: u16) -> String {
+    listing_z8000_impl(code, origin, false)
+}
+
+/// Render a segmented Z8001 disassembly as reassemblable `asl` source.
+#[must_use]
+pub fn listing_z8001(code: &[u8], origin: u16) -> String {
+    listing_z8000_impl(code, origin, true)
+}
+
+fn listing_z8000_impl(code: &[u8], origin: u16, seg: bool) -> String {
     // `supmode on` lets `asl` assemble the privileged I/O group; harmless for
     // every other instruction.
-    let mut s = format!("\tcpu Z8002\n\tsupmode on\n\torg 0{origin:04X}H\n");
-    for line in disassemble_z8000(code, origin) {
+    let cpu = if seg { "Z8001" } else { "Z8002" };
+    let mut s = format!("\tcpu {cpu}\n\tsupmode on\n\torg 0{origin:04X}H\n");
+    let lines = if seg {
+        disassemble_z8001(code, origin)
+    } else {
+        disassemble_z8000(code, origin)
+    };
+    for line in lines {
         s.push('\t');
         s.push_str(&line.text);
         s.push('\n');
     }
     s.push_str("\tend\n");
     s
+}
+
+/// Read a Z8000 direct / indexed address operand starting at byte `at`: a 16-bit
+/// address (non-segmented) or a two-word long-form `<<seg>>offset` (segmented).
+/// Returns the rendered address and its byte length, or `None` if it runs past
+/// the end or (segmented) is not a canonical long-form segment word.
+fn z8000_addr(code: &[u8], at: usize, seg: bool) -> Option<(String, usize)> {
+    if seg {
+        if at + 4 > code.len() {
+            return None;
+        }
+        let w1 = u16::from_be_bytes([code[at], code[at + 1]]);
+        // Long form: bit 15 set, segment in bits 14–8, low byte zero.
+        if w1 & 0x80FF != 0x8000 {
+            return None;
+        }
+        let s = (w1 >> 8) & 0x7F;
+        let off = u16::from_be_bytes([code[at + 2], code[at + 3]]);
+        Some((format!("<<{s}>>0{off:04X}H"), 4))
+    } else {
+        if at + 2 > code.len() {
+            return None;
+        }
+        let a = u16::from_be_bytes([code[at], code[at + 1]]);
+        Some((format!("0{a:04X}H"), 2))
+    }
+}
+
+/// A memory pointer register: `@Rn` (non-segmented) or `@RRn` (a segmented long
+/// pair, which must be an **even** register — an odd field is `None`, not a
+/// canonical encoding).
+fn z8000_ptr(field: u16, seg: bool) -> Option<String> {
+    if seg {
+        field.is_multiple_of(2).then(|| format!("@rr{field}"))
+    } else {
+        Some(format!("@r{field}"))
+    }
 }
 
 /// A Z8000 register name for a given operand [`Size`]: `rN` (word/address),
@@ -2802,12 +2867,10 @@ fn z8000_cc_prefix(cc: u8) -> String {
 /// Decode one Z8000 program-control instruction (`JP`/`CALL`/`JR`/`RET`/`DJNZ`/
 /// `CALR`) at `pos`, `addr` its load address (for the relative targets), or
 /// `None` if the word is not one of them.
-fn decode_ctl_z8000(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> {
+fn decode_ctl_z8000(code: &[u8], pos: usize, addr: u16, seg: bool) -> Option<(String, usize)> {
     use isa::z8000::{DA, IR, Size, X, mode_of};
     let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
     let (top, second) = ((word >> 8) as u8, word & 0xFF);
-    let addr16 =
-        || (pos + 4 <= code.len()).then(|| u16::from_be_bytes([code[pos + 2], code[pos + 3]]));
 
     match top >> 4 {
         // JR cc, addr — word-scaled signed 8-bit, target = PC + 2·disp.
@@ -2864,9 +2927,15 @@ fn decode_ctl_z8000(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize
                 return None; // CALL has no condition code
             }
             let (dst, len) = match mode {
-                IR => (format!("@r{field}"), 2),
-                DA => (format!("0{:04X}H", addr16()?), 4),
-                X => (format!("0{:04X}H(r{field})", addr16()?), 4),
+                IR => (z8000_ptr(field, seg)?, 2),
+                DA => {
+                    let (a, n) = z8000_addr(code, pos + 2, seg)?;
+                    (a, 2 + n)
+                }
+                X => {
+                    let (a, n) = z8000_addr(code, pos + 2, seg)?;
+                    (format!("{a}(r{field})"), 2 + n)
+                }
                 _ => return None,
             };
             let (mn, pre) = if is_jp {
@@ -2882,7 +2951,7 @@ fn decode_ctl_z8000(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize
 /// Decode one Z8000 single-operand ALU instruction (`CLR`/`COM`/`NEG`/`TEST`/
 /// `TSET`, `INC`/`DEC`) at `pos`, or `None`. The operand is the second byte's
 /// high nibble; the low nibble is a sub-opcode or a count.
-fn decode_mono_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+fn decode_mono_z8000(code: &[u8], pos: usize, seg: bool) -> Option<(String, usize)> {
     use isa::z8000::{DA, IR, R, X, mode_of};
     let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
     let (top, second) = ((word >> 8) as u8, word & 0xFF);
@@ -2893,16 +2962,14 @@ fn decode_mono_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
 
     let (operand, len) = match mode {
         R => (z8000_reg(field, m.size), 2),
-        IR => (format!("@r{field}"), 2),
+        IR => (z8000_ptr(field, seg)?, 2),
         DA => {
-            let a = (pos + 4 <= code.len())
-                .then(|| u16::from_be_bytes([code[pos + 2], code[pos + 3]]))?;
-            (format!("0{a:04X}H"), 4)
+            let (a, n) = z8000_addr(code, pos + 2, seg)?;
+            (a, 2 + n)
         }
         X => {
-            let a = (pos + 4 <= code.len())
-                .then(|| u16::from_be_bytes([code[pos + 2], code[pos + 3]]))?;
-            (format!("0{a:04X}H(r{field})"), 4)
+            let (a, n) = z8000_addr(code, pos + 2, seg)?;
+            (format!("{a}(r{field})"), 2 + n)
         }
         _ => return None, // IM is not a valid single-operand mode
     };
@@ -2916,7 +2983,7 @@ fn decode_mono_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
 /// Decode one Z8000 stack instruction (`PUSH`/`POP`/`PUSHL`/`POPL`) at `pos`, or
 /// `None`. The stack pointer is the second byte's high nibble, the value
 /// operand's field the low nibble.
-fn decode_stack_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+fn decode_stack_z8000(code: &[u8], pos: usize, seg: bool) -> Option<(String, usize)> {
     use isa::z8000::{DA, IR, R, X, mode_of};
     let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
     let (top, second) = ((word >> 8) as u8, word & 0xFF);
@@ -2924,12 +2991,14 @@ fn decode_stack_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
     if sp == 0 {
         return None; // R0 cannot be a stack pointer
     }
+    let sp_ptr = z8000_ptr(sp, seg)?;
     let addr16 =
         || (pos + 4 <= code.len()).then(|| u16::from_be_bytes([code[pos + 2], code[pos + 3]]));
 
-    // Special: PUSH @Rsp, #imm — MM = 00, so the whole top byte is 0x0D.
+    // Special: PUSH @Rsp, #imm — MM = 00, so the whole top byte is 0x0D. The
+    // immediate is a word even in segmented mode.
     if top == isa::z8000::PUSH_IMM_BASE6 && low == 9 {
-        return Some((format!("push @r{sp},#0{:04X}H", addr16()?), 4));
+        return Some((format!("push {sp_ptr},#0{:04X}H", addr16()?), 4));
     }
 
     let s = isa::z8000::stack_decode(top)?;
@@ -2940,15 +3009,21 @@ fn decode_stack_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
     }
     let (value, len) = match mode {
         R => (z8000_reg(low, s.size), 2),
-        IR => (format!("@r{low}"), 2),
-        DA => (format!("0{:04X}H", addr16()?), 4),
-        X => (format!("0{:04X}H(r{low})", addr16()?), 4),
+        IR => (z8000_ptr(low, seg)?, 2),
+        DA => {
+            let (a, n) = z8000_addr(code, pos + 2, seg)?;
+            (a, 2 + n)
+        }
+        X => {
+            let (a, n) = z8000_addr(code, pos + 2, seg)?;
+            (format!("{a}(r{low})"), 2 + n)
+        }
         _ => return None, // no immediate at these base6 (PUSH #imm is separate)
     };
     let text = if s.push {
-        format!("{} @r{sp},{value}", s.mnemonic.to_ascii_lowercase())
+        format!("{} {sp_ptr},{value}", s.mnemonic.to_ascii_lowercase())
     } else {
-        format!("{} {value},@r{sp}", s.mnemonic.to_ascii_lowercase())
+        format!("{} {value},{sp_ptr}", s.mnemonic.to_ascii_lowercase())
     };
     Some((text, len))
 }
@@ -3052,14 +3127,12 @@ fn decode_exts_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
 /// dyadic family does, with the low nibble a **bit number**; `MM` = 00 with a
 /// high nibble of zero is the two-word **dynamic** form (the bit number in a
 /// word register, the target register in word 2).
-fn decode_bit_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+fn decode_bit_z8000(code: &[u8], pos: usize, seg: bool) -> Option<(String, usize)> {
     let (top, second) = (code[pos], code[pos + 1]);
     let b = isa::z8000::bit_decode(top)?;
     let (field, low) = (u16::from(second >> 4), second & 0xF);
     let mn = b.mnemonic.to_ascii_lowercase();
     let bmax = isa::z8000::bit_max(b.size) as u16;
-    let addr16 =
-        || (pos + 4 <= code.len()).then(|| u16::from_be_bytes([code[pos + 2], code[pos + 3]]));
 
     match top >> 6 {
         // Static register (`MM` = 10).
@@ -3072,9 +3145,12 @@ fn decode_bit_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
         // `MM` = 00: static `@Rn` (pointer 1–15) or the dynamic form (nibble 0).
         0 => {
             if field == 0 {
-                // Dynamic: word 2 is `target << 8` (low byte zero, high nibble
-                // zero); anything else is not a canonical encoding.
-                let w2 = addr16()?;
+                // Dynamic: word 2 is `target << 8` (registers only — never a
+                // segmented address); anything else is not a canonical encoding.
+                if pos + 4 > code.len() {
+                    return None;
+                }
+                let w2 = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
                 if w2 & 0xF0FF != 0 {
                     return None;
                 }
@@ -3084,7 +3160,7 @@ fn decode_bit_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
                 if u16::from(low) > bmax {
                     return None;
                 }
-                Some((format!("{mn} @r{field},#{low}"), 2))
+                Some((format!("{mn} {},#{low}", z8000_ptr(field, seg)?), 2))
             }
         }
         // Static direct / indexed (`MM` = 01).
@@ -3092,13 +3168,13 @@ fn decode_bit_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
             if u16::from(low) > bmax {
                 return None;
             }
-            let a = addr16()?;
+            let (a, n) = z8000_addr(code, pos + 2, seg)?;
             let target = if field == 0 {
-                format!("0{a:04X}H")
+                a
             } else {
-                format!("0{a:04X}H(r{field})")
+                format!("{a}(r{field})")
             };
-            Some((format!("{mn} {target},#{low}"), 4))
+            Some((format!("{mn} {target},#{low}"), 2 + n))
         }
         _ => None, // `MM` = 11 is not a bit op
     }
@@ -3107,7 +3183,7 @@ fn decode_bit_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
 /// Decode one Z8000 multiply / divide (`MULT`/`MULTL`/`DIV`/`DIVL`) at `pos`, or
 /// `None`. Dyadic-shaped, but the destination accumulator is double-width (long
 /// `rr` / quad `rq`) and the source one size smaller (word / long).
-fn decode_muldiv_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+fn decode_muldiv_z8000(code: &[u8], pos: usize, seg: bool) -> Option<(String, usize)> {
     use isa::z8000::{DA, IM, IR, R, Size, X, mode_of, reg_aligned};
     let (top, second) = (code[pos], code[pos + 1]);
     let md = isa::z8000::muldiv_decode(top)?;
@@ -3128,9 +3204,15 @@ fn decode_muldiv_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
 
     let (src, len) = match mode {
         R => (z8000_reg(field, md.src), 2),
-        IR => (format!("@r{field}"), 2),
-        DA => (format!("0{:04X}H", addr16()?), 4),
-        X => (format!("0{:04X}H(r{field})", addr16()?), 4),
+        IR => (z8000_ptr(field, seg)?, 2),
+        DA => {
+            let (a, n) = z8000_addr(code, pos + 2, seg)?;
+            (a, 2 + n)
+        }
+        X => {
+            let (a, n) = z8000_addr(code, pos + 2, seg)?;
+            (format!("{a}(r{field})"), 2 + n)
+        }
         IM => match md.src {
             Size::Long => {
                 if pos + 6 > code.len() {
@@ -3151,7 +3233,7 @@ fn decode_muldiv_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
 /// `TRTxB`) at `pos`, or `None`. A two-word form: word 1 carries one pointer and
 /// the operation nibble, word 2 the count register, the other pointer / data
 /// register, and the control nibble. Word 2's top nibble must be zero.
-fn decode_block_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+fn decode_block_z8000(code: &[u8], pos: usize, seg: bool) -> Option<(String, usize)> {
     use isa::z8000::BlockShape;
     if pos + 4 > code.len() {
         return None;
@@ -3167,6 +3249,7 @@ fn decode_block_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
     let field1 = u16::from(w1_second >> 4); // word 1's pointer
     let field2 = (word2 >> 4) & 0xF; // word 2's pointer / data register
     let count = (word2 >> 8) & 0xF;
+    let p1 = z8000_ptr(field1, seg)?; // word 1 is always a pointer
     let mn = b.mnemonic.to_ascii_lowercase();
     let cc = if b.has_cc() {
         isa::z8000::cc_name(ctrl).map_or_else(String::new, |n| format!(",{n}"))
@@ -3177,14 +3260,14 @@ fn decode_block_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
     let text = match b.shape {
         // Source in word 1, destination pointer in word 2.
         BlockShape::Load | BlockShape::CompareString => {
-            format!("{mn} @r{field2},@r{field1},r{count}{cc}")
+            format!("{mn} {},{p1},r{count}{cc}", z8000_ptr(field2, seg)?)
         }
-        // Source in word 1, data register in word 2.
+        // Source in word 1, data register in word 2 (not a pointer).
         BlockShape::Compare => {
-            format!("{mn} {},@r{field1},r{count}{cc}", z8000_reg(field2, b.size))
+            format!("{mn} {},{p1},r{count}{cc}", z8000_reg(field2, b.size))
         }
         // Destination in word 1, source in word 2 (the reverse of `LDx`).
-        BlockShape::Translate => format!("{mn} @r{field1},@r{field2},r{count}"),
+        BlockShape::Translate => format!("{mn} {p1},{},r{count}", z8000_ptr(field2, seg)?),
     };
     Some((text, 4))
 }
@@ -3194,7 +3277,7 @@ fn decode_block_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
 /// `0x3B`/`0x3A` is a direct-port simple I/O (word-1 low nibble 4–7) or block
 /// I/O (a two-word Load form, low nibble 0–3/8–B); `0x3C`–`0x3F` is an indirect
 /// (`@Rn`-port) simple I/O.
-fn decode_io_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+fn decode_io_z8000(code: &[u8], pos: usize, seg: bool) -> Option<(String, usize)> {
     use isa::z8000::Size;
     let top = code[pos];
     match top {
@@ -3231,10 +3314,19 @@ fn decode_io_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
                 let src = u16::from(second >> 4);
                 let dst = (word2 >> 4) & 0xF;
                 let count = (word2 >> 8) & 0xF;
+                // The memory pointer is `@rr` in segmented mode; the I/O pointer
+                // stays `@r`. `op_nib` bit 1 marks output (memory is the source).
+                let (dst_seg, src_seg) = if low & 2 != 0 {
+                    (false, seg)
+                } else {
+                    (seg, false)
+                };
                 Some((
                     format!(
-                        "{} @r{dst},@r{src},r{count}",
-                        bio.mnemonic.to_ascii_lowercase()
+                        "{} {},{},r{count}",
+                        bio.mnemonic.to_ascii_lowercase(),
+                        z8000_ptr(dst, dst_seg)?,
+                        z8000_ptr(src, src_seg)?
                     ),
                     4,
                 ))
@@ -3276,7 +3368,7 @@ fn z8000_flags(mask: u8) -> String {
 /// Decode one Z8000 CPU-control instruction (`NOP`/`HALT`/`EI`/`DI`/`IRET`/
 /// `LDCTL`/`LDPS`/`MSET`/`MRES`/`MBIT`/`MREQ`/`SETFLG`/`RESFLG`/`COMFLG`/`SC`) at
 /// `pos`, or `None`. Each sub-group has a distinct top byte.
-fn decode_control_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+fn decode_control_z8000(code: &[u8], pos: usize, seg: bool) -> Option<(String, usize)> {
     use isa::z8000::Size;
     let (top, second) = (code[pos], code[pos + 1]);
     let (hi, low) = (u16::from(second >> 4), second & 0xF);
@@ -3310,7 +3402,7 @@ fn decode_control_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
         // LDCTL word: register in the high nibble, control-register code (with a
         // store bit) in the low.
         0x7D => {
-            let name = isa::z8000::word_ctrl_name(low & 7)?;
+            let name = isa::z8000::word_ctrl_name(low & 7, seg)?;
             let reg = format!("r{hi}");
             let text = if low & 8 != 0 {
                 format!("ldctl {name},{reg}")
@@ -3352,18 +3444,24 @@ fn decode_control_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
             }
         }
         // LDPS: indirect (`@Rn`) at 0x39, direct / indexed at 0x79.
-        0x39 => (low == 0 && hi != 0).then(|| (format!("ldps @r{hi}"), 2)),
+        0x39 => {
+            if low == 0 && hi != 0 {
+                Some((format!("ldps {}", z8000_ptr(hi, seg)?), 2))
+            } else {
+                None
+            }
+        }
         0x79 => {
-            if low != 0 || pos + 4 > code.len() {
+            if low != 0 {
                 return None;
             }
-            let addr = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
+            let (a, n) = z8000_addr(code, pos + 2, seg)?;
             let text = if hi == 0 {
-                format!("ldps 0{addr:04X}H")
+                format!("ldps {a}")
             } else {
-                format!("ldps 0{addr:04X}H(r{hi})")
+                format!("ldps {a}(r{hi})")
             };
-            Some((text, 4))
+            Some((text, 2 + n))
         }
         _ => None,
     }
@@ -3420,7 +3518,7 @@ fn decode_misc_z8000(code: &[u8], pos: usize, addr: u16) -> Option<(String, usiz
 /// Decode one Z8000 dyadic instruction at byte offset `pos`. Returns the
 /// reassemblable text and total byte length, or `None` for a word this
 /// increment doesn't decode (rendered as `word` data by the caller).
-fn decode_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+fn decode_z8000(code: &[u8], pos: usize, seg: bool) -> Option<(String, usize)> {
     use isa::z8000::{DA, IM, IR, R, Size, X};
     let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
     let (top, second) = ((word >> 8) as u8, word & 0xFF);
@@ -3437,6 +3535,16 @@ fn decode_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
     if insn.size == Size::Long && (reg % 2 == 1 || (mode == R && field % 2 == 1)) {
         return None;
     }
+    // In segmented mode `LDA` loads a 32-bit address into a long pair, so its
+    // destination register is named as (and must be) an even pair.
+    let dest_size = if seg && insn.size == Size::Address {
+        if reg % 2 == 1 {
+            return None;
+        }
+        Size::Long
+    } else {
+        insn.size
+    };
 
     // Read the extension word(s): a 16-bit address / immediate, or a 32-bit long
     // immediate. Returns the rendered source text and the total instruction len.
@@ -3447,23 +3555,34 @@ fn decode_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
     if insn.store {
         // Register → memory: `field` is the pointer/index, `reg` the source.
         let src = z8000_reg(reg, insn.size);
-        let dst = match mode {
-            IR => format!("@r{field}"),
-            DA => format!("0{:04X}H", addr16()?),
-            X => format!("0{:04X}H(r{field})", addr16()?),
+        let (dst, len) = match mode {
+            IR => (z8000_ptr(field, seg)?, 2),
+            DA => {
+                let (a, n) = z8000_addr(code, pos + 2, seg)?;
+                (a, 2 + n)
+            }
+            X => {
+                let (a, n) = z8000_addr(code, pos + 2, seg)?;
+                (format!("{a}(r{field})"), 2 + n)
+            }
             _ => return None,
         };
-        let len = if mode == IR { 2 } else { 4 };
         return Some((format!("{mn} {dst},{src}"), len));
     }
 
     // Source into register: `field` is the source field, `reg` the destination.
-    let dst = z8000_reg(reg, insn.size);
+    let dst = z8000_reg(reg, dest_size);
     let (src, len) = match mode {
         R => (z8000_reg(field, insn.size), 2),
-        IR => (format!("@r{field}"), 2),
-        DA => (format!("0{:04X}H", addr16()?), 4),
-        X => (format!("0{:04X}H(r{field})", addr16()?), 4),
+        IR => (z8000_ptr(field, seg)?, 2),
+        DA => {
+            let (a, n) = z8000_addr(code, pos + 2, seg)?;
+            (a, 2 + n)
+        }
+        X => {
+            let (a, n) = z8000_addr(code, pos + 2, seg)?;
+            (format!("{a}(r{field})"), 2 + n)
+        }
         IM => match insn.size {
             Size::Byte => {
                 // Byte immediates replicate the byte; halves that differ are not

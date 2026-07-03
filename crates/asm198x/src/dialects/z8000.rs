@@ -21,6 +21,13 @@
 //! **cleanup** one-offs (`TCC`/`TCCB`, `LDK`, `RLDB`/`RRDB`, the PC-relative
 //! `LDR`/`LDRB`/`LDRL`) — the complete non-segmented Z8002 instruction set.
 //!
+//! The [`seg`](Z8000::seg) flag selects the **segmented Z8001** target-extension
+//! (increment 12): the same opcodes, but a direct / indexed address is a
+//! two-word `<<seg>>offset` operand, an indirect pointer is a long pair
+//! (`@RRn`), and `LDA` targets a long pair; I/O and the relative forms are
+//! unchanged. The memory operand carries its own segment through [`Operand`], so
+//! [`addr_ext`] emits one or two words uniformly.
+//!
 //! A dyadic instruction packs its operands as fields in the opcode word, emitted
 //! through the engine's computed-operand seam ([`Operation::Encoded`]): a
 //! literal first word (`MM base6 | ssss dddd`) followed, for the immediate /
@@ -40,8 +47,11 @@ use super::mos6502::{
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, BinOp, Expr, Operation, Piece, Statement};
 
-/// The Zilog Z8000 dialect (non-segmented Z8002).
-pub(crate) struct Z8000;
+/// The Zilog Z8000 dialect. `seg` selects the segmented Z8001 model (widened
+/// memory operands) over the non-segmented Z8002 base.
+pub(crate) struct Z8000 {
+    pub(crate) seg: bool,
+}
 
 impl Dialect for Z8000 {
     fn instruction_set(&self) -> &'static isa::InstructionSet {
@@ -49,6 +59,7 @@ impl Dialect for Z8000 {
     }
 
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
+        let seg = self.seg;
         let mut out = Vec::new();
         let mut consts: BTreeMap<String, i64> = BTreeMap::new();
 
@@ -73,7 +84,7 @@ impl Dialect for Z8000 {
             let op = if rest.is_empty() {
                 None
             } else {
-                parse_op(rest, line)?
+                parse_op(rest, line, seg)?
             };
             if label.is_some() || op.is_some() {
                 out.push(Statement { line, label, op });
@@ -128,7 +139,7 @@ fn split_label(code: &str) -> (Option<String>, &str) {
     }
 }
 
-fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
+fn parse_op(rest: &str, line: usize, seg: bool) -> Result<Option<Operation>, AsmError> {
     let (word, args) = split_first_word(rest);
     let op = match word.to_ascii_lowercase().as_str() {
         "cpu" | "end" | "title" | "page" | "name" | "listing" | "supmode" => return Ok(None),
@@ -138,31 +149,31 @@ fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
         other => {
             let mn = other.to_ascii_uppercase();
             if let Some(ctl) = isa::z8000::ctl_lookup(&mn) {
-                encode_ctl(ctl, args, line)?
+                encode_ctl(ctl, args, line, seg)?
             } else if let Some(m) = isa::z8000::mono_lookup(&mn) {
-                encode_mono(m, args, line)?
+                encode_mono(m, args, line, seg)?
             } else if let Some(s) = isa::z8000::stack_lookup(&mn) {
-                encode_stack(s, args, line)?
+                encode_stack(s, args, line, seg)?
             } else if let Some(sh) = isa::z8000::shift_lookup(&mn) {
                 encode_shift(sh, args, line)?
             } else if let Some(e) = isa::z8000::extend_lookup(&mn) {
                 encode_extend(e, args, line)?
             } else if let Some(b) = isa::z8000::bit_lookup(&mn) {
-                encode_bit(b, args, line)?
+                encode_bit(b, args, line, seg)?
             } else if let Some(md) = isa::z8000::muldiv_lookup(&mn) {
-                encode_muldiv(md, args, line)?
+                encode_muldiv(md, args, line, seg)?
             } else if let Some(blk) = isa::z8000::block_lookup(&mn) {
-                encode_block(blk, args, line)?
+                encode_block(blk, args, line, seg)?
             } else if let Some(sio) = isa::z8000::simple_io_lookup(&mn) {
                 encode_simple_io(sio, args, line)?
             } else if let Some(bio) = isa::z8000::block_io_lookup(&mn) {
-                encode_block_io(bio, args, line)?
+                encode_block_io(bio, args, line, seg)?
             } else if let Some(c) = isa::z8000::control_lookup(&mn) {
-                encode_control(c, args, line)?
+                encode_control(c, args, line, seg)?
             } else if let Some(m) = isa::z8000::misc_lookup(&mn) {
                 encode_misc(m, args, line)?
             } else {
-                encode(&mn, args, line)?
+                encode(&mn, args, line, seg)?
             }
         }
     };
@@ -209,18 +220,35 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
 
 use isa::z8000::{Insn, Size};
 
-/// A parsed operand and the addressing mode it implies.
+/// A parsed operand and the addressing mode it implies. The `Option<u8>` on the
+/// memory forms is the segment of a Z8001 segmented address (`<<seg>>offset`),
+/// or `None` in non-segmented (Z8002) mode.
 enum Operand {
     /// A register (word / byte / long per the instruction size), by number.
     Reg(u16),
     /// Immediate `#n`.
     Imm(Expr),
-    /// Indirect register `@Rn`.
+    /// Indirect register `@Rn` (word) / `@RRn` (long pair, segmented).
     Ir(u16),
-    /// Direct address `addr`.
-    Da(Expr),
-    /// Indexed `addr(Rn)`.
-    Indexed(Expr, u16),
+    /// Direct address `addr` / `<<seg>>addr`.
+    Da(Expr, Option<u8>),
+    /// Indexed `addr(Rn)` / `<<seg>>addr(Rn)`.
+    Indexed(Expr, u16, Option<u8>),
+}
+
+/// The extension pieces for a direct / indexed address: one word (non-segmented)
+/// or two (a Z8001 segmented address — `0x8000 | seg << 8`, then the 16-bit
+/// offset).
+fn addr_ext(offset: Expr, seg: Option<u8>) -> Vec<Piece> {
+    match seg {
+        Some(s) => {
+            let hi = 0x8000u16 | (u16::from(s) << 8);
+            let mut v = Vec::from(word_lit(hi));
+            v.push(ext_word(offset));
+            v
+        }
+        None => vec![ext_word(offset)],
+    }
 }
 
 /// The two literal bytes of an opcode word, big-endian (high byte first).
@@ -292,7 +320,7 @@ fn imm_piece(e: Expr, size: Size) -> Piece {
     }
 }
 
-fn encode(mn: &str, args: &str, line: usize) -> Result<Operation, AsmError> {
+fn encode(mn: &str, args: &str, line: usize, seg: bool) -> Result<Operation, AsmError> {
     let insn = isa::z8000::lookup(mn)
         .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mn}`")))?;
     let ops = split_top_level(args.trim(), ',');
@@ -305,8 +333,15 @@ fn encode(mn: &str, args: &str, line: usize) -> Result<Operation, AsmError> {
         [a, b] => [*a, *b],
         _ => return Err(AsmError::new(line, format!("`{mn}` takes two operands"))),
     };
-    let dst = operand(dst_s, insn.size, line)?;
-    let src = operand(src_s, insn.size, line)?;
+    // In segmented mode `LDA` loads a 32-bit segmented address, so its register
+    // destination is a long pair.
+    let dest_size = if seg && insn.size == Size::Address {
+        Size::Long
+    } else {
+        insn.size
+    };
+    let dst = operand(dst_s, dest_size, line, seg)?;
+    let src = operand(src_s, insn.size, line, seg)?;
 
     // A store-capable load with a memory destination is a store.
     if let (Some(store), false) = (isa::z8000::store_entry(mn), matches!(dst, Operand::Reg(_))) {
@@ -331,14 +366,15 @@ fn encode(mn: &str, args: &str, line: usize) -> Result<Operation, AsmError> {
 
 /// Encode one dyadic form: `variable` is the memory/immediate/register operand
 /// whose mode is being encoded; `reg` is the fixed register (destination for a
-/// load, source for a store) that occupies the second byte's low nibble.
+/// load, source for a store) that occupies the second byte's low nibble. A
+/// direct/indexed address carries its own segment, so no `seg` flag is needed.
 fn dyadic(insn: &Insn, variable: &Operand, reg: u16, line: usize) -> Result<Operation, AsmError> {
-    let (mode, field, ext): (u8, u16, Option<Piece>) = match variable {
-        Operand::Reg(s) => (isa::z8000::R, *s, None),
-        Operand::Ir(p) => (isa::z8000::IR, *p, None),
-        Operand::Imm(e) => (isa::z8000::IM, 0, Some(imm_piece(e.clone(), insn.size))),
-        Operand::Da(e) => (isa::z8000::DA, 0, Some(ext_word(e.clone()))),
-        Operand::Indexed(e, i) => (isa::z8000::X, *i, Some(ext_word(e.clone()))),
+    let (mode, field, ext): (u8, u16, Vec<Piece>) = match variable {
+        Operand::Reg(s) => (isa::z8000::R, *s, vec![]),
+        Operand::Ir(p) => (isa::z8000::IR, *p, vec![]),
+        Operand::Imm(e) => (isa::z8000::IM, 0, vec![imm_piece(e.clone(), insn.size)]),
+        Operand::Da(e, sg) => (isa::z8000::DA, 0, addr_ext(e.clone(), *sg)),
+        Operand::Indexed(e, i, sg) => (isa::z8000::X, *i, addr_ext(e.clone(), *sg)),
     };
     if insn.modes & mode == 0 {
         return Err(AsmError::new(
@@ -362,7 +398,12 @@ fn sub(a: Expr, b: Expr) -> Expr {
 /// Encode a single-operand ALU instruction (`CLR`/`COM`/`NEG`/`TEST`/`TSET` and
 /// `INC`/`DEC`). The operand register/pointer/index is the second byte's high
 /// nibble; the low nibble is a fixed sub-opcode or `count − 1`.
-fn encode_mono(m: &isa::z8000::Mono, args: &str, line: usize) -> Result<Operation, AsmError> {
+fn encode_mono(
+    m: &isa::z8000::Mono,
+    args: &str,
+    line: usize,
+    seg: bool,
+) -> Result<Operation, AsmError> {
     use isa::z8000::{DA, IR, R, X};
     let ops: Vec<&str> = split_top_level(args.trim(), ',')
         .iter()
@@ -396,11 +437,11 @@ fn encode_mono(m: &isa::z8000::Mono, args: &str, line: usize) -> Result<Operatio
         }
     };
 
-    let (mode, field, ext): (u8, u16, Option<Piece>) = match operand(operand_str, m.size, line)? {
-        Operand::Reg(r) => (R, r, None),
-        Operand::Ir(p) => (IR, p, None),
-        Operand::Da(e) => (DA, 0, Some(ext_word(e))),
-        Operand::Indexed(e, i) => (X, i, Some(ext_word(e))),
+    let (mode, field, ext): (u8, u16, Vec<Piece>) = match operand(operand_str, m.size, line, seg)? {
+        Operand::Reg(r) => (R, r, vec![]),
+        Operand::Ir(p) => (IR, p, vec![]),
+        Operand::Da(e, sg) => (DA, 0, addr_ext(e, sg)),
+        Operand::Indexed(e, i, sg) => (X, i, addr_ext(e, sg)),
         Operand::Imm(_) => {
             return Err(AsmError::new(
                 line,
@@ -419,7 +460,12 @@ fn encode_mono(m: &isa::z8000::Mono, args: &str, line: usize) -> Result<Operatio
 /// `PUSH @Rsp, src` and `POP dst, @Rsp` — the stack pointer leads for a push and
 /// trails for a pop. The pointer is the second byte's high nibble, the value
 /// operand's field the low nibble.
-fn encode_stack(s: &isa::z8000::Stack, args: &str, line: usize) -> Result<Operation, AsmError> {
+fn encode_stack(
+    s: &isa::z8000::Stack,
+    args: &str,
+    line: usize,
+    seg: bool,
+) -> Result<Operation, AsmError> {
     use isa::z8000::{DA, IR, R, X};
     let ops: Vec<&str> = split_top_level(args.trim(), ',')
         .iter()
@@ -435,20 +481,17 @@ fn encode_stack(s: &isa::z8000::Stack, args: &str, line: usize) -> Result<Operat
             ));
         }
     };
-    // The stack pointer is `@Rsp`; it leads a push and trails a pop.
+    // The stack pointer is `@Rsp` (`@RRsp` in segmented mode); it leads a push
+    // and trails a pop.
     let (sp_tok, val_tok) = if s.push { (a, b) } else { (b, a) };
-    let sp = sp_tok
-        .strip_prefix('@')
-        .and_then(word_reg)
-        .filter(|&r| r != 0) // R0 cannot be a stack pointer
-        .ok_or_else(|| {
-            AsmError::new(
-                line,
-                format!("`{}` needs an @Rn stack pointer (not R0)", s.mnemonic),
-            )
-        })?;
+    let sp = ptr_reg(sp_tok, seg).ok_or_else(|| {
+        AsmError::new(
+            line,
+            format!("`{}` needs an @Rn stack pointer (not R0)", s.mnemonic),
+        )
+    })?;
 
-    let val = operand(val_tok, s.size, line)?;
+    let val = operand(val_tok, s.size, line, seg)?;
 
     // PUSH #imm is a special opcode (base6 0x0D, low nibble 9).
     if let Operand::Imm(e) = &val {
@@ -464,11 +507,11 @@ fn encode_stack(s: &isa::z8000::Stack, args: &str, line: usize) -> Result<Operat
         return Ok(Operation::Encoded(pieces));
     }
 
-    let (mode, field, ext): (u8, u16, Option<Piece>) = match val {
-        Operand::Reg(r) => (R, r, None),
-        Operand::Ir(p) => (IR, p, None),
-        Operand::Da(e) => (DA, 0, Some(ext_word(e))),
-        Operand::Indexed(e, i) => (X, i, Some(ext_word(e))),
+    let (mode, field, ext): (u8, u16, Vec<Piece>) = match val {
+        Operand::Reg(r) => (R, r, vec![]),
+        Operand::Ir(p) => (IR, p, vec![]),
+        Operand::Da(e, sg) => (DA, 0, addr_ext(e, sg)),
+        Operand::Indexed(e, i, sg) => (X, i, addr_ext(e, sg)),
         Operand::Imm(_) => unreachable!("handled above"),
     };
     let top = (mm(mode) << 6) | u16::from(s.base6);
@@ -561,7 +604,12 @@ fn encode_extend(e: &isa::z8000::Extend, args: &str, line: usize) -> Result<Oper
 /// a literal `#n` (static — the bit number is the second byte's low nibble, the
 /// target reached through the usual R / IR / DA / X modes) or a word register
 /// (dynamic — a two-word form with the target register in word 2).
-fn encode_bit(b: &isa::z8000::Bit, args: &str, line: usize) -> Result<Operation, AsmError> {
+fn encode_bit(
+    b: &isa::z8000::Bit,
+    args: &str,
+    line: usize,
+    seg: bool,
+) -> Result<Operation, AsmError> {
     use isa::z8000::{DA, IR, R, X};
     let ops: Vec<&str> = split_top_level(args.trim(), ',')
         .iter()
@@ -589,7 +637,7 @@ fn encode_bit(b: &isa::z8000::Bit, args: &str, line: usize) -> Result<Operation,
                 ),
             ));
         };
-        let Operand::Reg(target) = operand(target_s, b.size, line)? else {
+        let Operand::Reg(target) = operand(target_s, b.size, line, seg)? else {
             return Err(AsmError::new(
                 line,
                 format!("`{}` dynamic form needs a register target", b.mnemonic),
@@ -609,11 +657,11 @@ fn encode_bit(b: &isa::z8000::Bit, args: &str, line: usize) -> Result<Operation,
             format!("`{}` bit number must be 0..={max}", b.mnemonic),
         ));
     }
-    let (mode, field, ext): (u8, u16, Option<Piece>) = match operand(target_s, b.size, line)? {
-        Operand::Reg(r) => (R, r, None),
-        Operand::Ir(p) => (IR, p, None),
-        Operand::Da(e) => (DA, 0, Some(ext_word(e))),
-        Operand::Indexed(e, i) => (X, i, Some(ext_word(e))),
+    let (mode, field, ext): (u8, u16, Vec<Piece>) = match operand(target_s, b.size, line, seg)? {
+        Operand::Reg(r) => (R, r, vec![]),
+        Operand::Ir(p) => (IR, p, vec![]),
+        Operand::Da(e, sg) => (DA, 0, addr_ext(e, sg)),
+        Operand::Indexed(e, i, sg) => (X, i, addr_ext(e, sg)),
         Operand::Imm(_) => {
             return Err(AsmError::new(
                 line,
@@ -630,7 +678,12 @@ fn encode_bit(b: &isa::z8000::Bit, args: &str, line: usize) -> Result<Operation,
 /// Encode a multiply / divide (`MULT`/`MULTL`/`DIV`/`DIVL`). Dyadic-shaped, but
 /// the destination accumulator is double-width (long `rr` / quad `rq`) while the
 /// source (and its immediate) is one size smaller (word / long).
-fn encode_muldiv(md: &isa::z8000::MulDiv, args: &str, line: usize) -> Result<Operation, AsmError> {
+fn encode_muldiv(
+    md: &isa::z8000::MulDiv,
+    args: &str,
+    line: usize,
+    seg: bool,
+) -> Result<Operation, AsmError> {
     use isa::z8000::{DA, IM, IR, R, X};
     let ops: Vec<&str> = split_top_level(args.trim(), ',')
         .iter()
@@ -652,12 +705,12 @@ fn encode_muldiv(md: &isa::z8000::MulDiv, args: &str, line: usize) -> Result<Ope
             format!("`{}` needs a valid accumulator register", md.mnemonic),
         )
     })?;
-    let (mode, field, ext): (u8, u16, Option<Piece>) = match operand(src_s, md.src, line)? {
-        Operand::Reg(s) => (R, s, None),
-        Operand::Ir(p) => (IR, p, None),
-        Operand::Imm(e) => (IM, 0, Some(imm_piece(e, md.src))),
-        Operand::Da(e) => (DA, 0, Some(ext_word(e))),
-        Operand::Indexed(e, i) => (X, i, Some(ext_word(e))),
+    let (mode, field, ext): (u8, u16, Vec<Piece>) = match operand(src_s, md.src, line, seg)? {
+        Operand::Reg(s) => (R, s, vec![]),
+        Operand::Ir(p) => (IR, p, vec![]),
+        Operand::Imm(e) => (IM, 0, vec![imm_piece(e, md.src)]),
+        Operand::Da(e, sg) => (DA, 0, addr_ext(e, sg)),
+        Operand::Indexed(e, i, sg) => (X, i, addr_ext(e, sg)),
     };
     let top = (mm(mode) << 6) | u16::from(md.base6);
     let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | dest));
@@ -744,7 +797,12 @@ fn encode_misc(m: &isa::z8000::Misc, args: &str, line: usize) -> Result<Operatio
 /// Encode a CPU-control instruction (`NOP`/`HALT`/`EI`/`DI`/`IRET`/`LDCTL`/
 /// `LDPS`/`MSET`/`MRES`/`MBIT`/`MREQ`/`SETFLG`/`RESFLG`/`COMFLG`/`SC`). Each
 /// sub-group has its own small encoding; see [`isa::z8000::ControlKind`].
-fn encode_control(c: &isa::z8000::Control, args: &str, line: usize) -> Result<Operation, AsmError> {
+fn encode_control(
+    c: &isa::z8000::Control,
+    args: &str,
+    line: usize,
+    seg: bool,
+) -> Result<Operation, AsmError> {
     use isa::z8000::ControlKind;
     let ops: Vec<&str> = split_top_level(args.trim(), ',')
         .iter()
@@ -812,7 +870,8 @@ fn encode_control(c: &isa::z8000::Control, args: &str, line: usize) -> Result<Op
                     return Err(err("byte control register must be FLAGS"));
                 }
             } else {
-                isa::z8000::word_ctrl_code(ctrl_s).ok_or_else(|| err("invalid control register"))?
+                isa::z8000::word_ctrl_code(ctrl_s, seg)
+                    .ok_or_else(|| err("invalid control register"))?
             };
             let top: u16 = if matches!(size, Size::Byte) {
                 0x8C
@@ -825,18 +884,18 @@ fn encode_control(c: &isa::z8000::Control, args: &str, line: usize) -> Result<Op
             let [s] = ops.as_slice() else {
                 return Err(err("takes one source operand"));
             };
-            return match operand(s, Size::Word, line)? {
+            return match operand(s, Size::Word, line, seg)? {
                 Operand::Ir(p) if p != 0 => {
                     Ok(Operation::Encoded(Vec::from(word_lit(0x3900 | (p << 4)))))
                 }
-                Operand::Da(e) => {
+                Operand::Da(e, sg) => {
                     let mut pieces = Vec::from(word_lit(0x7900));
-                    pieces.push(ext_word(e));
+                    pieces.extend(addr_ext(e, sg));
                     Ok(Operation::Encoded(pieces))
                 }
-                Operand::Indexed(e, i) => {
+                Operand::Indexed(e, i, sg) => {
                     let mut pieces = Vec::from(word_lit(0x7900 | (i << 4)));
-                    pieces.push(ext_word(e));
+                    pieces.extend(addr_ext(e, sg));
                     Ok(Operation::Encoded(pieces))
                 }
                 _ => Err(err("needs an @Rn / address / indexed source")),
@@ -889,7 +948,8 @@ fn encode_simple_io(
         .ok_or_else(|| AsmError::new(line, format!("`{}` needs a data register", sio.mnemonic)))?;
 
     if port_s.starts_with('@') {
-        let port = ptr_reg(port_s)
+        // I/O port registers are 16-bit even in segmented mode.
+        let port = ptr_reg(port_s, false)
             .ok_or_else(|| AsmError::new(line, format!("`{}` bad @Rn port", sio.mnemonic)))?;
         let top = sio.indirect_top.ok_or_else(|| {
             AsmError::new(line, format!("`{}` has no @Rn port form", sio.mnemonic))
@@ -913,6 +973,7 @@ fn encode_block_io(
     bio: &isa::z8000::BlockIo,
     args: &str,
     line: usize,
+    seg: bool,
 ) -> Result<Operation, AsmError> {
     let ops: Vec<&str> = split_top_level(args.trim(), ',')
         .iter()
@@ -928,10 +989,18 @@ fn encode_block_io(
             ));
         }
     };
-    let dst = ptr_reg(dst_s).ok_or_else(|| {
+    // In segmented mode the *memory* pointer is a long pair (`@RRn`) but the I/O
+    // pointer stays a word register; `op_nib` bit 1 marks output (memory is the
+    // source) vs input (memory is the destination).
+    let (dst_seg, src_seg) = if bio.op_nib & 2 != 0 {
+        (false, seg)
+    } else {
+        (seg, false)
+    };
+    let dst = ptr_reg(dst_s, dst_seg).ok_or_else(|| {
         AsmError::new(line, format!("`{}` needs an @Rn destination", bio.mnemonic))
     })?;
-    let src = ptr_reg(src_s)
+    let src = ptr_reg(src_s, src_seg)
         .ok_or_else(|| AsmError::new(line, format!("`{}` needs an @Rn source", bio.mnemonic)))?;
     let count = word_reg(count_s)
         .ok_or_else(|| AsmError::new(line, format!("`{}` needs a count register", bio.mnemonic)))?;
@@ -943,19 +1012,27 @@ fn encode_block_io(
     Ok(Operation::Encoded(pieces))
 }
 
-/// Parse an `@Rn` pointer to a nonzero word register (`R0` is not a legal base).
-fn ptr_reg(tok: &str) -> Option<u16> {
-    tok.trim()
-        .strip_prefix('@')
-        .and_then(word_reg)
-        .filter(|&r| r != 0)
+/// Parse an `@Rn` memory pointer — a nonzero word register (`R0` is not a legal
+/// base), or, in segmented (`seg`) mode, a long register pair (`@RRn`).
+fn ptr_reg(tok: &str, seg: bool) -> Option<u16> {
+    let r = tok.trim().strip_prefix('@')?;
+    if seg {
+        long_reg(r)
+    } else {
+        word_reg(r).filter(|&v| v != 0)
+    }
 }
 
 /// Encode a block / string instruction (`LDx`/`CPx`/`CPSx`/`TRxB`/`TRTxB`). A
 /// two-word form: word 1 holds one pointer and the operation nibble, word 2 the
 /// count register, the other pointer / data register, and the control nibble
 /// (a single/repeat marker, or — for `CPx`/`CPSx` — a condition code).
-fn encode_block(b: &isa::z8000::Block, args: &str, line: usize) -> Result<Operation, AsmError> {
+fn encode_block(
+    b: &isa::z8000::Block,
+    args: &str,
+    line: usize,
+    seg: bool,
+) -> Result<Operation, AsmError> {
     use isa::z8000::BlockShape;
     let ops: Vec<&str> = split_top_level(args.trim(), ',')
         .iter()
@@ -973,7 +1050,7 @@ fn encode_block(b: &isa::z8000::Block, args: &str, line: usize) -> Result<Operat
             ));
         }
     };
-    let src = ptr_reg(src_s)
+    let src = ptr_reg(src_s, seg)
         .ok_or_else(|| AsmError::new(line, format!("`{}` needs an @Rn source", b.mnemonic)))?;
     let count = word_reg(count_s)
         .ok_or_else(|| AsmError::new(line, format!("`{}` needs a count register", b.mnemonic)))?;
@@ -987,7 +1064,7 @@ fn encode_block(b: &isa::z8000::Block, args: &str, line: usize) -> Result<Operat
 
     let (w1_field, w2_field) = match b.shape {
         BlockShape::Load | BlockShape::CompareString => {
-            let dst = ptr_reg(first).ok_or_else(|| {
+            let dst = ptr_reg(first, seg).ok_or_else(|| {
                 AsmError::new(line, format!("`{}` needs an @Rn destination", b.mnemonic))
             })?;
             (src, dst)
@@ -999,7 +1076,7 @@ fn encode_block(b: &isa::z8000::Block, args: &str, line: usize) -> Result<Operat
             (src, reg)
         }
         BlockShape::Translate => {
-            let dst = ptr_reg(first).ok_or_else(|| {
+            let dst = ptr_reg(first, seg).ok_or_else(|| {
                 AsmError::new(line, format!("`{}` needs an @Rn destination", b.mnemonic))
             })?;
             (dst, src)
@@ -1016,7 +1093,14 @@ fn encode_block(b: &isa::z8000::Block, args: &str, line: usize) -> Result<Operat
 }
 
 /// Encode a program-control instruction (`JP`/`CALL`/`JR`/`RET`/`DJNZ`/`CALR`).
-fn encode_ctl(ctl: &isa::z8000::Ctl, args: &str, line: usize) -> Result<Operation, AsmError> {
+/// Only the `JP`/`CALL` memory operands are affected by segmentation; the
+/// relative forms are unchanged.
+fn encode_ctl(
+    ctl: &isa::z8000::Ctl,
+    args: &str,
+    line: usize,
+    seg: bool,
+) -> Result<Operation, AsmError> {
     use isa::z8000::CtlKind;
     let ops: Vec<&str> = split_top_level(args.trim(), ',')
         .iter()
@@ -1038,11 +1122,11 @@ fn encode_ctl(ctl: &isa::z8000::Ctl, args: &str, line: usize) -> Result<Operatio
     match ctl.kind {
         CtlKind::Jump => {
             let [t] = one_target(rest, mn, line)?;
-            let dst = operand(t, Size::Word, line)?;
-            let (mode, field, ext): (u8, u16, Option<Piece>) = match dst {
-                Operand::Ir(p) => (isa::z8000::IR, p, None),
-                Operand::Da(e) => (isa::z8000::DA, 0, Some(ext_word(e))),
-                Operand::Indexed(e, i) => (isa::z8000::X, i, Some(ext_word(e))),
+            let dst = operand(t, Size::Word, line, seg)?;
+            let (mode, field, ext): (u8, u16, Vec<Piece>) = match dst {
+                Operand::Ir(p) => (isa::z8000::IR, p, vec![]),
+                Operand::Da(e, sg) => (isa::z8000::DA, 0, addr_ext(e, sg)),
+                Operand::Indexed(e, i, sg) => (isa::z8000::X, i, addr_ext(e, sg)),
                 _ => {
                     return Err(AsmError::new(
                         line,
@@ -1132,8 +1216,31 @@ fn one_target<'a>(ops: &[&'a str], mn: &str, line: usize) -> Result<[&'a str; 1]
     }
 }
 
-/// Parse an operand; a bare register is named per the instruction `size`.
-fn operand(tok: &str, size: Size, line: usize) -> Result<Operand, AsmError> {
+/// Parse a memory address, which in segmented (Z8001) mode is `<<seg>>offset`
+/// (segment 0–127) and otherwise a plain 16-bit offset. Returns the offset and,
+/// in segmented mode, the segment (defaulting to 0 when the `<<seg>>` is
+/// omitted).
+fn seg_addr(tok: &str, line: usize, seg: bool) -> Result<(Expr, Option<u8>), AsmError> {
+    let t = tok.trim();
+    if let Some(rest) = t.strip_prefix("<<") {
+        let close = rest
+            .find(">>")
+            .ok_or_else(|| AsmError::new(line, "expected `>>` after segment"))?;
+        let s = fold_const(&value(rest[..close].trim(), line)?, &BTreeMap::new(), line)?;
+        if !(0..=127).contains(&s) {
+            return Err(AsmError::new(line, format!("segment {s} out of 0..=127")));
+        }
+        let off = value(rest[close + 2..].trim(), line)?;
+        Ok((off, seg.then_some(s as u8)))
+    } else {
+        Ok((value(t, line)?, seg.then_some(0)))
+    }
+}
+
+/// Parse an operand; a bare register is named per the instruction `size`. In
+/// segmented (`seg`) mode a memory address is `<<seg>>offset` and an indirect
+/// pointer is a long register pair (`@RRn`).
+fn operand(tok: &str, size: Size, line: usize, seg: bool) -> Result<Operand, AsmError> {
     let t = tok.trim();
     let bad = || AsmError::new(line, format!("bad operand `{tok}`"));
 
@@ -1141,18 +1248,21 @@ fn operand(tok: &str, size: Size, line: usize) -> Result<Operand, AsmError> {
         return Ok(Operand::Imm(value(imm, line)?));
     }
     if let Some(ptr) = t.strip_prefix('@') {
-        return Ok(Operand::Ir(word_reg(ptr).ok_or_else(bad)?));
+        let n = if seg { long_reg(ptr) } else { word_reg(ptr) }.ok_or_else(bad)?;
+        return Ok(Operand::Ir(n));
     }
     if let Some(open) = t.find('(') {
         let close = t.rfind(')').ok_or_else(bad)?;
         let idx = word_reg(&t[open + 1..close]).ok_or_else(bad)?;
-        return Ok(Operand::Indexed(value(&t[..open], line)?, idx));
+        let (off, sg) = seg_addr(&t[..open], line, seg)?;
+        return Ok(Operand::Indexed(off, idx, sg));
     }
     if let Some(r) = size_reg(t, size) {
         return Ok(Operand::Reg(r));
     }
     // A bare expression is a direct address.
-    Ok(Operand::Da(value(t, line)?))
+    let (off, sg) = seg_addr(t, line, seg)?;
+    Ok(Operand::Da(off, sg))
 }
 
 /// Parse a register named for the instruction size. `Address` uses a word
