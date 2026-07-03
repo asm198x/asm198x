@@ -2734,6 +2734,7 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
         let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
         match decode_ctl_z8000(code, pos, addr)
             .or_else(|| decode_mono_z8000(code, pos))
+            .or_else(|| decode_stack_z8000(code, pos))
             .or_else(|| decode_z8000(code, pos))
         {
             Some((text, len)) => {
@@ -2899,6 +2900,46 @@ fn decode_mono_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
     } else {
         Some((format!("{mn} {operand}"), len))
     }
+}
+
+/// Decode one Z8000 stack instruction (`PUSH`/`POP`/`PUSHL`/`POPL`) at `pos`, or
+/// `None`. The stack pointer is the second byte's high nibble, the value
+/// operand's field the low nibble.
+fn decode_stack_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+    use isa::z8000::{DA, IR, R, X, mode_of};
+    let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
+    let (top, second) = ((word >> 8) as u8, word & 0xFF);
+    let (sp, low) = (second >> 4, second & 0xF);
+    if sp == 0 {
+        return None; // R0 cannot be a stack pointer
+    }
+    let addr16 =
+        || (pos + 4 <= code.len()).then(|| u16::from_be_bytes([code[pos + 2], code[pos + 3]]));
+
+    // Special: PUSH @Rsp, #imm — MM = 00, so the whole top byte is 0x0D.
+    if top == isa::z8000::PUSH_IMM_BASE6 && low == 9 {
+        return Some((format!("push @r{sp},#0{:04X}H", addr16()?), 4));
+    }
+
+    let s = isa::z8000::stack_decode(top)?;
+    let mode = mode_of(top >> 6, low);
+    // A long value register (PUSHL/POPL, R mode) must be an even pair.
+    if s.size == isa::z8000::Size::Long && mode == R && low % 2 == 1 {
+        return None;
+    }
+    let (value, len) = match mode {
+        R => (z8000_reg(low, s.size), 2),
+        IR => (format!("@r{low}"), 2),
+        DA => (format!("0{:04X}H", addr16()?), 4),
+        X => (format!("0{:04X}H(r{low})", addr16()?), 4),
+        _ => return None, // no immediate at these base6 (PUSH #imm is separate)
+    };
+    let text = if s.push {
+        format!("{} @r{sp},{value}", s.mnemonic.to_ascii_lowercase())
+    } else {
+        format!("{} {value},@r{sp}", s.mnemonic.to_ascii_lowercase())
+    };
+    Some((text, len))
 }
 
 /// Decode one Z8000 dyadic instruction at byte offset `pos`. Returns the
