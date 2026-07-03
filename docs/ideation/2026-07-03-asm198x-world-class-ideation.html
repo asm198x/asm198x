@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ideation: Making Asm198x a World-Class Tool</title>
+<style>
+  :root {
+    --bg: #faf9f7; --fg: #1f2430; --muted: #5c6370; --line: #e2ddd4;
+    --card: #ffffff; --accent: #8a4b2d; --accent-soft: #f6ece4; --accent-text: #6d3a21;
+    --good: #2e6e4e; --good-soft: #e8f2ec; --warn-text: #7a5a1e; --warn-soft: #f7f0dd;
+    --info-text: #2f5a7a; --info-soft: #e8f0f6; --chip: #efece6; --code-bg: #f3f0ea;
+  }
+  @media (prefers-color-scheme: dark) {
+    :root {
+      --bg: #191c22; --fg: #e6e2da; --muted: #a09a8f; --line: #333844;
+      --card: #21252e; --accent: #d99a6c; --accent-soft: #33291f; --accent-text: #e0aa80;
+      --good: #7fc9a2; --good-soft: #1e2f27; --warn-text: #d9b96c; --warn-soft: #2f2a1c;
+      --info-text: #86b6d9; --info-soft: #1e2833; --chip: #2b3039; --code-bg: #262b35;
+    }
+  }
+  * { box-sizing: border-box; }
+  body {
+    margin: 0; background: var(--bg); color: var(--fg);
+    font: 15px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  }
+  main { max-width: 900px; margin: 0 auto; padding: 3rem 1.5rem 4rem; }
+  p, li, dd { max-width: 72ch; }
+  h1 { font-size: 1.9rem; line-height: 1.25; margin: .4rem 0 0.6rem; }
+  h2 { font-size: 1.3rem; margin: 2.6rem 0 0.8rem; padding-top: 1rem; border-top: 1px solid var(--line); }
+  h3 { font-size: 1.05rem; margin: 0 0 .5rem; }
+  code, pre { font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: .88em; }
+  code { background: var(--code-bg); padding: .1em .35em; border-radius: 4px; }
+  pre { background: var(--code-bg); padding: .9rem 1rem; border-radius: 8px; overflow-x: auto; line-height: 1.5; }
+  pre code { background: none; padding: 0; }
+  .eyebrow { font-size: .72rem; letter-spacing: .12em; text-transform: uppercase; color: var(--accent-text); font-weight: 600; }
+  .meta { color: var(--muted); font-size: .85rem; margin-bottom: .3rem; }
+  .meta strong { color: var(--fg); font-weight: 600; }
+  .stats { display: flex; flex-wrap: wrap; gap: .6rem; margin: 1.2rem 0 0; }
+  .stat { background: var(--card); border: 1px solid var(--line); border-radius: 10px; padding: .55rem .9rem; font-size: .82rem; color: var(--muted); }
+  .stat b { display: block; font-size: 1.15rem; color: var(--fg); }
+  article.idea { background: var(--card); border: 1px solid var(--line); border-radius: 12px; padding: 1.3rem 1.4rem; margin: 1.1rem 0; }
+  .idea-head { display: flex; align-items: baseline; gap: .7rem; flex-wrap: wrap; }
+  .idchip { background: var(--accent-soft); color: var(--accent-text); font-weight: 700; border-radius: 999px; padding: .15rem .7rem; font-size: .8rem; }
+  .chip { background: var(--chip); color: var(--muted); border-radius: 999px; padding: .15rem .7rem; font-size: .75rem; }
+  .chip.conf-hi { background: var(--good-soft); color: var(--good); }
+  .chip.conf-md { background: var(--warn-soft); color: var(--warn-text); }
+  dl.fields { margin: .9rem 0 0; }
+  dl.fields dt { font-size: .7rem; letter-spacing: .1em; text-transform: uppercase; color: var(--muted); font-weight: 700; margin-top: .8rem; }
+  dl.fields dd { margin: .15rem 0 0; }
+  ul.jump { list-style: none; padding: 0; margin: .8rem 0 0; display: grid; gap: .25rem; }
+  ul.jump a { color: var(--accent-text); text-decoration: none; }
+  ul.jump a:hover { text-decoration: underline; }
+  table { border-collapse: collapse; width: 100%; font-size: .88rem; }
+  th, td { text-align: left; padding: .5rem .7rem; border-bottom: 1px solid var(--line); vertical-align: top; }
+  th { font-size: .72rem; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+  .diagram { margin: 1rem 0 .2rem; overflow-x: auto; }
+  .diagram svg { max-width: 100%; height: auto; display: block; }
+  .caption { font-size: .78rem; color: var(--muted); margin-top: .3rem; }
+  footer.composition-signal { margin-top: 3.5rem; padding-top: 1rem; border-top: 1px solid var(--line); font-size: .78rem; color: var(--muted); }
+  a { color: var(--accent-text); }
+  .axes li { margin: .25rem 0; }
+  .svgtxt { font: 12px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: var(--fg); }
+  .svgmut { font: 11px -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; fill: var(--muted); }
+</style>
+</head>
+<body>
+<main>
+  <div class="eyebrow">Ideation</div>
+  <h1>Making Asm198x a World-Class Tool</h1>
+  <p class="meta"><strong>Date</strong> 2026-07-03 &nbsp;·&nbsp; <strong>Topic</strong> asm198x-world-class &nbsp;·&nbsp; <strong>Focus</strong> capabilities beyond deficiency-fixes; ARM and future ISAs in scope; docs site desired &nbsp;·&nbsp; <strong>Mode</strong> repo-grounded</p>
+  <div class="stats">
+    <div class="stat"><b>46</b> raw ideas, 5 frames</div>
+    <div class="stat"><b>25 + 3</b> deduped + syntheses</div>
+    <div class="stat"><b>7</b> survivors</div>
+    <div class="stat"><b>5 / 5</b> axes covered</div>
+    <div class="stat"><b>0</b> bases refuted by verifier</div>
+  </div>
+
+  <h2 id="grounding-context">Grounding Context</h2>
+  <p><strong>Codebase context.</strong> Asm198x is a Rust workspace of three crates: <code>isa</code> (19 CPU encoding specs as <code>&amp;'static</code> data), <code>isa-disasm</code>, and the <code>asm198x</code> engine/CLI. Every CPU is validated byte-identical against a real reference assembler (acme, ca65, pasmo, sjasmplus, lwasm, vasm, rgbasm, asl), with round-trips and ~250k-encoding opcode sweeps. The release binary is 2.0&nbsp;MB for all 19 CPUs. This run's evidence layer was the same-day four-agent quality assessment (engine/dialects, ISA spec crate, disassembler, CLI/tests/docs/CI) with file:line findings, plus the issue-tracker history and the 198x family map (Emu198x emulator, Forge198x IDE, Code198x curriculum, Build198x media tools).</p>
+  <p><strong>External context (fresh web research, value: high).</strong> Three converging findings shaped the survivors: <em>(1)</em> no cross-assembler debug-info standard exists in the retro space — sjasmplus SLD and ca65 <code>.dbg</code> are single-tool formats each emulator imports bespoke; <em>(2)</em> local-label scoping is the most-praised assembler feature and macros are "the escape hatch users reach for"; <em>(3)</em> no retro LSP or browser playground is driven by a validated ISA spec — all incumbents hand-roll encoders. Community trust patterns: scene fragmentation is chronic, DOSBox-hosted tools are distrusted, and docs/banking-model clarity earns as much trust as features. Machine-readable-diagnostics (rustc JSON) and published-spec ecosystems (riscv-opcodes, sail-riscv) are the transferable cross-domain patterns.</p>
+  <p><strong>Binding constraints honored.</strong> Source-compatible dialects (no invented syntax); single binary + subcommands; fused linking; new-CPU validatability gate; no LLVM; sibling ownership boundaries (Build198x masters media, Play198x renders, Emu198x executes).</p>
+
+  <h2 id="topic-axes">Topic Axes</h2>
+  <ul class="axes">
+    <li><strong>dx</strong> — developer experience &amp; diagnostics: errors, editor integration, LSP, formatter</li>
+    <li><strong>debug-metadata</strong> — outputs beyond bytes: symbols, listings, source-level debug info, cycle/size analysis</li>
+    <li><strong>family-integration</strong> — Emu198x/Forge198x/Code198x seams, MCP/agent-native surface, WASM/embedding</li>
+    <li><strong>correctness-product</strong> — turning the validation method and spec data into public, trust-building artifacts</li>
+    <li><strong>language-surface</strong> — macros, conditionals, includes, label scoping within the source-compatible stance</li>
+  </ul>
+
+  <h2 id="ranked-ideas">Ranked Ideas</h2>
+  <ul class="jump">
+    <li><a href="#i1">1. One debug-info format for every CPU — the DWARF of retro</a></li>
+    <li><a href="#i2">2. The verdict pipeline — arbiter escrow → public conformance ledger</a></li>
+    <li><a href="#i3">3. One contract, four surfaces — API + diagnostics core; LSP, MCP, WASM as renderers</a></li>
+    <li><a href="#i4">4. One macro engine, N dialect skins</a></li>
+    <li><a href="#i5">5. Cycle-budget analyzer &amp; cycle-honest listing</a></li>
+    <li><a href="#i6">6. Dialect-to-dialect source converter</a></li>
+    <li><a href="#i7">7. The self-verifying docs site</a></li>
+  </ul>
+
+  <article class="idea" id="i1">
+    <div class="idea-head"><span class="idchip">1</span><h3>One debug-info format for every CPU — the DWARF of retro</h3></div>
+    <div><span class="chip">axis: debug-metadata</span> <span class="chip conf-hi">Confidence 85%</span> <span class="chip">Complexity: Medium</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>Define one machine-readable debug-info schema — line↔address mapping with SLD-style "long addresses" (address + bank/page so banked memory disambiguates), symbols, scopes, sections — emitted by the shared two-pass engine via a single <code>--debug=</code> flag, identically for all 19+ CPUs. Ship compatibility exporters (sjasmplus SLD for DeZog/CSpect, ca65 <code>.dbg</code> for Mesen2) so existing debuggers work on day one, while Emu198x and Forge198x consume the native schema. The existing listing/symbol/map gap becomes the on-ramp: <code>--sym</code>/<code>--listing</code> are the first two renderings of the same data.</dd>
+      <dt>Basis</dt>
+      <dd><code>external:</code> research digest — "there is NO cross-assembler DWARF-equivalent in retro space — every assembler grew its own format, every emulator wrote its own importer." <code>direct:</code> <code>Assembly.symbols: BTreeMap&lt;String, i64&gt;</code> already computed for every CPU (engine.rs:28) and exposed nowhere (verifier-confirmed).</dd>
+      <dt>Rationale</dt>
+      <dd>This is the strongest whitespace the research found, and Asm198x is structurally the only project that can fill it: incumbents are single-CPU community tools, so none can define a cross-CPU format — while the 198x family owns the emitter (one engine, 19 CPUs), the consumer (Emu198x debug views), and the IDE (Forge198x) in one house. Source-level debugging is what separates "a good assembler" from "a platform."</dd>
+      <dt>Downsides</dt>
+      <dd>A format design is a long-term compatibility commitment — worth one deliberate design session (and a decision record) before any emitter code. Banked/long-address semantics vary per machine and need care. Adoption outside the family depends on the compat exporters actually working with DeZog/Mesen2.</dd>
+    </dl>
+    <div class="diagram">
+    <svg viewBox="0 0 760 210" role="img" aria-label="Today: N assembler formats times M emulator importers. Proposed: one schema between all CPUs and all consumers.">
+      <text x="10" y="18" class="svgtxt" font-weight="700">Today (per-tool formats)</text>
+      <rect x="10" y="30" width="130" height="26" rx="6" fill="var(--chip)"/><text x="20" y="47" class="svgtxt">sjasmplus → SLD</text>
+      <rect x="10" y="62" width="130" height="26" rx="6" fill="var(--chip)"/><text x="20" y="79" class="svgtxt">ca65 → .dbg</text>
+      <rect x="10" y="94" width="130" height="26" rx="6" fill="var(--chip)"/><text x="20" y="111" class="svgtxt">wla-dx → .sym</text>
+      <rect x="230" y="30" width="120" height="26" rx="6" fill="var(--chip)"/><text x="240" y="47" class="svgtxt">DeZog importer</text>
+      <rect x="230" y="62" width="120" height="26" rx="6" fill="var(--chip)"/><text x="240" y="79" class="svgtxt">Mesen2 importer</text>
+      <rect x="230" y="94" width="120" height="26" rx="6" fill="var(--chip)"/><text x="240" y="111" class="svgtxt">BGB importer</text>
+      <line x1="140" y1="43" x2="230" y2="43" stroke="var(--muted)"/><line x1="140" y1="43" x2="230" y2="75" stroke="var(--muted)"/>
+      <line x1="140" y1="75" x2="230" y2="107" stroke="var(--muted)"/><line x1="140" y1="107" x2="230" y2="75" stroke="var(--muted)"/>
+      <text x="10" y="150" class="svgmut">N formats × M importers, none interoperable</text>
+      <text x="420" y="18" class="svgtxt" font-weight="700">Proposed (one schema)</text>
+      <rect x="420" y="30" width="120" height="90" rx="6" fill="var(--accent-soft)"/><text x="432" y="65" class="svgtxt">asm198x</text><text x="432" y="82" class="svgmut">19+ CPUs,</text><text x="432" y="96" class="svgmut">one engine</text>
+      <rect x="570" y="58" width="80" height="34" rx="6" fill="var(--good-soft)"/><text x="580" y="79" class="svgtxt" fill="var(--good)">schema</text>
+      <rect x="680" y="24" width="72" height="26" rx="6" fill="var(--chip)"/><text x="688" y="41" class="svgtxt">Emu198x</text>
+      <rect x="680" y="58" width="72" height="26" rx="6" fill="var(--chip)"/><text x="688" y="75" class="svgtxt">Forge198x</text>
+      <rect x="680" y="92" width="72" height="26" rx="6" fill="var(--chip)"/><text x="688" y="109" class="svgtxt">exporters</text>
+      <line x1="540" y1="75" x2="570" y2="75" stroke="var(--muted)"/>
+      <line x1="650" y1="75" x2="680" y2="37" stroke="var(--muted)"/><line x1="650" y1="75" x2="680" y2="71" stroke="var(--muted)"/><line x1="650" y1="75" x2="680" y2="105" stroke="var(--muted)"/>
+      <text x="420" y="150" class="svgmut">one emitter, one schema, every consumer (SLD/.dbg exported for existing debuggers)</text>
+    </svg>
+    <div class="caption">The structural advantage: incumbents each own one arrow; the 198x family owns the whole right-hand picture.</div>
+    </div>
+  </article>
+
+  <article class="idea" id="i2">
+    <div class="idea-head"><span class="idchip">2</span><h3>The verdict pipeline — arbiter escrow → public conformance ledger</h3></div>
+    <div><span class="chip">axis: correctness-product</span> <span class="chip conf-hi">Confidence 90%</span> <span class="chip">Complexity: Medium</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>Snapshot every reference-assembler verdict — source → bytes, accept/reject, tool name + exact version — into a committed, versioned <em>golden-verdict corpus</em>. CI and contributors then validate against the corpus with zero tools installed; the live references are needed only to grow it. On top of the corpus, publish a per-release <em>conformance ledger</em> (per CPU: reference tool + version, case count, corpus hash, pass rate — the wpt.fyi / Certificate-Transparency pattern) on the docs site, and extend the corpus with <em>negative conformance</em>: programs the references reject or truncate, with asserted Asm198x behaviour and a published divergence classification (we-accept/they-reject, they-accept/we-reject, both-accept-different-bytes).</dd>
+      <dt>Basis</dt>
+      <dd><code>direct:</code> "Reference-arbitrated suites are all #[ignore]d; CI installs no reference assemblers — the core guarantee runs only on the maintainer's machine" (verified this session); the full reference-tool set exists on exactly one machine. <code>direct:</code> issues #36 and #33 show real-world bugs concentrate at the acceptance <em>boundary</em>, which byte-identical happy-path testing is blind to by construction. <code>external:</code> wpt.fyi, Certificate Transparency, reproducible-builds rebuilder networks.</dd>
+      <dt>Rationale</dt>
+      <dd>The project's actual moat — byte-identical validation against 8+ references — is currently invisible, unverifiable, and bus-factor-one. One system fixes three things: CI can finally enforce the core guarantee (escrow), skeptical adopters get a receipt instead of a README claim (ledger), and the aging arbiters' behaviour is preserved — which is the project's own rescue mission applied to its trust chain. This sequencing beat the standalone dashboard idea precisely because the corpus must exist before there is anything to publish.</dd>
+      <dt>Downsides</dt>
+      <dd>Corpus curation and format design take real effort; verdict snapshots must record tool versions rigorously (which also lays the groundwork for dialect-edition pinning later). Repo size growth needs managing (verdicts compress well; store distilled forms).</dd>
+    </dl>
+    <div class="diagram">
+    <svg viewBox="0 0 760 150" role="img" aria-label="Reference tools feed a committed verdict corpus, which feeds CI gating, the public ledger, and divergence classes.">
+      <rect x="10" y="52" width="150" height="46" rx="6" fill="var(--chip)"/><text x="22" y="72" class="svgtxt">reference tools</text><text x="22" y="88" class="svgmut">asl, acme, pasmo… ×8</text>
+      <rect x="230" y="46" width="170" height="58" rx="6" fill="var(--accent-soft)"/><text x="244" y="70" class="svgtxt" font-weight="700">golden-verdict corpus</text><text x="244" y="88" class="svgmut">src → bytes · accept/reject</text>
+      <rect x="480" y="10" width="180" height="34" rx="6" fill="var(--good-soft)"/><text x="492" y="31" class="svgtxt" fill="var(--good)">CI gate — no tools needed</text>
+      <rect x="480" y="58" width="180" height="34" rx="6" fill="var(--good-soft)"/><text x="492" y="79" class="svgtxt" fill="var(--good)">public conformance ledger</text>
+      <rect x="480" y="106" width="180" height="34" rx="6" fill="var(--good-soft)"/><text x="492" y="127" class="svgtxt" fill="var(--good)">divergence classes</text>
+      <line x1="160" y1="75" x2="230" y2="75" stroke="var(--muted)"/>
+      <text x="167" y="66" class="svgmut">grow</text>
+      <line x1="400" y1="75" x2="480" y2="27" stroke="var(--muted)"/><line x1="400" y1="75" x2="480" y2="75" stroke="var(--muted)"/><line x1="400" y1="75" x2="480" y2="123" stroke="var(--muted)"/>
+    </svg>
+    <div class="caption">Live tools only grow the corpus; everything downstream runs from the committed verdicts.</div>
+    </div>
+  </article>
+
+  <article class="idea" id="i3">
+    <div class="idea-head"><span class="idchip">3</span><h3>One contract, four surfaces — API + diagnostics core; LSP, MCP, WASM as renderers</h3></div>
+    <div><span class="chip">axis: family-integration</span> <span class="chip conf-hi">Confidence 85%</span> <span class="chip">Complexity: High (staged)</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>Establish one structured core contract — <code>assemble(cpu, dialect, source) → Result&lt;Assembly, Diagnostics&gt;</code> with span-carrying, stable-coded, JSON-serializable diagnostics (rustc's "mechanically applicable fix" flag included), a public <code>Dialect</code> trait, and a spec-query API — then ship the user-facing surfaces as thin renderers over it: <code>asm198x lsp</code> (hover = cycles/flags/encoding from the spec itself), <code>asm198x mcp</code> (session-stateful agent surface, matching Emu198x's MCP-first family convention), and a WASM browser playground with byte-identical permalinks embedded in Code198x lesson pages. All are subcommands of the single binary, per the packaging decision.</dd>
+      <dt>Basis</dt>
+      <dd><code>direct:</code> ~26 flat <code>assemble_*</code> functions with 3 return shapes, <code>pub(crate) trait Dialect</code> (dialect.rs:25, verifier-confirmed), span-less <code>AsmError</code> — Forge198x is "gated on Asm198x maturity" and literally cannot integrate today. <code>external:</code> no retro LSP is spec-driven and no playground carries a validated encoder (both confirmed whitespace); rustc JSON diagnostics as the enabling pattern.</dd>
+      <dt>Rationale</dt>
+      <dd>The verifier called this the strongest strategic call in the set: shipping LSP/MCP/WASM before stabilizing the contract means redoing surface work three times. Done in order, one investment unblocks the IDE sibling, the agent-native goal, the classroom (zero-install assembler in every lesson page — the single biggest beginner drop-off removed), and modern editor UX — and every future CPU inherits all four surfaces automatically.</dd>
+      <dt>Downsides</dt>
+      <dd>The largest total scope in the set — it only works as a staged programme (contract → JSON diagnostics → one surface at a time). Committing the public API is a semver responsibility (<code>#[non_exhaustive]</code> from day one). LSP incrementality questions can be deferred but not forever.</dd>
+    </dl>
+    <div class="diagram">
+    <svg viewBox="0 0 760 170" role="img" aria-label="A single core contract with CLI, LSP, MCP and WASM playground as renderers over it.">
+      <rect x="270" y="60" width="220" height="52" rx="8" fill="var(--accent-soft)"/>
+      <text x="292" y="82" class="svgtxt" font-weight="700">core contract</text>
+      <text x="292" y="99" class="svgmut">Assembly · Diagnostics · spec query</text>
+      <rect x="30" y="20" width="130" height="30" rx="6" fill="var(--chip)"/><text x="52" y="40" class="svgtxt">CLI (today)</text>
+      <rect x="30" y="122" width="130" height="30" rx="6" fill="var(--chip)"/><text x="44" y="142" class="svgtxt">asm198x lsp</text>
+      <rect x="600" y="20" width="140" height="30" rx="6" fill="var(--chip)"/><text x="614" y="40" class="svgtxt">asm198x mcp</text>
+      <rect x="600" y="122" width="140" height="30" rx="6" fill="var(--chip)"/><text x="608" y="142" class="svgtxt">WASM playground</text>
+      <line x1="160" y1="35" x2="270" y2="70" stroke="var(--muted)"/>
+      <line x1="160" y1="137" x2="270" y2="102" stroke="var(--muted)"/>
+      <line x1="490" y1="70" x2="600" y2="35" stroke="var(--muted)"/>
+      <line x1="490" y1="102" x2="600" y2="137" stroke="var(--muted)"/>
+    </svg>
+    <div class="caption">Four thin renderers, one contract — the sequencing is the idea.</div>
+    </div>
+  </article>
+
+  <article class="idea" id="i4">
+    <div class="idea-head"><span class="idchip">4</span><h3>One macro engine, N dialect skins</h3></div>
+    <div><span class="chip">axis: language-surface</span> <span class="chip conf-hi">Confidence 80%</span> <span class="chip">Complexity: High</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>Implement macro expansion, conditional assembly, <code>include</code>/<code>incbin</code>, and local-label scoping <em>once</em> at the engine layer, then give each dialect a thin syntax-mapping skin — sjasmplus spells it <code>MACRO/ENDM</code> + <code>DUP</code>, ca65 spells it <code>.macro/.endmacro</code> + <code>.repeat</code>, rgbasm its own way — each skin differentially validated against its reference assembler, exactly like the instruction surface already is.</dd>
+      <dt>Basis</dt>
+      <dd><code>direct:</code> zero macros/conditionals/includes exist today; <code>sjasmplus.rs:16</code> carries a literal TODO ("modules, macros, DUP"); the only local-label support is an ad-hoc private hack (<code>qualify_locals</code>, z80.rs:455–496). <code>external:</code> the research digest's two loudest community signals — local-label scoping is "the single most-repeated praise pattern" and macros are "the escape hatch users reach for when a feature is missing."</dd>
+      <dt>Rationale</dt>
+      <dd>This is the largest gap between "byte-identical validated" and "usable for a real, non-trivial program" — curriculum-sized sources survive without macros; serious homebrew and demoscene work hits the wall immediately. Building it per-dialect would multiply the already-measured 16–20× dialect copy-paste problem by the hardest feature in the codebase; the engine-level architecture decision must precede the first line of macro code.</dd>
+      <dt>Downsides</dt>
+      <dd>The verifier's honest caveat: "N thin skins" undersells how much macro <em>semantics</em> (not just spelling) differ across ca65/sjasmplus/rgbasm — expect a shared core plus real per-dialect semantic work, validated dialect-by-dialect. This is the project's biggest single language-surface investment.</dd>
+    </dl>
+  </article>
+
+  <article class="idea" id="i5">
+    <div class="idea-head"><span class="idchip">5</span><h3>Cycle-budget analyzer &amp; cycle-honest listing</h3></div>
+    <div><span class="chip">axis: debug-metadata</span> <span class="chip conf-md">Confidence 75%</span> <span class="chip">Complexity: Medium</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>Emit listings (human table and machine JSON) annotating every line with size and cycle cost — min/max with branch-taken and page-cross penalties — plus per-block and per-label totals, sourced from the spec's validated <code>Cycles</code> data. Add a source-level assertion that fails the build when a routine exceeds its budget — the raster programmer's contract, checked by the assembler:</dd>
+      <dt>Basis</dt>
+      <dd><code>direct:</code> the Form-model specs already carry <code>Cycles { base, page_cross, branch_taken }</code>, machine-checked in tests, and used for <em>nothing</em>; no listing output exists at all. <code>external:</code> llvm-mca (static machine-code timing) and WCET analysis from real-time systems — the same mechanism, pointed at CPUs where cycle-exactness is the defining discipline (racing the beam, stable rasters).</dd>
+      <dt>Rationale</dt>
+      <dd>Demoscene and game programmers count cycles by hand today; no retro assembler does this uniformly across CPUs. It converts the spec's least-exploited asset into the feature that makes expert users switch — and gives Code198x a way to teach timing with tool support instead of folklore.</dd>
+      <dt>Downsides</dt>
+      <dd>The honest hidden cost: cycles are absent from all six bespoke spec models (m68k, 6809, 65816-ext, PDP-11, TMS9900, Z8000), so full coverage forces the backfill — which is also exactly the forcing function that upgrades the spec from "documentation-grade" to load-bearing. 68000-class timing (EA-dependent) is genuinely harder than 6502-class.</dd>
+    </dl>
+<pre><code>; asm198x: cycles(irq_raster) &lt;= 224        ← build fails if exceeded
+irq_raster:
+    lda $d019     ; 4      [4]
+    sta $d019     ; 4      [8]
+    ldx offset    ; 4      [12]
+    lda sine,x    ; 4+1p   [16..17]   p = page-cross penalty
+    sta $d020     ; 4      [20..21]
+    bne .loop     ; 2+1t   [22..24]   t = taken
+                  ; ── block total: 22 min / 24 max ──</code></pre>
+    <div class="caption">Sketch of a cycle-honest listing: every line priced, every block totalled, budgets enforced.</div>
+  </article>
+
+  <article class="idea" id="i6">
+    <div class="idea-head"><span class="idchip">6</span><h3>Dialect-to-dialect source converter — <code>asm198x convert</code></h3></div>
+    <div><span class="chip">axis: language-surface</span> <span class="chip conf-md">Confidence 65%</span> <span class="chip">Complexity: Medium-High</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>Because every dialect front-end already normalises to the same internal operations, emit that representation back out as a <em>different existing dialect</em> of the same CPU: <code>asm198x convert --from pasmo --to sjasmplus prog.asm</code>. Correctness is self-verifying — assemble both sides, diff the bytes — and no syntax is invented, so the source-compatible stance holds: both ends are real reference dialects.</dd>
+      <dt>Basis</dt>
+      <dd><code>direct:</code> the shared normal form exists (one <code>Expr</code> evaluator, the <code>Operation::Encoded</code> seam) with N front-ends over it. <code>external:</code> scene fragmentation is chronic (demoscene→sjasmplus, homebrew→WLA-DX, ROM-hacking→xkas) and decades of source are trapped in dying tools' dialects; Python 2to3/jscodeshift are the mechanism precedent, with the byte-diff as the built-in snapshot test.</dd>
+      <dt>Rationale</dt>
+      <dd>This is "rescue over replace" applied to <em>other people's code</em>, not just toolchains — the migration path that turns orphaned-source communities into users, offering something no single-dialect incumbent can attempt. Its self-verification doubles as a continuous cross-dialect consistency audit of the front-ends.</dd>
+      <dt>Downsides</dt>
+      <dd>Round-trip fidelity is the open question: comments, formatting, and (once they exist) macros need carrying through the IR, which today preserves none of them. Scope it as instruction/directive-level conversion first, fidelity later. Lowest confidence of the survivors — but the highest "nobody else can even try" score.</dd>
+    </dl>
+    <div class="diagram">
+    <svg viewBox="0 0 760 130" role="img" aria-label="pasmo source parses to shared IR, emits sjasmplus source; both assemble and the bytes must match.">
+      <rect x="10" y="40" width="140" height="34" rx="6" fill="var(--chip)"/><text x="24" y="61" class="svgtxt">pasmo source</text>
+      <rect x="230" y="40" width="130" height="34" rx="6" fill="var(--accent-soft)"/><text x="252" y="61" class="svgtxt" font-weight="700">shared IR</text>
+      <rect x="440" y="40" width="160" height="34" rx="6" fill="var(--chip)"/><text x="454" y="61" class="svgtxt">sjasmplus source</text>
+      <line x1="150" y1="57" x2="230" y2="57" stroke="var(--muted)"/><text x="168" y="49" class="svgmut">parse</text>
+      <line x1="360" y1="57" x2="440" y2="57" stroke="var(--muted)"/><text x="380" y="49" class="svgmut">emit</text>
+      <rect x="230" y="96" width="370" height="26" rx="6" fill="var(--good-soft)"/>
+      <text x="244" y="113" class="svgtxt" fill="var(--good)">assemble both → bytes must be identical (self-verifying)</text>
+      <line x1="80" y1="74" x2="80" y2="109" stroke="var(--muted)"/><line x1="80" y1="109" x2="230" y2="109" stroke="var(--muted)"/>
+      <line x1="520" y1="74" x2="520" y2="96" stroke="var(--muted)"/>
+    </svg>
+    <div class="caption">The converter's proof obligation is the tool's own core competence: byte-identical assembly.</div>
+    </div>
+  </article>
+
+  <article class="idea" id="i7">
+    <div class="idea-head"><span class="idchip">7</span><h3>The self-verifying docs site</h3></div>
+    <div><span class="chip">axis: dx</span> <span class="chip conf-hi">Confidence 90%</span> <span class="chip">Complexity: Medium</span></div>
+    <dl class="fields">
+      <dt>Description</dt>
+      <dd>Build the desired docs site so that it <em>cannot drift</em>: per-CPU instruction references generated from the <code>isa</code> crate (opcode, layout, cycles, flags, provenance link into the umbrella <code>reference/</code> library); per-dialect directive-support matrices derived from the conformance corpus; every code sample on the site assembled by the real binary in CI; diagnostic explain-pages keyed by stable error codes (shellcheck-wiki style) that teach the period-hardware <em>why</em> — branch range, page-cross, banked memory — citing datasheets. The conformance ledger (idea 2) publishes here. Prose that can rot is minimised; generated data that cannot is maximised.</dd>
+      <dt>Basis</dt>
+      <dd><code>direct:</code> the drift already happened — README says "Five CPUs" against 19 shipped, the docs repo holds one dialect page and a stale spec-format doc (verified this session). <code>external:</code> WLA-DX's cautionary tale that docs/banking-model confusion is resented as much as bugs; shellcheck's coded-wiki pattern; the digest's finding that docs clarity <em>is</em> trust in this community.</dd>
+      <dt>Rationale</dt>
+      <dd>The naive docs site (hand-written pages) creates a second source of truth that is provably already stale at 19 CPUs and will lose harder at 30. Generating from the spec makes the docs site a <em>correctness artifact</em> with the same trust property as the assembler — and it's the natural venue for the ledger, the explain-pages, and the spec's public face. mdBook + the existing Vale/House198x lint (promoted to a CI gate) fits the boring-tech stance; every future CPU documents itself the moment its spec lands.</dd>
+      <dt>Downsides</dt>
+      <dd>Needs a spec-export/query layer to generate from — which is the same layer the LSP and Emu198x validation want (build once, feed three consumers). Generated tables still need hand-written prose around them (directives, worked examples); the generator only removes the drift-prone half.</dd>
+    </dl>
+  </article>
+
+  <h2 id="rejection-summary">Rejection Summary</h2>
+  <table>
+    <thead><tr><th>#</th><th>Idea</th><th>Reason rejected</th></tr></thead>
+    <tbody>
+      <tr><td>2</td><td>Listing / symbol / map outputs</td><td>Already in this session's deficiency list; folded into idea 1 as its on-ramp rather than a separate slot.</td></tr>
+      <tr><td>4</td><td>Spec-model unification (one field IR)</td><td>Already recommended pre-ARM in the assessment — a prerequisite, not a new capability. (Verifier's "speculative for a hypothetical ARM" partially overruled: ARM is explicit user intent; the existing sweep harness makes the refactor byte-verifiable.)</td></tr>
+      <tr><td>5</td><td>Publish spec as versioned <code>isa-pack</code> + <code>asm198x isa</code> query</td><td>Strong (riscv-opcodes precedent) but folded into ideas 3 and 7 as their shared spec-export layer rather than a separate slot.</td></tr>
+      <tr><td>9</td><td>Crater-for-retro period-source release gates</td><td>Copyright/licensing on period source unaddressed; heavy release process for a solo maintainer relative to marginal value over the verdict pipeline.</td></tr>
+      <tr><td>11</td><td>Incremental (keystroke-speed) engine core</td><td>Premature — performance is fine at current workloads; becomes a design consideration when LSP work actually starts.</td></tr>
+      <tr><td>16</td><td>Mixed-ISA projects (<code>.cpu</code> switching, cross-visible symbols)</td><td>Gated on the 32-bit engine widening it doesn't account for; the standout "only we can do this" capability to revisit at ARM/GBA time — the strongest near-miss.</td></tr>
+      <tr><td>21</td><td>Semantic byte-diff debugger (<code>--diff-against</code>)</td><td>Sound but lower standalone value; natural feature inside the verdict pipeline's tooling.</td></tr>
+      <tr><td>22</td><td>Three-way round-robin (asm ⇄ disasm ⇄ Emu198x cores)</td><td>Cross-project commitment requiring Emu198x-side work and an umbrella-level decision; raise there, not as an Asm198x-only idea.</td></tr>
+      <tr><td>24</td><td>New-CPU onboarding wizard (reference-tool-driven spec drafts)</td><td>Unresolved tension with the authored-not-extracted canon; would need an explicit canon amendment first.</td></tr>
+      <tr><td>25</td><td>Manual-sourced conformance corpus</td><td>Laborious and niche relative to the verdict pipeline; fold into the existing provenance backlog.</td></tr>
+      <tr><td>S3</td><td>"Family debug pipeline" synthesis</td><td>Its sound legs (ideas 1, 5, structured disasm) survive individually; the round-robin leg imports the cross-project blocker above.</td></tr>
+    </tbody>
+  </table>
+  <p class="caption">All five axes have survivors; no coverage gap. Bases verified by a fresh-context adversarial pass (18 sound / 8 weak / 0 refuted; every spot-checked citation matched).</p>
+
+  <footer class="composition-signal">Composed 2026-07-03 by ce-ideate from the same-day Asm198x four-agent quality assessment + fresh web research (run 4f8a2c1d).</footer>
+</main>
+</body>
+</html>

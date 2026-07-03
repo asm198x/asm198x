@@ -1,0 +1,19 @@
+[package]
+name = "dbg198x"
+description = "The dbg198x cross-CPU debug-info format for the 198x family — NDJSON sidecar (line↔address map, symbols, sections, address-space qualifiers) written by Asm198x and read by Emu198x. Depends only on serde, so a consumer needs no assembler, parser, or CLI."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+
+# Depends only on serde + serde_json — the neutral footing of a data-contract
+# crate. The dependency direction is one-way: asm198x -> dbg198x (writer),
+# Emu198x -> dbg198x (reader). It must never depend on asm198x (would be
+# circular). See ../../decisions/dbg198x-format.md and the plan's KTD1.
+
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[lints]
+workspace = true
