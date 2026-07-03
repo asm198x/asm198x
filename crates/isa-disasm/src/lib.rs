@@ -2737,6 +2737,7 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
             .or_else(|| decode_stack_z8000(code, pos))
             .or_else(|| decode_shift_z8000(code, pos))
             .or_else(|| decode_exts_z8000(code, pos))
+            .or_else(|| decode_bit_z8000(code, pos))
             .or_else(|| decode_z8000(code, pos))
         {
             Some((text, len)) => {
@@ -3037,6 +3038,63 @@ fn decode_exts_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
         ),
         2,
     ))
+}
+
+/// Decode one Z8000 bit instruction (`BIT`/`SET`/`RES` + byte) at `pos`, or
+/// `None`. `MM` and the second byte's high nibble select the form exactly as the
+/// dyadic family does, with the low nibble a **bit number**; `MM` = 00 with a
+/// high nibble of zero is the two-word **dynamic** form (the bit number in a
+/// word register, the target register in word 2).
+fn decode_bit_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+    let (top, second) = (code[pos], code[pos + 1]);
+    let b = isa::z8000::bit_decode(top)?;
+    let (field, low) = (u16::from(second >> 4), second & 0xF);
+    let mn = b.mnemonic.to_ascii_lowercase();
+    let bmax = isa::z8000::bit_max(b.size) as u16;
+    let addr16 =
+        || (pos + 4 <= code.len()).then(|| u16::from_be_bytes([code[pos + 2], code[pos + 3]]));
+
+    match top >> 6 {
+        // Static register (`MM` = 10).
+        2 => {
+            if u16::from(low) > bmax {
+                return None; // bit number out of range for this size
+            }
+            Some((format!("{mn} {},#{low}", z8000_reg(field, b.size)), 2))
+        }
+        // `MM` = 00: static `@Rn` (pointer 1–15) or the dynamic form (nibble 0).
+        0 => {
+            if field == 0 {
+                // Dynamic: word 2 is `target << 8` (low byte zero, high nibble
+                // zero); anything else is not a canonical encoding.
+                let w2 = addr16()?;
+                if w2 & 0xF0FF != 0 {
+                    return None;
+                }
+                let target = (w2 >> 8) & 0xF;
+                Some((format!("{mn} {},r{low}", z8000_reg(target, b.size)), 4))
+            } else {
+                if u16::from(low) > bmax {
+                    return None;
+                }
+                Some((format!("{mn} @r{field},#{low}"), 2))
+            }
+        }
+        // Static direct / indexed (`MM` = 01).
+        1 => {
+            if u16::from(low) > bmax {
+                return None;
+            }
+            let a = addr16()?;
+            let target = if field == 0 {
+                format!("0{a:04X}H")
+            } else {
+                format!("0{a:04X}H(r{field})")
+            };
+            Some((format!("{mn} {target},#{low}"), 4))
+        }
+        _ => None, // `MM` = 11 is not a bit op
+    }
 }
 
 /// Decode one Z8000 dyadic instruction at byte offset `pos`. Returns the
