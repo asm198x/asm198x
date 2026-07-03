@@ -5,11 +5,13 @@
 //! with the 8080 dialect) and decimal; registers are `r0`–`r7`. The jzIntv /
 //! as1600 mnemonics `asl` accepts under `cpu CP-1600` are the homebrew standard.
 //!
-//! **Increment 1** covers the single-decle register / implied groups, so every
-//! instruction is exactly one opcode word (two literal bytes; the register
-//! fields resolve at parse time) emitted through the engine's computed-operand
-//! seam ([`Operation::Encoded`]). Later increments add the memory / immediate /
-//! shift / branch groups with their extension words.
+//! **Increments 1–2** cover the single-decle register / implied and shift / rotate
+//! groups — one opcode word, register fields resolved at parse time.
+//! **Increment 3** adds the two-decle relative branches: `Bcc`/`BEXT`/`NOPP`
+//! emit a [`Piece::Branch`], whose opcode word takes a direction bit from the
+//! sign of the displacement (forward `EA = PC + d`, backward `EA = PC − d − 1`).
+//! All ride the engine's computed-operand seam ([`Operation::Encoded`]). Later
+//! increments add the memory / immediate modes and `SDBD`.
 //!
 //! Validated byte-identical against `asl` (`cpu CP-1600`).
 
@@ -168,7 +170,55 @@ fn word_lit(w: u16) -> [Piece; 2] {
     [Piece::Lit((w >> 8) as u8), Piece::Lit(w as u8)]
 }
 
+/// A CP1610 branch piece: a two-decle relative branch whose opcode word takes a
+/// direction bit (`0x20`) from the sign of the displacement. `base` is the opcode
+/// with that bit clear; `unit` is 2 (bytes per decle).
+fn branch(target: Expr, base: u16) -> Piece {
+    Piece::Branch {
+        target,
+        base,
+        dir_bit: 0x20,
+        unit: 2,
+        what: "branch",
+    }
+}
+
 fn encode(mn: &str, args: &str, line: usize) -> Result<Operation, AsmError> {
+    // Branches are multi-word with a computed, sign-directed target, so they are
+    // handled ahead of the single-decle table.
+    if mn.eq_ignore_ascii_case("NOPP") {
+        // "Branch never" — a two-word no-op: opcode 0x0208, zero magnitude.
+        if !args.trim().is_empty() {
+            return Err(AsmError::new(line, "`NOPP` takes no operand"));
+        }
+        return Ok(Operation::Encoded(vec![
+            Piece::Lit(0x02),
+            Piece::Lit(0x08),
+            Piece::Lit(0x00),
+            Piece::Lit(0x00),
+        ]));
+    }
+    if mn.eq_ignore_ascii_case("BEXT") {
+        // `BEXT target, ec` — external-condition branch; `ec` (0–15) sits in the
+        // low nibble with bit 4 set (0x210 page).
+        let ops = split_top_level(args.trim(), ',');
+        let [t, e] = ops.as_slice() else {
+            return Err(AsmError::new(line, "`BEXT` takes a target and a condition"));
+        };
+        let ec = const_field(e, 0, 15, "external condition", line)?;
+        return Ok(Operation::Encoded(vec![branch(
+            value(t, line)?,
+            0x210 | ec,
+        )]));
+    }
+    if let Some(cond) = isa::cp1610::branch_cond(mn) {
+        let target = one_str(args, mn, line)?;
+        return Ok(Operation::Encoded(vec![branch(
+            value(target, line)?,
+            0x200 | u16::from(cond),
+        )]));
+    }
+
     let insn = isa::cp1610::lookup(mn)
         .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mn}`")))?;
     let ops: Vec<&str> = split_top_level(args.trim(), ',')
@@ -246,6 +296,32 @@ fn reg(tok: &str, max: u16, line: usize) -> Result<u16, AsmError> {
         .and_then(|n| n.parse::<u16>().ok())
         .filter(|&n| n <= max);
     n.ok_or_else(|| AsmError::new(line, format!("expected register r0..r{max}, got `{tok}`")))
+}
+
+/// Require exactly one operand from a raw argument string (a branch target).
+fn one_str<'a>(args: &'a str, mn: &str, line: usize) -> Result<&'a str, AsmError> {
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    match ops.as_slice() {
+        [a] => Ok(a),
+        _ => Err(AsmError::new(line, format!("`{mn}` takes one operand"))),
+    }
+}
+
+/// Evaluate a constant field (e.g. `BEXT`'s external condition) and range-check
+/// it. It must resolve to a constant, so a forward reference is an error.
+fn const_field(tok: &str, min: i64, max: i64, what: &str, line: usize) -> Result<u16, AsmError> {
+    let v = fold_const(&value(tok, line)?, &BTreeMap::new(), line)?;
+    if !(min..=max).contains(&v) {
+        return Err(AsmError::new(
+            line,
+            format!("{what} out of range ({v}; must be {min}..={max})"),
+        ));
+    }
+    Ok(v as u16)
 }
 
 /// Parse a shift count — either `1` or `2` (a shift shifts once or twice).

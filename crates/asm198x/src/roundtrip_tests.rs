@@ -622,6 +622,44 @@ fn round_trips_cp1610_registers_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_cp1610_branches_through_asl_syntax() {
+    // Increment 3: the two-decle relative branch group — every condition across
+    // both directions (forward and backward targets exercise the sign-selected
+    // direction bit), the external-condition `BEXT`, and the `NOPP` two-word
+    // no-op. Position-dependent, so this is the branch group's coverage (the
+    // sweep can't batch it).
+    let source = "\
+        \torg 0\n\
+        top:\n\
+        \tnop\n\
+        \tb top\n\
+        \tbc fwd\n\
+        \tbov top\n\
+        \tbpl fwd\n\
+        \tbeq top\n\
+        \tblt fwd\n\
+        \tble top\n\
+        \tbusc fwd\n\
+        \tbnc top\n\
+        \tbnov fwd\n\
+        \tbmi top\n\
+        \tbneq fwd\n\
+        \tbge top\n\
+        \tbgt fwd\n\
+        \tbesc top\n\
+        \tnopp\n\
+        \tbext fwd,5\n\
+        \tbext top,15\n\
+        fwd:\n\
+        \tnop\n\
+        \tb top\n";
+    let original = assemble_cp1610(source).expect("assemble");
+    let listing = listing_cp1610(&original.bytes, original.origin);
+    let re = assemble_cp1610(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_cp1610_shifts_through_asl_syntax() {
     // Increment 2: the register-only shift / rotate group — every mnemonic across
     // both the once and twice counts and the R0–R3 register range.

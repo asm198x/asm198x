@@ -284,6 +284,23 @@ pub(crate) enum Piece {
         or_bits: u32,
         what: &'static str,
     },
+    /// A two-word relative branch whose opcode word carries a **direction bit**
+    /// selected by the *sign* of the displacement, with the magnitude in the
+    /// following word — the CP1610 (Intellivision) branch shape, which the linear
+    /// [`Piece::Packed`] can't express. `target` is the destination address;
+    /// `base` is the opcode word (direction bit clear). The byte distance from the
+    /// instruction's end to `target` is divided by `unit` (the bytes per
+    /// addressing word — 2 for the CP1610's decle) to give the signed word
+    /// displacement `d`. Forward (`d >= 0`): opcode `base`, magnitude `d`.
+    /// Backward: opcode `base | dir_bit`, magnitude `-d - 1`. Both words are laid
+    /// down in the CPU's endianness; `what` names the field in a range error.
+    Branch {
+        target: Expr,
+        base: u16,
+        dir_bit: u16,
+        unit: i64,
+        what: &'static str,
+    },
 }
 
 impl Piece {
@@ -292,6 +309,8 @@ impl Piece {
             Piece::Lit(_) => 1,
             Piece::Val { bytes, .. } => i64::from(*bytes),
             Piece::Packed { bytes, .. } => i64::from(*bytes),
+            // Two words, each `unit` bytes: the opcode word plus the magnitude.
+            Piece::Branch { unit, .. } => 2 * *unit,
         }
     }
 }
@@ -581,6 +600,39 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                             }
                             let packed = i64::from((v as u32 & *mask) | *or_bits);
                             emit_value(&mut bytes, packed, *width, false, set.endianness, s.line)?;
+                        }
+                        Piece::Branch {
+                            target,
+                            base,
+                            dir_bit,
+                            unit,
+                            what,
+                        } => {
+                            let tgt = target.eval(&symbols, pc, s.line)?;
+                            // The CP1610 measures from the address after both
+                            // words (opcode + magnitude).
+                            let pc_after = origin + bytes.len() as i64 + 2 * *unit;
+                            let dist = tgt - pc_after;
+                            if dist % *unit != 0 {
+                                return Err(AsmError::new(
+                                    s.line,
+                                    format!("{what} target is not on a word boundary"),
+                                ));
+                            }
+                            let d = dist / *unit;
+                            let (word1, mag) = if d >= 0 {
+                                (i64::from(*base), d)
+                            } else {
+                                (i64::from(*base | *dir_bit), -d - 1)
+                            };
+                            if !(0..=0xFFFF).contains(&mag) {
+                                return Err(AsmError::new(
+                                    s.line,
+                                    format!("{what} out of range ({d} words)"),
+                                ));
+                            }
+                            emit_value(&mut bytes, word1, 2, false, set.endianness, s.line)?;
+                            emit_value(&mut bytes, mag, 2, false, set.endianness, s.line)?;
                         }
                     }
                 }
