@@ -3,13 +3,15 @@
 //! Assembles against [`isa::z8000`] and produces a flat **big-endian** binary at
 //! the `org`. Numbers are Intel `h`-suffix hex (shared with the 8080 dialect).
 //! Registers are word `r0`–`r15`, byte `rh0`–`rh7` / `rl0`–`rl7`, long
-//! `rr0`–`rr14`. Built as sweep-verified increments (see
-//! `decisions/z8000-staged-build.md`); this covers the **dyadic family**
-//! (increments 1–2: arithmetic / logic / compare / load / exchange /
-//! load-address), **program control** (increment 3: `JP`/`CALL`/`JR`/`RET`/
-//! `DJNZ`/`CALR` with condition codes), the **single-operand ALU**
-//! (increment 4: `CLR`/`COM`/`NEG`/`TEST`/`TSET`, `INC`/`DEC`), and the **stack**
-//! ops (increment 5: `PUSH`/`POP`/`PUSHL`/`POPL`).
+//! `rr0`–`rr14`, quad `rq0`/`rq4`/`rq8`/`rq12`. Built as sweep-verified
+//! increments (see `decisions/z8000-staged-build.md`); this covers the
+//! **dyadic family** (increments 1–2: arithmetic / logic / compare / load /
+//! exchange / load-address), **program control** (increment 3: `JP`/`CALL`/`JR`/
+//! `RET`/`DJNZ`/`CALR` with condition codes), the **single-operand ALU**
+//! (increment 4: `CLR`/`COM`/`NEG`/`TEST`/`TSET`, `INC`/`DEC`), the **stack**
+//! ops (increment 5: `PUSH`/`POP`/`PUSHL`/`POPL`), and the **shifts / rotates /
+//! sign-extends** (increment 6: `SLA`/`SRA`/`SLL`/`SRL` + byte/long, `RL`/`RR`/
+//! `RLC`/`RRC` + byte, `EXTSB`/`EXTS`/`EXTSL`).
 //!
 //! A dyadic instruction packs its operands as fields in the opcode word, emitted
 //! through the engine's computed-operand seam ([`Operation::Encoded`]): a
@@ -133,6 +135,10 @@ fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
                 encode_mono(m, args, line)?
             } else if let Some(s) = isa::z8000::stack_lookup(&mn) {
                 encode_stack(s, args, line)?
+            } else if let Some(sh) = isa::z8000::shift_lookup(&mn) {
+                encode_shift(sh, args, line)?
+            } else if let Some(e) = isa::z8000::extend_lookup(&mn) {
+                encode_extend(e, args, line)?
             } else {
                 encode(&mn, args, line)?
             }
@@ -438,6 +444,86 @@ fn encode_stack(s: &isa::z8000::Stack, args: &str, line: usize) -> Result<Operat
     Ok(Operation::Encoded(pieces))
 }
 
+/// Encode a shift or rotate (`SLA`/`SRA`/`SLL`/`SRL` + byte/long, `RL`/`RR`/
+/// `RLC`/`RRC` + byte). Syntax is `mn reg,#count` (the count defaults to 1). The
+/// register is the second byte's high nibble; the low nibble is a fixed
+/// sub-opcode (shift, with a trailing signed count word) or `type·4 + (count−1)·2`
+/// (rotate). A right shift (`SRx`) shares the left opcode with a negated count.
+fn encode_shift(sh: &isa::z8000::Shift, args: &str, line: usize) -> Result<Operation, AsmError> {
+    use isa::z8000::ShiftKind;
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let (reg_s, count) = match ops.as_slice() {
+        [r] => (*r, 1i64),
+        [r, c] => {
+            let n = fold_const(
+                &value(c.trim_start_matches('#'), line)?,
+                &BTreeMap::new(),
+                line,
+            )?;
+            (*r, n)
+        }
+        _ => {
+            return Err(AsmError::new(
+                line,
+                format!("`{}` takes a register and a count", sh.mnemonic),
+            ));
+        }
+    };
+    let reg = size_reg(reg_s, sh.size)
+        .ok_or_else(|| AsmError::new(line, format!("`{}` needs a register", sh.mnemonic)))?;
+    let top = (2u16 << 6) | u16::from(sh.base6); // MM = 10 (register group)
+
+    match sh.kind {
+        ShiftKind::Shift => {
+            let max = isa::z8000::shift_max(sh.size);
+            let lo = i64::from(sh.right); // right by 0 is invalid; left allows 0
+            if !(lo..=max).contains(&count) {
+                return Err(AsmError::new(
+                    line,
+                    format!("`{}` count must be {lo}..={max}", sh.mnemonic),
+                ));
+            }
+            let signed = if sh.right { -count } else { count };
+            // Word / long shifts carry a full 16-bit signed count; a byte shift's
+            // count is a signed 8-bit value in the low byte (high byte zero).
+            let count_word = if sh.size == Size::Byte {
+                signed & 0xFF
+            } else {
+                signed
+            };
+            let mut pieces = Vec::from(word_lit((top << 8) | (reg << 4) | u16::from(sh.sel)));
+            pieces.push(ext_word(Expr::Num(count_word)));
+            Ok(Operation::Encoded(pieces))
+        }
+        ShiftKind::Rotate => {
+            if count != 1 && count != 2 {
+                return Err(AsmError::new(
+                    line,
+                    format!("`{}` count must be 1 or 2", sh.mnemonic),
+                ));
+            }
+            let low = u16::from(sh.sel) * 4 + ((count as u16) - 1) * 2;
+            Ok(Operation::Encoded(Vec::from(word_lit(
+                (top << 8) | (reg << 4) | low,
+            ))))
+        }
+    }
+}
+
+/// Encode a sign-extend (`EXTSB`/`EXTS`/`EXTSL`). One register operand — a word,
+/// long pair, or quad per the mnemonic — in the second byte's high nibble, the
+/// sub-opcode in the low nibble; `0xB1` is the top byte.
+fn encode_extend(e: &isa::z8000::Extend, args: &str, line: usize) -> Result<Operation, AsmError> {
+    let reg = size_reg(args.trim(), e.size)
+        .ok_or_else(|| AsmError::new(line, format!("`{}` needs a register", e.mnemonic)))?;
+    let word = (u16::from(isa::z8000::EXTEND_TOP) << 8) | (reg << 4) | u16::from(e.subop);
+    Ok(Operation::Encoded(Vec::from(word_lit(word))))
+}
+
 /// Encode a program-control instruction (`JP`/`CALL`/`JR`/`RET`/`DJNZ`/`CALR`).
 fn encode_ctl(ctl: &isa::z8000::Ctl, args: &str, line: usize) -> Result<Operation, AsmError> {
     use isa::z8000::CtlKind;
@@ -584,6 +670,7 @@ fn size_reg(tok: &str, size: Size) -> Option<u16> {
     match size {
         Size::Byte => byte_reg(tok),
         Size::Long => long_reg(tok),
+        Size::Quad => quad_reg(tok),
         Size::Word | Size::Address => word_reg(tok),
     }
 }
@@ -621,4 +708,15 @@ fn long_reg(tok: &str) -> Option<u16> {
         .parse::<u16>()
         .ok()?;
     (n < 16 && n % 2 == 0).then_some(n)
+}
+
+/// Quad register `rq0`/`rq4`/`rq8`/`rq12` (a multiple of four).
+fn quad_reg(tok: &str) -> Option<u16> {
+    let n = tok
+        .trim()
+        .to_ascii_lowercase()
+        .strip_prefix("rq")?
+        .parse::<u16>()
+        .ok()?;
+    (n < 16 && n % 4 == 0).then_some(n)
 }

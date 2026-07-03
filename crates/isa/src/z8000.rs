@@ -426,6 +426,203 @@ pub fn stack_decode(top: u8) -> Option<&'static Stack> {
     STACK.iter().find(|s| s.base6 == base6)
 }
 
+// ---------------------------------------------------------------------------
+// Shifts / rotates (increment 6): SLA/SRA/SLL/SRL, RL/RR/RLC/RRC
+// ---------------------------------------------------------------------------
+
+/// A shift or rotate's field shape. Both key on `base6` 0x33 (word/long) or
+/// 0x32 (byte) with the operand register in the second byte's **high** nibble;
+/// the **low** nibble's bit 0 distinguishes the two (1 = shift, 0 = rotate).
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum ShiftKind {
+    /// Arithmetic / logical shift. A **signed count word** follows: positive is
+    /// left, negative is right, so `SLA`/`SRA` (and `SLL`/`SRL`) share one
+    /// opcode, told apart by the count's sign. The magnitude range is the size's
+    /// bit width (byte 8, word 16, long 32; left also allows 0).
+    Shift,
+    /// Rotate by 1 or 2. **No count word** — the rotate type and count pack into
+    /// the low nibble as `type·4 + (count − 1)·2` (`RL` 0, `RR` 1, `RLC` 2,
+    /// `RRC` 3).
+    Rotate,
+}
+
+use ShiftKind::{Rotate, Shift as ShiftK};
+
+/// One shift or rotate mnemonic.
+pub struct Shift {
+    pub mnemonic: &'static str,
+    /// 0x32 (byte) or 0x33 (word / long).
+    pub base6: u8,
+    pub size: Size,
+    pub kind: ShiftKind,
+    /// [`Shift`](ShiftKind::Shift): the low-nibble sub-opcode (word logical 1 /
+    /// arithmetic 9, long logical 5 / arithmetic 0xD).
+    /// [`Rotate`](ShiftKind::Rotate): the rotate type (0–3), laid down as
+    /// `type·4 + (count − 1)·2`.
+    pub sel: u8,
+    /// [`Shift`](ShiftKind::Shift) only: a right variant (`SRx`), so the encoder
+    /// negates the count. (The decoder reads left/right from the count's sign.)
+    pub right: bool,
+    pub summary: &'static str,
+}
+
+/// The shift and rotate instructions (increment 6).
+pub const SHIFTS: &[Shift] = &[
+    // --- Shifts: word (base6 0x33) -----------------------------------------
+    sh("SLA", 0x33, Word, 9, false, "Shift left arithmetic"),
+    sh("SRA", 0x33, Word, 9, true, "Shift right arithmetic"),
+    sh("SLL", 0x33, Word, 1, false, "Shift left logical"),
+    sh("SRL", 0x33, Word, 1, true, "Shift right logical"),
+    // --- Shifts: long (base6 0x33, distinct sub-opcode) --------------------
+    sh("SLAL", 0x33, Long, 0xD, false, "Shift left arithmetic long"),
+    sh("SRAL", 0x33, Long, 0xD, true, "Shift right arithmetic long"),
+    sh("SLLL", 0x33, Long, 5, false, "Shift left logical long"),
+    sh("SRLL", 0x33, Long, 5, true, "Shift right logical long"),
+    // --- Shifts: byte (base6 0x32) -----------------------------------------
+    sh("SLAB", 0x32, Byte, 9, false, "Shift left arithmetic byte"),
+    sh("SRAB", 0x32, Byte, 9, true, "Shift right arithmetic byte"),
+    sh("SLLB", 0x32, Byte, 1, false, "Shift left logical byte"),
+    sh("SRLB", 0x32, Byte, 1, true, "Shift right logical byte"),
+    // --- Rotates: word (base6 0x33) ----------------------------------------
+    rot("RL", 0x33, Word, 0, "Rotate left"),
+    rot("RR", 0x33, Word, 1, "Rotate right"),
+    rot("RLC", 0x33, Word, 2, "Rotate left through carry"),
+    rot("RRC", 0x33, Word, 3, "Rotate right through carry"),
+    // --- Rotates: byte (base6 0x32) ----------------------------------------
+    rot("RLB", 0x32, Byte, 0, "Rotate left byte"),
+    rot("RRB", 0x32, Byte, 1, "Rotate right byte"),
+    rot("RLCB", 0x32, Byte, 2, "Rotate left through carry byte"),
+    rot("RRCB", 0x32, Byte, 3, "Rotate right through carry byte"),
+];
+
+const fn sh(
+    mnemonic: &'static str,
+    base6: u8,
+    size: Size,
+    sel: u8,
+    right: bool,
+    summary: &'static str,
+) -> Shift {
+    Shift {
+        mnemonic,
+        base6,
+        size,
+        kind: ShiftK,
+        sel,
+        right,
+        summary,
+    }
+}
+
+const fn rot(
+    mnemonic: &'static str,
+    base6: u8,
+    size: Size,
+    sel: u8,
+    summary: &'static str,
+) -> Shift {
+    Shift {
+        mnemonic,
+        base6,
+        size,
+        kind: Rotate,
+        sel,
+        right: false,
+        summary,
+    }
+}
+
+/// The signed shift-count magnitude range for a size (byte 8, word 16, long 32).
+#[must_use]
+pub fn shift_max(size: Size) -> i64 {
+    match size {
+        Size::Byte => 8,
+        Size::Long => 32,
+        _ => 16,
+    }
+}
+
+/// Find a shift / rotate instruction by mnemonic (case-insensitive).
+#[must_use]
+pub fn shift_lookup(mnemonic: &str) -> Option<&'static Shift> {
+    SHIFTS
+        .iter()
+        .find(|s| s.mnemonic.eq_ignore_ascii_case(mnemonic))
+}
+
+/// Decode a shift for `(base6, subop)` and the count's sign (`right`), or `None`
+/// if no shift occupies that sub-opcode (the word is then data).
+#[must_use]
+pub fn shift_decode(base6: u8, subop: u8, right: bool) -> Option<&'static Shift> {
+    SHIFTS
+        .iter()
+        .find(|s| s.kind == ShiftK && s.base6 == base6 && s.sel == subop && s.right == right)
+}
+
+/// Decode a rotate for `(base6, type)` (the low nibble's high 3 bits), or `None`.
+#[must_use]
+pub fn rotate_decode(base6: u8, rtype: u8) -> Option<&'static Shift> {
+    SHIFTS
+        .iter()
+        .find(|s| s.kind == Rotate && s.base6 == base6 && s.sel == rtype)
+}
+
+// ---------------------------------------------------------------------------
+// Sign-extend (increment 6): EXTSB / EXTS / EXTSL
+// ---------------------------------------------------------------------------
+
+/// A sign-extend instruction. The first (and only) word is `0xB1` then the
+/// operand register in the second byte's **high** nibble and a sub-opcode in the
+/// low nibble. The register size widens per instruction: `EXTSB` sign-extends a
+/// byte through a **word** register, `EXTS` a word through a **long** pair,
+/// `EXTSL` a long through a **quad**.
+pub struct Extend {
+    pub mnemonic: &'static str,
+    /// Low-nibble sub-opcode: `EXTSB` 0, `EXTSL` 7, `EXTS` 0xA.
+    pub subop: u8,
+    pub size: Size,
+    pub summary: &'static str,
+}
+
+/// The top byte shared by every sign-extend instruction (`MM` = R, base6 0x31).
+pub const EXTEND_TOP: u8 = 0xB1;
+
+/// The sign-extend instructions (increment 6).
+pub const EXTENDS: &[Extend] = &[
+    Extend {
+        mnemonic: "EXTSB",
+        subop: 0,
+        size: Size::Word,
+        summary: "Extend sign byte",
+    },
+    Extend {
+        mnemonic: "EXTS",
+        subop: 0xA,
+        size: Size::Long,
+        summary: "Extend sign word",
+    },
+    Extend {
+        mnemonic: "EXTSL",
+        subop: 7,
+        size: Size::Quad,
+        summary: "Extend sign long",
+    },
+];
+
+/// Find a sign-extend instruction by mnemonic (case-insensitive).
+#[must_use]
+pub fn extend_lookup(mnemonic: &str) -> Option<&'static Extend> {
+    EXTENDS
+        .iter()
+        .find(|e| e.mnemonic.eq_ignore_ascii_case(mnemonic))
+}
+
+/// Decode a sign-extend instruction by its second byte's low nibble, or `None`.
+#[must_use]
+pub fn extend_decode(subop: u8) -> Option<&'static Extend> {
+    EXTENDS.iter().find(|e| e.subop == subop)
+}
+
 /// Operand size, which fixes register naming and immediate width.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Size {
@@ -435,6 +632,9 @@ pub enum Size {
     Word,
     /// Long register pairs `rr0`–`rr14`; a 32-bit immediate.
     Long,
+    /// Quad register `rq0`/`rq4`/`rq8`/`rq12` (four consecutive words); the
+    /// `EXTSL` operand only. No immediate.
+    Quad,
     /// An effective address into a word register (`LDA`); no immediate.
     Address,
 }

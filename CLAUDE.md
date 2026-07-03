@@ -308,8 +308,16 @@ curriculum corpus:
   is the second byte's high nibble and the low nibble is a fixed sub-opcode or a
   count. Then **increment 5 — stack:** `PUSH`/`POP`/`PUSHL`/`POPL` (a `Stack`
   table; the pointer leads a push and trails a pop, `PUSH #imm` a special
-  opcode). Remaining increments (shifts, bit, `LDR`, mul/div, block/IO, segmented
-  Z8001) tracked in the decision record.
+  opcode). Then **increment 6 — shifts / rotates / sign-extends:**
+  `SLA`/`SRA`/`SLL`/`SRL` (+ byte + long), `RL`/`RR`/`RLC`/`RRC` (+ byte), and
+  `EXTSB`/`EXTS`/`EXTSL` — a `Shift` table (shift + rotate, base6 0x32/0x33, the
+  register in the high nibble and the low nibble's bit 0 telling shift from
+  rotate) plus a tiny `Extend` table (top byte 0xB1). `SLA`/`SRA` share one
+  opcode (a trailing count word's sign is the direction); the count is a full
+  16-bit signed word for word/long shifts but a signed 8-bit value in the low
+  byte for byte shifts; `EXTSL` introduced a `Size::Quad` `rq` register.
+  Remaining increments (bit, `LDR`, mul/div, block/IO, segmented Z8001) tracked
+  in the decision record.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.

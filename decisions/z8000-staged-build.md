@@ -92,8 +92,25 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
    (pointer leads a push, trails a pop). `PUSH #imm` is a special opcode
    (`base6` 0x0D, low nibble 9). `PUSHL`/`POPL` are long; only `PUSH` has an
    immediate form.
-6. **Shifts / rotates** (+ `EXTS`) — the format is already decoded against
-   `asl` (see the note below); this should be a quick increment.
+6. **Shifts / rotates** (+ `EXTS`) — ✅ **landed (2026-07-03).** `SLA`/`SRA`/
+   `SLL`/`SRL` (+ byte + long), `RL`/`RR`/`RLC`/`RRC` (+ byte), and
+   `EXTSB`/`EXTS`/`EXTSL`. A `Shift` table (shift + rotate, a `ShiftKind`) keyed
+   on `base6` 0x32 (byte) / 0x33 (word/long) with the register in the second
+   byte's **high** nibble and the low nibble's bit 0 selecting shift (1) from
+   rotate (0); a separate tiny `Extend` table (`base6` 0x31, top byte 0xB1). The
+   key subtleties the probe pinned down: **`SLA`/`SRA` share one opcode** — the
+   sign of the trailing count word picks the direction, so the dialect emits
+   `+n` for left and `−n` for right and the disassembler reads the sign; the
+   count word is a full **16-bit** signed value for word / long shifts but a
+   signed **8-bit** value in the **low byte** (high byte zero) for byte shifts;
+   the long shift/`EXTS` use of even `rr` pairs and `EXTSL`'s multiple-of-four
+   **quad** `rq` register (a new `Size::Quad`) are enforced, odd/misaligned
+   registers decoding as data to match `asl`. Rotates and `EXTS` (no count word)
+   are opcode-sweep-verified; the shifts (whose count filler is out of range in
+   the sweep, so they fall to data there) have a targeted round-trip. The long
+   subops came out **SLLL/SRLL 5, SLAL/SRAL 0xD** and `EXTS` subops **EXTSB 0,
+   EXTSL 7, EXTS 0xA** (probed, confirming the decision-record guesses).
+   Byte-identical to `asl` (`cpu Z8002`).
 7. **Bit** — `BIT`/`SET`/`RES`, static and dynamic.
 8. **Multiply / divide** — `MULT`/`MULTL`/`DIV`/`DIVL`.
 9. **Block / string** — `LDIR`/`LDDR`/`CPIR`/`CPD`/`TR*`/… (the repeat group).
