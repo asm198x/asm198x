@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.7](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.6...asm198x-v0.0.7) - 2026-07-03
+
+### Added
+
+- *(cp1610)* add SDBD double-byte immediate — completes the CPU (increment 6) ([#58](https://github.com/asm198x/asm198x/pull/58))
+- *(cp1610)* add JUMP/JSR and word-addressing (increment 5) ([#57](https://github.com/asm198x/asm198x/pull/57))
+- *(cp1610)* add memory / immediate addressing modes (increment 4) ([#56](https://github.com/asm198x/asm198x/pull/56))
+- *(cp1610)* add relative branch group (increment 3) ([#54](https://github.com/asm198x/asm198x/pull/54))
+- *(cp1610)* add shift / rotate group (increment 2) ([#53](https://github.com/asm198x/asm198x/pull/53))
+- *(cp1610)* add GI CP1610 register/implied groups (increment 1) ([#52](https://github.com/asm198x/asm198x/pull/52))
+- *(z8000)* add segmented Z8001 target (increment 12) ([#51](https://github.com/asm198x/asm198x/pull/51))
+- *(z8000)* cleanup — TCC/LDK/RLDB/RRDB/LDR (complete Z8002 ISA)
+- *(z8000)* increment 11 — CPU control / status group
+- *(z8000)* increment 10 — privileged I/O group
+- *(z8000)* increment 9 — block/string repeat group
+- *(z8000)* increment 8 — multiply/divide (MULT/MULTL/DIV/DIVL)
+- *(z8000)* increment 7 — bit ops (BIT/SET/RES, static and dynamic)
+- *(z8000)* increment 6 — shifts/rotates/sign-extends
+- *(z8000)* increment 5 — stack ops (PUSH/POP/PUSHL/POPL)
+- *(z8000)* increment 4 — single-operand ALU (CLR/COM/NEG/TEST/TSET/INC/DEC)
+- *(z8000)* increment 3 — program control (JP/CALL/JR/RET/DJNZ/CALR)
+- *(z8000)* increment 2 — long ops, exchange, load address
+- *(z8000)* increment 1 — the dyadic arithmetic/logic/load family
+- add TI TMS9900 — Wave C, the TI-99/4A CPU
+- add DEC PDP-11 — Wave B, the family's first 16-bit CPU
+
 ## [0.0.6](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.5...asm198x-v0.0.6) - 2026-07-02
 
 ### Added

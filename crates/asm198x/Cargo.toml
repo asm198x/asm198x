@@ -15,8 +15,8 @@ repository.workspace = true
 # verify the manifest — release-plz runs it to compute the release diff, and
 # path deps without a version fail packaging. release-plz keeps it in sync on
 # each bump. Local builds use the path; the version is only for packaging.
-isa = { path = "../isa", version = "0.0.6" }
-isa-disasm = { path = "../isa-disasm", version = "0.0.6" }
+isa = { path = "../isa", version = "0.0.7" }
+isa-disasm = { path = "../isa-disasm", version = "0.0.7" }
 
 [lints]
 workspace = true
