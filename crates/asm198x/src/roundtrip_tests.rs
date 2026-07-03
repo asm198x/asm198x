@@ -318,6 +318,39 @@ fn round_trips_z8000_bit_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_z8000_muldiv_through_asl_syntax() {
+    // Increment 8: MULT/MULTL/DIV/DIVL across every addressing mode. The long
+    // immediate forms (MULTL/DIVL #imm) need a 4-byte immediate the opcode
+    // sweep's 4-byte candidate can't hold, so they fall to data there — this
+    // guards their round-trip.
+    let source = "\
+        \torg 0\n\
+        \tmult rr2,r4\n\
+        \tmult rr2,#1234h\n\
+        \tmult rr2,@r4\n\
+        \tmult rr2,5000h\n\
+        \tmult rr2,6000h(r4)\n\
+        \tmult rr14,r1\n\
+        \tmultl rq0,rr4\n\
+        \tmultl rq0,#12345678h\n\
+        \tmultl rq0,@r4\n\
+        \tmultl rq0,7000h(r2)\n\
+        \tmultl rq12,rr6\n\
+        \tdiv rr2,r4\n\
+        \tdiv rr2,#5\n\
+        \tdiv rr2,@r4\n\
+        \tdiv rr14,r15\n\
+        \tdivl rq0,rr4\n\
+        \tdivl rq0,#87654321h\n\
+        \tdivl rq0,@r4\n\
+        \tdivl rq4,8000h(r3)\n";
+    let original = assemble_z8000(source).expect("assemble");
+    let listing = listing_z8000(&original.bytes, original.origin);
+    let re = assemble_z8000(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_z8000_control_through_asl_syntax() {
     // Increment 3: program control — the position-dependent JR / DJNZ / CALR
     // the opcode sweep can't batch, plus JP / CALL / RET with condition codes.

@@ -320,9 +320,13 @@ curriculum corpus:
   `Bit` table (base6 0x22–0x27). The static form is dyadic-shaped with the low
   nibble a bit number; the dynamic form (bit number in a word register) is a
   two-word encoding at MM=00 with the second byte's high nibble zero, which never
-  collides with static `@Rn` because R0 is not a legal base register. Remaining
-  increments (`LDR`, mul/div, block/IO, segmented Z8001) tracked in the decision
-  record.
+  collides with static `@Rn` because R0 is not a legal base register. Then
+  **increment 8 — multiply / divide:** `MULT`/`MULTL`/`DIV`/`DIVL` — a `MulDiv`
+  table (base6 0x18–0x1B). Dyadic-shaped, but with asymmetric operand sizes: the
+  destination is a double-width accumulator (long `rr` / quad `rq`) while the
+  source is one size smaller (word / long), so the table carries two sizes rather
+  than the dyadic single one. Remaining increments (`LDR`, block/IO, segmented
+  Z8001) tracked in the decision record.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.

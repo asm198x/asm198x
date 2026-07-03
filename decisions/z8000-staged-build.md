@@ -125,7 +125,21 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
    static forms are opcode-sweep-verified; the dynamic form (its second word an
    out-of-range filler in the sweep, so it falls to data there) has a targeted
    round-trip. Byte-identical to `asl` (`cpu Z8002`).
-8. **Multiply / divide** — `MULT`/`MULTL`/`DIV`/`DIVL`.
+8. **Multiply / divide** — ✅ **landed (2026-07-03).** `MULT`/`MULTL`/`DIV`/
+   `DIVL`. A `MulDiv` table (`base6` `MULT` 0x19 / `MULTL` 0x18 / `DIV` 0x1B /
+   `DIVL` 0x1A). These turned out **dyadic-shaped** — `MM base6 | field << 4 |
+   dest`, the source reached by R / IM / IR / DA / X exactly as the dyadic family
+   — but with **asymmetric operand sizes**: the destination is a double-width
+   accumulator (a long `rr` pair for `MULT`/`DIV`, a quad `rq` for `MULTL`/
+   `DIVL`) while the source (and its immediate width) is one size smaller (word
+   for `MULT`/`DIV`, long for `MULTL`/`DIVL`). So the table carries **two** sizes
+   (`dest` + `src`) rather than the dyadic single `size`; a shared `reg_aligned`
+   helper enforces the even-`rr` / multiple-of-four-`rq` rules on both the
+   accumulator and a register source (odd registers decode as data to match
+   `asl`). The word-immediate forms (`MULT`/`DIV` `#imm`) are opcode-sweep-
+   verified; the long-immediate forms (`MULTL`/`DIVL` `#imm`, a 4-byte immediate
+   the sweep's 4-byte candidate can't hold) fall to data there, so a targeted
+   round-trip guards them. Byte-identical to `asl` (`cpu Z8002`).
 9. **Block / string** — `LDIR`/`LDDR`/`CPIR`/`CPD`/`TR*`/… (the repeat group).
 10. **I/O** — `IN`/`OUT`/`INIR`/`OTIR`/`SIN`/`SOUT`/… (privileged).
 11. **CPU control** — `NOP`/`HALT`/`EI`/`DI`/`LDCTL`/`LDPS`/`MSET`/flag ops.

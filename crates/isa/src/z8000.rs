@@ -712,6 +712,87 @@ pub fn bit_decode(top: u8) -> Option<&'static Bit> {
     BITS.iter().find(|b| b.base6 == base6)
 }
 
+// ---------------------------------------------------------------------------
+// Multiply / divide (increment 8): MULT / MULTL / DIV / DIVL
+// ---------------------------------------------------------------------------
+
+/// A multiply / divide instruction. Dyadic-shaped — `MM base6 | field << 4 |
+/// dest`, the source reached by R / IM / IR / DA / X exactly as the dyadic
+/// family — but with **asymmetric operand sizes**: the destination is a double-
+/// width accumulator (a long `rr` pair for `MULT`/`DIV`, a quad `rq` for
+/// `MULTL`/`DIVL`) while the source (and its immediate width) is one size
+/// smaller (`MULT`/`DIV` multiply/divide by a word, `MULTL`/`DIVL` by a long).
+pub struct MulDiv {
+    pub mnemonic: &'static str,
+    pub base6: u8,
+    /// The destination accumulator's size: [`Long`](Size::Long) (`rr`) or
+    /// [`Quad`](Size::Quad) (`rq`).
+    pub dest: Size,
+    /// The source operand's size (and immediate width):
+    /// [`Word`](Size::Word) or [`Long`](Size::Long).
+    pub src: Size,
+    pub summary: &'static str,
+}
+
+/// The multiply / divide instructions (increment 8).
+pub const MULDIV: &[MulDiv] = &[
+    MulDiv {
+        mnemonic: "MULT",
+        base6: 0x19,
+        dest: Size::Long,
+        src: Size::Word,
+        summary: "Multiply (word)",
+    },
+    MulDiv {
+        mnemonic: "MULTL",
+        base6: 0x18,
+        dest: Size::Quad,
+        src: Size::Long,
+        summary: "Multiply long",
+    },
+    MulDiv {
+        mnemonic: "DIV",
+        base6: 0x1B,
+        dest: Size::Long,
+        src: Size::Word,
+        summary: "Divide (word)",
+    },
+    MulDiv {
+        mnemonic: "DIVL",
+        base6: 0x1A,
+        dest: Size::Quad,
+        src: Size::Long,
+        summary: "Divide long",
+    },
+];
+
+/// Whether register number `reg` is a legal register of `size` (a long `rr`
+/// pair is even; a quad `rq` a multiple of four; word / byte unrestricted).
+#[must_use]
+pub fn reg_aligned(reg: u16, size: Size) -> bool {
+    match size {
+        Size::Long => reg.is_multiple_of(2),
+        Size::Quad => reg.is_multiple_of(4),
+        _ => true,
+    }
+}
+
+/// Find a multiply / divide instruction by mnemonic (case-insensitive).
+#[must_use]
+pub fn muldiv_lookup(mnemonic: &str) -> Option<&'static MulDiv> {
+    MULDIV
+        .iter()
+        .find(|m| m.mnemonic.eq_ignore_ascii_case(mnemonic))
+}
+
+/// Decode a multiply / divide instruction by its opcode top byte's `base6`, or
+/// `None`.
+#[must_use]
+pub fn muldiv_decode(top: u8) -> Option<&'static MulDiv> {
+    let base6 = top & 0x3F;
+    MULDIV.iter().find(|m| m.base6 == base6)
+}
+
 /// Operand size, which fixes register naming and immediate width.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Size {
