@@ -15,9 +15,17 @@ resolver = "2"
 members = [
     "crates/isa",
     "crates/isa-disasm",
+    "crates/dbg198x",
     "crates/asm198x",
 ]
 default-members = ["crates/asm198x"]
+
+# External dependencies (the workspace's first — the debug-info crate warrants
+# the ecosystem serializer; see crates/dbg198x and the plan's KTD1). Kept here
+# so versions are managed in one place.
+[workspace.dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
 
 [workspace.package]
 edition = "2024"
