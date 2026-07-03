@@ -14,9 +14,10 @@
 //! `RLC`/`RRC` + byte, `EXTSB`/`EXTS`/`EXTSL`), the **bit ops** (increment 7:
 //! `BIT`/`SET`/`RES` + byte, static and dynamic), **multiply / divide**
 //! (increment 8: `MULT`/`MULTL`/`DIV`/`DIVL`), the **block / string** repeat
-//! group (increment 9: `LDx`/`CPx`/`CPSx`/`TRxB`/`TRTxB`), and the privileged
+//! group (increment 9: `LDx`/`CPx`/`CPSx`/`TRxB`/`TRTxB`), the privileged
 //! **I/O** group (increment 10: `IN`/`OUT`/`SIN`/`SOUT` + the block-I/O repeat
-//! ops, `asl` needing `supmode on`).
+//! ops, `asl` needing `supmode on`), and the **CPU-control** group (increment
+//! 11: `NOP`/`HALT`/`EI`/`DI`/`IRET`/`LDCTL`/`LDPS`/`MSET`/`SETFLG`/`SC`/…).
 //!
 //! A dyadic instruction packs its operands as fields in the opcode word, emitted
 //! through the engine's computed-operand seam ([`Operation::Encoded`]): a
@@ -154,6 +155,8 @@ fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
                 encode_simple_io(sio, args, line)?
             } else if let Some(bio) = isa::z8000::block_io_lookup(&mn) {
                 encode_block_io(bio, args, line)?
+            } else if let Some(c) = isa::z8000::control_lookup(&mn) {
+                encode_control(c, args, line)?
             } else {
                 encode(&mn, args, line)?
             }
@@ -645,6 +648,125 @@ fn encode_muldiv(md: &isa::z8000::MulDiv, args: &str, line: usize) -> Result<Ope
     let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | dest));
     pieces.extend(ext);
     Ok(Operation::Encoded(pieces))
+}
+
+/// Encode a CPU-control instruction (`NOP`/`HALT`/`EI`/`DI`/`IRET`/`LDCTL`/
+/// `LDPS`/`MSET`/`MRES`/`MBIT`/`MREQ`/`SETFLG`/`RESFLG`/`COMFLG`/`SC`). Each
+/// sub-group has its own small encoding; see [`isa::z8000::ControlKind`].
+fn encode_control(c: &isa::z8000::Control, args: &str, line: usize) -> Result<Operation, AsmError> {
+    use isa::z8000::ControlKind;
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let err = |m: &str| AsmError::new(line, format!("`{}` {m}", c.mnemonic));
+    let word = match c.kind {
+        ControlKind::Fixed(w) => {
+            if !ops.is_empty() {
+                return Err(err("takes no operands"));
+            }
+            w
+        }
+        ControlKind::Mreq => {
+            let [r] = ops.as_slice() else {
+                return Err(err("takes one register"));
+            };
+            let reg = word_reg(r).ok_or_else(|| err("needs a register"))?;
+            0x7B00 | (reg << 4) | 0x0D
+        }
+        ControlKind::Flag(subop) => {
+            if ops.is_empty() {
+                return Err(err("needs at least one flag"));
+            }
+            let mut mask = 0u16;
+            for f in &ops {
+                mask |= u16::from(isa::z8000::flag_bit(f).ok_or_else(|| err("bad flag"))?);
+            }
+            0x8D00 | (mask << 4) | u16::from(subop)
+        }
+        ControlKind::Intr(ei) => {
+            let (mut vi, mut nvi) = (false, false);
+            for op in &ops {
+                match op.to_ascii_lowercase().as_str() {
+                    "vi" => vi = true,
+                    "nvi" => nvi = true,
+                    _ => return Err(err("interrupt must be vi or nvi")),
+                }
+            }
+            if !vi && !nvi {
+                return Err(err("needs vi and/or nvi"));
+            }
+            let low = u16::from(ei) << 2 | u16::from(!vi) << 1 | u16::from(!nvi);
+            0x7C00 | low
+        }
+        ControlKind::Ldctl(size) => {
+            let [a, b] = ops.as_slice() else {
+                return Err(err("takes a register and a control register"));
+            };
+            // The operand that parses as a register decides the direction: a
+            // leading register is a load (reg <- ctrl); otherwise a store.
+            let (reg, ctrl_s, store) = match size_reg(a, size) {
+                Some(r) => (r, *b, false),
+                None => (
+                    size_reg(b, size).ok_or_else(|| err("needs a register"))?,
+                    *a,
+                    true,
+                ),
+            };
+            let code = if matches!(size, Size::Byte) {
+                if ctrl_s.eq_ignore_ascii_case("flags") {
+                    1
+                } else {
+                    return Err(err("byte control register must be FLAGS"));
+                }
+            } else {
+                isa::z8000::word_ctrl_code(ctrl_s).ok_or_else(|| err("invalid control register"))?
+            };
+            let top: u16 = if matches!(size, Size::Byte) {
+                0x8C
+            } else {
+                0x7D
+            };
+            (top << 8) | (reg << 4) | u16::from(code | if store { 8 } else { 0 })
+        }
+        ControlKind::Ldps => {
+            let [s] = ops.as_slice() else {
+                return Err(err("takes one source operand"));
+            };
+            return match operand(s, Size::Word, line)? {
+                Operand::Ir(p) if p != 0 => {
+                    Ok(Operation::Encoded(Vec::from(word_lit(0x3900 | (p << 4)))))
+                }
+                Operand::Da(e) => {
+                    let mut pieces = Vec::from(word_lit(0x7900));
+                    pieces.push(ext_word(e));
+                    Ok(Operation::Encoded(pieces))
+                }
+                Operand::Indexed(e, i) => {
+                    let mut pieces = Vec::from(word_lit(0x7900 | (i << 4)));
+                    pieces.push(ext_word(e));
+                    Ok(Operation::Encoded(pieces))
+                }
+                _ => Err(err("needs an @Rn / address / indexed source")),
+            };
+        }
+        ControlKind::Sc => {
+            let [i] = ops.as_slice() else {
+                return Err(err("takes one #n operand"));
+            };
+            let n = fold_const(
+                &value(i.trim_start_matches('#'), line)?,
+                &BTreeMap::new(),
+                line,
+            )?;
+            if !(0..=255).contains(&n) {
+                return Err(err("code must be 0..=255"));
+            }
+            0x7F00 | n as u16
+        }
+    };
+    Ok(Operation::Encoded(Vec::from(word_lit(word))))
 }
 
 /// Encode a simple I/O instruction (`IN`/`OUT`/`SIN`/`SOUT` + byte). The port is

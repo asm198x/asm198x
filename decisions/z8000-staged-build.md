@@ -181,10 +181,34 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
     fall to data there (word-2 zero top nibble) so a direct differential over all
     44 plus a round-trip guard the group. R0 is rejected as an indirect port (it
     is not a legal base). `cpu Z8002`.
-11. **CPU control** — `NOP`/`HALT`/`EI`/`DI`/`LDCTL`/`LDPS`/`MSET`/flag ops.
+11. **CPU control** — ✅ **landed (2026-07-03).** 16 status / control
+    instructions: `NOP`, `HALT`, `IRET`, the multi-micro `MSET`/`MRES`/`MBIT`/
+    `MREQ`, the flag ops `SETFLG`/`RESFLG`/`COMFLG`, `EI`/`DI`, `LDCTL`/`LDCTLB`,
+    `LDPS`, and `SC`. A `Control` table + `ControlKind` enum, since the sub-groups
+    have unrelated encodings, each keyed by a **distinct top byte** on decode:
+    `0x7A` HALT, `0x7B` IRET/MSET/MRES/MBIT/MREQ, `0x7C` EI/DI, `0x7D` LDCTL,
+    `0x7F` SC, `0x8C` LDCTLB, `0x8D` flag ops + NOP, `0x39`/`0x79` LDPS. Notable
+    encodings: EI/DI's low two bits mark the **excluded** interrupts (bit 1 vi,
+    bit 0 nvi, so `di vi,nvi` = 0); the flag ops pack a `C=8/Z=4/S=2/P=1` mask in
+    the high nibble with subop 1/3/5, and **`NOP` is `0x8D07`** (the same page,
+    subop 7, mask 0); `LDCTL` codes are `FCW` 2 / `REFRESH` 3 / `PSAP` 5 / `NSP`
+    7 with `+8` for the store direction (segmented `PSAPSEG` 4 / `NSPSEG` 6 are
+    Z8001-only and rejected); `SC #n` is `0x7F00 | n`. The `0x8C`/`0x8D` pages are
+    shared with the increment-4 byte/word single-ops (`COMB`/`COM`/…, low nibbles
+    0/2/4/6/8), which the earlier `decode_mono` pass claims first — the control
+    low nibbles (1/3/5/7/9) never collide. **All are position-independent, so the
+    group is fully opcode-sweep-verified** (plus a direct differential and
+    round-trip). `cpu Z8002`.
 12. **Segmented Z8001** — widen DA/X/RA address operands to segmented addresses
     as a target-extension over the non-segmented base (the 65816-over-6502
     pattern). Not new instructions — touches every memory-addressing op.
+
+**Deferred miscellany (a cleanup pass before or alongside Z8001):** `TCC`/`TCCB`
+(test condition code, ALU-flavoured), `LDK` (load 4-bit constant), the
+PC-relative `LDR`/`LDRB`/`LDRL` (needs the relative seam, footnoted since
+increment 2), and `RLDB`/`RRDB` (rotate digit — not a repeat instruction, noted
+in increment 9). These decode as `word` data today and can land as a small
+final increment.
 
 Each step: probe `asl` for the group's exact encodings, add the table rows +
 dialect arm + decoder arm, extend the round-trip test, keep the sweep green,

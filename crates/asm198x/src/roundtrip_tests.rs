@@ -458,6 +458,46 @@ fn round_trips_z8000_io_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_z8000_cpu_control_through_asl_syntax() {
+    // Increment 11: the CPU-control / status group. All are position-independent
+    // and opcode-sweep-verified; this guards the round-trip (including the
+    // canonical flag order and control-register names).
+    let source = "\
+        \torg 0\n\
+        \tnop\n\
+        \thalt\n\
+        \tiret\n\
+        \tmset\n\
+        \tmres\n\
+        \tmbit\n\
+        \tmreq r1\n\
+        \tsetflg c\n\
+        \tsetflg c,z,s,p\n\
+        \tresflg s\n\
+        \tcomflg p\n\
+        \tei vi\n\
+        \tei vi,nvi\n\
+        \tdi nvi\n\
+        \tldctl r1,fcw\n\
+        \tldctl fcw,r1\n\
+        \tldctl r2,refresh\n\
+        \tldctl r4,psap\n\
+        \tldctl nsp,r6\n\
+        \tldctlb rl1,flags\n\
+        \tldctlb flags,rh3\n\
+        \tldps @r2\n\
+        \tldps 1234h\n\
+        \tldps 5000h(r3)\n\
+        \tsc #0\n\
+        \tsc #42h\n\
+        \tsc #255\n";
+    let original = assemble_z8000(source).expect("assemble");
+    let listing = listing_z8000(&original.bytes, original.origin);
+    let re = assemble_z8000(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_z8000_control_through_asl_syntax() {
     // Increment 3: program control — the position-dependent JR / DJNZ / CALR
     // the opcode sweep can't batch, plus JP / CALL / RET with condition codes.
