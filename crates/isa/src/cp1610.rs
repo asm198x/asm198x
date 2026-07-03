@@ -16,9 +16,11 @@
 //! transfer (`GSWD`/`RSWD`), and the register-register dyadic group
 //! (`MOVR`/`ADDR`/`SUBR`/`CMPR`/`ANDR`/`XORR`). **Increment 2** adds the
 //! register-only shift / rotate group (`SWAP`/`SLL`/`RLC`/`SLLC`/`SLR`/`SAR`/
-//! `RRC`/`SARC`, with a 1-or-2 count). The memory, immediate, and branch groups
-//! arrive in later increments. Every base opcode is validated byte-for-byte
-//! against `asl` (`cpu CP-1600`) — see `crates/asm198x/tests/conformance.rs`.
+//! `RRC`/`SARC`, with a 1-or-2 count). **Increment 3** adds the two-decle relative
+//! branches (see [`BRANCH_CONDS`] and `Piece::Branch` in the engine). The memory
+//! and immediate groups arrive in later increments. Every base opcode is
+//! validated byte-for-byte against `asl` (`cpu CP-1600`) — see
+//! `crates/asm198x/tests/conformance.rs`.
 
 use crate::{Endianness, InstructionSet};
 
@@ -104,6 +106,27 @@ pub fn decode(word: u16) -> Option<&'static Insn> {
         }
     }
     None
+}
+
+/// The sixteen conditional-branch mnemonics, indexed by the 4-bit condition code
+/// in the low nibble of a `0x200`-page branch opcode. Bit 3 negates the sense, so
+/// the second half mirrors the first (`B`/`NOPP`, `BC`/`BNC`, …). `NOPP` (code 8,
+/// "branch never") is a two-word no-op and takes no target operand. These are the
+/// `asl` (`cpu CP-1600`) spellings; the external-condition branch `BEXT` (bit 4
+/// set) is separate — its low nibble is an operand, not the mnemonic.
+pub const BRANCH_CONDS: [&str; 16] = [
+    "b", "bc", "bov", "bpl", "beq", "blt", "ble", "busc", // codes 0–7
+    "nopp", "bnc", "bnov", "bmi", "bneq", "bge", "bgt", "besc", // codes 8–15
+];
+
+/// The 4-bit condition code for a conditional-branch mnemonic, or `None`. `NOPP`
+/// resolves to code 8, but callers encode it specially (it takes no target).
+#[must_use]
+pub fn branch_cond(mnemonic: &str) -> Option<u8> {
+    BRANCH_CONDS
+        .iter()
+        .position(|m| m.eq_ignore_ascii_case(mnemonic))
+        .map(|i| i as u8)
 }
 
 /// Minimal set for the `Dialect` trait — the CP1610 dialect encodes through the

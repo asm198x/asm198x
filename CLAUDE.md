@@ -286,14 +286,17 @@ curriculum corpus:
   the same **field-packed** bespoke-table pattern as TMS9900 (a `Class` fixing the
   field layout, keyed by dialect + field disassembler), **not** the sub-byte model
   the roadmap first assumed. Built as **sweep-verified increments** like the
-  Z8000; **increments 1–2** cover the single-decle register / implied groups
+  Z8000; **increments 1–3** cover the single-decle register / implied groups
   (control ops, register-unary arithmetic, `GSWD`/`RSWD`, the register-register
-  dyadic `MOVR`/`ADDR`/…) and the register-only shift / rotate group
-  (`SWAP`/`SLL`/`RLC`/`SLLC`/`SLR`/`SAR`/`RRC`/`SARC`, count 1 or 2). Validated
-  byte-identical against `asl` (`cpu CP-1600`) by a decle-space sweep, a
-  differential, and round-trips. jzIntv / as1600 mnemonics. The branch group
-  (increment 3) needs a small engine extension for its sign-selected direction
-  bit. See `decisions/cp1610-staged-build.md`; closes the CP1610 half of #11.
+  dyadic `MOVR`/`ADDR`/…), the register-only shift / rotate group
+  (`SWAP`/`SLL`/`RLC`/`SLLC`/`SLR`/`SAR`/`RRC`/`SARC`, count 1 or 2), and the
+  two-decle relative branches (`Bcc`/`BEXT`/`NOPP`). The branch group needed a
+  small engine extension — a `Piece::Branch` whose opcode word takes a direction
+  bit from the sign of the displacement (the linear `Piece::Packed` can't express
+  it). Validated byte-identical against `asl` (`cpu CP-1600`) by a decle-space
+  sweep (register/shift), plus differentials and round-trips (the
+  position-dependent branches). jzIntv / as1600 mnemonics. See
+  `decisions/cp1610-staged-build.md`; closes the CP1610 half of #11.
 - **Z8000** (complete) — Zilog Z8000 syntax (`dialects::z8000`, `--cpu z8000`/
   `z8002` non-segmented, `--cpu z8001` segmented) over a fresh standalone
   `isa::z8000` spec. The family's

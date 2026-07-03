@@ -2733,7 +2733,7 @@ pub fn disassemble_cp1610(code: &[u8], origin: u16) -> Vec<Line> {
             continue;
         }
         let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
-        match decode_cp1610(word) {
+        match decode_cp1610(code, pos, addr) {
             Some((text, len)) => {
                 out.push(Line {
                     addr: u32::from(addr),
@@ -2772,11 +2772,42 @@ pub fn listing_cp1610(code: &[u8], origin: u16) -> String {
     s
 }
 
-/// Decode one CP1610 decle `word`. Returns the reassemblable text and byte length
-/// (2 for every increment-1 instruction), or `None` for an undecodable word
-/// (rendered as `word` data by the caller).
-fn decode_cp1610(word: u16) -> Option<(String, usize)> {
+/// Decode one CP1610 instruction at byte offset `pos`, `addr` its (byte) load
+/// address. Returns the reassemblable text and byte length, or `None` for an
+/// undecodable word / a branch missing its magnitude (rendered as `word` data by
+/// the caller).
+fn decode_cp1610(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> {
     use isa::cp1610::Class;
+    let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
+
+    // Branch page (0x200–0x23F): a two-decle relative branch. The magnitude word
+    // follows; the target is measured from two decles past the opcode, backward
+    // branches biased by one (`EA = PC - mag - 1`).
+    if word & 0x3C0 == 0x200 {
+        if pos + 4 > code.len() {
+            return None; // magnitude word runs past the buffer
+        }
+        let mag = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
+        // Byte address after both decles; each decle is two bytes.
+        let pc = addr.wrapping_add(4);
+        let target = if word & 0x20 != 0 {
+            pc.wrapping_sub(mag.wrapping_mul(2)).wrapping_sub(2)
+        } else {
+            pc.wrapping_add(mag.wrapping_mul(2))
+        };
+        let text = if word & 0x10 != 0 {
+            format!("bext 0{target:04X}H,{}", word & 0xF)
+        } else if word & 0xF == 8 {
+            "nopp".to_string() // branch-never: a two-word no-op
+        } else {
+            format!(
+                "{} 0{target:04X}H",
+                isa::cp1610::BRANCH_CONDS[(word & 0xF) as usize]
+            )
+        };
+        return Some((text, 4));
+    }
+
     let insn = isa::cp1610::decode(word)?;
     let mn = insn.mnemonic.to_ascii_lowercase();
     let text = match insn.class {

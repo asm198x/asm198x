@@ -2,9 +2,10 @@
 
 **Status:** 🚧 **In progress (started 2026-07-03).** The GI CP1610 (Mattel
 Intellivision CPU) is built as sweep-verified increments, like the Z8000.
-**Increments 1–2** — the single-decle register / implied groups and the
-register-only shift / rotate group — have landed, byte-identical to `asl`
-(`cpu CP-1600`). Closes the CP1610 half of asm198x/asm198x#11 when complete.
+**Increments 1–3** — the single-decle register / implied groups, the
+register-only shift / rotate group, and the two-decle relative branches — have
+landed, byte-identical to `asl` (`cpu CP-1600`). Closes the CP1610 half of
+asm198x/asm198x#11 when complete.
 
 ## The decle: 10-bit, but byte-aligned
 
@@ -69,14 +70,22 @@ directive on the way back in. (The accepted CPU spelling is also fussy:
    `base | (count-1) << 2 | reg`, R0–R3, count 1 or 2 — a bare register is
    count 1). Single-decle, no extension word, so no engine change. Verified by a
    differential, a round-trip, and the sweep.
-3. **Branches** — the PC-relative branch group (`B`/`Bcc`/`NOPP` and the negated
-   `BNC`/`BMI`/… forms, `0x200 | cond` with bit 3 negating the condition). These
-   need an **engine extension**: the branch is two decles where the *sign* of the
-   displacement selects a **direction bit** (bit 5) in the opcode word — forward
-   `EA = PC + d`, backward `EA = PC − d − 1`, `PC = opcode + 2` decles — which the
-   linear `Piece::Packed` can't express. Isolated into its own increment so the
-   shared-engine change is reviewed and sweep-checked on its own. This is where
-   decle addressing bites (the byte distance is decle-scaled).
+3. **Branches** — ✅ **landed (2026-07-03).** The two-decle relative branch group:
+   the 16 conditional branches (`B`/`BC`/`BOV`/`BPL`/`BEQ`/`BLT`/`BLE`/`BUSC` and
+   the bit-3-negated `NOPP`/`BNC`/`BNOV`/`BMI`/`BNEQ`/`BGE`/`BGT`/`BESC`), the
+   external-condition `BEXT target, ec` (bit 4 set, `ec` in the low nibble), and
+   `NOPP` (the branch-never two-word no-op, no operand). Required a small **engine
+   extension** — a new `Piece::Branch`: the branch is two decles where the *sign*
+   of the displacement selects a **direction bit** (`0x20`) in the opcode word
+   (forward `EA = PC + d`, backward `EA = PC − d − 1`, `PC = opcode + 2` decles),
+   which the linear `Piece::Packed` can't express. The byte distance is divided by
+   `unit` (2, bytes per decle) to the decle magnitude, so a label-based branch
+   matches `asl` exactly (both compute the same decle displacement). Isolated into
+   its own increment so the shared-engine change was reviewed and sweep-checked on
+   its own. Branches are **position-dependent**, so — like the TMS9900 jumps —
+   they fall out of the sweep and are covered by a differential + a round-trip
+   test instead. The disassembler prints byte-address targets, self-consistent
+   through the engine.
 4. **Memory modes + SDBD** — the indirect / auto-increment `@Rn` modes, direct
    address, immediate (`MVII`/`ADDI`/…), the `SDBD` double-byte-immediate prefix,
    and `JUMP` / `JSR`. This is where the `0x0035` / `0x0037` NOP/SIN variants and
