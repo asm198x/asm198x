@@ -14,10 +14,11 @@
 //! covers the single-decle register / implied groups: the control ops, the
 //! register-unary arithmetic (`INCR`/`DECR`/`COMR`/`NEGR`/`ADCR`), status
 //! transfer (`GSWD`/`RSWD`), and the register-register dyadic group
-//! (`MOVR`/`ADDR`/`SUBR`/`CMPR`/`ANDR`/`XORR`). The memory, immediate, shift, and
-//! branch groups arrive in later increments. Every base opcode is validated
-//! byte-for-byte against `asl` (`cpu CP-1600`) — see
-//! `crates/asm198x/tests/conformance.rs`.
+//! (`MOVR`/`ADDR`/`SUBR`/`CMPR`/`ANDR`/`XORR`). **Increment 2** adds the
+//! register-only shift / rotate group (`SWAP`/`SLL`/`RLC`/`SLLC`/`SLR`/`SAR`/
+//! `RRC`/`SARC`, with a 1-or-2 count). The memory, immediate, and branch groups
+//! arrive in later increments. Every base opcode is validated byte-for-byte
+//! against `asl` (`cpu CP-1600`) — see `crates/asm198x/tests/conformance.rs`.
 
 use crate::{Endianness, InstructionSet};
 
@@ -37,6 +38,11 @@ pub enum Class {
     /// Two registers — source in bits `5:3`, destination in bits `2:0`:
     /// `base | src << 3 | dst`. `MOVR`, `ADDR`, `SUBR`, `CMPR`, `ANDR`, `XORR`.
     RegReg,
+    /// A shift / rotate — register `R0`–`R3` in bits `1:0`, a 1-or-2 count in
+    /// bit `2` (0 = once, 1 = twice): `base | (count - 1) << 2 | reg`. `SWAP`,
+    /// `SLL`, `RLC`, `SLLC`, `SLR`, `SAR`, `RRC`, `SARC`. Register-only, no memory
+    /// form.
+    Shift,
 }
 
 /// One CP1610 mnemonic: its base opcode (operand fields zero) and [`Class`].
@@ -57,7 +63,7 @@ impl Class {
         match self {
             Class::Implied => 0x3FF,
             Class::GetStatus => 0x3FC,
-            Class::RegUnary => 0x3F8,
+            Class::RegUnary | Class::Shift => 0x3F8,
             Class::RegReg => 0x3C0,
         }
     }
@@ -85,6 +91,7 @@ pub fn decode(word: u16) -> Option<&'static Insn> {
         Class::Implied,
         Class::GetStatus,
         Class::RegUnary,
+        Class::Shift,
         Class::RegReg,
     ];
     for &class in ORDER {
@@ -108,7 +115,7 @@ pub const SET: InstructionSet = InstructionSet {
     instructions: &[],
 };
 
-use Class::{GetStatus, Implied, RegReg, RegUnary};
+use Class::{GetStatus, Implied, RegReg, RegUnary, Shift};
 
 /// Every base opcode covered so far, validated against `asl` (`cpu CP-1600`).
 pub const INSTRUCTIONS: &[Insn] = &[
@@ -247,5 +254,54 @@ pub const INSTRUCTIONS: &[Insn] = &[
         base: 0x1C0,
         class: RegReg,
         summary: "XOR register with register",
+    },
+    // --- Shifts / rotates (base | (count-1) << 2 | reg, R0–R3, count 1|2) ---
+    Insn {
+        mnemonic: "SWAP",
+        base: 0x040,
+        class: Shift,
+        summary: "Swap byte halves",
+    },
+    Insn {
+        mnemonic: "SLL",
+        base: 0x048,
+        class: Shift,
+        summary: "Shift logical left",
+    },
+    Insn {
+        mnemonic: "RLC",
+        base: 0x050,
+        class: Shift,
+        summary: "Rotate left through carry",
+    },
+    Insn {
+        mnemonic: "SLLC",
+        base: 0x058,
+        class: Shift,
+        summary: "Shift left, carry gets the bit shifted out",
+    },
+    Insn {
+        mnemonic: "SLR",
+        base: 0x060,
+        class: Shift,
+        summary: "Shift logical right",
+    },
+    Insn {
+        mnemonic: "SAR",
+        base: 0x068,
+        class: Shift,
+        summary: "Shift arithmetic right",
+    },
+    Insn {
+        mnemonic: "RRC",
+        base: 0x070,
+        class: Shift,
+        summary: "Rotate right through carry",
+    },
+    Insn {
+        mnemonic: "SARC",
+        base: 0x078,
+        class: Shift,
+        summary: "Shift arithmetic right, carry gets the bit shifted out",
     },
 ];

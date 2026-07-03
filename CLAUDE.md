@@ -286,11 +286,14 @@ curriculum corpus:
   the same **field-packed** bespoke-table pattern as TMS9900 (a `Class` fixing the
   field layout, keyed by dialect + field disassembler), **not** the sub-byte model
   the roadmap first assumed. Built as **sweep-verified increments** like the
-  Z8000; **increment 1** covers the single-decle register / implied groups
-  (control ops, register-unary arithmetic, `GSWD`/`RSWD`, and the register-register
-  dyadic `MOVR`/`ADDR`/…). Validated byte-identical against `asl` (`cpu CP-1600`)
-  by a decle-space sweep, a differential, and a round-trip. jzIntv / as1600
-  mnemonics. See `decisions/cp1610-staged-build.md`; closes the CP1610 half of #11.
+  Z8000; **increments 1–2** cover the single-decle register / implied groups
+  (control ops, register-unary arithmetic, `GSWD`/`RSWD`, the register-register
+  dyadic `MOVR`/`ADDR`/…) and the register-only shift / rotate group
+  (`SWAP`/`SLL`/`RLC`/`SLLC`/`SLR`/`SAR`/`RRC`/`SARC`, count 1 or 2). Validated
+  byte-identical against `asl` (`cpu CP-1600`) by a decle-space sweep, a
+  differential, and round-trips. jzIntv / as1600 mnemonics. The branch group
+  (increment 3) needs a small engine extension for its sign-selected direction
+  bit. See `decisions/cp1610-staged-build.md`; closes the CP1610 half of #11.
 - **Z8000** (complete) — Zilog Z8000 syntax (`dialects::z8000`, `--cpu z8000`/
   `z8002` non-segmented, `--cpu z8001` segmented) over a fresh standalone
   `isa::z8000` spec. The family's

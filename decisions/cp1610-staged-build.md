@@ -2,9 +2,9 @@
 
 **Status:** 🚧 **In progress (started 2026-07-03).** The GI CP1610 (Mattel
 Intellivision CPU) is built as sweep-verified increments, like the Z8000.
-**Increment 1** — the single-decle register / implied groups — has landed,
-byte-identical to `asl` (`cpu CP-1600`). Closes the CP1610 half of
-asm198x/asm198x#11 when complete.
+**Increments 1–2** — the single-decle register / implied groups and the
+register-only shift / rotate group — have landed, byte-identical to `asl`
+(`cpu CP-1600`). Closes the CP1610 half of asm198x/asm198x#11 when complete.
 
 ## The decle: 10-bit, but byte-aligned
 
@@ -64,11 +64,20 @@ directive on the way back in. (The accepted CPU spelling is also fussy:
    (`MOVR`/`ADDR`/`SUBR`/`CMPR`/`ANDR`/`XORR`). Four `Class` variants (`Implied`,
    `RegUnary`, `GetStatus`, `RegReg`), all one decle, no extension words. Verified
    by a direct differential, a round-trip test, and the decle-space sweep.
-2. **Shifts / rotates + branches** — the register-only shift group
-   (`SWAP`/`SLL`/`RLC`/`SLLC`/`SLR`/`SAR`/`RRC`/`SARC`, single/double count) and
-   the PC-relative branch group (`B`/`Bcc`/`NOPP`) on the computed-operand seam
-   (decle-scaled displacements — the point where decle addressing bites).
-3. **Memory modes + SDBD** — the indirect / auto-increment `@Rn` modes, direct
+2. **Shifts / rotates** — ✅ **landed (2026-07-03).** The register-only shift
+   group `SWAP`/`SLL`/`RLC`/`SLLC`/`SLR`/`SAR`/`RRC`/`SARC` (`Class::Shift`,
+   `base | (count-1) << 2 | reg`, R0–R3, count 1 or 2 — a bare register is
+   count 1). Single-decle, no extension word, so no engine change. Verified by a
+   differential, a round-trip, and the sweep.
+3. **Branches** — the PC-relative branch group (`B`/`Bcc`/`NOPP` and the negated
+   `BNC`/`BMI`/… forms, `0x200 | cond` with bit 3 negating the condition). These
+   need an **engine extension**: the branch is two decles where the *sign* of the
+   displacement selects a **direction bit** (bit 5) in the opcode word — forward
+   `EA = PC + d`, backward `EA = PC − d − 1`, `PC = opcode + 2` decles — which the
+   linear `Piece::Packed` can't express. Isolated into its own increment so the
+   shared-engine change is reviewed and sweep-checked on its own. This is where
+   decle addressing bites (the byte distance is decle-scaled).
+4. **Memory modes + SDBD** — the indirect / auto-increment `@Rn` modes, direct
    address, immediate (`MVII`/`ADDI`/…), the `SDBD` double-byte-immediate prefix,
    and `JUMP` / `JSR`. This is where the `0x0035` / `0x0037` NOP/SIN variants and
    the exact `asl` data directive get pinned.

@@ -197,6 +197,20 @@ fn encode(mn: &str, args: &str, line: usize) -> Result<Operation, AsmError> {
             let (src, dst) = (reg(s, 7, line)?, reg(d, 7, line)?);
             insn.base | (src << 3) | dst
         }
+        Class::Shift => {
+            // `mn Rd` (shift once) or `mn Rd,2` (shift twice); R0–R3 only.
+            let (r, count) = match ops.as_slice() {
+                [r] => (reg(r, 3, line)?, 1),
+                [r, c] => (reg(r, 3, line)?, shift_count(c, line)?),
+                _ => {
+                    return Err(AsmError::new(
+                        line,
+                        format!("`{mn}` takes a register and an optional count"),
+                    ));
+                }
+            };
+            insn.base | ((count - 1) << 2) | r
+        }
     };
     Ok(Operation::Encoded(Vec::from(word_lit(word))))
 }
@@ -232,4 +246,16 @@ fn reg(tok: &str, max: u16, line: usize) -> Result<u16, AsmError> {
         .and_then(|n| n.parse::<u16>().ok())
         .filter(|&n| n <= max);
     n.ok_or_else(|| AsmError::new(line, format!("expected register r0..r{max}, got `{tok}`")))
+}
+
+/// Parse a shift count — either `1` or `2` (a shift shifts once or twice).
+fn shift_count(tok: &str, line: usize) -> Result<u16, AsmError> {
+    match tok.trim() {
+        "1" => Ok(1),
+        "2" => Ok(2),
+        other => Err(AsmError::new(
+            line,
+            format!("shift count must be 1 or 2, got `{other}`"),
+        )),
+    }
 }

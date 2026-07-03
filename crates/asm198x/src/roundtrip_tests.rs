@@ -622,6 +622,34 @@ fn round_trips_cp1610_registers_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_cp1610_shifts_through_asl_syntax() {
+    // Increment 2: the register-only shift / rotate group — every mnemonic across
+    // both the once and twice counts and the R0–R3 register range.
+    let source = "\
+        \torg 0\n\
+        \tswap r0\n\
+        \tswap r3,2\n\
+        \tsll r1\n\
+        \tsll r1,2\n\
+        \trlc r2\n\
+        \trlc r2,2\n\
+        \tsllc r0\n\
+        \tsllc r3,2\n\
+        \tslr r1\n\
+        \tslr r1,2\n\
+        \tsar r2\n\
+        \tsar r2,2\n\
+        \trrc r0\n\
+        \trrc r0,2\n\
+        \tsarc r3\n\
+        \tsarc r3,2\n";
+    let original = assemble_cp1610(source).expect("assemble");
+    let listing = listing_cp1610(&original.bytes, original.origin);
+    let re = assemble_cp1610(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_z8000_control_through_asl_syntax() {
     // Increment 3: program control — the position-dependent JR / DJNZ / CALR
     // the opcode sweep can't batch, plus JP / CALL / RET with condition codes.
