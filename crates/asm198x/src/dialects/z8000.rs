@@ -2,16 +2,20 @@
 //!
 //! Assembles against [`isa::z8000`] and produces a flat **big-endian** binary at
 //! the `org`. Numbers are Intel `h`-suffix hex (shared with the 8080 dialect).
-//! Registers are word `r0`–`r15`, byte `rh0`–`rh7` / `rl0`–`rl7`. Built as
-//! sweep-verified increments (see `decisions/z8000-staged-build.md`); this is
-//! **increment 1**, the dyadic arithmetic / logic / load family.
+//! Registers are word `r0`–`r15`, byte `rh0`–`rh7` / `rl0`–`rl7`, long
+//! `rr0`–`rr14`. Built as sweep-verified increments (see
+//! `decisions/z8000-staged-build.md`); this covers the **dyadic family**
+//! (increments 1–2): arithmetic / logic / compare / load / exchange /
+//! load-address.
 //!
 //! A dyadic instruction packs its operands as fields in the opcode word, emitted
 //! through the engine's computed-operand seam ([`Operation::Encoded`]): a
-//! literal first word (`MM ooooo b | ssss dddd`) followed, for the immediate /
-//! direct / indexed modes, by one 16-bit extension word (a byte immediate
-//! replicated into both halves). Validated byte-identical against `asl`
-//! (`cpu Z8002`).
+//! literal first word (`MM base6 | ssss dddd`) followed, for the immediate /
+//! direct / indexed modes, by an extension word (a byte immediate replicated
+//! into both halves, or a 32-bit long immediate). The instruction's
+//! [`Size`](isa::z8000::Size) fixes register naming and immediate width; its
+//! modes bitmask gates which addressing modes are legal. Validated byte-identical
+//! against `asl` (`cpu Z8002`).
 
 use std::collections::BTreeMap;
 
@@ -161,9 +165,11 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
 // Instruction encoding
 // ---------------------------------------------------------------------------
 
-/// A parsed operand in one of the increment-1 addressing modes.
+use isa::z8000::{Insn, Size};
+
+/// A parsed operand and the addressing mode it implies.
 enum Operand {
-    /// A register (word `r0`–`r15` or byte `rh`/`rl`), by encoded number.
+    /// A register (word / byte / long per the instruction size), by number.
     Reg(u16),
     /// Immediate `#n`.
     Imm(Expr),
@@ -180,11 +186,21 @@ fn word_lit(w: u16) -> [Piece; 2] {
     [Piece::Lit((w >> 8) as u8), Piece::Lit(w as u8)]
 }
 
-/// A plain 16-bit big-endian extension word (an address or a word immediate).
+/// A big-endian extension word (an address or a word immediate).
 fn ext_word(expr: Expr) -> Piece {
     Piece::Val {
         expr,
         bytes: 2,
+        rel: false,
+        signed: false,
+    }
+}
+
+/// A 32-bit big-endian long immediate (two words).
+fn ext_long(expr: Expr) -> Piece {
+    Piece::Val {
+        expr,
+        bytes: 4,
         rel: false,
         signed: false,
     }
@@ -202,6 +218,27 @@ fn byte_imm(expr: Expr) -> Piece {
     ext_word(dup)
 }
 
+/// The addressing-mode group (`MM`) for a mode bit.
+fn mm(mode: u8) -> u16 {
+    use isa::z8000::{IM, IR, R};
+    if mode & (IM | IR) != 0 {
+        0
+    } else if mode == R {
+        2
+    } else {
+        1
+    }
+}
+
+/// The immediate extension piece for a source of the given size.
+fn imm_piece(e: Expr, size: Size) -> Piece {
+    match size {
+        Size::Byte => byte_imm(e),
+        Size::Long => ext_long(e),
+        _ => ext_word(e),
+    }
+}
+
 fn encode(mn: &str, args: &str, line: usize) -> Result<Operation, AsmError> {
     let insn = isa::z8000::lookup(mn)
         .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mn}`")))?;
@@ -215,107 +252,55 @@ fn encode(mn: &str, args: &str, line: usize) -> Result<Operation, AsmError> {
         [a, b] => [*a, *b],
         _ => return Err(AsmError::new(line, format!("`{mn}` takes two operands"))),
     };
-    let dst = operand(dst_s, insn.byte, line)?;
-    let src = operand(src_s, insn.byte, line)?;
-    let b = u16::from(!insn.byte); // b bit: 1 = word, 0 = byte
+    let dst = operand(dst_s, insn.size, line)?;
+    let src = operand(src_s, insn.size, line)?;
 
-    // LD/LDB with a memory destination is a store (register → memory).
-    if matches!(mn, "LD" | "LDB") && !matches!(dst, Operand::Reg(_)) {
+    // A store-capable load with a memory destination is a store.
+    if let (Some(store), false) = (isa::z8000::store_entry(mn), matches!(dst, Operand::Reg(_))) {
         let Operand::Reg(srcreg) = src else {
             return Err(AsmError::new(
                 line,
                 format!("`{mn}` store needs a register source"),
             ));
         };
-        let store =
-            isa::z8000::store_entry(mn).ok_or_else(|| AsmError::new(line, "missing store form"))?;
-        return store_form(store.op, b, &dst, srcreg, line);
+        return dyadic(store, &dst, srcreg, line);
     }
 
-    // Otherwise the destination must be a register; the source varies.
+    // Otherwise the destination is a register; the source is the varying operand.
     let Operand::Reg(dstreg) = dst else {
         return Err(AsmError::new(
             line,
             format!("`{mn}` destination must be a register"),
         ));
     };
-    let top = |mm: u16| ((mm << 6) | (u16::from(insn.op) << 1) | b) as u8;
-    let mut pieces = Vec::new();
-    match src {
-        Operand::Reg(s) => pieces.extend(word_lit(u16::from(top(0b10)) << 8 | (s << 4) | dstreg)),
-        Operand::Ir(ptr) => {
-            if insn.reg_only {
-                return Err(AsmError::new(
-                    line,
-                    format!("`{mn}` allows only a register source"),
-                ));
-            }
-            pieces.extend(word_lit(u16::from(top(0b00)) << 8 | (ptr << 4) | dstreg));
-        }
-        Operand::Imm(e) => {
-            if insn.reg_only {
-                return Err(AsmError::new(
-                    line,
-                    format!("`{mn}` allows only a register source"),
-                ));
-            }
-            pieces.extend(word_lit(u16::from(top(0b00)) << 8 | dstreg));
-            pieces.push(if insn.byte { byte_imm(e) } else { ext_word(e) });
-        }
-        Operand::Da(e) => {
-            if insn.reg_only {
-                return Err(AsmError::new(
-                    line,
-                    format!("`{mn}` allows only a register source"),
-                ));
-            }
-            pieces.extend(word_lit(u16::from(top(0b01)) << 8 | dstreg));
-            pieces.push(ext_word(e));
-        }
-        Operand::Indexed(e, idx) => {
-            if insn.reg_only {
-                return Err(AsmError::new(
-                    line,
-                    format!("`{mn}` allows only a register source"),
-                ));
-            }
-            pieces.extend(word_lit(u16::from(top(0b01)) << 8 | (idx << 4) | dstreg));
-            pieces.push(ext_word(e));
-        }
+    dyadic(insn, &src, dstreg, line)
+}
+
+/// Encode one dyadic form: `variable` is the memory/immediate/register operand
+/// whose mode is being encoded; `reg` is the fixed register (destination for a
+/// load, source for a store) that occupies the second byte's low nibble.
+fn dyadic(insn: &Insn, variable: &Operand, reg: u16, line: usize) -> Result<Operation, AsmError> {
+    let (mode, field, ext): (u8, u16, Option<Piece>) = match variable {
+        Operand::Reg(s) => (isa::z8000::R, *s, None),
+        Operand::Ir(p) => (isa::z8000::IR, *p, None),
+        Operand::Imm(e) => (isa::z8000::IM, 0, Some(imm_piece(e.clone(), insn.size))),
+        Operand::Da(e) => (isa::z8000::DA, 0, Some(ext_word(e.clone()))),
+        Operand::Indexed(e, i) => (isa::z8000::X, *i, Some(ext_word(e.clone()))),
+    };
+    if insn.modes & mode == 0 {
+        return Err(AsmError::new(
+            line,
+            format!("`{}` does not allow that addressing mode", insn.mnemonic),
+        ));
     }
+    let top = (mm(mode) << 6) | u16::from(insn.base6);
+    let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | reg));
+    pieces.extend(ext);
     Ok(Operation::Encoded(pieces))
 }
 
-/// Encode an `LD`/`LDB` store (register → memory): the second byte is the
-/// memory pointer/index in the high nibble, the source register in the low.
-fn store_form(
-    op: u8,
-    b: u16,
-    dst: &Operand,
-    srcreg: u16,
-    line: usize,
-) -> Result<Operation, AsmError> {
-    let top = |mm: u16| ((mm << 6) | (u16::from(op) << 1) | b) as u8;
-    let mut pieces = Vec::new();
-    match dst {
-        Operand::Ir(ptr) => {
-            pieces.extend(word_lit(u16::from(top(0b00)) << 8 | (ptr << 4) | srcreg))
-        }
-        Operand::Da(e) => {
-            pieces.extend(word_lit(u16::from(top(0b01)) << 8 | srcreg));
-            pieces.push(ext_word(e.clone()));
-        }
-        Operand::Indexed(e, idx) => {
-            pieces.extend(word_lit(u16::from(top(0b01)) << 8 | (idx << 4) | srcreg));
-            pieces.push(ext_word(e.clone()));
-        }
-        _ => return Err(AsmError::new(line, "store destination must be memory")),
-    }
-    Ok(Operation::Encoded(pieces))
-}
-
-/// Parse an operand. `byte` selects byte-register naming for a bare register.
-fn operand(tok: &str, byte: bool, line: usize) -> Result<Operand, AsmError> {
+/// Parse an operand; a bare register is named per the instruction `size`.
+fn operand(tok: &str, size: Size, line: usize) -> Result<Operand, AsmError> {
     let t = tok.trim();
     let bad = || AsmError::new(line, format!("bad operand `{tok}`"));
 
@@ -323,7 +308,6 @@ fn operand(tok: &str, byte: bool, line: usize) -> Result<Operand, AsmError> {
         return Ok(Operand::Imm(value(imm, line)?));
     }
     if let Some(ptr) = t.strip_prefix('@') {
-        // Indirect register uses a word register.
         return Ok(Operand::Ir(word_reg(ptr).ok_or_else(bad)?));
     }
     if let Some(open) = t.find('(') {
@@ -331,23 +315,27 @@ fn operand(tok: &str, byte: bool, line: usize) -> Result<Operand, AsmError> {
         let idx = word_reg(&t[open + 1..close]).ok_or_else(bad)?;
         return Ok(Operand::Indexed(value(&t[..open], line)?, idx));
     }
-    if let Some(r) = reg(t, byte) {
+    if let Some(r) = size_reg(t, size) {
         return Ok(Operand::Reg(r));
     }
     // A bare expression is a direct address.
     Ok(Operand::Da(value(t, line)?))
 }
 
-/// Parse a register operand, byte (`rh`/`rl`) or word (`r`) per `byte`.
-fn reg(tok: &str, byte: bool) -> Option<u16> {
-    if byte { byte_reg(tok) } else { word_reg(tok) }
+/// Parse a register named for the instruction size. `Address` uses a word
+/// register (the `LDA` destination).
+fn size_reg(tok: &str, size: Size) -> Option<u16> {
+    match size {
+        Size::Byte => byte_reg(tok),
+        Size::Long => long_reg(tok),
+        Size::Word | Size::Address => word_reg(tok),
+    }
 }
 
 /// Word register `r0`–`r15`.
 fn word_reg(tok: &str) -> Option<u16> {
-    let t = tok.trim();
-    let n = t.strip_prefix(['r', 'R'])?;
-    // Reject `rh`/`rl` here so a byte register isn't taken as a word register.
+    let n = tok.trim().strip_prefix(['r', 'R'])?;
+    // Reject `rh`/`rl`/`rr`/`rq` so a byte/long register isn't taken as a word.
     if n.starts_with(['h', 'H', 'l', 'L', 'r', 'R', 'q', 'Q']) {
         return None;
     }
@@ -366,4 +354,15 @@ fn byte_reg(tok: &str) -> Option<u16> {
         .ok()
         .filter(|&v| v < 8)
         .map(|n| base + n)
+}
+
+/// Long register pair `rr0`–`rr14` (even).
+fn long_reg(tok: &str) -> Option<u16> {
+    let n = tok
+        .trim()
+        .to_ascii_lowercase()
+        .strip_prefix("rr")?
+        .parse::<u16>()
+        .ok()?;
+    (n < 16 && n % 2 == 0).then_some(n)
 }

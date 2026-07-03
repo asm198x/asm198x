@@ -166,7 +166,19 @@ fn round_trips_z8000_dyadic_through_asl_syntax() {
         \tld 3000h,r1\n\
         \tld 3000h(r5),r1\n\
         \tldb @r7,rl1\n\
-        \tldb 4000h,rl1\n";
+        \tldb 4000h,rl1\n\
+        \tldl rr2,rr4\n\
+        \tldl rr2,#12345678h\n\
+        \tldl rr6,5000h(r1)\n\
+        \tldl @r3,rr2\n\
+        \taddl rr2,rr4\n\
+        \tsubl rr6,rr8\n\
+        \tcpl rr10,rr12\n\
+        \tex r1,r2\n\
+        \tex r3,@r4\n\
+        \texb rl1,rl2\n\
+        \tlda r1,6000h\n\
+        \tlda r2,7000h(r3)\n";
     let original = assemble_z8000(source).expect("assemble");
     let listing = listing_z8000(&original.bytes, original.origin);
     let re = assemble_z8000(&listing).expect("reassemble");

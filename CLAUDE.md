@@ -288,14 +288,18 @@ curriculum corpus:
   self-consistent and each increment proves its group byte-identical without
   disturbing the rest. **Big-endian**, Intel `h`-hex, word regs `r0`–`r15` /
   byte `rh`/`rl`. Another **bespoke field-packed table** on the seam (like the
-  PDP-11). **Increment 1 landed:** the dyadic arithmetic / logic / load family
-  (`ADD`/`SUB`/`OR`/`AND`/`XOR`/`CP`/`LD` + `ADC`/`SBC` + byte forms) across the
-  register / immediate / indirect / direct / indexed modes, plus the `LD` store
-  forms — the `MM ooooo b | ssss dddd` first word, a zero source field selecting
-  IM/DA vs IR/X, byte immediates replicated into both halves. Validated
-  byte-identical against `asl` (`cpu Z8002`) by the opcode-space sweep (~64k
-  words) + a round-trip. Remaining increments (long, program control, shifts,
-  bit, block/IO, segmented Z8001) tracked in the decision record.
+  PDP-11), keyed on a **`base6` + `Size` + modes-bitmask** model: a form's top
+  byte is `MM << 6 | base6`, `Size` (byte/word/long/address) fixes register
+  naming + immediate width, and the modes bitmask gates each entry's addressing
+  modes. **Increments 1–2 landed:** the dyadic arithmetic / logic / compare /
+  load family (`ADD`/`SUB`/`OR`/`AND`/`XOR`/`CP`/`LD`, `ADC`/`SBC` register-only,
+  byte forms) across register / immediate / indirect / direct / indexed modes +
+  the `LD` store forms; then the **long** ops (`LDL`/`ADDL`/`SUBL`/`CPL` + long
+  store), **`EX`/`EXB`**, and **`LDA`**. A zero source field selects IM/DA over
+  IR/X; byte immediates replicate into both halves, long immediates are 32-bit.
+  Validated byte-identical against `asl` (`cpu Z8002`) by the opcode-space sweep
+  (~64k words) + a round-trip. Remaining increments (program control, shifts,
+  bit, single-operand, block/IO, segmented Z8001) tracked in the decision record.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.

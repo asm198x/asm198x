@@ -59,8 +59,15 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
    Byte-identical to `asl` (`cpu Z8002`). (Correction from first probe: `ADC` is
    operation `0x1A`, `SBC` `0x1B`; byte immediates replicate the byte into both
    halves of the word.)
-2. **Long dyadic + `LDL`/`LDA`/`LDR`/`CLR`/`EX`** — the long-size opcodes
-   (`LDL = 0x94`, `ADDL`, …) and the load variants.
+2. **Long dyadic + `EX` + `LDA`** — ✅ **landed (2026-07-02).** `LDL`/`ADDL`/
+   `SUBL`/`CPL` (+ `LDL` store), `EX`/`EXB`, and `LDA`. This is also where the
+   increment-1 table was generalised to a **`base6` + `Size` + modes-bitmask**
+   model: a form's top byte is `MM << 6 | base6`, the `Size` (byte/word/long/
+   address) fixes register naming and immediate width, and the modes bitmask
+   gates which addressing modes each entry allows (so `EX` rejects immediate,
+   `LDA` is direct/indexed only, `ADC`/`SBC` are register only). `LDR` moved to
+   the program-control increment (it is PC-relative) and `CLR` to the
+   single-operand increment (a different, low-nibble-keyed format).
 3. **Program control** — `JP cc,dst`, `CALL`, `JR cc`, `DJNZ`, `CALR`, `RET cc`
    (the condition-code field + relative displacements, a `Piece::Packed` scale).
 4. **Single-operand** — `INC`/`DEC`/`NEG`/`COM`/`TEST`/`PUSH`/`POP`/`CLR`.
