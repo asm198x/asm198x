@@ -1458,27 +1458,38 @@ pub fn flag_bit(name: &str) -> Option<u8> {
 /// flag mask.
 pub const FLAG_BITS: &[(u8, &str)] = &[(8, "c"), (4, "z"), (2, "s"), (1, "p")];
 
-/// The 4-bit control-register code for a word control-register name (`FCW` 2,
-/// `REFRESH` 3, `PSAP`/`PSAPOFF` 5, `NSP`/`NSPOFF` 7), or `None`. (The segmented
-/// `PSAPSEG` 4 / `NSPSEG` 6 are Z8001-only and absent here.)
+/// The 4-bit control-register code for a word control-register name, or `None`.
+/// The `PSAP`/`NSP` pointers differ by CPU: non-segmented `Z8002` names them
+/// `PSAP` 5 / `NSP` 7 (16-bit), while segmented `Z8001` splits each into a
+/// segment and offset half — `PSAPSEG` 4 / `PSAPOFF` 5 / `NSPSEG` 6 / `NSPOFF`
+/// 7. `FCW` 2 and `REFRESH` 3 are common to both.
 #[must_use]
-pub fn word_ctrl_code(name: &str) -> Option<u8> {
+pub fn word_ctrl_code(name: &str, seg: bool) -> Option<u8> {
     match name.trim().to_ascii_lowercase().as_str() {
         "fcw" => Some(2),
         "refresh" => Some(3),
-        "psap" | "psapoff" => Some(5),
-        "nsp" | "nspoff" => Some(7),
+        "psap" if !seg => Some(5),
+        "nsp" if !seg => Some(7),
+        "psapseg" if seg => Some(4),
+        "psapoff" if seg => Some(5),
+        "nspseg" if seg => Some(6),
+        "nspoff" if seg => Some(7),
         _ => None,
     }
 }
 
-/// The canonical word control-register name for a code, or `None`.
+/// The canonical word control-register name for a code, or `None`. CPU-dependent
+/// for the pointer registers — see [`word_ctrl_code`].
 #[must_use]
-pub fn word_ctrl_name(code: u8) -> Option<&'static str> {
+pub fn word_ctrl_name(code: u8, seg: bool) -> Option<&'static str> {
     match code {
         2 => Some("fcw"),
         3 => Some("refresh"),
+        4 if seg => Some("psapseg"),
+        5 if seg => Some("psapoff"),
         5 => Some("psap"),
+        6 if seg => Some("nspseg"),
+        7 if seg => Some("nspoff"),
         7 => Some("nsp"),
         _ => None,
     }

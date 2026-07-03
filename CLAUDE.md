@@ -278,8 +278,9 @@ curriculum corpus:
   sweep (~64k decodable words) plus a position-dependent round-trip. The
   TMS9995 / TMS99105 supersets (extra instructions) are out of scope; this is the
   base-9900 set the TI-99/4A uses. Closes #10.
-- **Z8000** (in progress) — Zilog Z8000 syntax (`dialects::z8000`, `--cpu z8000`,
-  also `z8001`/`z8002`) over a fresh standalone `isa::z8000` spec. The family's
+- **Z8000** (complete) — Zilog Z8000 syntax (`dialects::z8000`, `--cpu z8000`/
+  `z8002` non-segmented, `--cpu z8001` segmented) over a fresh standalone
+  `isa::z8000` spec. The family's
   **largest ISA** (110 instruction types, eight addressing modes, word/byte/long,
   segmented Z8001 / non-segmented Z8002), so — unlike the one-shot CPUs — it is
   built as **sweep-verified increments** (see
@@ -340,10 +341,15 @@ curriculum corpus:
   0x79); `NOP` is `0x8D07` on the flag-ops page, and the 0x8C/0x8D pages are
   shared with the increment-4 single-ops (disambiguated by the low nibble). Fully
   sweep-verified. Then the **cleanup** one-offs (`TCC`/`TCCB`, `LDK`, `RLDB`/
-  `RRDB`, and the PC-relative `LDR`/`LDRB`/`LDRL` — a `Misc` table) **complete the
-  non-segmented Z8002 instruction set**. Remaining: only **segmented Z8001** (a
-  target-extension widening DA/X/RA operands, not new instructions) — tracked in
-  the decision record.
+  `RRDB`, and the PC-relative `LDR`/`LDRB`/`LDRL` — a `Misc` table) completed the
+  non-segmented Z8002 instruction set. Finally **increment 12 — segmented
+  Z8001:** a target-extension (`--cpu z8001` → `Z8000 { seg: true }`,
+  `assemble_z8001`/`disassemble_z8001`) — same opcodes, but a direct/indexed
+  address becomes a two-word `<<seg>>offset` operand, `@Rn` becomes a long pair
+  `@RRn`, and `LDA` targets a long pair; I/O and relative forms unchanged. A
+  single `seg` flag threaded through the operand seam, verified by a dedicated
+  Z8001 opcode sweep. **The Z8000 is complete — both models, every instruction,
+  byte-identical to `asl`.**
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.

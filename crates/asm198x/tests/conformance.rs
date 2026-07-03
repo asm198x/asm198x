@@ -938,6 +938,27 @@ fn spec_sweep_matches_reference() {
             &|_| false,
             &mut fails,
         );
+
+        // --- Zilog Z8001 / asl (segmented) ---------------------------------
+        // The same opcode space but with a canonical **long-form** segmented
+        // address filler (`0x8000` + `0x1234`) after each word — so direct /
+        // indexed operands decode as `<<0>>01234H` (and long immediates as the
+        // 32-bit `0x80001234`); `asl` always emits long-form, so short-form
+        // fillers could not round-trip. Verifies the widened memory operands
+        // (`<<seg>>offset` addresses, `@RRn` pointers, `LDA` into a long pair,
+        // block-I/O mixed pointers) across every instruction.
+        let seg_cands: Vec<Vec<u8>> = (0u32..=0xFFFF)
+            .map(|w| vec![(w >> 8) as u8, w as u8, 0x80, 0x00, 0x12, 0x34])
+            .collect();
+        checked += sweep(
+            "Z8001",
+            &seg_cands,
+            &|b, o| asm198x::disassemble_z8001(b, o as u16),
+            &|b, o| asm198x::listing_z8001(b, o as u16),
+            &reasm,
+            &|_| false,
+            &mut fails,
+        );
     } else {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (Z8000 sweep)");
     }

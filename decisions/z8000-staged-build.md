@@ -1,8 +1,9 @@
 # Z8000 — a staged, field-based build
 
-**Status:** In progress (Wave B). Branch `feat/z8000`. Foundation landed
-(sourced manual + decoded encoding model); implementation is staged in verified
-increments.
+**Status:** ✅ **Complete (2026-07-03).** The whole Z8000 landed across 13
+sweep-verified increments (dyadic → segmented Z8001) — both the non-segmented
+Z8002 and segmented Z8001 models, every instruction, byte-identical to `asl`.
+Built as verified increments from a sourced manual + decoded encoding model.
 
 ## Why staged, when the other CPUs were one-shot
 
@@ -214,10 +215,38 @@ the sweep's two-origin filter) so a targeted round-trip guards it. **This
 completes the entire non-segmented Z8002 instruction set** — byte-identical to
 `asl` (`cpu Z8002`).
 
-12. **Segmented Z8001** — widen DA/X/RA address operands to segmented addresses
-    as a target-extension over the non-segmented base (the 65816-over-6502
-    pattern). Not new instructions — touches every memory-addressing op. Now the
-    only remaining work, with the full Z8002 instruction set complete beneath it.
+12. **Segmented Z8001** — ✅ **landed (2026-07-03).** The target-extension over
+    the non-segmented base (the 65816-over-6502 pattern): `--cpu z8001` selects a
+    segmented `Z8000 { seg: true }`, `assemble_z8001` / `disassemble_z8001` /
+    `listing_z8001` (all the impls thread a single `seg` flag). Not new
+    instructions — the opcodes are identical; what widens is the **memory
+    operand**, worked out by probing `asl -cpu Z8001`:
+    - **DA / X** carry a two-word **long-form segmented address** — `0x8000 |
+      seg << 8` (7-bit segment) then the 16-bit offset — in place of the single
+      Z8002 address word. (`asl` never emits the one-word short form.) Written
+      `<<seg>>offset`.
+    - **IR `@Rn`** becomes a long register pair `@RRn` (the field encoding is
+      unchanged — only the register type / validation differs).
+    - **`LDA`** loads a 32-bit segmented address, so its destination register is a
+      long pair.
+    - **Relative** ops (`JR`/`DJNZ`/`CALR`/`LDR`), **I/O ports** (16-bit) and I/O
+      `@Rn` pointers (word registers) are **unchanged**.
+    - **Block-I/O** is the one subtlety: the *memory* pointer is `@RR` but the
+      *I/O* pointer stays `@R`, and which operand is which flips with the
+      IN/OUT direction (`op_nib` bit 1).
+    - **`LDCTL` control registers** are CPU-dependent: the 16-bit `PSAP` 5 /
+      `NSP` 7 of Z8002 become the segment/offset pair `PSAPSEG` 4 / `PSAPOFF` 5
+      / `NSPSEG` 6 / `NSPOFF` 7 under Z8001, so `word_ctrl_name`/`word_ctrl_code`
+      take a `seg` flag (`FCW` 2 / `REFRESH` 3 are common). The sweep caught this
+      — `asl -cpu Z8001` rejects `psap`.
+    Mechanically this is the `operand()` seam plus a `seg` bool threaded through
+    the encode/decode functions; the memory operand carries its own segment
+    (`Operand::Da(_, Option<u8>)`) so a single `addr_ext` helper emits one or two
+    words. Verified by a **dedicated Z8001 opcode-space sweep** (a long-form
+    `0x8000`/`0x1234` filler after each word — the short form could not round-trip
+    since `asl` only emits long) plus a direct differential and a round-trip,
+    byte-identical to `asl` (`cpu Z8001`). **This completes the Z8000 — both
+    models, every instruction.**
 
 Each step: probe `asl` for the group's exact encodings, add the table rows +
 dialect arm + decoder arm, extend the round-trip test, keep the sweep green,

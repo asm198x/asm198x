@@ -52,6 +52,8 @@ enum Assembler {
     Tms9900,
     /// asl-syntax Zilog Z8000 (non-segmented) — a flat big-endian binary.
     Z8000,
+    /// asl-syntax Zilog Z8001 (segmented) — a flat big-endian binary.
+    Z8001,
     Pasmo {
         z80n: bool,
     },
@@ -104,7 +106,8 @@ impl Assembler {
             Some("tms7000" | "7000" | "tms70c00") => Ok(Self::Tms7000),
             Some("pdp11" | "pdp-11" | "lsi11" | "lsi-11") => Ok(Self::Pdp11),
             Some("tms9900" | "9900" | "ti99") => Ok(Self::Tms9900),
-            Some("z8000" | "z8002" | "z8001") => Ok(Self::Z8000),
+            Some("z8000" | "z8002") => Ok(Self::Z8000),
+            Some("z8001") => Ok(Self::Z8001),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
             Some("pasmo") => Ok(Self::Pasmo {
@@ -146,6 +149,7 @@ impl Assembler {
             Self::Pdp11 => asm198x::assemble_pdp11(source),
             Self::Tms9900 => asm198x::assemble_tms9900(source),
             Self::Z8000 => asm198x::assemble_z8000(source),
+            Self::Z8001 => asm198x::assemble_z8001(source),
             // ca65 and vasm produce non-flat output and are handled in `run`.
             Self::Ca65 | Self::Vasm => unreachable!("ca65/vasm handled in run()"),
             Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
@@ -282,6 +286,9 @@ fn run(args: &[String]) -> Result<String, String> {
             }
             Assembler::Z8000 => {
                 print!("{}", asm198x::listing_z8000(&bytes, origin));
+            }
+            Assembler::Z8001 => {
+                print!("{}", asm198x::listing_z8001(&bytes, origin));
             }
         }
         return Ok(format!(
