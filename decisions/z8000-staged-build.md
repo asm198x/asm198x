@@ -140,7 +140,28 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
    verified; the long-immediate forms (`MULTL`/`DIVL` `#imm`, a 4-byte immediate
    the sweep's 4-byte candidate can't hold) fall to data there, so a targeted
    round-trip guards them. Byte-identical to `asl` (`cpu Z8002`).
-9. **Block / string** — `LDIR`/`LDDR`/`CPIR`/`CPD`/`TR*`/… (the repeat group).
+9. **Block / string** — ✅ **landed (2026-07-03).** The full repeat group (32
+   instructions): block move `LDI`/`LDIR`/`LDD`/`LDDR` (+ byte), block compare
+   `CPI`/`CPIR`/`CPD`/`CPDR` (+ byte), compare-string `CPSI`/…/`CPSDR` (+ byte),
+   translate `TRIB`/`TRIRB`/`TRDB`/`TRDRB`, and translate-and-test
+   `TRTIB`/…/`TRTDRB`. A `Block` table. All are **two-word** forms at `MM` = 10:
+   word 1 is `TOP | pointer << 4 | op_nib`, word 2 is `count << 8 |
+   pointer-or-register << 4 | ctrl` (word 2's top nibble always zero). Top bytes:
+   `0xBB` word / `0xBA` byte for `LD`/`CP`/`CPS`, `0xB8` for the byte-only
+   translate ops. Four operand shapes (a `BlockShape`): `LDx`/`CPSx` put the
+   **source** pointer in word 1 and the **dest** pointer in word 2; `CPx` puts a
+   **data register** (word/byte) in word 2 with a **condition code** in the
+   control nibble; `TRxB`/`TRTxB` **reverse** it (dest in word 1, source in word
+   2) and imply R1 (`RH1`). The control nibble is a fixed single/repeat marker
+   for `LD`/`TR`/`TRT` but the condition code for `CP`/`CPS` (default 8 =
+   *always*, omitted), reusing the increment-3 `cc_value`/`cc_name` table.
+   `op_nib` identifies the op within a base6; `LDI`/`LDIR` (etc.) share it and
+   split on the control nibble. **Not opcode-sweep-verified** — the sweep's
+   4-byte candidate always has a nonzero word-2 top nibble, which no canonical
+   block op has, so they all fall to data there; instead a **direct differential
+   over all 32** (byte-identical to `asl`) plus a comprehensive round-trip guard
+   the group. `cpu Z8002`. (`RLDB`/`RRDB` rotate-digit are *not* repeat
+   instructions and are deferred to a later increment.)
 10. **I/O** — `IN`/`OUT`/`INIR`/`OTIR`/`SIN`/`SOUT`/… (privileged).
 11. **CPU control** — `NOP`/`HALT`/`EI`/`DI`/`LDCTL`/`LDPS`/`MSET`/flag ops.
 12. **Segmented Z8001** — widen DA/X/RA address operands to segmented addresses

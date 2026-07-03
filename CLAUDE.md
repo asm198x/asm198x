@@ -325,8 +325,13 @@ curriculum corpus:
   table (base6 0x18–0x1B). Dyadic-shaped, but with asymmetric operand sizes: the
   destination is a double-width accumulator (long `rr` / quad `rq`) while the
   source is one size smaller (word / long), so the table carries two sizes rather
-  than the dyadic single one. Remaining increments (`LDR`, block/IO, segmented
-  Z8001) tracked in the decision record.
+  than the dyadic single one. Then **increment 9 — block / string:** the 32-op
+  repeat group (`LDx`/`CPx`/`CPSx`/`TRxB`/`TRTxB`) — a `Block` table of two-word
+  forms (top bytes 0xBB/0xBA/0xB8) with four operand shapes and a control nibble
+  that is a single/repeat marker or a condition code; not sweepable (word 2's top
+  nibble is always zero, unlike the filler), so guarded by a direct differential
+  over all 32 plus round-trip. Remaining increments (`LDR`, I/O, CPU control,
+  segmented Z8001) tracked in the decision record.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
