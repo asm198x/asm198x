@@ -40,6 +40,166 @@ pub enum Class {
     Dyadic,
 }
 
+// ---------------------------------------------------------------------------
+// Program control (increment 3): JP / CALL / JR / RET / DJNZ / CALR
+// ---------------------------------------------------------------------------
+
+/// A program-control instruction's shape.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub enum CtlKind {
+    /// `JP cc, dst` / `CALL dst` — a memory operand in IR / DA / X, the low
+    /// nibble a condition code (`JP`) or zero (`CALL`).
+    Jump,
+    /// `JR cc, addr` — `0xE0 | cc` then a word-scaled signed 8-bit PC offset
+    /// (`target = PC + 2·disp`).
+    Jr,
+    /// `RET cc` — `0x9E00 | cc`.
+    Ret,
+    /// `DJNZ r, addr` / `DBJNZ rb, addr` — `0xF0 | reg`, then `w` and a 7-bit
+    /// **backward** word offset (`target = PC − 2·disp`).
+    Djnz,
+    /// `CALR addr` — `0xD0..` a 12-bit **backward** word offset
+    /// (`target = PC − 2·disp`).
+    Calr,
+}
+
+/// One program-control mnemonic.
+pub struct Ctl {
+    pub mnemonic: &'static str,
+    pub kind: CtlKind,
+    /// The base opcode (top byte for `Jr`/`Djnz`/`Calr`, full word for `Ret`,
+    /// the `MM`-independent `base6` for `Jump`).
+    pub base: u16,
+    /// Allowed addressing modes ([`Jump`](CtlKind::Jump) only).
+    pub modes: u8,
+    /// Carries a condition code in its low nibble (`JP`, `JR`, `RET`).
+    pub cc: bool,
+    /// Byte form (`DBJNZ`).
+    pub byte: bool,
+    pub summary: &'static str,
+}
+
+use CtlKind::{Calr, Djnz, Jr, Jump, Ret};
+
+/// The program-control instructions (increment 3).
+pub const CONTROL: &[Ctl] = &[
+    Ctl {
+        mnemonic: "JP",
+        kind: Jump,
+        base: 0x1E,
+        modes: IR | DA | X,
+        cc: true,
+        byte: false,
+        summary: "Jump",
+    },
+    Ctl {
+        mnemonic: "CALL",
+        kind: Jump,
+        base: 0x1F,
+        modes: IR | DA | X,
+        cc: false,
+        byte: false,
+        summary: "Call",
+    },
+    Ctl {
+        mnemonic: "JR",
+        kind: Jr,
+        base: 0xE0,
+        modes: 0,
+        cc: true,
+        byte: false,
+        summary: "Jump relative",
+    },
+    Ctl {
+        mnemonic: "RET",
+        kind: Ret,
+        base: 0x9E00,
+        modes: 0,
+        cc: true,
+        byte: false,
+        summary: "Return",
+    },
+    Ctl {
+        mnemonic: "DJNZ",
+        kind: Djnz,
+        base: 0xF0,
+        modes: 0,
+        cc: false,
+        byte: false,
+        summary: "Decrement and jump if not zero",
+    },
+    Ctl {
+        mnemonic: "DBJNZ",
+        kind: Djnz,
+        base: 0xF0,
+        modes: 0,
+        cc: false,
+        byte: true,
+        summary: "Decrement byte and jump if not zero",
+    },
+    Ctl {
+        mnemonic: "CALR",
+        kind: Calr,
+        base: 0xD0,
+        modes: 0,
+        cc: false,
+        byte: false,
+        summary: "Call relative",
+    },
+];
+
+/// Find a program-control instruction by mnemonic (case-insensitive).
+#[must_use]
+pub fn ctl_lookup(mnemonic: &str) -> Option<&'static Ctl> {
+    CONTROL
+        .iter()
+        .find(|c| c.mnemonic.eq_ignore_ascii_case(mnemonic))
+}
+
+/// The 4-bit value of a condition-code mnemonic (case-insensitive), or `None`.
+#[must_use]
+pub fn cc_value(name: &str) -> Option<u8> {
+    CC.iter()
+        .find(|(n, _)| n.eq_ignore_ascii_case(name))
+        .map(|&(_, v)| v)
+}
+
+/// The canonical condition-code mnemonic for a 4-bit value, or `None` for the
+/// always-true code 8 (rendered as no condition).
+#[must_use]
+pub fn cc_name(v: u8) -> Option<&'static str> {
+    match v {
+        8 => None,
+        _ => CC.iter().find(|(_, val)| *val == v).map(|&(n, _)| n),
+    }
+}
+
+/// Condition codes: canonical name first for each value, aliases after.
+const CC: &[(&str, u8)] = &[
+    ("f", 0),
+    ("lt", 1),
+    ("le", 2),
+    ("ule", 3),
+    ("ov", 4),
+    ("mi", 5),
+    ("eq", 6),
+    ("c", 7),
+    ("ge", 9),
+    ("gt", 10),
+    ("ugt", 11),
+    ("nov", 12),
+    ("pl", 13),
+    ("ne", 14),
+    ("nc", 15),
+    // aliases
+    ("pe", 4),
+    ("z", 6),
+    ("ult", 7),
+    ("po", 12),
+    ("nz", 14),
+    ("uge", 15),
+];
+
 /// Operand size, which fixes register naming and immediate width.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Size {

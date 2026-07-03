@@ -297,9 +297,14 @@ curriculum corpus:
   the `LD` store forms; then the **long** ops (`LDL`/`ADDL`/`SUBL`/`CPL` + long
   store), **`EX`/`EXB`**, and **`LDA`**. A zero source field selects IM/DA over
   IR/X; byte immediates replicate into both halves, long immediates are 32-bit.
-  Validated byte-identical against `asl` (`cpu Z8002`) by the opcode-space sweep
-  (~64k words) + a round-trip. Remaining increments (program control, shifts,
-  bit, single-operand, block/IO, segmented Z8001) tracked in the decision record.
+  Then **increment 3 — program control:** `JP cc,dst` / `CALL` / `JR cc` /
+  `DJNZ`/`DBJNZ` / `CALR` / `RET cc`, via a separate `Ctl` table (the control
+  formats diverge from the dyadic layout) + a shared condition-code table; the
+  relative jumps reuse the PDP-11 word-scaled `Piece::Packed`. Validated
+  byte-identical against `asl` (`cpu Z8002`) by the opcode-space sweep (~64k
+  words; the position-dependent relative jumps have a targeted round-trip).
+  Remaining increments (shifts, bit, single-operand, `LDR`, block/IO, segmented
+  Z8001) tracked in the decision record.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
