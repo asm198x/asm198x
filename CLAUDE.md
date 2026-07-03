@@ -278,7 +278,7 @@ curriculum corpus:
   sweep (~64k decodable words) plus a position-dependent round-trip. The
   TMS9995 / TMS99105 supersets (extra instructions) are out of scope; this is the
   base-9900 set the TI-99/4A uses. Closes #10.
-- **CP1610** (staged, in progress) — GI CP1610 syntax (`dialects::cp1610`,
+- **CP1610** (complete) — GI CP1610 syntax (`dialects::cp1610`,
   `--cpu cp1610`, also `cp1600`/`intv`) over a fresh standalone `isa::cp1610`
   spec. The 16-bit CPU of the **Mattel Intellivision**. Its oddity is the 10-bit
   **"decle"** word — but `asl` (`cpu CP-1600`) and `p2bin` store each decle as a
@@ -292,17 +292,17 @@ curriculum corpus:
   (`SWAP`/`SLL`/`RLC`/`SLLC`/`SLR`/`SAR`/`RRC`/`SARC`, count 1 or 2), the
   two-decle relative branches (`Bcc`/`BEXT`/`NOPP`), the memory-referencing
   families (`MVI`/`MVO`/`ADD`/`SUB`/`CMP`/`AND`/`XOR` across direct / indirect
-  `@R1`–`@R6` / immediate, plus `PSHR`/`PULR`), and `JUMP`/`JSR`. Two small
-  engine additions were needed: a `Piece::Branch` (its opcode word takes a
-  direction bit from the *sign* of the displacement, which the linear
-  `Piece::Packed` can't express), and an `addr_unit` making the engine
-  **word-addressed** for the CP1610 (a decle is 2 bytes but a label is a decle
-  number, as in `asl`) so absolute-address operands match. Validated
-  byte-identical against `asl` (`cpu CP-1600`) by a decle-space sweep
-  (register/shift/memory), plus differentials and round-trips (the
-  position-dependent branches and jumps). Remaining: only the `SDBD`
-  double-byte immediate. jzIntv / as1600 mnemonics. See
-  `decisions/cp1610-staged-build.md`; closes the CP1610 half of #11.
+  `@R1`–`@R6` / immediate, plus `PSHR`/`PULR`), `JUMP`/`JSR`, and the stateful
+  `SDBD` double-byte immediate — the whole CPU. Two small engine additions were
+  needed: a `Piece::Branch` (its opcode word takes a direction bit from the
+  *sign* of the displacement, which the linear `Piece::Packed` can't express),
+  and an `addr_unit` making the engine **word-addressed** for the CP1610 (a decle
+  is 2 bytes but a label is a decle number, as in `asl`) so absolute-address
+  operands match. Validated byte-identical against `asl` (`cpu CP-1600`) by a
+  decle-space sweep (register/shift/memory), plus differentials and round-trips
+  (the position-dependent branches and jumps, and the `SDBD` sequence). jzIntv /
+  as1600 mnemonics. See `decisions/cp1610-staged-build.md`; closes the CP1610
+  half of #11.
 - **Z8000** (complete) — Zilog Z8000 syntax (`dialects::z8000`, `--cpu z8000`/
   `z8002` non-segmented, `--cpu z8001` segmented) over a fresh standalone
   `isa::z8000` spec. The family's

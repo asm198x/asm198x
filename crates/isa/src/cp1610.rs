@@ -19,8 +19,9 @@
 //! `RRC`/`SARC`, with a 1-or-2 count). **Increment 3** adds the two-decle relative
 //! branches (see [`BRANCH_CONDS`] and `Piece::Branch` in the engine). **Increment
 //! 4** adds the memory-referencing families (see [`MEM_FAMILIES`]) across their
-//! direct / indirect / immediate modes. `JUMP`/`JSR` and the `SDBD` double-byte
-//! immediate arrive in later increments. Every base opcode is validated
+//! direct / indirect / immediate modes. **Increment 5** adds `JUMP`/`JSR` (with
+//! engine word-addressing), and **increment 6** the `SDBD` double-byte immediate
+//! — completing the CPU. Every base opcode is validated
 //! byte-for-byte against `asl` (`cpu CP-1600`) — see
 //! `crates/asm198x/tests/conformance.rs`.
 

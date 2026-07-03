@@ -2721,6 +2721,9 @@ fn decode_tms9900(code: &[u8], pos: usize, instr_addr: u16) -> Option<(String, u
 pub fn disassemble_cp1610(code: &[u8], origin: u16) -> Vec<Line> {
     let mut out = Vec::new();
     let mut pos = 0;
+    // Whether the previous decle was `SDBD` (0x0001) — it makes the next
+    // immediate a two-decle, low-byte-first value.
+    let mut after_sdbd = false;
     while pos < code.len() {
         // The CP1610 is word-addressed: each decle is two bytes, so the address
         // advances by one per two bytes consumed.
@@ -2735,7 +2738,7 @@ pub fn disassemble_cp1610(code: &[u8], origin: u16) -> Vec<Line> {
             continue;
         }
         let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
-        match decode_cp1610(code, pos, addr) {
+        match decode_cp1610(code, pos, addr, after_sdbd) {
             Some((text, len)) => {
                 out.push(Line {
                     addr: u32::from(addr),
@@ -2753,6 +2756,7 @@ pub fn disassemble_cp1610(code: &[u8], origin: u16) -> Vec<Line> {
                 pos += 2;
             }
         }
+        after_sdbd = word == 0x0001;
     }
     out
 }
@@ -2778,7 +2782,7 @@ pub fn listing_cp1610(code: &[u8], origin: u16) -> String {
 /// address. Returns the reassemblable text and byte length, or `None` for an
 /// undecodable word / a branch missing its magnitude (rendered as `word` data by
 /// the caller).
-fn decode_cp1610(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> {
+fn decode_cp1610(code: &[u8], pos: usize, addr: u16, after_sdbd: bool) -> Option<(String, usize)> {
     use isa::cp1610::Class;
     let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
 
@@ -2847,11 +2851,24 @@ fn decode_cp1610(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> 
             _ => {
                 // Mode 7: immediate (loads / ALU only). `MVO` has no immediate
                 // form, so a store here is not a decodable instruction.
-                if fam.store || pos + 4 > code.len() {
+                if fam.store {
                     return None;
                 }
-                let imm = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
-                Some((format!("{mn}i 0{imm:04X}H,r{reg}"), 4))
+                if after_sdbd {
+                    // The immediate is two decles, low byte first.
+                    if pos + 6 > code.len() {
+                        return None;
+                    }
+                    let lo = u16::from_be_bytes([code[pos + 2], code[pos + 3]]) & 0xFF;
+                    let hi = u16::from_be_bytes([code[pos + 4], code[pos + 5]]) & 0xFF;
+                    Some((format!("{mn}i 0{:04X}H,r{reg}", (hi << 8) | lo), 6))
+                } else {
+                    if pos + 4 > code.len() {
+                        return None;
+                    }
+                    let imm = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
+                    Some((format!("{mn}i 0{imm:04X}H,r{reg}"), 4))
+                }
             }
         };
     }

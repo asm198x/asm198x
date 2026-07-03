@@ -1,13 +1,11 @@
 # CP1610 — a staged, field-based build
 
-**Status:** 🚧 **In progress (started 2026-07-03).** The GI CP1610 (Mattel
-Intellivision CPU) is built as sweep-verified increments, like the Z8000.
-**Increments 1–5** — the single-decle register / implied groups, the
-register-only shift / rotate group, the two-decle relative branches, the memory
-/ immediate addressing modes, and `JUMP`/`JSR` (with the engine word-addressing
-that makes label targets correct) — have landed, byte-identical to `asl`
-(`cpu CP-1600`). Remaining: only the `SDBD` double-byte immediate. Closes the
-CP1610 half of asm198x/asm198x#11 when complete.
+**Status:** ✅ **Complete (2026-07-03).** The GI CP1610 (Mattel Intellivision
+CPU) landed across six sweep-verified increments, like the Z8000 — every
+instruction byte-identical to `asl` (`cpu CP-1600`): the register / implied
+groups, the shift / rotate group, the two-decle relative branches, the memory /
+immediate addressing modes, `JUMP`/`JSR` (with engine word-addressing), and the
+`SDBD` double-byte immediate. Closes the CP1610 half of asm198x/asm198x#11.
 
 ## The decle: 10-bit, but byte-aligned
 
@@ -117,12 +115,18 @@ directive on the way back in. (The accepted CPU spelling is also fussy:
    position-independent but the `0x0004`-prefixed three-decle form is longer than
    the sweep's candidate, so they are covered by a differential (literals + labels)
    and a round-trip, not the sweep.
-6. **`SDBD` double-byte immediate** — the stateful prefix: after `SDBD`, the next
-   immediate is emitted as **two low-byte-first decles** (`0x1234` → `0x0034`,
-   `0x0012`), so both the dialect and the disassembler must track the preceding
-   `SDBD`. The `SDBD` opcode itself already exists (increment 1); this is only the
-   immediate-splitting. Also where the `0x0035` / `0x0037` NOP/SIN variants and
-   the exact `asl` data directive get pinned.
+6. **`SDBD` double-byte immediate** — ✅ **landed (2026-07-03).** The stateful
+   prefix: after `SDBD`, the next **immediate** (mode 7 — `MVII`/`ADDI`/…) is
+   emitted as **two low-byte-first decles** (`0x1234` → `0x0034`, `0x0012`);
+   direct addresses, indirect modes, and register ops are unaffected. Both sides
+   thread an `after_sdbd` flag — the dialect's parse loop sets it after an `SDBD`
+   and clears it on any other instruction; the disassembler tracks the previous
+   decle being `0x0001` and reads two immediate decles when it was. The `SDBD`
+   opcode itself already existed (increment 1); this is only the
+   immediate-splitting. The split immediate is built from `And`/`Shr` [`Expr`]s so
+   a forward reference still resolves. Covered by a differential (each immediate
+   mnemonic under `SDBD`, plus the must-not-split cases) and a round-trip; the
+   `SDBD` interaction is a two-instruction sequence the opcode sweep can't batch.
 
 ## Reference
 
