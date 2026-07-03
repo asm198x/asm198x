@@ -903,11 +903,11 @@ fn spec_sweep_matches_reference() {
     }
 
     // --- Zilog Z8000 / asl + p2bin (non-segmented Z8002) -------------------
-    // Increments 1–6 (dyadic, program control, single-operand, stack, shifts /
-    // rotates / sign-extends); groups not yet decoded fall to `word` data and
-    // are skipped. Shifts also fall to data here — the fixed extension-word
-    // filler is an out-of-range count — so their round-trip is the guard. See
-    // decisions/z8000-staged-build.md.
+    // Increments 1–7 (dyadic, program control, single-operand, stack, shifts /
+    // rotates / sign-extends, bit ops); groups not yet decoded fall to `word`
+    // data and are skipped. Shifts and the dynamic bit form also fall to data
+    // here — the fixed extension-word filler is an out-of-range count / register
+    // — so their round-trip is the guard. See decisions/z8000-staged-build.md.
     if have("asl") && have("p2bin") {
         // Every opcode word (big-endian), with a canonical big-endian
         // extension-word filler for the immediate / direct / indexed modes.

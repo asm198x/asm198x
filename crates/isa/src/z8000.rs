@@ -623,6 +623,95 @@ pub fn extend_decode(subop: u8) -> Option<&'static Extend> {
     EXTENDS.iter().find(|e| e.subop == subop)
 }
 
+// ---------------------------------------------------------------------------
+// Bit (increment 7): BIT / SET / RES, static and dynamic
+// ---------------------------------------------------------------------------
+
+/// A bit-manipulation instruction (`BIT`/`SET`/`RES` + byte). Two encodings
+/// share the `base6`:
+///
+/// - **Static** — a literal bit number. `MM base6 | field << 4 | b`: the operand
+///   (register / `@Rn` / direct / indexed) is chosen by `MM` and the second
+///   byte's **high** nibble exactly as the dyadic family does, and the **low**
+///   nibble is the bit number (0–15 word, 0–7 byte). One word (+ an address word
+///   for direct / indexed).
+/// - **Dynamic** — the bit number in a **word** register. A two-word form at
+///   `MM` = 00 with the second byte's high nibble **zero** (so it never collides
+///   with static `@Rn`, whose pointer is 1–15 — R0 is not a legal base): word 1
+///   is `base6 << 8 | bit-register`, word 2 is `target-register << 8`. The target
+///   is register-only (word or byte per the size).
+pub struct Bit {
+    pub mnemonic: &'static str,
+    /// `BIT` 0x27 / `BITB` 0x26 / `SET` 0x25 / `SETB` 0x24 / `RES` 0x23 /
+    /// `RESB` 0x22.
+    pub base6: u8,
+    pub size: Size,
+    pub summary: &'static str,
+}
+
+/// The bit-manipulation instructions (increment 7).
+pub const BITS: &[Bit] = &[
+    Bit {
+        mnemonic: "BIT",
+        base6: 0x27,
+        size: Size::Word,
+        summary: "Test bit",
+    },
+    Bit {
+        mnemonic: "BITB",
+        base6: 0x26,
+        size: Size::Byte,
+        summary: "Test bit byte",
+    },
+    Bit {
+        mnemonic: "SET",
+        base6: 0x25,
+        size: Size::Word,
+        summary: "Set bit",
+    },
+    Bit {
+        mnemonic: "SETB",
+        base6: 0x24,
+        size: Size::Byte,
+        summary: "Set bit byte",
+    },
+    Bit {
+        mnemonic: "RES",
+        base6: 0x23,
+        size: Size::Word,
+        summary: "Reset bit",
+    },
+    Bit {
+        mnemonic: "RESB",
+        base6: 0x22,
+        size: Size::Byte,
+        summary: "Reset bit byte",
+    },
+];
+
+/// The highest bit number for a size (byte 7, word 15).
+#[must_use]
+pub fn bit_max(size: Size) -> i64 {
+    match size {
+        Size::Byte => 7,
+        _ => 15,
+    }
+}
+
+/// Find a bit instruction by mnemonic (case-insensitive).
+#[must_use]
+pub fn bit_lookup(mnemonic: &str) -> Option<&'static Bit> {
+    BITS.iter()
+        .find(|b| b.mnemonic.eq_ignore_ascii_case(mnemonic))
+}
+
+/// Decode a bit instruction by its opcode top byte's `base6`, or `None`.
+#[must_use]
+pub fn bit_decode(top: u8) -> Option<&'static Bit> {
+    let base6 = top & 0x3F;
+    BITS.iter().find(|b| b.base6 == base6)
+}
+
 /// Operand size, which fixes register naming and immediate width.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub enum Size {

@@ -111,7 +111,20 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
    subops came out **SLLL/SRLL 5, SLAL/SRAL 0xD** and `EXTS` subops **EXTSB 0,
    EXTSL 7, EXTS 0xA** (probed, confirming the decision-record guesses).
    Byte-identical to `asl` (`cpu Z8002`).
-7. **Bit** — `BIT`/`SET`/`RES`, static and dynamic.
+7. **Bit** — ✅ **landed (2026-07-03).** `BIT`/`SET`/`RES` (+ byte), static and
+   dynamic. A `Bit` table (`base6` `BIT` 0x27 / `SET` 0x25 / `RES` 0x23, byte
+   forms one lower). The **static** form is dyadic-shaped: `MM base6 |
+   field << 4 | b`, the operand reached by R / IR / DA / X exactly as the dyadic
+   family, the **low nibble a bit number** (0–15 word, 0–7 byte), one word (+ an
+   address word for DA / X). The **dynamic** form (bit number in a *word*
+   register) is a two-word encoding at `MM` = 00 with the second byte's high
+   nibble **zero** — which never collides with static `@Rn`, because **R0 is not
+   a legal base register**, so the pointer field is always 1–15 and the zero slot
+   is free. Word 1 is `base6 << 8 | bit-register`; word 2 is
+   `target-register << 8` (register-only target, word or byte per the size). The
+   static forms are opcode-sweep-verified; the dynamic form (its second word an
+   out-of-range filler in the sweep, so it falls to data there) has a targeted
+   round-trip. Byte-identical to `asl` (`cpu Z8002`).
 8. **Multiply / divide** — `MULT`/`MULTL`/`DIV`/`DIVL`.
 9. **Block / string** — `LDIR`/`LDDR`/`CPIR`/`CPD`/`TR*`/… (the repeat group).
 10. **I/O** — `IN`/`OUT`/`INIR`/`OTIR`/`SIN`/`SOUT`/… (privileged).

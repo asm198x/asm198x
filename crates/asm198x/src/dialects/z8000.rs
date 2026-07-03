@@ -9,9 +9,10 @@
 //! exchange / load-address), **program control** (increment 3: `JP`/`CALL`/`JR`/
 //! `RET`/`DJNZ`/`CALR` with condition codes), the **single-operand ALU**
 //! (increment 4: `CLR`/`COM`/`NEG`/`TEST`/`TSET`, `INC`/`DEC`), the **stack**
-//! ops (increment 5: `PUSH`/`POP`/`PUSHL`/`POPL`), and the **shifts / rotates /
+//! ops (increment 5: `PUSH`/`POP`/`PUSHL`/`POPL`), the **shifts / rotates /
 //! sign-extends** (increment 6: `SLA`/`SRA`/`SLL`/`SRL` + byte/long, `RL`/`RR`/
-//! `RLC`/`RRC` + byte, `EXTSB`/`EXTS`/`EXTSL`).
+//! `RLC`/`RRC` + byte, `EXTSB`/`EXTS`/`EXTSL`), and the **bit ops** (increment 7:
+//! `BIT`/`SET`/`RES` + byte, static and dynamic).
 //!
 //! A dyadic instruction packs its operands as fields in the opcode word, emitted
 //! through the engine's computed-operand seam ([`Operation::Encoded`]): a
@@ -139,6 +140,8 @@ fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
                 encode_shift(sh, args, line)?
             } else if let Some(e) = isa::z8000::extend_lookup(&mn) {
                 encode_extend(e, args, line)?
+            } else if let Some(b) = isa::z8000::bit_lookup(&mn) {
+                encode_bit(b, args, line)?
             } else {
                 encode(&mn, args, line)?
             }
@@ -522,6 +525,76 @@ fn encode_extend(e: &isa::z8000::Extend, args: &str, line: usize) -> Result<Oper
         .ok_or_else(|| AsmError::new(line, format!("`{}` needs a register", e.mnemonic)))?;
     let word = (u16::from(isa::z8000::EXTEND_TOP) << 8) | (reg << 4) | u16::from(e.subop);
     Ok(Operation::Encoded(Vec::from(word_lit(word))))
+}
+
+/// Encode a bit instruction (`BIT`/`SET`/`RES` + byte). The bit source is either
+/// a literal `#n` (static — the bit number is the second byte's low nibble, the
+/// target reached through the usual R / IR / DA / X modes) or a word register
+/// (dynamic — a two-word form with the target register in word 2).
+fn encode_bit(b: &isa::z8000::Bit, args: &str, line: usize) -> Result<Operation, AsmError> {
+    use isa::z8000::{DA, IR, R, X};
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let [target_s, src_s] = match ops.as_slice() {
+        [a, c] => [*a, *c],
+        _ => {
+            return Err(AsmError::new(
+                line,
+                format!("`{}` takes two operands", b.mnemonic),
+            ));
+        }
+    };
+
+    // Dynamic form: the bit number lives in a word register (`bit r3,r1`).
+    if !src_s.starts_with('#') {
+        let Some(bitreg) = word_reg(src_s) else {
+            return Err(AsmError::new(
+                line,
+                format!(
+                    "`{}` bit source must be `#n` or a word register",
+                    b.mnemonic
+                ),
+            ));
+        };
+        let Operand::Reg(target) = operand(target_s, b.size, line)? else {
+            return Err(AsmError::new(
+                line,
+                format!("`{}` dynamic form needs a register target", b.mnemonic),
+            ));
+        };
+        let mut pieces = Vec::from(word_lit((u16::from(b.base6) << 8) | bitreg)); // MM = 00
+        pieces.extend(word_lit(target << 8));
+        return Ok(Operation::Encoded(pieces));
+    }
+
+    // Static form: a literal bit number in the low nibble.
+    let bitnum = fold_const(&value(&src_s[1..], line)?, &BTreeMap::new(), line)?;
+    let max = isa::z8000::bit_max(b.size);
+    if !(0..=max).contains(&bitnum) {
+        return Err(AsmError::new(
+            line,
+            format!("`{}` bit number must be 0..={max}", b.mnemonic),
+        ));
+    }
+    let (mode, field, ext): (u8, u16, Option<Piece>) = match operand(target_s, b.size, line)? {
+        Operand::Reg(r) => (R, r, None),
+        Operand::Ir(p) => (IR, p, None),
+        Operand::Da(e) => (DA, 0, Some(ext_word(e))),
+        Operand::Indexed(e, i) => (X, i, Some(ext_word(e))),
+        Operand::Imm(_) => {
+            return Err(AsmError::new(
+                line,
+                format!("`{}` target cannot be an immediate", b.mnemonic),
+            ));
+        }
+    };
+    let top = (mm(mode) << 6) | u16::from(b.base6);
+    let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | (bitnum as u16)));
+    pieces.extend(ext);
+    Ok(Operation::Encoded(pieces))
 }
 
 /// Encode a program-control instruction (`JP`/`CALL`/`JR`/`RET`/`DJNZ`/`CALR`).

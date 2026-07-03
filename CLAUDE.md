@@ -315,9 +315,14 @@ curriculum corpus:
   rotate) plus a tiny `Extend` table (top byte 0xB1). `SLA`/`SRA` share one
   opcode (a trailing count word's sign is the direction); the count is a full
   16-bit signed word for word/long shifts but a signed 8-bit value in the low
-  byte for byte shifts; `EXTSL` introduced a `Size::Quad` `rq` register.
-  Remaining increments (bit, `LDR`, mul/div, block/IO, segmented Z8001) tracked
-  in the decision record.
+  byte for byte shifts; `EXTSL` introduced a `Size::Quad` `rq` register. Then
+  **increment 7 — bit ops:** `BIT`/`SET`/`RES` (+ byte), static and dynamic — a
+  `Bit` table (base6 0x22–0x27). The static form is dyadic-shaped with the low
+  nibble a bit number; the dynamic form (bit number in a word register) is a
+  two-word encoding at MM=00 with the second byte's high nibble zero, which never
+  collides with static `@Rn` because R0 is not a legal base register. Remaining
+  increments (`LDR`, mul/div, block/IO, segmented Z8001) tracked in the decision
+  record.
 
 The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path that
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.

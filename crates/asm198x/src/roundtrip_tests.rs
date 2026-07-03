@@ -281,6 +281,43 @@ fn round_trips_z8000_shift_rotate_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_z8000_bit_through_asl_syntax() {
+    // Increment 7: BIT/SET/RES static (register / @Rn / direct / indexed, word
+    // and byte) and dynamic (the bit number in a word register). The dynamic
+    // two-word form falls to data in the opcode sweep (its second word is an
+    // out-of-range filler there), so its round-trip is guarded here.
+    let source = "\
+        \torg 0\n\
+        \tbit r1,#0\n\
+        \tbit r1,#15\n\
+        \tbit @r2,#3\n\
+        \tbit 1234h,#3\n\
+        \tbit 1234h(r2),#3\n\
+        \tset r1,#5\n\
+        \tset @r3,#7\n\
+        \tset 5000h(r4),#15\n\
+        \tres r1,#5\n\
+        \tres 7000h,#9\n\
+        \tbitb rl1,#7\n\
+        \tbitb rh0,#3\n\
+        \tbitb @r2,#3\n\
+        \tbitb 1234h(r6),#2\n\
+        \tsetb rl1,#5\n\
+        \tresb rh7,#6\n\
+        \tbit r3,r1\n\
+        \tbit r5,r8\n\
+        \tbit r0,r0\n\
+        \tbitb rl3,r1\n\
+        \tset r3,r1\n\
+        \tres r7,r15\n\
+        \tresb rl0,r2\n";
+    let original = assemble_z8000(source).expect("assemble");
+    let listing = listing_z8000(&original.bytes, original.origin);
+    let re = assemble_z8000(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_z8000_control_through_asl_syntax() {
     // Increment 3: program control — the position-dependent JR / DJNZ / CALR
     // the opcode sweep can't batch, plus JP / CALL / RET with condition codes.
