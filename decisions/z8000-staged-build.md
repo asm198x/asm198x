@@ -68,8 +68,16 @@ Verified against `asl`: `ld r1,r2 = A121`, `add r1,#5 = 0101 0005`,
    `LDA` is direct/indexed only, `ADC`/`SBC` are register only). `LDR` moved to
    the program-control increment (it is PC-relative) and `CLR` to the
    single-operand increment (a different, low-nibble-keyed format).
-3. **Program control** — `JP cc,dst`, `CALL`, `JR cc`, `DJNZ`, `CALR`, `RET cc`
-   (the condition-code field + relative displacements, a `Piece::Packed` scale).
+3. **Program control** — ✅ **landed (2026-07-03).** `JP cc,dst`, `CALL`,
+   `JR cc`, `DJNZ`/`DBJNZ`, `CALR`, `RET cc`. Added a separate `Ctl` table +
+   `CtlKind` (the control formats diverge from the dyadic field layout) and the
+   shared condition-code table (`cc_value`/`cc_name`; code 8 = always = no
+   mnemonic). The relative ops reuse the PDP-11 `Piece::Packed` word-scale:
+   `JR` is `(target − PC)/2` signed 8-bit, `DJNZ` `(PC − target)/2` 7-bit
+   backward, `CALR` `(PC − target)/2` signed 12-bit. `JP`/`CALL`/`RET` are
+   sweep-verified; the relative `JR`/`DJNZ`/`CALR` (position-dependent, dropped
+   by the sweep) have a targeted round-trip. `LDR` (PC-relative load) is deferred
+   to the relative-data / single-operand increment.
 4. **Single-operand** — `INC`/`DEC`/`NEG`/`COM`/`TEST`/`PUSH`/`POP`/`CLR`.
 5. **Shifts / rotates** — `SLA`/`SRA`/`SLL`/`SRL`/`RL`/`RR`/`RLC`/`RRC` (count).
 6. **Bit** — `BIT`/`SET`/`RES`, static and dynamic.

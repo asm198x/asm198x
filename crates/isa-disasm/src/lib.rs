@@ -2732,7 +2732,7 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
             continue;
         }
         let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
-        match decode_z8000(code, pos) {
+        match decode_ctl_z8000(code, pos, addr).or_else(|| decode_z8000(code, pos)) {
             Some((text, len)) => {
                 out.push(Line {
                     addr: u32::from(addr),
@@ -2776,6 +2776,91 @@ fn z8000_reg(n: u16, size: isa::z8000::Size) -> String {
         Size::Byte => format!("rl{}", n - 8),
         Size::Long => format!("rr{n}"),
         Size::Word | Size::Address => format!("r{n}"),
+    }
+}
+
+/// A condition-code prefix (`"eq,"`), or empty for the always-true code.
+fn z8000_cc_prefix(cc: u8) -> String {
+    isa::z8000::cc_name(cc).map_or_else(String::new, |n| format!("{n},"))
+}
+
+/// Decode one Z8000 program-control instruction (`JP`/`CALL`/`JR`/`RET`/`DJNZ`/
+/// `CALR`) at `pos`, `addr` its load address (for the relative targets), or
+/// `None` if the word is not one of them.
+fn decode_ctl_z8000(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> {
+    use isa::z8000::{DA, IR, Size, X, mode_of};
+    let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
+    let (top, second) = ((word >> 8) as u8, word & 0xFF);
+    let addr16 =
+        || (pos + 4 <= code.len()).then(|| u16::from_be_bytes([code[pos + 2], code[pos + 3]]));
+
+    match top >> 4 {
+        // JR cc, addr — word-scaled signed 8-bit, target = PC + 2·disp.
+        0xE => {
+            let disp = i32::from(second as i8);
+            let target = addr.wrapping_add(2).wrapping_add((2 * disp) as u16);
+            Some((
+                format!("jr {}0{target:04X}H", z8000_cc_prefix(top & 0xF)),
+                2,
+            ))
+        }
+        // DJNZ / DBJNZ r, addr — 7-bit backward, target = PC − 2·disp.
+        0xF => {
+            let (reg, w, disp) = (u16::from(top & 0xF), second >> 7, i32::from(second & 0x7F));
+            let target = addr.wrapping_add(2).wrapping_sub((2 * disp) as u16);
+            let (mn, rn) = if w == 1 {
+                ("djnz", format!("r{reg}"))
+            } else {
+                ("dbjnz", z8000_reg(reg, Size::Byte))
+            };
+            Some((format!("{mn} {rn},0{target:04X}H"), 2))
+        }
+        // CALR addr — 12-bit backward, target = PC − 2·disp.
+        0xD => {
+            let raw = (u16::from(top & 0xF) << 8) | second;
+            let disp = if raw & 0x800 != 0 {
+                i32::from(raw) - 0x1000
+            } else {
+                i32::from(raw)
+            };
+            let target = addr.wrapping_add(2).wrapping_sub((2 * disp) as u16);
+            Some((format!("calr 0{target:04X}H"), 2))
+        }
+        _ => {
+            // RET cc — 0x9E0X.
+            if top == 0x9E && second < 16 {
+                let ret = isa::z8000::cc_name(second as u8)
+                    .map_or_else(|| "ret".to_string(), |n| format!("ret {n}"));
+                return Some((ret, 2));
+            }
+            // JP cc, dst / CALL dst — a memory operand, cc in the low nibble (JP).
+            let base6 = top & 0x3F;
+            if base6 != 0x1E && base6 != 0x1F {
+                return None;
+            }
+            let is_jp = base6 == 0x1E;
+            let field = second >> 4;
+            let mode = mode_of(top >> 6, field);
+            if mode & (IR | DA | X) == 0 {
+                return None;
+            }
+            let cc_low = second & 0xF;
+            if !is_jp && cc_low != 0 {
+                return None; // CALL has no condition code
+            }
+            let (dst, len) = match mode {
+                IR => (format!("@r{field}"), 2),
+                DA => (format!("0{:04X}H", addr16()?), 4),
+                X => (format!("0{:04X}H(r{field})", addr16()?), 4),
+                _ => return None,
+            };
+            let (mn, pre) = if is_jp {
+                ("jp", z8000_cc_prefix(cc_low as u8))
+            } else {
+                ("call", String::new())
+            };
+            Some((format!("{mn} {pre}{dst}"), len))
+        }
     }
 }
 

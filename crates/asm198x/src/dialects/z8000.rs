@@ -5,8 +5,9 @@
 //! Registers are word `r0`–`r15`, byte `rh0`–`rh7` / `rl0`–`rl7`, long
 //! `rr0`–`rr14`. Built as sweep-verified increments (see
 //! `decisions/z8000-staged-build.md`); this covers the **dyadic family**
-//! (increments 1–2): arithmetic / logic / compare / load / exchange /
-//! load-address.
+//! (increments 1–2: arithmetic / logic / compare / load / exchange /
+//! load-address) and **program control** (increment 3: `JP`/`CALL`/`JR`/`RET`/
+//! `DJNZ`/`CALR` with condition codes).
 //!
 //! A dyadic instruction packs its operands as fields in the opcode word, emitted
 //! through the engine's computed-operand seam ([`Operation::Encoded`]): a
@@ -122,7 +123,14 @@ fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
         "org" | "aorg" | "rorg" => Operation::Org(value(args, line)?),
         "byte" | "db" | "dc.b" => Operation::Bytes(byte_list(args, line)?),
         "word" | "dw" | "dc.w" => Operation::Words(value_list(args, line)?),
-        _ => encode(&word.to_ascii_uppercase(), args, line)?,
+        other => {
+            let mn = other.to_ascii_uppercase();
+            if let Some(ctl) = isa::z8000::ctl_lookup(&mn) {
+                encode_ctl(ctl, args, line)?
+            } else {
+                encode(&mn, args, line)?
+            }
+        }
     };
     Ok(Some(op))
 }
@@ -297,6 +305,130 @@ fn dyadic(insn: &Insn, variable: &Operand, reg: u16, line: usize) -> Result<Oper
     let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | reg));
     pieces.extend(ext);
     Ok(Operation::Encoded(pieces))
+}
+
+fn add(a: Expr, b: Expr) -> Expr {
+    Expr::Bin(BinOp::Add, Box::new(a), Box::new(b))
+}
+fn sub(a: Expr, b: Expr) -> Expr {
+    Expr::Bin(BinOp::Sub, Box::new(a), Box::new(b))
+}
+
+/// Encode a program-control instruction (`JP`/`CALL`/`JR`/`RET`/`DJNZ`/`CALR`).
+fn encode_ctl(ctl: &isa::z8000::Ctl, args: &str, line: usize) -> Result<Operation, AsmError> {
+    use isa::z8000::CtlKind;
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let mn = ctl.mnemonic;
+
+    // Split off a leading condition code where the instruction allows one.
+    let (cc, rest): (u16, &[&str]) = if ctl.cc && ops.len() > usize::from(ctl.kind != CtlKind::Ret)
+    {
+        let v = isa::z8000::cc_value(ops[0])
+            .ok_or_else(|| AsmError::new(line, format!("unknown condition `{}`", ops[0])))?;
+        (u16::from(v), &ops[1..])
+    } else {
+        (8, &ops[..]) // always
+    };
+
+    match ctl.kind {
+        CtlKind::Jump => {
+            let [t] = one_target(rest, mn, line)?;
+            let dst = operand(t, Size::Word, line)?;
+            let (mode, field, ext): (u8, u16, Option<Piece>) = match dst {
+                Operand::Ir(p) => (isa::z8000::IR, p, None),
+                Operand::Da(e) => (isa::z8000::DA, 0, Some(ext_word(e))),
+                Operand::Indexed(e, i) => (isa::z8000::X, i, Some(ext_word(e))),
+                _ => {
+                    return Err(AsmError::new(
+                        line,
+                        format!("`{mn}` needs a memory operand"),
+                    ));
+                }
+            };
+            if ctl.modes & mode == 0 {
+                return Err(AsmError::new(line, format!("`{mn}` bad addressing mode")));
+            }
+            let top = (mm(mode) << 6) | ctl.base;
+            let low = if ctl.cc { cc } else { 0 };
+            let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | low));
+            pieces.extend(ext);
+            Ok(Operation::Encoded(pieces))
+        }
+        CtlKind::Jr => {
+            let [t] = one_target(rest, mn, line)?;
+            // target = PC + 2·disp -> disp = (target − (PC + 2)) / 2.
+            Ok(Operation::Encoded(vec![Piece::Packed {
+                expr: sub(value(t, line)?, add(Expr::Pc, Expr::Num(2))),
+                bytes: 2,
+                scale: 2,
+                min: -128,
+                max: 127,
+                mask: 0xFF,
+                or_bits: 0xE000 | (u32::from(cc) << 8),
+                what: "JR distance",
+            }]))
+        }
+        CtlKind::Ret => {
+            if !rest.is_empty() {
+                return Err(AsmError::new(
+                    line,
+                    format!("`{mn}` takes only a condition"),
+                ));
+            }
+            Ok(Operation::Encoded(Vec::from(word_lit(ctl.base | cc))))
+        }
+        CtlKind::Calr => {
+            let [t] = one_target(rest, mn, line)?;
+            // target = PC − 2·disp -> disp = ((PC + 2) − target) / 2, 12-bit signed.
+            Ok(Operation::Encoded(vec![Piece::Packed {
+                expr: sub(add(Expr::Pc, Expr::Num(2)), value(t, line)?),
+                bytes: 2,
+                scale: 2,
+                min: -2048,
+                max: 2047,
+                mask: 0xFFF,
+                or_bits: u32::from(ctl.base) << 8,
+                what: "CALR distance",
+            }]))
+        }
+        CtlKind::Djnz => {
+            let [r, t] = match rest {
+                [a, b] => [*a, *b],
+                _ => {
+                    return Err(AsmError::new(
+                        line,
+                        format!("`{mn}` takes a register and a target"),
+                    ));
+                }
+            };
+            let reg = if ctl.byte { byte_reg(r) } else { word_reg(r) }
+                .ok_or_else(|| AsmError::new(line, format!("`{mn}` needs a register")))?;
+            let w = u32::from(!ctl.byte); // bit 7: 1 = word
+            // Backward only: disp = ((PC + 2) − target) / 2, 0..=127.
+            Ok(Operation::Encoded(vec![Piece::Packed {
+                expr: sub(add(Expr::Pc, Expr::Num(2)), value(t, line)?),
+                bytes: 2,
+                scale: 2,
+                min: 0,
+                max: 127,
+                mask: 0x7F,
+                or_bits: (u32::from(ctl.base) << 8) | (u32::from(reg) << 8) | (w << 7),
+                what: "DJNZ distance",
+            }]))
+        }
+    }
+}
+
+/// Require exactly one target operand.
+fn one_target<'a>(ops: &[&'a str], mn: &str, line: usize) -> Result<[&'a str; 1], AsmError> {
+    match ops {
+        [t] => Ok([*t]),
+        _ => Err(AsmError::new(line, format!("`{mn}` takes one target"))),
+    }
 }
 
 /// Parse an operand; a bare register is named per the instruction `size`.

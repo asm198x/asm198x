@@ -186,6 +186,36 @@ fn round_trips_z8000_dyadic_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_z8000_control_through_asl_syntax() {
+    // Increment 3: program control — the position-dependent JR / DJNZ / CALR
+    // the opcode sweep can't batch, plus JP / CALL / RET with condition codes.
+    let source = "\
+        \torg 0100h\n\
+        back:\n\
+        \tjp back\n\
+        \tjp eq,back\n\
+        \tjp @r2\n\
+        \tjp 2000h(r3)\n\
+        \tcall back\n\
+        \tcall @r4\n\
+        \tjr back\n\
+        \tjr ne,fwd\n\
+        \tdjnz r1,back\n\
+        \tdbjnz rl2,back\n\
+        \tcalr back\n\
+        \tcalr fwd\n\
+        \tret\n\
+        \tret eq\n\
+        \tret nc\n\
+        fwd:\n\
+        \tret\n";
+    let original = assemble_z8000(source).expect("assemble");
+    let listing = listing_z8000(&original.bytes, original.origin);
+    let re = assemble_z8000(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_tms9900_through_asl_syntax() {
     // The position-dependent instructions the opcode sweep can't batch — the
     // word-scaled jumps (forward and backward) — plus a spread of formats and
