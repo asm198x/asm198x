@@ -2798,7 +2798,13 @@ fn decode_cp1610(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> 
         let text = if word & 0x10 != 0 {
             format!("bext 0{target:04X}H,{}", word & 0xF)
         } else if word & 0xF == 8 {
-            "nopp".to_string() // branch-never: a two-word no-op
+            // Branch-never (a two-word no-op). Only the canonical `NOPP`
+            // (opcode 0x208, zero magnitude) round-trips — asl always emits that
+            // form — so any other cond-8 shape is left as data.
+            if word != 0x208 || mag != 0 {
+                return None;
+            }
+            "nopp".to_string()
         } else {
             format!(
                 "{} 0{target:04X}H",
@@ -2806,6 +2812,46 @@ fn decode_cp1610(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> 
             )
         };
         return Some((text, 4));
+    }
+
+    // Memory region (0x240–0x3FF): `base | mm << 3 | reg`. `mm` picks the mode —
+    // 0 direct (a following address word), 1–6 indirect `@R1`–`@R6`, 7 immediate
+    // (a following value word). `MVO` stores, so its register operand comes first.
+    if word >= 0x240 {
+        let fam = isa::cp1610::mem_family_by_base(word & 0x3C0)?;
+        let mn = fam.mnemonic.to_ascii_lowercase();
+        let (mode, reg) = ((word >> 3) & 7, word & 7);
+        return match mode {
+            0 => {
+                if pos + 4 > code.len() {
+                    return None; // address word runs past the buffer
+                }
+                let a = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
+                let text = if fam.store {
+                    format!("{mn} r{reg},0{a:04X}H")
+                } else {
+                    format!("{mn} 0{a:04X}H,r{reg}")
+                };
+                Some((text, 4))
+            }
+            1..=6 => {
+                let text = if fam.store {
+                    format!("{mn}@ r{reg},r{mode}")
+                } else {
+                    format!("{mn}@ r{mode},r{reg}")
+                };
+                Some((text, 2))
+            }
+            _ => {
+                // Mode 7: immediate (loads / ALU only). `MVO` has no immediate
+                // form, so a store here is not a decodable instruction.
+                if fam.store || pos + 4 > code.len() {
+                    return None;
+                }
+                let imm = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
+                Some((format!("{mn}i 0{imm:04X}H,r{reg}"), 4))
+            }
+        };
     }
 
     let insn = isa::cp1610::decode(word)?;

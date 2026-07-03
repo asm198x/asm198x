@@ -660,6 +660,40 @@ fn round_trips_cp1610_branches_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_cp1610_memory_through_asl_syntax() {
+    // Increment 4: the memory-referencing families across all three addressing
+    // modes — direct (a following address word), indirect `@R1`–`@R6`, and
+    // immediate (a following value word) — for loads, stores (`MVO`, reversed
+    // operand order), and the ALU ops, plus the `PSHR`/`PULR` stack aliases.
+    let source = "\
+        \torg 0\n\
+        \tmvi 1234h,r0\n\
+        \tmvi@ r1,r0\n\
+        \tmvi@ r6,r3\n\
+        \tmvii 5678h,r2\n\
+        \tmvo r0,1234h\n\
+        \tmvo@ r0,r1\n\
+        \tmvo@ r3,r6\n\
+        \tpshr r4\n\
+        \tpulr r5\n\
+        \tadd 1234h,r0\n\
+        \tadd@ r2,r1\n\
+        \taddi 5678h,r0\n\
+        \tsub@ r3,r2\n\
+        \tsubi 5678h,r2\n\
+        \tcmp 1234h,r0\n\
+        \tcmpi 5678h,r0\n\
+        \tand@ r1,r0\n\
+        \tandi 5678h,r0\n\
+        \txor 1234h,r0\n\
+        \txori 5678h,r0\n";
+    let original = assemble_cp1610(source).expect("assemble");
+    let listing = listing_cp1610(&original.bytes, original.origin);
+    let re = assemble_cp1610(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_cp1610_shifts_through_asl_syntax() {
     // Increment 2: the register-only shift / rotate group — every mnemonic across
     // both the once and twice counts and the R0–R3 register range.

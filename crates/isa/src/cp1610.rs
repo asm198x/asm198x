@@ -17,9 +17,11 @@
 //! (`MOVR`/`ADDR`/`SUBR`/`CMPR`/`ANDR`/`XORR`). **Increment 2** adds the
 //! register-only shift / rotate group (`SWAP`/`SLL`/`RLC`/`SLLC`/`SLR`/`SAR`/
 //! `RRC`/`SARC`, with a 1-or-2 count). **Increment 3** adds the two-decle relative
-//! branches (see [`BRANCH_CONDS`] and `Piece::Branch` in the engine). The memory
-//! and immediate groups arrive in later increments. Every base opcode is
-//! validated byte-for-byte against `asl` (`cpu CP-1600`) — see
+//! branches (see [`BRANCH_CONDS`] and `Piece::Branch` in the engine). **Increment
+//! 4** adds the memory-referencing families (see [`MEM_FAMILIES`]) across their
+//! direct / indirect / immediate modes. `JUMP`/`JSR` and the `SDBD` double-byte
+//! immediate arrive in later increments. Every base opcode is validated
+//! byte-for-byte against `asl` (`cpu CP-1600`) — see
 //! `crates/asm198x/tests/conformance.rs`.
 
 use crate::{Endianness, InstructionSet};
@@ -127,6 +129,72 @@ pub fn branch_cond(mnemonic: &str) -> Option<u8> {
         .iter()
         .position(|m| m.eq_ignore_ascii_case(mnemonic))
         .map(|i| i as u8)
+}
+
+/// A memory-referencing instruction family. Each occupies a 64-opcode block
+/// `base | mm << 3 | reg`, where the 3-bit `mm` field is the addressing mode
+/// (0 = direct address, 1–6 = indirect `@R1`–`@R6`, 7 = immediate) and `reg` is
+/// the data register. `store` marks `MVO` (register → memory), whose operand
+/// order is reversed relative to the loads. The mnemonic suffix picks the mode:
+/// bare = direct, `@` = indirect, `I` = immediate (`MVI`/`MVI@`/`MVII`).
+pub struct MemFamily {
+    pub mnemonic: &'static str,
+    pub base: u16,
+    pub store: bool,
+}
+
+/// The seven memory-referencing families, in opcode order.
+pub const MEM_FAMILIES: &[MemFamily] = &[
+    MemFamily {
+        mnemonic: "MVO",
+        base: 0x240,
+        store: true,
+    },
+    MemFamily {
+        mnemonic: "MVI",
+        base: 0x280,
+        store: false,
+    },
+    MemFamily {
+        mnemonic: "ADD",
+        base: 0x2C0,
+        store: false,
+    },
+    MemFamily {
+        mnemonic: "SUB",
+        base: 0x300,
+        store: false,
+    },
+    MemFamily {
+        mnemonic: "CMP",
+        base: 0x340,
+        store: false,
+    },
+    MemFamily {
+        mnemonic: "AND",
+        base: 0x380,
+        store: false,
+    },
+    MemFamily {
+        mnemonic: "XOR",
+        base: 0x3C0,
+        store: false,
+    },
+];
+
+/// The memory family whose block contains `word` (i.e. keyed by `word & 0x3C0`),
+/// or `None` if `word` is outside the `0x240–0x3FF` memory region.
+#[must_use]
+pub fn mem_family_by_base(base: u16) -> Option<&'static MemFamily> {
+    MEM_FAMILIES.iter().find(|f| f.base == base)
+}
+
+/// The memory family with this exact mnemonic (case-insensitive), or `None`.
+#[must_use]
+pub fn mem_family_by_name(name: &str) -> Option<&'static MemFamily> {
+    MEM_FAMILIES
+        .iter()
+        .find(|f| f.mnemonic.eq_ignore_ascii_case(name))
 }
 
 /// Minimal set for the `Dialect` trait — the CP1610 dialect encodes through the

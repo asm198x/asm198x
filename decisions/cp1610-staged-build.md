@@ -2,10 +2,11 @@
 
 **Status:** 🚧 **In progress (started 2026-07-03).** The GI CP1610 (Mattel
 Intellivision CPU) is built as sweep-verified increments, like the Z8000.
-**Increments 1–3** — the single-decle register / implied groups, the
-register-only shift / rotate group, and the two-decle relative branches — have
-landed, byte-identical to `asl` (`cpu CP-1600`). Closes the CP1610 half of
-asm198x/asm198x#11 when complete.
+**Increments 1–4** — the single-decle register / implied groups, the
+register-only shift / rotate group, the two-decle relative branches, and the
+memory / immediate addressing modes — have landed, byte-identical to `asl`
+(`cpu CP-1600`). Remaining: `JUMP`/`JSR` and the `SDBD` double-byte immediate.
+Closes the CP1610 half of asm198x/asm198x#11 when complete.
 
 ## The decle: 10-bit, but byte-aligned
 
@@ -86,9 +87,24 @@ directive on the way back in. (The accepted CPU spelling is also fussy:
    they fall out of the sweep and are covered by a differential + a round-trip
    test instead. The disassembler prints byte-address targets, self-consistent
    through the engine.
-4. **Memory modes + SDBD** — the indirect / auto-increment `@Rn` modes, direct
-   address, immediate (`MVII`/`ADDI`/…), the `SDBD` double-byte-immediate prefix,
-   and `JUMP` / `JSR`. This is where the `0x0035` / `0x0037` NOP/SIN variants and
+4. **Memory / immediate modes** — ✅ **landed (2026-07-03).** The seven
+   memory-referencing families (`MVO` store; `MVI`/`ADD`/`SUB`/`CMP`/`AND`/`XOR`
+   loads + ALU) across all three addressing modes — direct (`mm=0`, a following
+   address word), indirect `@R1`–`@R6` (`mm=1..6`), and immediate (`mm=7`, a
+   following value word) — plus the `PSHR`/`PULR` R6-stack aliases. The mnemonic
+   suffix picks the mode (bare / `@` / `I`), and `MVO` reverses the operand order
+   (register first). Direct and immediate operands are **position-independent**
+   (absolute address / literal, stored with no scaling), so — unlike the branches
+   — they *are* covered by the sweep, whose CP1610 candidates gained a filler
+   extension word.
+5. **`JUMP` / `JSR`** — the jump family (`J`/`JE`/`JD`, `JSR`/`JSRE`/`JSRD`), a
+   three-decle encoding (`0x0004` prefix, then a register/interrupt/address word
+   pair) distinct from everything else.
+6. **`SDBD` double-byte immediate** — the stateful prefix: after `SDBD`, the next
+   immediate is emitted as **two low-byte-first decles** (`0x1234` → `0x0034`,
+   `0x0012`), so both the dialect and the disassembler must track the preceding
+   `SDBD`. The `SDBD` opcode itself already exists (increment 1); this is only the
+   immediate-splitting. Also where the `0x0035` / `0x0037` NOP/SIN variants and
    the exact `asl` data directive get pinned.
 
 ## Reference

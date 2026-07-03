@@ -218,6 +218,9 @@ fn encode(mn: &str, args: &str, line: usize) -> Result<Operation, AsmError> {
             0x200 | u16::from(cond),
         )]));
     }
+    if let Some(op) = encode_mem(mn, args, line)? {
+        return Ok(op);
+    }
 
     let insn = isa::cp1610::lookup(mn)
         .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mn}`")))?;
@@ -296,6 +299,114 @@ fn reg(tok: &str, max: u16, line: usize) -> Result<u16, AsmError> {
         .and_then(|n| n.parse::<u16>().ok())
         .filter(|&n| n <= max);
     n.ok_or_else(|| AsmError::new(line, format!("expected register r0..r{max}, got `{tok}`")))
+}
+
+/// A plain 16-bit extension word — a direct address or an immediate, in the
+/// following decle.
+fn ext_word(expr: Expr) -> Piece {
+    Piece::Val {
+        expr,
+        bytes: 2,
+        rel: false,
+        signed: false,
+    }
+}
+
+/// Parse an indirect pointer register `R1`–`R6` to its mode (1–6). The `@` sits
+/// on the mnemonic (`MVI@`), not the operand, so the register is written bare.
+/// `R0` is not a pointer (mode 0 is direct addressing) and `R7` is the immediate
+/// mode, so both are rejected here — matching `asl`.
+fn ptr_reg(tok: &str, line: usize) -> Result<u16, AsmError> {
+    let n = tok
+        .trim()
+        .strip_prefix(['r', 'R'])
+        .and_then(|n| n.parse::<u16>().ok())
+        .filter(|&n| (1..=6).contains(&n));
+    n.ok_or_else(|| AsmError::new(line, format!("expected pointer r1..r6, got `{tok}`")))
+}
+
+/// Encode a memory-referencing instruction (`MVI`/`MVO`/`ADD`/… and `PSHR`/
+/// `PULR`), or `None` if `mn` is not one — leaving it to the single-decle table.
+/// The mnemonic suffix picks the addressing mode: bare = direct (`mm=0`, a
+/// following address word), `@` = indirect `@R1`–`@R6` (`mm=1..6`), `I` =
+/// immediate (`mm=7`, a following value word). `MVO` is a store, so its register
+/// operand comes first; the loads/ALU ops take the register last.
+fn encode_mem(mn: &str, args: &str, line: usize) -> Result<Option<Operation>, AsmError> {
+    let upper = mn.to_ascii_uppercase();
+    // `PSHR`/`PULR` are the R6-stack aliases of `MVO@ Rs,R6` / `MVI@ R6,Rd`.
+    if upper == "PSHR" || upper == "PULR" {
+        let r = reg(one_str(args, mn, line)?, 7, line)?;
+        let base = if upper == "PSHR" { 0x240 } else { 0x280 };
+        return Ok(Some(Operation::Encoded(Vec::from(word_lit(
+            base | (6 << 3) | r,
+        )))));
+    }
+
+    // Classify the mnemonic into its family and addressing mode by suffix.
+    let (fam_name, mode): (&str, MemMode) = if let Some(f) = upper.strip_suffix('@') {
+        (f, MemMode::Indirect)
+    } else if let Some(f) = upper.strip_suffix('I').filter(|f| is_mem_family(f)) {
+        (f, MemMode::Immediate)
+    } else {
+        (upper.as_str(), MemMode::Direct)
+    };
+    let Some(fam) = isa::cp1610::mem_family_by_name(fam_name) else {
+        return Ok(None); // not a memory instruction
+    };
+
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let [a, b] = ops.as_slice() else {
+        return Err(AsmError::new(line, format!("`{mn}` takes two operands")));
+    };
+
+    let pieces = match mode {
+        MemMode::Direct => {
+            // Loads/ALU: `MN addr, Rd`. Store: `MN Rs, addr`.
+            let (reg_tok, addr_tok) = if fam.store { (a, b) } else { (b, a) };
+            let r = reg(reg_tok, 7, line)?;
+            vec![
+                Piece::Lit((fam.base >> 8) as u8),
+                Piece::Lit((fam.base | r) as u8),
+                ext_word(value(addr_tok, line)?),
+            ]
+        }
+        MemMode::Indirect => {
+            // Loads/ALU: `MN@ @Rp, Rd`. Store: `MN@ Rs, @Rp`.
+            let (ptr_tok, reg_tok) = if fam.store { (b, a) } else { (a, b) };
+            let m = ptr_reg(ptr_tok, line)?;
+            let r = reg(reg_tok, 7, line)?;
+            Vec::from(word_lit(fam.base | (m << 3) | r))
+        }
+        MemMode::Immediate => {
+            if fam.store {
+                return Err(AsmError::new(line, "`MVO` has no immediate form"));
+            }
+            // `MNI imm, Rd`.
+            let r = reg(b, 7, line)?;
+            vec![
+                Piece::Lit((fam.base >> 8) as u8),
+                Piece::Lit((fam.base | (7 << 3) | r) as u8),
+                ext_word(value(a, line)?),
+            ]
+        }
+    };
+    Ok(Some(Operation::Encoded(pieces)))
+}
+
+/// Whether `name` (already upper-case) is a memory family mnemonic.
+fn is_mem_family(name: &str) -> bool {
+    isa::cp1610::mem_family_by_name(name).is_some()
+}
+
+/// The addressing mode a memory mnemonic's suffix selects.
+enum MemMode {
+    Direct,
+    Indirect,
+    Immediate,
 }
 
 /// Require exactly one operand from a raw argument string (a branch target).

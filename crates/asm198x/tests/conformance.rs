@@ -904,13 +904,14 @@ fn spec_sweep_matches_reference() {
 
     // --- GI CP1610 / asl + p2bin (Intellivision) ---------------------------
     // Each 10-bit decle is a big-endian 16-bit word (top six bits zero), so the
-    // candidate space is `0x000..=0x3FF` with no extension-word filler.
-    // Increment 1 decodes only the single-decle register / implied groups; every
-    // other decle (branches, memory, shift, immediate) falls to `word` data and
-    // is skipped until its increment lands. See the crate `decisions/`.
+    // candidate space is `0x000..=0x3FF`, each with a canonical big-endian filler
+    // word for the direct-address and immediate modes' extension decle. The
+    // single-decle register / shift groups ignore it; the memory modes consume it.
+    // Branches (position-dependent) fall out of the two-origin check, so they are
+    // covered by a round-trip test, not the sweep. See the crate `decisions/`.
     if have("asl") && have("p2bin") {
         let cands: Vec<Vec<u8>> = (0u32..=0x3FF)
-            .map(|w| vec![(w >> 8) as u8, w as u8])
+            .map(|w| vec![(w >> 8) as u8, w as u8, 0x12, 0x34])
             .collect();
         let reasm = |src: &str| {
             ref_assemble(&tmp, src, "asm", |s, o| {
