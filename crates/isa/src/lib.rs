@@ -194,6 +194,7 @@ impl Cycles {
 }
 
 pub mod cdp1802;
+pub mod cp1610;
 pub mod f8;
 pub mod huc6280;
 pub mod i8048;

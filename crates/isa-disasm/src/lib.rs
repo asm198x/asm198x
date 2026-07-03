@@ -2709,6 +2709,86 @@ fn decode_tms9900(code: &[u8], pos: usize, instr_addr: u16) -> Option<(String, u
 }
 
 // ---------------------------------------------------------------------------
+// GI CP1610 (Mattel Intellivision) — built as increments; see the crate
+// `decisions/`. Increment 1: the single-decle register / implied groups.
+// ---------------------------------------------------------------------------
+
+/// Disassemble a flat CP1610 binary loaded at `origin`. The CP1610 is
+/// **big-endian**; each 10-bit decle is stored as a 16-bit word (top six bits
+/// zero). Groups not yet implemented (and undecodable words) render as `word`
+/// data.
+#[must_use]
+pub fn disassemble_cp1610(code: &[u8], origin: u16) -> Vec<Line> {
+    let mut out = Vec::new();
+    let mut pos = 0;
+    while pos < code.len() {
+        let addr = origin.wrapping_add(pos as u16);
+        if pos + 1 >= code.len() {
+            out.push(Line {
+                addr: u32::from(addr),
+                bytes: vec![code[pos]],
+                text: format!("byte 0{:02X}H", code[pos]),
+            });
+            pos += 1;
+            continue;
+        }
+        let word = u16::from_be_bytes([code[pos], code[pos + 1]]);
+        match decode_cp1610(word) {
+            Some((text, len)) => {
+                out.push(Line {
+                    addr: u32::from(addr),
+                    bytes: code[pos..pos + len].to_vec(),
+                    text,
+                });
+                pos += len;
+            }
+            None => {
+                out.push(Line {
+                    addr: u32::from(addr),
+                    bytes: code[pos..pos + 2].to_vec(),
+                    text: format!("word 0{word:04X}H"),
+                });
+                pos += 2;
+            }
+        }
+    }
+    out
+}
+
+/// Render a CP1610 disassembly as reassemblable `asl` source (`cpu CP-1600`).
+///
+/// `relaxed on` enables asl's Intel `h`-suffix hex in CP-1600 mode (which
+/// otherwise takes only decimal and its `x'…'` hex form), keeping the emitted
+/// numbers in the house-standard `0XXXXH` style shared with every other listing.
+#[must_use]
+pub fn listing_cp1610(code: &[u8], origin: u16) -> String {
+    let mut s = format!("\tcpu CP-1600\n\trelaxed on\n\torg 0{origin:04X}H\n");
+    for line in disassemble_cp1610(code, origin) {
+        s.push('\t');
+        s.push_str(&line.text);
+        s.push('\n');
+    }
+    s.push_str("\tend\n");
+    s
+}
+
+/// Decode one CP1610 decle `word`. Returns the reassemblable text and byte length
+/// (2 for every increment-1 instruction), or `None` for an undecodable word
+/// (rendered as `word` data by the caller).
+fn decode_cp1610(word: u16) -> Option<(String, usize)> {
+    use isa::cp1610::Class;
+    let insn = isa::cp1610::decode(word)?;
+    let mn = insn.mnemonic.to_ascii_lowercase();
+    let text = match insn.class {
+        Class::Implied => mn,
+        Class::RegUnary => format!("{mn} r{}", word & 7),
+        Class::GetStatus => format!("{mn} r{}", word & 3),
+        Class::RegReg => format!("{mn} r{},r{}", (word >> 3) & 7, word & 7),
+    };
+    Some((text, 2))
+}
+
+// ---------------------------------------------------------------------------
 // Zilog Z8000 (non-segmented Z8002) — built as increments; see
 // `decisions/z8000-staged-build.md`. Increment 1: the dyadic family.
 // ---------------------------------------------------------------------------

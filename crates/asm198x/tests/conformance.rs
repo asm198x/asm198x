@@ -902,6 +902,39 @@ fn spec_sweep_matches_reference() {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (TMS9900 sweep)");
     }
 
+    // --- GI CP1610 / asl + p2bin (Intellivision) ---------------------------
+    // Each 10-bit decle is a big-endian 16-bit word (top six bits zero), so the
+    // candidate space is `0x000..=0x3FF` with no extension-word filler.
+    // Increment 1 decodes only the single-decle register / implied groups; every
+    // other decle (branches, memory, shift, immediate) falls to `word` data and
+    // is skipped until its increment lands. See the crate `decisions/`.
+    if have("asl") && have("p2bin") {
+        let cands: Vec<Vec<u8>> = (0u32..=0x3FF)
+            .map(|w| vec![(w >> 8) as u8, w as u8])
+            .collect();
+        let reasm = |src: &str| {
+            ref_assemble(&tmp, src, "asm", |s, o| {
+                let obj = s.with_extension("p");
+                let mut a = Command::new("asl");
+                a.arg("-q").arg(s).arg("-o").arg(&obj);
+                let mut b = Command::new("p2bin");
+                b.arg(&obj).arg(o);
+                vec![a, b]
+            })
+        };
+        checked += sweep(
+            "CP1610",
+            &cands,
+            &|b, o| asm198x::disassemble_cp1610(b, o as u16),
+            &|b, o| asm198x::listing_cp1610(b, o as u16),
+            &reasm,
+            &|_| false,
+            &mut fails,
+        );
+    } else {
+        eprintln!("SKIP: `asl`/`p2bin` not on PATH (CP1610 sweep)");
+    }
+
     // --- Zilog Z8000 / asl + p2bin (non-segmented Z8002) -------------------
     // The full non-segmented Z8002 instruction set (dyadic, program control,
     // single-operand, stack, shifts / rotates / sign-extends, bit ops, multiply
