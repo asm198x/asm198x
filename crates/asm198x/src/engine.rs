@@ -287,18 +287,17 @@ pub(crate) enum Piece {
     /// A two-word relative branch whose opcode word carries a **direction bit**
     /// selected by the *sign* of the displacement, with the magnitude in the
     /// following word — the CP1610 (Intellivision) branch shape, which the linear
-    /// [`Piece::Packed`] can't express. `target` is the destination address;
-    /// `base` is the opcode word (direction bit clear). The byte distance from the
-    /// instruction's end to `target` is divided by `unit` (the bytes per
-    /// addressing word — 2 for the CP1610's decle) to give the signed word
-    /// displacement `d`. Forward (`d >= 0`): opcode `base`, magnitude `d`.
-    /// Backward: opcode `base | dir_bit`, magnitude `-d - 1`. Both words are laid
-    /// down in the CPU's endianness; `what` names the field in a range error.
+    /// [`Piece::Packed`] can't express. `target` is the destination address (in
+    /// the CPU's address units); `base` is the opcode word (direction bit clear).
+    /// The signed displacement `d` is `target` minus the address two words past
+    /// the opcode (the branch is two words long). Forward (`d >= 0`): opcode
+    /// `base`, magnitude `d`. Backward: opcode `base | dir_bit`, magnitude
+    /// `-d - 1`. Both words are laid down in the CPU's endianness; `what` names the
+    /// field in a range error.
     Branch {
         target: Expr,
         base: u16,
         dir_bit: u16,
-        unit: i64,
         what: &'static str,
     },
 }
@@ -309,8 +308,8 @@ impl Piece {
             Piece::Lit(_) => 1,
             Piece::Val { bytes, .. } => i64::from(*bytes),
             Piece::Packed { bytes, .. } => i64::from(*bytes),
-            // Two words, each `unit` bytes: the opcode word plus the magnitude.
-            Piece::Branch { unit, .. } => 2 * *unit,
+            // Two 16-bit words: the opcode word plus the magnitude.
+            Piece::Branch { .. } => 4,
         }
     }
 }
@@ -342,6 +341,10 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
 
     // Pass 1 — assign addresses to labels.
     let require_origin = dialect.requires_explicit_origin();
+    // Emitted bytes per address unit — 1 for the byte-addressed CPUs, 2 for the
+    // word-addressed CP1610 (a decle is two bytes). The location counter advances
+    // in address units, so a byte length is divided by this.
+    let addr_unit = dialect.addr_unit();
     let mut symbols: BTreeMap<String, i64> = BTreeMap::new();
     let mut pc: i64 = 0;
     let mut origin: Option<i64> = None;
@@ -396,13 +399,13 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                     "program counter undefined — set an origin (`*=`) before any code or data",
                 ));
             }
-            Some(Operation::Bytes(items)) => pc += items.len() as i64,
-            Some(Operation::Words(items)) => pc += 2 * items.len() as i64,
+            Some(Operation::Bytes(items)) => pc += items.len() as i64 / addr_unit,
+            Some(Operation::Words(items)) => pc += 2 * items.len() as i64 / addr_unit,
             Some(Operation::Instruction { mnemonic, mode, .. }) => {
-                pc += form(set, ext, mnemonic, mode, s.line)?.len() as i64;
+                pc += form(set, ext, mnemonic, mode, s.line)?.len() as i64 / addr_unit;
             }
             Some(Operation::Encoded(pieces)) => {
-                pc += pieces.iter().map(Piece::len).sum::<i64>();
+                pc += pieces.iter().map(Piece::len).sum::<i64>() / addr_unit;
             }
             Some(Operation::Equ(_)) => {}   // handled above
             Some(Operation::Entry(_)) => {} // records a start address; emits nothing
@@ -417,17 +420,18 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
     let mut start: Option<u16> = None;
     let mut bytes: Vec<u8> = Vec::new();
     for s in &statements {
-        // The location counter (`$`) is the address of this statement's start.
-        let pc = origin + bytes.len() as i64;
+        // The location counter (`$`) is the address of this statement's start,
+        // in address units (bytes divided by `addr_unit`).
+        let pc = origin + bytes.len() as i64 / addr_unit;
         match &s.op {
             None => {}
             Some(Operation::Org(e)) => {
                 let target = e.eval(&symbols, pc, s.line)?;
-                let cur = origin + bytes.len() as i64;
+                let cur = origin + bytes.len() as i64 / addr_unit;
                 if target < cur {
                     return Err(AsmError::new(s.line, "cannot move origin backwards"));
                 }
-                bytes.resize(bytes.len() + (target - cur) as usize, 0);
+                bytes.resize(bytes.len() + ((target - cur) * addr_unit) as usize, 0);
             }
             Some(Operation::Equ(_)) => {} // defines a symbol; emits nothing
             Some(Operation::Entry(e)) => {
@@ -605,21 +609,13 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                             target,
                             base,
                             dir_bit,
-                            unit,
                             what,
                         } => {
                             let tgt = target.eval(&symbols, pc, s.line)?;
                             // The CP1610 measures from the address after both
-                            // words (opcode + magnitude).
-                            let pc_after = origin + bytes.len() as i64 + 2 * *unit;
-                            let dist = tgt - pc_after;
-                            if dist % *unit != 0 {
-                                return Err(AsmError::new(
-                                    s.line,
-                                    format!("{what} target is not on a word boundary"),
-                                ));
-                            }
-                            let d = dist / *unit;
+                            // words (opcode + magnitude) — two address units past
+                            // this instruction's start (`pc`).
+                            let d = tgt - (pc + 2);
                             let (word1, mag) = if d >= 0 {
                                 (i64::from(*base), d)
                             } else {

@@ -56,4 +56,15 @@ pub(crate) trait Dialect {
     fn oversized_byte_policy(&self) -> Oversize {
         Oversize::Error
     }
+
+    /// The number of emitted bytes per **address unit** — how the location
+    /// counter (labels, `*`/`$`, `org`) relates to the byte stream. Almost every
+    /// CPU is byte-addressed, so this is `1`. The **CP1610** is *word*-addressed:
+    /// its 10-bit "decle" is stored as a 2-byte word and `asl` counts addresses
+    /// in decles, so labels advance by one per two bytes emitted — it returns `2`.
+    /// Code must be a whole number of units long (the CP1610's is always
+    /// decle-aligned).
+    fn addr_unit(&self) -> i64 {
+        1
+    }
 }
