@@ -7,12 +7,13 @@
 //! `asm198x-and-shared-isa-spec.md`.
 
 use crate::{
-    assemble_1802, assemble_2650, assemble_8039, assemble_8048, assemble_acme, assemble_f8,
-    assemble_i8080, assemble_m6800, assemble_pasmonext, assemble_pdp11, assemble_rgbasm,
-    assemble_scmp, assemble_tms7000, assemble_tms9900, assemble_vasm, assemble_z8000,
-    assemble_z8001, listing_1802, listing_2650, listing_6502, listing_8048, listing_68000,
-    listing_f8, listing_i8080, listing_m6800, listing_pdp11, listing_scmp, listing_sm83,
-    listing_tms7000, listing_tms9900, listing_z80, listing_z8000, listing_z8001,
+    assemble_1802, assemble_2650, assemble_8039, assemble_8048, assemble_acme, assemble_cp1610,
+    assemble_f8, assemble_i8080, assemble_m6800, assemble_pasmonext, assemble_pdp11,
+    assemble_rgbasm, assemble_scmp, assemble_tms7000, assemble_tms9900, assemble_vasm,
+    assemble_z8000, assemble_z8001, listing_1802, listing_2650, listing_6502, listing_8048,
+    listing_68000, listing_cp1610, listing_f8, listing_i8080, listing_m6800, listing_pdp11,
+    listing_scmp, listing_sm83, listing_tms7000, listing_tms9900, listing_z80, listing_z8000,
+    listing_z8001,
 };
 
 #[test]
@@ -578,6 +579,45 @@ fn round_trips_z8001_segmented_through_asl_syntax() {
     let original = assemble_z8001(source).expect("assemble");
     let listing = listing_z8001(&original.bytes, original.origin);
     let re = assemble_z8001(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
+fn round_trips_cp1610_registers_through_asl_syntax() {
+    // Increment 1: the single-decle register / implied groups — the control ops,
+    // register-unary arithmetic, GSWD/RSWD status transfer, and the
+    // register-register dyadic group. Every instruction is one big-endian decle.
+    let source = "\
+        \torg 0\n\
+        \thlt\n\
+        \tsdbd\n\
+        \teis\n\
+        \tdis\n\
+        \ttci\n\
+        \tclrc\n\
+        \tsetc\n\
+        \tnop\n\
+        \tsin\n\
+        \tincr r0\n\
+        \tincr r7\n\
+        \tdecr r3\n\
+        \tcomr r5\n\
+        \tnegr r2\n\
+        \tadcr r6\n\
+        \trswd r0\n\
+        \trswd r7\n\
+        \tgswd r0\n\
+        \tgswd r3\n\
+        \tmovr r0,r1\n\
+        \tmovr r7,r0\n\
+        \taddr r2,r3\n\
+        \tsubr r4,r5\n\
+        \tcmpr r6,r7\n\
+        \tandr r1,r2\n\
+        \txorr r3,r4\n";
+    let original = assemble_cp1610(source).expect("assemble");
+    let listing = listing_cp1610(&original.bytes, original.origin);
+    let re = assemble_cp1610(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
 
