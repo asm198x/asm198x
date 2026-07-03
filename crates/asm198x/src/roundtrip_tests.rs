@@ -239,6 +239,48 @@ fn round_trips_z8000_single_operand_through_asl_syntax() {
 }
 
 #[test]
+fn round_trips_z8000_shift_rotate_through_asl_syntax() {
+    // Increment 6: shifts (a signed count word, its sign selecting left/right),
+    // rotates (a packed 1/2 count), and the sign-extends. Shift candidates carry
+    // an out-of-range filler count in the opcode sweep, so they fall to data
+    // there — this guards their round-trip explicitly.
+    let source = "\
+        \torg 0\n\
+        \tsla r1,#4\n\
+        \tsra r1,#4\n\
+        \tsll r2,#16\n\
+        \tsrl r2,#16\n\
+        \tsla r3,#0\n\
+        \tslab rl1,#3\n\
+        \tsrab rl1,#8\n\
+        \tsllb rh0,#1\n\
+        \tsrlb rl7,#7\n\
+        \tslal rr2,#8\n\
+        \tsral rr4,#32\n\
+        \tslll rr6,#5\n\
+        \tsrll rr8,#31\n\
+        \trl r1,#1\n\
+        \trl r1,#2\n\
+        \trr r2,#1\n\
+        \trlc r3,#2\n\
+        \trrc r4,#1\n\
+        \trlb rl1,#1\n\
+        \trrb rl2,#2\n\
+        \trlcb rh0,#1\n\
+        \trrcb rl7,#2\n\
+        \textsb r1\n\
+        \texts rr2\n\
+        \textsl rq4\n\
+        \textsb r15\n\
+        \texts rr14\n\
+        \textsl rq12\n";
+    let original = assemble_z8000(source).expect("assemble");
+    let listing = listing_z8000(&original.bytes, original.origin);
+    let re = assemble_z8000(&listing).expect("reassemble");
+    assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+#[test]
 fn round_trips_z8000_control_through_asl_syntax() {
     // Increment 3: program control — the position-dependent JR / DJNZ / CALR
     // the opcode sweep can't batch, plus JP / CALL / RET with condition codes.

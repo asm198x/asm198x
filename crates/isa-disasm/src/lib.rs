@@ -2735,6 +2735,8 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
         match decode_ctl_z8000(code, pos, addr)
             .or_else(|| decode_mono_z8000(code, pos))
             .or_else(|| decode_stack_z8000(code, pos))
+            .or_else(|| decode_shift_z8000(code, pos))
+            .or_else(|| decode_exts_z8000(code, pos))
             .or_else(|| decode_z8000(code, pos))
         {
             Some((text, len)) => {
@@ -2779,6 +2781,7 @@ fn z8000_reg(n: u16, size: isa::z8000::Size) -> String {
         Size::Byte if n < 8 => format!("rh{n}"),
         Size::Byte => format!("rl{}", n - 8),
         Size::Long => format!("rr{n}"),
+        Size::Quad => format!("rq{n}"),
         Size::Word | Size::Address => format!("r{n}"),
     }
 }
@@ -2940,6 +2943,100 @@ fn decode_stack_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
         format!("{} {value},@r{sp}", s.mnemonic.to_ascii_lowercase())
     };
     Some((text, len))
+}
+
+/// Decode one Z8000 shift or rotate (`SLA`/`SRA`/`SLL`/`SRL`, `RL`/`RR`/`RLC`/
+/// `RRC`, + byte/long) at `pos`, or `None`. Both key on top byte `0xB2` (byte) /
+/// `0xB3` (word/long) with the operand register in the second byte's high
+/// nibble; the low nibble's bit 0 tells shift (1) from rotate (0). A shift takes
+/// a trailing signed count word (its sign selecting left/right); a rotate packs
+/// its count.
+fn decode_shift_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+    use isa::z8000::Size;
+    let (top, second) = (code[pos], code[pos + 1]);
+    // The group is `MM` = 10 (register), so the top byte is exactly `0xB2`
+    // (byte) or `0xB3` (word/long) — not merely `base6` 0x32/0x33 with any `MM`.
+    if top != 0xB2 && top != 0xB3 {
+        return None;
+    }
+    let base6 = top & 0x3F;
+    let (reg, low) = (u16::from(second >> 4), second & 0xF);
+
+    if low & 1 == 1 {
+        // Shift: a count word follows, its sign selecting left (≥ 0) / right (< 0).
+        if pos + 4 > code.len() {
+            return None;
+        }
+        // The size (from the sub-opcode, shared by both directions) fixes the
+        // count's width: a byte shift's count is the signed low byte (high byte
+        // zero); a word / long shift's is the full 16-bit signed word.
+        let size = isa::z8000::shift_decode(base6, low, false)?.size;
+        if size == Size::Long && reg % 2 == 1 {
+            return None; // a long shift takes an even register pair
+        }
+        let (hi, lo) = (code[pos + 2], code[pos + 3]);
+        let count = if size == Size::Byte {
+            if hi != 0 {
+                return None; // a byte count occupies the low byte only
+            }
+            i64::from(lo as i8)
+        } else {
+            i64::from(i16::from_be_bytes([hi, lo]))
+        };
+        let max = isa::z8000::shift_max(size);
+        if count > max || count < -max {
+            return None; // out of range for this size — `asl` would reject it
+        }
+        let sh = isa::z8000::shift_decode(base6, low, count < 0)?;
+        Some((
+            format!(
+                "{} {},#{}",
+                sh.mnemonic.to_ascii_lowercase(),
+                z8000_reg(reg, size),
+                count.abs()
+            ),
+            4,
+        ))
+    } else {
+        // Rotate: the type is the low nibble's high bits, the count its bit 1.
+        let sh = isa::z8000::rotate_decode(base6, low >> 2)?;
+        let count = u16::from((low >> 1) & 1) + 1;
+        Some((
+            format!(
+                "{} {},#{count}",
+                sh.mnemonic.to_ascii_lowercase(),
+                z8000_reg(reg, sh.size)
+            ),
+            2,
+        ))
+    }
+}
+
+/// Decode one Z8000 sign-extend (`EXTSB`/`EXTS`/`EXTSL`) at `pos`, or `None`. The
+/// top byte is `0xB1`; the operand register is the second byte's high nibble and
+/// the sub-opcode its low nibble.
+fn decode_exts_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+    use isa::z8000::Size;
+    let (top, second) = (code[pos], code[pos + 1]);
+    if top != isa::z8000::EXTEND_TOP {
+        return None;
+    }
+    let (reg, subop) = (u16::from(second >> 4), second & 0xF);
+    let e = isa::z8000::extend_decode(subop)?;
+    // A long pair must be even; a quad a multiple of four.
+    match e.size {
+        Size::Long if reg % 2 == 1 => return None,
+        Size::Quad if reg % 4 != 0 => return None,
+        _ => {}
+    }
+    Some((
+        format!(
+            "{} {}",
+            e.mnemonic.to_ascii_lowercase(),
+            z8000_reg(reg, e.size)
+        ),
+        2,
+    ))
 }
 
 /// Decode one Z8000 dyadic instruction at byte offset `pos`. Returns the
