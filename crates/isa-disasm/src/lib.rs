@@ -2738,6 +2738,7 @@ pub fn disassemble_z8000(code: &[u8], origin: u16) -> Vec<Line> {
             .or_else(|| decode_shift_z8000(code, pos))
             .or_else(|| decode_exts_z8000(code, pos))
             .or_else(|| decode_bit_z8000(code, pos))
+            .or_else(|| decode_muldiv_z8000(code, pos))
             .or_else(|| decode_z8000(code, pos))
         {
             Some((text, len)) => {
@@ -3095,6 +3096,49 @@ fn decode_bit_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
         }
         _ => None, // `MM` = 11 is not a bit op
     }
+}
+
+/// Decode one Z8000 multiply / divide (`MULT`/`MULTL`/`DIV`/`DIVL`) at `pos`, or
+/// `None`. Dyadic-shaped, but the destination accumulator is double-width (long
+/// `rr` / quad `rq`) and the source one size smaller (word / long).
+fn decode_muldiv_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+    use isa::z8000::{DA, IM, IR, R, Size, X, mode_of, reg_aligned};
+    let (top, second) = (code[pos], code[pos + 1]);
+    let md = isa::z8000::muldiv_decode(top)?;
+    let field = u16::from(second >> 4);
+    let dest = u16::from(second & 0xF);
+    let mode = mode_of(top >> 6, field);
+    // The accumulator must be an aligned register, and a register source too.
+    if !reg_aligned(dest, md.dest) {
+        return None;
+    }
+    if mode == R && !reg_aligned(field, md.src) {
+        return None;
+    }
+    let mn = md.mnemonic.to_ascii_lowercase();
+    let dst = z8000_reg(dest, md.dest);
+    let addr16 =
+        || (pos + 4 <= code.len()).then(|| u16::from_be_bytes([code[pos + 2], code[pos + 3]]));
+
+    let (src, len) = match mode {
+        R => (z8000_reg(field, md.src), 2),
+        IR => (format!("@r{field}"), 2),
+        DA => (format!("0{:04X}H", addr16()?), 4),
+        X => (format!("0{:04X}H(r{field})", addr16()?), 4),
+        IM => match md.src {
+            Size::Long => {
+                if pos + 6 > code.len() {
+                    return None;
+                }
+                let hi = u32::from(addr16()?);
+                let lo = u32::from(u16::from_be_bytes([code[pos + 4], code[pos + 5]]));
+                (format!("#0{:08X}H", (hi << 16) | lo), 6)
+            }
+            _ => (format!("#0{:04X}H", addr16()?), 4),
+        },
+        _ => return None,
+    };
+    Some((format!("{mn} {dst},{src}"), len))
 }
 
 /// Decode one Z8000 dyadic instruction at byte offset `pos`. Returns the

@@ -11,8 +11,9 @@
 //! (increment 4: `CLR`/`COM`/`NEG`/`TEST`/`TSET`, `INC`/`DEC`), the **stack**
 //! ops (increment 5: `PUSH`/`POP`/`PUSHL`/`POPL`), the **shifts / rotates /
 //! sign-extends** (increment 6: `SLA`/`SRA`/`SLL`/`SRL` + byte/long, `RL`/`RR`/
-//! `RLC`/`RRC` + byte, `EXTSB`/`EXTS`/`EXTSL`), and the **bit ops** (increment 7:
-//! `BIT`/`SET`/`RES` + byte, static and dynamic).
+//! `RLC`/`RRC` + byte, `EXTSB`/`EXTS`/`EXTSL`), the **bit ops** (increment 7:
+//! `BIT`/`SET`/`RES` + byte, static and dynamic), and **multiply / divide**
+//! (increment 8: `MULT`/`MULTL`/`DIV`/`DIVL`).
 //!
 //! A dyadic instruction packs its operands as fields in the opcode word, emitted
 //! through the engine's computed-operand seam ([`Operation::Encoded`]): a
@@ -142,6 +143,8 @@ fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
                 encode_extend(e, args, line)?
             } else if let Some(b) = isa::z8000::bit_lookup(&mn) {
                 encode_bit(b, args, line)?
+            } else if let Some(md) = isa::z8000::muldiv_lookup(&mn) {
+                encode_muldiv(md, args, line)?
             } else {
                 encode(&mn, args, line)?
             }
@@ -593,6 +596,44 @@ fn encode_bit(b: &isa::z8000::Bit, args: &str, line: usize) -> Result<Operation,
     };
     let top = (mm(mode) << 6) | u16::from(b.base6);
     let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | (bitnum as u16)));
+    pieces.extend(ext);
+    Ok(Operation::Encoded(pieces))
+}
+
+/// Encode a multiply / divide (`MULT`/`MULTL`/`DIV`/`DIVL`). Dyadic-shaped, but
+/// the destination accumulator is double-width (long `rr` / quad `rq`) while the
+/// source (and its immediate) is one size smaller (word / long).
+fn encode_muldiv(md: &isa::z8000::MulDiv, args: &str, line: usize) -> Result<Operation, AsmError> {
+    use isa::z8000::{DA, IM, IR, R, X};
+    let ops: Vec<&str> = split_top_level(args.trim(), ',')
+        .iter()
+        .map(|s| s.trim())
+        .filter(|s| !s.is_empty())
+        .collect();
+    let [dest_s, src_s] = match ops.as_slice() {
+        [a, b] => [*a, *b],
+        _ => {
+            return Err(AsmError::new(
+                line,
+                format!("`{}` takes two operands", md.mnemonic),
+            ));
+        }
+    };
+    let dest = size_reg(dest_s, md.dest).ok_or_else(|| {
+        AsmError::new(
+            line,
+            format!("`{}` needs a valid accumulator register", md.mnemonic),
+        )
+    })?;
+    let (mode, field, ext): (u8, u16, Option<Piece>) = match operand(src_s, md.src, line)? {
+        Operand::Reg(s) => (R, s, None),
+        Operand::Ir(p) => (IR, p, None),
+        Operand::Imm(e) => (IM, 0, Some(imm_piece(e, md.src))),
+        Operand::Da(e) => (DA, 0, Some(ext_word(e))),
+        Operand::Indexed(e, i) => (X, i, Some(ext_word(e))),
+    };
+    let top = (mm(mode) << 6) | u16::from(md.base6);
+    let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | dest));
     pieces.extend(ext);
     Ok(Operation::Encoded(pieces))
 }
