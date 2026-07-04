@@ -30,6 +30,9 @@
 //! Disassembly ([`disassemble_z80`]/[`disassemble_6502`]) is the inverse, driven
 //! by the same [`isa`] spec the assemblers emit from.
 
+// The source-preserving semantic AST (plan U2). A layer above the encoder;
+// dialects lower into it and it lowers to Statement/Operation (U3 wires that).
+mod ast;
 mod dialect;
 mod dialects;
 mod engine;
