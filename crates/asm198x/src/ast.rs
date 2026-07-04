@@ -1,23 +1,24 @@
-//! The source-preserving semantic AST — plan unit **U2**
-//! (`docs/plans/2026-07-04-005-feat-ir-ast-layer-plan.md`).
+//! The source-preserving semantic AST — plan units **U2** (types) and **U3**
+//! (the Z80 front-end lowers into it), see
+//! `docs/plans/2026-07-04-005-feat-ir-ast-layer-plan.md`.
 //!
-//! A new layer *above* the encoder: dialects parse source into this tree, and
-//! it lowers to today's [`Statement`](crate::engine::Statement) /
-//! [`Operation`](crate::engine::Operation) → bytes (U3 wires the lowering; the
-//! `isa`/encoding layer is unchanged — KTD1). This module defines the node
-//! types and their provenance/scope/trivia model; no dialect produces it yet,
-//! so it is unconsumed until U3.
+//! A layer *above* the encoder: a dialect parses source into a [`Program`], and
+//! [`lower`] turns it into today's [`Statement`](crate::engine::Statement) /
+//! [`Operation`](crate::engine::Operation) stream, which the existing two-pass
+//! driver assembles unchanged (KTD1 — the `isa`/encoding layer is untouched,
+//! output bytes are identical). U3 routes the Z80 dialects through this; other
+//! CPUs stay on direct lowering behind the dialect boundary (KTD6).
 //!
 //! **Neutrality is one tree *type* both dialects lower into, not identical
 //! streams** (the U1 gate finding). Where dialects diverge *semantically* —
-//! pasmo-vs-sjasmplus local-label scope, oversize policy — each dialect's
-//! parse→AST lowering resolves its own meaning into this shared type; the tree
-//! carries the *resolved* meaning (a scoped [`Symbol`], a structured
-//! [`Operand`]), and per-dialect policy stays a `Dialect` attribute applied at
-//! lowering. So the tree needs no per-dialect escape hatch.
-#![allow(dead_code)] // the foundation lands ahead of its first consumer (U3)
+//! pasmo-vs-sjasmplus local-label scope — each dialect resolves its own meaning
+//! into this shared type at parse: a leading-`.` label becomes a [`Scope::Local`]
+//! [`Symbol`] under sjasmplus and a [`Scope::Global`] one under pasmo. Per-dialect
+//! *policy* (oversize, `addr_unit`) stays a `Dialect` attribute the driver
+//! applies in pass 2, not tree content. So the tree needs no escape hatch.
+#![allow(dead_code)] // trivia + structured-operand paths land ahead of U4/U5/U6
 
-use crate::engine::Expr;
+use crate::engine::{Expr, Operation, Statement};
 
 // ---------------------------------------------------------------------------
 // Provenance (R3)
@@ -29,7 +30,7 @@ use crate::engine::Expr;
 pub(crate) struct FileId(pub(crate) u32);
 
 /// One macro-expansion frame (a rustc-style defined-at / invoked-at record).
-/// The room is reserved now; idea 4's macro engine fills it. Empty in v1.
+/// Reserved now; idea 4's macro engine fills it. Empty in v1.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct ExpansionFrame {
     pub(crate) macro_name: String,
@@ -60,20 +61,19 @@ impl Span {
 }
 
 // ---------------------------------------------------------------------------
-// Trivia — comments carried, not stripped (R5, KTD5)
+// Trivia — comments carried, not stripped (R5, KTD5). Populated in U4.
 // ---------------------------------------------------------------------------
 
-/// A source comment, kept as trivia so emit can reproduce it (R5). The text is
-/// the comment body; `span` locates it.
+/// A source comment, kept as trivia so emit can reproduce it (R5).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Comment {
     pub(crate) text: String,
     pub(crate) span: Span,
 }
 
-/// Comments attached to an item: own-line comments *before* it, and a same-line
+/// Comments attached to a node: own-line comments *before* it, and a same-line
 /// comment *after* it. Blank-line and mid-expression comments are out of the v1
-/// fidelity floor (KTD5).
+/// fidelity floor (KTD5). Empty until U4 stops the parser stripping comments.
 #[derive(Clone, Debug, Default, PartialEq, Eq)]
 pub(crate) struct Trivia {
     pub(crate) leading: Vec<Comment>,
@@ -84,24 +84,27 @@ pub(crate) struct Trivia {
 // Symbols with scope (R4)
 // ---------------------------------------------------------------------------
 
-/// A symbol's scope, resolved by the dialect lowering. A local label reused
-/// under two globals becomes two distinct symbols (same `name`, different
-/// scope) — the pasmo-vs-sjasmplus divergence the U1 spike proved lives here.
+/// A symbol's scope, resolved by the dialect at parse. A local label reused
+/// under two globals becomes two distinct symbols — the pasmo-vs-sjasmplus
+/// divergence the U1 spike proved lives here.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) enum Scope {
-    /// A plain (global) label — and how pasmo treats a leading-`.` name.
+    /// A plain global label — and how pasmo treats a leading-`.` name.
     Global,
     /// A local label, qualified by its enclosing global — how sjasmplus (and
     /// the existing `scopes_locals` mechanism) treats a leading-`.` name.
     Local { in_global: String },
 }
 
-/// A label definition or symbol reference carrying its resolved [`Scope`], so
-/// two same-named locals in different scopes are two distinct symbols (R4).
+/// A label definition carrying its **source** name, its resolved [`Scope`], and
+/// the **qualified** name lowering emits (`first.loop` for a local, the plain
+/// name for a global). Two same-named locals in different scopes are distinct
+/// symbols (R4); keeping the source name lets emit reproduce `.loop` (U5).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub(crate) struct Symbol {
     pub(crate) name: String,
     pub(crate) scope: Scope,
+    pub(crate) qualified: String,
 }
 
 // ---------------------------------------------------------------------------
@@ -119,12 +122,10 @@ pub(crate) enum AutoIndex {
 }
 
 /// An abstract addressing-mode operand for the computed / field-packed CPUs
-/// (6809 indexed, PDP-11, TMS9900, Z8000, CP1610, …). It keeps the *source
-/// structure* — register, auto marker, indirection, offset — rather than the
-/// pre-computed encoding bytes, so it round-trips to source and lowers to
-/// [`Piece`](crate::engine::Piece)s in U6. The U1 spike proved this shape
-/// suffices for the 6809 indexed operand with no escape hatch; other CPUs
-/// extend it.
+/// (6809 indexed, PDP-11, …). It keeps the *source structure* — register, auto
+/// marker, indirection, offset — rather than pre-computed encoding bytes, so it
+/// round-trips to source and lowers to [`Piece`](crate::engine::Piece)s in U6.
+/// The U1 spike proved this shape suffices for the 6809 with no escape hatch.
 #[derive(Clone, Debug)]
 pub(crate) struct StructuredOperand {
     pub(crate) reg: String,
@@ -133,58 +134,148 @@ pub(crate) struct StructuredOperand {
     pub(crate) offset: Option<Expr>,
 }
 
-/// One instruction operand.
+/// One instruction or directive operand.
 #[derive(Clone, Debug)]
 pub(crate) enum Operand {
-    /// A fixed-slot operand: the unresolved value plus its **source token text**
-    /// (`$0A`, `10`, `%1010` all evaluate to 10 but re-emit distinctly — KTD5).
+    /// A fixed-slot operand: the value plus its **source token text** (`$0A`,
+    /// `10`, `%1010` all evaluate to 10 but re-emit distinctly — KTD5). The
+    /// source text is empty until U5's emit path populates it.
     Expr { value: Expr, source: String },
-    /// A computed / field-packed operand (see [`StructuredOperand`]).
+    /// A computed / field-packed operand (see [`StructuredOperand`]); the 6809
+    /// and kin use this from U6.
     Structured(StructuredOperand),
+}
+
+impl Operand {
+    /// A fixed-slot operand with no captured source text (the U3 default; U5
+    /// fills the source in for faithful emit).
+    fn expr(value: Expr) -> Self {
+        Operand::Expr {
+            value,
+            source: String::new(),
+        }
+    }
+
+    /// The value of a fixed-slot operand. Panics on a structured operand — the
+    /// Z80 never produces one, so U3's lowering never hits this.
+    fn into_value(self) -> Expr {
+        match self {
+            Operand::Expr { value, .. } => value,
+            Operand::Structured(_) => {
+                unreachable!("a fixed-slot dialect never produces a structured operand")
+            }
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
 // Items and the program
 // ---------------------------------------------------------------------------
 
-/// One meaningful thing on a source line, before byte-lowering.
+/// One operation on a source line, before byte-lowering. The variants mirror the
+/// [`Operation`](crate::engine::Operation) kinds the Z80 dialects produce; other
+/// CPUs' kinds (`Encoded`, `Align`) are added when U6/ACME migrate. Instructions
+/// carry structured [`Operand`]s (source text + structured variants) even though
+/// U3 populates only the fixed-slot value.
 #[derive(Clone, Debug)]
 pub(crate) enum Item {
-    /// A label definition, carrying its resolved scope.
-    Label(Symbol),
-    /// An instruction: mnemonic, the isa mode label the dialect resolved (or
-    /// `None` before resolution), and its operands.
     Instruction {
         mnemonic: String,
-        mode: Option<&'static str>,
+        mode: &'static str,
         operands: Vec<Operand>,
     },
-    /// A directive (`org`, `equ`, `defb`, …) named as written, with its
-    /// operands. U3's lowering maps the name to the right `Operation`.
-    Directive {
-        name: String,
-        operands: Vec<Operand>,
-    },
+    Org(Operand),
+    Equ(Operand),
+    Bytes(Vec<Operand>),
+    Words(Vec<Operand>),
+    Entry(Operand),
 }
 
-/// An item with its provenance and attached comment trivia.
+/// A source line reduced to an optional (scoped) label and an optional
+/// operation, with provenance and attached comment trivia. Mirrors
+/// [`Statement`](crate::engine::Statement), enriched.
 #[derive(Clone, Debug)]
 pub(crate) struct Node {
-    pub(crate) item: Item,
+    pub(crate) label: Option<Symbol>,
+    pub(crate) item: Option<Item>,
     pub(crate) span: Span,
     pub(crate) trivia: Trivia,
 }
 
-/// A parsed translation unit: the ordered nodes. Lowers to `Vec<Statement>` in
-/// U3 (this module defines the type only).
+/// A parsed translation unit: the ordered nodes.
 #[derive(Clone, Debug, Default)]
 pub(crate) struct Program {
     pub(crate) nodes: Vec<Node>,
 }
 
+// ---------------------------------------------------------------------------
+// Lowering: AST -> the engine's Statement/Operation stream (U3, KTD1)
+// ---------------------------------------------------------------------------
+
+/// Lower an AST to the engine's statement stream. Label definitions emit their
+/// **qualified** name (so scope resolves exactly as the old string-mangle did),
+/// operations lower to their [`Operation`], and the driver assembles the result
+/// unchanged — byte-identical to direct parsing (AE1).
+pub(crate) fn lower(program: Program) -> Vec<Statement> {
+    program
+        .nodes
+        .into_iter()
+        .map(|node| Statement {
+            line: node.span.line as usize,
+            label: node.label.map(|s| s.qualified),
+            op: node.item.map(lower_item),
+        })
+        .collect()
+}
+
+fn lower_item(item: Item) -> Operation {
+    match item {
+        Item::Instruction {
+            mnemonic,
+            mode,
+            operands,
+        } => Operation::Instruction {
+            mnemonic,
+            mode,
+            operands: operands.into_iter().map(Operand::into_value).collect(),
+        },
+        Item::Org(o) => Operation::Org(o.into_value()),
+        Item::Equ(o) => Operation::Equ(o.into_value()),
+        Item::Bytes(v) => Operation::Bytes(v.into_iter().map(Operand::into_value).collect()),
+        Item::Words(v) => Operation::Words(v.into_iter().map(Operand::into_value).collect()),
+        Item::Entry(o) => Operation::Entry(o.into_value()),
+    }
+}
+
+/// Build an [`Item`] from an [`Operation`] a Z80 dialect produced. The Z80 never
+/// emits `Encoded` (it has no computed operands) or `Align` (ACME-only), so those
+/// are unreachable here; U6 and the ACME migration add them.
+pub(crate) fn item_from_operation(op: Operation) -> Item {
+    match op {
+        Operation::Instruction {
+            mnemonic,
+            mode,
+            operands,
+        } => Item::Instruction {
+            mnemonic,
+            mode,
+            operands: operands.into_iter().map(Operand::expr).collect(),
+        },
+        Operation::Org(e) => Item::Org(Operand::expr(e)),
+        Operation::Equ(e) => Item::Equ(Operand::expr(e)),
+        Operation::Bytes(v) => Item::Bytes(v.into_iter().map(Operand::expr).collect()),
+        Operation::Words(v) => Item::Words(v.into_iter().map(Operand::expr).collect()),
+        Operation::Entry(e) => Item::Entry(Operand::expr(e)),
+        Operation::Encoded(_) | Operation::Align { .. } => {
+            unreachable!("the Z80 dialects never emit Encoded or Align operations")
+        }
+    }
+}
+
 // ===========================================================================
-// Model tests — construct ASTs by hand and prove the type supports each
-// requirement, before U3 wires a parser to populate them.
+// Model tests — construct ASTs by hand and prove the type + lowering support
+// each requirement. (U3 adds full-program byte-identity tests via the Z80
+// front-end; see `ast_lowering_tests`.)
 // ===========================================================================
 
 #[cfg(test)]
@@ -195,11 +286,12 @@ mod tests {
     #[test]
     fn comment_is_queryable_trivia() {
         let node = Node {
-            item: Item::Instruction {
+            label: None,
+            item: Some(Item::Instruction {
                 mnemonic: "nop".into(),
-                mode: Some("implied"),
+                mode: "implied",
                 operands: vec![],
-            },
+            }),
             span: Span::at(2, 5),
             trivia: Trivia {
                 leading: vec![Comment {
@@ -217,7 +309,8 @@ mod tests {
         assert_eq!(node.trivia.trailing.as_ref().unwrap().text, "no-op");
     }
 
-    /// AE4 (R4) — a local label reused in two scopes is two distinct symbols.
+    /// AE4 (R4) — a local label reused in two scopes is two distinct symbols,
+    /// with distinct qualified names but the same source name.
     #[test]
     fn reused_local_is_two_distinct_scoped_symbols() {
         let first = Symbol {
@@ -225,15 +318,21 @@ mod tests {
             scope: Scope::Local {
                 in_global: "first".into(),
             },
+            qualified: "first.loop".into(),
         };
         let second = Symbol {
             name: ".loop".into(),
             scope: Scope::Local {
                 in_global: "second".into(),
             },
+            qualified: "second.loop".into(),
         };
-        assert_ne!(first, second, "same name, different scope -> distinct");
+        assert_ne!(
+            first, second,
+            "same source name, different scope -> distinct"
+        );
         assert_eq!(first.name, second.name);
+        assert_ne!(first.qualified, second.qualified);
     }
 
     /// AE2 (R3) — every node carries `(file, line, column)`, with the
@@ -247,12 +346,10 @@ mod tests {
         assert!(s.expansion_frames.is_empty(), "reserved, empty in v1");
     }
 
-    /// KTD5 — an operand round-trips its source token text: `$0A`, `10`, and
-    /// `%1010` all evaluate to 10 but re-emit distinctly.
+    /// KTD5 — an operand round-trips its source token text.
     #[test]
     fn operand_preserves_source_spelling() {
-        let forms = ["$0A", "10", "%1010"];
-        for src in forms {
+        for src in ["$0A", "10", "%1010"] {
             let op = Operand::Expr {
                 value: Expr::Num(10),
                 source: src.to_string(),
@@ -280,5 +377,81 @@ mod tests {
         assert_eq!(s.reg, "x");
         assert_eq!(s.auto, AutoIndex::Inc1);
         assert!(!s.indirect);
+    }
+
+    /// AE6 — pasmo and sjasmplus lower an equivalent program to identical bytes
+    /// (they share the AST lowering; full structural equality is proven by the
+    /// reference differential in `tests/conformance.rs`).
+    #[test]
+    fn pasmo_and_sjasmplus_share_the_lowering() {
+        let src = "  ld a, 5\n  ld b, a\n  ret\n";
+        let p = crate::assemble_pasmo(src).unwrap();
+        let s = crate::assemble_sjasmplus(src).unwrap();
+        assert_eq!(p.bytes, s.bytes);
+    }
+
+    /// U3 regression — sjasmplus scoped locals still resolve through the AST
+    /// refactor (two `.loop`s in two scopes assemble), and pasmo still rejects a
+    /// reused `.loop` (its non-scoping meaning is preserved).
+    #[test]
+    fn scoped_locals_survive_the_ast_refactor() {
+        let src = "\
+first:
+  ld b, 2
+.loop:
+  djnz .loop
+second:
+  ld b, 3
+.loop:
+  djnz .loop
+";
+        assert!(crate::assemble_sjasmplus(src).is_ok(), "sjasmplus scopes");
+        assert!(
+            crate::assemble_pasmo(src).is_err(),
+            "pasmo still rejects reused `.loop`"
+        );
+    }
+
+    /// KTD6 seam — a non-migrated CPU (6502 via acme) still assembles through
+    /// the direct-lowering path; it never touches the AST.
+    #[test]
+    fn seam_leaves_other_cpus_on_direct_lowering() {
+        let src = "*=$c000\n  lda #$05\n  rts\n";
+        assert!(crate::assemble_acme(src).is_ok(), "6502 direct path intact");
+    }
+
+    /// Lowering round-trips an Operation through an Item byte-for-byte (the
+    /// mechanism U3 relies on for AE1).
+    #[test]
+    fn item_round_trips_an_instruction() {
+        let node = Node {
+            label: Some(Symbol {
+                name: "start".into(),
+                scope: Scope::Global,
+                qualified: "start".into(),
+            }),
+            item: Some(item_from_operation(Operation::Instruction {
+                mnemonic: "ld".into(),
+                mode: "a,n",
+                operands: vec![Expr::Num(0x42)],
+            })),
+            span: Span::at(1, 1),
+            trivia: Trivia::default(),
+        };
+        let statements = lower(Program { nodes: vec![node] });
+        assert_eq!(statements.len(), 1);
+        assert_eq!(statements[0].label.as_deref(), Some("start"));
+        match &statements[0].op {
+            Some(Operation::Instruction {
+                mnemonic,
+                mode,
+                operands,
+            }) => {
+                assert_eq!(mnemonic, "ld");
+                assert_eq!(*mode, "a,n");
+                assert!(matches!(operands.as_slice(), [Expr::Num(0x42)]));
+            }
+            _ => panic!("expected an instruction"),
+        }
     }
 }

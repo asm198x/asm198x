@@ -77,7 +77,24 @@ pub(crate) fn assemble<S: Z80Syntax>(
     ext: Option<&'static isa::InstructionSet>,
     source: &str,
 ) -> Result<Vec<Statement>, AsmError> {
-    let mut out = Vec::new();
+    // The Z80 front-end parses into the semantic AST (U3), then lowers it to the
+    // engine's statement stream — byte-identical to the old direct parse (AE1).
+    // Other CPUs stay on direct lowering behind this boundary (KTD6).
+    Ok(crate::ast::lower(parse_program(syntax, set, ext, source)?))
+}
+
+/// Parse Z80 source into the semantic [`Program`](crate::ast::Program). Each line
+/// becomes a node carrying its scoped label, operation, and span; trivia is
+/// filled in U4. The scope resolution mirrors the old string-mangle exactly, so
+/// [`lower`](crate::ast::lower) reproduces the same statements.
+pub(crate) fn parse_program<S: Z80Syntax>(
+    syntax: &S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    source: &str,
+) -> Result<crate::ast::Program, AsmError> {
+    use crate::ast::{Node, Program, Scope, Span, Symbol, Trivia};
+    let mut nodes = Vec::new();
     // Constants defined with `equ`, recorded as parsed. Opcode-embedded
     // operands (BIT n, IM n, RST n) must be known at parse time to pick the
     // form, so they resolve against this — not the engine's pass-2 symbols.
@@ -91,36 +108,64 @@ pub(crate) fn assemble<S: Z80Syntax>(
         if code.trim().is_empty() {
             continue;
         }
-        let (mut label, rest) = split_label(syntax, set, ext, code, line)?;
+        let (label, rest) = split_label(syntax, set, ext, code, line)?;
         let mut op = parse_op(syntax, set, ext, rest, line, &consts)?;
-        if scoped {
-            // A leading-`.` label is local to the current scope; a plain label
-            // opens a new scope. Update the scope first, so a local reference
-            // on the same line (e.g. `done: jr .loop`) resolves against it.
-            match &label {
-                Some(name) if name.starts_with('.') => {
-                    if let Some(g) = &current_global {
-                        label = Some(format!("{g}{name}"));
-                    }
+
+        // Resolve the label's scope into a `Symbol` (source name, scope, and the
+        // qualified name lowering emits). A leading-`.` label is local to the
+        // current scope; a plain label opens a new scope. Update the scope first,
+        // so a local reference on the same line (`done: jr .loop`) resolves
+        // against it — matching the old ordering.
+        let symbol = label.map(|name| {
+            if scoped && name.starts_with('.') {
+                match &current_global {
+                    Some(g) => Symbol {
+                        qualified: format!("{g}{name}"),
+                        scope: Scope::Local {
+                            in_global: g.clone(),
+                        },
+                        name,
+                    },
+                    // A leading-`.` label with no enclosing global is left as-is
+                    // (the old code qualified only when a global existed).
+                    None => Symbol {
+                        qualified: name.clone(),
+                        scope: Scope::Global,
+                        name,
+                    },
                 }
-                Some(name) => current_global = Some(name.clone()),
-                None => {}
+            } else {
+                if scoped {
+                    current_global = Some(name.clone());
+                }
+                Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }
             }
-            if let Some(g) = &current_global {
-                op = op.map(|o| qualify_locals(o, g));
-            }
+        });
+        if scoped && let Some(g) = &current_global {
+            op = op.map(|o| qualify_locals(o, g));
         }
-        if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
+
+        // `equ` binds its (qualified) label to a parse-time constant.
+        if let (Some(sym), Some(Operation::Equ(e))) = (&symbol, &op)
             && let Some(v) = eval_const(e, &consts)
         {
-            consts.insert(name.clone(), v);
+            consts.insert(sym.qualified.clone(), v);
         }
-        if label.is_none() && op.is_none() {
+        if symbol.is_none() && op.is_none() {
             continue;
         }
-        out.push(Statement { line, label, op });
+        nodes.push(Node {
+            label: symbol,
+            item: op.map(crate::ast::item_from_operation),
+            span: Span::at(line as u32, 1),
+            trivia: Trivia::default(),
+        });
     }
-    Ok(out)
+    Ok(Program { nodes })
 }
 
 // ---------------------------------------------------------------------------
