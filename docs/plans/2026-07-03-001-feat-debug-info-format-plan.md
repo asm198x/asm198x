@@ -15,6 +15,7 @@ execution: code
 
 - **Objective:** Define and emit **dbg198x** — one machine-readable debug-info format (line↔address map, symbols, sections, address-space info) — uniformly for every CPU Asm198x assembles, so the 198x family (Emu198x first) gets source-level debugging from a single importer.
 - **Product authority:** Steve Hill. Seeded from the ideation record at `docs/ideation/2026-07-03-asm198x-world-class-ideation.html` (idea 1); scope questions resolved in dialogue 2026-07-03; requirements pressure-tested by document review the same day (nine findings applied).
+- **⏸ PAUSED (2026-07-04):** Implementation is paused pending the **core contract** (idea 3, `docs/plans/2026-07-03-003-feat-core-contract-plan.md`). That decision is *contract-first*: the contract lands before this feature, and dbg198x builds against the contract's structured result rather than the current `Assembly` (KTD2's "additive field on the current `Assembly`, no signature changes" predates it). Resume once the contract's sequencing is settled; the format design below is unaffected, only the emission integration point changes.
 - **Open blockers:** None for planning. One precondition for implementation: the Emu198x importer commitment named in Dependencies (milestone-standing, not mere issue existence) must be in place before implementation starts.
 
 ---
