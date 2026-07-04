@@ -195,6 +195,22 @@ pub(crate) fn parse_program<S: Z80Syntax>(
             trivia,
         });
     }
+    // Flush comments after the last node (a trailing comment block, or a
+    // comment-only file) as a label-less, op-less node so the formatter keeps
+    // them (they emit no bytes, so assembly is unaffected).
+    if !pending_leading.is_empty() {
+        let line = source.lines().count() as u32;
+        nodes.push(Node {
+            label: None,
+            item: None,
+            source: String::new(),
+            span: Span::at(line, 1),
+            trivia: Trivia {
+                leading: pending_leading,
+                trailing: None,
+            },
+        });
+    }
     Ok(Program { nodes })
 }
 

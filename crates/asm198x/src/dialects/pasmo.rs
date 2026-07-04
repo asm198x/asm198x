@@ -97,8 +97,8 @@ mod tests {
 
         let src = "; header\nstart:\n  ld a, 5   ; load five\n  ret\n";
         let d = Pasmo { z80n: false };
-        let prog =
-            z80::parse_program(&PasmoSyntax, d.instruction_set(), d.extension_set(), src).unwrap();
+        let prog = z80::parse_program(&PasmoSyntax, d.instruction_set(), d.extension_set(), src)
+            .expect("parses");
 
         // The header comment is leading trivia on the first node (`start:`).
         assert!(
@@ -119,9 +119,9 @@ mod tests {
             "same-line comment attaches as trailing trivia"
         );
         // Comments never reach the encoder — bytes are unchanged.
-        let with = crate::assemble_pasmo(src).unwrap().bytes;
+        let with = crate::assemble_pasmo(src).expect("assembles").bytes;
         let without = crate::assemble_pasmo("start:\n  ld a, 5\n  ret\n")
-            .unwrap()
+            .expect("assembles")
             .bytes;
         assert_eq!(with, without, "comments do not change bytes");
     }

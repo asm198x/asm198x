@@ -16,7 +16,12 @@
 //! [`Symbol`] under sjasmplus and a [`Scope::Global`] one under pasmo. Per-dialect
 //! *policy* (oversize, `addr_unit`) stays a `Dialect` attribute the driver
 //! applies in pass 2, not tree content. So the tree needs no escape hatch.
-#![allow(dead_code)] // trivia + structured-operand paths land ahead of U4/U5/U6
+//!
+//! The only code here ahead of its consumer is the computed-operand path
+//! ([`StructuredOperand`], [`AutoIndex`], [`Operand::Structured`], and the
+//! per-operand `source` slot), reserved for U6's field-packed CPUs — each
+//! carries a scoped `allow(dead_code)`, so the rest of the module keeps normal
+//! dead-code detection (CI is `-D warnings`).
 
 use crate::engine::{Expr, Operation, Statement};
 
@@ -112,6 +117,7 @@ pub(crate) struct Symbol {
 // ---------------------------------------------------------------------------
 
 /// An auto-increment / -decrement marker on an index register (6809 and kin).
+#[allow(dead_code)] // reserved for U6's computed-operand CPUs
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum AutoIndex {
     None,
@@ -126,6 +132,7 @@ pub(crate) enum AutoIndex {
 /// marker, indirection, offset — rather than pre-computed encoding bytes, so it
 /// round-trips to source and lowers to [`Piece`](crate::engine::Piece)s in U6.
 /// The U1 spike proved this shape suffices for the 6809 with no escape hatch.
+#[allow(dead_code)] // reserved for U6's computed-operand CPUs
 #[derive(Clone, Debug)]
 pub(crate) struct StructuredOperand {
     pub(crate) reg: String,
@@ -135,11 +142,16 @@ pub(crate) struct StructuredOperand {
 }
 
 /// One instruction or directive operand.
+#[allow(dead_code)] // the `source` slot and `Structured` variant are reserved for U6
 #[derive(Clone, Debug)]
 pub(crate) enum Operand {
-    /// A fixed-slot operand: the value plus its **source token text** (`$0A`,
-    /// `10`, `%1010` all evaluate to 10 but re-emit distinctly — KTD5). The
-    /// source text is empty until U5's emit path populates it.
+    /// A fixed-slot operand: the value plus a slot for its **source token text**
+    /// (`$0A`, `10`, `%1010` all evaluate to 10 but re-emit distinctly — KTD5).
+    /// U5's formatter round-trips spelling via the whole-line
+    /// [`Node::source`](Node), so this per-operand slot is **reserved for U6+**
+    /// (per-operand structural emit — the converter, refactoring) and is empty
+    /// today. It is populated when a consumer needs operand-level, not
+    /// line-level, source.
     Expr { value: Expr, source: String },
     /// A computed / field-packed operand (see [`StructuredOperand`]); the 6809
     /// and kin use this from U6.
@@ -147,8 +159,9 @@ pub(crate) enum Operand {
 }
 
 impl Operand {
-    /// A fixed-slot operand with no captured source text (the U3 default; U5
-    /// fills the source in for faithful emit).
+    /// A fixed-slot operand with no captured per-operand source text (the
+    /// default; the formatter round-trips spelling via the whole-line
+    /// `Node::source`, so operand-level source stays empty until U6+ needs it).
     fn expr(value: Expr) -> Self {
         Operand::Expr {
             value,
@@ -306,9 +319,12 @@ pub(crate) fn emit(program: &Program) -> String {
         match (label, node.item.as_ref()) {
             // `equ` binds its label to a value on the same statement, so its
             // label must stay on the operation's line (it cannot be split off).
+            // The colon is required: a bare `name` whose spelling collides with a
+            // mnemonic or directive (`in`, `di`, `end`, `set`, …) would re-parse
+            // as an instruction, but a `name:` token is always a label.
             (Some(name), Some(Item::Equ(_))) => {
                 out.push_str(name);
-                out.push(' ');
+                out.push_str(": ");
                 out.push_str(&node.source);
                 trailing(&mut out);
                 out.push('\n');
@@ -383,7 +399,10 @@ mod tests {
         };
         assert_eq!(node.trivia.leading.len(), 1);
         assert_eq!(node.trivia.leading[0].text, "set up the loop");
-        assert_eq!(node.trivia.trailing.as_ref().unwrap().text, "no-op");
+        assert_eq!(
+            node.trivia.trailing.as_ref().expect("has trailing").text,
+            "no-op"
+        );
     }
 
     /// AE4 (R4) — a local label reused in two scopes is two distinct symbols,
@@ -462,8 +481,8 @@ mod tests {
     #[test]
     fn pasmo_and_sjasmplus_share_the_lowering() {
         let src = "  ld a, 5\n  ld b, a\n  ret\n";
-        let p = crate::assemble_pasmo(src).unwrap();
-        let s = crate::assemble_sjasmplus(src).unwrap();
+        let p = crate::assemble_pasmo(src).expect("assembles");
+        let s = crate::assemble_sjasmplus(src).expect("assembles");
         assert_eq!(p.bytes, s.bytes);
     }
 

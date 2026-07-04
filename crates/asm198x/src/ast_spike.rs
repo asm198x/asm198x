@@ -162,8 +162,8 @@ fn oversize_divergence_is_byte_neutral_and_off_tree() {
 
     // And the statement streams are structurally identical — the divergence is
     // NOT in the tree (it's `Dialect::oversized_byte_policy`, applied in pass 2).
-    let ps = Pasmo { z80n: false }.parse(src).unwrap();
-    let ss = Sjasmplus { z80n: false }.parse(src).unwrap();
+    let ps = Pasmo { z80n: false }.parse(src).expect("parses");
+    let ss = Sjasmplus { z80n: false }.parse(src).expect("parses");
     assert_eq!(
         canon_stream(&ps),
         canon_stream(&ss),
@@ -195,7 +195,7 @@ second:
     // `.loop`s as DISTINCT qualified names (`first.loop` / `second.loop`).
     let s = assemble_sjasmplus(two_scope).expect("sjasmplus scopes locals");
     assert!(!s.bytes.is_empty());
-    let ss = Sjasmplus { z80n: false }.parse(two_scope).unwrap();
+    let ss = Sjasmplus { z80n: false }.parse(two_scope).expect("parses");
     let rendered = canon_stream(&ss).join("\n");
     assert!(
         rendered.contains("first.loop") && rendered.contains("second.loop"),
@@ -292,7 +292,7 @@ fn structured_6809_operand_lowers_byte_identical() {
 /// confirming the Encoded shape.
 #[test]
 fn cheaper_floor_is_insufficient_for_computed_operands() {
-    let ls = Lwasm.parse("        lda 5,x\n").unwrap();
+    let ls = Lwasm.parse("        lda 5,x\n").expect("parses");
     let rendered = canon_stream(&ls).join("\n");
     assert!(
         rendered.contains("encoded"),
