@@ -29,6 +29,16 @@ pub(crate) trait Z80Syntax {
     /// Strip a line comment, returning the code before it.
     fn strip_comment<'a>(&self, line: &'a str) -> &'a str;
 
+    /// Split a line into its code and its comment (with the delimiter, trailing
+    /// whitespace trimmed), for carrying comments as AST trivia (U4). Defined in
+    /// terms of [`strip_comment`](Self::strip_comment), which returns the code
+    /// prefix, so the comment is exactly what it removed — no behaviour change.
+    fn split_comment<'a>(&self, line: &'a str) -> (&'a str, Option<&'a str>) {
+        let code = self.strip_comment(line);
+        let comment = (code.len() < line.len()).then(|| line[code.len()..].trim_end());
+        (code, comment)
+    }
+
     /// Parse a numeric literal token (the dialect's hex/binary/char forms).
     fn parse_number(&self, tok: &str, line: usize) -> Result<i64, AsmError>;
 
@@ -93,7 +103,7 @@ pub(crate) fn parse_program<S: Z80Syntax>(
     ext: Option<&'static isa::InstructionSet>,
     source: &str,
 ) -> Result<crate::ast::Program, AsmError> {
-    use crate::ast::{Node, Program, Scope, Span, Symbol, Trivia};
+    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
     let mut nodes = Vec::new();
     // Constants defined with `equ`, recorded as parsed. Opcode-embedded
     // operands (BIT n, IM n, RST n) must be known at parse time to pick the
@@ -102,10 +112,22 @@ pub(crate) fn parse_program<S: Z80Syntax>(
     let scoped = syntax.scopes_locals();
     // The most recent global (non-`.`) label, for qualifying local labels.
     let mut current_global: Option<String> = None;
+    // Own-line comments seen since the last node, attached as leading trivia to
+    // the next node (U4). Comments never reach the encoder, so bytes are
+    // unchanged (AE1).
+    let mut pending_leading: Vec<Comment> = Vec::new();
     for (i, raw) in source.lines().enumerate() {
         let line = i + 1;
-        let code = syntax.strip_comment(raw);
+        let (code, comment) = syntax.split_comment(raw);
         if code.trim().is_empty() {
+            // A comment-only line becomes leading trivia for the next node; a
+            // blank line carries nothing.
+            if let Some(text) = comment {
+                pending_leading.push(Comment {
+                    text: text.to_string(),
+                    span: Span::at(line as u32, 1),
+                });
+            }
             continue;
         }
         let (label, rest) = split_label(syntax, set, ext, code, line)?;
@@ -158,11 +180,18 @@ pub(crate) fn parse_program<S: Z80Syntax>(
         if symbol.is_none() && op.is_none() {
             continue;
         }
+        let trivia = Trivia {
+            leading: std::mem::take(&mut pending_leading),
+            trailing: comment.map(|text| Comment {
+                text: text.to_string(),
+                span: Span::at(line as u32, (code.len() + 1) as u32),
+            }),
+        };
         nodes.push(Node {
             label: symbol,
             item: op.map(crate::ast::item_from_operation),
             span: Span::at(line as u32, 1),
-            trivia: Trivia::default(),
+            trivia,
         });
     }
     Ok(Program { nodes })
