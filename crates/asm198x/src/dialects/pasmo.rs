@@ -32,6 +32,14 @@ impl Dialect for Pasmo {
             source,
         )
     }
+    fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
+        Ok(Some(z80::parse_program(
+            &PasmoSyntax,
+            self.instruction_set(),
+            self.extension_set(),
+            source,
+        )?))
+    }
     /// pasmo silently truncates an over-range byte to its low 8 bits.
     fn oversized_byte_policy(&self) -> Oversize {
         Oversize::Truncate

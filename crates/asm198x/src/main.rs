@@ -190,6 +190,7 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut dialect: Option<&str> = None;
     let mut target: Option<&str> = None;
     let mut disassemble = false;
+    let mut format = false;
     let mut exe = false;
     let mut sna = false;
     let mut prg = false;
@@ -211,6 +212,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 target = Some(args.get(i).ok_or("`--target` needs a value")?);
             }
             "--disasm" | "--disassemble" => disassemble = true,
+            "--fmt" | "--format" => format = true,
             "--exe" | "--hunkexe" => exe = true,
             "--sna" => sna = true,
             "--prg" => prg = true,
@@ -306,6 +308,30 @@ fn run(args: &[String]) -> Result<String, String> {
 
     let assembler = Assembler::resolve(dialect, target)?;
     let source = std::fs::read_to_string(input).map_err(|e| format!("cannot read {input}: {e}"))?;
+
+    // `--fmt`: parse into the semantic AST and emit canonical same-dialect
+    // source (the formatter, U5). Prints to stdout, or writes with `-o`.
+    if format {
+        let formatted = match assembler {
+            Assembler::Pasmo { z80n: false } => asm198x::format_pasmo(&source),
+            Assembler::Pasmo { z80n: true } => asm198x::format_pasmonext(&source),
+            Assembler::Sjasmplus { z80n: false } => asm198x::format_sjasmplus(&source),
+            Assembler::Sjasmplus { z80n: true } => asm198x::format_sjasmplus_next(&source),
+            _ => {
+                return Err(
+                    "`--fmt` supports only the Z80 dialects (pasmo, sjasmplus) so far".into(),
+                );
+            }
+        }
+        .map_err(|e| format!("{input}: {e}"))?;
+        if let Some(path) = &output {
+            std::fs::write(path, &formatted)
+                .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
+            return Ok(format!("formatted {input} -> {}", path.display()));
+        }
+        print!("{formatted}");
+        return Ok(format!("formatted {input}"));
+    }
 
     // vasm (68000): a flat big-endian code image, or an Amiga hunk executable
     // with `--exe` (the curriculum's `-Fhunkexe` target).
@@ -423,7 +449,9 @@ fn usage() -> String {
      C64 program: asm198x --dialect acme --prg <input> [-o <out.prg>]\n\
      \x20            (prepends the 2-byte load address)\n\
      disassemble: asm198x --disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
-     \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\n\
+     \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\
+     format:      asm198x --fmt [--cpu <pasmo|sjasmplus>] <input.asm> [-o <out.asm>]\n\
+     \x20            (canonical layout, comments + operand spelling preserved; Z80 so far)\n\n\
      dialects (syntax): acme (C64 6502; also `6502`), ca65 (NES), vasm (Amiga\n\
      \x20                 68000), lwasm (6809), 65816 (ca65 native), huc6280\n\
      \x20                 (PC Engine ca65; also `pce`), rgbasm (Game Boy SM83;\n\

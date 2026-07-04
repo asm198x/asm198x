@@ -198,6 +198,10 @@ pub(crate) enum Item {
 pub(crate) struct Node {
     pub(crate) label: Option<Symbol>,
     pub(crate) item: Option<Item>,
+    /// The operation's raw source text (comment-stripped, trimmed), kept
+    /// verbatim so the formatter (U5) round-trips operand spelling and
+    /// source-form local names. Empty for a label-only line.
+    pub(crate) source: String,
     pub(crate) span: Span,
     pub(crate) trivia: Trivia,
 }
@@ -272,6 +276,78 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Emit: AST -> canonical same-dialect source — the U5 formatter (AE7, KTD5)
+// ---------------------------------------------------------------------------
+
+/// Emit an AST back to canonical source in its own dialect (`asm198x fmt`). The
+/// formatter canonicalises *layout* — labels at column 0, operations indented,
+/// own-line comments on their own lines, a same-line comment trailing its
+/// operation — while preserving each operation's source text verbatim, so
+/// operand spelling and source-form local names round-trip (KTD5). The result
+/// assembles byte-identical to the original (comments never reach the encoder,
+/// AE1) and re-emitting is a fixed point (idempotent, AE7).
+pub(crate) fn emit(program: &Program) -> String {
+    const INDENT: &str = "        ";
+    let mut out = String::new();
+    for node in &program.nodes {
+        for c in &node.trivia.leading {
+            out.push_str(&c.text);
+            out.push('\n');
+        }
+        // A same-line comment trails its operation with a canonical gap.
+        let trailing = |out: &mut String| {
+            if let Some(c) = &node.trivia.trailing {
+                out.push_str("   ");
+                out.push_str(&c.text);
+            }
+        };
+        let label = node.label.as_ref().map(|s| s.name.as_str());
+        match (label, node.item.as_ref()) {
+            // `equ` binds its label to a value on the same statement, so its
+            // label must stay on the operation's line (it cannot be split off).
+            (Some(name), Some(Item::Equ(_))) => {
+                out.push_str(name);
+                out.push(' ');
+                out.push_str(&node.source);
+                trailing(&mut out);
+                out.push('\n');
+            }
+            // Label + other operation: label on its own line, operation indented.
+            (Some(name), Some(_)) => {
+                out.push_str(name);
+                out.push_str(":\n");
+                out.push_str(INDENT);
+                out.push_str(&node.source);
+                trailing(&mut out);
+                out.push('\n');
+            }
+            // Label-only line.
+            (Some(name), None) => {
+                out.push_str(name);
+                out.push(':');
+                trailing(&mut out);
+                out.push('\n');
+            }
+            // Operation with no label.
+            (None, Some(_)) => {
+                out.push_str(INDENT);
+                out.push_str(&node.source);
+                trailing(&mut out);
+                out.push('\n');
+            }
+            // No label, no operation — a bare trailing comment (rare).
+            (None, None) => {
+                if let Some(c) = &node.trivia.trailing {
+                    out.push_str(&c.text);
+                    out.push('\n');
+                }
+            }
+        }
+    }
+    out
+}
+
 // ===========================================================================
 // Model tests — construct ASTs by hand and prove the type + lowering support
 // each requirement. (U3 adds full-program byte-identity tests via the Z80
@@ -292,6 +368,7 @@ mod tests {
                 mode: "implied",
                 operands: vec![],
             }),
+            source: "nop".into(),
             span: Span::at(2, 5),
             trivia: Trivia {
                 leading: vec![Comment {
@@ -435,6 +512,7 @@ second:
                 mode: "a,n",
                 operands: vec![Expr::Num(0x42)],
             })),
+            source: "ld a,$42".into(),
             span: Span::at(1, 1),
             trivia: Trivia::default(),
         };

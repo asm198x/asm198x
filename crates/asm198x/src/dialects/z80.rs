@@ -190,6 +190,7 @@ pub(crate) fn parse_program<S: Z80Syntax>(
         nodes.push(Node {
             label: symbol,
             item: op.map(crate::ast::item_from_operation),
+            source: rest.trim().to_string(),
             span: Span::at(line as u32, 1),
             trivia,
         });

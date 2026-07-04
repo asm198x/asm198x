@@ -42,6 +42,14 @@ impl Dialect for Sjasmplus {
             source,
         )
     }
+    fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
+        Ok(Some(z80::parse_program(
+            &SjasmplusSyntax,
+            self.instruction_set(),
+            self.extension_set(),
+            source,
+        )?))
+    }
     /// sjasmplus truncates an over-range byte to its low 8 bits and warns.
     fn oversized_byte_policy(&self) -> Oversize {
         Oversize::TruncateWarn

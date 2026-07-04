@@ -388,6 +388,50 @@ pub fn assemble_sjasmplus_next(source: &str) -> Result<Assembly, AsmError> {
     engine::assemble(source, &dialects::Sjasmplus { z80n: true })
 }
 
+/// Format pasmo-syntax Z80 source (`asm198x fmt`): parse into the semantic AST
+/// and emit canonical same-dialect source — labels at column 0, operations
+/// indented, comments preserved in position, operand spelling untouched. The
+/// result assembles byte-identical to the input and is idempotent (U5, AE7).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse failure.
+pub fn format_pasmo(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Pasmo { z80n: false }, source)
+}
+
+/// Format pasmonext-syntax (Z80N) source — see [`format_pasmo`].
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_pasmonext(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Pasmo { z80n: true }, source)
+}
+
+/// Format sjasmplus-syntax Z80 source — see [`format_pasmo`].
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_sjasmplus(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Sjasmplus { z80n: false }, source)
+}
+
+/// Format sjasmplus-syntax (Z80N) source — see [`format_pasmo`].
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_sjasmplus_next(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Sjasmplus { z80n: true }, source)
+}
+
+/// Parse with a dialect's AST front-end and emit canonical source. Errors if the
+/// dialect has no formatter yet (no AST front-end).
+fn format_ast(dialect: &dyn dialect::Dialect, source: &str) -> Result<String, AsmError> {
+    match dialect.parse_ast(source)? {
+        Some(program) => Ok(ast::emit(&program)),
+        None => Err(AsmError::new(0, "no formatter for this dialect yet")),
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
