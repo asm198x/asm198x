@@ -22,7 +22,7 @@
 
 use crate::dialect::Dialect;
 use crate::dialects::{Lwasm, Pasmo, Sjasmplus};
-use crate::engine::{Expr, Operation, Statement};
+use crate::engine::{Operation, Statement};
 use crate::{assemble_lwasm, assemble_pasmo, assemble_sjasmplus};
 
 // ---------------------------------------------------------------------------
