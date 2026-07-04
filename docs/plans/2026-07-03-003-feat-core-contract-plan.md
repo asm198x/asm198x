@@ -93,6 +93,7 @@ Two assets make this tractable. The `isa` crate **already** offers a query API (
 
 ### Outstanding Questions
 
+- **[Post-mapping — 2026-07-04] The AST layer reshapes R1/R4.** Mapping ideas 4–7 surfaced a foundational source-preserving IR (`docs/plans/2026-07-04-005-feat-ir-ast-layer-plan.md`): R1's "structured result" substance is really that **AST** (the byte-level image is a lowering of it), and R4's `Dialect` trait must be **bidirectional** (parse *and* emit), because the converter (idea 6) and the language surface (idea 4) build on it. Also: spans must carry `(file,line,column)` + scope + reserved macro-expansion frames (idea 4's C1–C3), and the field-packed cycles/flags backfill is a shared prerequisite with ideas 5/7. The AST is planned first; reconcile R1/R4 with it when this contract goes to `ce-plan`.
 - Whether load-bearing sibling (crate) consumption — dbg198x reading the structured result — fires the R7 freeze, or only a *surface* does. If it does, the freeze fires early (at dbg198x, not MCP); if not, dbg198x builds against a still-draft contract. Ties to R7's "crates, not surfaces" note.
 - Which contract types are semver-frozen at v1 versus draft, and the exact freeze checklist (mirror the dbg198x freeze-at-first-consumption record, including its bounded-review and secondary-trigger safeguards per R7).
 - Where the serializable spec-query layer lives so `isa` stays zero-dependency — a new contract crate vs an `isa` companion crate — planning.
