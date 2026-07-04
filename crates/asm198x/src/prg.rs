@@ -31,6 +31,7 @@ mod tests {
             symbols: std::collections::BTreeMap::new(),
             start: None,
             warnings: Vec::new(),
+            debug: crate::DebugData::default(),
         };
         assert_eq!(
             prg(&asm),

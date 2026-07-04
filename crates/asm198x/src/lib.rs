@@ -41,7 +41,10 @@ mod sna;
 // Disassembly lives in the dependency-free `isa-disasm` crate (only `isa` +
 // std) so Emu198x can consume it without the assembler; re-exported here so the
 // `asm198x` library API and CLI are unchanged.
-pub use engine::{AsmError, Assembly, Warning};
+pub use engine::{AsmError, Assembly, DebugData, LineRec, Warning};
+// Re-exported so consumers of `Assembly.debug` need not depend on dbg198x
+// directly for the symbol types the engine captures.
+pub use dbg198x;
 pub use isa_disasm::{
     Line, disassemble_1802, disassemble_2650, disassemble_6502, disassemble_6809, disassemble_8048,
     disassemble_65816, disassemble_68000, disassemble_cp1610, disassemble_f8, disassemble_huc6280,

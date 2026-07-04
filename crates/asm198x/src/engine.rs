@@ -33,6 +33,35 @@ pub struct Assembly {
     /// Non-fatal advisories raised during assembly (e.g. a byte truncated to fit
     /// its operand, sjasmplus-style). Empty for dialects that don't warn.
     pub warnings: Vec<Warning>,
+    /// Debug-info captured during pass 2 — the line→address map and typed
+    /// symbols the CLI renders into a `.dbg198x` sidecar / `--sym` / `--listing`.
+    /// Header-less (the CPU/dialect/source-file identity is the CLI's to add) and
+    /// section-less (the flat engine is a single implicit section 0, based at
+    /// `origin`). Capturing it never changes an emitted byte.
+    pub debug: DebugData,
+}
+
+/// The engine's slice of a `.dbg198x` record: typed symbols and line→address
+/// spans, in the CPU's **address units** (a decle for the word-addressed CP1610,
+/// a byte elsewhere) so a consumer's address lookups line up with the CPU's own
+/// addressing. Header-less; the CLI wraps it with identity and the source
+/// filename to form a full [`dbg198x::DebugInfo`].
+#[derive(Debug, Clone, Default, PartialEq, Eq)]
+pub struct DebugData {
+    /// Every label (address), `equ`/`=` constant (value), and entry point.
+    pub symbols: Vec<dbg198x::Symbol>,
+    /// One span per source-bearing statement that emitted bytes. Fill from `org`
+    /// gaps and `align` carries no span (the padding rule).
+    pub lines: Vec<LineRec>,
+}
+
+/// A line→address span before the source filename is attached: `length` address
+/// units at section-relative `offset` were produced by `line`.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct LineRec {
+    pub line: u32,
+    pub offset: u64,
+    pub length: u64,
 }
 
 /// An assembly error, with the 1-based source line it occurred on (0 = no
@@ -419,10 +448,12 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
     let mut warnings: Vec<Warning> = Vec::new();
     let mut start: Option<u16> = None;
     let mut bytes: Vec<u8> = Vec::new();
+    let mut debug = DebugData::default();
     for s in &statements {
         // The location counter (`$`) is the address of this statement's start,
         // in address units (bytes divided by `addr_unit`).
         let pc = origin + bytes.len() as i64 / addr_unit;
+        let len_before = bytes.len();
         match &s.op {
             None => {}
             Some(Operation::Org(e)) => {
@@ -634,6 +665,75 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 }
             }
         }
+
+        // --- Debug capture (U2). Reads only `pc`/`bytes.len()`/`symbols`; it
+        // never influences an emitted byte (AE2). Addresses are section-relative
+        // offsets in address units, section 0 based at `origin`. ---
+        if let Some(label) = &s.label {
+            let kind = if matches!(&s.op, Some(Operation::Equ(_))) {
+                // An `equ`/`=` constant: its value, not an address, and no space.
+                let value = symbols.get(label).copied().unwrap_or_default();
+                dbg198x::SymbolKind::Const {
+                    value: value as u64,
+                }
+            } else {
+                // A label lives at this statement's address (`pc`).
+                dbg198x::SymbolKind::Label {
+                    section: 0,
+                    offset: (pc - origin) as u64,
+                    space: None,
+                }
+            };
+            debug.symbols.push(dbg198x::Symbol {
+                name: label.clone(),
+                kind,
+            });
+        }
+        // A source-bearing statement that emitted bytes gets a line span; `org`
+        // gaps and `align` fill do not (the padding rule).
+        let source_bearing = matches!(
+            &s.op,
+            Some(
+                Operation::Bytes(_)
+                    | Operation::Words(_)
+                    | Operation::Instruction { .. }
+                    | Operation::Encoded(_)
+            )
+        );
+        if source_bearing && bytes.len() > len_before {
+            debug.lines.push(LineRec {
+                line: s.line as u32,
+                offset: (pc - origin) as u64,
+                length: ((bytes.len() - len_before) as i64 / addr_unit) as u64,
+            });
+        }
+        // The entry point (`end <addr>`) is an Entry symbol. When it targets a
+        // bare label, upgrade that label's kind in place (the entry *is* that
+        // location) rather than emitting a second same-named symbol; otherwise
+        // record a fresh `@entry`.
+        if let (Some(Operation::Entry(e)), Some(v)) = (&s.op, start) {
+            let entry = dbg198x::SymbolKind::Entry {
+                section: 0,
+                offset: (i64::from(v) - origin) as u64,
+                space: None,
+            };
+            let existing = match e {
+                Expr::Sym(n) => debug
+                    .symbols
+                    .iter_mut()
+                    .find(|s| s.name == *n && matches!(s.kind, dbg198x::SymbolKind::Label { .. })),
+                _ => None,
+            };
+            if let Some(sym) = existing {
+                sym.kind = entry;
+            } else {
+                let name = match e {
+                    Expr::Sym(n) => n.clone(),
+                    _ => "@entry".to_string(),
+                };
+                debug.symbols.push(dbg198x::Symbol { name, kind: entry });
+            }
+        }
     }
 
     if origin + bytes.len() as i64 > 0x1_0000 {
@@ -646,6 +746,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
         symbols,
         start,
         warnings,
+        debug,
     })
 }
 

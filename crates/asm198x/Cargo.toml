@@ -17,6 +17,7 @@ repository.workspace = true
 # each bump. Local builds use the path; the version is only for packaging.
 isa = { path = "../isa", version = "0.0.7" }
 isa-disasm = { path = "../isa-disasm", version = "0.0.7" }
+dbg198x = { path = "../dbg198x", version = "0.0.7" }
 
 [lints]
 workspace = true

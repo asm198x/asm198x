@@ -97,6 +97,7 @@ mod tests {
             symbols: std::collections::BTreeMap::new(),
             start,
             warnings: Vec::new(),
+            debug: crate::DebugData::default(),
         }
     }
 
