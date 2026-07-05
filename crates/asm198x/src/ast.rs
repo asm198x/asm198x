@@ -261,6 +261,72 @@ pub(crate) struct Program {
 }
 
 // ---------------------------------------------------------------------------
+// Conditional evaluation — the shared framework (idea 4, generalised)
+// ---------------------------------------------------------------------------
+
+/// A dialect's conditional-assembly semantics, for the shared [`evaluate`] walk.
+/// The reusable part is the tree walk (prune the untaken branch, thread the
+/// live/skipped flag); the two dialect-specific parts are **evaluating a
+/// condition** and **lowering one content line** (which also carries the
+/// dialect's environment — the `equ`/`=`/`!set` bindings a later condition tests).
+///
+/// A dialect gains conditionals by implementing this over an evaluator that owns
+/// its environment, then calling [`evaluate`]; the ACME (brace) and — when a
+/// keyword dialect adopts them — `IF … ENDIF` styles share this one walk.
+pub(crate) trait CondEval {
+    /// Evaluate a conditional head (`!if DEBUG = 1`, `IF DEBUG`, `IFDEF FOO`)
+    /// against the current environment: `true` if the then-branch is taken.
+    /// `line` is the head's source line, for diagnostics.
+    ///
+    /// # Errors
+    /// A malformed condition or an undefined symbol required to fold it.
+    fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError>;
+
+    /// Lower one content node (an instruction, directive, or `equ`/`=`/`!set`)
+    /// to zero or more statements, updating the environment so a later condition
+    /// sees the binding. Only ever called for a **live** node.
+    ///
+    /// # Errors
+    /// Any per-line parse, range, or fold failure.
+    fn lower(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError>;
+}
+
+/// Assemble by evaluating the conditional tree: prune the untaken branch of each
+/// [`Item::Conditional`] and lower every live content line through `dialect`. A
+/// skipped branch is walked with `emit = false` so it defines nothing — the rule
+/// ACME's old `process_block` used, now shared by any conditional dialect (idea
+/// 4). Blank/comment nodes (no label, no source) carry nothing and are skipped.
+pub(crate) fn evaluate<D: CondEval>(
+    dialect: &mut D,
+    nodes: &[Node],
+    emit: bool,
+    out: &mut Vec<Statement>,
+) -> Result<(), AsmError> {
+    for node in nodes {
+        if let Some(Item::Conditional {
+            head,
+            then_body,
+            else_body,
+            ..
+        }) = &node.item
+        {
+            let taken = if emit {
+                dialect.eval(head, node.span.line)?
+            } else {
+                false
+            };
+            evaluate(dialect, then_body, emit && taken, out)?;
+            if let Some(else_body) = else_body {
+                evaluate(dialect, else_body, emit && !taken, out)?;
+            }
+        } else if emit && (node.label.is_some() || !node.source.is_empty()) {
+            dialect.lower(node, out)?;
+        }
+    }
+    Ok(())
+}
+
+// ---------------------------------------------------------------------------
 // Lowering: AST -> the engine's Statement/Operation stream (U3, KTD1)
 // ---------------------------------------------------------------------------
 

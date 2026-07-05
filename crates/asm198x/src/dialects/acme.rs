@@ -46,23 +46,14 @@ impl Dialect for Acme {
         // conditional now lives in the tree, not a second parse.
         let program = parse_program(source)?;
         let anons = prescan_anons(source);
-        let set = self.instruction_set();
-        let mut env: BTreeMap<String, i64> = BTreeMap::new();
-        // Names bound by `!set` (a *reassignable* variable). They live in `env`
-        // like `=` constants, but are additionally marked here so each use is
-        // baked to the value current at that point (reassignment can't be a
-        // single pass-2 symbol).
-        let mut set_names: BTreeSet<String> = BTreeSet::new();
+        let mut eval = AcmeEval {
+            set: self.instruction_set(),
+            anons: &anons,
+            env: BTreeMap::new(),
+            set_names: BTreeSet::new(),
+        };
         let mut out = Vec::new();
-        evaluate(
-            &program.nodes,
-            set,
-            &anons,
-            &mut env,
-            &mut set_names,
-            true,
-            &mut out,
-        )?;
+        crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
         Ok(out)
     }
 
@@ -456,61 +447,40 @@ fn find_top(s: &str, ch: u8) -> Option<usize> {
 }
 
 // ---------------------------------------------------------------------------
-// Assembly by evaluation of the conditional AST (idea 4)
+// Assembly by evaluation of the conditional AST (idea 4) — the ACME evaluator
 // ---------------------------------------------------------------------------
 
-/// Evaluate the AST into the engine's statement stream: prune untaken branches,
-/// thread `env`/`set_names`, and lower each content line through
-/// [`parse_statement`]. A conditional emits only its taken branch (`emit &&
-/// taken`); a skipped branch is walked with `emit = false` so it defines no
-/// symbols — the same rule the old `process_block` used, now over the tree.
-#[allow(clippy::too_many_arguments)]
-fn evaluate(
-    nodes: &[crate::ast::Node],
+/// ACME's [`CondEval`](crate::ast::CondEval): it owns the environment (`=`/`equ`
+/// constants and `!set` variables) and lowers each live line through
+/// [`parse_statement`], re-parsing from the node's (label, source) with the
+/// current `env` — so a direct/extended choice or an opcode-embedded operand
+/// folds against exactly the bindings live at that point. The shared
+/// [`evaluate`](crate::ast::evaluate) walk prunes untaken branches; this supplies
+/// the ACME-specific condition test and per-line lowering.
+struct AcmeEval<'a> {
     set: &'static isa::InstructionSet,
-    anons: &[AnonDef],
-    env: &mut BTreeMap<String, i64>,
-    set_names: &mut BTreeSet<String>,
-    emit: bool,
-    out: &mut Vec<Statement>,
-) -> Result<(), AsmError> {
-    for node in nodes {
-        // A conditional block: evaluate its condition (only when this branch is
-        // itself live) and recurse into each branch.
-        if let Some(crate::ast::Item::Conditional {
-            head,
-            then_body,
-            else_body,
-            ..
-        }) = &node.item
-        {
-            let line = node.span.line as usize;
-            let taken = if emit {
-                match classify_conditional(head) {
-                    Some(Conditional::IfDef(s)) => env.contains_key(&s),
-                    Some(Conditional::IfNDef(s)) => !env.contains_key(&s),
-                    Some(Conditional::If(e)) => eval_condition(anons, env, &e, line)?,
-                    None => return Err(AsmError::new(line, format!("bad conditional `{head}`"))),
-                }
-            } else {
-                false
-            };
-            evaluate(then_body, set, anons, env, set_names, emit && taken, out)?;
-            if let Some(else_body) = else_body {
-                evaluate(else_body, set, anons, env, set_names, emit && !taken, out)?;
-            }
-            continue;
-        }
+    anons: &'a [AnonDef],
+    env: BTreeMap<String, i64>,
+    /// Names bound by `!set` (rebindable): each use is baked to its current value.
+    set_names: BTreeSet<String>,
+}
 
-        // A skipped branch defines nothing; blank/comment nodes emit nothing.
-        if !emit || (node.label.is_none() && node.source.is_empty()) {
-            continue;
+impl crate::ast::CondEval for AcmeEval<'_> {
+    fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError> {
+        let line = line as usize;
+        match classify_conditional(head) {
+            Some(Conditional::IfDef(s)) => Ok(self.env.contains_key(&s)),
+            Some(Conditional::IfNDef(s)) => Ok(!self.env.contains_key(&s)),
+            Some(Conditional::If(e)) => eval_condition(self.anons, &self.env, &e, line),
+            None => Err(AsmError::new(line, format!("bad conditional `{head}`"))),
         }
+    }
 
+    fn lower(&mut self, node: &crate::ast::Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
         let line = node.span.line as usize;
-        // Reconstruct the source line for `parse_statement` from the node's
-        // (label, operation source) — canonical whitespace, which the parser
-        // treats identically to the original.
+        // Reconstruct the source line from the node's (label, operation source) —
+        // canonical whitespace, which the parser treats identically to the
+        // original.
         let recon = match &node.label {
             Some(sym) if node.source.is_empty() => sym.name.clone(),
             Some(sym) => format!("{} {}", sym.name, node.source),
@@ -520,25 +490,25 @@ fn evaluate(
         // `!set name = expr` binds/rebinds a variable and emits nothing; later
         // uses are baked to this value.
         if split_first_word(recon.trim()).0 == "!set" {
-            let (name, value) = parse_set(anons, env, &recon, line)?;
-            env.insert(name.clone(), value);
-            set_names.insert(name);
-            continue;
+            let (name, value) = parse_set(self.anons, &self.env, &recon, line)?;
+            self.env.insert(name.clone(), value);
+            self.set_names.insert(name);
+            return Ok(());
         }
 
-        let (label, op) = parse_statement(set, anons, env, &recon, line)?;
+        let (label, op) = parse_statement(self.set, self.anons, &self.env, &recon, line)?;
         // Bake `!set` variables to their current value; real labels stay symbolic.
-        let op = op.map(|o| bake_set_vars(o, env, set_names));
+        let op = op.map(|o| bake_set_vars(o, &self.env, &self.set_names));
         if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
-            && let Ok(v) = fold_const(e, env, line)
+            && let Ok(v) = fold_const(e, &self.env, line)
         {
-            env.insert(name.clone(), v);
+            self.env.insert(name.clone(), v);
         }
         if !(label.is_none() && op.is_none()) {
             out.push(Statement { line, label, op });
         }
+        Ok(())
     }
-    Ok(())
 }
 
 /// Strip a `;` line comment. A `;` inside a `'c'` char literal or `"..."` string
