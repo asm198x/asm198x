@@ -6,8 +6,10 @@
 //! [`lower`] turns it into today's [`Statement`](crate::engine::Statement) /
 //! [`Operation`](crate::engine::Operation) stream, which the existing two-pass
 //! driver assembles unchanged (KTD1 — the `isa`/encoding layer is untouched,
-//! output bytes are identical). U3 routes the Z80 dialects through this; other
-//! CPUs stay on direct lowering behind the dialect boundary (KTD6).
+//! output bytes are identical). U3 routes the Z80 dialects through this and U6
+//! begins migrating the flat-engine CPUs (the Intel 8080 first — the first
+//! fixed-slot CPU); the rest stay on direct lowering behind the dialect
+//! boundary (KTD6) until migrated.
 //!
 //! **Neutrality is one tree *type* both dialects lower into, not identical
 //! streams** (the U1 gate finding). Where dialects diverge *semantically* —
@@ -344,7 +346,13 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
 /// operand spelling and source-form local names round-trip (KTD5). The result
 /// assembles byte-identical to the original (comments never reach the encoder,
 /// AE1) and re-emitting is a fixed point (idempotent, AE7).
-pub(crate) fn emit(program: &Program) -> String {
+///
+/// `equ_label_colon` is the one per-dialect emit divergence (U6): a Z80 `equ`
+/// label keeps a colon (`name: equ …`) so a name colliding with a mnemonic
+/// re-parses as a label, but an Intel-8080 `equ` label takes **no** colon
+/// (`name equ …`) — its `equ` keyword already disambiguates, and a colon would
+/// fail to reassemble.
+pub(crate) fn emit(program: &Program, equ_label_colon: bool) -> String {
     const INDENT: &str = "        ";
     let mut out = String::new();
     for node in &program.nodes {
@@ -368,7 +376,7 @@ pub(crate) fn emit(program: &Program) -> String {
             // as an instruction, but a `name:` token is always a label.
             (Some(name), Some(Item::Equ(_))) => {
                 out.push_str(name);
-                out.push_str(": ");
+                out.push_str(if equ_label_colon { ": " } else { " " });
                 out.push_str(&node.source);
                 trailing(&mut out);
                 out.push('\n');

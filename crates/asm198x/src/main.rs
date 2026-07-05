@@ -317,9 +317,11 @@ fn run(args: &[String]) -> Result<String, String> {
             Assembler::Pasmo { z80n: true } => asm198x::format_pasmonext(&source),
             Assembler::Sjasmplus { z80n: false } => asm198x::format_sjasmplus(&source),
             Assembler::Sjasmplus { z80n: true } => asm198x::format_sjasmplus_next(&source),
+            Assembler::I8080 => asm198x::format_i8080(&source),
             _ => {
                 return Err(
-                    "`--fmt` supports only the Z80 dialects (pasmo, sjasmplus) so far".into(),
+                    "`--fmt` supports only the Z80 dialects (pasmo, sjasmplus) and 8080 so far"
+                        .into(),
                 );
             }
         }
@@ -450,8 +452,8 @@ fn usage() -> String {
      \x20            (prepends the 2-byte load address)\n\
      disassemble: asm198x --disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\
-     format:      asm198x --fmt [--cpu <pasmo|sjasmplus>] <input.asm> [-o <out.asm>]\n\
-     \x20            (canonical layout, comments + operand spelling preserved; Z80 so far)\n\n\
+     format:      asm198x --fmt [--cpu <pasmo|sjasmplus|8080>] <input.asm> [-o <out.asm>]\n\
+     \x20            (canonical layout, comments + operand spelling preserved; Z80 + 8080)\n\n\
      dialects (syntax): acme (C64 6502; also `6502`), ca65 (NES), vasm (Amiga\n\
      \x20                 68000), lwasm (6809), 65816 (ca65 native), huc6280\n\
      \x20                 (PC Engine ca65; also `pce`), rgbasm (Game Boy SM83;\n\

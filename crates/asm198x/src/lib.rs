@@ -419,11 +419,23 @@ pub fn format_sjasmplus_next(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::Sjasmplus { z80n: true }, source)
 }
 
+/// Format Intel-syntax 8080 source (`asm198x fmt --cpu 8080`): parse into the
+/// semantic AST and emit canonical same-dialect source — labels at column 0,
+/// operations indented, comments preserved in position, radix-suffixed operand
+/// spelling untouched. The result assembles byte-identical to the input and is
+/// idempotent (U6 extends the U5 formatter to the first fixed-slot CPU).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse failure.
+pub fn format_i8080(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::I8080, source)
+}
+
 /// Parse with a dialect's AST front-end and emit canonical source. Errors if the
 /// dialect has no formatter yet (no AST front-end).
 fn format_ast(dialect: &dyn dialect::Dialect, source: &str) -> Result<String, AsmError> {
     match dialect.parse_ast(source)? {
-        Some(program) => Ok(ast::emit(&program)),
+        Some(program) => Ok(ast::emit(&program, dialect.equ_label_colon())),
         None => Err(AsmError::new(0, "no formatter for this dialect yet")),
     }
 }

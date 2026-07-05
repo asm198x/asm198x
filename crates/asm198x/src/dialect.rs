@@ -68,6 +68,16 @@ pub(crate) trait Dialect {
         Oversize::Error
     }
 
+    /// Whether the formatter keeps a colon on an `equ` label (`name: equ …`).
+    /// Defaults to `true` (the Z80 dialects): a bare `equ` label whose spelling
+    /// collides with a mnemonic re-parses as an instruction, so the colon forces
+    /// it to stay a label. The Intel-8080 dialect overrides to `false` — its
+    /// `equ` keyword already disambiguates the label, and a colon (`name: equ …`)
+    /// fails to reassemble there. Only consulted by [`crate::ast::emit`].
+    fn equ_label_colon(&self) -> bool {
+        true
+    }
+
     /// The number of emitted bytes per **address unit** — how the location
     /// counter (labels, `*`/`$`, `org`) relates to the byte stream. Almost every
     /// CPU is byte-addressed, so this is `1`. The **CP1610** is *word*-addressed:

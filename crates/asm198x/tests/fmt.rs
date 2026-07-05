@@ -3,7 +3,10 @@
 //! assemble byte-identical to the input, be idempotent, and preserve operand
 //! spelling and comments.
 
-use asm198x::{assemble_pasmo, assemble_sjasmplus, format_pasmo, format_sjasmplus};
+use asm198x::{
+    assemble_i8080, assemble_pasmo, assemble_sjasmplus, format_i8080, format_pasmo,
+    format_sjasmplus,
+};
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
 /// a forward `equ`, and leading + trailing comments.
@@ -157,6 +160,64 @@ second:
     assert!(
         formatted.contains(".loop"),
         "source-form local preserved:\n{formatted}"
+    );
+}
+
+/// A representative Intel-8080 program: origin, colon labels, a same-line label
+/// with an instruction, `equ` constants (one whose name collides with a
+/// mnemonic), radix-suffixed numbers, data directives, and comments. The first
+/// fixed-slot CPU to route through the AST formatter (U6).
+const PROG_8080: &str = "\
+; a small 8080 routine
+        org 100h
+start:  mvi a,5        ; load five
+        mov b,a
+loop:   dcr b
+        jnz loop
+        mvi m,0ffh     ; fill
+in      equ 0feh
+        out in
+        db 1, 2, 3
+        dw 1234h
+        ret
+";
+
+#[test]
+fn fmt_i8080_reassembles_byte_identical() {
+    let original = assemble_i8080(PROG_8080).expect("assembles").bytes;
+    let formatted = format_i8080(PROG_8080).expect("formats");
+    let reassembled = assemble_i8080(&formatted)
+        .unwrap_or_else(|e| panic!("formatted 8080 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "8080 round-trips byte-identical\n---\n{formatted}"
+    );
+    // Idempotent.
+    assert_eq!(
+        formatted,
+        format_i8080(&formatted).expect("formats"),
+        "8080 fmt is idempotent"
+    );
+}
+
+#[test]
+fn fmt_i8080_equ_label_takes_no_colon() {
+    // The mirror of the Z80 `in: equ` case: Intel `equ` must emit WITHOUT a
+    // colon, since a colon'd `in:` re-parses `equ` as a mnemonic and fails.
+    let formatted = format_i8080("in equ 0feh\n        out in\n").expect("formats");
+    assert!(
+        formatted.lines().any(|l| l.contains("in equ 0feh")),
+        "equ label keeps no colon:\n{formatted}"
+    );
+    assert!(
+        !formatted.contains("in: equ"),
+        "no colon on the 8080 equ label:\n{formatted}"
+    );
+    // And it reassembles (the round-trip the colon would have broken).
+    assert!(
+        assemble_i8080(&formatted).is_ok(),
+        "no-colon equ reassembles:\n{formatted}"
     );
 }
 
