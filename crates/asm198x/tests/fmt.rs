@@ -4,8 +4,8 @@
 //! spelling and comments.
 
 use asm198x::{
-    assemble_i8080, assemble_m6800, assemble_pasmo, assemble_sjasmplus, format_i8080, format_m6800,
-    format_pasmo, format_sjasmplus,
+    assemble_1802, assemble_i8080, assemble_m6800, assemble_pasmo, assemble_sjasmplus, format_1802,
+    format_i8080, format_m6800, format_pasmo, format_sjasmplus,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -258,6 +258,45 @@ fn fmt_m6800_reassembles_byte_identical() {
     // The `equ` label emits with no colon (Motorola, like the 8080).
     assert!(
         formatted.lines().any(|l| l.contains("count equ 3")),
+        "equ label keeps no colon:\n{formatted}"
+    );
+}
+
+/// A representative CDP1802 program: origin, colon labels, a same-line label
+/// with an instruction, an `equ`, register/immediate/inherent ops, a short and
+/// a long branch, data directives, and comments.
+const PROG_1802: &str = "\
+; a small 1802 routine
+        org 1000h
+start:  ldi 42h        ; load immediate
+        phi 3
+loop:   dec 3
+        bnz loop
+        lbr start
+delay   equ 5
+        db 1, 2, \"AB\"
+        dw 1234h
+        idl
+";
+
+#[test]
+fn fmt_1802_reassembles_byte_identical() {
+    let original = assemble_1802(PROG_1802).expect("assembles").bytes;
+    let formatted = format_1802(PROG_1802).expect("formats");
+    let reassembled = assemble_1802(&formatted)
+        .unwrap_or_else(|e| panic!("formatted 1802 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "1802 round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_1802(&formatted).expect("formats"),
+        "1802 fmt is idempotent"
+    );
+    assert!(
+        formatted.lines().any(|l| l.contains("delay equ 5")),
         "equ label keeps no colon:\n{formatted}"
     );
 }
