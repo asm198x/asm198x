@@ -489,6 +489,19 @@ pub fn format_lwasm(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::Lwasm, source)
 }
 
+/// Format ACME (C64 6502) source (`asm198x fmt --cpu acme`): parse into the
+/// source-preserving semantic AST and emit the canonical layout — labels at
+/// column 0, operations indented, comments repositioned, conditional (`!if`/
+/// `!ifdef`/`!ifndef`) blocks canonicalised, and runs of `name = value`
+/// constants re-aligned. Operand spelling is preserved; the result assembles
+/// byte-identical and is idempotent. See `decisions/formatter-canonical-style.md`.
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse failure.
+pub fn format_acme(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Acme, source)
+}
+
 /// Parse with a dialect's AST front-end and emit canonical source. Errors if the
 /// dialect has no formatter yet (no AST front-end).
 fn format_ast(dialect: &dyn dialect::Dialect, source: &str) -> Result<String, AsmError> {

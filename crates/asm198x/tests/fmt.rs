@@ -4,9 +4,9 @@
 //! spelling and comments.
 
 use asm198x::{
-    assemble_1802, assemble_i8080, assemble_lwasm, assemble_m6800, assemble_pasmo, assemble_rgbasm,
-    assemble_scmp, assemble_sjasmplus, format_1802, format_i8080, format_lwasm, format_m6800,
-    format_pasmo, format_rgbasm, format_scmp, format_sjasmplus,
+    assemble_1802, assemble_acme, assemble_i8080, assemble_lwasm, assemble_m6800, assemble_pasmo,
+    assemble_rgbasm, assemble_scmp, assemble_sjasmplus, format_1802, format_acme, format_i8080,
+    format_lwasm, format_m6800, format_pasmo, format_rgbasm, format_scmp, format_sjasmplus,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -457,6 +457,70 @@ fn fmt_lwasm_reassembles_byte_identical() {
     assert!(
         formatted.contains("* a small 6809 routine"),
         "whole-line `*` comment preserved:\n{formatted}"
+    );
+}
+
+/// A representative ACME (C64 6502) program: `*=` origin, a one-line guard, a
+/// re-alignable run of `name = value` constants, blank-line grouping, a label +
+/// instructions, and a multi-line `!if … {` … `} else { … }` block with comments.
+/// The formatter is canonical reflow with constant-run alignment (see
+/// `decisions/formatter-canonical-style.md`).
+const PROG_ACME: &str = "\
+*= $0801
+
+; default the debug flag
+!ifndef DEBUG { DEBUG = 0 }
+
+; screen constants
+SCREEN = $0400
+BORDER = $d020
+BG     = $d021
+
+start:
+        lda #$00
+        sta BORDER
+!if DEBUG = 1 {
+        ; debug: flash the background
+        lda #$01
+        sta BG
+} else {
+        lda #$02
+}
+        rts
+";
+
+#[test]
+fn fmt_acme_reassembles_byte_identical() {
+    let original = assemble_acme(PROG_ACME).expect("assembles").bytes;
+    let formatted = format_acme(PROG_ACME).expect("formats");
+    let reassembled = assemble_acme(&formatted)
+        .unwrap_or_else(|e| panic!("formatted acme must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "acme round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_acme(&formatted).expect("formats"),
+        "acme fmt is idempotent\n---\n{formatted}"
+    );
+    // Constant run re-aligned: `BG` padded to the longest name (`SCREEN`/`BORDER`).
+    assert!(
+        formatted.lines().any(|l| l == "BG     = $d021"),
+        "constant run re-aligned:\n{formatted}"
+    );
+    // One-line guard preserved.
+    assert!(
+        formatted.contains("!ifndef DEBUG { DEBUG = 0 }"),
+        "one-line guard preserved:\n{formatted}"
+    );
+    // Conditional delimiters at column 0, body indented.
+    assert!(
+        formatted.lines().any(|l| l == "!if DEBUG = 1 {")
+            && formatted.lines().any(|l| l == "} else {")
+            && formatted.lines().any(|l| l == "        lda #$01"),
+        "conditional block canonicalised:\n{formatted}"
     );
 }
 

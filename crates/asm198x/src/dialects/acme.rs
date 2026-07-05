@@ -61,6 +61,395 @@ impl Dialect for Acme {
         )?;
         Ok(out)
     }
+
+    /// The formatter parses through a *separate* source-preserving front-end
+    /// (`parse_program`) that keeps conditional blocks as `Item::Conditional`
+    /// and every other line's verbatim operation source — it does not evaluate
+    /// conditionals (that stays in `parse`'s preprocessor until idea 4's
+    /// evaluator lands). Assembly is unaffected.
+    fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
+        Ok(Some(parse_program(source)?))
+    }
+
+    /// ACME binds constants with `name = value` (no colon), so the formatter
+    /// emits the label without one — and re-aligns runs of them (the ruling).
+    fn equ_label_colon(&self) -> bool {
+        false
+    }
+}
+
+/// Split a line into its code and its `;` comment (delimiter kept, trailing
+/// whitespace trimmed) for carrying comments as AST trivia; defined via
+/// [`strip_comment`] so the comment is exactly what it removes.
+fn split_comment(line: &str) -> (&str, Option<&str>) {
+    let code = strip_comment(line);
+    let comment = (code.len() < line.len()).then(|| line[code.len()..].trim_end());
+    (code, comment)
+}
+
+// ---------------------------------------------------------------------------
+// Source-preserving parse for the formatter (`asm198x fmt`) — U6 / idea 4.
+//
+// This is a *second* front-end, distinct from `parse` (the assembler): it does
+// **not** evaluate conditionals, resolve anonymous labels, or bake `!set`. It
+// keeps the source structure — conditional blocks as `Item::Conditional`, every
+// other line as a flat node carrying its verbatim operation source — so `emit`
+// can reformat to the canonical layout (see `decisions/formatter-canonical-style.md`)
+// and reassemble byte-identical. The idea-4 evaluator (which will let `parse`
+// itself run off this tree) is the deliberate follow-on; for now `parse` keeps
+// its own preprocessor and this tree is formatter-only.
+// ---------------------------------------------------------------------------
+
+/// How a [`parse_block`](FmtCx::parse_block) ended.
+#[derive(PartialEq, Eq)]
+enum Closer {
+    Eof,
+    Brace,
+    BraceElse,
+}
+
+/// The formatter parse cursor.
+struct FmtCx<'a> {
+    set: &'static isa::InstructionSet,
+    lines: Vec<&'a str>,
+    pos: usize,
+    /// Own-line comments seen since the last node, attached as leading trivia.
+    pending: Vec<crate::ast::Comment>,
+}
+
+/// Parse ACME source into the source-preserving formatter AST.
+pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
+    let mut cx = FmtCx {
+        set: &isa::mos6502::SET,
+        lines: source.lines().collect(),
+        pos: 0,
+        pending: Vec::new(),
+    };
+    let (mut nodes, closer) = cx.parse_block()?;
+    if closer != Closer::Eof {
+        return Err(AsmError::new(cx.pos, "unbalanced `}` in conditional block"));
+    }
+    // Flush a trailing comment block so the formatter keeps it.
+    let last = cx.lines.len();
+    cx.flush_pending(&mut nodes, last);
+    Ok(crate::ast::Program { nodes })
+}
+
+impl<'a> FmtCx<'a> {
+    /// Parse a run of nodes until a block close (`}`, `} else {`) or EOF.
+    fn parse_block(&mut self) -> Result<(Vec<crate::ast::Node>, Closer), AsmError> {
+        let mut nodes = Vec::new();
+        while self.pos < self.lines.len() {
+            let raw = self.lines[self.pos];
+            let line = self.pos + 1;
+            let (code, comment) = split_comment(raw);
+            let trimmed = code.trim();
+
+            if trimmed.is_empty() {
+                match comment {
+                    // An own-line comment becomes leading trivia of the next node.
+                    Some(text) => self.pending.push(crate::ast::Comment {
+                        text: text.to_string(),
+                        span: crate::ast::Span::at(line as u32, 1),
+                    }),
+                    // A blank line is preserved as an empty-text marker (emit
+                    // renders it as a blank line), collapsing consecutive blanks
+                    // to one. Preserving blanks keeps constant-run boundaries
+                    // stable across re-formats (idempotence) and respects the
+                    // author's visual grouping.
+                    None => {
+                        let last_blank =
+                            matches!(self.pending.last(), Some(c) if c.text.is_empty());
+                        if !last_blank {
+                            self.pending.push(crate::ast::Comment {
+                                text: String::new(),
+                                span: crate::ast::Span::at(line as u32, 1),
+                            });
+                        }
+                    }
+                }
+                self.pos += 1;
+                continue;
+            }
+
+            // A block close: `}`, `} else {`, `} else`.
+            if let Some(rest) = trimmed.strip_prefix('}') {
+                let rest = rest.trim();
+                self.pos += 1;
+                // Flush comments/blanks pending at the block's end into *this*
+                // block, so a trailing comment stays inside the branch it closes
+                // rather than leaking onto the next one (across `} else {`).
+                self.flush_pending(&mut nodes, line);
+                if rest.is_empty() {
+                    return Ok((nodes, Closer::Brace));
+                }
+                if let Some(after) = rest.strip_prefix("else")
+                    && (after.trim().is_empty() || after.trim() == "{")
+                {
+                    return Ok((nodes, Closer::BraceElse));
+                }
+                return Err(AsmError::new(line, format!("unexpected `{trimmed}`")));
+            }
+
+            // A conditional head opens a block (one-line or multi-line).
+            if is_conditional_head(trimmed) {
+                let node = self.parse_conditional(trimmed, comment, line)?;
+                nodes.push(node);
+                continue;
+            }
+
+            // An ordinary line.
+            let leading = std::mem::take(&mut self.pending);
+            let node = self.parse_line(code, comment, line, leading)?;
+            nodes.push(node);
+            self.pos += 1;
+        }
+        Ok((nodes, Closer::Eof))
+    }
+
+    /// Parse a conditional block from the head line at `self.pos`. Handles the
+    /// one-line guard (`!ifndef X { X = 0 }`) and the multi-line `!if … {` … `}`
+    /// (with optional `} else {`).
+    fn parse_conditional(
+        &mut self,
+        trimmed: &str,
+        comment: Option<&str>,
+        line: usize,
+    ) -> Result<crate::ast::Node, AsmError> {
+        let leading = std::mem::take(&mut self.pending);
+        let open =
+            find_top(trimmed, b'{').ok_or_else(|| AsmError::new(line, "conditional needs `{`"))?;
+        let head = trimmed[..open].trim().to_string();
+        let after = trimmed[open + 1..].trim();
+
+        // One-line guard: `{ body }` closed on the same line.
+        if let Some(close) = find_top(after, b'}') {
+            let body_text = after[..close].trim();
+            let then_body = if body_text.is_empty() {
+                Vec::new()
+            } else {
+                vec![self.parse_line(body_text, None, line, Vec::new())?]
+            };
+            self.pos += 1;
+            return Ok(self.conditional_node(head, then_body, None, true, leading, comment, line));
+        }
+
+        // Multi-line: the body starts on the following line.
+        self.pos += 1;
+        let (then_body, closer) = self.parse_block()?;
+        let else_body = if closer == Closer::BraceElse {
+            let (eb, _) = self.parse_block()?;
+            Some(eb)
+        } else {
+            None
+        };
+        Ok(self.conditional_node(head, then_body, else_body, false, leading, comment, line))
+    }
+
+    /// Build one flat node from an ordinary line: its optional (column-0) label,
+    /// its verbatim operation source, and trivia. Mirrors `parse_statement`'s
+    /// label rules but keeps source rather than lowering.
+    fn parse_line(
+        &self,
+        code: &str,
+        comment: Option<&str>,
+        line: usize,
+        leading: Vec<crate::ast::Comment>,
+    ) -> Result<crate::ast::Node, AsmError> {
+        let trimmed = code.trim();
+
+        // `*= expr` / `* = expr` — a program-counter set (no label).
+        if let Some(rest) = trimmed.strip_prefix('*') {
+            let rest = rest.trim_start();
+            if let Some(value) = rest.strip_prefix('=') {
+                let src = format!("*= {}", value.trim());
+                return Ok(self.op_node(None, src, leading, comment, line));
+            }
+        }
+
+        // `name = expr` — a constant binding (a lone `=`), kept on the label line.
+        if let Some(eq) = top_level_lone_eq(trimmed) {
+            let name = trimmed[..eq].trim();
+            if is_ident(name) {
+                let src = format!("= {}", trimmed[eq + 1..].trim());
+                return Ok(self.equ_node(name, src, leading, comment, line));
+            }
+        }
+
+        // A column-0 token may be a label; a leading-whitespace line is all op.
+        if !code.starts_with([' ', '\t']) {
+            let (word, rest) = split_first_word(trimmed);
+            if anon_marker(word).is_some() {
+                return Ok(self.labeled_node(word, rest.trim(), leading, comment, line));
+            }
+            if let Some(name) = word.strip_suffix(':')
+                && is_ident(name)
+            {
+                return Ok(self.labeled_node(name, rest.trim(), leading, comment, line));
+            }
+            if !word.starts_with('!')
+                && self.set.instruction(&word.to_ascii_uppercase()).is_none()
+                && is_ident(word)
+            {
+                return Ok(self.labeled_node(word, rest.trim(), leading, comment, line));
+            }
+        }
+
+        // No label: an instruction or `!` directive, kept verbatim.
+        Ok(self.op_node(None, trimmed.to_string(), leading, comment, line))
+    }
+
+    // --- node builders ------------------------------------------------------
+
+    fn trailing(
+        &self,
+        comment: Option<&str>,
+        line: usize,
+        col: u32,
+    ) -> Option<crate::ast::Comment> {
+        comment.map(|text| crate::ast::Comment {
+            text: text.to_string(),
+            span: crate::ast::Span::at(line as u32, col),
+        })
+    }
+
+    fn equ_node(
+        &self,
+        name: &str,
+        source: String,
+        leading: Vec<crate::ast::Comment>,
+        comment: Option<&str>,
+        line: usize,
+    ) -> crate::ast::Node {
+        crate::ast::Node {
+            label: Some(global(name)),
+            // A placeholder value: the formatter reads only `source`; this tree is
+            // never lowered (ACME assembles via its preprocessor).
+            item: Some(crate::ast::item_from_operation(Operation::Equ(Expr::Num(
+                0,
+            )))),
+            source,
+            span: crate::ast::Span::at(line as u32, 1),
+            trivia: crate::ast::Trivia {
+                leading,
+                trailing: self.trailing(comment, line, 1),
+            },
+        }
+    }
+
+    /// A line with a column-0 label and (optionally) an operation after it.
+    fn labeled_node(
+        &self,
+        name: &str,
+        op: &str,
+        leading: Vec<crate::ast::Comment>,
+        comment: Option<&str>,
+        line: usize,
+    ) -> crate::ast::Node {
+        crate::ast::Node {
+            label: Some(global(name)),
+            item: None,
+            source: op.to_string(),
+            span: crate::ast::Span::at(line as u32, 1),
+            trivia: crate::ast::Trivia {
+                leading,
+                trailing: self.trailing(comment, line, 1),
+            },
+        }
+    }
+
+    fn op_node(
+        &self,
+        label: Option<crate::ast::Symbol>,
+        source: String,
+        leading: Vec<crate::ast::Comment>,
+        comment: Option<&str>,
+        line: usize,
+    ) -> crate::ast::Node {
+        crate::ast::Node {
+            label,
+            item: None,
+            source,
+            span: crate::ast::Span::at(line as u32, 1),
+            trivia: crate::ast::Trivia {
+                leading,
+                trailing: self.trailing(comment, line, 1),
+            },
+        }
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn conditional_node(
+        &self,
+        head: String,
+        then_body: Vec<crate::ast::Node>,
+        else_body: Option<Vec<crate::ast::Node>>,
+        inline: bool,
+        leading: Vec<crate::ast::Comment>,
+        comment: Option<&str>,
+        line: usize,
+    ) -> crate::ast::Node {
+        crate::ast::Node {
+            label: None,
+            item: Some(crate::ast::Item::Conditional {
+                head,
+                then_body,
+                else_body,
+                inline,
+            }),
+            source: String::new(),
+            span: crate::ast::Span::at(line as u32, 1),
+            trivia: crate::ast::Trivia {
+                leading,
+                trailing: self.trailing(comment, line, 1),
+            },
+        }
+    }
+
+    /// Append the pending comments/blanks as a bare node (so the formatter keeps
+    /// them) when a block or the file ends; a no-op if none are pending.
+    fn flush_pending(&mut self, nodes: &mut Vec<crate::ast::Node>, line: usize) {
+        if !self.pending.is_empty() {
+            nodes.push(crate::ast::Node {
+                label: None,
+                item: None,
+                source: String::new(),
+                span: crate::ast::Span::at(line as u32, 1),
+                trivia: crate::ast::Trivia {
+                    leading: std::mem::take(&mut self.pending),
+                    trailing: None,
+                },
+            });
+        }
+    }
+}
+
+/// A plain global symbol whose source name and qualified name are the same.
+fn global(name: &str) -> crate::ast::Symbol {
+    crate::ast::Symbol {
+        name: name.to_string(),
+        scope: crate::ast::Scope::Global,
+        qualified: name.to_string(),
+    }
+}
+
+/// Whether a trimmed line opens a conditional (`!if`/`!ifdef`/`!ifndef`).
+fn is_conditional_head(trimmed: &str) -> bool {
+    matches!(split_first_word(trimmed).0, "!if" | "!ifdef" | "!ifndef")
+}
+
+/// The first top-level occurrence of `ch` (outside `'…'`/`"…"`), for brace scans.
+fn find_top(s: &str, ch: u8) -> Option<usize> {
+    let (mut in_char, mut in_str) = (false, false);
+    for (i, &b) in s.as_bytes().iter().enumerate() {
+        match b {
+            b'\'' if !in_str => in_char = !in_char,
+            b'"' if !in_char => in_str = !in_str,
+            _ if b == ch && !in_char && !in_str => return Some(i),
+            _ => {}
+        }
+    }
+    None
 }
 
 /// Strip a `;` line comment. A `;` inside a `'c'` char literal or `"..."` string

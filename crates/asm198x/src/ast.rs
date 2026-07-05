@@ -232,9 +232,6 @@ pub(crate) enum Item {
     /// AST is the idea-4 *representation*; the idea-4 *evaluator* (which prunes a
     /// branch at lower-time and retires the preprocessor) is the deliberate
     /// follow-on. No lowering path constructs it, so the rejection never fires.
-    // Constructed by ACME's source-preserving `parse_ast` (the next commit); the
-    // emit + lower-reject paths and tests already exercise it.
-    #[allow(dead_code)]
     Conditional {
         head: String,
         then_body: Vec<Node>,
@@ -386,7 +383,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
 /// fail to reassemble.
 pub(crate) fn emit(program: &Program, equ_label_colon: bool) -> String {
     let mut out = String::new();
-    emit_nodes(&program.nodes, &mut out, equ_label_colon);
+    emit_nodes(&program.nodes, &mut out, equ_label_colon, "");
     out
 }
 
@@ -394,10 +391,20 @@ pub(crate) fn emit(program: &Program, equ_label_colon: bool) -> String {
 /// Bodies use the same layout rules as the top level: only a conditional's
 /// `!if`/`}`/`else` delimiters sit at column 0 (ACME detects labels by column,
 /// so a body label must stay at column 0 too — bodies are not deeper-indented).
-fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool) {
+/// `comment_indent` is prefixed to own-line comments so a body's comments align
+/// with its indented operations (empty at the top level); blank-line markers are
+/// never indented, so a blank line stays truly empty.
+fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_indent: &str) {
     const INDENT: &str = "        ";
-    for node in nodes {
+    // Per-node `=` alignment width for constant-definition runs (the ruling: the
+    // formatter owns the alignment of a `name = value` table). Zero for the
+    // colon form (Z80 `name: equ …`), which is not re-aligned.
+    let widths = equ_run_widths(nodes, equ_label_colon);
+    for (i, node) in nodes.iter().enumerate() {
         for c in &node.trivia.leading {
+            if !c.text.is_empty() {
+                out.push_str(comment_indent);
+            }
             out.push_str(&c.text);
             out.push('\n');
         }
@@ -429,61 +436,116 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool) {
             continue;
         }
         let label = node.label.as_ref().map(|s| s.name.as_str());
-        match (label, node.item.as_ref()) {
-            // `equ` binds its label to a value on the same statement, so its
-            // label must stay on the operation's line (it cannot be split off).
-            // The colon is required: a bare `name` whose spelling collides with a
-            // mnemonic or directive (`in`, `di`, `end`, `set`, …) would re-parse
-            // as an instruction, but a `name:` token is always a label.
-            (Some(name), Some(Item::Equ(_))) => {
+        let is_equ = matches!(node.item, Some(Item::Equ(_)));
+        // A node "has an operation" if it carries an item (a real operation) or
+        // just verbatim op source (an ACME directive/instruction the formatter
+        // does not lower — it keeps the source and no item).
+        let has_op = node.item.is_some() || !node.source.is_empty();
+        match label {
+            // `equ` binds its label to a value on the same line, so the label
+            // stays there. The colon (Z80) forces a mnemonic-colliding name to
+            // stay a label; the no-colon form (ACME `name = value`) is re-aligned
+            // to its run's width so constant tables keep their columns.
+            Some(name) if is_equ => {
                 out.push_str(name);
-                out.push_str(if equ_label_colon { ": " } else { " " });
+                if equ_label_colon {
+                    out.push_str(": ");
+                } else {
+                    for _ in name.len()..widths[i] {
+                        out.push(' ');
+                    }
+                    out.push(' ');
+                }
                 out.push_str(&node.source);
                 trailing(&mut *out);
                 out.push('\n');
             }
-            // Label + other operation: label on its own line, operation indented.
-            (Some(name), Some(_)) => {
-                out.push_str(name);
-                out.push_str(":\n");
+            // Label + operation: the label (bare for an anonymous `-`/`+`) on its
+            // own line, the operation indented.
+            Some(name) if has_op => {
+                push_label(out, name);
+                out.push('\n');
                 out.push_str(INDENT);
                 out.push_str(&node.source);
                 trailing(&mut *out);
                 out.push('\n');
             }
             // Label-only line.
-            (Some(name), None) => {
-                out.push_str(name);
-                out.push(':');
+            Some(name) => {
+                push_label(out, name);
                 trailing(&mut *out);
                 out.push('\n');
             }
-            // Operation with no label.
-            (None, Some(_)) => {
+            // Operation with no label — an ACME directive preserved verbatim, or
+            // a rgbasm no-address `SECTION`; indented like any operation.
+            None if !node.source.is_empty() => {
                 out.push_str(INDENT);
                 out.push_str(&node.source);
                 trailing(&mut *out);
                 out.push('\n');
             }
-            // No label, no operation. Either a directive preserved verbatim that
-            // lowers to nothing (a no-address rgbasm `SECTION` — `source` is set,
-            // indent it like any operation), or a bare trailing-comment line (the
-            // EOF-flush node — `source` is empty).
-            (None, None) => {
-                if node.source.is_empty() {
-                    if let Some(c) = &node.trivia.trailing {
-                        out.push_str(&c.text);
-                        out.push('\n');
-                    }
-                } else {
-                    out.push_str(INDENT);
-                    out.push_str(&node.source);
-                    trailing(&mut *out);
+            // No label, no operation — a bare trailing-comment line (the EOF-flush
+            // node).
+            None => {
+                if let Some(c) = &node.trivia.trailing {
+                    out.push_str(&c.text);
                     out.push('\n');
                 }
             }
         }
     }
+}
+
+/// Push a label, with a `:` unless it is an **anonymous** label (an all-`-` or
+/// all-`+` run, ACME's `-`/`+`/`++` targets), which are written bare.
+fn push_label(out: &mut String, name: &str) {
+    out.push_str(name);
+    if !is_anon_label(name) {
+        out.push(':');
+    }
+}
+
+/// An anonymous label — a non-empty run of all `-` or all `+` (ACME). These
+/// re-emit bare (no colon); a real identifier never looks like this.
+fn is_anon_label(name: &str) -> bool {
+    !name.is_empty() && (name.bytes().all(|b| b == b'-') || name.bytes().all(|b| b == b'+'))
+}
+
+/// Compute, per node, the `=` alignment column for a constant-definition run —
+/// one past the longest name in a maximal set of adjacent (consecutive source
+/// line) `name = value` nodes. Zero for the colon form (not re-aligned) and for
+/// non-constant nodes.
+fn equ_run_widths(nodes: &[Node], equ_label_colon: bool) -> Vec<usize> {
+    let mut widths = vec![0usize; nodes.len()];
+    if equ_label_colon {
+        return widths;
+    }
+    let is_const = |n: &Node| n.label.is_some() && matches!(n.item, Some(Item::Equ(_)));
+    let mut i = 0;
+    while i < nodes.len() {
+        if !is_const(&nodes[i]) {
+            i += 1;
+            continue;
+        }
+        // Extend the run while the next node is also a constant on the very next
+        // source line (a blank line or a comment breaks the run — the ruling).
+        let mut j = i + 1;
+        while j < nodes.len()
+            && is_const(&nodes[j])
+            && nodes[j].span.line == nodes[j - 1].span.line + 1
+        {
+            j += 1;
+        }
+        let w = (i..j)
+            .map(|k| nodes[k].label.as_ref().map_or(0, |s| s.name.len()))
+            .max()
+            .unwrap_or(0);
+        for width in &mut widths[i..j] {
+            *width = w;
+        }
+        i = j;
+    }
+    widths
 }
 
 /// Emit one conditional block. Delimiters (`!if … {`, `} else {`, `}`) sit at
@@ -522,10 +584,12 @@ fn emit_conditional(
     out.push_str(" {");
     trailing(&mut *out);
     out.push('\n');
-    emit_nodes(then_body, out, equ_label_colon);
+    // Body comments align with the body's col-8 operations.
+    const BODY: &str = "        ";
+    emit_nodes(then_body, out, equ_label_colon, BODY);
     if let Some(else_body) = else_body {
         out.push_str("} else {\n");
-        emit_nodes(else_body, out, equ_label_colon);
+        emit_nodes(else_body, out, equ_label_colon, BODY);
     }
     out.push_str("}\n");
 }
