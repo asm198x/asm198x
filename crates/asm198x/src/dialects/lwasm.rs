@@ -35,33 +35,107 @@ impl Dialect for Lwasm {
     }
 
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        let mut out = Vec::new();
-        let mut env: BTreeMap<String, i64> = BTreeMap::new();
-        for (i, raw) in source.lines().enumerate() {
-            let line = i + 1;
-            let code = strip_comment(raw);
-            if code.trim().is_empty() {
-                continue;
-            }
-            let (label, rest) = split_label(code);
-            let op = if rest.is_empty() {
-                None
-            } else {
-                parse_op(rest, &env, line)?
-            };
-            // Bind an `equ` value into the parse-time env so a later direct/
-            // extended choice can fold it (mirrors the engine's pass-1 `equ`).
-            if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
-                && let Ok(v) = fold_const(e, &env, line)
-            {
-                env.insert(name.clone(), v);
-            }
-            if label.is_some() || op.is_some() {
-                out.push(Statement { line, label, op });
-            }
-        }
-        Ok(out)
+        // Route assembly through the semantic AST (U6): parse into a `Program`,
+        // then lower to the engine's statement stream — byte-identical to the old
+        // direct parse (AE1). The 6809 is the first **computed-operand** CPU to
+        // migrate: its instructions carry a precomputed `Operation::Encoded`
+        // (postbyte + extension bytes), which the AST holds verbatim as
+        // `Item::Encoded` and the formatter re-emits via `Node::source`.
+        crate::ast::lower(parse_program(source)?)
     }
+
+    fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
+        Ok(Some(parse_program(source)?))
+    }
+}
+
+/// Parse 6809 source into the semantic [`Program`](crate::ast::Program). Each line
+/// becomes a node with its (global) label, operation, verbatim source, span, and
+/// comment trivia. The 6809 has no local-label scoping, so every label is a
+/// [`Scope::Global`](crate::ast::Scope) symbol whose qualified name is the source
+/// name. An instruction lowers to a computed [`Operation::Encoded`], carried as
+/// [`Item::Encoded`](crate::ast::Item::Encoded) — the formatter re-emits it from
+/// the node's source, so it round-trips byte-identical (the computed-operand path
+/// U1 axis 2 proved, now exercised on production code).
+pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
+    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
+    let mut nodes = Vec::new();
+    let mut env: BTreeMap<String, i64> = BTreeMap::new();
+    let mut pending_leading: Vec<Comment> = Vec::new();
+
+    for (i, raw) in source.lines().enumerate() {
+        let line = i + 1;
+        let (code, comment) = split_comment(raw);
+        if code.trim().is_empty() {
+            if let Some(text) = comment {
+                pending_leading.push(Comment {
+                    text: text.to_string(),
+                    span: Span::at(line as u32, 1),
+                });
+            }
+            continue;
+        }
+        let trailing = comment.map(|text| Comment {
+            text: text.to_string(),
+            span: Span::at(line as u32, (code.len() + 1) as u32),
+        });
+
+        let (label, rest) = split_label(code);
+        let op = if rest.is_empty() {
+            None
+        } else {
+            parse_op(rest, &env, line)?
+        };
+        // Bind an `equ` value into the parse-time env so a later direct/extended
+        // choice can fold it (mirrors the engine's pass-1 `equ`).
+        if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
+            && let Ok(v) = fold_const(e, &env, line)
+        {
+            env.insert(name.clone(), v);
+        }
+        if label.is_none() && op.is_none() {
+            continue;
+        }
+        nodes.push(Node {
+            label: label.map(|name| Symbol {
+                qualified: name.clone(),
+                scope: Scope::Global,
+                name,
+            }),
+            item: op.map(crate::ast::item_from_operation),
+            source: rest.trim().to_string(),
+            span: Span::at(line as u32, 1),
+            trivia: Trivia {
+                leading: std::mem::take(&mut pending_leading),
+                trailing,
+            },
+        });
+    }
+
+    if !pending_leading.is_empty() {
+        let line = source.lines().count() as u32;
+        nodes.push(Node {
+            label: None,
+            item: None,
+            source: String::new(),
+            span: Span::at(line, 1),
+            trivia: Trivia {
+                leading: pending_leading,
+                trailing: None,
+            },
+        });
+    }
+    Ok(Program { nodes })
+}
+
+/// Split a line into its code and its comment (delimiter kept, trailing
+/// whitespace trimmed) for carrying comments as AST trivia; defined via
+/// [`strip_comment`] so the comment is exactly what it removes. A whole-line
+/// `*` comment yields empty code and the whole line as the comment.
+fn split_comment(line: &str) -> (&str, Option<&str>) {
+    let code = strip_comment(line);
+    let comment = (code.len() < line.len()).then(|| line[code.len()..].trim_end());
+    (code, comment)
 }
 
 /// Strip a comment: a `*` as the first non-blank character makes the whole line
@@ -799,6 +873,46 @@ mod tests {
         assert_eq!(
             asm("        fcc /CD/\n").expect("slash").bytes,
             vec![0x43, 0x44]
+        );
+    }
+
+    /// U6 — the 6809 front-end routes through the AST. Its computed-operand
+    /// instructions carry `Item::Encoded`, and comments are carried as trivia
+    /// (both `*` whole-line and `;` inline) without changing the bytes (AE1).
+    #[test]
+    fn comments_are_carried_as_trivia() {
+        let src = "* header\nstart   lda #$05   ; load\n        leax 5,x\n";
+        let prog = super::parse_program(src).expect("parses");
+        assert!(
+            prog.nodes[0]
+                .trivia
+                .leading
+                .iter()
+                .any(|c| c.text == "* header"),
+            "whole-line `*` comment attaches as leading trivia"
+        );
+        assert!(
+            prog.nodes.iter().any(|n| n
+                .trivia
+                .trailing
+                .as_ref()
+                .is_some_and(|c| c.text == "; load")),
+            "same-line `;` comment attaches as trailing trivia"
+        );
+        // The indexed `leax 5,x` is a computed-operand instruction: its item is
+        // `Item::Encoded`, proving the wrap path.
+        assert!(
+            prog.nodes
+                .iter()
+                .any(|n| matches!(n.item, Some(crate::ast::Item::Encoded(_)))),
+            "a computed-operand instruction carries Item::Encoded"
+        );
+        assert_eq!(
+            asm(src).expect("with comments").bytes,
+            asm("start   lda #$05\n        leax 5,x\n")
+                .expect("without")
+                .bytes,
+            "comments do not change bytes"
         );
     }
 }

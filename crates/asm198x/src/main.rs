@@ -322,9 +322,10 @@ fn run(args: &[String]) -> Result<String, String> {
             Assembler::Cdp1802 => asm198x::format_1802(&source),
             Assembler::Scmp => asm198x::format_scmp(&source),
             Assembler::Rgbasm => asm198x::format_rgbasm(&source),
+            Assembler::Lwasm => asm198x::format_lwasm(&source),
             _ => {
                 return Err(
-                    "`--fmt` supports the Z80 dialects (pasmo, sjasmplus), 8080, 6800, 1802, scmp, and rgbasm so far"
+                    "`--fmt` supports the Z80 dialects (pasmo, sjasmplus), 8080, 6800, 1802, scmp, rgbasm, and 6809 so far"
                         .into(),
                 );
             }
@@ -456,8 +457,8 @@ fn usage() -> String {
      \x20            (prepends the 2-byte load address)\n\
      disassemble: asm198x --disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\
-     format:      asm198x --fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm>] <input.asm> [-o <out.asm>]\n\
-     \x20            (canonical layout, comments + operand spelling preserved; Z80/8080/6800/1802/scmp/rgbasm)\n\n\
+     format:      asm198x --fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
+     \x20            (canonical layout, comments + operand spelling preserved; Z80/8080/6800/1802/scmp/rgbasm/6809)\n\n\
      dialects (syntax): acme (C64 6502; also `6502`), ca65 (NES), vasm (Amiga\n\
      \x20                 68000), lwasm (6809), 65816 (ca65 native), huc6280\n\
      \x20                 (PC Engine ca65; also `pce`), rgbasm (Game Boy SM83;\n\

@@ -476,6 +476,19 @@ pub fn format_rgbasm(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::Rgbasm, source)
 }
 
+/// Format lwasm (Motorola 6809) source (`asm198x fmt --cpu 6809`): parse into the
+/// semantic AST and emit canonical same-dialect source — labels at column 0,
+/// operations indented, comments preserved, operand spelling untouched. The 6809
+/// is the first **computed-operand** CPU with a formatter: an instruction's
+/// precomputed bytes are held verbatim (`Item::Encoded`) and re-emitted from the
+/// node's source, so the result assembles byte-identical and is idempotent (U6).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse failure.
+pub fn format_lwasm(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Lwasm, source)
+}
+
 /// Parse with a dialect's AST front-end and emit canonical source. Errors if the
 /// dialect has no formatter yet (no AST front-end).
 fn format_ast(dialect: &dyn dialect::Dialect, source: &str) -> Result<String, AsmError> {

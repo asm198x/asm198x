@@ -4,9 +4,9 @@
 //! spelling and comments.
 
 use asm198x::{
-    assemble_1802, assemble_i8080, assemble_m6800, assemble_pasmo, assemble_rgbasm, assemble_scmp,
-    assemble_sjasmplus, format_1802, format_i8080, format_m6800, format_pasmo, format_rgbasm,
-    format_scmp, format_sjasmplus,
+    assemble_1802, assemble_i8080, assemble_lwasm, assemble_m6800, assemble_pasmo, assemble_rgbasm,
+    assemble_scmp, assemble_sjasmplus, format_1802, format_i8080, format_lwasm, format_m6800,
+    format_pasmo, format_rgbasm, format_scmp, format_sjasmplus,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -409,6 +409,54 @@ fn fmt_rgbasm_preserves_address_less_section() {
     assert_eq!(
         original, reassembled,
         "still byte-identical\n---\n{formatted}"
+    );
+}
+
+/// A representative 6809 program: a `*` whole-line comment, an origin, column-0
+/// labels (no colon), an `equ`, immediate / direct / **indexed** (computed
+/// postbyte) instructions, a branch, data, and a `;` trailing comment. The 6809
+/// is the first computed-operand CPU through the formatter — its instructions
+/// carry `Item::Encoded` and round-trip via the node's verbatim source.
+const PROG_6809: &str = "\
+* a small 6809 routine
+        org $2000
+start   lda #$05      ; init
+        ldb $20
+loop    sta ,x+       ; store, autoinc
+        decb
+        bne loop
+        ldx #$1234
+count   equ 3
+        fcb $01,$02
+        fdb $1234
+        rts
+";
+
+#[test]
+fn fmt_lwasm_reassembles_byte_identical() {
+    let original = assemble_lwasm(PROG_6809).expect("assembles").bytes;
+    let formatted = format_lwasm(PROG_6809).expect("formats");
+    let reassembled = assemble_lwasm(&formatted)
+        .unwrap_or_else(|e| panic!("formatted 6809 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "6809 round-trips byte-identical (computed operands via Item::Encoded)\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_lwasm(&formatted).expect("formats"),
+        "6809 fmt is idempotent"
+    );
+    // The indexed operand's spelling is preserved verbatim, and the `*` comment
+    // survives.
+    assert!(
+        formatted.lines().any(|l| l.contains("sta ,x+")),
+        "computed-operand spelling preserved:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("* a small 6809 routine"),
+        "whole-line `*` comment preserved:\n{formatted}"
     );
 }
 
