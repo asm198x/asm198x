@@ -404,10 +404,20 @@ pub(crate) fn emit(program: &Program, equ_label_colon: bool) -> String {
                 trailing(&mut out);
                 out.push('\n');
             }
-            // No label, no operation — a bare trailing comment (rare).
+            // No label, no operation. Either a directive preserved verbatim that
+            // lowers to nothing (a no-address rgbasm `SECTION` — `source` is set,
+            // indent it like any operation), or a bare trailing-comment line (the
+            // EOF-flush node — `source` is empty).
             (None, None) => {
-                if let Some(c) = &node.trivia.trailing {
-                    out.push_str(&c.text);
+                if node.source.is_empty() {
+                    if let Some(c) = &node.trivia.trailing {
+                        out.push_str(&c.text);
+                        out.push('\n');
+                    }
+                } else {
+                    out.push_str(INDENT);
+                    out.push_str(&node.source);
+                    trailing(&mut out);
                     out.push('\n');
                 }
             }

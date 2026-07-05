@@ -464,6 +464,18 @@ pub fn format_scmp(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::Scmp, source)
 }
 
+/// Format rgbasm (RGBDS / Game Boy SM83) source (`asm198x fmt --cpu rgbasm`):
+/// parse into the semantic AST and emit canonical same-dialect source — `name:`
+/// labels at column 0, operations indented, `SECTION` directives and comments
+/// preserved, and scoped `.local` labels re-emitted in source form. Assembles
+/// byte-identical to the input and is idempotent (U6).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse failure.
+pub fn format_rgbasm(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Rgbasm, source)
+}
+
 /// Parse with a dialect's AST front-end and emit canonical source. Errors if the
 /// dialect has no formatter yet (no AST front-end).
 fn format_ast(dialect: &dyn dialect::Dialect, source: &str) -> Result<String, AsmError> {

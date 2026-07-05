@@ -38,64 +38,170 @@ impl Dialect for Rgbasm {
     }
 
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        let set = self.instruction_set();
-        let mut out = Vec::new();
-        let mut consts: BTreeMap<String, i64> = BTreeMap::new();
-        let mut global = String::new();
-
-        for (i, raw) in source.lines().enumerate() {
-            let line = i + 1;
-            let code = strip_comment(raw);
-            if code.trim().is_empty() {
-                continue;
-            }
-            // `SECTION "name", TYPE[$addr]` — only the origin matters for a flat
-            // binary; a section with no address assembles at the current PC.
-            if code
-                .trim_start()
-                .to_ascii_uppercase()
-                .starts_with("SECTION")
-            {
-                if let Some(org) = section_origin(code.trim(), line)? {
-                    out.push(Statement {
-                        line,
-                        label: None,
-                        op: Some(Operation::Org(org)),
-                    });
-                }
-                continue;
-            }
-            // `NAME EQU expr` / `NAME = expr` — a constant.
-            if let Some((name, expr)) = constant(code.trim(), line)? {
-                if let Ok(v) = fold_const(&expr, &consts, line) {
-                    consts.insert(name.clone(), v);
-                }
-                out.push(Statement {
-                    line,
-                    label: Some(name),
-                    op: Some(Operation::Equ(expr)),
-                });
-                continue;
-            }
-
-            let (label, rest) = split_label(code, line)?;
-            if let Some(name) = &label
-                && !name.starts_with('.')
-            {
-                global = name.clone();
-            }
-            let label = label.map(|n| qualify(&n, &global));
-            let op = if rest.is_empty() {
-                None
-            } else {
-                parse_op(set, rest, &consts, &global, line)?
-            };
-            if label.is_some() || op.is_some() {
-                out.push(Statement { line, label, op });
-            }
-        }
-        Ok(out)
+        // Route assembly through the semantic AST (U6): parse into a `Program`,
+        // then lower to the engine's statement stream — byte-identical to the old
+        // direct parse (AE1). Other CPUs stay on direct lowering (KTD6).
+        crate::ast::lower(parse_program(source)?)
     }
+
+    fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
+        Ok(Some(parse_program(source)?))
+    }
+
+    /// rgbasm `equ` takes no colon on its label (`NAME equ …`); a colon would
+    /// fail to reassemble, since the label is disambiguated by the keyword.
+    /// (Normal `name:` labels still keep their colon — this governs `equ` only.)
+    fn equ_label_colon(&self) -> bool {
+        false
+    }
+}
+
+/// Parse rgbasm (SM83) source into the semantic [`Program`](crate::ast::Program).
+/// Each line becomes a node with its scoped label, operation, verbatim source,
+/// span, and comment trivia. rgbasm scopes `.local` labels under the most recent
+/// non-`.` global, so a `.local` becomes a [`Scope::Local`](crate::ast::Scope)
+/// symbol qualified as `global.local` (the string-mangle the old parser did);
+/// [`lower`](crate::ast::lower) reproduces the old statements exactly. A
+/// `SECTION` directive keeps its verbatim source for the formatter and lowers to
+/// an `Org` only when it pins an address.
+pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
+    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
+    let set = &isa::sm83::SET;
+    let mut nodes = Vec::new();
+    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
+    // The most recent non-`.` global label, for qualifying `.local` labels/refs.
+    let mut global = String::new();
+    let mut pending_leading: Vec<Comment> = Vec::new();
+
+    for (i, raw) in source.lines().enumerate() {
+        let line = i + 1;
+        let (code, comment) = split_comment(raw);
+        if code.trim().is_empty() {
+            if let Some(text) = comment {
+                pending_leading.push(Comment {
+                    text: text.to_string(),
+                    span: Span::at(line as u32, 1),
+                });
+            }
+            continue;
+        }
+        let trailing = comment.map(|text| Comment {
+            text: text.to_string(),
+            span: Span::at(line as u32, (code.len() + 1) as u32),
+        });
+
+        // `SECTION "name", TYPE[$addr]` — a directive preserved verbatim; it
+        // lowers to an `Org` only when it pins an address (a flat binary ignores
+        // an address-less section, but the formatter still keeps the line).
+        if code
+            .trim_start()
+            .to_ascii_uppercase()
+            .starts_with("SECTION")
+        {
+            let item = section_origin(code.trim(), line)?
+                .map(|org| crate::ast::item_from_operation(Operation::Org(org)));
+            nodes.push(Node {
+                label: None,
+                item,
+                source: code.trim().to_string(),
+                span: Span::at(line as u32, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut pending_leading),
+                    trailing,
+                },
+            });
+            continue;
+        }
+
+        // `NAME EQU expr` / `NAME = expr` — a (global) constant.
+        if let Some((name, expr, op_source)) = constant(code.trim(), line)? {
+            if let Ok(v) = fold_const(&expr, &consts, line) {
+                consts.insert(name.clone(), v);
+            }
+            nodes.push(Node {
+                label: Some(Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }),
+                item: Some(crate::ast::item_from_operation(Operation::Equ(expr))),
+                source: op_source,
+                span: Span::at(line as u32, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut pending_leading),
+                    trailing,
+                },
+            });
+            continue;
+        }
+
+        let (label, rest) = split_label(code, line)?;
+        // A non-`.` label opens a new scope; resolve it before qualifying the op.
+        if let Some(name) = &label
+            && !name.starts_with('.')
+        {
+            global = name.clone();
+        }
+        let symbol = label.map(|name| {
+            if name.starts_with('.') && !global.is_empty() {
+                Symbol {
+                    qualified: format!("{global}{name}"),
+                    scope: Scope::Local {
+                        in_global: global.clone(),
+                    },
+                    name,
+                }
+            } else {
+                Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }
+            }
+        });
+        let op = if rest.is_empty() {
+            None
+        } else {
+            parse_op(set, rest, &consts, &global, line)?
+        };
+        if symbol.is_none() && op.is_none() {
+            continue;
+        }
+        nodes.push(Node {
+            label: symbol,
+            item: op.map(crate::ast::item_from_operation),
+            source: rest.trim().to_string(),
+            span: Span::at(line as u32, 1),
+            trivia: Trivia {
+                leading: std::mem::take(&mut pending_leading),
+                trailing,
+            },
+        });
+    }
+
+    if !pending_leading.is_empty() {
+        let line = source.lines().count() as u32;
+        nodes.push(Node {
+            label: None,
+            item: None,
+            source: String::new(),
+            span: Span::at(line, 1),
+            trivia: Trivia {
+                leading: pending_leading,
+                trailing: None,
+            },
+        });
+    }
+    Ok(Program { nodes })
+}
+
+/// Split a line into its code and its `;` comment (delimiter kept, trailing
+/// whitespace trimmed) for carrying comments as AST trivia; defined via
+/// [`strip_comment`] so the comment is exactly what it removes.
+fn split_comment(line: &str) -> (&str, Option<&str>) {
+    let code = strip_comment(line);
+    let comment = (code.len() < line.len()).then(|| line[code.len()..].trim_end());
+    (code, comment)
 }
 
 /// Strip a `;` comment, ignoring `;` inside a `"..."` string.
@@ -119,14 +225,20 @@ fn section_origin(code: &str, line: usize) -> Result<Option<Expr>, AsmError> {
     }
 }
 
-/// `NAME EQU expr` or `NAME = expr` (redefinable). Returns the name and value.
-fn constant(code: &str, line: usize) -> Result<Option<(String, Expr)>, AsmError> {
+/// `NAME EQU expr` or `NAME = expr` (redefinable). Returns the name, the value
+/// expression, and the operation's source text (`EQU expr` / `= expr`) so the
+/// formatter can re-emit `NAME <source>` with the label kept on the same line.
+fn constant(code: &str, line: usize) -> Result<Option<(String, Expr, String)>, AsmError> {
     // `NAME EQU expr` / `NAME EQUS ...` — the keyword form.
     let (first, rest) = split_first_word(code);
     if !rest.is_empty() {
         let (kw, tail) = split_first_word(rest);
         if kw.eq_ignore_ascii_case("equ") && is_ident(first) {
-            return Ok(Some((first.to_string(), value(tail, line)?)));
+            return Ok(Some((
+                first.to_string(),
+                value(tail, line)?,
+                rest.trim().to_string(),
+            )));
         }
     }
     // `NAME = expr` — a lone `=`.
@@ -136,6 +248,7 @@ fn constant(code: &str, line: usize) -> Result<Option<(String, Expr)>, AsmError>
             return Ok(Some((
                 name.to_string(),
                 value(code[eq + 1..].trim(), line)?,
+                code[eq..].trim().to_string(),
             )));
         }
     }
@@ -168,15 +281,6 @@ fn split_label(code: &str, line: usize) -> Result<(Option<String>, &str), AsmErr
 
 fn is_local_or_ident(s: &str) -> bool {
     s.strip_prefix('.').map_or_else(|| is_ident(s), is_ident)
-}
-
-/// Qualify a leading-`.` local label under the current global scope.
-fn qualify(name: &str, global: &str) -> String {
-    if name.starts_with('.') {
-        format!("{global}{name}")
-    } else {
-        name.to_string()
-    }
 }
 
 /// Parse the operation part of a line: a directive or an instruction.
@@ -603,5 +707,44 @@ mod tests {
         assert_eq!(bytes(" dw $1234\n"), vec![0x34, 0x12]);
         assert_eq!(bytes(" ds 3\n"), vec![0x00, 0x00, 0x00]);
         assert_eq!(bytes(" ds 2, $FF\n"), vec![0xFF, 0xFF]);
+    }
+
+    /// U6 — the rgbasm front-end routes through the AST, carrying comments as
+    /// trivia without changing the emitted bytes (AE1), and preserving the
+    /// scoped `.local` resolution.
+    #[test]
+    fn comments_are_carried_as_trivia() {
+        let src =
+            "; header\nSECTION \"c\", ROM0[$0]\nstart:\n ld a, $05   ; load\n.loop:\n jr .loop\n";
+        let prog = super::parse_program(src).expect("parses");
+        assert!(
+            prog.nodes[0]
+                .trivia
+                .leading
+                .iter()
+                .any(|c| c.text == "; header"),
+            "own-line comment attaches as leading trivia"
+        );
+        assert!(
+            prog.nodes.iter().any(|n| n
+                .trivia
+                .trailing
+                .as_ref()
+                .is_some_and(|c| c.text == "; load")),
+            "same-line comment attaches as trailing trivia"
+        );
+        // The reused `.loop` resolves under its global (`start.loop`).
+        assert!(
+            prog.nodes.iter().any(|n| n
+                .label
+                .as_ref()
+                .is_some_and(|s| s.qualified == "start.loop")),
+            "scoped local qualifies under its global"
+        );
+        assert_eq!(
+            bytes(src),
+            bytes("SECTION \"c\", ROM0[$0]\nstart:\n ld a, $05\n.loop:\n jr .loop\n"),
+            "comments do not change bytes"
+        );
     }
 }
