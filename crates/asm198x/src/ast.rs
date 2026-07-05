@@ -227,11 +227,11 @@ pub(crate) enum Item {
     /// source wrote the whole block on one line (the idiomatic
     /// `!ifndef X { X = 0 }` guard), which the formatter preserves.
     ///
-    /// **Formatter-only today.** ACME still assembles through its own conditional
-    /// preprocessor, so [`lower`] rejects this node — the promotion to the shared
-    /// AST is the idea-4 *representation*; the idea-4 *evaluator* (which prunes a
-    /// branch at lower-time and retires the preprocessor) is the deliberate
-    /// follow-on. No lowering path constructs it, so the rejection never fires.
+    /// ACME assembles by **evaluating** this tree (`dialects::acme::evaluate`
+    /// prunes the untaken branch and threads `env`), not through the generic
+    /// [`lower`] — so `lower` rejects a conditional. No dialect routes a
+    /// conditional through `lower`, so the rejection never fires; it guards
+    /// against a future one doing so by mistake.
     Conditional {
         head: String,
         then_body: Vec<Node>,
@@ -319,14 +319,13 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             value,
             fill,
         },
-        // Formatter-only (see `Item::Conditional`): no dialect lowers a
-        // conditional block through the AST yet — ACME assembles via its own
-        // preprocessor — so this is unreachable in practice. Idea 4's evaluator
-        // will replace this arm with branch pruning.
+        // No dialect lowers a conditional through the generic path — ACME
+        // evaluates the tree in `dialects::acme::evaluate` — so this is
+        // unreachable in practice; it guards against a mis-routed future dialect.
         Item::Conditional { .. } => {
             return Err(AsmError::new(
                 0,
-                "internal error: a conditional block is formatter-only; ACME assembles through its preprocessor",
+                "internal error: a conditional block is evaluated by the dialect, not lowered",
             ));
         }
     })

@@ -38,35 +38,38 @@ impl Dialect for Acme {
     }
 
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        let set = self.instruction_set();
+        // Idea 4: assemble by **evaluating the shared conditional AST** — the same
+        // source-preserving tree the formatter parses — rather than a separate
+        // brace preprocessor. `evaluate` walks the tree, prunes untaken branches,
+        // threads `env`, bakes `!set`, and lowers each line through
+        // `parse_statement`. This retires `tokenize_braces`/`process_block`; the
+        // conditional now lives in the tree, not a second parse.
+        let program = parse_program(source)?;
         let anons = prescan_anons(source);
-        let units = tokenize_braces(source);
-        let mut out = Vec::new();
+        let set = self.instruction_set();
         let mut env: BTreeMap<String, i64> = BTreeMap::new();
         // Names bound by `!set` (a *reassignable* variable). They live in `env`
         // like `=` constants, but are additionally marked here so each use is
         // baked to the value current at that point (reassignment can't be a
         // single pass-2 symbol).
         let mut set_names: BTreeSet<String> = BTreeSet::new();
-        let mut idx = 0;
-        process_block(
+        let mut out = Vec::new();
+        evaluate(
+            &program.nodes,
             set,
             &anons,
             &mut env,
             &mut set_names,
-            &units,
-            &mut idx,
             true,
             &mut out,
         )?;
         Ok(out)
     }
 
-    /// The formatter parses through a *separate* source-preserving front-end
-    /// (`parse_program`) that keeps conditional blocks as `Item::Conditional`
-    /// and every other line's verbatim operation source — it does not evaluate
-    /// conditionals (that stays in `parse`'s preprocessor until idea 4's
-    /// evaluator lands). Assembly is unaffected.
+    /// The formatter parses through the same source-preserving front-end
+    /// (`parse_program`) the assembler now uses — conditional blocks as
+    /// `Item::Conditional`, every other line's verbatim operation source. `emit`
+    /// reformats this tree; `parse` evaluates it.
     fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
         Ok(Some(parse_program(source)?))
     }
@@ -88,16 +91,16 @@ fn split_comment(line: &str) -> (&str, Option<&str>) {
 }
 
 // ---------------------------------------------------------------------------
-// Source-preserving parse for the formatter (`asm198x fmt`) — U6 / idea 4.
+// Source-preserving parse — the single ACME front-end (U6 / idea 4).
 //
-// This is a *second* front-end, distinct from `parse` (the assembler): it does
-// **not** evaluate conditionals, resolve anonymous labels, or bake `!set`. It
-// keeps the source structure — conditional blocks as `Item::Conditional`, every
-// other line as a flat node carrying its verbatim operation source — so `emit`
-// can reformat to the canonical layout (see `decisions/formatter-canonical-style.md`)
-// and reassemble byte-identical. The idea-4 evaluator (which will let `parse`
-// itself run off this tree) is the deliberate follow-on; for now `parse` keeps
-// its own preprocessor and this tree is formatter-only.
+// `parse_program` keeps the source structure: conditional blocks as
+// `Item::Conditional`, every other line as a flat node carrying its verbatim
+// operation source. It does **not** evaluate — no branch pruning, no `!set`
+// baking, no anonymous-label resolution. Both consumers run off this one tree:
+// `emit` reformats it to the canonical layout (see
+// `decisions/formatter-canonical-style.md`), and `evaluate` (below) assembles
+// it — pruning branches and threading `env`. This is idea 4: the conditional
+// lives in the tree, replacing the old brace preprocessor.
 // ---------------------------------------------------------------------------
 
 /// How a [`parse_block`](FmtCx::parse_block) ended.
@@ -452,6 +455,92 @@ fn find_top(s: &str, ch: u8) -> Option<usize> {
     None
 }
 
+// ---------------------------------------------------------------------------
+// Assembly by evaluation of the conditional AST (idea 4)
+// ---------------------------------------------------------------------------
+
+/// Evaluate the AST into the engine's statement stream: prune untaken branches,
+/// thread `env`/`set_names`, and lower each content line through
+/// [`parse_statement`]. A conditional emits only its taken branch (`emit &&
+/// taken`); a skipped branch is walked with `emit = false` so it defines no
+/// symbols — the same rule the old `process_block` used, now over the tree.
+#[allow(clippy::too_many_arguments)]
+fn evaluate(
+    nodes: &[crate::ast::Node],
+    set: &'static isa::InstructionSet,
+    anons: &[AnonDef],
+    env: &mut BTreeMap<String, i64>,
+    set_names: &mut BTreeSet<String>,
+    emit: bool,
+    out: &mut Vec<Statement>,
+) -> Result<(), AsmError> {
+    for node in nodes {
+        // A conditional block: evaluate its condition (only when this branch is
+        // itself live) and recurse into each branch.
+        if let Some(crate::ast::Item::Conditional {
+            head,
+            then_body,
+            else_body,
+            ..
+        }) = &node.item
+        {
+            let line = node.span.line as usize;
+            let taken = if emit {
+                match classify_conditional(head) {
+                    Some(Conditional::IfDef(s)) => env.contains_key(&s),
+                    Some(Conditional::IfNDef(s)) => !env.contains_key(&s),
+                    Some(Conditional::If(e)) => eval_condition(anons, env, &e, line)?,
+                    None => return Err(AsmError::new(line, format!("bad conditional `{head}`"))),
+                }
+            } else {
+                false
+            };
+            evaluate(then_body, set, anons, env, set_names, emit && taken, out)?;
+            if let Some(else_body) = else_body {
+                evaluate(else_body, set, anons, env, set_names, emit && !taken, out)?;
+            }
+            continue;
+        }
+
+        // A skipped branch defines nothing; blank/comment nodes emit nothing.
+        if !emit || (node.label.is_none() && node.source.is_empty()) {
+            continue;
+        }
+
+        let line = node.span.line as usize;
+        // Reconstruct the source line for `parse_statement` from the node's
+        // (label, operation source) — canonical whitespace, which the parser
+        // treats identically to the original.
+        let recon = match &node.label {
+            Some(sym) if node.source.is_empty() => sym.name.clone(),
+            Some(sym) => format!("{} {}", sym.name, node.source),
+            None => node.source.clone(),
+        };
+
+        // `!set name = expr` binds/rebinds a variable and emits nothing; later
+        // uses are baked to this value.
+        if split_first_word(recon.trim()).0 == "!set" {
+            let (name, value) = parse_set(anons, env, &recon, line)?;
+            env.insert(name.clone(), value);
+            set_names.insert(name);
+            continue;
+        }
+
+        let (label, op) = parse_statement(set, anons, env, &recon, line)?;
+        // Bake `!set` variables to their current value; real labels stay symbolic.
+        let op = op.map(|o| bake_set_vars(o, env, set_names));
+        if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
+            && let Ok(v) = fold_const(e, env, line)
+        {
+            env.insert(name.clone(), v);
+        }
+        if !(label.is_none() && op.is_none()) {
+            out.push(Statement { line, label, op });
+        }
+    }
+    Ok(())
+}
+
 /// Strip a `;` line comment. A `;` inside a `'c'` char literal or `"..."` string
 /// is left alone so it is not mistaken for a comment.
 fn strip_comment(line: &str) -> &str {
@@ -553,53 +642,6 @@ fn resolve_anon(
 // Conditional assembly (`!if` / `!ifdef` / `!ifndef` … `{ }` … `else { }`)
 // ---------------------------------------------------------------------------
 
-/// One unit of source after `{`/`}` have been split out as standalone tokens.
-struct Unit {
-    line: usize,
-    text: String,
-}
-
-/// Split the source into units, isolating each top-level `{` and `}` (outside
-/// strings) so the conditional walker can treat them as block delimiters. Lines
-/// without braces pass through whole, leading whitespace intact (so column-0
-/// label detection still works).
-fn tokenize_braces(source: &str) -> Vec<Unit> {
-    let mut units = Vec::new();
-    for (i, raw) in source.lines().enumerate() {
-        let line = i + 1;
-        let code = strip_comment(raw);
-        let mut in_char = false;
-        let mut in_str = false;
-        let mut start = 0;
-        let bytes = code.as_bytes();
-        let flush = |seg: &str, units: &mut Vec<Unit>| {
-            if !seg.trim().is_empty() {
-                units.push(Unit {
-                    line,
-                    text: seg.to_string(),
-                });
-            }
-        };
-        for (j, &b) in bytes.iter().enumerate() {
-            match b {
-                b'\'' if !in_str => in_char = !in_char,
-                b'"' if !in_char => in_str = !in_str,
-                b'{' | b'}' if !in_char && !in_str => {
-                    flush(&code[start..j], &mut units);
-                    units.push(Unit {
-                        line,
-                        text: (b as char).to_string(),
-                    });
-                    start = j + 1;
-                }
-                _ => {}
-            }
-        }
-        flush(&code[start..], &mut units);
-    }
-    units
-}
-
 /// The kind of a conditional directive and the text it tests.
 enum Conditional {
     IfDef(String),
@@ -615,84 +657,6 @@ fn classify_conditional(text: &str) -> Option<Conditional> {
         "!if" => Some(Conditional::If(rest.trim().to_string())),
         _ => None,
     }
-}
-
-/// Walk units, emitting statements. A conditional emits its taken branch and
-/// recurses (with `emit = false`) through the other so braces stay balanced and
-/// the skipped branch defines no symbols. Returns having consumed this block's
-/// closing `}` (or at end of input for the top level).
-// The recursion threads eight distinct pieces of mutable state (env, set-names,
-// index, output, …); bundling them into a context struct would obscure more than
-// it helps, so the arg count is accepted here.
-#[allow(clippy::too_many_arguments)]
-fn process_block(
-    set: &'static isa::InstructionSet,
-    anons: &[AnonDef],
-    env: &mut BTreeMap<String, i64>,
-    set_names: &mut BTreeSet<String>,
-    units: &[Unit],
-    idx: &mut usize,
-    emit: bool,
-    out: &mut Vec<Statement>,
-) -> Result<(), AsmError> {
-    while *idx < units.len() {
-        let text = units[*idx].text.trim();
-        let line = units[*idx].line;
-        if text == "}" {
-            *idx += 1;
-            return Ok(());
-        }
-        if text == "{" || text == "else" {
-            return Err(AsmError::new(line, format!("unexpected `{text}`")));
-        }
-        if let Some(cond) = classify_conditional(text) {
-            *idx += 1;
-            expect_brace(units, idx, line)?;
-            let taken = if emit {
-                match &cond {
-                    Conditional::IfDef(s) => env.contains_key(s),
-                    Conditional::IfNDef(s) => !env.contains_key(s),
-                    Conditional::If(e) => eval_condition(anons, env, e, line)?,
-                }
-            } else {
-                false
-            };
-            process_block(set, anons, env, set_names, units, idx, emit && taken, out)?;
-            if *idx < units.len() && units[*idx].text.trim() == "else" {
-                *idx += 1;
-                expect_brace(units, idx, line)?;
-                process_block(set, anons, env, set_names, units, idx, emit && !taken, out)?;
-            }
-            continue;
-        }
-        // `!set name = expr` binds or rebinds a variable, folded now against the
-        // current `env`. It emits nothing; later uses are baked to this value.
-        if split_first_word(text).0 == "!set" {
-            if emit {
-                let (name, value) = parse_set(anons, env, text, line)?;
-                env.insert(name.clone(), value);
-                set_names.insert(name);
-            }
-            *idx += 1;
-            continue;
-        }
-        if emit {
-            let (label, op) = parse_statement(set, anons, env, &units[*idx].text, line)?;
-            // Bake `!set` variables to their current value (a rebindable var
-            // can't be one pass-2 symbol); real labels/constants stay symbolic.
-            let op = op.map(|o| bake_set_vars(o, env, set_names));
-            if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
-                && let Ok(v) = fold_const(e, env, line)
-            {
-                env.insert(name.clone(), v);
-            }
-            if !(label.is_none() && op.is_none()) {
-                out.push(Statement { line, label, op });
-            }
-        }
-        *idx += 1;
-    }
-    Ok(())
 }
 
 /// Parse `!set name = expr`, folding `expr` against the current `env`.
@@ -759,16 +723,6 @@ fn bake_expr(e: Expr, env: &BTreeMap<String, i64>, set_names: &BTreeSet<String>)
             Box::new(bake_expr(*r, env, set_names)),
         ),
         other => other,
-    }
-}
-
-fn expect_brace(units: &[Unit], idx: &mut usize, line: usize) -> Result<(), AsmError> {
-    match units.get(*idx) {
-        Some(u) if u.text.trim() == "{" => {
-            *idx += 1;
-            Ok(())
-        }
-        _ => Err(AsmError::new(line, "expected `{` after a conditional")),
     }
 }
 
