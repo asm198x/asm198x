@@ -453,6 +453,17 @@ pub fn format_1802(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::Cdp1802, source)
 }
 
+/// Format asl-syntax National SC/MP (INS8060) source (`asm198x fmt --cpu scmp`):
+/// parse into the semantic AST and emit canonical same-dialect source — labels at
+/// column 0, operations indented, comments preserved, C-style operand spelling
+/// (`0x..`) untouched. Assembles byte-identical to the input and is idempotent (U6).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse failure.
+pub fn format_scmp(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Scmp, source)
+}
+
 /// Parse with a dialect's AST front-end and emit canonical source. Errors if the
 /// dialect has no formatter yet (no AST front-end).
 fn format_ast(dialect: &dyn dialect::Dialect, source: &str) -> Result<String, AsmError> {

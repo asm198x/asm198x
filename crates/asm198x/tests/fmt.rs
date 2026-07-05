@@ -4,8 +4,9 @@
 //! spelling and comments.
 
 use asm198x::{
-    assemble_1802, assemble_i8080, assemble_m6800, assemble_pasmo, assemble_sjasmplus, format_1802,
-    format_i8080, format_m6800, format_pasmo, format_sjasmplus,
+    assemble_1802, assemble_i8080, assemble_m6800, assemble_pasmo, assemble_scmp,
+    assemble_sjasmplus, format_1802, format_i8080, format_m6800, format_pasmo, format_scmp,
+    format_sjasmplus,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -297,6 +298,44 @@ fn fmt_1802_reassembles_byte_identical() {
     );
     assert!(
         formatted.lines().any(|l| l.contains("delay equ 5")),
+        "equ label keeps no colon:\n{formatted}"
+    );
+}
+
+/// A representative SC/MP program: origin, colon labels, a same-line label with
+/// an instruction, an `equ`, inherent / pointer-exchange / memory-reference /
+/// immediate forms, data directives, and comments.
+const PROG_SCMP: &str = "\
+; a small SC/MP routine
+        org 0x0100
+start:  ldi 0x42       ; load immediate
+        st 5(1)
+loop:   ld @1(2)
+        jmp 0(0)
+mask    equ 0x0f
+        ani mask
+        db 1, 2, \"AB\"
+        nop
+";
+
+#[test]
+fn fmt_scmp_reassembles_byte_identical() {
+    let original = assemble_scmp(PROG_SCMP).expect("assembles").bytes;
+    let formatted = format_scmp(PROG_SCMP).expect("formats");
+    let reassembled = assemble_scmp(&formatted)
+        .unwrap_or_else(|e| panic!("formatted SC/MP must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "SC/MP round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_scmp(&formatted).expect("formats"),
+        "SC/MP fmt is idempotent"
+    );
+    assert!(
+        formatted.lines().any(|l| l.contains("mask equ 0x0f")),
         "equ label keeps no colon:\n{formatted}"
     );
 }
