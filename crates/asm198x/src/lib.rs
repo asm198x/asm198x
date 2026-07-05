@@ -431,6 +431,17 @@ pub fn format_i8080(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::I8080, source)
 }
 
+/// Format Motorola-syntax 6800 source (`asm198x fmt --cpu 6800`): parse into the
+/// semantic AST and emit canonical same-dialect source — labels at column 0,
+/// operations indented, comments preserved, `$`-hex operand spelling untouched.
+/// The result assembles byte-identical to the input and is idempotent (U6).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse failure.
+pub fn format_m6800(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::M6800, source)
+}
+
 /// Parse with a dialect's AST front-end and emit canonical source. Errors if the
 /// dialect has no formatter yet (no AST front-end).
 fn format_ast(dialect: &dyn dialect::Dialect, source: &str) -> Result<String, AsmError> {

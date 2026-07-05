@@ -4,8 +4,8 @@
 //! spelling and comments.
 
 use asm198x::{
-    assemble_i8080, assemble_pasmo, assemble_sjasmplus, format_i8080, format_pasmo,
-    format_sjasmplus,
+    assemble_i8080, assemble_m6800, assemble_pasmo, assemble_sjasmplus, format_i8080, format_m6800,
+    format_pasmo, format_sjasmplus,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -218,6 +218,47 @@ fn fmt_i8080_equ_label_takes_no_colon() {
     assert!(
         assemble_i8080(&formatted).is_ok(),
         "no-colon equ reassembles:\n{formatted}"
+    );
+}
+
+/// A representative Motorola-6800 program: origin, colon labels, a same-line
+/// label with an instruction, an `equ` constant, `#`/direct/extended/indexed
+/// modes, a `>` force, a relative branch, data directives, and comments.
+const PROG_6800: &str = "\
+; a small 6800 routine
+        org $0100
+start:  ldaa #$42     ; load
+        staa $50
+        ldx #$1234
+        ldaa >$50      ; forced extended
+loop:   deca
+        bne loop
+count   equ 3
+        fcb $01, $02, \"AB\"
+        fdb $1234
+        rts
+";
+
+#[test]
+fn fmt_m6800_reassembles_byte_identical() {
+    let original = assemble_m6800(PROG_6800).expect("assembles").bytes;
+    let formatted = format_m6800(PROG_6800).expect("formats");
+    let reassembled = assemble_m6800(&formatted)
+        .unwrap_or_else(|e| panic!("formatted 6800 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "6800 round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_m6800(&formatted).expect("formats"),
+        "6800 fmt is idempotent"
+    );
+    // The `equ` label emits with no colon (Motorola, like the 8080).
+    assert!(
+        formatted.lines().any(|l| l.contains("count equ 3")),
+        "equ label keeps no colon:\n{formatted}"
     );
 }
 
