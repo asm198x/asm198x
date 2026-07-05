@@ -219,6 +219,28 @@ pub(crate) enum Item {
         value: i64,
         fill: u8,
     },
+    /// A conditional-assembly block (ACME `!if`/`!ifdef`/`!ifndef` … `{ … }` …
+    /// `else { … }`), kept as **tree structure** so the formatter reflects the
+    /// block shape and idea 4's evaluator can prune branches. `head` is the
+    /// verbatim directive + condition (`!if DEBUG = 1`, `!ifndef FOO`);
+    /// `then_body`/`else_body` are the nested nodes; `inline` records that the
+    /// source wrote the whole block on one line (the idiomatic
+    /// `!ifndef X { X = 0 }` guard), which the formatter preserves.
+    ///
+    /// **Formatter-only today.** ACME still assembles through its own conditional
+    /// preprocessor, so [`lower`] rejects this node — the promotion to the shared
+    /// AST is the idea-4 *representation*; the idea-4 *evaluator* (which prunes a
+    /// branch at lower-time and retires the preprocessor) is the deliberate
+    /// follow-on. No lowering path constructs it, so the rejection never fires.
+    // Constructed by ACME's source-preserving `parse_ast` (the next commit); the
+    // emit + lower-reject paths and tests already exercise it.
+    #[allow(dead_code)]
+    Conditional {
+        head: String,
+        then_body: Vec<Node>,
+        else_body: Option<Vec<Node>>,
+        inline: bool,
+    },
 }
 
 /// A source line reduced to an optional (scoped) label and an optional
@@ -300,6 +322,16 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             value,
             fill,
         },
+        // Formatter-only (see `Item::Conditional`): no dialect lowers a
+        // conditional block through the AST yet — ACME assembles via its own
+        // preprocessor — so this is unreachable in practice. Idea 4's evaluator
+        // will replace this arm with branch pruning.
+        Item::Conditional { .. } => {
+            return Err(AsmError::new(
+                0,
+                "internal error: a conditional block is formatter-only; ACME assembles through its preprocessor",
+            ));
+        }
     })
 }
 
@@ -353,9 +385,18 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
 /// (`name equ …`) — its `equ` keyword already disambiguates, and a colon would
 /// fail to reassemble.
 pub(crate) fn emit(program: &Program, equ_label_colon: bool) -> String {
-    const INDENT: &str = "        ";
     let mut out = String::new();
-    for node in &program.nodes {
+    emit_nodes(&program.nodes, &mut out, equ_label_colon);
+    out
+}
+
+/// Emit a node list — the whole program, or one conditional block's body.
+/// Bodies use the same layout rules as the top level: only a conditional's
+/// `!if`/`}`/`else` delimiters sit at column 0 (ACME detects labels by column,
+/// so a body label must stay at column 0 too — bodies are not deeper-indented).
+fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool) {
+    const INDENT: &str = "        ";
+    for node in nodes {
         for c in &node.trivia.leading {
             out.push_str(&c.text);
             out.push('\n');
@@ -367,6 +408,26 @@ pub(crate) fn emit(program: &Program, equ_label_colon: bool) -> String {
                 out.push_str(&c.text);
             }
         };
+        // A conditional block renders its delimiters at column 0 and recurses
+        // into its bodies (the idea-4 tree shape).
+        if let Some(Item::Conditional {
+            head,
+            then_body,
+            else_body,
+            inline,
+        }) = &node.item
+        {
+            emit_conditional(
+                node,
+                head,
+                then_body,
+                else_body.as_deref(),
+                *inline,
+                out,
+                equ_label_colon,
+            );
+            continue;
+        }
         let label = node.label.as_ref().map(|s| s.name.as_str());
         match (label, node.item.as_ref()) {
             // `equ` binds its label to a value on the same statement, so its
@@ -378,7 +439,7 @@ pub(crate) fn emit(program: &Program, equ_label_colon: bool) -> String {
                 out.push_str(name);
                 out.push_str(if equ_label_colon { ": " } else { " " });
                 out.push_str(&node.source);
-                trailing(&mut out);
+                trailing(&mut *out);
                 out.push('\n');
             }
             // Label + other operation: label on its own line, operation indented.
@@ -387,21 +448,21 @@ pub(crate) fn emit(program: &Program, equ_label_colon: bool) -> String {
                 out.push_str(":\n");
                 out.push_str(INDENT);
                 out.push_str(&node.source);
-                trailing(&mut out);
+                trailing(&mut *out);
                 out.push('\n');
             }
             // Label-only line.
             (Some(name), None) => {
                 out.push_str(name);
                 out.push(':');
-                trailing(&mut out);
+                trailing(&mut *out);
                 out.push('\n');
             }
             // Operation with no label.
             (None, Some(_)) => {
                 out.push_str(INDENT);
                 out.push_str(&node.source);
-                trailing(&mut out);
+                trailing(&mut *out);
                 out.push('\n');
             }
             // No label, no operation. Either a directive preserved verbatim that
@@ -417,13 +478,74 @@ pub(crate) fn emit(program: &Program, equ_label_colon: bool) -> String {
                 } else {
                     out.push_str(INDENT);
                     out.push_str(&node.source);
-                    trailing(&mut out);
+                    trailing(&mut *out);
                     out.push('\n');
                 }
             }
         }
     }
-    out
+}
+
+/// Emit one conditional block. Delimiters (`!if … {`, `} else {`, `}`) sit at
+/// column 0; each body formats with the normal rules. The idiomatic one-line
+/// guard (`!ifndef X { X = 0 }`) is preserved when the source wrote it inline
+/// and the body is a single simple node — expanding it would be less idiomatic.
+fn emit_conditional(
+    node: &Node,
+    head: &str,
+    then_body: &[Node],
+    else_body: Option<&[Node]>,
+    inline: bool,
+    out: &mut String,
+    equ_label_colon: bool,
+) {
+    let trailing = |out: &mut String| {
+        if let Some(c) = &node.trivia.trailing {
+            out.push_str("   ");
+            out.push_str(&c.text);
+        }
+    };
+    if inline
+        && else_body.is_none()
+        && then_body.len() == 1
+        && let Some(body) = inline_render(&then_body[0])
+    {
+        out.push_str(head);
+        out.push_str(" { ");
+        out.push_str(&body);
+        out.push_str(" }");
+        trailing(&mut *out);
+        out.push('\n');
+        return;
+    }
+    out.push_str(head);
+    out.push_str(" {");
+    trailing(&mut *out);
+    out.push('\n');
+    emit_nodes(then_body, out, equ_label_colon);
+    if let Some(else_body) = else_body {
+        out.push_str("} else {\n");
+        emit_nodes(else_body, out, equ_label_colon);
+    }
+    out.push_str("}\n");
+}
+
+/// Render a single node inline (`X = 0`, `nop`) for the one-line guard idiom.
+/// `None` when it can't be safely inlined — a nested block, or attached comments
+/// a one-liner would drop.
+fn inline_render(node: &Node) -> Option<String> {
+    if matches!(node.item, Some(Item::Conditional { .. }))
+        || !node.trivia.leading.is_empty()
+        || node.trivia.trailing.is_some()
+    {
+        return None;
+    }
+    let label = node.label.as_ref().map(|s| s.name.as_str());
+    Some(match (label, node.source.as_str()) {
+        (Some(name), "") => name.to_string(),
+        (Some(name), src) => format!("{name} {src}"),
+        (None, src) => src.to_string(),
+    })
 }
 
 // ===========================================================================
@@ -635,6 +757,82 @@ second:
             lower_item(align).expect("lowers"),
             Operation::Align { andmask: 0xFF, .. }
         ));
+    }
+
+    /// Idea 4 promotion — a conditional block renders its delimiters at column 0
+    /// with the body formatted normally, and the one-line guard idiom is kept on
+    /// one line.
+    #[test]
+    fn conditional_block_emits_with_delimiters_at_column_zero() {
+        // A multi-line `!if` with a body op.
+        let body = Node {
+            label: None,
+            item: Some(Item::Instruction {
+                mnemonic: "jsr".into(),
+                mode: "abs",
+                operands: vec![],
+            }),
+            source: "jsr show_menu".into(),
+            span: Span::at(2, 1),
+            trivia: Trivia::default(),
+        };
+        let cond = Node {
+            label: None,
+            item: Some(Item::Conditional {
+                head: "!if DEBUG = 1".into(),
+                then_body: vec![body],
+                else_body: None,
+                inline: false,
+            }),
+            source: String::new(),
+            span: Span::at(1, 1),
+            trivia: Trivia::default(),
+        };
+        let out = emit(&Program { nodes: vec![cond] }, false);
+        assert_eq!(out, "!if DEBUG = 1 {\n        jsr show_menu\n}\n");
+
+        // The inline guard idiom stays on one line.
+        let guard_body = Node {
+            label: Some(Symbol {
+                name: "FOO".into(),
+                scope: Scope::Global,
+                qualified: "FOO".into(),
+            }),
+            item: Some(Item::Equ(Operand::expr(Expr::Num(0)))),
+            source: "= 0".into(),
+            span: Span::at(1, 1),
+            trivia: Trivia::default(),
+        };
+        let guard = Node {
+            label: None,
+            item: Some(Item::Conditional {
+                head: "!ifndef FOO".into(),
+                then_body: vec![guard_body],
+                else_body: None,
+                inline: true,
+            }),
+            source: String::new(),
+            span: Span::at(1, 1),
+            trivia: Trivia::default(),
+        };
+        assert_eq!(
+            emit(&Program { nodes: vec![guard] }, false),
+            "!ifndef FOO { FOO = 0 }\n"
+        );
+    }
+
+    /// A conditional block is formatter-only for now: lowering rejects it (ACME
+    /// assembles through its preprocessor). Never hit in practice — no lowering
+    /// path constructs one.
+    #[test]
+    fn conditional_block_rejects_lowering() {
+        let cond = Item::Conditional {
+            head: "!if X = 1".into(),
+            then_body: vec![],
+            else_body: None,
+            inline: false,
+        };
+        assert!(lower_item(cond).is_err(), "formatter-only, not lowerable");
     }
 
     /// A structured operand cannot lower to a fixed-slot value — it returns an
