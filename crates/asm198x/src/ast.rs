@@ -23,7 +23,7 @@
 //! carries a scoped `allow(dead_code)`, so the rest of the module keeps normal
 //! dead-code detection (CI is `-D warnings`).
 
-use crate::engine::{Expr, Operation, Statement};
+use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
 
 // ---------------------------------------------------------------------------
 // Provenance (R3)
@@ -169,14 +169,17 @@ impl Operand {
         }
     }
 
-    /// The value of a fixed-slot operand. Panics on a structured operand — the
-    /// Z80 never produces one, so U3's lowering never hits this.
-    fn into_value(self) -> Expr {
+    /// The value of a fixed-slot operand. A structured operand cannot lower to a
+    /// single fixed-slot value; it should have been carried as an
+    /// [`Item::Encoded`] instead, so reaching here is an internal error, not a
+    /// panic (a computed-operand dialect wraps its pre-computed pieces).
+    fn into_value(self) -> Result<Expr, AsmError> {
         match self {
-            Operand::Expr { value, .. } => value,
-            Operand::Structured(_) => {
-                unreachable!("a fixed-slot dialect never produces a structured operand")
-            }
+            Operand::Expr { value, .. } => Ok(value),
+            Operand::Structured(_) => Err(AsmError::new(
+                0,
+                "internal error: a structured operand cannot lower to a fixed-slot value",
+            )),
         }
     }
 }
@@ -186,11 +189,12 @@ impl Operand {
 // ---------------------------------------------------------------------------
 
 /// One operation on a source line, before byte-lowering. The variants mirror the
-/// [`Operation`](crate::engine::Operation) kinds the Z80 dialects produce; other
-/// CPUs' kinds (`Encoded`, `Align`) are added when U6/ACME migrate. Instructions
-/// carry structured [`Operand`]s (source text + structured variants) even though
-/// U3 populates only the fixed-slot value.
-#[derive(Clone, Debug)]
+/// [`Operation`](crate::engine::Operation) kinds a dialect produces. Instructions
+/// carry structured [`Operand`]s (source text + structured variants), though the
+/// fixed-slot dialects populate only the value.
+// No `Clone`/`Debug` derive: `Item::Encoded` carries `Vec<Piece>`, and `Piece`
+// (an engine encoding type) derives neither — keeping the encoder untouched
+// (KTD1). Nothing clones or debug-prints the tree, so the bounds aren't needed.
 pub(crate) enum Item {
     Instruction {
         mnemonic: String,
@@ -202,12 +206,22 @@ pub(crate) enum Item {
     Bytes(Vec<Operand>),
     Words(Vec<Operand>),
     Entry(Operand),
+    /// A dialect-computed instruction encoding (a 6809 postbyte + extension,
+    /// a field-packed word, …), carried verbatim so a computed-operand CPU
+    /// (U6) round-trips byte-identical; the formatter re-emits it via
+    /// [`Node::source`](Node).
+    Encoded(Vec<Piece>),
+    /// ACME's `!align` — a PC-dependent pad the engine resolves (U6).
+    Align {
+        andmask: i64,
+        value: i64,
+        fill: u8,
+    },
 }
 
 /// A source line reduced to an optional (scoped) label and an optional
 /// operation, with provenance and attached comment trivia. Mirrors
 /// [`Statement`](crate::engine::Statement), enriched.
-#[derive(Clone, Debug)]
 pub(crate) struct Node {
     pub(crate) label: Option<Symbol>,
     pub(crate) item: Option<Item>,
@@ -220,7 +234,7 @@ pub(crate) struct Node {
 }
 
 /// A parsed translation unit: the ordered nodes.
-#[derive(Clone, Debug, Default)]
+#[derive(Default)]
 pub(crate) struct Program {
     pub(crate) nodes: Vec<Node>,
 }
@@ -233,20 +247,22 @@ pub(crate) struct Program {
 /// **qualified** name (so scope resolves exactly as the old string-mangle did),
 /// operations lower to their [`Operation`], and the driver assembles the result
 /// unchanged — byte-identical to direct parsing (AE1).
-pub(crate) fn lower(program: Program) -> Vec<Statement> {
+pub(crate) fn lower(program: Program) -> Result<Vec<Statement>, AsmError> {
     program
         .nodes
         .into_iter()
-        .map(|node| Statement {
-            line: node.span.line as usize,
-            label: node.label.map(|s| s.qualified),
-            op: node.item.map(lower_item),
+        .map(|node| {
+            Ok(Statement {
+                line: node.span.line as usize,
+                label: node.label.map(|s| s.qualified),
+                op: node.item.map(lower_item).transpose()?,
+            })
         })
         .collect()
 }
 
-fn lower_item(item: Item) -> Operation {
-    match item {
+fn lower_item(item: Item) -> Result<Operation, AsmError> {
+    Ok(match item {
         Item::Instruction {
             mnemonic,
             mode,
@@ -254,19 +270,40 @@ fn lower_item(item: Item) -> Operation {
         } => Operation::Instruction {
             mnemonic,
             mode,
-            operands: operands.into_iter().map(Operand::into_value).collect(),
+            operands: operands
+                .into_iter()
+                .map(Operand::into_value)
+                .collect::<Result<_, _>>()?,
         },
-        Item::Org(o) => Operation::Org(o.into_value()),
-        Item::Equ(o) => Operation::Equ(o.into_value()),
-        Item::Bytes(v) => Operation::Bytes(v.into_iter().map(Operand::into_value).collect()),
-        Item::Words(v) => Operation::Words(v.into_iter().map(Operand::into_value).collect()),
-        Item::Entry(o) => Operation::Entry(o.into_value()),
-    }
+        Item::Org(o) => Operation::Org(o.into_value()?),
+        Item::Equ(o) => Operation::Equ(o.into_value()?),
+        Item::Bytes(v) => Operation::Bytes(
+            v.into_iter()
+                .map(Operand::into_value)
+                .collect::<Result<_, _>>()?,
+        ),
+        Item::Words(v) => Operation::Words(
+            v.into_iter()
+                .map(Operand::into_value)
+                .collect::<Result<_, _>>()?,
+        ),
+        Item::Entry(o) => Operation::Entry(o.into_value()?),
+        Item::Encoded(pieces) => Operation::Encoded(pieces),
+        Item::Align {
+            andmask,
+            value,
+            fill,
+        } => Operation::Align {
+            andmask,
+            value,
+            fill,
+        },
+    })
 }
 
-/// Build an [`Item`] from an [`Operation`] a Z80 dialect produced. The Z80 never
-/// emits `Encoded` (it has no computed operands) or `Align` (ACME-only), so those
-/// are unreachable here; U6 and the ACME migration add them.
+/// Build an [`Item`] from any [`Operation`] a dialect produced — total over the
+/// operation set, so a computed-operand CPU (`Encoded`) or ACME (`Align`) routes
+/// through the AST without a special case.
 pub(crate) fn item_from_operation(op: Operation) -> Item {
     match op {
         Operation::Instruction {
@@ -283,9 +320,16 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         Operation::Bytes(v) => Item::Bytes(v.into_iter().map(Operand::expr).collect()),
         Operation::Words(v) => Item::Words(v.into_iter().map(Operand::expr).collect()),
         Operation::Entry(e) => Item::Entry(Operand::expr(e)),
-        Operation::Encoded(_) | Operation::Align { .. } => {
-            unreachable!("the Z80 dialects never emit Encoded or Align operations")
-        }
+        Operation::Encoded(pieces) => Item::Encoded(pieces),
+        Operation::Align {
+            andmask,
+            value,
+            fill,
+        } => Item::Align {
+            andmask,
+            value,
+            fill,
+        },
     }
 }
 
@@ -535,7 +579,7 @@ second:
             span: Span::at(1, 1),
             trivia: Trivia::default(),
         };
-        let statements = lower(Program { nodes: vec![node] });
+        let statements = lower(Program { nodes: vec![node] }).expect("lowers");
         assert_eq!(statements.len(), 1);
         assert_eq!(statements[0].label.as_deref(), Some("start"));
         match &statements[0].op {
@@ -550,5 +594,45 @@ second:
             }
             _ => panic!("expected an instruction"),
         }
+    }
+
+    /// U6 — lowering is total over the operation set: a computed-operand
+    /// `Encoded` and an ACME `Align` round-trip through an `Item` without a
+    /// panic (the paths that were `unreachable!` before U6).
+    #[test]
+    fn encoded_and_align_round_trip() {
+        let encoded =
+            item_from_operation(Operation::Encoded(vec![Piece::Lit(0xA6), Piece::Lit(5)]));
+        assert!(matches!(
+            lower_item(encoded).expect("lowers"),
+            Operation::Encoded(_)
+        ));
+
+        let align = item_from_operation(Operation::Align {
+            andmask: 0xFF,
+            value: 0,
+            fill: 0,
+        });
+        assert!(matches!(
+            lower_item(align).expect("lowers"),
+            Operation::Align { andmask: 0xFF, .. }
+        ));
+    }
+
+    /// A structured operand cannot lower to a fixed-slot value — it returns an
+    /// internal error rather than panicking (the U6 graceful-failure path).
+    #[test]
+    fn structured_operand_in_instruction_errors_not_panics() {
+        let bad = Item::Instruction {
+            mnemonic: "x".into(),
+            mode: "",
+            operands: vec![Operand::Structured(StructuredOperand {
+                reg: "x".into(),
+                auto: AutoIndex::None,
+                indirect: false,
+                offset: None,
+            })],
+        };
+        assert!(lower_item(bad).is_err(), "graceful error, not a panic");
     }
 }

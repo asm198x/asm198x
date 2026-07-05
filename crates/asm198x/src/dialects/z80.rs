@@ -90,7 +90,7 @@ pub(crate) fn assemble<S: Z80Syntax>(
     // The Z80 front-end parses into the semantic AST (U3), then lowers it to the
     // engine's statement stream — byte-identical to the old direct parse (AE1).
     // Other CPUs stay on direct lowering behind this boundary (KTD6).
-    Ok(crate::ast::lower(parse_program(syntax, set, ext, source)?))
+    crate::ast::lower(parse_program(syntax, set, ext, source)?)
 }
 
 /// Parse Z80 source into the semantic [`Program`](crate::ast::Program). Each line

@@ -39,10 +39,6 @@ mod engine;
 mod prg;
 #[cfg(test)]
 mod roundtrip_tests;
-// U1 validation-spike (THROWAWAY, test-only). Gate for the AST plan; delete
-// after the gate decision. See docs/plans/2026-07-04-005-feat-ir-ast-layer-plan.md.
-#[cfg(test)]
-mod ast_spike;
 mod sna;
 
 // Disassembly lives in the dependency-free `isa-disasm` crate (only `isa` +
