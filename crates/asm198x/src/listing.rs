@@ -54,21 +54,67 @@ pub fn debug_info(
     }
 }
 
-/// The `--sym` rendering: one `name = $HEX` line per symbol, sorted by name.
-/// Labels and entry points render as absolute addresses (origin + offset, in
-/// the CPU's own address units); constants render their value. Both wear the
-/// same `$HEX` coat — the kind distinction lives in the sidecar, not here.
+/// Wrap a ca65 layout [`Capture`](crate::dialects::ca65::Capture) as a full
+/// [`debug198x::DebugInfo`] — the linked path's counterpart of [`debug_info`]
+/// (Debug198x U4, KTD4). Sections, symbols, and spans come straight from the
+/// capture (post-link CPU addresses); this adds the header identity and
+/// attaches `source_path` to every line span.
 #[must_use]
-pub fn render_sym(result: &AssemblyResult) -> String {
-    let base = u64::from(result.origin.unwrap_or(0));
-    let mut lines: Vec<String> = result
-        .debug
+pub(crate) fn ca65_debug_info(
+    capture: crate::dialects::ca65::Capture,
+    source_path: &str,
+) -> debug198x::DebugInfo {
+    debug198x::DebugInfo {
+        header: debug198x::Header {
+            tool: "asm198x".to_string(),
+            tool_version: env!("CARGO_PKG_VERSION").to_string(),
+            cpu: "6502".to_string(),
+            dialect: "ca65".to_string(),
+            sources: vec![source_path.to_string()],
+            ..debug198x::Header::default()
+        },
+        sections: capture.sections,
+        symbols: capture.symbols,
+        lines: capture
+            .lines
+            .into_iter()
+            .map(|(line, section, offset, length)| debug198x::LineSpan {
+                file: source_path.to_string(),
+                line,
+                section,
+                offset,
+                length,
+            })
+            .collect(),
+    }
+}
+
+/// The `--sym` rendering: one `name = $HEX` line per symbol, sorted by name.
+/// Labels and entry points render as absolute addresses (their section's base
+/// plus their offset, in the CPU's own address units); constants render their
+/// value. Both wear the same `$HEX` coat — the kind distinction lives in the
+/// sidecar, not here. Renders from the [`debug198x::DebugInfo`] record, so the
+/// flat and linked (ca65) paths share it (KTD2).
+#[must_use]
+pub fn render_sym(info: &debug198x::DebugInfo) -> String {
+    let section_base = |id: debug198x::SectionId| {
+        info.sections
+            .iter()
+            .find(|s| s.id == id)
+            .and_then(|s| s.base)
+            .unwrap_or(0)
+    };
+    let mut lines: Vec<String> = info
         .symbols
         .iter()
         .map(|s| {
             let value = match s.kind {
-                debug198x::SymbolKind::Label { offset, .. }
-                | debug198x::SymbolKind::Entry { offset, .. } => base + offset,
+                debug198x::SymbolKind::Label {
+                    section, offset, ..
+                }
+                | debug198x::SymbolKind::Entry {
+                    section, offset, ..
+                } => section_base(section) + offset,
                 debug198x::SymbolKind::Const { value } => value,
             };
             format!("{} = ${value:04X}", s.name)

@@ -398,13 +398,17 @@ fn run(args: &[String]) -> Result<String, String> {
     let assembler = Assembler::resolve(dialect, target)?;
     let source = std::fs::read_to_string(input).map_err(|e| format!("cannot read {input}: {e}"))?;
 
-    // Debug198x artifacts come from the flat engine's captured record (U3);
-    // the ca65 and vasm bypass paths gain emission in U4/U5.
+    // Debug198x artifacts: the flat engine (U3) and the ca65 linker path (U4)
+    // emit them; the vasm path gains emission in U5. The ca65 listing waits on
+    // a per-section byte map, so only the record-backed artifacts are live.
     if (debug.is_some() || sym.is_some() || listing.is_some())
-        && matches!(assembler, Assembler::Ca65 | Assembler::Vasm)
+        && matches!(assembler, Assembler::Vasm)
     {
+        return Err("`--debug`/`--sym`/`--listing` are not yet supported for the vasm path".into());
+    }
+    if listing.is_some() && matches!(assembler, Assembler::Ca65) {
         return Err(
-            "`--debug`/`--sym`/`--listing` are not yet supported for the ca65/vasm paths".into(),
+            "`--listing` is not yet supported for the ca65 path (`--debug` and `--sym` are)".into(),
         );
     }
 
@@ -494,14 +498,39 @@ fn run(args: &[String]) -> Result<String, String> {
         ));
     }
 
-    // ca65 assembles and links to a `.nes` ROM rather than a flat binary.
+    // ca65 assembles and links to a `.nes` ROM rather than a flat binary. With
+    // a debug artifact requested, the debug-capturing entry returns the record
+    // read out of layout (U4) — same bytes by construction.
     if let Assembler::Ca65 = assembler {
-        let rom = asm198x::assemble_ca65(&source).map_err(|e| e.to_string())?;
+        let (rom, info) = if debug.is_some() || sym.is_some() {
+            let (rom, info) =
+                asm198x::assemble_ca65_debug(&source, input).map_err(|e| e.to_string())?;
+            (rom, Some(info))
+        } else {
+            (
+                asm198x::assemble_ca65(&source).map_err(|e| e.to_string())?,
+                None,
+            )
+        };
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("nes"));
         std::fs::write(&out_path, &rom.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+        let debug_notes = match &info {
+            Some(info) => write_debug_artifacts(
+                input,
+                Some(&out_path),
+                1,
+                &rom,
+                info,
+                &source,
+                &debug,
+                &sym,
+                &listing,
+            )?,
+            None => String::new(),
+        };
         return Ok(format!(
-            "assembled + linked {} byte(s) -> {}",
+            "assembled + linked {} byte(s) -> {}{debug_notes}",
             rom.bytes.len(),
             out_path.display()
         ));
@@ -530,58 +559,80 @@ fn run(args: &[String]) -> Result<String, String> {
 
     // `--sna`: wrap the assembled Spectrum program in a 48K snapshot; `--prg`:
     // prefix the C64 load address; else a flat binary.
-    let summary = if sna {
+    let (summary, image_path) = if sna {
         // Only the Z80/Spectrum dialects carry an entry point; a missing
         // `end <addr>` fails here, before any file is written.
         let image = asm198x::sna_48k(&assembly).map_err(|e| e.to_string())?;
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("sna"));
         std::fs::write(&out_path, &image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
-        format!(
+        let summary = format!(
             "assembled {} byte(s) -> {} (48K snapshot)",
             image.len(),
             out_path.display(),
-        )
+        );
+        (summary, out_path)
     } else if prg {
         let image = asm198x::prg(&assembly);
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("prg"));
         std::fs::write(&out_path, &image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
-        format!(
+        let summary = format!(
             "assembled {} byte(s) -> {} (load ${:04X})",
             image.len(),
             out_path.display(),
             assembly.origin.unwrap_or(0),
-        )
+        );
+        (summary, out_path)
     } else {
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
         std::fs::write(&out_path, &assembly.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
-        format!(
+        let summary = format!(
             "assembled {} byte(s) at ${:04X} -> {}",
             assembly.bytes.len(),
             assembly.origin.unwrap_or(0),
             out_path.display(),
-        )
+        );
+        (summary, out_path)
     };
 
     // Debug artifacts (U3) are written only after the image write succeeded, so
     // a failed run never leaves a sidecar describing an image that was not
     // produced. `--debug` alongside `--sna`/`--prg` emits both artifacts.
-    let debug_notes =
-        write_debug_artifacts(input, assembler, &assembly, &source, &debug, &sym, &listing)?;
+    let debug_notes = if debug.is_some() || sym.is_some() || listing.is_some() {
+        let (cpu, dialect) = assembler.identity();
+        let info = asm198x::debug_info(&assembly, cpu, dialect, input);
+        write_debug_artifacts(
+            input,
+            Some(&image_path),
+            assembler.addr_unit(),
+            &assembly,
+            &info,
+            &source,
+            &debug,
+            &sym,
+            &listing,
+        )?
+    } else {
+        String::new()
+    };
     Ok(format!("{summary}{debug_notes}"))
 }
 
 /// Write the requested Debug198x artifacts — the `.debug198x` NDJSON sidecar
 /// (`--debug`), the symbol table (`--sym`), and the listing (`--listing`) —
 /// and return `wrote …` summary lines (empty when no flag was passed). All
-/// three render the one record pass 2 captured (plan KTD2); default paths are
-/// the input with the artifact's extension.
+/// three render the one captured record (plan KTD2), passed in as the prebuilt
+/// `info` (the flat engine's via [`asm198x::debug_info`], ca65's read out of
+/// layout); default paths are the input with the artifact's extension.
+#[allow(clippy::too_many_arguments)]
 fn write_debug_artifacts(
     input: &str,
-    assembler: Assembler,
+    image: Option<&Path>,
+    addr_unit: u64,
     assembly: &asm198x::AssemblyResult,
+    info: &asm198x::debug198x::DebugInfo,
     source: &str,
     debug: &ArtifactPath,
     sym: &ArtifactPath,
@@ -593,10 +644,17 @@ fn write_debug_artifacts(
             .clone()
             .unwrap_or_else(|| Path::new(input).with_extension(ext));
         // An input already named `*.{ext}` would make the default path the
-        // input itself — refuse rather than overwrite the source.
+        // input itself — refuse rather than overwrite the source. The image
+        // output gets the same protection: an artifact landing on the just-
+        // written binary would silently clobber it.
         if path == Path::new(input) {
             return Err(format!(
                 "refusing to overwrite the input with the {what} — pass an explicit `=<path>`"
+            ));
+        }
+        if image.is_some_and(|image| path == image) {
+            return Err(format!(
+                "refusing to overwrite the output image with the {what} — pass a different `=<path>`"
             ));
         }
         std::fs::write(&path, content)
@@ -605,15 +663,13 @@ fn write_debug_artifacts(
         Ok::<(), String>(())
     };
     if let Some(path) = debug {
-        let (cpu, dialect) = assembler.identity();
-        let info = asm198x::debug_info(assembly, cpu, dialect, input);
         emit(path, "debug198x", "debug sidecar", info.to_ndjson())?;
     }
     if let Some(path) = sym {
-        emit(path, "sym", "symbol table", asm198x::render_sym(assembly))?;
+        emit(path, "sym", "symbol table", asm198x::render_sym(info))?;
     }
     if let Some(path) = listing {
-        let text = asm198x::render_listing(source, assembly, assembler.addr_unit());
+        let text = asm198x::render_listing(source, assembly, addr_unit);
         emit(path, "lst", "listing", text)?;
     }
     Ok(notes)
@@ -642,7 +698,7 @@ fn usage() -> String {
      \x20            (--debug writes the .debug198x NDJSON sidecar; --sym a sorted\n\
      \x20             `name = $hex` table; --listing address/bytes/source rows —\n\
      \x20             defaults: input with .debug198x/.sym/.lst; flat dialects only\n\
-     \x20             for now, ca65/vasm land next)\n\
+     \x20             for now plus the ca65 NES path for --debug/--sym; vasm lands next)\n\
      disassemble: asm198x --disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\
      format:      asm198x --fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
@@ -695,9 +751,20 @@ fn emit_json(
     output: Option<&Path>,
     (debug, sym, listing): (&ArtifactPath, &ArtifactPath, &ArtifactPath),
 ) -> Result<String, String> {
+    let debug_requested = debug.is_some() || sym.is_some() || listing.is_some();
+    // The ca65 debug-capturing entry returns the record alongside the ROM; the
+    // flat paths build theirs from the result below. (vasm + debug flags was
+    // already rejected in `run`.)
+    let mut ca65_info: Option<asm198x::debug198x::DebugInfo> = None;
     let result = match assembler {
         Assembler::Vasm if exe => asm198x::assemble_vasm_exe(source),
         Assembler::Vasm => asm198x::assemble_vasm_warned(source),
+        Assembler::Ca65 if debug_requested => {
+            asm198x::assemble_ca65_debug(source, input).map(|(rom, info)| {
+                ca65_info = Some(info);
+                rom
+            })
+        }
         Assembler::Ca65 => asm198x::assemble_ca65(source),
         other => other.assemble(source),
     };
@@ -707,10 +774,25 @@ fn emit_json(
                 std::fs::write(path, &assembly.bytes)
                     .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
             }
-            // Debug artifacts are written in JSON mode too (the ca65/vasm guard
-            // in `run` has already rejected the unsupported paths); the notes
-            // are dropped — stdout carries only the JSON result.
-            write_debug_artifacts(input, *assembler, &assembly, source, debug, sym, listing)?;
+            // Debug artifacts are written in JSON mode too; the notes are
+            // dropped — stdout carries only the JSON result.
+            if debug_requested {
+                let info = ca65_info.unwrap_or_else(|| {
+                    let (cpu, dialect) = assembler.identity();
+                    asm198x::debug_info(&assembly, cpu, dialect, input)
+                });
+                write_debug_artifacts(
+                    input,
+                    output,
+                    assembler.addr_unit(),
+                    &assembly,
+                    &info,
+                    source,
+                    debug,
+                    sym,
+                    listing,
+                )?;
+            }
             let json =
                 serde_json::to_string(&assembly).map_err(|e| format!("json encode failed: {e}"))?;
             println!("{json}");

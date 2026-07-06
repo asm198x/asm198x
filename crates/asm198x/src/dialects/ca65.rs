@@ -123,11 +123,44 @@ struct Parsed {
 // Entry point: assemble + link
 // ---------------------------------------------------------------------------
 
+/// The debug record read out of layout (Debug198x U4, KTD4): per-segment
+/// sections, `(section, offset)`-addressed symbols, and line spans — all
+/// post-link CPU addresses (what a debugger needs), never file offsets. A
+/// read-out of data layout already computes; capturing it cannot change a byte.
+pub(crate) struct Capture {
+    /// The segments the program actually used, in `NES_SEGMENTS` order; ids are
+    /// indices into that table, bases the config's absolute addresses (KTD7).
+    pub(crate) sections: Vec<debug198x::Section>,
+    /// Labels at their `(section, offset)` placement plus `=` constants.
+    pub(crate) symbols: Vec<debug198x::Symbol>,
+    /// `(line, section, offset, length)` per byte-emitting placed statement;
+    /// the CLI attaches the source filename.
+    pub(crate) lines: Vec<(u32, debug198x::SectionId, u64, u64)>,
+}
+
+/// A segment's section id: its index in [`NES_SEGMENTS`] (the config order).
+fn seg_id(seg: &str) -> debug198x::SectionId {
+    NES_SEGMENTS
+        .iter()
+        .position(|(name, _, _)| *name == seg)
+        .expect("seg validated against NES_SEGMENTS") as debug198x::SectionId
+}
+
 /// Assemble ca65 source and link it into a `.nes` ROM image.
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
 pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
+    assemble_with_debug(source).map(|(rom, _)| rom)
+}
+
+/// Assemble + link, also returning the debug [`Capture`] read out of layout
+/// (Debug198x U4). One code path: [`assemble`] delegates here, so the bytes
+/// with and without capture are identical by construction (AE2).
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
+pub(crate) fn assemble_with_debug(source: &str) -> Result<(Vec<u8>, Capture), AsmError> {
     let set = &isa::mos6502::SET;
     // The AST is the single front-end IR: parse into the source-preserving
     // `Program` (carrying each statement's native `Kind`, `=` constants, and the
@@ -155,6 +188,18 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
         addr_env.insert(name.clone(), *value);
     }
     let mut placed: Vec<(String, u32, usize, Resolved)> = Vec::new(); // (segment, addr, line, item)
+    // The debug read-out (U4): symbols and line spans fall out of the layout
+    // values already in hand — `(section, offset)` is `(seg, addr - base)`.
+    let mut dbg_symbols: Vec<debug198x::Symbol> = Vec::new();
+    let mut dbg_lines: Vec<(u32, debug198x::SectionId, u64, u64)> = Vec::new();
+    for (name, value) in &parsed.consts {
+        dbg_symbols.push(debug198x::Symbol {
+            name: name.clone(),
+            kind: debug198x::SymbolKind::Const {
+                value: *value as u64,
+            },
+        });
+    }
     for stmt in parsed.stmts {
         let info = seg_info(&stmt.seg).ok_or_else(|| {
             AsmError::new(
@@ -171,14 +216,68 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
         let off = *offsets.entry(stmt.seg.clone()).or_insert(0);
         let addr = info.base + off;
         if let Some(label) = &stmt.label {
-            addr_env.insert(label.clone(), i64::from(addr));
+            // Real ca65 rejects a duplicate symbol; accepting one would also
+            // make the debug record lie (the record keeps every definition,
+            // the encoder the last — a debugger would disagree with the bytes).
+            // `addr_env` was seeded with the `=` constants, so this covers a
+            // label colliding with a constant too.
+            if addr_env.insert(label.clone(), i64::from(addr)).is_some() {
+                return Err(AsmError::new(
+                    stmt.line,
+                    format!("duplicate symbol `{}`", display_label(label)),
+                ));
+            }
+            // Anonymous (`:`) labels are positional, not names — a debugger
+            // cannot look one up, so they stay out of the symbol record. Cheap
+            // (`@name`) labels are qualified with a control byte internally;
+            // render the source form.
+            if !label.starts_with(LABEL_SEP) {
+                dbg_symbols.push(debug198x::Symbol {
+                    name: display_label(label),
+                    kind: debug198x::SymbolKind::Label {
+                        section: seg_id(&stmt.seg),
+                        offset: u64::from(off),
+                        space: None,
+                    },
+                });
+            }
         }
         let (resolved, size) = resolve(set, stmt.kind, &size_env, stmt.line)?;
         *offsets.get_mut(&stmt.seg).expect("segment offset") += size as u32;
+        // A line span per byte-emitting statement (address-space-only
+        // reservations — ZEROPAGE/BSS `.res` — carry no bytes, so no span; the
+        // HEADER segment is iNES file metadata, not CPU-addressed code, so its
+        // records would alias CPU $0000 — skipped, per AE3's no-fabrication rule).
+        if size > 0 && info.in_file && stmt.seg != "HEADER" {
+            dbg_lines.push((
+                stmt.line as u32,
+                seg_id(&stmt.seg),
+                u64::from(off),
+                size as u64,
+            ));
+        }
         if !matches!(resolved, Resolved::Nothing) {
             placed.push((stmt.seg, addr, stmt.line, resolved));
         }
     }
+
+    // The section table: every segment the program touched (placed bytes or
+    // just labels/reservations), in config order. CPU-addressed segments carry
+    // their absolute base; HEADER (file metadata) and CHARS (PPU address space)
+    // are *not* CPU-addressable, so they get `base: None` — the reader's
+    // absolute lookups skip them rather than aliasing them onto the zero page,
+    // and a PPU-space consumer can supply a `BaseMap` (KTD7). A `Space`
+    // qualifier is the eventual richer answer (KTD5, U7).
+    let sections: Vec<debug198x::Section> = NES_SEGMENTS
+        .iter()
+        .enumerate()
+        .filter(|(_, (name, _, _))| offsets.contains_key(*name))
+        .map(|(id, (name, base, _))| debug198x::Section {
+            id: id as debug198x::SectionId,
+            name: (*name).to_string(),
+            base: (!matches!(*name, "HEADER" | "CHARS")).then_some(u64::from(*base)),
+        })
+        .collect();
 
     // Emit pass: turn each placed item into bytes, per segment.
     let mut seg_bytes: BTreeMap<String, Vec<u8>> = BTreeMap::new();
@@ -190,7 +289,15 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
         emit(item, addr, &addr_env, buf, line)?;
     }
 
-    link(&seg_bytes)
+    let rom = link(&seg_bytes)?;
+    Ok((
+        rom,
+        Capture {
+            sections,
+            symbols: dbg_symbols,
+            lines: dbg_lines,
+        },
+    ))
 }
 
 /// Lay the file segments into the NROM ROM image.
@@ -207,6 +314,18 @@ fn link(seg_bytes: &BTreeMap<String, Vec<u8>>) -> Result<Vec<u8>, AsmError> {
     let mut prg = vec![FILL; PRG_SIZE];
     let code = get("CODE");
     let vectors = get("VECTORS");
+    // CODE reaching the vector table would be silently overwritten by the
+    // VECTORS placement below — corrupted code and a debug record describing
+    // bytes that did not survive. Reject it, as ld65 does when an area fills.
+    if code.len() > (0xFFFA - PRG_BASE) as usize {
+        return Err(AsmError::new(
+            0,
+            format!(
+                "segment `CODE` ({} bytes) overlaps `VECTORS` at $FFFA",
+                code.len()
+            ),
+        ));
+    }
     place(&mut prg, 0, code, "CODE")?;
     place(&mut prg, (0xFFFA - PRG_BASE) as usize, vectors, "VECTORS")?;
     rom.extend_from_slice(&prg);
@@ -956,6 +1075,18 @@ fn parse_value(
 /// A collision-proof symbol key for a cheap local, scoped to its global.
 fn cheap_key(global: &str, name: &str) -> String {
     format!("{global}\u{1}{name}")
+}
+
+/// The internal separator inside anonymous (`\u{1}:#N`) and cheap
+/// (`global\u{1}name`) label keys. Never valid in user source, so keys cannot
+/// collide with real names — but it must not leak into user-facing artifacts.
+pub(crate) const LABEL_SEP: char = '\u{1}';
+
+/// A label key rendered for a user-facing artifact (the debug record): a cheap
+/// key `global\u{1}name` reads back as its source form `global@name`; plain
+/// names pass through.
+fn display_label(key: &str) -> String {
+    key.replace(LABEL_SEP, "@")
 }
 
 #[cfg(test)]

@@ -97,6 +97,26 @@ pub fn assemble_ca65(source: &str) -> Result<AssemblyResult, AsmError> {
     dialects::ca65::assemble(source).map(AssemblyResult::image)
 }
 
+/// Assemble + link ca65 source, also returning the full [`debug198x::DebugInfo`]
+/// read out of layout (Debug198x U4, KTD4) — per-segment sections, symbols, and
+/// line spans at post-link CPU addresses. `source_path` names the source in the
+/// header and every line span. Bytes are identical to [`assemble_ca65`] by
+/// construction (one code path; AE2).
+///
+/// # Errors
+/// Returns an [`AsmError`] (with source line) on any parse, range, or
+/// symbol-resolution failure.
+pub fn assemble_ca65_debug(
+    source: &str,
+    source_path: &str,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), AsmError> {
+    let (rom, capture) = dialects::ca65::assemble_with_debug(source)?;
+    Ok((
+        AssemblyResult::image(rom),
+        listing::ca65_debug_info(capture, source_path),
+    ))
+}
+
 /// Reformat ca65-syntax NES source to canonical layout (the `--fmt` formatter).
 /// Parses into the source-preserving semantic AST and emits canonical
 /// same-dialect source — reassembling byte-identical to the input, with the

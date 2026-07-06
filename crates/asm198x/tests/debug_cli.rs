@@ -35,8 +35,9 @@ data:\tdb 1,2,3,4,5,6,7,8,9,10\n";
 #[test]
 fn sym_rendering_golden() {
     let r = asm198x::assemble_pasmo(Z80_SRC).expect("assemble");
+    let info = asm198x::debug_info(&r, "z80", "pasmo", "test.z80");
     assert_eq!(
-        asm198x::render_sym(&r),
+        asm198x::render_sym(&info),
         "data = $8003\nfive = $0005\nstart = $8000\n"
     );
 }
@@ -176,17 +177,18 @@ fn debug_flags_never_change_the_image() {
     assert_eq!(plain, flagged, "debug flags never change an emitted byte");
 }
 
-/// The ca65 (NES) and vasm (Amiga) bypass paths reject the debug flags until
-/// their emitters land (plan U4/U5) — a clear error, not a silent no-op.
+/// The vasm (Amiga) bypass path rejects the debug flags until its emitter
+/// lands (plan U5) — a clear error, not a silent no-op. (ca65 gained
+/// `--debug`/`--sym` in U4; see the U4 tests below.)
 #[test]
-fn ca65_and_vasm_reject_debug_flags_for_now() {
-    let src_path = temp_source("ca65", ".segment \"CODE\"\n    rts\n");
+fn vasm_rejects_debug_flags_for_now() {
+    let src_path = temp_source("vasm", "\tmoveq #0,d0\n\trts\n");
     let out = bin()
-        .args(["--dialect", "ca65", "--debug"])
+        .args(["--dialect", "vasm", "--debug"])
         .arg(&src_path)
         .output()
         .expect("run asm198x");
-    assert!(!out.status.success(), "ca65 + --debug is an error for now");
+    assert!(!out.status.success(), "vasm + --debug is an error for now");
     let stderr = String::from_utf8_lossy(&out.stderr);
     assert!(
         stderr.contains("not yet supported"),
@@ -299,11 +301,13 @@ fn default_sidecar_path_never_clobbers_the_input() {
 #[test]
 fn sym_rendering_includes_entry_symbols() {
     let r = asm198x::assemble_pasmo("\torg 8000h\nstart:\n\tret\n\tend start\n").expect("assemble");
-    assert_eq!(asm198x::render_sym(&r), "start = $8000\n");
+    let info = asm198x::debug_info(&r, "z80", "pasmo", "test.z80");
+    assert_eq!(asm198x::render_sym(&info), "start = $8000\n");
     // `end start` upgrades the label in place; a non-label entry records
     // `@entry` — pin that shape too.
     let r = asm198x::assemble_pasmo("\torg 8000h\n\tret\n\tend 8000h\n").expect("assemble");
-    assert_eq!(asm198x::render_sym(&r), "@entry = $8000\n");
+    let info = asm198x::debug_info(&r, "z80", "pasmo", "test.z80");
+    assert_eq!(asm198x::render_sym(&info), "@entry = $8000\n");
 }
 
 /// The CP1610 listing (the one word-addressed CPU): addresses are decles, the
@@ -321,4 +325,279 @@ fn cp1610_listing_indexes_bytes_by_decle() {
     ]
     .join("\n");
     assert_eq!(listing, expected);
+}
+
+// --- U4: the ca65 (NES) linker path ---
+
+/// A two-segment NES program with a zero-page variable and a `=` constant —
+/// the AE6 shape.
+const NES_SRC: &str = "\
+SPEED = 3\n\
+.segment \"ZEROPAGE\"\n\
+pos:    .res 1\n\
+.segment \"CODE\"\n\
+reset:  lda #SPEED\n\
+        sta pos\n\
+loop:   jmp loop\n\
+.segment \"VECTORS\"\n\
+        .word 0, reset, 0\n";
+
+/// AE6: the ca65 sidecar lists every used segment, a linker-placed label
+/// resolves to its post-link ROM address in both the symbol table and the
+/// line map, and `=` constants carry the constant kind.
+#[test]
+fn ca65_sidecar_covers_segments_symbols_and_lines() {
+    let src_path = temp_source("nes-ae6", NES_SRC);
+    let status = bin()
+        .args(["--dialect", "ca65", "--debug"])
+        .arg(&src_path)
+        .arg("-o")
+        .arg(src_path.with_extension("nes"))
+        .status()
+        .expect("run asm198x");
+    assert!(status.success());
+
+    let ndjson =
+        std::fs::read_to_string(src_path.with_extension("debug198x")).expect("read sidecar");
+    let info = asm198x::debug198x::DebugInfo::read(&ndjson).expect("sidecar parses");
+    assert_eq!(info.header.cpu, "6502");
+    assert_eq!(info.header.dialect, "ca65");
+
+    // Both code-bearing segments (and the zero-page one) are listed with their
+    // absolute bases.
+    let section = |name: &str| info.sections.iter().find(|s| s.name == name);
+    assert_eq!(section("CODE").and_then(|s| s.base), Some(0x8000));
+    assert_eq!(section("VECTORS").and_then(|s| s.base), Some(0xFFFA));
+    assert_eq!(section("ZEROPAGE").and_then(|s| s.base), Some(0));
+
+    // A linker-placed label resolves to its post-link CPU address in the
+    // symbol table and maps back through the line map (AE6, AE1 mechanism).
+    assert_eq!(info.addr_of("reset", None), Some(0x8000));
+    assert_eq!(info.addr_of("loop", None), Some(0x8004));
+    assert_eq!(
+        info.line_at(0x8004, None).map(|l| l.line),
+        Some(7),
+        "`jmp loop`'s address maps to its source line"
+    );
+
+    // The zero-page variable and the `=` constant carry their kinds.
+    assert_eq!(info.addr_of("pos", None), Some(0));
+    let speed = info
+        .symbols
+        .iter()
+        .find(|s| s.name == "SPEED")
+        .expect("SPEED present");
+    assert_eq!(
+        speed.kind,
+        asm198x::debug198x::SymbolKind::Const { value: 3 },
+        "a `=` binding is a constant, not an address"
+    );
+}
+
+/// AE2 for the ca65 path: the `.nes` ROM bytes with `--debug --sym` are
+/// identical to the bytes without any debug flag.
+#[test]
+fn ca65_debug_flags_never_change_the_rom() {
+    let plain_src = temp_source("nes-plain", NES_SRC);
+    let flagged_src = temp_source("nes-flagged", NES_SRC);
+    for (src, flags) in [
+        (&plain_src, &[][..]),
+        (&flagged_src, &["--debug", "--sym"][..]),
+    ] {
+        let status = bin()
+            .args(["--dialect", "ca65"])
+            .args(flags)
+            .arg(src)
+            .arg("-o")
+            .arg(src.with_extension("nes"))
+            .status()
+            .expect("run asm198x");
+        assert!(status.success());
+    }
+    let plain = std::fs::read(plain_src.with_extension("nes")).expect("plain ROM");
+    let flagged = std::fs::read(flagged_src.with_extension("nes")).expect("flagged ROM");
+    assert_eq!(plain, flagged, "debug flags never change a linked byte");
+}
+
+/// The ca65 `--sym` rendering resolves labels through their section bases —
+/// post-link absolutes, not segment offsets.
+#[test]
+fn ca65_sym_renders_post_link_addresses() {
+    let src_path = temp_source("nes-sym", NES_SRC);
+    let status = bin()
+        .args(["--dialect", "ca65", "--sym"])
+        .arg(&src_path)
+        .arg("-o")
+        .arg(src_path.with_extension("nes"))
+        .status()
+        .expect("run asm198x");
+    assert!(status.success());
+    let sym = std::fs::read_to_string(src_path.with_extension("sym")).expect("read sym");
+    assert_eq!(
+        sym,
+        "SPEED = $0003\nloop = $8004\npos = $0000\nreset = $8000\n"
+    );
+}
+
+/// `--listing` stays rejected for ca65 (it needs a per-section byte map);
+/// the error says which artifacts are available.
+#[test]
+fn ca65_listing_still_rejected() {
+    let src_path = temp_source("nes-lst", NES_SRC);
+    let out = bin()
+        .args(["--dialect", "ca65", "--listing"])
+        .arg(&src_path)
+        .output()
+        .expect("run asm198x");
+    assert!(!out.status.success());
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        stderr.contains("`--debug` and `--sym` are"),
+        "the error names what works: {stderr}"
+    );
+}
+
+/// JSON mode + ca65 + `--debug`: the sidecar writes while stdout stays a
+/// single JSON value (the linked-image result).
+#[test]
+fn ca65_json_mode_writes_sidecar() {
+    let src_path = temp_source("nes-json", NES_SRC);
+    let out = bin()
+        .args(["--dialect", "ca65", "--message-format=json", "--debug"])
+        .arg(&src_path)
+        .arg("-o")
+        .arg(src_path.with_extension("nes"))
+        .output()
+        .expect("run asm198x");
+    assert!(out.status.success());
+    let _: serde_json::Value =
+        serde_json::from_slice(&out.stdout).expect("stdout is exactly one JSON value");
+    assert!(src_path.with_extension("debug198x").exists());
+}
+
+/// HEADER (iNES metadata) and CHARS (PPU space) are not CPU-addressable:
+/// their sections carry no base, HEADER contributes no line spans, and CPU
+/// zero-page lookups never alias onto them.
+#[test]
+fn ca65_non_cpu_segments_never_alias_the_zero_page() {
+    let src = "\
+.segment \"HEADER\"\n\
+        .byte $4E, $45, $53, $1A\n\
+.segment \"ZEROPAGE\"\n\
+pos:    .res 1\n\
+.segment \"CODE\"\n\
+reset:  sta pos\n\
+.segment \"VECTORS\"\n\
+        .word 0, reset, 0\n\
+.segment \"CHARS\"\n\
+tiles:  .byte $FF, $00\n";
+    let src_path = temp_source("nes-alias", src);
+    let status = bin()
+        .args(["--dialect", "ca65", "--debug"])
+        .arg(&src_path)
+        .arg("-o")
+        .arg(src_path.with_extension("nes"))
+        .status()
+        .expect("run asm198x");
+    assert!(status.success());
+    let ndjson =
+        std::fs::read_to_string(src_path.with_extension("debug198x")).expect("read sidecar");
+    let info = asm198x::debug198x::DebugInfo::read(&ndjson).expect("sidecar parses");
+
+    let section = |name: &str| info.sections.iter().find(|s| s.name == name);
+    assert_eq!(
+        section("HEADER").map(|s| s.base),
+        Some(None),
+        "HEADER is file metadata, not a CPU address"
+    );
+    assert_eq!(
+        section("CHARS").map(|s| s.base),
+        Some(None),
+        "CHARS is PPU space; a consumer supplies a BaseMap"
+    );
+    // A CPU zero-page lookup resolves the ZEROPAGE variable, never the iNES
+    // header bytes or CHR data that share the raw value 0.
+    assert_eq!(info.addr_of("pos", None), Some(0));
+    assert!(
+        info.line_at(0, None).is_none(),
+        "no HEADER/CHR line span answers a CPU zero-page lookup"
+    );
+    assert!(
+        info.addr_of("tiles", None).is_none(),
+        "a PPU-space label has no CPU address without a BaseMap"
+    );
+}
+
+/// Cheap (`@name`) labels render their source form in the record — the
+/// internal control-byte key never leaks — and anonymous (`:`) labels stay
+/// out of the symbol table entirely.
+#[test]
+fn ca65_cheap_and_anon_labels_render_cleanly() {
+    let src = "\
+.segment \"CODE\"\n\
+reset:  lda #1\n\
+@wait:  bne @wait\n\
+:       jmp :-\n\
+.segment \"VECTORS\"\n\
+        .word 0, reset, 0\n";
+    let src_path = temp_source("nes-cheap", src);
+    let status = bin()
+        .args(["--dialect", "ca65", "--sym"])
+        .arg(&src_path)
+        .arg("-o")
+        .arg(src_path.with_extension("nes"))
+        .status()
+        .expect("run asm198x");
+    assert!(status.success());
+    let sym = std::fs::read_to_string(src_path.with_extension("sym")).expect("read sym");
+    assert_eq!(
+        sym, "reset = $8000\nreset@wait = $8002\n",
+        "cheap label renders as source form; anonymous labels are positional, not symbols"
+    );
+}
+
+/// A duplicate symbol is rejected (as real ca65 rejects it) — accepting it
+/// would leave a debug record disagreeing with the emitted bytes.
+#[test]
+fn ca65_duplicate_symbol_is_rejected() {
+    let src = "\
+.segment \"CODE\"\n\
+reset:  lda #1\n\
+reset:  lda #2\n\
+.segment \"VECTORS\"\n\
+        .word 0, reset, 0\n";
+    let src_path = temp_source("nes-dup", src);
+    let out = bin()
+        .args(["--dialect", "ca65"])
+        .arg(&src_path)
+        .output()
+        .expect("run asm198x");
+    assert!(!out.status.success(), "a duplicate label is an error");
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        stderr.contains("duplicate symbol `reset`"),
+        "the error names the symbol: {stderr}"
+    );
+}
+
+/// An artifact path colliding with the output image is refused — the sidecar
+/// must never clobber the just-written ROM.
+#[test]
+fn artifact_path_never_clobbers_the_output_image() {
+    let src_path = temp_source("nes-clobber-out", NES_SRC);
+    let rom = src_path.with_extension("nes");
+    let out = bin()
+        .args(["--dialect", "ca65"])
+        .arg(format!("--debug={}", rom.display()))
+        .arg(&src_path)
+        .arg("-o")
+        .arg(&rom)
+        .output()
+        .expect("run asm198x");
+    assert!(!out.status.success(), "artifact onto the ROM is refused");
+    let stderr = String::from_utf8_lossy(&out.stderr);
+    assert!(
+        stderr.contains("refusing to overwrite the output image"),
+        "the error explains the collision: {stderr}"
+    );
 }
