@@ -6,9 +6,9 @@
 use asm198x::{
     assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_f8, assemble_i8080,
     assemble_lwasm, assemble_m6800, assemble_pasmo, assemble_rgbasm, assemble_scmp,
-    assemble_sjasmplus, format_1802, format_2650, format_8048, format_acme, format_f8,
-    format_i8080, format_lwasm, format_m6800, format_pasmo, format_rgbasm, format_scmp,
-    format_sjasmplus,
+    assemble_sjasmplus, assemble_tms7000, format_1802, format_2650, format_8048, format_acme,
+    format_f8, format_i8080, format_lwasm, format_m6800, format_pasmo, format_rgbasm, format_scmp,
+    format_sjasmplus, format_tms7000,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -649,5 +649,44 @@ fn fmt_2650_reassembles_byte_identical() {
         formatted,
         format_2650(&formatted).expect("formats"),
         "2650 fmt is idempotent"
+    );
+}
+
+/// A representative TI TMS7000 program: origin, a same-line colon label with an
+/// instruction, an `equ` constant (no colon), immediate (`%`), register,
+/// peripheral (`p`), extended (`@`) and indirect (`*`) operands, a `djnz`
+/// relative jump, `trap` (the one computed `Encoded` byte), and data directives.
+/// A fixed-slot straggler routed through the AST formatter (0b).
+const PROG_TMS7000: &str = "\
+; a small TMS7000 routine
+        org 1000h
+start:  mov %42h,a     ; load immediate
+        add r5,a
+five    equ 5
+        mov %five,r6
+        movp p6,a
+        lda @1234h
+        call *r5
+loop:   djnz r5,loop
+        trap 23
+        db 1, 2, 3
+        dw 1234h
+";
+
+#[test]
+fn fmt_tms7000_reassembles_byte_identical() {
+    let original = assemble_tms7000(PROG_TMS7000).expect("assembles").bytes;
+    let formatted = format_tms7000(PROG_TMS7000).expect("formats");
+    let reassembled = assemble_tms7000(&formatted)
+        .unwrap_or_else(|e| panic!("formatted TMS7000 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "TMS7000 round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_tms7000(&formatted).expect("formats"),
+        "TMS7000 fmt is idempotent"
     );
 }
