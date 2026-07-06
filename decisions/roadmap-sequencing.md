@@ -14,8 +14,11 @@ idea without unnecessary rework is: **design each shared seam once, for the know
 future, and freeze it before its consumers build on it.** Everything not on a
 shared seam is independent and low-risk, and can proceed whenever.
 
-The current focus is **Layer 0** (the foundations). Nothing in Layers 2–3 should
-be built against a shared shape that Layer 0/1 has not yet frozen.
+**Layer 0 (the foundations) is complete as of 2026-07-06** — 0a (the one span
+model) is locked and 0b (the AST across every CPU) is done. The current focus is
+**Layer 1** — finishing the core contract (U3–U5) on the locked span, then
+freezing R1. Nothing in Layers 2–3 should be built against a shared shape that
+Layer 0/1 has not yet frozen.
 
 This record is the map. It does not restate each plan — it says what order they
 go in and why, and where the freeze-gates are. Read it before scheduling work
@@ -76,9 +79,10 @@ See § Layer 0 in detail below.
   gates nothing. Its generatable-now core (R1–R3, R5) is unblocked today and can
   start early as a thin skeleton, but its integrations wait on their sources.
 
-## Layer 0 in detail (the current focus)
+## Layer 0 in detail (✅ complete 2026-07-06)
 
 Two pieces. **0a is the hard freeze-gate; 0b is the highest-leverage unblock.**
+Both are done — kept here as the record of what the foundation guarantees.
 
 ### 0a. Lock the one span / source model
 
@@ -96,19 +100,30 @@ Two pieces. **0a is the hard freeze-gate; 0b is the highest-leverage unblock.**
   dbg198x). Every day it stays un-locked, U2/U3 and dbg198x risk building against
   a shape that idea 4 will invalidate.
 
-### 0b. Complete the AST across the remaining CPUs
+### 0b. Complete the AST across the remaining CPUs — ✅ COMPLETE (2026-07-06)
 
-- **Landed (AST-routed today):** 6502/acme, Z80 (pasmo/sjasmplus), 8080, 6800,
-  1802, SC/MP, rgbasm/SM83, 6809/lwasm — the migration proven this session.
-- **Not yet on the AST:** the fixed-slot stragglers (F8, 2650, TMS7000, 8048, the
-  ca65 family) and the field-packed/computed CPUs (PDP-11, TMS9900, Z8000,
-  CP1610, m68k/vasm).
-- **Two tiers of effort:** the fixed-slot stragglers are *mechanical* — the same
-  `parse_ast` + `item_from_operation` recipe this session applied eight times.
-  The field-packed/computed CPUs are the *harder tail* — their operands are
-  pre-computed `Item::Encoded` pieces, so structural AST adoption means carrying
-  structured operands, not encoded bytes.
-- **This is high-leverage but NOT a hard blocker.** Per contract KTD1, the
+- **Every dialect now routes assembly through the AST.** All 21 dialect
+  front-ends produce an `ast::Program` and assemble from it; `--fmt` covers them
+  all (the CLI's unsupported-dialect fallback was removed as unreachable).
+- **The mechanical stragglers** (ca65_816, ca65_huc6280, F8, 2650, TMS7000, 8048,
+  SC/MP…) used the `parse_ast` + `item_from_operation` recipe.
+- **The field-packed tier** (PDP-11, TMS9900, CP1610, Z8000/Z8001) turned out
+  *not* to need the "harder tail" work feared here: `item_from_operation` was
+  already total over `Operation::Encoded`, so they rode the same recipe — their
+  pre-computed pieces route through `Item::Encoded` unchanged.
+- **The multi-pass CISC dialects** (vasm/68000 and the NES ca65 assemble+link)
+  were the genuinely different case — standalone drivers that never used
+  `engine::assemble`. They adopt the AST via a **family-owned native payload**
+  (`Item::Native`), the shared tree carrying their un-lowered statements; see
+  [`ast-native-payload-for-multipass-cisc.md`](ast-native-payload-for-multipass-cisc.md).
+  This is the seam that will carry x86 and the 68020+/68080 line later.
+- **Every migration was byte-identity-gated** against its real reference tool
+  (incl. the 68000 opcode-space sweep and the NES curriculum vs `ca65`+`ld65`).
+- **Note for U3 (column spans):** AST-routed ≠ column-accurate. The per-line
+  `parse_program`s populate `Span::at(line, 1)` — real line, column `1`. So U3's
+  column work is *not* automatically delivered by 0b; the highest-value operand
+  error sites still need the operand's column threaded in. See U3's grounding.
+- **This was high-leverage but NOT a hard blocker.** Per contract KTD1, the
   diagnostic span rides the **engine error path, not the AST**, so *every* CPU
   already inherits diagnostics — column-accurate where AST-routed, line-granular
   otherwise, improving incrementally as CPUs migrate. So 0b unblocks the
