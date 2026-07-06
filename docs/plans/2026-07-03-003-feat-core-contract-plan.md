@@ -4,9 +4,10 @@ type: feat
 date: 2026-07-03
 topic: core-contract
 artifact_contract: ce-unified-plan/v1
-artifact_readiness: requirements-only
+artifact_readiness: implementation-ready
 product_contract_source: ce-brainstorm
 execution: code
+planned: 2026-07-05
 ---
 
 # Core Contract - Plan
@@ -106,3 +107,102 @@ Two assets make this tractable. The `isa` crate **already** offers a query API (
 - Grounding scout (2026-07-03): `/tmp/compound-engineering/ce-brainstorm/contract-surfaces/grounding.md` — contract specifics with `file:line`.
 - Sibling plans: `docs/plans/2026-07-03-001-feat-debug-info-format-plan.md` (dbg198x) and `docs/plans/2026-07-03-002-feat-verdict-pipeline-plan.md` (verdict pipeline) — the two already-planned consumers.
 - `decisions/packaging-and-cpu-roadmap.md` (single binary + subcommands), `decisions/syntax-stance.md`, and the dbg198x freeze-at-first-consumption pattern.
+
+---
+
+## Planning Contract
+
+**Product Contract preservation:** unchanged. R1–R8, the Acceptance Examples, and the scope boundaries are carried verbatim from the `ce-brainstorm` requirements. Planning added the HOW below and resolved the AST-reconciliation Outstanding Question (see KTD1/KTD2).
+
+**v1 scope reminder:** this plan implements **R1, R2, R3, R6 (envelope only), R7, R8**. **R4** (public `Dialect` trait) and **R5** (spec-query) stay deferred to the MCP first-surface increment (KTD7); the surfaces (MCP / WASM / LSP) are separate later plans.
+
+### Grounding (verified 2026-07-05)
+
+- `engine.rs`: `Assembly { origin: u16, bytes, symbols: BTreeMap<String,i64>, start: Option<u16>, warnings: Vec<Warning>, debug: DebugData }`; `DebugData { symbols: Vec<dbg198x::Symbol>, lines: Vec<LineRec { line, offset, length }> }`; `AsmError { line: usize, message: String }`; `Warning { line, message }`. None derive serde. **`dbg198x` is already a dependency** (via `DebugData`), so serde is already on the CLI path.
+- `lib.rs` public return shapes: **23× `Result<Assembly, AsmError>`** (the per-dialect `assemble_*`), **3× `Result<Vec<u8>, AsmError>`** (linked: ca65 `.nes`, vasm hunk), **1× `Result<(Vec<u8>, Vec<Warning>), AsmError>`** (`assemble_vasm_warned`) — **27 assemble entry points in all**. The 11× `Result<String>` are the formatters/listings — **not** assembly results, out of R1's scope.
+- `AsmError::new(line, msg)` has **344 construction sites** across the dialects. `AsmError`/`Warning` are built only via their `::new` constructors (no struct literals), so adding an optional field keeps every site compiling.
+- `ast.rs`: the existing span type is `ast::Span { file, line, col, expansion_frames }` — **line/column, no byte offset**. As of this session the AST-routed dialects (whose parses carry `ast::Node` spans) are **6502/acme, Z80 (pasmo/sjasmplus), 8080, 6800, 1802, SC/MP, rgbasm/SM83, 6809/lwasm**; the field-packed/computed CPUs (PDP-11, TMS9900, Z8000, CP1610, m68k) are **not** AST-routed and have no scoped migration. This is the ground truth for KTD1/U3's column-accuracy scope — take it from the code, not from the companion AST-layer plan, whose prose lags.
+
+### Key Technical Decisions
+
+- **KTD1 — Diagnostics span is optional on `AsmError`, aligned to `ast::Span`, byte-offset best-effort; column accuracy is incremental (resolves the AST Outstanding Question for R2).** `AsmError` gains an optional `span: Option<DiagSpan>`. **`DiagSpan` is named distinctly from the existing `ast::Span` to avoid a type collision**, and its fields **mirror `ast::Span`** so the AST path fills it directly: `{ file: Option<FileId>, line: u32, col: u32, offset: Option<u32> }`. The 344 line-only sites keep compiling unchanged (`span: None` → line-granular). The **AST-routed dialects** (the eight enumerated in Grounding) populate `file`+`line`+`col` from their `ast::Node` spans, so the curriculum-heavy CPUs get column-accurate diagnostics in v1. **Byte `offset` is best-effort, not universal:** `ast::Span` carries no offset today, so `offset` stays `None` on the AST path in v1 and is populated only where a parse already threads a byte cursor — R2/AE1's byte-offset is realized as *line+column now, offset when available*, matching the incremental posture (the alternative — threading a byte cursor through every dialect parse for v1 — is out of scope). The reserved `expansion_frames` (macro provenance, idea 4's C1–C3) are **not** in the v1 `DiagSpan`; they are added when the language surface lands, and `DiagSpan` is `#[non_exhaustive]` (KTD5) so that addition is additive. **Column accuracy for the field-packed/computed CPUs is contingent on an AST migration that is not currently scoped for them** — those CPUs stay line-granular until such a migration exists, so R2's column accuracy and R8's "every CPU inherits diagnostics" hold at *line* granularity for them, not as an automatic side effect. **R8 forces the span onto the engine's error path, not the AST** — not every CPU routes through the AST, and R8 requires every CPU to inherit diagnostics (at whatever granularity it can supply).
+- **KTD2 — R1 is a unification: every entry point returns `AssemblyResult`; the substance is already there, but the return type is a deliberate breaking change.** A serde-derivable `AssemblyResult` becomes the one shape, and **all 27 assemble entry points return `Result<AssemblyResult, AsmError>`** — the 23 `Assembly`-returning functions (whose substance already matches) *and* the 3 linked + 1 warned outliers. This **changes 27 public signatures** — an intentional breaking change, acceptable because the contract ships as public **draft** under `#[non_exhaustive]` (KTD5) before any external consumer freezes against it, and dbg198x (the one in-tree consumer) is paused. It is **not** a "keep `Assembly`, add a parallel shape" move: leaving `Assembly` as a public return shape would miss R1 (two shapes persist) — so `Assembly` is either renamed into `AssemblyResult` or demoted to an internal builder that the entry points convert from. **U1 owns updating the in-tree tests that destructure `Assembly`** (the `lib.rs` smoke tests reading `a.origin`/`a.bytes`/`a.symbols`, and `assemble_vasm_warned`'s tuple-destructuring `vasm_*_warns_not_errors` tests) — "the full existing suite stays green" means those tests are migrated to the new shape as part of U1, not that the shape is non-breaking. Linked output (ca65 `.nes`, vasm hunk), whose flat `origin` is meaningless, is a **variant** (`Output::Flat { origin } | Output::Image`), not forced into the flat shape (R1's explicit "variant, not forced"). The AST is **not** exposed as R1's result in v1 — "R1 is really the AST" (the Outstanding Question) is a *converter/idea-6* reconception; v1's R1 is the assembly **output**.
+- **KTD3 — Contract types live in a `contract` module inside `crates/asm198x` for v1; extractable to a crate with MCP.** serde is already present (dbg198x), so this adds no new base-CLI weight beyond serde-derive on the new types. Keeping async/LSP/WASM deps off the base path (the "lean binary" assumption) is unaffected — none of those land in v1. The eventual crate split (mirroring `isa-disasm`/`dbg198x`) is a follow-on with the first surface, not v1.
+- **KTD4 — R1's symbol/section shape is co-designed with dbg198x's record model; the symbol slice stays draft until dbg198x actually consumes it.** `DebugData` already uses `dbg198x::Symbol`; `AssemblyResult`'s symbol/section exposure reuses dbg198x's typed symbol kinds + `(section, offset)` addressing rather than inventing a parallel model, so a resumed dbg198x reads the result directly (R6). Do not duplicate the symbol model. **But dbg198x is paused and its own model is not yet exercised by real consumption**, so freezing R1's symbol/section slice at MCP would freeze it against an unexercised sibling — the exact draft-then-freeze failure R7 guards against. **Freeze precondition (feeds KTD5/U5):** the symbol/section slice of `AssemblyResult` stays **draft past MCP** until a *resumed dbg198x has actually read an `AssemblyResult`*; the rest of the result (bytes, output variant, warnings) may freeze at MCP on the normal schedule. If a resumed dbg198x revises its symbol model against real Emu198x consumption, the still-draft slice bends to it rather than blocking it.
+- **KTD5 — Public contract types are `#[non_exhaustive]` + versioned + skip-unknown from day one; the stability *promise* stays DRAFT until MCP (R7 draft-then-freeze).** A `version` field on the serialized envelope; unknown fields deserialize (skip-unknown) rather than erroring. The semver-freeze is a decision-record checklist deferred to first-surface contact — v1 ships the mechanism, documents the promise as draft.
+- **KTD6 — R6 in v1 is only the thin shared diagnostic envelope** (`{ severity, message }`), distinct from the rich `Diagnostic`. dbg198x and the verdict pipeline may reuse it. This plan makes two **cross-plan planning-doc edits** (not code): mark `docs/plans/2026-07-03-001-feat-debug-info-format-plan.md` (dbg198x) **paused pending this contract's designed R1 shape**, and confirm `…-002-…verdict-pipeline…` is **independent / not paused**.
+- **KTD7 — R4 and R5 are explicitly out of v1.** No public `Dialect` trait, no spec-query in this plan. Any unit that would touch them is a scope error — route to the MCP increment.
+
+---
+
+## Implementation Units
+
+### U1. The unified structured result (`AssemblyResult`)
+
+- **Goal:** collapse the 3 ad-hoc assembly return shapes into one serde-derivable `AssemblyResult` carrying bytes, output-kind (flat origin vs linked image), symbols, entry point, and warnings — the R1 shape every CPU inherits (R8).
+- **Requirements:** R1, R7 (version/non_exhaustive), R8. Covers AE1 (clean path), AE6.
+- **Dependencies:** none (first unit).
+- **Files:** `crates/asm198x/src/contract.rs` (new — the contract types), `crates/asm198x/src/engine.rs` (re-express `Assembly` as / into `AssemblyResult`), `crates/asm198x/src/lib.rs` (the 4 outlier functions adopt the shape), `crates/asm198x/Cargo.toml` (serde derive), `crates/asm198x/tests/contract.rs` (new).
+- **Approach:** define `AssemblyResult { output: Output, symbols, start, warnings }` where `Output::Flat { origin, bytes } | Output::Image { bytes }` handles the linked/bypass cases (KTD2). **The `diagnostics: Vec<Diagnostic>` field is added in U2**, where `Diagnostic` is defined — U1 must not embed a type it doesn't yet own (this keeps U1 genuinely dependency-free; see Dependencies). `#[non_exhaustive]`, `#[derive(Serialize, Deserialize)]`, `#[serde(default)]` skip-unknown. Reuse dbg198x's symbol model for the symbol exposure (KTD4). **All 27 entry points return `Result<AssemblyResult, AsmError>`** — the deliberate breaking change of KTD2; `Assembly` is renamed into / demoted behind `AssemblyResult`, and U1 migrates the in-tree tests that destructure `Assembly` (the `lib.rs` smoke tests and the `assemble_vasm_warned` tuple tests) to the new shape.
+- **Execution note:** start from a failing serde round-trip test on `AssemblyResult` (serialize → deserialize → equal), then build the type to satisfy it.
+- **Test scenarios:** *Covers AE1 (clean).* A clean 6502 assemble returns `AssemblyResult` with bytes + symbols + `Output::Flat{origin}`. A ca65 `.nes` assemble returns `Output::Image` (no meaningless origin). A vasm-warned assemble carries its warnings in the unified `warnings`. serde round-trip (of the U1 shape, before diagnostics) is identity. *Covers AE6.* the result type is CPU-agnostic — a second CPU's assemble returns the same shape with no per-CPU code. The migrated `lib.rs` smoke tests and vasm-warned tests pass against the new return type.
+
+### U2. The `Diagnostic` model + optional `AsmError` span + shared envelope
+
+- **Goal:** give asm198x's own errors the rustc shape — a span, a stable code, severity, message, and an optional machine-applicable fix — without churning the 344 line-only sites (KTD1), and expose the thin shared envelope (R6).
+- **Requirements:** R2, R6 (envelope). Covers AE2, AE4 (envelope reuse).
+- **Dependencies:** U1 (this unit **adds** `diagnostics: Vec<Diagnostic>` to `AssemblyResult` once `Diagnostic` exists, and adds its serde round-trip — the field U1 deliberately left off).
+- **Files:** `crates/asm198x/src/contract.rs` (Diagnostic, DiagSpan, Severity, Code, Fix, DiagnosticEnvelope; add the `diagnostics` field to `AssemblyResult`), `crates/asm198x/src/engine.rs` (`AsmError` gains `span: Option<DiagSpan>`, `From<AsmError> for Diagnostic`), `crates/asm198x/tests/contract.rs`.
+- **Approach:** `Diagnostic { span: Option<DiagSpan>, code: Code, severity: Severity, message: String, fix: Option<Fix> }`, all serde. `Code` is a stable `#[non_exhaustive]` enum of error kinds (start with the current message families; assign codes incrementally — **once assigned, a code's numeric/string identity is stable**, since R2 mandates stable codes; only *new* kinds are added). `DiagSpan { file: Option<FileId>, line, col, offset: Option<u32> }` — the KTD1 shape mirroring `ast::Span`, named distinctly to avoid colliding with `ast::Span`. `AsmError` gains `span: Option<DiagSpan>` defaulting to `None` — **`AsmError::new(line, msg)` keeps its signature** (span `None`); add `AsmError::at(span, msg)` for sites that have a position. `DiagnosticEnvelope { severity, message }` is the R6 thin type; `Diagnostic` derefs/flattens into it. `AsmError → Diagnostic` maps line-only errors to a line-granular span (`file`/`col`/`offset` `None`).
+- **Execution note:** characterize first — a test that today's error → Diagnostic keeps the same line + message, so the conversion is provably lossless before columns are added.
+- **Test scenarios:** *Covers AE2.* a Diagnostic with a populated span reports `col`/`offset`, not just line. *Covers AE4.* the verdict pipeline can construct a `DiagnosticEnvelope` from a foreign rejection (severity + verbatim text) without touching the rich fields. A line-only `AsmError` converts to a Diagnostic with a line-granular span and a stable code. `fix` is `Some` for a representative fixable case (e.g. an out-of-range byte → suggest masking) and `None` otherwise.
+
+### U3. Populate real spans in the AST-routed dialects
+
+- **Goal:** deliver AE2 column accuracy for the curriculum-heavy CPUs by threading `ast::Node` spans into the diagnostics they raise (KTD1's incremental population).
+- **Requirements:** R2 (column accuracy for the common case). Covers AE2 end-to-end.
+- **Dependencies:** U2.
+- **Files:** `crates/asm198x/src/ast.rs` (error-raising paths carry the node span), the AST-routed dialect front-ends (`dialects/z80.rs`, `dialects/acme.rs`, `dialects/i8080.rs`, `dialects/m6800.rs`, `dialects/cdp1802.rs`, `dialects/scmp.rs`, `dialects/rgbasm.rs`, `dialects/lwasm.rs`) at the sites where a parse/lower error has a known column, `crates/asm198x/tests/contract.rs`.
+- **Approach:** where the AST already knows the position (`ast::Node::span`, the per-line parse), construct the `AsmError`/`Diagnostic` with `AsmError::at(DiagSpan { file, line, col, offset: None }, …)` instead of line-only — `offset` stays `None` (the AST span carries no byte offset; KTD1). The eight dialects listed in Files are exactly those AST-routed today (per Grounding); no cross-plan migration is a prerequisite for this unit. Scope to the highest-value error sites (operand/mode errors), not every site — the rest stay line-granular and improve as more CPUs adopt the AST. Do **not** attempt the 344-site sweep (KTD1).
+- **Execution note:** proof-first — a failing test asserting the column of a known out-of-range operand in an acme and a Z80 program before wiring the span through.
+- **Test scenarios:** *Covers AE2.* an out-of-range operand in a 6502/acme program yields a diagnostic whose `col` points at the operand token, not the line start. Same for a Z80 program. A field-packed CPU's error stays line-granular (documented, not a regression).
+
+### U4. JSON serialization + `--message-format=json`
+
+- **Goal:** make the result and diagnostics machine-consumable and add the opt-in CLI JSON mode, human output unchanged (R3).
+- **Requirements:** R3. Covers AE1 (the `--message-format=json` emission).
+- **Dependencies:** U1, U2.
+- **Files:** `crates/asm198x/src/main.rs` (arg parsing for `--message-format=json`, JSON emit path), `crates/asm198x/src/lib.rs` (a `to_json` on the result if not free from derive), `crates/asm198x/tests/cli_json.rs` (new).
+- **Approach:** extend the hand-rolled CLI arg parser with `--message-format=human|json` (default `human`). On `json`, serialize the `AssemblyResult` (success) or the `Vec<Diagnostic>` (failure) to stdout; human output stays byte-for-byte as today when the flag is absent (or `=human`). Do **not** adopt clap in v1 (Outstanding Question → extend the hand-rolled parser; adding a dependency needs its own call).
+- **Test scenarios:** *Covers AE1.* `--message-format=json` on a failing program emits a JSON diagnostic with span + stable code + fix-where-applicable; on a clean program, JSON with bytes + symbols. Absent the flag, output is unchanged from today (a golden-file test). Invalid `--message-format=xml` errors cleanly.
+
+### U5. Versioning, skip-unknown, the freeze-draft record, and cross-plan notes
+
+- **Goal:** ship R7's additive/versioned mechanism and record the draft-then-freeze governance, plus the R6 cross-plan status edits.
+- **Requirements:** R7, R6 (cross-plan). Covers AE7.
+- **Dependencies:** U1, U2.
+- **Files:** `crates/asm198x/src/contract.rs` (version constant + field), `crates/asm198x/tests/contract.rs` (skip-unknown test), `decisions/core-contract-freeze.md` (new — the draft-then-freeze checklist, importing the dbg198x precedent incl. bounded-review + secondary-trigger per R7), `docs/plans/2026-07-03-001-feat-debug-info-format-plan.md` (dbg198x — paused note), `docs/plans/2026-07-03-002-feat-verdict-pipeline-plan.md` (independent/not-paused note).
+- **Approach:** a `CONTRACT_VERSION` on the serialized envelope; `#[serde(default)]` / `#[non_exhaustive]` already give additive/skip-unknown (U1/U2). The freeze **promise** stays draft — the decision record documents the checklist and that it fires at MCP (not at sibling-crate consumption, pending the Outstanding Question, which this record resolves conservatively: crates may build against a draft contract). **The record also carries the KTD4 carve-out: the symbol/section slice of `AssemblyResult` stays draft *past* MCP until a resumed dbg198x has actually read an `AssemblyResult`** — so the slice co-designed with a paused sibling is not frozen against an unexercised model (mirrors R7's split-freeze reasoning for R4/R5). Make the two cross-plan planning-doc edits (KTD6).
+- **Test scenarios:** *Covers AE7.* a serialized payload with an unknown extra field deserializes successfully (skip-unknown) rather than erroring; the payload carries a version field. The decision record exists and imports the bounded-review + secondary-trigger clauses.
+
+---
+
+## Verification Contract
+
+- **Serde round-trip:** `AssemblyResult` and `Diagnostic` serialize → deserialize → equal (U1, U2).
+- **Skip-unknown:** an unknown field in a serialized payload deserializes without error, and the payload carries a version (U5, AE7).
+- **Column accuracy:** an out-of-range operand in an acme and a Z80 program produces a diagnostic whose `col` points at the token (`offset` may be `None`; KTD1) (U3, AE2).
+- **CLI parity:** without `--message-format=json`, CLI output is byte-identical to today (golden file); with it, valid JSON emits for both success and failure (U4, AE1). *(AE3 is R5/spec-query, deferred to the MCP increment — not a v1 gate.)*
+- **No regressions:** the full existing suite stays green — `cargo clippy --workspace --all-targets -- -D warnings`, `cargo test -p asm198x`, and the `#[ignore]`d reference-tool conformance/curriculum guards (byte-identity of every CPU is unaffected — this is an additive result/error layer, KTD1/KTD2).
+- **Envelope reuse:** a `DiagnosticEnvelope` constructs from a foreign-tool rejection shape without the rich fields (U2, AE4).
+
+## Definition of Done
+
+- R1 shipped: one `AssemblyResult` shape across all CPUs/dialects (all 27 entry points migrated — a deliberate breaking change under the draft stance), linked output as a variant, serde-derivable; in-tree tests migrated to the new return type (U1).
+- R2 shipped: `Diagnostic` with `DiagSpan` (file/line/col, best-effort offset) + stable code + severity + message + optional fix; `AsmError` carries an optional span; AST-routed dialects populate real columns, field-packed CPUs stay line-granular (U2, U3).
+- R3 shipped: `--message-format=json` opt-in, human output unchanged as default (U4).
+- R6 (v1 slice): the thin `DiagnosticEnvelope` exists and is reusable; dbg198x paused-note and verdict independent-note landed (U2, U5).
+- R7 shipped: version field + `#[non_exhaustive]` + skip-unknown; the draft-then-freeze decision record exists with the full dbg198x precedent, including the KTD4 carve-out (symbol/section slice stays draft past MCP until dbg198x consumes it) (U5).
+- R8 holds: adding a CPU inherits the result + diagnostics with no per-CPU or per-surface work (U1 — verified by the CPU-agnostic result test).
+- R4/R5 remain explicitly deferred (KTD7) — no public `Dialect` trait, no spec-query in this plan.
+- Verification Contract gates all pass; the byte-identity of every CPU is unchanged.
