@@ -5,12 +5,12 @@
 
 use asm198x::{
     assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_ca65_816,
-    assemble_ca65_huc6280, assemble_f8, assemble_i8080, assemble_lwasm, assemble_m6800,
-    assemble_pasmo, assemble_pdp11, assemble_rgbasm, assemble_scmp, assemble_sjasmplus,
-    assemble_tms7000, assemble_tms9900, format_1802, format_2650, format_8048, format_acme,
-    format_ca65_816, format_ca65_huc6280, format_f8, format_i8080, format_lwasm, format_m6800,
-    format_pasmo, format_pdp11, format_rgbasm, format_scmp, format_sjasmplus, format_tms7000,
-    format_tms9900,
+    assemble_ca65_huc6280, assemble_cp1610, assemble_f8, assemble_i8080, assemble_lwasm,
+    assemble_m6800, assemble_pasmo, assemble_pdp11, assemble_rgbasm, assemble_scmp,
+    assemble_sjasmplus, assemble_tms7000, assemble_tms9900, format_1802, format_2650, format_8048,
+    format_acme, format_ca65_816, format_ca65_huc6280, format_cp1610, format_f8, format_i8080,
+    format_lwasm, format_m6800, format_pasmo, format_pdp11, format_rgbasm, format_scmp,
+    format_sjasmplus, format_tms7000, format_tms9900,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -848,5 +848,48 @@ fn fmt_tms9900_reassembles_byte_identical() {
         formatted,
         format_tms9900(&formatted).expect("formats"),
         "tms9900 fmt is idempotent"
+    );
+}
+
+/// A representative asl-syntax CP1610 program: an origin, colon labels, both
+/// constant spellings (`equ` and `=`), register ops, a `SDBD`+immediate pair
+/// (the two-decle state-threading crux — the formatter must keep the `sdbd`
+/// line in place or the following immediate reassembles at the wrong width), a
+/// relative branch, and leading + trailing comments.
+const PROG_CP1610: &str = "\
+; a small cp1610 routine
+        org 0
+mask    equ 00ffh
+delta = 4
+top:    movr r0, r1
+        incr r2
+        sdbd
+        mvii 1234h, r0    ; two-decle immediate (needs sdbd)
+        addr r2, r3
+loop:   decr r0
+        bneq loop
+        b top
+";
+
+#[test]
+fn fmt_cp1610_reassembles_byte_identical() {
+    let original = assemble_cp1610(PROG_CP1610).expect("assembles").bytes;
+    let formatted = format_cp1610(PROG_CP1610).expect("formats");
+    let reassembled = assemble_cp1610(&formatted)
+        .unwrap_or_else(|e| panic!("formatted cp1610 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "cp1610 round-trips byte-identical (sdbd state preserved)\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_cp1610(&formatted).expect("formats"),
+        "cp1610 fmt is idempotent"
+    );
+    // The sdbd prefix must survive in place — dropping it changes the bytes.
+    assert!(
+        formatted.contains("sdbd"),
+        "sdbd prefix preserved:\n{formatted}"
     );
 }
