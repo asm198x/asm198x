@@ -12,7 +12,7 @@ repository.workspace = true
 # asm198x-and-shared-isa-spec.md.
 
 [dependencies]
-isa = { path = "../isa", version = "0.0.7" }
+isa = { path = "../isa", version = "0.0.8" }
 
 [lints]
 workspace = true
