@@ -103,6 +103,18 @@ fn families() -> Vec<Family> {
             &|src| asm198x::assemble_vasm_exe(src).expect("vasm links").bytes,
         ),
         build(
+            "cp1610-intellivision",
+            &|src, path| {
+                let r = asm198x::assemble_cp1610(src).expect("cp1610 assembles");
+                (asm198x::debug_info(&r, "cp1610", "asl", path), r.bytes)
+            },
+            &|src| {
+                asm198x::assemble_cp1610(src)
+                    .expect("cp1610 assembles")
+                    .bytes
+            },
+        ),
+        build(
             "65816-sample",
             &|src, path| {
                 let r = asm198x::assemble_ca65_816(src).expect("65816 assembles");
@@ -186,6 +198,19 @@ fn corpus_lookups_resolve() {
     let m816 = DebugInfo::read(&fixture("65816-sample.debug198x")).expect("parse");
     assert_eq!(m816.addr_of("done", None), Some(6));
     assert_eq!(m816.line_at(0, None).map(|l| l.line), Some(5), "lda #");
+
+    // CP1610 — the one word-addressed family: offsets, lengths, and addresses
+    // are in the CPU's address units (decles), not bytes. The 12-byte image is
+    // 6 decles, and the spans account for exactly those 6.
+    let intv = DebugInfo::read(&fixture("cp1610-intellivision.debug198x")).expect("parse");
+    assert_eq!(intv.addr_of("start", None), Some(0x5000));
+    assert_eq!(intv.addr_of("done", None), Some(0x5005), "decle address");
+    assert_eq!(intv.line_at(0x5003, None).map(|l| l.line), Some(5), "bneq");
+    assert_eq!(
+        intv.lines.iter().map(|l| l.length).sum::<u64>(),
+        6,
+        "span lengths are decles: half the byte count"
+    );
 }
 
 /// AE3: the 65816 record carries a 24-bit constant from actual placement, and

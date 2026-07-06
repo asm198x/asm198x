@@ -49,10 +49,16 @@ only when the per-CPU `isa` boundary or Emu198x's consumption makes it real.
 - [`crates/debug198x`](crates/debug198x) — the Debug198x cross-CPU debug-info
   format (NDJSON sidecar: line↔address map, typed symbols, sections; renamed
   from `dbg198x` 2026-07-06). Written by asm198x (`--debug`), read by the
-  Emu198x importer; depends only on serde. The CLI's `--debug[=path]` /
-  `--sym[=path]` / `--listing[=path]` render the same captured record three
-  ways (plan `docs/plans/2026-07-03-001-feat-debug-info-format-plan.md`, U3;
-  flat-engine dialects today, ca65/vasm emission lands with U4/U5).
+  Emu198x importer; depends only on serde. **All three emission points are
+  live** (the flat engine, the ca65 linker, and the vasm hunk path — plan
+  `docs/plans/2026-07-03-001-feat-debug-info-format-plan.md`, complete
+  2026-07-06): `--debug[=path]`/`--sym[=path]` work everywhere,
+  `--listing[=path]` on the flat dialects. The format is specified for
+  external implementers in the org docs repo (`../docs/debug198x.md`),
+  enforced by the always-on fixture corpus
+  (`crates/asm198x/tests/fixtures/debug198x/`), and governed —
+  draft-v0 posture, freeze checklist, evolution rules — by
+  [`decisions/debug198x-format.md`](decisions/debug198x-format.md).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
   the shared per-CPU cores, the dialect front-ends) and the `asm198x` CLI. Also
   hosts the three layers above the encoder — the semantic **AST** (`src/ast.rs`),

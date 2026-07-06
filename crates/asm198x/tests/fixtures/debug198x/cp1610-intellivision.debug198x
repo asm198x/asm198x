@@ -1,0 +1,10 @@
+{"t":"header","format":"debug198x","format_version":"0.1","tool":"asm198x","tool_version":"0.0.7","cpu":"cp1610","dialect":"asl","sources":["cp1610-intellivision.s"]}
+{"t":"section","id":0,"name":"main","base":20480}
+{"t":"symbol","name":"COUNT","kind":"const","value":4}
+{"t":"symbol","name":"start","kind":"label","section":0,"offset":0}
+{"t":"symbol","name":"loop","kind":"label","section":0,"offset":2}
+{"t":"symbol","name":"done","kind":"label","section":0,"offset":5}
+{"t":"line","file":"cp1610-intellivision.s","line":3,"section":0,"offset":0,"length":2}
+{"t":"line","file":"cp1610-intellivision.s","line":4,"section":0,"offset":2,"length":1}
+{"t":"line","file":"cp1610-intellivision.s","line":5,"section":0,"offset":3,"length":2}
+{"t":"line","file":"cp1610-intellivision.s","line":6,"section":0,"offset":5,"length":1}

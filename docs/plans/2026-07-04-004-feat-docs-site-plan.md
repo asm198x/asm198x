@@ -88,6 +88,7 @@ Docs clarity is trust in this community — WLA-DX's cautionary tale is that ban
 - mdBook preprocessor vs build-script generation for the instruction reference — planning.
 - Hosting and deploy pipeline for the site — planning.
 - The exact shape of the per-dialect directive-support-matrix data the conformance corpus must expose — planning, when that slot is filled.
+- **[Scope addition, approved 2026-07-06]** v1 must also carry the user-guide surface: an installation guide, a complete CLI command/subcommand/flag reference (candidate for generation from the flag surface so it cannot drift, same spirit as R1), and a "which dialect for which machine" selection guide. Raised while closing the Debug198x plan (whose format spec `debug198x.md` now lives in the docs repo and folds into this site's structure when it lands).
 
 ### Sources
 
