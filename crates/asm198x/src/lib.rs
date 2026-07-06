@@ -113,7 +113,7 @@ pub fn assemble_ca65_debug(
     let (rom, capture) = dialects::ca65::assemble_with_debug(source)?;
     Ok((
         AssemblyResult::image(rom),
-        listing::ca65_debug_info(capture, source_path),
+        listing::capture_debug_info(capture, "6502", "ca65", source_path),
     ))
 }
 
@@ -168,6 +168,43 @@ pub fn assemble_vasm_warned(source: &str) -> Result<AssemblyResult, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_vasm_exe(source: &str) -> Result<AssemblyResult, AsmError> {
     dialects::vasm::assemble_exe(source).map(AssemblyResult::image)
+}
+
+/// As [`assemble_vasm_warned`], also returning the full
+/// [`debug198x::DebugInfo`] read out of assembly (Debug198x U5): the section
+/// table, `(section, offset)` symbols, and line spans — **section-relative**,
+/// with `base: None` throughout (hunks are relocatable; a consumer supplies
+/// load addresses via a `BaseMap`, KTD7). Bytes are identical to
+/// [`assemble_vasm_warned`] by construction (one `assemble_core` path; AE2).
+///
+/// # Errors
+/// As [`assemble_vasm_warned`].
+pub fn assemble_vasm_warned_debug(
+    source: &str,
+    source_path: &str,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), AsmError> {
+    let (bytes, warnings, capture) = dialects::vasm::assemble_warned_with_debug(source)?;
+    Ok((
+        AssemblyResult::image_warned(bytes, warnings),
+        listing::capture_debug_info(capture, "68000", "vasm", source_path),
+    ))
+}
+
+/// As [`assemble_vasm_exe`], also returning the full [`debug198x::DebugInfo`]
+/// read out of assembly (Debug198x U5) — the same section-relative record as
+/// [`assemble_vasm_warned_debug`], describing the hunks the executable loads.
+///
+/// # Errors
+/// As [`assemble_vasm_exe`].
+pub fn assemble_vasm_exe_debug(
+    source: &str,
+    source_path: &str,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), AsmError> {
+    let (bytes, capture) = dialects::vasm::assemble_exe_with_debug(source)?;
+    Ok((
+        AssemblyResult::image(bytes),
+        listing::capture_debug_info(capture, "68000", "vasm", source_path),
+    ))
 }
 
 /// Reformat Motorola-syntax 68000 (`vasm`) source to canonical layout (the

@@ -123,20 +123,12 @@ struct Parsed {
 // Entry point: assemble + link
 // ---------------------------------------------------------------------------
 
-/// The debug record read out of layout (Debug198x U4, KTD4): per-segment
-/// sections, `(section, offset)`-addressed symbols, and line spans — all
-/// post-link CPU addresses (what a debugger needs), never file offsets. A
-/// read-out of data layout already computes; capturing it cannot change a byte.
-pub(crate) struct Capture {
-    /// The segments the program actually used, in `NES_SEGMENTS` order; ids are
-    /// indices into that table, bases the config's absolute addresses (KTD7).
-    pub(crate) sections: Vec<debug198x::Section>,
-    /// Labels at their `(section, offset)` placement plus `=` constants.
-    pub(crate) symbols: Vec<debug198x::Symbol>,
-    /// `(line, section, offset, length)` per byte-emitting placed statement;
-    /// the CLI attaches the source filename.
-    pub(crate) lines: Vec<(u32, debug198x::SectionId, u64, u64)>,
-}
+// The debug record read out of layout (Debug198x U4, KTD4) is the shared
+// [`DebugCapture`]: per-segment sections, `(section, offset)`-addressed
+// symbols, and line spans — all post-link CPU addresses (what a debugger
+// needs), never file offsets. A read-out of data layout already computes;
+// capturing it cannot change a byte.
+use crate::listing::DebugCapture;
 
 /// A segment's section id: its index in [`NES_SEGMENTS`] (the config order).
 fn seg_id(seg: &str) -> debug198x::SectionId {
@@ -160,7 +152,7 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
-pub(crate) fn assemble_with_debug(source: &str) -> Result<(Vec<u8>, Capture), AsmError> {
+pub(crate) fn assemble_with_debug(source: &str) -> Result<(Vec<u8>, DebugCapture), AsmError> {
     let set = &isa::mos6502::SET;
     // The AST is the single front-end IR: parse into the source-preserving
     // `Program` (carrying each statement's native `Kind`, `=` constants, and the
@@ -292,7 +284,7 @@ pub(crate) fn assemble_with_debug(source: &str) -> Result<(Vec<u8>, Capture), As
     let rom = link(&seg_bytes)?;
     Ok((
         rom,
-        Capture {
+        DebugCapture {
             sections,
             symbols: dbg_symbols,
             lines: dbg_lines,

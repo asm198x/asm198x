@@ -177,22 +177,22 @@ fn debug_flags_never_change_the_image() {
     assert_eq!(plain, flagged, "debug flags never change an emitted byte");
 }
 
-/// The vasm (Amiga) bypass path rejects the debug flags until its emitter
-/// lands (plan U5) — a clear error, not a silent no-op. (ca65 gained
-/// `--debug`/`--sym` in U4; see the U4 tests below.)
+/// `--listing` stays rejected on the linked paths (ca65/vasm) — it needs a
+/// per-section byte map; the record-backed `--debug`/`--sym` are live on both
+/// (U4/U5).
 #[test]
-fn vasm_rejects_debug_flags_for_now() {
-    let src_path = temp_source("vasm", "\tmoveq #0,d0\n\trts\n");
+fn vasm_listing_still_rejected() {
+    let src_path = temp_source("vasm-lst", "\tmoveq #0,d0\n\trts\n");
     let out = bin()
-        .args(["--dialect", "vasm", "--debug"])
+        .args(["--dialect", "vasm", "--listing"])
         .arg(&src_path)
         .output()
         .expect("run asm198x");
-    assert!(!out.status.success(), "vasm + --debug is an error for now");
+    assert!(!out.status.success(), "vasm + --listing is an error");
     let stderr = String::from_utf8_lossy(&out.stderr);
     assert!(
-        stderr.contains("not yet supported"),
-        "the error names the gap: {stderr}"
+        stderr.contains("`--debug` and `--sym` are"),
+        "the error names what works: {stderr}"
     );
 }
 
@@ -599,5 +599,195 @@ fn artifact_path_never_clobbers_the_output_image() {
     assert!(
         stderr.contains("refusing to overwrite the output image"),
         "the error explains the collision: {stderr}"
+    );
+}
+
+// --- U5: the vasm (Amiga hunk) path ---
+
+/// A two-section Amiga program with a cross-section reference and an `even`
+/// pad — the AE4 shape.
+const VASM_SRC: &str = "\
+\tsection code,code\n\
+start:\tlea data(pc),a0\n\
+\tmoveq #5,d0\n\
+loop:\tdbf d0,loop\n\
+\trts\n\
+\tsection data,data\n\
+data:\tdc.w 1,2,3\n\
+msg:\tdc.b \"hi\",0\n\
+\teven\n\
+tail:\tdc.l msg\n";
+
+/// AE4: the vasm sidecar lists both sections (relocatable — no base), byte
+/// ranges attribute to the right section, a cross-section label resolves once
+/// a `BaseMap` supplies load addresses, and the hidden `even` pad byte belongs
+/// to no line (the padding rule).
+#[test]
+fn vasm_sidecar_covers_sections_and_relocatable_lookups() {
+    let src_path = temp_source("vasm-ae4", VASM_SRC);
+    let exe = src_path.with_extension("exe");
+    let status = bin()
+        .args(["--dialect", "vasm", "--exe", "--debug"])
+        .arg(&src_path)
+        .arg("-o")
+        .arg(&exe)
+        .status()
+        .expect("run asm198x");
+    assert!(status.success());
+
+    let ndjson =
+        std::fs::read_to_string(src_path.with_extension("debug198x")).expect("read sidecar");
+    let info = asm198x::debug198x::DebugInfo::read(&ndjson).expect("sidecar parses");
+    assert_eq!(info.header.cpu, "68000");
+    assert_eq!(info.header.dialect, "vasm");
+
+    // Both hunks are listed, relocatable: no fabricated absolute bases.
+    assert_eq!(
+        info.sections.iter().map(|s| s.base).collect::<Vec<_>>(),
+        vec![None, None],
+        "hunks carry no base — the loader assigns addresses"
+    );
+
+    // Without a BaseMap nothing resolves absolutely; with one (the loaded hunk
+    // addresses), a label in section 1 referenced from section 0 resolves.
+    assert_eq!(info.addr_of("data", None), None, "no base map, no absolute");
+    let bases: asm198x::debug198x::BaseMap = [(0, 0x2000), (1, 0x8000)].into_iter().collect();
+    assert_eq!(info.addr_of("start", Some(&bases)), Some(0x2000));
+    assert_eq!(info.addr_of("data", Some(&bases)), Some(0x8000));
+    assert_eq!(
+        info.line_at(0x2006, Some(&bases)).map(|l| l.line),
+        Some(4),
+        "`dbf` at code+6 maps to its source line"
+    );
+    // The `even` pad byte (data+9, between `msg` and `tail`) belongs to no line.
+    assert!(
+        info.line_at(0x8009, Some(&bases)).is_none(),
+        "alignment fill is attributed to no source line"
+    );
+    assert_eq!(
+        info.line_at(0x800A, Some(&bases)).map(|l| l.line),
+        Some(10),
+        "`tail:` data starts on the next even offset"
+    );
+}
+
+/// AE2 for the vasm path: hunk-exe and flat outputs are byte-identical with
+/// and without the debug flags.
+#[test]
+fn vasm_debug_flags_never_change_the_output() {
+    // Exe (multi-section) half.
+    let plain = temp_source("vasm-plain", VASM_SRC);
+    let flagged = temp_source("vasm-flagged", VASM_SRC);
+    for (src, flags) in [(&plain, &[][..]), (&flagged, &["--debug", "--sym"][..])] {
+        let status = bin()
+            .args(["--dialect", "vasm", "--exe"])
+            .args(flags)
+            .arg(src)
+            .arg("-o")
+            .arg(src.with_extension("exe"))
+            .status()
+            .expect("run asm198x");
+        assert!(status.success());
+    }
+    assert_eq!(
+        std::fs::read(plain.with_extension("exe")).expect("plain exe"),
+        std::fs::read(flagged.with_extension("exe")).expect("flagged exe"),
+        "debug flags never change a hunk-exe byte"
+    );
+
+    // Flat (single-section) half.
+    let flat_src = "\tmoveq #7,d0\nspin:\tdbf d0,spin\n\trts\n";
+    let plain = temp_source("vasm-flat-plain", flat_src);
+    let flagged = temp_source("vasm-flat-flagged", flat_src);
+    for (src, flags) in [(&plain, &[][..]), (&flagged, &["--debug", "--sym"][..])] {
+        let status = bin()
+            .args(["--dialect", "vasm"])
+            .args(flags)
+            .arg(src)
+            .arg("-o")
+            .arg(src.with_extension("bin"))
+            .status()
+            .expect("run asm198x");
+        assert!(status.success());
+    }
+    assert_eq!(
+        std::fs::read(plain.with_extension("bin")).expect("plain bin"),
+        std::fs::read(flagged.with_extension("bin")).expect("flagged bin"),
+        "debug flags never change a flat byte"
+    );
+}
+
+/// The flat vasm record: one section, `equ` constants carry the constant
+/// kind, and labels are section-relative.
+#[test]
+fn vasm_flat_record_carries_constants_and_labels() {
+    let src = "SIZE\tequ 40\nstart:\tmove.l #SIZE,d1\n\trts\n";
+    let src_path = temp_source("vasm-flat-rec", src);
+    let status = bin()
+        .args(["--dialect", "vasm", "--debug", "--sym"])
+        .arg(&src_path)
+        .arg("-o")
+        .arg(src_path.with_extension("bin"))
+        .status()
+        .expect("run asm198x");
+    assert!(status.success());
+    let ndjson =
+        std::fs::read_to_string(src_path.with_extension("debug198x")).expect("read sidecar");
+    let info = asm198x::debug198x::DebugInfo::read(&ndjson).expect("sidecar parses");
+    let size = info
+        .symbols
+        .iter()
+        .find(|s| s.name == "SIZE")
+        .expect("SIZE present");
+    assert_eq!(
+        size.kind,
+        asm198x::debug198x::SymbolKind::Const { value: 40 },
+        "an `equ` is a constant, not an address"
+    );
+    let sym = std::fs::read_to_string(src_path.with_extension("sym")).expect("read sym");
+    assert_eq!(sym, "SIZE = $0028\nstart = $0000\n");
+}
+
+/// JSON mode + vasm + `--debug`: the sidecar writes while stdout stays a
+/// single JSON value.
+#[test]
+fn vasm_json_mode_writes_sidecar() {
+    let src_path = temp_source("vasm-json", VASM_SRC);
+    let out = bin()
+        .args([
+            "--dialect",
+            "vasm",
+            "--exe",
+            "--message-format=json",
+            "--debug",
+        ])
+        .arg(&src_path)
+        .arg("-o")
+        .arg(src_path.with_extension("exe"))
+        .output()
+        .expect("run asm198x");
+    assert!(out.status.success());
+    let _: serde_json::Value =
+        serde_json::from_slice(&out.stdout).expect("stdout is exactly one JSON value");
+    assert!(src_path.with_extension("debug198x").exists());
+}
+
+/// A multi-hunk exe's `--sym` renders section-qualified offsets — bare
+/// offsets would collide across hunks (`start` and `data` are both offset 0).
+#[test]
+fn vasm_exe_sym_is_section_qualified() {
+    let src_path = temp_source("vasm-exe-sym", VASM_SRC);
+    let status = bin()
+        .args(["--dialect", "vasm", "--exe", "--sym"])
+        .arg(&src_path)
+        .arg("-o")
+        .arg(src_path.with_extension("exe"))
+        .status()
+        .expect("run asm198x");
+    assert!(status.success());
+    let sym = std::fs::read_to_string(src_path.with_extension("sym")).expect("read sym");
+    assert_eq!(
+        sym,
+        "data = data+$0000\nloop = code+$0006\nmsg = data+$0006\nstart = code+$0000\ntail = data+$000A\n"
     );
 }

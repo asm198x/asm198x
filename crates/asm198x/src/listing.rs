@@ -54,22 +54,35 @@ pub fn debug_info(
     }
 }
 
-/// Wrap a ca65 layout [`Capture`](crate::dialects::ca65::Capture) as a full
-/// [`debug198x::DebugInfo`] — the linked path's counterpart of [`debug_info`]
-/// (Debug198x U4, KTD4). Sections, symbols, and spans come straight from the
-/// capture (post-link CPU addresses); this adds the header identity and
-/// attaches `source_path` to every line span.
+/// A multi-section dialect's debug read-out, before header identity and the
+/// source filename are attached: the section table, `(section, offset)`
+/// symbols, and `(line, section, offset, length)` spans. The ca65 linker path
+/// (U4) and the vasm hunk path (U5) both collect one; [`capture_debug_info`]
+/// completes it. Collection is strictly passive — read out beside layout or
+/// emission, never branching on it.
+pub(crate) struct DebugCapture {
+    pub(crate) sections: Vec<debug198x::Section>,
+    pub(crate) symbols: Vec<debug198x::Symbol>,
+    pub(crate) lines: Vec<(u32, debug198x::SectionId, u64, u64)>,
+}
+
+/// Wrap a dialect's [`DebugCapture`] as a full [`debug198x::DebugInfo`] — the
+/// multi-section counterpart of [`debug_info`] (Debug198x U4/U5, KTD4).
+/// Sections, symbols, and spans come straight from the capture; this adds the
+/// header identity and attaches `source_path` to every line span.
 #[must_use]
-pub(crate) fn ca65_debug_info(
-    capture: crate::dialects::ca65::Capture,
+pub(crate) fn capture_debug_info(
+    capture: DebugCapture,
+    cpu: &str,
+    dialect: &str,
     source_path: &str,
 ) -> debug198x::DebugInfo {
     debug198x::DebugInfo {
         header: debug198x::Header {
             tool: "asm198x".to_string(),
             tool_version: env!("CARGO_PKG_VERSION").to_string(),
-            cpu: "6502".to_string(),
-            dialect: "ca65".to_string(),
+            cpu: cpu.to_string(),
+            dialect: dialect.to_string(),
             sources: vec![source_path.to_string()],
             ..debug198x::Header::default()
         },
@@ -89,20 +102,25 @@ pub(crate) fn ca65_debug_info(
     }
 }
 
-/// The `--sym` rendering: one `name = $HEX` line per symbol, sorted by name.
-/// Labels and entry points render as absolute addresses (their section's base
-/// plus their offset, in the CPU's own address units); constants render their
-/// value. Both wear the same `$HEX` coat — the kind distinction lives in the
-/// sidecar, not here. Renders from the [`debug198x::DebugInfo`] record, so the
-/// flat and linked (ca65) paths share it (KTD2).
+/// The `--sym` rendering: one line per symbol, sorted by name. A label whose
+/// section has an absolute base renders as `name = $HEX` (base + offset, in
+/// the CPU's own address units); a label in a **relocatable** section (a vasm
+/// hunk — `base: None`, KTD7) renders section-qualified as
+/// `name = <section>+$HEX`, since a bare offset would collide across hunks.
+/// Constants render their value. The kind distinction lives in the sidecar,
+/// not here. Renders from the [`debug198x::DebugInfo`] record, so the flat and
+/// linked (ca65/vasm) paths share it (KTD2).
 #[must_use]
 pub fn render_sym(info: &debug198x::DebugInfo) -> String {
-    let section_base = |id: debug198x::SectionId| {
-        info.sections
-            .iter()
-            .find(|s| s.id == id)
-            .and_then(|s| s.base)
-            .unwrap_or(0)
+    let place = |id: debug198x::SectionId, offset: u64| {
+        let section = info.sections.iter().find(|s| s.id == id);
+        match section.and_then(|s| s.base) {
+            Some(base) => format!("${:04X}", base + offset),
+            None => {
+                let name = section.map_or_else(|| format!("sec{id}"), |s| s.name.clone());
+                format!("{name}+${offset:04X}")
+            }
+        }
     };
     let mut lines: Vec<String> = info
         .symbols
@@ -114,10 +132,10 @@ pub fn render_sym(info: &debug198x::DebugInfo) -> String {
                 }
                 | debug198x::SymbolKind::Entry {
                     section, offset, ..
-                } => section_base(section) + offset,
-                debug198x::SymbolKind::Const { value } => value,
+                } => place(section, offset),
+                debug198x::SymbolKind::Const { value } => format!("${value:04X}"),
             };
-            format!("{} = ${value:04X}", s.name)
+            format!("{} = {value}", s.name)
         })
         .collect();
     lines.sort();

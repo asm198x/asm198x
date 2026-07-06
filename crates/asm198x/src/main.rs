@@ -398,17 +398,13 @@ fn run(args: &[String]) -> Result<String, String> {
     let assembler = Assembler::resolve(dialect, target)?;
     let source = std::fs::read_to_string(input).map_err(|e| format!("cannot read {input}: {e}"))?;
 
-    // Debug198x artifacts: the flat engine (U3) and the ca65 linker path (U4)
-    // emit them; the vasm path gains emission in U5. The ca65 listing waits on
-    // a per-section byte map, so only the record-backed artifacts are live.
-    if (debug.is_some() || sym.is_some() || listing.is_some())
-        && matches!(assembler, Assembler::Vasm)
-    {
-        return Err("`--debug`/`--sym`/`--listing` are not yet supported for the vasm path".into());
-    }
-    if listing.is_some() && matches!(assembler, Assembler::Ca65) {
+    // Debug198x artifacts: every path emits them (flat U3, ca65 U4, vasm U5).
+    // The ca65/vasm listings wait on a per-section byte map, so only the
+    // record-backed artifacts (`--debug`, `--sym`) are live there.
+    if listing.is_some() && matches!(assembler, Assembler::Ca65 | Assembler::Vasm) {
         return Err(
-            "`--listing` is not yet supported for the ca65 path (`--debug` and `--sym` are)".into(),
+            "`--listing` is not yet supported for the ca65/vasm paths (`--debug` and `--sym` are)"
+                .into(),
         );
     }
 
@@ -470,29 +466,60 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     // vasm (68000): a flat big-endian code image, or an Amiga hunk executable
-    // with `--exe` (the curriculum's `-Fhunkexe` target).
+    // with `--exe` (the curriculum's `-Fhunkexe` target). With a debug artifact
+    // requested, the debug-capturing entries return the section-relative record
+    // (U5) — same bytes by construction.
     if let Assembler::Vasm = assembler {
-        if exe {
-            let image = asm198x::assemble_vasm_exe(&source).map_err(|e| e.to_string())?;
+        let debug_requested = debug.is_some() || sym.is_some();
+        let (result, info, out_path) = if exe {
+            let (image, info) = if debug_requested {
+                let (image, info) =
+                    asm198x::assemble_vasm_exe_debug(&source, input).map_err(|e| e.to_string())?;
+                (image, Some(info))
+            } else {
+                (
+                    asm198x::assemble_vasm_exe(&source).map_err(|e| e.to_string())?,
+                    None,
+                )
+            };
             // vasm's convention: the executable drops the source extension.
             let out_path = output.unwrap_or_else(|| Path::new(input).with_extension(""));
-            std::fs::write(&out_path, &image.bytes)
-                .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
-            return Ok(format!(
-                "assembled {} byte(s) -> {}",
-                image.bytes.len(),
-                out_path.display()
-            ));
-        }
-        let result = asm198x::assemble_vasm_warned(&source).map_err(|e| e.to_string())?;
-        for w in &result.warnings {
-            eprintln!("asm198x: {input}: {w}");
-        }
-        let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
+            (image, info, out_path)
+        } else {
+            let (result, info) = if debug_requested {
+                let (result, info) = asm198x::assemble_vasm_warned_debug(&source, input)
+                    .map_err(|e| e.to_string())?;
+                (result, Some(info))
+            } else {
+                (
+                    asm198x::assemble_vasm_warned(&source).map_err(|e| e.to_string())?,
+                    None,
+                )
+            };
+            for w in &result.warnings {
+                eprintln!("asm198x: {input}: {w}");
+            }
+            let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
+            (result, info, out_path)
+        };
         std::fs::write(&out_path, &result.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+        let debug_notes = match &info {
+            Some(info) => write_debug_artifacts(
+                input,
+                Some(&out_path),
+                1,
+                &result,
+                info,
+                &source,
+                &debug,
+                &sym,
+                &listing,
+            )?,
+            None => String::new(),
+        };
         return Ok(format!(
-            "assembled {} byte(s) -> {}",
+            "assembled {} byte(s) -> {}{debug_notes}",
             result.bytes.len(),
             out_path.display()
         ));
@@ -698,7 +725,7 @@ fn usage() -> String {
      \x20            (--debug writes the .debug198x NDJSON sidecar; --sym a sorted\n\
      \x20             `name = $hex` table; --listing address/bytes/source rows —\n\
      \x20             defaults: input with .debug198x/.sym/.lst; flat dialects only\n\
-     \x20             for now plus the ca65 NES path for --debug/--sym; vasm lands next)\n\
+     \x20             for now plus the ca65/vasm linked paths for --debug/--sym)\n\
      disassemble: asm198x --disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\
      format:      asm198x --fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
@@ -752,18 +779,24 @@ fn emit_json(
     (debug, sym, listing): (&ArtifactPath, &ArtifactPath, &ArtifactPath),
 ) -> Result<String, String> {
     let debug_requested = debug.is_some() || sym.is_some() || listing.is_some();
-    // The ca65 debug-capturing entry returns the record alongside the ROM; the
-    // flat paths build theirs from the result below. (vasm + debug flags was
-    // already rejected in `run`.)
-    let mut ca65_info: Option<asm198x::debug198x::DebugInfo> = None;
+    // The ca65/vasm debug-capturing entries return the record alongside the
+    // image; the flat paths build theirs from the result below.
+    let mut linked_info: Option<asm198x::debug198x::DebugInfo> = None;
+    let mut capture = |(image, info): (asm198x::AssemblyResult, asm198x::debug198x::DebugInfo)| {
+        linked_info = Some(info);
+        image
+    };
     let result = match assembler {
+        Assembler::Vasm if exe && debug_requested => {
+            asm198x::assemble_vasm_exe_debug(source, input).map(&mut capture)
+        }
         Assembler::Vasm if exe => asm198x::assemble_vasm_exe(source),
+        Assembler::Vasm if debug_requested => {
+            asm198x::assemble_vasm_warned_debug(source, input).map(&mut capture)
+        }
         Assembler::Vasm => asm198x::assemble_vasm_warned(source),
         Assembler::Ca65 if debug_requested => {
-            asm198x::assemble_ca65_debug(source, input).map(|(rom, info)| {
-                ca65_info = Some(info);
-                rom
-            })
+            asm198x::assemble_ca65_debug(source, input).map(&mut capture)
         }
         Assembler::Ca65 => asm198x::assemble_ca65(source),
         other => other.assemble(source),
@@ -777,7 +810,7 @@ fn emit_json(
             // Debug artifacts are written in JSON mode too; the notes are
             // dropped — stdout carries only the JSON result.
             if debug_requested {
-                let info = ca65_info.unwrap_or_else(|| {
+                let info = linked_info.unwrap_or_else(|| {
                     let (cpu, dialect) = assembler.identity();
                     asm198x::debug_info(&assembly, cpu, dialect, input)
                 });

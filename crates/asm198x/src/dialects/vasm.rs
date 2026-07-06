@@ -189,7 +189,7 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
 /// if the source uses more than one non-empty section.
 pub(crate) fn assemble_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError> {
     let mut warnings = Vec::new();
-    let sections = assemble_core(source, true, &mut warnings)?;
+    let (sections, _) = assemble_core(source, true, &mut warnings)?;
     let bytes = flatten_one_section(&sections)?;
     Ok((bytes, warnings))
 }
@@ -202,7 +202,7 @@ pub(crate) fn assemble_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), A
 /// section carries bytes (a flat binary can hold only one).
 pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, AsmError> {
     let mut warnings = Vec::new();
-    let sections = assemble_core(source, optimize, &mut warnings)?;
+    let (sections, _) = assemble_core(source, optimize, &mut warnings)?;
     flatten_one_section(&sections)
 }
 
@@ -228,8 +228,47 @@ pub(crate) fn assemble_exe(source: &str) -> Result<Vec<u8>, AsmError> {
     // The hunk-exe path discards warnings for now (the CLI surfaces them on the
     // flat path via `assemble_warned`); the bytes are unaffected either way.
     let mut warnings = Vec::new();
-    let sections = assemble_core(source, true, &mut warnings)?;
+    let (sections, _) = assemble_core(source, true, &mut warnings)?;
     Ok(serialize_hunkexe(&sections))
+}
+
+/// As [`assemble_warned`], also returning the debug read-out (Debug198x U5).
+/// Same `assemble_core` call, so the bytes are identical by construction (AE2).
+///
+/// # Errors
+/// As [`assemble_warned`].
+pub(crate) fn assemble_warned_with_debug(
+    source: &str,
+) -> Result<(Vec<u8>, Vec<Warning>, crate::listing::DebugCapture), AsmError> {
+    let mut warnings = Vec::new();
+    let (sections, mut capture) = assemble_core(source, true, &mut warnings)?;
+    let bytes = flatten_one_section(&sections)?;
+    // The flat binary *is* the emitted section's bytes, so its offsets are file
+    // offsets: base the section at 0 so lookups resolve file-relative out of
+    // the box. A consumer loading the blob elsewhere overrides via the
+    // `BaseMap`, which wins over the recorded base.
+    if let Some(emitted) = sections.iter().position(|s| !s.bytes.is_empty())
+        && let Some(section) = capture
+            .sections
+            .iter_mut()
+            .find(|s| s.id == emitted as debug198x::SectionId)
+    {
+        section.base = Some(0);
+    }
+    Ok((bytes, warnings, capture))
+}
+
+/// As [`assemble_exe`], also returning the debug read-out (Debug198x U5).
+/// Same `assemble_core` call, so the bytes are identical by construction (AE2).
+///
+/// # Errors
+/// As [`assemble_exe`].
+pub(crate) fn assemble_exe_with_debug(
+    source: &str,
+) -> Result<(Vec<u8>, crate::listing::DebugCapture), AsmError> {
+    let mut warnings = Vec::new();
+    let (sections, capture) = assemble_core(source, true, &mut warnings)?;
+    Ok((serialize_hunkexe(&sections), capture))
 }
 
 /// A 32-bit relocation: a byte offset within a section, and the target section
@@ -255,12 +294,17 @@ struct Ctx {
 }
 
 /// Assemble into per-section byte buffers with their relocations — the shared
-/// core behind both the flat and the hunk-executable serializers.
+/// core behind both the flat and the hunk-executable serializers. Also returns
+/// the debug read-out (Debug198x U5): section table, `(section, offset)`
+/// symbols, and per-statement line spans, all **section-relative** with no
+/// fabricated absolutes (KTD7 — the reader's `BaseMap` owns rebasing to loaded
+/// hunk addresses). The capture is strictly passive: it observes emission and
+/// never branches on it.
 fn assemble_core(
     source: &str,
     optimize: bool,
     warnings: &mut Vec<Warning>,
-) -> Result<Vec<SecOut>, AsmError> {
+) -> Result<(Vec<SecOut>, crate::listing::DebugCapture), AsmError> {
     // The AST is the single front-end IR: parse into the source-preserving
     // `Program` (which carries each line's native 68000 statement, qualified),
     // then project it to the assembler's statement stream. Same bytes as the old
@@ -349,12 +393,16 @@ fn assemble_core(
             relocs: Vec::new(),
         })
         .collect();
+    let mut dbg_lines: Vec<(u32, debug198x::SectionId, u64, u64)> = Vec::new();
     for (i, s) in stmts.iter().enumerate() {
         let sec = sec_idx[i];
         let buf = &mut out[sec];
         if s.kind.aligns() && !buf.bytes.len().is_multiple_of(2) {
             buf.bytes.push(0);
         }
+        // Span start is measured *after* the align pad: the hidden pad byte is
+        // fill, not this statement's emission (the padding rule — no span).
+        let span_start = buf.bytes.len();
         match &s.kind {
             Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) => {}
             Stmt::Dc(size, items) => {
@@ -387,8 +435,67 @@ fn assemble_core(
                 buf.relocs.extend(relocs);
             }
         }
+        let emitted = out[sec].bytes.len() - span_start;
+        if emitted > 0 {
+            dbg_lines.push((
+                s.line as u32,
+                sec as debug198x::SectionId,
+                span_start as u64,
+                emitted as u64,
+            ));
+        }
     }
-    Ok(out)
+
+    // The debug read-out's symbols: every label at its `(section, offset)`
+    // placement (the final layout's value is the section-relative offset,
+    // aligns included), and every `equ` as a constant.
+    let mut dbg_symbols: Vec<debug198x::Symbol> = Vec::new();
+    for (i, s) in stmts.iter().enumerate() {
+        let Some(label) = &s.label else { continue };
+        let Some(value) = consts.get(label) else {
+            continue;
+        };
+        let kind = if matches!(s.kind, Stmt::Equ(..)) {
+            debug198x::SymbolKind::Const {
+                value: *value as u64,
+            }
+        } else {
+            debug198x::SymbolKind::Label {
+                section: sec_idx[i] as debug198x::SectionId,
+                offset: *value as u64,
+                space: None,
+            }
+        };
+        dbg_symbols.push(debug198x::Symbol {
+            name: label.clone(),
+            kind,
+        });
+    }
+    // The section table: hunk kind as the name, `base: None` throughout —
+    // hunks are relocatable, so offsets stay section-relative and a consumer
+    // (the Emu198x importer) supplies actual load addresses via a `BaseMap`.
+    let dbg_sections: Vec<debug198x::Section> = sec_meta
+        .iter()
+        .enumerate()
+        .map(|(id, (kind, _))| debug198x::Section {
+            id: id as debug198x::SectionId,
+            name: match kind {
+                HunkKind::Code => "code".to_string(),
+                HunkKind::Data => "data".to_string(),
+                HunkKind::Bss => "bss".to_string(),
+            },
+            base: None,
+        })
+        .collect();
+
+    Ok((
+        out,
+        crate::listing::DebugCapture {
+            sections: dbg_sections,
+            symbols: dbg_symbols,
+            lines: dbg_lines,
+        },
+    ))
 }
 
 /// Serialize assembled sections into an AmigaDOS hunk executable, matching
