@@ -31,41 +31,12 @@ use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
 // Provenance (R3)
 // ---------------------------------------------------------------------------
 
-/// Identifies a source file. v1 is single-file (`FileId(0)`); include chains
-/// (idea 4) allocate further ids so a span can name the *included* file.
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub(crate) struct FileId(pub(crate) u32);
-
-/// One macro-expansion frame (a rustc-style defined-at / invoked-at record).
-/// Reserved now; idea 4's macro engine fills it. Empty in v1.
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct ExpansionFrame {
-    pub(crate) macro_name: String,
-    pub(crate) invoked_at: Box<Span>,
-}
-
-/// Where a node came from: `(file, line, column)` through the include chain,
-/// with reserved room for macro-expansion frames (R3).
-#[derive(Clone, Debug, PartialEq, Eq)]
-pub(crate) struct Span {
-    pub(crate) file: FileId,
-    pub(crate) line: u32,
-    pub(crate) col: u32,
-    /// Empty in v1; populated when idea 4's macros land, without a type change.
-    pub(crate) expansion_frames: Vec<ExpansionFrame>,
-}
-
-impl Span {
-    /// A single-file v1 span with no expansion frames.
-    pub(crate) fn at(line: u32, col: u32) -> Self {
-        Span {
-            file: FileId(0),
-            line,
-            col,
-            expansion_frames: Vec::new(),
-        }
-    }
-}
+// The span/source model is the shared [`crate::span`] module — one span type
+// across the AST, the engine's `AsmError`, and the public `Diagnostic`
+// (`decisions/roadmap-sequencing.md` § the span/source seam). Re-exported here so
+// the AST's long-standing `crate::ast::Span` / `Span::at` references keep
+// resolving unchanged.
+pub(crate) use crate::span::Span;
 
 // ---------------------------------------------------------------------------
 // Trivia — comments carried, not stripped (R5, KTD5). Populated in U4.
@@ -749,7 +720,7 @@ mod tests {
     #[test]
     fn span_carries_file_line_column() {
         let s = Span::at(7, 9);
-        assert_eq!(s.file, FileId(0));
+        assert_eq!(s.file, crate::span::FileId(0));
         assert_eq!(s.line, 7);
         assert_eq!(s.col, 9);
         assert!(s.expansion_frames.is_empty(), "reserved, empty in v1");

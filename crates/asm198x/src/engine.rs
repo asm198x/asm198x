@@ -16,6 +16,7 @@ use std::fmt;
 use serde::{Deserialize, Serialize};
 
 use crate::dialect::{Dialect, Oversize};
+use crate::span::Span;
 
 /// The result of a successful assembly: where it loads and the bytes to load.
 #[derive(Debug, Clone)]
@@ -72,6 +73,12 @@ pub struct LineRec {
 pub struct AsmError {
     pub line: usize,
     pub message: String,
+    /// The source span, when the raising site knows a column-level position (the
+    /// AST-routed dialects, once U3 wires them). `None` for the line-only sites,
+    /// where the diagnostic is line-granular. Per contract KTD1 the span rides
+    /// this engine error path — not the AST — so every CPU inherits diagnostics,
+    /// and column accuracy improves as CPUs adopt the AST.
+    pub span: Option<Span>,
 }
 
 impl AsmError {
@@ -79,6 +86,20 @@ impl AsmError {
         Self {
             line,
             message: message.into(),
+            span: None,
+        }
+    }
+
+    /// An error carrying a source span. `line` mirrors the span's line so the
+    /// `Display` impl and existing `.line` readers keep working unchanged.
+    // The AST-routed dialects call this from U3 (populate real columns); U2
+    // builds the seam and covers it by test. Reserved until then.
+    #[allow(dead_code)]
+    pub(crate) fn at(span: Span, message: impl Into<String>) -> Self {
+        Self {
+            line: span.line as usize,
+            message: message.into(),
+            span: Some(span),
         }
     }
 }

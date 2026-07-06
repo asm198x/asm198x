@@ -41,6 +41,8 @@ mod prg;
 #[cfg(test)]
 mod roundtrip_tests;
 mod sna;
+// The shared source-provenance model (one Span across ast/engine/contract).
+mod span;
 
 // Disassembly lives in the dependency-free `isa-disasm` crate (only `isa` +
 // std) so Emu198x can consume it without the assembler; re-exported here so the
@@ -48,8 +50,9 @@ mod sna;
 // `AssemblyResult` (the one structured result, R1/U1) is the return type of
 // every `assemble_*` entry point. `Assembly` stays exported as the engine's
 // internal flat builder that `AssemblyResult` wraps.
-pub use contract::AssemblyResult;
+pub use contract::{AssemblyResult, Code, Diagnostic, DiagnosticEnvelope, Fix, Severity};
 pub use engine::{AsmError, Assembly, DebugData, LineRec, Warning};
+pub use span::{ExpansionFrame, FileId, Span};
 // Re-exported so consumers of `Assembly.debug` need not depend on dbg198x
 // directly for the symbol types the engine captures.
 pub use dbg198x;

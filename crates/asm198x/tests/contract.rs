@@ -89,3 +89,44 @@ fn unknown_fields_are_skipped_on_deserialise() {
         "skipping the unknown field preserves the value"
     );
 }
+
+// --- U2: diagnostics ---
+
+/// A real assemble failure converts to a public `Diagnostic` that keeps the
+/// error's line and message (the failure path U4's JSON mode will emit).
+#[test]
+fn assemble_error_becomes_diagnostic() {
+    let err = asm198x::assemble_acme("\n    frob $10\n").expect_err("unknown mnemonic");
+    let d = asm198x::Diagnostic::from(err);
+    assert_eq!(d.severity, asm198x::Severity::Error);
+    let span = d.span.expect("a line-granular span");
+    assert_eq!(span.line, 2, "the error's source line is preserved");
+    assert!(!d.message.is_empty(), "the message is carried verbatim");
+}
+
+/// The verdict pipeline records a foreign-tool rejection as the thin shared
+/// envelope — severity + verbatim text — with none of asm198x's rich fields
+/// (R6, AE4).
+#[test]
+fn foreign_rejection_builds_a_thin_envelope() {
+    let env = asm198x::DiagnosticEnvelope::new(
+        asm198x::Severity::Error,
+        "ca65: error: 'foo' is not a valid mnemonic",
+    );
+    assert_eq!(env.severity, asm198x::Severity::Error);
+    assert!(
+        env.message.contains("ca65"),
+        "the reference tool's text is kept verbatim"
+    );
+}
+
+/// A `Diagnostic` serialises to JSON and back to an identical value — the
+/// contract's error side is machine-readable too (R2/R3 groundwork).
+#[test]
+fn diagnostic_json_round_trip() {
+    let err = asm198x::assemble_acme("\n    frob $10\n").expect_err("err");
+    let d = asm198x::Diagnostic::from(err);
+    let json = serde_json::to_string(&d).expect("serialise");
+    let back: asm198x::Diagnostic = serde_json::from_str(&json).expect("deserialise");
+    assert_eq!(d, back, "diagnostic JSON round-trip is identity");
+}
