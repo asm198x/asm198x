@@ -4,9 +4,10 @@
 //! spelling and comments.
 
 use asm198x::{
-    assemble_1802, assemble_acme, assemble_i8080, assemble_lwasm, assemble_m6800, assemble_pasmo,
-    assemble_rgbasm, assemble_scmp, assemble_sjasmplus, format_1802, format_acme, format_i8080,
-    format_lwasm, format_m6800, format_pasmo, format_rgbasm, format_scmp, format_sjasmplus,
+    assemble_1802, assemble_8048, assemble_acme, assemble_i8080, assemble_lwasm, assemble_m6800,
+    assemble_pasmo, assemble_rgbasm, assemble_scmp, assemble_sjasmplus, format_1802, format_8048,
+    format_acme, format_i8080, format_lwasm, format_m6800, format_pasmo, format_rgbasm,
+    format_scmp, format_sjasmplus,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -533,5 +534,45 @@ fn fmt_keeps_comments_in_position() {
             .lines()
             .any(|l| l.contains("nop") && l.contains("; trailing")),
         "trailing comment stays on its operation's line:\n{formatted}"
+    );
+}
+
+/// A representative MCS-48 (8048) program: origin, a same-line colon label with
+/// an instruction, an `equ` constant (Intel — no colon), immediate/register/
+/// port operands, the computed `call`/`jmp` (the `Encoded` seam), data
+/// directives, and comments. The 8048 is a fixed-slot straggler routed through
+/// the AST formatter (0b).
+const PROG_8048: &str = "\
+; a small MCS-48 routine
+        org 100h
+start:  mov a,#42h     ; load
+        add a,r0
+        anl p2,#0fh
+five    equ 5
+        add a,#five
+        outl p1,a
+        call 200h
+        jmp 7ffh
+        db 1, 2, 3
+        dw 1234h
+        ret
+";
+
+#[test]
+fn fmt_8048_reassembles_byte_identical() {
+    let original = assemble_8048(PROG_8048).expect("assembles").bytes;
+    let formatted = format_8048(PROG_8048).expect("formats");
+    let reassembled = assemble_8048(&formatted)
+        .unwrap_or_else(|e| panic!("formatted 8048 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "8048 round-trips byte-identical\n---\n{formatted}"
+    );
+    // Idempotent.
+    assert_eq!(
+        formatted,
+        format_8048(&formatted).expect("formats"),
+        "8048 fmt is idempotent"
     );
 }

@@ -440,6 +440,24 @@ pub fn format_i8080(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::I8080, source)
 }
 
+/// Reformat Intel 8048 (MCS-48) source to canonical layout (the `--fmt`
+/// formatter). Reassembles byte-identical to the input.
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_8048(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::I8048 { romless: false }, source)
+}
+
+/// As [`format_8048`], for the ROM-less MCS-48 parts (8035/8039/8040): the four
+/// BUS-port instructions are rejected, matching assembly.
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_8039(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::I8048 { romless: true }, source)
+}
+
 /// Format Motorola-syntax 6800 source (`asm198x fmt --cpu 6800`): parse into the
 /// semantic AST and emit canonical same-dialect source — labels at column 0,
 /// operations indented, comments preserved, `$`-hex operand spelling untouched.
