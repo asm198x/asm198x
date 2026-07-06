@@ -130,6 +130,17 @@ pub fn assemble_vasm_exe(source: &str) -> Result<AssemblyResult, AsmError> {
     dialects::vasm::assemble_exe(source).map(AssemblyResult::image)
 }
 
+/// Reformat Motorola-syntax 68000 (`vasm`) source to canonical layout (the
+/// `--fmt` formatter). Parses into the source-preserving semantic AST and emits
+/// canonical same-dialect source — labels at column 0, operations indented,
+/// comments preserved — reassembling byte-identical to the input.
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_vasm(source: &str) -> Result<String, AsmError> {
+    Ok(ast::emit(&dialects::vasm::parse_program(source)?, false))
+}
+
 /// Assemble ca65-syntax 65816 source (native mode) into a flat binary — the
 /// 65816 as a target extension of the 6502 (`isa::mos6502` + `isa::mos65816`).
 /// Accumulator/index immediate width follows the `.a8`/`.a16`/`.i8`/`.i16`

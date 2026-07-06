@@ -24,7 +24,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use isa::m68k::{self, EaModes, Size, SizeEnc, Slot, ea};
 
 use super::mos6502::{self, is_ident, split_data_items, split_first_word, string_literal};
-use crate::engine::{AsmError, BinOp, Expr, Warning};
+use crate::engine::{AsmError, BinOp, Expr, Operation, Warning};
 
 /// Evaluate an expression against bound symbols, with `*` (the location
 /// counter) resolving to `here`. A thin PC-aware wrapper over the shared
@@ -1225,6 +1225,131 @@ fn parse(source: &str) -> Result<Vec<Line>, AsmError> {
     }
     qualify_local_labels(&mut out);
     Ok(out)
+}
+
+/// Parse vasm (Motorola-syntax) 68000 source into the source-preserving semantic
+/// [`Program`](crate::ast::Program) — the front-end the `--fmt` formatter and the
+/// dialect converter consume. Each line becomes a node carrying its label (with
+/// `.local` scope resolved as sjasmplus's), the verbatim operation source, and
+/// comment trivia (`;` inline and `*`-column-0 whole-line comments).
+///
+/// This preserves the source faithfully for formatting; it does **not** drive
+/// assembly yet (the multi-pass encoder still runs off [`parse`]). Routing
+/// assembly through the tree is the next increment — see
+/// `decisions/ast-native-payload-for-multipass-cisc.md`. Because the formatter
+/// re-emits each operation's source verbatim, an `equ` node only needs an
+/// [`Item::Equ`](crate::ast::Item) marker so emit keeps the binding on its label's
+/// line; the value expression is carried for the coming assembly path.
+pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
+    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
+    let mut nodes = Vec::new();
+    // The enclosing global label — a leading-`.` local qualifies against it, the
+    // same scoping vasm's `qualify_local_labels` applies (R4).
+    let mut scope = String::new();
+    // Own-line comments seen since the last node, attached as leading trivia to
+    // the next one. Comments never reach the encoder, so bytes are unchanged.
+    let mut pending_leading: Vec<Comment> = Vec::new();
+
+    for (i, raw) in source.lines().enumerate() {
+        let line = i + 1;
+        let (code, comment) = split_comment(raw);
+        if code.trim().is_empty() {
+            if let Some(text) = comment {
+                pending_leading.push(Comment {
+                    text: text.to_string(),
+                    span: Span::at(line as u32, 1),
+                });
+            }
+            continue;
+        }
+        let trailing = comment.map(|text| Comment {
+            text: text.to_string(),
+            span: Span::at(line as u32, (code.len() + 1) as u32),
+        });
+
+        let (label, rest) = split_label(code, line)?;
+        // A non-local label (including an `equ` name) opens a new scope; a
+        // leading-`.` name qualifies against the current one.
+        let symbol = label.map(|name| {
+            if name.starts_with('.') {
+                Symbol {
+                    qualified: format!("{scope}{name}"),
+                    scope: Scope::Local {
+                        in_global: scope.clone(),
+                    },
+                    name,
+                }
+            } else {
+                scope = name.clone();
+                Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }
+            }
+        });
+
+        // `name equ expr` / `name = expr` binds its label on the same line — mark
+        // the node `Item::Equ` so emit keeps the label there (no colon: vasm's
+        // `equ` label is disambiguated by the keyword). Every other line keeps its
+        // verbatim source and no item; the formatter re-emits from the source.
+        let (word, args) = split_first_word(rest);
+        let lower = word.to_ascii_lowercase();
+        let item = if (lower == "equ" || lower == "=") && symbol.is_some() {
+            Some(crate::ast::item_from_operation(Operation::Equ(
+                parse_value(args, line)?,
+            )))
+        } else {
+            None
+        };
+
+        // Skip a line with neither a label nor an operation (a bare separator);
+        // everything with a label or source becomes a node.
+        if symbol.is_none() && rest.trim().is_empty() {
+            continue;
+        }
+        nodes.push(Node {
+            label: symbol,
+            item,
+            source: rest.trim().to_string(),
+            span: Span::at(line as u32, 1),
+            trivia: Trivia {
+                leading: std::mem::take(&mut pending_leading),
+                trailing,
+            },
+        });
+    }
+
+    // Flush comments after the last node (a trailing block or comment-only file)
+    // as a label-less, op-less node so the formatter keeps them.
+    if !pending_leading.is_empty() {
+        let line = source.lines().count() as u32;
+        nodes.push(Node {
+            label: None,
+            item: None,
+            source: String::new(),
+            span: Span::at(line, 1),
+            trivia: Trivia {
+                leading: pending_leading,
+                trailing: None,
+            },
+        });
+    }
+    Ok(Program { nodes })
+}
+
+/// Split a line into its code and its comment for carrying comments as AST
+/// trivia — a `*`-column-0 line is a whole-line comment, otherwise the text from
+/// the first `;`. Defined to mirror [`strip_comment`] exactly (a naive `;` scan,
+/// no string awareness), so the comment is precisely what assembly discards.
+fn split_comment(line: &str) -> (&str, Option<&str>) {
+    if line.starts_with('*') {
+        return ("", Some(line.trim_end()));
+    }
+    match line.find(';') {
+        Some(i) => (&line[..i], Some(line[i..].trim_end())),
+        None => (line, None),
+    }
 }
 
 /// Resolve vasm local labels (names starting with `.`) to their enclosing

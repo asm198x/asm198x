@@ -7,11 +7,11 @@ use asm198x::{
     assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_ca65_816,
     assemble_ca65_huc6280, assemble_cp1610, assemble_f8, assemble_i8080, assemble_lwasm,
     assemble_m6800, assemble_pasmo, assemble_pdp11, assemble_rgbasm, assemble_scmp,
-    assemble_sjasmplus, assemble_tms7000, assemble_tms9900, assemble_z8000, assemble_z8001,
-    format_1802, format_2650, format_8048, format_acme, format_ca65_816, format_ca65_huc6280,
-    format_cp1610, format_f8, format_i8080, format_lwasm, format_m6800, format_pasmo, format_pdp11,
-    format_rgbasm, format_scmp, format_sjasmplus, format_tms7000, format_tms9900, format_z8000,
-    format_z8001,
+    assemble_sjasmplus, assemble_tms7000, assemble_tms9900, assemble_vasm, assemble_z8000,
+    assemble_z8001, format_1802, format_2650, format_8048, format_acme, format_ca65_816,
+    format_ca65_huc6280, format_cp1610, format_f8, format_i8080, format_lwasm, format_m6800,
+    format_pasmo, format_pdp11, format_rgbasm, format_scmp, format_sjasmplus, format_tms7000,
+    format_tms9900, format_vasm, format_z8000, format_z8001,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -966,5 +966,50 @@ fn fmt_z8001_reassembles_byte_identical() {
     assert!(
         formatted.contains("<<5>>"),
         "segmented `<<seg>>` operands preserved:\n{formatted}"
+    );
+}
+
+/// A representative Motorola-syntax 68000 (`vasm`) program: a `*`-column-0
+/// comment, an `equ` constant, a global label opening a scope, a reused
+/// `.local` label under it, instructions across several effective-address and
+/// register-list operands, `dc.w`/`dc.l` data, and `;` trailing comments. The
+/// first variable-length CISC dialect through the AST formatter.
+const PROG_VASM: &str = "\
+* a small 68000 routine
+        lea     $dff000,a5     ; custom chip base
+count   equ     100
+start:
+        move.l  (a5),d0
+.loop:
+        addq.w  #1,d0
+        cmp.w   #count,d0
+        bne.s   .loop
+        movem.l d0-d3/a0-a1,-(sp)
+        rts
+data:
+        dc.w    $0180,$0000
+        dc.l    $deadbeef
+";
+
+#[test]
+fn fmt_vasm_reassembles_byte_identical() {
+    let original = assemble_vasm(PROG_VASM).expect("assembles").bytes;
+    let formatted = format_vasm(PROG_VASM).expect("formats");
+    let reassembled = assemble_vasm(&formatted)
+        .unwrap_or_else(|e| panic!("formatted vasm must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "vasm round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_vasm(&formatted).expect("formats"),
+        "vasm fmt is idempotent"
+    );
+    // The reused `.local` re-emits in source form, and the `*` comment survives.
+    assert!(
+        formatted.contains(".loop") && formatted.contains("* a small 68000 routine"),
+        "local label + column-0 comment preserved:\n{formatted}"
     );
 }
