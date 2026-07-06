@@ -22,9 +22,10 @@ diagnostics, column-accurate operand spans in the AST-routed dialects,
 freeze *promise* fires at the MCP surface per
 `decisions/core-contract-freeze.md`; until then the contract is a public draft.
 The current focus is **Layer 2** — the consumers fan out on the frozen-shape
-foundations. First up is **Debug198x** (the `debug198x` crate, renamed from
-`dbg198x` on 2026-07-06): its contract-first pause condition — a designed,
-landed R1 shape — is satisfied, and implementation has resumed at U3.
+foundations. **Debug198x**, the first consumer, completed all seven units on
+2026-07-06 (see its bullet below); the remaining Layer 2 items are the verdict
+pipeline (independent, run anytime), the language surface, the converter, and
+the cycle analyzer (gated on the unowned cycles/flags data seam).
 
 This record is the map. It does not restate each plan — it says what order they
 go in and why, and where the freeze-gates are. Read it before scheduling work
