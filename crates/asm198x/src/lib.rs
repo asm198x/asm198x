@@ -504,6 +504,16 @@ pub fn format_ca65_huc6280(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::Ca65Huc6280, source)
 }
 
+/// Reformat asl-syntax PDP-11 source to canonical layout (the `--fmt`
+/// formatter). Reassembles byte-identical to the input — the first field-packed
+/// CPU to route through the AST formatter.
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_pdp11(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Pdp11, source)
+}
+
 /// Format Motorola-syntax 6800 source (`asm198x fmt --cpu 6800`): parse into the
 /// semantic AST and emit canonical same-dialect source — labels at column 0,
 /// operations indented, comments preserved, `$`-hex operand spelling untouched.

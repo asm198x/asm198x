@@ -6,10 +6,10 @@
 use asm198x::{
     assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_ca65_816,
     assemble_ca65_huc6280, assemble_f8, assemble_i8080, assemble_lwasm, assemble_m6800,
-    assemble_pasmo, assemble_rgbasm, assemble_scmp, assemble_sjasmplus, assemble_tms7000,
-    format_1802, format_2650, format_8048, format_acme, format_ca65_816, format_ca65_huc6280,
-    format_f8, format_i8080, format_lwasm, format_m6800, format_pasmo, format_rgbasm, format_scmp,
-    format_sjasmplus, format_tms7000,
+    assemble_pasmo, assemble_pdp11, assemble_rgbasm, assemble_scmp, assemble_sjasmplus,
+    assemble_tms7000, format_1802, format_2650, format_8048, format_acme, format_ca65_816,
+    format_ca65_huc6280, format_f8, format_i8080, format_lwasm, format_m6800, format_pasmo,
+    format_pdp11, format_rgbasm, format_scmp, format_sjasmplus, format_tms7000,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -768,5 +768,45 @@ fn fmt_ca65_huc6280_reassembles_byte_identical() {
         formatted,
         format_ca65_huc6280(&formatted).expect("formats"),
         "huc6280 fmt is idempotent"
+    );
+}
+
+/// A representative asl-syntax PDP-11 program: an origin, colon labels, both
+/// constant spellings (`equ` and `=`), a spread of addressing modes, a
+/// register move, a branch, a same-line label with a data directive, and
+/// leading + trailing comments. The first field-packed CPU through the AST
+/// formatter — its `Encoded` opcode words route through unchanged.
+const PROG_PDP11: &str = "\
+; a small pdp-11 routine
+        org 0x1000
+mask    equ 0x00ff
+delta = 4
+start:  mov #0x1234, r0   ; immediate
+        mov (r2)+, -(r3)
+        mov delta(r1), r5
+        clr count
+loop:   inc count
+        sob r0, loop
+        bne loop
+        halt
+count:  word 0
+msg:    byte 0x48, 0x49
+";
+
+#[test]
+fn fmt_pdp11_reassembles_byte_identical() {
+    let original = assemble_pdp11(PROG_PDP11).expect("assembles").bytes;
+    let formatted = format_pdp11(PROG_PDP11).expect("formats");
+    let reassembled = assemble_pdp11(&formatted)
+        .unwrap_or_else(|e| panic!("formatted pdp11 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "pdp11 round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_pdp11(&formatted).expect("formats"),
+        "pdp11 fmt is idempotent"
     );
 }
