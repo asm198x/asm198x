@@ -1,0 +1,12 @@
+{"t":"header","format":"debug198x","format_version":"0.1","tool":"asm198x","tool_version":"0.0.7","cpu":"6502","dialect":"ca65","sources":["6502-nes.s"]}
+{"t":"section","id":0,"name":"ZEROPAGE","base":0}
+{"t":"section","id":4,"name":"CODE","base":32768}
+{"t":"section","id":5,"name":"VECTORS","base":65530}
+{"t":"symbol","name":"SPEED","kind":"const","value":3}
+{"t":"symbol","name":"pos","kind":"label","section":0,"offset":0}
+{"t":"symbol","name":"reset","kind":"label","section":4,"offset":0}
+{"t":"symbol","name":"loop","kind":"label","section":4,"offset":4}
+{"t":"line","file":"6502-nes.s","line":5,"section":4,"offset":0,"length":2}
+{"t":"line","file":"6502-nes.s","line":6,"section":4,"offset":2,"length":2}
+{"t":"line","file":"6502-nes.s","line":7,"section":4,"offset":4,"length":3}
+{"t":"line","file":"6502-nes.s","line":9,"section":5,"offset":0,"length":6}

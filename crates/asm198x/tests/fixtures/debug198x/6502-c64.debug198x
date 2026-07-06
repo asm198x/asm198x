@@ -1,0 +1,12 @@
+{"t":"header","format":"debug198x","format_version":"0.1","tool":"asm198x","tool_version":"0.0.7","cpu":"6502","dialect":"acme","sources":["6502-c64.s"]}
+{"t":"section","id":0,"name":"main","base":49152}
+{"t":"symbol","name":"border","kind":"const","value":53280}
+{"t":"symbol","name":"start","kind":"label","section":0,"offset":0}
+{"t":"symbol","name":"loop","kind":"label","section":0,"offset":5}
+{"t":"symbol","name":"data","kind":"label","section":0,"offset":9}
+{"t":"line","file":"6502-c64.s","line":4,"section":0,"offset":0,"length":2}
+{"t":"line","file":"6502-c64.s","line":5,"section":0,"offset":2,"length":3}
+{"t":"line","file":"6502-c64.s","line":7,"section":0,"offset":5,"length":1}
+{"t":"line","file":"6502-c64.s","line":8,"section":0,"offset":6,"length":2}
+{"t":"line","file":"6502-c64.s","line":9,"section":0,"offset":8,"length":1}
+{"t":"line","file":"6502-c64.s","line":11,"section":0,"offset":9,"length":3}

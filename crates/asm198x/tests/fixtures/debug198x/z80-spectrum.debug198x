@@ -1,0 +1,11 @@
+{"t":"header","format":"debug198x","format_version":"0.1","tool":"asm198x","tool_version":"0.0.7","cpu":"z80","dialect":"pasmo","sources":["z80-spectrum.s"]}
+{"t":"section","id":0,"name":"main","base":32768}
+{"t":"symbol","name":"BORDER","kind":"const","value":254}
+{"t":"symbol","name":"start","kind":"entry","section":0,"offset":0}
+{"t":"symbol","name":"loop","kind":"label","section":0,"offset":4}
+{"t":"symbol","name":"msg","kind":"label","section":0,"offset":7}
+{"t":"line","file":"z80-spectrum.s","line":4,"section":0,"offset":0,"length":2}
+{"t":"line","file":"z80-spectrum.s","line":5,"section":0,"offset":2,"length":2}
+{"t":"line","file":"z80-spectrum.s","line":6,"section":0,"offset":4,"length":2}
+{"t":"line","file":"z80-spectrum.s","line":7,"section":0,"offset":6,"length":1}
+{"t":"line","file":"z80-spectrum.s","line":8,"section":0,"offset":7,"length":3}
