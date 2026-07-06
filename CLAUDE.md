@@ -34,20 +34,23 @@ before changing the crate structure or the ISA layer. The load-bearing points:
 
 ## Crate layout
 
-Two crates today; split further only when the per-CPU `isa` boundary or
-Emu198x's consumption makes it real.
+Three crates today (`isa`, `isa-disasm`, `asm198x`); split further only when the
+per-CPU `isa` boundary or Emu198x's consumption makes it real.
 
 - [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`
   + `m68k` + `mos6809` + `mos65816` + `huc6280` + `sm83` + `i8080` + `m6800` +
-  `cdp1802` + `i8048` + `scmp` + `f8` + `s2650` + `tms7000` + `pdp11` + `tms9900` + `z8000`; the Z80 set
+  `cdp1802` + `i8048` + `scmp` + `f8` + `s2650` + `tms7000` + `pdp11` + `tms9900` + `cp1610` + `z8000`; the Z80 set
   includes the Z80N extensions, `huc6280` is a 65C02-superset extension over
   `mos6502`, and `sm83`/`i8080`/`cdp1802`/`i8048`/`scmp`/`f8`/`s2650`/`tms7000`/`pdp11`/`tms9900`/`z8000` are standalone fresh specs, `m6800` is the big-endian Motorola-family root of the 6809, `pdp11`/`tms9900`/`z8000` bespoke field-packed tables rather than the `Form` model — `z8000` built as verified increments). Zero dependencies.
 - [`crates/isa-disasm`](crates/isa-disasm) — the spec-driven disassemblers
-  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048, SC/MP, F8, 2650, TMS7000, PDP-11, TMS9900, Z8000), decoding against `isa`.
+  (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048, SC/MP, F8, 2650, TMS7000, PDP-11, TMS9900, CP1610, Z8000), decoding against `isa`.
   Depends only on `isa` + std, so Emu198x can consume disassembly without the
   assembler. See [`decisions/disassembler-crate.md`](decisions/disassembler-crate.md).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
-  the shared per-CPU cores, the dialect front-ends) and the `asm198x` CLI. It
+  the shared per-CPU cores, the dialect front-ends) and the `asm198x` CLI. Also
+  hosts the three layers above the encoder — the semantic **AST** (`src/ast.rs`),
+  the `--fmt` **formatter**, and the **core contract** (`src/contract.rs`,
+  `src/span.rs`) — described below under *The layers above the encoder*. It
   re-exports the disassembler from `isa-disasm`.
 
 Delivered so far, all validated byte-identical against the real tool on the
@@ -380,6 +383,43 @@ The engine ↔ dialect ↔ spec seam (and, for ca65, the assemble + link path th
 bypasses the flat engine) is documented at the top of `crates/asm198x/src/lib.rs`.
 The encoding-model taxonomy (fixed slots / field-packed / computed operand) and
 the computed-operand seam are in `../../decisions/packaging-and-cpu-roadmap.md`.
+
+## The layers above the encoder (AST, formatter, core contract)
+
+Three subsystems sit on top of the per-CPU encoders. All are sequenced by
+[`decisions/roadmap-sequencing.md`](decisions/roadmap-sequencing.md) — read it
+first; it is the map (Layer 0 foundations ✅, Layer 1 the contract, Layer 2 the
+consumers).
+
+- **The semantic AST** (`src/ast.rs`) — the source-preserving tree between parse
+  and byte-lowering. **Every dialect now routes assembly through it** (Layer 0b,
+  complete 2026-07-06): a dialect's `parse_program`/`parse_ast` builds an
+  `ast::Program`, `lower` turns it into the engine's `Statement` stream
+  (byte-identical), and `emit` renders it back to canonical source. Fixed-slot
+  and field-packed CPUs carry their operations as the shared `Item`s (incl.
+  `Item::Encoded`); the two **multi-pass CISC** dialects that never use
+  `engine::assemble` — **vasm (68000)** and the **NES ca65** assemble+link —
+  carry their own un-lowered statements as a family-owned `Item::Native` payload
+  (the seam that will carry x86 and the 68020+/68080 line). See
+  [`decisions/ast-native-payload-for-multipass-cisc.md`](decisions/ast-native-payload-for-multipass-cisc.md).
+- **The formatter** (`--fmt`, the `format_*` fns) — canonical layout via the AST
+  `emit`: labels at column 0, operations indented, comments preserved as trivia,
+  operand spelling untouched. Reassembles **byte-identical** and is idempotent;
+  **covers every dialect** (the CLI's unsupported-dialect fallback is gone). Style
+  rules in [`decisions/formatter-canonical-style.md`](decisions/formatter-canonical-style.md);
+  round-trip tests in `crates/asm198x/tests/fmt.rs`.
+- **The core contract** (`src/contract.rs`) — one machine-readable result +
+  rustc-style diagnostics every CPU inherits (plan
+  `docs/plans/2026-07-03-003-feat-core-contract-plan.md`). Landed: **U1**
+  `AssemblyResult` (R1), **U2** `Diagnostic`/`Span`/envelope (R2), **U4**
+  `--message-format=json` (R3, `tests/cli_json.rs`), **U5** `CONTRACT_VERSION` +
+  skip-unknown + the draft-then-freeze governance
+  ([`decisions/core-contract-freeze.md`](decisions/core-contract-freeze.md)).
+  **Remaining: U3** — column-accurate spans (today every node span is
+  `Span::at(line, 1)`; U3 threads the operand column into the highest-value error
+  sites in acme/Z80, field-packed CPUs staying line-granular). After U3, R1
+  freezes at the MCP surface. The one span type is shared across `ast`, the
+  engine's `AsmError`, and `Diagnostic` (`src/span.rs`), multi-file-ready.
 
 ## How correctness is checked
 
