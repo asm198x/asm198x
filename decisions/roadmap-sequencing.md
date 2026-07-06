@@ -64,9 +64,11 @@ See § Layer 0 in detail below.
 freeze fires at MCP (`decisions/core-contract-freeze.md`).
 
 **Layer 2 — the consumers fan out** (on stable foundations, low rework):
-- **Debug198x (`…-001`, idea 1)** — resume against frozen R1 + the shared span/
-  symbol model. Was paused, correctly, pending the contract's designed R1 shape
-  (contract-first); **resumed 2026-07-06** once Layer 1 completed.
+- **Debug198x (`…-001`, idea 1)** — ✅ **complete 2026-07-06** (U1–U7: format
+  crate, engine/ca65/vasm emission, CLI artifacts, fixture corpus, spec page +
+  freeze record). Was paused, correctly, pending the contract's designed R1
+  shape (contract-first). The format's v1 freeze waits on Emu198x consumption
+  per `decisions/debug198x-format.md`.
 - **Verdict pipeline (`…-002`, idea 2)** — genuinely **independent**, gated on
   nothing; reuses only the thin diagnostic envelope opportunistically. Run its
   harness prerequisite (outcome-typed `ref_assemble`, its U2) whenever capacity
