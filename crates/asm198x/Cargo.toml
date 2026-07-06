@@ -21,9 +21,9 @@ dbg198x = { path = "../dbg198x", version = "0.0.7" }
 # serde derive for the public `AssemblyResult` contract (U1). Already on the CLI
 # path transitively via dbg198x; this makes the derive macro available directly.
 serde = { workspace = true }
-
-[dev-dependencies]
-# JSON round-trip proof for the contract types (tests/contract.rs).
+# JSON serialization for `--message-format=json` (U4) and the contract round-trip
+# tests. Already linked transitively via dbg198x — this names it directly, adding
+# nothing new to the shipped binary.
 serde_json = { workspace = true }
 
 [lints]

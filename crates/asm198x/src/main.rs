@@ -169,12 +169,20 @@ fn main() -> ExitCode {
     match run(&args) {
         Ok(summary) => {
             // Diagnostics go to stderr so stdout carries only real output
-            // (the disassembly listing); assembly writes its bytes to a file.
-            eprintln!("{summary}");
+            // (the disassembly listing); assembly writes its bytes to a file. An
+            // empty summary means the command already emitted its output (the
+            // `--message-format=json` path prints JSON to stdout itself).
+            if !summary.is_empty() {
+                eprintln!("{summary}");
+            }
             ExitCode::SUCCESS
         }
         Err(message) => {
-            eprintln!("asm198x: {message}");
+            // Likewise, an empty message means the failure was already reported
+            // (JSON diagnostics on stdout) — just set the exit code.
+            if !message.is_empty() {
+                eprintln!("asm198x: {message}");
+            }
             ExitCode::FAILURE
         }
     }
@@ -195,9 +203,18 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut sna = false;
     let mut prg = false;
     let mut origin: u16 = 0;
+    let mut message_format = MessageFormat::Human;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
+            "--message-format" => {
+                i += 1;
+                let value = args.get(i).ok_or("`--message-format` needs a value")?;
+                message_format = parse_message_format(value)?;
+            }
+            f if f.starts_with("--message-format=") => {
+                message_format = parse_message_format(&f["--message-format=".len()..])?;
+            }
             "-o" | "--output" => {
                 i += 1;
                 let path = args.get(i).ok_or("`-o` needs a path")?;
@@ -351,6 +368,14 @@ fn run(args: &[String]) -> Result<String, String> {
         return Ok(format!("formatted {input}"));
     }
 
+    // `--message-format=json`: emit the machine-consumable result (or its
+    // diagnostics) as JSON on stdout, for any dialect, instead of the human
+    // summary (U4). Byte output to `-o` still happens; only the reporting format
+    // changes. Handled before the per-dialect human output paths below.
+    if let MessageFormat::Json = message_format {
+        return emit_json(&assembler, &source, exe, output.as_deref());
+    }
+
     // vasm (68000): a flat big-endian code image, or an Amiga hunk executable
     // with `--exe` (the curriculum's `-Fhunkexe` target).
     if let Assembler::Vasm = assembler {
@@ -462,6 +487,8 @@ fn parse_u16(value: &str) -> Result<u16, String> {
 fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
      assemble:    asm198x [--dialect <name>] [--cpu <target>] <input> [-o <out.bin>]\n\
+     \x20            (add --message-format=json for a machine-readable result +\n\
+     \x20             diagnostics on stdout; --message-format=human is the default)\n\
      snapshot:    asm198x --dialect pasmonext --sna <input> [-o <out.sna>]\n\
      \x20            (Spectrum Z80 only; needs `end <addr>` for the entry point)\n\
      C64 program: asm198x --dialect acme --prg <input> [-o <out.prg>]\n\
@@ -484,4 +511,63 @@ fn usage() -> String {
      \x20                 the dialect\n\n\
      Assembles retro CPU source to a flat binary, or disassembles one back."
         .to_string()
+}
+
+/// The `--message-format` mode: human summary (default) or machine-consumable
+/// JSON (U4).
+#[derive(Clone, Copy)]
+enum MessageFormat {
+    Human,
+    Json,
+}
+
+fn parse_message_format(value: &str) -> Result<MessageFormat, String> {
+    match value {
+        "human" => Ok(MessageFormat::Human),
+        "json" => Ok(MessageFormat::Json),
+        other => Err(format!(
+            "invalid --message-format `{other}` (expected `human` or `json`)"
+        )),
+    }
+}
+
+/// Emit the assembly result (or its diagnostics) as JSON on stdout — the
+/// `--message-format=json` path (U4, R3). Byte output to `-o` still happens; only
+/// the reporting format changes. The shape is CPU-agnostic (R8): every dialect's
+/// `AssemblyResult` and every `AsmError`-derived `Diagnostic` serialize the same,
+/// so a new CPU inherits JSON output with no extra work. Returns an empty summary
+/// so the caller prints nothing further — the JSON is already on stdout.
+fn emit_json(
+    assembler: &Assembler,
+    source: &str,
+    exe: bool,
+    output: Option<&Path>,
+) -> Result<String, String> {
+    let result = match assembler {
+        Assembler::Vasm if exe => asm198x::assemble_vasm_exe(source),
+        Assembler::Vasm => asm198x::assemble_vasm_warned(source),
+        Assembler::Ca65 => asm198x::assemble_ca65(source),
+        other => other.assemble(source),
+    };
+    match result {
+        Ok(assembly) => {
+            if let Some(path) = output {
+                std::fs::write(path, &assembly.bytes)
+                    .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
+            }
+            let json =
+                serde_json::to_string(&assembly).map_err(|e| format!("json encode failed: {e}"))?;
+            println!("{json}");
+            Ok(String::new())
+        }
+        Err(error) => {
+            // A single diagnostic today (one fatal error); a Vec so the JSON shape
+            // is stable if multi-error accumulation lands later.
+            let diagnostics = [asm198x::Diagnostic::from(error)];
+            let json = serde_json::to_string(&diagnostics)
+                .map_err(|e| format!("json encode failed: {e}"))?;
+            println!("{json}");
+            Err(String::new())
+        }
+    }
 }
