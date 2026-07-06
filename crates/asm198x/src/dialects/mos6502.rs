@@ -24,6 +24,9 @@ pub(crate) enum Index {
 }
 
 /// Operand syntax as parsed, before it is resolved to an addressing mode.
+// `Clone` so a dialect that carries `OperandSyntax` in an AST node payload (the
+// ca65 NES `Kind`) can project it back out of the tree.
+#[derive(Clone)]
 pub(crate) enum OperandSyntax {
     None,
     Accumulator,

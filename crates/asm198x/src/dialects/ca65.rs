@@ -19,7 +19,7 @@ use super::mos6502::{
     self, BytePrec, assignment_split, fold_const, is_ident, parse_number, split_data_items,
     split_first_word, split_top_level, string_literal,
 };
-use crate::engine::{AsmError, Expr};
+use crate::engine::{AsmError, Expr, Operation};
 
 // ---------------------------------------------------------------------------
 // The fixed NES (NROM) layout
@@ -74,6 +74,10 @@ fn known_segments() -> String {
 // Parsed statements
 // ---------------------------------------------------------------------------
 
+// `Clone` so the assembler can project a statement out of the AST node that owns
+// it (the assemble+link driver runs on an owned `Vec<Stmt>`; see
+// `parsed_from_program`).
+#[derive(Clone)]
 enum Kind {
     Empty,
     Bytes(Vec<Expr>),
@@ -97,6 +101,16 @@ struct Stmt {
     kind: Kind,
 }
 
+// The ca65 statement kind is the family-owned native payload carried in the AST
+// (`decisions/ast-native-payload-for-multipass-cisc.md`): parse builds it into
+// the tree, and the assemble+link driver reads it back. `=` constants use the
+// shared `Item::Equ` instead, so no `Kind` reports `inline_label`.
+impl crate::ast::NativeItem for Kind {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
 struct Parsed {
     stmts: Vec<Stmt>,
     /// Each label's segment, for the zero-page-vs-absolute decision.
@@ -115,7 +129,12 @@ struct Parsed {
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
 pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
     let set = &isa::mos6502::SET;
-    let parsed = parse(set, source)?;
+    // The AST is the single front-end IR: parse into the source-preserving
+    // `Program` (carrying each statement's native `Kind`, `=` constants, and the
+    // segment directives), then project it to the assembler's `Parsed`. Same
+    // bytes as the old direct parse — see
+    // `decisions/ast-native-payload-for-multipass-cisc.md`.
+    let parsed = parsed_from_program(&parse_program(set, source)?);
 
     // The address-size environment: constants by value, plus zero-page labels
     // pinned below $100 so the shared mode picker selects the short form.
@@ -443,29 +462,68 @@ fn anon_ref(tok: &str) -> Option<(char, usize)> {
 // Parsing
 // ---------------------------------------------------------------------------
 
-fn parse(set: &'static isa::InstructionSet, source: &str) -> Result<Parsed, AsmError> {
+/// Parse ca65 (NES) source into the source-preserving semantic
+/// [`Program`](crate::ast::Program) — the single front-end IR the assemble+link
+/// driver and the `--fmt` formatter both consume. Each line becomes a node
+/// carrying its label (the **source form** — `name`, `@cheap`, or empty for an
+/// anonymous `:` — for the formatter, and the resolved name for assembly), the
+/// verbatim operation source, and comment trivia.
+///
+/// The ca65 statement [`Kind`] is the family-owned native payload
+/// (`decisions/ast-native-payload-for-multipass-cisc.md`); `=` constants are the
+/// shared [`Item::Equ`](crate::ast::Item), folded in source order so `.res`
+/// counts and the zero-page size decision see earlier definitions; a `.segment`
+/// directive is a byte-neutral source-only node the assembly projection reads to
+/// track the active segment.
+pub(crate) fn parse_program(
+    set: &'static isa::InstructionSet,
+    source: &str,
+) -> Result<crate::ast::Program, AsmError> {
+    use crate::ast::{Comment, Item, Node, Program, Scope, Span, Symbol, Trivia};
     let anons = prescan_anons(source);
-    let mut stmts = Vec::new();
-    let mut label_seg: BTreeMap<String, String> = BTreeMap::new();
-    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
-    let mut seg = "CODE".to_string(); // ca65's default segment
+    let mut nodes = Vec::new();
     let mut current_global = String::new();
+    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
+    let mut pending_leading: Vec<Comment> = Vec::new();
 
     for (i, raw) in source.lines().enumerate() {
         let line = i + 1;
-        let code = strip_comment(raw);
+        let (code, comment) = split_comment(raw);
         let trimmed = code.trim();
         if trimmed.is_empty() {
+            if let Some(text) = comment {
+                pending_leading.push(Comment {
+                    text: text.to_string(),
+                    span: Span::at(line as u32, 1),
+                });
+            }
+            continue;
+        }
+        let trailing = comment.map(|text| Comment {
+            text: text.to_string(),
+            span: Span::at(line as u32, (code.len() + 1) as u32),
+        });
+        let span = Span::at(line as u32, 1);
+
+        // `.segment "NAME"` switches the active segment — kept as a source-only
+        // node so the formatter reproduces it; the projection reads it back to
+        // track the active segment (parse itself needs no segment state).
+        if trimmed.starts_with(".segment") {
+            nodes.push(Node {
+                label: None,
+                item: None,
+                source: trimmed.to_string(),
+                span,
+                trivia: Trivia {
+                    leading: std::mem::take(&mut pending_leading),
+                    trailing,
+                },
+            });
             continue;
         }
 
-        // `.segment "NAME"` switches the active segment.
-        if let Some(rest) = trimmed.strip_prefix(".segment") {
-            seg = rest.trim().trim_matches('"').to_string();
-            continue;
-        }
-
-        // `NAME = expr` defines a constant.
+        // `NAME = expr` defines a constant — the shared `Item::Equ`, folded in
+        // source order (later statements' size decisions see it).
         if let Some(eq) = assignment_split(trimmed) {
             let name = trimmed[..eq].trim();
             if !is_ident(name) {
@@ -478,30 +536,142 @@ fn parse(set: &'static isa::InstructionSet, source: &str) -> Result<Parsed, AsmE
             if let Ok(v) = fold_const(&expr, &consts, line) {
                 consts.insert(name.to_string(), v);
             }
+            nodes.push(Node {
+                label: Some(Symbol {
+                    qualified: name.to_string(),
+                    scope: Scope::Global,
+                    name: name.to_string(),
+                }),
+                item: Some(crate::ast::item_from_operation(Operation::Equ(expr))),
+                source: trimmed[eq..].trim().to_string(),
+                span,
+                trivia: Trivia {
+                    leading: std::mem::take(&mut pending_leading),
+                    trailing,
+                },
+            });
             continue;
         }
 
         // An optional `name:` / `@cheap:` / `:` label, then an optional operation.
-        let (label, rest) = split_label(&anons, line, &mut current_global, trimmed)?;
-        if let Some(name) = &label {
-            label_seg.insert(name.clone(), seg.clone());
-        }
+        let (symbol, rest) = split_label_symbol(&anons, line, &mut current_global, trimmed)?;
         let kind = parse_op(set, &anons, &current_global, &consts, rest, line)?;
-        if label.is_none() && matches!(kind, Kind::Empty) {
-            continue;
+        let trivia = Trivia {
+            leading: std::mem::take(&mut pending_leading),
+            trailing,
+        };
+        match (symbol, kind) {
+            // A label-less empty line — nothing to place or format (unreachable
+            // in practice; a label-less operation never folds to `Empty`).
+            (None, Kind::Empty) => pending_leading = trivia.leading,
+            // A label with no operation: keep the label so the projection places
+            // it as an empty statement and records its address.
+            (symbol, Kind::Empty) => nodes.push(Node {
+                label: symbol,
+                item: None,
+                source: String::new(),
+                span,
+                trivia,
+            }),
+            (symbol, kind) => nodes.push(Node {
+                label: symbol,
+                item: Some(Item::Native(Box::new(kind))),
+                source: rest.trim().to_string(),
+                span,
+                trivia,
+            }),
         }
-        stmts.push(Stmt {
-            line,
-            seg: seg.clone(),
-            label,
-            kind,
+    }
+
+    // Flush comments after the last node (a trailing block or comment-only file).
+    if !pending_leading.is_empty() {
+        let line = source.lines().count() as u32;
+        nodes.push(Node {
+            label: None,
+            item: None,
+            source: String::new(),
+            span: Span::at(line, 1),
+            trivia: Trivia {
+                leading: pending_leading,
+                trailing: None,
+            },
         });
     }
-    Ok(Parsed {
+    Ok(Program { nodes })
+}
+
+/// Project the semantic [`Program`](crate::ast::Program) into the assembler's
+/// [`Parsed`] — the assemble+link driver runs on an owned `Vec<Stmt>` plus the
+/// label→segment and constant maps. Everything is read straight back out of the
+/// tree (nothing is re-parsed): a native [`Kind`] payload becomes a placed
+/// statement in the segment tracked from the `.segment` nodes, a label-only node
+/// becomes an empty placed statement, and an `Item::Equ` node folds into the
+/// constant table in source order.
+fn parsed_from_program(program: &crate::ast::Program) -> Parsed {
+    use crate::ast::{Item, Operand};
+    let mut seg = "CODE".to_string();
+    let mut stmts = Vec::new();
+    let mut label_seg: BTreeMap<String, String> = BTreeMap::new();
+    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
+
+    for node in &program.nodes {
+        let line = node.span.line as usize;
+        match &node.item {
+            Some(Item::Equ(Operand::Expr { value, .. })) => {
+                if let Some(sym) = node.label.as_ref()
+                    && let Ok(v) = fold_const(value, &consts, line)
+                {
+                    consts.insert(sym.qualified.clone(), v);
+                }
+            }
+            Some(Item::Native(payload)) => {
+                let kind = payload
+                    .as_any()
+                    .downcast_ref::<Kind>()
+                    .expect("ca65 stores a Kind in every native node")
+                    .clone();
+                let label = node.label.as_ref().map(|s| s.qualified.clone());
+                if let Some(l) = &label {
+                    label_seg.insert(l.clone(), seg.clone());
+                }
+                stmts.push(Stmt {
+                    line,
+                    seg: seg.clone(),
+                    label,
+                    kind,
+                });
+            }
+            // Item-less nodes: a `.segment` directive (tracked), a label-only line
+            // (an empty placed statement), or a comment-only flush node (skipped).
+            _ => {
+                if let Some(rest) = node.source.strip_prefix(".segment") {
+                    seg = rest.trim().trim_matches('"').to_string();
+                } else if let Some(sym) = node.label.as_ref() {
+                    label_seg.insert(sym.qualified.clone(), seg.clone());
+                    stmts.push(Stmt {
+                        line,
+                        seg: seg.clone(),
+                        label: Some(sym.qualified.clone()),
+                        kind: Kind::Empty,
+                    });
+                }
+            }
+        }
+    }
+    Parsed {
         stmts,
         label_seg,
         consts,
-    })
+    }
+}
+
+/// Split a line into its code and its `;` comment for carrying comments as AST
+/// trivia. Defined via [`strip_comment`] so the comment is exactly what it
+/// removes — no behaviour change to assembly.
+fn split_comment(line: &str) -> (&str, Option<&str>) {
+    let code = strip_comment(line);
+    let comment = (code.len() < line.len()).then(|| line[code.len()..].trim_end());
+    (code, comment)
 }
 
 /// Strip a `;` comment, ignoring `;` inside `'c'` or `"..."`.
@@ -519,28 +689,42 @@ fn strip_comment(line: &str) -> &str {
     line
 }
 
-/// Split a leading `name:`, `@cheap:`, or bare `:` (anonymous) label. Updates
-/// `current_global` when a non-cheap named label is defined (cheap locals scope
-/// to the preceding global).
-fn split_label<'a>(
+/// Split a leading `name:`, `@cheap:`, or bare `:` (anonymous) label into an AST
+/// [`Symbol`](crate::ast::Symbol) carrying both the **source form** (`name` /
+/// `@cheap` / empty for anonymous — what the formatter re-emits) and the
+/// **resolved** name (what assembly uses: the synthetic anonymous key, the
+/// `global@cheap` cheap key, or the plain name). Updates `current_global` when a
+/// non-cheap named label is defined (cheap locals scope to the preceding global).
+fn split_label_symbol<'a>(
     anons: &[AnonDef],
     line: usize,
     current_global: &mut String,
     trimmed: &'a str,
-) -> Result<(Option<String>, &'a str), AsmError> {
+) -> Result<(Option<crate::ast::Symbol>, &'a str), AsmError> {
+    use crate::ast::{Scope, Symbol};
     let (word, remainder) = split_first_word(trimmed);
-    // A bare `:` is an anonymous label; its synthetic name is pre-scanned.
+    // A bare `:` is an anonymous label: the empty source name re-emits as a lone
+    // `:` (emit appends the colon), while assembly uses the pre-scanned name.
     if word == ":" {
-        let name = anons
+        let qualified = anons
             .iter()
             .find(|d| d.line == line)
             .map(|d| d.name.clone())
             .ok_or_else(|| AsmError::new(line, "internal: anonymous label not pre-scanned"))?;
-        return Ok((Some(name), remainder));
+        return Ok((
+            Some(Symbol {
+                name: String::new(),
+                scope: Scope::Global,
+                qualified,
+            }),
+            remainder,
+        ));
     }
     let Some(name) = word.strip_suffix(':') else {
         return Ok((None, trimmed));
     };
+    // `@cheap:` — a cheap local. The `@cheap` source form round-trips; assembly
+    // uses the `global@cheap` key.
     if let Some(cheap) = name.strip_prefix('@') {
         if !is_ident(cheap) {
             return Err(AsmError::new(
@@ -548,13 +732,29 @@ fn split_label<'a>(
                 format!("invalid cheap-local label `{name}`"),
             ));
         }
-        return Ok((Some(cheap_key(current_global, cheap)), remainder));
+        return Ok((
+            Some(Symbol {
+                name: name.to_string(),
+                scope: Scope::Local {
+                    in_global: current_global.clone(),
+                },
+                qualified: cheap_key(current_global, cheap),
+            }),
+            remainder,
+        ));
     }
     if !is_ident(name) {
         return Err(AsmError::new(line, format!("invalid label `{name}`")));
     }
     *current_global = name.to_string();
-    Ok((Some(name.to_string()), remainder))
+    Ok((
+        Some(Symbol {
+            name: name.to_string(),
+            scope: Scope::Global,
+            qualified: name.to_string(),
+        }),
+        remainder,
+    ))
 }
 
 fn parse_op(

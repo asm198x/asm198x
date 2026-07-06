@@ -337,12 +337,9 @@ fn run(args: &[String]) -> Result<String, String> {
             Assembler::Lwasm => asm198x::format_lwasm(&source),
             Assembler::Acme => asm198x::format_acme(&source),
             Assembler::Vasm => asm198x::format_vasm(&source),
-            _ => {
-                return Err(
-                    "`--fmt` supports the Z80 dialects (pasmo, sjasmplus), 8080, 6800, 1802, 8048, f8, 2650, tms7000, 65816, huc6280, pdp11, tms9900, cp1610, z8000, z8001, scmp, rgbasm, 6809, vasm (68000), and acme so far"
-                        .into(),
-                );
-            }
+            Assembler::Ca65 => asm198x::format_ca65(&source),
+            // Every dialect now routes through the semantic AST, so `--fmt`
+            // covers them all — no unsupported-dialect fallback remains.
         }
         .map_err(|e| format!("{input}: {e}"))?;
         if let Some(path) = &output {

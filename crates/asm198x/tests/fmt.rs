@@ -4,14 +4,14 @@
 //! spelling and comments.
 
 use asm198x::{
-    assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_ca65_816,
+    assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_ca65, assemble_ca65_816,
     assemble_ca65_huc6280, assemble_cp1610, assemble_f8, assemble_i8080, assemble_lwasm,
     assemble_m6800, assemble_pasmo, assemble_pdp11, assemble_rgbasm, assemble_scmp,
     assemble_sjasmplus, assemble_tms7000, assemble_tms9900, assemble_vasm, assemble_z8000,
-    assemble_z8001, format_1802, format_2650, format_8048, format_acme, format_ca65_816,
-    format_ca65_huc6280, format_cp1610, format_f8, format_i8080, format_lwasm, format_m6800,
-    format_pasmo, format_pdp11, format_rgbasm, format_scmp, format_sjasmplus, format_tms7000,
-    format_tms9900, format_vasm, format_z8000, format_z8001,
+    assemble_z8001, format_1802, format_2650, format_8048, format_acme, format_ca65,
+    format_ca65_816, format_ca65_huc6280, format_cp1610, format_f8, format_i8080, format_lwasm,
+    format_m6800, format_pasmo, format_pdp11, format_rgbasm, format_scmp, format_sjasmplus,
+    format_tms7000, format_tms9900, format_vasm, format_z8000, format_z8001,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -1011,5 +1011,52 @@ fn fmt_vasm_reassembles_byte_identical() {
     assert!(
         formatted.contains(".loop") && formatted.contains("* a small 68000 routine"),
         "local label + column-0 comment preserved:\n{formatted}"
+    );
+}
+
+/// A representative ca65 NES program exercising every label form the AST must
+/// round-trip: a `.segment` directive, a `=` constant, a named label, an
+/// `@cheap` local, and an anonymous `:` label with a backward `:-` reference,
+/// plus data directives and comments. The standalone assemble+link dialect, now
+/// routed through the AST (the family-owned `Kind` payload).
+const PROG_CA65: &str = "\
+; a small nes routine
+        .segment \"CODE\"
+count = 4              ; a constant
+start:
+        ldx #0
+:                      ; anonymous label
+        inx
+        cpx #count
+        bne :-         ; backward anonymous reference
+@done:
+        rts
+data:
+        .byte 1, 2, 3
+        .word start
+";
+
+#[test]
+fn fmt_ca65_reassembles_byte_identical() {
+    let original = assemble_ca65(PROG_CA65).expect("assembles").bytes;
+    let formatted = format_ca65(PROG_CA65).expect("formats");
+    let reassembled = assemble_ca65(&formatted)
+        .unwrap_or_else(|e| panic!("formatted ca65 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "ca65 round-trips byte-identical (all label forms)\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_ca65(&formatted).expect("formats"),
+        "ca65 fmt is idempotent"
+    );
+    // Every label form and the segment directive survive verbatim.
+    assert!(
+        formatted.contains(".segment \"CODE\"")
+            && formatted.contains("@done:")
+            && formatted.contains("bne :-"),
+        "segment, cheap local, and anonymous reference preserved:\n{formatted}"
     );
 }

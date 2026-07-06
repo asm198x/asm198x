@@ -91,6 +91,20 @@ pub fn assemble_ca65(source: &str) -> Result<AssemblyResult, AsmError> {
     dialects::ca65::assemble(source).map(AssemblyResult::image)
 }
 
+/// Reformat ca65-syntax NES source to canonical layout (the `--fmt` formatter).
+/// Parses into the source-preserving semantic AST and emits canonical
+/// same-dialect source — reassembling byte-identical to the input, with the
+/// named, `@cheap`, and anonymous (`:`) label forms preserved.
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_ca65(source: &str) -> Result<String, AsmError> {
+    Ok(ast::emit(
+        &dialects::ca65::parse_program(&isa::mos6502::SET, source)?,
+        false,
+    ))
+}
+
 /// Assemble Motorola-syntax 68000 source into a flat big-endian code image
 /// (the Amiga curriculum's `vasm` dialect) with the optimizer on — matching
 /// `vasmm68k_mot -Fbin`. Rejects multi-section sources (a flat binary holds one
