@@ -323,13 +323,14 @@ fn run(args: &[String]) -> Result<String, String> {
             Assembler::I8048 { romless: false } => asm198x::format_8048(&source),
             Assembler::I8048 { romless: true } => asm198x::format_8039(&source),
             Assembler::F8 => asm198x::format_f8(&source),
+            Assembler::S2650 => asm198x::format_2650(&source),
             Assembler::Scmp => asm198x::format_scmp(&source),
             Assembler::Rgbasm => asm198x::format_rgbasm(&source),
             Assembler::Lwasm => asm198x::format_lwasm(&source),
             Assembler::Acme => asm198x::format_acme(&source),
             _ => {
                 return Err(
-                    "`--fmt` supports the Z80 dialects (pasmo, sjasmplus), 8080, 6800, 1802, 8048, f8, scmp, rgbasm, 6809, and acme so far"
+                    "`--fmt` supports the Z80 dialects (pasmo, sjasmplus), 8080, 6800, 1802, 8048, f8, 2650, scmp, rgbasm, 6809, and acme so far"
                         .into(),
                 );
             }

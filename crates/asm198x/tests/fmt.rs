@@ -4,10 +4,11 @@
 //! spelling and comments.
 
 use asm198x::{
-    assemble_1802, assemble_8048, assemble_acme, assemble_f8, assemble_i8080, assemble_lwasm,
-    assemble_m6800, assemble_pasmo, assemble_rgbasm, assemble_scmp, assemble_sjasmplus,
-    format_1802, format_8048, format_acme, format_f8, format_i8080, format_lwasm, format_m6800,
-    format_pasmo, format_rgbasm, format_scmp, format_sjasmplus,
+    assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_f8, assemble_i8080,
+    assemble_lwasm, assemble_m6800, assemble_pasmo, assemble_rgbasm, assemble_scmp,
+    assemble_sjasmplus, format_1802, format_2650, format_8048, format_acme, format_f8,
+    format_i8080, format_lwasm, format_m6800, format_pasmo, format_rgbasm, format_scmp,
+    format_sjasmplus,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -611,5 +612,42 @@ fn fmt_f8_reassembles_byte_identical() {
         formatted,
         format_f8(&formatted).expect("formats"),
         "F8 fmt is idempotent"
+    );
+}
+
+/// A representative Signetics 2650 program: origin, a same-line colon label with
+/// an instruction, an `equ` constant (no colon), the `mnemonic,reg` comma
+/// syntax, immediate/absolute/indexed operands, and the relative + absolute
+/// branches (the `Packed`/`Encoded` seams). A fixed-slot straggler routed
+/// through the AST formatter (0b).
+const PROG_2650: &str = "\
+; a small 2650 routine
+        org $0000
+start:  lodi,r0 $42    ; load
+        addi,r0 $05
+five    equ 5
+        lodi,r1 five
+        loda,r0 $1234
+        loda,r0 $1234,r3
+loop:   bctr,eq loop
+        bcta,un start
+        halt
+";
+
+#[test]
+fn fmt_2650_reassembles_byte_identical() {
+    let original = assemble_2650(PROG_2650).expect("assembles").bytes;
+    let formatted = format_2650(PROG_2650).expect("formats");
+    let reassembled = assemble_2650(&formatted)
+        .unwrap_or_else(|e| panic!("formatted 2650 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "2650 round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_2650(&formatted).expect("formats"),
+        "2650 fmt is idempotent"
     );
 }

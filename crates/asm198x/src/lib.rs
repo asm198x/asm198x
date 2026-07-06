@@ -467,6 +467,15 @@ pub fn format_f8(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::F8, source)
 }
 
+/// Reformat Signetics 2650 source to canonical layout (the `--fmt` formatter).
+/// Reassembles byte-identical to the input.
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_2650(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::S2650, source)
+}
+
 /// Format Motorola-syntax 6800 source (`asm198x fmt --cpu 6800`): parse into the
 /// semantic AST and emit canonical same-dialect source — labels at column 0,
 /// operations indented, comments preserved, `$`-hex operand spelling untouched.
