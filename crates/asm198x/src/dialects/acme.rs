@@ -251,13 +251,19 @@ impl<'a> FmtCx<'a> {
         leading: Vec<crate::ast::Comment>,
     ) -> Result<crate::ast::Node, AsmError> {
         let trimmed = code.trim();
+        // The original source line, so operand columns stay file-accurate even
+        // when `code` is a mid-line slice (an inline conditional body). Every
+        // slice below borrows from it (contract U3).
+        let raw = self.lines[line - 1];
+        let at_line = line as u32;
 
         // `*= expr` / `* = expr` — a program-counter set (no label).
         if let Some(rest) = trimmed.strip_prefix('*') {
             let rest = rest.trim_start();
             if let Some(value) = rest.strip_prefix('=') {
                 let src = format!("*= {}", value.trim());
-                return Ok(self.op_node(None, src, leading, comment, line));
+                let span = crate::ast::token_span(raw, value, at_line);
+                return Ok(self.op_node(span, None, src, leading, comment, line));
             }
         }
 
@@ -266,31 +272,34 @@ impl<'a> FmtCx<'a> {
             let name = trimmed[..eq].trim();
             if is_ident(name) {
                 let src = format!("= {}", trimmed[eq + 1..].trim());
-                return Ok(self.equ_node(name, src, leading, comment, line));
+                let span = crate::ast::token_span(raw, &trimmed[eq + 1..], at_line);
+                return Ok(self.equ_node(span, name, src, leading, comment, line));
             }
         }
 
         // A column-0 token may be a label; a leading-whitespace line is all op.
         if !code.starts_with([' ', '\t']) {
             let (word, rest) = split_first_word(trimmed);
+            let span = crate::ast::operand_span(raw, rest, at_line);
             if anon_marker(word).is_some() {
-                return Ok(self.labeled_node(word, rest.trim(), leading, comment, line));
+                return Ok(self.labeled_node(span, word, rest.trim(), leading, comment, line));
             }
             if let Some(name) = word.strip_suffix(':')
                 && is_ident(name)
             {
-                return Ok(self.labeled_node(name, rest.trim(), leading, comment, line));
+                return Ok(self.labeled_node(span, name, rest.trim(), leading, comment, line));
             }
             if !word.starts_with('!')
                 && self.set.instruction(&word.to_ascii_uppercase()).is_none()
                 && is_ident(word)
             {
-                return Ok(self.labeled_node(word, rest.trim(), leading, comment, line));
+                return Ok(self.labeled_node(span, word, rest.trim(), leading, comment, line));
             }
         }
 
         // No label: an instruction or `!` directive, kept verbatim.
-        Ok(self.op_node(None, trimmed.to_string(), leading, comment, line))
+        let span = crate::ast::operand_span(raw, trimmed, at_line);
+        Ok(self.op_node(span, None, trimmed.to_string(), leading, comment, line))
     }
 
     // --- node builders ------------------------------------------------------
@@ -309,6 +318,7 @@ impl<'a> FmtCx<'a> {
 
     fn equ_node(
         &self,
+        operand_span: Option<crate::ast::Span>,
         name: &str,
         source: String,
         leading: Vec<crate::ast::Comment>,
@@ -316,6 +326,7 @@ impl<'a> FmtCx<'a> {
         line: usize,
     ) -> crate::ast::Node {
         crate::ast::Node {
+            operand_span,
             label: Some(global(name)),
             // A placeholder value: the formatter reads only `source`; this tree is
             // never lowered (ACME assembles via its preprocessor).
@@ -334,6 +345,7 @@ impl<'a> FmtCx<'a> {
     /// A line with a column-0 label and (optionally) an operation after it.
     fn labeled_node(
         &self,
+        operand_span: Option<crate::ast::Span>,
         name: &str,
         op: &str,
         leading: Vec<crate::ast::Comment>,
@@ -341,6 +353,7 @@ impl<'a> FmtCx<'a> {
         line: usize,
     ) -> crate::ast::Node {
         crate::ast::Node {
+            operand_span,
             label: Some(global(name)),
             item: None,
             source: op.to_string(),
@@ -354,6 +367,7 @@ impl<'a> FmtCx<'a> {
 
     fn op_node(
         &self,
+        operand_span: Option<crate::ast::Span>,
         label: Option<crate::ast::Symbol>,
         source: String,
         leading: Vec<crate::ast::Comment>,
@@ -361,6 +375,7 @@ impl<'a> FmtCx<'a> {
         line: usize,
     ) -> crate::ast::Node {
         crate::ast::Node {
+            operand_span,
             label,
             item: None,
             source,
@@ -384,6 +399,7 @@ impl<'a> FmtCx<'a> {
         line: usize,
     ) -> crate::ast::Node {
         crate::ast::Node {
+            operand_span: None,
             label: None,
             item: Some(crate::ast::Item::Conditional {
                 head,
@@ -405,6 +421,7 @@ impl<'a> FmtCx<'a> {
     fn flush_pending(&mut self, nodes: &mut Vec<crate::ast::Node>, line: usize) {
         if !self.pending.is_empty() {
             nodes.push(crate::ast::Node {
+                operand_span: None,
                 label: None,
                 item: None,
                 source: String::new(),
@@ -505,7 +522,12 @@ impl crate::ast::CondEval for AcmeEval<'_> {
             self.env.insert(name.clone(), v);
         }
         if !(label.is_none() && op.is_none()) {
-            out.push(Statement { line, label, op });
+            out.push(Statement {
+                line,
+                label,
+                op,
+                operand_span: node.operand_span.clone(),
+            });
         }
         Ok(())
     }

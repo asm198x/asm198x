@@ -164,3 +164,141 @@ fn diagnostic_json_round_trip() {
     let back: asm198x::Diagnostic = serde_json::from_str(&json).expect("deserialise");
     assert_eq!(d, back, "diagnostic JSON round-trip is identity");
 }
+
+// --- U3: column-accurate spans (AE2) ---
+
+/// AE2: an out-of-range operand in a 6502/acme program yields a diagnostic
+/// whose `col` points at the operand token, not the line start.
+#[test]
+fn acme_out_of_range_operand_reports_operand_column() {
+    // Line 2 is `    lda #$1ff` — the operand `#$1ff` starts at column 9.
+    let err =
+        asm198x::assemble_acme("* = $0800\n    lda #$1ff\n").expect_err("511 overflows a byte");
+    let d = asm198x::Diagnostic::from(err);
+    let span = d.span.expect("the diagnostic carries a span");
+    assert_eq!(span.line, 2, "the error's source line is preserved");
+    assert_eq!(span.col, 9, "`col` points at the operand token `#$1ff`");
+}
+
+/// AE2: an out-of-range branch in a Z80 (pasmo) program yields a diagnostic
+/// whose `col` points at the operand token.
+#[test]
+fn z80_out_of_range_branch_reports_operand_column() {
+    // Line 2 is `    jr far` — the operand `far` starts at column 8.
+    let src = "    org 0\n    jr far\n    ds 200\nfar:\n";
+    let err = asm198x::assemble_pasmo(src).expect_err("jr target beyond -128..=127");
+    let d = asm198x::Diagnostic::from(err);
+    let span = d.span.expect("the diagnostic carries a span");
+    assert_eq!(span.line, 2, "the error's source line is preserved");
+    assert_eq!(span.col, 8, "`col` points at the operand token `far`");
+}
+
+/// A field-packed CPU's operand error stays line-granular — its dialect does
+/// not yet populate operand spans (contract KTD1: documented, not a
+/// regression; column accuracy arrives with an AST-span migration).
+#[test]
+fn field_packed_error_stays_line_granular() {
+    let err =
+        asm198x::assemble_pdp11("    mov #70000, r0\n").expect_err("immediate overflows a word");
+    let d = asm198x::Diagnostic::from(err);
+    let span = d.span.expect("a line-granular span");
+    assert_eq!(span.line, 1, "the error's source line is preserved");
+    assert_eq!(
+        span.col, 0,
+        "no operand column — the diagnostic is line-granular"
+    );
+}
+
+/// One AE2 case: a dialect name, its assemble entry point, a program whose
+/// operand is out of range, and the expected (line, col) of the diagnostic.
+type ColumnCase = (
+    &'static str,
+    fn(&str) -> Result<AssemblyResult, asm198x::AsmError>,
+    &'static str,
+    u32,
+    u32,
+);
+
+/// AE2 across the remaining span-carrying dialects: each of the six other
+/// AST-routed front-ends (8080, 6800, 1802, SC/MP, rgbasm, lwasm) reports the
+/// operand-field column on an out-of-range operand, not the line start.
+#[test]
+fn every_span_carrying_dialect_reports_operand_column() {
+    let cases: [ColumnCase; 6] = [
+        (
+            "i8080",
+            asm198x::assemble_i8080,
+            "        org 0\n        mvi a, 300H\n",
+            2,
+            13,
+        ),
+        (
+            "m6800",
+            asm198x::assemble_m6800,
+            "        org 0\n        ldaa #$1ff\n",
+            2,
+            14,
+        ),
+        (
+            "cdp1802",
+            asm198x::assemble_1802,
+            "        org 0\n        ldi 300H\n",
+            2,
+            13,
+        ),
+        ("scmp", asm198x::assemble_scmp, "        ldi 0x1ff\n", 1, 13),
+        (
+            "rgbasm",
+            asm198x::assemble_rgbasm,
+            "SECTION \"a\", ROM0\n        ld a, 300\n",
+            2,
+            12,
+        ),
+        (
+            "lwasm",
+            asm198x::assemble_lwasm,
+            "        org 0\n        ldb #$1ff\n",
+            2,
+            13,
+        ),
+    ];
+    for (dialect, assemble, src, line, col) in cases {
+        let err = assemble(src)
+            .err()
+            .unwrap_or_else(|| panic!("{dialect}: program should fail"));
+        let d = asm198x::Diagnostic::from(err);
+        let span = d
+            .span
+            .unwrap_or_else(|| panic!("{dialect}: diagnostic carries a span"));
+        assert_eq!(span.line, line, "{dialect}: source line");
+        assert_eq!(span.col, col, "{dialect}: operand column");
+    }
+}
+
+/// AE2 for acme's labelled-line path: the operand column is measured past the
+/// label, so `loop: lda #$1ff` points at `#$1ff`, not at the label or line start.
+#[test]
+fn acme_labeled_line_reports_operand_column() {
+    let err =
+        asm198x::assemble_acme("* = $0800\nloop: lda #$1ff\n").expect_err("511 overflows a byte");
+    let d = asm198x::Diagnostic::from(err);
+    let span = d.span.expect("the diagnostic carries a span");
+    assert_eq!(span.line, 2);
+    assert_eq!(span.col, 11, "`col` points at `#$1ff`, past the label");
+}
+
+/// AE2 for acme's inline conditional body — the one caller that hands the parse
+/// a mid-line slice. The column stays file-accurate (measured from the original
+/// line start, not the body start).
+#[test]
+fn acme_inline_conditional_body_reports_file_accurate_column() {
+    let err = asm198x::assemble_acme("* = $0800\n!if 1 { lda #$1ff }\n")
+        .expect_err("511 overflows a byte");
+    let d = asm198x::Diagnostic::from(err);
+    let span = d.span.expect("the diagnostic carries a span");
+    assert_eq!(span.line, 2);
+    assert_eq!(
+        span.col, 13,
+        "`col` is measured from the line start, not the `{{`"
+    );
+}

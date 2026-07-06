@@ -410,16 +410,23 @@ consumers).
   round-trip tests in `crates/asm198x/tests/fmt.rs`.
 - **The core contract** (`src/contract.rs`) — one machine-readable result +
   rustc-style diagnostics every CPU inherits (plan
-  `docs/plans/2026-07-03-003-feat-core-contract-plan.md`). Landed: **U1**
-  `AssemblyResult` (R1), **U2** `Diagnostic`/`Span`/envelope (R2), **U4**
-  `--message-format=json` (R3, `tests/cli_json.rs`), **U5** `CONTRACT_VERSION` +
-  skip-unknown + the draft-then-freeze governance
+  `docs/plans/2026-07-03-003-feat-core-contract-plan.md`). **Complete — all
+  five units landed 2026-07-06:** **U1** `AssemblyResult` (R1), **U2**
+  `Diagnostic`/`Span`/envelope (R2), **U3** column-accurate operand spans (eight dialects
+  carry `Node::operand_span` — computed by `ast::operand_span` from the line's
+  operand field — through `Statement::operand_span` into the engine's pass-2
+  range errors, so a diagnostic's `col` points at the operand *field*: acme,
+  z80 [pasmo+sjasmplus], i8080, m6800, cdp1802, scmp, rgbasm, lwasm. Everything
+  else stays line-granular per KTD1 — the field-packed/computed CPUs *and* the
+  not-yet-populated fixed-slot dialects [ca65 family, f8, i8048, s2650,
+  tms7000]; populating a dialect is one `operand_span:` field in its parse),
+  **U4** `--message-format=json` (R3,
+  `tests/cli_json.rs`), **U5** `CONTRACT_VERSION` + skip-unknown + the
+  draft-then-freeze governance
   ([`decisions/core-contract-freeze.md`](decisions/core-contract-freeze.md)).
-  **Remaining: U3** — column-accurate spans (today every node span is
-  `Span::at(line, 1)`; U3 threads the operand column into the highest-value error
-  sites in acme/Z80, field-packed CPUs staying line-granular). After U3, R1
-  freezes at the MCP surface. The one span type is shared across `ast`, the
-  engine's `AsmError`, and `Diagnostic` (`src/span.rs`), multi-file-ready.
+  R1's freeze promise fires at the MCP surface. The one span type is shared
+  across `ast`, the engine's `AsmError`, and `Diagnostic` (`src/span.rs`),
+  multi-file-ready.
 
 ## How correctness is checked
 

@@ -188,6 +188,7 @@ pub(crate) fn parse_program<S: Z80Syntax>(
             }),
         };
         nodes.push(Node {
+            operand_span: crate::ast::operand_span(raw, rest, line as u32),
             label: symbol,
             item: op.map(crate::ast::item_from_operation),
             source: rest.trim().to_string(),
@@ -201,6 +202,7 @@ pub(crate) fn parse_program<S: Z80Syntax>(
     if !pending_leading.is_empty() {
         let line = source.lines().count() as u32;
         nodes.push(Node {
+            operand_span: None,
             label: None,
             item: None,
             source: String::new(),

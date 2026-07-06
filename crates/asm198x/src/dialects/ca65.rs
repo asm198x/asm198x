@@ -510,6 +510,7 @@ pub(crate) fn parse_program(
         // track the active segment (parse itself needs no segment state).
         if trimmed.starts_with(".segment") {
             nodes.push(Node {
+                operand_span: None,
                 label: None,
                 item: None,
                 source: trimmed.to_string(),
@@ -537,6 +538,7 @@ pub(crate) fn parse_program(
                 consts.insert(name.to_string(), v);
             }
             nodes.push(Node {
+                operand_span: None,
                 label: Some(Symbol {
                     qualified: name.to_string(),
                     scope: Scope::Global,
@@ -567,6 +569,7 @@ pub(crate) fn parse_program(
             // A label with no operation: keep the label so the projection places
             // it as an empty statement and records its address.
             (symbol, Kind::Empty) => nodes.push(Node {
+                operand_span: None,
                 label: symbol,
                 item: None,
                 source: String::new(),
@@ -574,6 +577,7 @@ pub(crate) fn parse_program(
                 trivia,
             }),
             (symbol, kind) => nodes.push(Node {
+                operand_span: None,
                 label: symbol,
                 item: Some(Item::Native(Box::new(kind))),
                 source: rest.trim().to_string(),
@@ -587,6 +591,7 @@ pub(crate) fn parse_program(
     if !pending_leading.is_empty() {
         let line = source.lines().count() as u32;
         nodes.push(Node {
+            operand_span: None,
             label: None,
             item: None,
             source: String::new(),

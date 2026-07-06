@@ -53,9 +53,10 @@ fn json_failure_emits_diagnostics_with_span_and_code() {
     assert_eq!(diagnostics.len(), 1, "one fatal diagnostic");
     let diag = &diagnostics[0];
     assert!(matches!(diag.severity, Severity::Error));
-    // A line-granular span (the error path carries the line; columns arrive with
-    // U3). The line points at the offending instruction.
+    // A column-accurate span (U3): the line points at the offending
+    // instruction, the column at its operand field (`#$fff`, column 13).
     assert_eq!(diag.span.as_ref().map(|s| s.line), Some(2));
+    assert_eq!(diag.span.as_ref().map(|s| s.col), Some(13));
     assert!(!diag.message.is_empty(), "a human-readable message");
 }
 

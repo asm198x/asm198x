@@ -37,7 +37,14 @@ pub struct ExpansionFrame {
 #[non_exhaustive]
 pub struct Span {
     pub file: FileId,
+    /// 1-based source line.
     pub line: u32,
+    /// 1-based **byte** column within the line; `0` means line-granular (the
+    /// raising site knew no column — a JSON consumer should treat the span as
+    /// the whole line). For an operand-range diagnostic the column is the start
+    /// of the operand *field* after the mnemonic, not the individual offending
+    /// operand (contract U3/KTD1). Byte, not character: a multi-byte UTF-8
+    /// sequence earlier on the line advances it by its byte length.
     pub col: u32,
     /// Empty in v1; populated when idea 4's macros land, without a type change.
     #[serde(default)]

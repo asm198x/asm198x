@@ -249,7 +249,50 @@ pub(crate) struct Node {
     /// source-form local names. Empty for a label-only line.
     pub(crate) source: String,
     pub(crate) span: Span,
+    /// The operand field's position on the line, when the parse knew it (the
+    /// dialects that call [`operand_span`]; contract U3). The engine's pass-2
+    /// range errors point here, so a diagnostic's `col` lands on the operand
+    /// token. `None` keeps the error line-granular (contract KTD1).
+    pub(crate) operand_span: Option<Span>,
     pub(crate) trivia: Trivia,
+}
+
+/// The span of the operand field on a source line: the first non-blank
+/// character after the mnemonic token in `rest` (the post-label code), located
+/// within `raw` (the original line). `rest` must borrow from `raw` — the
+/// per-line parses slice the original line for comment/label splitting, which
+/// preserves the byte offsets this relies on. The pointer/bounds guards below
+/// make a `rest` from another allocation *usually* return `None` (line-granular)
+/// rather than a fabricated column, but they cannot detect an unrelated
+/// allocation that happens to sit inside `raw`'s range — the borrows-from
+/// contract is the caller's to uphold (a synthesized line, e.g. a future macro
+/// expansion, should pass `None` instead). A line with no operand field returns
+/// `None`. Columns are 1-based byte columns (assembly source is ASCII in
+/// practice).
+pub(crate) fn operand_span(raw: &str, rest: &str, line: u32) -> Option<Span> {
+    let base = (rest.as_ptr() as usize).checked_sub(raw.as_ptr() as usize)?;
+    if base + rest.len() > raw.len() {
+        return None;
+    }
+    let mnemonic_start = rest.find(|c: char| !c.is_whitespace())?;
+    let tail = &rest[mnemonic_start..];
+    let mnemonic_len = tail.find(char::is_whitespace).unwrap_or(tail.len());
+    let operand_off = tail[mnemonic_len..].find(|c: char| !c.is_whitespace())?;
+    let col = base + mnemonic_start + mnemonic_len + operand_off + 1;
+    Some(Span::at(line, col as u32))
+}
+
+/// The span of `token` itself — its first non-blank character — within `raw`
+/// (the original line). For operand slices the parse has already isolated
+/// (ACME's `*= expr` / `name = expr` values), where [`operand_span`]'s
+/// mnemonic-skipping does not apply. The same borrows-from-`raw` contract.
+pub(crate) fn token_span(raw: &str, token: &str, line: u32) -> Option<Span> {
+    let base = (token.as_ptr() as usize).checked_sub(raw.as_ptr() as usize)?;
+    if base + token.len() > raw.len() {
+        return None;
+    }
+    let off = token.find(|c: char| !c.is_whitespace())?;
+    Some(Span::at(line, (base + off + 1) as u32))
 }
 
 /// A parsed translation unit: the ordered nodes.
@@ -341,6 +384,7 @@ pub(crate) fn lower(program: Program) -> Result<Vec<Statement>, AsmError> {
                 line: node.span.line as usize,
                 label: node.label.map(|s| s.qualified),
                 op: node.item.map(lower_item).transpose()?,
+                operand_span: node.operand_span,
             })
         })
         .collect()
@@ -702,6 +746,7 @@ mod tests {
     #[test]
     fn comment_is_queryable_trivia() {
         let node = Node {
+            operand_span: None,
             label: None,
             item: Some(Item::Instruction {
                 mnemonic: "nop".into(),
@@ -845,6 +890,7 @@ second:
     #[test]
     fn item_round_trips_an_instruction() {
         let node = Node {
+            operand_span: None,
             label: Some(Symbol {
                 name: "start".into(),
                 scope: Scope::Global,
@@ -906,6 +952,7 @@ second:
     fn conditional_block_emits_with_delimiters_at_column_zero() {
         // A multi-line `!if` with a body op.
         let body = Node {
+            operand_span: None,
             label: None,
             item: Some(Item::Instruction {
                 mnemonic: "jsr".into(),
@@ -917,6 +964,7 @@ second:
             trivia: Trivia::default(),
         };
         let cond = Node {
+            operand_span: None,
             label: None,
             item: Some(Item::Conditional {
                 head: "!if DEBUG = 1".into(),
@@ -933,6 +981,7 @@ second:
 
         // The inline guard idiom stays on one line.
         let guard_body = Node {
+            operand_span: None,
             label: Some(Symbol {
                 name: "FOO".into(),
                 scope: Scope::Global,
@@ -944,6 +993,7 @@ second:
             trivia: Trivia::default(),
         };
         let guard = Node {
+            operand_span: None,
             label: None,
             item: Some(Item::Conditional {
                 head: "!ifndef FOO".into(),

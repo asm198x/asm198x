@@ -14,11 +14,16 @@ idea without unnecessary rework is: **design each shared seam once, for the know
 future, and freeze it before its consumers build on it.** Everything not on a
 shared seam is independent and low-risk, and can proceed whenever.
 
-**Layer 0 (the foundations) is complete as of 2026-07-06** — 0a (the one span
-model) is locked and 0b (the AST across every CPU) is done. The current focus is
-**Layer 1** — finishing the core contract (U3–U5) on the locked span, then
-freezing R1. Nothing in Layers 2–3 should be built against a shared shape that
-Layer 0/1 has not yet frozen.
+**Layers 0 and 1 are complete as of 2026-07-06** — 0a (the one span model) is
+locked, 0b (the AST across every CPU) is done, and the core contract's five
+units (U1–U5) have all landed: the unified `AssemblyResult`, rustc-shaped
+diagnostics, column-accurate operand spans in the AST-routed dialects,
+`--message-format=json`, and the versioned draft-then-freeze governance. R1's
+freeze *promise* fires at the MCP surface per
+`decisions/core-contract-freeze.md`; until then the contract is a public draft.
+The current focus is **Layer 2** — the consumers fan out on the frozen-shape
+foundations (dbg198x's contract-first pause condition — a designed, landed R1
+shape — is now satisfied).
 
 This record is the map. It does not restate each plan — it says what order they
 go in and why, and where the freeze-gates are. Read it before scheduling work
@@ -52,9 +57,10 @@ discipline is to make it *the* span, aligned to `ast::Span`, not a second one.
 **Layer 0 — foundations (current focus; finish before anything above freezes)**
 See § Layer 0 in detail below.
 
-**Layer 1 — the core contract** (`…-003`, in flight) — finish **U2–U5**
-(diagnostics + JSON) on the locked span, then freeze R1. U1 (unified
-`AssemblyResult`) landed 2026-07-06.
+**Layer 1 — the core contract** (`…-003`, ✅ complete 2026-07-06) — U1 (unified
+`AssemblyResult`), U2 (diagnostics), U3 (column-accurate operand spans), U4
+(JSON), and U5 (versioning + freeze governance) all landed 2026-07-06. R1's
+freeze fires at MCP (`decisions/core-contract-freeze.md`).
 
 **Layer 2 — the consumers fan out** (on stable foundations, low rework):
 - **dbg198x (`…-001`, idea 1)** — resume against frozen R1 + the shared span/

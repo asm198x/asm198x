@@ -1309,6 +1309,7 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
             // A label-only line: keep the label, no operation (emit renders the
             // label alone; the projection reads it back as `Stmt::Empty`).
             Stmt::Empty if symbol.is_some() => nodes.push(Node {
+                operand_span: None,
                 label: symbol,
                 item: None,
                 source: String::new(),
@@ -1323,6 +1324,7 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
                 continue;
             }
             stmt => nodes.push(Node {
+                operand_span: None,
                 label: symbol,
                 item: Some(crate::ast::Item::Native(Box::new(stmt))),
                 source: rest.trim().to_string(),
@@ -1337,6 +1339,7 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
     if !pending_leading.is_empty() {
         let line = source.lines().count() as u32;
         nodes.push(Node {
+            operand_span: None,
             label: None,
             item: None,
             source: String::new(),

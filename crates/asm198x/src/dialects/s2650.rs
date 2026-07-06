@@ -96,6 +96,7 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
                 consts.insert(name.clone(), v);
             }
             nodes.push(Node {
+                operand_span: None,
                 label: Some(Symbol {
                     qualified: name.clone(),
                     scope: Scope::Global,
@@ -122,6 +123,7 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
             continue;
         }
         nodes.push(Node {
+            operand_span: None,
             label: label.map(|name| Symbol {
                 qualified: name.clone(),
                 scope: Scope::Global,
@@ -142,6 +144,7 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
     if !pending_leading.is_empty() {
         let line = source.lines().count() as u32;
         nodes.push(Node {
+            operand_span: None,
             label: None,
             item: None,
             source: String::new(),
