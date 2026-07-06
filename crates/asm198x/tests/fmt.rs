@@ -4,10 +4,10 @@
 //! spelling and comments.
 
 use asm198x::{
-    assemble_1802, assemble_8048, assemble_acme, assemble_i8080, assemble_lwasm, assemble_m6800,
-    assemble_pasmo, assemble_rgbasm, assemble_scmp, assemble_sjasmplus, format_1802, format_8048,
-    format_acme, format_i8080, format_lwasm, format_m6800, format_pasmo, format_rgbasm,
-    format_scmp, format_sjasmplus,
+    assemble_1802, assemble_8048, assemble_acme, assemble_f8, assemble_i8080, assemble_lwasm,
+    assemble_m6800, assemble_pasmo, assemble_rgbasm, assemble_scmp, assemble_sjasmplus,
+    format_1802, format_8048, format_acme, format_f8, format_i8080, format_lwasm, format_m6800,
+    format_pasmo, format_rgbasm, format_scmp, format_sjasmplus,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -574,5 +574,42 @@ fn fmt_8048_reassembles_byte_identical() {
         formatted,
         format_8048(&formatted).expect("formats"),
         "8048 fmt is idempotent"
+    );
+}
+
+/// A representative Fairchild F8 program: origin, a same-line colon label with an
+/// instruction, an `equ` constant (no colon), register/immediate ops, a 16-bit
+/// big-endian `dci`/`jmp` address, and the relative branches (`br`/`br7` — the
+/// `Encoded` seam). A fixed-slot straggler routed through the AST formatter (0b).
+const PROG_F8: &str = "\
+; a small F8 routine
+        org 10h
+start:  li 42h         ; load a
+        as 1
+        ns d
+five    equ 5
+        lis 5
+        ni 0fh
+        dci 1234h
+        jmp 2000h
+loop:   br loop
+        br7 start
+";
+
+#[test]
+fn fmt_f8_reassembles_byte_identical() {
+    let original = assemble_f8(PROG_F8).expect("assembles").bytes;
+    let formatted = format_f8(PROG_F8).expect("formats");
+    let reassembled = assemble_f8(&formatted)
+        .unwrap_or_else(|e| panic!("formatted F8 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "F8 round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_f8(&formatted).expect("formats"),
+        "F8 fmt is idempotent"
     );
 }
