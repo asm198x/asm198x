@@ -485,6 +485,16 @@ pub fn format_tms7000(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::Tms7000, source)
 }
 
+/// Reformat ca65-syntax 65816 source to canonical layout (the `--fmt`
+/// formatter). Reassembles byte-identical to the input — the `.a8`/`.a16` width
+/// directives are preserved, so width-dependent immediates round-trip.
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_ca65_816(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Ca65_816, source)
+}
+
 /// Format Motorola-syntax 6800 source (`asm198x fmt --cpu 6800`): parse into the
 /// semantic AST and emit canonical same-dialect source — labels at column 0,
 /// operations indented, comments preserved, `$`-hex operand spelling untouched.

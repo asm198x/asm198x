@@ -4,11 +4,11 @@
 //! spelling and comments.
 
 use asm198x::{
-    assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_f8, assemble_i8080,
-    assemble_lwasm, assemble_m6800, assemble_pasmo, assemble_rgbasm, assemble_scmp,
+    assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_ca65_816, assemble_f8,
+    assemble_i8080, assemble_lwasm, assemble_m6800, assemble_pasmo, assemble_rgbasm, assemble_scmp,
     assemble_sjasmplus, assemble_tms7000, format_1802, format_2650, format_8048, format_acme,
-    format_f8, format_i8080, format_lwasm, format_m6800, format_pasmo, format_rgbasm, format_scmp,
-    format_sjasmplus, format_tms7000,
+    format_ca65_816, format_f8, format_i8080, format_lwasm, format_m6800, format_pasmo,
+    format_rgbasm, format_scmp, format_sjasmplus, format_tms7000,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -688,5 +688,48 @@ fn fmt_tms7000_reassembles_byte_identical() {
         formatted,
         format_tms7000(&formatted).expect("formats"),
         "TMS7000 fmt is idempotent"
+    );
+}
+
+/// A representative ca65 65816 program that leans on the `.a8`/`.a16` **width
+/// directives** — the crux of the migration. If the formatter dropped them, the
+/// 16-bit `lda #$1234` would reassemble as an 8-bit immediate and the bytes
+/// would diverge; keeping them as source-only nodes makes the round-trip hold.
+/// Also covers a `=` constant, long addressing, and a long jump. (0b straggler.)
+const PROG_65816: &str = "\
+; a small 65816 routine
+        .org $8000
+        .a16
+start:  lda #$1234     ; 16-bit immediate (needs .a16)
+        .a8
+        lda #$12       ; 8-bit immediate (needs .a8)
+five = 5
+        lda five
+        lda $123456
+        lda [$12],y
+        jml $123456
+        rts
+";
+
+#[test]
+fn fmt_ca65_816_reassembles_byte_identical() {
+    let original = assemble_ca65_816(PROG_65816).expect("assembles").bytes;
+    let formatted = format_ca65_816(PROG_65816).expect("formats");
+    let reassembled = assemble_ca65_816(&formatted)
+        .unwrap_or_else(|e| panic!("formatted 65816 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "65816 round-trips byte-identical (width directives preserved)\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_ca65_816(&formatted).expect("formats"),
+        "65816 fmt is idempotent"
+    );
+    // The width directives must survive — dropping them changes the bytes.
+    assert!(
+        formatted.contains(".a16") && formatted.contains(".a8"),
+        "width directives preserved in the formatted output:\n{formatted}"
     );
 }
