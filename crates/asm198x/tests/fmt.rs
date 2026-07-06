@@ -7,10 +7,11 @@ use asm198x::{
     assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_ca65_816,
     assemble_ca65_huc6280, assemble_cp1610, assemble_f8, assemble_i8080, assemble_lwasm,
     assemble_m6800, assemble_pasmo, assemble_pdp11, assemble_rgbasm, assemble_scmp,
-    assemble_sjasmplus, assemble_tms7000, assemble_tms9900, format_1802, format_2650, format_8048,
-    format_acme, format_ca65_816, format_ca65_huc6280, format_cp1610, format_f8, format_i8080,
-    format_lwasm, format_m6800, format_pasmo, format_pdp11, format_rgbasm, format_scmp,
-    format_sjasmplus, format_tms7000, format_tms9900,
+    assemble_sjasmplus, assemble_tms7000, assemble_tms9900, assemble_z8000, assemble_z8001,
+    format_1802, format_2650, format_8048, format_acme, format_ca65_816, format_ca65_huc6280,
+    format_cp1610, format_f8, format_i8080, format_lwasm, format_m6800, format_pasmo, format_pdp11,
+    format_rgbasm, format_scmp, format_sjasmplus, format_tms7000, format_tms9900, format_z8000,
+    format_z8001,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -891,5 +892,79 @@ fn fmt_cp1610_reassembles_byte_identical() {
     assert!(
         formatted.contains("sdbd"),
         "sdbd prefix preserved:\n{formatted}"
+    );
+}
+
+/// A representative asl-syntax Z8000 (non-segmented Z8002) program: an origin,
+/// colon labels, both constant spellings (`equ` and `=`), the dyadic family
+/// across register / immediate / indirect / indexed modes, byte and long ops,
+/// a conditional jump, and leading + trailing comments.
+const PROG_Z8000: &str = "\
+; a small z8002 routine
+        org 0
+mask    equ 00ffh
+delta = 4
+start:  ld r1, r2
+        add r1, #1234h    ; immediate
+        ld r3, 2000h(r4)
+        ldl rr2, #12345678h
+        addb rl1, rl2
+loop:   dec r1
+        jp nz, loop
+        halt
+";
+
+#[test]
+fn fmt_z8000_reassembles_byte_identical() {
+    let original = assemble_z8000(PROG_Z8000).expect("assembles").bytes;
+    let formatted = format_z8000(PROG_Z8000).expect("formats");
+    let reassembled = assemble_z8000(&formatted)
+        .unwrap_or_else(|e| panic!("formatted z8000 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "z8000 round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_z8000(&formatted).expect("formats"),
+        "z8000 fmt is idempotent"
+    );
+}
+
+/// A representative asl-syntax Z8001 (segmented) program: the `<<seg>>offset`
+/// two-word direct and indexed addresses, `@RRn` long-pair pointers, and `LDA`
+/// into a long pair — the operand shapes the segmented target adds.
+const PROG_Z8001: &str = "\
+; a small z8001 routine
+        org 0
+start:  ld r1, <<5>>1234h
+        ld r1, <<5>>1234h(r3)
+        ld r1, @rr2
+        ldl rr2, <<5>>1234h
+        lda rr2, <<5>>1234h
+        jp <<5>>1234h
+";
+
+#[test]
+fn fmt_z8001_reassembles_byte_identical() {
+    let original = assemble_z8001(PROG_Z8001).expect("assembles").bytes;
+    let formatted = format_z8001(PROG_Z8001).expect("formats");
+    let reassembled = assemble_z8001(&formatted)
+        .unwrap_or_else(|e| panic!("formatted z8001 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "z8001 round-trips byte-identical (segmented operands preserved)\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_z8001(&formatted).expect("formats"),
+        "z8001 fmt is idempotent"
+    );
+    // The segmented operand syntax must survive verbatim.
+    assert!(
+        formatted.contains("<<5>>"),
+        "segmented `<<seg>>` operands preserved:\n{formatted}"
     );
 }

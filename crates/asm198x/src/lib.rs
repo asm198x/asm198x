@@ -533,6 +533,24 @@ pub fn format_cp1610(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::Cp1610, source)
 }
 
+/// Reformat asl-syntax Zilog Z8000 (non-segmented Z8002) source to canonical
+/// layout (the `--fmt` formatter). Reassembles byte-identical to the input.
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_z8000(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Z8000 { seg: false }, source)
+}
+
+/// Reformat asl-syntax Zilog Z8001 (segmented) source to canonical layout (the
+/// `--fmt` formatter). Reassembles byte-identical to the input.
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_z8001(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Z8000 { seg: true }, source)
+}
+
 /// Format Motorola-syntax 6800 source (`asm198x fmt --cpu 6800`): parse into the
 /// semantic AST and emit canonical same-dialect source — labels at column 0,
 /// operations indented, comments preserved, `$`-hex operand spelling untouched.
