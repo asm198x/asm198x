@@ -29,6 +29,16 @@ pub(crate) trait Z80Syntax {
     /// Strip a line comment, returning the code before it.
     fn strip_comment<'a>(&self, line: &'a str) -> &'a str;
 
+    /// Split a line into its code and its comment (with the delimiter, trailing
+    /// whitespace trimmed), for carrying comments as AST trivia (U4). Defined in
+    /// terms of [`strip_comment`](Self::strip_comment), which returns the code
+    /// prefix, so the comment is exactly what it removed — no behaviour change.
+    fn split_comment<'a>(&self, line: &'a str) -> (&'a str, Option<&'a str>) {
+        let code = self.strip_comment(line);
+        let comment = (code.len() < line.len()).then(|| line[code.len()..].trim_end());
+        (code, comment)
+    }
+
     /// Parse a numeric literal token (the dialect's hex/binary/char forms).
     fn parse_number(&self, tok: &str, line: usize) -> Result<i64, AsmError>;
 
@@ -77,7 +87,24 @@ pub(crate) fn assemble<S: Z80Syntax>(
     ext: Option<&'static isa::InstructionSet>,
     source: &str,
 ) -> Result<Vec<Statement>, AsmError> {
-    let mut out = Vec::new();
+    // The Z80 front-end parses into the semantic AST (U3), then lowers it to the
+    // engine's statement stream — byte-identical to the old direct parse (AE1).
+    // Other CPUs stay on direct lowering behind this boundary (KTD6).
+    crate::ast::lower(parse_program(syntax, set, ext, source)?)
+}
+
+/// Parse Z80 source into the semantic [`Program`](crate::ast::Program). Each line
+/// becomes a node carrying its scoped label, operation, and span; trivia is
+/// filled in U4. The scope resolution mirrors the old string-mangle exactly, so
+/// [`lower`](crate::ast::lower) reproduces the same statements.
+pub(crate) fn parse_program<S: Z80Syntax>(
+    syntax: &S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    source: &str,
+) -> Result<crate::ast::Program, AsmError> {
+    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
+    let mut nodes = Vec::new();
     // Constants defined with `equ`, recorded as parsed. Opcode-embedded
     // operands (BIT n, IM n, RST n) must be known at parse time to pick the
     // form, so they resolve against this — not the engine's pass-2 symbols.
@@ -85,42 +112,108 @@ pub(crate) fn assemble<S: Z80Syntax>(
     let scoped = syntax.scopes_locals();
     // The most recent global (non-`.`) label, for qualifying local labels.
     let mut current_global: Option<String> = None;
+    // Own-line comments seen since the last node, attached as leading trivia to
+    // the next node (U4). Comments never reach the encoder, so bytes are
+    // unchanged (AE1).
+    let mut pending_leading: Vec<Comment> = Vec::new();
     for (i, raw) in source.lines().enumerate() {
         let line = i + 1;
-        let code = syntax.strip_comment(raw);
+        let (code, comment) = syntax.split_comment(raw);
         if code.trim().is_empty() {
+            // A comment-only line becomes leading trivia for the next node; a
+            // blank line carries nothing.
+            if let Some(text) = comment {
+                pending_leading.push(Comment {
+                    text: text.to_string(),
+                    span: Span::at(line as u32, 1),
+                });
+            }
             continue;
         }
-        let (mut label, rest) = split_label(syntax, set, ext, code, line)?;
+        let (label, rest) = split_label(syntax, set, ext, code, line)?;
         let mut op = parse_op(syntax, set, ext, rest, line, &consts)?;
-        if scoped {
-            // A leading-`.` label is local to the current scope; a plain label
-            // opens a new scope. Update the scope first, so a local reference
-            // on the same line (e.g. `done: jr .loop`) resolves against it.
-            match &label {
-                Some(name) if name.starts_with('.') => {
-                    if let Some(g) = &current_global {
-                        label = Some(format!("{g}{name}"));
-                    }
+
+        // Resolve the label's scope into a `Symbol` (source name, scope, and the
+        // qualified name lowering emits). A leading-`.` label is local to the
+        // current scope; a plain label opens a new scope. Update the scope first,
+        // so a local reference on the same line (`done: jr .loop`) resolves
+        // against it — matching the old ordering.
+        let symbol = label.map(|name| {
+            if scoped && name.starts_with('.') {
+                match &current_global {
+                    Some(g) => Symbol {
+                        qualified: format!("{g}{name}"),
+                        scope: Scope::Local {
+                            in_global: g.clone(),
+                        },
+                        name,
+                    },
+                    // A leading-`.` label with no enclosing global is left as-is
+                    // (the old code qualified only when a global existed).
+                    None => Symbol {
+                        qualified: name.clone(),
+                        scope: Scope::Global,
+                        name,
+                    },
                 }
-                Some(name) => current_global = Some(name.clone()),
-                None => {}
+            } else {
+                if scoped {
+                    current_global = Some(name.clone());
+                }
+                Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }
             }
-            if let Some(g) = &current_global {
-                op = op.map(|o| qualify_locals(o, g));
-            }
+        });
+        if scoped && let Some(g) = &current_global {
+            op = op.map(|o| qualify_locals(o, g));
         }
-        if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
+
+        // `equ` binds its (qualified) label to a parse-time constant.
+        if let (Some(sym), Some(Operation::Equ(e))) = (&symbol, &op)
             && let Some(v) = eval_const(e, &consts)
         {
-            consts.insert(name.clone(), v);
+            consts.insert(sym.qualified.clone(), v);
         }
-        if label.is_none() && op.is_none() {
+        if symbol.is_none() && op.is_none() {
             continue;
         }
-        out.push(Statement { line, label, op });
+        let trivia = Trivia {
+            leading: std::mem::take(&mut pending_leading),
+            trailing: comment.map(|text| Comment {
+                text: text.to_string(),
+                span: Span::at(line as u32, (code.len() + 1) as u32),
+            }),
+        };
+        nodes.push(Node {
+            operand_span: crate::ast::operand_span(raw, rest, line as u32),
+            label: symbol,
+            item: op.map(crate::ast::item_from_operation),
+            source: rest.trim().to_string(),
+            span: Span::at(line as u32, 1),
+            trivia,
+        });
     }
-    Ok(out)
+    // Flush comments after the last node (a trailing comment block, or a
+    // comment-only file) as a label-less, op-less node so the formatter keeps
+    // them (they emit no bytes, so assembly is unaffected).
+    if !pending_leading.is_empty() {
+        let line = source.lines().count() as u32;
+        nodes.push(Node {
+            operand_span: None,
+            label: None,
+            item: None,
+            source: String::new(),
+            span: Span::at(line, 1),
+            trivia: Trivia {
+                leading: pending_leading,
+                trailing: None,
+            },
+        });
+    }
+    Ok(Program { nodes })
 }
 
 // ---------------------------------------------------------------------------

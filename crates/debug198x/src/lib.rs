@@ -1,4 +1,4 @@
-//! **dbg198x** — the 198x family's cross-CPU debug-info format.
+//! **debug198x** — the 198x family's cross-CPU debug-info format.
 //!
 //! One machine-readable sidecar describes what an assembled image *means*: which
 //! source line produced each byte range (the line map), every symbol with its
@@ -36,7 +36,7 @@ use std::io::{self, Write};
 use serde::{Deserialize, Serialize};
 
 /// The format name written in (and required of) every file's [`Header`].
-pub const FORMAT: &str = "dbg198x";
+pub const FORMAT: &str = "debug198x";
 
 /// The format version this crate reads and writes. Draft (`0.x`) until the first
 /// consumer ships, after which v1 freezes the additive-evolution guarantee.
@@ -95,7 +95,7 @@ pub enum SymbolKind {
 /// and what it describes.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Header {
-    /// Always [`FORMAT`] (`"dbg198x"`).
+    /// Always [`FORMAT`] (`"debug198x"`).
     pub format: String,
     /// The [`FORMAT_VERSION`] the file conforms to.
     pub format_version: String,
@@ -176,7 +176,7 @@ impl Default for Header {
     }
 }
 
-/// A failure reading a `.dbg198x` file: malformed JSON on some line. An unknown
+/// A failure reading a `.debug198x` file: malformed JSON on some line. An unknown
 /// record *type* is not an error — it is skipped.
 #[derive(Debug)]
 pub enum ReadError {
@@ -407,7 +407,7 @@ mod tests {
         let ndjson = sample().to_ndjson();
         let first = ndjson.lines().next().expect("present");
         assert!(first.contains(r#""t":"header""#));
-        assert!(first.contains(r#""format":"dbg198x""#));
+        assert!(first.contains(r#""format":"debug198x""#));
     }
 
     #[test]

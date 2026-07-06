@@ -40,6 +40,17 @@ pub(crate) trait Dialect {
     /// Returns an [`AsmError`] on any tokenising or mode-resolution failure.
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError>;
 
+    /// Parse into the semantic AST (`crate::ast`) — the source-preserving tree
+    /// the formatter and bidirectional emit consume (U5). Defaults to `None`: a
+    /// dialect without an AST front-end has no formatter yet and stays on
+    /// [`parse`](Self::parse) for assembly. The Z80 dialects override it.
+    ///
+    /// # Errors
+    /// Returns an [`AsmError`] on any parse failure.
+    fn parse_ast(&self, _source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
+        Ok(None)
+    }
+
     /// Whether emitting bytes before any origin is set is an error. ACME's `*=`
     /// is mandatory before code or data — it rejects an implicit origin with
     /// "Program counter undefined" — so a forgotten `*=` fails loudly rather than
@@ -55,6 +66,16 @@ pub(crate) trait Dialect {
     /// warning), matching their reference tools.
     fn oversized_byte_policy(&self) -> Oversize {
         Oversize::Error
+    }
+
+    /// Whether the formatter keeps a colon on an `equ` label (`name: equ …`).
+    /// Defaults to `true` (the Z80 dialects): a bare `equ` label whose spelling
+    /// collides with a mnemonic re-parses as an instruction, so the colon forces
+    /// it to stay a label. The Intel-8080 dialect overrides to `false` — its
+    /// `equ` keyword already disambiguates the label, and a colon (`name: equ …`)
+    /// fails to reassemble there. Only consulted by [`crate::ast::emit`].
+    fn equ_label_colon(&self) -> bool {
+        true
     }
 
     /// The number of emitted bytes per **address unit** — how the location

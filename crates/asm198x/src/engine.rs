@@ -13,7 +13,10 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
+use serde::{Deserialize, Serialize};
+
 use crate::dialect::{Dialect, Oversize};
+use crate::span::Span;
 
 /// The result of a successful assembly: where it loads and the bytes to load.
 #[derive(Debug, Clone)]
@@ -33,6 +36,35 @@ pub struct Assembly {
     /// Non-fatal advisories raised during assembly (e.g. a byte truncated to fit
     /// its operand, sjasmplus-style). Empty for dialects that don't warn.
     pub warnings: Vec<Warning>,
+    /// Debug-info captured during pass 2 — the line→address map and typed
+    /// symbols the CLI renders into a `.debug198x` sidecar / `--sym` / `--listing`.
+    /// Header-less (the CPU/dialect/source-file identity is the CLI's to add) and
+    /// section-less (the flat engine is a single implicit section 0, based at
+    /// `origin`). Capturing it never changes an emitted byte.
+    pub debug: DebugData,
+}
+
+/// The engine's slice of a `.debug198x` record: typed symbols and line→address
+/// spans, in the CPU's **address units** (a decle for the word-addressed CP1610,
+/// a byte elsewhere) so a consumer's address lookups line up with the CPU's own
+/// addressing. Header-less; the CLI wraps it with identity and the source
+/// filename to form a full [`debug198x::DebugInfo`].
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DebugData {
+    /// Every label (address), `equ`/`=` constant (value), and entry point.
+    pub symbols: Vec<debug198x::Symbol>,
+    /// One span per source-bearing statement that emitted bytes. Fill from `org`
+    /// gaps and `align` carries no span (the padding rule).
+    pub lines: Vec<LineRec>,
+}
+
+/// A line→address span before the source filename is attached: `length` address
+/// units at section-relative `offset` were produced by `line`.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct LineRec {
+    pub line: u32,
+    pub offset: u64,
+    pub length: u64,
 }
 
 /// An assembly error, with the 1-based source line it occurred on (0 = no
@@ -41,6 +73,12 @@ pub struct Assembly {
 pub struct AsmError {
     pub line: usize,
     pub message: String,
+    /// The source span, when the raising site knows a column-level position (the
+    /// AST-routed dialects, once U3 wires them). `None` for the line-only sites,
+    /// where the diagnostic is line-granular. Per contract KTD1 the span rides
+    /// this engine error path — not the AST — so every CPU inherits diagnostics,
+    /// and column accuracy improves as CPUs adopt the AST.
+    pub span: Option<Span>,
 }
 
 impl AsmError {
@@ -48,6 +86,17 @@ impl AsmError {
         Self {
             line,
             message: message.into(),
+            span: None,
+        }
+    }
+
+    /// An error carrying a source span. `line` mirrors the span's line so the
+    /// `Display` impl and existing `.line` readers keep working unchanged.
+    pub(crate) fn at(span: Span, message: impl Into<String>) -> Self {
+        Self {
+            line: span.line as usize,
+            message: message.into(),
+            span: Some(span),
         }
     }
 }
@@ -68,7 +117,7 @@ impl std::error::Error for AsmError {}
 /// (0 = no specific line). Reference assemblers assemble *and* flag questionable
 /// source (e.g. an immediate too wide for its operand); a `Warning` carries that
 /// signal without failing the assembly. The bytes are still produced.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Warning {
     pub line: usize,
     pub message: String,
@@ -319,6 +368,21 @@ pub(crate) struct Statement {
     pub(crate) line: usize,
     pub(crate) label: Option<String>,
     pub(crate) op: Option<Operation>,
+    /// The operand field's source position, when the dialect parse knew it
+    /// (contract U3, [`crate::ast::operand_span`]). Pass-2 range errors point
+    /// here; `None` keeps them line-granular (contract KTD1).
+    pub(crate) operand_span: Option<Span>,
+}
+
+impl Statement {
+    /// An operand-range error: at the operand's span when the parse supplied
+    /// one (a column-accurate diagnostic, contract U3), else line-granular.
+    fn operand_err(&self, message: impl Into<String>) -> AsmError {
+        match &self.operand_span {
+            Some(span) => AsmError::at(span.clone(), message),
+            None => AsmError::new(self.line, message),
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -419,10 +483,12 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
     let mut warnings: Vec<Warning> = Vec::new();
     let mut start: Option<u16> = None;
     let mut bytes: Vec<u8> = Vec::new();
+    let mut debug = DebugData::default();
     for s in &statements {
         // The location counter (`$`) is the address of this statement's start,
         // in address units (bytes divided by `addr_unit`).
         let pc = origin + bytes.len() as i64 / addr_unit;
+        let len_before = bytes.len();
         match &s.op {
             None => {}
             Some(Operation::Org(e)) => {
@@ -452,13 +518,13 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
             Some(Operation::Bytes(items)) => {
                 for e in items {
                     let v = e.eval(&symbols, pc, s.line)?;
-                    emit_byte(&mut bytes, v, byte_policy, &mut warnings, s.line)?;
+                    emit_byte(&mut bytes, v, byte_policy, &mut warnings, s)?;
                 }
             }
             Some(Operation::Words(items)) => {
                 for e in items {
                     let v = e.eval(&symbols, pc, s.line)?;
-                    push_word(&mut bytes, v, s.line, set.endianness)?;
+                    push_word(&mut bytes, v, s, set.endianness)?;
                 }
             }
             Some(Operation::Instruction {
@@ -488,10 +554,10 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                         // byte; a Z80 `LD BC,nn` immediate is two.)
                         isa::OperandKind::Immediate | isa::OperandKind::Address => {
                             match slot.bytes {
-                                1 => emit_byte(&mut bytes, v, byte_policy, &mut warnings, s.line)?,
-                                2 => push_word(&mut bytes, v, s.line, set.endianness)?,
+                                1 => emit_byte(&mut bytes, v, byte_policy, &mut warnings, s)?,
+                                2 => push_word(&mut bytes, v, s, set.endianness)?,
                                 // 24-bit address (65816 long addressing).
-                                3 => push_addr24(&mut bytes, v, s.line, set.endianness)?,
+                                3 => push_addr24(&mut bytes, v, s, set.endianness)?,
                                 other => {
                                     return Err(AsmError::new(
                                         s.line,
@@ -503,15 +569,14 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                         // A big-endian immediate (Z80N `push nn`): high byte
                         // first, regardless of the set's little-endian default.
                         isa::OperandKind::ImmediateBe => {
-                            push_word(&mut bytes, v, s.line, isa::Endianness::Big)?;
+                            push_word(&mut bytes, v, s, isa::Endianness::Big)?;
                         }
                         // A signed index displacement, e.g. the `d` in (IX+d).
                         isa::OperandKind::Displacement => {
                             if !(-128..=127).contains(&v) {
-                                return Err(AsmError::new(
-                                    s.line,
-                                    format!("displacement {v} out of range (-128..=127)"),
-                                ));
+                                return Err(s.operand_err(format!(
+                                    "displacement {v} out of range (-128..=127)"
+                                )));
                             }
                             bytes.push(v as i8 as u8);
                         }
@@ -520,26 +585,20 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                             match slot.bytes {
                                 1 => {
                                     if !(-128..=127).contains(&offset) {
-                                        return Err(AsmError::new(
-                                            s.line,
-                                            format!(
-                                                "branch target out of range ({offset} bytes; must be -128..=127)"
-                                            ),
-                                        ));
+                                        return Err(s.operand_err(format!(
+                                            "branch target out of range ({offset} bytes; must be -128..=127)"
+                                        )));
                                     }
                                     bytes.push(offset as i8 as u8);
                                 }
                                 // 16-bit relative (65816 brl/per).
                                 2 => {
                                     if !(-32768..=32767).contains(&offset) {
-                                        return Err(AsmError::new(
-                                            s.line,
-                                            format!(
-                                                "long branch target out of range ({offset} bytes; must be -32768..=32767)"
-                                            ),
-                                        ));
+                                        return Err(s.operand_err(format!(
+                                            "long branch target out of range ({offset} bytes; must be -32768..=32767)"
+                                        )));
                                     }
-                                    push_word(&mut bytes, offset & 0xFFFF, s.line, set.endianness)?;
+                                    push_word(&mut bytes, offset & 0xFFFF, s, set.endianness)?;
                                 }
                                 other => {
                                     return Err(AsmError::new(
@@ -569,14 +628,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                             // follows this value (the next instruction).
                             let next = origin + bytes.len() as i64 + i64::from(*width);
                             let v = if *rel { raw - next } else { raw };
-                            emit_value(
-                                &mut bytes,
-                                v,
-                                *width,
-                                *rel || *signed,
-                                set.endianness,
-                                s.line,
-                            )?;
+                            emit_value(&mut bytes, v, *width, *rel || *signed, set.endianness, s)?;
                         }
                         Piece::Packed {
                             expr,
@@ -590,20 +642,18 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                         } => {
                             let raw = expr.eval(&symbols, pc, s.line)?;
                             if *scale != 1 && raw % *scale != 0 {
-                                return Err(AsmError::new(
-                                    s.line,
-                                    format!("{what} ({raw}) is not a multiple of {scale}"),
-                                ));
+                                return Err(s.operand_err(format!(
+                                    "{what} ({raw}) is not a multiple of {scale}"
+                                )));
                             }
                             let v = raw / *scale;
                             if !(*min..=*max).contains(&v) {
-                                return Err(AsmError::new(
-                                    s.line,
-                                    format!("{what} out of range ({v}; must be {min}..={max})"),
-                                ));
+                                return Err(s.operand_err(format!(
+                                    "{what} out of range ({v}; must be {min}..={max})"
+                                )));
                             }
                             let packed = i64::from((v as u32 & *mask) | *or_bits);
-                            emit_value(&mut bytes, packed, *width, false, set.endianness, s.line)?;
+                            emit_value(&mut bytes, packed, *width, false, set.endianness, s)?;
                         }
                         Piece::Branch {
                             target,
@@ -622,16 +672,83 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                                 (i64::from(*base | *dir_bit), -d - 1)
                             };
                             if !(0..=0xFFFF).contains(&mag) {
-                                return Err(AsmError::new(
-                                    s.line,
-                                    format!("{what} out of range ({d} words)"),
-                                ));
+                                return Err(
+                                    s.operand_err(format!("{what} out of range ({d} words)"))
+                                );
                             }
-                            emit_value(&mut bytes, word1, 2, false, set.endianness, s.line)?;
-                            emit_value(&mut bytes, mag, 2, false, set.endianness, s.line)?;
+                            emit_value(&mut bytes, word1, 2, false, set.endianness, s)?;
+                            emit_value(&mut bytes, mag, 2, false, set.endianness, s)?;
                         }
                     }
                 }
+            }
+        }
+
+        // --- Debug capture (U2). Reads only `pc`/`bytes.len()`/`symbols`; it
+        // never influences an emitted byte (AE2). Addresses are section-relative
+        // offsets in address units, section 0 based at `origin`. ---
+        if let Some(label) = &s.label {
+            let kind = if matches!(&s.op, Some(Operation::Equ(_))) {
+                // An `equ`/`=` constant: its value, not an address, and no space.
+                let value = symbols.get(label).copied().unwrap_or_default();
+                debug198x::SymbolKind::Const {
+                    value: value as u64,
+                }
+            } else {
+                // A label lives at this statement's address (`pc`).
+                debug198x::SymbolKind::Label {
+                    section: 0,
+                    offset: (pc - origin) as u64,
+                    space: None,
+                }
+            };
+            debug.symbols.push(debug198x::Symbol {
+                name: label.clone(),
+                kind,
+            });
+        }
+        // A source-bearing statement that emitted bytes gets a line span; `org`
+        // gaps and `align` fill do not (the padding rule).
+        let source_bearing = matches!(
+            &s.op,
+            Some(
+                Operation::Bytes(_)
+                    | Operation::Words(_)
+                    | Operation::Instruction { .. }
+                    | Operation::Encoded(_)
+            )
+        );
+        if source_bearing && bytes.len() > len_before {
+            debug.lines.push(LineRec {
+                line: s.line as u32,
+                offset: (pc - origin) as u64,
+                length: ((bytes.len() - len_before) as i64 / addr_unit) as u64,
+            });
+        }
+        // The entry point (`end <addr>`) is an Entry symbol. When it targets a
+        // bare label, upgrade that label's kind in place (the entry *is* that
+        // location) rather than emitting a second same-named symbol; otherwise
+        // record a fresh `@entry`.
+        if let (Some(Operation::Entry(e)), Some(v)) = (&s.op, start) {
+            let entry = debug198x::SymbolKind::Entry {
+                section: 0,
+                offset: (i64::from(v) - origin) as u64,
+                space: None,
+            };
+            let existing = match e {
+                Expr::Sym(n) => debug.symbols.iter_mut().find(|s| {
+                    s.name == *n && matches!(s.kind, debug198x::SymbolKind::Label { .. })
+                }),
+                _ => None,
+            };
+            if let Some(sym) = existing {
+                sym.kind = entry;
+            } else {
+                let name = match e {
+                    Expr::Sym(n) => n.clone(),
+                    _ => "@entry".to_string(),
+                };
+                debug.symbols.push(debug198x::Symbol { name, kind: entry });
             }
         }
     }
@@ -646,6 +763,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
         symbols,
         start,
         warnings,
+        debug,
     })
 }
 
@@ -685,7 +803,7 @@ fn emit_value(
     width: u8,
     signed: bool,
     endianness: isa::Endianness,
-    line: usize,
+    s: &Statement,
 ) -> Result<(), AsmError> {
     // `signed` (branch offsets, signed index displacements) range-checks as
     // two's-complement. Otherwise the value is an address/immediate/large index
@@ -700,16 +818,13 @@ fn emit_value(
         4 => (i64::from(i32::MIN), i64::from(u32::MAX)),
         other => {
             return Err(AsmError::new(
-                line,
+                s.line,
                 format!("unsupported value width {other}"),
             ));
         }
     };
     if !(lo..=hi).contains(&v) {
-        return Err(AsmError::new(
-            line,
-            format!("value {v} out of range for a {width}-byte operand"),
-        ));
+        return Err(s.operand_err(format!("value {v} out of range for a {width}-byte operand")));
     }
     let b = v.to_le_bytes();
     match (width, endianness) {
@@ -732,19 +847,19 @@ fn emit_byte(
     v: i64,
     policy: Oversize,
     warnings: &mut Vec<Warning>,
-    line: usize,
+    s: &Statement,
 ) -> Result<(), AsmError> {
     if !(-128..=0xFF).contains(&v) {
         match policy {
             Oversize::Error => {
-                return Err(AsmError::new(
-                    line,
-                    format!("value {v} does not fit in a byte"),
-                ));
+                return Err(s.operand_err(format!("value {v} does not fit in a byte")));
             }
             Oversize::Truncate => {}
             Oversize::TruncateWarn => {
-                warnings.push(Warning::new(line, format!("value {v} truncated to a byte")));
+                warnings.push(Warning::new(
+                    s.line,
+                    format!("value {v} truncated to a byte"),
+                ));
             }
         }
     }
@@ -755,14 +870,11 @@ fn emit_byte(
 fn push_word(
     bytes: &mut Vec<u8>,
     v: i64,
-    line: usize,
+    s: &Statement,
     endianness: isa::Endianness,
 ) -> Result<(), AsmError> {
     if !(0..=0xFFFF).contains(&v) {
-        return Err(AsmError::new(
-            line,
-            format!("value {v} does not fit in a word"),
-        ));
+        return Err(s.operand_err(format!("value {v} does not fit in a word")));
     }
     let lo = (v & 0xFF) as u8;
     let hi = ((v >> 8) & 0xFF) as u8;
@@ -783,14 +895,11 @@ fn push_word(
 fn push_addr24(
     bytes: &mut Vec<u8>,
     v: i64,
-    line: usize,
+    s: &Statement,
     endianness: isa::Endianness,
 ) -> Result<(), AsmError> {
     if !(0..=0xFF_FFFF).contains(&v) {
-        return Err(AsmError::new(
-            line,
-            format!("value {v} does not fit in a 24-bit address"),
-        ));
+        return Err(s.operand_err(format!("value {v} does not fit in a 24-bit address")));
     }
     let b = [
         (v & 0xFF) as u8,

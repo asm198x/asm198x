@@ -1286,7 +1286,7 @@ fn differential_fuzz_bytewise() {
             };
             let ours = match cpu.name {
                 "6809" => asm198x::assemble_lwasm(&text).map(|a| a.bytes).ok(),
-                _ => asm198x::assemble_vasm(&text).ok(),
+                _ => asm198x::assemble_vasm(&text).map(|a| a.bytes).ok(),
             };
             ours.as_deref() == Some(bytes)
         };
@@ -1327,7 +1327,7 @@ fn differential_fuzz_bytewise() {
             // Our assembler must reproduce the bytes (self-consistency).
             let ours = match cpu.name {
                 "6809" => asm198x::assemble_lwasm(&text).map(|a| a.bytes),
-                _ => asm198x::assemble_vasm(&text),
+                _ => asm198x::assemble_vasm(&text).map(|a| a.bytes),
             };
             match ours {
                 Ok(o) if o == blob => {}

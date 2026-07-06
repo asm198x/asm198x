@@ -34,39 +34,125 @@ impl Dialect for Scmp {
     }
 
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        let set = self.instruction_set();
-        let mut out = Vec::new();
-        let mut consts: BTreeMap<String, i64> = BTreeMap::new();
-
-        for (i, raw) in source.lines().enumerate() {
-            let line = i + 1;
-            let code = strip_comment(raw);
-            if code.trim().is_empty() {
-                continue;
-            }
-            if let Some((name, expr)) = constant(code.trim(), line)? {
-                if let Ok(v) = fold_const(&expr, &consts, line) {
-                    consts.insert(name.clone(), v);
-                }
-                out.push(Statement {
-                    line,
-                    label: Some(name),
-                    op: Some(Operation::Equ(expr)),
-                });
-                continue;
-            }
-            let (label, rest) = split_label(code);
-            let op = if rest.is_empty() {
-                None
-            } else {
-                parse_op(set, rest, &consts, line)?
-            };
-            if label.is_some() || op.is_some() {
-                out.push(Statement { line, label, op });
-            }
-        }
-        Ok(out)
+        // Route assembly through the semantic AST (U6, fixed-slot): parse into a
+        // `Program`, then lower to the engine's statement stream — byte-identical
+        // to the old direct parse (AE1). Other CPUs stay on direct lowering
+        // behind the dialect boundary (KTD6).
+        crate::ast::lower(parse_program(source)?)
     }
+
+    fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
+        Ok(Some(parse_program(source)?))
+    }
+
+    /// asl `equ` takes no colon on its label (`name equ …`); a colon would fail
+    /// to reassemble, since the label is disambiguated by the keyword.
+    fn equ_label_colon(&self) -> bool {
+        false
+    }
+}
+
+/// Parse SC/MP source into the semantic [`Program`](crate::ast::Program). Each
+/// line becomes a node with its (global) label, operation, verbatim source, span,
+/// and comment trivia. SC/MP has no local-label scoping, so every label is a
+/// [`Scope::Global`](crate::ast::Scope) symbol whose qualified name is the source
+/// name — [`lower`](crate::ast::lower) reproduces the old statements exactly.
+pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
+    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
+    let set = &isa::scmp::SET;
+    let mut nodes = Vec::new();
+    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
+    let mut pending_leading: Vec<Comment> = Vec::new();
+
+    for (i, raw) in source.lines().enumerate() {
+        let line = i + 1;
+        let (code, comment) = split_comment(raw);
+        if code.trim().is_empty() {
+            if let Some(text) = comment {
+                pending_leading.push(Comment {
+                    text: text.to_string(),
+                    span: Span::at(line as u32, 1),
+                });
+            }
+            continue;
+        }
+        let trailing = comment.map(|text| Comment {
+            text: text.to_string(),
+            span: Span::at(line as u32, (code.len() + 1) as u32),
+        });
+
+        if let Some((name, expr, op_source)) = constant(code.trim(), line)? {
+            if let Ok(v) = fold_const(&expr, &consts, line) {
+                consts.insert(name.clone(), v);
+            }
+            nodes.push(Node {
+                operand_span: None,
+                label: Some(Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }),
+                item: Some(crate::ast::item_from_operation(Operation::Equ(expr))),
+                source: op_source,
+                span: Span::at(line as u32, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut pending_leading),
+                    trailing,
+                },
+            });
+            continue;
+        }
+
+        let (label, rest) = split_label(code);
+        let op = if rest.is_empty() {
+            None
+        } else {
+            parse_op(set, rest, &consts, line)?
+        };
+        if label.is_none() && op.is_none() {
+            continue;
+        }
+        nodes.push(Node {
+            operand_span: crate::ast::operand_span(raw, rest, line as u32),
+            label: label.map(|name| Symbol {
+                qualified: name.clone(),
+                scope: Scope::Global,
+                name,
+            }),
+            item: op.map(crate::ast::item_from_operation),
+            source: rest.trim().to_string(),
+            span: Span::at(line as u32, 1),
+            trivia: Trivia {
+                leading: std::mem::take(&mut pending_leading),
+                trailing,
+            },
+        });
+    }
+
+    if !pending_leading.is_empty() {
+        let line = source.lines().count() as u32;
+        nodes.push(Node {
+            operand_span: None,
+            label: None,
+            item: None,
+            source: String::new(),
+            span: Span::at(line, 1),
+            trivia: Trivia {
+                leading: pending_leading,
+                trailing: None,
+            },
+        });
+    }
+    Ok(Program { nodes })
+}
+
+/// Split a line into its code and its `;` comment (delimiter kept, trailing
+/// whitespace trimmed) for carrying comments as AST trivia; defined via
+/// [`strip_comment`] so the comment is exactly what it removes.
+fn split_comment(line: &str) -> (&str, Option<&str>) {
+    let code = strip_comment(line);
+    let comment = (code.len() < line.len()).then(|| line[code.len()..].trim_end());
+    (code, comment)
 }
 
 fn strip_comment(line: &str) -> &str {
@@ -82,12 +168,19 @@ fn strip_comment(line: &str) -> &str {
     line
 }
 
-fn constant(code: &str, line: usize) -> Result<Option<(String, Expr)>, AsmError> {
+/// `NAME EQU expr` / `NAME = expr`. Returns the name, the value expression, and
+/// the operation's source text (`EQU expr` / `= expr`) so the formatter can
+/// re-emit `NAME <source>` with the label kept on the same line.
+fn constant(code: &str, line: usize) -> Result<Option<(String, Expr, String)>, AsmError> {
     let (first, rest) = split_first_word(code);
     if !rest.is_empty() {
         let (kw, tail) = split_first_word(rest);
         if kw.eq_ignore_ascii_case("equ") && is_ident(first) {
-            return Ok(Some((first.to_string(), value(tail, line)?)));
+            return Ok(Some((
+                first.to_string(),
+                value(tail, line)?,
+                rest.trim().to_string(),
+            )));
         }
     }
     if let Some(eq) = mos6502::assignment_split(code) {
@@ -96,6 +189,7 @@ fn constant(code: &str, line: usize) -> Result<Option<(String, Expr)>, AsmError>
             return Ok(Some((
                 name.to_string(),
                 value(code[eq + 1..].trim(), line)?,
+                code[eq..].trim().to_string(),
             )));
         }
     }
@@ -299,5 +393,34 @@ mod tests {
         assert_eq!(bytes(" ani 0x0f\n"), vec![0xD4, 0x0F]);
         assert_eq!(bytes(" xri 0b10101010\n"), vec![0xE4, 0xAA]);
         assert_eq!(bytes(" dly 5\n"), vec![0x8F, 0x05]);
+    }
+
+    /// U6 — the SC/MP front-end routes through the AST, carrying comments as
+    /// trivia without changing the emitted bytes (AE1).
+    #[test]
+    fn comments_are_carried_as_trivia() {
+        let src = "; header\nstart:\n ldi 0x42   ; load\n nop\n";
+        let prog = super::parse_program(src).expect("parses");
+        assert!(
+            prog.nodes[0]
+                .trivia
+                .leading
+                .iter()
+                .any(|c| c.text == "; header"),
+            "own-line comment attaches as leading trivia"
+        );
+        assert!(
+            prog.nodes.iter().any(|n| n
+                .trivia
+                .trailing
+                .as_ref()
+                .is_some_and(|c| c.text == "; load")),
+            "same-line comment attaches as trailing trivia"
+        );
+        assert_eq!(
+            bytes(src),
+            bytes("start:\n ldi 0x42\n nop\n"),
+            "comments do not change bytes"
+        );
     }
 }

@@ -32,6 +32,14 @@ impl Dialect for Pasmo {
             source,
         )
     }
+    fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
+        Ok(Some(z80::parse_program(
+            &PasmoSyntax,
+            self.instruction_set(),
+            self.extension_set(),
+            source,
+        )?))
+    }
     /// pasmo silently truncates an over-range byte to its low 8 bits.
     fn oversized_byte_policy(&self) -> Oversize {
         Oversize::Truncate
@@ -78,6 +86,45 @@ impl Z80Syntax for PasmoSyntax {
 #[cfg(test)]
 mod tests {
     use crate::assemble_pasmonext as asm;
+
+    /// U4 — comments are carried as AST trivia (leading own-line + trailing
+    /// same-line), not stripped, and do not change the emitted bytes (AE1).
+    #[test]
+    fn comments_are_carried_as_trivia() {
+        use super::{Pasmo, PasmoSyntax};
+        use crate::dialect::Dialect;
+        use crate::dialects::z80;
+
+        let src = "; header\nstart:\n  ld a, 5   ; load five\n  ret\n";
+        let d = Pasmo { z80n: false };
+        let prog = z80::parse_program(&PasmoSyntax, d.instruction_set(), d.extension_set(), src)
+            .expect("parses");
+
+        // The header comment is leading trivia on the first node (`start:`).
+        assert!(
+            prog.nodes[0]
+                .trivia
+                .leading
+                .iter()
+                .any(|c| c.text == "; header"),
+            "own-line comment attaches as leading trivia"
+        );
+        // The `ld a,5` line carries its same-line comment as trailing trivia.
+        assert!(
+            prog.nodes.iter().any(|n| n
+                .trivia
+                .trailing
+                .as_ref()
+                .is_some_and(|c| c.text == "; load five")),
+            "same-line comment attaches as trailing trivia"
+        );
+        // Comments never reach the encoder — bytes are unchanged.
+        let with = crate::assemble_pasmo(src).expect("assembles").bytes;
+        let without = crate::assemble_pasmo("start:\n  ld a, 5\n  ret\n")
+            .expect("assembles")
+            .bytes;
+        assert_eq!(with, without, "comments do not change bytes");
+    }
 
     #[test]
     fn oversized_byte_truncates_silently() {

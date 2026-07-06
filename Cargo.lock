@@ -6,12 +6,15 @@ version = 4
 name = "asm198x"
 version = "0.0.7"
 dependencies = [
+ "debug198x",
  "isa",
  "isa-disasm",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
-name = "dbg198x"
+name = "debug198x"
 version = "0.0.7"
 dependencies = [
  "serde",

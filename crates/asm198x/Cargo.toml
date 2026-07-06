@@ -17,6 +17,14 @@ repository.workspace = true
 # each bump. Local builds use the path; the version is only for packaging.
 isa = { path = "../isa", version = "0.0.7" }
 isa-disasm = { path = "../isa-disasm", version = "0.0.7" }
+debug198x = { path = "../debug198x", version = "0.0.7" }
+# serde derive for the public `AssemblyResult` contract (U1). Already on the CLI
+# path transitively via debug198x; this makes the derive macro available directly.
+serde = { workspace = true }
+# JSON serialization for `--message-format=json` (U4) and the contract round-trip
+# tests. Already linked transitively via debug198x — this names it directly, adding
+# nothing new to the shipped binary.
+serde_json = { workspace = true }
 
 [lints]
 workspace = true

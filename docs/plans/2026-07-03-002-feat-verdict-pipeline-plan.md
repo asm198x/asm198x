@@ -16,6 +16,7 @@ execution: code
 - **Objective:** Make the byte-identical guarantee enforceable and visible without the reference tools: a committed **reference-verdict corpus** that CI and contributors replay against, and a per-release public **conformance ledger** generated from it.
 - **Product authority:** Steve Hill. Seeded from the ideation record at `docs/ideation/2026-07-03-asm198x-world-class-ideation.html` (idea 2); scope confirmed 2026-07-03; pressure-tested by document review the same day (nine findings applied; two judgment calls returned to Steve).
 - **Open blockers:** None. Ready for planning.
+- **Sequencing (2026-07-06):** **Independent — not paused, not gated on the core contract.** Unlike dbg198x (paused, contract-first), this pipeline reuses only the thin `DiagnosticEnvelope` opportunistically and depends on no Layer-0/1 shape; its harness prerequisite (the outcome-typed `ref_assemble`, its U2) can run whenever capacity allows. See [`decisions/roadmap-sequencing.md`](../../decisions/roadmap-sequencing.md) Layer 2.
 
 ---
 

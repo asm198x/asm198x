@@ -189,7 +189,7 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
 /// if the source uses more than one non-empty section.
 pub(crate) fn assemble_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError> {
     let mut warnings = Vec::new();
-    let sections = assemble_core(source, true, &mut warnings)?;
+    let (sections, _) = assemble_core(source, true, &mut warnings)?;
     let bytes = flatten_one_section(&sections)?;
     Ok((bytes, warnings))
 }
@@ -202,7 +202,7 @@ pub(crate) fn assemble_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), A
 /// section carries bytes (a flat binary can hold only one).
 pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, AsmError> {
     let mut warnings = Vec::new();
-    let sections = assemble_core(source, optimize, &mut warnings)?;
+    let (sections, _) = assemble_core(source, optimize, &mut warnings)?;
     flatten_one_section(&sections)
 }
 
@@ -228,8 +228,47 @@ pub(crate) fn assemble_exe(source: &str) -> Result<Vec<u8>, AsmError> {
     // The hunk-exe path discards warnings for now (the CLI surfaces them on the
     // flat path via `assemble_warned`); the bytes are unaffected either way.
     let mut warnings = Vec::new();
-    let sections = assemble_core(source, true, &mut warnings)?;
+    let (sections, _) = assemble_core(source, true, &mut warnings)?;
     Ok(serialize_hunkexe(&sections))
+}
+
+/// As [`assemble_warned`], also returning the debug read-out (Debug198x U5).
+/// Same `assemble_core` call, so the bytes are identical by construction (AE2).
+///
+/// # Errors
+/// As [`assemble_warned`].
+pub(crate) fn assemble_warned_with_debug(
+    source: &str,
+) -> Result<(Vec<u8>, Vec<Warning>, crate::listing::DebugCapture), AsmError> {
+    let mut warnings = Vec::new();
+    let (sections, mut capture) = assemble_core(source, true, &mut warnings)?;
+    let bytes = flatten_one_section(&sections)?;
+    // The flat binary *is* the emitted section's bytes, so its offsets are file
+    // offsets: base the section at 0 so lookups resolve file-relative out of
+    // the box. A consumer loading the blob elsewhere overrides via the
+    // `BaseMap`, which wins over the recorded base.
+    if let Some(emitted) = sections.iter().position(|s| !s.bytes.is_empty())
+        && let Some(section) = capture
+            .sections
+            .iter_mut()
+            .find(|s| s.id == emitted as debug198x::SectionId)
+    {
+        section.base = Some(0);
+    }
+    Ok((bytes, warnings, capture))
+}
+
+/// As [`assemble_exe`], also returning the debug read-out (Debug198x U5).
+/// Same `assemble_core` call, so the bytes are identical by construction (AE2).
+///
+/// # Errors
+/// As [`assemble_exe`].
+pub(crate) fn assemble_exe_with_debug(
+    source: &str,
+) -> Result<(Vec<u8>, crate::listing::DebugCapture), AsmError> {
+    let mut warnings = Vec::new();
+    let (sections, capture) = assemble_core(source, true, &mut warnings)?;
+    Ok((serialize_hunkexe(&sections), capture))
 }
 
 /// A 32-bit relocation: a byte offset within a section, and the target section
@@ -255,13 +294,22 @@ struct Ctx {
 }
 
 /// Assemble into per-section byte buffers with their relocations — the shared
-/// core behind both the flat and the hunk-executable serializers.
+/// core behind both the flat and the hunk-executable serializers. Also returns
+/// the debug read-out (Debug198x U5): section table, `(section, offset)`
+/// symbols, and per-statement line spans, all **section-relative** with no
+/// fabricated absolutes (KTD7 — the reader's `BaseMap` owns rebasing to loaded
+/// hunk addresses). The capture is strictly passive: it observes emission and
+/// never branches on it.
 fn assemble_core(
     source: &str,
     optimize: bool,
     warnings: &mut Vec<Warning>,
-) -> Result<Vec<SecOut>, AsmError> {
-    let stmts = parse(source)?;
+) -> Result<(Vec<SecOut>, crate::listing::DebugCapture), AsmError> {
+    // The AST is the single front-end IR: parse into the source-preserving
+    // `Program` (which carries each line's native 68000 statement, qualified),
+    // then project it to the assembler's statement stream. Same bytes as the old
+    // direct parse — see `decisions/ast-native-payload-for-multipass-cisc.md`.
+    let stmts = lines_from_program(&parse_program(source)?);
 
     // Assign every statement to a section. A `section` directive opens one;
     // bytes emitted before any directive fall into an implicit code section.
@@ -345,12 +393,16 @@ fn assemble_core(
             relocs: Vec::new(),
         })
         .collect();
+    let mut dbg_lines: Vec<(u32, debug198x::SectionId, u64, u64)> = Vec::new();
     for (i, s) in stmts.iter().enumerate() {
         let sec = sec_idx[i];
         let buf = &mut out[sec];
         if s.kind.aligns() && !buf.bytes.len().is_multiple_of(2) {
             buf.bytes.push(0);
         }
+        // Span start is measured *after* the align pad: the hidden pad byte is
+        // fill, not this statement's emission (the padding rule — no span).
+        let span_start = buf.bytes.len();
         match &s.kind {
             Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) => {}
             Stmt::Dc(size, items) => {
@@ -383,8 +435,67 @@ fn assemble_core(
                 buf.relocs.extend(relocs);
             }
         }
+        let emitted = out[sec].bytes.len() - span_start;
+        if emitted > 0 {
+            dbg_lines.push((
+                s.line as u32,
+                sec as debug198x::SectionId,
+                span_start as u64,
+                emitted as u64,
+            ));
+        }
     }
-    Ok(out)
+
+    // The debug read-out's symbols: every label at its `(section, offset)`
+    // placement (the final layout's value is the section-relative offset,
+    // aligns included), and every `equ` as a constant.
+    let mut dbg_symbols: Vec<debug198x::Symbol> = Vec::new();
+    for (i, s) in stmts.iter().enumerate() {
+        let Some(label) = &s.label else { continue };
+        let Some(value) = consts.get(label) else {
+            continue;
+        };
+        let kind = if matches!(s.kind, Stmt::Equ(..)) {
+            debug198x::SymbolKind::Const {
+                value: *value as u64,
+            }
+        } else {
+            debug198x::SymbolKind::Label {
+                section: sec_idx[i] as debug198x::SectionId,
+                offset: *value as u64,
+                space: None,
+            }
+        };
+        dbg_symbols.push(debug198x::Symbol {
+            name: label.clone(),
+            kind,
+        });
+    }
+    // The section table: hunk kind as the name, `base: None` throughout —
+    // hunks are relocatable, so offsets stay section-relative and a consumer
+    // (the Emu198x importer) supplies actual load addresses via a `BaseMap`.
+    let dbg_sections: Vec<debug198x::Section> = sec_meta
+        .iter()
+        .enumerate()
+        .map(|(id, (kind, _))| debug198x::Section {
+            id: id as debug198x::SectionId,
+            name: match kind {
+                HunkKind::Code => "code".to_string(),
+                HunkKind::Data => "data".to_string(),
+                HunkKind::Bss => "bss".to_string(),
+            },
+            base: None,
+        })
+        .collect();
+
+    Ok((
+        out,
+        crate::listing::DebugCapture {
+            sections: dbg_sections,
+            symbols: dbg_symbols,
+            lines: dbg_lines,
+        },
+    ))
 }
 
 /// Serialize assembled sections into an AmigaDOS hunk executable, matching
@@ -1174,6 +1285,9 @@ impl MemFlag {
     }
 }
 
+// `Clone` so the assembler can project a statement out of the AST node that owns
+// it (the multi-pass driver runs on an owned `Vec<Line>`; see `lines_from_program`).
+#[derive(Clone)]
 enum Stmt {
     Empty,
     Equ(String, Expr),
@@ -1202,54 +1316,202 @@ impl Stmt {
     }
 }
 
+// The 68000 statement is the family-owned native payload carried in the AST
+// (`decisions/ast-native-payload-for-multipass-cisc.md`): parse builds and
+// qualifies it into the tree, and the multi-pass assembler reads it back.
+impl crate::ast::NativeItem for Stmt {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    /// `equ`/`=` binds its label on the same line, so the formatter keeps the
+    /// label there (no colon — the keyword disambiguates it).
+    fn inline_label(&self) -> bool {
+        matches!(self, Stmt::Equ(..))
+    }
+}
+
 struct Line {
     line: usize,
     label: Option<String>,
     kind: Stmt,
 }
 
-fn parse(source: &str) -> Result<Vec<Line>, AsmError> {
-    let mut out = Vec::new();
+/// Parse vasm (Motorola-syntax) 68000 source into the source-preserving semantic
+/// [`Program`](crate::ast::Program) — the front-end the `--fmt` formatter and the
+/// dialect converter consume. Each line becomes a node carrying its label (with
+/// `.local` scope resolved as sjasmplus's), the verbatim operation source, and
+/// comment trivia (`;` inline and `*`-column-0 whole-line comments).
+///
+/// This preserves the source faithfully for formatting; it does **not** drive
+/// assembly yet (the multi-pass encoder still runs off [`parse`]). Routing
+/// assembly through the tree is the next increment — see
+/// `decisions/ast-native-payload-for-multipass-cisc.md`. Because the formatter
+/// re-emits each operation's source verbatim, an `equ` node only needs an
+/// [`Item::Equ`](crate::ast::Item) marker so emit keeps the binding on its label's
+/// line; the value expression is carried for the coming assembly path.
+pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
+    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
+    let mut nodes = Vec::new();
+    // The enclosing global label — a leading-`.` local qualifies against it, the
+    // same scoping vasm's `qualify_local_labels` applies (R4).
+    let mut scope = String::new();
+    // Own-line comments seen since the last node, attached as leading trivia to
+    // the next one. Comments never reach the encoder, so bytes are unchanged.
+    let mut pending_leading: Vec<Comment> = Vec::new();
+
     for (i, raw) in source.lines().enumerate() {
         let line = i + 1;
-        let code = strip_comment(raw);
+        let (code, comment) = split_comment(raw);
         if code.trim().is_empty() {
+            if let Some(text) = comment {
+                pending_leading.push(Comment {
+                    text: text.to_string(),
+                    span: Span::at(line as u32, 1),
+                });
+            }
             continue;
         }
+        let trailing = comment.map(|text| Comment {
+            text: text.to_string(),
+            span: Span::at(line as u32, (code.len() + 1) as u32),
+        });
+
         let (label, rest) = split_label(code, line)?;
-        let kind = parse_op(&label, rest, line)?;
-        if label.is_none() && matches!(kind, Stmt::Empty) {
-            continue;
+        // A non-local label (including an `equ` name) opens a new scope; a
+        // leading-`.` name qualifies against the current one — the same forward
+        // pass vasm's old `qualify_local_labels` ran, done inline so the tree
+        // carries fully-resolved symbols.
+        let symbol = label.as_ref().map(|name| {
+            if name.starts_with('.') {
+                Symbol {
+                    qualified: format!("{scope}{name}"),
+                    scope: Scope::Local {
+                        in_global: scope.clone(),
+                    },
+                    name: name.clone(),
+                }
+            } else {
+                scope = name.clone();
+                Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name: name.clone(),
+                }
+            }
+        });
+
+        // Parse the 68000 statement and qualify its local references against the
+        // now-current scope, then store it in the node as the family-owned native
+        // payload (the assembler reads it back). An `equ`/`=` reports
+        // `inline_label`, so emit keeps its label on the operation's line.
+        let mut stmt = parse_op(&label, rest, line)?;
+        qualify_stmt(&mut stmt, &scope);
+        let trivia = Trivia {
+            leading: std::mem::take(&mut pending_leading),
+            trailing,
+        };
+        let span = Span::at(line as u32, 1);
+        match stmt {
+            // A label-only line: keep the label, no operation (emit renders the
+            // label alone; the projection reads it back as `Stmt::Empty`).
+            Stmt::Empty if symbol.is_some() => nodes.push(Node {
+                operand_span: None,
+                label: symbol,
+                item: None,
+                source: String::new(),
+                span,
+                trivia,
+            }),
+            // A bare line with neither label nor operation — nothing to keep.
+            // (Unreachable in practice: an empty operation implies empty code,
+            // already skipped above.)
+            Stmt::Empty => {
+                pending_leading = trivia.leading;
+                continue;
+            }
+            stmt => nodes.push(Node {
+                operand_span: None,
+                label: symbol,
+                item: Some(crate::ast::Item::Native(Box::new(stmt))),
+                source: rest.trim().to_string(),
+                span,
+                trivia,
+            }),
         }
-        out.push(Line { line, label, kind });
     }
-    qualify_local_labels(&mut out);
-    Ok(out)
+
+    // Flush comments after the last node (a trailing block or comment-only file)
+    // as a label-less, op-less node so the formatter keeps them.
+    if !pending_leading.is_empty() {
+        let line = source.lines().count() as u32;
+        nodes.push(Node {
+            operand_span: None,
+            label: None,
+            item: None,
+            source: String::new(),
+            span: Span::at(line, 1),
+            trivia: Trivia {
+                leading: pending_leading,
+                trailing: None,
+            },
+        });
+    }
+    Ok(Program { nodes })
 }
 
-/// Resolve vasm local labels (names starting with `.`) to their enclosing
-/// global label, so the same `.loop` can recur under different routines. Each
-/// local definition and reference is rewritten to `<global>.<local>`, a key no
-/// ordinary identifier collides with. Definition and reference share the global
-/// scope current at their line, so they always agree.
-fn qualify_local_labels(lines: &mut [Line]) {
-    let mut scope = String::new();
-    for l in lines.iter_mut() {
-        // A non-local label (or equ name) opens a new scope for the labels below.
-        if let Some(name) = &l.label
-            && !name.starts_with('.')
-        {
-            scope = name.clone();
-        }
-        if let Some(name) = &mut l.label
-            && name.starts_with('.')
-        {
-            *name = format!("{scope}{name}");
-        }
-        qualify_stmt(&mut l.kind, &scope);
+/// Project the semantic [`Program`](crate::ast::Program) into the assembler's
+/// statement stream — the multi-pass driver runs on an owned `Vec<Line>`. Each
+/// node's qualified label and native [`Stmt`] payload (built and qualified in
+/// [`parse_program`]) are read straight back out of the tree; nothing is
+/// re-parsed. A label-only node becomes an empty statement carrying its label;
+/// the comment-only flush node (no label, no item) carries no statement.
+fn lines_from_program(program: &crate::ast::Program) -> Vec<Line> {
+    use crate::ast::Item;
+    let mut out = Vec::new();
+    for node in &program.nodes {
+        let label = node.label.as_ref().map(|s| s.qualified.clone());
+        let kind = match &node.item {
+            Some(Item::Native(n)) => n
+                .as_any()
+                .downcast_ref::<Stmt>()
+                .expect("vasm stores a Stmt in every native node")
+                .clone(),
+            None if label.is_some() => Stmt::Empty,
+            // A comment-only flush node, or any non-native item (vasm produces
+            // only native items) — nothing to assemble.
+            _ => continue,
+        };
+        out.push(Line {
+            line: node.span.line as usize,
+            label,
+            kind,
+        });
+    }
+    out
+}
+
+/// Split a line into its code and its comment for carrying comments as AST
+/// trivia — a `*`-column-0 line is a whole-line comment, otherwise the text from
+/// the first `;` (a naive scan, no string awareness — exactly what vasm's parser
+/// treats as a comment), so the code half is precisely what assembly sees.
+fn split_comment(line: &str) -> (&str, Option<&str>) {
+    if line.starts_with('*') {
+        return ("", Some(line.trim_end()));
+    }
+    match line.find(';') {
+        Some(i) => (&line[..i], Some(line[i..].trim_end())),
+        None => (line, None),
     }
 }
 
+/// Resolve vasm local labels (names starting with `.`) to their enclosing global
+/// label, so the same `.loop` can recur under different routines: each local
+/// definition and reference is rewritten to `<global>.<local>`, a key no ordinary
+/// identifier collides with. Definition and reference share the global scope
+/// current at their line, so they always agree. [`parse_program`] applies this to
+/// each statement inline (the labels themselves are resolved as symbols are
+/// built), so the tree carries fully-qualified statements.
 fn qualify_stmt(kind: &mut Stmt, scope: &str) {
     match kind {
         Stmt::Equ(name, e) => {
@@ -1289,14 +1551,6 @@ fn qualify_expr(e: &mut Expr, scope: &str) {
         }
         _ => {}
     }
-}
-
-/// Strip a `;` comment, or a whole-line `*`-comment (column 0).
-fn strip_comment(line: &str) -> &str {
-    if line.starts_with('*') {
-        return "";
-    }
-    line.find(';').map_or(line, |i| &line[..i])
 }
 
 fn split_label(code: &str, line: usize) -> Result<(Option<String>, &str), AsmError> {

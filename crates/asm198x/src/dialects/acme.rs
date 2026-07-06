@@ -38,28 +38,498 @@ impl Dialect for Acme {
     }
 
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        let set = self.instruction_set();
+        // Idea 4: assemble by **evaluating the shared conditional AST** — the same
+        // source-preserving tree the formatter parses — rather than a separate
+        // brace preprocessor. `evaluate` walks the tree, prunes untaken branches,
+        // threads `env`, bakes `!set`, and lowers each line through
+        // `parse_statement`. This retires `tokenize_braces`/`process_block`; the
+        // conditional now lives in the tree, not a second parse.
+        let program = parse_program(source)?;
         let anons = prescan_anons(source);
-        let units = tokenize_braces(source);
+        let mut eval = AcmeEval {
+            set: self.instruction_set(),
+            anons: &anons,
+            env: BTreeMap::new(),
+            set_names: BTreeSet::new(),
+        };
         let mut out = Vec::new();
-        let mut env: BTreeMap<String, i64> = BTreeMap::new();
-        // Names bound by `!set` (a *reassignable* variable). They live in `env`
-        // like `=` constants, but are additionally marked here so each use is
-        // baked to the value current at that point (reassignment can't be a
-        // single pass-2 symbol).
-        let mut set_names: BTreeSet<String> = BTreeSet::new();
-        let mut idx = 0;
-        process_block(
-            set,
-            &anons,
-            &mut env,
-            &mut set_names,
-            &units,
-            &mut idx,
-            true,
-            &mut out,
-        )?;
+        crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
         Ok(out)
+    }
+
+    /// The formatter parses through the same source-preserving front-end
+    /// (`parse_program`) the assembler now uses — conditional blocks as
+    /// `Item::Conditional`, every other line's verbatim operation source. `emit`
+    /// reformats this tree; `parse` evaluates it.
+    fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
+        Ok(Some(parse_program(source)?))
+    }
+
+    /// ACME binds constants with `name = value` (no colon), so the formatter
+    /// emits the label without one — and re-aligns runs of them (the ruling).
+    fn equ_label_colon(&self) -> bool {
+        false
+    }
+}
+
+/// Split a line into its code and its `;` comment (delimiter kept, trailing
+/// whitespace trimmed) for carrying comments as AST trivia; defined via
+/// [`strip_comment`] so the comment is exactly what it removes.
+fn split_comment(line: &str) -> (&str, Option<&str>) {
+    let code = strip_comment(line);
+    let comment = (code.len() < line.len()).then(|| line[code.len()..].trim_end());
+    (code, comment)
+}
+
+// ---------------------------------------------------------------------------
+// Source-preserving parse — the single ACME front-end (U6 / idea 4).
+//
+// `parse_program` keeps the source structure: conditional blocks as
+// `Item::Conditional`, every other line as a flat node carrying its verbatim
+// operation source. It does **not** evaluate — no branch pruning, no `!set`
+// baking, no anonymous-label resolution. Both consumers run off this one tree:
+// `emit` reformats it to the canonical layout (see
+// `decisions/formatter-canonical-style.md`), and `evaluate` (below) assembles
+// it — pruning branches and threading `env`. This is idea 4: the conditional
+// lives in the tree, replacing the old brace preprocessor.
+// ---------------------------------------------------------------------------
+
+/// How a [`parse_block`](FmtCx::parse_block) ended.
+#[derive(PartialEq, Eq)]
+enum Closer {
+    Eof,
+    Brace,
+    BraceElse,
+}
+
+/// The formatter parse cursor.
+struct FmtCx<'a> {
+    set: &'static isa::InstructionSet,
+    lines: Vec<&'a str>,
+    pos: usize,
+    /// Own-line comments seen since the last node, attached as leading trivia.
+    pending: Vec<crate::ast::Comment>,
+}
+
+/// Parse ACME source into the source-preserving formatter AST.
+pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
+    let mut cx = FmtCx {
+        set: &isa::mos6502::SET,
+        lines: source.lines().collect(),
+        pos: 0,
+        pending: Vec::new(),
+    };
+    let (mut nodes, closer) = cx.parse_block()?;
+    if closer != Closer::Eof {
+        return Err(AsmError::new(cx.pos, "unbalanced `}` in conditional block"));
+    }
+    // Flush a trailing comment block so the formatter keeps it.
+    let last = cx.lines.len();
+    cx.flush_pending(&mut nodes, last);
+    Ok(crate::ast::Program { nodes })
+}
+
+impl<'a> FmtCx<'a> {
+    /// Parse a run of nodes until a block close (`}`, `} else {`) or EOF.
+    fn parse_block(&mut self) -> Result<(Vec<crate::ast::Node>, Closer), AsmError> {
+        let mut nodes = Vec::new();
+        while self.pos < self.lines.len() {
+            let raw = self.lines[self.pos];
+            let line = self.pos + 1;
+            let (code, comment) = split_comment(raw);
+            let trimmed = code.trim();
+
+            if trimmed.is_empty() {
+                match comment {
+                    // An own-line comment becomes leading trivia of the next node.
+                    Some(text) => self.pending.push(crate::ast::Comment {
+                        text: text.to_string(),
+                        span: crate::ast::Span::at(line as u32, 1),
+                    }),
+                    // A blank line is preserved as an empty-text marker (emit
+                    // renders it as a blank line), collapsing consecutive blanks
+                    // to one. Preserving blanks keeps constant-run boundaries
+                    // stable across re-formats (idempotence) and respects the
+                    // author's visual grouping.
+                    None => {
+                        let last_blank =
+                            matches!(self.pending.last(), Some(c) if c.text.is_empty());
+                        if !last_blank {
+                            self.pending.push(crate::ast::Comment {
+                                text: String::new(),
+                                span: crate::ast::Span::at(line as u32, 1),
+                            });
+                        }
+                    }
+                }
+                self.pos += 1;
+                continue;
+            }
+
+            // A block close: `}`, `} else {`, `} else`.
+            if let Some(rest) = trimmed.strip_prefix('}') {
+                let rest = rest.trim();
+                self.pos += 1;
+                // Flush comments/blanks pending at the block's end into *this*
+                // block, so a trailing comment stays inside the branch it closes
+                // rather than leaking onto the next one (across `} else {`).
+                self.flush_pending(&mut nodes, line);
+                if rest.is_empty() {
+                    return Ok((nodes, Closer::Brace));
+                }
+                if let Some(after) = rest.strip_prefix("else")
+                    && (after.trim().is_empty() || after.trim() == "{")
+                {
+                    return Ok((nodes, Closer::BraceElse));
+                }
+                return Err(AsmError::new(line, format!("unexpected `{trimmed}`")));
+            }
+
+            // A conditional head opens a block (one-line or multi-line).
+            if is_conditional_head(trimmed) {
+                let node = self.parse_conditional(trimmed, comment, line)?;
+                nodes.push(node);
+                continue;
+            }
+
+            // An ordinary line.
+            let leading = std::mem::take(&mut self.pending);
+            let node = self.parse_line(code, comment, line, leading)?;
+            nodes.push(node);
+            self.pos += 1;
+        }
+        Ok((nodes, Closer::Eof))
+    }
+
+    /// Parse a conditional block from the head line at `self.pos`. Handles the
+    /// one-line guard (`!ifndef X { X = 0 }`) and the multi-line `!if … {` … `}`
+    /// (with optional `} else {`).
+    fn parse_conditional(
+        &mut self,
+        trimmed: &str,
+        comment: Option<&str>,
+        line: usize,
+    ) -> Result<crate::ast::Node, AsmError> {
+        let leading = std::mem::take(&mut self.pending);
+        let open =
+            find_top(trimmed, b'{').ok_or_else(|| AsmError::new(line, "conditional needs `{`"))?;
+        let head = trimmed[..open].trim().to_string();
+        let after = trimmed[open + 1..].trim();
+
+        // One-line guard: `{ body }` closed on the same line.
+        if let Some(close) = find_top(after, b'}') {
+            let body_text = after[..close].trim();
+            let then_body = if body_text.is_empty() {
+                Vec::new()
+            } else {
+                vec![self.parse_line(body_text, None, line, Vec::new())?]
+            };
+            self.pos += 1;
+            return Ok(self.conditional_node(head, then_body, None, true, leading, comment, line));
+        }
+
+        // Multi-line: the body starts on the following line.
+        self.pos += 1;
+        let (then_body, closer) = self.parse_block()?;
+        let else_body = if closer == Closer::BraceElse {
+            let (eb, _) = self.parse_block()?;
+            Some(eb)
+        } else {
+            None
+        };
+        Ok(self.conditional_node(head, then_body, else_body, false, leading, comment, line))
+    }
+
+    /// Build one flat node from an ordinary line: its optional (column-0) label,
+    /// its verbatim operation source, and trivia. Mirrors `parse_statement`'s
+    /// label rules but keeps source rather than lowering.
+    fn parse_line(
+        &self,
+        code: &str,
+        comment: Option<&str>,
+        line: usize,
+        leading: Vec<crate::ast::Comment>,
+    ) -> Result<crate::ast::Node, AsmError> {
+        let trimmed = code.trim();
+        // The original source line, so operand columns stay file-accurate even
+        // when `code` is a mid-line slice (an inline conditional body). Every
+        // slice below borrows from it (contract U3).
+        let raw = self.lines[line - 1];
+        let at_line = line as u32;
+
+        // `*= expr` / `* = expr` — a program-counter set (no label).
+        if let Some(rest) = trimmed.strip_prefix('*') {
+            let rest = rest.trim_start();
+            if let Some(value) = rest.strip_prefix('=') {
+                let src = format!("*= {}", value.trim());
+                let span = crate::ast::token_span(raw, value, at_line);
+                return Ok(self.op_node(span, None, src, leading, comment, line));
+            }
+        }
+
+        // `name = expr` — a constant binding (a lone `=`), kept on the label line.
+        if let Some(eq) = top_level_lone_eq(trimmed) {
+            let name = trimmed[..eq].trim();
+            if is_ident(name) {
+                let src = format!("= {}", trimmed[eq + 1..].trim());
+                let span = crate::ast::token_span(raw, &trimmed[eq + 1..], at_line);
+                return Ok(self.equ_node(span, name, src, leading, comment, line));
+            }
+        }
+
+        // A column-0 token may be a label; a leading-whitespace line is all op.
+        if !code.starts_with([' ', '\t']) {
+            let (word, rest) = split_first_word(trimmed);
+            let span = crate::ast::operand_span(raw, rest, at_line);
+            if anon_marker(word).is_some() {
+                return Ok(self.labeled_node(span, word, rest.trim(), leading, comment, line));
+            }
+            if let Some(name) = word.strip_suffix(':')
+                && is_ident(name)
+            {
+                return Ok(self.labeled_node(span, name, rest.trim(), leading, comment, line));
+            }
+            if !word.starts_with('!')
+                && self.set.instruction(&word.to_ascii_uppercase()).is_none()
+                && is_ident(word)
+            {
+                return Ok(self.labeled_node(span, word, rest.trim(), leading, comment, line));
+            }
+        }
+
+        // No label: an instruction or `!` directive, kept verbatim.
+        let span = crate::ast::operand_span(raw, trimmed, at_line);
+        Ok(self.op_node(span, None, trimmed.to_string(), leading, comment, line))
+    }
+
+    // --- node builders ------------------------------------------------------
+
+    fn trailing(
+        &self,
+        comment: Option<&str>,
+        line: usize,
+        col: u32,
+    ) -> Option<crate::ast::Comment> {
+        comment.map(|text| crate::ast::Comment {
+            text: text.to_string(),
+            span: crate::ast::Span::at(line as u32, col),
+        })
+    }
+
+    fn equ_node(
+        &self,
+        operand_span: Option<crate::ast::Span>,
+        name: &str,
+        source: String,
+        leading: Vec<crate::ast::Comment>,
+        comment: Option<&str>,
+        line: usize,
+    ) -> crate::ast::Node {
+        crate::ast::Node {
+            operand_span,
+            label: Some(global(name)),
+            // A placeholder value: the formatter reads only `source`; this tree is
+            // never lowered (ACME assembles via its preprocessor).
+            item: Some(crate::ast::item_from_operation(Operation::Equ(Expr::Num(
+                0,
+            )))),
+            source,
+            span: crate::ast::Span::at(line as u32, 1),
+            trivia: crate::ast::Trivia {
+                leading,
+                trailing: self.trailing(comment, line, 1),
+            },
+        }
+    }
+
+    /// A line with a column-0 label and (optionally) an operation after it.
+    fn labeled_node(
+        &self,
+        operand_span: Option<crate::ast::Span>,
+        name: &str,
+        op: &str,
+        leading: Vec<crate::ast::Comment>,
+        comment: Option<&str>,
+        line: usize,
+    ) -> crate::ast::Node {
+        crate::ast::Node {
+            operand_span,
+            label: Some(global(name)),
+            item: None,
+            source: op.to_string(),
+            span: crate::ast::Span::at(line as u32, 1),
+            trivia: crate::ast::Trivia {
+                leading,
+                trailing: self.trailing(comment, line, 1),
+            },
+        }
+    }
+
+    fn op_node(
+        &self,
+        operand_span: Option<crate::ast::Span>,
+        label: Option<crate::ast::Symbol>,
+        source: String,
+        leading: Vec<crate::ast::Comment>,
+        comment: Option<&str>,
+        line: usize,
+    ) -> crate::ast::Node {
+        crate::ast::Node {
+            operand_span,
+            label,
+            item: None,
+            source,
+            span: crate::ast::Span::at(line as u32, 1),
+            trivia: crate::ast::Trivia {
+                leading,
+                trailing: self.trailing(comment, line, 1),
+            },
+        }
+    }
+
+    #[allow(clippy::too_many_arguments)]
+    fn conditional_node(
+        &self,
+        head: String,
+        then_body: Vec<crate::ast::Node>,
+        else_body: Option<Vec<crate::ast::Node>>,
+        inline: bool,
+        leading: Vec<crate::ast::Comment>,
+        comment: Option<&str>,
+        line: usize,
+    ) -> crate::ast::Node {
+        crate::ast::Node {
+            operand_span: None,
+            label: None,
+            item: Some(crate::ast::Item::Conditional {
+                head,
+                then_body,
+                else_body,
+                inline,
+            }),
+            source: String::new(),
+            span: crate::ast::Span::at(line as u32, 1),
+            trivia: crate::ast::Trivia {
+                leading,
+                trailing: self.trailing(comment, line, 1),
+            },
+        }
+    }
+
+    /// Append the pending comments/blanks as a bare node (so the formatter keeps
+    /// them) when a block or the file ends; a no-op if none are pending.
+    fn flush_pending(&mut self, nodes: &mut Vec<crate::ast::Node>, line: usize) {
+        if !self.pending.is_empty() {
+            nodes.push(crate::ast::Node {
+                operand_span: None,
+                label: None,
+                item: None,
+                source: String::new(),
+                span: crate::ast::Span::at(line as u32, 1),
+                trivia: crate::ast::Trivia {
+                    leading: std::mem::take(&mut self.pending),
+                    trailing: None,
+                },
+            });
+        }
+    }
+}
+
+/// A plain global symbol whose source name and qualified name are the same.
+fn global(name: &str) -> crate::ast::Symbol {
+    crate::ast::Symbol {
+        name: name.to_string(),
+        scope: crate::ast::Scope::Global,
+        qualified: name.to_string(),
+    }
+}
+
+/// Whether a trimmed line opens a conditional (`!if`/`!ifdef`/`!ifndef`).
+fn is_conditional_head(trimmed: &str) -> bool {
+    matches!(split_first_word(trimmed).0, "!if" | "!ifdef" | "!ifndef")
+}
+
+/// The first top-level occurrence of `ch` (outside `'…'`/`"…"`), for brace scans.
+fn find_top(s: &str, ch: u8) -> Option<usize> {
+    let (mut in_char, mut in_str) = (false, false);
+    for (i, &b) in s.as_bytes().iter().enumerate() {
+        match b {
+            b'\'' if !in_str => in_char = !in_char,
+            b'"' if !in_char => in_str = !in_str,
+            _ if b == ch && !in_char && !in_str => return Some(i),
+            _ => {}
+        }
+    }
+    None
+}
+
+// ---------------------------------------------------------------------------
+// Assembly by evaluation of the conditional AST (idea 4) — the ACME evaluator
+// ---------------------------------------------------------------------------
+
+/// ACME's [`CondEval`](crate::ast::CondEval): it owns the environment (`=`/`equ`
+/// constants and `!set` variables) and lowers each live line through
+/// [`parse_statement`], re-parsing from the node's (label, source) with the
+/// current `env` — so a direct/extended choice or an opcode-embedded operand
+/// folds against exactly the bindings live at that point. The shared
+/// [`evaluate`](crate::ast::evaluate) walk prunes untaken branches; this supplies
+/// the ACME-specific condition test and per-line lowering.
+struct AcmeEval<'a> {
+    set: &'static isa::InstructionSet,
+    anons: &'a [AnonDef],
+    env: BTreeMap<String, i64>,
+    /// Names bound by `!set` (rebindable): each use is baked to its current value.
+    set_names: BTreeSet<String>,
+}
+
+impl crate::ast::CondEval for AcmeEval<'_> {
+    fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError> {
+        let line = line as usize;
+        match classify_conditional(head) {
+            Some(Conditional::IfDef(s)) => Ok(self.env.contains_key(&s)),
+            Some(Conditional::IfNDef(s)) => Ok(!self.env.contains_key(&s)),
+            Some(Conditional::If(e)) => eval_condition(self.anons, &self.env, &e, line),
+            None => Err(AsmError::new(line, format!("bad conditional `{head}`"))),
+        }
+    }
+
+    fn lower(&mut self, node: &crate::ast::Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
+        let line = node.span.line as usize;
+        // Reconstruct the source line from the node's (label, operation source) —
+        // canonical whitespace, which the parser treats identically to the
+        // original.
+        let recon = match &node.label {
+            Some(sym) if node.source.is_empty() => sym.name.clone(),
+            Some(sym) => format!("{} {}", sym.name, node.source),
+            None => node.source.clone(),
+        };
+
+        // `!set name = expr` binds/rebinds a variable and emits nothing; later
+        // uses are baked to this value.
+        if split_first_word(recon.trim()).0 == "!set" {
+            let (name, value) = parse_set(self.anons, &self.env, &recon, line)?;
+            self.env.insert(name.clone(), value);
+            self.set_names.insert(name);
+            return Ok(());
+        }
+
+        let (label, op) = parse_statement(self.set, self.anons, &self.env, &recon, line)?;
+        // Bake `!set` variables to their current value; real labels stay symbolic.
+        let op = op.map(|o| bake_set_vars(o, &self.env, &self.set_names));
+        if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
+            && let Ok(v) = fold_const(e, &self.env, line)
+        {
+            self.env.insert(name.clone(), v);
+        }
+        if !(label.is_none() && op.is_none()) {
+            out.push(Statement {
+                line,
+                label,
+                op,
+                operand_span: node.operand_span.clone(),
+            });
+        }
+        Ok(())
     }
 }
 
@@ -164,53 +634,6 @@ fn resolve_anon(
 // Conditional assembly (`!if` / `!ifdef` / `!ifndef` … `{ }` … `else { }`)
 // ---------------------------------------------------------------------------
 
-/// One unit of source after `{`/`}` have been split out as standalone tokens.
-struct Unit {
-    line: usize,
-    text: String,
-}
-
-/// Split the source into units, isolating each top-level `{` and `}` (outside
-/// strings) so the conditional walker can treat them as block delimiters. Lines
-/// without braces pass through whole, leading whitespace intact (so column-0
-/// label detection still works).
-fn tokenize_braces(source: &str) -> Vec<Unit> {
-    let mut units = Vec::new();
-    for (i, raw) in source.lines().enumerate() {
-        let line = i + 1;
-        let code = strip_comment(raw);
-        let mut in_char = false;
-        let mut in_str = false;
-        let mut start = 0;
-        let bytes = code.as_bytes();
-        let flush = |seg: &str, units: &mut Vec<Unit>| {
-            if !seg.trim().is_empty() {
-                units.push(Unit {
-                    line,
-                    text: seg.to_string(),
-                });
-            }
-        };
-        for (j, &b) in bytes.iter().enumerate() {
-            match b {
-                b'\'' if !in_str => in_char = !in_char,
-                b'"' if !in_char => in_str = !in_str,
-                b'{' | b'}' if !in_char && !in_str => {
-                    flush(&code[start..j], &mut units);
-                    units.push(Unit {
-                        line,
-                        text: (b as char).to_string(),
-                    });
-                    start = j + 1;
-                }
-                _ => {}
-            }
-        }
-        flush(&code[start..], &mut units);
-    }
-    units
-}
-
 /// The kind of a conditional directive and the text it tests.
 enum Conditional {
     IfDef(String),
@@ -226,84 +649,6 @@ fn classify_conditional(text: &str) -> Option<Conditional> {
         "!if" => Some(Conditional::If(rest.trim().to_string())),
         _ => None,
     }
-}
-
-/// Walk units, emitting statements. A conditional emits its taken branch and
-/// recurses (with `emit = false`) through the other so braces stay balanced and
-/// the skipped branch defines no symbols. Returns having consumed this block's
-/// closing `}` (or at end of input for the top level).
-// The recursion threads eight distinct pieces of mutable state (env, set-names,
-// index, output, …); bundling them into a context struct would obscure more than
-// it helps, so the arg count is accepted here.
-#[allow(clippy::too_many_arguments)]
-fn process_block(
-    set: &'static isa::InstructionSet,
-    anons: &[AnonDef],
-    env: &mut BTreeMap<String, i64>,
-    set_names: &mut BTreeSet<String>,
-    units: &[Unit],
-    idx: &mut usize,
-    emit: bool,
-    out: &mut Vec<Statement>,
-) -> Result<(), AsmError> {
-    while *idx < units.len() {
-        let text = units[*idx].text.trim();
-        let line = units[*idx].line;
-        if text == "}" {
-            *idx += 1;
-            return Ok(());
-        }
-        if text == "{" || text == "else" {
-            return Err(AsmError::new(line, format!("unexpected `{text}`")));
-        }
-        if let Some(cond) = classify_conditional(text) {
-            *idx += 1;
-            expect_brace(units, idx, line)?;
-            let taken = if emit {
-                match &cond {
-                    Conditional::IfDef(s) => env.contains_key(s),
-                    Conditional::IfNDef(s) => !env.contains_key(s),
-                    Conditional::If(e) => eval_condition(anons, env, e, line)?,
-                }
-            } else {
-                false
-            };
-            process_block(set, anons, env, set_names, units, idx, emit && taken, out)?;
-            if *idx < units.len() && units[*idx].text.trim() == "else" {
-                *idx += 1;
-                expect_brace(units, idx, line)?;
-                process_block(set, anons, env, set_names, units, idx, emit && !taken, out)?;
-            }
-            continue;
-        }
-        // `!set name = expr` binds or rebinds a variable, folded now against the
-        // current `env`. It emits nothing; later uses are baked to this value.
-        if split_first_word(text).0 == "!set" {
-            if emit {
-                let (name, value) = parse_set(anons, env, text, line)?;
-                env.insert(name.clone(), value);
-                set_names.insert(name);
-            }
-            *idx += 1;
-            continue;
-        }
-        if emit {
-            let (label, op) = parse_statement(set, anons, env, &units[*idx].text, line)?;
-            // Bake `!set` variables to their current value (a rebindable var
-            // can't be one pass-2 symbol); real labels/constants stay symbolic.
-            let op = op.map(|o| bake_set_vars(o, env, set_names));
-            if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
-                && let Ok(v) = fold_const(e, env, line)
-            {
-                env.insert(name.clone(), v);
-            }
-            if !(label.is_none() && op.is_none()) {
-                out.push(Statement { line, label, op });
-            }
-        }
-        *idx += 1;
-    }
-    Ok(())
 }
 
 /// Parse `!set name = expr`, folding `expr` against the current `env`.
@@ -370,16 +715,6 @@ fn bake_expr(e: Expr, env: &BTreeMap<String, i64>, set_names: &BTreeSet<String>)
             Box::new(bake_expr(*r, env, set_names)),
         ),
         other => other,
-    }
-}
-
-fn expect_brace(units: &[Unit], idx: &mut usize, line: usize) -> Result<(), AsmError> {
-    match units.get(*idx) {
-        Some(u) if u.text.trim() == "{" => {
-            *idx += 1;
-            Ok(())
-        }
-        _ => Err(AsmError::new(line, "expected `{` after a conditional")),
     }
 }
 
@@ -753,14 +1088,14 @@ fn address_forces_absolute(operand: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use crate::{AsmError, Assembly, assemble_acme};
+    use crate::{AsmError, AssemblyResult, assemble_acme};
 
     /// Assemble ACME source, giving it a default origin when it declares none —
     /// so the byte-output tests below needn't each set `*=`. (ACME requires `*=`
     /// before code/data; a source that sets its own origin starts with `*` and
     /// passes straight through. The requirement itself is covered by
     /// `emitting_without_an_origin_is_an_error`.)
-    fn asm(src: &str) -> Result<Assembly, AsmError> {
+    fn asm(src: &str) -> Result<AssemblyResult, AsmError> {
         let sets_origin = src.lines().any(|l| l.trim_start().starts_with('*'));
         if sets_origin {
             assemble_acme(src)
@@ -781,13 +1116,16 @@ mod tests {
     #[test]
     fn sets_pc_and_emits_bytes() {
         let a = asm("*= $0801\n!byte $0c,$08,$0a,$00\n").expect("byte");
-        assert_eq!(a.origin, 0x0801);
+        assert_eq!(a.origin, Some(0x0801));
         assert_eq!(a.bytes, vec![0x0C, 0x08, 0x0A, 0x00]);
     }
 
     #[test]
     fn star_equals_with_spaces() {
-        assert_eq!(asm("* = $1000\n!byte 1\n").expect("spaced").origin, 0x1000);
+        assert_eq!(
+            asm("* = $1000\n!byte 1\n").expect("spaced").origin,
+            Some(0x1000)
+        );
     }
 
     #[test]

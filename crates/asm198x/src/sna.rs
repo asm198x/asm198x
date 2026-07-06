@@ -7,7 +7,8 @@
 //! all registers zero except the fixed defaults below — so an assembled program
 //! round-trips byte-for-byte against that reference (see #31).
 
-use crate::engine::{AsmError, Assembly};
+use crate::contract::AssemblyResult;
+use crate::engine::AsmError;
 
 /// The Spectrum's RAM starts at `$4000`; the low 16K is ROM (absent from a
 /// 48K snapshot).
@@ -34,7 +35,7 @@ const DEFAULT_ATTR: u8 = 0x38;
 /// Returns an [`AsmError`] if the assembly has no entry point (`end <addr>` is
 /// required for a snapshot, as `pasmo --sna` demands), or if the code does not
 /// fit in Spectrum RAM (`$4000..=$FFFF`).
-pub fn sna_48k(asm: &Assembly) -> Result<Vec<u8>, AsmError> {
+pub fn sna_48k(asm: &AssemblyResult) -> Result<Vec<u8>, AsmError> {
     let start = asm.start.ok_or_else(|| {
         AsmError::new(
             0,
@@ -42,7 +43,7 @@ pub fn sna_48k(asm: &Assembly) -> Result<Vec<u8>, AsmError> {
         )
     })?;
 
-    let origin = usize::from(asm.origin);
+    let origin = usize::from(asm.origin.unwrap_or(0));
     if origin < RAM_BASE {
         return Err(AsmError::new(
             0,
@@ -90,14 +91,16 @@ pub fn sna_48k(asm: &Assembly) -> Result<Vec<u8>, AsmError> {
 mod tests {
     use super::*;
 
-    fn asm(bytes: Vec<u8>, origin: u16, start: Option<u16>) -> Assembly {
-        Assembly {
+    fn asm(bytes: Vec<u8>, origin: u16, start: Option<u16>) -> AssemblyResult {
+        crate::engine::Assembly {
             origin,
             bytes,
             symbols: std::collections::BTreeMap::new(),
             start,
             warnings: Vec::new(),
+            debug: crate::DebugData::default(),
         }
+        .into()
     }
 
     #[test]

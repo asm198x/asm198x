@@ -59,39 +59,133 @@ impl Dialect for Z8000 {
     }
 
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        let seg = self.seg;
-        let mut out = Vec::new();
-        let mut consts: BTreeMap<String, i64> = BTreeMap::new();
-
-        for (i, raw) in source.lines().enumerate() {
-            let line = i + 1;
-            let code = strip_comment(raw);
-            if code.trim().is_empty() {
-                continue;
-            }
-            if let Some((name, expr)) = constant(code.trim(), line)? {
-                if let Ok(v) = fold_const(&expr, &consts, line) {
-                    consts.insert(name.clone(), v);
-                }
-                out.push(Statement {
-                    line,
-                    label: Some(name),
-                    op: Some(Operation::Equ(expr)),
-                });
-                continue;
-            }
-            let (label, rest) = split_label(code);
-            let op = if rest.is_empty() {
-                None
-            } else {
-                parse_op(rest, line, seg)?
-            };
-            if label.is_some() || op.is_some() {
-                out.push(Statement { line, label, op });
-            }
-        }
-        Ok(out)
+        // Route assembly through the semantic AST (0b field-packed migration):
+        // parse into a `Program`, then lower to the engine's statement stream —
+        // byte-identical to the old direct parse (AE1).
+        crate::ast::lower(parse_program(source, self.seg)?)
     }
+
+    fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
+        Ok(Some(parse_program(source, self.seg)?))
+    }
+
+    /// asl `equ` (and `name = expr`) takes no colon on its label; a colon would
+    /// fail to reassemble, since the label is disambiguated by the keyword / `=`.
+    fn equ_label_colon(&self) -> bool {
+        false
+    }
+}
+
+/// Parse Zilog Z8000 source into the semantic [`Program`](crate::ast::Program).
+/// Each line becomes a node carrying its (global) label, operation, verbatim
+/// source, span, and comment trivia. The Z8000 has no local-label scoping, so
+/// every label is a [`Scope::Global`](crate::ast::Scope) symbol and
+/// [`lower`](crate::ast::lower) reproduces the old statements exactly, so bytes
+/// are unchanged. Every instruction rides the `Encoded` seam (field-packed opcode
+/// word + extension words) through
+/// [`item_from_operation`](crate::ast::item_from_operation) unchanged. The `seg`
+/// flag (segmented Z8001) is the dialect's, constant for the whole source.
+pub(crate) fn parse_program(source: &str, seg: bool) -> Result<crate::ast::Program, AsmError> {
+    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
+    let mut nodes = Vec::new();
+    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
+    // Own-line comments seen since the last node, attached as leading trivia to
+    // the next one. Comments never reach the encoder, so bytes are unchanged.
+    let mut pending_leading: Vec<Comment> = Vec::new();
+
+    for (i, raw) in source.lines().enumerate() {
+        let line = i + 1;
+        let (code, comment) = split_comment(raw);
+        if code.trim().is_empty() {
+            if let Some(text) = comment {
+                pending_leading.push(Comment {
+                    text: text.to_string(),
+                    span: Span::at(line as u32, 1),
+                });
+            }
+            continue;
+        }
+        let trailing = comment.map(|text| Comment {
+            text: text.to_string(),
+            span: Span::at(line as u32, (code.len() + 1) as u32),
+        });
+
+        // `NAME EQU expr` / `NAME = expr` — a constant binds its label on the
+        // same line, so the label cannot split off (the formatter keeps it there).
+        if let Some((name, expr, op_source)) = constant(code.trim(), line)? {
+            if let Ok(v) = fold_const(&expr, &consts, line) {
+                consts.insert(name.clone(), v);
+            }
+            nodes.push(Node {
+                operand_span: None,
+                label: Some(Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }),
+                item: Some(crate::ast::item_from_operation(Operation::Equ(expr))),
+                source: op_source,
+                span: Span::at(line as u32, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut pending_leading),
+                    trailing,
+                },
+            });
+            continue;
+        }
+
+        let (label, rest) = split_label(code);
+        let op = if rest.is_empty() {
+            None
+        } else {
+            parse_op(rest, line, seg)?
+        };
+        if label.is_none() && op.is_none() {
+            continue;
+        }
+        nodes.push(Node {
+            operand_span: None,
+            label: label.map(|name| Symbol {
+                qualified: name.clone(),
+                scope: Scope::Global,
+                name,
+            }),
+            item: op.map(crate::ast::item_from_operation),
+            source: rest.trim().to_string(),
+            span: Span::at(line as u32, 1),
+            trivia: Trivia {
+                leading: std::mem::take(&mut pending_leading),
+                trailing,
+            },
+        });
+    }
+
+    // Flush comments after the last node (a trailing block or comment-only file)
+    // as a label-less, op-less node so the formatter keeps them.
+    if !pending_leading.is_empty() {
+        let line = source.lines().count() as u32;
+        nodes.push(Node {
+            operand_span: None,
+            label: None,
+            item: None,
+            source: String::new(),
+            span: Span::at(line, 1),
+            trivia: Trivia {
+                leading: pending_leading,
+                trailing: None,
+            },
+        });
+    }
+    Ok(Program { nodes })
+}
+
+/// Split a line into its code and its `;` comment (leading `;` and whitespace
+/// trimmed) for carrying comments as AST trivia. Defined via [`strip_comment`] so
+/// the comment is exactly what it removes — no behaviour change to assembly.
+fn split_comment(line: &str) -> (&str, Option<&str>) {
+    let code = strip_comment(line);
+    let comment = (code.len() < line.len()).then(|| line[code.len()..].trim_end());
+    (code, comment)
 }
 
 fn strip_comment(line: &str) -> &str {
@@ -107,12 +201,19 @@ fn strip_comment(line: &str) -> &str {
     line
 }
 
-fn constant(code: &str, line: usize) -> Result<Option<(String, Expr)>, AsmError> {
+/// `NAME EQU expr` or `NAME = expr`. Returns the name, the value expression, and
+/// the operation's source text (`EQU expr` / `= expr`) so the formatter can
+/// re-emit `NAME <source>` with the label kept on the same line.
+fn constant(code: &str, line: usize) -> Result<Option<(String, Expr, String)>, AsmError> {
     let (first, rest) = split_first_word(code);
     if !rest.is_empty() {
         let (kw, tail) = split_first_word(rest);
         if kw.eq_ignore_ascii_case("equ") && is_ident(first) {
-            return Ok(Some((first.to_string(), value(tail, line)?)));
+            return Ok(Some((
+                first.to_string(),
+                value(tail, line)?,
+                rest.trim().to_string(),
+            )));
         }
     }
     if let Some(eq) = mos6502::assignment_split(code) {
@@ -121,6 +222,7 @@ fn constant(code: &str, line: usize) -> Result<Option<(String, Expr)>, AsmError>
             return Ok(Some((
                 name.to_string(),
                 value(code[eq + 1..].trim(), line)?,
+                code[eq..].trim().to_string(),
             )));
         }
     }

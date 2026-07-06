@@ -51,10 +51,10 @@ git_tag_enable = false
 name = "isa-disasm"
 git_tag_enable = false
 
-# dbg198x is the same case again: the debug-info format crate has no binary and
+# debug198x is the same case again: the debug-info format crate has no binary and
 # ships only as a dependency (asm198x writes it, Emu198x reads it). Keep it
 # version-bumped in lockstep but untagged, so a version tag never fires
 # cargo-dist and mints a junk GitHub Release.
 [[package]]
-name = "dbg198x"
+name = "debug198x"
 git_tag_enable = false
