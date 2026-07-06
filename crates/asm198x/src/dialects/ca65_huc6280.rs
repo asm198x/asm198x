@@ -42,47 +42,138 @@ impl Dialect for Ca65Huc6280 {
     }
 
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        let prim = self.instruction_set();
-        let ext = &isa::huc6280::SET;
-        let mut out = Vec::new();
-        let mut env: BTreeMap<String, i64> = BTreeMap::new();
-
-        for (i, raw) in source.lines().enumerate() {
-            let line = i + 1;
-            let code = strip_comment(raw);
-            if code.trim().is_empty() {
-                continue;
-            }
-            // `name = expr` binds a named constant (a lone `=`, not a comparison).
-            if let Some(eq) = mos6502::assignment_split(code.trim()) {
-                let trimmed = code.trim();
-                let name = trimmed[..eq].trim();
-                if !is_ident(name) {
-                    return Err(AsmError::new(line, format!("invalid symbol `{name}`")));
-                }
-                let e = value(trimmed[eq + 1..].trim(), line)?;
-                if let Ok(v) = fold_const(&e, &env, line) {
-                    env.insert(name.to_string(), v);
-                }
-                out.push(Statement {
-                    line,
-                    label: Some(name.to_string()),
-                    op: Some(Operation::Equ(e)),
-                });
-                continue;
-            }
-            let (label, rest) = split_label(code);
-            let op = if rest.is_empty() {
-                None
-            } else {
-                parse_op(prim, ext, rest, &env, line)?
-            };
-            if label.is_some() || op.is_some() {
-                out.push(Statement { line, label, op });
-            }
-        }
-        Ok(out)
+        // Route assembly through the semantic AST (0b straggler migration): parse
+        // into a `Program`, then lower to the engine's statement stream —
+        // byte-identical to the old direct parse.
+        crate::ast::lower(parse_program(source)?)
     }
+
+    fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
+        Ok(Some(parse_program(source)?))
+    }
+
+    /// ca65 binds constants with `name = expr` — no `equ` keyword and no colon on
+    /// the label, so the formatter emits `name = expr`.
+    fn equ_label_colon(&self) -> bool {
+        false
+    }
+}
+
+/// Parse ca65-syntax HuC6280 source into the semantic [`Program`](crate::ast::Program).
+/// Each line becomes a node with its (global) label, operation, verbatim source,
+/// span, and comment trivia; the flat HuC6280 dialect has no local-label scoping,
+/// so every label is a [`Scope::Global`](crate::ast::Scope) symbol and
+/// [`lower`](crate::ast::lower) reproduces the old statements exactly. The byte-
+/// neutral no-op directives (`.segment`/`setcpu`/`smart`) are kept as source-only
+/// nodes so the formatter reproduces them.
+pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
+    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
+    let prim = &isa::mos6502::SET;
+    let ext = &isa::huc6280::SET;
+    let mut nodes = Vec::new();
+    let mut env: BTreeMap<String, i64> = BTreeMap::new();
+    // Own-line comments seen since the last node, attached as leading trivia to
+    // the next one. Comments never reach the encoder, so bytes are unchanged.
+    let mut pending_leading: Vec<Comment> = Vec::new();
+
+    for (i, raw) in source.lines().enumerate() {
+        let line = i + 1;
+        let (code, comment) = split_comment(raw);
+        if code.trim().is_empty() {
+            if let Some(text) = comment {
+                pending_leading.push(Comment {
+                    text: text.to_string(),
+                    span: Span::at(line as u32, 1),
+                });
+            }
+            continue;
+        }
+        let trailing = comment.map(|text| Comment {
+            text: text.to_string(),
+            span: Span::at(line as u32, (code.len() + 1) as u32),
+        });
+
+        // `name = expr` binds a named constant (a lone `=`, not a comparison).
+        if let Some(eq) = mos6502::assignment_split(code.trim()) {
+            let trimmed = code.trim();
+            let name = trimmed[..eq].trim();
+            if !is_ident(name) {
+                return Err(AsmError::new(line, format!("invalid symbol `{name}`")));
+            }
+            let e = value(trimmed[eq + 1..].trim(), line)?;
+            if let Ok(v) = fold_const(&e, &env, line) {
+                env.insert(name.to_string(), v);
+            }
+            nodes.push(Node {
+                label: Some(Symbol {
+                    qualified: name.to_string(),
+                    scope: Scope::Global,
+                    name: name.to_string(),
+                }),
+                item: Some(crate::ast::item_from_operation(Operation::Equ(e))),
+                source: trimmed[eq..].trim().to_string(),
+                span: Span::at(line as u32, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut pending_leading),
+                    trailing,
+                },
+            });
+            continue;
+        }
+
+        let (label, rest) = split_label(code);
+        let op = if rest.is_empty() {
+            None
+        } else {
+            parse_op(prim, ext, rest, &env, line)?
+        };
+        // Keep source-bearing no-op directives (`.segment`/`setcpu`/…) as
+        // source-only nodes so the formatter reproduces them; skip only a truly
+        // empty line (nothing to lower or format).
+        if label.is_none() && op.is_none() && rest.trim().is_empty() {
+            continue;
+        }
+        nodes.push(Node {
+            label: label.map(|name| Symbol {
+                qualified: name.clone(),
+                scope: Scope::Global,
+                name,
+            }),
+            item: op.map(crate::ast::item_from_operation),
+            source: rest.trim().to_string(),
+            span: Span::at(line as u32, 1),
+            trivia: Trivia {
+                leading: std::mem::take(&mut pending_leading),
+                trailing,
+            },
+        });
+    }
+
+    // Flush comments after the last node (a trailing block or comment-only file)
+    // as a label-less, op-less node so the formatter keeps them.
+    if !pending_leading.is_empty() {
+        let line = source.lines().count() as u32;
+        nodes.push(Node {
+            label: None,
+            item: None,
+            source: String::new(),
+            span: Span::at(line, 1),
+            trivia: Trivia {
+                leading: pending_leading,
+                trailing: None,
+            },
+        });
+    }
+    Ok(Program { nodes })
+}
+
+/// Split a line into its code and its `;` comment (leading `;` and whitespace
+/// trimmed) for carrying comments as AST trivia. Defined via [`strip_comment`] so
+/// the comment is exactly what it removes — no behaviour change to assembly.
+fn split_comment(line: &str) -> (&str, Option<&str>) {
+    let code = strip_comment(line);
+    let comment = (code.len() < line.len()).then(|| line[code.len()..].trim_end());
+    (code, comment)
 }
 
 /// Strip a `;` comment, ignoring `;` inside a `'c'` char or `"..."` string.

@@ -4,11 +4,12 @@
 //! spelling and comments.
 
 use asm198x::{
-    assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_ca65_816, assemble_f8,
-    assemble_i8080, assemble_lwasm, assemble_m6800, assemble_pasmo, assemble_rgbasm, assemble_scmp,
-    assemble_sjasmplus, assemble_tms7000, format_1802, format_2650, format_8048, format_acme,
-    format_ca65_816, format_f8, format_i8080, format_lwasm, format_m6800, format_pasmo,
-    format_rgbasm, format_scmp, format_sjasmplus, format_tms7000,
+    assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_ca65_816,
+    assemble_ca65_huc6280, assemble_f8, assemble_i8080, assemble_lwasm, assemble_m6800,
+    assemble_pasmo, assemble_rgbasm, assemble_scmp, assemble_sjasmplus, assemble_tms7000,
+    format_1802, format_2650, format_8048, format_acme, format_ca65_816, format_ca65_huc6280,
+    format_f8, format_i8080, format_lwasm, format_m6800, format_pasmo, format_rgbasm, format_scmp,
+    format_sjasmplus, format_tms7000,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -731,5 +732,41 @@ fn fmt_ca65_816_reassembles_byte_identical() {
     assert!(
         formatted.contains(".a16") && formatted.contains(".a8"),
         "width directives preserved in the formatted output:\n{formatted}"
+    );
+}
+
+/// A representative ca65 HuC6280 program: a `=` constant, inherited 6502/65C02
+/// instructions, a HuC6280 block transfer, a `bbr` two-operand branch, and
+/// leading + trailing comments. Exercises the 0b straggler migration.
+const PROG_HUC6280: &str = "\
+; a small pce routine
+        .org $2000
+mask = $55
+start:  lda #$12       ; immediate
+        sta $10        ; zero page
+        stz $1234      ; 65C02, absolute
+        bbr0 $10, start
+        tst #mask, $20
+        tii $1000, $2000, $0010
+        rts
+";
+
+#[test]
+fn fmt_ca65_huc6280_reassembles_byte_identical() {
+    let original = assemble_ca65_huc6280(PROG_HUC6280)
+        .expect("assembles")
+        .bytes;
+    let formatted = format_ca65_huc6280(PROG_HUC6280).expect("formats");
+    let reassembled = assemble_ca65_huc6280(&formatted)
+        .unwrap_or_else(|e| panic!("formatted huc6280 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "huc6280 round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_ca65_huc6280(&formatted).expect("formats"),
+        "huc6280 fmt is idempotent"
     );
 }
