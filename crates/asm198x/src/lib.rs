@@ -37,6 +37,9 @@ mod contract;
 mod dialect;
 mod dialects;
 mod engine;
+// Debug-record renderings: the `.debug198x` sidecar builder + `--sym` /
+// `--listing` text views of the same captured record (Debug198x U3, KTD2).
+mod listing;
 mod prg;
 #[cfg(test)]
 mod roundtrip_tests;
@@ -54,6 +57,7 @@ pub use contract::{
     AssemblyResult, CONTRACT_VERSION, Code, Diagnostic, DiagnosticEnvelope, Fix, Severity,
 };
 pub use engine::{AsmError, Assembly, DebugData, LineRec, Warning};
+pub use listing::{debug_info, render_listing, render_sym};
 pub use span::{ExpansionFrame, FileId, Span};
 // Re-exported so consumers of `Assembly.debug` need not depend on debug198x
 // directly for the symbol types the engine captures.

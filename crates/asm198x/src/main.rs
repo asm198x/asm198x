@@ -133,6 +133,48 @@ impl Assembler {
         }
     }
 
+    /// The `(cpu, dialect)` identity for a `.debug198x` sidecar header —
+    /// the target chip and the source syntax, per the format's `Header` docs.
+    fn identity(self) -> (&'static str, &'static str) {
+        match self {
+            Self::Acme => ("6502", "acme"),
+            Self::Ca65 => ("6502", "ca65"),
+            Self::Vasm => ("68000", "vasm"),
+            Self::Lwasm => ("6809", "lwasm"),
+            Self::Ca65_816 => ("65816", "ca65"),
+            Self::Ca65Huc6280 => ("huc6280", "ca65"),
+            Self::Rgbasm => ("sm83", "rgbasm"),
+            Self::I8080 => ("8080", "intel"),
+            Self::M6800 => ("6800", "motorola"),
+            Self::Cdp1802 => ("1802", "asl"),
+            Self::I8048 { romless: false } => ("8048", "asl"),
+            Self::I8048 { romless: true } => ("8039", "asl"),
+            Self::Scmp => ("scmp", "asl"),
+            Self::F8 => ("f8", "asl"),
+            Self::S2650 => ("2650", "asl"),
+            Self::Tms7000 => ("tms7000", "asl"),
+            Self::Pdp11 => ("pdp11", "asl"),
+            Self::Tms9900 => ("tms9900", "asl"),
+            Self::Cp1610 => ("cp1610", "asl"),
+            Self::Z8000 => ("z8000", "asl"),
+            Self::Z8001 => ("z8001", "asl"),
+            Self::Pasmo { z80n: false } => ("z80", "pasmo"),
+            Self::Pasmo { z80n: true } => ("z80n", "pasmo"),
+            Self::Sjasmplus { z80n: false } => ("z80", "sjasmplus"),
+            Self::Sjasmplus { z80n: true } => ("z80n", "sjasmplus"),
+        }
+    }
+
+    /// Bytes per address unit — 2 for the word-addressed CP1610 (a decle is two
+    /// bytes; labels and spans count decles), 1 for every byte-addressed CPU.
+    /// The listing's bytes column indexes raw bytes, so it needs the unit.
+    fn addr_unit(self) -> u64 {
+        match self {
+            Self::Cp1610 => 2,
+            _ => 1,
+        }
+    }
+
     fn assemble(self, source: &str) -> Result<asm198x::AssemblyResult, asm198x::AsmError> {
         match self {
             Self::Acme => asm198x::assemble_acme(source),
@@ -163,6 +205,10 @@ impl Assembler {
         }
     }
 }
+
+/// A debug-artifact flag's value: `None` = flag absent, `Some(None)` = default
+/// path (the input with the artifact's extension), `Some(Some(p))` = explicit.
+type ArtifactPath = Option<Option<PathBuf>>;
 
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
@@ -204,9 +250,26 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut prg = false;
     let mut origin: u16 = 0;
     let mut message_format = MessageFormat::Human;
+    // Debug198x artifacts (U3): `None` = flag absent; `Some(None)` = default
+    // path (input with the artifact's extension); `Some(Some(p))` = explicit.
+    let mut debug: ArtifactPath = None;
+    let mut sym: ArtifactPath = None;
+    let mut listing: ArtifactPath = None;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
+            "--debug" => debug = Some(None),
+            f if f.starts_with("--debug=") => {
+                debug = Some(Some(PathBuf::from(&f["--debug=".len()..])));
+            }
+            "--sym" => sym = Some(None),
+            f if f.starts_with("--sym=") => {
+                sym = Some(Some(PathBuf::from(&f["--sym=".len()..])));
+            }
+            "--listing" => listing = Some(None),
+            f if f.starts_with("--listing=") => {
+                listing = Some(Some(PathBuf::from(&f["--listing=".len()..])));
+            }
             "--message-format" => {
                 i += 1;
                 let value = args.get(i).ok_or("`--message-format` needs a value")?;
@@ -250,6 +313,15 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     let input = input.ok_or("no input file given (try --help)")?;
+
+    // The debug artifacts render an *assembly's* captured record; there is no
+    // record to render under `--fmt` or `--disasm`, so the combination is an
+    // error rather than a silent no-op.
+    if (debug.is_some() || sym.is_some() || listing.is_some()) && (format || disassemble) {
+        return Err(
+            "`--debug`/`--sym`/`--listing` apply to an assembly run, not `--fmt`/`--disasm`".into(),
+        );
+    }
 
     if disassemble {
         let assembler = Assembler::resolve(dialect, target)?;
@@ -326,6 +398,16 @@ fn run(args: &[String]) -> Result<String, String> {
     let assembler = Assembler::resolve(dialect, target)?;
     let source = std::fs::read_to_string(input).map_err(|e| format!("cannot read {input}: {e}"))?;
 
+    // Debug198x artifacts come from the flat engine's captured record (U3);
+    // the ca65 and vasm bypass paths gain emission in U4/U5.
+    if (debug.is_some() || sym.is_some() || listing.is_some())
+        && matches!(assembler, Assembler::Ca65 | Assembler::Vasm)
+    {
+        return Err(
+            "`--debug`/`--sym`/`--listing` are not yet supported for the ca65/vasm paths".into(),
+        );
+    }
+
     // `--fmt`: parse into the semantic AST and emit canonical same-dialect
     // source (the formatter, U5). Prints to stdout, or writes with `-o`.
     if format {
@@ -373,7 +455,14 @@ fn run(args: &[String]) -> Result<String, String> {
     // summary (U4). Byte output to `-o` still happens; only the reporting format
     // changes. Handled before the per-dialect human output paths below.
     if let MessageFormat::Json = message_format {
-        return emit_json(&assembler, &source, exe, output.as_deref());
+        return emit_json(
+            &assembler,
+            input,
+            &source,
+            exe,
+            output.as_deref(),
+            (&debug, &sym, &listing),
+        );
     }
 
     // vasm (68000): a flat big-endian code image, or an Amiga hunk executable
@@ -418,60 +507,116 @@ fn run(args: &[String]) -> Result<String, String> {
         ));
     }
 
+    // Container flags pair with specific dialects — validate before anything is
+    // written, so a doomed invocation leaves no files behind.
+    if sna
+        && !matches!(
+            assembler,
+            Assembler::Pasmo { .. } | Assembler::Sjasmplus { .. }
+        )
+    {
+        return Err(
+            "`--sna` is only for the Spectrum Z80 dialects (pasmo/pasmonext/sjasmplus)".into(),
+        );
+    }
+    if prg && !matches!(assembler, Assembler::Acme) {
+        return Err("`--prg` is only for the C64 dialect (acme)".into());
+    }
+
     let assembly = assembler.assemble(&source).map_err(|e| e.to_string())?;
     for w in &assembly.warnings {
         eprintln!("asm198x: {input}: {w}");
     }
 
-    // `--sna`: wrap the assembled Spectrum program in a 48K snapshot rather than
-    // writing a flat binary. Only the Z80/Spectrum dialects carry an entry point.
-    if sna {
-        if !matches!(
-            assembler,
-            Assembler::Pasmo { .. } | Assembler::Sjasmplus { .. }
-        ) {
-            return Err(
-                "`--sna` is only for the Spectrum Z80 dialects (pasmo/pasmonext/sjasmplus)".into(),
-            );
-        }
+    // `--sna`: wrap the assembled Spectrum program in a 48K snapshot; `--prg`:
+    // prefix the C64 load address; else a flat binary.
+    let summary = if sna {
+        // Only the Z80/Spectrum dialects carry an entry point; a missing
+        // `end <addr>` fails here, before any file is written.
         let image = asm198x::sna_48k(&assembly).map_err(|e| e.to_string())?;
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("sna"));
         std::fs::write(&out_path, &image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
-        return Ok(format!(
+        format!(
             "assembled {} byte(s) -> {} (48K snapshot)",
             image.len(),
             out_path.display(),
-        ));
-    }
-
-    // `--prg`: wrap the assembled C64 program in a `.prg` (load-address prefix).
-    if prg {
-        if !matches!(assembler, Assembler::Acme) {
-            return Err("`--prg` is only for the C64 dialect (acme)".into());
-        }
+        )
+    } else if prg {
         let image = asm198x::prg(&assembly);
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("prg"));
         std::fs::write(&out_path, &image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
-        return Ok(format!(
+        format!(
             "assembled {} byte(s) -> {} (load ${:04X})",
             image.len(),
             out_path.display(),
             assembly.origin.unwrap_or(0),
-        ));
+        )
+    } else {
+        let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
+        std::fs::write(&out_path, &assembly.bytes)
+            .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+        format!(
+            "assembled {} byte(s) at ${:04X} -> {}",
+            assembly.bytes.len(),
+            assembly.origin.unwrap_or(0),
+            out_path.display(),
+        )
+    };
+
+    // Debug artifacts (U3) are written only after the image write succeeded, so
+    // a failed run never leaves a sidecar describing an image that was not
+    // produced. `--debug` alongside `--sna`/`--prg` emits both artifacts.
+    let debug_notes =
+        write_debug_artifacts(input, assembler, &assembly, &source, &debug, &sym, &listing)?;
+    Ok(format!("{summary}{debug_notes}"))
+}
+
+/// Write the requested Debug198x artifacts — the `.debug198x` NDJSON sidecar
+/// (`--debug`), the symbol table (`--sym`), and the listing (`--listing`) —
+/// and return `wrote …` summary lines (empty when no flag was passed). All
+/// three render the one record pass 2 captured (plan KTD2); default paths are
+/// the input with the artifact's extension.
+fn write_debug_artifacts(
+    input: &str,
+    assembler: Assembler,
+    assembly: &asm198x::AssemblyResult,
+    source: &str,
+    debug: &ArtifactPath,
+    sym: &ArtifactPath,
+    listing: &ArtifactPath,
+) -> Result<String, String> {
+    let mut notes = String::new();
+    let mut emit = |path: &Option<PathBuf>, ext: &str, what: &str, content: String| {
+        let path = path
+            .clone()
+            .unwrap_or_else(|| Path::new(input).with_extension(ext));
+        // An input already named `*.{ext}` would make the default path the
+        // input itself — refuse rather than overwrite the source.
+        if path == Path::new(input) {
+            return Err(format!(
+                "refusing to overwrite the input with the {what} — pass an explicit `=<path>`"
+            ));
+        }
+        std::fs::write(&path, content)
+            .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
+        notes.push_str(&format!("\nwrote {} ({what})", path.display()));
+        Ok::<(), String>(())
+    };
+    if let Some(path) = debug {
+        let (cpu, dialect) = assembler.identity();
+        let info = asm198x::debug_info(assembly, cpu, dialect, input);
+        emit(path, "debug198x", "debug sidecar", info.to_ndjson())?;
     }
-
-    let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
-    std::fs::write(&out_path, &assembly.bytes)
-        .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
-
-    Ok(format!(
-        "assembled {} byte(s) at ${:04X} -> {}",
-        assembly.bytes.len(),
-        assembly.origin.unwrap_or(0),
-        out_path.display(),
-    ))
+    if let Some(path) = sym {
+        emit(path, "sym", "symbol table", asm198x::render_sym(assembly))?;
+    }
+    if let Some(path) = listing {
+        let text = asm198x::render_listing(source, assembly, assembler.addr_unit());
+        emit(path, "lst", "listing", text)?;
+    }
+    Ok(notes)
 }
 
 /// Parse an address: `$hhhh`, `0xhhhh`, or decimal.
@@ -493,6 +638,11 @@ fn usage() -> String {
      \x20            (Spectrum Z80 only; needs `end <addr>` for the entry point)\n\
      C64 program: asm198x --dialect acme --prg <input> [-o <out.prg>]\n\
      \x20            (prepends the 2-byte load address)\n\
+     debug info:  asm198x [--debug[=path]] [--sym[=path]] [--listing[=path]] <input>\n\
+     \x20            (--debug writes the .debug198x NDJSON sidecar; --sym a sorted\n\
+     \x20             `name = $hex` table; --listing address/bytes/source rows —\n\
+     \x20             defaults: input with .debug198x/.sym/.lst; flat dialects only\n\
+     \x20             for now, ca65/vasm land next)\n\
      disassemble: asm198x --disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\
      format:      asm198x --fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
@@ -539,9 +689,11 @@ fn parse_message_format(value: &str) -> Result<MessageFormat, String> {
 /// so the caller prints nothing further — the JSON is already on stdout.
 fn emit_json(
     assembler: &Assembler,
+    input: &str,
     source: &str,
     exe: bool,
     output: Option<&Path>,
+    (debug, sym, listing): (&ArtifactPath, &ArtifactPath, &ArtifactPath),
 ) -> Result<String, String> {
     let result = match assembler {
         Assembler::Vasm if exe => asm198x::assemble_vasm_exe(source),
@@ -555,6 +707,10 @@ fn emit_json(
                 std::fs::write(path, &assembly.bytes)
                     .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
             }
+            // Debug artifacts are written in JSON mode too (the ca65/vasm guard
+            // in `run` has already rejected the unsupported paths); the notes
+            // are dropped — stdout carries only the JSON result.
+            write_debug_artifacts(input, *assembler, &assembly, source, debug, sym, listing)?;
             let json =
                 serde_json::to_string(&assembly).map_err(|e| format!("json encode failed: {e}"))?;
             println!("{json}");

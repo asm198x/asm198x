@@ -34,8 +34,8 @@ before changing the crate structure or the ISA layer. The load-bearing points:
 
 ## Crate layout
 
-Three crates today (`isa`, `isa-disasm`, `asm198x`); split further only when the
-per-CPU `isa` boundary or Emu198x's consumption makes it real.
+Four crates today (`isa`, `isa-disasm`, `debug198x`, `asm198x`); split further
+only when the per-CPU `isa` boundary or Emu198x's consumption makes it real.
 
 - [`crates/isa`](crates/isa) — instruction-set specs (types + `mos6502` + `z80`
   + `m68k` + `mos6809` + `mos65816` + `huc6280` + `sm83` + `i8080` + `m6800` +
@@ -46,6 +46,13 @@ per-CPU `isa` boundary or Emu198x's consumption makes it real.
   (6502, Z80, 68000, 6809, 65816, HuC6280, SM83, 8080, 6800, 1802, 8048, SC/MP, F8, 2650, TMS7000, PDP-11, TMS9900, CP1610, Z8000), decoding against `isa`.
   Depends only on `isa` + std, so Emu198x can consume disassembly without the
   assembler. See [`decisions/disassembler-crate.md`](decisions/disassembler-crate.md).
+- [`crates/debug198x`](crates/debug198x) — the Debug198x cross-CPU debug-info
+  format (NDJSON sidecar: line↔address map, typed symbols, sections; renamed
+  from `dbg198x` 2026-07-06). Written by asm198x (`--debug`), read by the
+  Emu198x importer; depends only on serde. The CLI's `--debug[=path]` /
+  `--sym[=path]` / `--listing[=path]` render the same captured record three
+  ways (plan `docs/plans/2026-07-03-001-feat-debug-info-format-plan.md`, U3;
+  flat-engine dialects today, ca65/vasm emission lands with U4/U5).
 - [`crates/asm198x`](crates/asm198x) — the library (dialect-agnostic engine,
   the shared per-CPU cores, the dialect front-ends) and the `asm198x` CLI. Also
   hosts the three layers above the encoder — the semantic **AST** (`src/ast.rs`),
