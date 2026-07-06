@@ -514,6 +514,15 @@ pub fn format_pdp11(source: &str) -> Result<String, AsmError> {
     format_ast(&dialects::Pdp11, source)
 }
 
+/// Reformat asl-syntax TMS9900 source to canonical layout (the `--fmt`
+/// formatter). Reassembles byte-identical to the input.
+///
+/// # Errors
+/// Returns an [`AsmError`] on any parse failure.
+pub fn format_tms9900(source: &str) -> Result<String, AsmError> {
+    format_ast(&dialects::Tms9900, source)
+}
+
 /// Format Motorola-syntax 6800 source (`asm198x fmt --cpu 6800`): parse into the
 /// semantic AST and emit canonical same-dialect source — labels at column 0,
 /// operations indented, comments preserved, `$`-hex operand spelling untouched.

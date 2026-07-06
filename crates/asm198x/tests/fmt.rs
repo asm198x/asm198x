@@ -7,9 +7,10 @@ use asm198x::{
     assemble_1802, assemble_2650, assemble_8048, assemble_acme, assemble_ca65_816,
     assemble_ca65_huc6280, assemble_f8, assemble_i8080, assemble_lwasm, assemble_m6800,
     assemble_pasmo, assemble_pdp11, assemble_rgbasm, assemble_scmp, assemble_sjasmplus,
-    assemble_tms7000, format_1802, format_2650, format_8048, format_acme, format_ca65_816,
-    format_ca65_huc6280, format_f8, format_i8080, format_lwasm, format_m6800, format_pasmo,
-    format_pdp11, format_rgbasm, format_scmp, format_sjasmplus, format_tms7000,
+    assemble_tms7000, assemble_tms9900, format_1802, format_2650, format_8048, format_acme,
+    format_ca65_816, format_ca65_huc6280, format_f8, format_i8080, format_lwasm, format_m6800,
+    format_pasmo, format_pdp11, format_rgbasm, format_scmp, format_sjasmplus, format_tms7000,
+    format_tms9900,
 };
 
 /// A representative pasmo program: an origin, labels, a local, instructions,
@@ -808,5 +809,44 @@ fn fmt_pdp11_reassembles_byte_identical() {
         formatted,
         format_pdp11(&formatted).expect("formats"),
         "pdp11 fmt is idempotent"
+    );
+}
+
+/// A representative asl-syntax TMS9900 program: an origin, colon labels, both
+/// constant spellings (`equ` and `=`), a spread of formats and general-
+/// addressing modes, a symbolic-address instruction, a workspace-context op,
+/// a same-line data-directive label, and leading + trailing comments.
+const PROG_TMS9900: &str = "\
+; a small tms9900 routine
+        org 0100h
+mask    equ 00ffh
+delta = 4
+start:  li r0, 0abcdh     ; immediate
+        mov r1, r2
+        mov @0300h(r4), r5
+        clr r3
+loop:   dec r0
+        jne loop
+        bl @sub
+        jmp start
+sub:    b *r11
+count:  word 0
+";
+
+#[test]
+fn fmt_tms9900_reassembles_byte_identical() {
+    let original = assemble_tms9900(PROG_TMS9900).expect("assembles").bytes;
+    let formatted = format_tms9900(PROG_TMS9900).expect("formats");
+    let reassembled = assemble_tms9900(&formatted)
+        .unwrap_or_else(|e| panic!("formatted tms9900 must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "tms9900 round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_tms9900(&formatted).expect("formats"),
+        "tms9900 fmt is idempotent"
     );
 }
