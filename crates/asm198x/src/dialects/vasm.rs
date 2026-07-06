@@ -24,7 +24,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use isa::m68k::{self, EaModes, Size, SizeEnc, Slot, ea};
 
 use super::mos6502::{self, is_ident, split_data_items, split_first_word, string_literal};
-use crate::engine::{AsmError, BinOp, Expr, Operation, Warning};
+use crate::engine::{AsmError, BinOp, Expr, Warning};
 
 /// Evaluate an expression against bound symbols, with `*` (the location
 /// counter) resolving to `here`. A thin PC-aware wrapper over the shared
@@ -261,7 +261,11 @@ fn assemble_core(
     optimize: bool,
     warnings: &mut Vec<Warning>,
 ) -> Result<Vec<SecOut>, AsmError> {
-    let stmts = parse(source)?;
+    // The AST is the single front-end IR: parse into the source-preserving
+    // `Program` (which carries each line's native 68000 statement, qualified),
+    // then project it to the assembler's statement stream. Same bytes as the old
+    // direct parse — see `decisions/ast-native-payload-for-multipass-cisc.md`.
+    let stmts = lines_from_program(&parse_program(source)?);
 
     // Assign every statement to a section. A `section` directive opens one;
     // bytes emitted before any directive fall into an implicit code section.
@@ -1174,6 +1178,9 @@ impl MemFlag {
     }
 }
 
+// `Clone` so the assembler can project a statement out of the AST node that owns
+// it (the multi-pass driver runs on an owned `Vec<Line>`; see `lines_from_program`).
+#[derive(Clone)]
 enum Stmt {
     Empty,
     Equ(String, Expr),
@@ -1202,29 +1209,25 @@ impl Stmt {
     }
 }
 
+// The 68000 statement is the family-owned native payload carried in the AST
+// (`decisions/ast-native-payload-for-multipass-cisc.md`): parse builds and
+// qualifies it into the tree, and the multi-pass assembler reads it back.
+impl crate::ast::NativeItem for Stmt {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    /// `equ`/`=` binds its label on the same line, so the formatter keeps the
+    /// label there (no colon — the keyword disambiguates it).
+    fn inline_label(&self) -> bool {
+        matches!(self, Stmt::Equ(..))
+    }
+}
+
 struct Line {
     line: usize,
     label: Option<String>,
     kind: Stmt,
-}
-
-fn parse(source: &str) -> Result<Vec<Line>, AsmError> {
-    let mut out = Vec::new();
-    for (i, raw) in source.lines().enumerate() {
-        let line = i + 1;
-        let code = strip_comment(raw);
-        if code.trim().is_empty() {
-            continue;
-        }
-        let (label, rest) = split_label(code, line)?;
-        let kind = parse_op(&label, rest, line)?;
-        if label.is_none() && matches!(kind, Stmt::Empty) {
-            continue;
-        }
-        out.push(Line { line, label, kind });
-    }
-    qualify_local_labels(&mut out);
-    Ok(out)
 }
 
 /// Parse vasm (Motorola-syntax) 68000 source into the source-preserving semantic
@@ -1269,55 +1272,64 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
 
         let (label, rest) = split_label(code, line)?;
         // A non-local label (including an `equ` name) opens a new scope; a
-        // leading-`.` name qualifies against the current one.
-        let symbol = label.map(|name| {
+        // leading-`.` name qualifies against the current one — the same forward
+        // pass vasm's old `qualify_local_labels` ran, done inline so the tree
+        // carries fully-resolved symbols.
+        let symbol = label.as_ref().map(|name| {
             if name.starts_with('.') {
                 Symbol {
                     qualified: format!("{scope}{name}"),
                     scope: Scope::Local {
                         in_global: scope.clone(),
                     },
-                    name,
+                    name: name.clone(),
                 }
             } else {
                 scope = name.clone();
                 Symbol {
                     qualified: name.clone(),
                     scope: Scope::Global,
-                    name,
+                    name: name.clone(),
                 }
             }
         });
 
-        // `name equ expr` / `name = expr` binds its label on the same line — mark
-        // the node `Item::Equ` so emit keeps the label there (no colon: vasm's
-        // `equ` label is disambiguated by the keyword). Every other line keeps its
-        // verbatim source and no item; the formatter re-emits from the source.
-        let (word, args) = split_first_word(rest);
-        let lower = word.to_ascii_lowercase();
-        let item = if (lower == "equ" || lower == "=") && symbol.is_some() {
-            Some(crate::ast::item_from_operation(Operation::Equ(
-                parse_value(args, line)?,
-            )))
-        } else {
-            None
+        // Parse the 68000 statement and qualify its local references against the
+        // now-current scope, then store it in the node as the family-owned native
+        // payload (the assembler reads it back). An `equ`/`=` reports
+        // `inline_label`, so emit keeps its label on the operation's line.
+        let mut stmt = parse_op(&label, rest, line)?;
+        qualify_stmt(&mut stmt, &scope);
+        let trivia = Trivia {
+            leading: std::mem::take(&mut pending_leading),
+            trailing,
         };
-
-        // Skip a line with neither a label nor an operation (a bare separator);
-        // everything with a label or source becomes a node.
-        if symbol.is_none() && rest.trim().is_empty() {
-            continue;
+        let span = Span::at(line as u32, 1);
+        match stmt {
+            // A label-only line: keep the label, no operation (emit renders the
+            // label alone; the projection reads it back as `Stmt::Empty`).
+            Stmt::Empty if symbol.is_some() => nodes.push(Node {
+                label: symbol,
+                item: None,
+                source: String::new(),
+                span,
+                trivia,
+            }),
+            // A bare line with neither label nor operation — nothing to keep.
+            // (Unreachable in practice: an empty operation implies empty code,
+            // already skipped above.)
+            Stmt::Empty => {
+                pending_leading = trivia.leading;
+                continue;
+            }
+            stmt => nodes.push(Node {
+                label: symbol,
+                item: Some(crate::ast::Item::Native(Box::new(stmt))),
+                source: rest.trim().to_string(),
+                span,
+                trivia,
+            }),
         }
-        nodes.push(Node {
-            label: symbol,
-            item,
-            source: rest.trim().to_string(),
-            span: Span::at(line as u32, 1),
-            trivia: Trivia {
-                leading: std::mem::take(&mut pending_leading),
-                trailing,
-            },
-        });
     }
 
     // Flush comments after the last node (a trailing block or comment-only file)
@@ -1338,10 +1350,41 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
     Ok(Program { nodes })
 }
 
+/// Project the semantic [`Program`](crate::ast::Program) into the assembler's
+/// statement stream — the multi-pass driver runs on an owned `Vec<Line>`. Each
+/// node's qualified label and native [`Stmt`] payload (built and qualified in
+/// [`parse_program`]) are read straight back out of the tree; nothing is
+/// re-parsed. A label-only node becomes an empty statement carrying its label;
+/// the comment-only flush node (no label, no item) carries no statement.
+fn lines_from_program(program: &crate::ast::Program) -> Vec<Line> {
+    use crate::ast::Item;
+    let mut out = Vec::new();
+    for node in &program.nodes {
+        let label = node.label.as_ref().map(|s| s.qualified.clone());
+        let kind = match &node.item {
+            Some(Item::Native(n)) => n
+                .as_any()
+                .downcast_ref::<Stmt>()
+                .expect("vasm stores a Stmt in every native node")
+                .clone(),
+            None if label.is_some() => Stmt::Empty,
+            // A comment-only flush node, or any non-native item (vasm produces
+            // only native items) — nothing to assemble.
+            _ => continue,
+        };
+        out.push(Line {
+            line: node.span.line as usize,
+            label,
+            kind,
+        });
+    }
+    out
+}
+
 /// Split a line into its code and its comment for carrying comments as AST
 /// trivia — a `*`-column-0 line is a whole-line comment, otherwise the text from
-/// the first `;`. Defined to mirror [`strip_comment`] exactly (a naive `;` scan,
-/// no string awareness), so the comment is precisely what assembly discards.
+/// the first `;` (a naive scan, no string awareness — exactly what vasm's parser
+/// treats as a comment), so the code half is precisely what assembly sees.
 fn split_comment(line: &str) -> (&str, Option<&str>) {
     if line.starts_with('*') {
         return ("", Some(line.trim_end()));
@@ -1352,29 +1395,13 @@ fn split_comment(line: &str) -> (&str, Option<&str>) {
     }
 }
 
-/// Resolve vasm local labels (names starting with `.`) to their enclosing
-/// global label, so the same `.loop` can recur under different routines. Each
-/// local definition and reference is rewritten to `<global>.<local>`, a key no
-/// ordinary identifier collides with. Definition and reference share the global
-/// scope current at their line, so they always agree.
-fn qualify_local_labels(lines: &mut [Line]) {
-    let mut scope = String::new();
-    for l in lines.iter_mut() {
-        // A non-local label (or equ name) opens a new scope for the labels below.
-        if let Some(name) = &l.label
-            && !name.starts_with('.')
-        {
-            scope = name.clone();
-        }
-        if let Some(name) = &mut l.label
-            && name.starts_with('.')
-        {
-            *name = format!("{scope}{name}");
-        }
-        qualify_stmt(&mut l.kind, &scope);
-    }
-}
-
+/// Resolve vasm local labels (names starting with `.`) to their enclosing global
+/// label, so the same `.loop` can recur under different routines: each local
+/// definition and reference is rewritten to `<global>.<local>`, a key no ordinary
+/// identifier collides with. Definition and reference share the global scope
+/// current at their line, so they always agree. [`parse_program`] applies this to
+/// each statement inline (the labels themselves are resolved as symbols are
+/// built), so the tree carries fully-qualified statements.
 fn qualify_stmt(kind: &mut Stmt, scope: &str) {
     match kind {
         Stmt::Equ(name, e) => {
@@ -1414,14 +1441,6 @@ fn qualify_expr(e: &mut Expr, scope: &str) {
         }
         _ => {}
     }
-}
-
-/// Strip a `;` comment, or a whole-line `*`-comment (column 0).
-fn strip_comment(line: &str) -> &str {
-    if line.starts_with('*') {
-        return "";
-    }
-    line.find(';').map_or(line, |i| &line[..i])
 }
 
 fn split_label(code: &str, line: usize) -> Result<(Option<String>, &str), AsmError> {

@@ -161,6 +161,27 @@ impl Operand {
 // Items and the program
 // ---------------------------------------------------------------------------
 
+/// A dialect-family-owned statement carried in the tree, for the **multi-pass
+/// CISC** dialects (68000 now; x86 and the 68020+/68080 line later) whose
+/// encoding is *not* final at parse time — branch relaxation and the optimizer
+/// resize instructions across passes, so they hold un-lowered structured
+/// statements the shared `Item`s cannot express, and assemble with their own
+/// multi-pass driver rather than [`engine::assemble`](crate::engine). The AST is
+/// the single front-end IR (`decisions/ast-native-payload-for-multipass-cisc.md`);
+/// the dialect stores its statement here and reads it back, downcasting the
+/// concrete type it owns. The shared layer never inspects the payload — only
+/// [`inline_label`](Self::inline_label) is consulted, so emit renders an
+/// `equ`-style binding on its label's line.
+pub(crate) trait NativeItem: std::any::Any {
+    /// The concrete statement, for the owning dialect to downcast.
+    fn as_any(&self) -> &dyn std::any::Any;
+    /// Whether emit keeps the label on the operation's line (an `equ`-style
+    /// binding) rather than on its own line above. Defaults to `false`.
+    fn inline_label(&self) -> bool {
+        false
+    }
+}
+
 /// One operation on a source line, before byte-lowering. The variants mirror the
 /// [`Operation`](crate::engine::Operation) kinds a dialect produces. Instructions
 /// carry structured [`Operand`]s (source text + structured variants), though the
@@ -209,6 +230,12 @@ pub(crate) enum Item {
         else_body: Option<Vec<Node>>,
         inline: bool,
     },
+    /// A dialect-family-owned statement for a multi-pass CISC dialect (see
+    /// [`NativeItem`]). The owning dialect's assembler reads it back; the shared
+    /// layer treats it opaquely (emit renders from [`Node::source`], consulting
+    /// only [`NativeItem::inline_label`]; [`lower`] rejects it — a native item is
+    /// assembled by its dialect, never lowered to the engine).
+    Native(Box<dyn NativeItem>),
 }
 
 /// A source line reduced to an optional (scoped) label and an optional
@@ -365,6 +392,15 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
                 "internal error: a conditional block is evaluated by the dialect, not lowered",
             ));
         }
+        // A native (multi-pass CISC) item is assembled by its own dialect driver,
+        // never lowered to the engine — no dialect routes one through `lower`, so
+        // this guards against a future mistake, like the `Conditional` arm.
+        Item::Native(_) => {
+            return Err(AsmError::new(
+                0,
+                "internal error: a native item is assembled by its dialect, not lowered",
+            ));
+        }
     })
 }
 
@@ -472,7 +508,11 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
             continue;
         }
         let label = node.label.as_ref().map(|s| s.name.as_str());
-        let is_equ = matches!(node.item, Some(Item::Equ(_)));
+        // An `equ`-style binding keeps its label on the operation's line: the
+        // shared `Item::Equ`, or a native (multi-pass CISC) statement that asks
+        // for it (a vasm `equ`/`=`). Only these are rendered inline.
+        let is_equ = matches!(node.item, Some(Item::Equ(_)))
+            || matches!(&node.item, Some(Item::Native(n)) if n.inline_label());
         // A node "has an operation" if it carries an item (a real operation) or
         // just verbatim op source (an ACME directive/instruction the formatter
         // does not lower — it keeps the source and no item).
