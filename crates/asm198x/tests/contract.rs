@@ -90,6 +90,40 @@ fn unknown_fields_are_skipped_on_deserialise() {
     );
 }
 
+/// The serialized payload carries the contract version (R7/U5), and a payload
+/// with no `version` (an older producer's) still loads, defaulting to the current
+/// version — the additive-versioning promise.
+#[test]
+fn payload_carries_version_and_defaults_when_absent() {
+    let result: AssemblyResult =
+        asm198x::assemble_acme("* = $0400\n    nop\n").expect("acme assembles");
+    assert_eq!(
+        result.version,
+        asm198x::CONTRACT_VERSION,
+        "producer stamps it"
+    );
+
+    let mut value: serde_json::Value = serde_json::to_value(&result).expect("to value");
+    assert_eq!(
+        value.get("version").and_then(serde_json::Value::as_u64),
+        Some(u64::from(asm198x::CONTRACT_VERSION)),
+        "the version is present in the serialized payload"
+    );
+
+    // Drop the version, as an older producer would omit it: it defaults back.
+    value
+        .as_object_mut()
+        .expect("result is a JSON object")
+        .remove("version");
+    let restored: AssemblyResult =
+        serde_json::from_value(value).expect("a version-less payload still loads");
+    assert_eq!(
+        restored.version,
+        asm198x::CONTRACT_VERSION,
+        "absent version defaults to the current one"
+    );
+}
+
 // --- U2: diagnostics ---
 
 /// A real assemble failure converts to a public `Diagnostic` that keeps the

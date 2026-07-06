@@ -30,11 +30,29 @@ use std::collections::BTreeMap;
 use crate::engine::{AsmError, Assembly, DebugData, Warning};
 use crate::span::Span;
 
+/// The contract schema version a serialized payload was produced under (R7).
+/// Bumped **only** for a breaking change to the shape — additive fields ride
+/// `#[non_exhaustive]` + `#[serde(default)]` with no bump, and an unknown field is
+/// skipped on deserialize. A consumer reads [`AssemblyResult::version`] to branch
+/// on a major shape change; today there is only version 1.
+pub const CONTRACT_VERSION: u32 = 1;
+
+/// The default for a payload with no `version` (an older producer's), so
+/// deserialize stays additive: absent means the first version.
+fn current_contract_version() -> u32 {
+    CONTRACT_VERSION
+}
+
 /// The one structured result every `assemble_*` entry point returns (R1). Every
 /// current and future CPU inherits it with no per-CPU work (R8).
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct AssemblyResult {
+    /// The contract schema version ([`CONTRACT_VERSION`]) this payload was
+    /// produced under (R7). Defaults to the current version when a payload omits
+    /// it, so an older producer's output still loads.
+    #[serde(default = "current_contract_version")]
+    pub version: u32,
     /// The assembled machine code.
     pub bytes: Vec<u8>,
     /// The flat load origin, or `None` for a linked image (ca65 `.nes`, vasm
@@ -71,6 +89,7 @@ impl AssemblyResult {
     #[must_use]
     pub fn image(bytes: Vec<u8>) -> Self {
         Self {
+            version: CONTRACT_VERSION,
             bytes,
             origin: None,
             symbols: BTreeMap::new(),
@@ -97,6 +116,7 @@ impl AssemblyResult {
 impl From<Assembly> for AssemblyResult {
     fn from(a: Assembly) -> Self {
         Self {
+            version: CONTRACT_VERSION,
             bytes: a.bytes,
             origin: Some(a.origin),
             symbols: a.symbols,
