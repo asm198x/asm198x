@@ -22,8 +22,9 @@ diagnostics, column-accurate operand spans in the AST-routed dialects,
 freeze *promise* fires at the MCP surface per
 `decisions/core-contract-freeze.md`; until then the contract is a public draft.
 The current focus is **Layer 2** — the consumers fan out on the frozen-shape
-foundations (dbg198x's contract-first pause condition — a designed, landed R1
-shape — is now satisfied).
+foundations. First up is **Debug198x** (the `debug198x` crate, renamed from
+`dbg198x` on 2026-07-06): its contract-first pause condition — a designed,
+landed R1 shape — is satisfied, and implementation has resumed at U3.
 
 This record is the map. It does not restate each plan — it says what order they
 go in and why, and where the freeze-gates are. Read it before scheduling work
@@ -34,8 +35,8 @@ that touches more than one plan.
 | Seam | Owner (defines it) | Consumers (build on it) | Freeze-gate |
 |------|--------------------|-------------------------|-------------|
 | **The AST** — the source-preserving semantic tree (`crates/asm198x/src/ast.rs`) | AST plan (`…-005`) | contract diagnostics (`…-003` R2), language surface (`…-001`), converter (`…-003`/idea 6), cycle→source map (`…-002`) | Its *data model* is landed and stable; per-CPU coverage is still completing (Layer 0b) |
-| **The span / source model** — `(file, line, col)` + reserved macro-expansion frames | language surface (`…-001`, because includes force multi-file) | contract diagnostics + result (`…-003` R1/R2), dbg198x source model (`…-001`/idea 1) | **Lock before** contract U2/U3 freeze and before dbg198x resumes |
-| **The symbol / section model** — typed kinds, address-space qualifier, `(section, offset)` | co-designed dbg198x (`…-001`) ↔ contract R1 (`…-003`) | dbg198x reader (Emu198x), the JSON result | Symbol slice stays **draft past MCP** until a resumed dbg198x actually reads an `AssemblyResult` (contract KTD4) |
+| **The span / source model** — `(file, line, col)` + reserved macro-expansion frames | language surface (`…-001`, because includes force multi-file) | contract diagnostics + result (`…-003` R1/R2), debug198x source model (`…-001`/idea 1) | **Lock before** contract U2/U3 freeze and before debug198x resumes |
+| **The symbol / section model** — typed kinds, address-space qualifier, `(section, offset)` | co-designed debug198x (`…-001`) ↔ contract R1 (`…-003`) | debug198x reader (Emu198x), the JSON result | Symbol slice stays **draft past MCP** until a resumed debug198x actually reads an `AssemblyResult` (contract KTD4) |
 | **Field-packed cycles/flags data** — per-CPU timing/flag tables authored from datasheets | (unowned today) | cycle listing (`…-002`/idea 5), spec-query (`…-003` R5) | Author **once**, not per-consumer |
 
 **The seam that bites hardest is the span/source model.** Three ideas (1, 3, 4)
@@ -43,10 +44,10 @@ each define or consume "how a byte, symbol, or diagnostic is attributed to a
 location." The language-surface plan states it directly: *includes force a
 multi-file source model, so every byte/symbol/diagnostic must carry
 `(file, line, column)` through an include chain — which dictates the shape of the
-contract (R1/R2) and dbg198x's source model.* This session already nearly spawned
+contract (R1/R2) and debug198x's source model.* This session already nearly spawned
 **two** span types (`DiagSpan` vs `ast::Span`). If the contract's diagnostics
 (U2/U3) freeze a *single-file* span now and idea 4 later makes it multi-file, that
-is rework inside a **frozen** contract *and* dbg198x. The fix is cheap if done
+is rework inside a **frozen** contract *and* debug198x. The fix is cheap if done
 now and expensive if deferred: design the one span shape multi-file-and-
 expansion-frame-ready before diagnostics freeze. U1's `DiagSpan` already reserves
 `file: Option<FileId>` under `#[non_exhaustive]` — that instinct is correct; the
@@ -63,9 +64,9 @@ See § Layer 0 in detail below.
 freeze fires at MCP (`decisions/core-contract-freeze.md`).
 
 **Layer 2 — the consumers fan out** (on stable foundations, low rework):
-- **dbg198x (`…-001`, idea 1)** — resume against frozen R1 + the shared span/
-  symbol model. **Paused** today, correctly, pending the contract's designed R1
-  shape (contract-first).
+- **Debug198x (`…-001`, idea 1)** — resume against frozen R1 + the shared span/
+  symbol model. Was paused, correctly, pending the contract's designed R1 shape
+  (contract-first); **resumed 2026-07-06** once Layer 1 completed.
 - **Verdict pipeline (`…-002`, idea 2)** — genuinely **independent**, gated on
   nothing; reuses only the thin diagnostic envelope opportunistically. Run its
   harness prerequisite (outcome-typed `ref_assemble`, its U2) whenever capacity
@@ -94,16 +95,16 @@ Both are done — kept here as the record of what the foundation guarantees.
 
 - Define a single span shape — `{ file: FileId, line, col }` with reserved
   macro-expansion frames — used by **`ast::Span`**, the contract's diagnostic
-  span (`DiagSpan`), and dbg198x's source records. One type (or two that are
+  span (`DiagSpan`), and debug198x's source records. One type (or two that are
   provably identical by construction), not two that drift.
 - Make it **multi-file-ready now**, before includes (idea 4) are built: a single
   file is `FileId(0)`; the include chain populates the rest later without a shape
   change. `#[non_exhaustive]` so expansion frames add additively.
-- **Done when:** the contract's U2/U3 diagnostics and a resumed dbg198x can both
+- **Done when:** the contract's U2/U3 diagnostics and a resumed debug198x can both
   consume the *same* span type, and adding includes (idea 4) requires no change
   to its shape — only new values.
 - **Why first:** it is the seam that freezes into two consumers (contract +
-  dbg198x). Every day it stays un-locked, U2/U3 and dbg198x risk building against
+  debug198x). Every day it stays un-locked, U2/U3 and debug198x risk building against
   a shape that idea 4 will invalidate.
 
 ### 0b. Complete the AST across the remaining CPUs — ✅ COMPLETE (2026-07-06)
@@ -144,7 +145,7 @@ Both are done — kept here as the record of what the foundation guarantees.
 
 ## The disciplines that prevent the rework
 
-1. **Freeze-at-first-consumer.** Already the family's discipline (dbg198x is
+1. **Freeze-at-first-consumer.** Already the family's discipline (debug198x is
    paused for exactly this). A shared shape goes public as *draft*
    (`#[non_exhaustive]`, versioned, skip-unknown) and freezes only when a real
    consumer has exercised it. Never let a consumer build against an unfrozen
@@ -169,7 +170,7 @@ Both are done — kept here as the record of what the foundation guarantees.
 Stop and re-consult this record if a change would:
 
 - **Build a Layer 2/3 consumer against a Layer 0/1 shape that is not yet frozen**
-  — e.g. wiring dbg198x to a not-yet-designed R1, or the converter to an
+  — e.g. wiring debug198x to a not-yet-designed R1, or the converter to an
   incomplete renderer. That is the retrofit-rework this sequencing exists to
   prevent.
 - **Introduce a second span, symbol, or result type** for a concern a shared seam
@@ -188,5 +189,5 @@ Stop and re-consult this record if a change would:
 See the per-idea plans in [`../docs/plans/`](../docs/plans/), the contract's
 span/symbol decisions (`docs/plans/2026-07-03-003-feat-core-contract-plan.md`
 KTD1/KTD4), and [`conditional-assembly-framework.md`](conditional-assembly-framework.md)
-(adopt-on-demand). Cross-project consumption triggers (Emu198x reading dbg198x /
+(adopt-on-demand). Cross-project consumption triggers (Emu198x reading debug198x /
 `isa`) live in the umbrella `../../decisions/`.

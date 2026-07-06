@@ -5,7 +5,7 @@
 //! into [`AssemblyResult`], a serde-derivable value carrying the assembled
 //! bytes, load origin, resolved symbols, entry point, warnings, and debug info —
 //! so any consumer (the CLI's `--message-format=json` in U4, editors, agents, a
-//! resumed dbg198x) sees one shape across every CPU and dialect.
+//! resumed debug198x) sees one shape across every CPU and dialect.
 //!
 //! **Linked images and `origin`.** A flat assemble loads at a known `origin`; a
 //! linked image (ca65's `.nes` ROM, vasm's Amiga hunk executable) is the
@@ -71,7 +71,7 @@ pub struct AssemblyResult {
     #[serde(default)]
     pub warnings: Vec<Warning>,
     /// Debug info captured during assembly — the line→address map and typed
-    /// symbols the CLI renders into a `.dbg198x` sidecar / `--sym` / `--listing`.
+    /// symbols the CLI renders into a `.debug198x` sidecar / `--sym` / `--listing`.
     #[serde(default)]
     pub debug: DebugData,
     /// Non-fatal diagnostics attached to a *successful* assembly (U2). Empty
@@ -185,7 +185,7 @@ impl Fix {
 /// of the rich span/code/fix fields. asm198x's own errors are the full
 /// [`Diagnostic`]; a *foreign-tool* rejection the verdict pipeline records —
 /// whose text is the reference tool's, in no coordinate system of ours — is
-/// *only* an envelope. dbg198x and the verdict pipeline reuse this without the
+/// *only* an envelope. debug198x and the verdict pipeline reuse this without the
 /// rich fields.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[non_exhaustive]

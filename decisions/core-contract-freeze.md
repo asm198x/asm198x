@@ -15,9 +15,9 @@ skip-unknown — so consumers can build against them, but the semver-stability
 *promise* stays **draft** until a real surface has exercised them. Real surface
 contact falsifies API designs; the irreversible promise waits for it.
 
-This borrows the **dbg198x design pattern** — a versioned, serde-based,
+This borrows the **debug198x design pattern** — a versioned, serde-based,
 additive/skip-unknown contract that ships as public draft and freezes at first
-consumption. (dbg198x's own freeze is likewise still pending its first
+consumption. (debug198x's own freeze is likewise still pending its first
 consumer.)
 
 ## The additive mechanism (landed, U1/U2/U5)
@@ -43,7 +43,7 @@ a version bump + migration.
 
 The v1 core (**R1** structured result, **R2** diagnostics, **R3** JSON) freezes
 when the **first surface, MCP**, has consumed it — not at sibling-crate
-consumption. Crates in the family (dbg198x, Forge198x) **may build against the
+consumption. Crates in the family (debug198x, Forge198x) **may build against the
 draft** before then; the promise is about *external, cross-surface* stability,
 which only a real surface exercises.
 
@@ -64,8 +64,8 @@ them (a secondary trigger, per R7):
   APIs; freezing them against a single surface with only a paper cross-surface
   check is the exact failure draft-then-freeze exists to prevent.
 - **The symbol/section slice of `AssemblyResult`** (the `symbols` exposure,
-  co-designed with dbg198x's KTD4 model) stays draft **past MCP** until a resumed
-  dbg198x has actually **read an `AssemblyResult`**. The slice was designed with a
+  co-designed with debug198x's KTD4 model) stays draft **past MCP** until a resumed
+  debug198x has actually **read an `AssemblyResult`**. The slice was designed with a
   paused sibling; freezing it before that sibling exercises it would freeze
   against an unexercised model. (Mirrors the R4/R5 split-freeze reasoning.)
 
@@ -73,7 +73,7 @@ them (a secondary trigger, per R7):
 
 Re-consult this record if a change would:
 
-- **Freeze the contract at sibling-crate consumption** (dbg198x building against
+- **Freeze the contract at sibling-crate consumption** (debug198x building against
   it) rather than at the MCP surface. Family crates use the draft; the promise is
   cross-surface.
 - **Make a breaking change to a contract type without bumping `CONTRACT_VERSION`
@@ -81,7 +81,7 @@ Re-consult this record if a change would:
   change is a versioned event, not a silent one.
 - **Freeze R4 (`Dialect`) or R5 (spec-query) at MCP** rather than holding them for
   a second surface — or **freeze the symbol/section slice** before a resumed
-  dbg198x has read an `AssemblyResult`.
+  debug198x has read an `AssemblyResult`.
 - **Flip the freeze the instant a surface imports a type**, skipping the bounded
   review that is the point of shipping draft first.
 

@@ -37,22 +37,22 @@ pub struct Assembly {
     /// its operand, sjasmplus-style). Empty for dialects that don't warn.
     pub warnings: Vec<Warning>,
     /// Debug-info captured during pass 2 — the line→address map and typed
-    /// symbols the CLI renders into a `.dbg198x` sidecar / `--sym` / `--listing`.
+    /// symbols the CLI renders into a `.debug198x` sidecar / `--sym` / `--listing`.
     /// Header-less (the CPU/dialect/source-file identity is the CLI's to add) and
     /// section-less (the flat engine is a single implicit section 0, based at
     /// `origin`). Capturing it never changes an emitted byte.
     pub debug: DebugData,
 }
 
-/// The engine's slice of a `.dbg198x` record: typed symbols and line→address
+/// The engine's slice of a `.debug198x` record: typed symbols and line→address
 /// spans, in the CPU's **address units** (a decle for the word-addressed CP1610,
 /// a byte elsewhere) so a consumer's address lookups line up with the CPU's own
 /// addressing. Header-less; the CLI wraps it with identity and the source
-/// filename to form a full [`dbg198x::DebugInfo`].
+/// filename to form a full [`debug198x::DebugInfo`].
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DebugData {
     /// Every label (address), `equ`/`=` constant (value), and entry point.
-    pub symbols: Vec<dbg198x::Symbol>,
+    pub symbols: Vec<debug198x::Symbol>,
     /// One span per source-bearing statement that emitted bytes. Fill from `org`
     /// gaps and `align` carries no span (the padding rule).
     pub lines: Vec<LineRec>,
@@ -691,18 +691,18 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
             let kind = if matches!(&s.op, Some(Operation::Equ(_))) {
                 // An `equ`/`=` constant: its value, not an address, and no space.
                 let value = symbols.get(label).copied().unwrap_or_default();
-                dbg198x::SymbolKind::Const {
+                debug198x::SymbolKind::Const {
                     value: value as u64,
                 }
             } else {
                 // A label lives at this statement's address (`pc`).
-                dbg198x::SymbolKind::Label {
+                debug198x::SymbolKind::Label {
                     section: 0,
                     offset: (pc - origin) as u64,
                     space: None,
                 }
             };
-            debug.symbols.push(dbg198x::Symbol {
+            debug.symbols.push(debug198x::Symbol {
                 name: label.clone(),
                 kind,
             });
@@ -730,16 +730,15 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
         // location) rather than emitting a second same-named symbol; otherwise
         // record a fresh `@entry`.
         if let (Some(Operation::Entry(e)), Some(v)) = (&s.op, start) {
-            let entry = dbg198x::SymbolKind::Entry {
+            let entry = debug198x::SymbolKind::Entry {
                 section: 0,
                 offset: (i64::from(v) - origin) as u64,
                 space: None,
             };
             let existing = match e {
-                Expr::Sym(n) => debug
-                    .symbols
-                    .iter_mut()
-                    .find(|s| s.name == *n && matches!(s.kind, dbg198x::SymbolKind::Label { .. })),
+                Expr::Sym(n) => debug.symbols.iter_mut().find(|s| {
+                    s.name == *n && matches!(s.kind, debug198x::SymbolKind::Label { .. })
+                }),
                 _ => None,
             };
             if let Some(sym) = existing {
@@ -749,7 +748,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                     Expr::Sym(n) => n.clone(),
                     _ => "@entry".to_string(),
                 };
-                debug.symbols.push(dbg198x::Symbol { name, kind: entry });
+                debug.symbols.push(debug198x::Symbol { name, kind: entry });
             }
         }
     }
