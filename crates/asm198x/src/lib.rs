@@ -33,6 +33,7 @@
 // The source-preserving semantic AST (plan U2). A layer above the encoder;
 // dialects lower into it and it lowers to Statement/Operation (U3 wires that).
 mod ast;
+mod contract;
 mod dialect;
 mod dialects;
 mod engine;
@@ -44,6 +45,10 @@ mod sna;
 // Disassembly lives in the dependency-free `isa-disasm` crate (only `isa` +
 // std) so Emu198x can consume it without the assembler; re-exported here so the
 // `asm198x` library API and CLI are unchanged.
+// `AssemblyResult` (the one structured result, R1/U1) is the return type of
+// every `assemble_*` entry point. `Assembly` stays exported as the engine's
+// internal flat builder that `AssemblyResult` wraps.
+pub use contract::AssemblyResult;
 pub use engine::{AsmError, Assembly, DebugData, LineRec, Warning};
 // Re-exported so consumers of `Assembly.debug` need not depend on dbg198x
 // directly for the symbol types the engine captures.
@@ -67,8 +72,8 @@ pub use sna::sna_48k;
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_acme(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Acme)
+pub fn assemble_acme(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Acme).map(AssemblyResult::from)
 }
 
 /// Assemble ca65-syntax 6502 source for the NES and link it into a `.nes` ROM
@@ -79,8 +84,8 @@ pub fn assemble_acme(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_ca65(source: &str) -> Result<Vec<u8>, AsmError> {
-    dialects::ca65::assemble(source)
+pub fn assemble_ca65(source: &str) -> Result<AssemblyResult, AsmError> {
+    dialects::ca65::assemble(source).map(AssemblyResult::image)
 }
 
 /// Assemble Motorola-syntax 68000 source into a flat big-endian code image
@@ -91,8 +96,8 @@ pub fn assemble_ca65(source: &str) -> Result<Vec<u8>, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_vasm(source: &str) -> Result<Vec<u8>, AsmError> {
-    dialects::vasm::assemble(source)
+pub fn assemble_vasm(source: &str) -> Result<AssemblyResult, AsmError> {
+    dialects::vasm::assemble(source).map(AssemblyResult::image)
 }
 
 /// As [`assemble_vasm`], but also returns any non-fatal [`Warning`]s raised
@@ -104,8 +109,9 @@ pub fn assemble_vasm(source: &str) -> Result<Vec<u8>, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_vasm_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError> {
+pub fn assemble_vasm_warned(source: &str) -> Result<AssemblyResult, AsmError> {
     dialects::vasm::assemble_warned(source)
+        .map(|(bytes, warnings)| AssemblyResult::image_warned(bytes, warnings))
 }
 
 /// Assemble Motorola-syntax 68000 source into an Amiga hunk executable —
@@ -117,8 +123,8 @@ pub fn assemble_vasm_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), Asm
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_vasm_exe(source: &str) -> Result<Vec<u8>, AsmError> {
-    dialects::vasm::assemble_exe(source)
+pub fn assemble_vasm_exe(source: &str) -> Result<AssemblyResult, AsmError> {
+    dialects::vasm::assemble_exe(source).map(AssemblyResult::image)
 }
 
 /// Assemble ca65-syntax 65816 source (native mode) into a flat binary — the
@@ -129,8 +135,8 @@ pub fn assemble_vasm_exe(source: &str) -> Result<Vec<u8>, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_ca65_816(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Ca65_816)
+pub fn assemble_ca65_816(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Ca65_816).map(AssemblyResult::from)
 }
 
 /// Assemble ca65-syntax HuC6280 source into a flat little-endian binary — the
@@ -143,8 +149,8 @@ pub fn assemble_ca65_816(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_ca65_huc6280(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Ca65Huc6280)
+pub fn assemble_ca65_huc6280(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Ca65Huc6280).map(AssemblyResult::from)
 }
 
 /// Assemble rgbasm-syntax SM83 (Game Boy) source into a flat binary at the
@@ -155,8 +161,8 @@ pub fn assemble_ca65_huc6280(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_rgbasm(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Rgbasm)
+pub fn assemble_rgbasm(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Rgbasm).map(AssemblyResult::from)
 }
 
 /// Assemble Intel-syntax 8080 source into a flat binary at the `org` — the
@@ -166,8 +172,8 @@ pub fn assemble_rgbasm(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_i8080(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::I8080)
+pub fn assemble_i8080(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::I8080).map(AssemblyResult::from)
 }
 
 /// Assemble Motorola-syntax 6800 source into a flat big-endian binary at the
@@ -177,8 +183,8 @@ pub fn assemble_i8080(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_m6800(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::M6800)
+pub fn assemble_m6800(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::M6800).map(AssemblyResult::from)
 }
 
 /// Assemble asl-syntax RCA CDP1802 (COSMAC) source into a flat big-endian binary
@@ -188,8 +194,8 @@ pub fn assemble_m6800(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_1802(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Cdp1802)
+pub fn assemble_1802(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Cdp1802).map(AssemblyResult::from)
 }
 
 /// Assemble asl-syntax Intel 8048 (MCS-48) source into a flat binary at the
@@ -200,8 +206,8 @@ pub fn assemble_1802(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_8048(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::I8048 { romless: false })
+pub fn assemble_8048(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::I8048 { romless: false }).map(AssemblyResult::from)
 }
 
 /// Assemble asl-syntax ROM-less MCS-48 source (8035/8039/8040 and CMOS kin) into
@@ -213,8 +219,8 @@ pub fn assemble_8048(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure, or a BUS-port instruction.
-pub fn assemble_8039(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::I8048 { romless: true })
+pub fn assemble_8039(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::I8048 { romless: true }).map(AssemblyResult::from)
 }
 
 /// Assemble asl-syntax National SC/MP (INS8060) source into a flat binary at the
@@ -225,8 +231,8 @@ pub fn assemble_8039(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_scmp(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Scmp)
+pub fn assemble_scmp(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Scmp).map(AssemblyResult::from)
 }
 
 /// Assemble asl-syntax Fairchild F8 (3850) source into a flat binary at the
@@ -238,8 +244,8 @@ pub fn assemble_scmp(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_f8(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::F8)
+pub fn assemble_f8(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::F8).map(AssemblyResult::from)
 }
 
 /// Assemble asl-syntax Signetics 2650 source into a flat binary at the `org`,
@@ -251,8 +257,8 @@ pub fn assemble_f8(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_2650(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::S2650)
+pub fn assemble_2650(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::S2650).map(AssemblyResult::from)
 }
 
 /// Assemble asl-syntax TI TMS7000 source into a flat binary at the `org`, over
@@ -264,8 +270,8 @@ pub fn assemble_2650(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_tms7000(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Tms7000)
+pub fn assemble_tms7000(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Tms7000).map(AssemblyResult::from)
 }
 
 /// Assemble asl-syntax DEC PDP-11 source into a flat **little-endian** binary at
@@ -279,8 +285,8 @@ pub fn assemble_tms7000(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_pdp11(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Pdp11)
+pub fn assemble_pdp11(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Pdp11).map(AssemblyResult::from)
 }
 
 /// Assemble asl-syntax GI CP1610 source (the Mattel Intellivision CPU) into a
@@ -292,8 +298,8 @@ pub fn assemble_pdp11(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_cp1610(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Cp1610)
+pub fn assemble_cp1610(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Cp1610).map(AssemblyResult::from)
 }
 
 /// Assemble asl-syntax TI TMS9900 source into a flat **big-endian** binary at
@@ -305,8 +311,8 @@ pub fn assemble_cp1610(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_tms9900(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Tms9900)
+pub fn assemble_tms9900(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Tms9900).map(AssemblyResult::from)
 }
 
 /// Assemble asl-syntax Zilog Z8000 (non-segmented Z8002) source into a flat
@@ -319,8 +325,8 @@ pub fn assemble_tms9900(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_z8000(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Z8000 { seg: false })
+pub fn assemble_z8000(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Z8000 { seg: false }).map(AssemblyResult::from)
 }
 
 /// Assemble `asl`-syntax **segmented Z8001** source into a flat big-endian
@@ -330,8 +336,8 @@ pub fn assemble_z8000(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_z8001(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Z8000 { seg: true })
+pub fn assemble_z8001(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Z8000 { seg: true }).map(AssemblyResult::from)
 }
 
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching
@@ -341,8 +347,8 @@ pub fn assemble_z8001(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_lwasm(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Lwasm)
+pub fn assemble_lwasm(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Lwasm).map(AssemblyResult::from)
 }
 
 /// Assemble pasmo-syntax Z80 source into a flat binary, targeting a **plain
@@ -351,8 +357,8 @@ pub fn assemble_lwasm(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_pasmo(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Pasmo { z80n: false })
+pub fn assemble_pasmo(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Pasmo { z80n: false }).map(AssemblyResult::from)
 }
 
 /// Assemble pasmo-syntax Z80 source targeting the **ZX Spectrum Next (Z80N)** —
@@ -362,8 +368,8 @@ pub fn assemble_pasmo(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_pasmonext(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Pasmo { z80n: true })
+pub fn assemble_pasmonext(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Pasmo { z80n: true }).map(AssemblyResult::from)
 }
 
 /// Assemble sjasmplus-syntax Z80 source targeting a plain Z80.
@@ -371,8 +377,8 @@ pub fn assemble_pasmonext(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_sjasmplus(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Sjasmplus { z80n: false })
+pub fn assemble_sjasmplus(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Sjasmplus { z80n: false }).map(AssemblyResult::from)
 }
 
 /// Assemble sjasmplus-syntax Z80 source targeting the ZX Spectrum Next (Z80N).
@@ -380,8 +386,8 @@ pub fn assemble_sjasmplus(source: &str) -> Result<Assembly, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
-pub fn assemble_sjasmplus_next(source: &str) -> Result<Assembly, AsmError> {
-    engine::assemble(source, &dialects::Sjasmplus { z80n: true })
+pub fn assemble_sjasmplus_next(source: &str) -> Result<AssemblyResult, AsmError> {
+    engine::assemble(source, &dialects::Sjasmplus { z80n: true }).map(AssemblyResult::from)
 }
 
 /// Format pasmo-syntax Z80 source (`asm198x fmt`): parse into the semantic AST
@@ -531,7 +537,7 @@ mod tests {
                     bne loop\n\
                     rts\n";
         let a = assemble_acme(source).expect("assembles");
-        assert_eq!(a.origin, 0x0200);
+        assert_eq!(a.origin, Some(0x0200));
         assert_eq!(
             a.bytes,
             vec![
@@ -564,18 +570,18 @@ mod tests {
     fn vasm_immediate_ops_are_distinct_and_aliased() {
         // addi/subi/cmpi are their own mnemonics (the $06/$04/$0C encodings).
         assert_eq!(
-            assemble_vasm("\tsubi.b #16,d0\n").expect("subi"),
+            assemble_vasm("\tsubi.b #16,d0\n").expect("subi").bytes,
             vec![0x04, 0x00, 0x00, 0x10]
         );
         assert_eq!(
-            assemble_vasm("\taddi.w #100,d2\n").expect("addi"),
+            assemble_vasm("\taddi.w #100,d2\n").expect("addi").bytes,
             vec![0x06, 0x42, 0x00, 0x64]
         );
         // `cmp #imm,<memory>` aliases to cmpi (vasm uses the <ea>,Dn form only
         // for a data-register destination), so the two assemble identically.
         assert_eq!(
-            assemble_vasm("\tcmp.w #1,(a0)\n").expect("cmp alias"),
-            assemble_vasm("\tcmpi.w #1,(a0)\n").expect("cmpi"),
+            assemble_vasm("\tcmp.w #1,(a0)\n").expect("cmp alias").bytes,
+            assemble_vasm("\tcmpi.w #1,(a0)\n").expect("cmpi").bytes,
         );
     }
 
@@ -584,19 +590,19 @@ mod tests {
         // vasm warns (2037) but still assembles an out-of-range immediate to
         // CCR (byte) / SR (word); asm198x mirrors that — same bytes, plus a
         // non-fatal warning. In-range immediates warn about nothing.
-        let (bytes, warns) = assemble_vasm_warned("\tandi #$1234,ccr\n").expect("ccr");
-        assert_eq!(bytes, vec![0x02, 0x3C, 0x12, 0x34]); // byte-identical to vasm
-        assert_eq!(warns.len(), 1);
-        assert_eq!(warns[0].line, 1);
-        assert!(warns[0].message.contains("out of range"));
+        let r = assemble_vasm_warned("\tandi #$1234,ccr\n").expect("ccr");
+        assert_eq!(r.bytes, vec![0x02, 0x3C, 0x12, 0x34]); // byte-identical to vasm
+        assert_eq!(r.warnings.len(), 1);
+        assert_eq!(r.warnings[0].line, 1);
+        assert!(r.warnings[0].message.contains("out of range"));
 
-        let (bytes, warns) = assemble_vasm_warned("\tandi #$12345,sr\n").expect("sr");
-        assert_eq!(bytes, vec![0x02, 0x7C, 0x23, 0x45]);
-        assert_eq!(warns.len(), 1);
+        let r = assemble_vasm_warned("\tandi #$12345,sr\n").expect("sr");
+        assert_eq!(r.bytes, vec![0x02, 0x7C, 0x23, 0x45]);
+        assert_eq!(r.warnings.len(), 1);
 
         // In range: CCR byte ($FF) and SR word ($FFFF) raise no warning.
-        let (_, warns) = assemble_vasm_warned("\tandi #$ff,ccr\n\tandi #$ffff,sr\n").expect("ok");
-        assert!(warns.is_empty());
+        let r = assemble_vasm_warned("\tandi #$ff,ccr\n\tandi #$ffff,sr\n").expect("ok");
+        assert!(r.warnings.is_empty());
     }
 
     #[test]
@@ -611,14 +617,13 @@ mod tests {
             ("\ttrap #16\n", &[0x4E, 0x50]),
         ];
         for (src, want) in cases {
-            let (bytes, warns) = assemble_vasm_warned(src).expect(src);
-            assert_eq!(bytes, *want, "bytes for {src:?}");
-            assert_eq!(warns.len(), 1, "one warning for {src:?}");
+            let r = assemble_vasm_warned(src).expect(src);
+            assert_eq!(r.bytes, *want, "bytes for {src:?}");
+            assert_eq!(r.warnings.len(), 1, "one warning for {src:?}");
         }
         // In-range forms of the same instructions raise no warning.
-        let (_, warns) =
-            assemble_vasm_warned("\tmoveq #5,d0\n\taddq.w #3,d0\n\ttrap #7\n").expect("ok");
-        assert!(warns.is_empty());
+        let r = assemble_vasm_warned("\tmoveq #5,d0\n\taddq.w #3,d0\n\ttrap #7\n").expect("ok");
+        assert!(r.warnings.is_empty());
     }
 
     #[test]
@@ -628,6 +633,6 @@ mod tests {
         // PC). The disassembler<->assembler PC-relative contract.
         let bytes = vec![0x30, 0x3A, 0x00, 0x0E];
         let text = listing_68000(&bytes, 0);
-        assert_eq!(assemble_vasm(&text).expect("reassemble"), bytes);
+        assert_eq!(assemble_vasm(&text).expect("reassemble").bytes, bytes);
     }
 }

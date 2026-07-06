@@ -9,6 +9,8 @@ dependencies = [
  "dbg198x",
  "isa",
  "isa-disasm",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]

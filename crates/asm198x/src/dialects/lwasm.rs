@@ -760,7 +760,7 @@ mod tests {
     fn labels_and_org() {
         let a = asm("        org $2000\nstart   lda #$00\n        sta $1000\n        rts\n")
             .expect("prog");
-        assert_eq!(a.origin, 0x2000);
+        assert_eq!(a.origin, Some(0x2000));
         assert_eq!(a.bytes, vec![0x86, 0x00, 0xB7, 0x10, 0x00, 0x39]);
         assert_eq!(a.symbols.get("start"), Some(&0x2000));
     }

@@ -193,7 +193,7 @@ fn curriculum_is_byte_identical() {
                 _ => fails.push(format!("acme reference failed: {}", label(file))),
             }
             // Disassembler round-trip: assemble -> disassemble -> reassemble.
-            let listing = asm198x::listing_6502(&ours.bytes, ours.origin);
+            let listing = asm198x::listing_6502(&ours.bytes, ours.origin.unwrap_or(0));
             let round = asm198x::assemble_acme(&listing).expect("reassemble").bytes;
             if round != ours.bytes {
                 fails.push(format!("6502 disasm round-trip: {}", label(file)));
@@ -228,7 +228,7 @@ fn curriculum_is_byte_identical() {
             match (assembled, ref_bytes(&tmp, &rom, ld)) {
                 (true, Some(reference)) => {
                     checked += 1;
-                    if ours != reference {
+                    if ours.bytes != reference {
                         fails.push(format!("ca65 link: {}", label(file)));
                     }
                 }
@@ -259,7 +259,7 @@ fn curriculum_is_byte_identical() {
                 None => fails.push(format!("pasmo reference failed: {}", label(file))),
             }
             // Z80 disassembler round-trip.
-            let listing = asm198x::listing_z80(&ours.bytes, ours.origin, true);
+            let listing = asm198x::listing_z80(&ours.bytes, ours.origin.unwrap_or(0), true);
             let round = asm198x::assemble_pasmonext(&listing)
                 .expect("reassemble")
                 .bytes;
@@ -311,7 +311,7 @@ fn curriculum_is_byte_identical() {
             match ref_bytes(&tmp, &exe, cmd).and_then(|b| strip_hunk_symbols(&b)) {
                 Some(reference) => {
                     checked += 1;
-                    if ours_exe != reference {
+                    if ours_exe.bytes != reference {
                         fails.push(format!("vasm hunkexe: {}", label(file)));
                     }
                 }
@@ -325,7 +325,7 @@ fn curriculum_is_byte_identical() {
                 cmd.args(["-Fbin", "-quiet", "-o"]).arg(&bin).arg(file);
                 if let Some(reference) = ref_bytes(&tmp, &bin, cmd) {
                     checked += 1;
-                    if ours_bin != reference {
+                    if ours_bin.bytes != reference {
                         fails.push(format!("vasm -Fbin: {}", label(file)));
                     }
                 }
@@ -359,7 +359,7 @@ fn curriculum_is_byte_identical() {
                 None => fails.push(format!("lwasm reference failed: {name}")),
             }
             // Disassembler round-trip: assemble -> disassemble -> reassemble.
-            let listing = asm198x::listing_6809(&ours.bytes, ours.origin);
+            let listing = asm198x::listing_6809(&ours.bytes, ours.origin.unwrap_or(0));
             let round = asm198x::assemble_lwasm(&listing).expect("reassemble").bytes;
             if round != ours.bytes {
                 fails.push(format!("6809 disasm round-trip: {name}"));
@@ -412,7 +412,7 @@ fn curriculum_is_byte_identical() {
             // Disassembler round-trip: assemble -> disassemble -> reassemble. The
             // disassembler tracks m/x width via rep/sep and emits the matching
             // .aXX/.iXX directives, so width-switching code reproduces exactly.
-            let listing = asm198x::listing_65816(&ours.bytes, ours.origin);
+            let listing = asm198x::listing_65816(&ours.bytes, ours.origin.unwrap_or(0));
             let round = asm198x::assemble_ca65_816(&listing)
                 .expect("reassemble")
                 .bytes;

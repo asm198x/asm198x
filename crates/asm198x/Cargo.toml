@@ -18,6 +18,13 @@ repository.workspace = true
 isa = { path = "../isa", version = "0.0.7" }
 isa-disasm = { path = "../isa-disasm", version = "0.0.7" }
 dbg198x = { path = "../dbg198x", version = "0.0.7" }
+# serde derive for the public `AssemblyResult` contract (U1). Already on the CLI
+# path transitively via dbg198x; this makes the derive macro available directly.
+serde = { workspace = true }
+
+[dev-dependencies]
+# JSON round-trip proof for the contract types (tests/contract.rs).
+serde_json = { workspace = true }
 
 [lints]
 workspace = true

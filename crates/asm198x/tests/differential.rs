@@ -186,7 +186,7 @@ fn ours(dialect: &str, body: &str) -> Option<Vec<u8>> {
         "sjasmplus" => asm198x::assemble_sjasmplus(body).ok().map(|a| a.bytes),
         "z80n" => asm198x::assemble_sjasmplus_next(body).ok().map(|a| a.bytes),
         "lwasm" => asm198x::assemble_lwasm(body).ok().map(|a| a.bytes),
-        "vasm" => asm198x::assemble_vasm(body).ok(),
+        "vasm" => asm198x::assemble_vasm(body).ok().map(|a| a.bytes),
         "ca65-816" => asm198x::assemble_ca65_816(body).ok().map(|a| a.bytes),
         _ => None,
     }

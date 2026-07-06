@@ -1066,14 +1066,14 @@ fn address_forces_absolute(operand: &str) -> bool {
 
 #[cfg(test)]
 mod tests {
-    use crate::{AsmError, Assembly, assemble_acme};
+    use crate::{AsmError, AssemblyResult, assemble_acme};
 
     /// Assemble ACME source, giving it a default origin when it declares none —
     /// so the byte-output tests below needn't each set `*=`. (ACME requires `*=`
     /// before code/data; a source that sets its own origin starts with `*` and
     /// passes straight through. The requirement itself is covered by
     /// `emitting_without_an_origin_is_an_error`.)
-    fn asm(src: &str) -> Result<Assembly, AsmError> {
+    fn asm(src: &str) -> Result<AssemblyResult, AsmError> {
         let sets_origin = src.lines().any(|l| l.trim_start().starts_with('*'));
         if sets_origin {
             assemble_acme(src)
@@ -1094,13 +1094,16 @@ mod tests {
     #[test]
     fn sets_pc_and_emits_bytes() {
         let a = asm("*= $0801\n!byte $0c,$08,$0a,$00\n").expect("byte");
-        assert_eq!(a.origin, 0x0801);
+        assert_eq!(a.origin, Some(0x0801));
         assert_eq!(a.bytes, vec![0x0C, 0x08, 0x0A, 0x00]);
     }
 
     #[test]
     fn star_equals_with_spaces() {
-        assert_eq!(asm("* = $1000\n!byte 1\n").expect("spaced").origin, 0x1000);
+        assert_eq!(
+            asm("* = $1000\n!byte 1\n").expect("spaced").origin,
+            Some(0x1000)
+        );
     }
 
     #[test]

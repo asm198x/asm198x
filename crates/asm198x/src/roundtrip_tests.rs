@@ -34,7 +34,7 @@ fn round_trips_1802_through_asl_syntax() {
         \tlbr start\n\
         \tidl\n";
     let original = assemble_1802(source).expect("assemble");
-    let listing = listing_1802(&original.bytes, original.origin);
+    let listing = listing_1802(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_1802(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -58,7 +58,7 @@ fn round_trips_m6800_through_asl_syntax() {
         \tclra\n\
         \trts\n";
     let original = assemble_m6800(source).expect("assemble");
-    let listing = listing_m6800(&original.bytes, original.origin);
+    let listing = listing_m6800(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_m6800(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -83,7 +83,7 @@ fn round_trips_8048_through_asl_syntax() {
         \tjmp start\n\
         \tret\n";
     let original = assemble_8048(source).expect("assemble");
-    let listing = listing_8048(&original.bytes, original.origin);
+    let listing = listing_8048(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_8048(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -109,7 +109,7 @@ fn round_trips_scmp_through_asl_syntax() {
         \txppc 3\n\
         \thalt\n";
     let original = assemble_scmp(source).expect("assemble");
-    let listing = listing_scmp(&original.bytes, original.origin);
+    let listing = listing_scmp(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_scmp(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -134,7 +134,7 @@ fn round_trips_8039_romless_mcs48() {
         \tjmp start\n\
         \tret\n";
     let original = assemble_8039(source).expect("assemble");
-    let listing = listing_8048(&original.bytes, original.origin);
+    let listing = listing_8048(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_8039(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -181,7 +181,7 @@ fn round_trips_z8000_dyadic_through_asl_syntax() {
         \tlda r1,6000h\n\
         \tlda r2,7000h(r3)\n";
     let original = assemble_z8000(source).expect("assemble");
-    let listing = listing_z8000(&original.bytes, original.origin);
+    let listing = listing_z8000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -206,7 +206,7 @@ fn round_trips_z8000_stack_through_asl_syntax() {
         \tpopl rr2,@r14\n\
         \tpopl @r3,@r14\n";
     let original = assemble_z8000(source).expect("assemble");
-    let listing = listing_z8000(&original.bytes, original.origin);
+    let listing = listing_z8000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -234,7 +234,7 @@ fn round_trips_z8000_single_operand_through_asl_syntax() {
         \tincb rl1,#2\n\
         \tdecb rl4\n";
     let original = assemble_z8000(source).expect("assemble");
-    let listing = listing_z8000(&original.bytes, original.origin);
+    let listing = listing_z8000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -276,7 +276,7 @@ fn round_trips_z8000_shift_rotate_through_asl_syntax() {
         \texts rr14\n\
         \textsl rq12\n";
     let original = assemble_z8000(source).expect("assemble");
-    let listing = listing_z8000(&original.bytes, original.origin);
+    let listing = listing_z8000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -313,7 +313,7 @@ fn round_trips_z8000_bit_through_asl_syntax() {
         \tres r7,r15\n\
         \tresb rl0,r2\n";
     let original = assemble_z8000(source).expect("assemble");
-    let listing = listing_z8000(&original.bytes, original.origin);
+    let listing = listing_z8000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -346,7 +346,7 @@ fn round_trips_z8000_muldiv_through_asl_syntax() {
         \tdivl rq0,@r4\n\
         \tdivl rq4,8000h(r3)\n";
     let original = assemble_z8000(source).expect("assemble");
-    let listing = listing_z8000(&original.bytes, original.origin);
+    let listing = listing_z8000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -393,7 +393,7 @@ fn round_trips_z8000_block_through_asl_syntax() {
         \ttrtdb @r7,@r8,r9\n\
         \ttrtdrb @r7,@r8,r9\n";
     let original = assemble_z8000(source).expect("assemble");
-    let listing = listing_z8000(&original.bytes, original.origin);
+    let listing = listing_z8000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -453,7 +453,7 @@ fn round_trips_z8000_io_through_asl_syntax() {
         \tsoutdb @r4,@r5,r6\n\
         \tsotdrb @r4,@r5,r6\n";
     let original = assemble_z8000(source).expect("assemble");
-    let listing = listing_z8000(&original.bytes, original.origin);
+    let listing = listing_z8000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -493,7 +493,7 @@ fn round_trips_z8000_cpu_control_through_asl_syntax() {
         \tsc #42h\n\
         \tsc #255\n";
     let original = assemble_z8000(source).expect("assemble");
-    let listing = listing_z8000(&original.bytes, original.origin);
+    let listing = listing_z8000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -527,7 +527,7 @@ fn round_trips_z8000_misc_through_asl_syntax() {
         fwd:\n\
         \tnop\n";
     let original = assemble_z8000(source).expect("assemble");
-    let listing = listing_z8000(&original.bytes, original.origin);
+    let listing = listing_z8000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -577,7 +577,7 @@ fn round_trips_z8001_segmented_through_asl_syntax() {
         \tldctl r3,nspoff\n\
         \tldctl nspoff,r4\n";
     let original = assemble_z8001(source).expect("assemble");
-    let listing = listing_z8001(&original.bytes, original.origin);
+    let listing = listing_z8001(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8001(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -616,7 +616,7 @@ fn round_trips_cp1610_registers_through_asl_syntax() {
         \tandr r1,r2\n\
         \txorr r3,r4\n";
     let original = assemble_cp1610(source).expect("assemble");
-    let listing = listing_cp1610(&original.bytes, original.origin);
+    let listing = listing_cp1610(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_cp1610(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -654,7 +654,7 @@ fn round_trips_cp1610_branches_through_asl_syntax() {
         \tnop\n\
         \tb top\n";
     let original = assemble_cp1610(source).expect("assemble");
-    let listing = listing_cp1610(&original.bytes, original.origin);
+    let listing = listing_cp1610(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_cp1610(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -688,7 +688,7 @@ fn round_trips_cp1610_memory_through_asl_syntax() {
         \txor 1234h,r0\n\
         \txori 5678h,r0\n";
     let original = assemble_cp1610(source).expect("assemble");
-    let listing = listing_cp1610(&original.bytes, original.origin);
+    let listing = listing_cp1610(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_cp1610(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -719,7 +719,7 @@ fn round_trips_cp1610_sdbd_double_byte_through_asl_syntax() {
         \tsdbd\n\
         \tmvi 1234h,r0\n";
     let original = assemble_cp1610(source).expect("assemble");
-    let listing = listing_cp1610(&original.bytes, original.origin);
+    let listing = listing_cp1610(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_cp1610(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -749,7 +749,7 @@ fn round_trips_cp1610_jumps_and_labels_through_asl_syntax() {
         data:\n\
         \tnop\n";
     let original = assemble_cp1610(source).expect("assemble");
-    let listing = listing_cp1610(&original.bytes, original.origin);
+    let listing = listing_cp1610(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_cp1610(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -777,7 +777,7 @@ fn round_trips_cp1610_shifts_through_asl_syntax() {
         \tsarc r3\n\
         \tsarc r3,2\n";
     let original = assemble_cp1610(source).expect("assemble");
-    let listing = listing_cp1610(&original.bytes, original.origin);
+    let listing = listing_cp1610(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_cp1610(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -807,7 +807,7 @@ fn round_trips_z8000_control_through_asl_syntax() {
         fwd:\n\
         \tret\n";
     let original = assemble_z8000(source).expect("assemble");
-    let listing = listing_z8000(&original.bytes, original.origin);
+    let listing = listing_z8000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -850,7 +850,7 @@ fn round_trips_tms9900_through_asl_syntax() {
         \trtwp\n\
         count:\tword 0\n";
     let original = assemble_tms9900(source).expect("assemble");
-    let listing = listing_tms9900(&original.bytes, original.origin);
+    let listing = listing_tms9900(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_tms9900(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -894,7 +894,7 @@ fn round_trips_pdp11_through_asl_syntax() {
         count:\tword 0\n\
         msg:\tbyte 0x48, 0x49\n";
     let original = assemble_pdp11(source).expect("assemble");
-    let listing = listing_pdp11(&original.bytes, original.origin);
+    let listing = listing_pdp11(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_pdp11(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -934,7 +934,7 @@ fn round_trips_tms7000_through_asl_syntax() {
         \teint\n\
         \tnop\n";
     let original = assemble_tms7000(source).expect("assemble");
-    let listing = listing_tms7000(&original.bytes, original.origin);
+    let listing = listing_tms7000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_tms7000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -976,7 +976,7 @@ fn round_trips_2650_through_asl_syntax() {
         \tretc,un\n\
         \thalt\n";
     let original = assemble_2650(source).expect("assemble");
-    let listing = listing_2650(&original.bytes, original.origin);
+    let listing = listing_2650(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_2650(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -1013,7 +1013,7 @@ fn round_trips_f8_through_asl_syntax() {
         \tclr\n\
         \tpop\n";
     let original = assemble_f8(source).expect("assemble");
-    let listing = listing_f8(&original.bytes, original.origin);
+    let listing = listing_f8(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_f8(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -1037,7 +1037,7 @@ fn round_trips_i8080_through_asl_syntax() {
         \trst 7\n\
         \tret\n";
     let original = assemble_i8080(source).expect("assemble");
-    let listing = listing_i8080(&original.bytes, original.origin);
+    let listing = listing_i8080(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_i8080(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -1068,7 +1068,7 @@ fn round_trips_sm83_through_rgbasm() {
             jp start\n\
             ret\n";
     let original = assemble_rgbasm(source).expect("assemble");
-    let listing = listing_sm83(&original.bytes, original.origin);
+    let listing = listing_sm83(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_rgbasm(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -1088,7 +1088,7 @@ fn round_trips_z80_through_pasmonext() {
         jr $8000\n\
         ret\n";
     let original = assemble_pasmonext(source).expect("assemble");
-    let listing = listing_z80(&original.bytes, original.origin, true);
+    let listing = listing_z80(&original.bytes, original.origin.unwrap_or(0), true);
     let re = assemble_pasmonext(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -1105,7 +1105,7 @@ fn round_trips_z80n_opcodes() {
         push $abcd\n\
         ldirx\n";
     let original = assemble_pasmonext(source).expect("assemble");
-    let listing = listing_z80(&original.bytes, original.origin, true);
+    let listing = listing_z80(&original.bytes, original.origin.unwrap_or(0), true);
     let re = assemble_pasmonext(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -1127,7 +1127,7 @@ fn round_trips_6502_through_acme() {
                 bne loop\n\
                 rts\n";
     let original = assemble_acme(source).expect("assemble");
-    let listing = listing_6502(&original.bytes, original.origin);
+    let listing = listing_6502(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_acme(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
@@ -1163,7 +1163,7 @@ fn encodes_m68k_extended_and_bcd() {
     ];
     for (src, want) in cases {
         let got = assemble_vasm(src).unwrap_or_else(|e| panic!("assemble `{src}`: {e:?}"));
-        assert_eq!(&got, want, "for `{src}`");
+        assert_eq!(&got.bytes, want, "for `{src}`");
     }
 }
 
@@ -1186,7 +1186,7 @@ fn encodes_m68k_trap_movea_exg() {
     ];
     for (src, want) in cases {
         let got = assemble_vasm(src).unwrap_or_else(|e| panic!("assemble `{src}`: {e:?}"));
-        assert_eq!(&got, want, "for `{src}`");
+        assert_eq!(&got.bytes, want, "for `{src}`");
     }
 }
 
@@ -1213,7 +1213,7 @@ fn encodes_m68k_control_registers() {
     ];
     for (src, want) in cases {
         let got = assemble_vasm(src).unwrap_or_else(|e| panic!("assemble `{src}`: {e:?}"));
-        assert_eq!(&got, want, "for `{src}`");
+        assert_eq!(&got.bytes, want, "for `{src}`");
     }
 }
 
@@ -1229,7 +1229,7 @@ fn encodes_m68k_movep() {
     ];
     for (src, want) in cases {
         let got = assemble_vasm(src).unwrap_or_else(|e| panic!("assemble `{src}`: {e:?}"));
-        assert_eq!(&got, want, "for `{src}`");
+        assert_eq!(&got.bytes, want, "for `{src}`");
     }
 }
 
@@ -1248,7 +1248,7 @@ fn round_trips_m68k_pure_code() {
         \tmovem.l\td0-d3/a0-a1,-(sp)\n\
         \trts\n";
     let original = assemble_vasm(source).expect("assemble");
-    let listing = listing_68000(&original, 0);
+    let listing = listing_68000(&original.bytes, 0);
     let re = assemble_vasm(&listing).expect("reassemble");
     assert_eq!(re, original, "listing was:\n{listing}");
 }

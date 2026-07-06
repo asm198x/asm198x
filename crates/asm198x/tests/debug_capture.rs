@@ -8,7 +8,7 @@ use asm198x::{assemble_cp1610, assemble_pasmo};
 use dbg198x::SymbolKind;
 
 /// The `SymbolKind` recorded for a named symbol, or `None` if absent.
-fn kind_of<'a>(a: &'a asm198x::Assembly, name: &str) -> Option<&'a SymbolKind> {
+fn kind_of<'a>(a: &'a asm198x::AssemblyResult, name: &str) -> Option<&'a SymbolKind> {
     a.debug
         .symbols
         .iter()

@@ -133,7 +133,7 @@ impl Assembler {
         }
     }
 
-    fn assemble(self, source: &str) -> Result<asm198x::Assembly, asm198x::AsmError> {
+    fn assemble(self, source: &str) -> Result<asm198x::AssemblyResult, asm198x::AsmError> {
         match self {
             Self::Acme => asm198x::assemble_acme(source),
             Self::Lwasm => asm198x::assemble_lwasm(source),
@@ -348,24 +348,24 @@ fn run(args: &[String]) -> Result<String, String> {
             let image = asm198x::assemble_vasm_exe(&source).map_err(|e| e.to_string())?;
             // vasm's convention: the executable drops the source extension.
             let out_path = output.unwrap_or_else(|| Path::new(input).with_extension(""));
-            std::fs::write(&out_path, &image)
+            std::fs::write(&out_path, &image.bytes)
                 .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
             return Ok(format!(
                 "assembled {} byte(s) -> {}",
-                image.len(),
+                image.bytes.len(),
                 out_path.display()
             ));
         }
-        let (code, warnings) = asm198x::assemble_vasm_warned(&source).map_err(|e| e.to_string())?;
-        for w in &warnings {
+        let result = asm198x::assemble_vasm_warned(&source).map_err(|e| e.to_string())?;
+        for w in &result.warnings {
             eprintln!("asm198x: {input}: {w}");
         }
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
-        std::fs::write(&out_path, &code)
+        std::fs::write(&out_path, &result.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
         return Ok(format!(
             "assembled {} byte(s) -> {}",
-            code.len(),
+            result.bytes.len(),
             out_path.display()
         ));
     }
@@ -374,11 +374,11 @@ fn run(args: &[String]) -> Result<String, String> {
     if let Assembler::Ca65 = assembler {
         let rom = asm198x::assemble_ca65(&source).map_err(|e| e.to_string())?;
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("nes"));
-        std::fs::write(&out_path, &rom)
+        std::fs::write(&out_path, &rom.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
         return Ok(format!(
             "assembled + linked {} byte(s) -> {}",
-            rom.len(),
+            rom.bytes.len(),
             out_path.display()
         ));
     }
@@ -423,7 +423,7 @@ fn run(args: &[String]) -> Result<String, String> {
             "assembled {} byte(s) -> {} (load ${:04X})",
             image.len(),
             out_path.display(),
-            assembly.origin,
+            assembly.origin.unwrap_or(0),
         ));
     }
 
@@ -434,7 +434,7 @@ fn run(args: &[String]) -> Result<String, String> {
     Ok(format!(
         "assembled {} byte(s) at ${:04X} -> {}",
         assembly.bytes.len(),
-        assembly.origin,
+        assembly.origin.unwrap_or(0),
         out_path.display(),
     ))
 }

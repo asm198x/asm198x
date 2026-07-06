@@ -13,6 +13,8 @@
 use std::collections::BTreeMap;
 use std::fmt;
 
+use serde::{Deserialize, Serialize};
+
 use crate::dialect::{Dialect, Oversize};
 
 /// The result of a successful assembly: where it loads and the bytes to load.
@@ -46,7 +48,7 @@ pub struct Assembly {
 /// a byte elsewhere) so a consumer's address lookups line up with the CPU's own
 /// addressing. Header-less; the CLI wraps it with identity and the source
 /// filename to form a full [`dbg198x::DebugInfo`].
-#[derive(Debug, Clone, Default, PartialEq, Eq)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct DebugData {
     /// Every label (address), `equ`/`=` constant (value), and entry point.
     pub symbols: Vec<dbg198x::Symbol>,
@@ -57,7 +59,7 @@ pub struct DebugData {
 
 /// A line→address span before the source filename is attached: `length` address
 /// units at section-relative `offset` were produced by `line`.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct LineRec {
     pub line: u32,
     pub offset: u64,
@@ -97,7 +99,7 @@ impl std::error::Error for AsmError {}
 /// (0 = no specific line). Reference assemblers assemble *and* flag questionable
 /// source (e.g. an immediate too wide for its operand); a `Warning` carries that
 /// signal without failing the assembly. The bytes are still produced.
-#[derive(Debug, Clone, PartialEq, Eq)]
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Warning {
     pub line: usize,
     pub message: String,
