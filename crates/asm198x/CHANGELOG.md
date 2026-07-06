@@ -7,6 +7,60 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.8](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.7...asm198x-v0.0.8) - 2026-07-06
+
+### Added
+
+- *(debug)* emit the debug record from the vasm hunk path (U5)
+- *(debug)* emit the debug record from the ca65 NES path (U4)
+- *(debug)* emit the .debug198x sidecar, --sym, and --listing (U3)
+- *(contract)* point diagnostics at the operand column (U3)
+- version the core contract + record its freeze governance (U5)
+- add --message-format=json to the CLI (core-contract U4)
+- route NES ca65 (assemble+link) through the semantic AST
+- route vasm (68000) assembly through the semantic AST
+- give vasm (68000) an AST front-end for the --fmt formatter
+- route Z8000 assembly through the semantic AST
+- route CP1610 assembly through the semantic AST
+- route TMS9900 assembly through the semantic AST
+- route PDP-11 assembly through the semantic AST
+- route ca65 HuC6280 assembly through the semantic AST
+- route ca65 65816 assembly through the semantic AST
+- *(tms7000)* route the TMS7000 dialect through the AST (0b straggler)
+- *(2650)* route the Signetics 2650 dialect through the AST (0b straggler)
+- *(f8)* route the Fairchild F8 dialect through the AST (0b straggler)
+- *(8048)* route the MCS-48 dialect through the AST (0b straggler)
+- *(contract)* rustc-shaped diagnostics on one shared span (U2)
+- *(contract)* unify assembly output into one AssemblyResult (U1)
+- *(ast)* idea 4 — ACME assembles by evaluating the conditional AST
+- *(ast)* ACME/6502 formatter — canonical reflow with conditional blocks
+- *(ast)* promote the conditional-block representation into the shared AST (idea 4)
+- *(ast)* U6 — migrate the 6809 onto the AST (first computed-operand CPU)
+- *(ast)* U6 — migrate rgbasm (Game Boy SM83) onto the AST
+- *(ast)* U6 — migrate the National SC/MP onto the AST (fixed-slot)
+- *(ast)* U6 — migrate the RCA CDP1802 onto the AST (fixed-slot)
+- *(ast)* U6 — migrate the Motorola 6800 onto the AST (fixed-slot)
+- *(ast)* U6 — migrate the Intel 8080 onto the AST (first fixed-slot CPU)
+- *(ast)* U6 foundation — total lowering, retire the U1 spike
+- *(ast)* U5 — asm198x fmt, the AST emit proof (AE7)
+- *(ast)* U4 — carry Z80 comments as AST trivia
+- *(ast)* U3 — route the Z80 front-end through the semantic AST
+- *(ast)* U2 — the source-preserving semantic AST types
+- *(dbg198x)* capture debug info in the engine (U2)
+
+### Fixed
+
+- *(review)* fmt round-trip bugs + restore the clippy gate
+
+### Other
+
+- *(debug)* the format decision record + CP1610 fixture (U7 — plan complete)
+- *(debug)* the conformance fixture corpus (U6)
+- rename the dbg198x crate to debug198x
+- *(ast)* extract the shared conditional evaluator (CondEval)
+- *(ast)* drop unused import in the U1 spike
+- *(ast)* U1 validation spike — the neutral-AST gate
+
 ## [0.0.7](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.6...asm198x-v0.0.7) - 2026-07-03
 
 ### Added
