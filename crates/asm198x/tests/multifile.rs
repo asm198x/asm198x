@@ -13,7 +13,9 @@ use std::path::PathBuf;
 use std::process::Command;
 
 use asm198x::source::{FsLoader, MemoryLoader, SourceLoader, SourceMap};
-use asm198x::{FileId, assemble_sjasmplus, assemble_sjasmplus_files};
+use asm198x::{
+    FileId, assemble_pasmo, assemble_pasmo_files, assemble_sjasmplus, assemble_sjasmplus_files,
+};
 
 /// The built `asm198x` binary under test.
 fn bin() -> Command {
@@ -532,4 +534,394 @@ fn cli_json_failure_span_carries_the_included_files_path() {
         "the span's path names the included file: {:?}",
         span.path
     );
+}
+
+// ===========================================================================
+// U3 — the incbin mechanism on the z80 family (hermetic, MemoryLoader).
+// Every expected byte sequence and error posture below is pinned by the
+// sjasmplus/pasmo probe runs recorded in the U3 report (KTD5).
+// ===========================================================================
+
+/// The shared 8-byte probe asset: `10 11 12 13 14 15 16 17`.
+fn asset() -> Vec<u8> {
+    (0x10..0x18).collect()
+}
+
+/// AE2's mechanism: a plain incbin inserts the whole asset at the current
+/// location (probe t1: `AA 10..17 BB`), and the binary asset mints no
+/// `FileId` — the file table holds only the root (KTD8).
+#[test]
+fn incbin_inserts_the_asset_at_the_current_location() {
+    let loader = MemoryLoader::new().binary("data.bin", asset());
+    let src = "        org $8000\n        db $aa\n        incbin \"data.bin\"\n        db $bb\n";
+    let r = assemble_sjasmplus_files(src, "main.asm", &loader).expect("assembles");
+    let mut want = vec![0xAA];
+    want.extend(asset());
+    want.push(0xBB);
+    assert_eq!(r.bytes, want, "probe-pinned bytes (t1)");
+    assert_eq!(
+        r.files,
+        vec!["main.asm".to_string()],
+        "binary data mints no FileId (KTD8)"
+    );
+}
+
+/// The offset and offset+length forms slice the asset (probes t2/t3), and
+/// both arguments take expressions of `equ` constants (probe t16).
+#[test]
+fn incbin_offset_and_length_slice_the_asset() {
+    let loader = MemoryLoader::new().binary("data.bin", asset());
+    let offset = assemble_sjasmplus_files(
+        "        org $8000\n        incbin \"data.bin\",2\n",
+        "main.asm",
+        &loader,
+    )
+    .expect("offset form");
+    assert_eq!(offset.bytes, vec![0x12, 0x13, 0x14, 0x15, 0x16, 0x17]);
+
+    let both = assemble_sjasmplus_files(
+        "        org $8000\n        incbin \"data.bin\",2,3\n",
+        "main.asm",
+        &loader,
+    )
+    .expect("offset+length form");
+    assert_eq!(both.bytes, vec![0x12, 0x13, 0x14]);
+
+    let exprs = assemble_sjasmplus_files(
+        "OFF equ 2\nLEN equ 3\n        org $8000\n        incbin \"data.bin\",OFF,LEN\n",
+        "main.asm",
+        &loader,
+    )
+    .expect("equ-constant args");
+    assert_eq!(exprs.bytes, vec![0x12, 0x13, 0x14]);
+}
+
+/// Negative offsets count back from EOF and negative lengths mean "all but
+/// the last |n| of the remaining" (probes t8/t9/t11/t12).
+#[test]
+fn incbin_negative_offset_and_length_count_from_the_end() {
+    let loader = MemoryLoader::new().binary("data.bin", asset());
+    let cases: &[(&str, Vec<u8>)] = &[
+        ("        incbin \"data.bin\",-2\n", vec![0x16, 0x17]),
+        ("        incbin \"data.bin\",-4,2\n", vec![0x14, 0x15]),
+        ("        incbin \"data.bin\",2,-3\n", vec![0x12, 0x13, 0x14]),
+        (
+            "        incbin \"data.bin\",0,-2\n",
+            vec![0x10, 0x11, 0x12, 0x13, 0x14, 0x15],
+        ),
+    ];
+    for (line, want) in cases {
+        let src = format!("        org $8000\n{line}");
+        let r = assemble_sjasmplus_files(&src, "main.asm", &loader).expect(line);
+        assert_eq!(&r.bytes, want, "probe-pinned bytes for {line}");
+    }
+}
+
+/// The `<file>` and bare spellings resolve like the quoted form for
+/// sjasmplus (probes t14/t15), including a bare name with an offset tail.
+#[test]
+fn incbin_angle_and_bare_spellings_resolve() {
+    let loader = MemoryLoader::new().binary("data.bin", asset());
+    let src = "        org $8000\n        INCBIN <data.bin>\n        incbin data.bin,7\n";
+    let r = assemble_sjasmplus_files(src, "main.asm", &loader).expect("assembles");
+    let mut want = asset();
+    want.push(0x17);
+    assert_eq!(r.bytes, want);
+}
+
+/// A missing asset is a diagnostic at the directive's span — the operand
+/// column, the requesting file — naming the request (probe t10 posture).
+#[test]
+fn missing_incbin_asset_reports_at_the_directive_span() {
+    let loader = MemoryLoader::new();
+    let src = "        org $8000\n        incbin \"nothere.bin\"\n";
+    let e = assemble_sjasmplus_files(src, "main.asm", &loader).expect_err("missing asset");
+    assert!(
+        e.error.message.contains("nothere.bin"),
+        "names the request: {}",
+        e.error.message
+    );
+    let span = e.error.span.as_ref().expect("span at the directive");
+    assert_eq!(span.line, 2);
+    assert_eq!(span.col, 16, "points at the operand (the file name)");
+    assert_eq!(
+        e.source_map.file_table().get(span.file.0 as usize),
+        Some(&"main.asm".to_string())
+    );
+}
+
+/// An out-of-range window — offset beyond EOF, length beyond the remaining
+/// bytes, negative forms overshooting — is the reference's error posture
+/// (probes t4/t5/t13/t20: `file too short`, exit 1), at the directive's span.
+#[test]
+fn incbin_window_outside_the_file_is_an_error() {
+    let loader = MemoryLoader::new().binary("data.bin", asset());
+    for line in [
+        "        incbin \"data.bin\",100\n",
+        "        incbin \"data.bin\",4,100\n",
+        "        incbin \"data.bin\",-100\n",
+        "        incbin \"data.bin\",2,-10\n",
+    ] {
+        let src = format!("        org $8000\n{line}");
+        let e = assemble_sjasmplus_files(&src, "main.asm", &loader).expect_err(line);
+        assert!(
+            e.error.message.contains("too short"),
+            "the reference's `file too short` posture for {line}: {}",
+            e.error.message
+        );
+        assert_eq!(
+            e.error.span.as_ref().map(|s| s.line),
+            Some(2),
+            "at the directive's span for {line}"
+        );
+    }
+}
+
+/// A zero-length window — an explicit `,N,0` or an offset exactly at EOF —
+/// emits nothing and assembles cleanly, with the reference's advisory
+/// (probes t6/t7: warning `requested to include no data`, exit 0).
+#[test]
+fn incbin_zero_length_emits_nothing_and_assembles() {
+    let loader = MemoryLoader::new()
+        .binary("data.bin", asset())
+        .binary("empty.bin", Vec::new());
+    for line in [
+        "        incbin \"data.bin\",2,0\n",
+        "        incbin \"data.bin\",8\n",
+        "        incbin \"empty.bin\"\n",
+    ] {
+        let src = format!("        org $8000\n        db $aa\n{line}        db $bb\n");
+        let r = assemble_sjasmplus_files(&src, "main.asm", &loader).expect(line);
+        assert_eq!(r.bytes, vec![0xAA, 0xBB], "no payload bytes for {line}");
+        assert_eq!(
+            r.warnings.len(),
+            1,
+            "the reference's no-data advisory for {line}"
+        );
+        assert!(
+            r.warnings[0].message.contains("no data"),
+            "names the problem: {}",
+            r.warnings[0].message
+        );
+    }
+}
+
+/// An incbin pushing the image past 64K fails with the engine cap error
+/// carrying the *incbin's* span — proven inside an include, so the file is
+/// the include's, not the root's (the U2 mechanism).
+#[test]
+fn incbin_past_the_64k_cap_carries_the_directive_span() {
+    let loader = MemoryLoader::new()
+        .text("art.inc", "        nop\n        incbin \"data.bin\"\n")
+        .binary("data.bin", asset());
+    let src = "        org $fffe\n        include \"art.inc\"\n";
+    let e = assemble_sjasmplus_files(src, "main.asm", &loader).expect_err("past 64K");
+    assert!(
+        e.error.message.contains("64K"),
+        "names the cap: {}",
+        e.error.message
+    );
+    let span = e.error.span.as_ref().expect("span present");
+    assert_eq!(span.line, 2, "the incbin's line inside art.inc");
+    assert_eq!(
+        e.source_map.file_table().get(span.file.0 as usize),
+        Some(&"art.inc".to_string()),
+        "the span names the include that holds the incbin"
+    );
+}
+
+/// One `LineRec` covers the whole payload at the directive's line and file —
+/// here inside an include, so `file` is the include's `FileId`.
+#[test]
+fn incbin_payload_gets_one_linerec_at_the_directive() {
+    let loader = MemoryLoader::new()
+        .text("art.inc", "        incbin \"data.bin\",0,4\n")
+        .binary("data.bin", asset());
+    let src = "        org $8000\n        include \"art.inc\"\n        nop\n";
+    let r = assemble_sjasmplus_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0x10, 0x11, 0x12, 0x13, 0x00]);
+    let rec = r
+        .debug
+        .lines
+        .iter()
+        .find(|l| l.length == 4)
+        .expect("one record covers the payload");
+    assert_eq!(rec.line, 1, "the directive's line inside art.inc");
+    assert_eq!(rec.offset, 0);
+    assert_eq!(
+        r.files.get(rec.file.0 as usize).map(String::as_str),
+        Some("art.inc"),
+        "the record names the include, not the root"
+    );
+}
+
+/// A label on the incbin line binds at the payload's start address.
+#[test]
+fn label_on_the_incbin_line_binds_at_the_payload() {
+    let loader = MemoryLoader::new().binary("data.bin", asset());
+    let src = "        org $8000\n        nop\nart:    incbin \"data.bin\",0,2\n        jr art\n";
+    let r = assemble_sjasmplus_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0x00, 0x10, 0x11, 0x18, 0xFC]);
+    assert_eq!(r.symbols.get("art"), Some(&0x8001));
+}
+
+/// The single-source entry points still mean "one file": an `incbin` there is
+/// a clear pointer to the multi-file entry, not a silent skip.
+#[test]
+fn single_source_entry_rejects_incbin_with_a_clear_error() {
+    for result in [
+        assemble_sjasmplus("        incbin \"data.bin\"\n"),
+        assemble_pasmo("        incbin \"data.bin\"\n"),
+    ] {
+        let e = result.expect_err("no loader here");
+        assert!(
+            e.message.contains("incbin") && e.message.contains("multi-file"),
+            "points at the multi-file entry: {}",
+            e.message
+        );
+    }
+}
+
+// --- pasmo (U3): the plain form only, probe-pinned ---
+
+/// pasmo's plain `incbin "file"` inserts the whole asset (probe p1); the
+/// quoted and bare spellings both resolve (probe p5).
+#[test]
+fn pasmo_plain_incbin_inserts_the_asset() {
+    let loader = MemoryLoader::new().binary("data.bin", asset());
+    let src = "        org $8000\n        db $aa\n        incbin \"data.bin\"\n        incbin data.bin\n        db $bb\n";
+    let r = assemble_pasmo_files(src, "main.asm", &loader).expect("assembles");
+    let mut want = vec![0xAA];
+    want.extend(asset());
+    want.extend(asset());
+    want.push(0xBB);
+    assert_eq!(r.bytes, want);
+}
+
+/// pasmo has no offset/length tail (probe p2/p3: `End line expected but
+/// ','found`) — the comma is a parse error, at the directive's line.
+#[test]
+fn pasmo_incbin_rejects_an_offset_tail() {
+    let loader = MemoryLoader::new().binary("data.bin", asset());
+    let src = "        org $8000\n        incbin \"data.bin\",2\n";
+    let e = assemble_pasmo_files(src, "main.asm", &loader).expect_err("no tail in pasmo");
+    assert!(
+        e.error.message.contains("only a file name"),
+        "names the problem: {}",
+        e.error.message
+    );
+    assert_eq!(e.error.line, 2);
+}
+
+/// pasmo's `<file>` is a literal file name, not a quote form (probe p6): the
+/// loader is asked for `<data.bin>` verbatim, which fails as not-found.
+#[test]
+fn pasmo_incbin_angle_brackets_are_literal() {
+    let loader = MemoryLoader::new().binary("data.bin", asset());
+    let src = "        org $8000\n        incbin <data.bin>\n";
+    let e = assemble_pasmo_files(src, "main.asm", &loader).expect_err("literal <data.bin>");
+    assert!(
+        e.error.message.contains("<data.bin>"),
+        "asked for the verbatim token: {}",
+        e.error.message
+    );
+
+    // And a file literally so named *does* resolve, matching the reference.
+    let odd = MemoryLoader::new().binary("<data.bin>", vec![0x42]);
+    let r = assemble_pasmo_files(src, "main.asm", &odd).expect("verbatim name resolves");
+    assert_eq!(r.bytes, vec![0x42]);
+}
+
+/// pasmo silently accepts an empty asset (probe p7, exit 0, no output) —
+/// ours emits nothing; the advisory warning is asm198x's own (diagnostics may
+/// exceed the reference, KTD5).
+#[test]
+fn pasmo_incbin_empty_file_emits_nothing() {
+    let loader = MemoryLoader::new().binary("empty.bin", Vec::new());
+    let src = "        org $8000\n        db $aa\n        incbin \"empty.bin\"\n        db $bb\n";
+    let r = assemble_pasmo_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0xAA, 0xBB]);
+}
+
+// --- U3: search order (FsLoader) and the CLI end-to-end ---
+
+/// An incbin inside an included file resolves against *that file's*
+/// directory — the same search machinery as includes (probes t17/t18, KTD8).
+#[test]
+fn incbin_resolves_against_the_requesting_files_directory() {
+    let dir = temp_tree("u3-incbin-order");
+    let sub = dir.join("art");
+    std::fs::create_dir_all(&sub).expect("create art/");
+    std::fs::write(sub.join("sprite.bin"), [0xC1, 0xC2]).expect("write asset");
+    std::fs::write(sub.join("art.inc"), "        incbin \"sprite.bin\"\n").expect("write include");
+    let src = "        org $8000\n        include \"art/art.inc\"\n";
+    let root = dir.join("main.asm");
+    std::fs::write(&root, src).expect("write main");
+
+    let loader = FsLoader::new(&dir, Vec::new());
+    let r = assemble_sjasmplus_files(src, &root.to_string_lossy(), &loader)
+        .expect("the include's own dir resolves its asset");
+    assert_eq!(r.bytes, vec![0xC1, 0xC2]);
+
+    // The root does NOT see the subdir-local asset without -I (probe t18).
+    let miss = "        org $8000\n        incbin \"sprite.bin\"\n";
+    assert!(
+        assemble_sjasmplus_files(miss, &root.to_string_lossy(), &loader).is_err(),
+        "no fallback into a subdirectory"
+    );
+}
+
+/// End-to-end through the binary: a sjasmplus incbin with an offset tail
+/// assembles to the probe-pinned bytes.
+#[test]
+fn cli_assembles_an_incbin() {
+    let dir = temp_tree("u3-cli-incbin");
+    let main = dir.join("main.asm");
+    std::fs::write(
+        &main,
+        "        org $8000\n        db $aa\n        incbin \"data.bin\",2,3\n",
+    )
+    .expect("write main");
+    std::fs::write(dir.join("data.bin"), asset()).expect("write asset");
+    let out = dir.join("main.bin");
+    let run = bin()
+        .args(["--dialect", "sjasmplus"])
+        .arg(&main)
+        .arg("-o")
+        .arg(&out)
+        .output()
+        .expect("run asm198x");
+    assert!(
+        run.status.success(),
+        "assembles: {}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    assert_eq!(
+        std::fs::read(&out).expect("output written"),
+        vec![0xAA, 0x12, 0x13, 0x14]
+    );
+}
+
+/// End-to-end through the binary for pasmo: the plain form, resolving via
+/// the input's own directory (the new pasmo multi-file CLI wiring).
+#[test]
+fn cli_assembles_a_pasmo_incbin() {
+    let dir = temp_tree("u3-cli-pasmo-incbin");
+    let main = dir.join("main.asm");
+    std::fs::write(&main, "        org $8000\n        incbin \"data.bin\"\n").expect("write main");
+    std::fs::write(dir.join("data.bin"), asset()).expect("write asset");
+    let out = dir.join("main.bin");
+    let run = bin()
+        .args(["--dialect", "pasmo"])
+        .arg(&main)
+        .arg("-o")
+        .arg(&out)
+        .output()
+        .expect("run asm198x");
+    assert!(
+        run.status.success(),
+        "assembles: {}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    assert_eq!(std::fs::read(&out).expect("output written"), asset());
 }

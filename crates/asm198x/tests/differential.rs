@@ -371,21 +371,30 @@ fn source_matches_reference() {
 }
 
 // ===========================================================================
-// U2 — multi-file sjasmplus probes: the include mechanism against the real
-// tool. Each probe gets its own SUBDIRECTORY so stale files from other probes
-// (or earlier runs) can never leak into resolution.
+// U2/U3 — multi-file z80-family probes: the include and incbin mechanisms
+// against the real tools. Each probe gets its own SUBDIRECTORY so stale files
+// from other probes (or earlier runs) can never leak into resolution.
 // ===========================================================================
 
-/// One multi-file fixture: a root file plus its includes, assembled by both
-/// sides from a per-probe directory.
+/// One multi-file fixture: a root file plus its includes and binary assets,
+/// assembled by both sides from a per-probe directory.
 struct MultiProbe {
+    /// `sjasmplus` | `pasmo` — selects the reference tool and our entry point.
+    dialect: &'static str,
     note: &'static str,
     /// `(file name, contents)`; the first entry is the root.
     files: &'static [(&'static str, &'static str)],
+    /// `(file name, bytes)` — binary assets for the incbin probes (U3).
+    binaries: &'static [(&'static str, &'static [u8])],
 }
+
+/// The 8-byte incbin probe asset (`10..17`), matching the U3 probe runs.
+const ASSET: &[u8] = &[0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17];
 
 const MULTI_PROBES: &[MultiProbe] = &[
     MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[],
         note: "two-file include + equ feeding bit/rst/ds (KTD1)",
         files: &[
             (
@@ -396,6 +405,8 @@ const MULTI_PROBES: &[MultiProbe] = &[
         ],
     },
     MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[],
         note: "three-deep nested include, code at every level",
         files: &[
             (
@@ -410,6 +421,8 @@ const MULTI_PROBES: &[MultiProbe] = &[
         ],
     },
     MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[],
         note: "locals scope across the include boundary, both directions",
         files: &[
             (
@@ -423,6 +436,8 @@ const MULTI_PROBES: &[MultiProbe] = &[
         ],
     },
     MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[],
         note: "same file included twice is processed twice",
         files: &[
             (
@@ -433,6 +448,8 @@ const MULTI_PROBES: &[MultiProbe] = &[
         ],
     },
     MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[],
         note: "global defined inside the include rescopes the includer's locals",
         files: &[
             (
@@ -442,18 +459,77 @@ const MULTI_PROBES: &[MultiProbe] = &[
             ("glob.inc", "mid:    nop\n"),
         ],
     },
+    // --- U3: incbin ---
+    MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[("data.bin", ASSET)],
+        note: "plain incbin inserts the whole asset between code (U3)",
+        files: &[(
+            "main.asm",
+            "        org $8000\n        db $aa\n        incbin \"data.bin\"\n        db $bb\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[("data.bin", ASSET)],
+        note: "incbin offset form skips into the asset (U3)",
+        files: &[(
+            "main.asm",
+            "        org $8000\n        incbin \"data.bin\",2\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[("data.bin", ASSET)],
+        note: "incbin offset+length form, args as equ-constant expressions (U3)",
+        files: &[(
+            "main.asm",
+            "OFF equ 2\n        org $8000\n        incbin \"data.bin\",OFF,3\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[("data.bin", ASSET)],
+        note: "incbin negative offset/length count from the end (U3)",
+        files: &[(
+            "main.asm",
+            "        org $8000\n        incbin \"data.bin\",-4,2\n        incbin \"data.bin\",2,-3\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[("sprite.bin", ASSET)],
+        note: "incbin inside an include resolves via the include machinery (U3)",
+        files: &[
+            (
+                "main.asm",
+                "        org $8000\n        include \"art.inc\"\n        db $bb\n",
+            ),
+            ("art.inc", "        incbin \"sprite.bin\",0,4\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "pasmo",
+        binaries: &[("data.bin", ASSET)],
+        note: "pasmo's plain incbin inserts the whole asset (U3)",
+        files: &[(
+            "main.asm",
+            "        org $8000\n        db $aa\n        incbin \"data.bin\"\n        db $bb\n",
+        )],
+    },
 ];
 
 #[test]
-#[ignore = "needs sjasmplus; run with --ignored"]
+#[ignore = "needs sjasmplus + pasmo; run with --ignored"]
 fn multi_file_source_matches_reference() {
-    if !have("sjasmplus") {
-        eprintln!("SKIP: `sjasmplus` not on PATH");
-        return;
-    }
     let base = std::env::temp_dir().join("asm198x-differential-multi");
     let mut failures: Vec<String> = Vec::new();
+    let mut checked = 0usize;
     for (i, p) in MULTI_PROBES.iter().enumerate() {
+        if !have(tool(p.dialect)) {
+            eprintln!("SKIP: `{}` not on PATH", tool(p.dialect));
+            continue;
+        }
         // A per-probe subdirectory, wiped before use, so resolution can never
         // pick up a stale file from another probe.
         let dir = base.join(format!("probe-{i}"));
@@ -462,19 +538,34 @@ fn multi_file_source_matches_reference() {
         for (name, contents) in p.files {
             fs::write(dir.join(name), contents).expect("write fixture");
         }
+        for (name, bytes) in p.binaries {
+            fs::write(dir.join(name), bytes).expect("write binary fixture");
+        }
         let (root, _) = p.files[0];
         let out = dir.join("ref.bin");
-        let status = Command::new("sjasmplus")
-            .arg("--nologo")
-            .arg(format!("--raw={}", out.display()))
-            .arg(root)
-            .current_dir(&dir)
-            .output()
-            .expect("run sjasmplus");
+        let status = match p.dialect {
+            "sjasmplus" => {
+                let mut c = Command::new("sjasmplus");
+                c.arg("--nologo")
+                    .arg(format!("--raw={}", out.display()))
+                    .arg(root);
+                c
+            }
+            "pasmo" => {
+                let mut c = Command::new("pasmo");
+                c.arg(root).arg(&out);
+                c
+            }
+            other => panic!("no multi-file runner for dialect `{other}`"),
+        }
+        .current_dir(&dir)
+        .output()
+        .expect("run the reference tool");
         if !status.status.success() {
             failures.push(format!(
-                "{}: sjasmplus rejected the fixture: {}",
+                "{}: {} rejected the fixture: {}",
                 p.note,
+                p.dialect,
                 String::from_utf8_lossy(&status.stderr)
             ));
             continue;
@@ -484,7 +575,13 @@ fn multi_file_source_matches_reference() {
         let root_path = dir.join(root);
         let source = fs::read_to_string(&root_path).expect("read root");
         let loader = asm198x::source::FsLoader::new(&dir, Vec::new());
-        match asm198x::assemble_sjasmplus_files(&source, &root_path.to_string_lossy(), &loader) {
+        let entry = match p.dialect {
+            "sjasmplus" => asm198x::assemble_sjasmplus_files,
+            "pasmo" => asm198x::assemble_pasmo_files,
+            other => panic!("no multi-file entry for dialect `{other}`"),
+        };
+        checked += 1;
+        match entry(&source, &root_path.to_string_lossy(), &loader) {
             Ok(r) if r.bytes == reference => {}
             Ok(r) => failures.push(format!(
                 "{}: bytes diverge — ours {:02X?} vs ref {:02X?}",
@@ -498,5 +595,9 @@ fn multi_file_source_matches_reference() {
         "{} multi-file probe failure(s):\n  {}",
         failures.len(),
         failures.join("\n  ")
+    );
+    assert!(
+        checked > 0,
+        "no probes checked — no reference tools present?"
     );
 }

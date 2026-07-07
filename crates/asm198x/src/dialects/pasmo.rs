@@ -10,6 +10,7 @@
 use crate::dialect::{Dialect, Oversize};
 use crate::dialects::z80::{self, Z80Syntax};
 use crate::engine::{AsmError, Statement};
+use crate::source::{SourceLoader, SourceMap};
 
 /// The pasmo-family Z80 dialect. `z80n` selects the target: `false` for a plain
 /// Z80 (vanilla pasmo), `true` for the Spectrum Next's Z80N (pasmonext).
@@ -40,6 +41,23 @@ impl Dialect for Pasmo {
             source,
         )?))
     }
+    /// The incbin-capable parse (language-surface U3): the same
+    /// environment-threaded walk as sjasmplus's, resolving `incbin` lazily
+    /// through the loader. pasmo's `include` is *not* recognised yet (U4), so
+    /// includes still error exactly as on the single-file path.
+    fn parse_multi(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<Vec<Statement>, AsmError> {
+        crate::ast::lower(z80::parse_program_multi(
+            &PasmoSyntax,
+            self.instruction_set(),
+            self.extension_set(),
+            map,
+            loader,
+        )?)
+    }
     /// pasmo silently truncates an over-range byte to its low 8 bits.
     fn oversized_byte_policy(&self) -> Oversize {
         Oversize::Truncate
@@ -52,6 +70,20 @@ struct PasmoSyntax;
 impl Z80Syntax for PasmoSyntax {
     fn strip_comment<'a>(&self, line: &'a str) -> &'a str {
         line.find(';').map_or(line, |idx| &line[..idx])
+    }
+
+    /// pasmo's `incbin` (language-surface U3), listed so a column-0 spelling
+    /// reads as an operation, not a label. `include` waits for U4.
+    fn is_directive(&self, word: &str) -> bool {
+        self.is_incbin(word) || z80::is_common_directive(word)
+    }
+
+    /// pasmo's binary-inclusion directive (language-surface U3),
+    /// walk-handled. Probe-pinned to the **plain form only**: the trait's
+    /// defaults keep the `,offset[,length]` tail a parse error (pasmo:
+    /// `End line expected but ','found`) and `<file>` a literal file name.
+    fn is_incbin(&self, word: &str) -> bool {
+        word.eq_ignore_ascii_case("incbin")
     }
 
     /// pasmo numbers: `$hex`/`0xhex`, `%binary`, `'c'` char, decimal, and the

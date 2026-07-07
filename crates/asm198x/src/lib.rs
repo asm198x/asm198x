@@ -573,6 +573,36 @@ pub fn assemble_sjasmplus_next_files(
     )
 }
 
+/// Assemble a **multi-file** pasmo program (language-surface U3): as
+/// [`assemble_sjasmplus_files`], but pasmo's multi-file surface today is only
+/// the plain `incbin "file"` (probe-pinned — the reference has no
+/// offset/length tail; its `include` lands in U4), resolved through `loader`'s
+/// binary path. The single-source [`assemble_pasmo`] is unchanged and rejects
+/// an `incbin` with a pointer here.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (KTD2).
+pub fn assemble_pasmo_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Pasmo { z80n: false }, source, input_path, loader)
+}
+
+/// As [`assemble_pasmo_files`], targeting the ZX Spectrum Next (Z80N) — what
+/// `pasmonext` does.
+///
+/// # Errors
+/// As [`assemble_pasmo_files`].
+pub fn assemble_pasmonext_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Pasmo { z80n: true }, source, input_path, loader)
+}
+
 /// Assemble sjasmplus-syntax Z80 source targeting the ZX Spectrum Next (Z80N).
 ///
 /// # Errors

@@ -1109,3 +1109,65 @@ fn fmt_sjasmplus_include_reassembles_byte_identical() {
         .bytes;
     assert_eq!(original, reassembled, "round-trips:\n{formatted}");
 }
+
+/// U3 (language surface): `--fmt` renders an `INCBIN` directive verbatim —
+/// spelling, quote form, and the offset/length tail untouched — without ever
+/// opening the asset (formatting succeeds when it does not exist), and stays
+/// idempotent (KTD1). The pasmo skin's plain form gets the same treatment.
+#[test]
+fn fmt_incbin_is_verbatim_and_never_opens_the_asset() {
+    let src = "\
+        org $8000
+        incbin \"missing.bin\"   ; art, added later
+art:    INCBIN <also-missing.bin>,2,3
+        ld a,1
+";
+    let formatted = format_sjasmplus(src).expect("formats with the assets missing");
+    assert!(
+        formatted.contains("incbin \"missing.bin\""),
+        "the directive text is verbatim:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("INCBIN <also-missing.bin>,2,3"),
+        "spelling (case, brackets, tail) preserved:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("; art, added later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert_eq!(
+        format_sjasmplus(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+
+    // pasmo: the plain form, same contract.
+    let pasmo_src = "        org $8000\n        incbin \"missing.bin\"\n";
+    let pasmo_fmt = format_pasmo(pasmo_src).expect("pasmo formats with the asset missing");
+    assert!(
+        pasmo_fmt.contains("incbin \"missing.bin\""),
+        "verbatim under pasmo:\n{pasmo_fmt}"
+    );
+    assert_eq!(
+        format_pasmo(&pasmo_fmt).expect("formats again"),
+        pasmo_fmt,
+        "idempotent under pasmo"
+    );
+}
+
+/// U3: formatted incbin-bearing source reassembles byte-identical through the
+/// multi-file entry (the incbin leg of the fmt round-trip bar).
+#[test]
+fn fmt_incbin_reassembles_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || MemoryLoader::new().binary("data.bin", (0x10..0x18).collect());
+    let src = "        org $8000\n        incbin \"data.bin\",2,3\n        ld a,1\n";
+    let original = asm198x::assemble_sjasmplus_files(src, "main.asm", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_sjasmplus(src).expect("formats");
+    let reassembled = asm198x::assemble_sjasmplus_files(&formatted, "main.asm", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+}

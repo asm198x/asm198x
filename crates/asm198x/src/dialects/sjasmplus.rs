@@ -93,17 +93,37 @@ impl Z80Syntax for SjasmplusSyntax {
         true
     }
 
-    /// sjasmplus adds `byte` as a spelling of `db` (pasmo has neither), and
-    /// `include` (U2 — listed here so a column-0 `include` reads as an
-    /// operation, not a label; the walk intercepts it before directive
-    /// parsing).
+    /// sjasmplus adds `byte` as a spelling of `db` (pasmo has neither), plus
+    /// `include` (U2) and `incbin` (U3) — listed here so a column-0 spelling
+    /// reads as an operation, not a label; the walk intercepts both before
+    /// directive parsing.
     fn is_directive(&self, word: &str) -> bool {
-        word.eq_ignore_ascii_case("byte") || self.is_include(word) || z80::is_common_directive(word)
+        word.eq_ignore_ascii_case("byte")
+            || self.is_include(word)
+            || self.is_incbin(word)
+            || z80::is_common_directive(word)
     }
 
     /// sjasmplus's include directive (language-surface U2), walk-handled.
     fn is_include(&self, word: &str) -> bool {
         word.eq_ignore_ascii_case("include")
+    }
+
+    /// sjasmplus's binary-inclusion directive (language-surface U3),
+    /// walk-handled like `include`.
+    fn is_incbin(&self, word: &str) -> bool {
+        word.eq_ignore_ascii_case("incbin")
+    }
+
+    /// sjasmplus's `INCBIN "file"[,offset[,length]]` takes the full tail,
+    /// including the probe-pinned negative from-the-end forms.
+    fn incbin_offset_length(&self) -> bool {
+        true
+    }
+
+    /// sjasmplus accepts `<file>` for the incbin name (as its INCLUDE does).
+    fn incbin_angle_quotes(&self) -> bool {
+        true
     }
 
     /// `byte` is `db`; everything else is the shared common set.

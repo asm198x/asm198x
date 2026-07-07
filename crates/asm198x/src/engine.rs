@@ -306,6 +306,16 @@ pub(crate) enum Operation {
     /// bytes; surfaced on [`Assembly::start`] for containers that carry a start
     /// address (e.g. a Spectrum `.sna` snapshot). A flat binary ignores it.
     Entry(Expr),
+    /// A raw binary payload at the current location (an `incbin` asset,
+    /// language-surface U3). Deliberately **not** [`Operation::Bytes`]: a 32KB
+    /// asset as one `Expr` per byte would allocate a tree node and run the
+    /// per-byte oversize policy on every byte of data that was never source
+    /// text. The payload is emitted verbatim; it occupies a whole number of
+    /// **address units** (`Dialect::addr_unit`), the final partial unit
+    /// zero-padded — a byte-addressed CPU (unit 1) is unaffected, and the
+    /// word-addressed CP1610 (unit 2, U4) inherits consistent pass-1/pass-2
+    /// accounting.
+    Binary(Vec<u8>),
     /// Advance the program counter to the next address where `pc & andmask ==
     /// value`, filling the gap with `fill` (ACME's `!align andmask, value
     /// [, fill]`). The pad count is PC-dependent, so it is resolved in the
@@ -516,6 +526,7 @@ fn assemble_statements(
                 | Operation::Words(_)
                 | Operation::Instruction { .. }
                 | Operation::Encoded(_)
+                | Operation::Binary(_)
                 | Operation::Align { .. },
             ) if require_origin && origin.is_none() => {
                 return Err(s.err(
@@ -523,6 +534,11 @@ fn assemble_statements(
                 ));
             }
             Some(Operation::Bytes(items)) => pc += items.len() as i64 / addr_unit,
+            // A binary payload occupies whole address units, the final partial
+            // unit zero-padded in pass 2 — so both passes count the same.
+            Some(Operation::Binary(payload)) => {
+                pc += payload.len().div_ceil(addr_unit as usize) as i64;
+            }
             Some(Operation::Words(items)) => pc += 2 * items.len() as i64 / addr_unit,
             Some(Operation::Instruction { mnemonic, mode, .. }) => {
                 pc += form(set, ext, mnemonic, mode, s.line)
@@ -582,6 +598,24 @@ fn assemble_statements(
                     let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
                     emit_byte(&mut bytes, v, byte_policy, &mut warnings, s)?;
                 }
+            }
+            Some(Operation::Binary(payload)) => {
+                // Asset data, laid down verbatim — never through the per-byte
+                // oversize policy (it is data, not source values). An empty
+                // payload is legal (a zero-length incbin) but advisory, the
+                // posture sjasmplus takes (`requested to include no data`).
+                if payload.is_empty() {
+                    warnings.push(Warning {
+                        line: s.line,
+                        message: "binary inclusion included no data".to_string(),
+                        file: s.file,
+                    });
+                }
+                bytes.extend_from_slice(payload);
+                // Pad the final partial address unit so the location counter
+                // and the byte stream stay in step (pass 1 counted whole units).
+                let slack = (addr_unit - payload.len() as i64 % addr_unit) % addr_unit;
+                bytes.extend(std::iter::repeat_n(0u8, slack as usize));
             }
             Some(Operation::Words(items)) => {
                 for e in items {
@@ -777,6 +811,7 @@ fn assemble_statements(
                     | Operation::Words(_)
                     | Operation::Instruction { .. }
                     | Operation::Encoded(_)
+                    | Operation::Binary(_)
             )
         );
         if source_bearing && bytes.len() > len_before {

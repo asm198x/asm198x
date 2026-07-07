@@ -246,6 +246,23 @@ pub(crate) enum Item {
     Include {
         request: String,
     },
+    /// An `INCBIN "file"[,offset[,length]]` directive (language-surface U3,
+    /// KTD1): the request as written, **unresolved** — like
+    /// [`Include`](Self::Include), the single-source parse never opens the
+    /// asset, so `--fmt` renders the directive verbatim from [`Node::source`]
+    /// and succeeds when the asset is missing. The include-capable walk
+    /// resolves it lazily into an [`Item::Binary`] payload instead of building
+    /// this item; [`lower`] rejects it (no loader on the single-source API).
+    Incbin {
+        request: String,
+    },
+    /// A **resolved** binary payload (the multi-file walk's lowering of an
+    /// incbin, language-surface U3): raw asset bytes at the directive's
+    /// location, carried whole — not one `Expr` per byte — so a 32KB asset
+    /// stays one allocation and never runs per-byte source-value policy. Lowers
+    /// to [`Operation::Binary`]. Binary data mints no `FileId` (KTD8): the
+    /// node's span is the *directive's*, and that is where diagnostics point.
+    Binary(Vec<u8>),
 }
 
 /// A source line reduced to an optional (scoped) label and an optional
@@ -404,6 +421,18 @@ pub(crate) fn lower(program: Program) -> Result<Vec<Statement>, AsmError> {
                     ),
                 ));
             }
+            // An incbin item cannot lower either: loading the asset needs the
+            // loader seam, which only the multi-file walk carries (U3, KTD8).
+            if let Some(Item::Incbin { request }) = &node.item {
+                return Err(AsmError::at(
+                    node.span.clone(),
+                    format!(
+                        "cannot resolve `incbin \"{request}\"` here — the single-source \
+                         API assembles one file; use the multi-file entry point \
+                         (the CLI resolves binary inclusions automatically)"
+                    ),
+                ));
+            }
             Ok(Statement {
                 line: node.span.line as usize,
                 file: node.span.file,
@@ -470,14 +499,22 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
                 "internal error: a native item is assembled by its dialect, not lowered",
             ));
         }
-        // `lower` rejects an include before reaching here (it needs the node's
-        // span for the diagnostic); this arm guards a direct `lower_item` call.
+        // `lower` rejects an include/incbin before reaching here (it needs the
+        // node's span for the diagnostic); these arms guard a direct
+        // `lower_item` call.
         Item::Include { request } => {
             return Err(AsmError::new(
                 0,
                 format!("internal error: `include \"{request}\"` reached item lowering"),
             ));
         }
+        Item::Incbin { request } => {
+            return Err(AsmError::new(
+                0,
+                format!("internal error: `incbin \"{request}\"` reached item lowering"),
+            ));
+        }
+        Item::Binary(payload) => Operation::Binary(payload),
     })
 }
 
@@ -501,6 +538,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         Operation::Words(v) => Item::Words(v.into_iter().map(Operand::expr).collect()),
         Operation::Entry(e) => Item::Entry(Operand::expr(e)),
         Operation::Encoded(pieces) => Item::Encoded(pieces),
+        Operation::Binary(payload) => Item::Binary(payload),
         Operation::Align {
             andmask,
             value,

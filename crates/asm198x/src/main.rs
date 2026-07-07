@@ -595,10 +595,12 @@ fn run(args: &[String]) -> Result<String, String> {
         return Err("`--prg` is only for the C64 dialect (acme)".into());
     }
 
-    // sjasmplus is include-capable (U2): it assembles through the multi-file
-    // entry, with the input's directory + the `-I` dirs wired into a
-    // filesystem loader; a failure renders with the real file table and the
-    // include-graph notes. Every other dialect stays on the single-file path.
+    // The Z80 family is multi-file-capable: sjasmplus for includes + incbin
+    // (U2/U3), pasmo for its plain incbin (U3). Both assemble through the
+    // multi-file entries, with the input's directory + the `-I` dirs wired
+    // into a filesystem loader; a failure renders with the real file table
+    // and the include-graph notes. Every other dialect stays on the
+    // single-file path until U4–U6.
     let assembly = match assembler {
         Assembler::Sjasmplus { z80n } => {
             let loader = fs_loader(input, &include_dirs);
@@ -606,6 +608,15 @@ fn run(args: &[String]) -> Result<String, String> {
                 asm198x::assemble_sjasmplus_next_files
             } else {
                 asm198x::assemble_sjasmplus_files
+            };
+            entry(&source, input, &loader).map_err(|e| render_multi_error(input, &e))?
+        }
+        Assembler::Pasmo { z80n } => {
+            let loader = fs_loader(input, &include_dirs);
+            let entry = if z80n {
+                asm198x::assemble_pasmonext_files
+            } else {
+                asm198x::assemble_pasmo_files
             };
             entry(&source, input, &loader).map_err(|e| render_multi_error(input, &e))?
         }
@@ -907,6 +918,18 @@ fn emit_json(
                 asm198x::assemble_sjasmplus_next_files
             } else {
                 asm198x::assemble_sjasmplus_files
+            };
+            entry(source, input, &loader).map_err(|e| {
+                failure_files = e.source_map.file_table();
+                e.error
+            })
+        }
+        Assembler::Pasmo { z80n } => {
+            let loader = fs_loader(input, include_dirs);
+            let entry = if *z80n {
+                asm198x::assemble_pasmonext_files
+            } else {
+                asm198x::assemble_pasmo_files
             };
             entry(source, input, &loader).map_err(|e| {
                 failure_files = e.source_map.file_table();

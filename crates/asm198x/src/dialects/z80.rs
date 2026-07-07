@@ -74,6 +74,31 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// Whether `word` is this dialect's binary-inclusion directive
+    /// (language-surface U3). Off by default; sjasmplus and pasmo override for
+    /// `INCBIN`. Like an include, an incbin is walk-handled: a verbatim item
+    /// in the single-source parse (so `--fmt` never opens the asset), a lazy
+    /// binary load in the multi-file walk.
+    fn is_incbin(&self, word: &str) -> bool {
+        let _ = word;
+        false
+    }
+
+    /// Whether this dialect's incbin takes the `,offset[,length]` tail.
+    /// sjasmplus does (probe-pinned, incl. the negative from-the-end forms);
+    /// pasmo does not — its reference rejects a comma after the file name
+    /// (`End line expected but ','found`), so the tail stays a parse error.
+    fn incbin_offset_length(&self) -> bool {
+        false
+    }
+
+    /// Whether `<file>` is a quote form for the incbin file name. sjasmplus
+    /// accepts it (as its INCLUDE does); pasmo takes the token verbatim — it
+    /// looks for a file literally named `<file>` (probe-pinned).
+    fn incbin_angle_quotes(&self) -> bool {
+        false
+    }
+
     /// Parse a directive into an operation (`None` for ones that emit nothing,
     /// like `end`). Defaults to the common set. `consts` holds the `equ` values
     /// known so far, so a directive like `ds` can fold a constant-expression
@@ -111,10 +136,12 @@ pub(crate) fn assemble<S: Z80Syntax>(
 /// filled in U4. The scope resolution mirrors the old string-mangle exactly, so
 /// [`lower`](crate::ast::lower) reproduces the same statements.
 ///
-/// An include directive (a dialect that answers [`Z80Syntax::is_include`])
-/// becomes an **unresolved** [`Item::Include`](crate::ast::Item) — the target
-/// is never opened, so `--fmt` renders the directive verbatim and works with
-/// a missing target (U2, KTD1). Lazy resolution is [`parse_program_multi`]'s.
+/// An include or incbin directive (a dialect that answers
+/// [`Z80Syntax::is_include`] / [`Z80Syntax::is_incbin`]) becomes an
+/// **unresolved** [`Item::Include`](crate::ast::Item) /
+/// [`Item::Incbin`](crate::ast::Item) — the target is never opened, so
+/// `--fmt` renders the directive verbatim and works with a missing target
+/// (U2/U3, KTD1). Lazy resolution is [`parse_program_multi`]'s.
 pub(crate) fn parse_program<S: Z80Syntax>(
     syntax: &S,
     set: &'static isa::InstructionSet,
@@ -123,16 +150,22 @@ pub(crate) fn parse_program<S: Z80Syntax>(
 ) -> Result<crate::ast::Program, AsmError> {
     let mut w = Walker::new(syntax, set, ext);
     for (i, raw) in source.lines().enumerate() {
-        if let Some(inc) = w.walk_line(raw, i + 1, FileId(0))? {
+        if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
+            // Unresolved in the single-source parse: the target is never
+            // opened (KTD1), so `--fmt` renders the verbatim source and works
+            // with a missing file; `lower` rejects assembly with a pointer to
+            // the multi-file entry points.
+            let item = match d.kind {
+                WalkDirective::Include { request } => crate::ast::Item::Include { request },
+                WalkDirective::Incbin { request, .. } => crate::ast::Item::Incbin { request },
+            };
             w.nodes.push(Node {
-                operand_span: inc.operand_span,
-                label: inc.label,
-                item: Some(crate::ast::Item::Include {
-                    request: inc.request,
-                }),
-                source: inc.source,
-                span: inc.span,
-                trivia: inc.trivia,
+                operand_span: d.operand_span,
+                label: d.label,
+                item: Some(item),
+                source: d.source,
+                span: d.span,
+                trivia: d.trivia,
             });
         }
     }
@@ -184,51 +217,80 @@ fn walk_file<S: Z80Syntax>(
 ) -> Result<(), AsmError> {
     for (i, raw) in source.lines().enumerate() {
         let line = i + 1;
-        let Some(inc) = w
+        let Some(d) = w
             .walk_line(raw, line, file)
             .map_err(|e| stamp_file(e, file))?
         else {
             continue;
         };
-        // A label on the include line binds at the include point's address
-        // (probe-pinned), so it becomes a label-only node before the target's
-        // lines.
-        let span = inc.span;
-        if inc.label.is_some() {
-            w.nodes.push(Node {
-                operand_span: None,
-                label: inc.label,
-                item: None,
-                source: String::new(),
-                span: span.clone(),
-                trivia: inc.trivia,
-            });
-        }
+        let span = d.span;
         // Diagnostics point at the directive's operand (the file name) when
         // the parse knew its column, else the line.
-        let at = inc.operand_span.unwrap_or(span);
-        if stack.len() >= MAX_INCLUDE_DEPTH {
-            return Err(AsmError::at(
-                at,
-                format!("includes nested more than {MAX_INCLUDE_DEPTH} levels deep"),
-            ));
+        let at = d.operand_span.clone().unwrap_or_else(|| span.clone());
+        match d.kind {
+            WalkDirective::Include { request } => {
+                // A label on the include line binds at the include point's
+                // address (probe-pinned), so it becomes a label-only node
+                // before the target's lines.
+                if d.label.is_some() {
+                    w.nodes.push(Node {
+                        operand_span: None,
+                        label: d.label,
+                        item: None,
+                        source: String::new(),
+                        span,
+                        trivia: d.trivia,
+                    });
+                }
+                if stack.len() >= MAX_INCLUDE_DEPTH {
+                    return Err(AsmError::at(
+                        at,
+                        format!("includes nested more than {MAX_INCLUDE_DEPTH} levels deep"),
+                    ));
+                }
+                let id = map
+                    .load(loader, &request, file, line as u32)
+                    .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
+                if stack.contains(&id) {
+                    let chain = stack
+                        .iter()
+                        .chain(std::iter::once(&id))
+                        .map(|f| map.path(*f).unwrap_or("?"))
+                        .collect::<Vec<_>>()
+                        .join(" -> ");
+                    return Err(AsmError::at(at, format!("include cycle: {chain}")));
+                }
+                let contents = map.contents(id).unwrap_or_default().to_owned();
+                stack.push(id);
+                walk_file(w, &contents, id, map, loader, stack)?;
+                stack.pop();
+            }
+            WalkDirective::Incbin {
+                request,
+                offset,
+                length,
+            } => {
+                // Resolved lazily, exactly like an include (KTD1): the asset
+                // loads only when the walk reaches the directive live. The
+                // binary path mints no FileId (KTD8) — the payload rides a
+                // node at the *directive's* span, which is where the missing
+                // asset / window diagnostics land too.
+                let from = map.path(file).map(str::to_owned);
+                let data = loader
+                    .load_binary(&request, from.as_deref())
+                    .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
+                let payload = slice_incbin(&data, offset, length)
+                    .map_err(|msg| AsmError::at(at.clone(), format!("`{request}`: {msg}")))?;
+                w.nodes.push(Node {
+                    operand_span: d.operand_span,
+                    label: d.label,
+                    item: Some(crate::ast::Item::Binary(payload)),
+                    source: d.source,
+                    span,
+                    trivia: d.trivia,
+                });
+            }
         }
-        let id = map
-            .load(loader, &inc.request, file, line as u32)
-            .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
-        if stack.contains(&id) {
-            let chain = stack
-                .iter()
-                .chain(std::iter::once(&id))
-                .map(|f| map.path(*f).unwrap_or("?"))
-                .collect::<Vec<_>>()
-                .join(" -> ");
-            return Err(AsmError::at(at, format!("include cycle: {chain}")));
-        }
-        let contents = map.contents(id).unwrap_or_default().to_owned();
-        stack.push(id);
-        walk_file(w, &contents, id, map, loader, stack)?;
-        stack.pop();
     }
     Ok(())
 }
@@ -245,19 +307,35 @@ fn stamp_file(mut e: AsmError, file: FileId) -> AsmError {
     e
 }
 
-/// An include directive found by [`Walker::walk_line`], handed back for the
-/// driver to decide: the single-source parse keeps it as a verbatim item; the
-/// multi-file walk resolves it lazily (KTD1).
-struct IncludeLine {
-    /// The target as the directive spelled it (quotes/brackets stripped).
-    request: String,
-    /// A label on the include line — it binds at the include point.
+/// A walk-handled directive found by [`Walker::walk_line`], handed back for
+/// the driver to decide: the single-source parse keeps it as a verbatim item;
+/// the multi-file walk resolves it lazily (KTD1).
+struct DirectiveLine {
+    kind: WalkDirective,
+    /// A label on the directive line — it binds at the directive's address.
     label: Option<Symbol>,
     /// The verbatim directive text (`include "file.inc"`), for `--fmt`.
     source: String,
     span: Span,
     operand_span: Option<Span>,
     trivia: Trivia,
+}
+
+/// Which walk-handled directive a [`DirectiveLine`] carries.
+enum WalkDirective {
+    /// `INCLUDE "file"` — the target as the directive spelled it
+    /// (quotes/brackets stripped).
+    Include { request: String },
+    /// `INCBIN "file"[,offset[,length]]` (U3). The offset/length are folded to
+    /// parse-time constants (they set the statement's size, exactly like a
+    /// `ds` count); `None` means the argument was omitted. Negative values
+    /// keep sjasmplus's from-the-end meaning, applied when the asset's size is
+    /// known ([`slice_incbin`]).
+    Incbin {
+        request: String,
+        offset: Option<i64>,
+        length: Option<i64>,
+    },
 }
 
 /// The per-line parse walk shared by [`parse_program`] (single source) and
@@ -299,14 +377,14 @@ impl<'a, S: Z80Syntax> Walker<'a, S> {
     }
 
     /// Parse one line with the live environment. An ordinary line pushes its
-    /// node (or nothing, for a blank/comment line) and returns `None`; an
-    /// include directive is returned for the driver to handle.
+    /// node (or nothing, for a blank/comment line) and returns `None`; a
+    /// walk-handled directive (include/incbin) is returned for the driver.
     fn walk_line(
         &mut self,
         raw: &str,
         line: usize,
         file: FileId,
-    ) -> Result<Option<IncludeLine>, AsmError> {
+    ) -> Result<Option<DirectiveLine>, AsmError> {
         let (code, comment) = self.syntax.split_comment(raw);
         if code.trim().is_empty() {
             // A comment-only line becomes leading trivia for the next node; a
@@ -320,12 +398,14 @@ impl<'a, S: Z80Syntax> Walker<'a, S> {
             return Ok(None);
         }
         let (label, rest) = split_label(self.syntax, self.set, self.ext, code, line)?;
-        // An include is walk-handled, not an Operation: the target must not
-        // be opened here (KTD1 — `--fmt` succeeds with a missing target, and
-        // an untaken conditional branch must never load one once U8 lands).
+        // Includes and incbins are walk-handled, not Operations: the target
+        // must not be opened here (KTD1 — `--fmt` succeeds with a missing
+        // target, and an untaken conditional branch must never load one once
+        // U8 lands).
         let (word, args) = split_first_word(rest);
         let is_include = self.syntax.is_include(word);
-        let mut op = if is_include {
+        let is_incbin = self.syntax.is_incbin(word);
+        let mut op = if is_include || is_incbin {
             None
         } else {
             parse_op(self.syntax, self.set, self.ext, rest, line, &self.consts)?
@@ -387,9 +467,21 @@ impl<'a, S: Z80Syntax> Walker<'a, S> {
             s.file = file;
             s
         });
-        if is_include {
-            return Ok(Some(IncludeLine {
-                request: include_request(args, line)?,
+        if is_include || is_incbin {
+            let kind = if is_include {
+                WalkDirective::Include {
+                    request: include_request(args, line)?,
+                }
+            } else {
+                let (request, offset, length) = incbin_args(self.syntax, args, line, &self.consts)?;
+                WalkDirective::Incbin {
+                    request,
+                    offset,
+                    length,
+                }
+            };
+            return Ok(Some(DirectiveLine {
+                kind,
                 label: symbol,
                 source: rest.trim().to_string(),
                 span: Span::in_file(file, line as u32, 1),
@@ -453,6 +545,113 @@ fn include_request(args: &str, line: usize) -> Result<String, AsmError> {
         return Err(AsmError::new(line, "`include` needs a file name"));
     }
     Ok(inner.to_string())
+}
+
+/// Parse an incbin's arguments: the file name, then — where the dialect
+/// supports it ([`Z80Syntax::incbin_offset_length`]) — an optional
+/// `,offset[,length]` tail of parse-time constant expressions (they set the
+/// statement's size, so like a `ds` count they must fold now; sjasmplus's
+/// multi-pass acceptance of a *forward* constant is a known divergence).
+/// Name spellings are probe-pinned: `"file"` and a bare token everywhere;
+/// `<file>` only where [`Z80Syntax::incbin_angle_quotes`] says so (sjasmplus —
+/// pasmo reads `<file>` as a literal file name). A bare name stops at
+/// whitespace or a comma, so `incbin data.bin,2` still parses.
+fn incbin_args<S: Z80Syntax>(
+    syntax: &S,
+    args: &str,
+    line: usize,
+    consts: &BTreeMap<String, i64>,
+) -> Result<(String, Option<i64>, Option<i64>), AsmError> {
+    let t = args.trim();
+    let (name, rest) = if let Some(inner) = t.strip_prefix('"') {
+        let end = inner
+            .find('"')
+            .ok_or_else(|| AsmError::new(line, "unterminated incbin file name"))?;
+        (&inner[..end], &inner[end + 1..])
+    } else if syntax.incbin_angle_quotes()
+        && let Some(inner) = t.strip_prefix('<')
+    {
+        let end = inner
+            .find('>')
+            .ok_or_else(|| AsmError::new(line, "unterminated incbin file name"))?;
+        (&inner[..end], &inner[end + 1..])
+    } else {
+        let end = t
+            .find(|c: char| c.is_whitespace() || c == ',')
+            .unwrap_or(t.len());
+        (&t[..end], &t[end..])
+    };
+    if name.is_empty() {
+        return Err(AsmError::new(line, "`incbin` needs a file name"));
+    }
+    let rest = rest.trim();
+    if rest.is_empty() {
+        return Ok((name.to_string(), None, None));
+    }
+    if !syntax.incbin_offset_length() {
+        // pasmo's reference posture: nothing may follow the file name.
+        return Err(AsmError::new(
+            line,
+            format!("`incbin` takes only a file name here (unexpected `{rest}`)"),
+        ));
+    }
+    let Some(tail) = rest.strip_prefix(',') else {
+        return Err(AsmError::new(
+            line,
+            format!("expected `,offset[,length]` after the incbin file name, found `{rest}`"),
+        ));
+    };
+    let mut pieces = split_operands(tail);
+    if pieces.len() > 2 {
+        return Err(AsmError::new(
+            line,
+            "`incbin` takes at most a file name, an offset, and a length",
+        ));
+    }
+    let fold = |what: &str, piece: &str| -> Result<i64, AsmError> {
+        let expr = parse_value(syntax, piece, line)?;
+        eval_const(&expr, consts).ok_or_else(|| {
+            AsmError::new(
+                line,
+                format!(
+                    "incbin {what} must be a constant here (a number, an expression of \
+                     constants, or a value defined with `equ` above)"
+                ),
+            )
+        })
+    };
+    let offset = fold("offset", pieces.remove(0))?;
+    let length = pieces.pop().map(|p| fold("length", p)).transpose()?;
+    Ok((name.to_string(), Some(offset), length))
+}
+
+/// Apply an incbin's offset/length to the loaded asset — sjasmplus semantics,
+/// probe-pinned: a negative offset counts back from EOF; a negative length
+/// means "all but the last |n| of the remaining bytes"; any window falling
+/// outside the file is the reference's `file too short` error (offset *at*
+/// EOF is legal and empty). `Err` carries the message body; the caller wraps
+/// it with the request name and the directive's span.
+fn slice_incbin(data: &[u8], offset: Option<i64>, length: Option<i64>) -> Result<Vec<u8>, String> {
+    let len = data.len() as i64;
+    let off = offset.unwrap_or(0);
+    let off = if off < 0 { len + off } else { off };
+    if !(0..=len).contains(&off) {
+        return Err(format!(
+            "file too short (offset {off} of a {len}-byte file)"
+        ));
+    }
+    let remaining = len - off;
+    let take = match length {
+        None => remaining,
+        Some(l) if l < 0 => remaining + l,
+        Some(l) => l,
+    };
+    if !(0..=remaining).contains(&take) {
+        return Err(format!(
+            "file too short (length {take} with {remaining} byte(s) after offset {off})"
+        ));
+    }
+    Ok(data[off as usize..(off + take) as usize].to_vec())
 }
 
 // ---------------------------------------------------------------------------
@@ -805,6 +1004,9 @@ fn qualify_locals(op: Operation, g: &str) -> Operation {
         },
         // The Z80 dialect never emits pre-encoded instructions.
         Operation::Encoded(pieces) => Operation::Encoded(pieces),
+        // A binary payload carries no expressions (an incbin resolves in the
+        // walk, never through parse_op — this arm keeps the match total).
+        bin @ Operation::Binary(_) => bin,
         Operation::Entry(e) => Operation::Entry(qualify_expr(e, g)),
         // No sub-expressions to qualify (the acme-only align carries constants).
         align @ Operation::Align { .. } => align,
