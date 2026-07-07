@@ -9,6 +9,7 @@
 //! decimal JSON integers (KTD3).
 
 use crate::contract::AssemblyResult;
+use crate::span::FileId;
 
 /// Wrap an assembly's captured debug record as a full [`debug198x::DebugInfo`]
 /// — the shape the `.debug198x` sidecar serializes and the Emu198x importer
@@ -64,6 +65,84 @@ pub(crate) struct DebugCapture {
     pub(crate) sections: Vec<debug198x::Section>,
     pub(crate) symbols: Vec<debug198x::Symbol>,
     pub(crate) lines: Vec<(u32, debug198x::SectionId, u64, u64)>,
+}
+
+/// The multi-file counterpart of [`DebugCapture`] (language-surface U5): each
+/// line record carries the [`FileId`] its line counts within, so a linked
+/// path's spans can name an included file rather than stamping the root input
+/// everywhere. The ca65 assemble+link driver collects one; the vasm path
+/// adopts the same shape in U6. [`capture_debug_info_multi`] completes it
+/// against the source map's file table.
+pub(crate) struct DebugCaptureMulti {
+    pub(crate) sections: Vec<debug198x::Section>,
+    pub(crate) symbols: Vec<debug198x::Symbol>,
+    /// `(file, line, section, offset, length)` — the [`DebugCapture`] span
+    /// plus the file the line counts within.
+    pub(crate) lines: Vec<(FileId, u32, debug198x::SectionId, u64, u64)>,
+}
+
+impl DebugCaptureMulti {
+    /// Collapse to the single-file [`DebugCapture`] (every record in the root
+    /// input) — the single-source entry points keep their exact pre-multi-file
+    /// shape through this.
+    pub(crate) fn into_single(self) -> DebugCapture {
+        DebugCapture {
+            sections: self.sections,
+            symbols: self.symbols,
+            lines: self
+                .lines
+                .into_iter()
+                .map(|(_, line, section, offset, length)| (line, section, offset, length))
+                .collect(),
+        }
+    }
+}
+
+/// Wrap a multi-file [`DebugCaptureMulti`] as a full [`debug198x::DebugInfo`]
+/// (language-surface U5). `sources` is the source map's file table in
+/// `FileId` order, so `Header.sources[i] ⇔ FileId(i)` — one convention across
+/// the contract and the sidecar (KTD2) — and each line span names its own
+/// file's path. An unresolvable id (impossible from the walk, guarded anyway)
+/// falls back to the root entry.
+pub(crate) fn capture_debug_info_multi(
+    capture: DebugCaptureMulti,
+    cpu: &str,
+    dialect: &str,
+    sources: Vec<String>,
+) -> debug198x::DebugInfo {
+    let path_of = |file: FileId| {
+        sources
+            .get(file.0 as usize)
+            .or_else(|| sources.first())
+            .cloned()
+            .unwrap_or_default()
+    };
+    let lines = capture
+        .lines
+        .into_iter()
+        .map(
+            |(file, line, section, offset, length)| debug198x::LineSpan {
+                file: path_of(file),
+                line,
+                section,
+                offset,
+                length,
+            },
+        )
+        .collect();
+    debug198x::DebugInfo {
+        header: debug198x::Header {
+            tool: "asm198x".to_string(),
+            tool_version: env!("CARGO_PKG_VERSION").to_string(),
+            cpu: cpu.to_string(),
+            dialect: dialect.to_string(),
+            sources,
+            ..debug198x::Header::default()
+        },
+        sections: capture.sections,
+        symbols: capture.symbols,
+        lines,
+    }
 }
 
 /// Wrap a dialect's [`DebugCapture`] as a full [`debug198x::DebugInfo`] — the

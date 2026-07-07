@@ -555,17 +555,23 @@ fn run(args: &[String]) -> Result<String, String> {
         ));
     }
 
-    // ca65 assembles and links to a `.nes` ROM rather than a flat binary. With
-    // a debug artifact requested, the debug-capturing entry returns the record
-    // read out of layout (U4) — same bytes by construction.
+    // ca65 assembles and links to a `.nes` ROM rather than a flat binary — via
+    // the include-capable entries (language-surface U5), so `.include`/`.incbin`
+    // resolve against the input's directory + the `-I` dirs and a failure
+    // renders with the real file table and the include-graph notes. With a
+    // debug artifact requested, the debug-capturing entry returns the record
+    // read out of layout (U4), its line records naming each statement's file —
+    // same bytes by construction.
     if let Assembler::Ca65 = assembler {
+        let loader = fs_loader(input, &include_dirs);
         let (rom, info) = if debug.is_some() || sym.is_some() {
-            let (rom, info) = asm198x::assemble_ca65_debug(&source, input)
-                .map_err(|e| render_error(input, &files, &e))?;
+            let (rom, info) = asm198x::assemble_ca65_files_debug(&source, input, &loader)
+                .map_err(|e| render_multi_error(input, &e))?;
             (rom, Some(info))
         } else {
             (
-                asm198x::assemble_ca65(&source).map_err(|e| render_error(input, &files, &e))?,
+                asm198x::assemble_ca65_files(&source, input, &loader)
+                    .map_err(|e| render_multi_error(input, &e))?,
                 None,
             )
         };
@@ -904,10 +910,25 @@ fn emit_json(
             asm198x::assemble_vasm_warned_debug(source, input).map(&mut capture)
         }
         Assembler::Vasm => asm198x::assemble_vasm_warned(source),
+        // ca65 goes through its include-capable entries too (U5); a failure
+        // carries the file table so the diagnostic's span can name an
+        // included file.
         Assembler::Ca65 if debug_requested => {
-            asm198x::assemble_ca65_debug(source, input).map(&mut capture)
+            let loader = fs_loader(input, include_dirs);
+            asm198x::assemble_ca65_files_debug(source, input, &loader)
+                .map_err(|e| {
+                    failure_files = e.source_map.file_table();
+                    e.error
+                })
+                .map(&mut capture)
         }
-        Assembler::Ca65 => asm198x::assemble_ca65(source),
+        Assembler::Ca65 => {
+            let loader = fs_loader(input, include_dirs);
+            asm198x::assemble_ca65_files(source, input, &loader).map_err(|e| {
+                failure_files = e.source_map.file_table();
+                e.error
+            })
+        }
         // Every flat dialect goes through its multi-file entry (the same
         // table as the human path); ca65/vasm are the arms above.
         other => {

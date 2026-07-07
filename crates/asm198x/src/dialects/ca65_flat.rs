@@ -263,8 +263,10 @@ pub(crate) fn unresolved_node(d: DirectiveLine) -> Node {
 
 /// Stamp `file` onto a per-line parse error: the line-oriented dialect helpers
 /// know their line but not their file, so the walk supplies it at the one
-/// per-line boundary (the z80 walk's rule).
-fn stamp_file(mut e: AsmError, file: FileId) -> AsmError {
+/// per-line boundary (the z80 walk's rule). `pub(crate)` because the ca65-NES
+/// assemble+link driver stamps its post-parse layout/emit errors (duplicate
+/// symbol, range failures) with the owning statement's file the same way (U5).
+pub(crate) fn stamp_file(mut e: AsmError, file: FileId) -> AsmError {
     match &mut e.span {
         Some(span) => span.file = file,
         None if e.line != 0 => e.span = Some(Span::in_file(file, e.line as u32, 0)),

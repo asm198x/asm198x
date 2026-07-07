@@ -16,7 +16,8 @@ use asm198x::source::{FsLoader, MemoryLoader, SourceLoader, SourceMap};
 use asm198x::{
     FileId, assemble_1802, assemble_1802_files, assemble_2650, assemble_2650_files, assemble_8039,
     assemble_8039_files, assemble_8048, assemble_8048_files, assemble_acme, assemble_acme_files,
-    assemble_ca65_816, assemble_ca65_816_files, assemble_ca65_huc6280, assemble_ca65_huc6280_files,
+    assemble_ca65, assemble_ca65_816, assemble_ca65_816_files, assemble_ca65_files,
+    assemble_ca65_files_debug, assemble_ca65_huc6280, assemble_ca65_huc6280_files,
     assemble_cp1610_files, assemble_f8, assemble_f8_files, assemble_i8080, assemble_i8080_files,
     assemble_lwasm, assemble_lwasm_files, assemble_m6800, assemble_m6800_files, assemble_pasmo,
     assemble_pasmo_files, assemble_pdp11, assemble_pdp11_files, assemble_rgbasm,
@@ -2795,4 +2796,406 @@ fn z8000_include_smoke_matches_the_flattened_source() {
     let r = assemble_z8001_files(src, "main.asm", &loader).expect("assembles (z8001)");
     let flat = assemble_z8001(flat_src).expect("flat (z8001)");
     assert_eq!(r.bytes, flat.bytes);
+}
+
+// ===========================================================================
+// U5: the ca65-NES assemble+link path — `.include`/`.incbin` through the
+// `Item::Native` pipeline (its own parse + two-pass + link). Semantics are
+// the flat ca65 family's CA65_SEMANTICS, re-probed under the ca65+ld65 NES
+// link (they held: resolution and incbin windows are assembler-side); the
+// segment/anon/cheap-local threading bytes below are pinned by those probe
+// runs (ca65 V2.18 + ld65, the curriculum's nes.cfg).
+// ===========================================================================
+
+/// The PRG slice of a linked `.nes` ROM (after the 16-byte iNES header).
+fn prg(rom: &[u8]) -> &[u8] {
+    &rom[16..16 + 0x8000]
+}
+
+/// The CHR slice of a linked `.nes` ROM.
+fn chr(rom: &[u8]) -> &[u8] {
+    &rom[16 + 0x8000..]
+}
+
+/// A NES program split across `.include`d files — PRG code and CHARS data in
+/// separate files — links identically to the flattened source, with a
+/// ZEROPAGE symbol defined in the root feeding zp selection inside the
+/// include and an include-defined constant feeding the root's later lines
+/// (KTD1, both directions).
+#[test]
+fn ca65_nes_program_split_across_includes() {
+    let loader = MemoryLoader::new()
+        .text("prg.s", "        sta pos\nSPEED = 3\nloop:   jmp loop\n")
+        .text("chars.s", ".segment \"CHARS\"\n        .byte $AA, $BB\n");
+    let src = "\
+.segment \"HEADER\"\n\
+        .byte \"NES\", $1A, 2, 1\n\
+.segment \"ZEROPAGE\"\n\
+pos:    .res 1\n\
+.segment \"CODE\"\n\
+reset:  lda #SPEED\n\
+.include \"prg.s\"\n\
+.segment \"VECTORS\"\n\
+        .word 0, reset, 0\n\
+.include \"chars.s\"\n";
+    let r = assemble_ca65_files(src, "main.s", &loader).expect("links");
+    let flat = assemble_ca65(
+        &src.replace(
+            ".include \"prg.s\"",
+            "        sta pos\nSPEED = 3\nloop:   jmp loop",
+        )
+        .replace(
+            ".include \"chars.s\"",
+            ".segment \"CHARS\"\n        .byte $AA, $BB",
+        ),
+    )
+    .expect("flat links");
+    assert_eq!(r.bytes, flat.bytes, "includes are transparent to the ROM");
+    assert_eq!(r.bytes.len(), 16 + 0x8000 + 0x2000, "iNES shape");
+    // reset: lda #3 / sta pos (zp) / loop: jmp loop ($8004).
+    assert_eq!(
+        &prg(&r.bytes)[..7],
+        &[0xA9, 0x03, 0x85, 0x00, 0x4C, 0x04, 0x80]
+    );
+    assert_eq!(&chr(&r.bytes)[..2], &[0xAA, 0xBB]);
+    assert_eq!(r.files, vec!["main.s", "prg.s", "chars.s"]);
+}
+
+/// Probe-pinned: a `.segment` switch **inside** an included file persists
+/// into the includer after the include (ca65 splices text, so segment state
+/// is global) — bytes after the include land in the include's segment.
+#[test]
+fn ca65_nes_segment_switch_inside_include_persists() {
+    let loader =
+        MemoryLoader::new().text("chars.s", ".segment \"CHARS\"\n        .byte $AA, $BB\n");
+    let src = "\
+.segment \"CODE\"\n\
+reset:  lda #$01\n\
+.include \"chars.s\"\n\
+        .byte $77\n\
+.segment \"VECTORS\"\n\
+        .word 0, reset, 0\n";
+    let r = assemble_ca65_files(src, "main.s", &loader).expect("links");
+    assert_eq!(
+        &chr(&r.bytes)[..3],
+        &[0xAA, 0xBB, 0x77],
+        "the trailing .byte lands in CHARS, not CODE (probe-pinned)"
+    );
+    assert_eq!(
+        &prg(&r.bytes)[..3],
+        &[0xA9, 0x01, 0x00],
+        "CODE holds only the lda"
+    );
+}
+
+/// An error inside a nested include names *that* file and line, with the
+/// include chain walking back to the root (R3/AE1 on the NES path) — both a
+/// parse-time failure (unknown instruction) and a layout-time one (duplicate
+/// symbol, stamped by the driver).
+#[test]
+fn ca65_nes_error_in_included_file_names_that_file_with_its_chain() {
+    let loader = MemoryLoader::new()
+        .text("a.s", ".include \"b.s\"\n")
+        .text("b.s", "        lda #$01\n        frob $10\n");
+    let e = assemble_ca65_files(".segment \"CODE\"\n.include \"a.s\"\n", "main.s", &loader)
+        .expect_err("frob is unknown");
+    let span = e.error.span.as_ref().expect("the error carries a span");
+    assert_eq!(span.line, 2, "line 2 of b.s, not of main.s");
+    assert_eq!(
+        e.source_map
+            .file_table()
+            .get(span.file.0 as usize)
+            .map(String::as_str),
+        Some("b.s"),
+        "the span names the included file"
+    );
+    assert_eq!(
+        e.source_map.include_chain(span.file),
+        vec![("a.s".to_string(), 1), ("main.s".to_string(), 2)],
+        "the include chain walks back to the root"
+    );
+
+    // The layout pass: a duplicate symbol whose second definition sits inside
+    // the include is reported in the include's file.
+    let loader = MemoryLoader::new().text("dup.s", "reset:  lda #$02\n");
+    let e = assemble_ca65_files(
+        ".segment \"CODE\"\nreset:  lda #$01\n.include \"dup.s\"\n",
+        "main.s",
+        &loader,
+    )
+    .expect_err("duplicate symbol");
+    assert!(
+        e.error.message.contains("duplicate symbol `reset`"),
+        "names the symbol: {}",
+        e.error.message
+    );
+    let span = e
+        .error
+        .span
+        .as_ref()
+        .expect("layout errors carry a span too");
+    assert_eq!(span.line, 1, "line 1 of dup.s");
+    assert_eq!(
+        e.source_map
+            .file_table()
+            .get(span.file.0 as usize)
+            .map(String::as_str),
+        Some("dup.s")
+    );
+}
+
+/// A missing `.include` target and a missing `.incbin` asset are diagnostics
+/// at the directive's span (the operand's column), not CLI read errors.
+#[test]
+fn ca65_nes_missing_targets_report_at_the_directive_span() {
+    let loader = MemoryLoader::new();
+    let e = assemble_ca65_files(
+        ".segment \"CODE\"\n.include \"nothere.s\"\n",
+        "main.s",
+        &loader,
+    )
+    .expect_err("missing target");
+    assert!(e.error.message.contains("nothere.s"), "{}", e.error.message);
+    let span = e.error.span.as_ref().expect("span at the directive");
+    assert_eq!(span.line, 2);
+    assert_eq!(span.col, 10, "points at the operand (the file name)");
+
+    let e = assemble_ca65_files(
+        ".segment \"CHARS\"\n.incbin \"nothere.chr\"\n",
+        "main.s",
+        &loader,
+    )
+    .expect_err("missing asset");
+    assert!(
+        e.error.message.contains("nothere.chr"),
+        "{}",
+        e.error.message
+    );
+    assert_eq!(e.error.span.as_ref().map(|s| s.line), Some(2));
+}
+
+/// `.incbin` of CHR data with offset/size windows inside a CHARS-segment
+/// include — probe-pinned against ca65+ld65 (full asset, the `2,3` window,
+/// then the negative-size rest-of-file sentinel: 8 + 3 + 2 bytes).
+#[test]
+fn ca65_nes_incbin_chr_windows_match_the_probe() {
+    let tiles: Vec<u8> = vec![0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17];
+    let loader = MemoryLoader::new()
+        .text(
+            "art.s",
+            ".segment \"CHARS\"\n.incbin \"tiles.chr\"\n.incbin \"tiles.chr\", 2, 3\n.incbin \"tiles.chr\", 6, -9\n",
+        )
+        .binary("tiles.chr", tiles.clone());
+    let src = "\
+.segment \"CODE\"\n\
+reset:  lda #$01\n\
+.include \"art.s\"\n\
+.segment \"VECTORS\"\n\
+        .word 0, reset, 0\n";
+    let r = assemble_ca65_files(src, "main.s", &loader).expect("links");
+    let mut want = tiles;
+    want.extend_from_slice(&[0x12, 0x13, 0x14, 0x16, 0x17]);
+    assert_eq!(
+        &chr(&r.bytes)[..want.len()],
+        want.as_slice(),
+        "probe-pinned CHR windows"
+    );
+    // A window error carries the directive's span in the included file.
+    let loader = MemoryLoader::new()
+        .text("art.s", ".segment \"CHARS\"\n.incbin \"tiles.chr\", 9\n")
+        .binary("tiles.chr", vec![0u8; 8]);
+    let e = assemble_ca65_files(".include \"art.s\"\n", "main.s", &loader)
+        .expect_err("offset past EOF");
+    let span = e.error.span.as_ref().expect("span at the directive");
+    assert_eq!(span.line, 2);
+    assert_eq!(
+        e.source_map
+            .file_table()
+            .get(span.file.0 as usize)
+            .map(String::as_str),
+        Some("art.s")
+    );
+}
+
+/// Anonymous (`:`) labels resolve across the include boundary in evaluation
+/// order, and cheap (`@`) locals scope across it — a global inside the
+/// include rescopes the includer's later cheap locals. Bytes pinned by the
+/// p5/p6 probe runs.
+#[test]
+fn ca65_nes_anons_and_cheap_locals_cross_the_boundary() {
+    // p5: `jmp :+` in the root resolves to the anon inside part.s, and the
+    // root's later `bne :-` resolves back to that same in-include anon.
+    let loader = MemoryLoader::new().text("part.s", ":       nop\n");
+    let src = "\
+.segment \"CODE\"\n\
+reset:  ldx #0\n\
+:       inx\n\
+        jmp :+\n\
+.include \"part.s\"\n\
+        bne :-\n\
+.segment \"VECTORS\"\n\
+        .word 0, reset, 0\n";
+    let r = assemble_ca65_files(src, "main.s", &loader).expect("links");
+    assert_eq!(
+        &prg(&r.bytes)[..9],
+        &[0xA2, 0x00, 0xE8, 0x4C, 0x06, 0x80, 0xEA, 0xD0, 0xFD],
+        "probe-pinned: both anon references land on part.s's `:` at $8006"
+    );
+
+    // p6: `@loop` at the top of the include scopes to the root's `reset`;
+    // `mid:` inside rescopes the root's later `@tail`.
+    let loader = MemoryLoader::new().text("sub.s", "@loop:  jmp @loop\nmid:    nop\n");
+    let src = "\
+.segment \"CODE\"\n\
+reset:  lda #$01\n\
+.include \"sub.s\"\n\
+@tail:  jmp @tail\n\
+.segment \"VECTORS\"\n\
+        .word 0, reset, 0\n";
+    let r = assemble_ca65_files(src, "main.s", &loader).expect("links");
+    assert_eq!(
+        &prg(&r.bytes)[..9],
+        &[0xA9, 0x01, 0x4C, 0x02, 0x80, 0xEA, 0x4C, 0x06, 0x80],
+        "probe-pinned: @loop = $8002 under reset, @tail = $8006 under mid"
+    );
+}
+
+/// The single-source NES entry still means "one file": a `.include` or
+/// `.incbin` is a clear pointer to the multi-file entry, not the old
+/// `unsupported directive` rejection.
+#[test]
+fn ca65_nes_single_source_entry_rejects_both_directives_with_a_pointer() {
+    for src in [
+        ".segment \"CODE\"\n.include \"prg.s\"\n",
+        ".segment \"CHARS\"\n.incbin \"tiles.chr\"\n",
+    ] {
+        let e = assemble_ca65(src).expect_err("no loader here");
+        assert!(
+            e.message.contains("multi-file"),
+            "points at the multi-file entry: {}",
+            e.message
+        );
+    }
+}
+
+/// Per-file provenance in the debug record (U5): `Header.sources` is the file
+/// table in `FileId` order (KTD2) and each line span names the file its
+/// statement was written in — the CHARS bytes attribute to the included art
+/// file, the code to the root.
+#[test]
+fn ca65_nes_debug_line_records_carry_each_statements_file() {
+    let loader = MemoryLoader::new()
+        .text("art.s", ".segment \"CHARS\"\ntiles:  .byte $AA, $BB\n")
+        .binary("tiles.chr", vec![1, 2, 3, 4]);
+    let src = "\
+.segment \"CODE\"\n\
+reset:  lda #$01\n\
+.include \"art.s\"\n\
+.segment \"VECTORS\"\n\
+        .word 0, reset, 0\n";
+    let (r, info) = assemble_ca65_files_debug(src, "main.s", &loader).expect("links");
+    assert_eq!(r.files, vec!["main.s", "art.s"]);
+    assert_eq!(
+        info.header.sources, r.files,
+        "Header.sources ⇔ AssemblyResult.files, one FileId order (KTD2)"
+    );
+    let line_for = |file: &str, line: u32| {
+        info.lines
+            .iter()
+            .find(|l| l.file == file && l.line == line)
+            .unwrap_or_else(|| panic!("no line span for {file}:{line}"))
+    };
+    // The root's `lda` is main.s line 2; the include's `.byte` is art.s line 2.
+    assert_eq!(line_for("main.s", 2).length, 2);
+    let tiles = line_for("art.s", 2);
+    assert_eq!(tiles.length, 2);
+    // ...and the symbol defined in the include is in the record.
+    assert!(
+        info.symbols.iter().any(|s| s.name == "tiles"),
+        "the include's label reaches the symbol record"
+    );
+}
+
+/// The CLI's NES route (U5): a ca65 `.include` resolves via a `-I` search
+/// dir on the human path and the linked `.nes` is written; the JSON failure
+/// path resolves an in-include error's span to the included file's path.
+#[test]
+fn cli_assembles_a_ca65_nes_include_via_a_search_dir() {
+    let srcdir = temp_tree("u5-nes-cli-src");
+    let incdir = temp_tree("u5-nes-cli-inc");
+    let main = srcdir.join("game.s");
+    std::fs::write(
+        &main,
+        ".segment \"CODE\"\nreset:  lda #VAL\n.include \"defs.s\"\n\
+         .segment \"VECTORS\"\n        .word 0, reset, 0\n",
+    )
+    .expect("write main");
+    std::fs::write(incdir.join("defs.s"), "VAL = $2b\n").expect("write include");
+    let out = srcdir.join("game.nes");
+    let run = bin()
+        .args(["--dialect", "ca65", "-I"])
+        .arg(&incdir)
+        .arg(&main)
+        .arg("-o")
+        .arg(&out)
+        .output()
+        .expect("run asm198x");
+    assert!(
+        run.status.success(),
+        "links: {}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    let rom = std::fs::read(&out).expect("ROM written");
+    assert_eq!(rom.len(), 16 + 0x8000 + 0x2000);
+    assert_eq!(&rom[16..18], &[0xA9, 0x2B]);
+}
+
+/// The CLI's NES JSON failure path (U5): an error inside an included file
+/// carries the include's resolved path on the diagnostic's span, and the
+/// human path appends the `included from` note.
+#[test]
+fn cli_ca65_nes_error_in_include_names_that_file() {
+    let dir = temp_tree("u5-nes-cli-err");
+    let main = dir.join("main.s");
+    std::fs::write(
+        &main,
+        ".segment \"CODE\"\nreset:  lda #$01\n.include \"bad.s\"\n",
+    )
+    .expect("write main");
+    std::fs::write(dir.join("bad.s"), "        frob $10\n").expect("write include");
+
+    // JSON: the span's additive `path` resolves the included file (KTD2).
+    let run = bin()
+        .args(["--dialect", "ca65", "--message-format=json"])
+        .arg(&main)
+        .output()
+        .expect("run asm198x");
+    assert!(!run.status.success());
+    let diags: Vec<asm198x::Diagnostic> =
+        serde_json::from_slice(&run.stdout).expect("a bare Diagnostic array");
+    assert_eq!(diags.len(), 1);
+    let span = diags[0].span.as_ref().expect("span present");
+    assert_eq!(span.line, 1, "line 1 of bad.s");
+    assert!(
+        span.path.as_deref().is_some_and(|p| p.ends_with("bad.s")),
+        "the span's path names the included file: {:?}",
+        span.path
+    );
+
+    // Human: `bad.s:1: error: …` plus the include-graph note.
+    let run = bin()
+        .args(["--dialect", "ca65"])
+        .arg(&main)
+        .output()
+        .expect("run asm198x");
+    assert!(!run.status.success());
+    let stderr = String::from_utf8_lossy(&run.stderr);
+    assert!(
+        stderr.contains("bad.s:1:"),
+        "names the included file and line: {stderr}"
+    );
+    assert!(
+        stderr.contains("included from") && stderr.contains("main.s:3"),
+        "carries the included-from note: {stderr}"
+    );
 }

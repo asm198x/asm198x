@@ -791,3 +791,54 @@ fn vasm_exe_sym_is_section_qualified() {
         "data = data+$0000\nloop = code+$0006\nmsg = data+$0006\nstart = code+$0000\ntail = data+$000A\n"
     );
 }
+
+/// `--debug` on a multi-file NES program (language-surface U5): the sidecar's
+/// `Header.sources` lists every file in `FileId` order and each line record
+/// names the file its bytes were written in — the CHARS data attributes to
+/// the included art file, the code to the root input.
+#[test]
+fn ca65_multifile_debug_line_records_name_the_included_file() {
+    let dir = std::env::temp_dir().join("asm198x-debug-cli-nes-multi");
+    std::fs::create_dir_all(&dir).expect("temp tree");
+    let main = dir.join("main.s");
+    std::fs::write(
+        &main,
+        ".segment \"CODE\"\nreset:  lda #$01\n.include \"art.s\"\n\
+         .segment \"VECTORS\"\n        .word 0, reset, 0\n",
+    )
+    .expect("write main");
+    std::fs::write(
+        dir.join("art.s"),
+        ".segment \"CHARS\"\ntiles:  .byte $AA, $BB\n",
+    )
+    .expect("write art");
+    let status = bin()
+        .args(["--dialect", "ca65", "--debug"])
+        .arg(&main)
+        .arg("-o")
+        .arg(main.with_extension("nes"))
+        .status()
+        .expect("run asm198x");
+    assert!(status.success());
+    let ndjson = std::fs::read_to_string(main.with_extension("debug198x")).expect("read sidecar");
+    let info = asm198x::debug198x::DebugInfo::read(&ndjson).expect("sidecar parses");
+
+    assert_eq!(info.header.sources.len(), 2, "root + the include");
+    assert!(
+        info.header.sources[1].ends_with("art.s"),
+        "sources[1] is the include (FileId order): {:?}",
+        info.header.sources
+    );
+    let code = info
+        .lines
+        .iter()
+        .find(|l| l.line == 2 && l.file.ends_with("main.s"))
+        .expect("the root's lda has a span in main.s");
+    assert_eq!(code.length, 2);
+    let tiles = info
+        .lines
+        .iter()
+        .find(|l| l.line == 2 && l.file.ends_with("art.s"))
+        .expect("the include's .byte has a span in art.s");
+    assert_eq!(tiles.length, 2, "the CHARS bytes attribute to art.s");
+}

@@ -1542,3 +1542,76 @@ art:    binclude missing.bin,2,3
         "idempotent"
     );
 }
+
+/// U5 (language surface): the NES ca65 `--fmt` path renders `.include`/
+/// `.incbin` verbatim from the node's source without ever opening the
+/// targets — formatting succeeds when they do not exist — and stays
+/// idempotent (KTD1). Labels on the directive lines and the offset/size
+/// tail are preserved untouched.
+#[test]
+fn fmt_ca65_nes_include_and_incbin_are_verbatim_and_never_open_targets() {
+    let src = "\
+; header
+        .segment \"CODE\"
+OFF = 2
+here:   .include \"missing.s\"   ; pulled in later
+        .INCLUDE \"also-missing.s\"
+        .segment \"CHARS\"
+art:    .incbin \"missing.chr\", 2, 3
+        .incbin \"also-missing.chr\", OFF, -1
+";
+    let formatted = format_ca65(src).expect("formats with every target missing");
+    for verbatim in [
+        ".include \"missing.s\"",
+        ".INCLUDE \"also-missing.s\"",
+        ".incbin \"missing.chr\", 2, 3",
+        ".incbin \"also-missing.chr\", OFF, -1",
+    ] {
+        assert!(
+            formatted.contains(verbatim),
+            "`{verbatim}` survives verbatim:\n{formatted}"
+        );
+    }
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("here:") && formatted.contains("art:"),
+        "labels on the directive lines survive:\n{formatted}"
+    );
+    assert_eq!(
+        format_ca65(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U5: formatted `.include`/`.incbin`-bearing NES source reassembles into a
+/// byte-identical `.nes` ROM through the multi-file entry (the NES leg of
+/// the fmt round-trip bar).
+#[test]
+fn fmt_ca65_nes_include_and_incbin_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("art.s", ".segment \"CHARS\"\n .byte $AA\n")
+            .binary("tiles.chr", (0x10..0x18).collect())
+    };
+    let src = "\
+.segment \"CODE\"
+reset:  lda #$01
+        .include \"art.s\"
+        .incbin \"tiles.chr\", 2, 3
+.segment \"VECTORS\"
+        .word 0, reset, 0
+";
+    let original = asm198x::assemble_ca65_files(src, "main.s", &loader())
+        .expect("links")
+        .bytes;
+    let formatted = format_ca65(src).expect("formats");
+    let reassembled = asm198x::assemble_ca65_files(&formatted, "main.s", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must link: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "NES ROM round-trips:\n{formatted}");
+}

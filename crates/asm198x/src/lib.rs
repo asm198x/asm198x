@@ -122,12 +122,83 @@ pub fn assemble_acme_files(
 /// image — the NES curriculum's toolchain (ca65 + ld65) in one step. Unlike the
 /// flat assemblers, this returns the finished ROM bytes (iNES header + 32K PRG +
 /// 8K CHR) because the output is the linker's, not a single origin's.
+/// Single-source: a `.include`/`.incbin` directive is an error here — use
+/// [`assemble_ca65_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_ca65(source: &str) -> Result<AssemblyResult, AsmError> {
     dialects::ca65::assemble(source).map(AssemblyResult::image)
+}
+
+/// Assemble + link a **multi-file** NES ca65 program (language-surface U5):
+/// `source` is the root file's text, `input_path` its name (entry 0 of the
+/// file table), and `.include`/`.incbin` directives resolve through `loader` —
+/// the CLI wires an [`FsLoader`](source::FsLoader) carrying the input's
+/// directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows ca65's
+/// probe-pinned ancestor-chain order and `.incbin`'s offset/size window
+/// matches ca65 exactly (both re-confirmed under the ca65+ld65 NES link —
+/// they are assembler-side semantics). Segment state, `=` constants, cheap
+/// locals, and the anonymous-label stream all cross include boundaries as
+/// ca65's textual splice does (probe-pinned). On success,
+/// [`AssemblyResult::files`] holds the `FileId`→path table. The single-source
+/// [`assemble_ca65`] is unchanged and rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_ca65_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    let mut map = source::SourceMap::new(input_path, source);
+    match dialects::ca65::assemble_multi(&mut map, loader) {
+        Ok((rom, _)) => {
+            let mut result = AssemblyResult::image(rom);
+            result.files = map.file_table();
+            Ok(result)
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
+/// As [`assemble_ca65_files`], also returning the full
+/// [`debug198x::DebugInfo`] read out of layout — the multi-file counterpart of
+/// [`assemble_ca65_debug`]. `Header.sources` is the file table in `FileId`
+/// order (KTD2: `sources[i] ⇔ FileId(i)`, the same convention as
+/// [`AssemblyResult::files`]) and every line span names the file its statement
+/// was written in, so bytes pulled in by an included file attribute to that
+/// file. Bytes are identical to [`assemble_ca65_files`] by construction (one
+/// code path; AE2).
+///
+/// # Errors
+/// As [`assemble_ca65_files`].
+pub fn assemble_ca65_files_debug(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    let mut map = source::SourceMap::new(input_path, source);
+    match dialects::ca65::assemble_multi(&mut map, loader) {
+        Ok((rom, capture)) => {
+            let files = map.file_table();
+            let info = listing::capture_debug_info_multi(capture, "6502", "ca65", files.clone());
+            let mut result = AssemblyResult::image(rom);
+            result.files = files;
+            Ok((result, info))
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
 }
 
 /// Assemble + link ca65 source, also returning the full [`debug198x::DebugInfo`]

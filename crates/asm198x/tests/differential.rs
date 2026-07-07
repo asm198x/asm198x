@@ -82,6 +82,8 @@ fn tool(dialect: &str) -> &'static str {
         "vasm" => "vasmm68k_mot",
         "ca65-816" => "ca65",
         "ca65-huc6280" => "ca65",
+        // The NES assemble+link path (U5): ca65 + ld65 with the fixed nes.cfg.
+        "ca65-nes" => "ca65",
         "rgbasm" => "rgbasm",
         // The asl chips (U4): one arbiter for the family (asl + p2bin).
         "8080" | "tms9900" | "cp1610" => "asl",
@@ -758,6 +760,65 @@ const MULTI_PROBES: &[MultiProbe] = &[
             ("body.inc", "        lda #7\n"),
         ],
     },
+    // --- U5: the ca65-NES assemble+link path (`.include`/`.incbin` through
+    // the Item::Native pipeline; ca65 + ld65 with the curriculum's fixed
+    // nes.cfg, byte-comparing the whole .nes ROM). ---
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "NES program split across includes: PRG code + CHARS data in \
+               separate files; zp symbol + include-defined constant thread \
+               both directions; a .segment switch inside the include \
+               persists (U5)",
+        files: &[
+            (
+                "main.s",
+                ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+                 .segment \"ZEROPAGE\"\npos: .res 1\n\
+                 .segment \"CODE\"\nreset: lda #SPEED\n .include \"prg.s\"\n .byte $77\n\
+                 .segment \"VECTORS\"\n .word 0, reset, 0\n",
+            ),
+            (
+                "prg.s",
+                "SPEED = 3\n sta pos\nloop: jmp loop\n .include \"chars.s\"\n",
+            ),
+            ("chars.s", ".segment \"CHARS\"\n .byte $AA, $BB\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[("tiles.chr", ASSET)],
+        note: ".incbin of CHR data inside a CHARS-segment include: plain, \
+               offset+size, and the negative-size sentinel, under the NES \
+               link (U5)",
+        files: &[
+            (
+                "main.s",
+                ".segment \"CODE\"\nreset: lda #$01\n .include \"art.s\"\n\
+                 .segment \"VECTORS\"\n .word 0, reset, 0\n",
+            ),
+            (
+                "art.s",
+                ".segment \"CHARS\"\n .incbin \"tiles.chr\"\n \
+                 .incbin \"tiles.chr\", 2, 3\n .incbin \"tiles.chr\", 6, -9\n",
+            ),
+        ],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "anonymous and cheap labels resolve across the .include \
+               boundary in evaluation order on the NES path (U5)",
+        files: &[
+            (
+                "main.s",
+                ".segment \"CODE\"\nreset: ldx #0\n: inx\n jmp :+\n\
+                 .include \"part.s\"\n bne :-\n@tail: jmp @tail\n\
+                 .segment \"VECTORS\"\n .word 0, reset, 0\n",
+            ),
+            ("part.s", ": nop\n@in: jmp @in\nmid: nop\n"),
+        ],
+    },
     // --- U4: the asl chips (`include`/`binclude`, asl + p2bin) — probed on
     // the 8080 (the family's debut chip), spot-checked on the TMS9900, and
     // the CP1610 for the decle-accounting case.
@@ -914,6 +975,37 @@ fn multi_file_source_matches_reference() {
                 c.args(["-f", "plain", "-o"]).arg(&out).arg(root);
                 vec![c]
             }
+            // The NES path: ca65 + ld65 with the curriculum's fixed nes.cfg
+            // (the recipe the ca65 curriculum leg uses), emitting a .nes ROM
+            // that is byte-compared whole.
+            "ca65-nes" => {
+                let cfg = dir.join("nes.cfg");
+                fs::write(
+                    &cfg,
+                    "MEMORY {\n\
+                     \x20   ZP:     start = $00,    size = $100,   type = rw, file = \"\";\n\
+                     \x20   RAM:    start = $0200,  size = $600,   type = rw, file = \"\";\n\
+                     \x20   HEADER: start = $0,     size = $10,    type = ro, file = %O, fill = yes;\n\
+                     \x20   PRG:    start = $8000,  size = $8000,  type = ro, file = %O, fill = yes;\n\
+                     \x20   CHR:    start = $0,     size = $2000,  type = ro, file = %O, fill = yes;\n\
+                     }\n\
+                     SEGMENTS {\n\
+                     \x20   ZEROPAGE: load = ZP,     type = zp;\n\
+                     \x20   BSS:      load = RAM,    type = bss;\n\
+                     \x20   HEADER:   load = HEADER, type = ro;\n\
+                     \x20   CODE:     load = PRG,    type = ro,  start = $8000;\n\
+                     \x20   VECTORS:  load = PRG,    type = ro,  start = $FFFA;\n\
+                     \x20   CHARS:    load = CHR,    type = ro;\n\
+                     }\n",
+                )
+                .expect("write nes.cfg");
+                let obj = dir.join("ref.o");
+                let mut a = Command::new("ca65");
+                a.arg(root).arg("-o").arg(&obj);
+                let mut l = Command::new("ld65");
+                l.arg("-C").arg(&cfg).arg(&obj).arg("-o").arg(&out);
+                vec![a, l]
+            }
             // The ca65-flat family: assemble with the target CPU, link flat
             // at $0000 (the same recipe as the single-file ca65-816 arm).
             "ca65-816" | "ca65-huc6280" => {
@@ -978,6 +1070,7 @@ fn multi_file_source_matches_reference() {
             "acme" => asm198x::assemble_acme_files,
             "ca65-816" => asm198x::assemble_ca65_816_files,
             "ca65-huc6280" => asm198x::assemble_ca65_huc6280_files,
+            "ca65-nes" => asm198x::assemble_ca65_files,
             "rgbasm" => asm198x::assemble_rgbasm_files,
             "lwasm" => asm198x::assemble_lwasm_files,
             "8080" => asm198x::assemble_i8080_files,
