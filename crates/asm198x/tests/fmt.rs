@@ -1724,3 +1724,81 @@ start:
         "multi-file vasm round-trips byte-identical\n---\n{formatted}"
     );
 }
+
+/// U8: keyword conditionals round-trip through the new `CondStyle::Keyword`
+/// emit branch — `IF`/`ELSE`/`ENDIF` render as indented directives following
+/// the head keyword's case, bodies keep the normal layout (labels at column
+/// 0), the formatted source reassembles byte-identical, and re-formatting is
+/// a fixed point. ACME's brace rendering is untouched (its own fmt tests
+/// prove it).
+#[test]
+fn fmt_sjasmplus_conditionals_round_trip() {
+    let src = "\
+; build flavours
+        org $8000
+        DEFINE DEBUG 1
+mode    equ 2
+lbl:    IF DEBUG = 1   ; debug build
+        ld a,1
+        if mode = 2
+.inner: nop
+        djnz .inner
+        endif
+        ELSE
+        ld a,2
+        ENDIF
+        jr lbl
+";
+    let original = assemble_sjasmplus(src).expect("assembles").bytes;
+    let formatted = format_sjasmplus(src).expect("formats");
+    let reassembled = assemble_sjasmplus(&formatted)
+        .unwrap_or_else(|e| panic!("formatted conditionals must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+    assert_eq!(
+        formatted,
+        format_sjasmplus(&formatted).expect("formats again"),
+        "idempotent:\n{formatted}"
+    );
+    // The delimiters render as indented directives, case following the head.
+    assert!(
+        formatted.contains("        IF DEBUG = 1   ; debug build"),
+        "head verbatim with its comment:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("        ELSE\n") && formatted.contains("        ENDIF\n"),
+        "uppercase delimiters for the uppercase head:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("        if mode = 2") && formatted.contains("        endif\n"),
+        "lowercase head keeps lowercase delimiters:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("lbl:"),
+        "the label on the IF line survives:\n{formatted}"
+    );
+}
+
+/// U8 + KTD1 on the fmt path: a conditional-guarded include renders verbatim
+/// and the formatter never opens the target — formatting succeeds with the
+/// file missing, whichever branch would take it.
+#[test]
+fn fmt_sjasmplus_guarded_include_is_verbatim_and_never_opens_the_target() {
+    let src = "\
+        org $8000
+        IF 0
+        include \"missing.inc\"
+        ENDIF
+        ld a,1
+";
+    let formatted = format_sjasmplus(src).expect("formats with the target missing");
+    assert!(
+        formatted.contains("include \"missing.inc\""),
+        "directive verbatim inside the block:\n{formatted}"
+    );
+    assert_eq!(
+        format_sjasmplus(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}

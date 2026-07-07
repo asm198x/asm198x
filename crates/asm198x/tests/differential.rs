@@ -56,12 +56,11 @@ const fn ok(dialect: &'static str, note: &'static str, body: &'static str) -> Pr
         gap: None,
     }
 }
-// Currently unused: every tracked parser gap has been closed (the last batch —
-// acme `!pet`/`!align`/`!zone`/`!set`, ca65 `.dword`/`.dbyt`/`.asciiz`,
-// sjasmplus `byte`, lwasm `fill`/`zmb`/`fqb` — was issue #26). Kept so the next
-// discovered gap is a one-line `gap(...)` entry rather than re-deriving the
-// ledger's vocabulary.
-#[allow(dead_code)]
+// The open ledger: U8's out-of-surface sjasmplus conditional forms (ELSEIF,
+// colon-inline blocks, dotted spellings, multi-pass forward-symbol
+// conditions) are tracked by #67. Earlier batches (acme
+// `!pet`/`!align`/`!zone`/`!set`, ca65 `.dword`/`.dbyt`/`.asciiz`, sjasmplus
+// `byte`, lwasm `fill`/`zmb`/`fqb` — issue #26) are closed.
 const fn gap(dialect: &'static str, note: &'static str, body: &'static str, issue: u32) -> Probe {
     Probe {
         dialect,
@@ -264,6 +263,44 @@ const PROBES: &[Probe] = &[
     ok ("sjasmplus", "operator &",       " ld a,5 & 3\n"),
     ok ("sjasmplus", "operator ^",       " ld a,6 ^ 3\n"),
     ok ("sjasmplus", "directive byte",   " byte 1,2\n"),
+    // U8: conditional assembly + DEFINE (probe set u8-probes, sjasmplus 1.21.0).
+    ok ("sjasmplus", "IF taken/untaken + ELSE",
+        " IF 1\n ld a,1\n ELSE\n ld a,2\n ENDIF\n IF 0\n ld b,1\n ELSE\n ld b,2\n ENDIF\n"),
+    ok ("sjasmplus", "IF comparisons + logicals",
+        "V equ 5\n IF V = 5\n ld a,1\n ENDIF\n IF V == 5\n ld a,2\n ENDIF\n IF V > 3\n ld a,3\n ENDIF\n IF V != 4\n ld a,4\n ENDIF\n IF V && 0\n ld a,5\n ENDIF\n IF V || 0\n ld a,6\n ENDIF\n IF !V\n ld a,7\n ENDIF\n"),
+    ok ("sjasmplus", "IF parenthesised logicals",
+        "A1 equ 1\nB1 equ 0\n IF (A1 = 1) && (B1 = 0)\n ld a,1\n ENDIF\n IF !(A1 && B1)\n ld a,2\n ENDIF\n"),
+    ok ("sjasmplus", "nested conditionals, lowercase",
+        " if 1\n if 0\n ld a,1\n else\n ld a,2\n endif\n ifdef NOPE\n ld a,3\n endif\n endif\n"),
+    ok ("sjasmplus", "nesting tracked while skipping",
+        " IF 0\n IF 1\n ld a,1\n ENDIF\n ld a,2\n ENDIF\n ld a,3\n"),
+    ok ("sjasmplus", "IFDEF namespace is DEFINEs only",
+        " DEFINE DFLAG\nCONST equ 7\nLBL: nop\n IFDEF DFLAG\n ld a,1\n ENDIF\n IFDEF CONST\n ld a,2\n ENDIF\n IFDEF LBL\n ld a,3\n ENDIF\n IFNDEF NOPE\n ld a,4\n ENDIF\n"),
+    ok ("sjasmplus", "skipped branch defines nothing",
+        " IF 0\n DEFINE SKDEF\n ENDIF\n IFDEF SKDEF\n ld a,1\n ENDIF\n IFNDEF SKDEF\n ld a,2\n ENDIF\n"),
+    ok ("sjasmplus", "DEFINE substitutes operands + lines",
+        " DEFINE X 5\n ld a,X\n DEFINE Y ld b,2\n Y\n DEFINE N 3\n db N,N*2,\"N\"\n"),
+    ok ("sjasmplus", "chained DEFINEs expand at use",
+        " DEFINE A1 3\n DEFINE B1 A1+1\n db B1\n"),
+    ok ("sjasmplus", "DEFINE renames a label definition",
+        " DEFINE L mylab\nL: nop\n jr mylab\n"),
+    ok ("sjasmplus", "equ in taken branch feeds bit/ds forms",
+        " IF 1\nBITN equ 5\nPAD equ 2\n ENDIF\n bit BITN,a\n ds PAD\n ld a,1\n"),
+    ok ("sjasmplus", "conditional keeps local scoping intact",
+        "first:\n.l: nop\n IF 1\nsecond:\n.l: nop\n jr .l\n ENDIF\n jr .l\n"),
+    ok ("sjasmplus", "label on the IF line binds",
+        "lbl: IF 1\n ld a,1\n ENDIF\n jr lbl\n"),
+    // U8 gaps (#67): reference behaviour probed and out of the adopted
+    // surface — ELSEIF chains, colon-inline blocks, dotted directive
+    // spellings, and multi-pass conditions on forward/address symbols.
+    gap("sjasmplus", "ELSEIF chain",
+        "V equ 2\n IF V = 1\n ld a,1\n ELSEIF V = 2\n ld a,2\n ELSE\n ld a,3\n ENDIF\n", 67),
+    gap("sjasmplus", "colon-inline conditional",
+        " IF 1 : ld a,1 : ENDIF\n", 67),
+    gap("sjasmplus", "dotted .IF/.ENDIF spelling",
+        " .IF 1\n ld a,1\n .ENDIF\n", 67),
+    gap("sjasmplus", "IF on a forward label (multi-pass)",
+        " IF later\n ld a,1\n ENDIF\nlater: nop\n", 67),
 
     // ---- z80n (Spectrum Next extension ISA), sjasmplus reference -------------
     ok ("z80n", "swapnib / mirror",      " swapnib\n mirror a\n"),
@@ -543,6 +580,46 @@ const MULTI_PROBES: &[MultiProbe] = &[
             "main.asm",
             "        org $8000\n        db $aa\n        incbin \"data.bin\"\n        db $bb\n",
         )],
+    },
+    // --- U8: conditional-guarded includes (KTD1) ---
+    MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[],
+        note: "untaken guarded include never loads — the target does not exist (U8, KTD1)",
+        files: &[(
+            "main.asm",
+            "        org $8000\n        IF 0\n        include \"missing.inc\"\n        ENDIF\n        ld a,1\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[],
+        note: "taken guarded include loads; its equ feeds a later form; DEFINEs thread both ways (U8)",
+        files: &[
+            (
+                "main.asm",
+                "        org $8000\n        DEFINE WANT\n        IF 1\n        include \"guard.inc\"\n        ENDIF\n        bit BITN,a\n        IFDEF FROMINC\n        ld b,1\n        ENDIF\n",
+            ),
+            (
+                "guard.inc",
+                "        IFDEF WANT\n        ld a,9\n        ENDIF\nBITN equ 5\n        DEFINE FROMINC\n",
+            ),
+        ],
+    },
+    MultiProbe {
+        dialect: "sjasmplus",
+        binaries: &[],
+        note: "conditional wholly inside an include, condition from the includer's equ (U8)",
+        files: &[
+            (
+                "main.asm",
+                "        org $8000\nMODE equ 2\nstart:\n        include \"body.inc\"\n",
+            ),
+            (
+                "body.inc",
+                "        IF MODE = 2\n.here:  nop\n        jr .here\n        ELSE\n        ld a,0\n        ENDIF\n",
+            ),
+        ],
     },
     // --- U4: acme (`!src`/`!bin`) ---
     MultiProbe {

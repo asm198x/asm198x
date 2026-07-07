@@ -581,6 +581,7 @@ impl<'a> FmtCx<'a> {
                 then_body,
                 else_body,
                 inline,
+                style: crate::ast::CondStyle::Brace,
             }),
             source: String::new(),
             span: self.at(line, 1),

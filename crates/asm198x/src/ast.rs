@@ -212,23 +212,28 @@ pub(crate) enum Item {
         fill: u8,
     },
     /// A conditional-assembly block (ACME `!if`/`!ifdef`/`!ifndef` … `{ … }` …
-    /// `else { … }`), kept as **tree structure** so the formatter reflects the
-    /// block shape and idea 4's evaluator can prune branches. `head` is the
-    /// verbatim directive + condition (`!if DEBUG = 1`, `!ifndef FOO`);
-    /// `then_body`/`else_body` are the nested nodes; `inline` records that the
-    /// source wrote the whole block on one line (the idiomatic
-    /// `!ifndef X { X = 0 }` guard), which the formatter preserves.
+    /// `else { … }`, or a keyword dialect's `IF`/`IFDEF`/`IFNDEF` … `ELSE` …
+    /// `ENDIF` — sjasmplus is the first, language-surface U8), kept as **tree
+    /// structure** so the formatter reflects the block shape and idea 4's
+    /// evaluator can prune branches. `head` is the verbatim directive +
+    /// condition (`!if DEBUG = 1`, `IFNDEF FOO`); `then_body`/`else_body` are
+    /// the nested nodes; `style` selects the emit rendering (braces vs
+    /// keyword delimiters); `inline` records that the source wrote the whole
+    /// block on one line (ACME's idiomatic `!ifndef X { X = 0 }` guard),
+    /// which the formatter preserves — keyword dialects never set it.
     ///
-    /// ACME assembles by **evaluating** this tree (`dialects::acme::evaluate`
-    /// prunes the untaken branch and threads `env`), not through the generic
-    /// [`lower`] — so `lower` rejects a conditional. No dialect routes a
-    /// conditional through `lower`, so the rejection never fires; it guards
-    /// against a future one doing so by mistake.
+    /// Conditional dialects assemble by **evaluating** this tree (the shared
+    /// [`evaluate`] walk over a dialect [`CondEval`] prunes the untaken branch
+    /// and threads the environment), not through the generic [`lower`] — so
+    /// `lower` rejects a conditional. No dialect routes a conditional through
+    /// `lower`, so the rejection never fires; it guards against a future one
+    /// doing so by mistake.
     Conditional {
         head: String,
         then_body: Vec<Node>,
         else_body: Option<Vec<Node>>,
         inline: bool,
+        style: CondStyle,
     },
     /// A dialect-family-owned statement for a multi-pass CISC dialect (see
     /// [`NativeItem`]). The owning dialect's assembler reads it back; the shared
@@ -326,6 +331,19 @@ pub(crate) fn token_span(raw: &str, token: &str, line: u32) -> Option<Span> {
 #[derive(Default)]
 pub(crate) struct Program {
     pub(crate) nodes: Vec<Node>,
+}
+
+/// How a conditional block is rendered back to source by [`emit`] — the one
+/// per-style divergence the shared tree carries (the adoption recipe's step 4,
+/// `decisions/conditional-assembly-framework.md`). Parsing and evaluation are
+/// style-agnostic; only the delimiters differ.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum CondStyle {
+    /// ACME's brace form: `!if … {` / `} else {` / `}` at column 0.
+    Brace,
+    /// The keyword form (`IF …` / `ELSE` / `ENDIF` as indented directives) —
+    /// sjasmplus first (U8); `ELSE`/`ENDIF` follow the head keyword's case.
+    Keyword,
 }
 
 // ---------------------------------------------------------------------------
@@ -683,24 +701,35 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
                 out.push_str(&c.text);
             }
         };
-        // A conditional block renders its delimiters at column 0 and recurses
+        // A conditional block renders its style's delimiters and recurses
         // into its bodies (the idea-4 tree shape).
         if let Some(Item::Conditional {
             head,
             then_body,
             else_body,
             inline,
+            style,
         }) = &node.item
         {
-            emit_conditional(
-                node,
-                head,
-                then_body,
-                else_body.as_deref(),
-                *inline,
-                out,
-                equ_label_colon,
-            );
+            match style {
+                CondStyle::Brace => emit_conditional(
+                    node,
+                    head,
+                    then_body,
+                    else_body.as_deref(),
+                    *inline,
+                    out,
+                    equ_label_colon,
+                ),
+                CondStyle::Keyword => emit_keyword_conditional(
+                    node,
+                    head,
+                    then_body,
+                    else_body.as_deref(),
+                    out,
+                    equ_label_colon,
+                ),
+            }
             continue;
         }
         let label = node.label.as_ref().map(|s| s.name.as_str());
@@ -864,6 +893,43 @@ fn emit_conditional(
         emit_nodes(else_body, out, equ_label_colon, BODY);
     }
     out.push_str("}\n");
+}
+
+/// Emit one **keyword-style** conditional block (the recipe's step 4, built
+/// with its first consumer — sjasmplus, U8): the head (`IF cond`, `IFDEF X`)
+/// and the synthesized `ELSE`/`ENDIF` delimiters render as indented
+/// directives, each body with the normal layout rules (labels at column 0,
+/// operations indented — bodies are not deeper-indented, matching the brace
+/// style). `ELSE`/`ENDIF` follow the head keyword's case, so an all-lowercase
+/// source stays all-lowercase (the reference accepts only all-lower or
+/// all-upper spellings, probe-pinned).
+fn emit_keyword_conditional(
+    node: &Node,
+    head: &str,
+    then_body: &[Node],
+    else_body: Option<&[Node]>,
+    out: &mut String,
+    equ_label_colon: bool,
+) {
+    const INDENT: &str = "        ";
+    let upper = head.chars().next().is_some_and(|c| c.is_ascii_uppercase());
+    out.push_str(INDENT);
+    out.push_str(head);
+    if let Some(c) = &node.trivia.trailing {
+        out.push_str("   ");
+        out.push_str(&c.text);
+    }
+    out.push('\n');
+    emit_nodes(then_body, out, equ_label_colon, INDENT);
+    if let Some(else_body) = else_body {
+        out.push_str(INDENT);
+        out.push_str(if upper { "ELSE" } else { "else" });
+        out.push('\n');
+        emit_nodes(else_body, out, equ_label_colon, INDENT);
+    }
+    out.push_str(INDENT);
+    out.push_str(if upper { "ENDIF" } else { "endif" });
+    out.push('\n');
 }
 
 /// Render a single node inline (`X = 0`, `nop`) for the one-line guard idiom.
@@ -1123,6 +1189,7 @@ second:
                 then_body: vec![body],
                 else_body: None,
                 inline: false,
+                style: CondStyle::Brace,
             }),
             source: String::new(),
             span: Span::at(1, 1),
@@ -1152,6 +1219,7 @@ second:
                 then_body: vec![guard_body],
                 else_body: None,
                 inline: true,
+                style: CondStyle::Brace,
             }),
             source: String::new(),
             span: Span::at(1, 1),
@@ -1173,8 +1241,84 @@ second:
             then_body: vec![],
             else_body: None,
             inline: false,
+            style: CondStyle::Brace,
         };
         assert!(lower_item(cond).is_err(), "formatter-only, not lowerable");
+    }
+
+    /// U8 (the recipe's step 4) — a keyword-style conditional renders `IF …` /
+    /// `ELSE` / `ENDIF` as indented directives, the delimiters following the
+    /// head keyword's case, with bodies laid out by the normal rules.
+    #[test]
+    fn keyword_conditional_emits_indented_delimiters() {
+        let then_node = Node {
+            operand_span: None,
+            label: None,
+            item: None,
+            source: "ld a,1".into(),
+            span: Span::at(2, 1),
+            trivia: Trivia::default(),
+        };
+        let else_node = Node {
+            operand_span: None,
+            label: None,
+            item: None,
+            source: "ld a,2".into(),
+            span: Span::at(4, 1),
+            trivia: Trivia::default(),
+        };
+        let cond = Node {
+            operand_span: None,
+            label: None,
+            item: Some(Item::Conditional {
+                head: "IF DEBUG = 1".into(),
+                then_body: vec![then_node],
+                else_body: Some(vec![else_node]),
+                inline: false,
+                style: CondStyle::Keyword,
+            }),
+            source: String::new(),
+            span: Span::at(1, 1),
+            trivia: Trivia::default(),
+        };
+        let out = emit(&Program { nodes: vec![cond] }, true);
+        assert_eq!(
+            out,
+            "        IF DEBUG = 1\n        ld a,1\n        ELSE\n        ld a,2\n        ENDIF\n"
+        );
+
+        // A lowercase head keeps lowercase delimiters.
+        let body = Node {
+            operand_span: None,
+            label: None,
+            item: None,
+            source: "nop".into(),
+            span: Span::at(2, 1),
+            trivia: Trivia::default(),
+        };
+        let lower_cond = Node {
+            operand_span: None,
+            label: None,
+            item: Some(Item::Conditional {
+                head: "ifdef FLAG".into(),
+                then_body: vec![body],
+                else_body: None,
+                inline: false,
+                style: CondStyle::Keyword,
+            }),
+            source: String::new(),
+            span: Span::at(1, 1),
+            trivia: Trivia::default(),
+        };
+        assert_eq!(
+            emit(
+                &Program {
+                    nodes: vec![lower_cond]
+                },
+                true
+            ),
+            "        ifdef FLAG\n        nop\n        endif\n"
+        );
     }
 
     /// A structured operand cannot lower to a fixed-slot value — it returns an

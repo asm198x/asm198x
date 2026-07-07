@@ -13,7 +13,17 @@
 //! pasmo, a leading-`.` label is *local*, scoped under the most recent global
 //! label (so `.loop` may recur) — see [`Z80Syntax::scopes_locals`].
 //!
-//! TODO: sjasmplus modules, macros, and `DUP`.
+//! **Conditional assembly** (language-surface U8): sjasmplus is the first
+//! keyword-style adopter of the shared `ast::CondEval`/`ast::evaluate`
+//! framework — `IF`/`IFDEF`/`IFNDEF`/`ELSE`/`ENDIF` plus `DEFINE` (textual
+//! substitution, probe-pinned). All three entry points route through the
+//! z80 keyword pipeline (`z80::parse_program_keyword` + the `SjasmEval`
+//! walk), so every line lowers with the live environment and an include in
+//! an untaken branch never loads. pasmo stays on the eager walker — its
+//! conditional adoption is demand-gated
+//! (`decisions/conditional-assembly-framework.md`).
+//!
+//! TODO: sjasmplus modules, macros, `DUP`, and `ELSEIF` (#67).
 
 use std::collections::BTreeMap;
 
@@ -35,8 +45,12 @@ impl Dialect for Sjasmplus {
     fn extension_set(&self) -> Option<&'static isa::InstructionSet> {
         self.z80n.then_some(&isa::z80::NEXT)
     }
+    /// Assembly routes through the keyword-conditional pipeline (U8): the
+    /// structure parse builds the shared conditional tree, and the
+    /// `ast::evaluate` walk lowers each live line with the environment as of
+    /// that point (an `equ` in a taken branch feeds later form selection).
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        z80::assemble(
+        z80::assemble_keyword(
             &SjasmplusSyntax,
             self.instruction_set(),
             self.extension_set(),
@@ -44,28 +58,30 @@ impl Dialect for Sjasmplus {
         )
     }
     fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
-        Ok(Some(z80::parse_program(
+        Ok(Some(z80::parse_program_keyword(
             &SjasmplusSyntax,
             self.instruction_set(),
             self.extension_set(),
+            crate::span::FileId(0),
             source,
         )?))
     }
-    /// The include-capable parse (language-surface U2): the interleaved,
-    /// environment-threaded walk over the source map, resolving `INCLUDE`
-    /// lazily through the loader — see `z80::parse_program_multi`.
+    /// The include-capable parse (language-surface U2, conditional-aware
+    /// since U8): includes resolve lazily *inside* the conditional walk, so
+    /// a guarded include in an untaken branch never loads (KTD1) and the
+    /// environment threads through the boundary in both directions.
     fn parse_multi(
         &self,
         map: &mut SourceMap,
         loader: &dyn SourceLoader,
     ) -> Result<Vec<Statement>, AsmError> {
-        crate::ast::lower(z80::parse_program_multi(
+        z80::parse_program_multi_keyword(
             &SjasmplusSyntax,
             self.instruction_set(),
             self.extension_set(),
             map,
             loader,
-        )?)
+        )
     }
     /// sjasmplus truncates an over-range byte to its low 8 bits and warns.
     fn oversized_byte_policy(&self) -> Oversize {
@@ -279,5 +295,225 @@ mod tests {
         // `$` is the current statement's address (matches pasmo and the binary).
         let a = asm("        org $8000\n        jr $\n        ld hl,$\n").expect("pc");
         assert_eq!(a.bytes, vec![0x18, 0xFE, 0x21, 0x02, 0x80]);
+    }
+
+    // -----------------------------------------------------------------------
+    // Conditional assembly + DEFINE (language-surface U8). Every byte
+    // expectation below is pinned by the sjasmplus 1.21.0 probe runs (the
+    // u8-probes set); the same programs ride the differential corpus.
+    // -----------------------------------------------------------------------
+
+    /// AE4 (R5): taken and untaken branches, with `ELSE`, byte-identical to
+    /// the reference (probe p1).
+    #[test]
+    fn conditional_takes_the_live_branch() {
+        let src = "        org $8000\n\
+                   \x20       IF 1\n        ld a,1\n        ELSE\n        ld a,2\n        ENDIF\n\
+                   \x20       IF 0\n        ld b,1\n        ELSE\n        ld b,2\n        ENDIF\n";
+        assert_eq!(asm(src).expect("p1").bytes, vec![0x3E, 0x01, 0x06, 0x02]);
+    }
+
+    /// Condition grammar: comparisons (`=`/`==`/`>`/`<`/`>=`/`!=`),
+    /// arithmetic truthiness, `&&`/`||`/`!` (probe p2), and the
+    /// parenthesised logical forms (probe p45).
+    #[test]
+    fn condition_expressions_match_the_reference() {
+        let src = "        org $8000\n\
+                   VAL     equ 5\n\
+                   \x20       IF VAL = 5\n        ld a,1\n        ENDIF\n\
+                   \x20       IF VAL == 5\n        ld a,2\n        ENDIF\n\
+                   \x20       IF VAL > 3\n        ld a,3\n        ENDIF\n\
+                   \x20       IF VAL < 3\n        ld a,4\n        ENDIF\n\
+                   \x20       IF VAL*2-10\n        ld a,5\n        ENDIF\n\
+                   \x20       IF VAL && 0\n        ld a,6\n        ENDIF\n\
+                   \x20       IF VAL || 0\n        ld a,7\n        ENDIF\n\
+                   \x20       IF !VAL\n        ld a,8\n        ENDIF\n\
+                   \x20       IF (VAL = 5) && !(VAL && 0)\n        ld a,9\n        ENDIF\n";
+        assert_eq!(
+            asm(src).expect("conditions").bytes,
+            vec![0x3E, 1, 0x3E, 2, 0x3E, 3, 0x3E, 7, 0x3E, 9]
+        );
+    }
+
+    /// `IFDEF`/`IFNDEF` test the DEFINE namespace only — a same-named `equ`
+    /// constant or label is *not* "defined" (probe p3), and names are
+    /// case-sensitive (probe p22).
+    #[test]
+    fn ifdef_namespace_is_defines_only_and_case_sensitive() {
+        let src = "        org $8000\n\
+                   \x20       DEFINE flag\n\
+                   CONST   equ 7\n\
+                   LBL:    nop\n\
+                   \x20       IFDEF flag\n        ld a,1\n        ENDIF\n\
+                   \x20       IFDEF FLAG\n        ld a,2\n        ENDIF\n\
+                   \x20       IFDEF CONST\n        ld a,3\n        ENDIF\n\
+                   \x20       IFDEF LBL\n        ld a,4\n        ENDIF\n\
+                   \x20       IFNDEF NOPE\n        ld a,5\n        ENDIF\n";
+        assert_eq!(asm(src).expect("ifdef").bytes, vec![0x00, 0x3E, 1, 0x3E, 5]);
+    }
+
+    /// `DEFINE NAME value` substitutes textually at identifier boundaries —
+    /// operands, whole instructions, chains — but never inside strings or
+    /// partial identifiers (probes p4/p5/p20/p21/p24/p26).
+    #[test]
+    fn define_substitutes_textually() {
+        // Operand (p4) and expression (p6) positions.
+        assert_eq!(
+            asm("        DEFINE X 5\n        ld a,X\n")
+                .expect("p4")
+                .bytes,
+            vec![0x3E, 5]
+        );
+        assert_eq!(
+            asm("        DEFINE N 3\n        ld a,N+1\n        db N,N*2\n")
+                .expect("p6")
+                .bytes,
+            vec![0x3E, 4, 3, 6]
+        );
+        // A whole-instruction replacement on a bare line (p5).
+        assert_eq!(
+            asm("        DEFINE X ld a,1\n        X\n")
+                .expect("p5")
+                .bytes,
+            vec![0x3E, 1]
+        );
+        // Chained defines expand at use (p24).
+        assert_eq!(
+            asm("        DEFINE A1 3\n        DEFINE B1 A1+1\n        db B1\n")
+                .expect("p24")
+                .bytes,
+            vec![4]
+        );
+        // A DEFINE'd name renames a label definition (p26).
+        let r = asm("        org $8000\n        DEFINE L mylab\nL:      nop\n        jr mylab\n")
+            .expect("p26");
+        assert_eq!(r.bytes, vec![0x00, 0x18, 0xFD]);
+        // Identifier boundaries: `NN` is not an occurrence of `N` (p20).
+        assert!(asm("        DEFINE N 3\n        db NN\n").is_err(), "p20");
+        // Strings are never rewritten (p21).
+        assert_eq!(
+            asm("        DEFINE N 3\n        db \"N\"\n")
+                .expect("p21")
+                .bytes,
+            vec![0x4E]
+        );
+        // A duplicate DEFINE is the reference's error (p23).
+        let e = asm("        DEFINE X 1\n        DEFINE X 2\n").expect_err("p23");
+        assert!(e.message.contains("duplicate"), "unexpected: {e}");
+    }
+
+    /// A skipped branch defines nothing — labels, `equ` constants, and
+    /// DEFINEs inside an untaken branch do not exist afterwards (probes
+    /// p10/p10b), and untaken lines are never parsed at all (probe p31).
+    #[test]
+    fn skipped_branch_defines_nothing() {
+        let src = "        org $8000\n\
+                   \x20       IF 0\n\
+                   skipped:  nop\n\
+                   SKONST  equ 9\n\
+                   \x20       DEFINE SKDEF\n\
+                   \x20       ENDIF\n\
+                   \x20       IFDEF SKDEF\n        ld a,1\n        ENDIF\n\
+                   \x20       IFNDEF SKDEF\n        ld a,2\n        ENDIF\n";
+        let r = asm(src).expect("skipped defines nothing");
+        assert_eq!(r.bytes, vec![0x3E, 2]);
+        assert!(!r.symbols.contains_key("skipped"), "skipped label leaked");
+        // The skipped `equ` is unknown afterwards (the reference errors too).
+        assert!(
+            asm("        IF 0\nSK      equ 9\n        ENDIF\n        ld a,SK\n").is_err(),
+            "p10b"
+        );
+        // Untaken lines are skipped without parsing (p31).
+        assert_eq!(
+            asm("        org $8000\n        IF 0\n        @@!! garbage (((\n        ENDIF\n        ld a,1\n")
+                .expect("p31")
+                .bytes,
+            vec![0x3E, 1]
+        );
+    }
+
+    /// Nested conditionals: the inner block evaluates only inside a taken
+    /// outer branch, and nesting is tracked while skipping (probes p9/p42);
+    /// lowercase keywords are the reference's other accepted spelling.
+    #[test]
+    fn conditionals_nest() {
+        let src = "        org $8000\n\
+                   \x20       if 1\n\
+                   \x20       if 0\n        ld a,1\n        else\n        ld a,2\n        endif\n\
+                   \x20       ifdef NOPE\n        ld a,3\n        endif\n\
+                   \x20       endif\n";
+        assert_eq!(asm(src).expect("p9").bytes, vec![0x3E, 2]);
+        let src = "        org $8000\n\
+                   \x20       IF 0\n\
+                   \x20       IF 1\n        ld a,1\n        ENDIF\n        ld a,2\n\
+                   \x20       ENDIF\n        ld a,3\n";
+        assert_eq!(asm(src).expect("p42").bytes, vec![0x3E, 3]);
+    }
+
+    /// The environment threads across a conditional: an `equ` in a taken
+    /// branch feeds later opcode-embedded form selection (probe p38), and a
+    /// global label inside a taken branch rescopes later locals (probe p37).
+    #[test]
+    fn taken_branch_bindings_flow_out() {
+        let src = "        org $8000\n\
+                   \x20       IF 1\nBITN    equ 5\nPAD     equ 2\n        ENDIF\n\
+                   \x20       bit BITN,a\n        ds PAD\n        ld a,1\n";
+        assert_eq!(
+            asm(src).expect("p38").bytes,
+            vec![0xCB, 0x6F, 0, 0, 0x3E, 1]
+        );
+        let src = "        org $8000\n\
+                   first:\n.l:     nop\n\
+                   \x20       IF 1\nsecond:\n.l:     nop\n        jr .l\n        ENDIF\n\
+                   \x20       jr .l\n";
+        assert_eq!(
+            asm(src).expect("p37").bytes,
+            vec![0x00, 0x00, 0x18, 0xFD, 0x18, 0xFB]
+        );
+    }
+
+    /// A label on the `IF` line binds at the block's address (probe p27).
+    #[test]
+    fn label_on_the_if_line_binds() {
+        let r =
+            asm("        org $8000\nlbl:    IF 1\n        ld a,1\n        ENDIF\n        jr lbl\n")
+                .expect("p27");
+        assert_eq!(r.bytes, vec![0x3E, 1, 0x18, 0xFC]);
+        assert_eq!(r.symbols.get("lbl"), Some(&0x8000));
+    }
+
+    /// The block-structure error postures: an unterminated `IF`, a stray
+    /// `ENDIF`, junk after `ENDIF` (the reference rejects it; junk after
+    /// `ELSE` it ignores — probes p43/p43b/p35/p40), and the out-of-scope
+    /// `ELSEIF` (#67) all error clearly.
+    #[test]
+    fn block_structure_errors() {
+        let e = asm("        IF 1\n        ld a,1\n").expect_err("p43");
+        assert!(e.message.contains("ENDIF"), "unexpected: {e}");
+        let e = asm("        ENDIF\n").expect_err("p43b");
+        assert!(e.message.contains("without a matching"), "unexpected: {e}");
+        let e = asm("        IF 1\n        ENDIF junk\n").expect_err("p35");
+        assert!(e.message.contains("unexpected text"), "unexpected: {e}");
+        // Junk after ELSE is tolerated, as the reference does (p40).
+        assert_eq!(
+            asm("        org $8000\n        IF 0\n        ld a,1\n        ELSE junk\n        ld a,2\n        ENDIF\n")
+                .expect("p40")
+                .bytes,
+            vec![0x3E, 2]
+        );
+        let e =
+            asm("        IF 0\n        ld a,1\n        ELSEIF 1\n        ld a,2\n        ENDIF\n")
+                .expect_err("elseif");
+        assert!(e.message.contains("ELSEIF"), "unexpected: {e}");
+    }
+
+    /// Keywords spell all-lower or all-upper only; a mixed-case `If` is an
+    /// ordinary identifier, exactly as the reference treats it (probe p11).
+    #[test]
+    fn mixed_case_keywords_are_not_conditionals() {
+        assert!(
+            asm("        If 1\n        ld a,1\n        Endif\n").is_err(),
+            "p11"
+        );
     }
 }

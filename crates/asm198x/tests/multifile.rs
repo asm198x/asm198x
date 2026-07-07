@@ -3714,3 +3714,168 @@ fn cli_vasm_error_in_include_carries_an_included_from_note() {
         "carries the included-from note: {stderr}"
     );
 }
+
+// ===========================================================================
+// U8 — conditional assembly on sjasmplus meets the include walk. KTD1's
+// proof: an include inside an untaken branch never loads. Every byte
+// expectation is pinned by the sjasmplus 1.21.0 probe runs (u8-probes).
+// ===========================================================================
+
+/// KTD1's proof for a keyword dialect: `IF 0 / INCLUDE "missing.inc" / ENDIF`
+/// assembles cleanly — the loader is never asked for the untaken target
+/// (probe p14: the reference skips it too).
+#[test]
+fn guarded_include_never_loads_when_untaken() {
+    let loader = MemoryLoader::new(); // deliberately empty: nothing may load
+    let src = "        org $8000\n\
+               \x20       IF 0\n\
+               \x20       include \"missing.inc\"\n\
+               \x20       ENDIF\n\
+               \x20       ld a,1\n";
+    let r = assemble_sjasmplus_files(src, "main.asm", &loader).expect("untaken include skipped");
+    assert_eq!(r.bytes, vec![0x3E, 0x01]);
+    assert_eq!(
+        r.files,
+        vec!["main.asm".to_string()],
+        "the untaken target never entered the file table"
+    );
+}
+
+/// The taken counterpart: a guarded include loads, and what it defines (an
+/// `equ` feeding a later opcode-embedded form) flows out — the environment
+/// threads through the conditional *and* the include boundary.
+#[test]
+fn guarded_include_loads_when_taken() {
+    let loader = MemoryLoader::new().text("defs.inc", "BITN equ 5\n");
+    let src = "        org $8000\n\
+               \x20       IF 1\n\
+               \x20       include \"defs.inc\"\n\
+               \x20       ENDIF\n\
+               \x20       bit BITN,a\n";
+    let r = assemble_sjasmplus_files(src, "main.asm", &loader).expect("taken include loads");
+    assert_eq!(r.bytes, vec![0xCB, 0x6F]);
+    assert_eq!(
+        r.files,
+        vec!["main.asm".to_string(), "defs.inc".to_string()]
+    );
+}
+
+/// A guarded `incbin` behaves the same way: the untaken asset is never
+/// requested from the loader (the include mechanism's KTD1, on the binary
+/// path).
+#[test]
+fn guarded_incbin_never_loads_when_untaken() {
+    let loader = MemoryLoader::new();
+    let src = "        org $8000\n\
+               \x20       IF 0\n\
+               \x20       incbin \"missing.bin\"\n\
+               \x20       ENDIF\n\
+               \x20       ld a,1\n";
+    let r = assemble_sjasmplus_files(src, "main.asm", &loader).expect("untaken incbin skipped");
+    assert_eq!(r.bytes, vec![0x3E, 0x01]);
+}
+
+/// DEFINEs thread through the include boundary in both directions (probe
+/// p36): the includer's `DEFINE WANT` guards code *inside* the include, and
+/// the include's `DEFINE FROMINC` guards code *after* the include point.
+#[test]
+fn defines_thread_through_includes_both_ways() {
+    let loader = MemoryLoader::new().text(
+        "guard.inc",
+        "        IFDEF WANT\n        ld a,9\n        ENDIF\n        DEFINE FROMINC\n",
+    );
+    let src = "        org $8000\n\
+               \x20       DEFINE WANT\n\
+               \x20       include \"guard.inc\"\n\
+               \x20       IFDEF FROMINC\n\
+               \x20       ld b,1\n\
+               \x20       ENDIF\n";
+    let r = assemble_sjasmplus_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0x3E, 0x09, 0x06, 0x01]);
+}
+
+/// A conditional block cannot span an include boundary, direction one: the
+/// `IF` sits in the includer and the `ENDIF` inside the include. The
+/// includer's own structure parse rejects it before the include is even
+/// consulted (the reference rejects both halves — probe p12).
+#[test]
+fn cross_file_endif_in_include_is_rejected() {
+    let loader = MemoryLoader::new().text("tail.inc", "        ld a,9\n        ENDIF\n");
+    let src = "        org $8000\n\
+               \x20       IF 1\n\
+               \x20       include \"tail.inc\"\n\
+               \x20       ld b,1\n";
+    let e = assemble_sjasmplus_files(src, "main.asm", &loader).expect_err("unterminated IF");
+    assert!(
+        e.error.message.contains("no matching `ENDIF`"),
+        "names the unterminated block: {}",
+        e.error.message
+    );
+    let span = e.error.span.as_ref().expect("span at the IF head");
+    assert_eq!(span.line, 2, "points at the `IF` line");
+    assert_eq!(
+        e.source_map.file_table().first().map(String::as_str),
+        Some("main.asm")
+    );
+}
+
+/// Direction two: the `IF` opens inside the include and the `ENDIF` sits in
+/// the includer. The include's structure parse rejects the unterminated
+/// block, naming the include's file (probe p13's posture).
+#[test]
+fn cross_file_if_in_include_is_rejected() {
+    let loader = MemoryLoader::new().text("frag.inc", "        IF 1\n        ld a,9\n");
+    let src = "        org $8000\n        include \"frag.inc\"\n";
+    let e = assemble_sjasmplus_files(src, "main.asm", &loader).expect_err("unterminated IF");
+    assert!(
+        e.error.message.contains("no matching `ENDIF`"),
+        "names the unterminated block: {}",
+        e.error.message
+    );
+    let span = e.error.span.as_ref().expect("span inside the include");
+    assert_eq!(span.line, 1, "the `IF` line of frag.inc");
+    assert_eq!(
+        e.source_map
+            .file_table()
+            .get(span.file.0 as usize)
+            .map(String::as_str),
+        Some("frag.inc"),
+        "the diagnostic names the include, not the root"
+    );
+}
+
+/// A stray `ENDIF` at the top level of the root (the other half of probe
+/// p13's fixture) is rejected by the root's own parse.
+#[test]
+fn stray_endif_in_the_root_is_rejected() {
+    let loader = MemoryLoader::new().text("frag.inc", "        nop\n");
+    let src = "        org $8000\n        include \"frag.inc\"\n        ENDIF\n";
+    let e = assemble_sjasmplus_files(src, "main.asm", &loader).expect_err("stray ENDIF");
+    assert!(
+        e.error.message.contains("`ENDIF` without a matching `IF`"),
+        "unexpected: {}",
+        e.error.message
+    );
+}
+
+/// A conditional inside an include evaluates with the environment live at the
+/// include point, and locals keep scoping across the boundary (the U2
+/// boundary scenario, now under a conditional).
+#[test]
+fn conditional_inside_include_sees_the_includers_environment() {
+    let loader = MemoryLoader::new().text(
+        "body.inc",
+        "        IF MODE = 2\n.here:  nop\n        jr .here\n        ELSE\n        ld a,0\n        ENDIF\n",
+    );
+    let src = "        org $8000\n\
+               MODE    equ 2\n\
+               start:\n\
+               \x20       include \"body.inc\"\n";
+    let r = assemble_sjasmplus_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0x00, 0x18, 0xFD]);
+    assert_eq!(
+        r.symbols.get("start.here"),
+        Some(&0x8000),
+        "the include's local scoped under the includer's global"
+    );
+}

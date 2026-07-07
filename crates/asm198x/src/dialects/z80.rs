@@ -118,7 +118,10 @@ pub(crate) trait Z80Syntax {
 }
 
 /// Assemble Z80 source under `syntax` into the engine's statement stream, using
-/// `set` (and optional Z80N `ext`) for the instruction encodings.
+/// `set` (and optional Z80N `ext`) for the instruction encodings. The **eager**
+/// pipeline — pasmo's, since U8: a keyword-conditional dialect (sjasmplus)
+/// routes through [`assemble_keyword`] instead, so its lines lower with the
+/// live conditional environment.
 pub(crate) fn assemble<S: Z80Syntax>(
     syntax: &S,
     set: &'static isa::InstructionSet,
@@ -131,9 +134,11 @@ pub(crate) fn assemble<S: Z80Syntax>(
     crate::ast::lower(parse_program(syntax, set, ext, source)?)
 }
 
-/// Parse Z80 source into the semantic [`Program`](crate::ast::Program). Each line
-/// becomes a node carrying its scoped label, operation, and span; trivia is
-/// filled in U4. The scope resolution mirrors the old string-mangle exactly, so
+/// Parse Z80 source into the semantic [`Program`](crate::ast::Program) — the
+/// eager per-line parse (pasmo's; sjasmplus parses through
+/// [`parse_program_keyword`] since U8). Each line becomes a node carrying its
+/// scoped label, operation, and span; trivia is filled in U4. The scope
+/// resolution mirrors the old string-mangle exactly, so
 /// [`lower`](crate::ast::lower) reproduces the same statements.
 ///
 /// An include or incbin directive (a dialect that answers
@@ -307,6 +312,17 @@ fn stamp_file(mut e: AsmError, file: FileId) -> AsmError {
     e
 }
 
+/// As [`stamp_file`], but only when the error has no span yet — the
+/// conditional walk's variant (U8): a nested include's errors arrive already
+/// stamped with the *inner* file, which must not be overwritten by the
+/// includer's frame.
+fn stamp_missing_file(mut e: AsmError, file: FileId) -> AsmError {
+    if e.span.is_none() && e.line != 0 {
+        e.span = Some(Span::in_file(file, e.line as u32, 0));
+    }
+    e
+}
+
 /// A walk-handled directive found by [`Walker::walk_line`], handed back for
 /// the driver to decide: the single-source parse keeps it as a verbatim item;
 /// the multi-file walk resolves it lazily (KTD1).
@@ -400,8 +416,8 @@ impl<'a, S: Z80Syntax> Walker<'a, S> {
         let (label, rest) = split_label(self.syntax, self.set, self.ext, code, line)?;
         // Includes and incbins are walk-handled, not Operations: the target
         // must not be opened here (KTD1 — `--fmt` succeeds with a missing
-        // target, and an untaken conditional branch must never load one once
-        // U8 lands).
+        // target; on the keyword pipeline, `SjasmEval` applies the same rule
+        // inside conditional branches, U8).
         let (word, args) = split_first_word(rest);
         let is_include = self.syntax.is_include(word);
         let is_incbin = self.syntax.is_incbin(word);
@@ -652,6 +668,1041 @@ fn slice_incbin(data: &[u8], offset: Option<i64>, length: Option<i64>) -> Result
         ));
     }
     Ok(data[off as usize..(off + take) as usize].to_vec())
+}
+
+// ---------------------------------------------------------------------------
+// Keyword conditionals + DEFINE — the sjasmplus adoption (language-surface U8)
+//
+// The decision record's four-step recipe
+// (`decisions/conditional-assembly-framework.md`), applied to the z80 family's
+// first keyword dialect: a **structure parse** recognises `IF`/`IFDEF`/
+// `IFNDEF` … `ELSE` … `ENDIF` into the shared [`Item::Conditional`] tree
+// (bodies kept verbatim, never parsed eagerly — probe p31: the reference
+// accepts arbitrary garbage in an untaken branch), and [`SjasmEval`]
+// implements [`CondEval`](crate::ast::CondEval) so the shared
+// [`evaluate`](crate::ast::evaluate) walk prunes branches and threads the
+// environment. Every line lowers at **evaluation** time with the live
+// environment — an `equ` inside a taken branch feeds a later `bit`/`ds` form
+// choice (probe p38), a `DEFINE` in a skipped branch defines nothing (probe
+// p10), and an include inside an untaken branch never loads (probe p14,
+// KTD1's proof). pasmo keeps the eager [`Walker`] pipeline untouched; a
+// dialect opts in by calling these entry points (the [`Z80Syntax`] gate).
+//
+// Reference semantics, probe-pinned (sjasmplus 1.21.0, scratch u8-probes/):
+// keywords spell all-lower or all-upper only (`If` is an ordinary identifier,
+// probes p9/p11/p34); at column 0 a keyword is a *label*, so conditionals are
+// written in the operation field (probe p33); `IFDEF`/`IFNDEF` test the
+// case-sensitive DEFINE namespace only — not labels or `equ` constants
+// (probes p3/p22) — on the first token, ignoring the rest (probe p48);
+// `ELSE` ignores trailing text, `ENDIF` rejects it (probes p40/p35); nesting
+// is tracked while skipping (probe p42); a conditional block never spans an
+// include boundary (probes p12/p13 — both directions rejected); `DEFINE NAME
+// value` is *textual substitution* at identifier boundaries, outside string/
+// char literals, chained to a fixed point at use (probes p4/p5/p20/p21/p24),
+// and a duplicate `DEFINE` is an error (probe p23). `ELSEIF` exists in the
+// reference but is out of the adopted surface (#67).
+// ---------------------------------------------------------------------------
+
+/// The keyword-conditional vocabulary. The reference accepts only the
+/// all-lowercase and all-uppercase spellings (probes p9/p11); anything else
+/// falls through to ordinary identifier handling, exactly as it does there.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum CondKw {
+    If,
+    IfDef,
+    IfNDef,
+    Else,
+    ElseIf,
+    EndIf,
+}
+
+fn cond_keyword(word: &str) -> Option<CondKw> {
+    Some(match word {
+        "if" | "IF" => CondKw::If,
+        "ifdef" | "IFDEF" => CondKw::IfDef,
+        "ifndef" | "IFNDEF" => CondKw::IfNDef,
+        "else" | "ELSE" => CondKw::Else,
+        "elseif" | "ELSEIF" => CondKw::ElseIf,
+        "endif" | "ENDIF" => CondKw::EndIf,
+        _ => return None,
+    })
+}
+
+/// The `DEFINE` directive's spellings (the same strict case rule — probe p34).
+fn is_define_word(word: &str) -> bool {
+    matches!(word, "define" | "DEFINE")
+}
+
+/// How one leg of [`KwCx::parse_block`] ended.
+#[derive(PartialEq, Eq)]
+enum KwClose {
+    Eof,
+    Else,
+    EndIf,
+}
+
+/// The keyword-conditional structure parse cursor: line-oriented, no brace
+/// matching — `IF`/`ELSE`/`ENDIF` are recognised in the operation field and
+/// bodies collect as **verbatim** nodes (only an `equ` keeps its item, for the
+/// formatter's inline `name: equ …` rendering). No evaluation happens here:
+/// no environment, no DEFINE table — [`SjasmEval`] supplies those on the live
+/// walk.
+struct KwCx<'a, S: Z80Syntax> {
+    syntax: &'a S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    file: FileId,
+    lines: Vec<&'a str>,
+    /// The next line to read (0-based).
+    pos: usize,
+    /// Own-line comments since the last node, attached as leading trivia.
+    pending: Vec<Comment>,
+}
+
+/// Parse one file of a keyword-conditional program into the source-preserving
+/// tree: conditional blocks as [`Item::Conditional`](crate::ast::Item) (the
+/// `Keyword` style), every other line a verbatim node. Used for `--fmt`
+/// (`parse_ast`) and as the front half of [`assemble_keyword`] /
+/// [`parse_program_multi_keyword`].
+pub(crate) fn parse_program_keyword<S: Z80Syntax>(
+    syntax: &S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    file: FileId,
+    source: &str,
+) -> Result<Program, AsmError> {
+    let mut cx = KwCx {
+        syntax,
+        set,
+        ext,
+        file,
+        lines: source.lines().collect(),
+        pos: 0,
+        pending: Vec::new(),
+    };
+    let (mut nodes, close) = cx.parse_block(false).map_err(|e| stamp_file(e, file))?;
+    debug_assert!(close == KwClose::Eof, "top level only ends at EOF");
+    // Flush a trailing comment block so the formatter keeps it.
+    if !cx.pending.is_empty() {
+        let last = cx.lines.len() as u32;
+        nodes.push(Node {
+            operand_span: None,
+            label: None,
+            item: None,
+            source: String::new(),
+            span: Span::in_file(file, last, 1),
+            trivia: Trivia {
+                leading: std::mem::take(&mut cx.pending),
+                trailing: None,
+            },
+        });
+    }
+    Ok(Program { nodes })
+}
+
+impl<S: Z80Syntax> KwCx<'_, S> {
+    /// Parse lines until `ELSE`/`ENDIF` (inside a block) or EOF, collecting
+    /// nodes. `in_block` is false only at the top level, where a stray
+    /// `ELSE`/`ENDIF` is an error (probe p43b's posture).
+    fn parse_block(&mut self, in_block: bool) -> Result<(Vec<Node>, KwClose), AsmError> {
+        let mut nodes = Vec::new();
+        while self.pos < self.lines.len() {
+            let raw = self.lines[self.pos];
+            let line = self.pos + 1;
+            self.pos += 1;
+            let (code, comment) = self.syntax.split_comment(raw);
+            if code.trim().is_empty() {
+                if let Some(text) = comment {
+                    self.pending.push(Comment {
+                        text: text.to_string(),
+                        span: Span::in_file(self.file, line as u32, 1),
+                    });
+                }
+                continue;
+            }
+            // A label-split failure is deferred, not raised: an untaken
+            // branch may hold anything (probe p31), so the whole line becomes
+            // verbatim op source — a *live* line still errors when it lowers.
+            let (label, rest) = match split_label(self.syntax, self.set, self.ext, code, line) {
+                Ok(v) => v,
+                Err(_) => (None, code.trim()),
+            };
+            let (word, args) = split_first_word(rest);
+            match cond_keyword(word) {
+                Some(CondKw::If | CondKw::IfDef | CondKw::IfNDef) => {
+                    self.parse_conditional(&mut nodes, raw, rest, word, label, comment, line)?;
+                }
+                Some(CondKw::Else) => {
+                    if !in_block {
+                        return Err(AsmError::new(line, "`ELSE` without a matching `IF`"));
+                    }
+                    if label.is_some() {
+                        return Err(AsmError::new(line, "a label cannot precede `ELSE`"));
+                    }
+                    // The reference ignores text after `ELSE` (probe p40).
+                    if let Some(text) = comment {
+                        self.pending.push(Comment {
+                            text: text.to_string(),
+                            span: Span::in_file(self.file, line as u32, 1),
+                        });
+                    }
+                    return Ok((nodes, KwClose::Else));
+                }
+                Some(CondKw::EndIf) => {
+                    if !in_block {
+                        return Err(AsmError::new(line, "`ENDIF` without a matching `IF`"));
+                    }
+                    if label.is_some() {
+                        return Err(AsmError::new(line, "a label cannot precede `ENDIF`"));
+                    }
+                    if !args.trim().is_empty() {
+                        // The reference rejects text after `ENDIF` (probe p35).
+                        return Err(AsmError::new(
+                            line,
+                            format!("unexpected text after `ENDIF`: `{}`", args.trim()),
+                        ));
+                    }
+                    if let Some(text) = comment {
+                        self.pending.push(Comment {
+                            text: text.to_string(),
+                            span: Span::in_file(self.file, line as u32, 1),
+                        });
+                    }
+                    return Ok((nodes, KwClose::EndIf));
+                }
+                Some(CondKw::ElseIf) => {
+                    // The reference has ELSEIF; adopting it is tracked by #67 —
+                    // reject clearly rather than mis-assemble the chain.
+                    return Err(AsmError::new(
+                        line,
+                        "`ELSEIF` is not supported yet — nest an `IF` inside the `ELSE` \
+                         branch (#67)",
+                    ));
+                }
+                None => {
+                    // A plain line: verbatim op source. Only `equ` keeps an
+                    // item, so the formatter renders `name: equ …` inline as
+                    // the eager parse did; lowering re-parses from source.
+                    let item = if label.is_some() && word.eq_ignore_ascii_case("equ") {
+                        parse_value(self.syntax, args, line)
+                            .ok()
+                            .map(|e| crate::ast::item_from_operation(Operation::Equ(e)))
+                    } else {
+                        None
+                    };
+                    let symbol = label.map(|name| Symbol {
+                        qualified: name.clone(),
+                        scope: Scope::Global,
+                        name,
+                    });
+                    let operand_span =
+                        crate::ast::operand_span(raw, rest, line as u32).map(|mut s| {
+                            s.file = self.file;
+                            s
+                        });
+                    nodes.push(Node {
+                        operand_span,
+                        label: symbol,
+                        item,
+                        source: rest.to_string(),
+                        span: Span::in_file(self.file, line as u32, 1),
+                        trivia: self.trivia(comment, code, line),
+                    });
+                }
+            }
+        }
+        Ok((nodes, KwClose::Eof))
+    }
+
+    /// Parse one `IF`/`IFDEF`/`IFNDEF` block: recurse for the then-branch, an
+    /// optional `ELSE` branch, and require the `ENDIF`. A label on the head
+    /// line binds at the block's address (probe p27), as its own node — the
+    /// shared walk never reads a conditional node's label.
+    #[allow(clippy::too_many_arguments)]
+    fn parse_conditional(
+        &mut self,
+        nodes: &mut Vec<Node>,
+        _raw: &str,
+        rest: &str,
+        word: &str,
+        label: Option<String>,
+        comment: Option<&str>,
+        line: usize,
+    ) -> Result<(), AsmError> {
+        let mut leading = std::mem::take(&mut self.pending);
+        if let Some(name) = label {
+            nodes.push(Node {
+                operand_span: None,
+                label: Some(Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }),
+                item: None,
+                source: String::new(),
+                span: Span::in_file(self.file, line as u32, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut leading),
+                    trailing: None,
+                },
+            });
+        }
+        let head = rest.to_string();
+        let (then_body, first) = self.parse_block(true)?;
+        let else_body = match first {
+            KwClose::EndIf => None,
+            KwClose::Else => {
+                let (body, second) = self.parse_block(true)?;
+                if second != KwClose::EndIf {
+                    return Err(AsmError::new(
+                        line,
+                        format!("`{word}` has no matching `ENDIF`"),
+                    ));
+                }
+                Some(body)
+            }
+            KwClose::Eof => {
+                return Err(AsmError::new(
+                    line,
+                    format!("`{word}` has no matching `ENDIF`"),
+                ));
+            }
+        };
+        nodes.push(Node {
+            operand_span: None,
+            label: None,
+            item: Some(crate::ast::Item::Conditional {
+                head,
+                then_body,
+                else_body,
+                inline: false,
+                style: crate::ast::CondStyle::Keyword,
+            }),
+            source: String::new(),
+            span: Span::in_file(self.file, line as u32, 1),
+            trivia: Trivia {
+                leading,
+                trailing: comment.map(|text| Comment {
+                    text: text.to_string(),
+                    span: Span::in_file(self.file, line as u32, 1),
+                }),
+            },
+        });
+        Ok(())
+    }
+
+    /// Trivia for a plain node: the pending own-line comments plus this
+    /// line's trailing comment.
+    fn trivia(&mut self, comment: Option<&str>, code: &str, line: usize) -> Trivia {
+        Trivia {
+            leading: std::mem::take(&mut self.pending),
+            trailing: comment.map(|text| Comment {
+                text: text.to_string(),
+                span: Span::in_file(self.file, line as u32, (code.len() + 1) as u32),
+            }),
+        }
+    }
+}
+
+/// The multi-file context of a keyword-conditional walk: the source map that
+/// owns `FileId` allocation and the include graph, the loader seam, and the
+/// active include stack for cycle detection (the acme `MultiCx` precedent).
+struct MultiCx<'a> {
+    map: &'a mut SourceMap,
+    loader: &'a dyn SourceLoader,
+    /// The files currently open, root first. Cycle detection is membership —
+    /// a file may be included twice *sequentially* but never while open.
+    stack: Vec<FileId>,
+}
+
+/// The z80 family's keyword [`CondEval`](crate::ast::CondEval) — **sjasmplus
+/// is its first consumer** (U8, `decisions/conditional-assembly-framework.md`).
+/// It owns the walk environment: the `equ` constants a later condition or
+/// form choice folds against, the `DEFINE` substitution table, and the
+/// current global label for `.local` scoping. `eval` tests a conditional head
+/// against that environment; `lower` re-parses one **live** line from its
+/// verbatim source with the environment as of that point — so a skipped
+/// branch defines nothing and an include-defined constant feeds later form
+/// selection, exactly as the eager walker did for unconditional programs.
+///
+/// With a [`MultiCx`] wired in, `INCLUDE`/`INCBIN` resolve *inside* this walk
+/// (an untaken branch's include never loads — KTD1); without one, they error
+/// with a pointer at the multi-file entry points.
+struct SjasmEval<'a, S: Z80Syntax> {
+    syntax: &'a S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    /// `equ` constants as lowered, keyed by qualified name (the walker's rule).
+    consts: BTreeMap<String, i64>,
+    /// `DEFINE` bindings: name → verbatim replacement text (may be empty for
+    /// the bare flag form). Case-sensitive (probe p22).
+    defines: BTreeMap<String, String>,
+    /// The most recent global (non-`.`) label, for qualifying locals.
+    current_global: Option<String>,
+    multi: Option<MultiCx<'a>>,
+    /// The file the walk is currently inside — stamps condition-evaluation
+    /// errors, which the shared walk raises without node context.
+    current_file: FileId,
+}
+
+impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
+    fn new(
+        syntax: &'a S,
+        set: &'static isa::InstructionSet,
+        ext: Option<&'static isa::InstructionSet>,
+        multi: Option<MultiCx<'a>>,
+    ) -> Self {
+        Self {
+            syntax,
+            set,
+            ext,
+            consts: BTreeMap::new(),
+            defines: BTreeMap::new(),
+            current_global: None,
+            multi,
+            current_file: FileId(0),
+        }
+    }
+
+    /// Resolve a label's defined name with the live environment: a `DEFINE`'d
+    /// name renames the label (probe p26 — single-identifier replacements
+    /// only, the smallest slice byte-identity needs), then the walker's scope
+    /// rule applies — a leading-`.` local qualifies under the current global,
+    /// a plain name opens a new scope.
+    fn resolve_label(&mut self, name: &str, line: usize) -> Result<String, AsmError> {
+        let name = if self.defines.contains_key(name) {
+            let expanded = substitute_defines(name, &self.defines, line)?;
+            let expanded = expanded.trim().to_string();
+            if !is_ident(&expanded) {
+                return Err(AsmError::new(
+                    line,
+                    format!("DEFINE `{name}` does not expand to a label name (got `{expanded}`)"),
+                ));
+            }
+            expanded
+        } else {
+            name.to_string()
+        };
+        if self.syntax.scopes_locals() && name.starts_with('.') {
+            return Ok(match &self.current_global {
+                Some(g) => format!("{g}{name}"),
+                None => name,
+            });
+        }
+        if self.syntax.scopes_locals() {
+            self.current_global = Some(name.clone());
+        }
+        Ok(name)
+    }
+
+    /// Bind a directive line's label at the current address as a label-only
+    /// statement (an include point, a `DEFINE` line).
+    fn push_label(
+        &mut self,
+        name: &str,
+        node: &Node,
+        out: &mut Vec<Statement>,
+    ) -> Result<(), AsmError> {
+        let line = node.span.line as usize;
+        let qualified = self.resolve_label(name, line)?;
+        out.push(Statement {
+            line,
+            file: node.span.file,
+            label: Some(qualified),
+            op: None,
+            operand_span: None,
+        });
+        Ok(())
+    }
+
+    /// Lower one live line (the body of [`CondEval::lower`]; the caller
+    /// stamps span-less errors with the node's file).
+    fn lower_line(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
+        let line = node.span.line as usize;
+        let file = node.span.file;
+        let (word0, args0) = split_first_word(&node.source);
+        // `DEFINE` is handled before substitution, so the name being defined
+        // is never itself expanded; chained values expand at use (probe p24).
+        if is_define_word(word0) {
+            if let Some(sym) = &node.label {
+                let name = sym.name.clone();
+                self.push_label(&name, node, out)?;
+            }
+            let (name, value) = split_first_word(args0);
+            if name.is_empty() {
+                return Err(AsmError::new(line, "`DEFINE` needs a name"));
+            }
+            if !is_ident(name) {
+                return Err(AsmError::new(line, format!("bad `DEFINE` name `{name}`")));
+            }
+            if self.defines.contains_key(name) {
+                // The reference errors on a duplicate DEFINE (probe p23).
+                return Err(AsmError::new(line, format!("duplicate `DEFINE` `{name}`")));
+            }
+            self.defines.insert(name.to_string(), value.to_string());
+            return Ok(());
+        }
+        // Textual DEFINE substitution: identifier-boundary, string-aware,
+        // chained to a fixed point (probes p4/p5/p20/p21/p24).
+        let src = substitute_defines(&node.source, &self.defines, line)?;
+        let (word, args) = split_first_word(&src);
+        if self.syntax.is_include(word) {
+            return self.lower_include(node, args, out);
+        }
+        if self.syntax.is_incbin(word) {
+            return self.lower_incbin(node, args, out);
+        }
+        let rest = src.trim();
+        let mut op = if rest.is_empty() {
+            None
+        } else {
+            parse_op(self.syntax, self.set, self.ext, rest, line, &self.consts)?
+        };
+        let label = match &node.label {
+            Some(sym) => Some(self.resolve_label(&sym.name, line)?),
+            None => None,
+        };
+        if self.syntax.scopes_locals()
+            && let Some(g) = &self.current_global
+        {
+            op = op.map(|o| crate::ast::qualify_locals(o, g));
+        }
+        // `equ` binds its (qualified) label to a parse-time constant.
+        if let (Some(q), Some(Operation::Equ(e))) = (&label, &op)
+            && let Some(v) = eval_const(e, &self.consts)
+        {
+            self.consts.insert(q.clone(), v);
+        }
+        if label.is_none() && op.is_none() {
+            return Ok(());
+        }
+        out.push(Statement {
+            line,
+            file,
+            label,
+            op,
+            operand_span: node.operand_span.clone(),
+        });
+        Ok(())
+    }
+
+    /// Resolve an `INCLUDE` live (KTD1): the target loads only when the walk
+    /// reaches the directive in a taken branch, its tree parses in its own
+    /// `FileId`, and it evaluates through `self` — the environment (`equ`
+    /// constants, DEFINEs, the current global) threads in and back out. A
+    /// conditional block can never span the boundary: each file parses its
+    /// own structure, so an unbalanced `IF`/`ENDIF` errors in the file that
+    /// carries it (the reference rejects both directions — probes p12/p13).
+    fn lower_include(
+        &mut self,
+        node: &Node,
+        args: &str,
+        out: &mut Vec<Statement>,
+    ) -> Result<(), AsmError> {
+        let line = node.span.line as usize;
+        let file = node.span.file;
+        let at = node
+            .operand_span
+            .clone()
+            .unwrap_or_else(|| node.span.clone());
+        let request = include_request(args, line)?;
+        if let Some(sym) = &node.label {
+            let name = sym.name.clone();
+            self.push_label(&name, node, out)?;
+        }
+        let Some(mcx) = self.multi.as_mut() else {
+            return Err(AsmError::at(
+                at,
+                format!(
+                    "cannot resolve `include \"{request}\"` here — the single-source \
+                     API assembles one file; use the multi-file entry point \
+                     (the CLI resolves includes automatically)"
+                ),
+            ));
+        };
+        if mcx.stack.len() >= MAX_INCLUDE_DEPTH {
+            return Err(AsmError::at(
+                at,
+                format!("includes nested more than {MAX_INCLUDE_DEPTH} levels deep"),
+            ));
+        }
+        let id = mcx
+            .map
+            .load(mcx.loader, &request, file, line as u32)
+            .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
+        if mcx.stack.contains(&id) {
+            let chain = mcx
+                .stack
+                .iter()
+                .chain(std::iter::once(&id))
+                .map(|f| mcx.map.path(*f).unwrap_or("?"))
+                .collect::<Vec<_>>()
+                .join(" -> ");
+            return Err(AsmError::at(at, format!("include cycle: {chain}")));
+        }
+        let contents = mcx.map.contents(id).unwrap_or_default().to_owned();
+        mcx.stack.push(id);
+        let program = parse_program_keyword(self.syntax, self.set, self.ext, id, &contents)?;
+        let saved = self.current_file;
+        self.current_file = id;
+        let walked = crate::ast::evaluate(self, &program.nodes, true, out);
+        self.current_file = saved;
+        if let Some(mcx) = self.multi.as_mut() {
+            mcx.stack.pop();
+        }
+        walked
+    }
+
+    /// Resolve an `INCBIN` live: the asset loads only when the directive is
+    /// reached in a taken branch, the offset/length fold against the live
+    /// constants, and the payload rides one statement at the directive's span
+    /// (the walker's semantics, unchanged — KTD8: no `FileId` for binaries).
+    fn lower_incbin(
+        &mut self,
+        node: &Node,
+        args: &str,
+        out: &mut Vec<Statement>,
+    ) -> Result<(), AsmError> {
+        let line = node.span.line as usize;
+        let file = node.span.file;
+        let at = node
+            .operand_span
+            .clone()
+            .unwrap_or_else(|| node.span.clone());
+        let (request, offset, length) = incbin_args(self.syntax, args, line, &self.consts)?;
+        let label = match &node.label {
+            Some(sym) => {
+                let name = sym.name.clone();
+                Some(self.resolve_label(&name, line)?)
+            }
+            None => None,
+        };
+        let Some(mcx) = self.multi.as_mut() else {
+            return Err(AsmError::at(
+                at,
+                format!(
+                    "cannot resolve `incbin \"{request}\"` here — the single-source \
+                     API assembles one file; use the multi-file entry point \
+                     (the CLI resolves binary inclusions automatically)"
+                ),
+            ));
+        };
+        let from = mcx.map.path(file).map(str::to_owned);
+        let data = mcx
+            .loader
+            .load_binary(&request, from.as_deref())
+            .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
+        let payload = slice_incbin(&data, offset, length)
+            .map_err(|msg| AsmError::at(at, format!("`{request}`: {msg}")))?;
+        out.push(Statement {
+            line,
+            file,
+            label,
+            op: Some(Operation::Binary(payload)),
+            operand_span: node.operand_span.clone(),
+        });
+        Ok(())
+    }
+}
+
+impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
+    fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError> {
+        let line = line as usize;
+        let (word, args) = split_first_word(head);
+        let taken = match cond_keyword(word) {
+            Some(kw @ (CondKw::IfDef | CondKw::IfNDef)) => {
+                // The reference tests the FIRST token, ignoring the rest
+                // (probe p48); the namespace is the case-sensitive DEFINE
+                // table only — never labels or `equ` constants (probes
+                // p3/p22).
+                match args.split_whitespace().next() {
+                    Some(name) => {
+                        let defined = self.defines.contains_key(name);
+                        Ok(if kw == CondKw::IfDef {
+                            defined
+                        } else {
+                            !defined
+                        })
+                    }
+                    None => Err(AsmError::new(line, format!("`{word}` needs a name"))),
+                }
+            }
+            Some(CondKw::If) => {
+                // DEFINEs substitute into the condition (probe p25) before it
+                // folds against the `equ` constants.
+                substitute_defines(args, &self.defines, line).and_then(|cond| {
+                    eval_condition_keyword(self.syntax, &cond, line, &self.consts).map(|v| v != 0)
+                })
+            }
+            _ => Err(AsmError::new(
+                line,
+                format!("internal error: `{head}` is not a conditional head"),
+            )),
+        };
+        // The shared walk raises condition errors without node context, so a
+        // failure inside an included file is stamped here.
+        taken.map_err(|e| stamp_file(e, self.current_file))
+    }
+
+    fn lower(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
+        // Per-line helpers know their line but not their file; stamp at this
+        // one boundary — but only span-less errors. An error from a *nested*
+        // walk (an include's lines, reached through `lower_include`) was
+        // stamped by its own frame and must keep the inner file.
+        self.lower_line(node, out)
+            .map_err(|e| stamp_missing_file(e, node.span.file))
+    }
+}
+
+/// Assemble keyword-conditional source (single file): the structure parse,
+/// then the shared conditional walk over [`SjasmEval`] with no loader — an
+/// `INCLUDE`/`INCBIN` reached live errors with a pointer at the multi-file
+/// entry points.
+pub(crate) fn assemble_keyword<S: Z80Syntax>(
+    syntax: &S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    source: &str,
+) -> Result<Vec<Statement>, AsmError> {
+    let program = parse_program_keyword(syntax, set, ext, FileId(0), source)?;
+    let mut eval = SjasmEval::new(syntax, set, ext, None);
+    let mut out = Vec::new();
+    crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+    Ok(out)
+}
+
+/// Parse a multi-file keyword-conditional program to the engine's statement
+/// stream: the structure parse per file, includes resolving lazily *inside*
+/// the conditional walk (an untaken include never loads — KTD1).
+pub(crate) fn parse_program_multi_keyword<S: Z80Syntax>(
+    syntax: &S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+) -> Result<Vec<Statement>, AsmError> {
+    let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
+    let program = parse_program_keyword(syntax, set, ext, FileId(0), &root)?;
+    let mut eval = SjasmEval::new(
+        syntax,
+        set,
+        ext,
+        Some(MultiCx {
+            map,
+            loader,
+            stack: vec![FileId(0)],
+        }),
+    );
+    let mut out = Vec::new();
+    crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+    Ok(out)
+}
+
+/// Expand `DEFINE` names in one line of source, per the probe-pinned
+/// reference semantics: identifier tokens replace at exact boundaries (`NN`
+/// is not an occurrence of `N` — probe p20); `"…"` strings and `'c'` char
+/// literals are untouched (probe p21); number tokens — digit-led runs and
+/// `$`/`%`/`#`-sigil runs — are skipped whole, so a define named `FF` never
+/// rewrites `$FF`. Chained defines expand pass by pass to a fixed point
+/// (probe p24), with a depth cap against recursive definitions.
+fn substitute_defines(
+    s: &str,
+    defines: &BTreeMap<String, String>,
+    line: usize,
+) -> Result<String, AsmError> {
+    if defines.is_empty() {
+        return Ok(s.to_string());
+    }
+    let mut cur = s.to_string();
+    for _ in 0..32 {
+        let (next, changed) = substitute_once(&cur, defines);
+        if !changed || next == cur {
+            return Ok(next);
+        }
+        cur = next;
+    }
+    Err(AsmError::new(
+        line,
+        "`DEFINE` expansion did not terminate (recursive DEFINE?)",
+    ))
+}
+
+/// One substitution pass over `s`; `true` if anything was replaced.
+fn substitute_once(s: &str, defines: &BTreeMap<String, String>) -> (String, bool) {
+    let chars: Vec<char> = s.chars().collect();
+    let mut out = String::with_capacity(s.len());
+    let mut changed = false;
+    let mut i = 0;
+    while i < chars.len() {
+        let c = chars[i];
+        if c == '"' {
+            // Copy a string literal whole (or to end-of-line if unterminated).
+            out.push(c);
+            i += 1;
+            while i < chars.len() {
+                out.push(chars[i]);
+                let closed = chars[i] == '"';
+                i += 1;
+                if closed {
+                    break;
+                }
+            }
+        } else if c == '\'' && i + 2 < chars.len() && chars[i + 2] == '\'' {
+            // A `'c'` char literal (the tokenizer's shape); a lone `'`
+            // (`af'`) copies below.
+            out.push(chars[i]);
+            out.push(chars[i + 1]);
+            out.push(chars[i + 2]);
+            i += 3;
+        } else if c == '$' || c == '%' || c == '#' {
+            // A number sigil: copy it and its alphanumeric run untouched.
+            out.push(c);
+            i += 1;
+            while i < chars.len() && chars[i].is_ascii_alphanumeric() {
+                out.push(chars[i]);
+                i += 1;
+            }
+        } else if c.is_ascii_digit() {
+            // A digit-led number (incl. `10h`/`0x10` forms): copy whole.
+            while i < chars.len() && chars[i].is_ascii_alphanumeric() {
+                out.push(chars[i]);
+                i += 1;
+            }
+        } else if c.is_ascii_alphabetic() || c == '_' || c == '.' {
+            let start = i;
+            while i < chars.len()
+                && (chars[i].is_ascii_alphanumeric() || chars[i] == '_' || chars[i] == '.')
+            {
+                i += 1;
+            }
+            let ident: String = chars[start..i].iter().collect();
+            match defines.get(&ident) {
+                Some(replacement) => {
+                    out.push_str(replacement);
+                    changed = true;
+                }
+                None => out.push_str(&ident),
+            }
+        } else {
+            out.push(c);
+            i += 1;
+        }
+    }
+    (out, changed)
+}
+
+/// Evaluate a keyword `IF` condition to a value (nonzero = taken) against the
+/// parse-time constants. The grammar mirrors the operand expression grammar
+/// and adds the condition operators the reference accepts (probes p2/p45):
+/// `||`/`&&` (loosest), one comparison (`=`/`==`/`!=`/`<`/`>`/`<=`/`>=`),
+/// unary `!`, and parentheses that enclose the full condition grammar.
+/// Trailing text after a complete condition is ignored, as the reference does
+/// (probe p50). Symbols resolve against `equ` constants (DEFINEs substituted
+/// before this) — a label-valued or forward symbol, and the location counter
+/// `$`, are the reference's multi-pass territory and error here (#67).
+fn eval_condition_keyword<S: Z80Syntax>(
+    syntax: &S,
+    s: &str,
+    line: usize,
+    consts: &BTreeMap<String, i64>,
+) -> Result<i64, AsmError> {
+    let tokens = tokenize_cond(syntax, s, line)?;
+    if tokens.is_empty() {
+        return Err(AsmError::new(line, "`IF` needs a condition"));
+    }
+    CondParser {
+        tokens,
+        pos: 0,
+        line,
+        consts,
+    }
+    .or_expr()
+}
+
+/// The condition parser: precedence-climbing over [`Tok`]s, folding to `i64`
+/// immediately (a condition must be decidable when its `IF` is reached).
+struct CondParser<'a> {
+    tokens: Vec<Tok>,
+    pos: usize,
+    line: usize,
+    consts: &'a BTreeMap<String, i64>,
+}
+
+impl CondParser<'_> {
+    fn or_expr(&mut self) -> Result<i64, AsmError> {
+        let mut v = self.and_expr()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::OrOr)) {
+            self.pos += 1;
+            let r = self.and_expr()?;
+            v = i64::from(v != 0 || r != 0);
+        }
+        Ok(v)
+    }
+
+    fn and_expr(&mut self) -> Result<i64, AsmError> {
+        let mut v = self.cmp_expr()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::AndAnd)) {
+            self.pos += 1;
+            let r = self.cmp_expr()?;
+            v = i64::from(v != 0 && r != 0);
+        }
+        Ok(v)
+    }
+
+    /// At most one comparison, non-chaining (`a = b = c` is not a condition
+    /// the reference's sources write).
+    fn cmp_expr(&mut self) -> Result<i64, AsmError> {
+        let a = self.bit_or()?;
+        let tok = match self.tokens.get(self.pos) {
+            Some(t @ (Tok::Eq | Tok::Ne | Tok::Lt | Tok::Gt | Tok::Le | Tok::Ge)) => t.clone(),
+            _ => return Ok(a),
+        };
+        self.pos += 1;
+        let b = self.bit_or()?;
+        Ok(i64::from(match tok {
+            Tok::Eq => a == b,
+            Tok::Ne => a != b,
+            Tok::Lt => a < b,
+            Tok::Gt => a > b,
+            Tok::Le => a <= b,
+            Tok::Ge => a >= b,
+            _ => unreachable!("matched above"),
+        }))
+    }
+
+    fn bit_or(&mut self) -> Result<i64, AsmError> {
+        let mut v = self.bit_xor()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::Or)) {
+            self.pos += 1;
+            v |= self.bit_xor()?;
+        }
+        Ok(v)
+    }
+
+    fn bit_xor(&mut self) -> Result<i64, AsmError> {
+        let mut v = self.bit_and()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::Xor)) {
+            self.pos += 1;
+            v ^= self.bit_and()?;
+        }
+        Ok(v)
+    }
+
+    fn bit_and(&mut self) -> Result<i64, AsmError> {
+        let mut v = self.shift()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::And)) {
+            self.pos += 1;
+            v &= self.shift()?;
+        }
+        Ok(v)
+    }
+
+    fn shift(&mut self) -> Result<i64, AsmError> {
+        let mut v = self.add_sub()?;
+        loop {
+            let left = match self.tokens.get(self.pos) {
+                Some(Tok::Shl) => true,
+                Some(Tok::Shr) => false,
+                _ => return Ok(v),
+            };
+            self.pos += 1;
+            let by = self.add_sub()?;
+            if !(0..64).contains(&by) {
+                return Err(AsmError::new(
+                    self.line,
+                    "shift amount out of range in condition",
+                ));
+            }
+            v = if left { v << by } else { v >> by };
+        }
+    }
+
+    fn add_sub(&mut self) -> Result<i64, AsmError> {
+        let mut v = self.mul_div()?;
+        loop {
+            let add = match self.tokens.get(self.pos) {
+                Some(Tok::Plus) => true,
+                Some(Tok::Minus) => false,
+                _ => return Ok(v),
+            };
+            self.pos += 1;
+            let r = self.mul_div()?;
+            v = if add {
+                v.wrapping_add(r)
+            } else {
+                v.wrapping_sub(r)
+            };
+        }
+    }
+
+    fn mul_div(&mut self) -> Result<i64, AsmError> {
+        let mut v = self.unary()?;
+        loop {
+            let mul = match self.tokens.get(self.pos) {
+                Some(Tok::Star) => true,
+                Some(Tok::Slash) => false,
+                _ => return Ok(v),
+            };
+            self.pos += 1;
+            let r = self.unary()?;
+            if mul {
+                v = v.wrapping_mul(r);
+            } else if r == 0 {
+                return Err(AsmError::new(self.line, "division by zero in condition"));
+            } else {
+                v = v.wrapping_div(r);
+            }
+        }
+    }
+
+    fn unary(&mut self) -> Result<i64, AsmError> {
+        match self.tokens.get(self.pos) {
+            Some(Tok::Minus) => {
+                self.pos += 1;
+                Ok(self.unary()?.wrapping_neg())
+            }
+            Some(Tok::Not) => {
+                self.pos += 1;
+                Ok(i64::from(self.unary()? == 0))
+            }
+            _ => self.atom(),
+        }
+    }
+
+    fn atom(&mut self) -> Result<i64, AsmError> {
+        let tok = self
+            .tokens
+            .get(self.pos)
+            .cloned()
+            .ok_or_else(|| AsmError::new(self.line, "expected a value in condition"))?;
+        self.pos += 1;
+        match tok {
+            Tok::Num(n) => Ok(n),
+            Tok::Sym(s) => self.consts.get(&s).copied().ok_or_else(|| {
+                AsmError::new(
+                    self.line,
+                    format!(
+                        "`{s}` must be a constant here (a number, an expression of \
+                         constants, or a value defined with `equ` or `DEFINE` above)"
+                    ),
+                )
+            }),
+            Tok::Pc => Err(AsmError::new(
+                self.line,
+                "the location counter `$` cannot be tested in a conditional here",
+            )),
+            Tok::LParen => {
+                let v = self.or_expr()?;
+                if matches!(self.tokens.get(self.pos), Some(Tok::RParen)) {
+                    self.pos += 1;
+                    Ok(v)
+                } else {
+                    Err(AsmError::new(self.line, "expected `)` in condition"))
+                }
+            }
+            _ => Err(AsmError::new(self.line, "expected a value in condition")),
+        }
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -1156,12 +2207,46 @@ enum Tok {
     Shr,
     LParen,
     RParen,
+    // Condition-only tokens (keyword conditionals, U8): produced only by
+    // [`tokenize_cond`], so operand expressions keep rejecting them exactly
+    // as before.
+    /// `=` or `==` — the reference treats both as equality (probe p2).
+    Eq,
+    /// `!=`.
+    Ne,
+    Lt,
+    Gt,
+    Le,
+    Ge,
+    AndAnd,
+    OrOr,
+    /// Unary logical not `!`.
+    Not,
+}
+
+/// Lex an operand expression (see [`tokenize_impl`]).
+fn tokenize<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Vec<Tok>, AsmError> {
+    tokenize_impl(syntax, raw, line, false)
+}
+
+/// Lex a keyword `IF` condition: the operand lexer plus the condition
+/// operators (`=`/`==`/`!=`/`<`/`>`/`<=`/`>=`/`&&`/`||`/`!`) the reference's
+/// conditions accept (probes p2/p45).
+fn tokenize_cond<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Vec<Tok>, AsmError> {
+    tokenize_impl(syntax, raw, line, true)
 }
 
 /// Lex an expression. The number *extent* (a `$`/`%`/`#`/digit start then an
 /// alphanumeric run) is shared; the dialect's `parse_number` interprets it,
-/// which is where hex/binary format differences live.
-fn tokenize<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Vec<Tok>, AsmError> {
+/// which is where hex/binary format differences live. `cond` admits the
+/// condition-only operators; operand expressions (`cond = false`) reject them
+/// unchanged.
+fn tokenize_impl<S: Z80Syntax>(
+    syntax: &S,
+    raw: &str,
+    line: usize,
+    cond: bool,
+) -> Result<Vec<Tok>, AsmError> {
     let chars: Vec<char> = raw.chars().collect();
     let mut tokens = Vec::new();
     let mut i = 0;
@@ -1185,9 +2270,17 @@ fn tokenize<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Vec<Tok>
                 tokens.push(Tok::Slash);
                 i += 1;
             }
+            '&' if cond && chars.get(i + 1) == Some(&'&') => {
+                tokens.push(Tok::AndAnd);
+                i += 2;
+            }
             '&' => {
                 tokens.push(Tok::And);
                 i += 1;
+            }
+            '|' if cond && chars.get(i + 1) == Some(&'|') => {
+                tokens.push(Tok::OrOr);
+                i += 2;
             }
             '|' => {
                 tokens.push(Tok::Or);
@@ -1199,13 +2292,46 @@ fn tokenize<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Vec<Tok>
                 tokens.push(Tok::Xor);
                 i += 1;
             }
+            // Conditions: `=` and `==` are both equality (probe p2), `!=` is
+            // inequality, a bare `!` is logical not.
+            '=' if cond => {
+                tokens.push(Tok::Eq);
+                i += if chars.get(i + 1) == Some(&'=') { 2 } else { 1 };
+            }
+            '!' if cond => {
+                if chars.get(i + 1) == Some(&'=') {
+                    tokens.push(Tok::Ne);
+                    i += 2;
+                } else {
+                    tokens.push(Tok::Not);
+                    i += 1;
+                }
+            }
             '<' if chars.get(i + 1) == Some(&'<') => {
                 tokens.push(Tok::Shl);
                 i += 2;
             }
+            '<' if cond => {
+                if chars.get(i + 1) == Some(&'=') {
+                    tokens.push(Tok::Le);
+                    i += 2;
+                } else {
+                    tokens.push(Tok::Lt);
+                    i += 1;
+                }
+            }
             '>' if chars.get(i + 1) == Some(&'>') => {
                 tokens.push(Tok::Shr);
                 i += 2;
+            }
+            '>' if cond => {
+                if chars.get(i + 1) == Some(&'=') {
+                    tokens.push(Tok::Ge);
+                    i += 2;
+                } else {
+                    tokens.push(Tok::Gt);
+                    i += 1;
+                }
             }
             '(' => {
                 tokens.push(Tok::LParen);
