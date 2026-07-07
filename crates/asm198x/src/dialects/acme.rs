@@ -11,6 +11,29 @@
 //! Encoding comes from [`isa::mos6502`]; the two-pass engine and byte emission
 //! live in [`crate::engine`]. See `decisions/syntax-stance.md`.
 //!
+//! Includes and binary inclusion (language-surface U4) resolve **inside the
+//! evaluation walk**: `!src`/`!source` and `!bin`/`!binary` are recognised by
+//! [`AcmeEval::lower`], so an include in an untaken conditional branch never
+//! loads (KTD1), the environment (`=` constants, `!set` variables, the
+//! conditional bindings) threads through the included file and back out, and
+//! anonymous `-`/`+` labels are collected in **spliced evaluation order**
+//! across files — not by textual position over any single source string.
+//! Probe-pinned semantics (acme 0.97): `!bin "file"[, [size][, [skip]]]` with
+//! size *then* skip, zero-padding (never an error) when the size exceeds the
+//! available data, negative skip reading from the start, and a negative size
+//! rejected; a forward `+` reference never matches a definition on its own
+//! line, while a backward `-` reference does.
+//!
+//! One deliberate deviation, on our own CLI surface rather than the
+//! directive's semantics: acme resolves a quoted relative `!src`/`!bin`
+//! against the **process working directory** only (then `-I`), never the
+//! including file's directory. Our loader never consults the process cwd
+//! (the [`crate::source::FsLoader`] contract); it anchors at the requesting
+//! file's directory first, then the `-I` dirs — identical in the canonical
+//! run-from-the-project-directory layout. The `<file>` library spelling
+//! (acme: the `ACME` environment variable only) resolves through the same
+//! loader order instead.
+//!
 //! Not yet covered (no curriculum use): macros and `!for`.
 //! `!zone` is accepted but inert (no `.`-local scoping yet).
 
@@ -22,6 +45,8 @@ use super::mos6502::{
 };
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, Expr, Operation, Statement};
+use crate::source::{MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
+use crate::span::FileId;
 
 /// The ACME 6502 dialect.
 pub(crate) struct Acme;
@@ -43,17 +68,43 @@ impl Dialect for Acme {
         // brace preprocessor. `evaluate` walks the tree, prunes untaken branches,
         // threads `env`, bakes `!set`, and lowers each line through
         // `parse_statement`. This retires `tokenize_braces`/`process_block`; the
-        // conditional now lives in the tree, not a second parse.
+        // conditional now lives in the tree, not a second parse. No loader here:
+        // a `!src`/`!bin` on this single-source path is an error pointing at the
+        // multi-file entry points.
         let program = parse_program(source)?;
-        let anons = prescan_anons(source);
-        let mut eval = AcmeEval {
-            set: self.instruction_set(),
-            anons: &anons,
-            env: BTreeMap::new(),
-            set_names: BTreeSet::new(),
-        };
+        let mut eval = AcmeEval::new(self.instruction_set(), None);
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        eval.resolve_anon_refs(&mut out)?;
+        Ok(out)
+    }
+
+    /// The include-capable parse (language-surface U4): the same evaluation
+    /// walk as [`parse`](Self::parse), with a loader wired in — `!src` and
+    /// `!bin` resolve *live* inside the walk (an untaken branch never loads,
+    /// KTD1), the environment threads through included files and back out,
+    /// and anonymous labels collect in spliced evaluation order.
+    fn parse_multi(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<Vec<Statement>, AsmError> {
+        let root = map
+            .contents(FileId(0))
+            .map(str::to_owned)
+            .unwrap_or_default();
+        let program = parse_program_in(FileId(0), &root)?;
+        let mut eval = AcmeEval::new(
+            self.instruction_set(),
+            Some(MultiCx {
+                map,
+                loader,
+                stack: vec![FileId(0)],
+            }),
+        );
+        let mut out = Vec::new();
+        crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        eval.resolve_anon_refs(&mut out)?;
         Ok(out)
     }
 
@@ -105,16 +156,28 @@ enum Closer {
 /// The formatter parse cursor.
 struct FmtCx<'a> {
     set: &'static isa::InstructionSet,
+    /// The file every node's span points into — `FileId(0)` for the root /
+    /// single-source parse, the include's own id in the multi-file walk.
+    file: FileId,
     lines: Vec<&'a str>,
     pos: usize,
     /// Own-line comments seen since the last node, attached as leading trivia.
     pending: Vec<crate::ast::Comment>,
 }
 
-/// Parse ACME source into the source-preserving formatter AST.
+/// Parse ACME source into the source-preserving formatter AST (the root /
+/// single-source form: spans point into `FileId(0)`).
 pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
+    parse_program_in(FileId(0), source)
+}
+
+/// Parse one file of a multi-file ACME program: as [`parse_program`], with
+/// every span minted in `file` so diagnostics and line records name the
+/// include they came from (language-surface U4).
+fn parse_program_in(file: FileId, source: &str) -> Result<crate::ast::Program, AsmError> {
     let mut cx = FmtCx {
         set: &isa::mos6502::SET,
+        file,
         lines: source.lines().collect(),
         pos: 0,
         pending: Vec::new(),
@@ -130,6 +193,20 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
 }
 
 impl<'a> FmtCx<'a> {
+    /// A span at `line:col` in this parse's file.
+    fn at(&self, line: usize, col: u32) -> crate::ast::Span {
+        crate::ast::Span::in_file(self.file, line as u32, col)
+    }
+
+    /// Stamp this parse's file onto a computed operand/token span (the shared
+    /// helpers mint `FileId(0)`).
+    fn patch(&self, span: Option<crate::ast::Span>) -> Option<crate::ast::Span> {
+        span.map(|mut s| {
+            s.file = self.file;
+            s
+        })
+    }
+
     /// Parse a run of nodes until a block close (`}`, `} else {`) or EOF.
     fn parse_block(&mut self) -> Result<(Vec<crate::ast::Node>, Closer), AsmError> {
         let mut nodes = Vec::new();
@@ -144,7 +221,7 @@ impl<'a> FmtCx<'a> {
                     // An own-line comment becomes leading trivia of the next node.
                     Some(text) => self.pending.push(crate::ast::Comment {
                         text: text.to_string(),
-                        span: crate::ast::Span::at(line as u32, 1),
+                        span: self.at(line, 1),
                     }),
                     // A blank line is preserved as an empty-text marker (emit
                     // renders it as a blank line), collapsing consecutive blanks
@@ -157,7 +234,7 @@ impl<'a> FmtCx<'a> {
                         if !last_blank {
                             self.pending.push(crate::ast::Comment {
                                 text: String::new(),
-                                span: crate::ast::Span::at(line as u32, 1),
+                                span: self.at(line, 1),
                             });
                         }
                     }
@@ -262,7 +339,7 @@ impl<'a> FmtCx<'a> {
             let rest = rest.trim_start();
             if let Some(value) = rest.strip_prefix('=') {
                 let src = format!("*= {}", value.trim());
-                let span = crate::ast::token_span(raw, value, at_line);
+                let span = self.patch(crate::ast::token_span(raw, value, at_line));
                 return Ok(self.op_node(span, None, src, leading, comment, line));
             }
         }
@@ -272,7 +349,7 @@ impl<'a> FmtCx<'a> {
             let name = trimmed[..eq].trim();
             if is_ident(name) {
                 let src = format!("= {}", trimmed[eq + 1..].trim());
-                let span = crate::ast::token_span(raw, &trimmed[eq + 1..], at_line);
+                let span = self.patch(crate::ast::token_span(raw, &trimmed[eq + 1..], at_line));
                 return Ok(self.equ_node(span, name, src, leading, comment, line));
             }
         }
@@ -280,7 +357,7 @@ impl<'a> FmtCx<'a> {
         // A column-0 token may be a label; a leading-whitespace line is all op.
         if !code.starts_with([' ', '\t']) {
             let (word, rest) = split_first_word(trimmed);
-            let span = crate::ast::operand_span(raw, rest, at_line);
+            let span = self.patch(crate::ast::operand_span(raw, rest, at_line));
             if anon_marker(word).is_some() {
                 return Ok(self.labeled_node(span, word, rest.trim(), leading, comment, line));
             }
@@ -298,7 +375,7 @@ impl<'a> FmtCx<'a> {
         }
 
         // No label: an instruction or `!` directive, kept verbatim.
-        let span = crate::ast::operand_span(raw, trimmed, at_line);
+        let span = self.patch(crate::ast::operand_span(raw, trimmed, at_line));
         Ok(self.op_node(span, None, trimmed.to_string(), leading, comment, line))
     }
 
@@ -312,7 +389,7 @@ impl<'a> FmtCx<'a> {
     ) -> Option<crate::ast::Comment> {
         comment.map(|text| crate::ast::Comment {
             text: text.to_string(),
-            span: crate::ast::Span::at(line as u32, col),
+            span: self.at(line, col),
         })
     }
 
@@ -334,7 +411,7 @@ impl<'a> FmtCx<'a> {
                 0,
             )))),
             source,
-            span: crate::ast::Span::at(line as u32, 1),
+            span: self.at(line, 1),
             trivia: crate::ast::Trivia {
                 leading,
                 trailing: self.trailing(comment, line, 1),
@@ -357,7 +434,7 @@ impl<'a> FmtCx<'a> {
             label: Some(global(name)),
             item: None,
             source: op.to_string(),
-            span: crate::ast::Span::at(line as u32, 1),
+            span: self.at(line, 1),
             trivia: crate::ast::Trivia {
                 leading,
                 trailing: self.trailing(comment, line, 1),
@@ -379,7 +456,7 @@ impl<'a> FmtCx<'a> {
             label,
             item: None,
             source,
-            span: crate::ast::Span::at(line as u32, 1),
+            span: self.at(line, 1),
             trivia: crate::ast::Trivia {
                 leading,
                 trailing: self.trailing(comment, line, 1),
@@ -408,7 +485,7 @@ impl<'a> FmtCx<'a> {
                 inline,
             }),
             source: String::new(),
-            span: crate::ast::Span::at(line as u32, 1),
+            span: self.at(line, 1),
             trivia: crate::ast::Trivia {
                 leading,
                 trailing: self.trailing(comment, line, 1),
@@ -425,7 +502,7 @@ impl<'a> FmtCx<'a> {
                 label: None,
                 item: None,
                 source: String::new(),
-                span: crate::ast::Span::at(line as u32, 1),
+                span: self.at(line, 1),
                 trivia: crate::ast::Trivia {
                     leading: std::mem::take(&mut self.pending),
                     trailing: None,
@@ -467,6 +544,18 @@ fn find_top(s: &str, ch: u8) -> Option<usize> {
 // Assembly by evaluation of the conditional AST (idea 4) — the ACME evaluator
 // ---------------------------------------------------------------------------
 
+/// The multi-file context of an include-capable walk (language-surface U4,
+/// KTD8): the source map that owns `FileId` allocation and the include graph,
+/// the loader seam, and the active include stack for cycle detection.
+struct MultiCx<'a> {
+    map: &'a mut SourceMap,
+    loader: &'a dyn SourceLoader,
+    /// The files currently open, root first. Cycle detection is membership —
+    /// a file may be included twice *sequentially* (acme re-reads it) but
+    /// never while it is still open.
+    stack: Vec<FileId>,
+}
+
 /// ACME's [`CondEval`](crate::ast::CondEval): it owns the environment (`=`/`equ`
 /// constants and `!set` variables) and lowers each live line through
 /// [`parse_statement`], re-parsing from the node's (label, source) with the
@@ -474,27 +563,231 @@ fn find_top(s: &str, ch: u8) -> Option<usize> {
 /// folds against exactly the bindings live at that point. The shared
 /// [`evaluate`](crate::ast::evaluate) walk prunes untaken branches; this supplies
 /// the ACME-specific condition test and per-line lowering.
+///
+/// With a [`MultiCx`] wired in, `!src`/`!bin` resolve *inside* this walk
+/// (U4, KTD1): the target loads only when its directive is reached live, the
+/// included tree evaluates through `self` (so the environment threads through
+/// and back out), and anonymous labels register in spliced evaluation order.
+/// Without one (the single-source entry points), those directives are an
+/// error pointing at the multi-file entry points.
 struct AcmeEval<'a> {
     set: &'static isa::InstructionSet,
-    anons: &'a [AnonDef],
+    anons: Anons,
     env: BTreeMap<String, i64>,
     /// Names bound by `!set` (rebindable): each use is baked to its current value.
     set_names: BTreeSet<String>,
+    multi: Option<MultiCx<'a>>,
+    /// The file the walk is currently inside — stamps condition-evaluation
+    /// errors, which the shared walk raises without node context.
+    current_file: FileId,
+}
+
+impl<'a> AcmeEval<'a> {
+    fn new(set: &'static isa::InstructionSet, multi: Option<MultiCx<'a>>) -> Self {
+        Self {
+            set,
+            anons: Anons::default(),
+            env: BTreeMap::new(),
+            set_names: BTreeSet::new(),
+            multi,
+            current_file: FileId(0),
+        }
+    }
+
+    /// Resolve every anonymous-label *reference* placeholder left in the
+    /// statement stream against the definitions collected during the walk —
+    /// the deferred half of the spliced-order model (see [`Anons`]). Call
+    /// after the evaluation walk completes.
+    fn resolve_anon_refs(&self, out: &mut [Statement]) -> Result<(), AsmError> {
+        for s in out.iter_mut() {
+            if let Some(op) = s.op.take() {
+                s.op = Some(substitute_anon_refs(op, &self.anons, s.file, s.line)?);
+            }
+        }
+        Ok(())
+    }
+
+    /// The label a directive line binds, as a statement-ready name: an
+    /// anonymous `-`/`+` marker resolves to the definition registered for the
+    /// current evaluation position; a plain name passes through.
+    fn statement_label(&self, node: &crate::ast::Node) -> Result<Option<String>, AsmError> {
+        let Some(sym) = &node.label else {
+            return Ok(None);
+        };
+        if anon_marker(&sym.name).is_some() {
+            let def = self.anons.def_here().ok_or_else(|| {
+                AsmError::new(
+                    node.span.line as usize,
+                    "internal: anonymous label not registered",
+                )
+            })?;
+            return Ok(Some(def.name.clone()));
+        }
+        Ok(Some(sym.name.clone()))
+    }
+
+    /// Resolve a `!src`/`!source` directive live (U4, KTD1): load the target
+    /// through the loader, parse it in its own `FileId`, and evaluate its tree
+    /// through `self` — the environment and anonymous-label order thread
+    /// straight through. A label on the directive line binds at the include
+    /// point (probe-pinned).
+    fn lower_include(
+        &mut self,
+        node: &crate::ast::Node,
+        args: &str,
+        out: &mut Vec<Statement>,
+    ) -> Result<(), AsmError> {
+        let line = node.span.line as usize;
+        let file = node.span.file;
+        let at = node
+            .operand_span
+            .clone()
+            .unwrap_or_else(|| node.span.clone());
+        let (request, rest) = file_request(args, line, "!src")?;
+        if !rest.trim().is_empty() {
+            return Err(AsmError::at(
+                at,
+                format!("`!src` takes one file name (unexpected `{}`)", rest.trim()),
+            ));
+        }
+        if let Some(label) = self.statement_label(node)? {
+            out.push(Statement {
+                line,
+                file,
+                label: Some(label),
+                op: None,
+                operand_span: None,
+            });
+        }
+        let Some(mcx) = self.multi.as_mut() else {
+            return Err(AsmError::at(
+                at,
+                format!(
+                    "cannot resolve `!src \"{request}\"` here — the single-source \
+                     API assembles one file; use the multi-file entry point \
+                     (the CLI resolves includes automatically)"
+                ),
+            ));
+        };
+        if mcx.stack.len() >= MAX_INCLUDE_DEPTH {
+            return Err(AsmError::at(
+                at,
+                format!("includes nested more than {MAX_INCLUDE_DEPTH} levels deep"),
+            ));
+        }
+        let id = mcx
+            .map
+            .load(mcx.loader, &request, file, line as u32)
+            .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
+        if mcx.stack.contains(&id) {
+            let chain = mcx
+                .stack
+                .iter()
+                .chain(std::iter::once(&id))
+                .map(|f| mcx.map.path(*f).unwrap_or("?"))
+                .collect::<Vec<_>>()
+                .join(" -> ");
+            return Err(AsmError::at(at, format!("include cycle: {chain}")));
+        }
+        let contents = mcx.map.contents(id).unwrap_or_default().to_owned();
+        mcx.stack.push(id);
+        let program = parse_program_in(id, &contents).map_err(|e| stamp_file(e, id))?;
+        let saved = self.current_file;
+        self.current_file = id;
+        let walked = crate::ast::evaluate(self, &program.nodes, true, out);
+        self.current_file = saved;
+        if let Some(mcx) = self.multi.as_mut() {
+            mcx.stack.pop();
+        }
+        walked
+    }
+
+    /// Resolve a `!bin`/`!binary` directive live (U4, KTD8): load the asset
+    /// through the loader's binary path (no `FileId` — spans only ever point
+    /// into source files) and window it with acme's probe-pinned size/skip
+    /// semantics ([`window_bin`]). The payload rides one statement at the
+    /// directive's span; a label binds at the payload's start.
+    fn lower_incbin(
+        &mut self,
+        node: &crate::ast::Node,
+        args: &str,
+        out: &mut Vec<Statement>,
+    ) -> Result<(), AsmError> {
+        let line = node.span.line as usize;
+        let file = node.span.file;
+        let at = node
+            .operand_span
+            .clone()
+            .unwrap_or_else(|| node.span.clone());
+        let (request, size, skip) = bin_args(&self.anons, &self.env, args, line)?;
+        let label = self.statement_label(node)?;
+        let Some(mcx) = self.multi.as_mut() else {
+            return Err(AsmError::at(
+                at,
+                format!(
+                    "cannot resolve `!bin \"{request}\"` here — the single-source \
+                     API assembles one file; use the multi-file entry point \
+                     (the CLI resolves binary inclusions automatically)"
+                ),
+            ));
+        };
+        let from = mcx.map.path(file).map(str::to_owned);
+        let data = mcx
+            .loader
+            .load_binary(&request, from.as_deref())
+            .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
+        let payload = window_bin(&data, size, skip)
+            .map_err(|msg| AsmError::at(at, format!("`{request}`: {msg}")))?;
+        out.push(Statement {
+            line,
+            file,
+            label,
+            op: Some(Operation::Binary(payload)),
+            operand_span: node.operand_span.clone(),
+        });
+        Ok(())
+    }
 }
 
 impl crate::ast::CondEval for AcmeEval<'_> {
     fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError> {
         let line = line as usize;
-        match classify_conditional(head) {
+        let taken = match classify_conditional(head) {
             Some(Conditional::IfDef(s)) => Ok(self.env.contains_key(&s)),
             Some(Conditional::IfNDef(s)) => Ok(!self.env.contains_key(&s)),
-            Some(Conditional::If(e)) => eval_condition(self.anons, &self.env, &e, line),
+            Some(Conditional::If(e)) => eval_condition(&self.anons, &self.env, &e, line),
             None => Err(AsmError::new(line, format!("bad conditional `{head}`"))),
-        }
+        };
+        // The shared walk raises condition errors without node context, so a
+        // failure inside an included file is stamped here (U4).
+        taken.map_err(|e| stamp_file(e, self.current_file))
     }
 
     fn lower(&mut self, node: &crate::ast::Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
         let line = node.span.line as usize;
+        let file = node.span.file;
+        // Every live line takes the next evaluation-order position (the anon
+        // "virtual line"): included files splice their lines here, so `-`/`+`
+        // resolution follows the spliced order, never any single file's line
+        // numbers — and a definition in an untaken branch never registers,
+        // matching acme (probe-pinned, U4).
+        self.anons.vline += 1;
+        if let Some(sym) = &node.label
+            && let Some((sign, level)) = anon_marker(&sym.name)
+        {
+            self.anons.define(sign, level);
+        }
+
+        // `!src`/`!bin` are walk-handled (case-insensitive, with their
+        // aliases), never parsed as operations: resolution must happen inside
+        // the live walk (KTD1) or not at all (the single-source pointer).
+        let (word, args) = split_first_word(node.source.trim());
+        match word.to_ascii_lowercase().as_str() {
+            "!src" | "!source" => return self.lower_include(node, args, out),
+            "!bin" | "!binary" => return self.lower_incbin(node, args, out),
+            _ => {}
+        }
+
         // Reconstruct the source line from the node's (label, operation source) —
         // canonical whitespace, which the parser treats identically to the
         // original.
@@ -507,13 +800,15 @@ impl crate::ast::CondEval for AcmeEval<'_> {
         // `!set name = expr` binds/rebinds a variable and emits nothing; later
         // uses are baked to this value.
         if split_first_word(recon.trim()).0 == "!set" {
-            let (name, value) = parse_set(self.anons, &self.env, &recon, line)?;
+            let (name, value) =
+                parse_set(&self.anons, &self.env, &recon, line).map_err(|e| stamp_file(e, file))?;
             self.env.insert(name.clone(), value);
             self.set_names.insert(name);
             return Ok(());
         }
 
-        let (label, op) = parse_statement(self.set, self.anons, &self.env, &recon, line)?;
+        let (label, op) = parse_statement(self.set, &self.anons, &self.env, &recon, line)
+            .map_err(|e| stamp_file(e, file))?;
         // Bake `!set` variables to their current value; real labels stay symbolic.
         let op = op.map(|o| bake_set_vars(o, &self.env, &self.set_names));
         if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
@@ -524,7 +819,7 @@ impl crate::ast::CondEval for AcmeEval<'_> {
         if !(label.is_none() && op.is_none()) {
             out.push(Statement {
                 line,
-                file: crate::span::FileId(0),
+                file,
                 label,
                 op,
                 operand_span: node.operand_span.clone(),
@@ -532,6 +827,138 @@ impl crate::ast::CondEval for AcmeEval<'_> {
         }
         Ok(())
     }
+}
+
+/// Stamp `file` onto a per-line parse error: the line-oriented helpers
+/// (`parse_statement`, the expression parser) know their line but not their
+/// file, so the walk supplies it at the per-line boundary (language-surface
+/// U4, the z80 walk's convention).
+fn stamp_file(mut e: AsmError, file: FileId) -> AsmError {
+    match &mut e.span {
+        Some(span) => span.file = file,
+        None if e.line != 0 => {
+            e.span = Some(crate::ast::Span::in_file(file, e.line as u32, 0));
+        }
+        None => {}
+    }
+    e
+}
+
+/// The file name of a `!src`/`!bin` directive: acme requires `"file"` quotes
+/// or the `<file>` library form — a bare token is rejected (probe-pinned:
+/// `File name quotes not found`). Returns the name and the remaining text
+/// after the closing quote/bracket for the caller's argument handling.
+fn file_request<'t>(
+    args: &'t str,
+    line: usize,
+    directive: &str,
+) -> Result<(String, &'t str), AsmError> {
+    let t = args.trim();
+    let (inner, rest) = if let Some(body) = t.strip_prefix('"') {
+        let end = body
+            .find('"')
+            .ok_or_else(|| AsmError::new(line, format!("unterminated `{directive}` file name")))?;
+        (&body[..end], &body[end + 1..])
+    } else if let Some(body) = t.strip_prefix('<') {
+        let end = body
+            .find('>')
+            .ok_or_else(|| AsmError::new(line, format!("unterminated `{directive}` file name")))?;
+        (&body[..end], &body[end + 1..])
+    } else {
+        return Err(AsmError::new(
+            line,
+            format!("`{directive}` file name must be quoted (\"file\" or <file>)"),
+        ));
+    };
+    if inner.is_empty() {
+        return Err(AsmError::new(
+            line,
+            format!("`{directive}` needs a file name"),
+        ));
+    }
+    Ok((inner.to_string(), rest))
+}
+
+/// Parse `!bin`'s arguments: the file name, then acme's optional
+/// `, [size] [, [skip]]` tail — **size first, then skip**, either slot
+/// omittable by leaving it empty (`!bin "f", , 2` skips two and reads the
+/// rest; probe-pinned). Both fold against the parse-time environment (they
+/// set the statement's size, like a `!fill` count).
+fn bin_args(
+    anons: &Anons,
+    env: &BTreeMap<String, i64>,
+    args: &str,
+    line: usize,
+) -> Result<(String, Option<i64>, Option<i64>), AsmError> {
+    let (name, rest) = file_request(args, line, "!bin")?;
+    let rest = rest.trim();
+    if rest.is_empty() {
+        return Ok((name, None, None));
+    }
+    let Some(tail) = rest.strip_prefix(',') else {
+        return Err(AsmError::new(
+            line,
+            format!("expected `, size [, skip]` after the `!bin` file name, found `{rest}`"),
+        ));
+    };
+    let pieces = mos6502::split_top_level(tail, ',');
+    if pieces.len() > 2 {
+        return Err(AsmError::new(
+            line,
+            "`!bin` takes at most a file name, a size, and a skip",
+        ));
+    }
+    let fold = |what: &str, piece: &str| -> Result<Option<i64>, AsmError> {
+        if piece.trim().is_empty() {
+            return Ok(None); // an empty slot: acme reads it as "not given"
+        }
+        let expr = parse_value(anons, piece, line)?;
+        fold_const(&expr, env, line).map(Some).map_err(|_| {
+            AsmError::new(
+                line,
+                format!(
+                    "`!bin` {what} must be a constant here (a number, an expression \
+                     of constants, or a symbol defined above)"
+                ),
+            )
+        })
+    };
+    let size = fold("size", pieces[0])?;
+    let skip = pieces
+        .get(1)
+        .map(|p| fold("skip", p))
+        .transpose()?
+        .flatten();
+    Ok((name, size, skip))
+}
+
+/// Apply acme's `!bin` size/skip window to the loaded asset — probe-pinned
+/// (acme 0.97): skip past EOF or a size beyond the available data **pads with
+/// zeroes** rather than erroring; a negative skip reads from the start; a
+/// negative size is an error; no size means "from skip to EOF" (empty when
+/// skip is at or past EOF). `Err` carries the message body; the caller wraps
+/// it with the request name and the directive's span.
+fn window_bin(data: &[u8], size: Option<i64>, skip: Option<i64>) -> Result<Vec<u8>, String> {
+    if let Some(s) = size
+        && s < 0
+    {
+        return Err(format!("negative `!bin` size ({s})"));
+    }
+    // A negative skip reads from the start of the file (the reference's seek
+    // fails and the read position stays at 0).
+    let skip = usize::try_from(skip.unwrap_or(0).max(0)).map_err(|_| "skip overflows")?;
+    let start = skip.min(data.len());
+    Ok(match size {
+        None => data[start..].to_vec(),
+        Some(s) => {
+            let s = usize::try_from(s).map_err(|_| "size overflows")?;
+            let end = start.saturating_add(s).min(data.len());
+            let mut v = data[start..end].to_vec();
+            // acme pads a short read with zeroes to exactly `size` bytes.
+            v.resize(s, 0);
+            v
+        }
+    })
 }
 
 /// Strip a `;` line comment. A `;` inside a `'c'` char literal or `"..."` string
@@ -555,15 +982,71 @@ fn strip_comment(line: &str) -> &str {
 // Anonymous labels (`-`/`--`/`+`/`++` …)
 // ---------------------------------------------------------------------------
 
-/// One anonymous-label definition: where it sits, its sign and level (the run
+/// One anonymous-label definition: its **evaluation-order position** (the
+/// "virtual line" — one per live lowered line, so included files splice in
+/// order and untaken branches never register), its sign and level (the run
 /// length, so `--` is level 2), and the unique synthetic name it binds. The
 /// name carries a leading control char so it can never collide with a real
 /// identifier.
 struct AnonDef {
-    line: usize,
+    vline: usize,
     sign: char,
     level: usize,
     name: String,
+}
+
+/// The anonymous-label state of one evaluation walk (language-surface U4).
+///
+/// Definitions register as the walk reaches them live, in spliced order.
+/// References cannot resolve during the walk — a forward `+` may point into a
+/// file not yet loaded (an include reached later) — so [`parse_value`] mints
+/// a self-describing **placeholder symbol** ([`anon_ref_placeholder`])
+/// encoding the sign, level, and referencing position; after the walk,
+/// [`AcmeEval::resolve_anon_refs`] rewrites every placeholder to its
+/// definition's name ([`substitute_anon_refs`]).
+#[derive(Default)]
+struct Anons {
+    defs: Vec<AnonDef>,
+    /// The current evaluation position; bumped once per live lowered line.
+    vline: usize,
+}
+
+impl Anons {
+    /// Register a definition at the current evaluation position.
+    fn define(&mut self, sign: char, level: usize) {
+        let name = format!("\u{1}{sign}{level}#{}", self.defs.len());
+        self.defs.push(AnonDef {
+            vline: self.vline,
+            sign,
+            level,
+            name,
+        });
+    }
+
+    /// The definition registered at the current evaluation position, if any —
+    /// how the label side of a line finds its own synthetic name.
+    fn def_here(&self) -> Option<&AnonDef> {
+        self.defs.last().filter(|d| d.vline == self.vline)
+    }
+
+    /// Resolve a reference at position `vline`: the nearest preceding `-`
+    /// definition (backward — the same line is allowed: `- jmp -` self-loops)
+    /// or the nearest *strictly following* `+` definition (forward — acme does
+    /// **not** let `+ jmp +` see its own line; probe-pinned), at the same
+    /// level.
+    fn resolve(&self, sign: char, level: usize, vline: usize) -> Option<&AnonDef> {
+        let matching = self
+            .defs
+            .iter()
+            .filter(|d| d.sign == sign && d.level == level);
+        if sign == '-' {
+            matching
+                .filter(|d| d.vline <= vline)
+                .max_by_key(|d| d.vline)
+        } else {
+            matching.filter(|d| d.vline > vline).min_by_key(|d| d.vline)
+        }
+    }
 }
 
 /// A column-0 token made entirely of `-` or entirely of `+` is an anonymous
@@ -578,56 +1061,85 @@ fn anon_marker(word: &str) -> Option<(char, usize)> {
     }
 }
 
-/// Collect every anonymous-label definition in source order, assigning each a
-/// unique synthetic name.
-fn prescan_anons(source: &str) -> Vec<AnonDef> {
-    let mut defs = Vec::new();
-    for (i, raw) in source.lines().enumerate() {
-        let line = i + 1;
-        let code = strip_comment(raw);
-        if code.starts_with([' ', '\t']) {
-            continue;
-        }
-        let (word, _) = split_first_word(code.trim());
-        if let Some((sign, level)) = anon_marker(word) {
-            let name = format!("\u{1}{sign}{level}#{}", defs.len());
-            defs.push(AnonDef {
-                line,
-                sign,
-                level,
-                name,
-            });
-        }
-    }
-    defs
+/// The self-describing placeholder a reference parses to during the walk:
+/// `\u{2}{sign}{level}@{vline}`. The `\u{2}` prefix can never collide with a
+/// real identifier (or with the `\u{1}` definition names), and the payload
+/// carries everything post-walk resolution needs — no side table.
+fn anon_ref_placeholder(sign: char, level: usize, vline: usize) -> String {
+    format!("\u{2}{sign}{level}@{vline}")
 }
 
-/// Resolve an anonymous reference at `ref_line`: the nearest preceding `-`
-/// definition (backward, same line allowed) or the nearest following `+`
-/// definition (forward), at the same level.
-fn resolve_anon(
-    anons: &[AnonDef],
-    sign: char,
-    level: usize,
-    ref_line: usize,
+/// Decode an [`anon_ref_placeholder`]'s `(sign, level, vline)`, or `None` for
+/// an ordinary symbol.
+fn decode_anon_ref(name: &str) -> Option<(char, usize, usize)> {
+    let body = name.strip_prefix('\u{2}')?;
+    let mut chars = body.chars();
+    let sign = chars.next()?;
+    let rest = chars.as_str();
+    let (level, vline) = rest.split_once('@')?;
+    Some((sign, level.parse().ok()?, vline.parse().ok()?))
+}
+
+/// Rewrite every anonymous-reference placeholder in `op` to its resolved
+/// definition name — the post-walk half of the spliced-order model. An
+/// unresolvable reference errors at the statement that made it.
+fn substitute_anon_refs(
+    op: Operation,
+    anons: &Anons,
+    file: FileId,
     line: usize,
-) -> Result<String, AsmError> {
-    let matching = anons.iter().filter(|d| d.sign == sign && d.level == level);
-    let chosen = if sign == '-' {
-        matching
-            .filter(|d| d.line <= ref_line)
-            .max_by_key(|d| d.line)
-    } else {
-        matching
-            .filter(|d| d.line >= ref_line)
-            .min_by_key(|d| d.line)
-    };
-    chosen.map(|d| d.name.clone()).ok_or_else(|| {
-        let run: String = std::iter::repeat_n(sign, level).collect();
-        AsmError::new(
-            line,
-            format!("no anonymous label `{run}` in that direction"),
-        )
+) -> Result<Operation, AsmError> {
+    let subst = |e: Expr| subst_anon_expr(e, anons, file, line);
+    Ok(match op {
+        Operation::Org(e) => Operation::Org(subst(e)?),
+        Operation::Equ(e) => Operation::Equ(subst(e)?),
+        Operation::Entry(e) => Operation::Entry(subst(e)?),
+        Operation::Bytes(v) => {
+            Operation::Bytes(v.into_iter().map(subst).collect::<Result<_, _>>()?)
+        }
+        Operation::Words(v) => {
+            Operation::Words(v.into_iter().map(subst).collect::<Result<_, _>>()?)
+        }
+        Operation::Instruction {
+            mnemonic,
+            mode,
+            operands,
+        } => Operation::Instruction {
+            mnemonic,
+            mode,
+            operands: operands.into_iter().map(subst).collect::<Result<_, _>>()?,
+        },
+        // No expressions to rewrite: pre-encoded pieces, binary payloads, and
+        // the constant-argument align.
+        other @ (Operation::Encoded(_) | Operation::Binary(_) | Operation::Align { .. }) => other,
+    })
+}
+
+fn subst_anon_expr(e: Expr, anons: &Anons, file: FileId, line: usize) -> Result<Expr, AsmError> {
+    Ok(match e {
+        Expr::Sym(s) => match decode_anon_ref(&s) {
+            Some((sign, level, vline)) => {
+                let def = anons.resolve(sign, level, vline).ok_or_else(|| {
+                    let run: String = std::iter::repeat_n(sign, level).collect();
+                    AsmError::at(
+                        crate::ast::Span::in_file(file, line as u32, 0),
+                        format!("no anonymous label `{run}` in that direction"),
+                    )
+                })?;
+                Expr::Sym(def.name.clone())
+            }
+            None => Expr::Sym(s),
+        },
+        Expr::Lo(b) => Expr::Lo(Box::new(subst_anon_expr(*b, anons, file, line)?)),
+        Expr::Hi(b) => Expr::Hi(Box::new(subst_anon_expr(*b, anons, file, line)?)),
+        Expr::Bank(b) => Expr::Bank(Box::new(subst_anon_expr(*b, anons, file, line)?)),
+        Expr::Neg(b) => Expr::Neg(Box::new(subst_anon_expr(*b, anons, file, line)?)),
+        Expr::Bin(op, l, r) => Expr::Bin(
+            op,
+            Box::new(subst_anon_expr(*l, anons, file, line)?),
+            Box::new(subst_anon_expr(*r, anons, file, line)?),
+        ),
+        other @ (Expr::Num(_) | Expr::Pc) => other,
     })
 }
 
@@ -654,7 +1166,7 @@ fn classify_conditional(text: &str) -> Option<Conditional> {
 
 /// Parse `!set name = expr`, folding `expr` against the current `env`.
 fn parse_set(
-    anons: &[AnonDef],
+    anons: &Anons,
     env: &BTreeMap<String, i64>,
     text: &str,
     line: usize,
@@ -724,7 +1236,7 @@ fn bake_expr(e: Expr, env: &BTreeMap<String, i64>, set_names: &BTreeSet<String>)
 /// `>` comparisons are not supported (they collide with the byte prefixes); the
 /// curriculum uses only `=`.
 fn eval_condition(
-    anons: &[AnonDef],
+    anons: &Anons,
     env: &BTreeMap<String, i64>,
     cond: &str,
     line: usize,
@@ -796,7 +1308,7 @@ fn top_level_lone_eq(s: &str) -> Option<usize> {
 /// Reduce one source line to an optional label and an optional operation.
 fn parse_statement(
     set: &'static isa::InstructionSet,
-    anons: &[AnonDef],
+    anons: &Anons,
     env: &BTreeMap<String, i64>,
     code: &str,
     line: usize,
@@ -835,7 +1347,7 @@ fn parse_statement(
 /// operation, not a label; an all-`-`/all-`+` run is an anonymous label.
 fn split_label<'a>(
     set: &'static isa::InstructionSet,
-    anons: &[AnonDef],
+    anons: &Anons,
     code: &'a str,
     line: usize,
 ) -> Result<(Option<String>, &'a str), AsmError> {
@@ -845,11 +1357,12 @@ fn split_label<'a>(
     let trimmed = code.trim();
     let (word, remainder) = split_first_word(trimmed);
     if anon_marker(word).is_some() {
+        // The walk registered this line's definition (at the current
+        // evaluation position) before lowering it.
         let name = anons
-            .iter()
-            .find(|d| d.line == line)
+            .def_here()
             .map(|d| d.name.clone())
-            .ok_or_else(|| AsmError::new(line, "internal: anonymous label not pre-scanned"))?;
+            .ok_or_else(|| AsmError::new(line, "internal: anonymous label not registered"))?;
         return Ok((Some(name), remainder));
     }
     if let Some(name) = word.strip_suffix(':') {
@@ -870,7 +1383,7 @@ fn split_label<'a>(
 /// Parse the operation part (after any label): a `!` directive or an instruction.
 fn parse_op(
     set: &'static isa::InstructionSet,
-    anons: &[AnonDef],
+    anons: &Anons,
     env: &BTreeMap<String, i64>,
     rest: &str,
     line: usize,
@@ -901,7 +1414,7 @@ fn parse_op(
 // ---------------------------------------------------------------------------
 
 fn parse_directive(
-    anons: &[AnonDef],
+    anons: &Anons,
     env: &BTreeMap<String, i64>,
     directive: &str,
     line: usize,
@@ -930,7 +1443,7 @@ fn parse_directive(
 /// against the parse-time `env` (so a `= const` like `MAX_NOTES` works), because
 /// the size has to be known before pass two assigns addresses.
 fn parse_fill(
-    anons: &[AnonDef],
+    anons: &Anons,
     env: &BTreeMap<String, i64>,
     rest: &str,
     line: usize,
@@ -957,7 +1470,7 @@ fn parse_fill(
 /// is PC-dependent, so the count is computed by the engine (`Operation::Align`),
 /// not here.
 fn parse_align(
-    anons: &[AnonDef],
+    anons: &Anons,
     env: &BTreeMap<String, i64>,
     rest: &str,
     line: usize,
@@ -986,7 +1499,7 @@ fn parse_align(
     })
 }
 
-fn parse_list(anons: &[AnonDef], rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
+fn parse_list(anons: &Anons, rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
     if rest.trim().is_empty() {
         return Err(AsmError::new(line, "directive needs at least one value"));
     }
@@ -1000,7 +1513,7 @@ fn parse_list(anons: &[AnonDef], rest: &str, line: usize) -> Result<Vec<Expr>, A
 /// character, passed through `convert`) and bare values (emitted as-is). ACME's
 /// `!text` passes characters through unchanged; `!scr` maps them to screen codes.
 fn parse_text(
-    anons: &[AnonDef],
+    anons: &Anons,
     rest: &str,
     line: usize,
     convert: fn(u8) -> u8,
@@ -1050,12 +1563,14 @@ fn screen_code(c: u8) -> u8 {
 // Value parsing (ACME surface over the shared expression core)
 // ---------------------------------------------------------------------------
 
-/// Parse an ACME value: a bare `-`/`+` run is an anonymous-label reference;
-/// otherwise it is an expression with `<`/`>` applying loosely.
-fn parse_value(anons: &[AnonDef], raw: &str, line: usize) -> Result<Expr, AsmError> {
+/// Parse an ACME value: a bare `-`/`+` run is an anonymous-label reference —
+/// deferred to a placeholder, since a forward `+` may point into a file the
+/// walk has not loaded yet (see [`Anons`]); otherwise it is an expression
+/// with `<`/`>` applying loosely.
+fn parse_value(anons: &Anons, raw: &str, line: usize) -> Result<Expr, AsmError> {
     let trimmed = raw.trim();
     if let Some((sign, level)) = anon_marker(trimmed) {
-        return Ok(Expr::Sym(resolve_anon(anons, sign, level, line, line)?));
+        return Ok(Expr::Sym(anon_ref_placeholder(sign, level, anons.vline)));
     }
     mos6502::parse_expr(
         raw,
@@ -1224,6 +1739,36 @@ mod tests {
     fn self_referencing_backward_label() {
         let a = asm("*= $1000\n-      jmp -\n").expect("selfloop");
         assert_eq!(a.bytes, vec![0x4C, 0x00, 0x10]);
+    }
+
+    /// U4 (probe-pinned): an anonymous definition inside an **untaken** `!if`
+    /// branch does not exist — a later `-` reference skips over it to the live
+    /// definition, exactly as acme resolves it (a9 01 d0 fc). The old textual
+    /// prescan collected the dead definition and failed with an undefined
+    /// symbol; evaluation-order collection fixes it.
+    #[test]
+    fn anon_in_untaken_branch_does_not_exist() {
+        let a = asm("*= $1000\n\
+             FLAG = 0\n\
+             -       lda #1\n\
+             !if FLAG {\n\
+             -       lda #2\n\
+             }\n\
+             \x20       bne -\n")
+        .expect("the dead branch's anon is invisible");
+        assert_eq!(a.bytes, vec![0xA9, 0x01, 0xD0, 0xFC]);
+    }
+
+    /// U4 (probe-pinned): a forward `+` reference never matches a definition
+    /// on its **own** line — acme rejects `+ jmp +` with `Value not defined`
+    /// — while the backward self-reference (`- jmp -`, above) stays legal.
+    #[test]
+    fn forward_anon_never_matches_its_own_line() {
+        let err = asm("*= $1000\n+      jmp +\n").expect_err("strictly forward");
+        assert!(
+            err.message.contains("no anonymous label"),
+            "unexpected: {err}"
+        );
     }
 
     #[test]

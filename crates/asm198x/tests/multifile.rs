@@ -14,7 +14,8 @@ use std::process::Command;
 
 use asm198x::source::{FsLoader, MemoryLoader, SourceLoader, SourceMap};
 use asm198x::{
-    FileId, assemble_pasmo, assemble_pasmo_files, assemble_sjasmplus, assemble_sjasmplus_files,
+    FileId, assemble_acme, assemble_acme_files, assemble_pasmo, assemble_pasmo_files,
+    assemble_sjasmplus, assemble_sjasmplus_files,
 };
 
 /// The built `asm198x` binary under test.
@@ -899,6 +900,374 @@ fn cli_assembles_an_incbin() {
     assert_eq!(
         std::fs::read(&out).expect("output written"),
         vec![0xAA, 0x12, 0x13, 0x14]
+    );
+}
+
+// ===========================================================================
+// U4 — ACME: `!src`/`!source` and `!bin`/`!binary` resolve inside the
+// evaluation walk (hermetic, MemoryLoader). Every expected byte sequence and
+// error posture below is pinned by the acme 0.97 probe runs in the U4 report
+// (KTD5).
+// ===========================================================================
+
+/// AE1's mechanism for acme: a two-file program assembles byte-identical to
+/// its flattened equivalent, and the result's file table lists both files in
+/// `FileId` order (KTD2).
+#[test]
+fn acme_include_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("defs.a", "border = $d020\n");
+    let src = "* = $1000\n        !src \"defs.a\"\n        sta border\n";
+    let r = assemble_acme_files(src, "main.a", &loader).expect("assembles");
+    let flat = assemble_acme("* = $1000\nborder = $d020\n        sta border\n")
+        .expect("flattened equivalent assembles");
+    assert_eq!(r.bytes, flat.bytes, "include is transparent to the bytes");
+    assert_eq!(
+        r.files,
+        vec!["main.a".to_string(), "defs.a".to_string()],
+        "the file table survives into the result (KTD2)"
+    );
+}
+
+/// Three-deep nesting: main → a → b, code at every level, in include order;
+/// `!source` is the long alias and the spellings are case-insensitive
+/// (probe-pinned).
+#[test]
+fn acme_include_three_deep_nests() {
+    let loader = MemoryLoader::new()
+        .text(
+            "a.a",
+            "        lda #2\n        !SRC \"b.a\"\n        lda #4\n",
+        )
+        .text("b.a", "        lda #3\n");
+    let src = "* = $1000\n        lda #1\n        !source \"a.a\"\n        lda #5\n";
+    let r = assemble_acme_files(src, "main.a", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0xA9, 0x01, 0xA9, 0x02, 0xA9, 0x03, 0xA9, 0x04, 0xA9, 0x05],
+        "bytes interleave in include order"
+    );
+    assert_eq!(r.files, vec!["main.a", "a.a", "b.a"]);
+}
+
+/// KTD1's driver on the 6502: symbols defined inside the include feed the
+/// includer's *later* zero-page vs absolute selection — acme picks the
+/// addressing mode by value knowledge (probe-pinned: a5 10 / 8d 00 04).
+#[test]
+fn acme_include_defined_symbols_feed_later_zp_abs_selection() {
+    let loader = MemoryLoader::new().text("defs.a", "ptr = $10\naddr = $0400\n");
+    let src = "* = $1000\n        !src \"defs.a\"\n        lda ptr\n        sta addr\n";
+    let r = assemble_acme_files(src, "main.a", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0xA5, 0x10, 0x8D, 0x00, 0x04],
+        "zp for ptr, absolute for addr (KTD1)"
+    );
+}
+
+/// The environment flows *out* of the include: a constant defined inside it
+/// drives the includer's later conditional (probe-pinned: a9 ff).
+#[test]
+fn acme_include_defined_symbol_drives_a_later_conditional() {
+    let loader = MemoryLoader::new().text("cfg.a", "DEBUG = 1\n");
+    let src = "* = $1000\n        !src \"cfg.a\"\n\
+               !if DEBUG = 1 {\n        lda #$ff\n} else {\n        lda #$00\n}\n";
+    let r = assemble_acme_files(src, "main.a", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0xA9, 0xFF], "env threads back out (KTD1)");
+}
+
+/// KTD1's proof, testable on ACME today (it has conditionals): a `!src` in an
+/// **untaken** branch never loads — the target may not even exist — while the
+/// taken branch does load it.
+#[test]
+fn acme_conditional_guarded_include_loads_only_when_taken() {
+    let src = "* = $1000\n\
+               !ifdef DEMO {\n        !src \"demo.a\"\n}\n        lda #3\n";
+    // Untaken: `demo.a` is not registered anywhere; the walk must not ask for it.
+    let untaken = assemble_acme_files(src, "main.a", &MemoryLoader::new())
+        .expect("the untaken branch never loads (probe-pinned: acme assembles)");
+    assert_eq!(untaken.bytes, vec![0xA9, 0x03]);
+    assert_eq!(
+        untaken.files,
+        vec!["main.a".to_string()],
+        "no FileId was minted for the guarded include"
+    );
+
+    // Taken: the same source with DEMO defined loads and splices the file.
+    let taken_src = format!("DEMO = 1\n{src}");
+    let loader = MemoryLoader::new().text("demo.a", "        lda #2\n");
+    let taken = assemble_acme_files(&taken_src, "main.a", &loader).expect("taken branch loads");
+    assert_eq!(taken.bytes, vec![0xA9, 0x02, 0xA9, 0x03]);
+    assert_eq!(taken.files, vec!["main.a", "demo.a"]);
+}
+
+/// Anonymous `-`/`+` labels resolve in **spliced evaluation order** across
+/// the `!src` boundary, both directions (probe-pinned bytes): the include
+/// references the includer's `-`, and the includer's forward `jmp +` lands on
+/// the `+` defined inside the include.
+#[test]
+fn acme_anons_resolve_across_the_include_boundary() {
+    let loader = MemoryLoader::new().text("part.a", "+       lda #2\n        beq -\n");
+    let src = "* = $1000\n\
+               -       lda #1\n\
+               \x20       jmp +\n\
+               \x20       !src \"part.a\"\n\
+               \x20       bne -\n";
+    let r = assemble_acme_files(src, "main.a", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![
+            0xA9, 0x01, 0x4C, 0x05, 0x10, 0xA9, 0x02, 0xF0, 0xF7, 0xD0, 0xF5
+        ],
+        "probe-pinned bytes (c1)"
+    );
+}
+
+/// A label on the `!src` line binds at the include point (probe-pinned:
+/// `here !src …` then `!word here` = 00 10 at origin $1000).
+#[test]
+fn acme_label_on_the_src_line_binds_at_the_include_point() {
+    let loader = MemoryLoader::new().text("body.a", "        lda #7\n");
+    let src = "* = $1000\nhere    !src \"body.a\"\n        !word here\n";
+    let r = assemble_acme_files(src, "main.a", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0xA9, 0x07, 0x00, 0x10]);
+    assert_eq!(r.symbols.get("here"), Some(&0x1000));
+}
+
+/// `!bin "file"[, [size][, [skip]]]` — acme's argument order is size *then*
+/// skip, and every window case is probe-pinned: plain, size-only, size+skip,
+/// an empty size slot, and the zero-padding postures (size past the data,
+/// skip past EOF) that acme pads rather than rejects.
+#[test]
+fn acme_bin_size_skip_windows_match_the_probes() {
+    let loader = || MemoryLoader::new().binary("data.bin", asset());
+    let cases: &[(&str, Vec<u8>)] = &[
+        // b1: the whole asset.
+        ("!bin \"data.bin\"", asset()),
+        // b2: size 3 = the first three bytes.
+        ("!bin \"data.bin\", 3", vec![0x10, 0x11, 0x12]),
+        // b3: size 3, skip 2 — skip first, then take size.
+        ("!bin \"data.bin\", 3, 2", vec![0x12, 0x13, 0x14]),
+        // b4: size past the data pads with zeroes (never an error).
+        ("!bin \"data.bin\", 12", {
+            let mut v = asset();
+            v.extend([0, 0, 0, 0]);
+            v
+        }),
+        // b6: an empty size slot = skip 2, read to EOF.
+        (
+            "!bin \"data.bin\", , 2",
+            vec![0x12, 0x13, 0x14, 0x15, 0x16, 0x17],
+        ),
+        // b7: skip past EOF with a size = pure zero padding.
+        ("!bin \"data.bin\", 2, 20", vec![0x00, 0x00]),
+        // b8: skip past EOF without a size = nothing.
+        ("!bin \"data.bin\", , 20", vec![]),
+        // b9: a negative skip reads from the start.
+        ("!bin \"data.bin\", 2, -1", vec![0x10, 0x11]),
+        // b10/b17-style: size and skip take constant expressions.
+        (
+            "SZ = 2\n!bin \"data.bin\", SZ+1, SZ",
+            vec![0x12, 0x13, 0x14],
+        ),
+        // `!binary` is the long alias (b18).
+        ("!binary \"data.bin\", 2", vec![0x10, 0x11]),
+    ];
+    for (line, want) in cases {
+        let src = format!("* = $1000\n{line}\n");
+        let r = assemble_acme_files(&src, "main.a", &loader()).expect(line);
+        assert_eq!(&r.bytes, want, "probe-pinned bytes for {line}");
+    }
+}
+
+/// A negative `!bin` size is acme's error posture (probe b13, `Negative size
+/// argument`), at the directive's span.
+#[test]
+fn acme_bin_negative_size_is_an_error() {
+    let loader = MemoryLoader::new().binary("data.bin", asset());
+    let src = "* = $1000\n        !bin \"data.bin\", -2\n";
+    let e = assemble_acme_files(src, "main.a", &loader).expect_err("negative size");
+    assert!(
+        e.error.message.contains("negative"),
+        "names the problem: {}",
+        e.error.message
+    );
+    assert_eq!(e.error.line, 2, "at the directive's line");
+}
+
+/// acme requires quotes on the file name (probe b15) and rejects extra
+/// arguments (`!src` takes one file, c8; `!bin` at most size and skip, b14).
+#[test]
+fn acme_malformed_directive_arguments_are_rejected() {
+    let loader = MemoryLoader::new()
+        .text("body.a", "        lda #7\n")
+        .binary("data.bin", asset());
+    for (src, needle) in [
+        ("* = $1000\n        !src body.a\n", "quoted"),
+        ("* = $1000\n        !bin data.bin\n", "quoted"),
+        ("* = $1000\n        !src \"body.a\", 2\n", "one file name"),
+        ("* = $1000\n        !bin \"data.bin\", 2, 1, 9\n", "at most"),
+    ] {
+        let e = assemble_acme_files(src, "main.a", &loader).expect_err(src);
+        assert!(
+            e.error.message.contains(needle),
+            "`{src}` names the problem: {}",
+            e.error.message
+        );
+    }
+}
+
+/// A label on the `!bin` line binds at the payload's start (probe b16).
+#[test]
+fn acme_label_on_the_bin_line_binds_at_the_payload() {
+    let loader = MemoryLoader::new().binary("data.bin", asset());
+    let src = "* = $1000\nart     !bin \"data.bin\", 2\n        !word art\n";
+    let r = assemble_acme_files(src, "main.a", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0x10, 0x11, 0x00, 0x10]);
+    assert_eq!(r.symbols.get("art"), Some(&0x1000));
+}
+
+/// An error inside an included file names *that* file and line, and the
+/// include graph yields the chain back to the root (KTD2 failure path).
+#[test]
+fn acme_error_in_included_file_names_that_file_with_its_chain() {
+    let loader = MemoryLoader::new()
+        .text("a.a", "        !src \"b.a\"\n")
+        .text("b.a", "        lda #1\n        frob $10\n");
+    let src = "* = $1000\n        !src \"a.a\"\n";
+    let e = assemble_acme_files(src, "main.a", &loader).expect_err("frob is unknown");
+    let span = e.error.span.as_ref().expect("the error carries a span");
+    assert_eq!(span.line, 2, "line 2 of b.a, not of main.a");
+    let table = e.source_map.file_table();
+    assert_eq!(
+        table.get(span.file.0 as usize).map(String::as_str),
+        Some("b.a"),
+        "the span names the included file"
+    );
+    assert_eq!(
+        e.source_map.include_chain(span.file),
+        vec![("a.a".to_string(), 1), ("main.a".to_string(), 2)],
+        "the include chain walks back to the root"
+    );
+}
+
+/// A missing `!src` target is a diagnostic at the directive's span — the
+/// operand's column — not a CLI read error; a missing `!bin` asset likewise.
+#[test]
+fn acme_missing_targets_report_at_the_directive_span() {
+    let loader = MemoryLoader::new();
+    let src = "* = $1000\n        !src \"nothere.a\"\n";
+    let e = assemble_acme_files(src, "main.a", &loader).expect_err("missing target");
+    assert!(
+        e.error.message.contains("nothere.a"),
+        "names the request: {}",
+        e.error.message
+    );
+    let span = e.error.span.as_ref().expect("span at the directive");
+    assert_eq!(span.line, 2);
+    assert_eq!(span.col, 14, "points at the operand (the file name)");
+
+    let bin = "* = $1000\n        !bin \"nothere.bin\"\n";
+    let e = assemble_acme_files(bin, "main.a", &loader).expect_err("missing asset");
+    assert!(
+        e.error.message.contains("nothere.bin"),
+        "names the request: {}",
+        e.error.message
+    );
+    assert_eq!(e.error.span.as_ref().map(|s| s.line), Some(2));
+}
+
+/// A self-include is a cycle diagnostic listing the chain (diagnostics may
+/// exceed the reference's depth-overflow posture, KTD5).
+#[test]
+fn acme_self_include_reports_the_cycle() {
+    let src = "* = $1000\n        !src \"main.a\"\n";
+    let loader = MemoryLoader::new().text("main.a", src);
+    let e = assemble_acme_files(src, "main.a", &loader).expect_err("cycle");
+    assert!(
+        e.error.message.contains("include cycle"),
+        "names the cycle: {}",
+        e.error.message
+    );
+    assert!(
+        e.error.message.contains("main.a -> main.a"),
+        "lists the chain: {}",
+        e.error.message
+    );
+}
+
+/// The single-source entry points still mean "one file": a `!src` or `!bin`
+/// there is a clear pointer to the multi-file entry, not a silent skip.
+#[test]
+fn acme_single_source_entry_rejects_src_and_bin_with_a_pointer() {
+    for (src, directive) in [
+        ("* = $1000\n        !src \"defs.a\"\n", "!src"),
+        ("* = $1000\n        !bin \"data.bin\"\n", "!bin"),
+    ] {
+        let e = assemble_acme(src).expect_err("no loader here");
+        assert!(
+            e.message.contains(directive) && e.message.contains("multi-file"),
+            "points at the multi-file entry: {}",
+            e.message
+        );
+    }
+}
+
+/// End-to-end through the binary: an acme `!src` resolves via `-I` from a
+/// directory other than the input's own, and `--prg` still packages the
+/// result (the new acme multi-file CLI wiring).
+#[test]
+fn cli_assembles_an_acme_include_via_a_search_dir() {
+    let srcdir = temp_tree("u4-acme-cli-src");
+    let incdir = temp_tree("u4-acme-cli-inc");
+    let main = srcdir.join("main.a");
+    std::fs::write(
+        &main,
+        "* = $1000\n        !src \"defs.a\"\n        lda #VAL\n",
+    )
+    .expect("write main");
+    std::fs::write(incdir.join("defs.a"), "VAL = $2b\n").expect("write include");
+    let out = srcdir.join("main.bin");
+    let run = bin()
+        .args(["--dialect", "acme", "-I"])
+        .arg(&incdir)
+        .arg(&main)
+        .arg("-o")
+        .arg(&out)
+        .output()
+        .expect("run asm198x");
+    assert!(
+        run.status.success(),
+        "assembles: {}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    assert_eq!(
+        std::fs::read(&out).expect("output written"),
+        vec![0xA9, 0x2B]
+    );
+}
+
+/// A failure inside an acme include renders rustc-style with the included
+/// file's name plus an `included from` note naming the includer and line.
+#[test]
+fn cli_acme_error_in_include_carries_an_included_from_note() {
+    let dir = temp_tree("u4-acme-cli-note");
+    let main = dir.join("main.a");
+    std::fs::write(&main, "* = $1000\n        !src \"bad.a\"\n").expect("write main");
+    std::fs::write(dir.join("bad.a"), "        frob $10\n").expect("write include");
+    let run = bin()
+        .args(["--dialect", "acme"])
+        .arg(&main)
+        .output()
+        .expect("run asm198x");
+    assert!(!run.status.success(), "frob fails the assemble");
+    let stderr = String::from_utf8_lossy(&run.stderr);
+    assert!(
+        stderr.contains("bad.a:1"),
+        "names the included file and line: {stderr}"
+    );
+    assert!(
+        stderr.contains("included from") && stderr.contains("main.a:2"),
+        "carries the included-from note: {stderr}"
     );
 }
 

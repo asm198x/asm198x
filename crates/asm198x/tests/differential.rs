@@ -214,6 +214,11 @@ const PROBES: &[Probe] = &[
     ok ("acme", "directive !align",      " !align 255,0\n lda #1\n"),
     ok ("acme", "directive !zone",       " !zone main\n rts\n"),
     ok ("acme", "directive !set",        " !set n=5\n lda #n\n"),
+    // U4: an anon defined in an untaken `!if` branch does not exist — the
+    // later `-` reference resolves to the live definition (the evaluation-order
+    // collection; the old textual prescan failed this probe).
+    ok ("acme", "anon skips untaken branch",
+        "FLAG = 0\n-       lda #1\n!if FLAG {\n-       lda #2\n}\n        bne -\n"),
 
     // ---- pasmo / z80 --------------------------------------------------------
     ok ("pasmo", "hex $ / binary %",     " ld a,$10\n ld b,%1010\n"),
@@ -517,10 +522,72 @@ const MULTI_PROBES: &[MultiProbe] = &[
             "        org $8000\n        db $aa\n        incbin \"data.bin\"\n        db $bb\n",
         )],
     },
+    // --- U4: acme (`!src`/`!bin`) ---
+    MultiProbe {
+        dialect: "acme",
+        binaries: &[],
+        note: "nested !src, code at every level, include-defined symbol feeds zp/abs (U4)",
+        files: &[
+            (
+                "main.a",
+                "* = $1000\n        lda #1\n        !src \"a.a\"\n        lda ptr\n        sta addr\n",
+            ),
+            (
+                "a.a",
+                "        lda #2\n        !src \"b.a\"\n        lda #4\n",
+            ),
+            ("b.a", "        lda #3\nptr = $10\naddr = $0400\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "acme",
+        binaries: &[("data.bin", ASSET)],
+        note: "!bin size+skip window, empty size slot, and the zero-pad posture (U4)",
+        files: &[(
+            "main.a",
+            "* = $1000\n!byte $aa\n!bin \"data.bin\", 3, 2\n!bin \"data.bin\", , 6\n!bin \"data.bin\", 12\n!byte $bb\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "acme",
+        binaries: &[],
+        note: "anonymous labels resolve across the !src boundary, both directions (U4)",
+        files: &[
+            (
+                "main.a",
+                "* = $1000\n-       lda #1\n        jmp +\n        !src \"part.a\"\n        bne -\n",
+            ),
+            ("part.a", "+       lda #2\n        beq -\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "acme",
+        binaries: &[],
+        note: "conditional-guarded !src: untaken never loads (target absent), taken splices (U4)",
+        files: &[
+            (
+                "main.a",
+                "* = $1000\nDEMO = 1\n!ifdef NOPE {\n        !src \"missing.a\"\n}\n!ifdef DEMO {\n        !src \"demo.a\"\n}\n        lda #3\n",
+            ),
+            ("demo.a", "        lda #2\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "acme",
+        binaries: &[("data.bin", ASSET)],
+        note: "labels on the !src and !bin lines bind at the include point / payload (U4)",
+        files: &[
+            (
+                "main.a",
+                "* = $1000\nhere    !src \"body.a\"\nart     !bin \"data.bin\", 2\n        !word here\n        !word art\n",
+            ),
+            ("body.a", "        lda #7\n"),
+        ],
+    },
 ];
 
 #[test]
-#[ignore = "needs sjasmplus + pasmo; run with --ignored"]
+#[ignore = "needs sjasmplus + pasmo + acme; run with --ignored"]
 fn multi_file_source_matches_reference() {
     let base = std::env::temp_dir().join("asm198x-differential-multi");
     let mut failures: Vec<String> = Vec::new();
@@ -556,6 +623,15 @@ fn multi_file_source_matches_reference() {
                 c.arg(root).arg(&out);
                 c
             }
+            // acme runs from the probe dir, so its cwd-anchored `!src`/`!bin`
+            // resolution and our requesting-file-first order agree (the probe
+            // fixtures are flat by design; the order divergence is documented
+            // in the acme skin).
+            "acme" => {
+                let mut c = Command::new("acme");
+                c.args(["-f", "plain", "-o"]).arg(&out).arg(root);
+                c
+            }
             other => panic!("no multi-file runner for dialect `{other}`"),
         }
         .current_dir(&dir)
@@ -578,6 +654,7 @@ fn multi_file_source_matches_reference() {
         let entry = match p.dialect {
             "sjasmplus" => asm198x::assemble_sjasmplus_files,
             "pasmo" => asm198x::assemble_pasmo_files,
+            "acme" => asm198x::assemble_acme_files,
             other => panic!("no multi-file entry for dialect `{other}`"),
         };
         checked += 1;

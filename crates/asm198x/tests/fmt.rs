@@ -1155,6 +1155,67 @@ art:    INCBIN <also-missing.bin>,2,3
     );
 }
 
+/// U4 (language surface): `--fmt` renders acme's `!src`/`!bin` directives
+/// verbatim from the node's source without ever opening the targets —
+/// formatting succeeds when they do not exist — and stays idempotent (KTD1).
+/// Spelling (case, aliases, the `<>` library form, the size/skip tail) is
+/// preserved untouched.
+#[test]
+fn fmt_acme_src_and_bin_are_verbatim_and_never_open_targets() {
+    let src = "\
+; header
+* = $1000
+        !src \"missing.a\"   ; pulled in later
+here    !SOURCE <also-missing.a>
+art     !bin \"missing.bin\", 3, 2
+        !BINARY \"also-missing.bin\", , 2
+        lda #1
+";
+    let formatted = format_acme(src).expect("formats with every target missing");
+    for verbatim in [
+        "!src \"missing.a\"",
+        "!SOURCE <also-missing.a>",
+        "!bin \"missing.bin\", 3, 2",
+        "!BINARY \"also-missing.bin\", , 2",
+    ] {
+        assert!(
+            formatted.contains(verbatim),
+            "`{verbatim}` survives verbatim:\n{formatted}"
+        );
+    }
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert_eq!(
+        format_acme(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U4: formatted `!src`/`!bin`-bearing acme source reassembles byte-identical
+/// through the multi-file entry (the acme leg of the fmt round-trip bar).
+#[test]
+fn fmt_acme_src_and_bin_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.a", "VAL = $2b\n")
+            .binary("data.bin", (0x10..0x18).collect())
+    };
+    let src =
+        "* = $1000\n        !src \"defs.a\"\n        lda #VAL\n        !bin \"data.bin\", 3, 2\n";
+    let original = asm198x::assemble_acme_files(src, "main.a", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_acme(src).expect("formats");
+    let reassembled = asm198x::assemble_acme_files(&formatted, "main.a", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+}
+
 /// U3: formatted incbin-bearing source reassembles byte-identical through the
 /// multi-file entry (the incbin leg of the fmt round-trip bar).
 #[test]

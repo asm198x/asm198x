@@ -595,13 +595,18 @@ fn run(args: &[String]) -> Result<String, String> {
         return Err("`--prg` is only for the C64 dialect (acme)".into());
     }
 
-    // The Z80 family is multi-file-capable: sjasmplus for includes + incbin
-    // (U2/U3), pasmo for its plain incbin (U3). Both assemble through the
-    // multi-file entries, with the input's directory + the `-I` dirs wired
-    // into a filesystem loader; a failure renders with the real file table
-    // and the include-graph notes. Every other dialect stays on the
-    // single-file path until U4–U6.
+    // The multi-file-capable dialects — sjasmplus for includes + incbin
+    // (U2/U3), pasmo for its plain incbin (U3), acme for `!src`/`!bin` (U4) —
+    // assemble through the multi-file entries, with the input's directory +
+    // the `-I` dirs wired into a filesystem loader; a failure renders with
+    // the real file table and the include-graph notes. Every other dialect
+    // stays on the single-file path until U4–U6 complete.
     let assembly = match assembler {
+        Assembler::Acme => {
+            let loader = fs_loader(input, &include_dirs);
+            asm198x::assemble_acme_files(&source, input, &loader)
+                .map_err(|e| render_multi_error(input, &e))?
+        }
         Assembler::Sjasmplus { z80n } => {
             let loader = fs_loader(input, &include_dirs);
             let entry = if z80n {
@@ -932,6 +937,13 @@ fn emit_json(
                 asm198x::assemble_pasmo_files
             };
             entry(source, input, &loader).map_err(|e| {
+                failure_files = e.source_map.file_table();
+                e.error
+            })
+        }
+        Assembler::Acme => {
+            let loader = fs_loader(input, include_dirs);
+            asm198x::assemble_acme_files(source, input, &loader).map_err(|e| {
                 failure_files = e.source_map.file_table();
                 e.error
             })

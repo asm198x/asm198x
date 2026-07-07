@@ -84,12 +84,38 @@ pub use sna::sna_48k;
 
 /// Assemble ACME-syntax 6502 source into a flat binary — the C64 curriculum's
 /// dialect (`*=` to set the PC, `!byte`/`!word`/`!fill`, `name = value`).
+/// Single-source: a `!src`/`!bin` directive is an error here — use
+/// [`assemble_acme_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_acme(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Acme).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** ACME program (language-surface U4): `source` is
+/// the root file's text, `input_path` its name (entry 0 of the file table),
+/// and `!src`/`!source` and `!bin`/`!binary` directives resolve through
+/// `loader` — the CLI wires an [`FsLoader`](source::FsLoader) carrying the
+/// input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution happens inside
+/// the live evaluation walk, so a `!src` in an untaken conditional branch
+/// never loads (KTD1), and acme's probe-pinned `!bin "file"[, size[, skip]]`
+/// window semantics (zero-padding past EOF) apply byte-identically. On
+/// success, [`AssemblyResult::files`] holds the `FileId`→path table. The
+/// single-source [`assemble_acme`] is unchanged and rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_acme_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Acme, source, input_path, loader)
 }
 
 /// Assemble ca65-syntax 6502 source for the NES and link it into a `.nes` ROM
