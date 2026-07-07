@@ -23,9 +23,12 @@ freeze *promise* fires at the MCP surface per
 `decisions/core-contract-freeze.md`; until then the contract is a public draft.
 The current focus is **Layer 2** — the consumers fan out on the frozen-shape
 foundations. **Debug198x**, the first consumer, completed all seven units on
-2026-07-06 (see its bullet below); the remaining Layer 2 items are the verdict
-pipeline (independent, run anytime), the language surface, the converter, and
-the cycle analyzer (gated on the unowned cycles/flags data seam).
+2026-07-06, and the **language surface** completed its v1 (foundation:
+includes/incbin, local-label scoping, sjasmplus conditionals, the multi-file
+debug leg) on 2026-07-07 — macros are its deliberate stage 2 (see the bullets
+below). The remaining Layer 2 items are the verdict pipeline (independent, run
+anytime), the converter, and the cycle analyzer (gated on the unowned
+cycles/flags data seam).
 
 This record is the map. It does not restate each plan — it says what order they
 go in and why, and where the freeze-gates are. Read it before scheduling work
@@ -74,8 +77,15 @@ freeze fires at MCP (`decisions/core-contract-freeze.md`).
   nothing; reuses only the thin diagnostic envelope opportunistically. Run its
   harness prerequisite (outcome-typed `ref_assemble`, its U2) whenever capacity
   allows — it needs no other layer.
-- **Language surface (`…-001`, idea 4)** — on the completed AST; it *finalizes*
-  the multi-file source model, so its span decisions must be locked in Layer 0.
+- **Language surface (`…-001`, idea 4)** — ✅ **complete for v1 2026-07-07**
+  (U1–U9: the multi-file source model + `FileId` table on the Layer-0 span
+  shape — new values, no reshape; include/incbin across the full dialect
+  roster including the ca65-NES and vasm linked paths; local-label scoping on
+  the shared AST helper with ACME `!zone` made real; sjasmplus conditionals
+  as the first keyword `CondEval` adopter; and the multi-file debug artifacts
+  + fixture families closing the debug198x leg). **Macros are the deliberate
+  stage-2 follow-on** — with repetition, modules, and further conditional
+  adopters — recorded in the plan's Scope Boundaries, not partially started.
 - **Converter (`…-003`/idea 6)** — on the completed AST + the structural
   renderer it defines; macro/include/conditional conversion is gated on idea 4.
 - **Cycle analyzer (`…-002`/idea 5)** — needs the field-packed cycles/flags data

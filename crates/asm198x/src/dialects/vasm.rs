@@ -23,8 +23,58 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use isa::m68k::{self, EaModes, Size, SizeEnc, Slot, ea};
 
+use super::ca65_flat::{self, DirectiveLine, FlatWalk, Resolution, WalkDirective, WalkSemantics};
 use super::mos6502::{self, is_ident, split_data_items, split_first_word, string_literal};
 use crate::engine::{AsmError, BinOp, Expr, Warning};
+use crate::listing::{DebugCapture, DebugCaptureMulti};
+use crate::source::{SourceLoader, SourceMap};
+use crate::span::FileId;
+
+/// vasm's probe-pinned multi-file semantics (language-surface U6, KTD5;
+/// `vasmm68k_mot` 2.0b): relative `include`/`incbin` requests anchor at the
+/// **root input's directory** for every request, however deep the requester —
+/// vasm searches its process cwd first and then the main source's directory,
+/// never the *including* file's directory (a copy next to a nested include is
+/// not found). Our input's directory stands in for the cwd, the documented
+/// [`FsLoader`](crate::source::FsLoader) stance, then the `-I` dirs — the same
+/// mapping rgbasm's probe pinned. The incbin window is [`vasm_incbin_window`];
+/// there is no include extension defaulting.
+const VASM_SEMANTICS: WalkSemantics = WalkSemantics {
+    resolution: Resolution::Root,
+    window: vasm_incbin_window,
+    include_default_ext: None,
+};
+
+/// Apply vasm's `incbin "file"[,offset[,length]]` window — probe-pinned
+/// (`vasmm68k_mot` 2.0b): a negative offset or an offset past EOF is an error
+/// ("bad file-offset argument"); offset at EOF is legal and empty; a length
+/// that is omitted, **zero, or negative** means the rest of the file (zero is
+/// vasm's unspecified sentinel, unlike ca65's negative-only one); a length
+/// past the remaining bytes **silently truncates** to what remains (vasm
+/// exits 0 with no warning — mirrored, so the bytes stay identical).
+fn vasm_incbin_window(
+    data: &[u8],
+    offset: Option<i64>,
+    size: Option<i64>,
+) -> Result<Vec<u8>, String> {
+    let len = data.len() as i64;
+    let off = offset.unwrap_or(0);
+    if off < 0 {
+        return Err(format!("offset {off} must not be negative"));
+    }
+    if off > len {
+        return Err(format!(
+            "offset {off} is past the end of the {len}-byte file"
+        ));
+    }
+    let remaining = len - off;
+    let take = match size {
+        None => remaining,
+        Some(s) if s <= 0 => remaining,
+        Some(s) => s.min(remaining),
+    };
+    Ok(data[off as usize..(off + take) as usize].to_vec())
+}
 
 /// Evaluate an expression against bound symbols, with `*` (the location
 /// counter) resolving to `here`. A thin PC-aware wrapper over the shared
@@ -189,9 +239,61 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
 /// if the source uses more than one non-empty section.
 pub(crate) fn assemble_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError> {
     let mut warnings = Vec::new();
-    let (sections, _) = assemble_core(source, true, &mut warnings)?;
+    let (sections, _) = assemble_core(&parse_program(source)?, true, &mut warnings)?;
     let bytes = flatten_one_section(&sections)?;
     Ok((bytes, warnings))
+}
+
+/// Assemble a **multi-file** 68000 program to a flat binary (language-surface
+/// U6): the root is `map`'s `FileId(0)`, `include`/`incbin` resolve lazily
+/// through `loader` under vasm's probe-pinned semantics ([`VASM_SEMANTICS`]),
+/// and the capture's line records carry each statement's real file. Optimizer
+/// on, matching `vasmm68k_mot -Fbin` exactly as [`assemble_warned`] does.
+///
+/// # Errors
+/// Any per-line parse failure (stamped with its file), a missing target, an
+/// include cycle, a bad `incbin` window, or any layout/encode failure.
+pub(crate) fn assemble_warned_multi(
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
+    let mut warnings = Vec::new();
+    let (sections, mut capture) =
+        assemble_core(&parse_program_multi(map, loader)?, true, &mut warnings)?;
+    let bytes = flatten_one_section(&sections)?;
+    rebase_flat_capture(&sections, &mut capture);
+    Ok((bytes, warnings, capture))
+}
+
+/// Assemble a **multi-file** 68000 program to an Amiga hunk executable
+/// (language-surface U6): as [`assemble_warned_multi`], serialized like
+/// [`assemble_exe`] (`-Fhunkexe -kick1hunks`, debug symbol table omitted).
+///
+/// # Errors
+/// As [`assemble_warned_multi`].
+pub(crate) fn assemble_exe_multi(
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
+    let mut warnings = Vec::new();
+    let (sections, capture) =
+        assemble_core(&parse_program_multi(map, loader)?, true, &mut warnings)?;
+    Ok((serialize_hunkexe(&sections), warnings, capture))
+}
+
+/// The flat binary *is* the emitted section's bytes, so its offsets are file
+/// offsets: base that section at 0 so debug lookups resolve file-relative out
+/// of the box (a consumer loading the blob elsewhere overrides via the
+/// `BaseMap`, which wins over the recorded base).
+fn rebase_flat_capture(sections: &[SecOut], capture: &mut DebugCaptureMulti) {
+    if let Some(emitted) = sections.iter().position(|s| !s.bytes.is_empty())
+        && let Some(section) = capture
+            .sections
+            .iter_mut()
+            .find(|s| s.id == emitted as debug198x::SectionId)
+    {
+        section.base = Some(0);
+    }
 }
 
 /// Assemble with the optimizer either on (Stage 2, matches `vasm -Fbin`) or off
@@ -202,7 +304,7 @@ pub(crate) fn assemble_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), A
 /// section carries bytes (a flat binary can hold only one).
 pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, AsmError> {
     let mut warnings = Vec::new();
-    let (sections, _) = assemble_core(source, optimize, &mut warnings)?;
+    let (sections, _) = assemble_core(&parse_program(source)?, optimize, &mut warnings)?;
     flatten_one_section(&sections)
 }
 
@@ -228,7 +330,7 @@ pub(crate) fn assemble_exe(source: &str) -> Result<Vec<u8>, AsmError> {
     // The hunk-exe path discards warnings for now (the CLI surfaces them on the
     // flat path via `assemble_warned`); the bytes are unaffected either way.
     let mut warnings = Vec::new();
-    let (sections, _) = assemble_core(source, true, &mut warnings)?;
+    let (sections, _) = assemble_core(&parse_program(source)?, true, &mut warnings)?;
     Ok(serialize_hunkexe(&sections))
 }
 
@@ -239,23 +341,15 @@ pub(crate) fn assemble_exe(source: &str) -> Result<Vec<u8>, AsmError> {
 /// As [`assemble_warned`].
 pub(crate) fn assemble_warned_with_debug(
     source: &str,
-) -> Result<(Vec<u8>, Vec<Warning>, crate::listing::DebugCapture), AsmError> {
+) -> Result<(Vec<u8>, Vec<Warning>, DebugCapture), AsmError> {
     let mut warnings = Vec::new();
-    let (sections, mut capture) = assemble_core(source, true, &mut warnings)?;
+    let (sections, mut capture) = assemble_core(&parse_program(source)?, true, &mut warnings)?;
     let bytes = flatten_one_section(&sections)?;
-    // The flat binary *is* the emitted section's bytes, so its offsets are file
-    // offsets: base the section at 0 so lookups resolve file-relative out of
-    // the box. A consumer loading the blob elsewhere overrides via the
-    // `BaseMap`, which wins over the recorded base.
-    if let Some(emitted) = sections.iter().position(|s| !s.bytes.is_empty())
-        && let Some(section) = capture
-            .sections
-            .iter_mut()
-            .find(|s| s.id == emitted as debug198x::SectionId)
-    {
-        section.base = Some(0);
-    }
-    Ok((bytes, warnings, capture))
+    rebase_flat_capture(&sections, &mut capture);
+    // The single-source API keeps its exact pre-multi-file record shape:
+    // every line lives in the root input (U6 adopts `DebugCaptureMulti`
+    // internally; this entry collapses it).
+    Ok((bytes, warnings, capture.into_single()))
 }
 
 /// As [`assemble_exe`], also returning the debug read-out (Debug198x U5).
@@ -263,12 +357,10 @@ pub(crate) fn assemble_warned_with_debug(
 ///
 /// # Errors
 /// As [`assemble_exe`].
-pub(crate) fn assemble_exe_with_debug(
-    source: &str,
-) -> Result<(Vec<u8>, crate::listing::DebugCapture), AsmError> {
+pub(crate) fn assemble_exe_with_debug(source: &str) -> Result<(Vec<u8>, DebugCapture), AsmError> {
     let mut warnings = Vec::new();
-    let (sections, capture) = assemble_core(source, true, &mut warnings)?;
-    Ok((serialize_hunkexe(&sections), capture))
+    let (sections, capture) = assemble_core(&parse_program(source)?, true, &mut warnings)?;
+    Ok((serialize_hunkexe(&sections), capture.into_single()))
 }
 
 /// A 32-bit relocation: a byte offset within a section, and the target section
@@ -293,23 +385,27 @@ struct Ctx {
     optimize: bool,
 }
 
-/// Assemble into per-section byte buffers with their relocations — the shared
-/// core behind both the flat and the hunk-executable serializers. Also returns
-/// the debug read-out (Debug198x U5): section table, `(section, offset)`
-/// symbols, and per-statement line spans, all **section-relative** with no
-/// fabricated absolutes (KTD7 — the reader's `BaseMap` owns rebasing to loaded
-/// hunk addresses). The capture is strictly passive: it observes emission and
-/// never branches on it.
+/// Assemble a parsed [`Program`](crate::ast::Program) into per-section byte
+/// buffers with their relocations — the shared core behind both the flat and
+/// the hunk-executable serializers, and behind both the single-source and
+/// multi-file entries (one body, so their bytes can never drift). Also returns
+/// the debug read-out (Debug198x U5, multi-file since language-surface U6):
+/// section table, `(section, offset)` symbols, and per-statement line spans
+/// carrying each statement's file, all **section-relative** with no fabricated
+/// absolutes (KTD7 — the reader's `BaseMap` owns rebasing to loaded hunk
+/// addresses). The capture is strictly passive: it observes emission and never
+/// branches on it. Errors and warnings are stamped with the owning statement's
+/// file, so a failure inside an included file names that file.
 fn assemble_core(
-    source: &str,
+    program: &crate::ast::Program,
     optimize: bool,
     warnings: &mut Vec<Warning>,
-) -> Result<(Vec<SecOut>, crate::listing::DebugCapture), AsmError> {
-    // The AST is the single front-end IR: parse into the source-preserving
-    // `Program` (which carries each line's native 68000 statement, qualified),
-    // then project it to the assembler's statement stream. Same bytes as the old
+) -> Result<(Vec<SecOut>, DebugCaptureMulti), AsmError> {
+    // The AST is the single front-end IR: the parse built the source-preserving
+    // `Program` (which carries each line's native 68000 statement, qualified);
+    // project it to the assembler's statement stream. Same bytes as the old
     // direct parse — see `decisions/ast-native-payload-for-multipass-cisc.md`.
-    let stmts = lines_from_program(&parse_program(source)?);
+    let stmts = lines_from_program(program)?;
 
     // Assign every statement to a section. A `section` directive opens one;
     // bytes emitted before any directive fall into an implicit code section.
@@ -369,12 +465,15 @@ fn assemble_core(
                 && !word_branch[i]
                 && let Some(target) = relaxable_branch_target(&s.kind)
             {
-                let disp = eval(target, &consts, pc[sec], s.line)? - (pc[sec] + 2);
+                let disp = eval(target, &consts, pc[sec], s.line)
+                    .map_err(|e| ca65_flat::stamp_file(e, s.file))?
+                    - (pc[sec] + 2);
                 if disp == 0 || i8::try_from(disp).is_err() {
                     next[i] = true;
                 }
             }
-            pc[sec] += stmt_size(&s.kind, &ctx, &consts, sec, word_branch[i], s.line)? as i64;
+            pc[sec] += stmt_size(&s.kind, &ctx, &consts, sec, word_branch[i], s.line)
+                .map_err(|e| ca65_flat::stamp_file(e, s.file))? as i64;
         }
         if next == word_branch {
             break;
@@ -393,8 +492,11 @@ fn assemble_core(
             relocs: Vec::new(),
         })
         .collect();
-    let mut dbg_lines: Vec<(u32, debug198x::SectionId, u64, u64)> = Vec::new();
+    let mut dbg_lines: Vec<(FileId, u32, debug198x::SectionId, u64, u64)> = Vec::new();
     for (i, s) in stmts.iter().enumerate() {
+        // Pass-2 errors and warnings are stamped with the statement's file
+        // (U6), so a failure inside an included file names that file.
+        let stamp = |e: AsmError| ca65_flat::stamp_file(e, s.file);
         let sec = sec_idx[i];
         let buf = &mut out[sec];
         if s.kind.aligns() && !buf.bytes.len().is_multiple_of(2) {
@@ -405,18 +507,23 @@ fn assemble_core(
         let span_start = buf.bytes.len();
         match &s.kind {
             Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) => {}
+            Stmt::Raw(payload) => buf.bytes.extend_from_slice(payload),
             Stmt::Dc(size, items) => {
                 for e in items {
-                    push_sized(&mut buf.bytes, eval(e, &consts, 0, s.line)?, *size);
+                    push_sized(
+                        &mut buf.bytes,
+                        eval(e, &consts, 0, s.line).map_err(stamp)?,
+                        *size,
+                    );
                 }
             }
             Stmt::Ds(size, count) => {
-                let n = count_of(count, &consts, s.line)?;
+                let n = count_of(count, &consts, s.line).map_err(stamp)?;
                 buf.bytes.resize(buf.bytes.len() + n * size.bytes(), 0);
             }
             Stmt::Dcb(size, count, value) => {
-                let n = count_of(count, &consts, s.line)?;
-                let v = eval(value, &consts, 0, s.line)?;
+                let n = count_of(count, &consts, s.line).map_err(stamp)?;
+                let v = eval(value, &consts, 0, s.line).map_err(stamp)?;
                 for _ in 0..n {
                     push_sized(&mut buf.bytes, v, *size);
                 }
@@ -428,9 +535,14 @@ fn assemble_core(
             } => {
                 let here = buf.bytes.len() as i64;
                 let size = branch_size(ctx.optimize, &s.kind, size, word_branch[i]);
+                let before = warnings.len();
                 let (bytes, relocs) = encode(
                     mnemonic, size, operands, &ctx, &consts, sec, here, s.line, warnings,
-                )?;
+                )
+                .map_err(stamp)?;
+                for w in &mut warnings[before..] {
+                    w.file = s.file;
+                }
                 buf.bytes.extend_from_slice(&bytes);
                 buf.relocs.extend(relocs);
             }
@@ -438,6 +550,7 @@ fn assemble_core(
         let emitted = out[sec].bytes.len() - span_start;
         if emitted > 0 {
             dbg_lines.push((
+                s.file,
                 s.line as u32,
                 sec as debug198x::SectionId,
                 span_start as u64,
@@ -490,7 +603,7 @@ fn assemble_core(
 
     Ok((
         out,
-        crate::listing::DebugCapture {
+        DebugCaptureMulti {
             sections: dbg_sections,
             symbols: dbg_symbols,
             lines: dbg_lines,
@@ -594,7 +707,7 @@ fn reloc_sym<'a>(e: &'a Expr, reloc: &BTreeSet<String>) -> Option<&'a str> {
 fn stmt_emits(kind: &Stmt) -> bool {
     matches!(
         kind,
-        Stmt::Insn { .. } | Stmt::Dc(..) | Stmt::Ds(..) | Stmt::Dcb(..) | Stmt::Even
+        Stmt::Insn { .. } | Stmt::Dc(..) | Stmt::Ds(..) | Stmt::Dcb(..) | Stmt::Even | Stmt::Raw(_)
     )
 }
 
@@ -626,7 +739,8 @@ fn layout(
         if let Some(label) = &s.label {
             consts.insert(label.clone(), pc[sec]);
         }
-        pc[sec] += stmt_size(&s.kind, ctx, &consts, sec, word_branch[i], s.line)? as i64;
+        pc[sec] += stmt_size(&s.kind, ctx, &consts, sec, word_branch[i], s.line)
+            .map_err(|e| ca65_flat::stamp_file(e, s.file))? as i64;
     }
     Ok((consts, pc))
 }
@@ -1097,6 +1211,7 @@ fn stmt_size(
 ) -> Result<usize, AsmError> {
     Ok(match kind {
         Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) => 0,
+        Stmt::Raw(payload) => payload.len(),
         Stmt::Dc(size, items) => items.len() * size.bytes(),
         Stmt::Ds(size, count) | Stmt::Dcb(size, count, _) => {
             count_of(count, consts, line)? * size.bytes()
@@ -1301,6 +1416,11 @@ enum Stmt {
     /// `dcb.x count,value` — `count` copies of `value` (defaults to 0). Both are
     /// expressions, resolved in pass 1.
     Dcb(DataSize, Expr, Expr),
+    /// A resolved `incbin` payload (language-surface U6): raw asset bytes at
+    /// the directive's location in the current section. Never parsed into a
+    /// native node — the multi-file walk resolves the directive into a shared
+    /// [`Item::Binary`](crate::ast::Item) and the projection carries it here.
+    Raw(Vec<u8>),
     Insn {
         mnemonic: String,
         size: Option<Size>,
@@ -1310,7 +1430,8 @@ enum Stmt {
 
 impl Stmt {
     /// Whether this statement begins on an even address (instructions and `even`
-    /// align; `dc`/`ds` do not pad on their own).
+    /// align; `dc`/`ds` — and an `incbin` payload, probe-pinned — do not pad on
+    /// their own).
     fn aligns(&self) -> bool {
         matches!(self, Stmt::Insn { .. } | Stmt::Even)
     }
@@ -1333,66 +1454,182 @@ impl crate::ast::NativeItem for Stmt {
 
 struct Line {
     line: usize,
+    /// The file `line` counts within (language-surface U6): the root for a
+    /// single-file assemble, an include's `FileId` otherwise. Layout/encode
+    /// errors, warnings, and debug line records are stamped with it.
+    file: FileId,
     label: Option<String>,
     kind: Stmt,
 }
 
 /// Parse vasm (Motorola-syntax) 68000 source into the source-preserving semantic
-/// [`Program`](crate::ast::Program) — the front-end the `--fmt` formatter and the
-/// dialect converter consume. Each line becomes a node carrying its label (with
-/// `.local` scope resolved as sjasmplus's), the verbatim operation source, and
-/// comment trivia (`;` inline and `*`-column-0 whole-line comments).
+/// [`Program`](crate::ast::Program) — the single front-end IR the multi-pass
+/// assembler and the `--fmt` formatter both consume. Each line becomes a node
+/// carrying its label (with `.local` scope resolved as vasm's), the verbatim
+/// operation source, and comment trivia (`;` inline and `*`-column-0 whole-line
+/// comments). Because the formatter re-emits each operation's source verbatim,
+/// an `equ` node only needs its native marker so emit keeps the binding on its
+/// label's line.
 ///
-/// This preserves the source faithfully for formatting; it does **not** drive
-/// assembly yet (the multi-pass encoder still runs off [`parse`]). Routing
-/// assembly through the tree is the next increment — see
-/// `decisions/ast-native-payload-for-multipass-cisc.md`. Because the formatter
-/// re-emits each operation's source verbatim, an `equ` node only needs an
-/// [`Item::Equ`](crate::ast::Item) marker so emit keeps the binding on its label's
-/// line; the value expression is carried for the coming assembly path.
+/// Single-source: an `include`/`incbin` stays an **unresolved** item (KTD1) —
+/// `--fmt` renders the directive verbatim without opening the target, and the
+/// assembly projection rejects it with a pointer to the multi-file entry.
 pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
-    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
-    let mut nodes = Vec::new();
-    // The enclosing global label — a leading-`.` local qualifies against it, the
-    // same scoping vasm's `qualify_local_labels` applies (R4).
-    let mut scope = String::new();
-    // Own-line comments seen since the last node, attached as leading trivia to
-    // the next one. Comments never reach the encoder, so bytes are unchanged.
-    let mut pending_leading: Vec<Comment> = Vec::new();
-
+    let mut w = Walker::default();
     for (i, raw) in source.lines().enumerate() {
-        let line = i + 1;
+        if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
+            w.nodes.push(ca65_flat::unresolved_node(d));
+        }
+    }
+    Ok(w.finish(source.lines().count() as u32))
+}
+
+/// Parse a multi-file 68000 program (language-surface U6, KTD1): the
+/// **interleaved walk** over the source map, resolving `include`/`incbin`
+/// lazily through `loader` under vasm's probe-pinned semantics
+/// ([`VASM_SEMANTICS`] — root-anchored resolution, the zero/negative-length
+/// "rest of file" incbin sentinel with silent truncation). Everything the
+/// parse accumulates crosses include boundaries in both directions, exactly
+/// as vasm's textual splice does (probe-pinned): the `.local` scope's current
+/// global (a global defined inside an include rescopes the includer's later
+/// locals), the parse-time constant folds feeding `incbin` offsets, and — via
+/// the projection reading the spliced node order — the active `section` (a
+/// switch inside an include persists into the includer). `equ` constants
+/// defined in an include feed the includer's later instruction selection
+/// (`addq`/`lea`/`moveq`) through the ordinary layout passes, which see the
+/// spliced statement stream whole.
+///
+/// # Errors
+/// Any per-line parse failure (stamped with the file it occurred in), a
+/// missing target, an include cycle, a bad `incbin` window, or the depth
+/// backstop — all at the directive's span.
+pub(crate) fn parse_program_multi(
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+) -> Result<crate::ast::Program, AsmError> {
+    let mut w = Walker::default();
+    let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
+    let root_lines = root.lines().count() as u32;
+    let mut stack = vec![FileId(0)];
+    ca65_flat::walk_file(
+        &mut w,
+        &root,
+        FileId(0),
+        map,
+        loader,
+        &mut stack,
+        &VASM_SEMANTICS,
+    )?;
+    Ok(w.finish(root_lines))
+}
+
+/// The per-line parse walk shared by [`parse_program`] (single source) and
+/// [`parse_program_multi`] (the include-capable walk). The environment — the
+/// enclosing global label a leading-`.` local qualifies against, the
+/// parse-time constant folds `incbin` offset/length arguments consult, and
+/// pending comment trivia — lives here, so in the multi-file walk it threads
+/// *through* include boundaries in both directions (KTD1, probe-pinned).
+#[derive(Default)]
+struct Walker {
+    /// The enclosing global label — a leading-`.` local qualifies against it,
+    /// the same scoping vasm's `qualify_local_labels` applies (R4).
+    scope: String,
+    /// `equ`/`=` constants folded in source order — only for `incbin`
+    /// offset/length folding (vasm: "expression must be constant" on a
+    /// forward reference, probe-pinned). Assembly itself re-resolves every
+    /// constant in its own layout passes.
+    consts: BTreeMap<String, i64>,
+    /// Own-line comments seen since the last node, attached as leading trivia
+    /// to the next one. Comments never reach the encoder, so bytes are
+    /// unchanged.
+    pending_leading: Vec<crate::ast::Comment>,
+    nodes: Vec<crate::ast::Node>,
+}
+
+impl Walker {
+    /// Flush comments after the last node (a trailing block or comment-only
+    /// file) as a label-less, op-less node so the formatter keeps them.
+    fn finish(mut self, last_line: u32) -> crate::ast::Program {
+        use crate::ast::{Node, Program, Span, Trivia};
+        if !self.pending_leading.is_empty() {
+            self.nodes.push(Node {
+                operand_span: None,
+                label: None,
+                item: None,
+                source: String::new(),
+                span: Span::at(last_line, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing: None,
+                },
+            });
+        }
+        Program { nodes: self.nodes }
+    }
+
+    /// Recognise a walk-handled `include`/`incbin` operation, parsing the
+    /// `incbin` offset/length against the live constant folds (a forward
+    /// reference is vasm's "expression must be constant" posture,
+    /// probe-pinned).
+    fn walk_directive(&self, rest: &str, line: usize) -> Result<Option<WalkDirective>, AsmError> {
+        let (word, args) = split_first_word(rest);
+        match word.to_ascii_lowercase().as_str() {
+            "include" => Ok(Some(WalkDirective::Include {
+                request: file_request(args, line, "include")?.0,
+            })),
+            "incbin" => {
+                let (request, offset, size) = incbin_args(args, line, &self.consts)?;
+                Ok(Some(WalkDirective::Incbin {
+                    request,
+                    offset,
+                    size,
+                }))
+            }
+            _ => Ok(None),
+        }
+    }
+}
+
+impl FlatWalk for Walker {
+    fn walk_line(
+        &mut self,
+        raw: &str,
+        line: usize,
+        file: FileId,
+    ) -> Result<Option<DirectiveLine>, AsmError> {
+        use crate::ast::{Comment, Node, Scope, Span, Symbol, Trivia};
         let (code, comment) = split_comment(raw);
         if code.trim().is_empty() {
             if let Some(text) = comment {
-                pending_leading.push(Comment {
+                self.pending_leading.push(Comment {
                     text: text.to_string(),
-                    span: Span::at(line as u32, 1),
+                    span: Span::in_file(file, line as u32, 1),
                 });
             }
-            continue;
+            return Ok(None);
         }
         let trailing = comment.map(|text| Comment {
             text: text.to_string(),
-            span: Span::at(line as u32, (code.len() + 1) as u32),
+            span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
         });
 
         let (label, rest) = split_label(code, line)?;
         // A non-local label (including an `equ` name) opens a new scope; a
         // leading-`.` name qualifies against the current one — the same forward
         // pass vasm's old `qualify_local_labels` ran, done inline so the tree
-        // carries fully-resolved symbols.
+        // carries fully-resolved symbols. Include boundaries do not reset it
+        // (textual-splice semantics, probe-pinned).
         let symbol = label.as_ref().map(|name| {
             if name.starts_with('.') {
                 Symbol {
-                    qualified: format!("{scope}{name}"),
+                    qualified: format!("{}{name}", self.scope),
                     scope: Scope::Local {
-                        in_global: scope.clone(),
+                        in_global: self.scope.clone(),
                     },
                     name: name.clone(),
                 }
             } else {
-                scope = name.clone();
+                self.scope = name.clone();
                 Symbol {
                     qualified: name.clone(),
                     scope: Scope::Global,
@@ -1400,22 +1637,47 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
                 }
             }
         });
+        let span = Span::in_file(file, line as u32, 1);
+
+        // `include`/`incbin` are walk-handled, not parsed here: the target
+        // must not be opened by the parse (KTD1 — `--fmt` succeeds with a
+        // missing target), so hand them back for the driver to resolve (or
+        // keep unresolved, in the single-source parse).
+        if let Some(kind) = self.walk_directive(rest, line)? {
+            return Ok(Some(DirectiveLine {
+                kind,
+                label: symbol,
+                source: rest.trim().to_string(),
+                span,
+                operand_span: ca65_flat::directive_operand_span(raw, rest, line, file),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing,
+                },
+            }));
+        }
 
         // Parse the 68000 statement and qualify its local references against the
         // now-current scope, then store it in the node as the family-owned native
         // payload (the assembler reads it back). An `equ`/`=` reports
         // `inline_label`, so emit keeps its label on the operation's line.
         let mut stmt = parse_op(&label, rest, line)?;
-        qualify_stmt(&mut stmt, &scope);
+        qualify_stmt(&mut stmt, &self.scope);
+        // Fold an `equ` constant for later `incbin` argument folding (the
+        // qualified name, so a local `equ` resolves like any other reference).
+        if let Stmt::Equ(name, e) = &stmt
+            && let Ok(v) = e.eval_with(&|s| self.consts.get(s).copied(), None, line)
+        {
+            self.consts.insert(name.clone(), v);
+        }
         let trivia = Trivia {
-            leading: std::mem::take(&mut pending_leading),
+            leading: std::mem::take(&mut self.pending_leading),
             trailing,
         };
-        let span = Span::at(line as u32, 1);
         match stmt {
             // A label-only line: keep the label, no operation (emit renders the
             // label alone; the projection reads it back as `Stmt::Empty`).
-            Stmt::Empty if symbol.is_some() => nodes.push(Node {
+            Stmt::Empty if symbol.is_some() => self.nodes.push(Node {
                 operand_span: None,
                 label: symbol,
                 item: None,
@@ -1427,10 +1689,9 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
             // (Unreachable in practice: an empty operation implies empty code,
             // already skipped above.)
             Stmt::Empty => {
-                pending_leading = trivia.leading;
-                continue;
+                self.pending_leading = trivia.leading;
             }
-            stmt => nodes.push(Node {
+            stmt => self.nodes.push(Node {
                 operand_span: None,
                 label: symbol,
                 item: Some(crate::ast::Item::Native(Box::new(stmt))),
@@ -1439,34 +1700,103 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
                 trivia,
             }),
         }
+        Ok(None)
     }
 
-    // Flush comments after the last node (a trailing block or comment-only file)
-    // as a label-less, op-less node so the formatter keeps them.
-    if !pending_leading.is_empty() {
-        let line = source.lines().count() as u32;
-        nodes.push(Node {
-            operand_span: None,
-            label: None,
-            item: None,
-            source: String::new(),
-            span: Span::at(line, 1),
-            trivia: Trivia {
-                leading: pending_leading,
-                trailing: None,
-            },
-        });
+    fn push_node(&mut self, node: crate::ast::Node) {
+        self.nodes.push(node);
     }
-    Ok(Program { nodes })
+}
+
+/// The file name of a vasm `include`/`incbin` directive, and whatever follows
+/// it. Probe-pinned spellings: `"file"`, `'file'`, or a bare token (stopping
+/// at whitespace or a comma, so `incbin data.bin,2` parses). Anything after a
+/// quoted name that is not an argument tail is silently ignored, as vasm
+/// ignores it (source-compatible: real Amiga source with trailing text still
+/// assembles).
+fn file_request<'a>(
+    args: &'a str,
+    line: usize,
+    directive: &str,
+) -> Result<(String, &'a str), AsmError> {
+    let t = args.trim();
+    let (name, rest) = if let Some(quote) = t.chars().next().filter(|c| *c == '"' || *c == '\'') {
+        let inner = &t[1..];
+        let end = inner
+            .find(quote)
+            .ok_or_else(|| AsmError::new(line, format!("unterminated `{directive}` file name")))?;
+        (&inner[..end], &inner[end + 1..])
+    } else {
+        let end = t
+            .find(|c: char| c.is_whitespace() || c == ',')
+            .unwrap_or(t.len());
+        (&t[..end], &t[end..])
+    };
+    if name.is_empty() {
+        return Err(AsmError::new(
+            line,
+            format!("`{directive}` needs a file name"),
+        ));
+    }
+    Ok((name.to_string(), rest))
+}
+
+/// Parse an `incbin`'s arguments: the file name, then an optional
+/// `,offset[,length]` tail of parse-time constant expressions (probe-pinned:
+/// vasm folds them when the directive is read — an `equ` defined before works,
+/// a forward reference or `*` is "expression must be constant").
+fn incbin_args(
+    args: &str,
+    line: usize,
+    consts: &BTreeMap<String, i64>,
+) -> Result<(String, Option<i64>, Option<i64>), AsmError> {
+    let (name, rest) = file_request(args, line, "incbin")?;
+    let rest = rest.trim();
+    let Some(tail) = rest.strip_prefix(',') else {
+        // No `,offset` tail: trailing junk after the name is ignored
+        // (probe-pinned — vasm assembles `incbin "f" junk` silently).
+        return Ok((name, None, None));
+    };
+    let pieces = split_operands(tail);
+    if pieces.len() > 2 {
+        return Err(AsmError::new(
+            line,
+            "`incbin` takes at most a file name, an offset, and a length",
+        ));
+    }
+    let fold = |what: &str, piece: &str| -> Result<i64, AsmError> {
+        parse_value(piece, line)?
+            .eval_with(&|s| consts.get(s).copied(), None, line)
+            .map_err(|e| {
+                AsmError::new(
+                    line,
+                    format!(
+                        "`incbin` {what} must be a constant expression: {}",
+                        e.message
+                    ),
+                )
+            })
+    };
+    let offset = fold("offset", pieces[0])?;
+    let size = pieces.get(1).map(|p| fold("length", p)).transpose()?;
+    Ok((name, Some(offset), size))
 }
 
 /// Project the semantic [`Program`](crate::ast::Program) into the assembler's
 /// statement stream — the multi-pass driver runs on an owned `Vec<Line>`. Each
 /// node's qualified label and native [`Stmt`] payload (built and qualified in
 /// [`parse_program`]) are read straight back out of the tree; nothing is
-/// re-parsed. A label-only node becomes an empty statement carrying its label;
-/// the comment-only flush node (no label, no item) carries no statement.
-fn lines_from_program(program: &crate::ast::Program) -> Vec<Line> {
+/// re-parsed. A resolved `incbin` payload (the multi-file walk's lowering)
+/// becomes [`Stmt::Raw`]; a label-only node becomes an empty statement
+/// carrying its label; the comment-only flush node (no label, no item)
+/// carries no statement.
+///
+/// # Errors
+/// An **unresolved** `include`/`incbin` cannot assemble: it needs a loader,
+/// which only the multi-file entry has (U6, KTD1). The single-source API
+/// keeps meaning "one file, no includes" — with a pointer, not the old
+/// unknown-directive rejection.
+fn lines_from_program(program: &crate::ast::Program) -> Result<Vec<Line>, AsmError> {
     use crate::ast::Item;
     let mut out = Vec::new();
     for node in &program.nodes {
@@ -1477,18 +1807,40 @@ fn lines_from_program(program: &crate::ast::Program) -> Vec<Line> {
                 .downcast_ref::<Stmt>()
                 .expect("vasm stores a Stmt in every native node")
                 .clone(),
+            Some(Item::Binary(payload)) => Stmt::Raw(payload.clone()),
+            Some(Item::Include { request }) => {
+                return Err(AsmError::at(
+                    node.span.clone(),
+                    format!(
+                        "cannot resolve `include \"{request}\"` here — the single-source \
+                         API assembles one file; use the multi-file entry point \
+                         (the CLI resolves includes automatically)"
+                    ),
+                ));
+            }
+            Some(Item::Incbin { request }) => {
+                return Err(AsmError::at(
+                    node.span.clone(),
+                    format!(
+                        "cannot resolve `incbin \"{request}\"` here — the single-source \
+                         API assembles one file; use the multi-file entry point \
+                         (the CLI resolves binary inclusions automatically)"
+                    ),
+                ));
+            }
             None if label.is_some() => Stmt::Empty,
-            // A comment-only flush node, or any non-native item (vasm produces
-            // only native items) — nothing to assemble.
+            // A comment-only flush node, or any other shared item (vasm
+            // produces only native/binary items) — nothing to assemble.
             _ => continue,
         };
         out.push(Line {
             line: node.span.line as usize,
+            file: node.span.file,
             label,
             kind,
         });
     }
-    out
+    Ok(out)
 }
 
 /// Split a line into its code and its comment for carrying comments as AST
@@ -1527,7 +1879,7 @@ fn qualify_stmt(kind: &mut Stmt, scope: &str) {
             qualify_expr(value, scope);
         }
         Stmt::Insn { operands, .. } => operands.iter_mut().for_each(|o| qualify_opnd(o, scope)),
-        Stmt::Empty | Stmt::Even | Stmt::Section(..) => {}
+        Stmt::Empty | Stmt::Even | Stmt::Section(..) | Stmt::Raw(_) => {}
     }
 }
 

@@ -16,11 +16,22 @@
 
 use serde::{Deserialize, Serialize};
 
-/// Identifies a source file. v1 is single-file (`FileId(0)`); include chains
-/// (idea 4) allocate further ids so a span can name the *included* file.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+/// Identifies a source file. `FileId(0)` is the root input; include chains
+/// (language-surface U2) allocate further ids so a span can name the
+/// *included* file. `Default` is the root — the single-file value.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct FileId(pub u32);
+
+impl FileId {
+    /// Whether this is the root input (`FileId(0)`) — the serde skip guard
+    /// that keeps pre-multi-file payloads byte-identical (KTD7): a `file`
+    /// field is only written when it says something the old shape could not.
+    #[must_use]
+    pub fn is_root(&self) -> bool {
+        self.0 == 0
+    }
+}
 
 /// One macro-expansion frame (a rustc-style defined-at / invoked-at record).
 /// Reserved now; idea 4's macro engine fills it. Empty in v1.
@@ -49,17 +60,34 @@ pub struct Span {
     /// Empty in v1; populated when idea 4's macros land, without a type change.
     #[serde(default)]
     pub expansion_frames: Vec<ExpansionFrame>,
+    /// The resolved path of `file`, stamped from the result's file table for
+    /// serialization (KTD2's failure-path leg): a JSON consumer of the bare
+    /// diagnostic-array failure output can name the file without the
+    /// success-only `AssemblyResult::files` table. `None` — and skipped — until
+    /// an include-capable entry point resolves it, so pre-multi-file payloads
+    /// and fixtures are unchanged.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<String>,
 }
 
 impl Span {
-    /// A single-file v1 span with no expansion frames.
+    /// A root-file (`FileId(0)`) span with no expansion frames.
     #[must_use]
     pub fn at(line: u32, col: u32) -> Self {
+        Span::in_file(FileId(0), line, col)
+    }
+
+    /// A span in a specific file — the include-chain constructor alongside
+    /// [`Span::at`]. The path stays unresolved until stamped from a file table
+    /// ([`crate::contract::resolve_span_path`]).
+    #[must_use]
+    pub fn in_file(file: FileId, line: u32, col: u32) -> Self {
         Span {
-            file: FileId(0),
+            file,
             line,
             col,
             expansion_frames: Vec::new(),
+            path: None,
         }
     }
 }

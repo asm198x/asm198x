@@ -19,15 +19,39 @@
 //! and emit no byte.
 //!
 //! Output is validated byte-identical against `rgbasm`/`rgblink` (RGBDS).
+//!
+//! `INCLUDE`/`INCBIN` (language-surface U4) resolve through the shared
+//! [`super::ca65_flat`] walk driver with rgbasm's probe-pinned semantics
+//! (rgbasm v1.0.1): every relative request — however deeply nested — anchors
+//! at the **root input's directory** (rgbasm searches the process cwd, never
+//! the including file's directory; our input's directory stands in for the
+//! cwd, the documented [`FsLoader`](crate::source::FsLoader) stance), then
+//! the `-I` dirs first-listed-wins. State threads through the boundary in
+//! both directions: a `DEF … EQU` inside an include feeds the includer's
+//! later opcode-embedded operands (`bit`/`rst`/`ds`), and `.local` labels
+//! scope under the most recent global across files — a global defined inside
+//! the include rescopes the includer's subsequent locals.
+//!
+//! **`INCBIN "file"[, offset[, length]]` window (probe-pinned):** offset and
+//! length are parse-time constant expressions (a forward reference is
+//! rgbasm's "Expected constant expression"); a negative offset or length is
+//! an error ("Constant must not be negative"); offset in `0..=len` is
+//! honoured (at EOF → empty, past → "Specified start position is greater
+//! than length"); a length past the remaining bytes is an error ("out of
+//! bounds"); length 0 is empty.
 
 use std::collections::BTreeMap;
 
+use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
 use super::mos6502::{
     self, BytePrec, Caret, ExprOpts, fold_const, is_ident, parse_number, split_data_items,
     split_first_word, split_top_level, string_literal,
 };
+use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, Expr, Operation, Statement};
+use crate::source::{SourceLoader, SourceMap};
+use crate::span::FileId;
 
 /// The rgbasm (SM83) dialect.
 pub(crate) struct Rgbasm;
@@ -48,6 +72,17 @@ impl Dialect for Rgbasm {
         Ok(Some(parse_program(source)?))
     }
 
+    /// The include-capable parse (language-surface U4): the interleaved,
+    /// environment-threaded walk over the source map, resolving `INCLUDE`/
+    /// `INCBIN` lazily through the loader — see [`parse_program_multi`].
+    fn parse_multi(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<Vec<Statement>, AsmError> {
+        crate::ast::lower(parse_program_multi(map, loader)?)
+    }
+
     /// rgbasm `equ` takes no colon on its label (`NAME equ …`); a colon would
     /// fail to reassemble, since the label is disambiguated by the keyword.
     /// (Normal `name:` labels still keep their colon — this governs `equ` only.)
@@ -64,30 +99,211 @@ impl Dialect for Rgbasm {
 /// [`lower`](crate::ast::lower) reproduces the old statements exactly. A
 /// `SECTION` directive keeps its verbatim source for the formatter and lowers to
 /// an `Org` only when it pins an address.
-pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
-    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
-    let set = &isa::sm83::SET;
-    let mut nodes = Vec::new();
-    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
-    // The most recent non-`.` global label, for qualifying `.local` labels/refs.
-    let mut global = String::new();
-    let mut pending_leading: Vec<Comment> = Vec::new();
-
+///
+/// An `INCLUDE`/`INCBIN` becomes an **unresolved**
+/// [`Item::Include`](crate::ast::Item) / [`Item::Incbin`](crate::ast::Item) —
+/// the target is never opened, so `--fmt` renders the directive verbatim and
+/// works with a missing target (U4, KTD1). Lazy resolution is
+/// [`parse_program_multi`]'s.
+pub(crate) fn parse_program(source: &str) -> Result<Program, AsmError> {
+    let mut w = Walker::new();
     for (i, raw) in source.lines().enumerate() {
-        let line = i + 1;
+        if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
+            w.nodes.push(ca65_flat::unresolved_node(d));
+        }
+    }
+    w.flush_trailing(source.lines().count() as u32);
+    Ok(Program { nodes: w.nodes })
+}
+
+/// Parse a multi-file rgbasm program (language-surface U4, KTD1): the
+/// **interleaved, environment-threaded walk**. The root (`FileId(0)` in `map`)
+/// parses line by line with the environment accumulated so far; when the walk
+/// reaches an `INCLUDE` live, the target loads through `loader` (anchored at
+/// the root input's directory — rgbasm's probe-pinned cwd anchor), its lines
+/// parse with the same environment, and everything it defined — `DEF`
+/// constants feeding `bit`/`rst`/`ds`, the current global scoping later
+/// `.local`s — flows back out to the includer's subsequent lines.
+///
+/// # Errors
+/// Any per-line parse failure (stamped with the file it occurred in), a
+/// missing target, an include cycle, a bad `INCBIN` window, or the depth
+/// backstop — all at the directive's span.
+pub(crate) fn parse_program_multi(
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+) -> Result<Program, AsmError> {
+    let mut w = Walker::new();
+    let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
+    let mut stack = vec![FileId(0)];
+    ca65_flat::walk_file(
+        &mut w,
+        &root,
+        FileId(0),
+        map,
+        loader,
+        &mut stack,
+        &SEMANTICS,
+    )?;
+    Ok(Program { nodes: w.nodes })
+}
+
+/// rgbasm's probe-pinned multi-file semantics: root-anchored resolution (the
+/// cwd stance mapped to our input directory) and the no-negatives incbin
+/// window.
+const SEMANTICS: ca65_flat::WalkSemantics = ca65_flat::WalkSemantics {
+    resolution: ca65_flat::Resolution::Root,
+    window: slice_incbin,
+    include_default_ext: None,
+};
+
+/// Apply rgbasm's `INCBIN` window to the loaded asset — probe-pinned (see the
+/// module docs): negative offset or length are errors, offset at EOF or
+/// length 0 are legal and empty, any window past EOF is an error. `Err`
+/// carries the message body; the driver wraps it with the request name and
+/// the directive's span.
+fn slice_incbin(data: &[u8], offset: Option<i64>, size: Option<i64>) -> Result<Vec<u8>, String> {
+    let len = data.len() as i64;
+    let off = offset.unwrap_or(0);
+    if off < 0 {
+        return Err(format!("offset must not be negative (rgbasm), got {off}"));
+    }
+    if off > len {
+        return Err(format!(
+            "start position {off} is greater than the length of the {len}-byte file"
+        ));
+    }
+    let remaining = len - off;
+    let take = match size {
+        None => remaining,
+        Some(s) if s < 0 => {
+            return Err(format!("length must not be negative (rgbasm), got {s}"));
+        }
+        Some(s) => s,
+    };
+    if take > remaining {
+        return Err(format!("range is out of bounds ({off} + {take} > {len})"));
+    }
+    Ok(data[off as usize..(off + take) as usize].to_vec())
+}
+
+/// The per-line parse walk shared by [`parse_program`] (single source) and
+/// [`parse_program_multi`] (the include-capable walk). The environment — the
+/// `EQU`/`DEF` constants, the current global label scoping `.local`s, and
+/// pending comment trivia — lives here, so in the multi-file walk it threads
+/// *through* include boundaries in both directions (KTD1, probe-pinned).
+struct Walker {
+    /// Constants bound with `[DEF] NAME EQU/= expr`, consulted for
+    /// opcode-embedded operands (`bit`/`rst`), `ds` counts, and `INCBIN`
+    /// argument folding at parse time.
+    consts: BTreeMap<String, i64>,
+    /// The most recent non-`.` global label, for qualifying `.local`
+    /// labels/refs — a global defined inside an include rescopes the
+    /// includer's later locals (probe-pinned).
+    global: String,
+    /// Own-line comments seen since the last node, attached as leading trivia
+    /// to the next one. Comments never reach the encoder, so bytes are
+    /// unchanged.
+    pending_leading: Vec<Comment>,
+    nodes: Vec<Node>,
+}
+
+impl Walker {
+    fn new() -> Self {
+        Self {
+            consts: BTreeMap::new(),
+            global: String::new(),
+            pending_leading: Vec::new(),
+            nodes: Vec::new(),
+        }
+    }
+
+    /// Flush comments after the last node (a trailing block or comment-only
+    /// file) as a label-less, op-less node so the formatter keeps them.
+    fn flush_trailing(&mut self, last_line: u32) {
+        if !self.pending_leading.is_empty() {
+            self.nodes.push(Node {
+                operand_span: None,
+                label: None,
+                item: None,
+                source: String::new(),
+                span: Span::at(last_line, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing: None,
+                },
+            });
+        }
+    }
+
+    /// The scoped symbol for a label: a leading-`.` local qualifies under the
+    /// current global (rgbasm's scoping rule), anything else is global.
+    fn symbol(&self, name: String) -> Symbol {
+        if name.starts_with('.') && !self.global.is_empty() {
+            Symbol {
+                qualified: format!("{}{name}", self.global),
+                scope: Scope::Local {
+                    in_global: self.global.clone(),
+                },
+                name,
+            }
+        } else {
+            Symbol {
+                qualified: name.clone(),
+                scope: Scope::Global,
+                name,
+            }
+        }
+    }
+
+    /// Recognise a walk-handled `INCLUDE`/`INCBIN` operation (keywords are
+    /// case-insensitive) and parse its arguments with the live environment:
+    /// a quoted file name is required and trailing junk is rejected (both
+    /// probe-pinned — rgbasm: "is not a string symbol" / a syntax error);
+    /// `INCBIN` offset/length fold against the constants known so far (a
+    /// forward reference is rgbasm's "Expected constant expression").
+    fn walk_directive(&self, rest: &str, line: usize) -> Result<Option<WalkDirective>, AsmError> {
+        let (word, args) = split_first_word(rest);
+        match word.to_ascii_uppercase().as_str() {
+            "INCLUDE" => Ok(Some(WalkDirective::Include {
+                request: ca65_flat::include_request(args, line, "INCLUDE")?,
+            })),
+            "INCBIN" => {
+                let fold =
+                    |piece: &str| fold_const(&value(piece.trim(), line)?, &self.consts, line);
+                let (request, offset, size) = ca65_flat::incbin_args(args, line, "INCBIN", &fold)?;
+                Ok(Some(WalkDirective::Incbin {
+                    request,
+                    offset,
+                    size,
+                }))
+            }
+            _ => Ok(None),
+        }
+    }
+}
+
+impl FlatWalk for Walker {
+    fn walk_line(
+        &mut self,
+        raw: &str,
+        line: usize,
+        file: FileId,
+    ) -> Result<Option<DirectiveLine>, AsmError> {
+        let set = &isa::sm83::SET;
         let (code, comment) = split_comment(raw);
         if code.trim().is_empty() {
             if let Some(text) = comment {
-                pending_leading.push(Comment {
+                self.pending_leading.push(Comment {
                     text: text.to_string(),
-                    span: Span::at(line as u32, 1),
+                    span: Span::in_file(file, line as u32, 1),
                 });
             }
-            continue;
+            return Ok(None);
         }
         let trailing = comment.map(|text| Comment {
             text: text.to_string(),
-            span: Span::at(line as u32, (code.len() + 1) as u32),
+            span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
         });
 
         // `SECTION "name", TYPE[$addr]` — a directive preserved verbatim; it
@@ -100,103 +316,98 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
         {
             let item = section_origin(code.trim(), line)?
                 .map(|org| crate::ast::item_from_operation(Operation::Org(org)));
-            nodes.push(Node {
+            self.nodes.push(Node {
                 operand_span: None,
                 label: None,
                 item,
                 source: code.trim().to_string(),
-                span: Span::at(line as u32, 1),
+                span: Span::in_file(file, line as u32, 1),
                 trivia: Trivia {
-                    leading: std::mem::take(&mut pending_leading),
+                    leading: std::mem::take(&mut self.pending_leading),
                     trailing,
                 },
             });
-            continue;
+            return Ok(None);
         }
 
-        // `NAME EQU expr` / `NAME = expr` — a (global) constant.
-        if let Some((name, expr, op_source)) = constant(code.trim(), line)? {
-            if let Ok(v) = fold_const(&expr, &consts, line) {
-                consts.insert(name.clone(), v);
+        // `[DEF] NAME EQU expr` / `[DEF] NAME = expr` — a (global) constant.
+        if let Some(c) = constant(code.trim(), line)? {
+            if let Ok(v) = fold_const(&c.expr, &self.consts, line) {
+                self.consts.insert(c.name.clone(), v);
             }
-            nodes.push(Node {
+            self.nodes.push(Node {
                 operand_span: None,
                 label: Some(Symbol {
-                    qualified: name.clone(),
+                    qualified: c.name.clone(),
                     scope: Scope::Global,
-                    name,
+                    name: c.render_name,
                 }),
-                item: Some(crate::ast::item_from_operation(Operation::Equ(expr))),
-                source: op_source,
-                span: Span::at(line as u32, 1),
+                item: Some(crate::ast::item_from_operation(Operation::Equ(c.expr))),
+                source: c.op_source,
+                span: Span::in_file(file, line as u32, 1),
                 trivia: Trivia {
-                    leading: std::mem::take(&mut pending_leading),
+                    leading: std::mem::take(&mut self.pending_leading),
                     trailing,
                 },
             });
-            continue;
+            return Ok(None);
         }
 
         let (label, rest) = split_label(code, line)?;
-        // A non-`.` label opens a new scope; resolve it before qualifying the op.
+        // A non-`.` label opens a new scope; resolve it before qualifying the op
+        // (also on an `INCLUDE`/`INCBIN` line — the label is a label like any
+        // other).
         if let Some(name) = &label
             && !name.starts_with('.')
         {
-            global = name.clone();
+            self.global = name.clone();
         }
-        let symbol = label.map(|name| {
-            if name.starts_with('.') && !global.is_empty() {
-                Symbol {
-                    qualified: format!("{global}{name}"),
-                    scope: Scope::Local {
-                        in_global: global.clone(),
-                    },
-                    name,
-                }
-            } else {
-                Symbol {
-                    qualified: name.clone(),
-                    scope: Scope::Global,
-                    name,
-                }
-            }
-        });
+        // `INCLUDE`/`INCBIN` are walk-handled, not directives: the target must
+        // not be opened here (KTD1 — `--fmt` succeeds with a missing target),
+        // so hand them back for the driver to resolve (or keep unresolved, in
+        // the single-source parse).
+        if let Some(kind) = self.walk_directive(rest, line)? {
+            return Ok(Some(DirectiveLine {
+                kind,
+                label: label.map(|name| self.symbol(name)),
+                source: rest.trim().to_string(),
+                span: Span::in_file(file, line as u32, 1),
+                operand_span: ca65_flat::directive_operand_span(raw, rest, line, file),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing,
+                },
+            }));
+        }
+        let symbol = label.map(|name| self.symbol(name));
         let op = if rest.is_empty() {
             None
         } else {
-            parse_op(set, rest, &consts, &global, line)?
+            parse_op(set, rest, &self.consts, &self.global, line)?
         };
         if symbol.is_none() && op.is_none() {
-            continue;
+            return Ok(None);
         }
-        nodes.push(Node {
-            operand_span: crate::ast::operand_span(raw, rest, line as u32),
+        self.nodes.push(Node {
+            operand_span: crate::ast::operand_span(raw, rest, line as u32).map(|mut s| {
+                s.file = file;
+                s
+            }),
             label: symbol,
             item: op.map(crate::ast::item_from_operation),
             source: rest.trim().to_string(),
-            span: Span::at(line as u32, 1),
+            span: Span::in_file(file, line as u32, 1),
             trivia: Trivia {
-                leading: std::mem::take(&mut pending_leading),
+                leading: std::mem::take(&mut self.pending_leading),
                 trailing,
             },
         });
+        Ok(None)
     }
 
-    if !pending_leading.is_empty() {
-        let line = source.lines().count() as u32;
-        nodes.push(Node {
-            operand_span: None,
-            label: None,
-            item: None,
-            source: String::new(),
-            span: Span::at(line, 1),
-            trivia: Trivia {
-                leading: pending_leading,
-                trailing: None,
-            },
-        });
+    fn push_node(&mut self, node: Node) {
+        self.nodes.push(node);
     }
-    Ok(Program { nodes })
 }
 
 /// Split a line into its code and its `;` comment (delimiter kept, trailing
@@ -229,31 +440,58 @@ fn section_origin(code: &str, line: usize) -> Result<Option<Expr>, AsmError> {
     }
 }
 
-/// `NAME EQU expr` or `NAME = expr` (redefinable). Returns the name, the value
-/// expression, and the operation's source text (`EQU expr` / `= expr`) so the
-/// formatter can re-emit `NAME <source>` with the label kept on the same line.
-fn constant(code: &str, line: usize) -> Result<Option<(String, Expr, String)>, AsmError> {
-    // `NAME EQU expr` / `NAME EQUS ...` — the keyword form.
+/// A parsed constant definition: `name` is the symbol the engine binds;
+/// `render_name` is what the formatter prints in the label position —
+/// `DEF NAME` for the `DEF`-keyword spelling (rgbasm v1.0's required form,
+/// preserved verbatim so formatted output stays reference-valid), plain
+/// `NAME` for the legacy bare spelling; `op_source` is the operation's
+/// source text (`EQU expr` / `= expr`), re-emitted after the render name.
+struct Constant {
+    name: String,
+    render_name: String,
+    expr: Expr,
+    op_source: String,
+}
+
+/// `[DEF] NAME EQU expr` or `[DEF] NAME = expr` (redefinable). rgbasm v1.0
+/// requires the `DEF` keyword (a bare `NAME EQU` is "Undefined macro" there);
+/// the bare spelling is kept accepted for older sources.
+fn constant(code: &str, line: usize) -> Result<Option<Constant>, AsmError> {
+    // An optional leading `DEF` keyword; remember it for verbatim re-emit.
+    let (def, code) = match split_first_word(code) {
+        (kw, rest) if kw.eq_ignore_ascii_case("def") && !rest.is_empty() => (true, rest),
+        _ => (false, code),
+    };
+    let render = |name: &str| {
+        if def {
+            format!("DEF {name}")
+        } else {
+            name.to_string()
+        }
+    };
+    // `NAME EQU expr` — the keyword form.
     let (first, rest) = split_first_word(code);
     if !rest.is_empty() {
         let (kw, tail) = split_first_word(rest);
         if kw.eq_ignore_ascii_case("equ") && is_ident(first) {
-            return Ok(Some((
-                first.to_string(),
-                value(tail, line)?,
-                rest.trim().to_string(),
-            )));
+            return Ok(Some(Constant {
+                name: first.to_string(),
+                render_name: render(first),
+                expr: value(tail, line)?,
+                op_source: rest.trim().to_string(),
+            }));
         }
     }
     // `NAME = expr` — a lone `=`.
     if let Some(eq) = mos6502::assignment_split(code) {
         let name = code[..eq].trim();
         if is_ident(name) {
-            return Ok(Some((
-                name.to_string(),
-                value(code[eq + 1..].trim(), line)?,
-                code[eq..].trim().to_string(),
-            )));
+            return Ok(Some(Constant {
+                name: name.to_string(),
+                render_name: render(name),
+                expr: value(code[eq + 1..].trim(), line)?,
+                op_source: code[eq..].trim().to_string(),
+            }));
         }
     }
     Ok(None)
@@ -310,7 +548,7 @@ fn parse_op(
             }
         }
     };
-    Ok(Some(qualify_op(op, global)))
+    Ok(Some(crate::ast::qualify_locals(op, global)))
 }
 
 /// `ds count [, fill]` — reserve `count` bytes of `fill` (default 0).
@@ -588,42 +826,12 @@ fn product(lists: &[Vec<Alternative>]) -> Vec<Vec<Alternative>> {
     result
 }
 
-/// Qualify leading-`.` local references in an operation under `global`.
-fn qualify_op(op: Operation, global: &str) -> Operation {
-    let q = |e: Expr| qualify_expr(e, global);
-    match op {
-        Operation::Bytes(v) => Operation::Bytes(v.into_iter().map(q).collect()),
-        Operation::Words(v) => Operation::Words(v.into_iter().map(q).collect()),
-        Operation::Instruction {
-            mnemonic,
-            mode,
-            operands,
-        } => Operation::Instruction {
-            mnemonic,
-            mode,
-            operands: operands.into_iter().map(q).collect(),
-        },
-        Operation::Org(e) => Operation::Org(q(e)),
-        Operation::Equ(e) => Operation::Equ(q(e)),
-        other => other,
-    }
-}
-
-fn qualify_expr(e: Expr, global: &str) -> Expr {
-    match e {
-        Expr::Sym(s) if s.starts_with('.') => Expr::Sym(format!("{global}{s}")),
-        Expr::Sym(_) | Expr::Num(_) | Expr::Pc => e,
-        Expr::Lo(b) => Expr::Lo(Box::new(qualify_expr(*b, global))),
-        Expr::Hi(b) => Expr::Hi(Box::new(qualify_expr(*b, global))),
-        Expr::Bank(b) => Expr::Bank(Box::new(qualify_expr(*b, global))),
-        Expr::Neg(b) => Expr::Neg(Box::new(qualify_expr(*b, global))),
-        Expr::Bin(op, l, r) => Expr::Bin(
-            op,
-            Box::new(qualify_expr(*l, global)),
-            Box::new(qualify_expr(*r, global)),
-        ),
-    }
-}
+// Local qualification — `jr .loop` under `start` → `start.loop` — is the
+// shared [`crate::ast::qualify_locals`] (language-surface U7): rgbasm's copy
+// was character-identical to z80's over the same engine types (its
+// `other => other` arm differed only for `Operation::Entry`, which rgbasm
+// never constructs — no `end`-style directive), so the mangle lives in one
+// place; rgbasm's *scope rule* (the last non-`.` global) stays in [`Walker`].
 
 #[cfg(test)]
 mod tests {

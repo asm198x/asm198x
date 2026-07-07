@@ -24,6 +24,36 @@ fn fixture(name: &str) -> String {
     std::fs::read_to_string(&path).unwrap_or_else(|e| panic!("read fixture {path}: {e}"))
 }
 
+fn fixture_bytes(name: &str) -> Vec<u8> {
+    let path = format!(
+        "{}/tests/fixtures/debug198x/{name}",
+        env!("CARGO_MANIFEST_DIR")
+    );
+    std::fs::read(&path).unwrap_or_else(|e| panic!("read fixture {path}: {e}"))
+}
+
+/// The multi-file Z80 family's hermetic loader (language-surface U9): the
+/// include and the binary asset registered under their fixture basenames, so
+/// the golden's `sources` stay machine-independent (no canonical temp paths).
+fn multifile_z80_loader() -> asm198x::source::MemoryLoader {
+    asm198x::source::MemoryLoader::new()
+        .text(
+            "z80-spectrum-multifile.inc",
+            fixture("z80-spectrum-multifile.inc"),
+        )
+        .binary(
+            "z80-spectrum-multifile.bin",
+            fixture_bytes("z80-spectrum-multifile.bin"),
+        )
+}
+
+/// The multi-file NES family's hermetic loader (language-surface U9): the
+/// included CHR-data source registered under its fixture basename.
+fn multifile_nes_loader() -> asm198x::source::MemoryLoader {
+    asm198x::source::MemoryLoader::new()
+        .text("6502-nes-multifile.inc", fixture("6502-nes-multifile.inc"))
+}
+
 /// Normalize the producing tool's version so expected sidecars survive release
 /// bumps. (The plan sketched an injectable writer version; normalizing at the
 /// comparison achieves the same byte-stability with no extra API surface.)
@@ -126,6 +156,43 @@ fn families() -> Vec<Family> {
                     .bytes
             },
         ),
+        // The multi-file flat-engine family (language-surface U9): a two-file
+        // sjasmplus program — an `include` plus an `incbin` — whose golden
+        // pins the two-entry `sources` (FileId order, KTD2) and per-file line
+        // records, hermetically via the in-memory loader.
+        build(
+            "z80-spectrum-multifile",
+            &|src, path| {
+                let loader = multifile_z80_loader();
+                let r = asm198x::assemble_sjasmplus_files(src, path, &loader)
+                    .expect("multi-file z80 assembles");
+                (asm198x::debug_info(&r, "z80", "sjasmplus", path), r.bytes)
+            },
+            &|src| {
+                let loader = multifile_z80_loader();
+                asm198x::assemble_sjasmplus_files(src, "z80-spectrum-multifile.s", &loader)
+                    .expect("multi-file z80 assembles")
+                    .bytes
+            },
+        ),
+        // The multi-file linked family (language-surface U9): a two-file NES
+        // program whose included CHR data attributes to its own file through
+        // the ca65 assemble+link path's native multi-file capture (U5).
+        build(
+            "6502-nes-multifile",
+            &|src, path| {
+                let loader = multifile_nes_loader();
+                let (r, info) = asm198x::assemble_ca65_files_debug(src, path, &loader)
+                    .expect("multi-file ca65 links");
+                (info, r.bytes)
+            },
+            &|src| {
+                let loader = multifile_nes_loader();
+                asm198x::assemble_ca65_files(src, "6502-nes-multifile.s", &loader)
+                    .expect("multi-file ca65 links")
+                    .bytes
+            },
+        ),
     ]
 }
 
@@ -210,6 +277,35 @@ fn corpus_lookups_resolve() {
         intv.lines.iter().map(|l| l.length).sum::<u64>(),
         6,
         "span lengths are decles: half the byte count"
+    );
+
+    // The multi-file families (U9): a lookup that lands in an included file
+    // answers with *that* file — the incbin payload's record names the
+    // include and its directive line, not the root input.
+    let zmulti = DebugInfo::read(&fixture("z80-spectrum-multifile.debug198x")).expect("parse");
+    assert_eq!(zmulti.header.sources.len(), 2, "root + the include");
+    assert_eq!(zmulti.addr_of("tiles", None), Some(0x8002));
+    let payload = zmulti.line_at(0x8002, None).expect("incbin payload record");
+    assert_eq!(
+        (payload.file.as_str(), payload.line, payload.length),
+        ("z80-spectrum-multifile.inc", 2, 4),
+        "one record covers the incbin payload at the directive's own file+line"
+    );
+
+    let nmulti = DebugInfo::read(&fixture("6502-nes-multifile.debug198x")).expect("parse");
+    assert_eq!(nmulti.addr_of("reset", None), Some(0x8000));
+    assert!(
+        nmulti.addr_of("tiles", None).is_none(),
+        "the include's CHR label is PPU space — no CPU address without a BaseMap"
+    );
+    assert_eq!(
+        nmulti
+            .lines
+            .iter()
+            .find(|l| l.file.ends_with(".inc"))
+            .map(|l| l.line),
+        Some(2),
+        "the included CHR bytes attribute to the include's own line"
     );
 }
 

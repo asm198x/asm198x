@@ -1,0 +1,9 @@
+{"t":"header","format":"debug198x","format_version":"0.1","tool":"asm198x","tool_version":"0.0.7","cpu":"6502","dialect":"ca65","sources":["6502-nes-multifile.s","6502-nes-multifile.inc"]}
+{"t":"section","id":4,"name":"CODE","base":32768}
+{"t":"section","id":5,"name":"VECTORS","base":65530}
+{"t":"section","id":6,"name":"CHARS"}
+{"t":"symbol","name":"reset","kind":"label","section":4,"offset":0}
+{"t":"symbol","name":"tiles","kind":"label","section":6,"offset":0}
+{"t":"line","file":"6502-nes-multifile.s","line":2,"section":4,"offset":0,"length":2}
+{"t":"line","file":"6502-nes-multifile.inc","line":2,"section":6,"offset":0,"length":2}
+{"t":"line","file":"6502-nes-multifile.s","line":5,"section":5,"offset":0,"length":6}

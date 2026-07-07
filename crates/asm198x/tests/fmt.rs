@@ -529,6 +529,42 @@ fn fmt_acme_reassembles_byte_identical() {
     );
 }
 
+/// U7: an acme `!zone` block (`!zone name { … }`) survives `--fmt` — the head
+/// and its `}` re-render, the result reassembles byte-identical (the block's
+/// scope restore included), and re-formatting is a fixed point.
+#[test]
+fn fmt_acme_zone_block_round_trips() {
+    let src = "\
+*= $1000
+.out    lda #1
+!zone inner {
+.loop   lda #2
+        bne .loop
+}
+        bne .out
+!zone tail
+.loop   lda #3
+";
+    let original = assemble_acme(src).expect("assembles").bytes;
+    let formatted = format_acme(src).expect("formats");
+    let reassembled = assemble_acme(&formatted)
+        .unwrap_or_else(|e| panic!("formatted zone block must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "zone block round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_acme(&formatted).expect("formats"),
+        "zone-block fmt is idempotent\n---\n{formatted}"
+    );
+    assert!(
+        formatted.contains("!zone inner {"),
+        "the block head re-renders:\n{formatted}"
+    );
+}
+
 #[test]
 fn fmt_keeps_comments_in_position() {
     let formatted = format_pasmo("; header\n        nop   ; trailing\n").expect("formats");
@@ -1058,5 +1094,711 @@ fn fmt_ca65_reassembles_byte_identical() {
             && formatted.contains("@done:")
             && formatted.contains("bne :-"),
         "segment, cheap local, and anonymous reference preserved:\n{formatted}"
+    );
+}
+
+/// U2 (language surface): `--fmt` renders an `INCLUDE` directive verbatim from
+/// the node's source without ever opening the target — formatting succeeds
+/// when the target does not exist — and stays idempotent (KTD1).
+#[test]
+fn fmt_sjasmplus_include_is_verbatim_and_never_opens_the_target() {
+    let src = "\
+; header
+        org $8000
+        include \"missing.inc\"   ; pulled in later
+lbl:    INCLUDE <also-missing.inc>
+        ld a,1
+";
+    let formatted = format_sjasmplus(src).expect("formats with the targets missing");
+    assert!(
+        formatted.contains("include \"missing.inc\""),
+        "the directive text is verbatim:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("INCLUDE <also-missing.inc>"),
+        "spelling (case, brackets) preserved:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert_eq!(
+        format_sjasmplus(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U2: formatted include-bearing source reassembles byte-identical through
+/// the include-capable entry (the multi-file leg of the fmt round-trip bar).
+#[test]
+fn fmt_sjasmplus_include_reassembles_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || MemoryLoader::new().text("defs.inc", "VAL equ $2b\n");
+    let src = "        org $8000\n        include \"defs.inc\"\n        ld a,VAL\n";
+    let original = asm198x::assemble_sjasmplus_files(src, "main.asm", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_sjasmplus(src).expect("formats");
+    let reassembled = asm198x::assemble_sjasmplus_files(&formatted, "main.asm", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+}
+
+/// U3 (language surface): `--fmt` renders an `INCBIN` directive verbatim —
+/// spelling, quote form, and the offset/length tail untouched — without ever
+/// opening the asset (formatting succeeds when it does not exist), and stays
+/// idempotent (KTD1). The pasmo skin's plain form gets the same treatment.
+#[test]
+fn fmt_incbin_is_verbatim_and_never_opens_the_asset() {
+    let src = "\
+        org $8000
+        incbin \"missing.bin\"   ; art, added later
+art:    INCBIN <also-missing.bin>,2,3
+        ld a,1
+";
+    let formatted = format_sjasmplus(src).expect("formats with the assets missing");
+    assert!(
+        formatted.contains("incbin \"missing.bin\""),
+        "the directive text is verbatim:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("INCBIN <also-missing.bin>,2,3"),
+        "spelling (case, brackets, tail) preserved:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("; art, added later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert_eq!(
+        format_sjasmplus(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+
+    // pasmo: the plain form, same contract.
+    let pasmo_src = "        org $8000\n        incbin \"missing.bin\"\n";
+    let pasmo_fmt = format_pasmo(pasmo_src).expect("pasmo formats with the asset missing");
+    assert!(
+        pasmo_fmt.contains("incbin \"missing.bin\""),
+        "verbatim under pasmo:\n{pasmo_fmt}"
+    );
+    assert_eq!(
+        format_pasmo(&pasmo_fmt).expect("formats again"),
+        pasmo_fmt,
+        "idempotent under pasmo"
+    );
+}
+
+/// U4 (language surface): `--fmt` renders acme's `!src`/`!bin` directives
+/// verbatim from the node's source without ever opening the targets —
+/// formatting succeeds when they do not exist — and stays idempotent (KTD1).
+/// Spelling (case, aliases, the `<>` library form, the size/skip tail) is
+/// preserved untouched.
+#[test]
+fn fmt_acme_src_and_bin_are_verbatim_and_never_open_targets() {
+    let src = "\
+; header
+* = $1000
+        !src \"missing.a\"   ; pulled in later
+here    !SOURCE <also-missing.a>
+art     !bin \"missing.bin\", 3, 2
+        !BINARY \"also-missing.bin\", , 2
+        lda #1
+";
+    let formatted = format_acme(src).expect("formats with every target missing");
+    for verbatim in [
+        "!src \"missing.a\"",
+        "!SOURCE <also-missing.a>",
+        "!bin \"missing.bin\", 3, 2",
+        "!BINARY \"also-missing.bin\", , 2",
+    ] {
+        assert!(
+            formatted.contains(verbatim),
+            "`{verbatim}` survives verbatim:\n{formatted}"
+        );
+    }
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert_eq!(
+        format_acme(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U4: formatted `!src`/`!bin`-bearing acme source reassembles byte-identical
+/// through the multi-file entry (the acme leg of the fmt round-trip bar).
+#[test]
+fn fmt_acme_src_and_bin_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.a", "VAL = $2b\n")
+            .binary("data.bin", (0x10..0x18).collect())
+    };
+    let src =
+        "* = $1000\n        !src \"defs.a\"\n        lda #VAL\n        !bin \"data.bin\", 3, 2\n";
+    let original = asm198x::assemble_acme_files(src, "main.a", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_acme(src).expect("formats");
+    let reassembled = asm198x::assemble_acme_files(&formatted, "main.a", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+}
+
+/// U3: formatted incbin-bearing source reassembles byte-identical through the
+/// multi-file entry (the incbin leg of the fmt round-trip bar).
+#[test]
+fn fmt_incbin_reassembles_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || MemoryLoader::new().binary("data.bin", (0x10..0x18).collect());
+    let src = "        org $8000\n        incbin \"data.bin\",2,3\n        ld a,1\n";
+    let original = asm198x::assemble_sjasmplus_files(src, "main.asm", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_sjasmplus(src).expect("formats");
+    let reassembled = asm198x::assemble_sjasmplus_files(&formatted, "main.asm", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+}
+
+/// U4 (language surface): `--fmt` renders the ca65-flat family's
+/// `.include`/`.incbin` directives verbatim from the node's source without
+/// ever opening the targets — formatting succeeds when they do not exist —
+/// and stays idempotent (KTD1). Spelling (case, the offset/size tail, labels
+/// on the directive lines) is preserved untouched, on both dialects.
+#[test]
+fn fmt_ca65_flat_include_and_incbin_are_verbatim_and_never_open_targets() {
+    let src = "\
+; header
+OFF = 2
+here: .include \"missing.s\"   ; pulled in later
+ .INCLUDE \"also-missing.s\"
+art: .incbin \"missing.bin\", 2, 3
+ .incbin \"also-missing.bin\", OFF, -1
+ lda #$01
+";
+    for (name, fmt) in [
+        (
+            "65816",
+            format_ca65_816 as fn(&str) -> Result<String, asm198x::AsmError>,
+        ),
+        ("huc6280", format_ca65_huc6280),
+    ] {
+        let formatted =
+            fmt(src).unwrap_or_else(|e| panic!("{name} formats with targets missing: {e}"));
+        for verbatim in [
+            ".include \"missing.s\"",
+            ".INCLUDE \"also-missing.s\"",
+            ".incbin \"missing.bin\", 2, 3",
+            ".incbin \"also-missing.bin\", OFF, -1",
+        ] {
+            assert!(
+                formatted.contains(verbatim),
+                "{name}: `{verbatim}` survives verbatim:\n{formatted}"
+            );
+        }
+        assert!(
+            formatted.contains("; pulled in later"),
+            "{name}: the trailing comment survives:\n{formatted}"
+        );
+        assert!(
+            formatted.contains("here:") && formatted.contains("art:"),
+            "{name}: labels on the directive lines survive:\n{formatted}"
+        );
+        assert_eq!(
+            fmt(&formatted).unwrap_or_else(|e| panic!("{name} formats again: {e}")),
+            formatted,
+            "{name}: idempotent"
+        );
+    }
+}
+
+/// U4: formatted `.include`/`.incbin`-bearing ca65-flat source reassembles
+/// byte-identical through the multi-file entries (this family's leg of the
+/// fmt round-trip bar) — including the 65816's width state crossing the
+/// include boundary.
+#[test]
+fn fmt_ca65_flat_include_and_incbin_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.s", ".a16\nptr = $10\n")
+            .binary("data.bin", (0x10..0x18).collect())
+    };
+    let src =
+        " lda #$11\n .include \"defs.s\"\n lda #$22\n .a8\n lda ptr\n .incbin \"data.bin\", 2, 3\n";
+    let original = asm198x::assemble_ca65_816_files(src, "main.s", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_ca65_816(src).expect("formats");
+    let reassembled = asm198x::assemble_ca65_816_files(&formatted, "main.s", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "65816 round-trips:\n{formatted}");
+
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.s", "ptr = $10\n sax\n")
+            .binary("data.bin", (0x10..0x18).collect())
+    };
+    let src = " lda #$11\n .include \"defs.s\"\n lda ptr\n .incbin \"data.bin\", 6, -9\n";
+    let original = asm198x::assemble_ca65_huc6280_files(src, "main.s", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_ca65_huc6280(src).expect("formats");
+    let reassembled = asm198x::assemble_ca65_huc6280_files(&formatted, "main.s", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "huc6280 round-trips:\n{formatted}");
+}
+
+/// U4 (language surface): `--fmt` renders rgbasm's `INCLUDE`/`INCBIN`
+/// directives verbatim from the node's source without ever opening the
+/// targets — formatting succeeds when they do not exist — and stays
+/// idempotent (KTD1). Spelling (case, the offset/length tail, labels on the
+/// directive lines, the `DEF` constant keyword) is preserved untouched.
+#[test]
+fn fmt_rgbasm_include_and_incbin_are_verbatim_and_never_open_targets() {
+    let src = "\
+; header
+SECTION \"c\", ROM0[$0]
+DEF OFF EQU 2
+here: INCLUDE \"missing.inc\"   ; pulled in later
+ include \"also-missing.inc\"
+art: INCBIN \"missing.bin\", 2, 3
+ INCBIN \"also-missing.bin\", OFF
+ ld a, 1
+";
+    let formatted = format_rgbasm(src).expect("formats with every target missing");
+    for verbatim in [
+        "INCLUDE \"missing.inc\"",
+        "include \"also-missing.inc\"",
+        "INCBIN \"missing.bin\", 2, 3",
+        "INCBIN \"also-missing.bin\", OFF",
+        "DEF OFF EQU 2",
+    ] {
+        assert!(
+            formatted.contains(verbatim),
+            "`{verbatim}` survives verbatim:\n{formatted}"
+        );
+    }
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("here:") && formatted.contains("art:"),
+        "labels on the directive lines survive:\n{formatted}"
+    );
+    assert_eq!(
+        format_rgbasm(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U4: formatted `INCLUDE`/`INCBIN`-bearing rgbasm source reassembles
+/// byte-identical through the multi-file entry (rgbasm's leg of the fmt
+/// round-trip bar) — including a `DEF` constant crossing the boundary.
+#[test]
+fn fmt_rgbasm_include_and_incbin_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.inc", "DEF VAL EQU $42\n ld c, 3\n")
+            .binary("data.bin", (0x10..0x18).collect())
+    };
+    let src = "SECTION \"c\", ROM0[$0]\n ld a, 1\n INCLUDE \"defs.inc\"\n ld a, VAL\n \
+               INCBIN \"data.bin\", 2, 3\n";
+    let original = asm198x::assemble_rgbasm_files(src, "main.asm", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_rgbasm(src).expect("formats");
+    let reassembled = asm198x::assemble_rgbasm_files(&formatted, "main.asm", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+}
+
+/// U4 (language surface): `--fmt` renders lwasm's `include`/`use`/
+/// `includebin` directives verbatim from the node's source without ever
+/// opening the targets — formatting succeeds when they do not exist — and
+/// stays idempotent (KTD1). Spelling (the `use` alias, quoted vs bare names,
+/// the offset/length tail, labels on the directive lines) is preserved
+/// untouched.
+#[test]
+fn fmt_lwasm_include_and_includebin_are_verbatim_and_never_open_targets() {
+    let src = "\
+* header
+here    include \"missing.inc\"   ; pulled in later
+        use also-missing.inc
+art     includebin \"missing.bin\",2,3
+        includebin missing-too.bin,-4
+        lda #1
+";
+    let formatted = format_lwasm(src).expect("formats with every target missing");
+    for verbatim in [
+        "include \"missing.inc\"",
+        "use also-missing.inc",
+        "includebin \"missing.bin\",2,3",
+        "includebin missing-too.bin,-4",
+    ] {
+        assert!(
+            formatted.contains(verbatim),
+            "`{verbatim}` survives verbatim:\n{formatted}"
+        );
+    }
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("here") && formatted.contains("art"),
+        "labels on the directive lines survive:\n{formatted}"
+    );
+    assert_eq!(
+        format_lwasm(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U4: formatted `include`/`includebin`-bearing lwasm source reassembles
+/// byte-identical through the multi-file entry (lwasm's leg of the fmt
+/// round-trip bar) — including an `equ` crossing the boundary into the
+/// direct-vs-extended choice and a negative-offset window.
+#[test]
+fn fmt_lwasm_include_and_includebin_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.inc", "ptr     equ $20\n")
+            .binary("data.bin", (0x10..0x18).collect())
+    };
+    let src =
+        "        include \"defs.inc\"\n        lda ptr\n        includebin \"data.bin\",-4,2\n";
+    let original = asm198x::assemble_lwasm_files(src, "main.asm", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_lwasm(src).expect("formats");
+    let reassembled = asm198x::assemble_lwasm_files(&formatted, "main.asm", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+}
+
+/// U4 (asl chips): `--fmt` renders the asl `include`/`binclude` directives
+/// verbatim from the node's source — spelling (case, quoted or bare name,
+/// window tail) untouched — without ever opening the targets, and stays
+/// idempotent (KTD1). The 8080 is the family's representative chip.
+#[test]
+fn fmt_i8080_include_and_binclude_are_verbatim_and_never_open_targets() {
+    let src = "\
+; header
+        include \"missing.inc\"   ; pulled in later
+lbl:    INCLUDE bare-missing
+art:    binclude missing.bin,2,3
+        BINCLUDE \"also-missing.bin\"
+        mvi a,1
+";
+    let formatted = format_i8080(src).expect("formats with every target missing");
+    for verbatim in [
+        "include \"missing.inc\"",
+        "INCLUDE bare-missing",
+        "binclude missing.bin,2,3",
+        "BINCLUDE \"also-missing.bin\"",
+    ] {
+        assert!(
+            formatted.contains(verbatim),
+            "`{verbatim}` survives verbatim:\n{formatted}"
+        );
+    }
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert_eq!(
+        format_i8080(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U4: formatted include/binclude-bearing 8080 source reassembles
+/// byte-identical through the multi-file entry (the asl leg of the fmt
+/// round-trip bar).
+#[test]
+fn fmt_i8080_include_and_binclude_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.inc", "CONST equ 42h\n")
+            .binary("art.bin", vec![0x10, 0x11, 0x12, 0x13])
+    };
+    let src =
+        "        include \"defs.inc\"\n        mvi a,CONST\n        binclude \"art.bin\",1,2\n";
+    let original = asm198x::assemble_i8080_files(src, "main.asm", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_i8080(src).expect("formats");
+    let reassembled = asm198x::assemble_i8080_files(&formatted, "main.asm", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+}
+
+/// U4: the CP1610's `include`/`binclude` render verbatim and idempotent too —
+/// the word-addressed chip shares the asl walker, so its fmt path must keep
+/// the same never-opens-the-target property.
+#[test]
+fn fmt_cp1610_include_and_binclude_are_verbatim_and_never_open_targets() {
+    let src = "\
+        org 0
+        include \"missing.inc\"
+art:    binclude missing.bin,2,3
+        movr r0, r1
+";
+    let formatted = format_cp1610(src).expect("formats with the targets missing");
+    assert!(
+        formatted.contains("include \"missing.inc\"")
+            && formatted.contains("binclude missing.bin,2,3"),
+        "directives survive verbatim:\n{formatted}"
+    );
+    assert_eq!(
+        format_cp1610(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U5 (language surface): the NES ca65 `--fmt` path renders `.include`/
+/// `.incbin` verbatim from the node's source without ever opening the
+/// targets — formatting succeeds when they do not exist — and stays
+/// idempotent (KTD1). Labels on the directive lines and the offset/size
+/// tail are preserved untouched.
+#[test]
+fn fmt_ca65_nes_include_and_incbin_are_verbatim_and_never_open_targets() {
+    let src = "\
+; header
+        .segment \"CODE\"
+OFF = 2
+here:   .include \"missing.s\"   ; pulled in later
+        .INCLUDE \"also-missing.s\"
+        .segment \"CHARS\"
+art:    .incbin \"missing.chr\", 2, 3
+        .incbin \"also-missing.chr\", OFF, -1
+";
+    let formatted = format_ca65(src).expect("formats with every target missing");
+    for verbatim in [
+        ".include \"missing.s\"",
+        ".INCLUDE \"also-missing.s\"",
+        ".incbin \"missing.chr\", 2, 3",
+        ".incbin \"also-missing.chr\", OFF, -1",
+    ] {
+        assert!(
+            formatted.contains(verbatim),
+            "`{verbatim}` survives verbatim:\n{formatted}"
+        );
+    }
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("here:") && formatted.contains("art:"),
+        "labels on the directive lines survive:\n{formatted}"
+    );
+    assert_eq!(
+        format_ca65(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U5: formatted `.include`/`.incbin`-bearing NES source reassembles into a
+/// byte-identical `.nes` ROM through the multi-file entry (the NES leg of
+/// the fmt round-trip bar).
+#[test]
+fn fmt_ca65_nes_include_and_incbin_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("art.s", ".segment \"CHARS\"\n .byte $AA\n")
+            .binary("tiles.chr", (0x10..0x18).collect())
+    };
+    let src = "\
+.segment \"CODE\"
+reset:  lda #$01
+        .include \"art.s\"
+        .incbin \"tiles.chr\", 2, 3
+.segment \"VECTORS\"
+        .word 0, reset, 0
+";
+    let original = asm198x::assemble_ca65_files(src, "main.s", &loader())
+        .expect("links")
+        .bytes;
+    let formatted = format_ca65(src).expect("formats");
+    let reassembled = asm198x::assemble_ca65_files(&formatted, "main.s", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must link: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "NES ROM round-trips:\n{formatted}");
+}
+
+/// U6: `--fmt` on the vasm (68000) path renders `include`/`incbin`
+/// directives verbatim from the node's source without ever opening the
+/// targets — formatting succeeds when they do not exist — and stays
+/// idempotent (KTD1). Spelling (quoted vs single-quoted vs bare names, the
+/// offset/length tail, labels on the directive lines) is preserved untouched.
+#[test]
+fn fmt_vasm_include_and_incbin_are_verbatim_and_never_open_targets() {
+    let src = "\
+* header
+here:   include \"missing.inc\"   ; pulled in later
+        include 'also-missing.i'
+art:    incbin  \"missing.bin\",2,3
+        incbin  missing-too.bin
+        moveq   #1,d0
+";
+    let formatted = format_vasm(src).expect("formats with every target missing");
+    for verbatim in [
+        "include \"missing.inc\"",
+        "include 'also-missing.i'",
+        "incbin  \"missing.bin\",2,3",
+        "incbin  missing-too.bin",
+    ] {
+        assert!(
+            formatted.contains(verbatim),
+            "`{verbatim}` survives verbatim:\n{formatted}"
+        );
+    }
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("here") && formatted.contains("art"),
+        "labels on the directive lines survive:\n{formatted}"
+    );
+    assert_eq!(
+        format_vasm(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U6: formatted `include`/`incbin`-bearing vasm source reassembles
+/// byte-identical through the multi-file entry (the 68000's leg of the fmt
+/// round-trip bar) — including an `equ` crossing the boundary into the
+/// optimizer's `addq` selection and an offset/length window.
+#[test]
+fn fmt_vasm_include_and_incbin_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.inc", "N equ 5\n")
+            .binary("data.bin", (0x10..0x18).collect())
+    };
+    let src = "\t\tinclude \"defs.inc\"
+start:
+        add.l   #N,d0
+        incbin  \"data.bin\",2,3
+        rts
+";
+    let original = asm198x::assemble_vasm_warned_files(src, "main.s", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_vasm(src).expect("formats");
+    let reassembled = asm198x::assemble_vasm_warned_files(&formatted, "main.s", &loader())
+        .unwrap_or_else(|e| panic!("formatted vasm must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "multi-file vasm round-trips byte-identical\n---\n{formatted}"
+    );
+}
+
+/// U8: keyword conditionals round-trip through the new `CondStyle::Keyword`
+/// emit branch — `IF`/`ELSE`/`ENDIF` render as indented directives following
+/// the head keyword's case, bodies keep the normal layout (labels at column
+/// 0), the formatted source reassembles byte-identical, and re-formatting is
+/// a fixed point. ACME's brace rendering is untouched (its own fmt tests
+/// prove it).
+#[test]
+fn fmt_sjasmplus_conditionals_round_trip() {
+    let src = "\
+; build flavours
+        org $8000
+        DEFINE DEBUG 1
+mode    equ 2
+lbl:    IF DEBUG = 1   ; debug build
+        ld a,1
+        if mode = 2
+.inner: nop
+        djnz .inner
+        endif
+        ELSE
+        ld a,2
+        ENDIF
+        jr lbl
+";
+    let original = assemble_sjasmplus(src).expect("assembles").bytes;
+    let formatted = format_sjasmplus(src).expect("formats");
+    let reassembled = assemble_sjasmplus(&formatted)
+        .unwrap_or_else(|e| panic!("formatted conditionals must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+    assert_eq!(
+        formatted,
+        format_sjasmplus(&formatted).expect("formats again"),
+        "idempotent:\n{formatted}"
+    );
+    // The delimiters render as indented directives, case following the head.
+    assert!(
+        formatted.contains("        IF DEBUG = 1   ; debug build"),
+        "head verbatim with its comment:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("        ELSE\n") && formatted.contains("        ENDIF\n"),
+        "uppercase delimiters for the uppercase head:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("        if mode = 2") && formatted.contains("        endif\n"),
+        "lowercase head keeps lowercase delimiters:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("lbl:"),
+        "the label on the IF line survives:\n{formatted}"
+    );
+}
+
+/// U8 + KTD1 on the fmt path: a conditional-guarded include renders verbatim
+/// and the formatter never opens the target — formatting succeeds with the
+/// file missing, whichever branch would take it.
+#[test]
+fn fmt_sjasmplus_guarded_include_is_verbatim_and_never_opens_the_target() {
+    let src = "\
+        org $8000
+        IF 0
+        include \"missing.inc\"
+        ENDIF
+        ld a,1
+";
+    let formatted = format_sjasmplus(src).expect("formats with the target missing");
+    assert!(
+        formatted.contains("include \"missing.inc\""),
+        "directive verbatim inside the block:\n{formatted}"
+    );
+    assert_eq!(
+        format_sjasmplus(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
     );
 }

@@ -64,6 +64,20 @@ asl-family `IF … ENDIF` and lwasm/rgbasm follow the same shape):
 4. **Add a style branch in `ast::emit`** to render the dialect's delimiters
    (`head … ENDIF`) instead of ACME's braces, for the formatter.
 
+## Dated notes
+
+- **2026-07-07 — sjasmplus is the second `CondEval` consumer** (language-surface
+  U8, plan `docs/plans/2026-07-04-001-feat-language-surface-plan.md`). The
+  adoption followed the recipe above verbatim: `SjasmEval` over the `DEFINE`
+  table + `equ` consts, line-oriented `IF`/`IFDEF`/`IFNDEF`/`ELSE`/`ENDIF`
+  parsed into `Item::Conditional`, assembly routed through `ast::evaluate`, and
+  the keyword style branch in `ast::emit` built now that its first consumer
+  exists (`CondStyle::{Brace, Keyword}` on the node). The driver is real-world
+  Z80 source compatibility (the `syntax-stance` gap this record anticipated),
+  not curriculum demand. Includes resolve inside the walk, so a guarded
+  include in an untaken branch never loads. Further adopters remain
+  demand-gated.
+
 ## Drift triggers
 
 Stop and re-consult if a change would:

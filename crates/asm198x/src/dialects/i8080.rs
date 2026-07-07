@@ -18,12 +18,14 @@
 
 use std::collections::BTreeMap;
 
+use super::asl::{self, AslChip};
 use super::mos6502::{
     self, BytePrec, Caret, ExprOpts, fold_const, is_ident, split_data_items, split_first_word,
     split_top_level, string_literal,
 };
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, Expr, Operation, Statement};
+use crate::source::{SourceLoader, SourceMap};
 
 /// The Intel 8080 dialect.
 pub(crate) struct I8080;
@@ -45,6 +47,17 @@ impl Dialect for I8080 {
         Ok(Some(parse_program(source)?))
     }
 
+    /// The include-capable parse (language-surface U4): the shared asl-family
+    /// walk, resolving `INCLUDE`/`BINCLUDE` lazily through the loader — see
+    /// [`parse_program_multi`].
+    fn parse_multi(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<Vec<Statement>, AsmError> {
+        crate::ast::lower(parse_program_multi(map, loader)?)
+    }
+
     /// Intel `equ` takes no colon on its label (`name equ …`); a colon would
     /// fail to reassemble, since the label is disambiguated by the keyword.
     fn equ_label_colon(&self) -> bool {
@@ -52,106 +65,71 @@ impl Dialect for I8080 {
     }
 }
 
-/// Parse Intel-8080 source into the semantic [`Program`](crate::ast::Program).
-/// Each line becomes a node carrying its (global) label, operation, verbatim
-/// source, span, and comment trivia. The 8080 has no local-label scoping, so
-/// every label is a [`Scope::Global`](crate::ast::Scope) symbol whose qualified
-/// name is the source name — [`lower`](crate::ast::lower) then reproduces the
-/// old statements exactly. `equ`/`=` constants fold at parse time, as before, so
-/// a `ds`/`rst` operand that references one still resolves.
+/// Parse Intel-8080 source into the semantic [`Program`](crate::ast::Program)
+/// via the shared asl-family walk ([`asl::parse_single`]): each line becomes a
+/// node carrying its (global) label, operation, verbatim source, span, and
+/// comment trivia. The 8080 has no local-label scoping, so every label is a
+/// global symbol whose qualified name is the source name —
+/// [`lower`](crate::ast::lower) then reproduces the old statements exactly.
+/// `equ`/`=` constants fold at parse time, as before, so a `ds`/`rst` operand
+/// that references one still resolves. An `INCLUDE`/`BINCLUDE` stays an
+/// unresolved item — the target is never opened here (U4, KTD1).
 pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
-    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
-    let set = &isa::i8080::SET;
-    let mut nodes = Vec::new();
-    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
-    // Own-line comments seen since the last node, attached as leading trivia to
-    // the next one. Comments never reach the encoder, so bytes are unchanged.
-    let mut pending_leading: Vec<Comment> = Vec::new();
+    asl::parse_single(Chip, source)
+}
 
-    for (i, raw) in source.lines().enumerate() {
-        let line = i + 1;
-        let (code, comment) = split_comment(raw);
-        if code.trim().is_empty() {
-            if let Some(text) = comment {
-                pending_leading.push(Comment {
-                    text: text.to_string(),
-                    span: Span::at(line as u32, 1),
-                });
-            }
-            continue;
-        }
-        let trailing = comment.map(|text| Comment {
-            text: text.to_string(),
-            span: Span::at(line as u32, (code.len() + 1) as u32),
-        });
+/// Parse a multi-file Intel-8080 program (language-surface U4): the shared
+/// asl-family interleaved walk with asl's probe-pinned semantics — see
+/// [`asl::parse_multi_files`].
+///
+/// # Errors
+/// Any per-line parse failure (stamped with its file), a missing target, an
+/// include cycle, a bad `BINCLUDE` window, or the depth backstop — all at the
+/// directive's span.
+pub(crate) fn parse_program_multi(
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+) -> Result<crate::ast::Program, AsmError> {
+    asl::parse_multi_files(Chip, map, loader, &asl::SEMANTICS)
+}
 
-        // `NAME EQU expr` / `NAME = expr` — a constant binds its label on the
-        // same line, so the label cannot split off (the formatter keeps it there).
-        if let Some((name, expr, op_source)) = constant(code.trim(), line)? {
-            if let Ok(v) = fold_const(&expr, &consts, line) {
-                consts.insert(name.clone(), v);
-            }
-            nodes.push(Node {
-                operand_span: None,
-                label: Some(Symbol {
-                    qualified: name.clone(),
-                    scope: Scope::Global,
-                    name,
-                }),
-                item: Some(crate::ast::item_from_operation(Operation::Equ(expr))),
-                source: op_source,
-                span: Span::at(line as u32, 1),
-                trivia: Trivia {
-                    leading: std::mem::take(&mut pending_leading),
-                    trailing,
-                },
-            });
-            continue;
-        }
+/// The 8080's hooks into the shared asl-family walk: its own comment scanner,
+/// constant recogniser, label split, Intel number lexer, and operation parse.
+struct Chip;
 
-        let (label, rest) = split_label(code);
-        let op = if rest.is_empty() {
-            None
-        } else {
-            parse_op(set, rest, &consts, line)?
-        };
-        if label.is_none() && op.is_none() {
-            continue;
-        }
-        nodes.push(Node {
-            operand_span: crate::ast::operand_span(raw, rest, line as u32),
-            label: label.map(|name| Symbol {
-                qualified: name.clone(),
-                scope: Scope::Global,
-                name,
-            }),
-            item: op.map(crate::ast::item_from_operation),
-            source: rest.trim().to_string(),
-            span: Span::at(line as u32, 1),
-            trivia: Trivia {
-                leading: std::mem::take(&mut pending_leading),
-                trailing,
-            },
-        });
+impl AslChip for Chip {
+    fn split_comment<'a>(&self, line: &'a str) -> (&'a str, Option<&'a str>) {
+        split_comment(line)
     }
 
-    // Flush comments after the last node (a trailing block or a comment-only
-    // file) as a label-less, op-less node so the formatter keeps them.
-    if !pending_leading.is_empty() {
-        let line = source.lines().count() as u32;
-        nodes.push(Node {
-            operand_span: None,
-            label: None,
-            item: None,
-            source: String::new(),
-            span: Span::at(line, 1),
-            trivia: Trivia {
-                leading: pending_leading,
-                trailing: None,
-            },
-        });
+    fn constant(
+        &self,
+        code: &str,
+        line: usize,
+    ) -> Result<Option<(String, Expr, String)>, AsmError> {
+        constant(code, line)
     }
-    Ok(Program { nodes })
+
+    fn split_label<'a>(&self, code: &'a str) -> (Option<String>, &'a str) {
+        split_label(code)
+    }
+
+    fn parse_op(
+        &mut self,
+        rest: &str,
+        consts: &BTreeMap<String, i64>,
+        line: usize,
+    ) -> Result<Option<Operation>, AsmError> {
+        parse_op(&isa::i8080::SET, rest, consts, line)
+    }
+
+    fn value(&self, raw: &str, line: usize) -> Result<Expr, AsmError> {
+        value(raw, line)
+    }
+
+    fn operand_span(&self, raw: &str, rest: &str, line: usize) -> Option<crate::ast::Span> {
+        crate::ast::operand_span(raw, rest, line as u32)
+    }
 }
 
 /// Split a line into its code and its `;` comment (with the delimiter, trailing

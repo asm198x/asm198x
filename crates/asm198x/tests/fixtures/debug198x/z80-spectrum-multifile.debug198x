@@ -1,0 +1,8 @@
+{"t":"header","format":"debug198x","format_version":"0.1","tool":"asm198x","tool_version":"0.0.7","cpu":"z80","dialect":"sjasmplus","sources":["z80-spectrum-multifile.s","z80-spectrum-multifile.inc"]}
+{"t":"section","id":0,"name":"main","base":32768}
+{"t":"symbol","name":"start","kind":"label","section":0,"offset":0}
+{"t":"symbol","name":"tiles","kind":"label","section":0,"offset":2}
+{"t":"line","file":"z80-spectrum-multifile.s","line":3,"section":0,"offset":0,"length":2}
+{"t":"line","file":"z80-spectrum-multifile.inc","line":2,"section":0,"offset":2,"length":4}
+{"t":"line","file":"z80-spectrum-multifile.inc","line":3,"section":0,"offset":6,"length":2}
+{"t":"line","file":"z80-spectrum-multifile.s","line":5,"section":0,"offset":8,"length":1}

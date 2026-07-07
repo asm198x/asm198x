@@ -1,6 +1,8 @@
 /target
 **/*.rs.bk
 *.bin
+# ...but binary fixture assets are part of the committed corpus
+!crates/asm198x/tests/fixtures/**/*.bin
 a.out
 .DS_Store
 

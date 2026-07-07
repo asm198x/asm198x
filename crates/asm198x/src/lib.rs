@@ -44,6 +44,12 @@ mod prg;
 #[cfg(test)]
 mod roundtrip_tests;
 mod sna;
+// The multi-file source model (language-surface U1): the loader seam
+// (filesystem + in-memory), the FileId-allocating source map, and the include
+// graph. Public as a module (not flattened into the crate root): consumers
+// reach `source::SourceMap` etc.; the include-capable assemble entry points
+// arrive in U2.
+pub mod source;
 // The shared source-provenance model (one Span across ast/engine/contract).
 mod span;
 
@@ -55,9 +61,10 @@ mod span;
 // internal flat builder that `AssemblyResult` wraps.
 pub use contract::{
     AssemblyResult, CONTRACT_VERSION, Code, Diagnostic, DiagnosticEnvelope, Fix, Severity,
+    resolve_span_path,
 };
 pub use engine::{AsmError, Assembly, DebugData, LineRec, Warning};
-pub use listing::{debug_info, render_listing, render_sym};
+pub use listing::{ListingFile, debug_info, render_listing, render_listing_files, render_sym};
 pub use span::{ExpansionFrame, FileId, Span};
 // Re-exported so consumers of `Assembly.debug` need not depend on debug198x
 // directly for the symbol types the engine captures.
@@ -77,6 +84,8 @@ pub use sna::sna_48k;
 
 /// Assemble ACME-syntax 6502 source into a flat binary — the C64 curriculum's
 /// dialect (`*=` to set the PC, `!byte`/`!word`/`!fill`, `name = value`).
+/// Single-source: a `!src`/`!bin` directive is an error here — use
+/// [`assemble_acme_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
@@ -85,16 +94,126 @@ pub fn assemble_acme(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Acme).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** ACME program (language-surface U4): `source` is
+/// the root file's text, `input_path` its name (entry 0 of the file table),
+/// and `!src`/`!source` and `!bin`/`!binary` directives resolve through
+/// `loader` — the CLI wires an [`FsLoader`](source::FsLoader) carrying the
+/// input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution happens inside
+/// the live evaluation walk, so a `!src` in an untaken conditional branch
+/// never loads (KTD1), and acme's probe-pinned `!bin "file"[, size[, skip]]`
+/// window semantics (zero-padding past EOF) apply byte-identically. On
+/// success, [`AssemblyResult::files`] holds the `FileId`→path table. The
+/// single-source [`assemble_acme`] is unchanged and rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_acme_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Acme, source, input_path, loader)
+}
+
 /// Assemble ca65-syntax 6502 source for the NES and link it into a `.nes` ROM
 /// image — the NES curriculum's toolchain (ca65 + ld65) in one step. Unlike the
 /// flat assemblers, this returns the finished ROM bytes (iNES header + 32K PRG +
 /// 8K CHR) because the output is the linker's, not a single origin's.
+/// Single-source: a `.include`/`.incbin` directive is an error here — use
+/// [`assemble_ca65_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_ca65(source: &str) -> Result<AssemblyResult, AsmError> {
     dialects::ca65::assemble(source).map(AssemblyResult::image)
+}
+
+/// The source map every multi-file entry point starts from: the root at
+/// `FileId(0)` under the caller's spelling, with the root's **canonical**
+/// path aliased into the dedup index so an include that re-requests the root
+/// resolves to `FileId(0)` (the cycle check then fires at the first
+/// re-entry) rather than minting a duplicate id. A path that does not
+/// canonicalize — a hermetic test's fake name under a
+/// [`MemoryLoader`](source::MemoryLoader) — simply gains no alias.
+fn new_source_map(input_path: &str, source: &str) -> source::SourceMap {
+    let mut map = source::SourceMap::new(input_path, source);
+    if let Ok(c) = std::fs::canonicalize(input_path) {
+        map.alias_root(c.to_string_lossy().into_owned());
+    }
+    map
+}
+
+/// Assemble + link a **multi-file** NES ca65 program (language-surface U5):
+/// `source` is the root file's text, `input_path` its name (entry 0 of the
+/// file table), and `.include`/`.incbin` directives resolve through `loader` —
+/// the CLI wires an [`FsLoader`](source::FsLoader) carrying the input's
+/// directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows ca65's
+/// probe-pinned ancestor-chain order and `.incbin`'s offset/size window
+/// matches ca65 exactly (both re-confirmed under the ca65+ld65 NES link —
+/// they are assembler-side semantics). Segment state, `=` constants, cheap
+/// locals, and the anonymous-label stream all cross include boundaries as
+/// ca65's textual splice does (probe-pinned). On success,
+/// [`AssemblyResult::files`] holds the `FileId`→path table. The single-source
+/// [`assemble_ca65`] is unchanged and rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_ca65_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    let mut map = new_source_map(input_path, source);
+    match dialects::ca65::assemble_multi(&mut map, loader) {
+        Ok((rom, _)) => {
+            let mut result = AssemblyResult::image(rom);
+            result.files = map.file_table();
+            Ok(result)
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
+/// As [`assemble_ca65_files`], also returning the full
+/// [`debug198x::DebugInfo`] read out of layout — the multi-file counterpart of
+/// [`assemble_ca65_debug`]. `Header.sources` is the file table in `FileId`
+/// order (KTD2: `sources[i] ⇔ FileId(i)`, the same convention as
+/// [`AssemblyResult::files`]) and every line span names the file its statement
+/// was written in, so bytes pulled in by an included file attribute to that
+/// file. Bytes are identical to [`assemble_ca65_files`] by construction (one
+/// code path; AE2).
+///
+/// # Errors
+/// As [`assemble_ca65_files`].
+pub fn assemble_ca65_files_debug(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    let mut map = new_source_map(input_path, source);
+    match dialects::ca65::assemble_multi(&mut map, loader) {
+        Ok((rom, capture)) => {
+            let files = map.file_table();
+            let info = listing::capture_debug_info_multi(capture, "6502", "ca65", files.clone());
+            let mut result = AssemblyResult::image(rom);
+            result.files = files;
+            Ok((result, info))
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
 }
 
 /// Assemble + link ca65 source, also returning the full [`debug198x::DebugInfo`]
@@ -207,10 +326,142 @@ pub fn assemble_vasm_exe_debug(
     ))
 }
 
+/// Assemble a **multi-file** 68000 program to a flat binary (language-surface
+/// U6): `source` is the root file's text, `input_path` its name (entry 0 of
+/// the file table), and `include`/`incbin` directives resolve through
+/// `loader` — the CLI wires an [`FsLoader`](source::FsLoader) carrying the
+/// input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows vasm's
+/// probe-pinned anchor — every relative request, however deeply nested,
+/// resolves against the **root input's directory** (vasm searches its process
+/// cwd and the main source's directory, never the *including* file's; the
+/// input's directory stands in for the cwd) then the `-I` dirs. State — the
+/// local-label scope, `equ` constants feeding the optimizer's
+/// `addq`/`lea`/`moveq` selections, the active `section` — threads through an
+/// include and back out (textual-splice semantics, probe-pinned), and
+/// `incbin`'s offset/length window matches vasm exactly (zero or negative
+/// length means the rest of the file; an over-long length silently
+/// truncates). Warnings ride the result; on success,
+/// [`AssemblyResult::files`] holds the `FileId`→path table. The single-source
+/// [`assemble_vasm_warned`] is unchanged and rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_vasm_warned_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    let mut map = new_source_map(input_path, source);
+    match dialects::vasm::assemble_warned_multi(&mut map, loader) {
+        Ok((bytes, warnings, _)) => {
+            let mut result = AssemblyResult::image_warned(bytes, warnings);
+            result.files = map.file_table();
+            Ok(result)
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
+/// Assemble a **multi-file** 68000 program to an Amiga hunk executable
+/// (language-surface U6): as [`assemble_vasm_warned_files`] — the same
+/// `include`/`incbin` surface, resolution order, window semantics, and
+/// cross-boundary state — serialized like [`assemble_vasm_exe`]
+/// (`-Fhunkexe -kick1hunks`, debug symbol table omitted). The single-source
+/// [`assemble_vasm_exe`] is unchanged and rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (KTD2).
+pub fn assemble_vasm_exe_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    let mut map = new_source_map(input_path, source);
+    match dialects::vasm::assemble_exe_multi(&mut map, loader) {
+        Ok((bytes, warnings, _)) => {
+            let mut result = AssemblyResult::image_warned(bytes, warnings);
+            result.files = map.file_table();
+            Ok(result)
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
+/// As [`assemble_vasm_warned_files`], also returning the full
+/// [`debug198x::DebugInfo`] read out of assembly — the multi-file counterpart
+/// of [`assemble_vasm_warned_debug`]. `Header.sources` is the file table in
+/// `FileId` order (KTD2: `sources[i] ⇔ FileId(i)`, the same convention as
+/// [`AssemblyResult::files`]) and every line span names the file its
+/// statement was written in. Bytes are identical to
+/// [`assemble_vasm_warned_files`] by construction (one `assemble_core` path;
+/// AE2).
+///
+/// # Errors
+/// As [`assemble_vasm_warned_files`].
+pub fn assemble_vasm_warned_files_debug(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    let mut map = new_source_map(input_path, source);
+    match dialects::vasm::assemble_warned_multi(&mut map, loader) {
+        Ok((bytes, warnings, capture)) => {
+            let files = map.file_table();
+            let info = listing::capture_debug_info_multi(capture, "68000", "vasm", files.clone());
+            let mut result = AssemblyResult::image_warned(bytes, warnings);
+            result.files = files;
+            Ok((result, info))
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
+/// As [`assemble_vasm_exe_files`], also returning the full
+/// [`debug198x::DebugInfo`] read out of assembly — the multi-file counterpart
+/// of [`assemble_vasm_exe_debug`], describing the hunks the executable loads
+/// with per-file line records (KTD2).
+///
+/// # Errors
+/// As [`assemble_vasm_exe_files`].
+pub fn assemble_vasm_exe_files_debug(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    let mut map = new_source_map(input_path, source);
+    match dialects::vasm::assemble_exe_multi(&mut map, loader) {
+        Ok((bytes, warnings, capture)) => {
+            let files = map.file_table();
+            let info = listing::capture_debug_info_multi(capture, "68000", "vasm", files.clone());
+            let mut result = AssemblyResult::image_warned(bytes, warnings);
+            result.files = files;
+            Ok((result, info))
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
 /// Reformat Motorola-syntax 68000 (`vasm`) source to canonical layout (the
 /// `--fmt` formatter). Parses into the source-preserving semantic AST and emits
 /// canonical same-dialect source — labels at column 0, operations indented,
-/// comments preserved — reassembling byte-identical to the input.
+/// comments preserved — reassembling byte-identical to the input. An
+/// `include`/`incbin` directive renders verbatim; the target is never opened
+/// (KTD1), so formatting succeeds when it is missing.
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse failure.
@@ -221,7 +472,9 @@ pub fn format_vasm(source: &str) -> Result<String, AsmError> {
 /// Assemble ca65-syntax 65816 source (native mode) into a flat binary — the
 /// 65816 as a target extension of the 6502 (`isa::mos6502` + `isa::mos65816`).
 /// Accumulator/index immediate width follows the `.a8`/`.a16`/`.i8`/`.i16`
-/// directives. Matches `ca65 --cpu 65816` linked flat.
+/// directives. Matches `ca65 --cpu 65816` linked flat. Single-source: a
+/// `.include`/`.incbin` directive is an error here — use
+/// [`assemble_ca65_816_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
@@ -230,12 +483,40 @@ pub fn assemble_ca65_816(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Ca65_816).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** ca65-65816 program (language-surface U4):
+/// `source` is the root file's text, `input_path` its name (entry 0 of the
+/// file table), and `.include`/`.incbin` directives resolve through `loader`
+/// — the CLI wires an [`FsLoader`](source::FsLoader) carrying the input's
+/// directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows ca65's
+/// probe-pinned order (the requesting file's directory, then each enclosing
+/// includer's, innermost → outermost), state — constants *and* the
+/// `.a8`/`.a16`/`.i8`/`.i16` width — threads through an include and back out,
+/// and `.incbin`'s offset/size window matches ca65 exactly (a negative size
+/// reads to EOF). On success, [`AssemblyResult::files`] holds the
+/// `FileId`→path table. The single-source [`assemble_ca65_816`] is unchanged
+/// and rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_ca65_816_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Ca65_816, source, input_path, loader)
+}
+
 /// Assemble ca65-syntax HuC6280 source into a flat little-endian binary — the
 /// HuC6280 (PC Engine / TurboGrafx-16 CPU) as a target extension of the 6502
 /// (`isa::mos6502` + `isa::huc6280`), mirroring the 65816 mechanism. Covers the
 /// 65C02 additions, the Rockwell bit ops, and the HuC6280-specific instructions
 /// (`st0`–`st2`, `tam`/`tma`, `tst`, `bsr`, and the block transfers). Matches
-/// `ca65 --cpu huc6280` linked flat.
+/// `ca65 --cpu huc6280` linked flat. Single-source: a `.include`/`.incbin`
+/// directive is an error here — use [`assemble_ca65_huc6280_files`] for a
+/// multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
@@ -244,16 +525,63 @@ pub fn assemble_ca65_huc6280(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Ca65Huc6280).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** ca65-HuC6280 program (language-surface U4): as
+/// [`assemble_ca65_816_files`] — the same ca65 `.include`/`.incbin` surface,
+/// resolution order, and window semantics, over the HuC6280 target. The
+/// single-source [`assemble_ca65_huc6280`] is unchanged and rejects both
+/// directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (KTD2).
+pub fn assemble_ca65_huc6280_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Ca65Huc6280, source, input_path, loader)
+}
+
 /// Assemble rgbasm-syntax SM83 (Game Boy) source into a flat binary at the
 /// section's origin — the RGBDS dialect over [`isa::sm83`]. Covers the full
 /// documented instruction set, `SECTION`/`db`/`dw`/`ds`/`EQU`, and `.local`
-/// labels. Matches `rgbasm`/`rgblink` for the emitted bytes.
+/// labels. Matches `rgbasm`/`rgblink` for the emitted bytes. Single-source:
+/// an `INCLUDE`/`INCBIN` directive is an error here — use
+/// [`assemble_rgbasm_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_rgbasm(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Rgbasm).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** rgbasm program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and `INCLUDE`/`INCBIN` directives resolve through `loader` — the
+/// CLI wires an [`FsLoader`](source::FsLoader) carrying the input's directory
+/// and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows rgbasm's
+/// probe-pinned anchor — every relative request, however deeply nested,
+/// resolves against the **root input's directory** (rgbasm searches the
+/// process cwd, never the including file's directory; the input's directory
+/// stands in for the cwd) then the `-I` dirs. State — `DEF` constants
+/// feeding `bit`/`rst`/`ds`, the `.local` scope's current global — threads
+/// through an include and back out, and `INCBIN`'s offset/length window
+/// matches rgbasm exactly (negative values rejected). On success,
+/// [`AssemblyResult::files`] holds the `FileId`→path table. The
+/// single-source [`assemble_rgbasm`] is unchanged and rejects both
+/// directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_rgbasm_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Rgbasm, source, input_path, loader)
 }
 
 /// Assemble Intel-syntax 8080 source into a flat binary at the `org` — the
@@ -267,6 +595,33 @@ pub fn assemble_i8080(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::I8080).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** Intel-8080 program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_i8080`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_i8080_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::I8080, source, input_path, loader)
+}
+
 /// Assemble Motorola-syntax 6800 source into a flat big-endian binary at the
 /// `org`, over [`isa::m6800`]. Motorola `$`-hex, `#` immediate, `$nn,X` indexed,
 /// direct-vs-extended by size (or a `>`/`<` force). Matches `asl` (`cpu 6800`).
@@ -276,6 +631,25 @@ pub fn assemble_i8080(source: &str) -> Result<AssemblyResult, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_m6800(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::M6800).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** Motorola-6800 program (language-surface U4): as
+/// [`assemble_i8080_files`] — same asl-family `include`/`binclude`
+/// resolution semantics (quoted-or-bare names, requester-directory
+/// resolution, the `.inc` extension default, state threading through the
+/// boundary). The single-source [`assemble_m6800`] is unchanged and rejects
+/// both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_m6800_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::M6800, source, input_path, loader)
 }
 
 /// Assemble asl-syntax RCA CDP1802 (COSMAC) source into a flat big-endian binary
@@ -289,6 +663,25 @@ pub fn assemble_1802(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Cdp1802).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** CDP1802 program (language-surface U4): as
+/// [`assemble_i8080_files`] — same asl-family `include`/`binclude`
+/// resolution semantics (quoted-or-bare names, requester-directory
+/// resolution, the `.inc` extension default, state threading through the
+/// boundary). The single-source [`assemble_1802`] is unchanged and rejects
+/// both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_1802_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Cdp1802, source, input_path, loader)
+}
+
 /// Assemble asl-syntax Intel 8048 (MCS-48) source into a flat binary at the
 /// `org`, over [`isa::i8048`]. Intel `H`-hex; the mode label is the operand
 /// template; `JMP`/`CALL` pack the address page into the opcode via the
@@ -299,6 +692,30 @@ pub fn assemble_1802(source: &str) -> Result<AssemblyResult, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_8048(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::I8048 { romless: false }).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** 8048 program (language-surface U4): as
+/// [`assemble_i8080_files`] — same asl-family `include`/`binclude`
+/// resolution semantics (quoted-or-bare names, requester-directory
+/// resolution, the `.inc` extension default, state threading through the
+/// boundary). The single-source [`assemble_8048`] is unchanged and rejects
+/// both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_8048_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(
+        &dialects::I8048 { romless: false },
+        source,
+        input_path,
+        loader,
+    )
 }
 
 /// Assemble asl-syntax ROM-less MCS-48 source (8035/8039/8040 and CMOS kin) into
@@ -314,6 +731,30 @@ pub fn assemble_8039(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::I8048 { romless: true }).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** ROM-less MCS-48 program (language-surface U4): as
+/// [`assemble_i8080_files`] — same asl-family `include`/`binclude`
+/// resolution semantics (quoted-or-bare names, requester-directory
+/// resolution, the `.inc` extension default, state threading through the
+/// boundary). The single-source [`assemble_8039`] is unchanged and rejects
+/// both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_8039_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(
+        &dialects::I8048 { romless: true },
+        source,
+        input_path,
+        loader,
+    )
+}
+
 /// Assemble asl-syntax National SC/MP (INS8060) source into a flat binary at the
 /// `org`, over [`isa::scmp`]. C-style numbers (`0x..` hex); `disp(ptr)` /
 /// `@disp(ptr)` memory references (the literal `e` selects the E-register
@@ -324,6 +765,25 @@ pub fn assemble_8039(source: &str) -> Result<AssemblyResult, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_scmp(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Scmp).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** SC/MP program (language-surface U4): as
+/// [`assemble_i8080_files`] — same asl-family `include`/`binclude`
+/// resolution semantics (quoted-or-bare names, requester-directory
+/// resolution, the `.inc` extension default, state threading through the
+/// boundary). The single-source [`assemble_scmp`] is unchanged and rejects
+/// both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_scmp_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Scmp, source, input_path, loader)
 }
 
 /// Assemble asl-syntax Fairchild F8 (3850) source into a flat binary at the
@@ -339,6 +799,25 @@ pub fn assemble_f8(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::F8).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** F8 program (language-surface U4): as
+/// [`assemble_i8080_files`] — same asl-family `include`/`binclude`
+/// resolution semantics (quoted-or-bare names, requester-directory
+/// resolution, the `.inc` extension default, state threading through the
+/// boundary). The single-source [`assemble_f8`] is unchanged and rejects
+/// both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_f8_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::F8, source, input_path, loader)
+}
+
 /// Assemble asl-syntax Signetics 2650 source into a flat binary at the `org`,
 /// over [`isa::s2650`]. `$`-hex; the `mnemonic,reg`/`mnemonic,cc` comma syntax;
 /// register / immediate / 7-bit relative (indirect `*`) / 15-bit absolute
@@ -352,6 +831,25 @@ pub fn assemble_2650(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::S2650).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** 2650 program (language-surface U4): as
+/// [`assemble_i8080_files`] — same asl-family `include`/`binclude`
+/// resolution semantics (quoted-or-bare names, requester-directory
+/// resolution, the `.inc` extension default, state threading through the
+/// boundary). The single-source [`assemble_2650`] is unchanged and rejects
+/// both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_2650_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::S2650, source, input_path, loader)
+}
+
 /// Assemble asl-syntax TI TMS7000 source into a flat binary at the `org`, over
 /// [`isa::tms7000`]. Intel `H`-hex; operands classified by prefix (`A`/`B`,
 /// `%n` immediate, `Rn` register file, `Pn` peripheral, `@nnnn` direct, `*Rn`
@@ -363,6 +861,25 @@ pub fn assemble_2650(source: &str) -> Result<AssemblyResult, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_tms7000(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Tms7000).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** TMS7000 program (language-surface U4): as
+/// [`assemble_i8080_files`] — same asl-family `include`/`binclude`
+/// resolution semantics (quoted-or-bare names, requester-directory
+/// resolution, the `.inc` extension default, state threading through the
+/// boundary). The single-source [`assemble_tms7000`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_tms7000_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Tms7000, source, input_path, loader)
 }
 
 /// Assemble asl-syntax DEC PDP-11 source into a flat **little-endian** binary at
@@ -380,6 +897,25 @@ pub fn assemble_pdp11(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Pdp11).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** PDP-11 program (language-surface U4): as
+/// [`assemble_i8080_files`] — same asl-family `include`/`binclude`
+/// resolution semantics (quoted-or-bare names, requester-directory
+/// resolution, the `.inc` extension default, state threading through the
+/// boundary). The single-source [`assemble_pdp11`] is unchanged and rejects
+/// both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_pdp11_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Pdp11, source, input_path, loader)
+}
+
 /// Assemble asl-syntax GI CP1610 source (the Mattel Intellivision CPU) into a
 /// flat **big-endian** binary at the `org`, over [`isa::cp1610`] — one 16-bit
 /// word per 10-bit decle. Intel `h`-hex, registers `r0`–`r7`, jzIntv / as1600
@@ -393,6 +929,30 @@ pub fn assemble_cp1610(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Cp1610).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** CP1610 program (language-surface U4): as
+/// [`assemble_i8080_files`] (the other asl-chip `*_files` entries — asl's
+/// quoted-or-bare `include`/`binclude`, requester-directory resolution, the
+/// `.inc` extension default, state threading through the boundary), with
+/// the CP1610's probe-pinned
+/// `binclude` accounting: offset/length count **bytes**, and an N-byte
+/// window occupies N **decles** — the image carries the N raw file bytes
+/// followed by N zero bytes, exactly as `asl` (`cpu CP-1600`) + p2bin lay it
+/// down (an odd byte count is legal, not padded to a decle boundary and not
+/// packed two-per-decle). The single-source [`assemble_cp1610`] is unchanged
+/// and rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_cp1610_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Cp1610, source, input_path, loader)
+}
+
 /// Assemble asl-syntax TI TMS9900 source into a flat **big-endian** binary at
 /// the `org`, over [`isa::tms9900`]. Intel `h`-hex, registers `r0`–`r15`, and
 /// the general-addressing modes (`Rn`, `*Rn`, `@addr`, `@addr(Rn)`, `*Rn+`).
@@ -404,6 +964,25 @@ pub fn assemble_cp1610(source: &str) -> Result<AssemblyResult, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_tms9900(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Tms9900).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** TMS9900 program (language-surface U4): as
+/// [`assemble_i8080_files`] — same asl-family `include`/`binclude`
+/// resolution semantics (quoted-or-bare names, requester-directory
+/// resolution, the `.inc` extension default, state threading through the
+/// boundary). The single-source [`assemble_tms9900`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_tms9900_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Tms9900, source, input_path, loader)
 }
 
 /// Assemble asl-syntax Zilog Z8000 (non-segmented Z8002) source into a flat
@@ -420,6 +999,25 @@ pub fn assemble_z8000(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Z8000 { seg: false }).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** Z8000 (Z8002) program (language-surface U4): as
+/// [`assemble_i8080_files`] — same asl-family `include`/`binclude`
+/// resolution semantics (quoted-or-bare names, requester-directory
+/// resolution, the `.inc` extension default, state threading through the
+/// boundary). The single-source [`assemble_z8000`] is unchanged and rejects
+/// both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_z8000_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Z8000 { seg: false }, source, input_path, loader)
+}
+
 /// Assemble `asl`-syntax **segmented Z8001** source into a flat big-endian
 /// binary. Like [`assemble_z8000`] but with segmented memory operands
 /// (`<<seg>>offset` direct/indexed addresses, `@RRn` long-pair pointers).
@@ -431,15 +1029,63 @@ pub fn assemble_z8001(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Z8000 { seg: true }).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** segmented Z8001 program (language-surface U4):
+/// as [`assemble_i8080_files`] — same asl-family `include`/`binclude`
+/// resolution semantics (quoted-or-bare names, requester-directory
+/// resolution, the `.inc` extension default, state threading through the
+/// boundary). The single-source [`assemble_z8001`] is unchanged and rejects
+/// both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_z8001_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Z8000 { seg: true }, source, input_path, loader)
+}
+
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching
 /// `lwasm --6809 --raw`. Covers inherent, immediate, direct, extended, and
 /// relative (short + long) addressing; indexed addressing is not yet supported.
+/// Single-source: an `include`/`use`/`includebin` directive is an error here —
+/// use [`assemble_lwasm_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_lwasm(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Lwasm).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** lwasm program (language-surface U4): `source` is
+/// the root file's text, `input_path` its name (entry 0 of the file table),
+/// and `include`/`use` (both spellings, quoted or bare names) and
+/// `includebin "file"[,offset[,length]]` directives resolve through `loader`
+/// — the CLI wires an [`FsLoader`](source::FsLoader) carrying the input's
+/// directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows lwasm's
+/// probe-pinned order — the **requesting file's own directory**, then the
+/// `-I` dirs (no cwd, no root fallback, no ancestor hops). An `equ` defined
+/// inside an include feeds the includer's later direct-vs-extended selection,
+/// and `includebin`'s window matches lwasm exactly (a negative offset counts
+/// back from EOF). On success, [`AssemblyResult::files`] holds the
+/// `FileId`→path table. The single-source [`assemble_lwasm`] is unchanged
+/// and rejects the directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_lwasm_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Lwasm, source, input_path, loader)
 }
 
 /// Assemble pasmo-syntax Z80 source into a flat binary, targeting a **plain
@@ -463,13 +1109,137 @@ pub fn assemble_pasmonext(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Pasmo { z80n: true }).map(AssemblyResult::from)
 }
 
-/// Assemble sjasmplus-syntax Z80 source targeting a plain Z80.
+/// Assemble sjasmplus-syntax Z80 source targeting a plain Z80. Single-source:
+/// an `include` directive is an error here — use
+/// [`assemble_sjasmplus_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_sjasmplus(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Sjasmplus { z80n: false }).map(AssemblyResult::from)
+}
+
+/// The failure shape of the include-capable entry points (language-surface
+/// U2, KTD2): the assembly error **plus the source map built up to the
+/// failure** — its [`file_table`](source::SourceMap::file_table) resolves the
+/// error span's `FileId` and its
+/// [`include_chain`](source::SourceMap::include_chain) yields the
+/// `included from` notes. An error inside an included file is a failure-path
+/// scenario, so the table must survive an `Err`; this type is where it rides.
+#[derive(Debug)]
+pub struct MultiFileError {
+    /// The underlying assembly failure; its span's `FileId` indexes
+    /// [`source_map`](Self::source_map)'s file table.
+    pub error: AsmError,
+    /// Every file loaded before the failure: the `FileId` table and the
+    /// include graph. Boxed to keep the `Err` variant lean on the happy path
+    /// (clippy `result_large_err`); methods read through the box unchanged.
+    pub source_map: Box<source::SourceMap>,
+}
+
+impl std::fmt::Display for MultiFileError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.error.fmt(f)
+    }
+}
+
+impl std::error::Error for MultiFileError {}
+
+/// The shared body of the include-capable entry points: root at `FileId(0)`,
+/// includes resolved through `loader`, and the file table populated on
+/// success — or carried on the error (KTD2).
+fn assemble_files(
+    dialect: &dyn dialect::Dialect,
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    let mut map = new_source_map(input_path, source);
+    match engine::assemble_multi(&mut map, loader, dialect) {
+        Ok(assembly) => {
+            let mut result = AssemblyResult::from(assembly);
+            result.files = map.file_table();
+            Ok(result)
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
+/// Assemble a **multi-file** sjasmplus program (language-surface U2):
+/// `source` is the root file's text, `input_path` its name (entry 0 of the
+/// file table), and `INCLUDE` directives resolve through `loader` — the CLI
+/// wires an [`FsLoader`](source::FsLoader) carrying the input's directory and
+/// the `-I` search dirs; tests wire a [`MemoryLoader`](source::MemoryLoader)
+/// (KTD8). On success, [`AssemblyResult::files`] holds the `FileId`→path
+/// table. The single-source [`assemble_sjasmplus`] is unchanged and rejects
+/// includes.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_sjasmplus_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(
+        &dialects::Sjasmplus { z80n: false },
+        source,
+        input_path,
+        loader,
+    )
+}
+
+/// As [`assemble_sjasmplus_files`], targeting the ZX Spectrum Next (Z80N).
+///
+/// # Errors
+/// As [`assemble_sjasmplus_files`].
+pub fn assemble_sjasmplus_next_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(
+        &dialects::Sjasmplus { z80n: true },
+        source,
+        input_path,
+        loader,
+    )
+}
+
+/// Assemble a **multi-file** pasmo program (language-surface U3): as
+/// [`assemble_sjasmplus_files`], but pasmo's multi-file surface today is only
+/// the plain `incbin "file"` (probe-pinned — the reference has no
+/// offset/length tail; its `include` lands in U4), resolved through `loader`'s
+/// binary path. The single-source [`assemble_pasmo`] is unchanged and rejects
+/// an `incbin` with a pointer here.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (KTD2).
+pub fn assemble_pasmo_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Pasmo { z80n: false }, source, input_path, loader)
+}
+
+/// As [`assemble_pasmo_files`], targeting the ZX Spectrum Next (Z80N) — what
+/// `pasmonext` does.
+///
+/// # Errors
+/// As [`assemble_pasmo_files`].
+pub fn assemble_pasmonext_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Pasmo { z80n: true }, source, input_path, loader)
 }
 
 /// Assemble sjasmplus-syntax Z80 source targeting the ZX Spectrum Next (Z80N).

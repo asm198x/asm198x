@@ -20,9 +20,13 @@ use std::collections::BTreeMap;
 
 use isa::mos6809::{self, Kind};
 
+use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
 use super::mos6502::{self, BytePrec, fold_const, split_first_word};
+use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
+use crate::source::{SourceLoader, SourceMap};
+use crate::span::FileId;
 
 /// The lwasm 6809 dialect.
 pub(crate) struct Lwasm;
@@ -47,6 +51,18 @@ impl Dialect for Lwasm {
     fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
         Ok(Some(parse_program(source)?))
     }
+
+    /// The include-capable parse (language-surface U4): the interleaved,
+    /// environment-threaded walk over the source map, resolving `include`/
+    /// `use`/`includebin` lazily through the loader — see
+    /// [`parse_program_multi`].
+    fn parse_multi(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<Vec<Statement>, AsmError> {
+        crate::ast::lower(parse_program_multi(map, loader)?)
+    }
 }
 
 /// Parse 6809 source into the semantic [`Program`](crate::ast::Program). Each line
@@ -57,47 +73,296 @@ impl Dialect for Lwasm {
 /// [`Item::Encoded`](crate::ast::Item::Encoded) — the formatter re-emits it from
 /// the node's source, so it round-trips byte-identical (the computed-operand path
 /// U1 axis 2 proved, now exercised on production code).
-pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
-    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
-    let mut nodes = Vec::new();
-    let mut env: BTreeMap<String, i64> = BTreeMap::new();
-    let mut pending_leading: Vec<Comment> = Vec::new();
-
+/// An `include`/`use`/`includebin` becomes an **unresolved**
+/// [`Item::Include`](crate::ast::Item) / [`Item::Incbin`](crate::ast::Item) —
+/// the target is never opened, so `--fmt` renders the directive verbatim and
+/// works with a missing target (U4, KTD1). Lazy resolution is
+/// [`parse_program_multi`]'s.
+pub(crate) fn parse_program(source: &str) -> Result<Program, AsmError> {
+    let mut w = Walker::new();
     for (i, raw) in source.lines().enumerate() {
-        let line = i + 1;
+        if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
+            w.nodes.push(ca65_flat::unresolved_node(d));
+        }
+    }
+    w.flush_trailing(source.lines().count() as u32);
+    Ok(Program { nodes: w.nodes })
+}
+
+/// Parse a multi-file lwasm program (language-surface U4, KTD1): the
+/// **interleaved, environment-threaded walk**. The root (`FileId(0)` in
+/// `map`) parses line by line with the environment accumulated so far; when
+/// the walk reaches an `include`/`use` live, the target loads through
+/// `loader` (anchored at the **requesting file's own directory**, then the
+/// `-I` dirs — lwasm 4.24's probe-pinned order: no cwd, no root fallback),
+/// its lines parse with the same environment, and an `equ` it defined feeds
+/// the includer's later direct-vs-extended selection.
+///
+/// # Errors
+/// Any per-line parse failure (stamped with the file it occurred in), a
+/// missing target, an include cycle, a bad `includebin` window, or the depth
+/// backstop — all at the directive's span.
+pub(crate) fn parse_program_multi(
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+) -> Result<Program, AsmError> {
+    let mut w = Walker::new();
+    let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
+    let mut stack = vec![FileId(0)];
+    ca65_flat::walk_file(
+        &mut w,
+        &root,
+        FileId(0),
+        map,
+        loader,
+        &mut stack,
+        &SEMANTICS,
+    )?;
+    Ok(Program { nodes: w.nodes })
+}
+
+/// lwasm's probe-pinned multi-file semantics: requester-directory resolution
+/// (then `-I`; no ancestor hops — a root-directory copy is *not* found from
+/// inside a subdirectory include) and the negative-offset-from-EOF
+/// `includebin` window.
+const SEMANTICS: ca65_flat::WalkSemantics = ca65_flat::WalkSemantics {
+    resolution: ca65_flat::Resolution::Requester,
+    window: slice_includebin,
+    include_default_ext: None,
+};
+
+/// Apply lwasm's `includebin` window to the loaded asset — probe-pinned
+/// (lwasm 4.24): a **negative offset counts back from EOF** (`-4` = the last
+/// four bytes; past the start is "Start value out of range"); offset at EOF
+/// or length 0 are legal and empty; an offset past EOF is an error; a
+/// negative length or a length past the remaining bytes is "Length value out
+/// of range". `Err` carries the message body; the driver wraps it with the
+/// request name and the directive's span.
+fn slice_includebin(
+    data: &[u8],
+    offset: Option<i64>,
+    size: Option<i64>,
+) -> Result<Vec<u8>, String> {
+    let len = data.len() as i64;
+    let off = match offset.unwrap_or(0) {
+        o if o < 0 => len + o,
+        o => o,
+    };
+    if !(0..=len).contains(&off) {
+        return Err(format!(
+            "start value {} is out of range for the {len}-byte file",
+            offset.unwrap_or(0)
+        ));
+    }
+    let remaining = len - off;
+    let take = size.unwrap_or(remaining);
+    if !(0..=remaining).contains(&take) {
+        return Err(format!(
+            "length value {take} is out of range ({remaining} byte(s) after the start)"
+        ));
+    }
+    Ok(data[off as usize..(off + take) as usize].to_vec())
+}
+
+/// The per-line parse walk shared by [`parse_program`] (single source) and
+/// [`parse_program_multi`] (the include-capable walk). The environment — the
+/// `equ` constants driving direct-vs-extended selection, and pending comment
+/// trivia — lives here, so in the multi-file walk it threads *through*
+/// include boundaries in both directions (KTD1, probe-pinned).
+struct Walker {
+    /// `equ` bindings, consulted for the parse-time direct/extended choice
+    /// and `includebin` argument folding.
+    env: BTreeMap<String, i64>,
+    /// Own-line comments seen since the last node, attached as leading trivia
+    /// to the next one. Comments never reach the encoder, so bytes are
+    /// unchanged.
+    pending_leading: Vec<Comment>,
+    nodes: Vec<Node>,
+}
+
+impl Walker {
+    fn new() -> Self {
+        Self {
+            env: BTreeMap::new(),
+            pending_leading: Vec::new(),
+            nodes: Vec::new(),
+        }
+    }
+
+    /// Flush comments after the last node (a trailing block or comment-only
+    /// file) as a label-less, op-less node so the formatter keeps them.
+    fn flush_trailing(&mut self, last_line: u32) {
+        if !self.pending_leading.is_empty() {
+            self.nodes.push(Node {
+                operand_span: None,
+                label: None,
+                item: None,
+                source: String::new(),
+                span: Span::at(last_line, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing: None,
+                },
+            });
+        }
+    }
+
+    /// Recognise a walk-handled `include`/`use`/`includebin` operation
+    /// (keywords are case-insensitive) and parse its arguments with the live
+    /// environment. lwasm's grammar is looser than the quoted-only dialects
+    /// (probe-pinned): the file name may be quoted **or bare** (a bare name
+    /// ends at whitespace — or at a comma for `includebin`), and text after a
+    /// quoted name is the Motorola comment field, ignored. `includebin`'s
+    /// `,offset[,length]` fold against the constants known so far (a forward
+    /// reference errors — lwasm itself misfolds one to an out-of-range 0).
+    fn walk_directive(&self, rest: &str, line: usize) -> Result<Option<WalkDirective>, AsmError> {
+        let (word, args) = split_first_word(rest);
+        let m = word.to_ascii_lowercase();
+        match m.as_str() {
+            "include" | "use" => {
+                let (request, _) = file_name(args, line, &m)?;
+                Ok(Some(WalkDirective::Include { request }))
+            }
+            "includebin" => {
+                let (request, tail) = file_name(args, line, &m)?;
+                let tail = tail.trim();
+                let (offset, size) = if let Some(list) = tail.strip_prefix(',') {
+                    let pieces = mos6502::split_top_level(list, ',');
+                    if pieces.len() > 2 {
+                        return Err(AsmError::new(
+                            line,
+                            "`includebin` takes at most a file name, an offset, and a length",
+                        ));
+                    }
+                    let fold = |what: &str, piece: &str| -> Result<i64, AsmError> {
+                        fold_const(&value(piece.trim(), line)?, &self.env, line).map_err(|e| {
+                            AsmError::new(
+                                line,
+                                format!(
+                                    "`includebin` {what} must be a constant expression: {}",
+                                    e.message
+                                ),
+                            )
+                        })
+                    };
+                    let offset = fold("offset", pieces[0])?;
+                    let size = pieces.get(1).map(|p| fold("length", p)).transpose()?;
+                    (Some(offset), size)
+                } else {
+                    (None, None)
+                };
+                Ok(Some(WalkDirective::Incbin {
+                    request,
+                    offset,
+                    size,
+                }))
+            }
+            _ => Ok(None),
+        }
+    }
+}
+
+/// The file-name operand of an lwasm `include`/`use`/`includebin`: a quoted
+/// string (the rest of the line after the closing quote is returned for the
+/// caller — `includebin` args, else the comment field) or a bare name ending
+/// at whitespace or a comma (probe-pinned: lwasm accepts both spellings).
+fn file_name<'a>(
+    args: &'a str,
+    line: usize,
+    directive: &str,
+) -> Result<(String, &'a str), AsmError> {
+    let t = args.trim_start();
+    if let Some(inner) = t.strip_prefix('"') {
+        let end = inner
+            .find('"')
+            .ok_or_else(|| AsmError::new(line, format!("unterminated `{directive}` file name")))?;
+        let name = &inner[..end];
+        if name.is_empty() {
+            return Err(AsmError::new(
+                line,
+                format!("`{directive}` needs a file name"),
+            ));
+        }
+        return Ok((name.to_string(), &inner[end + 1..]));
+    }
+    let end = t
+        .find(|c: char| c.is_whitespace() || c == ',')
+        .unwrap_or(t.len());
+    let name = &t[..end];
+    if name.is_empty() {
+        return Err(AsmError::new(
+            line,
+            format!("`{directive}` needs a file name"),
+        ));
+    }
+    Ok((name.to_string(), &t[end..]))
+}
+
+impl FlatWalk for Walker {
+    fn walk_line(
+        &mut self,
+        raw: &str,
+        line: usize,
+        file: FileId,
+    ) -> Result<Option<DirectiveLine>, AsmError> {
         let (code, comment) = split_comment(raw);
         if code.trim().is_empty() {
             if let Some(text) = comment {
-                pending_leading.push(Comment {
+                self.pending_leading.push(Comment {
                     text: text.to_string(),
-                    span: Span::at(line as u32, 1),
+                    span: Span::in_file(file, line as u32, 1),
                 });
             }
-            continue;
+            return Ok(None);
         }
         let trailing = comment.map(|text| Comment {
             text: text.to_string(),
-            span: Span::at(line as u32, (code.len() + 1) as u32),
+            span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
         });
 
         let (label, rest) = split_label(code);
+        // `include`/`use`/`includebin` are walk-handled, not directives: the
+        // target must not be opened here (KTD1 — `--fmt` succeeds with a
+        // missing target), so hand them back for the driver to resolve (or
+        // keep unresolved, in the single-source parse). A label on the line
+        // binds at the include point / payload start (probe-pinned).
+        if let Some(kind) = self.walk_directive(rest, line)? {
+            return Ok(Some(DirectiveLine {
+                kind,
+                label: label.map(|name| Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }),
+                source: rest.trim().to_string(),
+                span: Span::in_file(file, line as u32, 1),
+                operand_span: ca65_flat::directive_operand_span(raw, rest, line, file),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing,
+                },
+            }));
+        }
         let op = if rest.is_empty() {
             None
         } else {
-            parse_op(rest, &env, line)?
+            parse_op(rest, &self.env, line)?
         };
         // Bind an `equ` value into the parse-time env so a later direct/extended
         // choice can fold it (mirrors the engine's pass-1 `equ`).
         if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
-            && let Ok(v) = fold_const(e, &env, line)
+            && let Ok(v) = fold_const(e, &self.env, line)
         {
-            env.insert(name.clone(), v);
+            self.env.insert(name.clone(), v);
         }
         if label.is_none() && op.is_none() {
-            continue;
+            return Ok(None);
         }
-        nodes.push(Node {
-            operand_span: crate::ast::operand_span(raw, rest, line as u32),
+        self.nodes.push(Node {
+            operand_span: crate::ast::operand_span(raw, rest, line as u32).map(|mut s| {
+                s.file = file;
+                s
+            }),
             label: label.map(|name| Symbol {
                 qualified: name.clone(),
                 scope: Scope::Global,
@@ -105,29 +370,18 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
             }),
             item: op.map(crate::ast::item_from_operation),
             source: rest.trim().to_string(),
-            span: Span::at(line as u32, 1),
+            span: Span::in_file(file, line as u32, 1),
             trivia: Trivia {
-                leading: std::mem::take(&mut pending_leading),
+                leading: std::mem::take(&mut self.pending_leading),
                 trailing,
             },
         });
+        Ok(None)
     }
 
-    if !pending_leading.is_empty() {
-        let line = source.lines().count() as u32;
-        nodes.push(Node {
-            operand_span: None,
-            label: None,
-            item: None,
-            source: String::new(),
-            span: Span::at(line, 1),
-            trivia: Trivia {
-                leading: pending_leading,
-                trailing: None,
-            },
-        });
+    fn push_node(&mut self, node: Node) {
+        self.nodes.push(node);
     }
-    Ok(Program { nodes })
 }
 
 /// Split a line into its code and its comment (delimiter kept, trailing

@@ -212,23 +212,28 @@ pub(crate) enum Item {
         fill: u8,
     },
     /// A conditional-assembly block (ACME `!if`/`!ifdef`/`!ifndef` … `{ … }` …
-    /// `else { … }`), kept as **tree structure** so the formatter reflects the
-    /// block shape and idea 4's evaluator can prune branches. `head` is the
-    /// verbatim directive + condition (`!if DEBUG = 1`, `!ifndef FOO`);
-    /// `then_body`/`else_body` are the nested nodes; `inline` records that the
-    /// source wrote the whole block on one line (the idiomatic
-    /// `!ifndef X { X = 0 }` guard), which the formatter preserves.
+    /// `else { … }`, or a keyword dialect's `IF`/`IFDEF`/`IFNDEF` … `ELSE` …
+    /// `ENDIF` — sjasmplus is the first, language-surface U8), kept as **tree
+    /// structure** so the formatter reflects the block shape and idea 4's
+    /// evaluator can prune branches. `head` is the verbatim directive +
+    /// condition (`!if DEBUG = 1`, `IFNDEF FOO`); `then_body`/`else_body` are
+    /// the nested nodes; `style` selects the emit rendering (braces vs
+    /// keyword delimiters); `inline` records that the source wrote the whole
+    /// block on one line (ACME's idiomatic `!ifndef X { X = 0 }` guard),
+    /// which the formatter preserves — keyword dialects never set it.
     ///
-    /// ACME assembles by **evaluating** this tree (`dialects::acme::evaluate`
-    /// prunes the untaken branch and threads `env`), not through the generic
-    /// [`lower`] — so `lower` rejects a conditional. No dialect routes a
-    /// conditional through `lower`, so the rejection never fires; it guards
-    /// against a future one doing so by mistake.
+    /// Conditional dialects assemble by **evaluating** this tree (the shared
+    /// [`evaluate`] walk over a dialect [`CondEval`] prunes the untaken branch
+    /// and threads the environment), not through the generic [`lower`] — so
+    /// `lower` rejects a conditional. No dialect routes a conditional through
+    /// `lower`, so the rejection never fires; it guards against a future one
+    /// doing so by mistake.
     Conditional {
         head: String,
         then_body: Vec<Node>,
         else_body: Option<Vec<Node>>,
         inline: bool,
+        style: CondStyle,
     },
     /// A dialect-family-owned statement for a multi-pass CISC dialect (see
     /// [`NativeItem`]). The owning dialect's assembler reads it back; the shared
@@ -236,6 +241,33 @@ pub(crate) enum Item {
     /// only [`NativeItem::inline_label`]; [`lower`] rejects it — a native item is
     /// assembled by its dialect, never lowered to the engine).
     Native(Box<dyn NativeItem>),
+    /// An `INCLUDE "file"` directive (language-surface U2, KTD1): the request
+    /// as written, **unresolved** — the single-source parse never opens the
+    /// target, so `--fmt` renders the directive verbatim from [`Node::source`]
+    /// and succeeds when the target is missing. The include-capable walk
+    /// (`dialects::z80::parse_program_multi`) resolves includes lazily instead
+    /// of building this item; [`lower`] rejects it, because the single-source
+    /// API has no loader to resolve with.
+    Include {
+        request: String,
+    },
+    /// An `INCBIN "file"[,offset[,length]]` directive (language-surface U3,
+    /// KTD1): the request as written, **unresolved** — like
+    /// [`Include`](Self::Include), the single-source parse never opens the
+    /// asset, so `--fmt` renders the directive verbatim from [`Node::source`]
+    /// and succeeds when the asset is missing. The include-capable walk
+    /// resolves it lazily into an [`Item::Binary`] payload instead of building
+    /// this item; [`lower`] rejects it (no loader on the single-source API).
+    Incbin {
+        request: String,
+    },
+    /// A **resolved** binary payload (the multi-file walk's lowering of an
+    /// incbin, language-surface U3): raw asset bytes at the directive's
+    /// location, carried whole — not one `Expr` per byte — so a 32KB asset
+    /// stays one allocation and never runs per-byte source-value policy. Lowers
+    /// to [`Operation::Binary`]. Binary data mints no `FileId` (KTD8): the
+    /// node's span is the *directive's*, and that is where diagnostics point.
+    Binary(Vec<u8>),
 }
 
 /// A source line reduced to an optional (scoped) label and an optional
@@ -299,6 +331,19 @@ pub(crate) fn token_span(raw: &str, token: &str, line: u32) -> Option<Span> {
 #[derive(Default)]
 pub(crate) struct Program {
     pub(crate) nodes: Vec<Node>,
+}
+
+/// How a conditional block is rendered back to source by [`emit`] — the one
+/// per-style divergence the shared tree carries (the adoption recipe's step 4,
+/// `decisions/conditional-assembly-framework.md`). Parsing and evaluation are
+/// style-agnostic; only the delimiters differ.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum CondStyle {
+    /// ACME's brace form: `!if … {` / `} else {` / `}` at column 0.
+    Brace,
+    /// The keyword form (`IF …` / `ELSE` / `ENDIF` as indented directives) —
+    /// sjasmplus first (U8); `ELSE`/`ENDIF` follow the head keyword's case.
+    Keyword,
 }
 
 // ---------------------------------------------------------------------------
@@ -380,8 +425,35 @@ pub(crate) fn lower(program: Program) -> Result<Vec<Statement>, AsmError> {
         .nodes
         .into_iter()
         .map(|node| {
+            // An include item cannot lower: it needs a loader, which only the
+            // multi-file walk has (U2, KTD1). The single-source entry points
+            // keep meaning "one file, no includes" — with a pointer, not a
+            // silent skip or a bogus `unknown instruction`.
+            if let Some(Item::Include { request }) = &node.item {
+                return Err(AsmError::at(
+                    node.span.clone(),
+                    format!(
+                        "cannot resolve `include \"{request}\"` here — the single-source \
+                         API assembles one file; use the multi-file entry point \
+                         (the CLI resolves includes automatically)"
+                    ),
+                ));
+            }
+            // An incbin item cannot lower either: loading the asset needs the
+            // loader seam, which only the multi-file walk carries (U3, KTD8).
+            if let Some(Item::Incbin { request }) = &node.item {
+                return Err(AsmError::at(
+                    node.span.clone(),
+                    format!(
+                        "cannot resolve `incbin \"{request}\"` here — the single-source \
+                         API assembles one file; use the multi-file entry point \
+                         (the CLI resolves binary inclusions automatically)"
+                    ),
+                ));
+            }
             Ok(Statement {
                 line: node.span.line as usize,
+                file: node.span.file,
                 label: node.label.map(|s| s.qualified),
                 op: node.item.map(lower_item).transpose()?,
                 operand_span: node.operand_span,
@@ -445,7 +517,104 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
                 "internal error: a native item is assembled by its dialect, not lowered",
             ));
         }
+        // `lower` rejects an include/incbin before reaching here (it needs the
+        // node's span for the diagnostic); these arms guard a direct
+        // `lower_item` call.
+        Item::Include { request } => {
+            return Err(AsmError::new(
+                0,
+                format!("internal error: `include \"{request}\"` reached item lowering"),
+            ));
+        }
+        Item::Incbin { request } => {
+            return Err(AsmError::new(
+                0,
+                format!("internal error: `incbin \"{request}\"` reached item lowering"),
+            ));
+        }
+        Item::Binary(payload) => Operation::Binary(payload),
     })
+}
+
+// ---------------------------------------------------------------------------
+// Local-label qualification — the shared mangle (language-surface U7, R4)
+// ---------------------------------------------------------------------------
+//
+// **Consolidation audit (U7).** Four dialect families carried their own local
+// qualification before this helper existed:
+//
+// - **z80 (pasmo/sjasmplus)** and **rgbasm** rewrote leading-`.` references in
+//   engine [`Operation`]s by prefixing the current scope string — *identical*
+//   code over identical types, differing only in an `Entry` arm rgbasm never
+//   reaches (it has no `end`-style directive, so `Operation::Entry` is
+//   unconstructible there). Consolidated **here**; both call [`qualify_locals`].
+// - **acme** (U7's `!zone` activation) uses the same leading-`.` prefix rule
+//   with a zone-derived scope string, applied at its single expression entry
+//   point — it shares [`qualify_expr`].
+// - **vasm (68000)** keeps its own copy: it rewrites its *native* multipass
+//   `Stmt`/`Opnd`/`Expr` types (the `Item::Native` payload), not the engine's
+//   `Operation`/`Expr`, so this helper cannot apply without converting types
+//   that deliberately stay family-owned.
+// - **ca65** keeps its cheap-label machinery: `@cheap` names resolve at parse
+//   into `global\u{1}cheap` keys — a different marker character, a different
+//   key shape (collision-proof separator), and parse-time rather than
+//   post-parse-rewrite timing. Not the same semantics; not consolidated
+//   (`decisions/syntax-stance.md`: no premature generalisation).
+//
+// The *when and with what scope* stays per-dialect — that is where the real
+// divergence lives (pasmo doesn't scope at all; sjasmplus/rgbasm scope under
+// the last global; acme scopes under the current `!zone`, and a global label
+// does NOT delimit — all probe-pinned).
+
+/// Rewrite every bare local reference (a leading-`.` symbol) in an operation,
+/// qualifying it with the current scope string `scope` — so `jr .loop` under
+/// scope `start` resolves to `start.loop`. A non-local symbol, or an
+/// already-qualified `global.local`, is left untouched.
+pub(crate) fn qualify_locals(op: Operation, scope: &str) -> Operation {
+    match op {
+        Operation::Org(e) => Operation::Org(qualify_expr(e, scope)),
+        Operation::Equ(e) => Operation::Equ(qualify_expr(e, scope)),
+        Operation::Bytes(v) => {
+            Operation::Bytes(v.into_iter().map(|e| qualify_expr(e, scope)).collect())
+        }
+        Operation::Words(v) => {
+            Operation::Words(v.into_iter().map(|e| qualify_expr(e, scope)).collect())
+        }
+        Operation::Instruction {
+            mnemonic,
+            mode,
+            operands,
+        } => Operation::Instruction {
+            mnemonic,
+            mode,
+            operands: operands
+                .into_iter()
+                .map(|e| qualify_expr(e, scope))
+                .collect(),
+        },
+        Operation::Entry(e) => Operation::Entry(qualify_expr(e, scope)),
+        // No sub-expressions to qualify: pre-encoded pieces, resolved binary
+        // payloads, and the constant-argument align.
+        other @ (Operation::Encoded(_) | Operation::Binary(_) | Operation::Align { .. }) => other,
+    }
+}
+
+/// The expression half of [`qualify_locals`]: prefix every leading-`.` symbol
+/// with `scope`, recursing through the expression tree.
+pub(crate) fn qualify_expr(e: Expr, scope: &str) -> Expr {
+    match e {
+        Expr::Sym(s) if s.starts_with('.') => Expr::Sym(format!("{scope}{s}")),
+        Expr::Sym(_) | Expr::Num(_) | Expr::Pc => e,
+        Expr::Lo(b) => Expr::Lo(Box::new(qualify_expr(*b, scope))),
+        Expr::Hi(b) => Expr::Hi(Box::new(qualify_expr(*b, scope))),
+        Expr::Bank(b) => Expr::Bank(Box::new(qualify_expr(*b, scope))),
+        Expr::Neg(b) => Expr::Neg(Box::new(qualify_expr(*b, scope))),
+        Expr::Bin(op, l, r) => Expr::Bin(
+            op,
+            Box::new(qualify_expr(*l, scope)),
+            Box::new(qualify_expr(*r, scope)),
+        ),
+    }
 }
 
 /// Build an [`Item`] from any [`Operation`] a dialect produced — total over the
@@ -468,6 +637,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         Operation::Words(v) => Item::Words(v.into_iter().map(Operand::expr).collect()),
         Operation::Entry(e) => Item::Entry(Operand::expr(e)),
         Operation::Encoded(pieces) => Item::Encoded(pieces),
+        Operation::Binary(payload) => Item::Binary(payload),
         Operation::Align {
             andmask,
             value,
@@ -531,24 +701,35 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
                 out.push_str(&c.text);
             }
         };
-        // A conditional block renders its delimiters at column 0 and recurses
+        // A conditional block renders its style's delimiters and recurses
         // into its bodies (the idea-4 tree shape).
         if let Some(Item::Conditional {
             head,
             then_body,
             else_body,
             inline,
+            style,
         }) = &node.item
         {
-            emit_conditional(
-                node,
-                head,
-                then_body,
-                else_body.as_deref(),
-                *inline,
-                out,
-                equ_label_colon,
-            );
+            match style {
+                CondStyle::Brace => emit_conditional(
+                    node,
+                    head,
+                    then_body,
+                    else_body.as_deref(),
+                    *inline,
+                    out,
+                    equ_label_colon,
+                ),
+                CondStyle::Keyword => emit_keyword_conditional(
+                    node,
+                    head,
+                    then_body,
+                    else_body.as_deref(),
+                    out,
+                    equ_label_colon,
+                ),
+            }
             continue;
         }
         let label = node.label.as_ref().map(|s| s.name.as_str());
@@ -712,6 +893,43 @@ fn emit_conditional(
         emit_nodes(else_body, out, equ_label_colon, BODY);
     }
     out.push_str("}\n");
+}
+
+/// Emit one **keyword-style** conditional block (the recipe's step 4, built
+/// with its first consumer — sjasmplus, U8): the head (`IF cond`, `IFDEF X`)
+/// and the synthesized `ELSE`/`ENDIF` delimiters render as indented
+/// directives, each body with the normal layout rules (labels at column 0,
+/// operations indented — bodies are not deeper-indented, matching the brace
+/// style). `ELSE`/`ENDIF` follow the head keyword's case, so an all-lowercase
+/// source stays all-lowercase (the reference accepts only all-lower or
+/// all-upper spellings, probe-pinned).
+fn emit_keyword_conditional(
+    node: &Node,
+    head: &str,
+    then_body: &[Node],
+    else_body: Option<&[Node]>,
+    out: &mut String,
+    equ_label_colon: bool,
+) {
+    const INDENT: &str = "        ";
+    let upper = head.chars().next().is_some_and(|c| c.is_ascii_uppercase());
+    out.push_str(INDENT);
+    out.push_str(head);
+    if let Some(c) = &node.trivia.trailing {
+        out.push_str("   ");
+        out.push_str(&c.text);
+    }
+    out.push('\n');
+    emit_nodes(then_body, out, equ_label_colon, INDENT);
+    if let Some(else_body) = else_body {
+        out.push_str(INDENT);
+        out.push_str(if upper { "ELSE" } else { "else" });
+        out.push('\n');
+        emit_nodes(else_body, out, equ_label_colon, INDENT);
+    }
+    out.push_str(INDENT);
+    out.push_str(if upper { "ENDIF" } else { "endif" });
+    out.push('\n');
 }
 
 /// Render a single node inline (`X = 0`, `nop`) for the one-line guard idiom.
@@ -971,6 +1189,7 @@ second:
                 then_body: vec![body],
                 else_body: None,
                 inline: false,
+                style: CondStyle::Brace,
             }),
             source: String::new(),
             span: Span::at(1, 1),
@@ -1000,6 +1219,7 @@ second:
                 then_body: vec![guard_body],
                 else_body: None,
                 inline: true,
+                style: CondStyle::Brace,
             }),
             source: String::new(),
             span: Span::at(1, 1),
@@ -1021,8 +1241,84 @@ second:
             then_body: vec![],
             else_body: None,
             inline: false,
+            style: CondStyle::Brace,
         };
         assert!(lower_item(cond).is_err(), "formatter-only, not lowerable");
+    }
+
+    /// U8 (the recipe's step 4) — a keyword-style conditional renders `IF …` /
+    /// `ELSE` / `ENDIF` as indented directives, the delimiters following the
+    /// head keyword's case, with bodies laid out by the normal rules.
+    #[test]
+    fn keyword_conditional_emits_indented_delimiters() {
+        let then_node = Node {
+            operand_span: None,
+            label: None,
+            item: None,
+            source: "ld a,1".into(),
+            span: Span::at(2, 1),
+            trivia: Trivia::default(),
+        };
+        let else_node = Node {
+            operand_span: None,
+            label: None,
+            item: None,
+            source: "ld a,2".into(),
+            span: Span::at(4, 1),
+            trivia: Trivia::default(),
+        };
+        let cond = Node {
+            operand_span: None,
+            label: None,
+            item: Some(Item::Conditional {
+                head: "IF DEBUG = 1".into(),
+                then_body: vec![then_node],
+                else_body: Some(vec![else_node]),
+                inline: false,
+                style: CondStyle::Keyword,
+            }),
+            source: String::new(),
+            span: Span::at(1, 1),
+            trivia: Trivia::default(),
+        };
+        let out = emit(&Program { nodes: vec![cond] }, true);
+        assert_eq!(
+            out,
+            "        IF DEBUG = 1\n        ld a,1\n        ELSE\n        ld a,2\n        ENDIF\n"
+        );
+
+        // A lowercase head keeps lowercase delimiters.
+        let body = Node {
+            operand_span: None,
+            label: None,
+            item: None,
+            source: "nop".into(),
+            span: Span::at(2, 1),
+            trivia: Trivia::default(),
+        };
+        let lower_cond = Node {
+            operand_span: None,
+            label: None,
+            item: Some(Item::Conditional {
+                head: "ifdef FLAG".into(),
+                then_body: vec![body],
+                else_body: None,
+                inline: false,
+                style: CondStyle::Keyword,
+            }),
+            source: String::new(),
+            span: Span::at(1, 1),
+            trivia: Trivia::default(),
+        };
+        assert_eq!(
+            emit(
+                &Program {
+                    nodes: vec![lower_cond]
+                },
+                true
+            ),
+            "        ifdef FLAG\n        nop\n        endif\n"
+        );
     }
 
     /// A structured operand cannot lower to a fixed-slot value — it returns an
