@@ -81,6 +81,14 @@ pub struct AssemblyResult {
     /// can rely on across CPUs (R8).
     #[serde(default)]
     pub diagnostics: Vec<Diagnostic>,
+    /// The `FileId`→path table (language-surface KTD2): `files[i]` is the path
+    /// of `FileId(i)`, entry 0 the root input, one entry per canonical path in
+    /// allocation order — so every span in the payload resolves to a file.
+    /// Empty (and skipped) until the include-capable entry points (U2)
+    /// populate it, so a pre-multi-file payload is byte-identical and an older
+    /// payload without the field still loads.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub files: Vec<String>,
 }
 
 impl AssemblyResult {
@@ -97,6 +105,7 @@ impl AssemblyResult {
             warnings: Vec::new(),
             debug: DebugData::default(),
             diagnostics: Vec::new(),
+            files: Vec::new(),
         }
     }
 
@@ -124,8 +133,21 @@ impl From<Assembly> for AssemblyResult {
             warnings: a.warnings,
             debug: a.debug,
             diagnostics: Vec::new(),
+            files: Vec::new(),
         }
     }
+}
+
+/// Resolve a span's `path` from a file table (`files[i]` ⇔ `FileId(i)`, the
+/// [`AssemblyResult::files`] convention) — KTD2's failure-path leg: the bare
+/// diagnostic-array output carries no `files` table, so the span itself names
+/// its file. A `FileId` outside the table leaves the span unresolved rather
+/// than failing. U2's include-capable entry points stamp every serialized
+/// diagnostic through this before emitting it.
+#[must_use]
+pub fn resolve_span_path(mut span: Span, files: &[String]) -> Span {
+    span.path = files.get(span.file.0 as usize).cloned();
+    span
 }
 
 // ---------------------------------------------------------------------------

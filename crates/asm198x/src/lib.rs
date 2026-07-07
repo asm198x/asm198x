@@ -44,6 +44,12 @@ mod prg;
 #[cfg(test)]
 mod roundtrip_tests;
 mod sna;
+// The multi-file source model (language-surface U1): the loader seam
+// (filesystem + in-memory), the FileId-allocating source map, and the include
+// graph. Public as a module (not flattened into the crate root): consumers
+// reach `source::SourceMap` etc.; the include-capable assemble entry points
+// arrive in U2.
+pub mod source;
 // The shared source-provenance model (one Span across ast/engine/contract).
 mod span;
 
@@ -55,6 +61,7 @@ mod span;
 // internal flat builder that `AssemblyResult` wraps.
 pub use contract::{
     AssemblyResult, CONTRACT_VERSION, Code, Diagnostic, DiagnosticEnvelope, Fix, Severity,
+    resolve_span_path,
 };
 pub use engine::{AsmError, Assembly, DebugData, LineRec, Warning};
 pub use listing::{debug_info, render_listing, render_sym};

@@ -49,17 +49,34 @@ pub struct Span {
     /// Empty in v1; populated when idea 4's macros land, without a type change.
     #[serde(default)]
     pub expansion_frames: Vec<ExpansionFrame>,
+    /// The resolved path of `file`, stamped from the result's file table for
+    /// serialization (KTD2's failure-path leg): a JSON consumer of the bare
+    /// diagnostic-array failure output can name the file without the
+    /// success-only `AssemblyResult::files` table. `None` — and skipped — until
+    /// an include-capable entry point resolves it, so pre-multi-file payloads
+    /// and fixtures are unchanged.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub path: Option<String>,
 }
 
 impl Span {
-    /// A single-file v1 span with no expansion frames.
+    /// A root-file (`FileId(0)`) span with no expansion frames.
     #[must_use]
     pub fn at(line: u32, col: u32) -> Self {
+        Span::in_file(FileId(0), line, col)
+    }
+
+    /// A span in a specific file — the include-chain constructor alongside
+    /// [`Span::at`]. The path stays unresolved until stamped from a file table
+    /// ([`crate::contract::resolve_span_path`]).
+    #[must_use]
+    pub fn in_file(file: FileId, line: u32, col: u32) -> Self {
         Span {
-            file: FileId(0),
+            file,
             line,
             col,
             expansion_frames: Vec::new(),
+            path: None,
         }
     }
 }

@@ -69,6 +69,17 @@ them (a secondary trigger, per R7):
   paused sibling; freezing it before that sibling exercises it would freeze
   against an unexercised model. (Mirrors the R4/R5 split-freeze reasoning.)
 
+## Dated notes (additive changes while draft)
+
+- **2026-07-07 — multi-file source model (language-surface U1).** Two additive
+  fields, both `#[serde(default)]` and skipped when empty/absent so existing
+  payloads stay byte-identical: `AssemblyResult.files` (the FileId→path table,
+  index = `FileId`, entry 0 = the root input) and `Span.path` (a resolved-path
+  string on serialized spans, so a JSON consumer of the bare diagnostic-array
+  *failure* output can resolve a file without the success-only table). No
+  version bump — additive per the mechanism above. Plan:
+  `docs/plans/2026-07-04-001-feat-language-surface-plan.md` (KTD2).
+
 ## Drift triggers
 
 Re-consult this record if a change would:

@@ -302,3 +302,91 @@ fn acme_inline_conditional_body_reports_file_accurate_column() {
         "`col` is measured from the line start, not the `{{`"
     );
 }
+
+// --- language-surface U1: the FileId→path table (KTD2) + the span path leg ---
+
+/// A populated `files` table (index ⇔ `FileId`, entry 0 = the root input)
+/// serialises into the JSON payload and round-trips to an identical value.
+#[test]
+fn files_table_serialises_and_round_trips() {
+    let mut result: AssemblyResult =
+        asm198x::assemble_acme("* = $0400\n    nop\n").expect("acme assembles");
+    result.files = vec!["main.s".to_string(), "inc/defs.inc".to_string()];
+
+    let value: serde_json::Value = serde_json::to_value(&result).expect("to value");
+    assert_eq!(
+        value.get("files"),
+        Some(&serde_json::json!(["main.s", "inc/defs.inc"])),
+        "the file table is present, in FileId order"
+    );
+
+    let restored: AssemblyResult = serde_json::from_value(value).expect("from value");
+    assert_eq!(result, restored, "files round-trip is identity");
+}
+
+/// An older payload with no `files` (a pre-multi-file producer's) still loads —
+/// the field is additive, defaulting to empty (the U5 version-default pattern).
+#[test]
+fn payload_without_files_still_deserialises() {
+    let result: AssemblyResult =
+        asm198x::assemble_acme("* = $0400\n    nop\n").expect("acme assembles");
+    let mut value: serde_json::Value = serde_json::to_value(&result).expect("to value");
+    value
+        .as_object_mut()
+        .expect("result is a JSON object")
+        .remove("files");
+    let restored: AssemblyResult =
+        serde_json::from_value(value).expect("a files-less payload still loads");
+    assert!(
+        restored.files.is_empty(),
+        "absent `files` defaults to empty"
+    );
+}
+
+/// A span serialises without the resolved-path field when unresolved (skipped
+/// when `None`, so existing fixtures stay valid), carries it once resolved from
+/// a file table, and round-trips identically either way (KTD2's failure-path
+/// leg: a bare Diagnostic-array consumer can name the file with no table).
+#[test]
+fn span_json_round_trips_with_and_without_path() {
+    use asm198x::{FileId, Span};
+
+    let bare = Span::in_file(FileId(1), 12, 8);
+    let json = serde_json::to_string(&bare).expect("serialise bare span");
+    assert!(
+        !json.contains("\"path\""),
+        "an unresolved span omits `path`: {json}"
+    );
+    let back: Span = serde_json::from_str(&json).expect("deserialise bare span");
+    assert_eq!(bare, back, "bare round-trip is identity");
+
+    let files = vec!["main.s".to_string(), "that-file.inc".to_string()];
+    let resolved = asm198x::resolve_span_path(bare, &files);
+    assert_eq!(
+        resolved.path.as_deref(),
+        Some("that-file.inc"),
+        "the helper resolves the span's file from the table"
+    );
+    let json = serde_json::to_string(&resolved).expect("serialise resolved span");
+    assert!(json.contains("that-file.inc"), "path serialises: {json}");
+    let back: Span = serde_json::from_str(&json).expect("deserialise resolved span");
+    assert_eq!(resolved, back, "resolved round-trip is identity");
+
+    // An older payload (no `path` at all) still loads, path defaulting to None.
+    let mut value: serde_json::Value = serde_json::to_value(&resolved).expect("to value");
+    value
+        .as_object_mut()
+        .expect("span is a JSON object")
+        .remove("path");
+    let older: Span = serde_json::from_value(value).expect("a path-less span still loads");
+    assert_eq!(older.path, None, "absent `path` defaults to None");
+}
+
+/// A `FileId` outside the table leaves the span unresolved rather than
+/// panicking — the helper is total over malformed input.
+#[test]
+fn resolve_span_path_out_of_table_stays_unresolved() {
+    use asm198x::{FileId, Span};
+    let span = asm198x::resolve_span_path(Span::in_file(FileId(9), 1, 1), &["main.s".to_string()]);
+    assert_eq!(span.path, None);
+}

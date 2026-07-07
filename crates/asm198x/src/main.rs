@@ -255,6 +255,10 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut debug: ArtifactPath = None;
     let mut sym: ArtifactPath = None;
     let mut listing: ArtifactPath = None;
+    // Repeatable `-I <dir>` include-search directories, in command-line order —
+    // the order is the search order (language-surface U1/KTD8). The
+    // include-capable entry points (U2) feed them to the filesystem loader.
+    let mut include_dirs: Vec<PathBuf> = Vec::new();
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -291,6 +295,11 @@ fn run(args: &[String]) -> Result<String, String> {
                 i += 1;
                 target = Some(args.get(i).ok_or("`--target` needs a value")?);
             }
+            "-I" => {
+                i += 1;
+                let dir = args.get(i).ok_or("`-I` needs a directory")?;
+                include_dirs.push(PathBuf::from(dir));
+            }
             "--disasm" | "--disassemble" => disassemble = true,
             "--fmt" | "--format" => format = true,
             "--exe" | "--hunkexe" => exe = true,
@@ -313,6 +322,10 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     let input = input.ok_or("no input file given (try --help)")?;
+    // The FileId→path table for human error rendering: single-file today, so
+    // the root input is the whole table. U2's include-capable paths return the
+    // real multi-file table (with `include_dirs` wired into the loader).
+    let files = [input.to_string()];
 
     // The debug artifacts render an *assembly's* captured record; there is no
     // record to render under `--fmt` or `--disasm`, so the combination is an
@@ -440,7 +453,7 @@ fn run(args: &[String]) -> Result<String, String> {
             // Every dialect now routes through the semantic AST, so `--fmt`
             // covers them all — no unsupported-dialect fallback remains.
         }
-        .map_err(|e| format!("{input}: {e}"))?;
+        .map_err(|e| render_error(input, &files, &e))?;
         if let Some(path) = &output {
             std::fs::write(path, &formatted)
                 .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
@@ -473,12 +486,13 @@ fn run(args: &[String]) -> Result<String, String> {
         let debug_requested = debug.is_some() || sym.is_some();
         let (result, info, out_path) = if exe {
             let (image, info) = if debug_requested {
-                let (image, info) =
-                    asm198x::assemble_vasm_exe_debug(&source, input).map_err(|e| e.to_string())?;
+                let (image, info) = asm198x::assemble_vasm_exe_debug(&source, input)
+                    .map_err(|e| render_error(input, &files, &e))?;
                 (image, Some(info))
             } else {
                 (
-                    asm198x::assemble_vasm_exe(&source).map_err(|e| e.to_string())?,
+                    asm198x::assemble_vasm_exe(&source)
+                        .map_err(|e| render_error(input, &files, &e))?,
                     None,
                 )
             };
@@ -488,11 +502,12 @@ fn run(args: &[String]) -> Result<String, String> {
         } else {
             let (result, info) = if debug_requested {
                 let (result, info) = asm198x::assemble_vasm_warned_debug(&source, input)
-                    .map_err(|e| e.to_string())?;
+                    .map_err(|e| render_error(input, &files, &e))?;
                 (result, Some(info))
             } else {
                 (
-                    asm198x::assemble_vasm_warned(&source).map_err(|e| e.to_string())?,
+                    asm198x::assemble_vasm_warned(&source)
+                        .map_err(|e| render_error(input, &files, &e))?,
                     None,
                 )
             };
@@ -530,12 +545,12 @@ fn run(args: &[String]) -> Result<String, String> {
     // read out of layout (U4) — same bytes by construction.
     if let Assembler::Ca65 = assembler {
         let (rom, info) = if debug.is_some() || sym.is_some() {
-            let (rom, info) =
-                asm198x::assemble_ca65_debug(&source, input).map_err(|e| e.to_string())?;
+            let (rom, info) = asm198x::assemble_ca65_debug(&source, input)
+                .map_err(|e| render_error(input, &files, &e))?;
             (rom, Some(info))
         } else {
             (
-                asm198x::assemble_ca65(&source).map_err(|e| e.to_string())?,
+                asm198x::assemble_ca65(&source).map_err(|e| render_error(input, &files, &e))?,
                 None,
             )
         };
@@ -579,7 +594,9 @@ fn run(args: &[String]) -> Result<String, String> {
         return Err("`--prg` is only for the C64 dialect (acme)".into());
     }
 
-    let assembly = assembler.assemble(&source).map_err(|e| e.to_string())?;
+    let assembly = assembler
+        .assemble(&source)
+        .map_err(|e| render_error(input, &files, &e))?;
     for w in &assembly.warnings {
         eprintln!("asm198x: {input}: {w}");
     }
@@ -589,7 +606,7 @@ fn run(args: &[String]) -> Result<String, String> {
     let (summary, image_path) = if sna {
         // Only the Z80/Spectrum dialects carry an entry point; a missing
         // `end <addr>` fails here, before any file is written.
-        let image = asm198x::sna_48k(&assembly).map_err(|e| e.to_string())?;
+        let image = asm198x::sna_48k(&assembly).map_err(|e| render_error(input, &files, &e))?;
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("sna"));
         std::fs::write(&out_path, &image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
@@ -702,6 +719,39 @@ fn write_debug_artifacts(
     Ok(notes)
 }
 
+/// Render an assembly failure for humans. An error carrying a span whose file
+/// resolves in `files` (the FileId→path table, index ⇔ `FileId`) renders
+/// rustc-style — `file:line:col: error: message`, or `file:line: error:
+/// message` when the span is line-granular (col 0) — so a failure inside an
+/// included file names *that* file, not the root input. An error with no span
+/// (or an unresolvable file id) falls back to the pre-multi-file
+/// `input: <error>` shape.
+fn render_error(input: &str, files: &[String], e: &asm198x::AsmError) -> String {
+    let resolved = e
+        .span
+        .as_ref()
+        .and_then(|span| files.get(span.file.0 as usize).map(|file| (span, file)));
+    match resolved {
+        Some((span, file)) if span.col != 0 => {
+            format!("{file}:{}:{}: error: {}", span.line, span.col, e.message)
+        }
+        Some((span, file)) => format!("{file}:{}: error: {}", span.line, e.message),
+        None => format!("{input}: {e}"),
+    }
+}
+
+/// One rustc-style `included from <file>:<line>` note per include-graph hop,
+/// innermost first, each on its own line — appended to a rendered error so a
+/// failure deep in an include chain shows how it was reached. Empty for the
+/// root input (included from nowhere).
+#[allow(dead_code)] // rendered once U2's include-capable paths return a populated map
+fn render_include_notes(map: &asm198x::source::SourceMap, file: asm198x::FileId) -> String {
+    map.include_chain(file)
+        .iter()
+        .map(|(path, line)| format!("\nincluded from {path}:{line}"))
+        .collect()
+}
+
 /// Parse an address: `$hhhh`, `0xhhhh`, or decimal.
 fn parse_u16(value: &str) -> Result<u16, String> {
     let parsed = if let Some(hex) = value.strip_prefix('$').or_else(|| value.strip_prefix("0x")) {
@@ -714,9 +764,10 @@ fn parse_u16(value: &str) -> Result<u16, String> {
 
 fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
-     assemble:    asm198x [--dialect <name>] [--cpu <target>] <input> [-o <out.bin>]\n\
+     assemble:    asm198x [--dialect <name>] [--cpu <target>] [-I <dir>]... <input> [-o <out.bin>]\n\
      \x20            (add --message-format=json for a machine-readable result +\n\
-     \x20             diagnostics on stdout; --message-format=human is the default)\n\
+     \x20             diagnostics on stdout; --message-format=human is the default;\n\
+     \x20             -I adds an include-search directory, repeatable, in order)\n\
      snapshot:    asm198x --dialect pasmonext --sna <input> [-o <out.sna>]\n\
      \x20            (Spectrum Z80 only; needs `end <addr>` for the entry point)\n\
      C64 program: asm198x --dialect acme --prg <input> [-o <out.prg>]\n\
@@ -840,5 +891,85 @@ fn emit_json(
             println!("{json}");
             Err(String::new())
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use asm198x::source::{MemoryLoader, SourceMap};
+    use asm198x::{AsmError, FileId, Span};
+
+    /// A span in a non-root file renders that file's name from the table —
+    /// `that-file.inc:12:8: error: …` — never the root input's.
+    #[test]
+    fn render_error_names_the_included_file_not_the_input() {
+        let files = vec!["main.s".to_string(), "that-file.inc".to_string()];
+        let e = AsmError {
+            line: 12,
+            message: "value 300 does not fit in a byte".to_string(),
+            span: Some(Span::in_file(FileId(1), 12, 8)),
+        };
+        assert_eq!(
+            render_error("main.s", &files, &e),
+            "that-file.inc:12:8: error: value 300 does not fit in a byte"
+        );
+    }
+
+    /// A line-granular span (col 0) drops the column component rather than
+    /// printing a meaningless `:0`.
+    #[test]
+    fn render_error_omits_a_zero_column() {
+        let files = vec!["main.s".to_string()];
+        let e = AsmError {
+            line: 4,
+            message: "boom".to_string(),
+            span: Some(Span::in_file(FileId(0), 4, 0)),
+        };
+        assert_eq!(render_error("main.s", &files, &e), "main.s:4: error: boom");
+    }
+
+    /// No span (or a file id outside the table) falls back to the
+    /// pre-multi-file `input: <error>` shape.
+    #[test]
+    fn render_error_falls_back_without_a_resolvable_span() {
+        let files = vec!["main.s".to_string()];
+        let spanless = AsmError {
+            line: 2,
+            message: "no entry point".to_string(),
+            span: None,
+        };
+        assert_eq!(
+            render_error("main.s", &files, &spanless),
+            "main.s: line 2: no entry point"
+        );
+
+        let out_of_table = AsmError {
+            line: 3,
+            message: "boom".to_string(),
+            span: Some(Span::in_file(FileId(7), 3, 1)),
+        };
+        assert_eq!(
+            render_error("main.s", &files, &out_of_table),
+            "main.s: line 3: boom"
+        );
+    }
+
+    /// A synthetic include graph renders one `included from <file>:<line>`
+    /// note per hop, innermost first; the root renders none.
+    #[test]
+    fn include_notes_render_one_note_per_hop() {
+        let loader = MemoryLoader::new()
+            .text("a.inc", "        include \"b.inc\"\n")
+            .text("b.inc", "        nop\n");
+        let mut map = SourceMap::new("main.s", "        include \"a.inc\"\n");
+        let a = map.load(&loader, "a.inc", FileId(0), 3).expect("a loads");
+        let b = map.load(&loader, "b.inc", a, 5).expect("b loads");
+
+        assert_eq!(
+            render_include_notes(&map, b),
+            "\nincluded from a.inc:5\nincluded from main.s:3"
+        );
+        assert_eq!(render_include_notes(&map, FileId(0)), "");
     }
 }
