@@ -154,6 +154,7 @@ pub(crate) fn parse_program_multi(
 const SEMANTICS: ca65_flat::WalkSemantics = ca65_flat::WalkSemantics {
     resolution: ca65_flat::Resolution::Root,
     window: slice_incbin,
+    include_default_ext: None,
 };
 
 /// Apply rgbasm's `INCBIN` window to the loaded asset — probe-pinned (see the

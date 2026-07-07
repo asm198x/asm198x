@@ -175,36 +175,50 @@ impl Assembler {
         }
     }
 
-    fn assemble(self, source: &str) -> Result<asm198x::AssemblyResult, asm198x::AsmError> {
+    /// The multi-file library entry for an include-capable dialect — every
+    /// flat dialect assembles through its `assemble_*_files` entry (the U2–U4
+    /// rollout: the z80 family, acme, the ca65-flat family, rgbasm, lwasm,
+    /// and the twelve asl chips). Only the two non-flat paths — ca65's
+    /// assemble+link and vasm's multipass — sit outside the table; both are
+    /// handled by their own arms in `run`/`emit_json` before this is asked.
+    fn multi_entry(self) -> Option<MultiEntry> {
         match self {
-            Self::Acme => asm198x::assemble_acme(source),
-            Self::Lwasm => asm198x::assemble_lwasm(source),
-            Self::Ca65_816 => asm198x::assemble_ca65_816(source),
-            Self::Ca65Huc6280 => asm198x::assemble_ca65_huc6280(source),
-            Self::Rgbasm => asm198x::assemble_rgbasm(source),
-            Self::I8080 => asm198x::assemble_i8080(source),
-            Self::M6800 => asm198x::assemble_m6800(source),
-            Self::Cdp1802 => asm198x::assemble_1802(source),
-            Self::I8048 { romless: false } => asm198x::assemble_8048(source),
-            Self::I8048 { romless: true } => asm198x::assemble_8039(source),
-            Self::Scmp => asm198x::assemble_scmp(source),
-            Self::F8 => asm198x::assemble_f8(source),
-            Self::S2650 => asm198x::assemble_2650(source),
-            Self::Tms7000 => asm198x::assemble_tms7000(source),
-            Self::Pdp11 => asm198x::assemble_pdp11(source),
-            Self::Tms9900 => asm198x::assemble_tms9900(source),
-            Self::Cp1610 => asm198x::assemble_cp1610(source),
-            Self::Z8000 => asm198x::assemble_z8000(source),
-            Self::Z8001 => asm198x::assemble_z8001(source),
+            Self::Acme => Some(asm198x::assemble_acme_files),
+            Self::Lwasm => Some(asm198x::assemble_lwasm_files),
+            Self::Ca65_816 => Some(asm198x::assemble_ca65_816_files),
+            Self::Ca65Huc6280 => Some(asm198x::assemble_ca65_huc6280_files),
+            Self::Rgbasm => Some(asm198x::assemble_rgbasm_files),
+            Self::I8080 => Some(asm198x::assemble_i8080_files),
+            Self::M6800 => Some(asm198x::assemble_m6800_files),
+            Self::Cdp1802 => Some(asm198x::assemble_1802_files),
+            Self::I8048 { romless: false } => Some(asm198x::assemble_8048_files),
+            Self::I8048 { romless: true } => Some(asm198x::assemble_8039_files),
+            Self::Scmp => Some(asm198x::assemble_scmp_files),
+            Self::F8 => Some(asm198x::assemble_f8_files),
+            Self::S2650 => Some(asm198x::assemble_2650_files),
+            Self::Tms7000 => Some(asm198x::assemble_tms7000_files),
+            Self::Pdp11 => Some(asm198x::assemble_pdp11_files),
+            Self::Tms9900 => Some(asm198x::assemble_tms9900_files),
+            Self::Cp1610 => Some(asm198x::assemble_cp1610_files),
+            Self::Z8000 => Some(asm198x::assemble_z8000_files),
+            Self::Z8001 => Some(asm198x::assemble_z8001_files),
+            Self::Pasmo { z80n: false } => Some(asm198x::assemble_pasmo_files),
+            Self::Pasmo { z80n: true } => Some(asm198x::assemble_pasmonext_files),
+            Self::Sjasmplus { z80n: false } => Some(asm198x::assemble_sjasmplus_files),
+            Self::Sjasmplus { z80n: true } => Some(asm198x::assemble_sjasmplus_next_files),
             // ca65 and vasm produce non-flat output and are handled in `run`.
-            Self::Ca65 | Self::Vasm => unreachable!("ca65/vasm handled in run()"),
-            Self::Pasmo { z80n: false } => asm198x::assemble_pasmo(source),
-            Self::Pasmo { z80n: true } => asm198x::assemble_pasmonext(source),
-            Self::Sjasmplus { z80n: false } => asm198x::assemble_sjasmplus(source),
-            Self::Sjasmplus { z80n: true } => asm198x::assemble_sjasmplus_next(source),
+            Self::Ca65 | Self::Vasm => None,
         }
     }
 }
+
+/// The shape every multi-file library entry shares (`assemble_*_files`):
+/// root source, root path, and the loader seam (KTD8).
+type MultiEntry = fn(
+    &str,
+    &str,
+    &dyn asm198x::source::SourceLoader,
+) -> Result<asm198x::AssemblyResult, asm198x::MultiFileError>;
 
 /// A debug-artifact flag's value: `None` = flag absent, `Some(None)` = default
 /// path (the input with the artifact's extension), `Some(Some(p))` = explicit.
@@ -595,62 +609,17 @@ fn run(args: &[String]) -> Result<String, String> {
         return Err("`--prg` is only for the C64 dialect (acme)".into());
     }
 
-    // The multi-file-capable dialects — sjasmplus for includes + incbin
-    // (U2/U3), pasmo for its plain incbin (U3), acme for `!src`/`!bin`, the
-    // ca65-flat family (65816, HuC6280) for `.include`/`.incbin`, rgbasm for
-    // `INCLUDE`/`INCBIN`, and lwasm for `include`/`use`/`includebin` (U4) —
-    // assemble through the multi-file entries, with the input's directory +
-    // the `-I` dirs wired into a filesystem loader; a failure renders with
-    // the real file table and the include-graph notes. Every other dialect
-    // stays on the single-file path until U4–U6 complete.
-    let assembly = match assembler {
-        Assembler::Acme => {
-            let loader = fs_loader(input, &include_dirs);
-            asm198x::assemble_acme_files(&source, input, &loader)
-                .map_err(|e| render_multi_error(input, &e))?
-        }
-        Assembler::Rgbasm => {
-            let loader = fs_loader(input, &include_dirs);
-            asm198x::assemble_rgbasm_files(&source, input, &loader)
-                .map_err(|e| render_multi_error(input, &e))?
-        }
-        Assembler::Lwasm => {
-            let loader = fs_loader(input, &include_dirs);
-            asm198x::assemble_lwasm_files(&source, input, &loader)
-                .map_err(|e| render_multi_error(input, &e))?
-        }
-        Assembler::Ca65_816 => {
-            let loader = fs_loader(input, &include_dirs);
-            asm198x::assemble_ca65_816_files(&source, input, &loader)
-                .map_err(|e| render_multi_error(input, &e))?
-        }
-        Assembler::Ca65Huc6280 => {
-            let loader = fs_loader(input, &include_dirs);
-            asm198x::assemble_ca65_huc6280_files(&source, input, &loader)
-                .map_err(|e| render_multi_error(input, &e))?
-        }
-        Assembler::Sjasmplus { z80n } => {
-            let loader = fs_loader(input, &include_dirs);
-            let entry = if z80n {
-                asm198x::assemble_sjasmplus_next_files
-            } else {
-                asm198x::assemble_sjasmplus_files
-            };
-            entry(&source, input, &loader).map_err(|e| render_multi_error(input, &e))?
-        }
-        Assembler::Pasmo { z80n } => {
-            let loader = fs_loader(input, &include_dirs);
-            let entry = if z80n {
-                asm198x::assemble_pasmonext_files
-            } else {
-                asm198x::assemble_pasmo_files
-            };
-            entry(&source, input, &loader).map_err(|e| render_multi_error(input, &e))?
-        }
-        _ => assembler
-            .assemble(&source)
-            .map_err(|e| render_error(input, &files, &e))?,
+    // Every flat dialect assembles through its multi-file entry (U2–U4 — the
+    // z80 family, acme, the ca65-flat family, rgbasm, lwasm, and the twelve
+    // asl chips), with the input's directory + the `-I` dirs wired into a
+    // filesystem loader; a failure renders with the real file table and the
+    // include-graph notes. Only the non-flat ca65/vasm paths (handled above)
+    // sit outside the table.
+    let Some(entry) = assembler.multi_entry() else {
+        unreachable!("ca65/vasm handled above")
     };
+    let loader = fs_loader(input, &include_dirs);
+    let assembly = entry(&source, input, &loader).map_err(|e| render_multi_error(input, &e))?;
     for w in &assembly.warnings {
         // A warning inside an included file names that file (the multi-file
         // table); single-file results have an empty table and keep naming the
@@ -939,66 +908,18 @@ fn emit_json(
             asm198x::assemble_ca65_debug(source, input).map(&mut capture)
         }
         Assembler::Ca65 => asm198x::assemble_ca65(source),
-        Assembler::Sjasmplus { z80n } => {
-            let loader = fs_loader(input, include_dirs);
-            let entry = if *z80n {
-                asm198x::assemble_sjasmplus_next_files
-            } else {
-                asm198x::assemble_sjasmplus_files
+        // Every flat dialect goes through its multi-file entry (the same
+        // table as the human path); ca65/vasm are the arms above.
+        other => {
+            let Some(entry) = other.multi_entry() else {
+                unreachable!("ca65/vasm handled above")
             };
+            let loader = fs_loader(input, include_dirs);
             entry(source, input, &loader).map_err(|e| {
                 failure_files = e.source_map.file_table();
                 e.error
             })
         }
-        Assembler::Pasmo { z80n } => {
-            let loader = fs_loader(input, include_dirs);
-            let entry = if *z80n {
-                asm198x::assemble_pasmonext_files
-            } else {
-                asm198x::assemble_pasmo_files
-            };
-            entry(source, input, &loader).map_err(|e| {
-                failure_files = e.source_map.file_table();
-                e.error
-            })
-        }
-        Assembler::Acme => {
-            let loader = fs_loader(input, include_dirs);
-            asm198x::assemble_acme_files(source, input, &loader).map_err(|e| {
-                failure_files = e.source_map.file_table();
-                e.error
-            })
-        }
-        Assembler::Ca65_816 => {
-            let loader = fs_loader(input, include_dirs);
-            asm198x::assemble_ca65_816_files(source, input, &loader).map_err(|e| {
-                failure_files = e.source_map.file_table();
-                e.error
-            })
-        }
-        Assembler::Ca65Huc6280 => {
-            let loader = fs_loader(input, include_dirs);
-            asm198x::assemble_ca65_huc6280_files(source, input, &loader).map_err(|e| {
-                failure_files = e.source_map.file_table();
-                e.error
-            })
-        }
-        Assembler::Rgbasm => {
-            let loader = fs_loader(input, include_dirs);
-            asm198x::assemble_rgbasm_files(source, input, &loader).map_err(|e| {
-                failure_files = e.source_map.file_table();
-                e.error
-            })
-        }
-        Assembler::Lwasm => {
-            let loader = fs_loader(input, include_dirs);
-            asm198x::assemble_lwasm_files(source, input, &loader).map_err(|e| {
-                failure_files = e.source_map.file_table();
-                e.error
-            })
-        }
-        other => other.assemble(source),
     };
     match result {
         Ok(assembly) => {

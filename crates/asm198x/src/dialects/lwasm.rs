@@ -128,6 +128,7 @@ pub(crate) fn parse_program_multi(
 const SEMANTICS: ca65_flat::WalkSemantics = ca65_flat::WalkSemantics {
     resolution: ca65_flat::Resolution::Requester,
     window: slice_includebin,
+    include_default_ext: None,
 };
 
 /// Apply lwasm's `includebin` window to the loaded asset — probe-pinned

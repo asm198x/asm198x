@@ -5,6 +5,7 @@
 //! here — not touching the engine.
 
 pub(crate) mod acme;
+pub(crate) mod asl;
 pub(crate) mod ca65;
 pub(crate) mod ca65_816;
 pub(crate) mod ca65_flat;

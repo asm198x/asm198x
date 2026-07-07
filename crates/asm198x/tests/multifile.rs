@@ -14,10 +14,16 @@ use std::process::Command;
 
 use asm198x::source::{FsLoader, MemoryLoader, SourceLoader, SourceMap};
 use asm198x::{
-    FileId, assemble_acme, assemble_acme_files, assemble_ca65_816, assemble_ca65_816_files,
-    assemble_ca65_huc6280, assemble_ca65_huc6280_files, assemble_lwasm, assemble_lwasm_files,
-    assemble_pasmo, assemble_pasmo_files, assemble_rgbasm, assemble_rgbasm_files,
-    assemble_sjasmplus, assemble_sjasmplus_files,
+    FileId, assemble_1802, assemble_1802_files, assemble_2650, assemble_2650_files, assemble_8039,
+    assemble_8039_files, assemble_8048, assemble_8048_files, assemble_acme, assemble_acme_files,
+    assemble_ca65_816, assemble_ca65_816_files, assemble_ca65_huc6280, assemble_ca65_huc6280_files,
+    assemble_cp1610_files, assemble_f8, assemble_f8_files, assemble_i8080, assemble_i8080_files,
+    assemble_lwasm, assemble_lwasm_files, assemble_m6800, assemble_m6800_files, assemble_pasmo,
+    assemble_pasmo_files, assemble_pdp11, assemble_pdp11_files, assemble_rgbasm,
+    assemble_rgbasm_files, assemble_scmp, assemble_scmp_files, assemble_sjasmplus,
+    assemble_sjasmplus_files, assemble_tms7000, assemble_tms7000_files, assemble_tms9900,
+    assemble_tms9900_files, assemble_z8000, assemble_z8000_files, assemble_z8001,
+    assemble_z8001_files,
 };
 
 /// The built `asm198x` binary under test.
@@ -2414,4 +2420,379 @@ fn cli_lwasm_error_in_include_carries_an_included_from_note() {
         stderr.contains("included from") && stderr.contains("main.asm:2"),
         "carries the included-from note: {stderr}"
     );
+}
+
+// ===========================================================================
+// U4 — the asl-syntax chips (8080 representative + CP1610 decle accounting +
+// one smoke per remaining chip). asl's multi-file surface is uniform across
+// chips (probe-pinned on the 8080, spot-checked on the TMS9900 and CP1610),
+// so the deep coverage rides the family's debut chip and the rest prove
+// their wiring. Every expected byte sequence below is pinned by the U4d
+// probe runs against asl 1.42 + p2bin.
+// ===========================================================================
+
+/// Nested includes on the 8080: main -> a -> sub, code at every level, in
+/// include order, with both the quoted and the bare-name spellings.
+#[test]
+fn i8080_include_three_deep_nests_in_both_spellings() {
+    let loader = MemoryLoader::new()
+        .text(
+            "a.inc",
+            "        mvi b,2\n        include sub.inc\n        mvi d,4\n",
+        )
+        .text("sub.inc", "        mvi c,3\n");
+    let src = "        mvi a,1\n        include \"a.inc\"\n        mvi e,5\n";
+    let r = assemble_i8080_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x3E, 0x01, 0x06, 0x02, 0x0E, 0x03, 0x16, 0x04, 0x1E, 0x05],
+        "bytes interleave in include order"
+    );
+    assert_eq!(r.files, vec!["main.asm", "a.inc", "sub.inc"]);
+}
+
+/// KTD1's driver on the 8080: an `equ` defined inside the include feeds an
+/// opcode-embedded operand (`rst`'s vector) and a `ds` count on the
+/// includer's *later* lines. Probe-pinned: asl emits 3E 42 / DF / three zero
+/// bytes.
+#[test]
+fn i8080_include_defined_equ_feeds_later_includer_lines() {
+    let loader = MemoryLoader::new().text("defs.inc", "CONST equ 42h\nRSTVEC equ 3\nPAD equ 3\n");
+    let src =
+        "        include \"defs.inc\"\n        mvi a,CONST\n        rst RSTVEC\n        ds PAD\n";
+    let r = assemble_i8080_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x3E, 0x42, 0xDF, 0x00, 0x00, 0x00],
+        "include-defined constants flow out to later form selection (KTD1)"
+    );
+}
+
+/// asl's probe-pinned extension default: an extensionless `include` request
+/// tries `name.inc` first and the exact spelling second.
+#[test]
+fn i8080_extensionless_include_tries_inc_then_the_exact_name() {
+    // `include defs` with both spellings registered: `.inc` wins.
+    let loader = MemoryLoader::new()
+        .text("defs.inc", "        mvi a,11h\n")
+        .text("defs", "        mvi a,99h\n");
+    let src = "        include defs\n";
+    let r = assemble_i8080_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0x3E, 0x11], "`defs.inc` beats `defs`");
+
+    // Only the exact name registered: the fallback finds it.
+    let loader = MemoryLoader::new().text("bare", "        mvi a,77h\n");
+    let r = assemble_i8080_files("        include bare\n", "main.asm", &loader)
+        .expect("assembles via the exact-name fallback");
+    assert_eq!(r.bytes, vec![0x3E, 0x77]);
+}
+
+/// An error inside an included file names that file and line, with the
+/// include chain walking back to the root (KTD2's failure path).
+#[test]
+fn i8080_error_in_included_file_names_that_file_with_its_chain() {
+    let loader = MemoryLoader::new()
+        .text("a.inc", "        include \"b.inc\"\n")
+        .text("b.inc", "        nop\n        frob\n");
+    let src = "        include \"a.inc\"\n";
+    let e = assemble_i8080_files(src, "main.asm", &loader).expect_err("frob is unknown");
+    let span = e.error.span.as_ref().expect("the error carries a span");
+    assert_eq!(span.line, 2, "line 2 of b.inc, not of main.asm");
+    let table = e.source_map.file_table();
+    assert_eq!(
+        table.get(span.file.0 as usize).map(String::as_str),
+        Some("b.inc"),
+        "the span names the included file"
+    );
+    assert_eq!(
+        e.source_map.include_chain(span.file),
+        vec![("a.inc".to_string(), 1), ("main.asm".to_string(), 1)],
+        "the include chain walks back to the root"
+    );
+}
+
+/// Missing targets — an include and a binclude — report at the directive's
+/// span (the operand's column), not as a CLI read error.
+#[test]
+fn i8080_missing_targets_report_at_the_directive_span() {
+    let loader = MemoryLoader::new();
+    let e = assemble_i8080_files("        include \"nothere.inc\"\n", "main.asm", &loader)
+        .expect_err("missing include target");
+    assert!(
+        e.error.message.contains("nothere.inc"),
+        "names the request: {}",
+        e.error.message
+    );
+    let span = e.error.span.as_ref().expect("span at the directive");
+    assert_eq!((span.line, span.col), (1, 17), "points at the file name");
+
+    let e = assemble_i8080_files("        binclude \"nothere.bin\"\n", "main.asm", &loader)
+        .expect_err("missing binclude asset");
+    assert!(
+        e.error.message.contains("nothere.bin"),
+        "names the request: {}",
+        e.error.message
+    );
+    let span = e.error.span.as_ref().expect("span at the directive");
+    assert_eq!(span.line, 1);
+}
+
+/// The probe asset (`10..17`), matching the U4d probe runs.
+fn asl_asset() -> Vec<u8> {
+    vec![0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17]
+}
+
+/// `binclude`'s legal windows, all probe-pinned: plain, offset, offset+length
+/// (as equ-fed expressions), offset at EOF, and length 0 — the empty windows
+/// assemble cleanly (with the engine's advisory warning).
+#[test]
+fn i8080_binclude_windows_match_the_probes() {
+    let loader = MemoryLoader::new().binary("data.bin", asl_asset());
+    let src = "OFF equ 2\n        db 0aah\n        binclude \"data.bin\"\n        binclude \"data.bin\",2\n        binclude data.bin,OFF,3\n        binclude \"data.bin\",8\n        binclude \"data.bin\",0,0\n        db 0bbh\n";
+    let r = assemble_i8080_files(src, "main.asm", &loader).expect("assembles");
+    let mut expected = vec![0xAA];
+    expected.extend(asl_asset()); // plain
+    expected.extend(&asl_asset()[2..]); // offset 2
+    expected.extend(&asl_asset()[2..5]); // offset 2 length 3 (equ-fed)
+    expected.push(0xBB); // offset-at-EOF and length-0 emit nothing
+    assert_eq!(r.bytes, expected);
+}
+
+/// `binclude`'s error postures, all probe-pinned strict (asl has no negative
+/// sentinels): negative offset, negative length, offset past EOF, and length
+/// past the remaining bytes — each at the directive's span.
+#[test]
+fn i8080_binclude_window_errors_match_the_probes() {
+    let loader = MemoryLoader::new().binary("data.bin", asl_asset());
+    for (args, what) in [
+        (",-2", "negative offset"),
+        (",2,-2", "negative length"),
+        (",9", "offset past EOF"),
+        (",2,7", "length past the remaining bytes"),
+    ] {
+        let src = format!("        binclude \"data.bin\"{args}\n");
+        let e = match assemble_i8080_files(&src, "main.asm", &loader) {
+            Ok(_) => panic!("{what} must be an error"),
+            Err(e) => e,
+        };
+        assert!(
+            e.error.message.contains("data.bin"),
+            "{what} names the asset: {}",
+            e.error.message
+        );
+        let span = e.error.span.as_ref().expect("span at the directive");
+        assert_eq!(span.line, 1, "{what} points at the directive line");
+    }
+}
+
+/// Labels on the `include` and `binclude` lines bind at the include point /
+/// payload start (probe-pinned: `here:` reads the include's first byte
+/// address, `art:` the payload's).
+#[test]
+fn i8080_labels_on_directive_lines_bind_at_the_point() {
+    let loader = MemoryLoader::new()
+        .text("body.inc", "        mvi a,7\n")
+        .binary("data.bin", asl_asset());
+    let src = "here:   include \"body.inc\"\nart:    binclude \"data.bin\",2,2\n        lxi h,here\n        lxi h,art\n";
+    let r = assemble_i8080_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x3E, 0x07, 0x12, 0x13, 0x21, 0x00, 0x00, 0x21, 0x02, 0x00],
+        "here = $0000 (the include point), art = $0002 (the payload start)"
+    );
+}
+
+/// A self-include is a cycle diagnostic listing the chain (asl itself dies on
+/// the OS's open-file limit — diagnostics may exceed the reference, KTD5).
+#[test]
+fn i8080_self_include_reports_the_cycle() {
+    let src = "        include \"main.asm\"\n";
+    let loader = MemoryLoader::new().text("main.asm", src);
+    let e = assemble_i8080_files(src, "main.asm", &loader).expect_err("cycle");
+    assert!(
+        e.error.message.contains("include cycle"),
+        "names the cycle: {}",
+        e.error.message
+    );
+}
+
+/// The single-source entry points stay single-source: both directives are
+/// rejected with a pointer to the multi-file API, not a bogus parse error.
+#[test]
+fn i8080_single_source_entry_rejects_directives_with_a_pointer() {
+    let e = assemble_i8080("        include \"defs.inc\"\n").expect_err("include rejected");
+    assert!(
+        e.message.contains("multi-file"),
+        "points at the multi-file entry: {}",
+        e.message
+    );
+    let e = assemble_i8080("        binclude \"data.bin\"\n").expect_err("binclude rejected");
+    assert!(
+        e.message.contains("multi-file"),
+        "points at the multi-file entry: {}",
+        e.message
+    );
+}
+
+// --- CP1610: the decle accounting (the plan's named assumption, resolved) ---
+
+/// The CP1610's probe-pinned `binclude` accounting: offset/length count
+/// bytes, and an N-byte window occupies N **decles** — the image carries the
+/// N raw file bytes followed by N zero bytes, exactly as asl (`cpu CP-1600`)
+/// with p2bin lays it down. An odd byte count is legal: 3 bytes -> 3 decles,
+/// and a label after the payload lands at decle N.
+#[test]
+fn cp1610_binclude_counts_bytes_and_occupies_one_decle_per_byte() {
+    let loader = MemoryLoader::new().binary("odd3.bin", vec![0x10, 0x11, 0x12]);
+    let src = "        org 0\n        binclude \"odd3.bin\"\nafter:  word after\n";
+    let r = assemble_cp1610_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x10, 0x11, 0x12, 0x00, 0x00, 0x00, 0x00, 0x03],
+        "3 bytes + 3 zeros = 3 decles; `after` = decle 3 (probe-pinned)"
+    );
+
+    // A window slices in bytes first, then tails: `,2,3` -> 12 13 14 + 3 zeros.
+    let loader = MemoryLoader::new().binary("data.bin", asl_asset());
+    let src = "        org 0\n        binclude \"data.bin\",2,3\nafter:  word after\n";
+    let r = assemble_cp1610_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x12, 0x13, 0x14, 0x00, 0x00, 0x00, 0x00, 0x03],
+        "the window counts bytes; the tail pads to whole decles"
+    );
+}
+
+// --- One wiring smoke per remaining asl chip: a two-file assemble through
+// the new entry matches the flattened source (hermetic, one assert each). ---
+
+#[test]
+fn m6800_include_smoke_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("a.inc", "        ldaa #$42\n");
+    let r = assemble_m6800_files(
+        "        include \"a.inc\"\n        ldaa $42\n",
+        "main.asm",
+        &loader,
+    )
+    .expect("assembles");
+    let flat = assemble_m6800("        ldaa #$42\n        ldaa $42\n").expect("flat");
+    assert_eq!(r.bytes, flat.bytes);
+}
+
+#[test]
+fn cdp1802_include_smoke_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("a.inc", "        inc 3\n");
+    let r = assemble_1802_files(
+        "        include \"a.inc\"\n        ldn 7\n",
+        "main.asm",
+        &loader,
+    )
+    .expect("assembles");
+    let flat = assemble_1802("        inc 3\n        ldn 7\n").expect("flat");
+    assert_eq!(r.bytes, flat.bytes);
+}
+
+#[test]
+fn i8048_include_smoke_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("a.inc", "        add a,r0\n");
+    let src = "        include \"a.inc\"\n        add a,@r1\n";
+    let r = assemble_8048_files(src, "main.asm", &loader).expect("assembles");
+    let flat = assemble_8048("        add a,r0\n        add a,@r1\n").expect("flat");
+    assert_eq!(r.bytes, flat.bytes);
+    // The ROM-less kin shares the walker; its entry wires the same way.
+    let r = assemble_8039_files(src, "main.asm", &loader).expect("assembles (8039)");
+    let flat = assemble_8039("        add a,r0\n        add a,@r1\n").expect("flat (8039)");
+    assert_eq!(r.bytes, flat.bytes);
+}
+
+#[test]
+fn scmp_include_smoke_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("a.inc", "        xpal 1\n");
+    let r = assemble_scmp_files(
+        "        include \"a.inc\"\n        nop\n",
+        "main.asm",
+        &loader,
+    )
+    .expect("assembles");
+    let flat = assemble_scmp("        xpal 1\n        nop\n").expect("flat");
+    assert_eq!(r.bytes, flat.bytes);
+}
+
+#[test]
+fn f8_include_smoke_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("a.inc", "        lr a,3\n");
+    let r = assemble_f8_files(
+        "        include \"a.inc\"\n        lr a,ku\n",
+        "main.asm",
+        &loader,
+    )
+    .expect("assembles");
+    let flat = assemble_f8("        lr a,3\n        lr a,ku\n").expect("flat");
+    assert_eq!(r.bytes, flat.bytes);
+}
+
+#[test]
+fn s2650_include_smoke_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("a.inc", "        lodi,r0 $42\n");
+    let r = assemble_2650_files(
+        "        include \"a.inc\"\n        lodz r1\n",
+        "main.asm",
+        &loader,
+    )
+    .expect("assembles");
+    let flat = assemble_2650("        lodi,r0 $42\n        lodz r1\n").expect("flat");
+    assert_eq!(r.bytes, flat.bytes);
+}
+
+#[test]
+fn tms7000_include_smoke_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("a.inc", "        mov %42h,a\n");
+    let r = assemble_tms7000_files(
+        "        include \"a.inc\"\n        mov r5,a\n",
+        "main.asm",
+        &loader,
+    )
+    .expect("assembles");
+    let flat = assemble_tms7000("        mov %42h,a\n        mov r5,a\n").expect("flat");
+    assert_eq!(r.bytes, flat.bytes);
+}
+
+#[test]
+fn pdp11_include_smoke_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("a.inc", "        mov #0x1234, r0\n");
+    let r = assemble_pdp11_files(
+        "        include \"a.inc\"\n        mov (r2)+, -(r3)\n",
+        "main.asm",
+        &loader,
+    )
+    .expect("assembles");
+    let flat = assemble_pdp11("        mov #0x1234, r0\n        mov (r2)+, -(r3)\n").expect("flat");
+    assert_eq!(r.bytes, flat.bytes);
+}
+
+#[test]
+fn tms9900_include_smoke_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("a.inc", "        li r0, 0abcdh\n");
+    let r = assemble_tms9900_files(
+        "        include \"a.inc\"\n        mov r1, r2\n",
+        "main.asm",
+        &loader,
+    )
+    .expect("assembles");
+    let flat = assemble_tms9900("        li r0, 0abcdh\n        mov r1, r2\n").expect("flat");
+    assert_eq!(r.bytes, flat.bytes);
+}
+
+#[test]
+fn z8000_include_smoke_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("a.inc", "        add r1, #1234h\n");
+    let src = "        include \"a.inc\"\n        ld r1, r2\n";
+    let flat_src = "        add r1, #1234h\n        ld r1, r2\n";
+    let r = assemble_z8000_files(src, "main.asm", &loader).expect("assembles");
+    let flat = assemble_z8000(flat_src).expect("flat");
+    assert_eq!(r.bytes, flat.bytes);
+    // The segmented Z8001 entry threads the same walker with `seg` set.
+    let r = assemble_z8001_files(src, "main.asm", &loader).expect("assembles (z8001)");
+    let flat = assemble_z8001(flat_src).expect("flat (z8001)");
+    assert_eq!(r.bytes, flat.bytes);
 }

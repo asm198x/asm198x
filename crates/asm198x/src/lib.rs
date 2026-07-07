@@ -377,6 +377,33 @@ pub fn assemble_i8080(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::I8080).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** Intel-8080 program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_i8080`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_i8080_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::I8080, source, input_path, loader)
+}
+
 /// Assemble Motorola-syntax 6800 source into a flat big-endian binary at the
 /// `org`, over [`isa::m6800`]. Motorola `$`-hex, `#` immediate, `$nn,X` indexed,
 /// direct-vs-extended by size (or a `>`/`<` force). Matches `asl` (`cpu 6800`).
@@ -386,6 +413,33 @@ pub fn assemble_i8080(source: &str) -> Result<AssemblyResult, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_m6800(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::M6800).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** Motorola-6800 program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_m6800`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_m6800_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::M6800, source, input_path, loader)
 }
 
 /// Assemble asl-syntax RCA CDP1802 (COSMAC) source into a flat big-endian binary
@@ -399,6 +453,33 @@ pub fn assemble_1802(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Cdp1802).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** CDP1802 program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_1802`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_1802_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Cdp1802, source, input_path, loader)
+}
+
 /// Assemble asl-syntax Intel 8048 (MCS-48) source into a flat binary at the
 /// `org`, over [`isa::i8048`]. Intel `H`-hex; the mode label is the operand
 /// template; `JMP`/`CALL` pack the address page into the opcode via the
@@ -409,6 +490,38 @@ pub fn assemble_1802(source: &str) -> Result<AssemblyResult, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_8048(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::I8048 { romless: false }).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** 8048 program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_8048`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_8048_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(
+        &dialects::I8048 { romless: false },
+        source,
+        input_path,
+        loader,
+    )
 }
 
 /// Assemble asl-syntax ROM-less MCS-48 source (8035/8039/8040 and CMOS kin) into
@@ -424,6 +537,38 @@ pub fn assemble_8039(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::I8048 { romless: true }).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** ROM-less MCS-48 program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_8039`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_8039_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(
+        &dialects::I8048 { romless: true },
+        source,
+        input_path,
+        loader,
+    )
+}
+
 /// Assemble asl-syntax National SC/MP (INS8060) source into a flat binary at the
 /// `org`, over [`isa::scmp`]. C-style numbers (`0x..` hex); `disp(ptr)` /
 /// `@disp(ptr)` memory references (the literal `e` selects the E-register
@@ -434,6 +579,33 @@ pub fn assemble_8039(source: &str) -> Result<AssemblyResult, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_scmp(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Scmp).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** SC/MP program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_scmp`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_scmp_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Scmp, source, input_path, loader)
 }
 
 /// Assemble asl-syntax Fairchild F8 (3850) source into a flat binary at the
@@ -449,6 +621,33 @@ pub fn assemble_f8(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::F8).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** F8 program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_f8`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_f8_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::F8, source, input_path, loader)
+}
+
 /// Assemble asl-syntax Signetics 2650 source into a flat binary at the `org`,
 /// over [`isa::s2650`]. `$`-hex; the `mnemonic,reg`/`mnemonic,cc` comma syntax;
 /// register / immediate / 7-bit relative (indirect `*`) / 15-bit absolute
@@ -462,6 +661,33 @@ pub fn assemble_2650(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::S2650).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** 2650 program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_2650`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_2650_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::S2650, source, input_path, loader)
+}
+
 /// Assemble asl-syntax TI TMS7000 source into a flat binary at the `org`, over
 /// [`isa::tms7000`]. Intel `H`-hex; operands classified by prefix (`A`/`B`,
 /// `%n` immediate, `Rn` register file, `Pn` peripheral, `@nnnn` direct, `*Rn`
@@ -473,6 +699,33 @@ pub fn assemble_2650(source: &str) -> Result<AssemblyResult, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_tms7000(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Tms7000).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** TMS7000 program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_tms7000`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_tms7000_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Tms7000, source, input_path, loader)
 }
 
 /// Assemble asl-syntax DEC PDP-11 source into a flat **little-endian** binary at
@@ -490,6 +743,33 @@ pub fn assemble_pdp11(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Pdp11).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** PDP-11 program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_pdp11`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_pdp11_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Pdp11, source, input_path, loader)
+}
+
 /// Assemble asl-syntax GI CP1610 source (the Mattel Intellivision CPU) into a
 /// flat **big-endian** binary at the `org`, over [`isa::cp1610`] — one 16-bit
 /// word per 10-bit decle. Intel `h`-hex, registers `r0`–`r7`, jzIntv / as1600
@@ -503,6 +783,29 @@ pub fn assemble_cp1610(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Cp1610).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** CP1610 program (language-surface U4): as the
+/// other asl-chip `*_files` entries (asl's quoted-or-bare `include`/
+/// `binclude`, requester-directory resolution, the `.inc` extension default,
+/// state threading through the boundary), with the CP1610's probe-pinned
+/// `binclude` accounting: offset/length count **bytes**, and an N-byte
+/// window occupies N **decles** — the image carries the N raw file bytes
+/// followed by N zero bytes, exactly as `asl` (`cpu CP-1600`) + p2bin lay it
+/// down (an odd byte count is legal, not padded to a decle boundary and not
+/// packed two-per-decle). The single-source [`assemble_cp1610`] is unchanged
+/// and rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_cp1610_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Cp1610, source, input_path, loader)
+}
+
 /// Assemble asl-syntax TI TMS9900 source into a flat **big-endian** binary at
 /// the `org`, over [`isa::tms9900`]. Intel `h`-hex, registers `r0`–`r15`, and
 /// the general-addressing modes (`Rn`, `*Rn`, `@addr`, `@addr(Rn)`, `*Rn+`).
@@ -514,6 +817,33 @@ pub fn assemble_cp1610(source: &str) -> Result<AssemblyResult, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_tms9900(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Tms9900).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** TMS9900 program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_tms9900`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_tms9900_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Tms9900, source, input_path, loader)
 }
 
 /// Assemble asl-syntax Zilog Z8000 (non-segmented Z8002) source into a flat
@@ -530,6 +860,33 @@ pub fn assemble_z8000(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Z8000 { seg: false }).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** Z8000 (Z8002) program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_z8000`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_z8000_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Z8000 { seg: false }, source, input_path, loader)
+}
+
 /// Assemble `asl`-syntax **segmented Z8001** source into a flat big-endian
 /// binary. Like [`assemble_z8000`] but with segmented memory operands
 /// (`<<seg>>offset` direct/indexed addresses, `@RRn` long-pair pointers).
@@ -539,6 +896,33 @@ pub fn assemble_z8000(source: &str) -> Result<AssemblyResult, AsmError> {
 /// symbol-resolution failure.
 pub fn assemble_z8001(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Z8000 { seg: true }).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** segmented Z8001 program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and asl's `include`/`binclude` directives (quoted or bare names)
+/// resolve through `loader` — the CLI wires an [`FsLoader`](source::FsLoader)
+/// carrying the input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows asl's
+/// probe-pinned order: the requesting file's **own directory** (no cwd, no
+/// root fallback), then the search dirs — and an extensionless `include`
+/// request tries `name.inc` before the exact spelling. An `equ` defined
+/// inside an include feeds the includer's later lines, and `binclude`'s
+/// offset/length window matches asl exactly (strict: negatives and any
+/// window past EOF are errors). On success, [`AssemblyResult::files`] holds
+/// the `FileId`->path table. The single-source [`assemble_z8001`] is unchanged and
+/// rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_z8001_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Z8000 { seg: true }, source, input_path, loader)
 }
 
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching

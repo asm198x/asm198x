@@ -1458,3 +1458,87 @@ fn fmt_lwasm_include_and_includebin_reassemble_byte_identical() {
         .bytes;
     assert_eq!(original, reassembled, "round-trips:\n{formatted}");
 }
+
+/// U4 (asl chips): `--fmt` renders the asl `include`/`binclude` directives
+/// verbatim from the node's source — spelling (case, quoted or bare name,
+/// window tail) untouched — without ever opening the targets, and stays
+/// idempotent (KTD1). The 8080 is the family's representative chip.
+#[test]
+fn fmt_i8080_include_and_binclude_are_verbatim_and_never_open_targets() {
+    let src = "\
+; header
+        include \"missing.inc\"   ; pulled in later
+lbl:    INCLUDE bare-missing
+art:    binclude missing.bin,2,3
+        BINCLUDE \"also-missing.bin\"
+        mvi a,1
+";
+    let formatted = format_i8080(src).expect("formats with every target missing");
+    for verbatim in [
+        "include \"missing.inc\"",
+        "INCLUDE bare-missing",
+        "binclude missing.bin,2,3",
+        "BINCLUDE \"also-missing.bin\"",
+    ] {
+        assert!(
+            formatted.contains(verbatim),
+            "`{verbatim}` survives verbatim:\n{formatted}"
+        );
+    }
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert_eq!(
+        format_i8080(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U4: formatted include/binclude-bearing 8080 source reassembles
+/// byte-identical through the multi-file entry (the asl leg of the fmt
+/// round-trip bar).
+#[test]
+fn fmt_i8080_include_and_binclude_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.inc", "CONST equ 42h\n")
+            .binary("art.bin", vec![0x10, 0x11, 0x12, 0x13])
+    };
+    let src =
+        "        include \"defs.inc\"\n        mvi a,CONST\n        binclude \"art.bin\",1,2\n";
+    let original = asm198x::assemble_i8080_files(src, "main.asm", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_i8080(src).expect("formats");
+    let reassembled = asm198x::assemble_i8080_files(&formatted, "main.asm", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+}
+
+/// U4: the CP1610's `include`/`binclude` render verbatim and idempotent too —
+/// the word-addressed chip shares the asl walker, so its fmt path must keep
+/// the same never-opens-the-target property.
+#[test]
+fn fmt_cp1610_include_and_binclude_are_verbatim_and_never_open_targets() {
+    let src = "\
+        org 0
+        include \"missing.inc\"
+art:    binclude missing.bin,2,3
+        movr r0, r1
+";
+    let formatted = format_cp1610(src).expect("formats with the targets missing");
+    assert!(
+        formatted.contains("include \"missing.inc\"")
+            && formatted.contains("binclude missing.bin,2,3"),
+        "directives survive verbatim:\n{formatted}"
+    );
+    assert_eq!(
+        format_cp1610(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}

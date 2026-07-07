@@ -83,6 +83,8 @@ fn tool(dialect: &str) -> &'static str {
         "ca65-816" => "ca65",
         "ca65-huc6280" => "ca65",
         "rgbasm" => "rgbasm",
+        // The asl chips (U4): one arbiter for the family (asl + p2bin).
+        "8080" | "tms9900" | "cp1610" => "asl",
         other => panic!("no reference tool for dialect `{other}`"),
     }
 }
@@ -756,6 +758,83 @@ const MULTI_PROBES: &[MultiProbe] = &[
             ("body.inc", "        lda #7\n"),
         ],
     },
+    // --- U4: the asl chips (`include`/`binclude`, asl + p2bin) — probed on
+    // the 8080 (the family's debut chip), spot-checked on the TMS9900, and
+    // the CP1610 for the decle-accounting case.
+    MultiProbe {
+        dialect: "8080",
+        binaries: &[],
+        note: "asl nested include, both spellings incl. the .inc extension \
+               default; equ defined inside feeds rst selection + a later \
+               immediate (U4; `ds` itself is out of probe scope — asl leaves \
+               a gap p2bin fills with $FF, ours emits zeros, pre-existing)",
+        files: &[
+            (
+                "main.asm",
+                "\tcpu 8080\n\torg 0\n\tmvi a,1\n\tinclude \"a.inc\"\n\trst RSTVEC\n\tmvi c,PAD\n\tmvi e,5\n",
+            ),
+            (
+                "a.inc",
+                "RSTVEC equ 3\n\tmvi b,2\n\tinclude sub\n\tmvi d,4\n",
+            ),
+            ("sub.inc", "PAD equ 3\n\tmvi c,3\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "8080",
+        binaries: &[("data.bin", ASSET)],
+        note: "asl binclude windows: plain, offset, equ-fed offset+length, \
+               offset at EOF, length 0, and the bare-name spelling (U4)",
+        files: &[(
+            "main.asm",
+            "OFF equ 2\n\tcpu 8080\n\torg 0\n\tdb 0aah\n\tbinclude \"data.bin\"\n\tbinclude \"data.bin\",2\n\tbinclude data.bin,OFF,3\n\tbinclude \"data.bin\",8\n\tbinclude \"data.bin\",0,0\n\tdb 0bbh\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "8080",
+        binaries: &[("data.bin", ASSET)],
+        note: "asl labels on the include and binclude lines bind at the \
+               include point / payload start (U4)",
+        files: &[
+            (
+                "main.asm",
+                "\tcpu 8080\n\torg 0\nhere:\tinclude \"body.inc\"\nart:\tbinclude \"data.bin\",2,2\n\tlxi h,here\n\tlxi h,art\n",
+            ),
+            ("body.inc", "\tmvi a,7\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "tms9900",
+        binaries: &[("data.bin", ASSET)],
+        note: "asl family uniformity spot-check: nested include via a \
+               subdirectory beats a root decoy (requester-dir resolution), \
+               equ feeds the includer, binclude window (U4)",
+        files: &[
+            (
+                "main.asm",
+                "\tcpu TMS9900\n\torg 0\n\tinclude \"sub/mid.inc\"\n\tli r1,K\n\tbinclude \"data.bin\",2,3\n\tbyte 0bbh\n",
+            ),
+            ("sub/mid.inc", "\tinclude \"shared.inc\"\n"),
+            ("sub/shared.inc", "K equ 42h\n\tbyte 11h\n"),
+            // The decoy: if either side anchored at the root/cwd instead of
+            // the requesting file's directory, the bytes would diverge.
+            ("shared.inc", "K equ 99h\n\tbyte 99h\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "cp1610",
+        binaries: &[("odd3.bin", &[0x10, 0x11, 0x12]), ("data.bin", ASSET)],
+        note: "cp1610 include + equ across the boundary, and binclude decle \
+               accounting: an odd byte count and a byte-window, each one \
+               decle per byte with the zero tail (U4)",
+        files: &[
+            (
+                "main.asm",
+                "\tcpu CP-1600\n\trelaxed on\n\torg 00000H\n\tinclude \"defs.inc\"\n\tmvii K,r0\n\tbinclude \"odd3.bin\"\nafter:\tword after\n\tbinclude \"data.bin\",2,3\n",
+            ),
+            ("defs.inc", "K equ 5\n\tword 0AAAAH\n"),
+        ],
+    },
 ];
 
 #[test]
@@ -772,6 +851,11 @@ fn multi_file_source_matches_reference() {
         // The rgbasm arm links with rgblink (RGBDS ships them together).
         if p.dialect == "rgbasm" && !have("rgblink") {
             eprintln!("SKIP: `rgblink` not on PATH");
+            continue;
+        }
+        // The asl arms convert the `.p` object with p2bin (shipped together).
+        if tool(p.dialect) == "asl" && !have("p2bin") {
+            eprintln!("SKIP: `p2bin` not on PATH");
             continue;
         }
         // A per-probe subdirectory, wiped before use, so resolution can never
@@ -852,6 +936,17 @@ fn multi_file_source_matches_reference() {
                 l.arg("-C").arg(&cfg).arg(&obj).arg("-o").arg(&out);
                 vec![a, l]
             }
+            // The asl chips: assemble to a `.p` object, convert with p2bin
+            // (the same recipe as the conformance sweeps). The root carries
+            // its own `cpu`/`org` header, which our dialects ignore/share.
+            "8080" | "tms9900" | "cp1610" => {
+                let obj = dir.join("ref.p");
+                let mut a = Command::new("asl");
+                a.arg("-q").arg(root).arg("-o").arg(&obj);
+                let mut b = Command::new("p2bin");
+                b.arg(&obj).arg(&out);
+                vec![a, b]
+            }
             other => panic!("no multi-file runner for dialect `{other}`"),
         };
         let mut reference_failed = None;
@@ -885,6 +980,9 @@ fn multi_file_source_matches_reference() {
             "ca65-huc6280" => asm198x::assemble_ca65_huc6280_files,
             "rgbasm" => asm198x::assemble_rgbasm_files,
             "lwasm" => asm198x::assemble_lwasm_files,
+            "8080" => asm198x::assemble_i8080_files,
+            "tms9900" => asm198x::assemble_tms9900_files,
+            "cp1610" => asm198x::assemble_cp1610_files,
             other => panic!("no multi-file entry for dialect `{other}`"),
         };
         // rgblink zero-pads the ROM to the bank size (probe-pinned), so the

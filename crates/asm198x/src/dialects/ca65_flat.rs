@@ -108,6 +108,12 @@ pub(crate) type IncbinWindow = fn(&[u8], Option<i64>, Option<i64>) -> Result<Vec
 pub(crate) struct WalkSemantics {
     pub(crate) resolution: Resolution,
     pub(crate) window: IncbinWindow,
+    /// The extension appended to an **extensionless** include request before
+    /// the exact spelling is tried — asl's probe-pinned `.inc` default
+    /// (`include defs` finds `defs.inc` first, `defs` second); `None` for the
+    /// dialects without extension defaulting. Applies to includes only —
+    /// asl's `BINCLUDE` has no defaulting (probe-pinned).
+    pub(crate) include_default_ext: Option<&'static str>,
 }
 
 /// ca65's own semantics: the ancestor-chain anchor and the negative-size
@@ -115,6 +121,7 @@ pub(crate) struct WalkSemantics {
 pub(crate) const CA65_SEMANTICS: WalkSemantics = WalkSemantics {
     resolution: Resolution::AncestorChain,
     window: slice_incbin,
+    include_default_ext: None,
 };
 
 /// The per-line seam a flat ca65 dialect supplies to the shared walk: parse
@@ -188,7 +195,7 @@ pub(crate) fn walk_file<W: FlatWalk>(
                         format!("includes nested more than {MAX_INCLUDE_DEPTH} levels deep"),
                     ));
                 }
-                let id = load_include(map, loader, &request, stack, line as u32, sem.resolution)
+                let id = load_include_defaulted(map, loader, &request, stack, line as u32, sem)
                     .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
                 // Cycle detection is membership of the *active* stack: ca65
                 // itself has none (a self-include dies on the OS's open-file
@@ -264,6 +271,36 @@ fn stamp_file(mut e: AsmError, file: FileId) -> AsmError {
         None => {}
     }
     e
+}
+
+/// Apply the dialect's include extension default before resolving: an
+/// extensionless request tries the defaulted spelling (`request.inc`) first
+/// and the exact spelling second — asl's probe-pinned order (with both
+/// `bare` and `bare.inc` present, `.inc` wins; with only `bare`, it is
+/// found). A failure reports the request **as written**, not the defaulted
+/// spelling. Dialects without defaulting resolve the request directly.
+fn load_include_defaulted(
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+    request: &str,
+    stack: &[FileId],
+    line: u32,
+    sem: &WalkSemantics,
+) -> Result<FileId, LoadError> {
+    if let Some(ext) = sem.include_default_ext
+        && std::path::Path::new(request).extension().is_none()
+        && let Ok(id) = load_include(
+            map,
+            loader,
+            &format!("{request}.{ext}"),
+            stack,
+            line,
+            sem.resolution,
+        )
+    {
+        return Ok(id);
+    }
+    load_include(map, loader, request, stack, line, sem.resolution)
 }
 
 /// Resolve an include per the dialect's probe-pinned [`Resolution`]. The
