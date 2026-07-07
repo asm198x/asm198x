@@ -21,7 +21,10 @@
 
 use std::collections::BTreeMap;
 
+use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
+use crate::source::{MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
+use crate::span::FileId;
 
 /// The per-dialect surface: the parts of Z80 syntax that actually differ
 /// between assemblers. Everything else in this module is shared.
@@ -61,6 +64,16 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// Whether `word` is this dialect's include directive (language-surface
+    /// U2). Off by default: sjasmplus overrides for `INCLUDE`; pasmo's
+    /// include lands in U4. An include is walk-handled (a verbatim item in
+    /// the single-source parse, a lazy load in the multi-file walk), never an
+    /// [`Operation`].
+    fn is_include(&self, word: &str) -> bool {
+        let _ = word;
+        false
+    }
+
     /// Parse a directive into an operation (`None` for ones that emit nothing,
     /// like `end`). Defaults to the common set. `consts` holds the `equ` values
     /// known so far, so a directive like `ds` can fold a constant-expression
@@ -97,50 +110,236 @@ pub(crate) fn assemble<S: Z80Syntax>(
 /// becomes a node carrying its scoped label, operation, and span; trivia is
 /// filled in U4. The scope resolution mirrors the old string-mangle exactly, so
 /// [`lower`](crate::ast::lower) reproduces the same statements.
+///
+/// An include directive (a dialect that answers [`Z80Syntax::is_include`])
+/// becomes an **unresolved** [`Item::Include`](crate::ast::Item) — the target
+/// is never opened, so `--fmt` renders the directive verbatim and works with
+/// a missing target (U2, KTD1). Lazy resolution is [`parse_program_multi`]'s.
 pub(crate) fn parse_program<S: Z80Syntax>(
     syntax: &S,
     set: &'static isa::InstructionSet,
     ext: Option<&'static isa::InstructionSet>,
     source: &str,
 ) -> Result<crate::ast::Program, AsmError> {
-    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
-    let mut nodes = Vec::new();
-    // Constants defined with `equ`, recorded as parsed. Opcode-embedded
-    // operands (BIT n, IM n, RST n) must be known at parse time to pick the
-    // form, so they resolve against this — not the engine's pass-2 symbols.
-    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
-    let scoped = syntax.scopes_locals();
-    // The most recent global (non-`.`) label, for qualifying local labels.
-    let mut current_global: Option<String> = None;
-    // Own-line comments seen since the last node, attached as leading trivia to
-    // the next node (U4). Comments never reach the encoder, so bytes are
-    // unchanged (AE1).
-    let mut pending_leading: Vec<Comment> = Vec::new();
+    let mut w = Walker::new(syntax, set, ext);
+    for (i, raw) in source.lines().enumerate() {
+        if let Some(inc) = w.walk_line(raw, i + 1, FileId(0))? {
+            w.nodes.push(Node {
+                operand_span: inc.operand_span,
+                label: inc.label,
+                item: Some(crate::ast::Item::Include {
+                    request: inc.request,
+                }),
+                source: inc.source,
+                span: inc.span,
+                trivia: inc.trivia,
+            });
+        }
+    }
+    w.flush_trailing(source.lines().count() as u32);
+    Ok(Program { nodes: w.nodes })
+}
+
+/// Parse a multi-file Z80 program (language-surface U2, KTD1): the
+/// **interleaved, environment-threaded walk**. The root (`FileId(0)` in
+/// `map`) parses line by line with the environment accumulated so far; when
+/// the walk reaches an include directive *live*, the target loads through
+/// `loader`, its lines parse with the same environment, and everything it
+/// defined — `equ` constants, the current global label — flows back out to
+/// the includer's subsequent lines. That outward flow is load-bearing: z80
+/// form selection (`bit`/`rst`/`ds`) consults the parse-time constants table,
+/// so an include-defined constant must be visible after the include point
+/// (probe-pinned against sjasmplus).
+///
+/// # Errors
+/// Any per-line parse failure (stamped with the file it occurred in), a
+/// missing include target, an include cycle (the active-stack check), or the
+/// [`MAX_INCLUDE_DEPTH`] backstop — all at the directive's span.
+pub(crate) fn parse_program_multi<S: Z80Syntax>(
+    syntax: &S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+) -> Result<crate::ast::Program, AsmError> {
+    let mut w = Walker::new(syntax, set, ext);
+    let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
+    // The active include stack: cycle detection is membership (a file may be
+    // included twice *sequentially* — the reference re-reads it — but never
+    // while it is still open).
+    let mut stack = vec![FileId(0)];
+    walk_file(&mut w, &root, FileId(0), map, loader, &mut stack)?;
+    Ok(Program { nodes: w.nodes })
+}
+
+/// One file's leg of the multi-file walk: parse each line through the shared
+/// [`Walker`], and recurse into includes as they are reached.
+fn walk_file<S: Z80Syntax>(
+    w: &mut Walker<'_, S>,
+    source: &str,
+    file: FileId,
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+    stack: &mut Vec<FileId>,
+) -> Result<(), AsmError> {
     for (i, raw) in source.lines().enumerate() {
         let line = i + 1;
-        let (code, comment) = syntax.split_comment(raw);
+        let Some(inc) = w
+            .walk_line(raw, line, file)
+            .map_err(|e| stamp_file(e, file))?
+        else {
+            continue;
+        };
+        // A label on the include line binds at the include point's address
+        // (probe-pinned), so it becomes a label-only node before the target's
+        // lines.
+        let span = inc.span;
+        if inc.label.is_some() {
+            w.nodes.push(Node {
+                operand_span: None,
+                label: inc.label,
+                item: None,
+                source: String::new(),
+                span: span.clone(),
+                trivia: inc.trivia,
+            });
+        }
+        // Diagnostics point at the directive's operand (the file name) when
+        // the parse knew its column, else the line.
+        let at = inc.operand_span.unwrap_or(span);
+        if stack.len() >= MAX_INCLUDE_DEPTH {
+            return Err(AsmError::at(
+                at,
+                format!("includes nested more than {MAX_INCLUDE_DEPTH} levels deep"),
+            ));
+        }
+        let id = map
+            .load(loader, &inc.request, file, line as u32)
+            .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
+        if stack.contains(&id) {
+            let chain = stack
+                .iter()
+                .chain(std::iter::once(&id))
+                .map(|f| map.path(*f).unwrap_or("?"))
+                .collect::<Vec<_>>()
+                .join(" -> ");
+            return Err(AsmError::at(at, format!("include cycle: {chain}")));
+        }
+        let contents = map.contents(id).unwrap_or_default().to_owned();
+        stack.push(id);
+        walk_file(w, &contents, id, map, loader, stack)?;
+        stack.pop();
+    }
+    Ok(())
+}
+
+/// Stamp `file` onto a per-line parse error: the line-oriented helpers below
+/// (`split_label`, `parse_op`, the expression parser) know their line but not
+/// their file, so the walk supplies it at the one per-line boundary.
+fn stamp_file(mut e: AsmError, file: FileId) -> AsmError {
+    match &mut e.span {
+        Some(span) => span.file = file,
+        None if e.line != 0 => e.span = Some(Span::in_file(file, e.line as u32, 0)),
+        None => {}
+    }
+    e
+}
+
+/// An include directive found by [`Walker::walk_line`], handed back for the
+/// driver to decide: the single-source parse keeps it as a verbatim item; the
+/// multi-file walk resolves it lazily (KTD1).
+struct IncludeLine {
+    /// The target as the directive spelled it (quotes/brackets stripped).
+    request: String,
+    /// A label on the include line — it binds at the include point.
+    label: Option<Symbol>,
+    /// The verbatim directive text (`include "file.inc"`), for `--fmt`.
+    source: String,
+    span: Span,
+    operand_span: Option<Span>,
+    trivia: Trivia,
+}
+
+/// The per-line parse walk shared by [`parse_program`] (single source) and
+/// [`parse_program_multi`] (the include-capable walk). The environment — the
+/// `equ` constants table, the current global label for local scoping, and
+/// pending comment trivia — lives here, so in the multi-file walk it threads
+/// *through* include boundaries in both directions (KTD1).
+struct Walker<'a, S: Z80Syntax> {
+    syntax: &'a S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    /// Constants defined with `equ`, recorded as parsed. Opcode-embedded
+    /// operands (BIT n, IM n, RST n) must be known at parse time to pick the
+    /// form, so they resolve against this — not the engine's pass-2 symbols.
+    consts: BTreeMap<String, i64>,
+    /// The most recent global (non-`.`) label, for qualifying local labels.
+    current_global: Option<String>,
+    /// Own-line comments seen since the last node, attached as leading trivia
+    /// to the next node (U4). Comments never reach the encoder (AE1).
+    pending_leading: Vec<Comment>,
+    nodes: Vec<Node>,
+}
+
+impl<'a, S: Z80Syntax> Walker<'a, S> {
+    fn new(
+        syntax: &'a S,
+        set: &'static isa::InstructionSet,
+        ext: Option<&'static isa::InstructionSet>,
+    ) -> Self {
+        Self {
+            syntax,
+            set,
+            ext,
+            consts: BTreeMap::new(),
+            current_global: None,
+            pending_leading: Vec::new(),
+            nodes: Vec::new(),
+        }
+    }
+
+    /// Parse one line with the live environment. An ordinary line pushes its
+    /// node (or nothing, for a blank/comment line) and returns `None`; an
+    /// include directive is returned for the driver to handle.
+    fn walk_line(
+        &mut self,
+        raw: &str,
+        line: usize,
+        file: FileId,
+    ) -> Result<Option<IncludeLine>, AsmError> {
+        let (code, comment) = self.syntax.split_comment(raw);
         if code.trim().is_empty() {
             // A comment-only line becomes leading trivia for the next node; a
             // blank line carries nothing.
             if let Some(text) = comment {
-                pending_leading.push(Comment {
+                self.pending_leading.push(Comment {
                     text: text.to_string(),
-                    span: Span::at(line as u32, 1),
+                    span: Span::in_file(file, line as u32, 1),
                 });
             }
-            continue;
+            return Ok(None);
         }
-        let (label, rest) = split_label(syntax, set, ext, code, line)?;
-        let mut op = parse_op(syntax, set, ext, rest, line, &consts)?;
+        let (label, rest) = split_label(self.syntax, self.set, self.ext, code, line)?;
+        // An include is walk-handled, not an Operation: the target must not
+        // be opened here (KTD1 — `--fmt` succeeds with a missing target, and
+        // an untaken conditional branch must never load one once U8 lands).
+        let (word, args) = split_first_word(rest);
+        let is_include = self.syntax.is_include(word);
+        let mut op = if is_include {
+            None
+        } else {
+            parse_op(self.syntax, self.set, self.ext, rest, line, &self.consts)?
+        };
 
         // Resolve the label's scope into a `Symbol` (source name, scope, and the
         // qualified name lowering emits). A leading-`.` label is local to the
         // current scope; a plain label opens a new scope. Update the scope first,
         // so a local reference on the same line (`done: jr .loop`) resolves
         // against it — matching the old ordering.
+        let scoped = self.syntax.scopes_locals();
         let symbol = label.map(|name| {
             if scoped && name.starts_with('.') {
-                match &current_global {
+                match &self.current_global {
                     Some(g) => Symbol {
                         qualified: format!("{g}{name}"),
                         scope: Scope::Local {
@@ -158,7 +357,7 @@ pub(crate) fn parse_program<S: Z80Syntax>(
                 }
             } else {
                 if scoped {
-                    current_global = Some(name.clone());
+                    self.current_global = Some(name.clone());
                 }
                 Symbol {
                     qualified: name.clone(),
@@ -167,53 +366,93 @@ pub(crate) fn parse_program<S: Z80Syntax>(
                 }
             }
         });
-        if scoped && let Some(g) = &current_global {
+        if scoped && let Some(g) = &self.current_global {
             op = op.map(|o| qualify_locals(o, g));
         }
 
         // `equ` binds its (qualified) label to a parse-time constant.
         if let (Some(sym), Some(Operation::Equ(e))) = (&symbol, &op)
-            && let Some(v) = eval_const(e, &consts)
+            && let Some(v) = eval_const(e, &self.consts)
         {
-            consts.insert(sym.qualified.clone(), v);
-        }
-        if symbol.is_none() && op.is_none() {
-            continue;
+            self.consts.insert(sym.qualified.clone(), v);
         }
         let trivia = Trivia {
-            leading: std::mem::take(&mut pending_leading),
+            leading: std::mem::take(&mut self.pending_leading),
             trailing: comment.map(|text| Comment {
                 text: text.to_string(),
-                span: Span::at(line as u32, (code.len() + 1) as u32),
+                span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
             }),
         };
-        nodes.push(Node {
-            operand_span: crate::ast::operand_span(raw, rest, line as u32),
+        let operand_span = crate::ast::operand_span(raw, rest, line as u32).map(|mut s| {
+            s.file = file;
+            s
+        });
+        if is_include {
+            return Ok(Some(IncludeLine {
+                request: include_request(args, line)?,
+                label: symbol,
+                source: rest.trim().to_string(),
+                span: Span::in_file(file, line as u32, 1),
+                operand_span,
+                trivia,
+            }));
+        }
+        if symbol.is_none() && op.is_none() {
+            return Ok(None);
+        }
+        self.nodes.push(Node {
+            operand_span,
             label: symbol,
             item: op.map(crate::ast::item_from_operation),
             source: rest.trim().to_string(),
-            span: Span::at(line as u32, 1),
+            span: Span::in_file(file, line as u32, 1),
             trivia,
         });
+        Ok(None)
     }
-    // Flush comments after the last node (a trailing comment block, or a
-    // comment-only file) as a label-less, op-less node so the formatter keeps
-    // them (they emit no bytes, so assembly is unaffected).
-    if !pending_leading.is_empty() {
-        let line = source.lines().count() as u32;
-        nodes.push(Node {
-            operand_span: None,
-            label: None,
-            item: None,
-            source: String::new(),
-            span: Span::at(line, 1),
-            trivia: Trivia {
-                leading: pending_leading,
-                trailing: None,
-            },
-        });
+
+    /// Flush comments after the last node (a trailing comment block, or a
+    /// comment-only file) as a label-less, op-less node so the formatter keeps
+    /// them (they emit no bytes, so assembly is unaffected).
+    fn flush_trailing(&mut self, last_line: u32) {
+        if !self.pending_leading.is_empty() {
+            self.nodes.push(Node {
+                operand_span: None,
+                label: None,
+                item: None,
+                source: String::new(),
+                span: Span::at(last_line, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing: None,
+                },
+            });
+        }
     }
-    Ok(Program { nodes })
+}
+
+/// The file name of an include directive: `"file"`, `<file>`, or a bare
+/// token, matching the reference's accepted spellings (probe-pinned). Text
+/// after a closing quote/bracket is ignored, as the reference does.
+fn include_request(args: &str, line: usize) -> Result<String, AsmError> {
+    let t = args.trim();
+    let inner = if let Some(rest) = t.strip_prefix('"') {
+        let end = rest
+            .find('"')
+            .ok_or_else(|| AsmError::new(line, "unterminated include file name"))?;
+        &rest[..end]
+    } else if let Some(rest) = t.strip_prefix('<') {
+        let end = rest
+            .find('>')
+            .ok_or_else(|| AsmError::new(line, "unterminated include file name"))?;
+        &rest[..end]
+    } else {
+        t.split_whitespace().next().unwrap_or("")
+    };
+    if inner.is_empty() {
+        return Err(AsmError::new(line, "`include` needs a file name"));
+    }
+    Ok(inner.to_string())
 }
 
 // ---------------------------------------------------------------------------

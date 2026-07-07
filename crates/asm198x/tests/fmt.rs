@@ -1060,3 +1060,52 @@ fn fmt_ca65_reassembles_byte_identical() {
         "segment, cheap local, and anonymous reference preserved:\n{formatted}"
     );
 }
+
+/// U2 (language surface): `--fmt` renders an `INCLUDE` directive verbatim from
+/// the node's source without ever opening the target — formatting succeeds
+/// when the target does not exist — and stays idempotent (KTD1).
+#[test]
+fn fmt_sjasmplus_include_is_verbatim_and_never_opens_the_target() {
+    let src = "\
+; header
+        org $8000
+        include \"missing.inc\"   ; pulled in later
+lbl:    INCLUDE <also-missing.inc>
+        ld a,1
+";
+    let formatted = format_sjasmplus(src).expect("formats with the targets missing");
+    assert!(
+        formatted.contains("include \"missing.inc\""),
+        "the directive text is verbatim:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("INCLUDE <also-missing.inc>"),
+        "spelling (case, brackets) preserved:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert_eq!(
+        format_sjasmplus(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U2: formatted include-bearing source reassembles byte-identical through
+/// the include-capable entry (the multi-file leg of the fmt round-trip bar).
+#[test]
+fn fmt_sjasmplus_include_reassembles_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || MemoryLoader::new().text("defs.inc", "VAL equ $2b\n");
+    let src = "        org $8000\n        include \"defs.inc\"\n        ld a,VAL\n";
+    let original = asm198x::assemble_sjasmplus_files(src, "main.asm", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_sjasmplus(src).expect("formats");
+    let reassembled = asm198x::assemble_sjasmplus_files(&formatted, "main.asm", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+}

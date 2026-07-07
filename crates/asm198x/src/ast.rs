@@ -236,6 +236,16 @@ pub(crate) enum Item {
     /// only [`NativeItem::inline_label`]; [`lower`] rejects it — a native item is
     /// assembled by its dialect, never lowered to the engine).
     Native(Box<dyn NativeItem>),
+    /// An `INCLUDE "file"` directive (language-surface U2, KTD1): the request
+    /// as written, **unresolved** — the single-source parse never opens the
+    /// target, so `--fmt` renders the directive verbatim from [`Node::source`]
+    /// and succeeds when the target is missing. The include-capable walk
+    /// (`dialects::z80::parse_program_multi`) resolves includes lazily instead
+    /// of building this item; [`lower`] rejects it, because the single-source
+    /// API has no loader to resolve with.
+    Include {
+        request: String,
+    },
 }
 
 /// A source line reduced to an optional (scoped) label and an optional
@@ -380,8 +390,23 @@ pub(crate) fn lower(program: Program) -> Result<Vec<Statement>, AsmError> {
         .nodes
         .into_iter()
         .map(|node| {
+            // An include item cannot lower: it needs a loader, which only the
+            // multi-file walk has (U2, KTD1). The single-source entry points
+            // keep meaning "one file, no includes" — with a pointer, not a
+            // silent skip or a bogus `unknown instruction`.
+            if let Some(Item::Include { request }) = &node.item {
+                return Err(AsmError::at(
+                    node.span.clone(),
+                    format!(
+                        "cannot resolve `include \"{request}\"` here — the single-source \
+                         API assembles one file; use the multi-file entry point \
+                         (the CLI resolves includes automatically)"
+                    ),
+                ));
+            }
             Ok(Statement {
                 line: node.span.line as usize,
+                file: node.span.file,
                 label: node.label.map(|s| s.qualified),
                 op: node.item.map(lower_item).transpose()?,
                 operand_span: node.operand_span,
@@ -443,6 +468,14 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             return Err(AsmError::new(
                 0,
                 "internal error: a native item is assembled by its dialect, not lowered",
+            ));
+        }
+        // `lower` rejects an include before reaching here (it needs the node's
+        // span for the diagnostic); this arm guards a direct `lower_item` call.
+        Item::Include { request } => {
+            return Err(AsmError::new(
+                0,
+                format!("internal error: `include \"{request}\"` reached item lowering"),
             ));
         }
     })

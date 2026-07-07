@@ -472,6 +472,7 @@ fn run(args: &[String]) -> Result<String, String> {
             &assembler,
             input,
             &source,
+            &include_dirs,
             exe,
             output.as_deref(),
             (&debug, &sym, &listing),
@@ -594,11 +595,33 @@ fn run(args: &[String]) -> Result<String, String> {
         return Err("`--prg` is only for the C64 dialect (acme)".into());
     }
 
-    let assembly = assembler
-        .assemble(&source)
-        .map_err(|e| render_error(input, &files, &e))?;
+    // sjasmplus is include-capable (U2): it assembles through the multi-file
+    // entry, with the input's directory + the `-I` dirs wired into a
+    // filesystem loader; a failure renders with the real file table and the
+    // include-graph notes. Every other dialect stays on the single-file path.
+    let assembly = match assembler {
+        Assembler::Sjasmplus { z80n } => {
+            let loader = fs_loader(input, &include_dirs);
+            let entry = if z80n {
+                asm198x::assemble_sjasmplus_next_files
+            } else {
+                asm198x::assemble_sjasmplus_files
+            };
+            entry(&source, input, &loader).map_err(|e| render_multi_error(input, &e))?
+        }
+        _ => assembler
+            .assemble(&source)
+            .map_err(|e| render_error(input, &files, &e))?,
+    };
     for w in &assembly.warnings {
-        eprintln!("asm198x: {input}: {w}");
+        // A warning inside an included file names that file (the multi-file
+        // table); single-file results have an empty table and keep naming the
+        // input.
+        let file = assembly
+            .files
+            .get(w.file.0 as usize)
+            .map_or(input, String::as_str);
+        eprintln!("asm198x: {file}: {w}");
     }
 
     // `--sna`: wrap the assembled Spectrum program in a 48K snapshot; `--prg`:
@@ -744,12 +767,34 @@ fn render_error(input: &str, files: &[String], e: &asm198x::AsmError) -> String 
 /// innermost first, each on its own line — appended to a rendered error so a
 /// failure deep in an include chain shows how it was reached. Empty for the
 /// root input (included from nowhere).
-#[allow(dead_code)] // rendered once U2's include-capable paths return a populated map
 fn render_include_notes(map: &asm198x::source::SourceMap, file: asm198x::FileId) -> String {
     map.include_chain(file)
         .iter()
         .map(|(path, line)| format!("\nincluded from {path}:{line}"))
         .collect()
+}
+
+/// Render a multi-file assembly failure for humans: the rustc-style
+/// `file:line:col` render against the failure-path file table (KTD2), plus
+/// the `included from` chain when the error sits inside an include.
+fn render_multi_error(input: &str, e: &asm198x::MultiFileError) -> String {
+    let table = e.source_map.file_table();
+    let mut message = render_error(input, &table, &e.error);
+    if let Some(span) = &e.error.span {
+        message.push_str(&render_include_notes(&e.source_map, span.file));
+    }
+    message
+}
+
+/// The filesystem loader for an include-capable run: anchored at the input's
+/// directory, searching the repeatable `-I` dirs in command-line order (U2,
+/// KTD8).
+fn fs_loader(input: &str, include_dirs: &[PathBuf]) -> asm198x::source::FsLoader {
+    let base = Path::new(input)
+        .parent()
+        .filter(|p| !p.as_os_str().is_empty())
+        .map_or_else(|| PathBuf::from("."), Path::to_path_buf);
+    asm198x::source::FsLoader::new(base, include_dirs.to_vec())
 }
 
 /// Parse an address: `$hhhh`, `0xhhhh`, or decimal.
@@ -821,10 +866,12 @@ fn parse_message_format(value: &str) -> Result<MessageFormat, String> {
 /// `AssemblyResult` and every `AsmError`-derived `Diagnostic` serialize the same,
 /// so a new CPU inherits JSON output with no extra work. Returns an empty summary
 /// so the caller prints nothing further — the JSON is already on stdout.
+#[allow(clippy::too_many_arguments)]
 fn emit_json(
     assembler: &Assembler,
     input: &str,
     source: &str,
+    include_dirs: &[PathBuf],
     exe: bool,
     output: Option<&Path>,
     (debug, sym, listing): (&ArtifactPath, &ArtifactPath, &ArtifactPath),
@@ -837,6 +884,10 @@ fn emit_json(
         linked_info = Some(info);
         image
     };
+    // The include-capable failure carries the file table (KTD2); it resolves
+    // each failure diagnostic's `span.path`, so the bare Diagnostic-array
+    // shape needs no change.
+    let mut failure_files: Vec<String> = Vec::new();
     let result = match assembler {
         Assembler::Vasm if exe && debug_requested => {
             asm198x::assemble_vasm_exe_debug(source, input).map(&mut capture)
@@ -850,6 +901,18 @@ fn emit_json(
             asm198x::assemble_ca65_debug(source, input).map(&mut capture)
         }
         Assembler::Ca65 => asm198x::assemble_ca65(source),
+        Assembler::Sjasmplus { z80n } => {
+            let loader = fs_loader(input, include_dirs);
+            let entry = if *z80n {
+                asm198x::assemble_sjasmplus_next_files
+            } else {
+                asm198x::assemble_sjasmplus_files
+            };
+            entry(source, input, &loader).map_err(|e| {
+                failure_files = e.source_map.file_table();
+                e.error
+            })
+        }
         other => other.assemble(source),
     };
     match result {
@@ -884,8 +947,17 @@ fn emit_json(
         }
         Err(error) => {
             // A single diagnostic today (one fatal error); a Vec so the JSON shape
-            // is stable if multi-error accumulation lands later.
-            let diagnostics = [asm198x::Diagnostic::from(error)];
+            // is stable if multi-error accumulation lands later. On the
+            // include-capable path, the span's additive `path` field resolves
+            // its file from the failure-path table (KTD2) — the array shape
+            // itself is unchanged.
+            let mut diagnostic = asm198x::Diagnostic::from(error);
+            if !failure_files.is_empty() {
+                diagnostic.span = diagnostic
+                    .span
+                    .map(|span| asm198x::resolve_span_path(span, &failure_files));
+            }
+            let diagnostics = [diagnostic];
             let json = serde_json::to_string(&diagnostics)
                 .map_err(|e| format!("json encode failed: {e}"))?;
             println!("{json}");

@@ -524,6 +524,7 @@ impl crate::ast::CondEval for AcmeEval<'_> {
         if !(label.is_none() && op.is_none()) {
             out.push(Statement {
                 line,
+                file: crate::span::FileId(0),
                 label,
                 op,
                 operand_span: node.operand_span.clone(),

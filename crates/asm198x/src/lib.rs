@@ -470,13 +470,107 @@ pub fn assemble_pasmonext(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Pasmo { z80n: true }).map(AssemblyResult::from)
 }
 
-/// Assemble sjasmplus-syntax Z80 source targeting a plain Z80.
+/// Assemble sjasmplus-syntax Z80 source targeting a plain Z80. Single-source:
+/// an `include` directive is an error here — use
+/// [`assemble_sjasmplus_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_sjasmplus(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Sjasmplus { z80n: false }).map(AssemblyResult::from)
+}
+
+/// The failure shape of the include-capable entry points (language-surface
+/// U2, KTD2): the assembly error **plus the source map built up to the
+/// failure** — its [`file_table`](source::SourceMap::file_table) resolves the
+/// error span's `FileId` and its
+/// [`include_chain`](source::SourceMap::include_chain) yields the
+/// `included from` notes. An error inside an included file is a failure-path
+/// scenario, so the table must survive an `Err`; this type is where it rides.
+#[derive(Debug)]
+pub struct MultiFileError {
+    /// The underlying assembly failure; its span's `FileId` indexes
+    /// [`source_map`](Self::source_map)'s file table.
+    pub error: AsmError,
+    /// Every file loaded before the failure: the `FileId` table and the
+    /// include graph. Boxed to keep the `Err` variant lean on the happy path
+    /// (clippy `result_large_err`); methods read through the box unchanged.
+    pub source_map: Box<source::SourceMap>,
+}
+
+impl std::fmt::Display for MultiFileError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.error.fmt(f)
+    }
+}
+
+impl std::error::Error for MultiFileError {}
+
+/// The shared body of the include-capable entry points: root at `FileId(0)`,
+/// includes resolved through `loader`, and the file table populated on
+/// success — or carried on the error (KTD2).
+fn assemble_files(
+    dialect: &dyn dialect::Dialect,
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    let mut map = source::SourceMap::new(input_path, source);
+    match engine::assemble_multi(&mut map, loader, dialect) {
+        Ok(assembly) => {
+            let mut result = AssemblyResult::from(assembly);
+            result.files = map.file_table();
+            Ok(result)
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
+/// Assemble a **multi-file** sjasmplus program (language-surface U2):
+/// `source` is the root file's text, `input_path` its name (entry 0 of the
+/// file table), and `INCLUDE` directives resolve through `loader` — the CLI
+/// wires an [`FsLoader`](source::FsLoader) carrying the input's directory and
+/// the `-I` search dirs; tests wire a [`MemoryLoader`](source::MemoryLoader)
+/// (KTD8). On success, [`AssemblyResult::files`] holds the `FileId`→path
+/// table. The single-source [`assemble_sjasmplus`] is unchanged and rejects
+/// includes.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_sjasmplus_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(
+        &dialects::Sjasmplus { z80n: false },
+        source,
+        input_path,
+        loader,
+    )
+}
+
+/// As [`assemble_sjasmplus_files`], targeting the ZX Spectrum Next (Z80N).
+///
+/// # Errors
+/// As [`assemble_sjasmplus_files`].
+pub fn assemble_sjasmplus_next_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(
+        &dialects::Sjasmplus { z80n: true },
+        source,
+        input_path,
+        loader,
+    )
 }
 
 /// Assemble sjasmplus-syntax Z80 source targeting the ZX Spectrum Next (Z80N).

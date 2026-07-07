@@ -20,6 +20,7 @@ use std::collections::BTreeMap;
 use crate::dialect::{Dialect, Oversize};
 use crate::dialects::z80::{self, Z80Syntax};
 use crate::engine::{AsmError, Operation, Statement};
+use crate::source::{SourceLoader, SourceMap};
 
 /// The sjasmplus Z80 dialect. `z80n` selects the target instruction set
 /// (sjasmplus emits Z80N when targeting the Next).
@@ -50,6 +51,22 @@ impl Dialect for Sjasmplus {
             source,
         )?))
     }
+    /// The include-capable parse (language-surface U2): the interleaved,
+    /// environment-threaded walk over the source map, resolving `INCLUDE`
+    /// lazily through the loader — see `z80::parse_program_multi`.
+    fn parse_multi(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<Vec<Statement>, AsmError> {
+        crate::ast::lower(z80::parse_program_multi(
+            &SjasmplusSyntax,
+            self.instruction_set(),
+            self.extension_set(),
+            map,
+            loader,
+        )?)
+    }
     /// sjasmplus truncates an over-range byte to its low 8 bits and warns.
     fn oversized_byte_policy(&self) -> Oversize {
         Oversize::TruncateWarn
@@ -76,9 +93,17 @@ impl Z80Syntax for SjasmplusSyntax {
         true
     }
 
-    /// sjasmplus adds `byte` as a spelling of `db` (pasmo has neither).
+    /// sjasmplus adds `byte` as a spelling of `db` (pasmo has neither), and
+    /// `include` (U2 — listed here so a column-0 `include` reads as an
+    /// operation, not a label; the walk intercepts it before directive
+    /// parsing).
     fn is_directive(&self, word: &str) -> bool {
-        word.eq_ignore_ascii_case("byte") || z80::is_common_directive(word)
+        word.eq_ignore_ascii_case("byte") || self.is_include(word) || z80::is_common_directive(word)
+    }
+
+    /// sjasmplus's include directive (language-surface U2), walk-handled.
+    fn is_include(&self, word: &str) -> bool {
+        word.eq_ignore_ascii_case("include")
     }
 
     /// `byte` is `db`; everything else is the shared common set.

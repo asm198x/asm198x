@@ -79,6 +79,13 @@ them (a secondary trigger, per R7):
   *failure* output can resolve a file without the success-only table). No
   version bump — additive per the mechanism above. Plan:
   `docs/plans/2026-07-04-001-feat-language-surface-plan.md` (KTD2).
+- **2026-07-07 — file dimension on warnings and line records (language-surface
+  U2).** `Warning.file` and `LineRec.file` gain an additive `FileId` field,
+  `#[serde(default, skip_serializing_if)]`-guarded so it serializes only for a
+  non-root file — pre-multi-file payloads stay byte-identical. `AssemblyResult.files`
+  is now populated by the first include-capable dialect (sjasmplus), and failure
+  diagnostics resolve `Span.path` from the failure-path source map
+  (`MultiFileError`). No version bump.
 
 ## Drift triggers
 

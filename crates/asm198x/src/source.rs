@@ -29,6 +29,13 @@ use std::path::{Path, PathBuf};
 
 use crate::span::FileId;
 
+/// The include-nesting backstop (language-surface U2): a walk deeper than
+/// this many active files errors out. Cycles are caught exactly (the walk
+/// tracks its active stack), so this only fires on a genuinely pathological
+/// non-cyclic chain. Generous next to the reference's own cap (sjasmplus
+/// stops at 20 nested files).
+pub(crate) const MAX_INCLUDE_DEPTH: usize = 64;
+
 /// A failed load: the request as written in the directive, the requesting
 /// file (`None` for the root input / CLI), and the underlying reason. Carries
 /// both names so an include failure is diagnosable from the message alone.
@@ -92,13 +99,22 @@ pub trait SourceLoader {
 }
 
 /// The filesystem loader the CLI wires: a relative request is tried against
-/// the input file's directory first, then each `-I` search directory in
-/// command-line order; an absolute request is used as-is. Resolution order
-/// beyond that is a per-dialect semantic, probed in U2+ (KTD5/KTD8).
+/// the **requesting file's own directory** first (the root's is `base`), then
+/// each `-I` search directory in command-line order; an absolute request is
+/// used as-is.
+///
+/// The requesting-file-first rule is probe-pinned against sjasmplus (U2,
+/// KTD5): a nested include resolves relative to *its includer's* directory —
+/// the reference does **not** fall back to the root's directory for nested
+/// includes. Two deliberate deviations from the reference, both on our own
+/// CLI surface rather than the directive's semantics: the process working
+/// directory is never searched (sjasmplus tries it last — an unpredictable
+/// dependency on where the tool was launched), and our repeatable `-I` keeps
+/// first-listed-wins order (sjasmplus's `-i` gives *later* flags priority).
 pub struct FsLoader {
-    /// The root input's directory — the first search location.
+    /// The root input's directory — the search anchor for root-level requests.
     base: PathBuf,
-    /// Ordered `-I` search directories, tried after `base`.
+    /// Ordered `-I` search directories, tried after the requester's directory.
     search: Vec<PathBuf>,
 }
 
@@ -112,14 +128,24 @@ impl FsLoader {
         }
     }
 
-    /// The first existing candidate for `request`, in search order.
-    fn resolve(&self, request: &str) -> Option<PathBuf> {
+    /// The first existing candidate for `request`, in search order: the
+    /// requesting file's directory (the root's spelling may carry none — fall
+    /// back to `base`, which *is* the root's directory), then the `-I` dirs.
+    fn resolve(&self, request: &str, from: Option<&str>) -> Option<PathBuf> {
         let req = Path::new(request);
         if req.is_absolute() {
             return req.exists().then(|| req.to_path_buf());
         }
-        std::iter::once(&self.base)
-            .chain(self.search.iter())
+        // Includes are keyed by canonical (absolute) paths, so a nested
+        // request always has a real parent; a bare root spelling (`main.s`)
+        // has an empty one and anchors at `base` instead.
+        let from_dir = from
+            .map(Path::new)
+            .and_then(Path::parent)
+            .filter(|dir| !dir.as_os_str().is_empty())
+            .map_or_else(|| self.base.clone(), Path::to_path_buf);
+        std::iter::once(from_dir)
+            .chain(self.search.iter().cloned())
             .map(|dir| dir.join(req))
             .find(|candidate| candidate.exists())
     }
@@ -127,7 +153,7 @@ impl FsLoader {
     /// Resolve and canonicalize, so two spellings of one file share a key.
     fn resolve_canonical(&self, request: &str, from: Option<&str>) -> Result<PathBuf, LoadError> {
         let path = self
-            .resolve(request)
+            .resolve(request, from)
             .ok_or_else(|| LoadError::new(request, from, "file not found"))?;
         std::fs::canonicalize(&path).map_err(|e| LoadError::new(request, from, e.to_string()))
     }
@@ -197,6 +223,7 @@ impl SourceLoader for MemoryLoader {
 
 /// One loaded source file: its canonical path, its contents, and where it was
 /// included from (`None` for the root input).
+#[derive(Debug)]
 struct SourceFile {
     path: String,
     contents: String,
@@ -209,6 +236,7 @@ struct SourceFile {
 /// include graph. `FileId(0)` is always the root input; every include a loader
 /// resolves gets one id per canonical path however many times — and however
 /// spelled — it is requested.
+#[derive(Debug)]
 pub struct SourceMap {
     /// `files[i]` ⇔ `FileId(i)`.
     files: Vec<SourceFile>,

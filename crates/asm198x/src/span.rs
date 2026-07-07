@@ -16,11 +16,22 @@
 
 use serde::{Deserialize, Serialize};
 
-/// Identifies a source file. v1 is single-file (`FileId(0)`); include chains
-/// (idea 4) allocate further ids so a span can name the *included* file.
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+/// Identifies a source file. `FileId(0)` is the root input; include chains
+/// (language-surface U2) allocate further ids so a span can name the
+/// *included* file. `Default` is the root — the single-file value.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(transparent)]
 pub struct FileId(pub u32);
+
+impl FileId {
+    /// Whether this is the root input (`FileId(0)`) — the serde skip guard
+    /// that keeps pre-multi-file payloads byte-identical (KTD7): a `file`
+    /// field is only written when it says something the old shape could not.
+    #[must_use]
+    pub fn is_root(&self) -> bool {
+        self.0 == 0
+    }
+}
 
 /// One macro-expansion frame (a rustc-style defined-at / invoked-at record).
 /// Reserved now; idea 4's macro engine fills it. Empty in v1.

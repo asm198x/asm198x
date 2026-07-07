@@ -369,3 +369,134 @@ fn source_matches_reference() {
         "no snippets checked — no reference tools present?"
     );
 }
+
+// ===========================================================================
+// U2 — multi-file sjasmplus probes: the include mechanism against the real
+// tool. Each probe gets its own SUBDIRECTORY so stale files from other probes
+// (or earlier runs) can never leak into resolution.
+// ===========================================================================
+
+/// One multi-file fixture: a root file plus its includes, assembled by both
+/// sides from a per-probe directory.
+struct MultiProbe {
+    note: &'static str,
+    /// `(file name, contents)`; the first entry is the root.
+    files: &'static [(&'static str, &'static str)],
+}
+
+const MULTI_PROBES: &[MultiProbe] = &[
+    MultiProbe {
+        note: "two-file include + equ feeding bit/rst/ds (KTD1)",
+        files: &[
+            (
+                "main.asm",
+                "        org $8000\n        include \"defs.inc\"\n        bit BITNUM,a\n        rst RSTVEC\n        ds PAD\n        ld a,1\n",
+            ),
+            ("defs.inc", "BITNUM equ 5\nRSTVEC equ $18\nPAD equ 3\n"),
+        ],
+    },
+    MultiProbe {
+        note: "three-deep nested include, code at every level",
+        files: &[
+            (
+                "main.asm",
+                "        org $8000\n        ld a,1\n        include \"a.inc\"\n        ld e,5\n",
+            ),
+            (
+                "a.inc",
+                "        ld b,2\n        include \"b.inc\"\n        ld d,4\n",
+            ),
+            ("b.inc", "        ld c,3\n"),
+        ],
+    },
+    MultiProbe {
+        note: "locals scope across the include boundary, both directions",
+        files: &[
+            (
+                "main.asm",
+                "        org $8000\nstart:\n.here:  nop\n        include \"loc.inc\"\n        jr .after\n.after: nop\n",
+            ),
+            (
+                "loc.inc",
+                ".inloc: nop\n        jr .inloc\n        jr .here\n",
+            ),
+        ],
+    },
+    MultiProbe {
+        note: "same file included twice is processed twice",
+        files: &[
+            (
+                "main.asm",
+                "        org $8000\n        include \"body.inc\"\n        include \"body.inc\"\n",
+            ),
+            ("body.inc", "        nop\n"),
+        ],
+    },
+    MultiProbe {
+        note: "global defined inside the include rescopes the includer's locals",
+        files: &[
+            (
+                "main.asm",
+                "        org $8000\nstart:  nop\n        include \"glob.inc\"\n.tail:  nop\n        jr .tail\n",
+            ),
+            ("glob.inc", "mid:    nop\n"),
+        ],
+    },
+];
+
+#[test]
+#[ignore = "needs sjasmplus; run with --ignored"]
+fn multi_file_source_matches_reference() {
+    if !have("sjasmplus") {
+        eprintln!("SKIP: `sjasmplus` not on PATH");
+        return;
+    }
+    let base = std::env::temp_dir().join("asm198x-differential-multi");
+    let mut failures: Vec<String> = Vec::new();
+    for (i, p) in MULTI_PROBES.iter().enumerate() {
+        // A per-probe subdirectory, wiped before use, so resolution can never
+        // pick up a stale file from another probe.
+        let dir = base.join(format!("probe-{i}"));
+        let _ = fs::remove_dir_all(&dir);
+        fs::create_dir_all(&dir).expect("probe dir");
+        for (name, contents) in p.files {
+            fs::write(dir.join(name), contents).expect("write fixture");
+        }
+        let (root, _) = p.files[0];
+        let out = dir.join("ref.bin");
+        let status = Command::new("sjasmplus")
+            .arg("--nologo")
+            .arg(format!("--raw={}", out.display()))
+            .arg(root)
+            .current_dir(&dir)
+            .output()
+            .expect("run sjasmplus");
+        if !status.status.success() {
+            failures.push(format!(
+                "{}: sjasmplus rejected the fixture: {}",
+                p.note,
+                String::from_utf8_lossy(&status.stderr)
+            ));
+            continue;
+        }
+        let reference = fs::read(&out).expect("reference bytes");
+
+        let root_path = dir.join(root);
+        let source = fs::read_to_string(&root_path).expect("read root");
+        let loader = asm198x::source::FsLoader::new(&dir, Vec::new());
+        match asm198x::assemble_sjasmplus_files(&source, &root_path.to_string_lossy(), &loader) {
+            Ok(r) if r.bytes == reference => {}
+            Ok(r) => failures.push(format!(
+                "{}: bytes diverge — ours {:02X?} vs ref {:02X?}",
+                p.note, r.bytes, reference
+            )),
+            Err(e) => failures.push(format!("{}: we reject it: {}", p.note, e.error)),
+        }
+    }
+    assert!(
+        failures.is_empty(),
+        "{} multi-file probe failure(s):\n  {}",
+        failures.len(),
+        failures.join("\n  ")
+    );
+}

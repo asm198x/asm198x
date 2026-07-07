@@ -10,6 +10,8 @@
 //! than one CPU). See `decisions/syntax-stance.md`.
 
 use crate::engine::{AsmError, Statement};
+use crate::source::{SourceLoader, SourceMap};
+use crate::span::FileId;
 
 /// What a dialect does with a value too large for the byte operand it's emitted
 /// into. The 6502/6809 assemblers (ACME, ca65, lwasm) treat it as an error; the
@@ -39,6 +41,29 @@ pub(crate) trait Dialect {
     /// # Errors
     /// Returns an [`AsmError`] on any tokenising or mode-resolution failure.
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError>;
+
+    /// Parse a multi-file program (language-surface U2, KTD8): the root is
+    /// `FileId(0)` in `map`, and an include-capable dialect resolves its
+    /// include directives through `loader`, minting further ids in `map` as
+    /// the walk reaches them live (KTD1). The default is the single-file
+    /// behaviour — parse the root, no include resolution — so a dialect gains
+    /// includes by overriding this (sjasmplus in U2; the rest in U4–U6).
+    ///
+    /// # Errors
+    /// As [`parse`](Self::parse), plus include-resolution failures (missing
+    /// target, cycle, depth) at the directive's span.
+    fn parse_multi(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<Vec<Statement>, AsmError> {
+        let _ = loader;
+        let root = map
+            .contents(FileId(0))
+            .map(str::to_owned)
+            .unwrap_or_default();
+        self.parse(&root)
+    }
 
     /// Parse into the semantic AST (`crate::ast`) — the source-preserving tree
     /// the formatter and bidirectional emit consume (U5). Defaults to `None`: a

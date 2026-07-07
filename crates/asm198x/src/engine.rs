@@ -16,7 +16,8 @@ use std::fmt;
 use serde::{Deserialize, Serialize};
 
 use crate::dialect::{Dialect, Oversize};
-use crate::span::Span;
+use crate::source::{SourceLoader, SourceMap};
+use crate::span::{FileId, Span};
 
 /// The result of a successful assembly: where it loads and the bytes to load.
 #[derive(Debug, Clone)]
@@ -65,6 +66,13 @@ pub struct LineRec {
     pub line: u32,
     pub offset: u64,
     pub length: u64,
+    /// The file `line` counts within (language-surface U2): the root input for
+    /// a single-file assemble, an include's `FileId` otherwise. Additive per
+    /// KTD7 — absent means the root, and a root value is not serialized, so
+    /// pre-multi-file payloads are byte-identical. U9 renders these; the
+    /// engine just carries the data.
+    #[serde(default, skip_serializing_if = "FileId::is_root")]
+    pub file: FileId,
 }
 
 /// An assembly error, with the 1-based source line it occurred on (0 = no
@@ -121,6 +129,12 @@ impl std::error::Error for AsmError {}
 pub struct Warning {
     pub line: usize,
     pub message: String,
+    /// The file `line` counts within (language-surface U2) — a warning raised
+    /// inside an include names that include. Additive per KTD7: absent means
+    /// the root, and a root value is not serialized, so pre-multi-file
+    /// payloads are byte-identical.
+    #[serde(default, skip_serializing_if = "FileId::is_root")]
+    pub file: FileId,
 }
 
 impl Warning {
@@ -128,6 +142,7 @@ impl Warning {
         Self {
             line,
             message: message.into(),
+            file: FileId(0),
         }
     }
 }
@@ -366,6 +381,10 @@ impl Piece {
 /// One source line, reduced to an optional label and an optional operation.
 pub(crate) struct Statement {
     pub(crate) line: usize,
+    /// The file `line` counts within (language-surface U2). `FileId(0)` for
+    /// every single-file parse; the include-capable walks mint real ids so an
+    /// engine error deep in an include names the right file.
+    pub(crate) file: FileId,
     pub(crate) label: Option<String>,
     pub(crate) op: Option<Operation>,
     /// The operand field's source position, when the dialect parse knew it
@@ -375,12 +394,30 @@ pub(crate) struct Statement {
 }
 
 impl Statement {
+    /// A line-granular error at this statement, carrying its `(file, line)`
+    /// as a real span — so a failure inside an included file renders with
+    /// that file's name, not a bare line number.
+    fn err(&self, message: impl Into<String>) -> AsmError {
+        AsmError::at(Span::in_file(self.file, self.line as u32, 0), message)
+    }
+
+    /// Stamp this statement's file onto an error raised by a line-only helper
+    /// (expression evaluation, form lookup): a span-less error gains a
+    /// line-granular span in this statement's file; an error that already
+    /// carries a span (an operand-accurate one) is left alone.
+    fn stamp(&self, mut e: AsmError) -> AsmError {
+        if e.span.is_none() && e.line != 0 {
+            e.span = Some(Span::in_file(self.file, e.line as u32, 0));
+        }
+        e
+    }
+
     /// An operand-range error: at the operand's span when the parse supplied
     /// one (a column-accurate diagnostic, contract U3), else line-granular.
     fn operand_err(&self, message: impl Into<String>) -> AsmError {
         match &self.operand_span {
             Some(span) => AsmError::at(span.clone(), message),
-            None => AsmError::new(self.line, message),
+            None => self.err(message),
         }
     }
 }
@@ -399,9 +436,35 @@ impl Statement {
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, AsmError> {
+    assemble_statements(dialect.parse(source)?, dialect)
+}
+
+/// Assemble a multi-file program (language-surface U2): the root is
+/// `FileId(0)` in `map`, and the dialect's include-capable parse resolves
+/// `INCLUDE` directives through `loader`, minting further ids as it goes. The
+/// two-pass driver below is the same one [`assemble`] uses — only the parse
+/// differs.
+///
+/// # Errors
+/// As [`assemble`]; errors raised inside an included file carry that file's
+/// `FileId` in their span.
+pub(crate) fn assemble_multi(
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+    dialect: &dyn Dialect,
+) -> Result<Assembly, AsmError> {
+    assemble_statements(dialect.parse_multi(map, loader)?, dialect)
+}
+
+/// The shared two-pass driver over an already-parsed statement stream — the
+/// single body behind [`assemble`] and [`assemble_multi`], so the single- and
+/// multi-file paths cannot drift.
+fn assemble_statements(
+    statements: Vec<Statement>,
+    dialect: &dyn Dialect,
+) -> Result<Assembly, AsmError> {
     let set = dialect.instruction_set();
     let ext = dialect.extension_set();
-    let statements = dialect.parse(source)?;
 
     // Pass 1 — assign addresses to labels.
     let require_origin = dialect.requires_explicit_origin();
@@ -419,34 +482,31 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
             let label = s
                 .label
                 .as_ref()
-                .ok_or_else(|| AsmError::new(s.line, "`equ` needs a label"))?;
-            let v = e.eval(&symbols, pc, s.line)?;
+                .ok_or_else(|| s.err("`equ` needs a label"))?;
+            let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
             // Constants may be 24-bit (65816 bank/long addresses).
             if !(0..=0xFF_FFFF).contains(&v) {
-                return Err(AsmError::new(
-                    s.line,
-                    format!("equ value {v} out of range 0..=16777215"),
-                ));
+                return Err(s.err(format!("equ value {v} out of range 0..=16777215")));
             }
             if symbols.insert(label.clone(), v).is_some() {
-                return Err(AsmError::new(s.line, format!("duplicate label `{label}`")));
+                return Err(s.err(format!("duplicate label `{label}`")));
             }
             continue;
         }
         if let Some(label) = &s.label {
             if !(0..=0xFF_FFFF).contains(&pc) {
-                return Err(AsmError::new(s.line, "address out of range"));
+                return Err(s.err("address out of range"));
             }
             if symbols.insert(label.clone(), pc).is_some() {
-                return Err(AsmError::new(s.line, format!("duplicate label `{label}`")));
+                return Err(s.err(format!("duplicate label `{label}`")));
             }
         }
         match &s.op {
             None => {}
             Some(Operation::Org(e)) => {
-                let v = e.eval(&symbols, pc, s.line)?;
+                let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
                 if !(0..=0xFFFF).contains(&v) {
-                    return Err(AsmError::new(s.line, "origin address out of range"));
+                    return Err(s.err("origin address out of range"));
                 }
                 pc = v;
                 origin.get_or_insert(v);
@@ -458,15 +518,17 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 | Operation::Encoded(_)
                 | Operation::Align { .. },
             ) if require_origin && origin.is_none() => {
-                return Err(AsmError::new(
-                    s.line,
+                return Err(s.err(
                     "program counter undefined — set an origin (`*=`) before any code or data",
                 ));
             }
             Some(Operation::Bytes(items)) => pc += items.len() as i64 / addr_unit,
             Some(Operation::Words(items)) => pc += 2 * items.len() as i64 / addr_unit,
             Some(Operation::Instruction { mnemonic, mode, .. }) => {
-                pc += form(set, ext, mnemonic, mode, s.line)?.len() as i64 / addr_unit;
+                pc += form(set, ext, mnemonic, mode, s.line)
+                    .map_err(|err| s.stamp(err))?
+                    .len() as i64
+                    / addr_unit;
             }
             Some(Operation::Encoded(pieces)) => {
                 pc += pieces.iter().map(Piece::len).sum::<i64>() / addr_unit;
@@ -492,18 +554,18 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
         match &s.op {
             None => {}
             Some(Operation::Org(e)) => {
-                let target = e.eval(&symbols, pc, s.line)?;
+                let target = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
                 let cur = origin + bytes.len() as i64 / addr_unit;
                 if target < cur {
-                    return Err(AsmError::new(s.line, "cannot move origin backwards"));
+                    return Err(s.err("cannot move origin backwards"));
                 }
                 bytes.resize(bytes.len() + ((target - cur) * addr_unit) as usize, 0);
             }
             Some(Operation::Equ(_)) => {} // defines a symbol; emits nothing
             Some(Operation::Entry(e)) => {
-                let v = e.eval(&symbols, pc, s.line)?;
+                let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
                 if !(0..=0xFFFF).contains(&v) {
-                    return Err(AsmError::new(s.line, "entry address out of range"));
+                    return Err(s.err("entry address out of range"));
                 }
                 start = Some(v as u16);
             }
@@ -517,13 +579,13 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
             }
             Some(Operation::Bytes(items)) => {
                 for e in items {
-                    let v = e.eval(&symbols, pc, s.line)?;
+                    let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
                     emit_byte(&mut bytes, v, byte_policy, &mut warnings, s)?;
                 }
             }
             Some(Operation::Words(items)) => {
                 for e in items {
-                    let v = e.eval(&symbols, pc, s.line)?;
+                    let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
                     push_word(&mut bytes, v, s, set.endianness)?;
                 }
             }
@@ -532,21 +594,18 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 mode,
                 operands,
             }) => {
-                let f = form(set, ext, mnemonic, mode, s.line)?;
+                let f = form(set, ext, mnemonic, mode, s.line).map_err(|err| s.stamp(err))?;
                 if operands.len() != f.operands.len() {
-                    return Err(AsmError::new(
-                        s.line,
-                        format!(
-                            "internal: `{mnemonic}` {mode} takes {} operand value(s), got {}",
-                            f.operands.len(),
-                            operands.len()
-                        ),
-                    ));
+                    return Err(s.err(format!(
+                        "internal: `{mnemonic}` {mode} takes {} operand value(s), got {}",
+                        f.operands.len(),
+                        operands.len()
+                    )));
                 }
                 let next_addr = origin + bytes.len() as i64 + f.len() as i64;
                 bytes.extend_from_slice(f.opcode);
                 for (slot, e) in f.operands.iter().zip(operands.iter()) {
-                    let v = e.eval(&symbols, pc, s.line)?;
+                    let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
                     match slot.kind {
                         // Immediates and addresses lay down a value of the
                         // slot's width; only the width matters on the wire, so
@@ -559,10 +618,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                                 // 24-bit address (65816 long addressing).
                                 3 => push_addr24(&mut bytes, v, s, set.endianness)?,
                                 other => {
-                                    return Err(AsmError::new(
-                                        s.line,
-                                        format!("unsupported operand width {other}"),
-                                    ));
+                                    return Err(s.err(format!("unsupported operand width {other}")));
                                 }
                             }
                         }
@@ -601,10 +657,9 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                                     push_word(&mut bytes, offset & 0xFFFF, s, set.endianness)?;
                                 }
                                 other => {
-                                    return Err(AsmError::new(
-                                        s.line,
-                                        format!("unsupported relative width {other}"),
-                                    ));
+                                    return Err(
+                                        s.err(format!("unsupported relative width {other}"))
+                                    );
                                 }
                             }
                         }
@@ -623,7 +678,9 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                             rel,
                             signed,
                         } => {
-                            let raw = expr.eval(&symbols, pc, s.line)?;
+                            let raw = expr
+                                .eval(&symbols, pc, s.line)
+                                .map_err(|err| s.stamp(err))?;
                             // A branch offset is relative to the address that
                             // follows this value (the next instruction).
                             let next = origin + bytes.len() as i64 + i64::from(*width);
@@ -640,7 +697,9 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                             or_bits,
                             what,
                         } => {
-                            let raw = expr.eval(&symbols, pc, s.line)?;
+                            let raw = expr
+                                .eval(&symbols, pc, s.line)
+                                .map_err(|err| s.stamp(err))?;
                             if *scale != 1 && raw % *scale != 0 {
                                 return Err(s.operand_err(format!(
                                     "{what} ({raw}) is not a multiple of {scale}"
@@ -661,7 +720,9 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                             dir_bit,
                             what,
                         } => {
-                            let tgt = target.eval(&symbols, pc, s.line)?;
+                            let tgt = target
+                                .eval(&symbols, pc, s.line)
+                                .map_err(|err| s.stamp(err))?;
                             // The CP1610 measures from the address after both
                             // words (opcode + magnitude) — two address units past
                             // this instruction's start (`pc`).
@@ -723,6 +784,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 line: s.line as u32,
                 offset: (pc - origin) as u64,
                 length: ((bytes.len() - len_before) as i64 / addr_unit) as u64,
+                file: s.file,
             });
         }
         // The entry point (`end <addr>`) is an Entry symbol. When it targets a
@@ -751,10 +813,13 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
                 debug.symbols.push(debug198x::Symbol { name, kind: entry });
             }
         }
-    }
 
-    if origin + bytes.len() as i64 > 0x1_0000 {
-        return Err(AsmError::new(0, "program exceeds the 64K address space"));
+        // The 64K cap, checked as bytes land so the error carries the span of
+        // the statement that crossed it (`bytes` only grows, so the first
+        // offender fires) — a failure in an included file names that file.
+        if origin + bytes.len() as i64 > 0x1_0000 {
+            return Err(s.err("program exceeds the 64K address space"));
+        }
     }
 
     Ok(Assembly {
@@ -817,10 +882,7 @@ fn emit_value(
         4 if signed => (i64::from(i32::MIN), i64::from(i32::MAX)),
         4 => (i64::from(i32::MIN), i64::from(u32::MAX)),
         other => {
-            return Err(AsmError::new(
-                s.line,
-                format!("unsupported value width {other}"),
-            ));
+            return Err(s.err(format!("unsupported value width {other}")));
         }
     };
     if !(lo..=hi).contains(&v) {
@@ -856,10 +918,11 @@ fn emit_byte(
             }
             Oversize::Truncate => {}
             Oversize::TruncateWarn => {
-                warnings.push(Warning::new(
-                    s.line,
-                    format!("value {v} truncated to a byte"),
-                ));
+                warnings.push(Warning {
+                    line: s.line,
+                    message: format!("value {v} truncated to a byte"),
+                    file: s.file,
+                });
             }
         }
     }
