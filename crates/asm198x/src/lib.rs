@@ -64,7 +64,7 @@ pub use contract::{
     resolve_span_path,
 };
 pub use engine::{AsmError, Assembly, DebugData, LineRec, Warning};
-pub use listing::{debug_info, render_listing, render_sym};
+pub use listing::{ListingFile, debug_info, render_listing, render_listing_files, render_sym};
 pub use span::{ExpansionFrame, FileId, Span};
 // Re-exported so consumers of `Assembly.debug` need not depend on debug198x
 // directly for the symbol types the engine captures.

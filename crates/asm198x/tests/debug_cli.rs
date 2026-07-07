@@ -792,6 +792,168 @@ fn vasm_exe_sym_is_section_qualified() {
     );
 }
 
+// --- U9: multi-file debug artifacts on the flat path ---
+
+/// The two-file sjasmplus program the flat multi-file tests share: an
+/// `include` plus an `incbin`, code on both sides of the boundary.
+const Z80_MULTI_MAIN: &str = "\
+\torg $8000\n\
+start:\n\
+\tld a,1\n\
+\tinclude \"part.inc\"\n\
+\tret\n";
+const Z80_MULTI_INC: &str = "\
+tiles:\n\
+\tincbin \"tiles.bin\"\n\
+\tld b,2\n";
+const Z80_MULTI_BIN: [u8; 4] = [0xDE, 0xAD, 0xBE, 0xEF];
+
+/// The multi-file `--listing` rendering (U9), golden: included lines splice in
+/// at the include point, every row carries a file margin (basenames), and the
+/// incbin payload elides to a one-line byte-count row instead of a hex dump.
+#[test]
+fn multifile_listing_golden() {
+    let loader = asm198x::source::MemoryLoader::new()
+        .text("part.inc", Z80_MULTI_INC)
+        .binary("tiles.bin", Z80_MULTI_BIN.to_vec());
+    let r = asm198x::assemble_sjasmplus_files(Z80_MULTI_MAIN, "main.s", &loader)
+        .expect("multi-file assembles");
+    let files = [
+        asm198x::ListingFile {
+            path: "main.s".to_string(),
+            contents: Z80_MULTI_MAIN.to_string(),
+            included_from: None,
+        },
+        asm198x::ListingFile {
+            path: "part.inc".to_string(),
+            contents: Z80_MULTI_INC.to_string(),
+            included_from: Some((asm198x::FileId(0), 4)),
+        },
+    ];
+    let listing = asm198x::render_listing_files(&files, &r, 1);
+    let expected = [
+        format!("main.s{}\torg $8000", " ".repeat(35)),
+        format!("main.s{}start:", " ".repeat(35)),
+        format!("main.s    8000  3E 01{}\tld a,1", " ".repeat(20)),
+        format!("main.s{}\tinclude \"part.inc\"", " ".repeat(35)),
+        format!("part.inc{}tiles:", " ".repeat(33)),
+        format!(
+            "part.inc  8002  .. 4 bytes{}\tincbin \"tiles.bin\"",
+            " ".repeat(15)
+        ),
+        format!("part.inc  8006  06 02{}\tld b,2", " ".repeat(20)),
+        format!("main.s    8008  C9{}\tret", " ".repeat(23)),
+        String::new(),
+    ]
+    .join("\n");
+    assert_eq!(listing, expected);
+}
+
+/// The one-file call of `render_listing_files` is byte-identical to
+/// `render_listing` — the single-file `--listing` output is unchanged by the
+/// multi-file renderer (no margin, no elision surprises).
+#[test]
+fn single_file_listing_files_matches_render_listing() {
+    let r = asm198x::assemble_pasmo(Z80_SRC).expect("assemble");
+    let via_files = asm198x::render_listing_files(
+        &[asm198x::ListingFile {
+            path: "test.z80".to_string(),
+            contents: Z80_SRC.to_string(),
+            included_from: None,
+        }],
+        &r,
+        1,
+    );
+    assert_eq!(via_files, asm198x::render_listing(Z80_SRC, &r, 1));
+}
+
+/// `--debug`/`--sym`/`--listing` on a multi-file flat program via the CLI
+/// (U9): the sidecar's `sources` lists both files in `FileId` order with line
+/// records naming the included file; `--sym` keeps its exact shape (KTD4);
+/// the listing carries the file margin and the elided incbin row.
+#[test]
+fn flat_multifile_debug_artifacts_tell_the_truth() {
+    let dir = std::env::temp_dir().join("asm198x-debug-cli-z80-multi");
+    std::fs::create_dir_all(&dir).expect("temp tree");
+    let main = dir.join("main.s");
+    std::fs::write(&main, Z80_MULTI_MAIN).expect("write main");
+    std::fs::write(dir.join("part.inc"), Z80_MULTI_INC).expect("write include");
+    std::fs::write(dir.join("tiles.bin"), Z80_MULTI_BIN).expect("write asset");
+    let status = bin()
+        .args(["--dialect", "sjasmplus", "--debug", "--sym", "--listing"])
+        .arg(&main)
+        .arg("-o")
+        .arg(main.with_extension("bin"))
+        .status()
+        .expect("run asm198x");
+    assert!(status.success());
+
+    // The sidecar: two sources in FileId order; per-file line records.
+    let ndjson = std::fs::read_to_string(main.with_extension("debug198x")).expect("read sidecar");
+    let info = asm198x::debug198x::DebugInfo::read(&ndjson).expect("sidecar parses");
+    assert_eq!(info.header.sources.len(), 2, "root + the include");
+    assert!(
+        info.header.sources[1].ends_with("part.inc"),
+        "sources[1] is the include (FileId order): {:?}",
+        info.header.sources
+    );
+    let payload = info
+        .lines
+        .iter()
+        .find(|l| l.file.ends_with("part.inc") && l.line == 2)
+        .expect("the incbin payload's record names the include");
+    assert_eq!(payload.length, 4, "one record covers the whole payload");
+    assert!(
+        info.lines
+            .iter()
+            .all(|l| l.file.ends_with("part.inc") || l.file.ends_with("main.s")),
+        "every record names a real file from the table"
+    );
+
+    // `--sym`: the exact pre-multi-file shape — qualified names, sorted,
+    // `name = $HEX` — with symbols from both files in the one table.
+    let sym = std::fs::read_to_string(main.with_extension("sym")).expect("read sym");
+    assert_eq!(sym, "start = $8000\ntiles = $8002\n");
+
+    // `--listing`: the file margin on included lines, the elided incbin row.
+    let lst = std::fs::read_to_string(main.with_extension("lst")).expect("read listing");
+    assert!(
+        lst.contains("part.inc  8002  .. 4 bytes"),
+        "the incbin row is elided to a byte count under the include's margin:\n{lst}"
+    );
+    assert!(
+        lst.contains("part.inc  8006  06 02"),
+        "the include's code row carries its file margin:\n{lst}"
+    );
+    assert!(
+        lst.contains("main.s    8008  C9"),
+        "the root's rows carry the root margin:\n{lst}"
+    );
+    let margin_col = |line: &str| line.starts_with("main.s") || line.starts_with("part.inc");
+    assert!(
+        lst.lines().filter(|l| !l.is_empty()).all(margin_col),
+        "every row names its file in the margin:\n{lst}"
+    );
+}
+
+/// A single-file CLI `--listing` is unchanged by the multi-file plumbing:
+/// the written artifact matches `render_listing`'s output byte-for-byte.
+#[test]
+fn single_file_cli_listing_output_unchanged() {
+    let src_path = temp_source("single-lst", Z80_SRC);
+    let status = bin()
+        .args(["--dialect", "pasmo", "--listing"])
+        .arg(&src_path)
+        .arg("-o")
+        .arg(src_path.with_extension("bin"))
+        .status()
+        .expect("run asm198x");
+    assert!(status.success());
+    let lst = std::fs::read_to_string(src_path.with_extension("lst")).expect("read listing");
+    let r = asm198x::assemble_pasmo(Z80_SRC).expect("assemble");
+    assert_eq!(lst, asm198x::render_listing(Z80_SRC, &r, 1));
+}
+
 /// `--debug` on a multi-file NES program (language-surface U5): the sidecar's
 /// `Header.sources` lists every file in `FileId` order and each line record
 /// names the file its bytes were written in — the CHARS data attributes to

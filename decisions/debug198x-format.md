@@ -82,13 +82,32 @@ months** of this record (by 2027-01-06), re-examine here — either schedule the
 consumer, invoke the secondary trigger, or explicitly extend the draft with
 reasoning. The draft never waits open-endedly by default.
 
+## Dated notes
+
+- **2026-07-07 — multi-file population (language-surface U9).** The
+  multi-file source model reached every emission path: `Header.sources` is
+  now populated in the producer's `FileId` order — `sources[0]` = the root
+  input, one entry per included file in first-inclusion order, the
+  `AssemblyResult.files` convention, so one id space spans the contract and
+  the sidecar (KTD2) — and each `line` record's `file` names the record's own
+  file. An `incbin` payload is one `line` record covering the whole payload
+  at the directive's position; binary assets never appear in `sources`.
+  **Data-semantics clarification only**: no field or record shape changed and
+  no existing golden was regenerated. The corpus grew two always-on
+  multi-file families (`z80-spectrum-multifile` — flat engine, include +
+  incbin; `6502-nes-multifile` — ca65 linked, included CHR data). Spec page
+  updated in the same change per the draft posture above (plan KTD7).
+
 ## Coverage and accepted gaps
 
 The v0 corpus covers: z80-spectrum (flat engine + entry symbol), 6502-c64
 (acme), 6502-nes (ca65 linker, multi-segment, non-CPU sections), 68000-amiga
 (vasm hunks, relocatable), 65816 (24-bit constant), cp1610-intellivision (the
-one word-addressed family — decle units), and the hand-authored
-spectrum128-banked shape fixture.
+one word-addressed family — decle units), the hand-authored
+spectrum128-banked shape fixture, and — since 2026-07-07 — the two multi-file
+families (z80-spectrum-multifile: flat include + incbin; 6502-nes-multifile:
+ca65-linked included CHR data) pinning per-file line records and ordered
+`sources`.
 
 **Accepted gap:** the asl-syntax flat chips (8080, 6800, 1802, 8048, SC/MP,
 F8, 2650, TMS7000, PDP-11, TMS9900, Z8000) share the flat engine's single

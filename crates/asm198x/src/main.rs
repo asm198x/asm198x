@@ -224,6 +224,133 @@ type MultiEntry = fn(
 /// path (the input with the artifact's extension), `Some(Some(p))` = explicit.
 type ArtifactPath = Option<Option<PathBuf>>;
 
+/// One recorded include load: what `--listing` needs to splice an included
+/// file into the multi-file listing — its canonical path (the file-table key),
+/// its text, and the include point (requesting file + directive line).
+struct IncludeLoad {
+    canonical: String,
+    contents: String,
+    from: Option<String>,
+    line: u32,
+}
+
+/// A [`SourceLoader`](asm198x::source::SourceLoader) wrapper that records
+/// every **include** load (the line-carrying `load_text_at` entry the source
+/// map's registration uses) while delegating all resolution to the wrapped
+/// loader. The success path of the `assemble_*_files` entries returns only
+/// the file table, so this is how the CLI keeps each included file's contents
+/// and include point for `--listing` (language-surface U9). Un-lined
+/// `load_text` probes (the ca65-flat resolution probing) and binary loads
+/// pass through unrecorded — they are not include registrations.
+struct RecordingLoader<'a> {
+    inner: &'a dyn asm198x::source::SourceLoader,
+    log: std::cell::RefCell<Vec<IncludeLoad>>,
+}
+
+impl<'a> RecordingLoader<'a> {
+    fn new(inner: &'a dyn asm198x::source::SourceLoader) -> Self {
+        Self {
+            inner,
+            log: std::cell::RefCell::new(Vec::new()),
+        }
+    }
+
+    /// Drain the recorded include loads, in load order (first inclusion of a
+    /// file first — matching the source map's first-inclusion-wins graph).
+    fn take(&self) -> Vec<IncludeLoad> {
+        self.log.take()
+    }
+}
+
+impl asm198x::source::SourceLoader for RecordingLoader<'_> {
+    fn load_text(
+        &self,
+        request: &str,
+        from: Option<&str>,
+    ) -> Result<(String, String), asm198x::source::LoadError> {
+        self.inner.load_text(request, from)
+    }
+
+    fn load_text_at(
+        &self,
+        request: &str,
+        from: Option<&str>,
+        line: u32,
+    ) -> Result<(String, String), asm198x::source::LoadError> {
+        let (canonical, contents) = self.inner.load_text_at(request, from, line)?;
+        self.log.borrow_mut().push(IncludeLoad {
+            canonical: canonical.clone(),
+            contents: contents.clone(),
+            from: from.map(str::to_owned),
+            line,
+        });
+        Ok((canonical, contents))
+    }
+
+    fn load_binary(
+        &self,
+        request: &str,
+        from: Option<&str>,
+    ) -> Result<Vec<u8>, asm198x::source::LoadError> {
+        self.inner.load_binary(request, from)
+    }
+}
+
+/// Build the `--listing` source set from a successful assemble: the file table
+/// (`FileId` order), the root's already-read text, and the recorded include
+/// loads supplying each included file's contents and include point. A table
+/// entry with no recorded load (unreachable from the include walk) degrades to
+/// an empty, unspliced entry rather than failing the listing.
+fn listing_sources(
+    input: &str,
+    source: &str,
+    files: &[String],
+    loads: &[IncludeLoad],
+) -> Vec<asm198x::ListingFile> {
+    if files.is_empty() {
+        // A single-source result (no file table): the root is the whole set.
+        return vec![asm198x::ListingFile {
+            path: input.to_string(),
+            contents: source.to_string(),
+            included_from: None,
+        }];
+    }
+    files
+        .iter()
+        .enumerate()
+        .map(|(i, path)| {
+            if i == 0 {
+                return asm198x::ListingFile {
+                    path: path.clone(),
+                    contents: source.to_string(),
+                    included_from: None,
+                };
+            }
+            // The first recorded load is the first inclusion — the one the
+            // source map's include graph records.
+            match loads.iter().find(|l| l.canonical == *path) {
+                Some(l) => {
+                    let parent = l
+                        .from
+                        .as_deref()
+                        .and_then(|f| files.iter().position(|p| p == f))
+                        .unwrap_or(0);
+                    asm198x::ListingFile {
+                        path: path.clone(),
+                        contents: l.contents.clone(),
+                        included_from: Some((asm198x::FileId(parent as u32), l.line)),
+                    }
+                }
+                None => asm198x::ListingFile {
+                    path: path.clone(),
+                    contents: String::new(),
+                    included_from: None,
+                },
+            }
+        })
+        .collect()
+}
+
 fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match run(&args) {
@@ -546,7 +673,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 1,
                 &result,
                 info,
-                &source,
+                &[],
                 &debug,
                 &sym,
                 &listing,
@@ -590,7 +717,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 1,
                 &rom,
                 info,
-                &source,
+                &[],
                 &debug,
                 &sym,
                 &listing,
@@ -630,7 +757,11 @@ fn run(args: &[String]) -> Result<String, String> {
         unreachable!("ca65/vasm handled above")
     };
     let loader = fs_loader(input, &include_dirs);
-    let assembly = entry(&source, input, &loader).map_err(|e| render_multi_error(input, &e))?;
+    // The recorder keeps each include's contents + include point so a
+    // `--listing` on a multi-file program can splice the files (U9); the
+    // resolution behaviour is the wrapped filesystem loader's, unchanged.
+    let recorder = RecordingLoader::new(&loader);
+    let assembly = entry(&source, input, &recorder).map_err(|e| render_multi_error(input, &e))?;
     for w in &assembly.warnings {
         // A warning inside an included file names that file (the multi-file
         // table); single-file results have an empty table and keep naming the
@@ -687,14 +818,17 @@ fn run(args: &[String]) -> Result<String, String> {
     // produced. `--debug` alongside `--sna`/`--prg` emits both artifacts.
     let debug_notes = if debug.is_some() || sym.is_some() || listing.is_some() {
         let (cpu, dialect) = assembler.identity();
+        // `debug_info` reads the result's own file table (KTD2), so the
+        // sidecar's `sources` and per-file line records are multi-file-true.
         let info = asm198x::debug_info(&assembly, cpu, dialect, input);
+        let sources = listing_sources(input, &source, &assembly.files, &recorder.take());
         write_debug_artifacts(
             input,
             Some(&image_path),
             assembler.addr_unit(),
             &assembly,
             &info,
-            &source,
+            &sources,
             &debug,
             &sym,
             &listing,
@@ -711,6 +845,9 @@ fn run(args: &[String]) -> Result<String, String> {
 /// three render the one captured record (plan KTD2), passed in as the prebuilt
 /// `info` (the flat engine's via [`asm198x::debug_info`], ca65's read out of
 /// layout); default paths are the input with the artifact's extension.
+/// `sources` is the listing's spliced source set ([`listing_sources`]) — the
+/// linked ca65/vasm paths, where `--listing` is rejected upstream, pass an
+/// empty slice.
 #[allow(clippy::too_many_arguments)]
 fn write_debug_artifacts(
     input: &str,
@@ -718,7 +855,7 @@ fn write_debug_artifacts(
     addr_unit: u64,
     assembly: &asm198x::AssemblyResult,
     info: &asm198x::debug198x::DebugInfo,
-    source: &str,
+    sources: &[asm198x::ListingFile],
     debug: &ArtifactPath,
     sym: &ArtifactPath,
     listing: &ArtifactPath,
@@ -754,7 +891,7 @@ fn write_debug_artifacts(
         emit(path, "sym", "symbol table", asm198x::render_sym(info))?;
     }
     if let Some(path) = listing {
-        let text = asm198x::render_listing(source, assembly, addr_unit);
+        let text = asm198x::render_listing_files(sources, assembly, addr_unit);
         emit(path, "lst", "listing", text)?;
     }
     Ok(notes)
@@ -906,12 +1043,16 @@ fn emit_json(
     // each failure diagnostic's `span.path`, so the bare Diagnostic-array
     // shape needs no change.
     let mut failure_files: Vec<String> = Vec::new();
+    // One filesystem loader for every route, wrapped in the include recorder
+    // so a flat `--listing` can splice included files (U9); the linked paths
+    // reject `--listing` upstream and ignore the recording.
+    let fs = fs_loader(input, include_dirs);
+    let loader = RecordingLoader::new(&fs);
     let result = match assembler {
         // vasm goes through its include-capable entries (U6); a failure
         // carries the file table so the diagnostic's span can name an
         // included file.
         Assembler::Vasm => {
-            let loader = fs_loader(input, include_dirs);
             let fail = |e: asm198x::MultiFileError| {
                 failure_files = e.source_map.file_table();
                 e.error
@@ -935,7 +1076,6 @@ fn emit_json(
         // carries the file table so the diagnostic's span can name an
         // included file.
         Assembler::Ca65 if debug_requested => {
-            let loader = fs_loader(input, include_dirs);
             asm198x::assemble_ca65_files_debug(source, input, &loader)
                 .map_err(|e| {
                     failure_files = e.source_map.file_table();
@@ -943,20 +1083,16 @@ fn emit_json(
                 })
                 .map(&mut capture)
         }
-        Assembler::Ca65 => {
-            let loader = fs_loader(input, include_dirs);
-            asm198x::assemble_ca65_files(source, input, &loader).map_err(|e| {
-                failure_files = e.source_map.file_table();
-                e.error
-            })
-        }
+        Assembler::Ca65 => asm198x::assemble_ca65_files(source, input, &loader).map_err(|e| {
+            failure_files = e.source_map.file_table();
+            e.error
+        }),
         // Every flat dialect goes through its multi-file entry (the same
         // table as the human path); ca65/vasm are the arms above.
         other => {
             let Some(entry) = other.multi_entry() else {
                 unreachable!("ca65/vasm handled above")
             };
-            let loader = fs_loader(input, include_dirs);
             entry(source, input, &loader).map_err(|e| {
                 failure_files = e.source_map.file_table();
                 e.error
@@ -976,13 +1112,14 @@ fn emit_json(
                     let (cpu, dialect) = assembler.identity();
                     asm198x::debug_info(&assembly, cpu, dialect, input)
                 });
+                let sources = listing_sources(input, source, &assembly.files, &loader.take());
                 write_debug_artifacts(
                     input,
                     output,
                     assembler.addr_unit(),
                     &assembly,
                     &info,
-                    source,
+                    &sources,
                     debug,
                     sym,
                     listing,

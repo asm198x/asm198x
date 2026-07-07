@@ -89,6 +89,27 @@ pub trait SourceLoader {
     /// target cannot be resolved or read.
     fn load_text(&self, request: &str, from: Option<&str>) -> Result<(String, String), LoadError>;
 
+    /// As [`load_text`](Self::load_text), additionally told the 1-based line
+    /// of the include directive in the requesting file. This is the entry
+    /// [`SourceMap::load`] calls — every include registration passes through
+    /// it — so a wrapper that records `(canonical, contents, from, line)` sees
+    /// the whole include graph as it is built (the CLI's `--listing` splices
+    /// included files from exactly that record, language-surface U9). The
+    /// default forwards to `load_text`, ignoring the line; only recording
+    /// wrappers need to override it.
+    ///
+    /// # Errors
+    /// As [`load_text`](Self::load_text).
+    fn load_text_at(
+        &self,
+        request: &str,
+        from: Option<&str>,
+        line: u32,
+    ) -> Result<(String, String), LoadError> {
+        let _ = line;
+        self.load_text(request, from)
+    }
+
     /// Resolve `request` and load it as raw bytes (the incbin path). No
     /// `FileId` is minted — binary data has no spans.
     ///
@@ -277,7 +298,7 @@ impl SourceMap {
         line: u32,
     ) -> Result<FileId, LoadError> {
         let from_path = self.path(from).map(str::to_owned);
-        let (canonical, contents) = loader.load_text(request, from_path.as_deref())?;
+        let (canonical, contents) = loader.load_text_at(request, from_path.as_deref(), line)?;
         if let Some(&id) = self.by_path.get(&canonical) {
             return Ok(id);
         }
