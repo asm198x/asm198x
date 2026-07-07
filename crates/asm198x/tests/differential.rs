@@ -81,6 +81,7 @@ fn tool(dialect: &str) -> &'static str {
         "lwasm" => "lwasm",
         "vasm" => "vasmm68k_mot",
         "ca65-816" => "ca65",
+        "ca65-huc6280" => "ca65",
         other => panic!("no reference tool for dialect `{other}`"),
     }
 }
@@ -584,10 +585,76 @@ const MULTI_PROBES: &[MultiProbe] = &[
             ("body.a", "        lda #7\n"),
         ],
     },
+    // --- U4: the ca65-flat family (`.include`/`.incbin`, 65816 + HuC6280) ---
+    MultiProbe {
+        dialect: "ca65-816",
+        binaries: &[],
+        note: "nested .include via a subdirectory; the ancestor-chain resolution; \
+               .a16 + a symbol defined inside flow out to the includer (U4)",
+        files: &[
+            (
+                "main.s",
+                " lda #$11\n .include \"sub/mid.s\"\n lda #$34\n lda ptr\n",
+            ),
+            // From sub/mid.s, `shared.s` lives in the ROOT's directory — ca65
+            // resolves it by walking the include chain's directories
+            // (probe-pinned); so must we.
+            ("sub/mid.s", " lda #$22\n .include \"shared.s\"\n"),
+            ("shared.s", ".a16\nptr = $10\n lda #$12\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "ca65-816",
+        binaries: &[("data.bin", ASSET)],
+        note: ".incbin windows: plain, offset, offset+size, offset at EOF, \
+               and ca65's negative-size-reads-to-EOF sentinel (U4)",
+        files: &[(
+            "main.s",
+            " .byte $aa\n .incbin \"data.bin\"\n .incbin \"data.bin\", 2\n \
+             .incbin \"data.bin\", 2, 3\n .incbin \"data.bin\", 8\n \
+             .incbin \"data.bin\", 2, -2\n .byte $bb\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-816",
+        binaries: &[("data.bin", ASSET)],
+        note: "labels on the .include/.incbin lines bind at the include point / payload (U4)",
+        files: &[
+            (
+                "main.s",
+                "here: .include \"body.s\"\nart: .incbin \"data.bin\", 2, 2\n \
+                 .word here\n .word art\n",
+            ),
+            ("body.s", " lda #$07\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "ca65-huc6280",
+        binaries: &[],
+        note: "nested .include with HuC6280 extension ops; an include-defined \
+               symbol feeds later zp selection (U4)",
+        files: &[
+            (
+                "main.s",
+                " lda #$11\n .include \"a.s\"\n lda ptr\n rmb0 $10\n",
+            ),
+            ("a.s", " sax\n .include \"b.s\"\n"),
+            ("b.s", "ptr = $10\n tii $1000, $2000, $0010\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "ca65-huc6280",
+        binaries: &[("data.bin", ASSET)],
+        note: ".incbin offset/size and the negative-size sentinel on the HuC6280 leg (U4)",
+        files: &[(
+            "main.s",
+            " .byte $aa\n .incbin \"data.bin\", 2, 3\n .incbin \"data.bin\", 6, -9\n .byte $bb\n",
+        )],
+    },
 ];
 
 #[test]
-#[ignore = "needs sjasmplus + pasmo + acme; run with --ignored"]
+#[ignore = "needs sjasmplus + pasmo + acme + ca65/ld65; run with --ignored"]
 fn multi_file_source_matches_reference() {
     let base = std::env::temp_dir().join("asm198x-differential-multi");
     let mut failures: Vec<String> = Vec::new();
@@ -603,25 +670,31 @@ fn multi_file_source_matches_reference() {
         let _ = fs::remove_dir_all(&dir);
         fs::create_dir_all(&dir).expect("probe dir");
         for (name, contents) in p.files {
-            fs::write(dir.join(name), contents).expect("write fixture");
+            let path = dir.join(name);
+            if let Some(parent) = path.parent() {
+                fs::create_dir_all(parent).expect("fixture parent dir");
+            }
+            fs::write(path, contents).expect("write fixture");
         }
         for (name, bytes) in p.binaries {
             fs::write(dir.join(name), bytes).expect("write binary fixture");
         }
         let (root, _) = p.files[0];
         let out = dir.join("ref.bin");
-        let status = match p.dialect {
+        // A dialect's reference run is one or more commands (the ca65-flat
+        // family assembles then links), all from the probe dir.
+        let commands: Vec<Command> = match p.dialect {
             "sjasmplus" => {
                 let mut c = Command::new("sjasmplus");
                 c.arg("--nologo")
                     .arg(format!("--raw={}", out.display()))
                     .arg(root);
-                c
+                vec![c]
             }
             "pasmo" => {
                 let mut c = Command::new("pasmo");
                 c.arg(root).arg(&out);
-                c
+                vec![c]
             }
             // acme runs from the probe dir, so its cwd-anchored `!src`/`!bin`
             // resolution and our requesting-file-first order agree (the probe
@@ -630,19 +703,47 @@ fn multi_file_source_matches_reference() {
             "acme" => {
                 let mut c = Command::new("acme");
                 c.args(["-f", "plain", "-o"]).arg(&out).arg(root);
-                c
+                vec![c]
+            }
+            // The ca65-flat family: assemble with the target CPU, link flat
+            // at $0000 (the same recipe as the single-file ca65-816 arm).
+            "ca65-816" | "ca65-huc6280" => {
+                let cfg = dir.join("flat.cfg");
+                fs::write(
+                    &cfg,
+                    "MEMORY { MAIN: start=$0000, size=$10000, fill=no, file=%O; }\n\
+                     SEGMENTS { CODE: load=MAIN, type=ro; }\n",
+                )
+                .expect("write linker cfg");
+                let cpu = if p.dialect == "ca65-816" {
+                    "65816"
+                } else {
+                    "huc6280"
+                };
+                let obj = dir.join("ref.o");
+                let mut a = Command::new("ca65");
+                a.args(["--cpu", cpu]).arg(root).arg("-o").arg(&obj);
+                let mut l = Command::new("ld65");
+                l.arg("-C").arg(&cfg).arg(&obj).arg("-o").arg(&out);
+                vec![a, l]
             }
             other => panic!("no multi-file runner for dialect `{other}`"),
+        };
+        let mut reference_failed = None;
+        for mut c in commands {
+            let run = c
+                .current_dir(&dir)
+                .output()
+                .expect("run the reference tool");
+            if !run.status.success() {
+                reference_failed = Some(String::from_utf8_lossy(&run.stderr).into_owned());
+                break;
+            }
         }
-        .current_dir(&dir)
-        .output()
-        .expect("run the reference tool");
-        if !status.status.success() {
+        if let Some(stderr) = reference_failed {
             failures.push(format!(
-                "{}: {} rejected the fixture: {}",
-                p.note,
-                p.dialect,
-                String::from_utf8_lossy(&status.stderr)
+                "{}: {} rejected the fixture: {stderr}",
+                p.note, p.dialect
             ));
             continue;
         }
@@ -655,6 +756,8 @@ fn multi_file_source_matches_reference() {
             "sjasmplus" => asm198x::assemble_sjasmplus_files,
             "pasmo" => asm198x::assemble_pasmo_files,
             "acme" => asm198x::assemble_acme_files,
+            "ca65-816" => asm198x::assemble_ca65_816_files,
+            "ca65-huc6280" => asm198x::assemble_ca65_huc6280_files,
             other => panic!("no multi-file entry for dialect `{other}`"),
         };
         checked += 1;

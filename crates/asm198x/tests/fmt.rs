@@ -1232,3 +1232,94 @@ fn fmt_incbin_reassembles_byte_identical() {
         .bytes;
     assert_eq!(original, reassembled, "round-trips:\n{formatted}");
 }
+
+/// U4 (language surface): `--fmt` renders the ca65-flat family's
+/// `.include`/`.incbin` directives verbatim from the node's source without
+/// ever opening the targets — formatting succeeds when they do not exist —
+/// and stays idempotent (KTD1). Spelling (case, the offset/size tail, labels
+/// on the directive lines) is preserved untouched, on both dialects.
+#[test]
+fn fmt_ca65_flat_include_and_incbin_are_verbatim_and_never_open_targets() {
+    let src = "\
+; header
+OFF = 2
+here: .include \"missing.s\"   ; pulled in later
+ .INCLUDE \"also-missing.s\"
+art: .incbin \"missing.bin\", 2, 3
+ .incbin \"also-missing.bin\", OFF, -1
+ lda #$01
+";
+    for (name, fmt) in [
+        (
+            "65816",
+            format_ca65_816 as fn(&str) -> Result<String, asm198x::AsmError>,
+        ),
+        ("huc6280", format_ca65_huc6280),
+    ] {
+        let formatted =
+            fmt(src).unwrap_or_else(|e| panic!("{name} formats with targets missing: {e}"));
+        for verbatim in [
+            ".include \"missing.s\"",
+            ".INCLUDE \"also-missing.s\"",
+            ".incbin \"missing.bin\", 2, 3",
+            ".incbin \"also-missing.bin\", OFF, -1",
+        ] {
+            assert!(
+                formatted.contains(verbatim),
+                "{name}: `{verbatim}` survives verbatim:\n{formatted}"
+            );
+        }
+        assert!(
+            formatted.contains("; pulled in later"),
+            "{name}: the trailing comment survives:\n{formatted}"
+        );
+        assert!(
+            formatted.contains("here:") && formatted.contains("art:"),
+            "{name}: labels on the directive lines survive:\n{formatted}"
+        );
+        assert_eq!(
+            fmt(&formatted).unwrap_or_else(|e| panic!("{name} formats again: {e}")),
+            formatted,
+            "{name}: idempotent"
+        );
+    }
+}
+
+/// U4: formatted `.include`/`.incbin`-bearing ca65-flat source reassembles
+/// byte-identical through the multi-file entries (this family's leg of the
+/// fmt round-trip bar) — including the 65816's width state crossing the
+/// include boundary.
+#[test]
+fn fmt_ca65_flat_include_and_incbin_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.s", ".a16\nptr = $10\n")
+            .binary("data.bin", (0x10..0x18).collect())
+    };
+    let src =
+        " lda #$11\n .include \"defs.s\"\n lda #$22\n .a8\n lda ptr\n .incbin \"data.bin\", 2, 3\n";
+    let original = asm198x::assemble_ca65_816_files(src, "main.s", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_ca65_816(src).expect("formats");
+    let reassembled = asm198x::assemble_ca65_816_files(&formatted, "main.s", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "65816 round-trips:\n{formatted}");
+
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.s", "ptr = $10\n sax\n")
+            .binary("data.bin", (0x10..0x18).collect())
+    };
+    let src = " lda #$11\n .include \"defs.s\"\n lda ptr\n .incbin \"data.bin\", 6, -9\n";
+    let original = asm198x::assemble_ca65_huc6280_files(src, "main.s", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_ca65_huc6280(src).expect("formats");
+    let reassembled = asm198x::assemble_ca65_huc6280_files(&formatted, "main.s", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "huc6280 round-trips:\n{formatted}");
+}

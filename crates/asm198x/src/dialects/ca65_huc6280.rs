@@ -19,15 +19,24 @@
 //! Output is a flat little-endian binary, validated byte-identical against
 //! `ca65 --cpu huc6280`. There is no PC Engine curriculum yet, so (as with
 //! 6809/lwasm and the 65816) the reference is the tool directly.
+//!
+//! `.include`/`.incbin` (language-surface U4) resolve through the shared
+//! ca65-flat walk in [`super::ca65_flat`]: constants defined inside an include
+//! flow back out to drive the includer's later zp/abs selection, exactly as
+//! `ca65 --cpu huc6280` does (probe-pinned).
 
 use std::collections::BTreeMap;
 
+use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
 use super::mos6502::{
     self, BytePrec, Index, OperandSyntax, fold_const, is_ident, parse_number, split_data_items,
     split_first_word, split_top_level, string_literal, top_level_rfind,
 };
+use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
 use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
+use crate::source::{SourceLoader, SourceMap};
+use crate::span::FileId;
 
 /// The ca65 HuC6280 dialect.
 pub(crate) struct Ca65Huc6280;
@@ -52,6 +61,17 @@ impl Dialect for Ca65Huc6280 {
         Ok(Some(parse_program(source)?))
     }
 
+    /// The include-capable parse (language-surface U4): the interleaved,
+    /// environment-threaded walk over the source map, resolving `.include`/
+    /// `.incbin` lazily through the loader — see [`parse_program_multi`].
+    fn parse_multi(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<Vec<Statement>, AsmError> {
+        crate::ast::lower(parse_program_multi(map, loader)?)
+    }
+
     /// ca65 binds constants with `name = expr` — no `equ` keyword and no colon on
     /// the label, so the formatter emits `name = expr`.
     fn equ_label_colon(&self) -> bool {
@@ -66,31 +86,134 @@ impl Dialect for Ca65Huc6280 {
 /// [`lower`](crate::ast::lower) reproduces the old statements exactly. The byte-
 /// neutral no-op directives (`.segment`/`setcpu`/`smart`) are kept as source-only
 /// nodes so the formatter reproduces them.
-pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
-    use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
-    let prim = &isa::mos6502::SET;
-    let ext = &isa::huc6280::SET;
-    let mut nodes = Vec::new();
-    let mut env: BTreeMap<String, i64> = BTreeMap::new();
-    // Own-line comments seen since the last node, attached as leading trivia to
-    // the next one. Comments never reach the encoder, so bytes are unchanged.
-    let mut pending_leading: Vec<Comment> = Vec::new();
-
+///
+/// A `.include`/`.incbin` becomes an **unresolved**
+/// [`Item::Include`](crate::ast::Item) / [`Item::Incbin`](crate::ast::Item) —
+/// the target is never opened, so `--fmt` renders the directive verbatim and
+/// works with a missing target (U4, KTD1). Lazy resolution is
+/// [`parse_program_multi`]'s.
+pub(crate) fn parse_program(source: &str) -> Result<Program, AsmError> {
+    let mut w = Walker::new();
     for (i, raw) in source.lines().enumerate() {
-        let line = i + 1;
+        if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
+            w.nodes.push(ca65_flat::unresolved_node(d));
+        }
+    }
+    w.flush_trailing(source.lines().count() as u32);
+    Ok(Program { nodes: w.nodes })
+}
+
+/// Parse a multi-file ca65-HuC6280 program (language-surface U4, KTD1): the
+/// **interleaved, environment-threaded walk**. When the walk reaches a
+/// `.include` live, the target loads through `loader`, its lines parse with
+/// the same environment, and constants it defined flow back out to drive the
+/// includer's later zp/abs selection (probe-pinned against
+/// `ca65 --cpu huc6280`).
+///
+/// # Errors
+/// Any per-line parse failure (stamped with the file it occurred in), a
+/// missing target, an include cycle, a bad `.incbin` window, or the depth
+/// backstop — all at the directive's span.
+pub(crate) fn parse_program_multi(
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+) -> Result<Program, AsmError> {
+    let mut w = Walker::new();
+    let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
+    let mut stack = vec![FileId(0)];
+    ca65_flat::walk_file(&mut w, &root, FileId(0), map, loader, &mut stack)?;
+    Ok(Program { nodes: w.nodes })
+}
+
+/// The per-line parse walk shared by [`parse_program`] (single source) and
+/// [`parse_program_multi`] (the include-capable walk). The environment — the
+/// `name = expr` constants and pending comment trivia — lives here, so in the
+/// multi-file walk it threads *through* include boundaries in both directions
+/// (KTD1, probe-pinned).
+struct Walker {
+    /// Constants bound with `name = expr`, consulted for zp/abs sizing and
+    /// `.res`/`.incbin` argument folding at parse time.
+    env: BTreeMap<String, i64>,
+    /// Own-line comments seen since the last node, attached as leading trivia
+    /// to the next one. Comments never reach the encoder, so bytes are
+    /// unchanged.
+    pending_leading: Vec<Comment>,
+    nodes: Vec<Node>,
+}
+
+impl Walker {
+    fn new() -> Self {
+        Self {
+            env: BTreeMap::new(),
+            pending_leading: Vec::new(),
+            nodes: Vec::new(),
+        }
+    }
+
+    /// Flush comments after the last node (a trailing block or comment-only
+    /// file) as a label-less, op-less node so the formatter keeps them.
+    fn flush_trailing(&mut self, last_line: u32) {
+        if !self.pending_leading.is_empty() {
+            self.nodes.push(Node {
+                operand_span: None,
+                label: None,
+                item: None,
+                source: String::new(),
+                span: Span::at(last_line, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing: None,
+                },
+            });
+        }
+    }
+
+    /// Recognise a walk-handled `.include`/`.incbin` operation and parse its
+    /// arguments with the live environment (the `.incbin` offset/size fold
+    /// against the constants known so far — a forward reference is ca65's
+    /// "Constant expression expected" error, probe-pinned).
+    fn walk_directive(&self, rest: &str, line: usize) -> Result<Option<WalkDirective>, AsmError> {
+        let (word, args) = split_first_word(rest);
+        match word.to_ascii_lowercase().as_str() {
+            ".include" => Ok(Some(WalkDirective::Include {
+                request: ca65_flat::include_request(args, line)?,
+            })),
+            ".incbin" => {
+                let fold = |piece: &str| fold_const(&value(piece.trim(), line)?, &self.env, line);
+                let (request, offset, size) = ca65_flat::incbin_args(args, line, &fold)?;
+                Ok(Some(WalkDirective::Incbin {
+                    request,
+                    offset,
+                    size,
+                }))
+            }
+            _ => Ok(None),
+        }
+    }
+}
+
+impl FlatWalk for Walker {
+    fn walk_line(
+        &mut self,
+        raw: &str,
+        line: usize,
+        file: FileId,
+    ) -> Result<Option<DirectiveLine>, AsmError> {
+        let prim = &isa::mos6502::SET;
+        let ext = &isa::huc6280::SET;
         let (code, comment) = split_comment(raw);
         if code.trim().is_empty() {
             if let Some(text) = comment {
-                pending_leading.push(Comment {
+                self.pending_leading.push(Comment {
                     text: text.to_string(),
-                    span: Span::at(line as u32, 1),
+                    span: Span::in_file(file, line as u32, 1),
                 });
             }
-            continue;
+            return Ok(None);
         }
         let trailing = comment.map(|text| Comment {
             text: text.to_string(),
-            span: Span::at(line as u32, (code.len() + 1) as u32),
+            span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
         });
 
         // `name = expr` binds a named constant (a lone `=`, not a comparison).
@@ -101,10 +224,10 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
                 return Err(AsmError::new(line, format!("invalid symbol `{name}`")));
             }
             let e = value(trimmed[eq + 1..].trim(), line)?;
-            if let Ok(v) = fold_const(&e, &env, line) {
-                env.insert(name.to_string(), v);
+            if let Ok(v) = fold_const(&e, &self.env, line) {
+                self.env.insert(name.to_string(), v);
             }
-            nodes.push(Node {
+            self.nodes.push(Node {
                 operand_span: None,
                 label: Some(Symbol {
                     qualified: name.to_string(),
@@ -113,28 +236,49 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
                 }),
                 item: Some(crate::ast::item_from_operation(Operation::Equ(e))),
                 source: trimmed[eq..].trim().to_string(),
-                span: Span::at(line as u32, 1),
+                span: Span::in_file(file, line as u32, 1),
                 trivia: Trivia {
-                    leading: std::mem::take(&mut pending_leading),
+                    leading: std::mem::take(&mut self.pending_leading),
                     trailing,
                 },
             });
-            continue;
+            return Ok(None);
         }
 
         let (label, rest) = split_label(code);
+        // `.include`/`.incbin` are walk-handled, not directives: the target
+        // must not be opened here (KTD1 — `--fmt` succeeds with a missing
+        // target), so hand them back for the driver to resolve (or keep
+        // unresolved, in the single-source parse).
+        if let Some(kind) = self.walk_directive(rest, line)? {
+            return Ok(Some(DirectiveLine {
+                kind,
+                label: label.map(|name| Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }),
+                source: rest.trim().to_string(),
+                span: Span::in_file(file, line as u32, 1),
+                operand_span: ca65_flat::directive_operand_span(raw, rest, line, file),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing,
+                },
+            }));
+        }
         let op = if rest.is_empty() {
             None
         } else {
-            parse_op(prim, ext, rest, &env, line)?
+            parse_op(prim, ext, rest, &self.env, line)?
         };
         // Keep source-bearing no-op directives (`.segment`/`setcpu`/…) as
         // source-only nodes so the formatter reproduces them; skip only a truly
         // empty line (nothing to lower or format).
         if label.is_none() && op.is_none() && rest.trim().is_empty() {
-            continue;
+            return Ok(None);
         }
-        nodes.push(Node {
+        self.nodes.push(Node {
             operand_span: None,
             label: label.map(|name| Symbol {
                 qualified: name.clone(),
@@ -143,31 +287,18 @@ pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmErro
             }),
             item: op.map(crate::ast::item_from_operation),
             source: rest.trim().to_string(),
-            span: Span::at(line as u32, 1),
+            span: Span::in_file(file, line as u32, 1),
             trivia: Trivia {
-                leading: std::mem::take(&mut pending_leading),
+                leading: std::mem::take(&mut self.pending_leading),
                 trailing,
             },
         });
+        Ok(None)
     }
 
-    // Flush comments after the last node (a trailing block or comment-only file)
-    // as a label-less, op-less node so the formatter keeps them.
-    if !pending_leading.is_empty() {
-        let line = source.lines().count() as u32;
-        nodes.push(Node {
-            operand_span: None,
-            label: None,
-            item: None,
-            source: String::new(),
-            span: Span::at(line, 1),
-            trivia: Trivia {
-                leading: pending_leading,
-                trailing: None,
-            },
-        });
+    fn push_node(&mut self, node: Node) {
+        self.nodes.push(node);
     }
-    Ok(Program { nodes })
 }
 
 /// Split a line into its code and its `;` comment (leading `;` and whitespace

@@ -254,7 +254,9 @@ pub fn format_vasm(source: &str) -> Result<String, AsmError> {
 /// Assemble ca65-syntax 65816 source (native mode) into a flat binary — the
 /// 65816 as a target extension of the 6502 (`isa::mos6502` + `isa::mos65816`).
 /// Accumulator/index immediate width follows the `.a8`/`.a16`/`.i8`/`.i16`
-/// directives. Matches `ca65 --cpu 65816` linked flat.
+/// directives. Matches `ca65 --cpu 65816` linked flat. Single-source: a
+/// `.include`/`.incbin` directive is an error here — use
+/// [`assemble_ca65_816_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
@@ -263,18 +265,62 @@ pub fn assemble_ca65_816(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Ca65_816).map(AssemblyResult::from)
 }
 
+/// Assemble a **multi-file** ca65-65816 program (language-surface U4):
+/// `source` is the root file's text, `input_path` its name (entry 0 of the
+/// file table), and `.include`/`.incbin` directives resolve through `loader`
+/// — the CLI wires an [`FsLoader`](source::FsLoader) carrying the input's
+/// directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows ca65's
+/// probe-pinned order (the requesting file's directory, then each enclosing
+/// includer's, innermost → outermost), state — constants *and* the
+/// `.a8`/`.a16`/`.i8`/`.i16` width — threads through an include and back out,
+/// and `.incbin`'s offset/size window matches ca65 exactly (a negative size
+/// reads to EOF). On success, [`AssemblyResult::files`] holds the
+/// `FileId`→path table. The single-source [`assemble_ca65_816`] is unchanged
+/// and rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_ca65_816_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Ca65_816, source, input_path, loader)
+}
+
 /// Assemble ca65-syntax HuC6280 source into a flat little-endian binary — the
 /// HuC6280 (PC Engine / TurboGrafx-16 CPU) as a target extension of the 6502
 /// (`isa::mos6502` + `isa::huc6280`), mirroring the 65816 mechanism. Covers the
 /// 65C02 additions, the Rockwell bit ops, and the HuC6280-specific instructions
 /// (`st0`–`st2`, `tam`/`tma`, `tst`, `bsr`, and the block transfers). Matches
-/// `ca65 --cpu huc6280` linked flat.
+/// `ca65 --cpu huc6280` linked flat. Single-source: a `.include`/`.incbin`
+/// directive is an error here — use [`assemble_ca65_huc6280_files`] for a
+/// multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_ca65_huc6280(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Ca65Huc6280).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** ca65-HuC6280 program (language-surface U4): as
+/// [`assemble_ca65_816_files`] — the same ca65 `.include`/`.incbin` surface,
+/// resolution order, and window semantics, over the HuC6280 target. The
+/// single-source [`assemble_ca65_huc6280`] is unchanged and rejects both
+/// directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (KTD2).
+pub fn assemble_ca65_huc6280_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Ca65Huc6280, source, input_path, loader)
 }
 
 /// Assemble rgbasm-syntax SM83 (Game Boy) source into a flat binary at the

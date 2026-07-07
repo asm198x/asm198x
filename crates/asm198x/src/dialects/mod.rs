@@ -7,6 +7,7 @@
 pub(crate) mod acme;
 pub(crate) mod ca65;
 pub(crate) mod ca65_816;
+pub(crate) mod ca65_flat;
 pub(crate) mod ca65_huc6280;
 pub(crate) mod cdp1802;
 pub(crate) mod cp1610;

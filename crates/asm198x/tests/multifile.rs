@@ -14,7 +14,8 @@ use std::process::Command;
 
 use asm198x::source::{FsLoader, MemoryLoader, SourceLoader, SourceMap};
 use asm198x::{
-    FileId, assemble_acme, assemble_acme_files, assemble_pasmo, assemble_pasmo_files,
+    FileId, assemble_acme, assemble_acme_files, assemble_ca65_816, assemble_ca65_816_files,
+    assemble_ca65_huc6280, assemble_ca65_huc6280_files, assemble_pasmo, assemble_pasmo_files,
     assemble_sjasmplus, assemble_sjasmplus_files,
 };
 
@@ -1293,4 +1294,393 @@ fn cli_assembles_a_pasmo_incbin() {
         String::from_utf8_lossy(&run.stderr)
     );
     assert_eq!(std::fs::read(&out).expect("output written"), asset());
+}
+
+// --- U4: the ca65-syntax flat family (65816, HuC6280) — `.include`/`.incbin`.
+// Every expected byte sequence and error posture below is pinned by the ca65
+// V2.18 probe runs recorded in the U4 report (the flat816.cfg link recipe),
+// not an assumption.
+
+/// A ca65-65816 include is transparent to the bytes, and the file table
+/// survives into the result (KTD2).
+#[test]
+fn ca65_816_include_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("defs.s", "ptr = $10\n");
+    let src = " lda #$11\n .include \"defs.s\"\n lda ptr\n";
+    let r = assemble_ca65_816_files(src, "main.s", &loader).expect("assembles");
+    let flat = assemble_ca65_816("ptr = $10\n lda #$11\n lda ptr\n").expect("flat assembles");
+    assert_eq!(r.bytes, flat.bytes, "include is transparent to the bytes");
+    assert_eq!(r.bytes, vec![0xA9, 0x11, 0xA5, 0x10], "probe-pinned bytes");
+    assert_eq!(r.files, vec!["main.s".to_string(), "defs.s".to_string()]);
+}
+
+/// Three-deep nesting, code at every level, in include order; `.INCLUDE` is
+/// case-insensitive like every ca65 dot-keyword.
+#[test]
+fn ca65_816_include_three_deep_nests() {
+    let loader = MemoryLoader::new()
+        .text("a.s", " lda #$02\n .INCLUDE \"b.s\"\n lda #$04\n")
+        .text("b.s", " lda #$03\n");
+    let src = " lda #$01\n .include \"a.s\"\n lda #$05\n";
+    let r = assemble_ca65_816_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0xA9, 0x01, 0xA9, 0x02, 0xA9, 0x03, 0xA9, 0x04, 0xA9, 0x05],
+        "bytes interleave in include order"
+    );
+    assert_eq!(r.files, vec!["main.s", "a.s", "b.s"]);
+}
+
+/// KTD1's driver on the 65816: a `.a16`/`.i16` width flip **inside** an
+/// include sizes the includer's *later* immediates, and an include-defined
+/// constant feeds later zp/abs selection — both probe-pinned
+/// (a9 11 / a9 12 00 / a9 34 00, then a5 10).
+#[test]
+fn ca65_816_width_and_symbols_thread_out_of_the_include() {
+    let loader = MemoryLoader::new().text("wide.s", ".a16\n lda #$12\nptr = $10\n");
+    let src = " lda #$11\n .include \"wide.s\"\n lda #$34\n .a8\n lda ptr\n";
+    let r = assemble_ca65_816_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0xA9, 0x11, 0xA9, 0x12, 0x00, 0xA9, 0x34, 0x00, 0xA5, 0x10],
+        "the include's .a16 widens the includer's later immediate (probe-pinned)"
+    );
+}
+
+/// An error inside a nested include names *that* file and line, and the
+/// include chain walks back to the root (the shared mechanism, spot-checked
+/// on this family).
+#[test]
+fn ca65_816_error_in_included_file_names_that_file_with_its_chain() {
+    let loader = MemoryLoader::new()
+        .text("a.s", " .include \"b.s\"\n")
+        .text("b.s", " lda #$01\n frob $10\n");
+    let src = " .include \"a.s\"\n";
+    let e = assemble_ca65_816_files(src, "main.s", &loader).expect_err("frob is unknown");
+    let span = e.error.span.as_ref().expect("the error carries a span");
+    assert_eq!(span.line, 2, "line 2 of b.s, not of main.s");
+    let table = e.source_map.file_table();
+    assert_eq!(
+        table.get(span.file.0 as usize).map(String::as_str),
+        Some("b.s"),
+        "the span names the included file"
+    );
+    assert_eq!(
+        e.source_map.include_chain(span.file),
+        vec![("a.s".to_string(), 1), ("main.s".to_string(), 1)],
+        "the include chain walks back to the root"
+    );
+}
+
+/// A missing `.include` target and a missing `.incbin` asset are diagnostics
+/// at the directive's span (the operand's column), not CLI read errors.
+#[test]
+fn ca65_816_missing_targets_report_at_the_directive_span() {
+    let loader = MemoryLoader::new();
+    let src = " lda #$01\n .include \"nothere.s\"\n";
+    let e = assemble_ca65_816_files(src, "main.s", &loader).expect_err("missing target");
+    assert!(
+        e.error.message.contains("nothere.s"),
+        "names the request: {}",
+        e.error.message
+    );
+    let span = e.error.span.as_ref().expect("span at the directive");
+    assert_eq!(span.line, 2);
+    assert_eq!(span.col, 11, "points at the operand (the file name)");
+    assert_eq!(
+        e.source_map.file_table().get(span.file.0 as usize),
+        Some(&"main.s".to_string())
+    );
+
+    let src = " .incbin \"nothere.bin\"\n";
+    let e = assemble_ca65_816_files(src, "main.s", &loader).expect_err("missing asset");
+    assert!(
+        e.error.message.contains("nothere.bin"),
+        "names the request: {}",
+        e.error.message
+    );
+    assert_eq!(e.error.span.as_ref().map(|s| s.line), Some(1));
+}
+
+/// `.incbin "file"[, offset[, size]]` — the probe-pinned window matrix:
+/// plain, offset, offset+size, expression arguments, offset at EOF (empty),
+/// size 0 (empty), and ca65's negative-size-reads-to-EOF sentinel.
+#[test]
+fn ca65_816_incbin_windows_match_the_probes() {
+    let loader = || MemoryLoader::new().binary("data.bin", asset());
+    let cases: &[(&str, Vec<u8>)] = &[
+        (" .incbin \"data.bin\"", asset()),
+        (
+            " .incbin \"data.bin\", 2",
+            vec![0x12, 0x13, 0x14, 0x15, 0x16, 0x17],
+        ),
+        (" .incbin \"data.bin\", 2, 3", vec![0x12, 0x13, 0x14]),
+        // Constant expressions fold against the live environment.
+        (
+            "OFF = 2\n .incbin \"data.bin\", OFF, OFF+1",
+            vec![0x12, 0x13, 0x14],
+        ),
+        // Offset at EOF and size 0 are legal and empty (probe-pinned).
+        (" .incbin \"data.bin\", 8", vec![]),
+        (" .incbin \"data.bin\", 0, 0", vec![]),
+        // ca65 reads ANY negative size as "the rest of the file" (probe-pinned:
+        // `, 2, -2` on the 8-byte asset emitted all 6 remaining bytes).
+        (
+            " .incbin \"data.bin\", 2, -2",
+            vec![0x12, 0x13, 0x14, 0x15, 0x16, 0x17],
+        ),
+        (" .incbin \"data.bin\", 6, -9", vec![0x16, 0x17]),
+    ];
+    for (src, expect) in cases {
+        let full = format!("{src}\n .byte $bb\n");
+        let r = assemble_ca65_816_files(&full, "main.s", &loader())
+            .unwrap_or_else(|e| panic!("`{src}` assembles: {e}"));
+        let mut want = expect.clone();
+        want.push(0xBB);
+        assert_eq!(r.bytes, want, "window for `{src}`");
+    }
+}
+
+/// The probe-pinned `.incbin` error postures: offset past EOF, size past the
+/// remaining bytes, a negative offset (ca65: "Range error" / a read error —
+/// ours name the numbers), and a forward-referenced argument (ca65:
+/// "Constant expression expected"). All at the directive's span.
+#[test]
+fn ca65_816_incbin_window_errors_match_the_probes() {
+    let loader = || MemoryLoader::new().binary("data.bin", asset());
+    for (src, what) in [
+        (" .incbin \"data.bin\", 9", "offset past EOF"),
+        (
+            " .incbin \"data.bin\", 6, 4",
+            "size past the remaining bytes",
+        ),
+        (" .incbin \"data.bin\", -2", "negative offset"),
+        (
+            " .incbin \"data.bin\", 0, SZ\nSZ = 3",
+            "forward-referenced size",
+        ),
+    ] {
+        assert!(
+            assemble_ca65_816_files(src, "main.s", &loader()).is_err(),
+            "`{src}` must fail ({what})"
+        );
+    }
+    // The spans: a window error points at the directive's line.
+    let e = assemble_ca65_816_files(" lda #$01\n .incbin \"data.bin\", 9\n", "main.s", &loader())
+        .expect_err("offset past EOF");
+    assert_eq!(e.error.span.as_ref().map(|s| s.line), Some(2));
+    assert!(
+        e.error.message.contains("data.bin"),
+        "names the asset: {}",
+        e.error.message
+    );
+}
+
+/// Labels on the `.include`/`.incbin` lines bind at the include point / the
+/// payload start (probe-pinned: `here: .include …` then `.word here`).
+#[test]
+fn ca65_816_labels_on_directive_lines_bind_at_the_point() {
+    let loader = MemoryLoader::new()
+        .text("body.s", " lda #$07\n")
+        .binary("data.bin", asset());
+    let src = ".org $1000\nhere: .include \"body.s\"\nart: .incbin \"data.bin\", 2, 2\n .word here\n .word art\n";
+    let r = assemble_ca65_816_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0xA9, 0x07, 0x12, 0x13, 0x00, 0x10, 0x02, 0x10],
+        "here = $1000 (include point), art = $1002 (payload start)"
+    );
+    assert_eq!(r.symbols.get("here"), Some(&0x1000));
+    assert_eq!(r.symbols.get("art"), Some(&0x1002));
+}
+
+/// A self-include is a cycle diagnostic listing the chain — ca65 itself has
+/// no cycle detection (a self-include dies on the OS open-file limit), so
+/// this diagnostic exceeds the reference (KTD5: diagnostics are not
+/// byte-compared).
+#[test]
+fn ca65_816_self_include_reports_the_cycle() {
+    let src = " .include \"main.s\"\n";
+    let loader = MemoryLoader::new().text("main.s", src);
+    let e = assemble_ca65_816_files(src, "main.s", &loader).expect_err("cycle");
+    assert!(
+        e.error.message.contains("include cycle"),
+        "names the cycle: {}",
+        e.error.message
+    );
+    assert!(
+        e.error.message.contains("main.s -> main.s"),
+        "lists the chain: {}",
+        e.error.message
+    );
+}
+
+/// The single-source entry points still mean "one file": a `.include` or
+/// `.incbin` there is a clear pointer to the multi-file entry, not the old
+/// `unsupported directive` rejection or a silent skip.
+#[test]
+fn ca65_816_single_source_entry_rejects_both_directives_with_a_pointer() {
+    for src in [" .include \"defs.s\"\n", " .incbin \"data.bin\"\n"] {
+        let e = assemble_ca65_816(src).expect_err("no loader here");
+        assert!(
+            e.message.contains("multi-file"),
+            "points at the multi-file entry: {}",
+            e.message
+        );
+    }
+}
+
+/// ca65's probe-pinned resolution order walks the **include chain's
+/// directories**, innermost → outermost: a nested include's request resolves
+/// against its own directory first, then its includer's — never the bare
+/// process working directory. (ca65 V2.18: `sub/inc2.s` beat the root-dir
+/// copy; with it absent, the root-dir copy was found from inside `sub/`.)
+#[test]
+fn ca65_flat_include_resolution_walks_the_ancestor_chain() {
+    let root = temp_tree("u4-ca65-chain");
+    std::fs::create_dir_all(root.join("sub")).expect("create sub/");
+    let main = root.join("main.s");
+    std::fs::write(&main, " lda #$01\n .include \"sub/mid.s\"\n").expect("write main");
+    std::fs::write(
+        root.join("sub/mid.s"),
+        " lda #$02\n .include \"shared.s\"\n",
+    )
+    .expect("write mid");
+    // Scenario 1: `shared.s` only in the ROOT's directory — found from inside
+    // sub/ via the ancestor hop.
+    std::fs::remove_file(root.join("sub/shared.s")).ok();
+    std::fs::write(root.join("shared.s"), " lda #$03\n").expect("write root shared");
+    let source = std::fs::read_to_string(&main).expect("read main");
+    let loader = FsLoader::new(&root, Vec::new());
+    let r = assemble_ca65_816_files(&source, &main.to_string_lossy(), &loader)
+        .expect("resolves via the includer chain");
+    assert_eq!(r.bytes, vec![0xA9, 0x01, 0xA9, 0x02, 0xA9, 0x03]);
+    assert_eq!(r.files.len(), 3, "root + mid + the chain-resolved shared");
+
+    // Scenario 2: a copy next to the requester (sub/) wins over the root's.
+    std::fs::write(root.join("sub/shared.s"), " lda #$04\n").expect("write sub shared");
+    let r = assemble_ca65_816_files(&source, &main.to_string_lossy(), &loader)
+        .expect("resolves via the requester's own directory");
+    assert_eq!(
+        r.bytes,
+        vec![0xA9, 0x01, 0xA9, 0x02, 0xA9, 0x04],
+        "the requesting file's directory wins (probe-pinned)"
+    );
+}
+
+// --- U4: the HuC6280 leg of the family (the shared walk, spot-checked). ---
+
+/// A nested HuC6280 include with an include-defined constant feeding later
+/// zp selection, plus the incbin window — probe-pinned bytes
+/// (a9 11 / a9 22 / a5 10 / 12 13 14).
+#[test]
+fn ca65_huc6280_include_and_incbin_match_the_probes() {
+    let loader = MemoryLoader::new()
+        .text("defs.s", "ptr = $10\n lda #$22\n")
+        .binary("data.bin", asset());
+    let src = " lda #$11\n .include \"defs.s\"\n lda ptr\n .incbin \"data.bin\", 2, 3\n";
+    let r = assemble_ca65_huc6280_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0xA9, 0x11, 0xA9, 0x22, 0xA5, 0x10, 0x12, 0x13, 0x14],
+        "probe-pinned (ca65 --cpu huc6280)"
+    );
+    assert_eq!(r.files, vec!["main.s", "defs.s"]);
+}
+
+/// HuC6280-specific opcodes assemble inside an include, and ca65's
+/// negative-size sentinel reads to EOF (probe-pinned: 22 16 17).
+#[test]
+fn ca65_huc6280_extension_ops_and_negative_size_in_include() {
+    let loader = MemoryLoader::new()
+        .text("outer.s", " .include \"inner.s\"\n")
+        .text("inner.s", " sax\n")
+        .binary("data.bin", asset());
+    let src = " .include \"outer.s\"\n .incbin \"data.bin\", 6, -9\n";
+    let r = assemble_ca65_huc6280_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0x22, 0x16, 0x17], "probe-pinned");
+    assert_eq!(r.files, vec!["main.s", "outer.s", "inner.s"]);
+}
+
+/// The HuC6280 leg's error postures: missing targets at the directive span;
+/// the single-source entries keep rejecting with the multi-file pointer.
+#[test]
+fn ca65_huc6280_errors_and_single_source_rejection() {
+    let e = assemble_ca65_huc6280_files(" .include \"nope.s\"\n", "main.s", &MemoryLoader::new())
+        .expect_err("missing target");
+    assert!(e.error.message.contains("nope.s"));
+    assert_eq!(e.error.span.as_ref().map(|s| s.line), Some(1));
+
+    for src in [" .include \"defs.s\"\n", " .incbin \"data.bin\"\n"] {
+        let e = assemble_ca65_huc6280(src).expect_err("no loader here");
+        assert!(
+            e.message.contains("multi-file"),
+            "points at the multi-file entry: {}",
+            e.message
+        );
+    }
+}
+
+/// A label on the HuC6280 `.incbin` line binds at the payload start.
+#[test]
+fn ca65_huc6280_label_on_the_incbin_line_binds_at_the_payload() {
+    let loader = MemoryLoader::new().binary("data.bin", asset());
+    let src = ".org $2000\nart: .incbin \"data.bin\", 0, 2\n .word art\n";
+    let r = assemble_ca65_huc6280_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0x10, 0x11, 0x00, 0x20]);
+    assert_eq!(r.symbols.get("art"), Some(&0x2000));
+}
+
+/// End-to-end through the binary: a ca65-65816 `.include` resolves via `-I`
+/// from a directory other than the input's own (the new CLI wiring).
+#[test]
+fn cli_assembles_a_ca65_816_include_via_a_search_dir() {
+    let srcdir = temp_tree("u4-816-cli-src");
+    let incdir = temp_tree("u4-816-cli-inc");
+    let main = srcdir.join("main.s");
+    std::fs::write(&main, " .include \"defs.s\"\n lda #VAL\n").expect("write main");
+    std::fs::write(incdir.join("defs.s"), "VAL = $2b\n").expect("write include");
+    let out = srcdir.join("main.bin");
+    let run = bin()
+        .args(["--cpu", "65816", "-I"])
+        .arg(&incdir)
+        .arg(&main)
+        .arg("-o")
+        .arg(&out)
+        .output()
+        .expect("run asm198x");
+    assert!(
+        run.status.success(),
+        "assembles: {}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    assert_eq!(
+        std::fs::read(&out).expect("output written"),
+        vec![0xA9, 0x2B]
+    );
+}
+
+/// A failure inside a HuC6280 include renders rustc-style with the included
+/// file's name plus an `included from` note (the human CLI path).
+#[test]
+fn cli_ca65_huc6280_error_in_include_carries_an_included_from_note() {
+    let dir = temp_tree("u4-huc-cli-note");
+    let main = dir.join("main.s");
+    std::fs::write(&main, " lda #$01\n .include \"bad.s\"\n").expect("write main");
+    std::fs::write(dir.join("bad.s"), " frob $10\n").expect("write include");
+    let run = bin()
+        .args(["--cpu", "huc6280"])
+        .arg(&main)
+        .output()
+        .expect("run asm198x");
+    assert!(!run.status.success(), "frob fails the assemble");
+    let stderr = String::from_utf8_lossy(&run.stderr);
+    assert!(
+        stderr.contains("bad.s:1"),
+        "names the included file and line: {stderr}"
+    );
+    assert!(
+        stderr.contains("included from") && stderr.contains("main.s:2"),
+        "carries the included-from note: {stderr}"
+    );
 }
