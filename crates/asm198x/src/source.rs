@@ -312,6 +312,16 @@ impl SourceMap {
         }
     }
 
+    /// Seed the dedup index with the root's **canonical** path, so an include
+    /// that re-requests the root — however spelled — resolves to `FileId(0)`
+    /// instead of minting a duplicate id (and the walks' active-stack cycle
+    /// check sees the re-entry immediately). The display path stays
+    /// `files[0]` (the CLI's spelling); this only adds a lookup key, and only
+    /// when the key is not already taken.
+    pub fn alias_root(&mut self, canonical: impl Into<String>) {
+        self.by_path.entry(canonical.into()).or_insert(FileId(0));
+    }
+
     /// Load `request` through `loader`, requested by `from` at 1-based `line`
     /// (the include directive's position, recorded in the include graph). An
     /// already-loaded canonical path returns its existing `FileId` without

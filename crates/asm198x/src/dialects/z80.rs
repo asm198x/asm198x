@@ -1420,6 +1420,12 @@ fn substitute_defines(
             return Ok(next);
         }
         cur = next;
+        // Mutually-recursive definitions (`DEFINE A B+B` / `DEFINE B A+A`)
+        // grow geometrically within the pass cap, so the working line is
+        // size-bounded too: past 64K it can only be a runaway expansion.
+        if cur.len() > 64 * 1024 {
+            break;
+        }
     }
     Err(AsmError::new(
         line,

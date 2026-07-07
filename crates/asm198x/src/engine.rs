@@ -62,6 +62,7 @@ pub struct DebugData {
 /// A line→address span before the source filename is attached: `length` address
 /// units at section-relative `offset` were produced by `line`.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct LineRec {
     pub line: u32,
     pub offset: u64,
@@ -126,6 +127,7 @@ impl std::error::Error for AsmError {}
 /// source (e.g. an immediate too wide for its operand); a `Warning` carries that
 /// signal without failing the assembly. The bytes are still produced.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct Warning {
     pub line: usize,
     pub message: String,
@@ -852,7 +854,10 @@ fn assemble_statements(
         // The 64K cap, checked as bytes land so the error carries the span of
         // the statement that crossed it (`bytes` only grows, so the first
         // offender fires) — a failure in an included file names that file.
-        if origin + bytes.len() as i64 > 0x1_0000 {
+        // The cap is on the **address space**, so the byte count converts to
+        // address units first (a CP1610 decle is 2 bytes but 1 address); a
+        // trailing partial unit still occupies its address.
+        if origin + bytes.len().div_ceil(addr_unit as usize) as i64 > 0x1_0000 {
             return Err(s.err("program exceeds the 64K address space"));
         }
     }

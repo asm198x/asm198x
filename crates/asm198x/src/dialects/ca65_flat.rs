@@ -279,8 +279,12 @@ pub(crate) fn stamp_file(mut e: AsmError, file: FileId) -> AsmError {
 /// extensionless request tries the defaulted spelling (`request.inc`) first
 /// and the exact spelling second — asl's probe-pinned order (with both
 /// `bare` and `bare.inc` present, `.inc` wins; with only `bare`, it is
-/// found). A failure reports the request **as written**, not the defaulted
-/// spelling. Dialects without defaulting resolve the request directly.
+/// found). The fallback is gated on **resolution**, not on the load
+/// succeeding: a defaulted candidate that exists but cannot be read (a
+/// directory, a permission failure) is an error naming the defaulted
+/// spelling, never a silent fall-through to the exact name. A
+/// does-not-resolve failure reports the request **as written**. Dialects
+/// without defaulting resolve the request directly.
 fn load_include_defaulted(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
@@ -291,18 +295,50 @@ fn load_include_defaulted(
 ) -> Result<FileId, LoadError> {
     if let Some(ext) = sem.include_default_ext
         && std::path::Path::new(request).extension().is_none()
-        && let Ok(id) = load_include(
-            map,
-            loader,
-            &format!("{request}.{ext}"),
-            stack,
-            line,
-            sem.resolution,
-        )
     {
-        return Ok(id);
+        let defaulted = format!("{request}.{ext}");
+        if include_resolves(map, loader, &defaulted, stack, sem.resolution) {
+            return load_include(map, loader, &defaulted, stack, line, sem.resolution);
+        }
     }
     load_include(map, loader, request, stack, line, sem.resolution)
+}
+
+/// Whether `request` resolves under the dialect's [`Resolution`] anchor —
+/// the same probe order [`load_include`] loads through, minus the read.
+/// Existence only: an unreadable-but-existing target still resolves, so its
+/// load error surfaces instead of being swallowed.
+fn include_resolves(
+    map: &SourceMap,
+    loader: &dyn SourceLoader,
+    request: &str,
+    stack: &[FileId],
+    resolution: Resolution,
+) -> bool {
+    let requester = stack.last().copied().unwrap_or(FileId(0));
+    let requester_path = map.path(requester).map(str::to_owned);
+    match resolution {
+        Resolution::Requester => loader
+            .resolve_text(request, requester_path.as_deref())
+            .is_some(),
+        Resolution::Root => {
+            let from = if requester == FileId(0) {
+                requester_path
+            } else {
+                map.path(FileId(0)).map(str::to_owned)
+            };
+            loader.resolve_text(request, from.as_deref()).is_some()
+        }
+        Resolution::AncestorChain => std::iter::once(requester_path)
+            .chain(
+                stack
+                    .iter()
+                    .rev()
+                    .skip(1)
+                    .map(|&ancestor| map.path(ancestor).map(str::to_owned)),
+            )
+            .any(|from| loader.resolve_text(request, from.as_deref()).is_some()),
+    }
 }
 
 /// Resolve an include per the dialect's probe-pinned [`Resolution`]. The

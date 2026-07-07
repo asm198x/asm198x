@@ -294,6 +294,13 @@ impl asm198x::source::SourceLoader for RecordingLoader<'_> {
     ) -> Result<Vec<u8>, asm198x::source::LoadError> {
         self.inner.load_binary(request, from)
     }
+
+    fn resolve_text(&self, request: &str, from: Option<&str>) -> Option<String> {
+        // Forward to the wrapped loader's cheap probe — the trait default
+        // resolves by reading and discarding, which would defeat the source
+        // map's read-once dedup on every CLI assemble.
+        self.inner.resolve_text(request, from)
+    }
 }
 
 /// Build the `--listing` source set from a successful assemble: the file table

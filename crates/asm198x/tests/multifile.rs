@@ -3859,6 +3859,117 @@ fn stray_endif_in_the_root_is_rejected() {
     );
 }
 
+// --- Guard regressions: defaulted-include resolution gating, the address-unit
+// 64K cap, root-canonical dedup, DEFINE growth, and included-file error
+// attribution. Each pins a fix that adds a guard or metadata only — no
+// currently-accepted program changes bytes. ---
+
+/// An extensionless `include` whose **defaulted** spelling resolves but
+/// cannot be read (here: `defs.inc` is a directory) errors naming the
+/// defaulted spelling — it must never silently fall back to the exact-name
+/// `defs` and assemble the wrong file. The fallback is gated on resolution,
+/// not on the load succeeding.
+#[test]
+fn defaulted_include_that_resolves_but_cannot_be_read_errors() {
+    let dir = temp_tree("asl-defaulted-unreadable");
+    std::fs::create_dir_all(dir.join("defs.inc")).expect("create defs.inc as a directory");
+    std::fs::write(dir.join("defs"), "        mvi a,99h\n").expect("write defs");
+    let loader = FsLoader::new(&dir, Vec::new());
+    let e = assemble_i8080_files("        include defs\n", "main.asm", &loader)
+        .expect_err("`defs.inc` resolves (a directory), so its read failure must surface");
+    assert!(
+        e.error.message.contains("defs.inc"),
+        "names the defaulted spelling: {}",
+        e.error.message
+    );
+}
+
+/// A binclude payload past 32K **bytes** still fits the CP1610's 64K
+/// **decle** space: the engine's cap counts address units, not bytes (a
+/// decle is 2 bytes but 1 address, so counting bytes halved the effective
+/// space). 20000 asset bytes at `org 7000h` occupy decles $7000..$BE20 —
+/// comfortably inside 64K.
+#[test]
+fn cp1610_binclude_past_32k_bytes_stays_inside_the_decle_space() {
+    let loader = MemoryLoader::new().binary("asset.bin", vec![0xAB; 20_000]);
+    let src = "        org 7000h\n        binclude \"asset.bin\"\nafter:  word after\n";
+    let r = assemble_cp1610_files(src, "main.asm", &loader)
+        .expect("20000 bytes = 20000 decles, ending at $BE20 — inside the address space");
+    // One decle (2 output bytes) per asset byte, then the closing word.
+    assert_eq!(r.bytes.len(), 2 * 20_000 + 2);
+    assert_eq!(
+        &r.bytes[2 * 20_000..],
+        [0xBE, 0x20],
+        "`after` = decle $BE20"
+    );
+}
+
+/// Re-including the root through an include is a cycle at the **first**
+/// re-entry, with the root deduped to `FileId(0)` however the CLI spelled it:
+/// the map aliases the root's canonical path into the dedup index, so the
+/// file table names the root once (no duplicate id, no one-hop-late cycle).
+#[test]
+fn root_reincluded_from_an_include_cycles_at_first_reentry() {
+    let dir = temp_tree("root-alias-cycle");
+    let src = "        org $8000\n        include \"sub.inc\"\n";
+    std::fs::write(dir.join("main.s"), src).expect("write root");
+    std::fs::write(dir.join("sub.inc"), "        include \"main.s\"\n").expect("write sub");
+    let loader = FsLoader::new(&dir, Vec::new());
+    // A non-canonical spelling of the root (the `/./` hop), as a CLI may pass.
+    let input = dir.join(".").join("main.s").to_string_lossy().into_owned();
+    let e = assemble_sjasmplus_files(src, &input, &loader).expect_err("cycle");
+    assert!(
+        e.error.message.contains("include cycle"),
+        "names the cycle: {}",
+        e.error.message
+    );
+    assert_eq!(
+        e.error.message.matches("sub.inc").count(),
+        1,
+        "fires at the first re-entry — one hop through sub.inc, not two: {}",
+        e.error.message
+    );
+    let table = e.source_map.file_table();
+    assert_eq!(
+        table.len(),
+        2,
+        "root + sub.inc, no duplicate root: {table:?}"
+    );
+}
+
+/// Mutually-recursive `DEFINE`s double the working line every substitution
+/// pass, so the expansion is size-bounded as well as pass-bounded: the
+/// recursive-DEFINE diagnostic fires long before memory does.
+#[test]
+fn mutually_recursive_defines_error_instead_of_exhausting_memory() {
+    let src = "        DEFINE A B+B\n        DEFINE B A+A\n        db A\n";
+    let e = assemble_sjasmplus(src).expect_err("recursive DEFINE");
+    assert!(
+        e.message.contains("did not terminate"),
+        "the recursive-DEFINE diagnostic: {}",
+        e.message
+    );
+}
+
+/// A malformed `!bin` argument list inside an **included** file is stamped
+/// with that file, not the root: the arg parser knows its line but not its
+/// file, so the include-aware lowering supplies it.
+#[test]
+fn acme_bad_bin_args_inside_an_include_name_the_included_file() {
+    let loader = MemoryLoader::new()
+        .text("gfx.a", "        !bin \"data.bin\", 1, 2, 3\n")
+        .binary("data.bin", vec![0u8; 8]);
+    let src = "* = $1000\n        !src \"gfx.a\"\n";
+    let e = assemble_acme_files(src, "main.a", &loader).expect_err("too many !bin args");
+    let span = e.error.span.as_ref().expect("the error carries a span");
+    assert_eq!(span.line, 1, "line 1 of gfx.a");
+    assert_eq!(
+        e.source_map.file_table().get(span.file.0 as usize),
+        Some(&"gfx.a".to_string()),
+        "the diagnostic names the included file, not the root"
+    );
+}
+
 /// A conditional inside an include evaluates with the environment live at the
 /// include point, and locals keep scoping across the boundary (the U2
 /// boundary scenario, now under a conditional).

@@ -827,7 +827,9 @@ impl<'a> AcmeEval<'a> {
             .operand_span
             .clone()
             .unwrap_or_else(|| node.span.clone());
-        let (request, rest) = file_request(args, line, "!src")?;
+        // The arg parser knows its line but not its file: stamp here so a
+        // malformed `!src` inside an included file names that file.
+        let (request, rest) = file_request(args, line, "!src").map_err(|e| stamp_file(e, file))?;
         if !rest.trim().is_empty() {
             return Err(AsmError::at(
                 at,
@@ -903,7 +905,10 @@ impl<'a> AcmeEval<'a> {
             .operand_span
             .clone()
             .unwrap_or_else(|| node.span.clone());
-        let (request, size, skip) = bin_args(&self.anons, &self.zone, &self.env, args, line)?;
+        // The arg parser knows its line but not its file: stamp here so a
+        // malformed `!bin` inside an included file names that file.
+        let (request, size, skip) = bin_args(&self.anons, &self.zone, &self.env, args, line)
+            .map_err(|e| stamp_file(e, file))?;
         let label = self.statement_label(node)?;
         let Some(mcx) = self.multi.as_mut() else {
             return Err(AsmError::at(

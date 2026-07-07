@@ -85,7 +85,25 @@ them (a secondary trigger, per R7):
   non-root file — pre-multi-file payloads stay byte-identical. `AssemblyResult.files`
   is now populated by the first include-capable dialect (sjasmplus), and failure
   diagnostics resolve `Span.path` from the failure-path source map
-  (`MultiFileError`). No version bump.
+  (`MultiFileError`). No version bump. `LineRec` and `Warning` join the
+  `#[non_exhaustive]` roster (they compose `AssemblyResult` and grew the
+  field), closing a gap in the additive mechanism above.
+- **2026-07-07 — human-mode rendering superseded (language-surface U1).** The
+  CLI's default human error format is now rustc-style `file:line:col: error:
+  message` (rendered from the span, with `included from <file>:<line>` notes),
+  replacing the `{input}: line N:` prefix. This supersedes the core-contract
+  plan's U4-era acceptance line that human output stays byte-identical — that
+  promise held for the JSON-mode work it gated; the multi-file model
+  deliberately changed the human rendering (plan
+  `docs/plans/2026-07-04-001-feat-language-surface-plan.md`, U1). JSON-mode
+  shapes are unchanged apart from the additive fields above.
+- **2026-07-07 — known accepted gap for the bounded review: include-chain
+  provenance is CLI-only.** A JSON consumer resolves *which* file via
+  `Span.path`/`files`, but the hop-by-hop include chain the human renderer
+  shows is not in the wire contract (deliberate v1 deferral, plan KTD3 — the
+  chain must never squat on `expansion_frames`). Revisit at the MCP bounded
+  review: if a surface consumer needs the chain, add it as an additive sibling
+  field rather than letting the gap freeze in by default.
 
 ## Drift triggers
 
