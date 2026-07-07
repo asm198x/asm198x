@@ -1015,6 +1015,18 @@ fn parse_message_format(value: &str) -> Result<MessageFormat, String> {
     }
 }
 
+/// Unwrap a multi-file failure: keep its file table for span-path resolution
+/// (KTD2's failure-path leg) and pass the inner error on. Every include-capable
+/// route funnels its `map_err` through here so the capture cannot drift
+/// per-arm.
+fn capture_failure(
+    failure_files: &mut Vec<String>,
+    e: asm198x::MultiFileError,
+) -> asm198x::AsmError {
+    *failure_files = e.source_map.file_table();
+    e.error
+}
+
 /// Emit the assembly result (or its diagnostics) as JSON on stdout — the
 /// `--message-format=json` path (U4, R3). Byte output to `-o` still happens; only
 /// the reporting format changes. The shape is CPU-agnostic (R8): every dialect's
@@ -1052,51 +1064,35 @@ fn emit_json(
         // vasm goes through its include-capable entries (U6); a failure
         // carries the file table so the diagnostic's span can name an
         // included file.
-        Assembler::Vasm => {
-            let fail = |e: asm198x::MultiFileError| {
-                failure_files = e.source_map.file_table();
-                e.error
-            };
-            match (exe, debug_requested) {
-                (true, true) => asm198x::assemble_vasm_exe_files_debug(source, input, &loader)
-                    .map_err(fail)
-                    .map(&mut capture),
-                (true, false) => {
-                    asm198x::assemble_vasm_exe_files(source, input, &loader).map_err(fail)
-                }
-                (false, true) => asm198x::assemble_vasm_warned_files_debug(source, input, &loader)
-                    .map_err(fail)
-                    .map(&mut capture),
-                (false, false) => {
-                    asm198x::assemble_vasm_warned_files(source, input, &loader).map_err(fail)
-                }
-            }
-        }
+        Assembler::Vasm => match (exe, debug_requested) {
+            (true, true) => asm198x::assemble_vasm_exe_files_debug(source, input, &loader)
+                .map_err(|e| capture_failure(&mut failure_files, e))
+                .map(&mut capture),
+            (true, false) => asm198x::assemble_vasm_exe_files(source, input, &loader)
+                .map_err(|e| capture_failure(&mut failure_files, e)),
+            (false, true) => asm198x::assemble_vasm_warned_files_debug(source, input, &loader)
+                .map_err(|e| capture_failure(&mut failure_files, e))
+                .map(&mut capture),
+            (false, false) => asm198x::assemble_vasm_warned_files(source, input, &loader)
+                .map_err(|e| capture_failure(&mut failure_files, e)),
+        },
         // ca65 goes through its include-capable entries too (U5); a failure
         // carries the file table so the diagnostic's span can name an
         // included file.
         Assembler::Ca65 if debug_requested => {
             asm198x::assemble_ca65_files_debug(source, input, &loader)
-                .map_err(|e| {
-                    failure_files = e.source_map.file_table();
-                    e.error
-                })
+                .map_err(|e| capture_failure(&mut failure_files, e))
                 .map(&mut capture)
         }
-        Assembler::Ca65 => asm198x::assemble_ca65_files(source, input, &loader).map_err(|e| {
-            failure_files = e.source_map.file_table();
-            e.error
-        }),
+        Assembler::Ca65 => asm198x::assemble_ca65_files(source, input, &loader)
+            .map_err(|e| capture_failure(&mut failure_files, e)),
         // Every flat dialect goes through its multi-file entry (the same
         // table as the human path); ca65/vasm are the arms above.
         other => {
             let Some(entry) = other.multi_entry() else {
                 unreachable!("ca65/vasm handled above")
             };
-            entry(source, input, &loader).map_err(|e| {
-                failure_files = e.source_map.file_table();
-                e.error
-            })
+            entry(source, input, &loader).map_err(|e| capture_failure(&mut failure_files, e))
         }
     };
     match result {

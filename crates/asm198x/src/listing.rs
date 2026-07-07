@@ -36,15 +36,6 @@ pub fn debug_info(
     } else {
         result.files.clone()
     };
-    // An unresolvable id (impossible from the walk, guarded anyway) falls back
-    // to the root entry, mirroring `capture_debug_info_multi`.
-    let path_of = |file: FileId| {
-        sources
-            .get(file.0 as usize)
-            .or_else(|| sources.first())
-            .cloned()
-            .unwrap_or_default()
-    };
     debug198x::DebugInfo {
         header: debug198x::Header {
             tool: "asm198x".to_string(),
@@ -65,7 +56,7 @@ pub fn debug_info(
             .lines
             .iter()
             .map(|l| debug198x::LineSpan {
-                file: path_of(l.file),
+                file: path_in(&sources, l.file),
                 line: l.line,
                 section: 0,
                 offset: l.offset,
@@ -73,6 +64,17 @@ pub fn debug_info(
             })
             .collect(),
     }
+}
+
+/// Resolve `file` against a `FileId`-ordered sources table. An unresolvable
+/// id (impossible from the walk, guarded anyway) falls back to the root
+/// entry.
+fn path_in(sources: &[String], file: FileId) -> String {
+    sources
+        .get(file.0 as usize)
+        .or_else(|| sources.first())
+        .cloned()
+        .unwrap_or_default()
 }
 
 /// A multi-section dialect's debug read-out, before header identity and the
@@ -131,19 +133,12 @@ pub(crate) fn capture_debug_info_multi(
     dialect: &str,
     sources: Vec<String>,
 ) -> debug198x::DebugInfo {
-    let path_of = |file: FileId| {
-        sources
-            .get(file.0 as usize)
-            .or_else(|| sources.first())
-            .cloned()
-            .unwrap_or_default()
-    };
     let lines = capture
         .lines
         .into_iter()
         .map(
             |(file, line, section, offset, length)| debug198x::LineSpan {
-                file: path_of(file),
+                file: path_in(&sources, file),
                 line,
                 section,
                 offset,

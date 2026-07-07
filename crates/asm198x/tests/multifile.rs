@@ -2631,9 +2631,10 @@ fn i8080_missing_targets_report_at_the_directive_span() {
     assert_eq!(span.line, 1);
 }
 
-/// The probe asset (`10..17`), matching the U4d probe runs.
+/// The probe asset (`10..17`), matching the U4d probe runs — the same shared
+/// 8-byte asset [`asset`] builds.
 fn asl_asset() -> Vec<u8> {
-    vec![0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17]
+    asset()
 }
 
 /// `binclude`'s legal windows, all probe-pinned: plain, offset, offset+length

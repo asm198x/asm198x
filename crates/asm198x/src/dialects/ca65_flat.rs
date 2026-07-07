@@ -327,6 +327,12 @@ fn load_include(
                 return map.load(loader, request, requester, line);
             }
             let root = map.path(FileId(0)).map(str::to_owned);
+            // Resolve against the root anchor without paying for a read the
+            // registration below would repeat; a miss falls through to the
+            // full load for its error message.
+            if let Some(canonical) = loader.resolve_text(request, root.as_deref()) {
+                return map.load(loader, &canonical, requester, line);
+            }
             match loader.load_text(request, root.as_deref()) {
                 Ok((canonical, _)) => map.load(loader, &canonical, requester, line),
                 Err(mut e) => {
@@ -343,7 +349,7 @@ fn load_include(
             };
             for &ancestor in stack.iter().rev().skip(1) {
                 let from = map.path(ancestor).map(str::to_owned);
-                if let Ok((canonical, _)) = loader.load_text(request, from.as_deref()) {
+                if let Some(canonical) = loader.resolve_text(request, from.as_deref()) {
                     return map.load(loader, &canonical, requester, line);
                 }
             }

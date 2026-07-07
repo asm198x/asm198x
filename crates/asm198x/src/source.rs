@@ -117,6 +117,21 @@ pub trait SourceLoader {
     /// A [`LoadError`] naming the request and the requesting file when the
     /// target cannot be resolved or read.
     fn load_binary(&self, request: &str, from: Option<&str>) -> Result<Vec<u8>, LoadError>;
+
+    /// Resolve `request` to the exact canonical form
+    /// [`load_text`](Self::load_text) would return, **without reading
+    /// contents** where the loader has a cheaper path; `None` means the
+    /// request does not resolve. [`SourceMap::load`] consults this before its
+    /// dedup cache so a file included many times is read from its backing
+    /// store once, and the dialect walks' resolution anchors use it to find a
+    /// canonical name without paying for a read the registration would
+    /// repeat. The default resolves by reading and discarding — exact parity
+    /// for loaders that don't override.
+    fn resolve_text(&self, request: &str, from: Option<&str>) -> Option<String> {
+        self.load_text(request, from)
+            .ok()
+            .map(|(canonical, _)| canonical)
+    }
 }
 
 /// The filesystem loader the CLI wires: a relative request is tried against
@@ -192,6 +207,14 @@ impl SourceLoader for FsLoader {
         let canonical = self.resolve_canonical(request, from)?;
         std::fs::read(&canonical).map_err(|e| LoadError::new(request, from, e.to_string()))
     }
+
+    fn resolve_text(&self, request: &str, from: Option<&str>) -> Option<String> {
+        // The same canonicalization `load_text` performs, minus the read —
+        // the returned string must match its dedup key exactly.
+        self.resolve_canonical(request, from)
+            .ok()
+            .map(|canonical| canonical.to_string_lossy().into_owned())
+    }
 }
 
 /// The hermetic in-memory loader for unit tests: registered names are the
@@ -239,6 +262,12 @@ impl SourceLoader for MemoryLoader {
             .get(request)
             .cloned()
             .ok_or_else(|| LoadError::new(request, from, "file not found"))
+    }
+
+    fn resolve_text(&self, request: &str, _from: Option<&str>) -> Option<String> {
+        // Registered names are the canonical paths, exactly as `load_text`
+        // returns them.
+        self.texts.contains_key(request).then(|| request.to_owned())
     }
 }
 
@@ -298,6 +327,14 @@ impl SourceMap {
         line: u32,
     ) -> Result<FileId, LoadError> {
         let from_path = self.path(from).map(str::to_owned);
+        // Dedup before reading: an already-loaded canonical path costs a
+        // resolve, never a re-read — a shared header included from N files is
+        // read from its backing store once.
+        if let Some(canonical) = loader.resolve_text(request, from_path.as_deref())
+            && let Some(&id) = self.by_path.get(&canonical)
+        {
+            return Ok(id);
+        }
         let (canonical, contents) = loader.load_text_at(request, from_path.as_deref(), line)?;
         if let Some(&id) = self.by_path.get(&canonical) {
             return Ok(id);
