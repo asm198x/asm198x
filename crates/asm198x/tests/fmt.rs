@@ -529,6 +529,42 @@ fn fmt_acme_reassembles_byte_identical() {
     );
 }
 
+/// U7: an acme `!zone` block (`!zone name { … }`) survives `--fmt` — the head
+/// and its `}` re-render, the result reassembles byte-identical (the block's
+/// scope restore included), and re-formatting is a fixed point.
+#[test]
+fn fmt_acme_zone_block_round_trips() {
+    let src = "\
+*= $1000
+.out    lda #1
+!zone inner {
+.loop   lda #2
+        bne .loop
+}
+        bne .out
+!zone tail
+.loop   lda #3
+";
+    let original = assemble_acme(src).expect("assembles").bytes;
+    let formatted = format_acme(src).expect("formats");
+    let reassembled = assemble_acme(&formatted)
+        .unwrap_or_else(|e| panic!("formatted zone block must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "zone block round-trips byte-identical\n---\n{formatted}"
+    );
+    assert_eq!(
+        formatted,
+        format_acme(&formatted).expect("formats"),
+        "zone-block fmt is idempotent\n---\n{formatted}"
+    );
+    assert!(
+        formatted.contains("!zone inner {"),
+        "the block head re-renders:\n{formatted}"
+    );
+}
+
 #[test]
 fn fmt_keeps_comments_in_position() {
     let formatted = format_pasmo("; header\n        nop   ; trailing\n").expect("formats");

@@ -548,7 +548,7 @@ fn parse_op(
             }
         }
     };
-    Ok(Some(qualify_op(op, global)))
+    Ok(Some(crate::ast::qualify_locals(op, global)))
 }
 
 /// `ds count [, fill]` — reserve `count` bytes of `fill` (default 0).
@@ -826,42 +826,12 @@ fn product(lists: &[Vec<Alternative>]) -> Vec<Vec<Alternative>> {
     result
 }
 
-/// Qualify leading-`.` local references in an operation under `global`.
-fn qualify_op(op: Operation, global: &str) -> Operation {
-    let q = |e: Expr| qualify_expr(e, global);
-    match op {
-        Operation::Bytes(v) => Operation::Bytes(v.into_iter().map(q).collect()),
-        Operation::Words(v) => Operation::Words(v.into_iter().map(q).collect()),
-        Operation::Instruction {
-            mnemonic,
-            mode,
-            operands,
-        } => Operation::Instruction {
-            mnemonic,
-            mode,
-            operands: operands.into_iter().map(q).collect(),
-        },
-        Operation::Org(e) => Operation::Org(q(e)),
-        Operation::Equ(e) => Operation::Equ(q(e)),
-        other => other,
-    }
-}
-
-fn qualify_expr(e: Expr, global: &str) -> Expr {
-    match e {
-        Expr::Sym(s) if s.starts_with('.') => Expr::Sym(format!("{global}{s}")),
-        Expr::Sym(_) | Expr::Num(_) | Expr::Pc => e,
-        Expr::Lo(b) => Expr::Lo(Box::new(qualify_expr(*b, global))),
-        Expr::Hi(b) => Expr::Hi(Box::new(qualify_expr(*b, global))),
-        Expr::Bank(b) => Expr::Bank(Box::new(qualify_expr(*b, global))),
-        Expr::Neg(b) => Expr::Neg(Box::new(qualify_expr(*b, global))),
-        Expr::Bin(op, l, r) => Expr::Bin(
-            op,
-            Box::new(qualify_expr(*l, global)),
-            Box::new(qualify_expr(*r, global)),
-        ),
-    }
-}
+// Local qualification — `jr .loop` under `start` → `start.loop` — is the
+// shared [`crate::ast::qualify_locals`] (language-surface U7): rgbasm's copy
+// was character-identical to z80's over the same engine types (its
+// `other => other` arm differed only for `Operation::Entry`, which rgbasm
+// never constructs — no `end`-style directive), so the mangle lives in one
+// place; rgbasm's *scope rule* (the last non-`.` global) stays in [`Walker`].
 
 #[cfg(test)]
 mod tests {

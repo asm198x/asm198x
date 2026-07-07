@@ -447,7 +447,7 @@ impl<'a, S: Z80Syntax> Walker<'a, S> {
             }
         });
         if scoped && let Some(g) = &self.current_global {
-            op = op.map(|o| qualify_locals(o, g));
+            op = op.map(|o| crate::ast::qualify_locals(o, g));
         }
 
         // `equ` binds its (qualified) label to a parse-time constant.
@@ -979,55 +979,11 @@ pub(crate) fn eval_const(expr: &Expr, consts: &BTreeMap<String, i64>) -> Option<
     expr.eval_with(&|s| consts.get(s).copied(), None, 0).ok()
 }
 
-/// Rewrite every bare local reference (a leading-`.` symbol) in an operation,
-/// qualifying it with the current global scope `g` — so `jr .loop` under global
-/// `start` resolves to `start.loop`. A non-local symbol, or an already-qualified
-/// `global.local`, is left untouched.
-fn qualify_locals(op: Operation, g: &str) -> Operation {
-    match op {
-        Operation::Org(e) => Operation::Org(qualify_expr(e, g)),
-        Operation::Equ(e) => Operation::Equ(qualify_expr(e, g)),
-        Operation::Bytes(v) => {
-            Operation::Bytes(v.into_iter().map(|e| qualify_expr(e, g)).collect())
-        }
-        Operation::Words(v) => {
-            Operation::Words(v.into_iter().map(|e| qualify_expr(e, g)).collect())
-        }
-        Operation::Instruction {
-            mnemonic,
-            mode,
-            operands,
-        } => Operation::Instruction {
-            mnemonic,
-            mode,
-            operands: operands.into_iter().map(|e| qualify_expr(e, g)).collect(),
-        },
-        // The Z80 dialect never emits pre-encoded instructions.
-        Operation::Encoded(pieces) => Operation::Encoded(pieces),
-        // A binary payload carries no expressions (an incbin resolves in the
-        // walk, never through parse_op — this arm keeps the match total).
-        bin @ Operation::Binary(_) => bin,
-        Operation::Entry(e) => Operation::Entry(qualify_expr(e, g)),
-        // No sub-expressions to qualify (the acme-only align carries constants).
-        align @ Operation::Align { .. } => align,
-    }
-}
-
-fn qualify_expr(e: Expr, g: &str) -> Expr {
-    match e {
-        Expr::Sym(s) if s.starts_with('.') => Expr::Sym(format!("{g}{s}")),
-        Expr::Sym(_) | Expr::Num(_) | Expr::Pc => e,
-        Expr::Lo(b) => Expr::Lo(Box::new(qualify_expr(*b, g))),
-        Expr::Hi(b) => Expr::Hi(Box::new(qualify_expr(*b, g))),
-        Expr::Bank(b) => Expr::Bank(Box::new(qualify_expr(*b, g))),
-        Expr::Neg(b) => Expr::Neg(Box::new(qualify_expr(*b, g))),
-        Expr::Bin(op, l, r) => Expr::Bin(
-            op,
-            Box::new(qualify_expr(*l, g)),
-            Box::new(qualify_expr(*r, g)),
-        ),
-    }
-}
+// Local qualification — `jr .loop` under global `start` → `start.loop` — is
+// the shared [`crate::ast::qualify_locals`] (language-surface U7): z80 and
+// rgbasm ran provably identical copies, so the mangle lives in one place; the
+// *when* (only under `Z80Syntax::scopes_locals()`, so pasmo never scopes)
+// stays here.
 
 /// Cartesian product of each operand's alternatives.
 fn product(lists: &[Vec<Alternative>]) -> Vec<Vec<Alternative>> {

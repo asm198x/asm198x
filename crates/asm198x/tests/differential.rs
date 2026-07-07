@@ -222,6 +222,19 @@ const PROBES: &[Probe] = &[
     ok ("acme", "directive !align",      " !align 255,0\n lda #1\n"),
     ok ("acme", "directive !zone",       " !zone main\n rts\n"),
     ok ("acme", "directive !set",        " !set n=5\n lda #n\n"),
+    // U7: `!zone` scopes `.`-locals — reuse across named/bare zones, the
+    // `{ … }` block form restoring the enclosing zone, a fresh scope on
+    // re-entering a title, and zone-scoped constants driving `!ifdef`.
+    ok ("acme", "zone scopes local reuse",
+        "!zone one\n.loop   lda #1\n        bne .loop\n!zone\n.loop   lda #2\n        bne .loop\n"),
+    ok ("acme", "zone block form restores the enclosing zone",
+        ".out    lda #1\n!zone inner {\n.loop   lda #2\n        bne .loop\n}\n        bne .out\n"),
+    ok ("acme", "zone title re-entry is a fresh scope",
+        "!zone one\n.x      lda #1\n!zone two\n        lda #2\n!zone one\n.x      lda #3\n"),
+    ok ("acme", "zone-scoped constant + !ifdef",
+        "!zone one\n.flag = 1\n!ifdef .flag {\n        lda #1\n}\n!zone two\n!ifdef .flag {\n        lda #2\n}\n        nop\n"),
+    ok ("acme", "locals cross globals within one zone",
+        "first   lda #1\n        bne .later\nsecond  lda #2\n.later  rts\n"),
     // U4: an anon defined in an untaken `!if` branch does not exist — the
     // later `-` reference resolves to the live definition (the evaluation-order
     // collection; the old textual prescan failed this probe).
@@ -591,6 +604,33 @@ const MULTI_PROBES: &[MultiProbe] = &[
                 "* = $1000\nhere    !src \"body.a\"\nart     !bin \"data.bin\", 2\n        !word here\n        !word art\n",
             ),
             ("body.a", "        lda #7\n"),
+        ],
+    },
+    // --- U7: acme `!zone` × `!src` (zone state threads through includes) ---
+    MultiProbe {
+        dialect: "acme",
+        binaries: &[],
+        note: "zone state threads through !src: the include inherits the \
+               includer's zone, and a !zone inside it persists after return (U7)",
+        files: &[
+            (
+                "main.a",
+                "* = $1000\n!zone one\n.x      lda #1\n        !src \"part.a\"\n        bne .y\n",
+            ),
+            ("part.a", "        beq .x\n!zone inc\n.y      lda #2\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "acme",
+        binaries: &[],
+        note: "a .local defined inside an include (no zone switch) is visible \
+               to the includer after return — same zone (U7)",
+        files: &[
+            (
+                "main.a",
+                "* = $1000\n!zone one\n        lda #1\n        !src \"mid.a\"\n        bne .mid\n",
+            ),
+            ("mid.a", ".mid    lda #2\n"),
         ],
     },
     // --- U4: the ca65-flat family (`.include`/`.incbin`, 65816 + HuC6280) ---

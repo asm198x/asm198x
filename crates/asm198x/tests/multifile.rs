@@ -1136,6 +1136,98 @@ fn acme_label_on_the_bin_line_binds_at_the_payload() {
     assert_eq!(r.symbols.get("art"), Some(&0x1000));
 }
 
+// ===========================================================================
+// U7 — ACME `!zone` local-label scoping × the multi-file model. Every byte
+// sequence and error posture is pinned by the acme 0.97 probe runs in the U7
+// report (probes z1-z20, zh1-zh9, za-zg).
+// ===========================================================================
+
+/// AE3 + C3: a `.local` reused across two `!zone`s assembles byte-identical
+/// to the flattened reference bytes, and the two locals are two **distinct
+/// qualified symbols** in `AssemblyResult.symbols` (KTD4 — qualified-name
+/// keys, no new shape).
+#[test]
+fn acme_zone_local_reuse_yields_two_distinct_qualified_symbols() {
+    let src = "* = $1000\n\
+               !zone one\n\
+               .loop   lda #1\n\
+               \x20       bne .loop\n\
+               !zone two\n\
+               .loop   lda #2\n\
+               \x20       bne .loop\n";
+    let r = assemble_acme_files(src, "main.a", &MemoryLoader::new()).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0xA9, 0x01, 0xD0, 0xFC, 0xA9, 0x02, 0xD0, 0xFC],
+        "probe z1 bytes"
+    );
+    assert_eq!(r.symbols.get("one@1.loop"), Some(&0x1000));
+    assert_eq!(r.symbols.get("two@2.loop"), Some(&0x1004));
+    assert!(
+        !r.symbols.contains_key(".loop"),
+        "no unqualified collision key"
+    );
+}
+
+/// Zone state threads through `!src` like the rest of the environment
+/// (probes za/zb/zc): the include inherits the includer's zone (its `beq .x`
+/// sees the includer's `.x`), a `!zone` inside the include persists after
+/// return (the includer's later `.y` reference resolves in the include's
+/// zone), and the includer's pre-include `.x` is then out of scope (zb2).
+#[test]
+fn acme_zone_state_threads_through_the_include_boundary() {
+    let loader = MemoryLoader::new().text("part.a", "        beq .x\n!zone inc\n.y      lda #2\n");
+    let src = "* = $1000\n\
+               !zone one\n\
+               .x      lda #1\n\
+               \x20       !src \"part.a\"\n\
+               \x20       bne .y\n";
+    let r = assemble_acme_files(src, "main.a", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0xA9, 0x01, 0xF0, 0xFC, 0xA9, 0x02, 0xD0, 0xFC],
+        "inherit + persist (probes za/zb)"
+    );
+
+    // zb2: after the include's `!zone`, the includer's `.x` is out of scope.
+    let out_of_scope = "* = $1000\n\
+                        !zone one\n\
+                        .x      lda #1\n\
+                        \x20       !src \"part.a\"\n\
+                        \x20       bne .x\n";
+    let e = assemble_acme_files(out_of_scope, "main.a", &loader).expect_err("out of scope");
+    assert!(
+        e.error.message.contains("undefined"),
+        "probe zb2 posture: {}",
+        e.error.message
+    );
+
+    // zg: a duplicate `.local` via an include (same zone) errors, naming the
+    // *included* file.
+    let dup_loader = MemoryLoader::new().text("dup.a", ".x      lda #2\n");
+    let dup = "* = $1000\n!zone one\n.x      lda #1\n        !src \"dup.a\"\n";
+    let e = assemble_acme_files(dup, "main.a", &dup_loader).expect_err("duplicate");
+    let span = e.error.span.as_ref().expect("carries a span");
+    assert_eq!(
+        e.source_map
+            .file_table()
+            .get(span.file.0 as usize)
+            .map(String::as_str),
+        Some("dup.a"),
+        "the duplicate is reported in the included file"
+    );
+}
+
+/// A `.local` before any `!zone` lives in the initial zone under its bare
+/// key (probe z4), so zone-free programs keep today's public symbol keys.
+#[test]
+fn acme_local_before_any_zone_keeps_the_bare_key() {
+    let src = "* = $1000\n.early  lda #1\n        bne .early\n";
+    let r = assemble_acme_files(src, "main.a", &MemoryLoader::new()).expect("assembles");
+    assert_eq!(r.bytes, vec![0xA9, 0x01, 0xD0, 0xFC]);
+    assert_eq!(r.symbols.get(".early"), Some(&0x1000));
+}
+
 /// An error inside an included file names *that* file and line, and the
 /// include graph yields the chain back to the root (KTD2 failure path).
 #[test]

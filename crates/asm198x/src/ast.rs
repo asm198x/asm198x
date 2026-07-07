@@ -518,6 +518,87 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
     })
 }
 
+// ---------------------------------------------------------------------------
+// Local-label qualification — the shared mangle (language-surface U7, R4)
+// ---------------------------------------------------------------------------
+//
+// **Consolidation audit (U7).** Four dialect families carried their own local
+// qualification before this helper existed:
+//
+// - **z80 (pasmo/sjasmplus)** and **rgbasm** rewrote leading-`.` references in
+//   engine [`Operation`]s by prefixing the current scope string — *identical*
+//   code over identical types, differing only in an `Entry` arm rgbasm never
+//   reaches (it has no `end`-style directive, so `Operation::Entry` is
+//   unconstructible there). Consolidated **here**; both call [`qualify_locals`].
+// - **acme** (U7's `!zone` activation) uses the same leading-`.` prefix rule
+//   with a zone-derived scope string, applied at its single expression entry
+//   point — it shares [`qualify_expr`].
+// - **vasm (68000)** keeps its own copy: it rewrites its *native* multipass
+//   `Stmt`/`Opnd`/`Expr` types (the `Item::Native` payload), not the engine's
+//   `Operation`/`Expr`, so this helper cannot apply without converting types
+//   that deliberately stay family-owned.
+// - **ca65** keeps its cheap-label machinery: `@cheap` names resolve at parse
+//   into `global\u{1}cheap` keys — a different marker character, a different
+//   key shape (collision-proof separator), and parse-time rather than
+//   post-parse-rewrite timing. Not the same semantics; not consolidated
+//   (`decisions/syntax-stance.md`: no premature generalisation).
+//
+// The *when and with what scope* stays per-dialect — that is where the real
+// divergence lives (pasmo doesn't scope at all; sjasmplus/rgbasm scope under
+// the last global; acme scopes under the current `!zone`, and a global label
+// does NOT delimit — all probe-pinned).
+
+/// Rewrite every bare local reference (a leading-`.` symbol) in an operation,
+/// qualifying it with the current scope string `scope` — so `jr .loop` under
+/// scope `start` resolves to `start.loop`. A non-local symbol, or an
+/// already-qualified `global.local`, is left untouched.
+pub(crate) fn qualify_locals(op: Operation, scope: &str) -> Operation {
+    match op {
+        Operation::Org(e) => Operation::Org(qualify_expr(e, scope)),
+        Operation::Equ(e) => Operation::Equ(qualify_expr(e, scope)),
+        Operation::Bytes(v) => {
+            Operation::Bytes(v.into_iter().map(|e| qualify_expr(e, scope)).collect())
+        }
+        Operation::Words(v) => {
+            Operation::Words(v.into_iter().map(|e| qualify_expr(e, scope)).collect())
+        }
+        Operation::Instruction {
+            mnemonic,
+            mode,
+            operands,
+        } => Operation::Instruction {
+            mnemonic,
+            mode,
+            operands: operands
+                .into_iter()
+                .map(|e| qualify_expr(e, scope))
+                .collect(),
+        },
+        Operation::Entry(e) => Operation::Entry(qualify_expr(e, scope)),
+        // No sub-expressions to qualify: pre-encoded pieces, resolved binary
+        // payloads, and the constant-argument align.
+        other @ (Operation::Encoded(_) | Operation::Binary(_) | Operation::Align { .. }) => other,
+    }
+}
+
+/// The expression half of [`qualify_locals`]: prefix every leading-`.` symbol
+/// with `scope`, recursing through the expression tree.
+pub(crate) fn qualify_expr(e: Expr, scope: &str) -> Expr {
+    match e {
+        Expr::Sym(s) if s.starts_with('.') => Expr::Sym(format!("{scope}{s}")),
+        Expr::Sym(_) | Expr::Num(_) | Expr::Pc => e,
+        Expr::Lo(b) => Expr::Lo(Box::new(qualify_expr(*b, scope))),
+        Expr::Hi(b) => Expr::Hi(Box::new(qualify_expr(*b, scope))),
+        Expr::Bank(b) => Expr::Bank(Box::new(qualify_expr(*b, scope))),
+        Expr::Neg(b) => Expr::Neg(Box::new(qualify_expr(*b, scope))),
+        Expr::Bin(op, l, r) => Expr::Bin(
+            op,
+            Box::new(qualify_expr(*l, scope)),
+            Box::new(qualify_expr(*r, scope)),
+        ),
+    }
+}
+
 /// Build an [`Item`] from any [`Operation`] a dialect produced — total over the
 /// operation set, so a computed-operand CPU (`Encoded`) or ACME (`Align`) routes
 /// through the AST without a special case.
