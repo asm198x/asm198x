@@ -311,10 +311,142 @@ pub fn assemble_vasm_exe_debug(
     ))
 }
 
+/// Assemble a **multi-file** 68000 program to a flat binary (language-surface
+/// U6): `source` is the root file's text, `input_path` its name (entry 0 of
+/// the file table), and `include`/`incbin` directives resolve through
+/// `loader` — the CLI wires an [`FsLoader`](source::FsLoader) carrying the
+/// input's directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows vasm's
+/// probe-pinned anchor — every relative request, however deeply nested,
+/// resolves against the **root input's directory** (vasm searches its process
+/// cwd and the main source's directory, never the *including* file's; the
+/// input's directory stands in for the cwd) then the `-I` dirs. State — the
+/// local-label scope, `equ` constants feeding the optimizer's
+/// `addq`/`lea`/`moveq` selections, the active `section` — threads through an
+/// include and back out (textual-splice semantics, probe-pinned), and
+/// `incbin`'s offset/length window matches vasm exactly (zero or negative
+/// length means the rest of the file; an over-long length silently
+/// truncates). Warnings ride the result; on success,
+/// [`AssemblyResult::files`] holds the `FileId`→path table. The single-source
+/// [`assemble_vasm_warned`] is unchanged and rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_vasm_warned_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    let mut map = source::SourceMap::new(input_path, source);
+    match dialects::vasm::assemble_warned_multi(&mut map, loader) {
+        Ok((bytes, warnings, _)) => {
+            let mut result = AssemblyResult::image_warned(bytes, warnings);
+            result.files = map.file_table();
+            Ok(result)
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
+/// Assemble a **multi-file** 68000 program to an Amiga hunk executable
+/// (language-surface U6): as [`assemble_vasm_warned_files`] — the same
+/// `include`/`incbin` surface, resolution order, window semantics, and
+/// cross-boundary state — serialized like [`assemble_vasm_exe`]
+/// (`-Fhunkexe -kick1hunks`, debug symbol table omitted). The single-source
+/// [`assemble_vasm_exe`] is unchanged and rejects both directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (KTD2).
+pub fn assemble_vasm_exe_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    let mut map = source::SourceMap::new(input_path, source);
+    match dialects::vasm::assemble_exe_multi(&mut map, loader) {
+        Ok((bytes, warnings, _)) => {
+            let mut result = AssemblyResult::image_warned(bytes, warnings);
+            result.files = map.file_table();
+            Ok(result)
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
+/// As [`assemble_vasm_warned_files`], also returning the full
+/// [`debug198x::DebugInfo`] read out of assembly — the multi-file counterpart
+/// of [`assemble_vasm_warned_debug`]. `Header.sources` is the file table in
+/// `FileId` order (KTD2: `sources[i] ⇔ FileId(i)`, the same convention as
+/// [`AssemblyResult::files`]) and every line span names the file its
+/// statement was written in. Bytes are identical to
+/// [`assemble_vasm_warned_files`] by construction (one `assemble_core` path;
+/// AE2).
+///
+/// # Errors
+/// As [`assemble_vasm_warned_files`].
+pub fn assemble_vasm_warned_files_debug(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    let mut map = source::SourceMap::new(input_path, source);
+    match dialects::vasm::assemble_warned_multi(&mut map, loader) {
+        Ok((bytes, warnings, capture)) => {
+            let files = map.file_table();
+            let info = listing::capture_debug_info_multi(capture, "68000", "vasm", files.clone());
+            let mut result = AssemblyResult::image_warned(bytes, warnings);
+            result.files = files;
+            Ok((result, info))
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
+/// As [`assemble_vasm_exe_files`], also returning the full
+/// [`debug198x::DebugInfo`] read out of assembly — the multi-file counterpart
+/// of [`assemble_vasm_exe_debug`], describing the hunks the executable loads
+/// with per-file line records (KTD2).
+///
+/// # Errors
+/// As [`assemble_vasm_exe_files`].
+pub fn assemble_vasm_exe_files_debug(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    let mut map = source::SourceMap::new(input_path, source);
+    match dialects::vasm::assemble_exe_multi(&mut map, loader) {
+        Ok((bytes, warnings, capture)) => {
+            let files = map.file_table();
+            let info = listing::capture_debug_info_multi(capture, "68000", "vasm", files.clone());
+            let mut result = AssemblyResult::image_warned(bytes, warnings);
+            result.files = files;
+            Ok((result, info))
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
 /// Reformat Motorola-syntax 68000 (`vasm`) source to canonical layout (the
 /// `--fmt` formatter). Parses into the source-preserving semantic AST and emits
 /// canonical same-dialect source — labels at column 0, operations indented,
-/// comments preserved — reassembling byte-identical to the input.
+/// comments preserved — reassembling byte-identical to the input. An
+/// `include`/`incbin` directive renders verbatim; the target is never opened
+/// (KTD1), so formatting succeeds when it is missing.
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse failure.

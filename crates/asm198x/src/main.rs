@@ -494,44 +494,49 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     // vasm (68000): a flat big-endian code image, or an Amiga hunk executable
-    // with `--exe` (the curriculum's `-Fhunkexe` target). With a debug artifact
-    // requested, the debug-capturing entries return the section-relative record
-    // (U5) — same bytes by construction.
+    // with `--exe` (the curriculum's `-Fhunkexe` target) — via the
+    // include-capable entries (language-surface U6), so `include`/`incbin`
+    // resolve against the input's directory + the `-I` dirs and a failure
+    // renders with the real file table and the include-graph notes. With a
+    // debug artifact requested, the debug-capturing entries return the
+    // section-relative record with per-file line spans — same bytes by
+    // construction.
     if let Assembler::Vasm = assembler {
+        let loader = fs_loader(input, &include_dirs);
         let debug_requested = debug.is_some() || sym.is_some();
-        let (result, info, out_path) = if exe {
-            let (image, info) = if debug_requested {
-                let (image, info) = asm198x::assemble_vasm_exe_debug(&source, input)
-                    .map_err(|e| render_error(input, &files, &e))?;
-                (image, Some(info))
-            } else {
-                (
-                    asm198x::assemble_vasm_exe(&source)
-                        .map_err(|e| render_error(input, &files, &e))?,
-                    None,
-                )
-            };
-            // vasm's convention: the executable drops the source extension.
-            let out_path = output.unwrap_or_else(|| Path::new(input).with_extension(""));
-            (image, info, out_path)
+        let (result, info) = if exe && debug_requested {
+            let (image, info) = asm198x::assemble_vasm_exe_files_debug(&source, input, &loader)
+                .map_err(|e| render_multi_error(input, &e))?;
+            (image, Some(info))
+        } else if exe {
+            (
+                asm198x::assemble_vasm_exe_files(&source, input, &loader)
+                    .map_err(|e| render_multi_error(input, &e))?,
+                None,
+            )
+        } else if debug_requested {
+            let (result, info) = asm198x::assemble_vasm_warned_files_debug(&source, input, &loader)
+                .map_err(|e| render_multi_error(input, &e))?;
+            (result, Some(info))
         } else {
-            let (result, info) = if debug_requested {
-                let (result, info) = asm198x::assemble_vasm_warned_debug(&source, input)
-                    .map_err(|e| render_error(input, &files, &e))?;
-                (result, Some(info))
-            } else {
-                (
-                    asm198x::assemble_vasm_warned(&source)
-                        .map_err(|e| render_error(input, &files, &e))?,
-                    None,
-                )
-            };
-            for w in &result.warnings {
-                eprintln!("asm198x: {input}: {w}");
-            }
-            let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
-            (result, info, out_path)
+            (
+                asm198x::assemble_vasm_warned_files(&source, input, &loader)
+                    .map_err(|e| render_multi_error(input, &e))?,
+                None,
+            )
         };
+        for w in &result.warnings {
+            // A warning inside an included file names that file (the
+            // multi-file table).
+            let file = result
+                .files
+                .get(w.file.0 as usize)
+                .map_or(input, String::as_str);
+            eprintln!("asm198x: {file}: {w}");
+        }
+        // vasm's convention: the executable drops the source extension.
+        let out_path =
+            output.unwrap_or_else(|| Path::new(input).with_extension(if exe { "" } else { "bin" }));
         std::fs::write(&out_path, &result.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
         let debug_notes = match &info {
@@ -902,14 +907,30 @@ fn emit_json(
     // shape needs no change.
     let mut failure_files: Vec<String> = Vec::new();
     let result = match assembler {
-        Assembler::Vasm if exe && debug_requested => {
-            asm198x::assemble_vasm_exe_debug(source, input).map(&mut capture)
+        // vasm goes through its include-capable entries (U6); a failure
+        // carries the file table so the diagnostic's span can name an
+        // included file.
+        Assembler::Vasm => {
+            let loader = fs_loader(input, include_dirs);
+            let fail = |e: asm198x::MultiFileError| {
+                failure_files = e.source_map.file_table();
+                e.error
+            };
+            match (exe, debug_requested) {
+                (true, true) => asm198x::assemble_vasm_exe_files_debug(source, input, &loader)
+                    .map_err(fail)
+                    .map(&mut capture),
+                (true, false) => {
+                    asm198x::assemble_vasm_exe_files(source, input, &loader).map_err(fail)
+                }
+                (false, true) => asm198x::assemble_vasm_warned_files_debug(source, input, &loader)
+                    .map_err(fail)
+                    .map(&mut capture),
+                (false, false) => {
+                    asm198x::assemble_vasm_warned_files(source, input, &loader).map_err(fail)
+                }
+            }
         }
-        Assembler::Vasm if exe => asm198x::assemble_vasm_exe(source),
-        Assembler::Vasm if debug_requested => {
-            asm198x::assemble_vasm_warned_debug(source, input).map(&mut capture)
-        }
-        Assembler::Vasm => asm198x::assemble_vasm_warned(source),
         // ca65 goes through its include-capable entries too (U5); a failure
         // carries the file table so the diagnostic's span can name an
         // included file.

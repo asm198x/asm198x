@@ -1615,3 +1615,76 @@ reset:  lda #$01
         .bytes;
     assert_eq!(original, reassembled, "NES ROM round-trips:\n{formatted}");
 }
+
+/// U6: `--fmt` on the vasm (68000) path renders `include`/`incbin`
+/// directives verbatim from the node's source without ever opening the
+/// targets — formatting succeeds when they do not exist — and stays
+/// idempotent (KTD1). Spelling (quoted vs single-quoted vs bare names, the
+/// offset/length tail, labels on the directive lines) is preserved untouched.
+#[test]
+fn fmt_vasm_include_and_incbin_are_verbatim_and_never_open_targets() {
+    let src = "\
+* header
+here:   include \"missing.inc\"   ; pulled in later
+        include 'also-missing.i'
+art:    incbin  \"missing.bin\",2,3
+        incbin  missing-too.bin
+        moveq   #1,d0
+";
+    let formatted = format_vasm(src).expect("formats with every target missing");
+    for verbatim in [
+        "include \"missing.inc\"",
+        "include 'also-missing.i'",
+        "incbin  \"missing.bin\",2,3",
+        "incbin  missing-too.bin",
+    ] {
+        assert!(
+            formatted.contains(verbatim),
+            "`{verbatim}` survives verbatim:\n{formatted}"
+        );
+    }
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("here") && formatted.contains("art"),
+        "labels on the directive lines survive:\n{formatted}"
+    );
+    assert_eq!(
+        format_vasm(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U6: formatted `include`/`incbin`-bearing vasm source reassembles
+/// byte-identical through the multi-file entry (the 68000's leg of the fmt
+/// round-trip bar) — including an `equ` crossing the boundary into the
+/// optimizer's `addq` selection and an offset/length window.
+#[test]
+fn fmt_vasm_include_and_incbin_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.inc", "N equ 5\n")
+            .binary("data.bin", (0x10..0x18).collect())
+    };
+    let src = "\t\tinclude \"defs.inc\"
+start:
+        add.l   #N,d0
+        incbin  \"data.bin\",2,3
+        rts
+";
+    let original = asm198x::assemble_vasm_warned_files(src, "main.s", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_vasm(src).expect("formats");
+    let reassembled = asm198x::assemble_vasm_warned_files(&formatted, "main.s", &loader())
+        .unwrap_or_else(|e| panic!("formatted vasm must assemble: {e:?}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(
+        original, reassembled,
+        "multi-file vasm round-trips byte-identical\n---\n{formatted}"
+    );
+}

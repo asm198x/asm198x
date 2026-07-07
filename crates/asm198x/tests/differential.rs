@@ -80,6 +80,8 @@ fn tool(dialect: &str) -> &'static str {
         "z80n" => "sjasmplus",
         "lwasm" => "lwasm",
         "vasm" => "vasmm68k_mot",
+        // The 68000 multipass path (U6): the flat (-Fbin) and hunk-exe legs.
+        "vasm-exe" => "vasmm68k_mot",
         "ca65-816" => "ca65",
         "ca65-huc6280" => "ca65",
         // The NES assemble+link path (U5): ca65 + ld65 with the fixed nes.cfg.
@@ -896,6 +898,92 @@ const MULTI_PROBES: &[MultiProbe] = &[
             ("defs.inc", "K equ 5\n\tword 0AAAAH\n"),
         ],
     },
+    // --- U6: the vasm (68000) multipass path ---
+    MultiProbe {
+        dialect: "vasm",
+        binaries: &[],
+        note: "vasm two-file include + equ feeding the optimizer's \
+               addq/lea/moveq selections (U6, KTD1)",
+        files: &[
+            (
+                "main.s",
+                "\tinclude \"defs.inc\"\n\tadd.l #N,d0\n\tadd.l #BIG,a0\n\tmoveq #N,d1\n\trts\n",
+            ),
+            ("defs.inc", "N equ 5\nBIG equ $1234\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "vasm",
+        binaries: &[],
+        note: "vasm three-deep nested include, code at every level; nested \
+               resolution anchors at the root's directory — the sub/ decoy \
+               would diverge if either side searched the requester's dir (U6)",
+        files: &[
+            (
+                "main.s",
+                "\tmoveq #1,d0\n\tinclude \"sub/mid.inc\"\n\tmoveq #5,d4\n",
+            ),
+            (
+                "sub/mid.inc",
+                "\tmoveq #2,d1\n\tinclude \"leaf.inc\"\n\tmoveq #4,d3\n",
+            ),
+            // Root-anchored resolution (probe-pinned): this copy wins…
+            ("leaf.inc", "\tmoveq #3,d2\n"),
+            // …over the requester-directory decoy.
+            ("sub/leaf.inc", "\tmoveq #9,d2\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "vasm",
+        binaries: &[],
+        note: "vasm locals scope across the include boundary, both directions \
+               (U6)",
+        files: &[
+            (
+                "main.s",
+                "start:\tnop\n\tinclude \"loc.inc\"\n.tail:\tnop\n\tbra.s .tail\n\tbra.s .here\n",
+            ),
+            ("loc.inc", ".here:\tnop\n\tbra.s .here\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "vasm",
+        binaries: &[("data.bin", ASSET)],
+        note: "vasm incbin windows: plain between data, offset, equ-fed \
+               offset+length, offset at EOF, length 0 = rest of file, and \
+               silent over-length truncation (U6)",
+        files: &[(
+            "main.s",
+            "OFF equ 2\n\tdc.b $aa\n\tincbin \"data.bin\"\n\tincbin \"data.bin\",2\n\tincbin \"data.bin\",OFF,3\n\tincbin \"data.bin\",8\n\tincbin \"data.bin\",0,0\n\tincbin \"data.bin\",6,4\n\tdc.b $bb\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "vasm",
+        binaries: &[("sprite.bin", ASSET)],
+        note: "vasm incbin inside an include resolves via the include \
+               machinery, with labels on both directive lines (U6)",
+        files: &[
+            (
+                "main.s",
+                "here:\tinclude \"art.inc\"\n\tdc.w here\n\tdc.w art\n",
+            ),
+            ("art.inc", "art:\tincbin \"sprite.bin\",0,4\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "vasm-exe",
+        binaries: &[("data.bin", ASSET)],
+        note: "vasm hunk executable: a section switch inside an include \
+               persists into the includer, and an incbin lands in that \
+               section (U6; label-less so vasm emits no HUNK_SYMBOL)",
+        files: &[
+            (
+                "main.s",
+                "\tsection one,code\n\tmoveq #1,d0\n\tinclude \"sw.inc\"\n\tdc.b $02\n\tincbin \"data.bin\",2,3\n",
+            ),
+            ("sw.inc", "\tsection two,data\n\tdc.b $01\n"),
+        ],
+    },
 ];
 
 #[test]
@@ -964,6 +1052,23 @@ fn multi_file_source_matches_reference() {
             "lwasm" => {
                 let mut c = Command::new("lwasm");
                 c.args(["--6809", "--raw", "-o"]).arg(&out).arg(root);
+                vec![c]
+            }
+            // vasm runs from the probe dir, so its cwd-anchored resolution and
+            // our root-input anchor agree (the cwd *is* the root's directory;
+            // the nested-decoy probe proves neither side searches the
+            // requester's). Flat = `-Fbin` (optimizer on, our entry's match);
+            // exe = `-Fhunkexe -kick1hunks`, the curriculum recipe.
+            "vasm" => {
+                let mut c = Command::new("vasmm68k_mot");
+                c.args(["-Fbin", "-quiet", "-o"]).arg(&out).arg(root);
+                vec![c]
+            }
+            "vasm-exe" => {
+                let mut c = Command::new("vasmm68k_mot");
+                c.args(["-Fhunkexe", "-kick1hunks", "-quiet", "-o"])
+                    .arg(&out)
+                    .arg(root);
                 vec![c]
             }
             // acme runs from the probe dir, so its cwd-anchored `!src`/`!bin`
@@ -1073,6 +1178,8 @@ fn multi_file_source_matches_reference() {
             "ca65-nes" => asm198x::assemble_ca65_files,
             "rgbasm" => asm198x::assemble_rgbasm_files,
             "lwasm" => asm198x::assemble_lwasm_files,
+            "vasm" => asm198x::assemble_vasm_warned_files,
+            "vasm-exe" => asm198x::assemble_vasm_exe_files,
             "8080" => asm198x::assemble_i8080_files,
             "tms9900" => asm198x::assemble_tms9900_files,
             "cp1610" => asm198x::assemble_cp1610_files,

@@ -842,3 +842,62 @@ fn ca65_multifile_debug_line_records_name_the_included_file() {
         .expect("the include's .byte has a span in art.s");
     assert_eq!(tiles.length, 2, "the CHARS bytes attribute to art.s");
 }
+
+/// `--debug` on a multi-file vasm program (language-surface U6): the
+/// sidecar's `Header.sources` lists every file in `FileId` order and each
+/// line record names the file its bytes were written in — the included
+/// data attributes to the include, the code to the root input. Runs the
+/// hunk-exe leg (`--exe`) so the multi-section capture is the one exercised.
+#[test]
+fn vasm_multifile_debug_line_records_name_the_included_file() {
+    let dir = std::env::temp_dir().join("asm198x-debug-cli-vasm-multi");
+    std::fs::create_dir_all(&dir).expect("temp tree");
+    let main = dir.join("main.s");
+    std::fs::write(
+        &main,
+        "\tsection one,code\nstart:\tmoveq #1,d0\n\tinclude \"art.i\"\n\trts\n",
+    )
+    .expect("write main");
+    std::fs::write(
+        dir.join("art.i"),
+        "\tsection two,data\nsprite:\tdc.w $ABCD\n",
+    )
+    .expect("write art");
+    let status = bin()
+        .args(["--dialect", "vasm", "--exe", "--debug"])
+        .arg(&main)
+        .arg("-o")
+        .arg(main.with_extension("exe"))
+        .status()
+        .expect("run asm198x");
+    assert!(status.success());
+    let ndjson = std::fs::read_to_string(main.with_extension("debug198x")).expect("read sidecar");
+    let info = asm198x::debug198x::DebugInfo::read(&ndjson).expect("sidecar parses");
+
+    assert_eq!(info.header.sources.len(), 2, "root + the include");
+    assert!(
+        info.header.sources[1].ends_with("art.i"),
+        "sources[1] is the include (FileId order): {:?}",
+        info.header.sources
+    );
+    let code = info
+        .lines
+        .iter()
+        .find(|l| l.line == 2 && l.file.ends_with("main.s"))
+        .expect("the root's moveq has a span in main.s");
+    assert_eq!(code.length, 2);
+    let sprite = info
+        .lines
+        .iter()
+        .find(|l| l.line == 2 && l.file.ends_with("art.i"))
+        .expect("the include's dc.w has a span in art.i");
+    assert_eq!(sprite.length, 2, "the data bytes attribute to art.i");
+    assert_ne!(
+        code.section, sprite.section,
+        "the include's section switch put them in different hunks"
+    );
+    assert!(
+        info.symbols.iter().any(|s| s.name == "sprite"),
+        "the include's label reaches the symbol record"
+    );
+}

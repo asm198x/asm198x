@@ -23,7 +23,8 @@ use asm198x::{
     assemble_pasmo_files, assemble_pdp11, assemble_pdp11_files, assemble_rgbasm,
     assemble_rgbasm_files, assemble_scmp, assemble_scmp_files, assemble_sjasmplus,
     assemble_sjasmplus_files, assemble_tms7000, assemble_tms7000_files, assemble_tms9900,
-    assemble_tms9900_files, assemble_z8000, assemble_z8000_files, assemble_z8001,
+    assemble_tms9900_files, assemble_vasm, assemble_vasm_exe_files, assemble_vasm_warned,
+    assemble_vasm_warned_files, assemble_z8000, assemble_z8000_files, assemble_z8001,
     assemble_z8001_files,
 };
 
@@ -3196,6 +3197,428 @@ fn cli_ca65_nes_error_in_include_names_that_file() {
     );
     assert!(
         stderr.contains("included from") && stderr.contains("main.s:3"),
+        "carries the included-from note: {stderr}"
+    );
+}
+
+// ===========================================================================
+// U6: the vasm (68000) multipass path — `include`/`incbin` through the flat
+// (`assemble_vasm_warned_files`) and hunk-executable
+// (`assemble_vasm_exe_files`) outputs. Semantics are pinned by the U6 probe
+// runs (vasmm68k_mot 2.0b, mot syntax 3.19b): root-anchored resolution (vasm
+// searches its cwd and the main source's directory, never the including
+// file's), the zero/negative-length "rest of file" incbin sentinel with
+// silent over-length truncation, and textual-splice state threading.
+// ===========================================================================
+
+/// A two-file 68000 program assembles exactly like the flattened text — the
+/// include splices at the directive point (flat output).
+#[test]
+fn vasm_include_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("body.inc", "\tmoveq #2,d1\n\tadd.l d1,d0\n");
+    let src = "\tmoveq #1,d0\n\tinclude \"body.inc\"\n\trts\n";
+    let r = assemble_vasm_warned_files(src, "main.s", &loader).expect("assembles");
+    let flat = assemble_vasm_warned("\tmoveq #1,d0\n\tmoveq #2,d1\n\tadd.l d1,d0\n\trts\n")
+        .expect("flattened");
+    assert_eq!(r.bytes, flat.bytes);
+    assert_eq!(r.files, vec!["main.s", "body.inc"]);
+}
+
+/// Three-deep nesting, code at every level, spliced in walk order.
+#[test]
+fn vasm_include_three_deep_nests() {
+    let loader = MemoryLoader::new()
+        .text(
+            "a.inc",
+            "\tmoveq #2,d1\n\tinclude \"b.inc\"\n\tmoveq #4,d3\n",
+        )
+        .text("b.inc", "\tmoveq #3,d2\n");
+    let src = "\tmoveq #1,d0\n\tinclude \"a.inc\"\n\tmoveq #5,d4\n";
+    let r = assemble_vasm_warned_files(src, "main.s", &loader).expect("assembles");
+    let flat = assemble_vasm_warned(
+        "\tmoveq #1,d0\n\tmoveq #2,d1\n\tmoveq #3,d2\n\tmoveq #4,d3\n\tmoveq #5,d4\n",
+    )
+    .expect("flattened");
+    assert_eq!(r.bytes, flat.bytes);
+    assert_eq!(r.files, vec!["main.s", "a.inc", "b.inc"]);
+}
+
+/// An `equ` defined inside an include feeds the includer's later instruction
+/// selection — vasm's optimizer consults the constant: `add.l #N` becomes
+/// `addq` (5A80), `add.l #BIG,a0` becomes `lea d16(a0),a0` (41E8 1234), and
+/// `moveq #N` encodes in range (7205). Bytes probe-pinned (KTD1's outward
+/// flow, the vasm shape).
+#[test]
+fn vasm_equ_in_include_feeds_optimizer_selection() {
+    let loader = MemoryLoader::new().text("defs.inc", "N equ 5\nBIG equ $1234\n");
+    let src = "\tinclude \"defs.inc\"\n\tadd.l #N,d0\n\tadd.l #BIG,a0\n\tmoveq #N,d1\n";
+    let r = assemble_vasm_warned_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x5A, 0x80, 0x41, 0xE8, 0x12, 0x34, 0x72, 0x05],
+        "addq / lea / moveq selections all saw the include's constants"
+    );
+}
+
+/// vasm request spellings, all probe-pinned: `"file"`, `'file'`, a bare
+/// token, and trailing junk after a quoted name is ignored.
+#[test]
+fn vasm_request_spellings_match_the_probes() {
+    for src in [
+        "\tinclude \"body.inc\"\n",
+        "\tinclude 'body.inc'\n",
+        "\tinclude body.inc\n",
+        "\tinclude \"body.inc\" junk\n",
+    ] {
+        let loader = MemoryLoader::new().text("body.inc", "\tnop\n");
+        let r = assemble_vasm_warned_files(src, "main.s", &loader)
+            .unwrap_or_else(|e| panic!("{src:?} assembles: {}", e.error));
+        assert_eq!(r.bytes, vec![0x4E, 0x71], "{src:?}");
+    }
+    // The bare form stops at a comma, so the incbin tail still parses.
+    let loader = MemoryLoader::new().binary("data.bin", vec![0x10, 0x11, 0x12, 0x13]);
+    let r = assemble_vasm_warned_files("\tincbin data.bin,2\n", "main.s", &loader)
+        .expect("bare name with a tail");
+    assert_eq!(r.bytes, vec![0x12, 0x13]);
+}
+
+/// Locals qualify against the enclosing global across the boundary in both
+/// directions (textual splice, probe-pinned): a `.local` in the include
+/// scopes under the includer's global, and a global defined inside the
+/// include rescopes the includer's locals after it.
+#[test]
+fn vasm_locals_cross_include_boundary() {
+    // Probe l.s: main defines `start`, the include defines `.here` under it,
+    // and main references `.here` after the include (bytes 4E71 4E71 60FC
+    // 4E71 60FC 60F6, probe-pinned).
+    let loader = MemoryLoader::new().text("loc.inc", ".here:\tnop\n\tbra.s .here\n");
+    let src = "start:\tnop\n\tinclude \"loc.inc\"\n.tail:\tnop\n\tbra.s .tail\n\tbra.s .here\n";
+    let r = assemble_vasm_warned_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![
+            0x4E, 0x71, 0x4E, 0x71, 0x60, 0xFC, 0x4E, 0x71, 0x60, 0xFC, 0x60, 0xF6
+        ]
+    );
+
+    // Probe g2.s: a global inside the include rescopes — `.a` after the
+    // include resolves under `mid`, which never defined it (vasm: undefined
+    // symbol < mid .a>).
+    let loader = MemoryLoader::new().text("glob.inc", "mid:\tnop\n");
+    let src = "start:\tnop\n.a:\tnop\n\tinclude \"glob.inc\"\n\tbra.s .a\n";
+    let e = assemble_vasm_warned_files(src, "main.s", &loader)
+        .expect_err("rescoped local is undefined");
+    assert!(
+        e.error.message.contains("mid.a"),
+        "the reference resolved under the include's global: {}",
+        e.error.message
+    );
+}
+
+/// An error inside an included file names that file, its line, and the
+/// include chain (R3 / AE1's mechanism on the vasm path).
+#[test]
+fn vasm_error_in_included_file_names_that_file_with_its_chain() {
+    let loader = MemoryLoader::new()
+        .text("a.inc", "\tinclude \"b.inc\"\n")
+        .text("b.inc", "\tmoveq #1,d0\n\tfrobnicate d0\n");
+    let e = assemble_vasm_warned_files("\tinclude \"a.inc\"\n", "main.s", &loader)
+        .expect_err("frobnicate is unknown");
+    let span = e.error.span.as_ref().expect("the error carries a span");
+    assert_eq!(span.line, 2, "line 2 of b.inc, not of main.s");
+    assert_eq!(
+        e.source_map
+            .file_table()
+            .get(span.file.0 as usize)
+            .map(String::as_str),
+        Some("b.inc"),
+        "the span names the included file"
+    );
+    assert_eq!(
+        e.source_map.include_chain(span.file),
+        vec![("a.inc".to_string(), 1), ("main.s".to_string(), 1)],
+        "the include chain walks back to the root"
+    );
+}
+
+/// A warning raised inside an included file is stamped with that file — the
+/// CLI prints `w.inc: …`, not the root input's name.
+#[test]
+fn vasm_warning_in_included_file_names_that_file() {
+    let loader = MemoryLoader::new().text("w.inc", "\tmoveq #999,d0\n");
+    let r = assemble_vasm_warned_files("\tinclude \"w.inc\"\n\trts\n", "main.s", &loader)
+        .expect("warns, not errors");
+    assert_eq!(r.warnings.len(), 1);
+    assert_eq!(
+        r.files
+            .get(r.warnings[0].file.0 as usize)
+            .map(String::as_str),
+        Some("w.inc"),
+        "the warning names the include"
+    );
+}
+
+/// A missing `include` target and a missing `incbin` asset are diagnostics at
+/// the directive's span (the operand's column), not CLI read errors.
+#[test]
+fn vasm_missing_targets_report_at_the_directive_span() {
+    let loader = MemoryLoader::new();
+    let e = assemble_vasm_warned_files("\tnop\n\tinclude \"nope.inc\"\n", "main.s", &loader)
+        .expect_err("missing include");
+    assert!(e.error.message.contains("nope.inc"), "{}", e.error.message);
+    let span = e.error.span.as_ref().expect("span present");
+    assert_eq!((span.line, span.file), (2, FileId(0)));
+    assert_ne!(span.col, 0, "points at the operand field");
+
+    let e = assemble_vasm_warned_files("\tincbin \"nope.bin\"\n", "main.s", &loader)
+        .expect_err("missing incbin");
+    assert!(e.error.message.contains("nope.bin"), "{}", e.error.message);
+    assert_eq!(e.error.span.as_ref().map(|s| s.line), Some(1));
+}
+
+/// A self-include reports the cycle with its chain.
+#[test]
+fn vasm_self_include_reports_the_cycle() {
+    let loader = MemoryLoader::new().text("loop.inc", "\tinclude \"loop.inc\"\n");
+    let e = assemble_vasm_warned_files("\tinclude \"loop.inc\"\n", "main.s", &loader)
+        .expect_err("cycle");
+    assert!(
+        e.error.message.contains("include cycle"),
+        "{}",
+        e.error.message
+    );
+}
+
+/// The vasm `incbin` windows, probe-pinned (vasmm68k_mot 2.0b): plain and
+/// offset forms; offset at EOF is empty; a length of zero **or** negative is
+/// the rest-of-file sentinel; a length past the remaining bytes silently
+/// truncates (vasm exits 0 — mirrored so the bytes stay identical).
+#[test]
+fn vasm_incbin_windows_match_the_probes() {
+    let asset = vec![0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17];
+    let cases: &[(&str, &[u8])] = &[
+        (
+            "\tdc.b $aa\n\tincbin \"data.bin\"\n\tdc.b $bb\n",
+            &[0xAA, 0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17, 0xBB],
+        ),
+        (
+            "\tincbin \"data.bin\",2\n",
+            &[0x12, 0x13, 0x14, 0x15, 0x16, 0x17],
+        ),
+        ("\tincbin \"data.bin\",2,3\n", &[0x12, 0x13, 0x14]),
+        ("\tincbin \"data.bin\",8\n", &[]),
+        // Zero and negative lengths are vasm's "rest of the file" sentinel.
+        (
+            "\tincbin \"data.bin\",0,0\n",
+            &[0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17],
+        ),
+        (
+            "\tincbin \"data.bin\",2,-3\n",
+            &[0x12, 0x13, 0x14, 0x15, 0x16, 0x17],
+        ),
+        // A length past the remaining bytes silently truncates.
+        ("\tincbin \"data.bin\",6,4\n", &[0x16, 0x17]),
+        // Offset/length are parse-time constant expressions over the live
+        // environment — including constants from an earlier include.
+        (
+            "\tinclude \"off.inc\"\n\tincbin \"data.bin\",OFF,OFF+1\n",
+            &[0x12, 0x13, 0x14],
+        ),
+    ];
+    for (src, want) in cases {
+        let loader = MemoryLoader::new()
+            .binary("data.bin", asset.clone())
+            .text("off.inc", "OFF equ 2\n");
+        let r = assemble_vasm_warned_files(src, "main.s", &loader)
+            .unwrap_or_else(|e| panic!("{src:?} assembles: {}", e.error));
+        assert_eq!(r.bytes, *want, "{src:?}");
+        assert!(r.warnings.is_empty(), "no warnings for {src:?}");
+    }
+}
+
+/// The vasm `incbin` error postures, probe-pinned: a negative offset and an
+/// offset past EOF are errors ("bad file-offset argument"); a forward
+/// reference in the offset is "expression must be constant" (parse-time
+/// folding).
+#[test]
+fn vasm_incbin_window_errors_match_the_probes() {
+    let asset = vec![0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17];
+    for (src, needle) in [
+        ("\tincbin \"data.bin\",-2\n", "negative"),
+        ("\tincbin \"data.bin\",9\n", "past the end"),
+        ("\tincbin \"data.bin\",OFF\nOFF equ 2\n", "constant"),
+    ] {
+        let loader = MemoryLoader::new().binary("data.bin", asset.clone());
+        let e = assemble_vasm_warned_files(src, "main.s", &loader).expect_err("window error");
+        assert!(
+            e.error.message.contains(needle),
+            "{src:?}: {}",
+            e.error.message
+        );
+        assert_eq!(e.error.span.as_ref().map(|s| s.line), Some(1));
+    }
+}
+
+/// A label on an `include` line binds at the include point; a label on an
+/// `incbin` line binds at the payload start (probe-pinned).
+#[test]
+fn vasm_labels_on_directive_lines_bind_at_the_point() {
+    let loader = MemoryLoader::new()
+        .text("body.inc", "\tmoveq #1,d0\n")
+        .binary("data.bin", vec![0x10, 0x11]);
+    let src = "here:\tinclude \"body.inc\"\nart:\tincbin \"data.bin\"\n\tdc.w here\n\tdc.w art\n";
+    let r = assemble_vasm_warned_files(src, "main.s", &loader).expect("assembles");
+    // moveq (2) + payload (2) + dc.w 0 (here) + dc.w 2 (art).
+    assert_eq!(
+        r.bytes,
+        vec![0x70, 0x01, 0x10, 0x11, 0x00, 0x00, 0x00, 0x02]
+    );
+}
+
+/// A `section` switch inside an include persists into the includer after it
+/// (textual splice, probe-pinned under the hunk-exe output), and a hunk
+/// executable with an included file and an incbin serializes exactly like
+/// the flattened source through the single-source exe path.
+#[test]
+fn vasm_section_switch_inside_include_persists_in_the_exe() {
+    let loader = MemoryLoader::new()
+        .text("sw.inc", "\tsection two,data\n\tdc.b $01\n")
+        .binary(
+            "data.bin",
+            vec![0x10, 0x11, 0x12, 0x13, 0x14, 0x15, 0x16, 0x17],
+        );
+    let src = "\tsection one,code\n\tmoveq #1,d0\n\tinclude \"sw.inc\"\n\tdc.b $02\n\tincbin \"data.bin\",2,3\n";
+    let r = assemble_vasm_exe_files(src, "main.s", &loader).expect("exe assembles");
+    let flat = asm198x::assemble_vasm_exe(
+        "\tsection one,code\n\tmoveq #1,d0\n\tsection two,data\n\tdc.b $01\n\tdc.b $02\n\tdc.b $12,$13,$14\n",
+    )
+    .expect("flattened exe");
+    assert_eq!(
+        r.bytes, flat.bytes,
+        "the include's section switch owns the includer's later bytes"
+    );
+    assert_eq!(r.files, vec!["main.s", "sw.inc"]);
+}
+
+/// The single-source vasm entries still mean "one file": an `include` or
+/// `incbin` is a clear pointer to the multi-file entry, on both the flat and
+/// the hunk-exe paths.
+#[test]
+fn vasm_single_source_entries_reject_both_directives_with_a_pointer() {
+    for src in ["\tinclude \"body.inc\"\n", "\tincbin \"data.bin\"\n"] {
+        let e = assemble_vasm(src).expect_err("no loader here");
+        assert!(
+            e.message.contains("multi-file"),
+            "flat points at the multi-file entry: {}",
+            e.message
+        );
+        let e = asm198x::assemble_vasm_exe(src).expect_err("no loader here either");
+        assert!(
+            e.message.contains("multi-file"),
+            "exe points at the multi-file entry: {}",
+            e.message
+        );
+    }
+}
+
+/// Per-file provenance in the vasm debug record (U6): `Header.sources` is the
+/// file table in `FileId` order (KTD2) and each line span names the file its
+/// statement was written in — on both the flat and the hunk-exe captures.
+#[test]
+fn vasm_debug_line_records_carry_each_statements_file() {
+    let loader = MemoryLoader::new().text("art.inc", "sprite:\tdc.w $ABCD\n");
+    let src = "start:\tmoveq #1,d0\n\tinclude \"art.inc\"\n\trts\n";
+    let (r, info) =
+        asm198x::assemble_vasm_warned_files_debug(src, "main.s", &loader).expect("assembles");
+    assert_eq!(r.files, vec!["main.s", "art.inc"]);
+    assert_eq!(
+        info.header.sources, r.files,
+        "Header.sources ⇔ AssemblyResult.files, one FileId order (KTD2)"
+    );
+    let line_for = |file: &str, line: u32| {
+        info.lines
+            .iter()
+            .find(|l| l.file == file && l.line == line)
+            .unwrap_or_else(|| panic!("no line span for {file}:{line}"))
+    };
+    assert_eq!(
+        line_for("main.s", 1).length,
+        2,
+        "moveq is the root's line 1"
+    );
+    assert_eq!(
+        line_for("art.inc", 1).length,
+        2,
+        "the dc.w attributes to the include"
+    );
+    assert!(
+        info.symbols.iter().any(|s| s.name == "sprite"),
+        "the include's label reaches the symbol record"
+    );
+
+    // The exe capture carries the same per-file records.
+    let loader = MemoryLoader::new().text("art.inc", "sprite:\tdc.w $ABCD\n");
+    let (_, info) =
+        asm198x::assemble_vasm_exe_files_debug(src, "main.s", &loader).expect("exe assembles");
+    assert!(
+        info.lines
+            .iter()
+            .any(|l| l.file == "art.inc" && l.line == 1),
+        "exe line records name the include too"
+    );
+}
+
+/// The CLI's vasm route (U6): an `include` resolves via a `-I` search dir on
+/// the human path (flat output), and `--exe` writes the hunk executable
+/// through the same multi-file entries.
+#[test]
+fn cli_assembles_a_vasm_include_via_a_search_dir() {
+    let srcdir = temp_tree("u6-vasm-cli-src");
+    let incdir = temp_tree("u6-vasm-cli-inc");
+    let main = srcdir.join("game.s");
+    std::fs::write(&main, "\tmoveq #N,d0\n\tinclude \"defs.i\"\n\trts\n").expect("write main");
+    std::fs::write(incdir.join("defs.i"), "N equ 3\n").expect("write include");
+    let out = srcdir.join("game.bin");
+    let run = bin()
+        .args(["--dialect", "vasm", "-I"])
+        .arg(&incdir)
+        .arg(&main)
+        .arg("-o")
+        .arg(&out)
+        .output()
+        .expect("run asm198x");
+    assert!(
+        run.status.success(),
+        "assembles: {}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    assert_eq!(
+        std::fs::read(&out).expect("bin written"),
+        vec![0x70, 0x03, 0x4E, 0x75]
+    );
+}
+
+/// The CLI's vasm human failure path (U6): an error inside an included file
+/// renders `file:line` with the `included from` note.
+#[test]
+fn cli_vasm_error_in_include_carries_an_included_from_note() {
+    let dir = temp_tree("u6-vasm-cli-err");
+    let main = dir.join("main.s");
+    std::fs::write(&main, "\tmoveq #1,d0\n\tinclude \"bad.i\"\n").expect("write main");
+    std::fs::write(dir.join("bad.i"), "\tfrobnicate d0\n").expect("write include");
+    let run = bin()
+        .args(["--dialect", "vasm"])
+        .arg(&main)
+        .output()
+        .expect("run asm198x");
+    assert!(!run.status.success());
+    let stderr = String::from_utf8_lossy(&run.stderr);
+    assert!(
+        stderr.contains("bad.i:1"),
+        "names the included file and line: {stderr}"
+    );
+    assert!(
+        stderr.contains("included from") && stderr.contains("main.s:2"),
         "carries the included-from note: {stderr}"
     );
 }

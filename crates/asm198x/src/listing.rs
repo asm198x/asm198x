@@ -70,9 +70,10 @@ pub(crate) struct DebugCapture {
 /// The multi-file counterpart of [`DebugCapture`] (language-surface U5): each
 /// line record carries the [`FileId`] its line counts within, so a linked
 /// path's spans can name an included file rather than stamping the root input
-/// everywhere. The ca65 assemble+link driver collects one; the vasm path
-/// adopts the same shape in U6. [`capture_debug_info_multi`] completes it
-/// against the source map's file table.
+/// everywhere. The ca65 assemble+link driver and the vasm multipass core (U6)
+/// both collect one; [`capture_debug_info_multi`] completes it against the
+/// source map's file table, and the single-source entries collapse it via
+/// [`into_single`](Self::into_single).
 pub(crate) struct DebugCaptureMulti {
     pub(crate) sections: Vec<debug198x::Section>,
     pub(crate) symbols: Vec<debug198x::Symbol>,
