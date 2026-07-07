@@ -82,6 +82,7 @@ fn tool(dialect: &str) -> &'static str {
         "vasm" => "vasmm68k_mot",
         "ca65-816" => "ca65",
         "ca65-huc6280" => "ca65",
+        "rgbasm" => "rgbasm",
         other => panic!("no reference tool for dialect `{other}`"),
     }
 }
@@ -385,7 +386,8 @@ fn source_matches_reference() {
 /// One multi-file fixture: a root file plus its includes and binary assets,
 /// assembled by both sides from a per-probe directory.
 struct MultiProbe {
-    /// `sjasmplus` | `pasmo` — selects the reference tool and our entry point.
+    /// `sjasmplus` | `pasmo` | `acme` | `ca65-816` | `ca65-huc6280` |
+    /// `rgbasm` | `lwasm` — selects the reference tool and our entry point.
     dialect: &'static str,
     note: &'static str,
     /// `(file name, contents)`; the first entry is the root.
@@ -651,10 +653,113 @@ const MULTI_PROBES: &[MultiProbe] = &[
             " .byte $aa\n .incbin \"data.bin\", 2, 3\n .incbin \"data.bin\", 6, -9\n .byte $bb\n",
         )],
     },
+    // --- U4: rgbasm (`INCLUDE`/`INCBIN`, SM83) — assembled + linked, the
+    // reference bytes compared as a prefix (rgblink zero-pads the ROM bank).
+    MultiProbe {
+        dialect: "rgbasm",
+        binaries: &[],
+        note: "nested INCLUDE; DEF constants defined inside feed the includer's \
+               later bit/rst/ds (U4)",
+        files: &[
+            (
+                "main.asm",
+                "SECTION \"c\", ROM0[$0]\n ld a, 1\n INCLUDE \"a.inc\"\n bit BITNUM, a\n \
+                 rst RSTVEC\n ds PAD\n ld b, 2\n",
+            ),
+            ("a.inc", "DEF BITNUM EQU 5\n INCLUDE \"b.inc\"\n ld d, 4\n"),
+            ("b.inc", "DEF RSTVEC EQU $18\nDEF PAD EQU 3\n ld c, 3\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "rgbasm",
+        binaries: &[("data.bin", ASSET)],
+        note: "INCBIN windows: plain, offset, offset+length, offset at EOF, \
+               length 0, and DEF-expression arguments (U4)",
+        files: &[(
+            "main.asm",
+            "SECTION \"c\", ROM0[$0]\nDEF OFF EQU 2\n db $aa\n INCBIN \"data.bin\"\n \
+             INCBIN \"data.bin\", 2\n INCBIN \"data.bin\", OFF, OFF+1\n \
+             INCBIN \"data.bin\", 8\n INCBIN \"data.bin\", 0, 0\n db $bb\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "rgbasm",
+        binaries: &[],
+        note: "locals scope across the INCLUDE boundary; a global inside \
+               rescopes the includer's later locals (U4)",
+        files: &[
+            (
+                "main.asm",
+                "SECTION \"c\", ROM0[$0]\nstart:\n.here:\n nop\n INCLUDE \"loc.inc\"\n \
+                 jr .here\n INCLUDE \"glob.inc\"\n.tail:\n nop\n jr .tail\n",
+            ),
+            ("loc.inc", ".inloc:\n nop\n jr .inloc\n"),
+            ("glob.inc", "mid:\n nop\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "rgbasm",
+        binaries: &[("data.bin", ASSET)],
+        note: "labels on the INCLUDE and INCBIN lines bind at the include \
+               point / payload start (U4)",
+        files: &[
+            (
+                "main.asm",
+                "SECTION \"c\", ROM0[$0]\nhere: INCLUDE \"body.inc\"\n\
+                 art: INCBIN \"data.bin\", 2, 2\n dw here\n dw art\n",
+            ),
+            ("body.inc", " ld a, 7\n"),
+        ],
+    },
+    // --- U4: lwasm (`include`/`use`/`includebin`, 6809) ---
+    MultiProbe {
+        dialect: "lwasm",
+        binaries: &[],
+        note: "nested include in both spellings (quoted include, bare use); an \
+               equ defined inside feeds the includer's direct/extended choice (U4)",
+        files: &[
+            (
+                "main.asm",
+                "        lda #1\n        include \"a.inc\"\n        lda ptr\n        lda #5\n",
+            ),
+            (
+                "a.inc",
+                "        lda #2\n        use b.inc\n        lda #4\n",
+            ),
+            ("b.inc", "ptr     equ $20\n        lda #3\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "lwasm",
+        binaries: &[("data.bin", ASSET)],
+        note: "includebin windows: plain (quoted + bare), offset, offset+length, \
+               offset at EOF, length 0, and the negative-offset-from-EOF forms (U4)",
+        files: &[(
+            "main.asm",
+            "        fcb $aa\n        includebin \"data.bin\"\n        includebin data.bin,2\n\
+             \x20       includebin \"data.bin\",2,3\n        includebin \"data.bin\",8\n\
+             \x20       includebin \"data.bin\",2,0\n        includebin \"data.bin\",-4,2\n\
+             \x20       includebin \"data.bin\",-2\n        fcb $bb\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "lwasm",
+        binaries: &[("data.bin", ASSET)],
+        note: "labels on the include and includebin lines bind at the include \
+               point / payload start (U4)",
+        files: &[
+            (
+                "main.asm",
+                "        org $1000\nhere    include \"body.inc\"\nart     includebin \"data.bin\",2,2\n\
+                 \x20       fdb here\n        fdb art\n",
+            ),
+            ("body.inc", "        lda #7\n"),
+        ],
+    },
 ];
 
 #[test]
-#[ignore = "needs sjasmplus + pasmo + acme + ca65/ld65; run with --ignored"]
+#[ignore = "needs sjasmplus + pasmo + acme + ca65/ld65 + rgbasm/rgblink + lwasm; run with --ignored"]
 fn multi_file_source_matches_reference() {
     let base = std::env::temp_dir().join("asm198x-differential-multi");
     let mut failures: Vec<String> = Vec::new();
@@ -662,6 +767,11 @@ fn multi_file_source_matches_reference() {
     for (i, p) in MULTI_PROBES.iter().enumerate() {
         if !have(tool(p.dialect)) {
             eprintln!("SKIP: `{}` not on PATH", tool(p.dialect));
+            continue;
+        }
+        // The rgbasm arm links with rgblink (RGBDS ships them together).
+        if p.dialect == "rgbasm" && !have("rgblink") {
+            eprintln!("SKIP: `rgblink` not on PATH");
             continue;
         }
         // A per-probe subdirectory, wiped before use, so resolution can never
@@ -694,6 +804,21 @@ fn multi_file_source_matches_reference() {
             "pasmo" => {
                 let mut c = Command::new("pasmo");
                 c.arg(root).arg(&out);
+                vec![c]
+            }
+            // rgbasm assembles to an object; rgblink emits the ROM (the same
+            // recipe as the SM83 conformance sweep).
+            "rgbasm" => {
+                let obj = dir.join("ref.o");
+                let mut a = Command::new("rgbasm");
+                a.arg("-o").arg(&obj).arg(root);
+                let mut l = Command::new("rgblink");
+                l.arg("-o").arg(&out).arg(&obj);
+                vec![a, l]
+            }
+            "lwasm" => {
+                let mut c = Command::new("lwasm");
+                c.args(["--6809", "--raw", "-o"]).arg(&out).arg(root);
                 vec![c]
             }
             // acme runs from the probe dir, so its cwd-anchored `!src`/`!bin`
@@ -758,14 +883,30 @@ fn multi_file_source_matches_reference() {
             "acme" => asm198x::assemble_acme_files,
             "ca65-816" => asm198x::assemble_ca65_816_files,
             "ca65-huc6280" => asm198x::assemble_ca65_huc6280_files,
+            "rgbasm" => asm198x::assemble_rgbasm_files,
+            "lwasm" => asm198x::assemble_lwasm_files,
             other => panic!("no multi-file entry for dialect `{other}`"),
+        };
+        // rgblink zero-pads the ROM to the bank size (probe-pinned), so the
+        // rgbasm arm compares our bytes as the reference's prefix and requires
+        // the remainder to be all padding; every other arm is exact.
+        let matches = |ours: &[u8]| {
+            if p.dialect == "rgbasm" {
+                reference.len() >= ours.len()
+                    && reference[..ours.len()] == *ours
+                    && reference[ours.len()..].iter().all(|b| *b == 0)
+            } else {
+                reference == ours
+            }
         };
         checked += 1;
         match entry(&source, &root_path.to_string_lossy(), &loader) {
-            Ok(r) if r.bytes == reference => {}
+            Ok(r) if matches(&r.bytes) => {}
             Ok(r) => failures.push(format!(
                 "{}: bytes diverge — ours {:02X?} vs ref {:02X?}",
-                p.note, r.bytes, reference
+                p.note,
+                r.bytes,
+                &reference[..reference.len().min(64)]
             )),
             Err(e) => failures.push(format!("{}: we reject it: {}", p.note, e.error)),
         }

@@ -596,8 +596,9 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     // The multi-file-capable dialects — sjasmplus for includes + incbin
-    // (U2/U3), pasmo for its plain incbin (U3), acme for `!src`/`!bin` and
-    // the ca65-flat family (65816, HuC6280) for `.include`/`.incbin` (U4) —
+    // (U2/U3), pasmo for its plain incbin (U3), acme for `!src`/`!bin`, the
+    // ca65-flat family (65816, HuC6280) for `.include`/`.incbin`, rgbasm for
+    // `INCLUDE`/`INCBIN`, and lwasm for `include`/`use`/`includebin` (U4) —
     // assemble through the multi-file entries, with the input's directory +
     // the `-I` dirs wired into a filesystem loader; a failure renders with
     // the real file table and the include-graph notes. Every other dialect
@@ -606,6 +607,16 @@ fn run(args: &[String]) -> Result<String, String> {
         Assembler::Acme => {
             let loader = fs_loader(input, &include_dirs);
             asm198x::assemble_acme_files(&source, input, &loader)
+                .map_err(|e| render_multi_error(input, &e))?
+        }
+        Assembler::Rgbasm => {
+            let loader = fs_loader(input, &include_dirs);
+            asm198x::assemble_rgbasm_files(&source, input, &loader)
+                .map_err(|e| render_multi_error(input, &e))?
+        }
+        Assembler::Lwasm => {
+            let loader = fs_loader(input, &include_dirs);
+            asm198x::assemble_lwasm_files(&source, input, &loader)
                 .map_err(|e| render_multi_error(input, &e))?
         }
         Assembler::Ca65_816 => {
@@ -969,6 +980,20 @@ fn emit_json(
         Assembler::Ca65Huc6280 => {
             let loader = fs_loader(input, include_dirs);
             asm198x::assemble_ca65_huc6280_files(source, input, &loader).map_err(|e| {
+                failure_files = e.source_map.file_table();
+                e.error
+            })
+        }
+        Assembler::Rgbasm => {
+            let loader = fs_loader(input, include_dirs);
+            asm198x::assemble_rgbasm_files(source, input, &loader).map_err(|e| {
+                failure_files = e.source_map.file_table();
+                e.error
+            })
+        }
+        Assembler::Lwasm => {
+            let loader = fs_loader(input, include_dirs);
+            asm198x::assemble_lwasm_files(source, input, &loader).map_err(|e| {
                 failure_files = e.source_map.file_table();
                 e.error
             })

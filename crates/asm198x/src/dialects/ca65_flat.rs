@@ -1,5 +1,13 @@
 //! Shared `.include`/`.incbin` machinery for the **ca65-syntax flat family**
-//! (`ca65_816`, `ca65_huc6280`) — language-surface U4, KTD1/KTD5/KTD8.
+//! (`ca65_816`, `ca65_huc6280`) — language-surface U4, KTD1/KTD5/KTD8 — and
+//! the recursion driver the other flat walk-based dialects (rgbasm, lwasm)
+//! reuse. The driver ([`walk_file`]) owns what is genuinely shared: the
+//! interleaved per-line walk, lazy include/incbin resolution (KTD1), cycle
+//! detection, the depth backstop, label-binds-at-the-point, and per-file error
+//! stamping. What the probes proved **divergent** — the resolution anchor and
+//! the incbin window arithmetic — is per-dialect, supplied through
+//! [`WalkSemantics`] so a dialect states its probe-pinned semantics rather
+//! than inheriting ca65's.
 //!
 //! Both flat ca65 dialects parse line-by-line with an accumulated environment
 //! (constants; the 65816 adds the `.a8`/`.a16`/`.i8`/`.i16` width state), so
@@ -68,6 +76,47 @@ pub(crate) enum WalkDirective {
     },
 }
 
+/// Where a dialect's reference anchors a relative include/incbin request —
+/// probe-pinned per dialect (KTD5), because the references genuinely diverge.
+/// The `-I` search dirs always apply after the anchor (the loader's fallback).
+#[derive(Clone, Copy)]
+pub(crate) enum Resolution {
+    /// The requesting file's own directory, then each **enclosing includer's**
+    /// innermost → outermost (ca65 V2.18, probe-pinned).
+    AncestorChain,
+    /// The requesting file's own directory only — no ancestor hops, no root
+    /// fallback (lwasm 4.24, probe-pinned: a root-dir copy is *not* found from
+    /// inside a subdirectory include).
+    Requester,
+    /// The **root input's** directory for every request, however deep the
+    /// requester (rgbasm v1.0.1, probe-pinned: rgbasm anchors at the process
+    /// cwd and never the including file's directory — our input's directory
+    /// stands in for the cwd, the documented
+    /// [`FsLoader`](crate::source::FsLoader) stance).
+    Root,
+}
+
+/// A dialect's incbin window arithmetic: `(data, offset, size)` → the sliced
+/// payload, or the error-message body (the driver wraps it with the request
+/// name at the directive's span).
+pub(crate) type IncbinWindow = fn(&[u8], Option<i64>, Option<i64>) -> Result<Vec<u8>, String>;
+
+/// A dialect's probe-pinned multi-file semantics, handed to [`walk_file`]:
+/// the resolution anchor and the incbin window arithmetic (offset/size
+/// legality diverges — ca65 reads a negative size as "rest of file", rgbasm
+/// rejects negatives outright, lwasm counts a negative offset from EOF).
+pub(crate) struct WalkSemantics {
+    pub(crate) resolution: Resolution,
+    pub(crate) window: IncbinWindow,
+}
+
+/// ca65's own semantics: the ancestor-chain anchor and the negative-size
+/// sentinel window ([`slice_incbin`]).
+pub(crate) const CA65_SEMANTICS: WalkSemantics = WalkSemantics {
+    resolution: Resolution::AncestorChain,
+    window: slice_incbin,
+};
+
 /// The per-line seam a flat ca65 dialect supplies to the shared walk: parse
 /// one line with the live environment, pushing ordinary nodes internally and
 /// handing a `.include`/`.incbin` back for the driver.
@@ -104,6 +153,7 @@ pub(crate) fn walk_file<W: FlatWalk>(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
     stack: &mut Vec<FileId>,
+    sem: &WalkSemantics,
 ) -> Result<(), AsmError> {
     for (i, raw) in source.lines().enumerate() {
         let line = i + 1;
@@ -138,7 +188,7 @@ pub(crate) fn walk_file<W: FlatWalk>(
                         format!("includes nested more than {MAX_INCLUDE_DEPTH} levels deep"),
                     ));
                 }
-                let id = load_include(map, loader, &request, stack, line as u32)
+                let id = load_include(map, loader, &request, stack, line as u32, sem.resolution)
                     .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
                 // Cycle detection is membership of the *active* stack: ca65
                 // itself has none (a self-include dies on the OS's open-file
@@ -155,7 +205,7 @@ pub(crate) fn walk_file<W: FlatWalk>(
                 }
                 let contents = map.contents(id).unwrap_or_default().to_owned();
                 stack.push(id);
-                walk_file(w, &contents, id, map, loader, stack)?;
+                walk_file(w, &contents, id, map, loader, stack, sem)?;
                 stack.pop();
             }
             WalkDirective::Incbin {
@@ -167,9 +217,9 @@ pub(crate) fn walk_file<W: FlatWalk>(
                 // path mints no FileId (KTD8) — the payload rides a node at
                 // the *directive's* span, which is where the missing-asset /
                 // window diagnostics land too.
-                let data = load_binary(map, loader, &request, stack)
+                let data = load_binary(map, loader, &request, stack, sem.resolution)
                     .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
-                let payload = slice_incbin(&data, offset, size)
+                let payload = (sem.window)(&data, offset, size)
                     .map_err(|msg| AsmError::at(at.clone(), format!("`{request}`: {msg}")))?;
                 w.push_node(Node {
                     operand_span: d.operand_span,
@@ -216,68 +266,109 @@ fn stamp_file(mut e: AsmError, file: FileId) -> AsmError {
     e
 }
 
-/// Resolve an include through ca65's probe-pinned search order: the requesting
-/// file's own directory first (via the loader's `from`), then each enclosing
-/// includer's directory innermost → outermost. The include-graph edge always
-/// names the *true* requester — an ancestor hop re-requests by the canonical
-/// path it resolved, so the `included from` notes stay honest.
+/// Resolve an include per the dialect's probe-pinned [`Resolution`]. The
+/// include-graph edge always names the *true* requester — a non-requester
+/// anchor (an ancestor hop, the root anchor) re-requests by the canonical
+/// path it resolved, so the `included from` notes stay honest — and a failure
+/// is reported as the requester's own (it names the request as written and
+/// the file that asked).
 fn load_include(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
     request: &str,
     stack: &[FileId],
     line: u32,
+    resolution: Resolution,
 ) -> Result<FileId, LoadError> {
     let requester = stack.last().copied().unwrap_or(FileId(0));
-    let first = map.load(loader, request, requester, line);
-    let Err(first_err) = first else {
-        return first;
-    };
-    for &ancestor in stack.iter().rev().skip(1) {
-        let from = map.path(ancestor).map(str::to_owned);
-        if let Ok((canonical, _)) = loader.load_text(request, from.as_deref()) {
-            return map.load(loader, &canonical, requester, line);
+    match resolution {
+        Resolution::Requester => map.load(loader, request, requester, line),
+        Resolution::Root => {
+            if requester == FileId(0) {
+                return map.load(loader, request, requester, line);
+            }
+            let root = map.path(FileId(0)).map(str::to_owned);
+            match loader.load_text(request, root.as_deref()) {
+                Ok((canonical, _)) => map.load(loader, &canonical, requester, line),
+                Err(mut e) => {
+                    // Name the file whose directive failed, not the anchor.
+                    e.from = map.path(requester).map(str::to_owned);
+                    Err(e)
+                }
+            }
+        }
+        Resolution::AncestorChain => {
+            let first = map.load(loader, request, requester, line);
+            let Err(first_err) = first else {
+                return first;
+            };
+            for &ancestor in stack.iter().rev().skip(1) {
+                let from = map.path(ancestor).map(str::to_owned);
+                if let Ok((canonical, _)) = loader.load_text(request, from.as_deref()) {
+                    return map.load(loader, &canonical, requester, line);
+                }
+            }
+            // Every hop failed: report the requester's own failure.
+            Err(first_err)
         }
     }
-    // Every hop failed: report the requester's own failure (it names the
-    // request as written and the file that asked).
-    Err(first_err)
 }
 
-/// Resolve an incbin asset through the same chain as [`load_include`] (KTD8:
-/// include and incbin can never fork resolution behaviour). No `FileId` is
-/// minted — binary data has no spans.
+/// Resolve an incbin asset through the same [`Resolution`] as
+/// [`load_include`] (KTD8: include and incbin can never fork resolution
+/// behaviour — probe-confirmed for all three anchors). No `FileId` is minted
+/// — binary data has no spans.
 fn load_binary(
     map: &SourceMap,
     loader: &dyn SourceLoader,
     request: &str,
     stack: &[FileId],
+    resolution: Resolution,
 ) -> Result<Vec<u8>, LoadError> {
     let requester = stack.last().copied().unwrap_or(FileId(0));
-    let from = map.path(requester).map(str::to_owned);
-    let first = loader.load_binary(request, from.as_deref());
-    let Err(first_err) = first else {
-        return first;
-    };
-    for &ancestor in stack.iter().rev().skip(1) {
-        let from = map.path(ancestor).map(str::to_owned);
-        if let Ok(bytes) = loader.load_binary(request, from.as_deref()) {
-            return Ok(bytes);
+    let requester_path = map.path(requester).map(str::to_owned);
+    match resolution {
+        Resolution::Requester => loader.load_binary(request, requester_path.as_deref()),
+        Resolution::Root => {
+            let root = map.path(FileId(0)).map(str::to_owned);
+            loader
+                .load_binary(request, root.as_deref())
+                .map_err(|mut e| {
+                    e.from = requester_path;
+                    e
+                })
+        }
+        Resolution::AncestorChain => {
+            let first = loader.load_binary(request, requester_path.as_deref());
+            let Err(first_err) = first else {
+                return first;
+            };
+            for &ancestor in stack.iter().rev().skip(1) {
+                let from = map.path(ancestor).map(str::to_owned);
+                if let Ok(bytes) = loader.load_binary(request, from.as_deref()) {
+                    return Ok(bytes);
+                }
+            }
+            Err(first_err)
         }
     }
-    Err(first_err)
 }
 
-/// The file name of a `.include`: ca65 requires a quoted string ("String
-/// constant expected") and rejects anything after the closing quote —
-/// probe-pinned, both mirrored.
-pub(crate) fn include_request(args: &str, line: usize) -> Result<String, AsmError> {
-    let (name, rest) = quoted_name(args, line, ".include")?;
+/// The file name of an include directive (`directive` names it in errors):
+/// a quoted string is required (ca65: "String constant expected"; rgbasm:
+/// "is not a string symbol") and anything after the closing quote is
+/// rejected (ca65 errors; rgbasm: "syntax error") — probe-pinned, mirrored.
+pub(crate) fn include_request(
+    args: &str,
+    line: usize,
+    directive: &str,
+) -> Result<String, AsmError> {
+    let (name, rest) = quoted_name(args, line, directive)?;
     if !rest.trim().is_empty() {
         return Err(AsmError::new(
             line,
             format!(
-                "unexpected `{}` after the `.include` file name",
+                "unexpected `{}` after the `{directive}` file name",
                 rest.trim()
             ),
         ));
@@ -285,16 +376,19 @@ pub(crate) fn include_request(args: &str, line: usize) -> Result<String, AsmErro
     Ok(name)
 }
 
-/// Parse a `.incbin`'s arguments: the quoted file name, then an optional
-/// `, offset[, size]` tail of parse-time constant expressions. `fold` is the
-/// dialect's expression parser + constant folder over its live environment
-/// (a forward reference fails — ca65's "Constant expression expected").
+/// Parse an incbin directive's arguments (`directive` names it in errors):
+/// the quoted file name, then an optional `, offset[, size]` tail of
+/// parse-time constant expressions. `fold` is the dialect's expression
+/// parser and constant folder over its live environment (a forward reference
+/// fails — ca65's "Constant expression expected"; rgbasm's "Expected
+/// constant expression: undefined symbol").
 pub(crate) fn incbin_args(
     args: &str,
     line: usize,
+    directive: &str,
     fold: &dyn Fn(&str) -> Result<i64, AsmError>,
 ) -> Result<(String, Option<i64>, Option<i64>), AsmError> {
-    let (name, rest) = quoted_name(args, line, ".incbin")?;
+    let (name, rest) = quoted_name(args, line, directive)?;
     let rest = rest.trim();
     if rest.is_empty() {
         return Ok((name, None, None));
@@ -302,14 +396,14 @@ pub(crate) fn incbin_args(
     let Some(tail) = rest.strip_prefix(',') else {
         return Err(AsmError::new(
             line,
-            format!("expected `,offset[,size]` after the `.incbin` file name, found `{rest}`"),
+            format!("expected `,offset[,size]` after the `{directive}` file name, found `{rest}`"),
         ));
     };
     let pieces = super::mos6502::split_top_level(tail, ',');
     if pieces.len() > 2 {
         return Err(AsmError::new(
             line,
-            "`.incbin` takes at most a file name, an offset, and a size",
+            format!("`{directive}` takes at most a file name, an offset, and a size"),
         ));
     }
     let fold_arg = |what: &str, piece: &str| -> Result<i64, AsmError> {
@@ -317,7 +411,7 @@ pub(crate) fn incbin_args(
             AsmError::new(
                 line,
                 format!(
-                    "`.incbin` {what} must be a constant expression: {}",
+                    "`{directive}` {what} must be a constant expression: {}",
                     e.message
                 ),
             )
@@ -450,12 +544,12 @@ mod tests {
 
     #[test]
     fn quoted_name_requires_the_string_form() {
-        assert!(include_request(" \"a.s\" ", 1).is_ok());
+        assert!(include_request(" \"a.s\" ", 1, ".include").is_ok());
         // Unquoted (ca65: "String constant expected") and trailing junk (ca65
         // errors) are both rejected.
-        assert!(include_request(" a.s", 1).is_err());
-        assert!(include_request(" \"a.s\" junk", 1).is_err());
-        assert!(include_request(" \"a.s", 1).is_err());
-        assert!(include_request(" \"\"", 1).is_err());
+        assert!(include_request(" a.s", 1, ".include").is_err());
+        assert!(include_request(" \"a.s\" junk", 1, ".include").is_err());
+        assert!(include_request(" \"a.s", 1, ".include").is_err());
+        assert!(include_request(" \"\"", 1, ".include").is_err());
     }
 }

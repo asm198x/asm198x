@@ -326,13 +326,44 @@ pub fn assemble_ca65_huc6280_files(
 /// Assemble rgbasm-syntax SM83 (Game Boy) source into a flat binary at the
 /// section's origin — the RGBDS dialect over [`isa::sm83`]. Covers the full
 /// documented instruction set, `SECTION`/`db`/`dw`/`ds`/`EQU`, and `.local`
-/// labels. Matches `rgbasm`/`rgblink` for the emitted bytes.
+/// labels. Matches `rgbasm`/`rgblink` for the emitted bytes. Single-source:
+/// an `INCLUDE`/`INCBIN` directive is an error here — use
+/// [`assemble_rgbasm_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_rgbasm(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Rgbasm).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** rgbasm program (language-surface U4): `source`
+/// is the root file's text, `input_path` its name (entry 0 of the file
+/// table), and `INCLUDE`/`INCBIN` directives resolve through `loader` — the
+/// CLI wires an [`FsLoader`](source::FsLoader) carrying the input's directory
+/// and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows rgbasm's
+/// probe-pinned anchor — every relative request, however deeply nested,
+/// resolves against the **root input's directory** (rgbasm searches the
+/// process cwd, never the including file's directory; the input's directory
+/// stands in for the cwd) then the `-I` dirs. State — `DEF` constants
+/// feeding `bit`/`rst`/`ds`, the `.local` scope's current global — threads
+/// through an include and back out, and `INCBIN`'s offset/length window
+/// matches rgbasm exactly (negative values rejected). On success,
+/// [`AssemblyResult::files`] holds the `FileId`→path table. The
+/// single-source [`assemble_rgbasm`] is unchanged and rejects both
+/// directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_rgbasm_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Rgbasm, source, input_path, loader)
 }
 
 /// Assemble Intel-syntax 8080 source into a flat binary at the `org` — the
@@ -513,12 +544,41 @@ pub fn assemble_z8001(source: &str) -> Result<AssemblyResult, AsmError> {
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching
 /// `lwasm --6809 --raw`. Covers inherent, immediate, direct, extended, and
 /// relative (short + long) addressing; indexed addressing is not yet supported.
+/// Single-source: an `include`/`use`/`includebin` directive is an error here —
+/// use [`assemble_lwasm_files`] for a multi-file program.
 ///
 /// # Errors
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_lwasm(source: &str) -> Result<AssemblyResult, AsmError> {
     engine::assemble(source, &dialects::Lwasm).map(AssemblyResult::from)
+}
+
+/// Assemble a **multi-file** lwasm program (language-surface U4): `source` is
+/// the root file's text, `input_path` its name (entry 0 of the file table),
+/// and `include`/`use` (both spellings, quoted or bare names) and
+/// `includebin "file"[,offset[,length]]` directives resolve through `loader`
+/// — the CLI wires an [`FsLoader`](source::FsLoader) carrying the input's
+/// directory and the `-I` search dirs; tests wire a
+/// [`MemoryLoader`](source::MemoryLoader) (KTD8). Resolution follows lwasm's
+/// probe-pinned order — the **requesting file's own directory**, then the
+/// `-I` dirs (no cwd, no root fallback, no ancestor hops). An `equ` defined
+/// inside an include feeds the includer's later direct-vs-extended selection,
+/// and `includebin`'s window matches lwasm exactly (a negative offset counts
+/// back from EOF). On success, [`AssemblyResult::files`] holds the
+/// `FileId`→path table. The single-source [`assemble_lwasm`] is unchanged
+/// and rejects the directives.
+///
+/// # Errors
+/// A [`MultiFileError`] carrying the failure *and* the source map (file
+/// table + include graph) built up to it, so a failure inside an included
+/// file can still name its file and chain (KTD2).
+pub fn assemble_lwasm_files(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+) -> Result<AssemblyResult, MultiFileError> {
+    assemble_files(&dialects::Lwasm, source, input_path, loader)
 }
 
 /// Assemble pasmo-syntax Z80 source into a flat binary, targeting a **plain

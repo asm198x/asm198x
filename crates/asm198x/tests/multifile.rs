@@ -15,7 +15,8 @@ use std::process::Command;
 use asm198x::source::{FsLoader, MemoryLoader, SourceLoader, SourceMap};
 use asm198x::{
     FileId, assemble_acme, assemble_acme_files, assemble_ca65_816, assemble_ca65_816_files,
-    assemble_ca65_huc6280, assemble_ca65_huc6280_files, assemble_pasmo, assemble_pasmo_files,
+    assemble_ca65_huc6280, assemble_ca65_huc6280_files, assemble_lwasm, assemble_lwasm_files,
+    assemble_pasmo, assemble_pasmo_files, assemble_rgbasm, assemble_rgbasm_files,
     assemble_sjasmplus, assemble_sjasmplus_files,
 };
 
@@ -1681,6 +1682,736 @@ fn cli_ca65_huc6280_error_in_include_carries_an_included_from_note() {
     );
     assert!(
         stderr.contains("included from") && stderr.contains("main.s:2"),
+        "carries the included-from note: {stderr}"
+    );
+}
+
+// ===========================================================================
+// U4 — rgbasm (SM83): `INCLUDE`/`INCBIN` through the shared walk driver with
+// rgbasm's probe-pinned semantics (rgbasm v1.0.1 + rgblink probe runs in the
+// U4 report): root-anchored resolution (rgbasm searches the process cwd and
+// never the including file's directory — our input's directory stands in),
+// `DEF` constants and the `.local` scope threading through the boundary, and
+// the no-negatives INCBIN window.
+// ===========================================================================
+
+/// An rgbasm include is transparent to the bytes, and the file table survives
+/// into the result (KTD2). `include` is case-insensitive like every rgbasm
+/// keyword.
+#[test]
+fn rgbasm_include_matches_the_flattened_source() {
+    let loader = MemoryLoader::new().text("defs.inc", "DEF VAL EQU $42\n ld c, 3\n");
+    let src = "SECTION \"c\", ROM0[$0]\n ld a, 1\n include \"defs.inc\"\n ld a, VAL\n ld b, 2\n";
+    let r = assemble_rgbasm_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x3E, 0x01, 0x0E, 0x03, 0x3E, 0x42, 0x06, 0x02],
+        "probe-pinned (rgbasm/rgblink): the include splices at its point and \
+         its DEF flows out to the includer"
+    );
+    assert_eq!(
+        r.files,
+        vec!["main.asm".to_string(), "defs.inc".to_string()]
+    );
+}
+
+/// Three-deep nesting, code at every level, in include order (probe-pinned).
+#[test]
+fn rgbasm_include_three_deep_nests() {
+    let loader = MemoryLoader::new()
+        .text("a.inc", " ld b, 2\n INCLUDE \"b.inc\"\n ld d, 4\n")
+        .text("b.inc", " ld c, 3\n");
+    let src = "SECTION \"c\", ROM0[$0]\n ld a, 1\n INCLUDE \"a.inc\"\n ld e, 5\n";
+    let r = assemble_rgbasm_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x3E, 0x01, 0x06, 0x02, 0x0E, 0x03, 0x16, 0x04, 0x1E, 0x05],
+        "bytes interleave in include order (probe-pinned)"
+    );
+    assert_eq!(r.files, vec!["main.asm", "a.inc", "b.inc"]);
+}
+
+/// KTD1's driver on rgbasm: `DEF` constants defined **inside** the include
+/// feed the includer's *later* opcode-embedded operands (`bit`, `rst`) and a
+/// `ds` count — all parse-time consumers (probe-pinned:
+/// 3e 01 / 0e 03 / cb 6f / df / 00 00 00 / 06 02).
+#[test]
+fn rgbasm_def_constants_feed_later_includer_lines() {
+    let loader = MemoryLoader::new().text(
+        "defs.inc",
+        "DEF BITNUM EQU 5\nDEF RSTVEC EQU $18\nDEF PAD EQU 3\n ld c, 3\n",
+    );
+    let src = "SECTION \"c\", ROM0[$0]\n ld a, 1\n INCLUDE \"defs.inc\"\n bit BITNUM, a\n \
+               rst RSTVEC\n ds PAD\n ld b, 2\n";
+    let r = assemble_rgbasm_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![
+            0x3E, 0x01, 0x0E, 0x03, 0xCB, 0x6F, 0xDF, 0x00, 0x00, 0x00, 0x06, 0x02
+        ],
+        "include-defined DEF constants drive bit/rst/ds on later includer lines"
+    );
+}
+
+/// `.local` labels scope across the include boundary, both directions
+/// (probe-pinned: a `.local` at the top of the include scopes under the
+/// includer's current global, and the includer's scope continues after the
+/// include — bytes 00 00 18 fd 18 fa).
+#[test]
+fn rgbasm_locals_scope_across_the_include_boundary() {
+    let loader = MemoryLoader::new().text("loc.inc", ".inloc:\n nop\n jr .inloc\n");
+    let src = "SECTION \"c\", ROM0[$0]\nstart:\n.here:\n nop\n INCLUDE \"loc.inc\"\n jr .here\n";
+    let r = assemble_rgbasm_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x00, 0x00, 0x18, 0xFD, 0x18, 0xFA],
+        "probe-pinned (rgbasm/rgblink)"
+    );
+    assert_eq!(
+        r.symbols.get("start.inloc"),
+        Some(&0x0001),
+        "the include's local qualifies under the includer's global"
+    );
+}
+
+/// A global defined *inside* the include becomes the current global for the
+/// includer's subsequent locals — probe-pinned by reusing one `.local` name
+/// in both scopes: rgbasm accepts the duplicate because they are distinct
+/// symbols (`start.tail` vs `mid.tail`).
+#[test]
+fn rgbasm_global_defined_in_include_rescopes_later_includer_locals() {
+    let loader = MemoryLoader::new().text("glob.inc", "mid:\n nop\n");
+    let src = "SECTION \"c\", ROM0[$0]\nstart:\n.tail:\n nop\n INCLUDE \"glob.inc\"\n.tail:\n \
+               nop\n jr .tail\n";
+    let r = assemble_rgbasm_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x00, 0x00, 0x00, 0x18, 0xFD],
+        "probe-pinned (rgbasm/rgblink)"
+    );
+    assert_eq!(r.symbols.get("start.tail"), Some(&0x0000));
+    assert_eq!(
+        r.symbols.get("mid.tail"),
+        Some(&0x0002),
+        "the includer's post-include local scopes under the include's global"
+    );
+}
+
+/// An error inside a nested include names *that* file and line, and the
+/// include chain walks back to the root (the shared mechanism, spot-checked
+/// on rgbasm).
+#[test]
+fn rgbasm_error_in_included_file_names_that_file_with_its_chain() {
+    let loader = MemoryLoader::new()
+        .text("a.inc", " INCLUDE \"b.inc\"\n")
+        .text("b.inc", " ld a, 1\n frob $10\n");
+    let src = "SECTION \"c\", ROM0[$0]\n INCLUDE \"a.inc\"\n";
+    let e = assemble_rgbasm_files(src, "main.asm", &loader).expect_err("frob is unknown");
+    let span = e.error.span.as_ref().expect("the error carries a span");
+    assert_eq!(span.line, 2, "line 2 of b.inc, not of main.asm");
+    let table = e.source_map.file_table();
+    assert_eq!(
+        table.get(span.file.0 as usize).map(String::as_str),
+        Some("b.inc"),
+        "the span names the included file"
+    );
+    assert_eq!(
+        e.source_map.include_chain(span.file),
+        vec![("a.inc".to_string(), 1), ("main.asm".to_string(), 2)],
+        "the include chain walks back to the root"
+    );
+}
+
+/// A missing `INCLUDE` target and a missing `INCBIN` asset are diagnostics at
+/// the directive's span (the operand's column), not CLI read errors.
+#[test]
+fn rgbasm_missing_targets_report_at_the_directive_span() {
+    let loader = MemoryLoader::new();
+    let src = "SECTION \"c\", ROM0[$0]\n ld a, 1\n INCLUDE \"nothere.inc\"\n";
+    let e = assemble_rgbasm_files(src, "main.asm", &loader).expect_err("missing target");
+    assert!(
+        e.error.message.contains("nothere.inc"),
+        "names the request: {}",
+        e.error.message
+    );
+    let span = e.error.span.as_ref().expect("span at the directive");
+    assert_eq!(span.line, 3);
+    assert_eq!(span.col, 10, "points at the operand (the file name)");
+
+    let src = "SECTION \"c\", ROM0[$0]\n INCBIN \"nothere.bin\"\n";
+    let e = assemble_rgbasm_files(src, "main.asm", &loader).expect_err("missing asset");
+    assert!(
+        e.error.message.contains("nothere.bin"),
+        "names the request: {}",
+        e.error.message
+    );
+    assert_eq!(e.error.span.as_ref().map(|s| s.line), Some(2));
+}
+
+/// `INCBIN "file"[, offset[, length]]` — the probe-pinned window matrix:
+/// plain, offset, offset+length, `DEF`-constant expression arguments, offset
+/// at EOF (empty), and length 0 (empty). rgbasm has no negative sentinel —
+/// negatives are errors (the error matrix below).
+#[test]
+fn rgbasm_incbin_windows_match_the_probes() {
+    let loader = || MemoryLoader::new().binary("data.bin", asset());
+    let cases: &[(&str, Vec<u8>)] = &[
+        (" INCBIN \"data.bin\"", asset()),
+        (
+            " INCBIN \"data.bin\", 2",
+            vec![0x12, 0x13, 0x14, 0x15, 0x16, 0x17],
+        ),
+        (" INCBIN \"data.bin\", 2, 3", vec![0x12, 0x13, 0x14]),
+        // Constant expressions fold against the live environment.
+        (
+            "DEF OFF EQU 2\n INCBIN \"data.bin\", OFF, OFF+1",
+            vec![0x12, 0x13, 0x14],
+        ),
+        // Offset at EOF and length 0 are legal and empty (probe-pinned).
+        (" INCBIN \"data.bin\", 8", vec![]),
+        (" INCBIN \"data.bin\", 0, 0", vec![]),
+    ];
+    for (src, expect) in cases {
+        let full = format!("SECTION \"c\", ROM0[$0]\n{src}\n db $bb\n");
+        let r = assemble_rgbasm_files(&full, "main.asm", &loader())
+            .unwrap_or_else(|e| panic!("`{src}` assembles: {e}"));
+        let mut want = expect.clone();
+        want.push(0xBB);
+        assert_eq!(r.bytes, want, "window for `{src}`");
+    }
+}
+
+/// The probe-pinned `INCBIN` error postures: offset past EOF ("start
+/// position is greater than length"), length past the remaining bytes ("out
+/// of bounds"), negative offset/length ("Constant must not be negative" —
+/// rgbasm has no from-the-end sentinel), and a forward-referenced argument
+/// ("Expected constant expression"). All at the directive's span.
+#[test]
+fn rgbasm_incbin_window_errors_match_the_probes() {
+    let loader = || MemoryLoader::new().binary("data.bin", asset());
+    for (src, what) in [
+        (" INCBIN \"data.bin\", 9", "offset past EOF"),
+        (
+            " INCBIN \"data.bin\", 2, 7",
+            "length past the remaining bytes",
+        ),
+        (" INCBIN \"data.bin\", -2", "negative offset"),
+        (" INCBIN \"data.bin\", 2, -2", "negative length"),
+        (
+            " INCBIN \"data.bin\", 0, SZ\nDEF SZ EQU 3",
+            "forward-referenced length",
+        ),
+    ] {
+        let full = format!("SECTION \"c\", ROM0[$0]\n{src}\n");
+        assert!(
+            assemble_rgbasm_files(&full, "main.asm", &loader()).is_err(),
+            "`{src}` must fail ({what})"
+        );
+    }
+    // The spans: a window error points at the directive's line.
+    let e = assemble_rgbasm_files(
+        "SECTION \"c\", ROM0[$0]\n ld a, 1\n INCBIN \"data.bin\", 9\n",
+        "main.asm",
+        &loader(),
+    )
+    .expect_err("offset past EOF");
+    assert_eq!(e.error.span.as_ref().map(|s| s.line), Some(3));
+    assert!(
+        e.error.message.contains("data.bin"),
+        "names the asset: {}",
+        e.error.message
+    );
+}
+
+/// Labels on the `INCLUDE`/`INCBIN` lines bind at the include point / the
+/// payload start (probe-pinned: `here: INCLUDE …` then `dw here`).
+#[test]
+fn rgbasm_labels_on_directive_lines_bind_at_the_point() {
+    let loader = MemoryLoader::new()
+        .text("body.inc", " ld a, 7\n")
+        .binary("data.bin", asset());
+    let src = "SECTION \"c\", ROM0[$0]\nhere: INCLUDE \"body.inc\"\nart: INCBIN \"data.bin\", 2, 2\n \
+               dw here\n dw art\n";
+    let r = assemble_rgbasm_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x3E, 0x07, 0x12, 0x13, 0x00, 0x00, 0x02, 0x00],
+        "here = $0000 (include point), art = $0002 (payload start) — probe-pinned"
+    );
+    assert_eq!(r.symbols.get("here"), Some(&0x0000));
+    assert_eq!(r.symbols.get("art"), Some(&0x0002));
+}
+
+/// A self-include is a cycle diagnostic listing the chain — rgbasm itself
+/// stops at its recursion limit of 64 (probe-pinned), so this exact
+/// diagnostic exceeds the reference (KTD5: diagnostics are not
+/// byte-compared).
+#[test]
+fn rgbasm_self_include_reports_the_cycle() {
+    let src = "SECTION \"c\", ROM0[$0]\n INCLUDE \"main.asm\"\n";
+    let loader = MemoryLoader::new().text("main.asm", src);
+    let e = assemble_rgbasm_files(src, "main.asm", &loader).expect_err("cycle");
+    assert!(
+        e.error.message.contains("include cycle"),
+        "names the cycle: {}",
+        e.error.message
+    );
+    assert!(
+        e.error.message.contains("main.asm -> main.asm"),
+        "lists the chain: {}",
+        e.error.message
+    );
+}
+
+/// The single-source entry points still mean "one file": an `INCLUDE` or
+/// `INCBIN` there is a clear pointer to the multi-file entry, not an
+/// `unknown instruction` rejection or a silent skip.
+#[test]
+fn rgbasm_single_source_entry_rejects_both_directives_with_a_pointer() {
+    for src in [
+        "SECTION \"c\", ROM0[$0]\n INCLUDE \"defs.inc\"\n",
+        "SECTION \"c\", ROM0[$0]\n INCBIN \"data.bin\"\n",
+    ] {
+        let e = assemble_rgbasm(src).expect_err("no loader here");
+        assert!(
+            e.message.contains("multi-file"),
+            "points at the multi-file entry: {}",
+            e.message
+        );
+    }
+}
+
+/// rgbasm's probe-pinned resolution anchor is the **root input's directory**
+/// for every request, however deep the requester (rgbasm v1.0.1 anchors at
+/// the process cwd, never the including file's directory; our input's
+/// directory stands in for the cwd) — the opposite of lwasm's
+/// requester-first rule. A copy next to the requester is *not* consulted.
+#[test]
+fn rgbasm_include_resolution_anchors_at_the_root() {
+    let root = temp_tree("u4-rgbasm-anchor");
+    std::fs::create_dir_all(root.join("sub")).expect("create sub/");
+    let main = root.join("main.asm");
+    std::fs::write(
+        &main,
+        "SECTION \"c\", ROM0[$0]\n ld a, 1\n INCLUDE \"sub/mid.inc\"\n",
+    )
+    .expect("write main");
+    std::fs::write(
+        root.join("sub/mid.inc"),
+        " ld b, 2\n INCLUDE \"leaf.inc\"\n",
+    )
+    .expect("write mid");
+    // The root-dir copy resolves — even though the requester lives in sub/ —
+    // and a different copy next to the requester is ignored (probe-pinned).
+    std::fs::write(root.join("leaf.inc"), " ld c, 3\n").expect("write root leaf");
+    std::fs::write(root.join("sub/leaf.inc"), " ld e, 5\n").expect("write sub leaf");
+    let source = std::fs::read_to_string(&main).expect("read main");
+    let loader = FsLoader::new(&root, Vec::new());
+    let r = assemble_rgbasm_files(&source, &main.to_string_lossy(), &loader)
+        .expect("resolves at the root anchor");
+    assert_eq!(
+        r.bytes,
+        vec![0x3E, 0x01, 0x06, 0x02, 0x0E, 0x03],
+        "the ROOT directory's copy wins (probe-pinned: rgbasm never searches \
+         the including file's directory)"
+    );
+
+    // With the root copy gone, the requester-adjacent copy is still not
+    // found: the request falls through to the `-I` dirs and fails without
+    // one (probe-pinned).
+    std::fs::remove_file(root.join("leaf.inc")).expect("remove root leaf");
+    let e = assemble_rgbasm_files(&source, &main.to_string_lossy(), &loader)
+        .expect_err("no root copy, no -I: unresolved");
+    assert!(
+        e.error.message.contains("leaf.inc"),
+        "names the request: {}",
+        e.error.message
+    );
+}
+
+/// The CLI assembles an rgbasm include resolved through a `-I` search dir,
+/// and `INCBIN` through the same loader (the human path wiring).
+#[test]
+fn cli_assembles_an_rgbasm_include_via_a_search_dir() {
+    let dir = temp_tree("u4-rgbasm-cli");
+    let libdir = dir.join("lib");
+    std::fs::create_dir_all(&libdir).expect("create lib/");
+    let main = dir.join("main.asm");
+    std::fs::write(
+        &main,
+        "SECTION \"c\", ROM0[$0]\n ld a, 1\n INCLUDE \"defs.inc\"\n INCBIN \"art.bin\", 1, 2\n",
+    )
+    .expect("write main");
+    std::fs::write(libdir.join("defs.inc"), " ld c, 3\n").expect("write include");
+    std::fs::write(libdir.join("art.bin"), [0xDE, 0xAD, 0xBE, 0xEF]).expect("write asset");
+    let out = dir.join("out.bin");
+    let run = bin()
+        .args(["--cpu", "rgbasm", "-I"])
+        .arg(&libdir)
+        .arg(&main)
+        .arg("-o")
+        .arg(&out)
+        .output()
+        .expect("run asm198x");
+    assert!(
+        run.status.success(),
+        "stderr: {}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    assert_eq!(
+        std::fs::read(&out).expect("read output"),
+        vec![0x3E, 0x01, 0x0E, 0x03, 0xAD, 0xBE],
+        "include and incbin both resolve through the -I dir"
+    );
+}
+
+// ===========================================================================
+// U4 — lwasm (6809): `include`/`use`/`includebin` through the shared walk
+// driver with lwasm's probe-pinned semantics (lwasm 4.24 probe runs in the
+// U4 report): requester-directory resolution (then `-I`; no cwd, no root
+// fallback), quoted OR bare file names, and the negative-offset-from-EOF
+// includebin window.
+// ===========================================================================
+
+/// An lwasm include is transparent to the bytes — in the `include` and `use`
+/// spellings, quoted and bare — and the file table survives into the result
+/// (KTD2). Probe-pinned: all four spellings assemble identically.
+#[test]
+fn lwasm_include_spellings_match_the_flattened_source() {
+    for directive in [
+        "include \"body.inc\"",
+        "include body.inc",
+        "use \"body.inc\"",
+        "use body.inc",
+        "INCLUDE \"body.inc\"",
+    ] {
+        let loader = MemoryLoader::new().text("body.inc", "        lda #2\n");
+        let src = format!("        {directive}\n        lda #1\n");
+        let r = assemble_lwasm_files(&src, "main.asm", &loader)
+            .unwrap_or_else(|e| panic!("`{directive}` assembles: {e}"));
+        assert_eq!(
+            r.bytes,
+            vec![0x86, 0x02, 0x86, 0x01],
+            "probe-pinned (lwasm --6809 --raw) for `{directive}`"
+        );
+        assert_eq!(
+            r.files,
+            vec!["main.asm".to_string(), "body.inc".to_string()]
+        );
+    }
+}
+
+/// Three-deep nesting, code at every level, in include order (probe-pinned:
+/// 86 01 / 86 02 / 86 03 / 86 04 / 86 05).
+#[test]
+fn lwasm_include_three_deep_nests() {
+    let loader = MemoryLoader::new()
+        .text(
+            "a.inc",
+            "        lda #2\n        include \"b.inc\"\n        lda #4\n",
+        )
+        .text("b.inc", "        lda #3\n");
+    let src = "        lda #1\n        include \"a.inc\"\n        lda #5\n";
+    let r = assemble_lwasm_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x86, 0x01, 0x86, 0x02, 0x86, 0x03, 0x86, 0x04, 0x86, 0x05]
+    );
+    assert_eq!(r.files, vec!["main.asm", "a.inc", "b.inc"]);
+}
+
+/// KTD1's driver on lwasm: an `equ` defined **inside** the include feeds the
+/// includer's *later* direct-vs-extended selection (probe-pinned: `lda ptr`
+/// with an include-defined `ptr equ $20` emits the DIRECT form 96 20, not
+/// extended B6 00 20).
+#[test]
+fn lwasm_equ_in_include_feeds_direct_extended_selection() {
+    let loader = MemoryLoader::new().text("defs.inc", "ptr     equ $20\n");
+    let src = "        include \"defs.inc\"\n        lda ptr\n";
+    let r = assemble_lwasm_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x96, 0x20],
+        "the include-defined equ selects the direct form (probe-pinned)"
+    );
+}
+
+/// An error inside a nested include names *that* file and line, and the
+/// include chain walks back to the root (the shared mechanism, spot-checked
+/// on lwasm).
+#[test]
+fn lwasm_error_in_included_file_names_that_file_with_its_chain() {
+    let loader = MemoryLoader::new()
+        .text("a.inc", "        include \"b.inc\"\n")
+        .text("b.inc", "        lda #1\n        frob $10\n");
+    let src = "        include \"a.inc\"\n";
+    let e = assemble_lwasm_files(src, "main.asm", &loader).expect_err("frob is unknown");
+    let span = e.error.span.as_ref().expect("the error carries a span");
+    assert_eq!(span.line, 2, "line 2 of b.inc, not of main.asm");
+    let table = e.source_map.file_table();
+    assert_eq!(
+        table.get(span.file.0 as usize).map(String::as_str),
+        Some("b.inc"),
+        "the span names the included file"
+    );
+    assert_eq!(
+        e.source_map.include_chain(span.file),
+        vec![("a.inc".to_string(), 1), ("main.asm".to_string(), 1)],
+        "the include chain walks back to the root"
+    );
+}
+
+/// A missing `include` target and a missing `includebin` asset are
+/// diagnostics at the directive's span (the operand's column), not CLI read
+/// errors.
+#[test]
+fn lwasm_missing_targets_report_at_the_directive_span() {
+    let loader = MemoryLoader::new();
+    let src = "        lda #1\n        include \"nothere.inc\"\n";
+    let e = assemble_lwasm_files(src, "main.asm", &loader).expect_err("missing target");
+    assert!(
+        e.error.message.contains("nothere.inc"),
+        "names the request: {}",
+        e.error.message
+    );
+    let span = e.error.span.as_ref().expect("span at the directive");
+    assert_eq!(span.line, 2);
+    assert_eq!(span.col, 17, "points at the operand (the file name)");
+
+    let src = "        includebin \"nothere.bin\"\n";
+    let e = assemble_lwasm_files(src, "main.asm", &loader).expect_err("missing asset");
+    assert!(
+        e.error.message.contains("nothere.bin"),
+        "names the request: {}",
+        e.error.message
+    );
+    assert_eq!(e.error.span.as_ref().map(|s| s.line), Some(1));
+}
+
+/// `includebin "file"[,offset[,length]]` — the probe-pinned window matrix:
+/// plain (quoted and bare), offset, offset+length, equ-fed expression
+/// arguments, offset at EOF (empty), length 0 (empty), and lwasm's
+/// **negative offset counts back from EOF** (`-4,2` = two bytes from
+/// position len-4; `-8` = the whole file).
+#[test]
+fn lwasm_includebin_windows_match_the_probes() {
+    let loader = || MemoryLoader::new().binary("data.bin", asset());
+    let cases: &[(&str, Vec<u8>)] = &[
+        ("        includebin \"data.bin\"", asset()),
+        ("        includebin data.bin", asset()),
+        (
+            "        includebin \"data.bin\",2",
+            vec![0x12, 0x13, 0x14, 0x15, 0x16, 0x17],
+        ),
+        (
+            "        includebin \"data.bin\",2,3",
+            vec![0x12, 0x13, 0x14],
+        ),
+        ("        includebin data.bin,2,3", vec![0x12, 0x13, 0x14]),
+        (
+            "OFF     equ 2\n        includebin \"data.bin\",OFF,OFF+1",
+            vec![0x12, 0x13, 0x14],
+        ),
+        // Offset at EOF and length 0 are legal and empty (probe-pinned).
+        ("        includebin \"data.bin\",8", vec![]),
+        ("        includebin \"data.bin\",2,0", vec![]),
+        // Negative offsets count back from EOF (probe-pinned).
+        ("        includebin \"data.bin\",-4,2", vec![0x14, 0x15]),
+        ("        includebin \"data.bin\",-2", vec![0x16, 0x17]),
+        ("        includebin \"data.bin\",-8", asset()),
+    ];
+    for (src, expect) in cases {
+        let full = format!("{src}\n        fcb $bb\n");
+        let r = assemble_lwasm_files(&full, "main.asm", &loader())
+            .unwrap_or_else(|e| panic!("`{src}` assembles: {e}"));
+        let mut want = expect.clone();
+        want.push(0xBB);
+        assert_eq!(r.bytes, want, "window for `{src}`");
+    }
+}
+
+/// The probe-pinned `includebin` error postures: offset past EOF or before
+/// the start ("Start value out of range"), a length past the remaining bytes
+/// or negative ("Length value out of range"), and a forward-referenced
+/// argument (lwasm misfolds it to an out-of-range 0; ours is a
+/// constant-expression diagnostic — diagnostics are not byte-compared,
+/// KTD5). All at the directive's span.
+#[test]
+fn lwasm_includebin_window_errors_match_the_probes() {
+    let loader = || MemoryLoader::new().binary("data.bin", asset());
+    for (src, what) in [
+        ("        includebin \"data.bin\",9", "offset past EOF"),
+        (
+            "        includebin \"data.bin\",-9",
+            "offset before the start",
+        ),
+        (
+            "        includebin \"data.bin\",2,7",
+            "length past the remaining bytes",
+        ),
+        (
+            "        includebin \"data.bin\",-2,3",
+            "length past EOF after a negative offset",
+        ),
+        ("        includebin \"data.bin\",2,-3", "negative length"),
+        (
+            "        includebin \"data.bin\",0,SZ\nSZ      equ 3",
+            "forward-referenced length",
+        ),
+    ] {
+        assert!(
+            assemble_lwasm_files(src, "main.asm", &loader()).is_err(),
+            "`{src}` must fail ({what})"
+        );
+    }
+    // The spans: a window error points at the directive's line.
+    let e = assemble_lwasm_files(
+        "        lda #1\n        includebin \"data.bin\",9\n",
+        "main.asm",
+        &loader(),
+    )
+    .expect_err("offset past EOF");
+    assert_eq!(e.error.span.as_ref().map(|s| s.line), Some(2));
+    assert!(
+        e.error.message.contains("data.bin"),
+        "names the asset: {}",
+        e.error.message
+    );
+}
+
+/// Labels on the `include`/`includebin` lines bind at the include point /
+/// the payload start (probe-pinned: `here include …` then `fdb here` — fdb
+/// is big-endian).
+#[test]
+fn lwasm_labels_on_directive_lines_bind_at_the_point() {
+    let loader = MemoryLoader::new()
+        .text("body.inc", "        lda #7\n")
+        .binary("data.bin", asset());
+    let src = "        org $1000\nhere    include \"body.inc\"\nart     includebin \"data.bin\",2,2\n        fdb here\n        fdb art\n";
+    let r = assemble_lwasm_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0x86, 0x07, 0x12, 0x13, 0x10, 0x00, 0x10, 0x02],
+        "here = $1000 (include point), art = $1002 (payload start)"
+    );
+    assert_eq!(r.symbols.get("here"), Some(&0x1000));
+    assert_eq!(r.symbols.get("art"), Some(&0x1002));
+}
+
+/// A self-include is a cycle diagnostic listing the chain — lwasm itself has
+/// no cycle detection (a self-include dies on the OS's open-file limit,
+/// probe-pinned), so this diagnostic exceeds the reference (KTD5).
+#[test]
+fn lwasm_self_include_reports_the_cycle() {
+    let src = "        include \"main.asm\"\n";
+    let loader = MemoryLoader::new().text("main.asm", src);
+    let e = assemble_lwasm_files(src, "main.asm", &loader).expect_err("cycle");
+    assert!(
+        e.error.message.contains("include cycle"),
+        "names the cycle: {}",
+        e.error.message
+    );
+    assert!(
+        e.error.message.contains("main.asm -> main.asm"),
+        "lists the chain: {}",
+        e.error.message
+    );
+}
+
+/// The single-source entry points still mean "one file": an `include`,
+/// `use`, or `includebin` there is a clear pointer to the multi-file entry.
+#[test]
+fn lwasm_single_source_entry_rejects_directives_with_a_pointer() {
+    for src in [
+        "        include \"defs.inc\"\n",
+        "        use defs.inc\n",
+        "        includebin \"data.bin\"\n",
+    ] {
+        let e = assemble_lwasm(src).expect_err("no loader here");
+        assert!(
+            e.message.contains("multi-file"),
+            "points at the multi-file entry: {}",
+            e.message
+        );
+    }
+}
+
+/// lwasm's probe-pinned resolution order: the **requesting file's own
+/// directory**, then the `-I` dirs — and *only* those. A root-directory copy
+/// is NOT found from inside a subdirectory include (lwasm 4.24 probe-pinned;
+/// the opposite of ca65's ancestor chain and rgbasm's root anchor).
+#[test]
+fn lwasm_include_resolution_is_requester_dir_then_search() {
+    let root = temp_tree("u4-lwasm-order");
+    std::fs::create_dir_all(root.join("sub")).expect("create sub/");
+    let main = root.join("main.asm");
+    std::fs::write(
+        &main,
+        "        lda #1\n        include \"sub/mid.inc\"\n        lda #5\n",
+    )
+    .expect("write main");
+    std::fs::write(
+        root.join("sub/mid.inc"),
+        "        lda #2\n        include \"leaf.inc\"\n        lda #4\n",
+    )
+    .expect("write mid");
+    // Scenario 1: the requester-adjacent copy resolves (and wins over -I).
+    std::fs::write(root.join("sub/leaf.inc"), "        lda #3\n").expect("write sub leaf");
+    let source = std::fs::read_to_string(&main).expect("read main");
+    let loader = FsLoader::new(&root, Vec::new());
+    let r = assemble_lwasm_files(&source, &main.to_string_lossy(), &loader)
+        .expect("resolves via the requester's directory");
+    assert_eq!(
+        r.bytes,
+        vec![0x86, 0x01, 0x86, 0x02, 0x86, 0x03, 0x86, 0x04, 0x86, 0x05]
+    );
+
+    // Scenario 2: a root-directory copy is NOT found from inside sub/
+    // (probe-pinned: lwasm has no root/cwd fallback).
+    std::fs::remove_file(root.join("sub/leaf.inc")).expect("remove sub leaf");
+    std::fs::write(root.join("leaf.inc"), "        lda #9\n").expect("write root leaf");
+    let e = assemble_lwasm_files(&source, &main.to_string_lossy(), &loader)
+        .expect_err("the root-dir copy must not resolve");
+    assert!(
+        e.error.message.contains("leaf.inc"),
+        "names the request: {}",
+        e.error.message
+    );
+
+    // Scenario 3: a `-I` dir resolves it.
+    let libdir = root.join("lib");
+    std::fs::create_dir_all(&libdir).expect("create lib/");
+    std::fs::write(libdir.join("leaf.inc"), "        lda #3\n").expect("write lib leaf");
+    let loader = FsLoader::new(&root, vec![libdir]);
+    let r =
+        assemble_lwasm_files(&source, &main.to_string_lossy(), &loader).expect("resolves via -I");
+    assert_eq!(
+        r.bytes,
+        vec![0x86, 0x01, 0x86, 0x02, 0x86, 0x03, 0x86, 0x04, 0x86, 0x05]
+    );
+}
+
+/// A failure inside an lwasm include renders rustc-style with the included
+/// file's name plus an `included from` note (the human CLI path wiring).
+#[test]
+fn cli_lwasm_error_in_include_carries_an_included_from_note() {
+    let dir = temp_tree("u4-lwasm-cli-note");
+    let main = dir.join("main.asm");
+    std::fs::write(&main, "        lda #1\n        include \"bad.inc\"\n").expect("write main");
+    std::fs::write(dir.join("bad.inc"), "        frob $10\n").expect("write include");
+    let run = bin()
+        .args(["--cpu", "6809"])
+        .arg(&main)
+        .output()
+        .expect("run asm198x");
+    assert!(!run.status.success(), "frob fails the assemble");
+    let stderr = String::from_utf8_lossy(&run.stderr);
+    assert!(
+        stderr.contains("bad.inc:1"),
+        "names the included file and line: {stderr}"
+    );
+    assert!(
+        stderr.contains("included from") && stderr.contains("main.asm:2"),
         "carries the included-from note: {stderr}"
     );
 }

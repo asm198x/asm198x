@@ -1323,3 +1323,138 @@ fn fmt_ca65_flat_include_and_incbin_reassemble_byte_identical() {
         .bytes;
     assert_eq!(original, reassembled, "huc6280 round-trips:\n{formatted}");
 }
+
+/// U4 (language surface): `--fmt` renders rgbasm's `INCLUDE`/`INCBIN`
+/// directives verbatim from the node's source without ever opening the
+/// targets — formatting succeeds when they do not exist — and stays
+/// idempotent (KTD1). Spelling (case, the offset/length tail, labels on the
+/// directive lines, the `DEF` constant keyword) is preserved untouched.
+#[test]
+fn fmt_rgbasm_include_and_incbin_are_verbatim_and_never_open_targets() {
+    let src = "\
+; header
+SECTION \"c\", ROM0[$0]
+DEF OFF EQU 2
+here: INCLUDE \"missing.inc\"   ; pulled in later
+ include \"also-missing.inc\"
+art: INCBIN \"missing.bin\", 2, 3
+ INCBIN \"also-missing.bin\", OFF
+ ld a, 1
+";
+    let formatted = format_rgbasm(src).expect("formats with every target missing");
+    for verbatim in [
+        "INCLUDE \"missing.inc\"",
+        "include \"also-missing.inc\"",
+        "INCBIN \"missing.bin\", 2, 3",
+        "INCBIN \"also-missing.bin\", OFF",
+        "DEF OFF EQU 2",
+    ] {
+        assert!(
+            formatted.contains(verbatim),
+            "`{verbatim}` survives verbatim:\n{formatted}"
+        );
+    }
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("here:") && formatted.contains("art:"),
+        "labels on the directive lines survive:\n{formatted}"
+    );
+    assert_eq!(
+        format_rgbasm(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U4: formatted `INCLUDE`/`INCBIN`-bearing rgbasm source reassembles
+/// byte-identical through the multi-file entry (rgbasm's leg of the fmt
+/// round-trip bar) — including a `DEF` constant crossing the boundary.
+#[test]
+fn fmt_rgbasm_include_and_incbin_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.inc", "DEF VAL EQU $42\n ld c, 3\n")
+            .binary("data.bin", (0x10..0x18).collect())
+    };
+    let src = "SECTION \"c\", ROM0[$0]\n ld a, 1\n INCLUDE \"defs.inc\"\n ld a, VAL\n \
+               INCBIN \"data.bin\", 2, 3\n";
+    let original = asm198x::assemble_rgbasm_files(src, "main.asm", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_rgbasm(src).expect("formats");
+    let reassembled = asm198x::assemble_rgbasm_files(&formatted, "main.asm", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+}
+
+/// U4 (language surface): `--fmt` renders lwasm's `include`/`use`/
+/// `includebin` directives verbatim from the node's source without ever
+/// opening the targets — formatting succeeds when they do not exist — and
+/// stays idempotent (KTD1). Spelling (the `use` alias, quoted vs bare names,
+/// the offset/length tail, labels on the directive lines) is preserved
+/// untouched.
+#[test]
+fn fmt_lwasm_include_and_includebin_are_verbatim_and_never_open_targets() {
+    let src = "\
+* header
+here    include \"missing.inc\"   ; pulled in later
+        use also-missing.inc
+art     includebin \"missing.bin\",2,3
+        includebin missing-too.bin,-4
+        lda #1
+";
+    let formatted = format_lwasm(src).expect("formats with every target missing");
+    for verbatim in [
+        "include \"missing.inc\"",
+        "use also-missing.inc",
+        "includebin \"missing.bin\",2,3",
+        "includebin missing-too.bin,-4",
+    ] {
+        assert!(
+            formatted.contains(verbatim),
+            "`{verbatim}` survives verbatim:\n{formatted}"
+        );
+    }
+    assert!(
+        formatted.contains("; pulled in later"),
+        "the trailing comment survives:\n{formatted}"
+    );
+    assert!(
+        formatted.contains("here") && formatted.contains("art"),
+        "labels on the directive lines survive:\n{formatted}"
+    );
+    assert_eq!(
+        format_lwasm(&formatted).expect("formats again"),
+        formatted,
+        "idempotent"
+    );
+}
+
+/// U4: formatted `include`/`includebin`-bearing lwasm source reassembles
+/// byte-identical through the multi-file entry (lwasm's leg of the fmt
+/// round-trip bar) — including an `equ` crossing the boundary into the
+/// direct-vs-extended choice and a negative-offset window.
+#[test]
+fn fmt_lwasm_include_and_includebin_reassemble_byte_identical() {
+    use asm198x::source::MemoryLoader;
+    let loader = || {
+        MemoryLoader::new()
+            .text("defs.inc", "ptr     equ $20\n")
+            .binary("data.bin", (0x10..0x18).collect())
+    };
+    let src =
+        "        include \"defs.inc\"\n        lda ptr\n        includebin \"data.bin\",-4,2\n";
+    let original = asm198x::assemble_lwasm_files(src, "main.asm", &loader())
+        .expect("assembles")
+        .bytes;
+    let formatted = format_lwasm(src).expect("formats");
+    let reassembled = asm198x::assemble_lwasm_files(&formatted, "main.asm", &loader())
+        .unwrap_or_else(|e| panic!("formatted source must assemble: {e}\n---\n{formatted}"))
+        .bytes;
+    assert_eq!(original, reassembled, "round-trips:\n{formatted}");
+}

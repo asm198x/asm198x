@@ -121,7 +121,15 @@ pub(crate) fn parse_program_multi(
     let mut w = Walker::new();
     let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
     let mut stack = vec![FileId(0)];
-    ca65_flat::walk_file(&mut w, &root, FileId(0), map, loader, &mut stack)?;
+    ca65_flat::walk_file(
+        &mut w,
+        &root,
+        FileId(0),
+        map,
+        loader,
+        &mut stack,
+        &ca65_flat::CA65_SEMANTICS,
+    )?;
     Ok(Program { nodes: w.nodes })
 }
 
@@ -316,11 +324,11 @@ impl Walker {
         let (word, args) = split_first_word(rest);
         match word.to_ascii_lowercase().as_str() {
             ".include" => Ok(Some(WalkDirective::Include {
-                request: ca65_flat::include_request(args, line)?,
+                request: ca65_flat::include_request(args, line, ".include")?,
             })),
             ".incbin" => {
                 let fold = |piece: &str| fold_const(&value(piece.trim(), line)?, &self.env, line);
-                let (request, offset, size) = ca65_flat::incbin_args(args, line, &fold)?;
+                let (request, offset, size) = ca65_flat::incbin_args(args, line, ".incbin", &fold)?;
                 Ok(Some(WalkDirective::Incbin {
                     request,
                     offset,
