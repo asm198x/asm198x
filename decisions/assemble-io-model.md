@@ -215,3 +215,19 @@ authoring (ADF, D64, DSK, TRD, MDR, bootable images) is a **separate sibling**,
 build step. The boundary: Asm198x emits program framings; Build198x masters them
 onto media. Build198x's full scope (disk/media mastering vs broader build
 orchestration) and its own umbrella record are still to be settled.
+
+### 2026-07-08 — Tape framing vs tape mastering clarified
+
+Build198x's tape-master demand gate (Gloaming's cassette packaging, fired
+2026-07-03) reopened where a bootable tape sits on the seam. Resolved at the
+umbrella —
+[`tape-framing-vs-mastering.md`](../../../decisions/tape-framing-vs-mastering.md)
+— by splitting on **composition**, which *confirms* this record rather than
+amending it: a `.tap`/`.tzx` whose content is the assembled program and
+nothing else stays an Asm198x framing, **including** the minimal auto-run
+BASIC stub where the reference tool emits one (pasmo `--tapbas`, sjasmplus
+`SAVETAP` — stub parity is entailed by byte-identical dialect validation).
+Composing *multiple* artifacts onto a tape — an authored BASIC loader, a
+SCREEN$ loading screen, multiload — is mastering, owned by Build198x, exactly
+parallel to the bootblock-vs-bootable-ADF split above. The Spectrum
+`.tap`/`.tzx` first-wave targets in this record are unchanged.
