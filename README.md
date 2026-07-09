@@ -15,23 +15,15 @@ of it unmaintained C. Asm198x is one statically-linked, cross-platform,
 well-documented toolchain that spans the family's CPUs. *Rescue beats replace.*
 
 The guiding rule is **source-compatibility**: real-world source for a machine
-should assemble unchanged. Rather than invent a house syntax, each front-end
-matches an existing dialect, and the output is validated byte-for-byte against
-that tool on real curriculum code.
+should assemble unchanged. Instead of inventing a house syntax, each front-end
+matches an existing dialect where compatibility matters, and output is validated
+byte-for-byte against reference tools and fixtures.
 
 ## What works
 
-**Five CPUs, both directions** — every front-end validated byte-identical
-against the reference tool (on the [Code198x](../../Code198x) curriculum where one
-exists, against the reference assembler directly otherwise):
+Asm198x now covers a broad 8-bit and 16-bit CPU surface through source-compatible dialect front-ends, shared ISA specs, and spec-driven disassemblers. Current families include 6502/65816/HuC6280, Z80/Z80N/SM83/8080/Z8000, 6800/6809/68000, CDP1802, MCS-48/8048, SC/MP, Fairchild F8, Signetics 2650, TMS7000, PDP-11, TMS9900, and CP1610.
 
-| CPU | Dialect(s) | Output | Disassembler |
-|-----|-----------|--------|--------------|
-| 6502 | **acme** (C64), **ca65** (NES) | flat binary / `.nes` ROM | ✅ |
-| Z80 | **pasmo**/**pasmonext**, **sjasmplus** | flat binary, incl. Z80N | ✅ |
-| 68000 | **vasm** (Motorola syntax) | flat binary / Amiga hunk executable | ✅ |
-| 6809 | **lwasm** | flat binary | ✅ |
-| 65816 | **ca65** (`--cpu 65816`) | flat binary | ✅ |
+Representative validated front doors:
 
 - **6502 / acme** — `*=`, `!byte`/`!word`/`!fill`/`!text`/`!scr`, `name = value`,
   anonymous `-`/`+` labels, conditional assembly (`!if`/`!ifdef`/`!ifndef`),
@@ -57,9 +49,8 @@ exists, against the reference assembler directly otherwise):
   `m`/`x` width tracking (`.a8`/`.a16`/`.i8`/`.i16`), long / `[dp]` /
   stack-relative modes, `mvn`/`mvp`, `cop`/`wdm`, the `^` bank-byte operator,
   24-bit operands. Validated against `ca65 --cpu 65816`.
-- **Disassembly** is driven by the same spec the assemblers emit from, so
-  assemble → disassemble → reassemble round-trips byte-for-byte (the 65816
-  disassembler even tracks `m`/`x` via `rep`/`sep`).
+- **Additional CPU families** are validated through spec sweeps, opcode-space sweeps, targeted round trips, and reference-assembler differentials. Keep detailed CPU coverage in tests, decisions, and `CLAUDE.md`, not duplicated here.
+- **Disassembly** is driven by the same specs the assemblers emit from, so assemble → disassemble → reassemble round-trips stay byte-for-byte where that surface is implemented.
 
 ```sh
 asm198x --dialect acme       examples/countdown.s -o countdown.bin   # C64 6502
@@ -72,13 +63,14 @@ asm198x --disasm --dialect 6502 --org 0x0200      countdown.bin      # back to s
 
 ## Architecture
 
-Three crates, split only where a boundary is real:
+Four crates, split only where a boundary is real:
 
 | Crate | Role |
 |-------|------|
-| [`isa`](crates/isa) | Declarative instruction-set specs — the single source of truth for encoding (mnemonic ↔ opcode ↔ operand layout ↔ cycles ↔ flags) for `mos6502`, `z80` (with the Z80N extension set), `m68k`, `mos6809`, and `mos65816`. Zero dependencies; the neutral layer Emu198x will validate its decoders against. |
-| [`isa-disasm`](crates/isa-disasm) | The spec-driven disassemblers (6502, Z80, 68000, 6809, 65816), decoding against the same `isa` data the assemblers emit from. Depends only on `isa` + std, so Emu198x can consume disassembly without pulling in the assembler. |
-| [`asm198x`](crates/asm198x) | The library — a dialect-agnostic engine, the shared per-CPU cores, the dialect front-ends, and the bounded NES linker — plus the `asm198x` CLI. Re-exports the disassembler from `isa-disasm`. |
+| [`isa`](crates/isa) | Dependency-free declarative instruction-set specs: the single source of truth for encoding. |
+| [`isa-disasm`](crates/isa-disasm) | Spec-driven disassemblers that decode against `isa` without pulling in the assembler. |
+| [`debug198x`](crates/debug198x) | Cross-CPU debug-info sidecar format for line/address maps, typed symbols, and sections. |
+| [`asm198x`](crates/asm198x) | Assembler library, dialect front-ends, shared engine, formatter, diagnostics contract, bounded linked-output paths, and the `asm198x` CLI. |
 
 The **engine ↔ dialect ↔ spec** seam is what lets one binary span many CPUs and
 dialects: a dialect is a front-end module, a CPU is a spec. Most dialects produce
@@ -88,10 +80,7 @@ finished image, bypassing the flat engine while reusing the shared core.
 See the top of [`crates/asm198x/src/lib.rs`](crates/asm198x/src/lib.rs) and
 [`decisions/syntax-stance.md`](decisions/syntax-stance.md).
 
-This is the **assembler** pillar of the 198x family, a sibling to
-[Code198x](../../Code198x) (curriculum) and [Emu198x](../../Emu198x) (emulator),
-built on the same shared hardware reference. The binding architecture decision
-lives in the umbrella record:
+Asm198x owns the assembler/disassembler and executable ISA-spec layer for the 198x family, built on the same shared hardware reference as the curriculum, emulator, build-tools, catalogue, and future workbench projects. The binding architecture decision lives in the umbrella record:
 [`../../decisions/asm198x-and-shared-isa-spec.md`](../../decisions/asm198x-and-shared-isa-spec.md).
 
 ## Build and test
