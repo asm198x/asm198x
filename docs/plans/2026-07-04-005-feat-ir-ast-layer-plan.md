@@ -1,3 +1,5 @@
+> Planning document. Do not treat status claims here as current unless they match `../../CLAUDE.md`, `../../README.md`, and the current test/CLI surface.
+
 ---
 title: Intermediate Representation (AST) - Plan
 type: feat
