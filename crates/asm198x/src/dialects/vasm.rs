@@ -510,6 +510,18 @@ fn assemble_core(
             Stmt::Raw(payload) => buf.bytes.extend_from_slice(payload),
             Stmt::Dc(size, items) => {
                 for e in items {
+                    // A longword `dc.l <label>` stores the label's
+                    // section-relative offset and needs a RELOC32 so the loader
+                    // fixes it up — the same as an absolute address in an
+                    // instruction. Data tables of pointers into another hunk
+                    // (e.g. flock's `vehtab: dc.l tractx …`) rely on this.
+                    if size.bytes() == 4 {
+                        if let Some(target) =
+                            reloc_sym(e, &ctx.reloc).and_then(|s| ctx.sec_of.get(s).copied())
+                        {
+                            buf.relocs.push((buf.bytes.len() as u32, target));
+                        }
+                    }
                     push_sized(
                         &mut buf.bytes,
                         eval(e, &consts, 0, s.line).map_err(stamp)?,
@@ -2243,6 +2255,7 @@ fn parse_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         mos6502::parse_number,
         mos6502::ExprOpts {
+            bang_is_or: true,
             prec: mos6502::BytePrec::Tight,
             byte_prefix: false,
             caret: mos6502::Caret::Xor,

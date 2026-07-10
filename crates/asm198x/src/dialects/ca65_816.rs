@@ -522,6 +522,7 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         parse_number,
         mos6502::ExprOpts {
+            bang_is_or: false,
             prec: BytePrec::Tight,
             byte_prefix: true,
             caret: mos6502::Caret::BankOrXor,

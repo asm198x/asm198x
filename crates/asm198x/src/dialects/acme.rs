@@ -1807,6 +1807,7 @@ fn parse_value(anons: &Anons, zone: &str, raw: &str, line: usize) -> Result<Expr
         line,
         parse_number,
         mos6502::ExprOpts {
+            bang_is_or: false,
             prec: BytePrec::Loose,
             byte_prefix: true,
             // ACME's `^` is exponentiation and its XOR is the `XOR`/`EOR`

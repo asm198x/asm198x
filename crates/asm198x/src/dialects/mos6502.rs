@@ -230,6 +230,11 @@ pub(crate) struct ExprOpts {
     /// so this is off by default and only rgbasm turns it on. When on, `@`
     /// tokenises exactly like `*` (a PC atom).
     pub at_is_pc: bool,
+    /// Whether `!` is a bitwise-OR operator, an alias for `|` at the same
+    /// precedence (vasm). Verified against `vasmm68k_mot`: `(1<<6)!2` = 66,
+    /// `6!1&3` = 7 (binds looser than `&`, like `|`). Off elsewhere — other
+    /// dialects (e.g. rgbasm) give `!` a different meaning.
+    pub bang_is_or: bool,
 }
 
 /// Parse a value expression. `parse_number` lexes the dialect's numeric literal
@@ -347,6 +352,12 @@ fn tokenize(
                 i += 1;
             }
             '|' => {
+                tokens.push(Tok::Or);
+                i += 1;
+            }
+            // vasm accepts `!` as a second spelling of bitwise OR, at the same
+            // precedence as `|` (verified against vasmm68k_mot).
+            '!' if opts.bang_is_or => {
                 tokens.push(Tok::Or);
                 i += 1;
             }
@@ -819,6 +830,7 @@ mod tests {
             byte_prefix: true,
             caret: Caret::Xor,
             at_is_pc: false,
+            bang_is_or: false,
         };
         fold_const(&parse_expr(raw, 1, num, opts).expect("parse"), &env, 1).expect("fold")
     }
