@@ -7,6 +7,34 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.9](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.8...asm198x-v0.0.9) - 2026-07-10
+
+### Added
+
+- *(debug)* multi-file debug artifacts - per-file line records, spliced listings, and the fixture families
+- *(conditionals)* sjasmplus adopts the shared CondEval walk - IF/IFDEF/IFNDEF/ELSE/ENDIF plus textual DEFINE
+- *(locals)* ACME !zone scoping becomes real; the z80/rgbasm qualifiers consolidate onto the shared AST helper
+- *(vasm)* include and incbin through the 68000 multipass path, byte-identical to vasm
+- *(ca65-nes)* .include and .incbin through the assemble+link path, ROM-identical to ca65+ld65
+- *(asl)* INCLUDE and BINCLUDE across all twelve asl-syntax chips, byte-identical to asl
+- *(rgbasm,lwasm)* include and incbin for the Game Boy and 6809 dialects, byte-identical to their references
+- *(ca65-flat)* .include and .incbin for the 65816 and HuC6280 dialects, byte-identical to ca65
+- *(acme)* !src and !bin land through the evaluation walk, byte-identical to acme
+- *(incbin)* binary inclusion lands for the z80 family, byte-identical to sjasmplus and pasmo
+- *(include)* INCLUDE lands end-to-end, proven byte-identical on sjasmplus
+- *(source)* the multi-file foundation - loader seam, FileId table, file:line:col rendering
+
+### Fixed
+
+- *(vasm)* support `!` as bitwise-OR and relocate `dc.l <label>` data
+- *(review)* apply the nine validated findings from the multi-agent + cross-model review
+
+### Other
+
+- collapse collapsible_if in vasm dc.l reloc path
+- Merge pull request #68 from asm198x/feat/language-surface
+- *(source)* resolve includes before reading - a shared header is read once, not once per inclusion
+
 ## [0.0.8](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.7...asm198x-v0.0.8) - 2026-07-06
 
 ### Added
