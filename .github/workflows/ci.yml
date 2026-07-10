@@ -19,7 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Read pinned toolchain
         # rust-toolchain.toml is the single source of truth across local +
@@ -45,7 +45,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Read pinned toolchain
         id: toolchain
@@ -79,7 +79,7 @@ jobs:
       COVERAGE_GATE_THRESHOLD: 60
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Read pinned toolchain
         id: toolchain
@@ -141,7 +141,7 @@ jobs:
         os: [macos-latest, windows-latest]
     steps:
       - name: Check out repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Read pinned toolchain
         id: toolchain
