@@ -515,12 +515,11 @@ fn assemble_core(
                     // fixes it up — the same as an absolute address in an
                     // instruction. Data tables of pointers into another hunk
                     // (e.g. flock's `vehtab: dc.l tractx …`) rely on this.
-                    if size.bytes() == 4 {
-                        if let Some(target) =
+                    if size.bytes() == 4
+                        && let Some(target) =
                             reloc_sym(e, &ctx.reloc).and_then(|s| ctx.sec_of.get(s).copied())
-                        {
-                            buf.relocs.push((buf.bytes.len() as u32, target));
-                        }
+                    {
+                        buf.relocs.push((buf.bytes.len() as u32, target));
                     }
                     push_sized(
                         &mut buf.bytes,
