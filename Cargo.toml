@@ -32,6 +32,9 @@ edition = "2024"
 version = "0.0.11"
 license = "GPL-2.0-or-later"
 repository = "https://github.com/asm198x/asm198x"
+# The Homebrew formula carries a homepage; without one `dist` warns and the
+# generated formula is poorer for it.
+homepage = "https://asm198x.github.io"
 
 [workspace.lints.rust]
 unsafe_code = "forbid"
@@ -60,9 +63,14 @@ codegen-units = 1
 cargo-dist-version = "0.32.0"
 ci = "github"
 # shell/powershell need no infrastructure beyond the GitHub Release the
-# archives already ship to. A Homebrew tap would need its own repo
-# (asm198x/homebrew-tap) and is a separate decision.
-installers = ["shell", "powershell"]
+# archives already ship to. homebrew publishes a formula to `tap` below, which
+# needs that repo to exist and a token with write access to it (the release
+# workflow reads `HOMEBREW_TAP_TOKEN`).
+installers = ["shell", "powershell", "homebrew"]
+tap = "asm198x/homebrew-tap"
+# Publishing the formula is a separate job from building the installer; without
+# it the tap is named and never written to.
+publish-jobs = ["homebrew"]
 targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
 pr-run-mode = "plan"
 

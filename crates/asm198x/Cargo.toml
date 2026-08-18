@@ -5,6 +5,7 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
+homepage.workspace = true
 
 # One crate provides both the library API (`asm198x::assemble_6502`) and the
 # `asm198x` binary (src/main.rs). The engine-vs-dialect crate split is deferred
