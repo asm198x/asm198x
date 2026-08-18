@@ -218,7 +218,7 @@ fn split_label(code: &str) -> (Option<String>, &str) {
 fn parse_op(rest: &str, line: usize, seg: bool) -> Result<Option<Operation>, AsmError> {
     let (word, args) = split_first_word(rest);
     let op = match word.to_ascii_lowercase().as_str() {
-        "cpu" | "end" | "title" | "page" | "name" | "listing" | "supmode" => return Ok(None),
+        "cpu" | "end" | "title" | "page" | "aseg" | "listing" | "supmode" => return Ok(None),
         "org" | "aorg" | "rorg" => Operation::Org(value(args, line)?),
         "byte" | "db" | "dc.b" => Operation::Bytes(byte_list(args, line)?),
         "word" | "dw" | "dc.w" => Operation::Words(value_list(args, line)?),

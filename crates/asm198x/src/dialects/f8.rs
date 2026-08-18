@@ -204,7 +204,7 @@ fn parse_op(
 ) -> Result<Option<Operation>, AsmError> {
     let (word, args) = split_first_word(rest);
     let op = match word.to_ascii_lowercase().as_str() {
-        "cpu" | "end" | "title" | "page" | "name" => return Ok(None),
+        "cpu" | "end" | "title" | "page" | "aseg" | "listing" => return Ok(None),
         "org" => Operation::Org(value(args, line)?),
         "db" | "dc" | "byte" => Operation::Bytes(byte_list(args, line)?),
         "dw" | "word" => Operation::Words(value_list(args, line)?),
