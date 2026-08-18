@@ -637,7 +637,9 @@ fn run(args: &[String]) -> Result<String, String> {
             return Ok(format!("formatted {input} -> {}", path.display()));
         }
         print!("{formatted}");
-        return Ok(format!("formatted {input}"));
+        // Name the destination, as the `-o` arm does. "formatted <input>" alone
+        // reads as though the input were rewritten in place, which it is not.
+        return Ok(format!("formatted {input} -> stdout"));
     }
 
     // `--message-format=json`: emit the machine-consumable result (or its
