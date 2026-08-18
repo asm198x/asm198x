@@ -268,6 +268,11 @@ pub(crate) enum Item {
     /// to [`Operation::Binary`]. Binary data mints no `FileId` (KTD8): the
     /// node's span is the *directive's*, and that is where diagnostics point.
     Binary(Vec<u8>),
+    /// Reserved space (`ds`/`rmb`/`res`/`block`) — a count of address units,
+    /// filled by the engine with [`Dialect::gap_fill`]. Distinct from `Bytes`
+    /// so that lowering back out of the AST does not turn a reservation into
+    /// literal zeros, which is what made the asl-family output diverge.
+    Reserve(usize),
 }
 
 /// A source line reduced to an optional (scoped) label and an optional
@@ -490,6 +495,7 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
         ),
         Item::Entry(o) => Operation::Entry(o.into_value()?),
         Item::Encoded(pieces) => Operation::Encoded(pieces),
+        Item::Reserve(count) => Operation::Reserve(count),
         Item::Align {
             andmask,
             value,
@@ -595,7 +601,10 @@ pub(crate) fn qualify_locals(op: Operation, scope: &str) -> Operation {
         Operation::Entry(e) => Operation::Entry(qualify_expr(e, scope)),
         // No sub-expressions to qualify: pre-encoded pieces, resolved binary
         // payloads, and the constant-argument align.
-        other @ (Operation::Encoded(_) | Operation::Binary(_) | Operation::Align { .. }) => other,
+        other @ (Operation::Encoded(_)
+        | Operation::Binary(_)
+        | Operation::Align { .. }
+        | Operation::Reserve(_)) => other,
     }
 }
 
@@ -638,6 +647,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         Operation::Entry(e) => Item::Entry(Operand::expr(e)),
         Operation::Encoded(pieces) => Item::Encoded(pieces),
         Operation::Binary(payload) => Item::Binary(payload),
+        Operation::Reserve(count) => Item::Reserve(count),
         Operation::Align {
             andmask,
             value,

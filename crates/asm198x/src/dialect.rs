@@ -113,4 +113,43 @@ pub(crate) trait Dialect {
     fn addr_unit(&self) -> i64 {
         1
     }
+
+    /// The byte that fills space the source reserved but did not define — an
+    /// `org` gap, or a `ds`/`rmb`/`res`/`block` reservation.
+    ///
+    /// This is a property of the dialect's **toolchain**, not of the CPU, which
+    /// is why it lives here and not in the `isa` spec: the same 8080 program
+    /// assembled by asl and converted with `p2bin` reserves `$FF`, while pasmo,
+    /// sjasmplus, acme, lwasm and rgbasm all reserve `$00`. Defaults to `0x00`;
+    /// the asl-family dialects override it, since `p2bin` fills the gaps asl
+    /// leaves with `$FF`.
+    fn gap_fill(&self) -> u8 {
+        0x00
+    }
+
+    /// Whether the image ends at the last byte the source actually *wrote*, so
+    /// space reserved past that point is absent rather than filled.
+    ///
+    /// The two toolchain models differ here, and the difference is only visible
+    /// on a trailing reservation. pasmo, sjasmplus and lwasm **materialise** a
+    /// reservation — `ds 3` at the end of a program contributes three `$00`
+    /// bytes to the image. asl **reserves** it: nothing is written, and `p2bin`
+    /// materialises only the gaps that fall *inside* the written range, so a
+    /// trailing `ds` contributes nothing and the binary simply ends earlier.
+    ///
+    /// Defaults to `false` (materialise); the asl-family dialects override it.
+    ///
+    /// # Known remaining divergence: a *leading* reservation
+    ///
+    /// `p2bin` writes from the lowest written address to the highest, so a
+    /// reservation *before* any data shifts the image's start rather than
+    /// filling: `ds 3` then `db 9` gives a one-byte file loading at 3, where we
+    /// emit `FF FF FF 09` at the origin. Closing that means advancing
+    /// [`Assembly::origin`](crate::engine::Assembly) past a leading gap, which
+    /// reaches the container writers and the debug sidecar's offsets — larger
+    /// than this fill fix, and tracked separately. Interior and trailing
+    /// reservations, the cases #66 was filed for, match byte-for-byte.
+    fn trims_trailing_gap(&self) -> bool {
+        false
+    }
 }

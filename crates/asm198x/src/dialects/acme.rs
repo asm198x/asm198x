@@ -1326,7 +1326,10 @@ fn substitute_anon_refs(
         },
         // No expressions to rewrite: pre-encoded pieces, binary payloads, and
         // the constant-argument align.
-        other @ (Operation::Encoded(_) | Operation::Binary(_) | Operation::Align { .. }) => other,
+        other @ (Operation::Encoded(_)
+        | Operation::Binary(_)
+        | Operation::Align { .. }
+        | Operation::Reserve(_)) => other,
     })
 }
 
