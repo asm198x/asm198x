@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.9](https://github.com/asm198x/asm198x/compare/debug198x-v0.0.8...debug198x-v0.0.9) - 2026-07-10
+
+### Other
+
+- release v0.0.7 ([#63](https://github.com/asm198x/asm198x/pull/63))
+- rename the dbg198x crate to debug198x
+
 ## [0.0.8](https://github.com/asm198x/asm198x/compare/debug198x-v0.0.7...debug198x-v0.0.8) - 2026-07-06
 
 ### Other
