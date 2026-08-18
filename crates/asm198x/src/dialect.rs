@@ -147,8 +147,9 @@ pub(crate) trait Dialect {
     /// emit `FF FF FF 09` at the origin. Closing that means advancing
     /// [`Assembly::origin`](crate::engine::Assembly) past a leading gap, which
     /// reaches the container writers and the debug sidecar's offsets — larger
-    /// than this fill fix, and tracked separately. Interior and trailing
-    /// reservations, the cases #66 was filed for, match byte-for-byte.
+    /// than this fill fix, and tracked in
+    /// [#90](https://github.com/asm198x/asm198x/issues/90). Interior and
+    /// trailing reservations, the cases #66 was filed for, match byte-for-byte.
     fn trims_trailing_gap(&self) -> bool {
         false
     }
