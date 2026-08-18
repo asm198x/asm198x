@@ -17,7 +17,7 @@ execution: code
 
 - **Objective:** Make the byte-identical guarantee enforceable and visible without the reference tools: a committed **reference-verdict corpus** that CI and contributors replay against, and a per-release public **conformance ledger** generated from it.
 - **Product authority:** Steve Hill. Seeded from the ideation record at `docs/ideation/2026-07-03-asm198x-world-class-ideation.html` (idea 2); scope confirmed 2026-07-03; pressure-tested by document review the same day (nine findings applied; two judgment calls returned to Steve).
-- **Open blockers:** None. Ready for planning.
+- **Open blockers:** None. Ready for planning. **Re-grounded 2026-08-18** — anchors re-verified, counts corrected, and the work is now on the v1.0 bar (`decisions/v1-scope.md`) rather than merely independent; see *Dependencies / Assumptions*.
 - **Sequencing (2026-07-06):** **Independent — not paused, not gated on the core contract.** Unlike dbg198x (paused, contract-first), this pipeline reuses only the thin `DiagnosticEnvelope` opportunistically and depends on no Layer-0/1 shape; its harness prerequisite (the outcome-typed `ref_assemble`, its U2) can run whenever capacity allows. See [`decisions/roadmap-sequencing.md`](../../decisions/roadmap-sequencing.md) Layer 2.
 
 ---
@@ -126,6 +126,61 @@ The confirmed CI-net-first ordering suggests two increments inside v1; nothing h
 - Copying curriculum sources into this repo — Code198x stays canonical; the corpus stores digests only.
 
 ### Dependencies / Assumptions
+
+**Re-grounded 2026-08-18** (supersedes the 2026-07-03 scout where they differ).
+Every cited anchor was re-verified against the tree; the plan stands. What
+changed:
+
+- **All structural anchors hold.** `have(bin)` is still presence-only
+  (`tests/conformance.rs:33`); `ref_assemble` still collapses deliberate
+  rejection and environmental failure into one `None` (`:74`), so U2's premise
+  is intact; the hardcoded `../../../../Code198x` locator is unchanged
+  (`tests/curriculum.rs:25-29`); `scripts/coverage.sh` still forwards `"$@"`
+  (`:20`) and CI still calls it with no args (`ci.yml:104`), so replay must
+  remain default tests. Line numbers have drifted by a line or two; the facts
+  have not.
+- **The ignore wall is smaller than stated, and in three suites not four:**
+  **7** `#[ignore]` attributes — conformance 4, curriculum 1, differential 2.
+  (An earlier count of 11 across four files counted doc-comment *mentions* of
+  `#[ignore]`, not attributes.) The problem is unchanged in kind: those 7 are
+  where the byte-identical guarantee actually lives, and CI runs none of them.
+- **`tests/debug198x_fixtures.rs` is the always-on precedent this plan
+  generalises.** It has **zero** ignored tests: it arbitrates a format contract
+  in CI with no external tool, because its expectations are committed. That is
+  exactly the shape v1a gives the reference-arbitrated suites, and it now has
+  months of service behind it.
+- **Curriculum grew ~7%:** 689 `.asm` files, against the ~646 the scout counted.
+  Nothing structural, but R5's completeness receipt sizes against the current
+  number.
+- **New dialect surface needs arbitrating.** sjasmplus gained `ELSEIF` chains
+  and the dotted conditional spellings (2026-08-18, #67 stage 1). Their
+  differential probes moved from `gap` to `ok`, so they are arbitrated text the
+  corpus must cover from its first growth run.
+- **A worked example of the de-arbitration case now exists.** The asl-family
+  reserve fix (#66, 2026-08-18) changed emitted bytes for seven dialects —
+  `ds`/`org` gaps now fill `$FF` and a trailing reservation is absent. Under this
+  design that is not corpus invalidation: the reference facts stay true, the text
+  we hand the reference changes, and the affected cases resurface as unarbitrated
+  coverage to grow. The plan asserted this shape would occur; it has, which is
+  worth knowing before the first growth run rather than after.
+
+**What changed around the plan, not in it:**
+
+- **Debug198x froze at v1** (2026-08-18). The sibling contract this plan
+  opportunistically reuses is now stable rather than draft, so no shape churn is
+  expected from that direction.
+- **This work is now release-gating, not merely independent.**
+  [`decisions/v1-scope.md`](../../decisions/v1-scope.md) puts the verdict corpus
+  on the v1.0 bar as one of its two substantial items. The 2026-07-06 sequencing
+  note — "independent, gated on nothing, run whenever capacity allows" — is still
+  true about its *dependencies* and no longer true about its *priority*.
+- **The ledger is not the corpus's only consumer.** `v1-scope.md` makes
+  per-dialect **directive matrices generate from this corpus**, feeding the
+  docs-site plan's slot rather than being hand-authored. So U7/U8's outputs have a
+  second downstream reader, and "what the corpus must be able to answer" now
+  includes "which directives does dialect X accept", not only coverage counts and
+  the ledger. Worth confirming against U8's design before it is built.
+
 
 - The full reference-tool set exists on exactly one machine (the maintainer's); growth runs happen there until a tools-installed runner exists — replay fixes verification's bus factor, not growth's.
 - The generative-audit structure (synthesize → our disasm → reference) is unchanged; the corpus keys on the text handed to the reference.
