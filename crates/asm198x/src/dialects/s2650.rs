@@ -217,7 +217,7 @@ fn parse_op(
         None => (word, None),
     };
     let op = match mnemonic.to_ascii_lowercase().as_str() {
-        "cpu" | "end" | "title" | "page" | "name" => return Ok(None),
+        "cpu" | "end" | "title" | "page" | "aseg" | "listing" => return Ok(None),
         "org" => Operation::Org(value(args, line)?),
         "db" | "dc" | "byte" | "acon" => Operation::Bytes(byte_list(args, line)?),
         "dw" | "word" => Operation::Words(value_list(args, line)?),

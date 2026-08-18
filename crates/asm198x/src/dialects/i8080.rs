@@ -222,7 +222,7 @@ fn parse_op(
     let (word, args) = split_first_word(rest);
     let op = match word.to_ascii_lowercase().as_str() {
         // Assembler-control directives the flat model ignores.
-        "cpu" | "end" | "title" | "page" | "name" | "aseg" | "cseg" => return Ok(None),
+        "cpu" | "end" | "title" | "page" | "aseg" | "listing" => return Ok(None),
         "org" => Operation::Org(value(args, line)?),
         "db" | "defb" | "dc.b" => Operation::Bytes(byte_list(args, line)?),
         "dw" | "defw" | "dc.w" => Operation::Words(value_list(args, line)?),
