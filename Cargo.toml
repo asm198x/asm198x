@@ -59,7 +59,10 @@ codegen-units = 1
 [workspace.metadata.dist]
 cargo-dist-version = "0.32.0"
 ci = "github"
-installers = []
+# shell/powershell need no infrastructure beyond the GitHub Release the
+# archives already ship to. A Homebrew tap would need its own repo
+# (asm198x/homebrew-tap) and is a separate decision.
+installers = ["shell", "powershell"]
 targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
 pr-run-mode = "plan"
 
