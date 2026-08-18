@@ -14,7 +14,7 @@
 //! cross-check) a cross-repo freeze-checklist item, not automatable in this
 //! tree.
 
-use asm198x::debug198x::{BaseMap, DebugInfo};
+use asm198x::debug198x::{BaseMap, DebugInfo, Space};
 
 fn fixture(name: &str) -> String {
     let path = format!(
@@ -396,4 +396,48 @@ fn banked_fixture_resolves_per_paging_state() {
         space_of("music"),
         Some(Some(asm198x::debug198x::Space::Paged { slot: 3, page: 3 }))
     );
+}
+
+/// The section-level `space` is what turns a machine's paging state into a base
+/// map *mechanically*: given only "slot 3 currently holds page 1", the sections to
+/// map are discoverable from the records themselves — no scraping a symbol out of
+/// each section, and a section holding nothing but line records still places.
+#[test]
+fn section_space_yields_the_base_map_for_a_paging_state() {
+    let info = DebugInfo::read(&fixture("spectrum128-banked.debug198x")).expect("parse");
+
+    // Everything the consumer needs to supply: which page is in which slot.
+    let bases_for = |slot: u8, page: u16| -> BaseMap {
+        let slot_addr = 0x4000_u64 * u64::from(slot);
+        info.sections
+            .iter()
+            .filter(|s| s.space == Some(Space::Paged { slot, page }))
+            .map(|s| (s.id, slot_addr))
+            .collect()
+    };
+
+    // Page 1 in slot 3 maps bank1 alone — and only bank1 answers.
+    let page1 = bases_for(3, 1);
+    assert_eq!(page1, [(0, 0xC000)].into_iter().collect::<BaseMap>());
+    assert_eq!(
+        info.symbol_at(0xC010, Some(&page1)).map(|s| &*s.name),
+        Some("draw")
+    );
+    assert_eq!(info.line_at(0xC010, Some(&page1)).map(|l| l.line), Some(5));
+
+    // Page 3 in the same slot maps bank3 alone, and the same address moves with it.
+    let page3 = bases_for(3, 3);
+    assert_eq!(page3, [(1, 0xC000)].into_iter().collect::<BaseMap>());
+    assert_eq!(
+        info.symbol_at(0xC010, Some(&page3)).map(|s| &*s.name),
+        Some("music")
+    );
+    assert_eq!(info.line_at(0xC010, Some(&page3)).map(|l| l.line), Some(12));
+
+    // A page this image has no code in maps nothing, so the lookup declines to
+    // answer rather than answering from whichever bank happens to sort first.
+    let page6 = bases_for(3, 6);
+    assert!(page6.is_empty());
+    assert_eq!(info.symbol_at(0xC010, Some(&page6)), None);
+    assert_eq!(info.line_at(0xC010, Some(&page6)), None);
 }

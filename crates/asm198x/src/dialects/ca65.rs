@@ -335,6 +335,8 @@ fn assemble_program(
             id: id as debug198x::SectionId,
             name: (*name).to_string(),
             base: (!matches!(*name, "HEADER" | "CHARS")).then_some(u64::from(*base)),
+            // The NES mapper's banking is not modelled here; no space is fabricated.
+            space: None,
         })
         .collect();
 

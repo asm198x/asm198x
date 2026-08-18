@@ -49,6 +49,7 @@ pub fn debug_info(
             id: 0,
             name: "main".to_string(),
             base: result.origin.map(u64::from),
+            space: None,
         }],
         symbols: result.debug.symbols.clone(),
         lines: result
