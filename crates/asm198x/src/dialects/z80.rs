@@ -699,13 +699,19 @@ fn slice_incbin(data: &[u8], offset: Option<i64>, length: Option<i64>) -> Result
 // include boundary (probes p12/p13 — both directions rejected); `DEFINE NAME
 // value` is *textual substitution* at identifier boundaries, outside string/
 // char literals, chained to a fixed point at use (probes p4/p5/p20/p21/p24),
-// and a duplicate `DEFINE` is an error (probe p23). `ELSEIF` exists in the
-// reference but is out of the adopted surface (#67).
+// and a duplicate `DEFINE` is an error (probe p23). `ELSEIF` chains and the
+// dotted spellings are adopted (#67, 2026-08-18); colon-inline blocks and
+// conditions on forward symbols are not.
 // ---------------------------------------------------------------------------
 
 /// The keyword-conditional vocabulary. The reference accepts only the
 /// all-lowercase and all-uppercase spellings (probes p9/p11); anything else
 /// falls through to ordinary identifier handling, exactly as it does there.
+///
+/// Every keyword also has a **dotted** spelling — `.IF`/`.ENDIF`/`.ELSE` and
+/// kin (#67, re-probed 2026-08-18). The dot is a bare prefix: it does not relax
+/// the case rule (`.If` is rejected exactly as `If` is), and dotted and
+/// undotted spellings mix freely within one block, so `.IF … ENDIF` assembles.
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum CondKw {
     If,
@@ -717,6 +723,9 @@ enum CondKw {
 }
 
 fn cond_keyword(word: &str) -> Option<CondKw> {
+    // The dot is an optional prefix on every spelling, and strips before the
+    // case test — so `.If` stays as unacceptable as `If`.
+    let word = word.strip_prefix('.').unwrap_or(word);
     Some(match word {
         "if" | "IF" => CondKw::If,
         "ifdef" | "IFDEF" => CondKw::IfDef,
@@ -738,6 +747,11 @@ fn is_define_word(word: &str) -> bool {
 enum KwClose {
     Eof,
     Else,
+    /// The block ended at an `ELSEIF`, carrying its verbatim head (`ELSEIF 1`)
+    /// and line. The head keeps its keyword so the chain leg round-trips: the
+    /// evaluator reads it like an `IF`, and the formatter renders it back as an
+    /// `ELSEIF` rather than the nested `IF` it lowers to (#67).
+    ElseIf(String, usize),
     EndIf,
 }
 
@@ -871,13 +885,19 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                     return Ok((nodes, KwClose::EndIf));
                 }
                 Some(CondKw::ElseIf) => {
-                    // The reference has ELSEIF; adopting it is tracked by #67 —
-                    // reject clearly rather than mis-assemble the chain.
-                    return Err(AsmError::new(
-                        line,
-                        "`ELSEIF` is not supported yet — nest an `IF` inside the `ELSE` \
-                         branch (#67)",
-                    ));
+                    if !in_block {
+                        return Err(AsmError::new(line, "`ELSEIF` without a matching `IF`"));
+                    }
+                    if label.is_some() {
+                        return Err(AsmError::new(line, "a label cannot precede `ELSEIF`"));
+                    }
+                    if let Some(text) = comment {
+                        self.pending.push(Comment {
+                            text: text.to_string(),
+                            span: Span::in_file(self.file, line as u32, 1),
+                        });
+                    }
+                    return Ok((nodes, KwClose::ElseIf(rest.to_string(), line)));
                 }
                 None => {
                     // A plain line: verbatim op source. Only `equ` keeps an
@@ -947,19 +967,52 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                 },
             });
         }
-        let head = rest.to_string();
+        self.parse_cond_chain(nodes, rest.to_string(), word, line, leading, comment)
+    }
+
+    /// Build one leg of a conditional chain and, recursively, the legs after it.
+    /// An `ELSEIF` lowers to a nested conditional in the else-branch — the shape
+    /// the shared evaluator already walks, and the workaround this dialect used
+    /// to tell people to write by hand. The leg keeps its verbatim `ELSEIF …`
+    /// head so the formatter can render the chain back rather than the nesting.
+    fn parse_cond_chain(
+        &mut self,
+        nodes: &mut Vec<Node>,
+        head: String,
+        word: &str,
+        line: usize,
+        leading: Vec<Comment>,
+        comment: Option<&str>,
+    ) -> Result<(), AsmError> {
         let (then_body, first) = self.parse_block(true)?;
         let else_body = match first {
             KwClose::EndIf => None,
             KwClose::Else => {
                 let (body, second) = self.parse_block(true)?;
-                if second != KwClose::EndIf {
-                    return Err(AsmError::new(
-                        line,
-                        format!("`{word}` has no matching `ENDIF`"),
-                    ));
+                match second {
+                    KwClose::EndIf => Some(body),
+                    // The reference tolerates an `ELSEIF` after `ELSE` by
+                    // discarding it and everything to the `ENDIF`. Silently
+                    // dropping source is worse than saying so, and no real
+                    // program means it.
+                    KwClose::ElseIf(_, at) => {
+                        return Err(AsmError::new(
+                            at,
+                            "`ELSEIF` cannot follow `ELSE` — the chain is already closed",
+                        ));
+                    }
+                    _ => {
+                        return Err(AsmError::new(
+                            line,
+                            format!("`{word}` has no matching `ENDIF`"),
+                        ));
+                    }
                 }
-                Some(body)
+            }
+            KwClose::ElseIf(next_head, at) => {
+                let mut nested = Vec::new();
+                self.parse_cond_chain(&mut nested, next_head, word, at, Vec::new(), None)?;
+                Some(nested)
             }
             KwClose::Eof => {
                 return Err(AsmError::new(
@@ -1327,7 +1380,9 @@ impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
                     None => Err(AsmError::new(line, format!("`{word}` needs a name"))),
                 }
             }
-            Some(CondKw::If) => {
+            Some(CondKw::If | CondKw::ElseIf) => {
+                // An `ELSEIF` leg tests its condition exactly as an `IF` does;
+                // it reaches here only as the head of a chain leg (#67).
                 // DEFINEs substitute into the condition (probe p25) before it
                 // folds against the `equ` constants.
                 substitute_defines(args, &self.defines, line).and_then(|cond| {

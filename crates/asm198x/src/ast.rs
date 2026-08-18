@@ -922,7 +922,11 @@ fn emit_keyword_conditional(
     equ_label_colon: bool,
 ) {
     const INDENT: &str = "        ";
-    let upper = head.chars().next().is_some_and(|c| c.is_ascii_uppercase());
+    // `ELSE`/`ENDIF` follow the head's case and its dot, so `.if …` closes with
+    // `.endif` and `IF …` with `ENDIF` — the spellings the author chose.
+    let bare = head.strip_prefix('.').unwrap_or(head);
+    let upper = bare.chars().next().is_some_and(|c| c.is_ascii_uppercase());
+    let dot = if head.starts_with('.') { "." } else { "" };
     out.push_str(INDENT);
     out.push_str(head);
     if let Some(c) = &node.trivia.trailing {
@@ -931,15 +935,48 @@ fn emit_keyword_conditional(
     }
     out.push('\n');
     emit_nodes(then_body, out, equ_label_colon, INDENT);
-    if let Some(else_body) = else_body {
+    // Walk down the chain: an `ELSEIF` leg is stored as a nested conditional in
+    // the else-branch (the shape the evaluator walks), but it was written as one
+    // flat chain and must render back that way — otherwise the formatter emits
+    // `ELSE` before `ELSEIF`, which does not reassemble.
+    let mut rest = else_body;
+    while let Some(body) = rest {
+        if let [only] = body
+            && let Some(Item::Conditional {
+                head: leg_head,
+                then_body: leg_then,
+                else_body: leg_else,
+                style: CondStyle::Keyword,
+                ..
+            }) = &only.item
+            && is_elseif_head(leg_head)
+        {
+            out.push_str(INDENT);
+            out.push_str(leg_head);
+            out.push('\n');
+            emit_nodes(leg_then, out, equ_label_colon, INDENT);
+            rest = leg_else.as_deref();
+            continue;
+        }
         out.push_str(INDENT);
+        out.push_str(dot);
         out.push_str(if upper { "ELSE" } else { "else" });
         out.push('\n');
-        emit_nodes(else_body, out, equ_label_colon, INDENT);
+        emit_nodes(body, out, equ_label_colon, INDENT);
+        break;
     }
     out.push_str(INDENT);
+    out.push_str(dot);
     out.push_str(if upper { "ENDIF" } else { "endif" });
     out.push('\n');
+}
+
+/// Whether a conditional head opens an `ELSEIF` chain leg rather than a block.
+/// The keyword dialects accept the all-upper and all-lower spellings, each with
+/// an optional dot; the head is stored verbatim, so it carries its own marker.
+fn is_elseif_head(head: &str) -> bool {
+    let word = head.split_whitespace().next().unwrap_or_default();
+    matches!(word.strip_prefix('.').unwrap_or(word), "elseif" | "ELSEIF")
 }
 
 /// Render a single node inline (`X = 0`, `nop`) for the one-line guard idiom.
