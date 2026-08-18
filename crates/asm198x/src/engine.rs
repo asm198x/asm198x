@@ -50,7 +50,9 @@ pub struct Assembly {
 /// a byte elsewhere) so a consumer's address lookups line up with the CPU's own
 /// addressing. Header-less; the CLI wraps it with identity and the source
 /// filename to form a full [`debug198x::DebugInfo`].
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+// No `Eq`: `debug198x::Symbol` may carry a `Space::Unknown` holding arbitrary
+// JSON, which is `PartialEq` but not `Eq`. Nothing compares these as map keys.
+#[derive(Debug, Clone, Default, PartialEq, Serialize, Deserialize)]
 pub struct DebugData {
     /// Every label (address), `equ`/`=` constant (value), and entry point.
     pub symbols: Vec<debug198x::Symbol>,

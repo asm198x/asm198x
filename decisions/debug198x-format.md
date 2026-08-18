@@ -98,6 +98,64 @@ reasoning. The draft never waits open-endedly by default.
   incbin; `6502-nes-multifile` — ca65 linked, included CHR data). Spec page
   updated in the same change per the draft posture above (plan KTD7).
 
+- **2026-08-18 — `space` shapes made forward-compatible; the `bank` shape
+  withdrawn (bounded review, checklist item 4, second pass).** With legs 1–3
+  complete the Emu198x session was asked to say whether anything looked thinner
+  than the checklist implied, and it did: `Space::Bank` was exercised by
+  **nothing** — no fixture in the corpus emits it, no producer populates it, no
+  consumer matches it. The one thing pinning it was a serialization round-trip
+  unit test, which fixes the wire shape and says nothing about whether the shape
+  is right. `65816-sample.debug198x`, the fixture that should have exercised it,
+  carries `base: 0` and expresses its one far address as a plain `const`.
+
+  Checking how expensive it would be to correct `bank` after a freeze surfaced
+  the larger problem. `Space` is `#[serde(untagged)]`, so a shape a reader does
+  not recognize is not skipped — it is a **hard parse error that fails the whole
+  file**:
+
+  ```
+  {"space":{"segment":7,"window":2}}  ->  data did not match any variant of untagged enum Space
+  {"t":"quantum","whatever":1}        ->  skipped, as designed
+  ```
+
+  The evolution policy promises that *record types* and *fields* are additive,
+  and AE5 pins exactly that. A new **variant of an existing enum** is neither, so
+  the promise was not broken on its face — but the consequence was that the set
+  of `space` shapes would close permanently at v1, uniquely among the format's
+  parts, and nothing said so. Discovered by probe, not by reading the policy.
+
+  Two changes, both while draft:
+
+  - **`Space::Unknown` carries an unrecognized shape verbatim.** Skip-unknown
+    applied one level down: the record still resolves through its section, the
+    qualifier is treated as uninterpretable, and a rewritten file preserves it.
+    The cost is strictness — a misspelled qualifier lands in the catch-all rather
+    than being rejected — which is the right trade for a data contract whose
+    consumers must not refuse files they only partly understand.
+  - **`bank` is withdrawn.** Unexercised, and redundant on this model: a 65816
+    address resolves to its full 24-bit value (the fixture's `FARBUF` is 98304 =
+    `$018000`), so the bank byte is the top 8 bits of something the reader
+    already has. `Paged` earns its place because two pages genuinely share a CPU
+    address; no equivalent case was ever shown for `bank`. With the catch-all in
+    place, adding a real banked shape once a 65816 consumer has a requirement is
+    safe — and a file carrying the old shape still loads.
+
+  Freezing v1 with `{slot, page}` alone means freezing the one shape that is
+  fixture-pinned, hardware-cross-checked against a real `Memory128K` (leg 3), and
+  consumer-exercised.
+
+  **Cost:** `Eq` is gone from `Space`, `SymbolKind`, `Symbol`, `Section`,
+  `DebugInfo`, and — cascading through the debug slice — `asm198x`'s `DebugData`
+  and `AssemblyResult`. Arbitrary JSON has no total equality. `PartialEq` remains
+  everywhere; nothing used these as map keys or set members. `Header` and
+  `LineSpan` keep `Eq`. The `AssemblyResult` change touches the core contract,
+  which is public draft under
+  [`core-contract-freeze.md`](core-contract-freeze.md) and outside the v1.0
+  promise per [`v1-scope.md`](v1-scope.md), so it costs no stability claim.
+
+  Every generated golden is unchanged: no producer emitted `bank`, so no fixture
+  moves. Spec page updated in the same change per the draft posture.
+
 - **2026-08-18 — `space` on `Section` (bounded review, checklist item 4).**
   First consumption (the Emu198x importer, emu198x/emu198x#741) reported the
   banked fixture's two symbols as indistinguishable

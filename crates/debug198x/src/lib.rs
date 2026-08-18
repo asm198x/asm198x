@@ -3,8 +3,8 @@
 //! One machine-readable sidecar describes what an assembled image *means*: which
 //! source line produced each byte range (the line map), every symbol with its
 //! kind and address, the sections/segments the image is laid out in, and — where
-//! it matters — the address space each address lives in (a flat 16-bit space, a
-//! 65816 bank, a paged/banked slot). Asm198x writes it; Emu198x (and any other
+//! it matters — the address space each address lives in (a flat space, or a
+//! paged/banked slot). Asm198x writes it; Emu198x (and any other
 //! consumer) reads it for symbolized disassembly and source-anchored breakpoints.
 //!
 //! ## Serialization — NDJSON
@@ -70,14 +70,25 @@ pub type SectionId = u32;
 pub type BaseMap = BTreeMap<SectionId, u64>;
 
 /// The address space an address lives in. Absent (`None` on a record) means the
-/// ordinary flat space — flat CPUs emit nothing extra. The populated shapes are
-/// the 65816's [`Bank`](Space::Bank) and the [`Paged`](Space::Paged) form for
-/// banked machines (Spectrum 128 slots, NES mappers).
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+/// ordinary flat space — flat CPUs emit nothing extra, and most machines need
+/// nothing more. The one populated shape is [`Paged`](Space::Paged), for banked
+/// machines (Spectrum 128 slots, NES mappers).
+///
+/// # Unknown shapes are carried, not fatal
+///
+/// A shape this reader does not know deserializes into
+/// [`Unknown`](Space::Unknown), preserving it verbatim, so a newer producer's
+/// file still loads and still round-trips. That is the skip-unknown guarantee
+/// applied one level down: without it, `#[serde(untagged)]` makes an
+/// unrecognized shape a hard parse error that fails the whole file — which would
+/// close the set of shapes permanently at the freeze.
+///
+/// The cost is strictness: a misspelled qualifier lands in `Unknown` rather than
+/// being rejected. That is the intended trade — a consumer that does not
+/// recognize a space should ignore that record's qualifier, not refuse the file.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(untagged)]
 pub enum Space {
-    /// A 65816-style bank byte — the high 8 bits of a 24-bit address.
-    Bank { bank: u8 },
     /// A banked/paged location: a `page` (bank) of memory, and the hardware
     /// `slot` the producer expected it in.
     ///
@@ -111,13 +122,23 @@ pub enum Space {
     /// contains it keeps `symbol_at`/`line_at` unambiguous however many windows
     /// a page appears in, because every CPU address is in exactly one slot.
     Paged { slot: u8, page: u16 },
+    /// A shape this reader does not know, carried verbatim.
+    ///
+    /// Never written deliberately: a producer emits a shape it understands or no
+    /// `space` at all (AE3's no-fabrication rule). This exists so that reading a
+    /// file from a newer producer degrades to "there is a qualifier here I cannot
+    /// interpret" instead of failing. Treat a record whose space is `Unknown` as
+    /// one whose address space you cannot reason about — resolve it if its
+    /// section resolves, and do not guess at the qualifier's meaning.
+    Unknown(serde_json::Value),
 }
 
 /// The kind of a [`Symbol`], with the fields that kind carries. Address kinds
 /// (`Label`, `Entry`) carry a `(section, offset)` location and an optional
-/// address-space qualifier; a `Const` carries a plain value and no space — so a
-/// bank-`$7E` label and a constant sharing its low bits stay distinguishable.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+/// address-space qualifier; a `Const` carries a plain value and no space, so a
+/// label and a constant that resolve to the same number stay distinguishable by
+/// kind.
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(tag = "kind", rename_all = "lowercase")]
 pub enum SymbolKind {
     /// A code/data label at a section-relative location.
@@ -168,7 +189,7 @@ pub struct Header {
 /// names the page now in a slot, map those to the slot's address, leave the rest
 /// unmapped. Without it the mapping can only be inferred by scraping a symbol,
 /// and a section holding only line records cannot be placed at all.
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Section {
     pub id: SectionId,
     pub name: String,
@@ -182,7 +203,7 @@ pub struct Section {
 }
 
 /// A symbol: a name and its [`SymbolKind`] (which carries the location or value).
-#[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 pub struct Symbol {
     pub name: String,
     #[serde(flatten)]
@@ -213,7 +234,7 @@ enum Record<'a> {
 
 /// The whole debug record for one assembled image — the in-memory shape the
 /// writer serializes and the reader parses into, plus the consumer lookups.
-#[derive(Clone, Debug, PartialEq, Eq, Default)]
+#[derive(Clone, Debug, PartialEq, Default)]
 pub struct DebugInfo {
     pub header: Header,
     pub sections: Vec<Section>,
@@ -657,24 +678,14 @@ mod tests {
                 base: Some(0),
                 space: Some(Space::Paged { slot: 3, page: 7 }),
             }],
-            symbols: vec![
-                Symbol {
-                    name: "far".into(),
-                    kind: SymbolKind::Label {
-                        section: 0,
-                        offset: 0x1234,
-                        space: Some(Space::Bank { bank: 0x7E }),
-                    },
+            symbols: vec![Symbol {
+                name: "paged".into(),
+                kind: SymbolKind::Label {
+                    section: 0,
+                    offset: 0xC000,
+                    space: Some(Space::Paged { slot: 3, page: 7 }),
                 },
-                Symbol {
-                    name: "paged".into(),
-                    kind: SymbolKind::Label {
-                        section: 0,
-                        offset: 0xC000,
-                        space: Some(Space::Paged { slot: 3, page: 7 }),
-                    },
-                },
-            ],
+            }],
             ..Default::default()
         };
         let back = DebugInfo::read(&info.to_ndjson()).expect("parse");
@@ -705,6 +716,64 @@ mod tests {
             !json.contains("space"),
             "flat section must not emit a space field: {json}"
         );
+    }
+
+    /// AE5 one level down: a space shape this reader does not know must be
+    /// carried, not fatal. Before `Space::Unknown` existed, `#[serde(untagged)]`
+    /// made this a hard parse error that failed the entire file — which would
+    /// have closed the set of shapes permanently at the v1 freeze.
+    #[test]
+    fn an_unknown_space_shape_is_carried_not_fatal() {
+        let future = concat!(
+            r#"{"t":"section","id":0,"name":"main","base":0}"#,
+            "\n",
+            r#"{"t":"symbol","name":"here","kind":"label","section":0,"offset":4,"#,
+            r#""space":{"segment":7,"window":2}}"#,
+        );
+        let info = DebugInfo::read(future).expect("an unknown space shape must not fail the file");
+
+        // The qualifier is opaque; the address is not.
+        assert_eq!(info.addr_of("here", None), Some(4));
+        assert_eq!(
+            info.symbol_at(4, None).map(|s| &*s.name),
+            Some("here"),
+            "an unreadable qualifier must not cost the lookup"
+        );
+
+        // Carried verbatim, so a reader that rewrites the file does not silently
+        // drop what it could not interpret.
+        let SymbolKind::Label { space, .. } = &info.symbols[0].kind else {
+            panic!("expected a label");
+        };
+        let Some(Space::Unknown(raw)) = space else {
+            panic!("expected the catch-all, got {space:?}");
+        };
+        assert_eq!(raw["segment"], 7);
+        assert_eq!(raw["window"], 2);
+        assert!(
+            info.to_ndjson()
+                .contains(r#""space":{"segment":7,"window":2}"#)
+        );
+    }
+
+    /// The `bank` shape was specified in draft and withdrawn before the freeze,
+    /// having never been emitted, fixtured, or read. A file that still carries
+    /// one must keep loading: it lands in the catch-all like any other shape this
+    /// reader does not know.
+    #[test]
+    fn a_withdrawn_bank_shape_still_loads() {
+        let legacy = concat!(
+            r#"{"t":"section","id":0,"name":"main","base":0}"#,
+            "\n",
+            r#"{"t":"symbol","name":"far","kind":"label","section":0,"offset":16,"#,
+            r#""space":{"bank":126}}"#,
+        );
+        let info = DebugInfo::read(legacy).expect("a withdrawn shape must not fail the file");
+        assert_eq!(info.addr_of("far", None), Some(16));
+        let SymbolKind::Label { space, .. } = &info.symbols[0].kind else {
+            panic!("expected a label");
+        };
+        assert!(matches!(space, Some(Space::Unknown(_))), "got {space:?}");
     }
 
     /// The `page` is the join key and the `slot` is not — the case that proves
