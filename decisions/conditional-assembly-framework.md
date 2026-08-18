@@ -92,6 +92,6 @@ Stop and re-consult if a change would:
   shared `Item::Conditional`. ACME's `process_block` was retired for exactly this
   reason (idea 4).
 
-See [`asm198x-and-shared-isa-spec.md`](../../decisions/asm198x-and-shared-isa-spec.md)
+See [`asm198x-and-shared-isa-spec.md`](../../../decisions/asm198x-and-shared-isa-spec.md)
 (the AST layer) and the plan `docs/plans/2026-07-04-005-feat-ir-ast-layer-plan.md`
 (U6 / idea 4).

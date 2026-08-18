@@ -86,4 +86,4 @@ handled from increment 1.
 `reference/by-topic/cpu-arm/cpu-arm-reference.md` (distilled) + the VTI ARM
 Databook 1990 (`vti-arm-databook-1990.md`). `vasmarm_std -m2` is the byte
 arbiter. This is the roadmap's **Wave D** opener — see the umbrella
-[`asm198x-cpu-coverage-roadmap.md`](../../decisions/asm198x-cpu-coverage-roadmap.md).
+[`asm198x-cpu-coverage-roadmap.md`](../../../decisions/asm198x-cpu-coverage-roadmap.md).

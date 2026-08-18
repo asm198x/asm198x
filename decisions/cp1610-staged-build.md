@@ -26,7 +26,7 @@ is a decle number, not a byte offset — the engine gained an `addr_unit` for th
 (2 for the CP1610, 1 everywhere else) in increment 5, once absolute-address
 operands made it load-bearing (see increment 5 below). The genuinely sub-byte
 machines (HP-Saturn nibble, SM5xx 4-bit) stay in Wave E. See the umbrella
-[`asm198x-cpu-coverage-roadmap.md`](../../decisions/asm198x-cpu-coverage-roadmap.md)
+[`asm198x-cpu-coverage-roadmap.md`](../../../decisions/asm198x-cpu-coverage-roadmap.md)
 § Wave E for the reclassification.
 
 ## Architecture
@@ -131,7 +131,7 @@ directive on the way back in. (The accepted CPU spelling is also fussy:
 ## Reference
 
 Facts from the umbrella primary library: distilled
-[`cpu-cp1610-reference.md`](../../reference/by-topic/cpu-cp1610/cpu-cp1610-reference.md)
+[`cpu-cp1610-reference.md`](../../../reference/by-topic/cpu-cp1610/cpu-cp1610-reference.md)
 (register set, addressing modes, SDBD, flags) and the Intellivision manual set in
 `reference/by-system/intellivision/`. `asl` (`cpu CP-1600`) is the byte arbiter,
 exactly as it is for the other field-based CPUs. Exact opcode encodings are

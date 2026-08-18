@@ -25,7 +25,7 @@ the sweep proves it byte-identical without disturbing the rest.
 
 ## Architecture
 
-Like [PDP-11](../../decisions/asm198x-cpu-coverage-roadmap.md) and TMS9900, the
+Like [PDP-11](../../../decisions/asm198x-cpu-coverage-roadmap.md) and TMS9900, the
 Z8000 is **field-packed** — operands live in fields inside the opcode word — so
 `isa::z8000` is a **bespoke table** (mnemonic + base + a `Class` fixing the
 field layout), keyed by both the dialect and a field-based disassembler, riding
