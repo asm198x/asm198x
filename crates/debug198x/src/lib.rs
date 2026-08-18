@@ -49,6 +49,24 @@ pub type SectionId = u32;
 /// An override map from [`SectionId`] to an absolute base address, supplied by a
 /// consumer that knows where relocatable sections actually loaded (Emu198x hands
 /// in hunk load addresses). Absent entries fall back to the section's own `base`.
+///
+/// # A banked machine's paging state *is* the base map
+///
+/// On a paged machine the map is not static setup — it is the live paging
+/// state, and it carries the answer to "which page is in this slot". Map **only
+/// the sections currently paged in**. A section that is neither mapped here nor
+/// carrying its own `base` does not resolve, and that silence is the mechanism:
+/// it keeps a paged-out bank out of every lookup.
+///
+/// So for a Spectrum 128 with bank 1 in slot 3, map section `bank1` to `$C000`
+/// and leave `bank3` unmapped; `symbol_at($C010)` then names `draw`. Page bank 3
+/// in and the map swaps with it, and the same address names `music`.
+///
+/// Mapping two pages of one slot to the same address at once describes a state
+/// the hardware cannot be in — one slot holds one page. The lookups will answer
+/// from whichever record comes first rather than reporting the contradiction, so
+/// build the map from the machine's real paging state and drop entries for banks
+/// that page out.
 pub type BaseMap = BTreeMap<SectionId, u64>;
 
 /// The address space an address lives in. Absent (`None` on a record) means the
@@ -114,12 +132,24 @@ pub struct Header {
 /// A section/segment of the image. `base` is its absolute load address when
 /// known (flat and linked-absolute paths); relocatable sections leave it `None`
 /// and rely on a [`BaseMap`] at lookup time.
+///
+/// A section may also carry a [`Space`] — for a banked machine, the (slot, page)
+/// the whole section lives in. That is what lets a consumer turn a machine's
+/// paging state into a [`BaseMap`] mechanically: find the sections whose `space`
+/// names the page now in a slot, map those to the slot's address, leave the rest
+/// unmapped. Without it the mapping can only be inferred by scraping a symbol,
+/// and a section holding only line records cannot be placed at all.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 pub struct Section {
     pub id: SectionId,
     pub name: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub base: Option<u64>,
+    /// The address space this section as a whole lives in, when it needs one.
+    /// A record's own `space` is the finer truth where it carries one; this is
+    /// the section-wide default, and the only qualifier a [`LineSpan`] has.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub space: Option<Space>,
 }
 
 /// A symbol: a name and its [`SymbolKind`] (which carries the location or value).
@@ -288,7 +318,12 @@ impl DebugInfo {
 
     /// The symbol defined at absolute address `addr` (an address-kind symbol whose
     /// resolved location equals `addr`), or `None`. `bases` optionally overrides
-    /// section bases for relocatable images.
+    /// section bases for relocatable images, and on a banked machine carries the
+    /// paging state — map only the sections paged in, per [`BaseMap`].
+    ///
+    /// The first matching record wins, so two sections mapped to the same address
+    /// make the result record order. That is unreachable for a base map built from
+    /// a real paging state, where one slot holds one page.
     #[must_use]
     pub fn symbol_at(&self, addr: u64, bases: Option<&BaseMap>) -> Option<&Symbol> {
         self.symbols.iter().find(|sym| match sym.kind {
@@ -303,7 +338,9 @@ impl DebugInfo {
     }
 
     /// The value of the named symbol: the absolute address for an address kind, or
-    /// the constant's value. `None` if the name is unknown or its section base is.
+    /// the constant's value. `None` if the name is unknown or its section base is —
+    /// which is the answer for a symbol in a bank that is currently paged out, since
+    /// on a banked machine `bases` is the paging state (see [`BaseMap`]).
     #[must_use]
     pub fn addr_of(&self, name: &str, bases: Option<&BaseMap>) -> Option<u64> {
         let sym = self.symbols.iter().find(|s| s.name == name)?;
@@ -320,6 +357,9 @@ impl DebugInfo {
 
     /// The line span covering absolute address `addr` — the span whose
     /// `[base+offset, base+offset+length)` range contains it — or `None`.
+    ///
+    /// Line records carry no space qualifier of their own; a banked span is
+    /// selected by its section being mapped in `bases`, per [`BaseMap`].
     #[must_use]
     pub fn line_at(&self, addr: u64, bases: Option<&BaseMap>) -> Option<&LineSpan> {
         self.lines.iter().find(|span| {
@@ -353,6 +393,7 @@ mod tests {
                 id: 0,
                 name: "CODE".into(),
                 base: Some(0xC000),
+                space: None,
             }],
             symbols: vec![
                 Symbol {
@@ -465,6 +506,7 @@ mod tests {
                 id: 0,
                 name: "S".into(),
                 base: Some(100),
+                space: None,
             }],
             symbols: vec![
                 Symbol {
@@ -497,6 +539,7 @@ mod tests {
                 id: 0,
                 name: "S".into(),
                 base: Some(u64::MAX - 4),
+                space: None,
             }],
             symbols: vec![Symbol {
                 name: "top".into(),
@@ -534,11 +577,13 @@ mod tests {
                     id: 0,
                     name: "text".into(),
                     base: Some(0),
+                    space: None,
                 },
                 Section {
                     id: 1,
                     name: "data".into(),
                     base: None,
+                    space: None,
                 },
             ],
             symbols: vec![
@@ -581,6 +626,7 @@ mod tests {
                 id: 0,
                 name: "S".into(),
                 base: Some(0),
+                space: Some(Space::Paged { slot: 3, page: 7 }),
             }],
             symbols: vec![
                 Symbol {
@@ -617,6 +663,18 @@ mod tests {
         assert!(
             !json.contains("space"),
             "flat symbol must not emit a space field: {json}"
+        );
+        // Nor does a flat section — the same rule one level up.
+        let flat_section = Section {
+            id: 0,
+            name: "S".into(),
+            base: Some(0),
+            space: None,
+        };
+        let json = serde_json::to_string(&Record::Section(&flat_section)).expect("present");
+        assert!(
+            !json.contains("space"),
+            "flat section must not emit a space field: {json}"
         );
     }
 }

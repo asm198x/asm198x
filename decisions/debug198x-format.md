@@ -98,6 +98,44 @@ reasoning. The draft never waits open-endedly by default.
   incbin; `6502-nes-multifile` — ca65 linked, included CHR data). Spec page
   updated in the same change per the draft posture above (plan KTD7).
 
+- **2026-08-18 — `space` on `Section` (bounded review, checklist item 4).**
+  First consumption (the Emu198x importer, emu198x/emu198x#741) reported the
+  banked fixture's two symbols as indistinguishable
+  ([#71](https://github.com/asm198x/asm198x/issues/71)). The reported defect was
+  not one: the base map already *is* the paging channel — map only the sections
+  paged in and both banks resolve correctly, which
+  `banked_fixture_resolves_per_paging_state` has pinned since 2026-07-06 and the
+  spec page states outright. The importer had mapped both pages into slot 3 at
+  once, a state the hardware cannot be in, and read the resulting record-order
+  answer as a reader bug.
+
+  What contact did reveal is the field behind that mistake: **paging was
+  expressible but not discoverable.** `space` lived only on address-kind
+  symbols, so a consumer holding a real paging state had no stated section →
+  (slot, page) mapping to build the base map from — only the inference "scrape
+  any symbol out of the section", which a section holding nothing but `line`
+  records defeats entirely. `Section` now carries an optional `space` with the
+  same two shapes, making the mapping a lookup rather than an inference, and
+  giving a `LineSpan` the qualifier it has no room to carry itself. Precedence:
+  a record's own `space` is the finer truth where it carries one; the section's
+  is the section-wide default.
+
+  **Additive on the wire** — the field is skipped when absent, so every
+  generated golden is byte-identical and older readers are unaffected (AE3's
+  no-fabrication rule now applies at both levels, asserted for sections as well
+  as symbols). Source-breaking for anyone building a `Section` from a struct
+  literal, which the draft posture permits. Spec page updated and the hand-authored
+  `spectrum128-banked` fixture carries section spaces in the same change;
+  `section_space_yields_the_base_map_for_a_paging_state` derives the base map
+  from a paging state and asserts an absent page maps nothing rather than
+  answering from whichever bank sorts first.
+
+  The crate's own rustdoc gained the banked contract too. It had lived on the
+  spec page and in a test but not on `BaseMap` or the three lookups — and the
+  first consumer read the crate, not the page. That gap is the reason a
+  competent importer got it wrong, and closing it is the durable half of this
+  note.
+
 ## Coverage and accepted gaps
 
 The v0 corpus covers: z80-spectrum (flat engine + entry symbol), 6502-c64

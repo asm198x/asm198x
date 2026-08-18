@@ -609,6 +609,7 @@ fn assemble_core(
                 HunkKind::Bss => "bss".to_string(),
             },
             base: None,
+            space: None,
         })
         .collect();
 

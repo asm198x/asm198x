@@ -20,10 +20,13 @@ with slot 3 based at `$C000`.
 
 Every field an SLD line needs is recoverable: the page from `space.page`, the
 in-page offset from `offset` (pages are section-aligned in this fixture), and
-the CPU address from the paged-in slot base. Nothing in the record has to be
-guessed — the projection is a pure function of the fixture's data. (That
-bank 3's long address coincides with its CPU address is arithmetic, not
-meaning: `3 * $4000 = $C000`.)
+the CPU address from the paged-in slot base. The two `line` rows take their
+space from their section, which is where a `line` record's qualifier lives —
+the table read that way before sections carried one, and since 2026-08-18 the
+fixture states it rather than leaving it to be inferred from a neighbouring
+symbol. Nothing in the record has to be guessed — the projection is a pure
+function of the fixture's data. (That bank 3's long address coincides with its
+CPU address is arithmetic, not meaning: `3 * $4000 = $C000`.)
 
 The third validation leg — cross-checking the slot/page expectations against
 Emu198x's actual Spectrum 128 paging model — is cross-repo and lives on the
