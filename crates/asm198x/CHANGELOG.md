@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.10](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.9...asm198x-v0.0.10) - 2026-08-18
+
+### Added
+
+- *(sjasmplus)* adopt ELSEIF chains and the dotted conditional spellings
+- *(debug198x)* let a section state the page it lives in
+
+### Fixed
+
+- *(asl)* reserve space the way asl and p2bin do, not as zeros
+- *(debug198x)* [**breaking**] carry unknown space shapes, and withdraw `bank`
+- *(debug198x)* document the page as the join key, and prove it
+
+### Other
+
+- *(debug198x)* record leg 3's verdict against the fixture's claims
+- *(debug198x)* state the banked fixture's claims for the leg-3 cross-check
+- Merge pull request #72 from asm198x/debug198x-section-space
+
 ## [0.0.9](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.8...asm198x-v0.0.9) - 2026-07-10
 
 ### Added
