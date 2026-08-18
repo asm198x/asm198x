@@ -45,7 +45,11 @@ fn current_contract_version() -> u32 {
 
 /// The one structured result every `assemble_*` entry point returns (R1). Every
 /// current and future CPU inherits it with no per-CPU work (R8).
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+///
+/// `PartialEq` but not `Eq`: the debug slice may carry a `Space::Unknown`
+/// holding arbitrary JSON from a newer producer, which has no total equality.
+/// Nothing uses these as map keys or set members.
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct AssemblyResult {
     /// The contract schema version ([`CONTRACT_VERSION`]) this payload was
