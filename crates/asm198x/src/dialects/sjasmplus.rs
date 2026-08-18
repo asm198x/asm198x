@@ -23,7 +23,9 @@
 //! conditional adoption is demand-gated
 //! (`decisions/conditional-assembly-framework.md`).
 //!
-//! TODO: sjasmplus modules, macros, `DUP`, and `ELSEIF` (#67).
+//! TODO: sjasmplus modules, macros, and `DUP`. `ELSEIF` and the dotted
+//! conditional spellings landed 2026-08-18; colon-inline blocks and
+//! conditions on forward symbols remain open under #67.
 
 use std::collections::BTreeMap;
 
@@ -484,8 +486,8 @@ mod tests {
 
     /// The block-structure error postures: an unterminated `IF`, a stray
     /// `ENDIF`, junk after `ENDIF` (the reference rejects it; junk after
-    /// `ELSE` it ignores — probes p43/p43b/p35/p40), and the out-of-scope
-    /// `ELSEIF` (#67) all error clearly.
+    /// `ELSE` it ignores — probes p43/p43b/p35/p40), a stray `ELSEIF`, and an
+    /// `ELSEIF` after `ELSE` all error clearly.
     #[test]
     fn block_structure_errors() {
         let e = asm("        IF 1\n        ld a,1\n").expect_err("p43");
@@ -501,10 +503,83 @@ mod tests {
                 .bytes,
             vec![0x3E, 2]
         );
-        let e =
-            asm("        IF 0\n        ld a,1\n        ELSEIF 1\n        ld a,2\n        ENDIF\n")
-                .expect_err("elseif");
-        assert!(e.message.contains("ELSEIF"), "unexpected: {e}");
+        let e = asm("        ELSEIF 1\n        ENDIF\n").expect_err("stray elseif");
+        assert!(e.message.contains("without a matching"), "unexpected: {e}");
+        // The reference tolerates an `ELSEIF` after `ELSE` by discarding it and
+        // everything to the `ENDIF` (re-probed 2026-08-18). Dropping source
+        // silently is worse than saying so, and no real program means it.
+        let e = asm(
+            "        IF 0\n        ld a,1\n        ELSE\n        ld a,2\n\
+             \x20       ELSEIF 1\n        ld a,3\n        ENDIF\n",
+        )
+        .expect_err("elseif after else");
+        assert!(e.message.contains("already closed"), "unexpected: {e}");
+    }
+
+    /// `ELSEIF` chains (#67), probed against the reference: the first true leg
+    /// wins, a chain can end in `ELSE`, and none-true emits nothing.
+    #[test]
+    fn elseif_chains_pick_the_first_true_leg() {
+        let asmb = |src: &str| asm(src).expect("chain").bytes;
+        assert_eq!(
+            asmb("        IF 0\n        ld a,1\n        ELSEIF 1\n        ld a,2\n        ENDIF\n"),
+            vec![0x3E, 2]
+        );
+        assert_eq!(
+            asmb("        IF 1\n        ld a,1\n        ELSEIF 1\n        ld a,2\n        ENDIF\n"),
+            vec![0x3E, 1]
+        );
+        assert_eq!(
+            asmb(
+                "        IF 0\n        ld a,1\n        ELSEIF 1\n        ld a,2\n\
+                  \x20       ELSEIF 1\n        ld a,3\n        ENDIF\n"
+            ),
+            vec![0x3E, 2],
+            "the first true leg wins"
+        );
+        assert_eq!(
+            asmb(
+                "        IF 0\n        ld a,1\n        ELSEIF 0\n        ld a,2\n\
+                  \x20       ELSE\n        ld a,3\n        ENDIF\n"
+            ),
+            vec![0x3E, 3]
+        );
+        assert_eq!(
+            asmb(
+                "        IF 0\n        ld a,1\n        ELSEIF 0\n        ld a,2\n        ENDIF\n        nop\n"
+            ),
+            vec![0x00],
+            "no leg taken emits only what follows the block"
+        );
+    }
+
+    /// Every conditional keyword also has a dotted spelling (#67). The dot does
+    /// not relax the case rule, and dotted and undotted mix within one block —
+    /// both probed against the reference.
+    #[test]
+    fn dotted_conditional_spellings() {
+        let asmb = |src: &str| asm(src).expect("dotted").bytes;
+        assert_eq!(
+            asmb("        .IF 1\n        ld a,1\n        .ENDIF\n"),
+            vec![0x3E, 1]
+        );
+        assert_eq!(
+            asmb("        .if 1\n        ld a,1\n        .endif\n"),
+            vec![0x3E, 1]
+        );
+        assert_eq!(
+            asmb("        .IF 0\n        ld a,1\n        .ELSE\n        ld a,2\n        .ENDIF\n"),
+            vec![0x3E, 2]
+        );
+        assert_eq!(
+            asmb("        .IF 1\n        ld a,1\n        ENDIF\n"),
+            vec![0x3E, 1],
+            "dotted and undotted mix, as the reference allows"
+        );
+        assert!(
+            asm("        .If 1\n        ld a,1\n        .EndIf\n").is_err(),
+            "the dot does not relax the all-upper/all-lower rule"
+        );
     }
 
     /// Keywords spell all-lower or all-upper only; a mixed-case `If` is an

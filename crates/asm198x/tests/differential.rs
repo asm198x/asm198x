@@ -290,15 +290,18 @@ const PROBES: &[Probe] = &[
         "first:\n.l: nop\n IF 1\nsecond:\n.l: nop\n jr .l\n ENDIF\n jr .l\n"),
     ok ("sjasmplus", "label on the IF line binds",
         "lbl: IF 1\n ld a,1\n ENDIF\n jr lbl\n"),
-    // U8 gaps (#67): reference behaviour probed and out of the adopted
-    // surface — ELSEIF chains, colon-inline blocks, dotted directive
-    // spellings, and multi-pass conditions on forward/address symbols.
-    gap("sjasmplus", "ELSEIF chain",
-        "V equ 2\n IF V = 1\n ld a,1\n ELSEIF V = 2\n ld a,2\n ELSE\n ld a,3\n ENDIF\n", 67),
+    // #67, stage 1 (2026-08-18): ELSEIF chains and the dotted spellings are
+    // adopted and arbitrated here.
+    ok ("sjasmplus", "ELSEIF chain",
+        "V equ 2\n IF V = 1\n ld a,1\n ELSEIF V = 2\n ld a,2\n ELSE\n ld a,3\n ENDIF\n"),
+    ok ("sjasmplus", "dotted .IF/.ENDIF spelling",
+        " .IF 1\n ld a,1\n .ENDIF\n"),
+    ok ("sjasmplus", "dotted chain, lower case",
+        " .if 0\n ld a,1\n .elseif 1\n ld a,2\n .endif\n"),
+    // #67, still open: colon-inline blocks are a separate bounded change, and
+    // conditions on forward/address symbols need the multi-pass resolution.
     gap("sjasmplus", "colon-inline conditional",
         " IF 1 : ld a,1 : ENDIF\n", 67),
-    gap("sjasmplus", "dotted .IF/.ENDIF spelling",
-        " .IF 1\n ld a,1\n .ENDIF\n", 67),
     gap("sjasmplus", "IF on a forward label (multi-pass)",
         " IF later\n ld a,1\n ENDIF\nlater: nop\n", 67),
 
