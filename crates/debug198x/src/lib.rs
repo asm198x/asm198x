@@ -130,6 +130,23 @@ pub enum Space {
     /// interpret" instead of failing. Treat a record whose space is `Unknown` as
     /// one whose address space you cannot reason about — resolve it if its
     /// section resolves, and do not guess at the qualifier's meaning.
+    ///
+    /// # Surface it; do not let it look like nothing
+    ///
+    /// This variant trades a loud failure for a quiet one, and the quiet failure
+    /// is the harder of the two to diagnose. A section whose shape a consumer
+    /// cannot read matches no paging state, so it never maps and its symbols
+    /// never resolve — which from the outside is **indistinguishable from a bank
+    /// that is simply paged out**. Both look like "no symbols here". A producer
+    /// typo then costs symbols instead of raising an error, and whoever is
+    /// debugging it has no thread to pull.
+    ///
+    /// So a consumer that holds `Unknown` records owes its caller a way to find
+    /// out: some means of asking "is anything here described in a way I cannot
+    /// read?", so an unexpected absence of symbols can be told apart from a
+    /// legitimate one. Emu198x's importer does this with an `unreadable_spaces()`
+    /// query. Carrying an unknown shape is only safe if someone can discover that
+    /// it happened.
     Unknown(serde_json::Value),
 }
 
