@@ -2547,8 +2547,15 @@ fn i8080_include_three_deep_nests_in_both_spellings() {
 
 /// KTD1's driver on the 8080: an `equ` defined inside the include feeds an
 /// opcode-embedded operand (`rst`'s vector) and a `ds` count on the
-/// includer's *later* lines. Probe-pinned: asl emits 3E 42 / DF / three zero
-/// bytes.
+/// includer's *later* lines.
+///
+/// Re-probed 2026-08-18 (#66). The previous claim here — "asl emits 3E 42 / DF
+/// / three zero bytes" — was wrong on both counts. asl reserves rather than
+/// materialises, and `p2bin` fills only the gaps *inside* the written range, so
+/// this program's trailing `ds PAD` contributes nothing at all: the reference
+/// pipeline emits **three** bytes, not six. The `equ` still has to flow out to
+/// the count, which is what this test is for — a wrong count would now change
+/// the image length rather than the fill.
 #[test]
 fn i8080_include_defined_equ_feeds_later_includer_lines() {
     let loader = MemoryLoader::new().text("defs.inc", "CONST equ 42h\nRSTVEC equ 3\nPAD equ 3\n");
@@ -2557,8 +2564,9 @@ fn i8080_include_defined_equ_feeds_later_includer_lines() {
     let r = assemble_i8080_files(src, "main.asm", &loader).expect("assembles");
     assert_eq!(
         r.bytes,
-        vec![0x3E, 0x42, 0xDF, 0x00, 0x00, 0x00],
-        "include-defined constants flow out to later form selection (KTD1)"
+        vec![0x3E, 0x42, 0xDF],
+        "include-defined constants flow out to later form selection (KTD1); the \
+         trailing reservation is absent, as asl + p2bin leave it"
     );
 }
 

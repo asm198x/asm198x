@@ -326,6 +326,14 @@ pub(crate) enum Operation {
     /// engine passes; `andmask`/`value`/`fill` are folded to constants by the
     /// dialect. The pad is `(value - pc) & andmask`.
     Align { andmask: i64, value: i64, fill: u8 },
+    /// Reserve `count` address units without emitting source-derived data (the
+    /// `ds`/`rmb`/`res`/`block` directives). Deliberately **not**
+    /// [`Operation::Bytes`] of zeros: what fills reserved space is a property of
+    /// the dialect's toolchain, not of the source, so the engine fills it with
+    /// [`Dialect::gap_fill`] — the same value an `org` gap takes. Emitting zeros
+    /// here is what made the asl-family output diverge from asl + p2bin, which
+    /// leaves a gap and fills it with `$FF`.
+    Reserve(usize),
 }
 
 /// One piece of a dialect-computed instruction encoding.
@@ -538,6 +546,7 @@ fn assemble_statements(
                 ));
             }
             Some(Operation::Bytes(items)) => pc += items.len() as i64 / addr_unit,
+            Some(Operation::Reserve(count)) => pc += *count as i64,
             // A binary payload occupies whole address units, the final partial
             // unit zero-padded in pass 2 — so both passes count the same.
             Some(Operation::Binary(payload)) => {
@@ -562,6 +571,12 @@ fn assemble_statements(
 
     // Pass 2 — emit.
     let byte_policy = dialect.oversized_byte_policy();
+    let gap_fill = dialect.gap_fill();
+    // The image length as of the last operation that actually *wrote* data.
+    // Reservations and `org` gaps advance the counter without contributing, so
+    // on a dialect whose toolchain reserves rather than materialises, anything
+    // past this point is trimmed (see `Dialect::trims_trailing_gap`).
+    let mut written_len = 0usize;
     let mut warnings: Vec<Warning> = Vec::new();
     let mut start: Option<u16> = None;
     let mut bytes: Vec<u8> = Vec::new();
@@ -579,7 +594,10 @@ fn assemble_statements(
                 if target < cur {
                     return Err(s.err("cannot move origin backwards"));
                 }
-                bytes.resize(bytes.len() + ((target - cur) * addr_unit) as usize, 0);
+                bytes.resize(
+                    bytes.len() + ((target - cur) * addr_unit) as usize,
+                    gap_fill,
+                );
             }
             Some(Operation::Equ(_)) => {} // defines a symbol; emits nothing
             Some(Operation::Entry(e)) => {
@@ -602,6 +620,9 @@ fn assemble_statements(
                     let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
                     emit_byte(&mut bytes, v, byte_policy, &mut warnings, s)?;
                 }
+            }
+            Some(Operation::Reserve(count)) => {
+                bytes.extend(std::iter::repeat_n(gap_fill, count * addr_unit as usize));
             }
             Some(Operation::Binary(payload)) => {
                 // Asset data, laid down verbatim — never through the per-byte
@@ -816,8 +837,12 @@ fn assemble_statements(
                     | Operation::Instruction { .. }
                     | Operation::Encoded(_)
                     | Operation::Binary(_)
+                    | Operation::Reserve(_)
             )
         );
+        if !matches!(s.op, Some(Operation::Org(_)) | Some(Operation::Reserve(_))) {
+            written_len = bytes.len();
+        }
         if source_bearing && bytes.len() > len_before {
             debug.lines.push(LineRec {
                 line: s.line as u32,
@@ -862,6 +887,12 @@ fn assemble_statements(
         if origin + bytes.len().div_ceil(addr_unit as usize) as i64 > 0x1_0000 {
             return Err(s.err("program exceeds the 64K address space"));
         }
+    }
+
+    // asl reserves rather than materialises: `p2bin` fills only the gaps inside
+    // the written range, so a trailing reservation is absent from the image.
+    if dialect.trims_trailing_gap() {
+        bytes.truncate(written_len);
     }
 
     Ok(Assembly {

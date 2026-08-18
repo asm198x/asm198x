@@ -37,6 +37,20 @@ impl Dialect for Cdp1802 {
         &isa::cdp1802::SET
     }
 
+    /// asl leaves reserved space and `org` gaps as holes; `p2bin`, the converter
+    /// that turns asl's object into a binary, fills them with `$FF`. Matching the
+    /// reference pipeline byte-for-byte means reserving `$FF`, not `$00`.
+    fn gap_fill(&self) -> u8 {
+        0xFF
+    }
+
+    /// asl writes nothing for reserved space, and `p2bin` materialises only the
+    /// gaps inside the written range — so a trailing `ds` is absent from the
+    /// image rather than filled.
+    fn trims_trailing_gap(&self) -> bool {
+        true
+    }
+
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
         // Route assembly through the semantic AST (U6, fixed-slot): parse into a
         // `Program`, then lower to the engine's statement stream — byte-identical
@@ -228,7 +242,7 @@ fn parse_ds(
     let count = fold_const(&value(args.trim(), line)?, consts, line)?;
     let count = usize::try_from(count)
         .map_err(|_| AsmError::new(line, "`ds` count must be a non-negative constant"))?;
-    Ok(Operation::Bytes(vec![Expr::Num(0); count]))
+    Ok(Operation::Reserve(count))
 }
 
 fn byte_list(args: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
@@ -360,7 +374,14 @@ mod tests {
     fn directives() {
         assert_eq!(bytes(" db 1,2,\"AB\"\n"), vec![0x01, 0x02, 0x41, 0x42]);
         assert_eq!(bytes(" dw 1234h\n"), vec![0x12, 0x34]); // big-endian
-        assert_eq!(bytes(" ds 3\n"), vec![0x00, 0x00, 0x00]);
+        // Reserved space follows asl + p2bin, which reserves rather than
+        // materialises: a gap *inside* the written range is filled with $FF,
+        // and a trailing reservation is absent from the image entirely.
+        assert_eq!(
+            bytes(" db 1\n ds 3\n db 9\n"),
+            vec![0x01, 0xFF, 0xFF, 0xFF, 0x09]
+        );
+        assert_eq!(bytes(" db 9\n ds 3\n"), vec![0x09]);
     }
 
     /// U6 — the 1802 front-end routes through the AST, carrying comments as
