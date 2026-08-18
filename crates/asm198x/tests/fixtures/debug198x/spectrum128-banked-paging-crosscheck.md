@@ -1,10 +1,20 @@
 # Paging cross-check — the banked fixture's third validation leg
 
-Plan R10's third leg, and the last open item on the Debug198x v1 freeze
+Plan R10's third leg, and the last Emu198x item on the Debug198x v1 freeze
 checklist (`decisions/debug198x-format.md` § *The freeze checklist*, item 3):
 **cross-check this fixture's slot/page expectations against Emu198x's actual
 Spectrum 128 paging model.** It is cross-repo by design — the fixture is written
 here, but only a machine model can say whether it describes a real machine.
+
+> **✅ Passed 2026-08-18** — emu198x/emu198x#986, `454baf55`. Six tests in
+> `crates/runtime-sinclair-zx-spectrum/tests/debug198x_paging_cross_check.rs`,
+> driving a real `Memory128K` into each paging state. No ROMs, no firmware, no
+> skip path, so it always runs; nothing is asserted from the spec — every
+> address the sidecar claims is checked by reading the byte back through the
+> same `MemoryBus` the CPU uses.
+>
+> **Every hardware claim below holds.** The cross-check also found something the
+> fixture could not: see *What leg 3 changed* at the end.
 
 This document exists because of how the first cross-repo contact went wrong.
 The Emu198x importer read the reader's consumer model out of type signatures
@@ -24,8 +34,8 @@ right?"
 | **T** | sjasmplus's SLD convention | The tool; recorded in [`spectrum128-banked-sld.md`](spectrum128-banked-sld.md), not Emu198x's to settle |
 | **F** | How this fixture is constructed | This repo — stated so a checker does not mistake a fixture choice for a hardware assertion |
 
-Only the **H** claims need a verdict. **T** and **F** are listed so they are not
-silently swept into the cross-check.
+Only the **H** claims needed a verdict. **T** and **F** are listed so they were
+not silently swept into the cross-check.
 
 ## What the fixture is
 
@@ -143,12 +153,63 @@ Debug198x is still draft — which is cheaper now than after the freeze.
    wording fix, not a format change — but it should be caught here rather than by
    a third implementer.
 
-## Recording the result
+## The verdict
 
-A verdict on **H1–H5** plus answers to the open questions completes leg 3. It
-lands as a dated note in `decisions/debug198x-format.md`, alongside legs 1 and 2,
-and clears the last checklist item before the freeze review.
+Each claim against the test that settles it, in
+`crates/runtime-sinclair-zx-spectrum/tests/debug198x_paging_cross_check.rs`:
 
-If everything holds, the note says so and the freeze proceeds. If anything does
-not, it is a draft-format change — spec page, fixtures, and a dated note moving
-in the same change, per the draft posture in that record.
+| Claim | Verdict | Settled by |
+|-------|---------|-----------|
+| **H1** slot 3 is `$C000–$FFFF`, the pageable window | ✅ holds | `slot_three_is_the_switchable_window_the_fixture_assumes` |
+| **H2** pages 1 and 3 are both legally pageable | ✅ holds | `every_page_the_fixture_names_is_one_the_hardware_can_select` |
+| **H3** one slot holds one page at a time | ✅ holds | `the_symbol_at_one_address_follows_the_machines_paging_state` |
+| **H4** two symbols in different pages share a CPU address | ✅ holds | same, plus `a_page_the_image_has_no_code_in_answers_nothing` |
+| **H5** `Section.space` expresses what the model does | ✅ holds, **with a correction** | `a_bank_live_in_two_slots_at_once_answers_at_both_addresses` |
+| **T1** the SLD projection | ✅ now tied to real RAM | `the_sld_long_address_projection_matches_this_machines_banks` |
+
+H3 was the highest-consequence claim — false would have meant the format's model
+was wrong, not just the fixture. It holds.
+
+T1 gained something the desk exercise could not give it: each long address is
+checked to land inside the bank its page names, and `music`'s long address
+coinciding with its CPU address is asserted as arithmetic (`3 * $4000 == $C000`)
+rather than meaning, so the coincidence cannot later be read as a rule.
+
+### Answers to the open questions
+
+1. **Fixed banks — answered, yes.** `{slot: 1, page: 5}` is meaningful and works.
+   The dual-window test describes slot 1 holding page 5 at `$4000` *and* slot 3
+   holding page 5 at `$C000`, and the same symbol answers at both.
+2. **The ROM slot** — not exercised. Still open, and still cheap: no consumer has
+   wanted it.
+3. **+2A/+3 `$1FFD` all-RAM configurations** — not exercised. The fixture's scope
+   is 128/+2, and whether `{slot, page}` covers the +2A/+3 modes is untested.
+4. **Shadow screen, bank 7** — not exercised. No consumer has needed display
+   state in address attribution.
+5. **Slot numbering — answered, yes.** Slot 3 is `$C000` and slot 1 is `$4000`:
+   0-based by 16 KiB window, exactly as the fixture assumes.
+
+Questions 2–4 are recorded as untested rather than resolved. None blocks the
+freeze — each concerns a shape no producer emits and no consumer reads, and the
+catch-all added on 2026-08-18 means a later shape can be added without breaking a
+v1 reader.
+
+## What leg 3 changed
+
+The cross-check earned its keep by finding what the fixture alone could not.
+
+Both fixture sections sit in slot 3, so the fixture cannot distinguish "join on
+the page" from "join on the (slot, page) pair" — they agree on every record it
+contains. Driving a real machine broke the tie: a 128K keeps bank 5 at `$4000`
+permanently **and** can select it into `$C000`, so one page is live at two CPU
+addresses at once. A pair match makes that impossible by construction.
+
+`page` is the join key; `slot` records where the producer expected the bank. That
+was stated correctly on the spec page and **wrongly** in the crate's own rustdoc,
+which asserted the pair was the discriminator — and the worked example shipped
+with `Section.space` matched the pair too. Fixed in asm198x/asm198x#76, with a
+regression guard that fails under a pair match rather than passing under both.
+
+The lesson is the one this format keeps re-teaching: a contract stated in one
+place and contradicted in another is worse than one stated nowhere, because the
+reader finds the wrong half first.
