@@ -407,11 +407,15 @@ fn section_space_yields_the_base_map_for_a_paging_state() {
     let info = DebugInfo::read(&fixture("spectrum128-banked.debug198x")).expect("parse");
 
     // Everything the consumer needs to supply: which page is in which slot.
+    // The join is on the **page** alone — a section's `slot` records where the
+    // producer expected it, not where the machine has it now, so matching the
+    // pair would hide a bank the machine has put somewhere else (and a page can
+    // be live in two slots at once; see `debug198x`'s own suite).
     let bases_for = |slot: u8, page: u16| -> BaseMap {
         let slot_addr = 0x4000_u64 * u64::from(slot);
         info.sections
             .iter()
-            .filter(|s| s.space == Some(Space::Paged { slot, page }))
+            .filter(|s| matches!(s.space, Some(Space::Paged { page: p, .. }) if p == page))
             .map(|s| (s.id, slot_addr))
             .collect()
     };

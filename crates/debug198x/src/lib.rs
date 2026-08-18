@@ -78,9 +78,38 @@ pub type BaseMap = BTreeMap<SectionId, u64>;
 pub enum Space {
     /// A 65816-style bank byte — the high 8 bits of a 24-bit address.
     Bank { bank: u8 },
-    /// A banked/paged location: a hardware `slot` filled by a `page` (bank) of
-    /// memory. The (slot, page) pair distinguishes two symbols that share the
-    /// same low address in different pages.
+    /// A banked/paged location: a `page` (bank) of memory, and the hardware
+    /// `slot` the producer expected it in.
+    ///
+    /// # `page` is the join key; `slot` is not
+    ///
+    /// The two fields are **not** a composite key, and matching on the pair is
+    /// the natural-looking mistake. `page` is the durable fact: a bank of code
+    /// belongs to a page, and which slot it appears in is a fact about the
+    /// machine right now. `slot` records where the *producer* expected it.
+    ///
+    /// So a consumer turning paging state into a [`BaseMap`] matches on `page`
+    /// alone and takes the address from the slot it knows the page is in:
+    ///
+    /// ```
+    /// # use debug198x::{BaseMap, DebugInfo, Space};
+    /// # fn f(info: &DebugInfo, slot: u8, page: u16, slot_addr: u64) -> BaseMap {
+    /// info.sections
+    ///     .iter()
+    ///     .filter(|s| matches!(s.space, Some(Space::Paged { page: p, .. }) if p == page))
+    ///     .map(|s| (s.id, slot_addr))
+    ///     .collect()
+    /// # }
+    /// ```
+    ///
+    /// Matching `Space::Paged { slot, page }` as a pair instead makes a bank
+    /// invisible wherever the machine has put it other than where the assembler
+    /// expected, and makes a bank live in *two* slots impossible by
+    /// construction. That case is real: a Spectrum 128 keeps bank 5 at `$4000`
+    /// permanently **and** can select it into `$C000`, so one page is live at
+    /// two CPU addresses at once. Resolving each address through the slot that
+    /// contains it keeps `symbol_at`/`line_at` unambiguous however many windows
+    /// a page appears in, because every CPU address is in exactly one slot.
     Paged { slot: u8, page: u16 },
 }
 
@@ -675,6 +704,56 @@ mod tests {
         assert!(
             !json.contains("space"),
             "flat section must not emit a space field: {json}"
+        );
+    }
+
+    /// The `page` is the join key and the `slot` is not — the case that proves
+    /// it. A Spectrum 128 keeps bank 5 at `$4000` permanently *and* can select
+    /// it into `$C000`, so one page is live at two CPU addresses at once. A
+    /// consumer matching `Space::Paged { slot, page }` as a pair finds nothing
+    /// for the second window, because the section records the slot the producer
+    /// expected.
+    #[test]
+    fn a_page_live_in_two_slots_resolves_through_each_window() {
+        let info = DebugInfo {
+            sections: vec![Section {
+                id: 0,
+                name: "bank5".into(),
+                base: None,
+                space: Some(Space::Paged { slot: 1, page: 5 }),
+            }],
+            symbols: vec![Symbol {
+                name: "screen_fill".into(),
+                kind: SymbolKind::Label {
+                    section: 0,
+                    offset: 0x10,
+                    space: Some(Space::Paged { slot: 1, page: 5 }),
+                },
+            }],
+            ..Default::default()
+        };
+
+        // Match on the page alone; the address comes from the slot the caller
+        // knows that page is currently in.
+        let bases_for = |slot: u8, page: u16| -> BaseMap {
+            info.sections
+                .iter()
+                .filter(|s| matches!(s.space, Some(Space::Paged { page: p, .. }) if p == page))
+                .map(|s| (s.id, 0x4000_u64 * u64::from(slot)))
+                .collect()
+        };
+
+        // The window the producer expected: bank 5 fixed at $4000.
+        let fixed = bases_for(1, 5);
+        assert_eq!(info.addr_of("screen_fill", Some(&fixed)), Some(0x4010));
+
+        // The same page selected into slot 3. A `{ slot, page }` pair match
+        // would yield an empty map here and resolve nothing.
+        let selected = bases_for(3, 5);
+        assert_eq!(info.addr_of("screen_fill", Some(&selected)), Some(0xC010));
+        assert_eq!(
+            info.symbol_at(0xC010, Some(&selected)).map(|s| &*s.name),
+            Some("screen_fill")
         );
     }
 }
