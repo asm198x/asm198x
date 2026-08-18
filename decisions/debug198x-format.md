@@ -1,7 +1,10 @@
 # Decision: the Debug198x format's evolution policy and freeze governance
 
-**Status:** Active. The format is **public draft v0.1**; the v1 freeze is a
-gated event executed via the checklist below.
+**Status:** Active. The format is **frozen at v1** as of 2026-08-18 — the
+additive-evolution guarantee is now an irreversible promise. See *The v1 freeze*
+at the end of this record for the evidence each checklist item was confirmed
+against. The checklist below is kept as the gate that was applied, not as
+outstanding work.
 
 **Date:** 2026-07-06.
 
@@ -70,8 +73,9 @@ confirming every item:
    - Leg 2 — SLD long-address projection table committed alongside the
      fixture: ✅ done 2026-07-06 (`spectrum128-banked-sld.md`).
    - Leg 3 — the fixture's slot/page expectations cross-checked against
-     Emu198x's actual Spectrum 128 paging model: ⏳ **pending, cross-repo**
-     (belongs to the importer work in the Emu198x session).
+     Emu198x's actual Spectrum 128 paging model: ✅ done 2026-08-18
+     (emu198x/emu198x#986, `454baf55`; verdict recorded beside each claim in
+     `spectrum128-banked-paging-crosscheck.md`).
 4. **A bounded review has passed:** a deliberate pass over the shape against
    the consuming reader — did contact reveal a field that is wrong, missing,
    or misnamed? Fix while draft; only then freeze. The freeze is never an
@@ -212,13 +216,104 @@ shape; they are accepted as a class, gaining fixtures incrementally as
 consumers reach them (R10 — fixture growth is additive and independent of the
 freeze).
 
+## The v1 freeze
+
+**Executed 2026-08-18.** Every checklist item confirmed below, against evidence
+rather than assertion. From this date the additive-evolution guarantee (R11) is
+irreversible: new record types and new fields are added without a version break,
+a conforming reader skips unknown `t` values and ignores unknown fields, and a
+**breaking** shape change requires a new decision in this record plus a
+`format_version` bump and a migration path.
+
+### Item 1 — first consumption has occurred
+
+The primary trigger, not the secondary one. The Emu198x importer
+(emu198x/emu198x#741, merged) exercises the reader end-to-end against a real
+asm198x-produced sidecar (`border-walk.debug198x`, a C64 6502 build), through
+both consumption modes the trigger names: **symbolized disassembly**
+(`DebugSymbols::symbolise`) and **source-anchored breakpoints**
+(`addr_of_line`). The relocatable leg — per-section base maps from actual load
+addresses — is exercised separately against `68000-amiga.debug198x` with hunks
+placed out of order, so an adjacency assumption cannot hide (emu198x/emu198x#987).
+
+### Item 2 — fixture coverage matches consumption
+
+The consumer exercises the 6502 C64 shape and the Spectrum 128 banked shape;
+the corpus covers both. **Named gap, risk accepted:** the corpus holds nine
+shapes and one consumer reads two of them. NES, both multi-file families, 65816,
+CP1610, plain z80-spectrum and 68000-amiga are pinned by the corpus as a
+*producer* contract and have no reader. That is the corpus's job — it pins what
+asm198x writes — and R10 keeps fixture growth additive and independent of this
+freeze, so a later consumer finds its family already covered.
+
+### Item 3 — the banked fixture's three validation legs
+
+All complete. Legs 1 and 2 on 2026-07-06; **leg 3 on 2026-08-18**
+(emu198x/emu198x#986, `454baf55`): six tests driving a real `Memory128K` into
+each paging state, no ROMs and no skip path, with nothing asserted from the
+spec — every address the sidecar claims is checked by reading the byte back
+through the same `MemoryBus` the CPU uses. All five hardware claims hold,
+including the load-bearing one (a slot holds one page at a time), whose failure
+would have meant the format's model was wrong rather than the fixture's. Verdict
+recorded per claim in `spectrum128-banked-paging-crosscheck.md`.
+
+### Item 4 — the bounded review has passed
+
+It ran **twice**, and earned its keep both times. This is the item the record
+insisted was never an automatic flip, and it was right to.
+
+- **First pass** (`space` on `Section`): contact revealed that paging was
+  expressible but not discoverable — `space` lived only on address-kind symbols,
+  so a consumer holding real paging state had no stated section → (slot, page)
+  mapping to build a base map from. The reported defect (#71) was *not* one; the
+  gap behind it was.
+- **Second pass** (`space` shapes made forward-compatible; `bank` withdrawn):
+  asked whether anything looked thinner than the checklist implied, the consumer
+  found `Space::Bank` exercised by nothing — no fixture, no producer, no reader.
+  Probing how expensive a post-freeze correction would be then exposed the
+  larger problem: `#[serde(untagged)]` made an unrecognized shape a hard parse
+  error, so the *set of space shapes* would have closed permanently at this
+  freeze, uniquely among the format's parts, with nothing saying so.
+
+Both were fixed while draft. Freezing today therefore freezes one space shape,
+`{slot, page}` — fixture-pinned, hardware-cross-checked, consumer-exercised, and
+guarded against the join-key error — with a catch-all that keeps the shape set
+open for whatever a later machine needs.
+
+### What is deliberately *not* changed: `format_version` stays `"0.1"`
+
+The freeze is a change of **promise**, not of shape. Nothing about the wire
+format moved today, so bumping the version string would misinform every reader:
+the spec's own rule is *"branch on `format_version` for a breaking change;
+additive changes never bump it"*, and a reader that sees the number move is
+entitled to conclude a shape it knows has changed.
+
+It would also break real consumers for no reason. The Emu198x importer validates
+`format_version` by **exact match** against the crate constant
+(`crates/emu198x-shell/src/debug_info.rs:163`), so a bump makes every
+post-freeze sidecar unreadable to any build pinned before it — including the
+released Emu198x v0.3.0 — in exchange for no new information.
+
+So `FORMAT_VERSION` stays `"0.1"`, and `"0.1"` now denotes the frozen v1
+specification. If that pairing later reads as confusing enough to be worth the
+migration, changing it is a breaking change and needs its own decision here,
+with the consumer coordinated rather than surprised.
+
 ## Drift triggers
 
 Re-consult this record before:
 
 - adding, renaming, or removing any field or record type in
   `crates/debug198x/src/lib.rs` — spec page and fixtures move in the same
-  change, and post-freeze a breaking change needs a new decision here;
+  change. **The format is frozen (2026-08-18): additive is still free, but a
+  breaking shape change now needs a new decision in this record, a
+  `format_version` bump, and a migration path.** "It is still 0.1, so it is
+  still draft" is the misreading to watch for — the string is the frozen v1
+  spec's version, see *The v1 freeze*;
+- **bumping `FORMAT_VERSION`** — it is deliberately unchanged at the freeze, and
+  moving it tells every reader a shape they know has changed *and* breaks the
+  Emu198x importer's exact-match check. Its own decision, with the consumer
+  coordinated first;
 - making a consumer depend on a field the spec marks informational
   (`tool`/`tool_version`);
 - emitting a `space` qualifier from a new machine — the paged shape is
