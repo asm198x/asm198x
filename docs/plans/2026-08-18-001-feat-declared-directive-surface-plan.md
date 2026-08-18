@@ -51,7 +51,26 @@ Measured across `crates/asm198x/src/dialects/`:
   - *Argument-guarded* — **2 of 206**: z80's `end` (bare = ignored, `end <addr>` = `Operation::Entry`) and acme's `}`.
   - *Not a directive* — acme's `}` block close.
 - **The same family appears both enumerated and generated.** asl-family, cp1610, pdp11 and tms9900 write `"db" | "defb" | "dc.b"` and `"dw" | "defw" | "dc.w"` longhand; vasm generates `dc.{b,w,l}` from a stem. They are one concept with different size sets — the 8-bit dialects enumerate only the sizes their CPU has.
-- **Accept-and-ignore is structurally distinct and mechanical to detect.** All 12 asl-family dialects carry exactly one arm returning `Ok(None)` — a shared core of `cpu`/`end`/`title`/`page`/`name` plus per-chip extras (`aseg`/`cseg`, `listing`, `relaxed`, `sect`/`text`, `supmode`).
+- **Accept-and-ignore is structurally distinct and mechanical to detect.** All 12 asl-family dialects carry exactly one arm returning `Ok(None)`.
+
+  *Superseded 2026-08-18 by #85.* At survey time those lists were a shared core
+  of `cpu`/`end`/`title`/`page`/`name` plus ad-hoc per-chip extras — and probing
+  every spelling against every chip showed they were close to **uncorrelated**
+  with what asl accepts, in both directions. `name` was in all twelve and
+  accepted by none; `cseg` and `sect` were accepted nowhere; `text` was on the
+  wrong chip; `listing` and `aseg` are accepted on all twelve and were ignored by
+  four and one respectively. #85 aligned them, so the current lists are
+  `cpu`/`end`/`title`/`page`/`aseg`/`listing` plus `relaxed` (cp1610) and
+  `supmode` (z8000).
+
+  Two things this plan should carry forward. The remaining per-chip entries are
+  the last unprobed inconsistency, tracked with the wider semantic pseudo-op
+  question in [#87](https://github.com/asm198x/asm198x/issues/87). And the drift
+  itself is the argument for this plan: twelve dialects sharing one arbiter
+  disagreed with it and with each other, invisibly, until something asked the
+  arbiter the same question twelve times. A declared surface probed against its
+  reference is what makes that class of error impossible rather than merely
+  findable.
 - **Sigil handling is already inconsistent in-tree.** acme and ca65 keep the sigil *in* the matched spelling (`"!zone"`, `".incbin"`); the sjasmplus conditionals landed 2026-08-18 strip it *before* matching so dotted and undotted share one arm. Both work; they are different models of one idea.
 - **Spellings are not always identifier-shaped.** acme accepts numeric aliases — `"byte" | "by" | "8"`, `"word" | "wo" | "16"`.
 
@@ -98,6 +117,7 @@ Measured across `crates/asm198x/src/dialects/`:
 
 - **The sigil convention — decide before U5.** Two models exist in-tree: sigil-in-the-spelling (acme `"!zone"`, ca65 `".incbin"`) and sigil-stripped-before-match (sjasmplus conditionals, 2026-08-18). A declared surface must pick one. Stripping is tidier for a matrix (one row per directive, sigil as a dialect property) but changes what some dialects accept — if acme strips `!`, does bare `zone` become valid? It must not. So stripping needs to be *conditional on the dialect requiring the sigil*, which is a third model and the likely answer. **This is the one place the plan can change behaviour, so it is decided explicitly, per dialect, with probes.**
 - Whether `Ignored` entries need a per-spelling reason for documentation, or whether one category is enough.
+- Whether a **`KnownUnsupported`** category is needed. [#87](https://github.com/asm198x/asm198x/issues/87) asks what to do with asl's semantic pseudo-ops (`radix`, `phase`, `align`, `charset`, …): they cannot be ignored without mis-assembling, and today they fail as *unknown mnemonics*, which misdescribes the problem. If the answer for any of them is "reject, but say what it is", the declaration needs a category for it.
 - Whether the stable id in R1 is the canonical spelling or a separate symbol — matters only when two dialects share a spelling with different meanings (`end`).
 
 ### Sources
