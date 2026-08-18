@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.11](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.10...asm198x-v0.0.11) - 2026-08-18
+
+### Fixed
+
+- *(asl)* align the ignore lists with what asl actually accepts
+
 ## [0.0.10](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.9...asm198x-v0.0.10) - 2026-08-18
 
 ### Added
