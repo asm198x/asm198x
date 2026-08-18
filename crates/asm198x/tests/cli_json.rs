@@ -120,3 +120,90 @@ fn invalid_message_format_errors_cleanly() {
         "clear error message: {err}"
     );
 }
+
+// ---------------------------------------------------------------------------
+// Subcommands (`asm198x asm|disasm|fmt`) — the CLI shape v1.0 freezes, per
+// `decisions/packaging-and-cpu-roadmap.md` and `decisions/v1-scope.md`.
+// ---------------------------------------------------------------------------
+
+/// Assembling stays the default operation, so an invocation with no subcommand
+/// keeps working. This is the external contract: Code198x's capture harness
+/// drives the binary this way (`_capture/verify.py`), from a workflow pinned to
+/// a revision, and every published example spells it like this.
+#[test]
+fn a_bare_invocation_still_assembles() {
+    let src = temp_source("bare", "\tld a,1\n");
+    let out = temp_source("bare-out", "").with_extension("bin");
+    let run = bin()
+        .args(["--dialect", "pasmo"])
+        .arg(&src)
+        .arg("-o")
+        .arg(&out)
+        .output()
+        .expect("run asm198x");
+    assert!(run.status.success(), "bare invocation must assemble");
+    assert_eq!(std::fs::read(&out).expect("output"), vec![0x3E, 0x01]);
+}
+
+/// `asm` is the explicit spelling of the default, and must produce exactly what
+/// the bare form does.
+#[test]
+fn the_asm_subcommand_matches_the_bare_form() {
+    let src = temp_source("explicit", "\tld a,1\n");
+    let out = temp_source("explicit-out", "").with_extension("bin");
+    let run = bin()
+        .args(["asm", "--dialect", "pasmo"])
+        .arg(&src)
+        .arg("-o")
+        .arg(&out)
+        .output()
+        .expect("run asm198x");
+    assert!(run.status.success(), "`asm` must assemble");
+    assert_eq!(std::fs::read(&out).expect("output"), vec![0x3E, 0x01]);
+}
+
+/// `disasm` and `fmt` are subcommands, not flags.
+#[test]
+fn disasm_and_fmt_are_subcommands() {
+    let src = temp_source("modes", "\tld a,1\n");
+    let fmt = bin()
+        .args(["fmt", "--dialect", "pasmo"])
+        .arg(&src)
+        .output()
+        .expect("run asm198x");
+    assert!(fmt.status.success(), "`fmt` must run");
+
+    let bin_path = temp_source("modes-bin", "").with_extension("bin");
+    std::fs::write(&bin_path, [0x3E, 0x01]).expect("write");
+    let dis = bin()
+        .args(["disasm", "--dialect", "pasmo"])
+        .arg(&bin_path)
+        .output()
+        .expect("run asm198x");
+    assert!(dis.status.success(), "`disasm` must run");
+    assert!(
+        String::from_utf8_lossy(&dis.stdout).contains("LD A,$01"),
+        "disasm should render the instruction"
+    );
+}
+
+/// The withdrawn flags say where the operation went. A bare "unknown flag"
+/// would be accurate and useless — anyone hitting it has a working command line
+/// from an older release and needs the one-word translation, not a rejection.
+#[test]
+fn the_withdrawn_mode_flags_name_their_replacement() {
+    for (flag, want) in [("--disasm", "asm198x disasm"), ("--fmt", "asm198x fmt")] {
+        let src = temp_source("withdrawn", "\tnop\n");
+        let out = bin()
+            .args(["--dialect", "pasmo", flag])
+            .arg(&src)
+            .output()
+            .expect("run asm198x");
+        assert!(!out.status.success(), "{flag} must be rejected");
+        let stderr = String::from_utf8_lossy(&out.stderr);
+        assert!(
+            stderr.contains(want),
+            "{flag} should point at `{want}`, got: {stderr}"
+        );
+    }
+}

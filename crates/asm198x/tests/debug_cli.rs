@@ -242,7 +242,7 @@ fn failed_container_run_writes_no_artifacts() {
 fn debug_flags_reject_fmt_and_disasm() {
     let src_path = temp_source("fmt", "\tnop\n");
     let out = bin()
-        .args(["--dialect", "pasmo", "--fmt", "--listing"])
+        .args(["fmt", "--dialect", "pasmo", "--listing"])
         .arg(&src_path)
         .output()
         .expect("run asm198x");
