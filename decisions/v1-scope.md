@@ -93,18 +93,35 @@ Six items. Two are substantial; four are small.
      a shell installer and a Homebrew tap are cargo-dist configuration.
    - A CLI reference. `--help` is dense and complete, and it is the only CLI
      documentation that exists.
-   - Dialect references. There are 21 dialect front-ends and **one** dialect
+   - Per-dialect directive matrices, **generated from the conformance corpus** —
+     not hand-authored. There are 21 dialect front-ends and **one** dialect
      reference document (`dialects/6502.md` in the org docs repo, itself carrying
      a caveat that its gap notes may be stale). Source-compatibility is the
-     product's identity; per-dialect fidelity is the thing a user most needs
-     written down, and it is the least written down.
+     product's identity, so per-dialect fidelity is what a user most needs
+     written down and it is the least written down — but hand-writing 21 pages is
+     the naive fix the docs-site plan
+     (`docs/plans/2026-07-04-004-feat-docs-site-plan.md`) exists to prevent: *"a
+     second source of truth already stale at 19 CPUs and losing harder at 30."*
+     That plan already wires directive matrices as a **generated slot** fed by the
+     conformance corpus, which is item 2 above. The corpus pays off twice — it
+     makes the guarantee provable *and* it is the source the dialect
+     documentation generates from. This item is downstream of item 2, not
+     parallel work.
+   - The docs-site plan's **v1 core** — R1 instruction references generated from
+     `isa` with provenance links into the umbrella `reference/` library, R2 every
+     sample assembled by the real binary in CI, R3 mdBook plus the House198x Vale
+     lint promoted to a CI gate — in scope while it stays cheap. It is unblocked
+     today per [`roadmap-sequencing.md`](roadmap-sequencing.md), and it is where
+     the generated matrices land. Its later slots stay out.
 
 ## Explicitly outside v1.0
 
 Cycle analyzer (blocked on the unowned timing/flags data seam), dialect
-converter, generated docs site, LSP, WASM playground, MCP, ARM2, the `isa198x`
-extraction, a standalone linker and object format. None are promises the README
-makes. Folding any of them in converts a 1.0 bar into a 2.0 bar.
+converter, LSP, WASM playground, MCP, ARM2, the `isa198x` extraction, a
+standalone linker and object format — and the docs site's post-v1 slots
+(diagnostic explain-pages, the conformance ledger, cycle columns), each gated on
+a source that does not exist yet. None are promises the README makes. Folding any
+of them in converts a 1.0 bar into a 2.0 bar.
 
 ## Order
 
@@ -114,8 +131,9 @@ Bugs, then the cheap freeze, then the two substantial items, then the surface:
 2. Debug198x freeze (leg 3)
 3. Verdict corpus v1a
 4. Macros
-5. CLI subcommands, installers, dialect references
-6. Cut 1.0
+5. CLI subcommands, installers, the CLI reference
+6. Docs-site v1 core, carrying the dialect matrices generated in step 3
+7. Cut 1.0
 
 ## Drift triggers
 
@@ -138,3 +156,9 @@ Re-consult this record before:
 - *"Ship 1.0 with the reference suites still `#[ignore]`d; they pass locally."* →
   That is the bus-factor-one trust chain #61 exists to remove, on the one claim
   the product is built around.
+- *"Just hand-write the dialect pages, it's faster than wiring generation."* →
+  No. That is the drift the docs-site plan was written to prevent, and it
+  compounds with every CPU added. Dialect documentation generates from the
+  conformance corpus. Editorial prose that duplicates generated data is what to
+  avoid; a **CLI reference** is genuinely editorial and is hand-written on
+  purpose.
