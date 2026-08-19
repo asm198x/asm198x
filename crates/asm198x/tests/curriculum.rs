@@ -20,12 +20,17 @@ use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
+mod support;
+
+use verdict_corpus::Suite;
+
 /// Locate the `Code198x` checkout, a sibling of the `Asm198x` container two
 /// levels above this crate's workspace.
 fn code198x() -> Option<PathBuf> {
-    let p = Path::new(env!("CARGO_MANIFEST_DIR")).join("../../../../Code198x");
-    let p = p.canonicalize().ok()?;
-    p.is_dir().then_some(p)
+    // Shared with the tool-free replay, so recording and checking never
+    // disagree about where the curriculum is. `ASM198X_CODE_SAMPLES` lets CI
+    // point at a checkout inside the workspace (#61).
+    support::verdicts::code_samples_root()
 }
 
 /// Whether a reference tool is on `PATH` (it exists if it runs at all).
@@ -156,6 +161,54 @@ fn strip_hunk_symbols(data: &[u8]) -> Option<Vec<u8>> {
     Some(out)
 }
 
+/// Record one curriculum build: the key is the file's identity, the outcome a
+/// digest of the reference's output.
+///
+/// Curriculum source is Code198x's, not ours, so none of it is copied into this
+/// repo — the corpus stores what the file *was* (path, variant, content digest)
+/// and what the reference made of it, never the text itself.
+struct Build {
+    /// The CPU whose corpus this lands in.
+    cpu: &'static str,
+    /// The executable whose identity signs the verdict.
+    tool: &'static str,
+    /// How the file is built. One file can be built more than one way — the
+    /// Amiga units build both as a hunk executable and as a flat binary — so
+    /// the variant is part of the key and those two cannot collide.
+    variant: &'static str,
+}
+
+fn record_curriculum(
+    recorder: &mut support::verdicts::Recorder,
+    root: &Path,
+    file: &Path,
+    build: Build,
+    source: &str,
+    reference: &[u8],
+) {
+    let Ok(relpath) = file.strip_prefix(root) else {
+        return;
+    };
+    let key = support::verdicts::curriculum_key(
+        &relpath.to_string_lossy().replace('\\', "/"),
+        build.variant,
+        source,
+    );
+    recorder.record(
+        support::verdicts::CaseRef {
+            suite: Suite::Curriculum,
+            cpu: build.cpu,
+            tool: build.tool,
+            dialect: build.variant,
+            case: label(file),
+            source: &key,
+        },
+        verdict_corpus::Outcome::Digest {
+            digest: support::verdicts::sha256_hex(reference),
+        },
+    );
+}
+
 #[test]
 #[ignore = "needs the reference assemblers and the Code198x checkout; run with --ignored"]
 fn curriculum_is_byte_identical() {
@@ -168,6 +221,7 @@ fn curriculum_is_byte_identical() {
 
     let mut fails: Vec<String> = Vec::new();
     let mut checked = 0usize;
+    let mut recorder = support::verdicts::Recorder::new();
 
     // --- 6502 / acme (C64) -------------------------------------------------
     if have("acme") {
@@ -186,6 +240,18 @@ fn curriculum_is_byte_identical() {
                 // acme's `cbm` output is a 2-byte load address then the data.
                 Some(prg_bytes) if prg_bytes.len() >= 2 => {
                     checked += 1;
+                    record_curriculum(
+                        &mut recorder,
+                        &root,
+                        file,
+                        Build {
+                            cpu: "6502",
+                            tool: "acme",
+                            variant: "acme",
+                        },
+                        &src,
+                        &prg_bytes[2..],
+                    );
                     if ours.bytes != prg_bytes[2..] {
                         fails.push(format!("acme assemble: {}", label(file)));
                     }
@@ -228,6 +294,18 @@ fn curriculum_is_byte_identical() {
             match (assembled, ref_bytes(&tmp, &rom, ld)) {
                 (true, Some(reference)) => {
                     checked += 1;
+                    record_curriculum(
+                        &mut recorder,
+                        &root,
+                        file,
+                        Build {
+                            cpu: "6502",
+                            tool: "ca65",
+                            variant: "ca65-nes",
+                        },
+                        &src,
+                        &reference,
+                    );
                     if ours.bytes != reference {
                         fails.push(format!("ca65 link: {}", label(file)));
                     }
@@ -252,6 +330,18 @@ fn curriculum_is_byte_identical() {
             match ref_bytes(&tmp, &bin, cmd) {
                 Some(reference) => {
                     checked += 1;
+                    record_curriculum(
+                        &mut recorder,
+                        &root,
+                        file,
+                        Build {
+                            cpu: "Z80",
+                            tool: "pasmo",
+                            variant: "pasmonext",
+                        },
+                        &src,
+                        &reference,
+                    );
                     if ours.bytes != reference {
                         fails.push(format!("pasmonext assemble: {}", label(file)));
                     }
@@ -280,6 +370,18 @@ fn curriculum_is_byte_identical() {
             match ref_bytes(&tmp, &bin, cmd) {
                 Some(reference) => {
                     checked += 1;
+                    record_curriculum(
+                        &mut recorder,
+                        &root,
+                        file,
+                        Build {
+                            cpu: "Z80",
+                            tool: "sjasmplus",
+                            variant: "sjasmplus",
+                        },
+                        &src,
+                        &reference,
+                    );
                     if ours.bytes != reference {
                         fails.push(format!("sjasmplus assemble: {}", label(file)));
                     }
@@ -311,6 +413,18 @@ fn curriculum_is_byte_identical() {
             match ref_bytes(&tmp, &exe, cmd).and_then(|b| strip_hunk_symbols(&b)) {
                 Some(reference) => {
                     checked += 1;
+                    record_curriculum(
+                        &mut recorder,
+                        &root,
+                        file,
+                        Build {
+                            cpu: "68000",
+                            tool: "vasmm68k_mot",
+                            variant: "vasm-exe",
+                        },
+                        &src,
+                        &reference,
+                    );
                     if ours_exe.bytes != reference {
                         fails.push(format!("vasm hunkexe: {}", label(file)));
                     }
@@ -325,6 +439,18 @@ fn curriculum_is_byte_identical() {
                 cmd.args(["-Fbin", "-quiet", "-o"]).arg(&bin).arg(file);
                 if let Some(reference) = ref_bytes(&tmp, &bin, cmd) {
                     checked += 1;
+                    record_curriculum(
+                        &mut recorder,
+                        &root,
+                        file,
+                        Build {
+                            cpu: "68000",
+                            tool: "vasmm68k_mot",
+                            variant: "vasm-bin",
+                        },
+                        &src,
+                        &reference,
+                    );
                     if ours_bin.bytes != reference {
                         fails.push(format!("vasm -Fbin: {}", label(file)));
                     }
@@ -424,6 +550,9 @@ fn curriculum_is_byte_identical() {
         eprintln!("SKIP: `ca65`/`ld65` not on PATH (65816)");
     }
 
+    let recorded = recorder.flush().expect("write the verdict corpus");
+    write_pin(&root);
+    eprintln!("recorded {recorded} new curriculum verdict(s)");
     eprintln!("checked {checked} byte-identity comparisons across the curriculum");
     assert!(
         fails.is_empty(),
@@ -651,3 +780,26 @@ const CA65_816_PROGRAMS: &[(&str, &str)] = &[
          sub:    rts\n",
     ),
 ];
+
+/// Pin the curriculum revision the corpus was recorded against.
+///
+/// A curriculum verdict is keyed by its file's content digest, so a moved
+/// curriculum loses coverage rather than asserting something false. The pin is
+/// what lets CI check out the revision where that coverage exists, instead of
+/// tracking `main` and quietly replaying nothing.
+fn write_pin(root: &Path) {
+    let Ok(out) = Command::new("git")
+        .arg("-C")
+        .arg(root.join("code-samples"))
+        .args(["rev-parse", "HEAD"])
+        .output()
+    else {
+        return;
+    };
+    if !out.status.success() {
+        return;
+    }
+    let sha = String::from_utf8_lossy(&out.stdout).trim().to_string();
+    let pin = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/verdicts/code-samples.pin");
+    let _ = fs::write(pin, format!("{sha}\n"));
+}

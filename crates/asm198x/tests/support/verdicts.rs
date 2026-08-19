@@ -214,11 +214,82 @@ fn ours(result: Result<asm198x::AssemblyResult, asm198x::AsmError>) -> Result<Ve
         .map_err(|e| format!("we rejected the source: {e}"))
 }
 
+/// SHA-256 of some bytes, lower-case hex.
+pub fn sha256_hex(bytes: &[u8]) -> String {
+    use sha2::{Digest, Sha256};
+    let mut h = Sha256::new();
+    h.update(bytes);
+    format!("{:x}", h.finalize())
+}
+
+/// The Code198x checkout the curriculum suite reads from.
+///
+/// `ASM198X_CODE_SAMPLES` wins when set, which is how CI points at a checkout
+/// inside the workspace; otherwise the sibling container two levels above, as
+/// on a development machine. Shared so recording and replay never disagree
+/// about where the curriculum is.
+pub fn code_samples_root() -> Option<PathBuf> {
+    if let Some(dir) = std::env::var_os("ASM198X_CODE_SAMPLES") {
+        let p = PathBuf::from(dir);
+        return p.is_dir().then_some(p);
+    }
+    let p = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../../Code198x");
+    let p = p.canonicalize().ok()?;
+    p.is_dir().then_some(p)
+}
+
+/// The key for a curriculum verdict.
+///
+/// Curriculum source belongs to Code198x, so it is **not** copied into this
+/// repo — which means a curriculum verdict cannot key on the source text the
+/// way every other suite does. It keys on an identity instead: the path, the
+/// build variant, and a digest of the file's contents.
+///
+/// The content digest is the load-bearing part. Key on the path alone and an
+/// edited curriculum file would silently be checked against the reference bytes
+/// for its *previous* contents — a green suite asserting something that stopped
+/// being true. With the digest in the key, changed source simply has no
+/// recorded fact yet, which is a coverage gap rather than a false pass.
+///
+/// The variant is in the key because one file can be built more than one way:
+/// the Amiga path builds each unit both as a hunk executable and as a flat
+/// binary. Without it, those two would key identically with different outcomes
+/// and read as a conflict.
+pub fn curriculum_key(relpath: &str, variant: &str, source: &str) -> String {
+    format!("{relpath}#{variant}@{}", sha256_hex(source.as_bytes()))
+}
+
+/// Take a curriculum key apart again: (path, variant, source digest).
+pub fn parse_curriculum_key(key: &str) -> Option<(&str, &str, &str)> {
+    let (path, rest) = key.split_once('#')?;
+    let (variant, digest) = rest.split_once('@')?;
+    Some((path, variant, digest))
+}
+
+/// Assemble a curriculum file the way its variant is built.
+pub fn assemble_curriculum(variant: &str, source: &str) -> Option<Result<Vec<u8>, String>> {
+    let result = match variant {
+        "acme" => asm198x::assemble_acme(source),
+        "ca65-nes" => asm198x::assemble_ca65(source),
+        "pasmonext" => asm198x::assemble_pasmonext(source),
+        "sjasmplus" => asm198x::assemble_sjasmplus(source),
+        "vasm-exe" => asm198x::assemble_vasm_exe(source),
+        "vasm-bin" => asm198x::assemble_vasm(source),
+        _ => return None,
+    };
+    Some(ours(result))
+}
+
 /// What a replay pass found.
 #[derive(Debug, Default)]
 pub struct ReplayReport {
     /// Facts checked against our assembler.
     pub checked: usize,
+    /// Facts checked, per suite. A whole suite that stops being replayed —
+    /// because its outcome shape changed, or its source moved — would otherwise
+    /// hide behind the other suites' totals, which is exactly how the
+    /// curriculum leg was silently skipped while it was being written.
+    pub by_suite: BTreeMap<String, usize>,
     /// Facts whose CPU has no replay assembler wired up.
     pub unreplayable: usize,
     /// Cases where our bytes and the reference's disagree, or we rejected
@@ -253,6 +324,12 @@ pub fn replay_corpus(cpu: &str, corpus: &Corpus, report: &mut ReplayReport) {
             Resolution::Fact {
                 outcome, verdict, ..
             } => {
+                // Curriculum first: its outcome is a digest, not bytes, so the
+                // byte guard below would skip every one of them.
+                if verdict.suite == Suite::Curriculum {
+                    replay_curriculum(cpu, verdict, &key.source, outcome, report);
+                    continue;
+                }
                 let Some(reference) = outcome.bytes() else {
                     // A recorded rejection says the reference refused source we
                     // never claim to accept. Pairing that against our own
@@ -276,6 +353,10 @@ pub fn replay_corpus(cpu: &str, corpus: &Corpus, report: &mut ReplayReport) {
                     continue;
                 };
                 report.checked += 1;
+                *report
+                    .by_suite
+                    .entry(format!("{:?}", verdict.suite))
+                    .or_default() += 1;
 
                 // A divergence is a *tracked* difference: the reference accepts
                 // and we knowingly do not match. Agreement is therefore the
@@ -325,6 +406,60 @@ pub fn recorded_cpus() -> Vec<String> {
     found.sort();
     found.dedup();
     found
+}
+
+/// Replay one curriculum verdict.
+///
+/// Unlike every other suite, this needs the *source* — it was never copied into
+/// this repo — but still needs no reference assembler. A file that is absent, or
+/// whose contents have changed since the fact was recorded, is not a failure:
+/// there is simply no recorded fact for what is on disk now. That is a coverage
+/// gap, counted as unreplayable, never a silent pass.
+fn replay_curriculum(
+    cpu: &str,
+    verdict: &Verdict,
+    key: &str,
+    outcome: &Outcome,
+    report: &mut ReplayReport,
+) {
+    let Outcome::Digest { digest } = outcome else {
+        report.failures.push(format!(
+            "{cpu}: curriculum verdict `{}` is not a digest",
+            verdict.case
+        ));
+        return;
+    };
+    let (Some(root), Some((relpath, variant, source_digest))) =
+        (code_samples_root(), parse_curriculum_key(key))
+    else {
+        report.unreplayable += 1;
+        return;
+    };
+    let Ok(source) = std::fs::read_to_string(root.join(relpath)) else {
+        report.unreplayable += 1;
+        return;
+    };
+    if sha256_hex(source.as_bytes()) != source_digest {
+        // The curriculum moved on. The recorded fact is about different source.
+        report.unreplayable += 1;
+        return;
+    }
+    let Some(ours) = assemble_curriculum(variant, &source) else {
+        report.unreplayable += 1;
+        return;
+    };
+    report.checked += 1;
+    *report.by_suite.entry("Curriculum".to_string()).or_default() += 1;
+    match ours {
+        Ok(bytes) if &sha256_hex(&bytes) == digest => {}
+        Ok(bytes) => report.failures.push(format!(
+            "{cpu} [{variant}] {relpath}: our output digests {} , reference {digest}",
+            sha256_hex(&bytes)
+        )),
+        Err(e) => report
+            .failures
+            .push(format!("{cpu} [{variant}] {relpath}: {e}")),
+    }
 }
 
 #[cfg(test)]
