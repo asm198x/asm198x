@@ -1,0 +1,125 @@
+# Decision: macros are a shared expander with per-dialect grammar, and the formatter never expands
+
+**Status:** Active. Binding for how dialects gain macro support.
+
+**Date:** 2026-08-19.
+
+## The decision
+
+Macro expansion is a **source pre-pass**: definitions are collected and removed,
+invocations are replaced by their substituted bodies, and the result goes
+through the dialect's ordinary parse. The mechanics live once, in
+[`crates/asm198x/src/dialects/macros.rs`](../crates/asm198x/src/dialects/macros.rs);
+each dialect supplies its own grammar through the `MacroSyntax` trait.
+
+The seam is drawn where the references agree, and only there.
+
+**Shared, because every reference measured does it the same way:**
+
+- substitution is textual, and happens *before* expression evaluation, so
+  `v*2` with `v = 5` assembles as `10`;
+- it respects word boundaries, so a parameter `v` leaves the symbol `val` alone;
+- it does not reach inside string literals, so `db "v"` emits the letter;
+- parameter names match case-sensitively;
+- definitions are all collected before anything expands, so a macro may invoke
+  one defined later in the file;
+- a self-recursive macro is refused with the macro named.
+
+**Per-dialect, through `MacroSyntax`:** the definition header, the closing
+keyword, which names are local to an expansion, which lines are declarations
+and not code, and what happens when an invocation's argument count does not
+match the parameter list.
+
+## Why the grammar is not shared
+
+Because the dialects do not disagree about spelling. They disagree about
+meaning.
+
+| | sjasmplus 1.21.0 | pasmo 0.5.5 |
+|---|---|---|
+| header | `MACRO name p1 p2` | `MACRO name, p1, p2` *or* `name MACRO p1, p2` |
+| per-expansion locals | any `.dotted` label in the body | only what a `LOCAL` line declares |
+| a `.dotted` label in a body | scoped to the expansion | an ordinary label — the second invocation **collides** |
+| too many arguments | `Too many arguments for macro` | extras silently **dropped** |
+| too few arguments | `Not enough arguments for macro` | missing one substitutes **empty**, and the emptied operand raises the error |
+
+The middle row is the one that settles it. The same source, `MACRO m` with
+`.spin nop` inside, invoked twice, assembles under sjasmplus and is rejected by
+pasmo. A house macro system that picked one of those behaviours would produce
+wrong bytes — silently, for one of the two — against source its users wrote for
+a real assembler. That is the opposite of the identity claim.
+
+So `fit_arguments` has **no default implementation**. A new dialect must state
+its posture, because guessing between "reject" and "drop and continue" is
+exactly the kind of quiet wrongness the corpus exists to catch.
+
+This is the v1 scope's *"adopted against real dialect requirements rather than
+as a universal macro language"* ([`v1-scope.md`](v1-scope.md)), made structural.
+
+## The formatter must not expand
+
+`asm198x fmt` lays source out. It does not rewrite programs.
+
+Expansion is a source pre-pass, so the obvious wiring — one hook on the shared
+parse — makes the formatter inline every invocation and delete every
+definition. Over the author's file. This was not hypothetical: sjasmplus shipped
+that way from the first macro slice and it was found while adding pasmo's, by
+running `fmt` over a probe file and reading the output.
+
+The fix is `z80::Expand`, an explicit mode on the parse entry points. Assembly
+paths pass `Expand::Yes`; the `parse_ast` paths that feed the formatter pass
+`Expand::No`. The two paths ask for genuinely different parses of the same text,
+and the difference is named, not implied.
+
+A regression test in each dialect pins it, and the sjasmplus one asserts both
+halves — that formatting gives the macro back, *and* that assembling the same
+text still expands — so a future "simplification" that collapses the two parses
+fails rather than passes.
+
+## Adoption
+
+- **2026-08-18 — sjasmplus** (#93, #122). `MACRO`/`ENDM`, dot-prefixed locals
+  renamed per expansion, arity rejected in both directions. Wired through
+  `Z80Syntax::expand_source` so all three entry points inherit it — the first
+  attempt hooked `parse` only, which the CLI does not use, so the feature did
+  nothing in the actual tool. Expansion frames on `Span` carry `in expansion of
+  macro` notes, since an error in generated code otherwise points at an
+  invocation and says nothing about why.
+
+- **2026-08-19 — pasmo** (#93). Both header spellings, `LOCAL` declarations, and
+  pasmo's no-arity-check posture. The mechanics were extracted to
+  `dialects/macros.rs` at this point rather than earlier: one implementation is
+  a guess about what generalises, two are evidence. Nine facts recorded in the
+  verdict corpus from real pasmo output, and the two `issue-93` gap markers it
+  closed were retired with a supersede record — the corpus failed the moment the
+  feature worked, which is the marker doing its job.
+
+  **Known gap:** pasmo's formatter still cannot format a file containing macros.
+  Its parse is the eager walker, which reads `MACRO` as an instruction and
+  rejects it — exactly as it did before macros existed, so nothing regressed,
+  but a user who can now assemble macros will reasonably expect to format them.
+  sjasmplus formats them because the keyword pipeline keeps unrecognised lines
+  verbatim. Pinned by a test so closing it is deliberate.
+
+## Drift triggers
+
+Stop and re-consult if a change would:
+
+- **Unify the dialects' macro grammar** — a common header parser, a shared
+  local-scoping rule, a default `fit_arguments`. The references disagree about
+  meaning, not spelling; see the table above.
+- **Route the formatter through the expanding parse**, or collapse `Expand` back
+  into a single mode "since assembly always expands anyway". It destroys source.
+- **Add macro support to a dialect from its manual** rather than from probes
+  against the installed reference. Every row of that table contradicts a
+  reasonable reading of the documentation.
+- **Reproduce a reference's crash for fidelity.** Both assemblers measured
+  segfault on self-recursion (exit 139). Byte-identical output is the goal;
+  byte-identical crashing is not.
+- **Expand macros across an include boundary** without probing what the
+  reference does. Each file expands on its own today, which is a deliberate
+  hold, not a considered answer.
+
+See [`conditional-assembly-framework.md`](conditional-assembly-framework.md)
+(the same shared-core, demand-gated-adoption shape), [`syntax-stance.md`](syntax-stance.md)
+(fidelity over convergence), and [`v1-scope.md`](v1-scope.md) (macros as a v1.0 bar item).

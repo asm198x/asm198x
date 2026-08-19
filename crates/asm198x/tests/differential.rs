@@ -320,12 +320,12 @@ const PROBES: &[Probe] = &[
         " IF later\n ld a,1\n ENDIF\nlater: nop\n", 99),
 
     // ---- macros (#93) -------------------------------------------------------
-    // No dialect supports macros yet, so every one of these is a gap: the
-    // reference accepts it and we reject it. Recording them puts each
-    // reference's *actual* macro output in the corpus, so implementing a form
-    // has ground truth to build against rather than a reading of its manual —
-    // and the marker fails the suite the moment a form starts working, which
-    // is when it should be deleted.
+    // sjasmplus and pasmo have macros; the rest are still gaps — the reference
+    // accepts the body and we reject it. Recording a gap puts that reference's
+    // *actual* macro output in the corpus, so implementing the form has ground
+    // truth to build against rather than a reading of its manual — and the
+    // marker fails the suite the moment the form starts working, which is when
+    // it should be deleted. Both pasmo markers came out that way.
     //
     // Every body below was verified accepted by its reference before being
     // added. A body the reference rejects is silently skipped by this harness,
@@ -342,12 +342,38 @@ const PROBES: &[Probe] = &[
         "!macro nop2 {\n\tnop\n\tnop\n}\n+nop2\n", 93),
     gap("acme", "macro with a parameter",
         "!macro ldav .v {\n\tlda #.v\n}\n+ldav 5\n", 93),
-    gap("pasmo", "macro definition and invocation",
-        " MACRO nop2\n nop\n nop\n ENDM\n nop2\n", 93),
+    ok ("pasmo", "macro definition and invocation",
+        " MACRO nop2\n nop\n nop\n ENDM\n nop2\n"),
     // pasmo wants a comma after the name before parameters, where sjasmplus
     // takes a space — the same keyword, a different grammar.
-    gap("pasmo", "macro with a parameter",
-        " MACRO ldav, val\n ld a,val\n ENDM\n ldav 5\n", 93),
+    ok ("pasmo", "macro with a parameter",
+        " MACRO ldav, val\n ld a,val\n ENDM\n ldav 5\n"),
+    // ...and it takes the definition the other way round too, which sjasmplus
+    // does not.
+    ok ("pasmo", "macro defined name-first",
+        "ldav MACRO val\n ld a,val\n ENDM\n ldav 5\n"),
+    // A macro with a loop is most of what macros are for. pasmo scopes nothing
+    // by spelling: the label repeats cleanly only because `LOCAL` declares it.
+    // The macro is called `delay`, not `m`: pasmo also knows the 8080 mnemonic
+    // set, where `M` names `(HL)`, so a macro called `m` is never invoked — it
+    // is `Unexpected 'M' used as instruction`.
+    ok ("pasmo", "LOCAL label, invoked twice",
+        "delay MACRO\n LOCAL spin\nspin djnz spin\n ENDM\n delay\n delay\n"),
+    ok ("pasmo", "LOCAL label with a parameter",
+        "delay MACRO v\n LOCAL spin\nspin djnz spin\n ld a,v\n ENDM\n delay 5\n delay 6\n"),
+    // Substitution is textual, word-bounded and string-safe: `v` must not
+    // touch `val` or the letter inside the string.
+    ok ("pasmo", "substitution respects words and strings",
+        "val equ 7\n MACRO m1, v\n ld a,v\n ld hl,val\n defb \"v\"\n ld a,v*2\n ENDM\n m1 9\n"),
+    ok ("pasmo", "nested macro passes a parameter through",
+        " MACRO inner, v\n ld a,v\n ENDM\n MACRO outer, v\n inner v\n inner v+1\n ENDM\n outer 3\n"),
+    ok ("pasmo", "macro invokes one defined later",
+        " MACRO outer\n inner\n ENDM\n MACRO inner\n nop\n ENDM\n outer\n"),
+    // pasmo checks no arity: the extra argument is dropped rather than
+    // rejected. Recorded because it is surprising, and because the quiet
+    // alternative — rejecting it — would emit nothing where pasmo emits code.
+    ok ("pasmo", "extra arguments are dropped",
+        " MACRO m1, v\n ld a,v\n ENDM\n m1 1,2\n"),
     ok ("sjasmplus", "macro definition and invocation",
         " MACRO nop2\n nop\n nop\n ENDM\n nop2\n"),
     ok ("sjasmplus", "macro with a parameter",
