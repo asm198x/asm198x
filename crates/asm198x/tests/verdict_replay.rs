@@ -33,6 +33,9 @@ fn committed_verdicts_replay_without_the_reference_tools() {
         cpus.len(),
         report.unreplayable,
     );
+    for (suite, n) in &report.by_suite {
+        eprintln!("  {suite}: {n}");
+    }
 
     // An alarm means two runs of the same tool version disagreed about the same
     // source. Recency cannot settle that; a person has to, with a supersede

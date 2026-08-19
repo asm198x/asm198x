@@ -114,8 +114,27 @@ jobs:
       - name: Cache Rust build artifacts
         uses: Swatinem/rust-cache@v2
 
+      # The curriculum's verdicts (#61) are keyed by each file's content
+      # digest, so they only replay against the revision they were recorded
+      # from. The pin names it; tracking `main` instead would silently replay
+      # nothing the first time the curriculum moved.
+      - name: Read the pinned curriculum revision
+        id: pin
+        run: echo "sha=$(cat crates/asm198x/tests/verdicts/code-samples.pin)" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the curriculum at that revision
+        uses: actions/checkout@v7
+        with:
+          repository: code198x/code-samples
+          ref: ${{ steps.pin.outputs.sha }}
+          path: _code198x/code-samples
+
       - name: Run coverage suite
         # This is the test step too — pass/fail here is the regression gate.
+        # ASM198X_CODE_SAMPLES points at the parent of the checkout, matching
+        # the layout the curriculum suite expects from a dev machine.
+        env:
+          ASM198X_CODE_SAMPLES: ${{ github.workspace }}/_code198x
         run: ./scripts/coverage.sh
 
       - name: Enforce coverage floor
