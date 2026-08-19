@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.13](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.12...asm198x-v0.0.13) - 2026-08-19
+
+### Added
+
+- *(cli)* generate the dialect list from one table (#93 follow-on) ([#131](https://github.com/asm198x/asm198x/pull/131))
+- *(acme)* assemble brace-delimited macros with arity overloads ([#93](https://github.com/asm198x/asm198x/pull/93)) ([#129](https://github.com/asm198x/asm198x/pull/129))
+- *(lwasm,vasm)* assemble positional-parameter macros ([#93](https://github.com/asm198x/asm198x/pull/93)) ([#127](https://github.com/asm198x/asm198x/pull/127))
+- *(ca65)* assemble .macro/.endmacro with .local-scoped labels ([#93](https://github.com/asm198x/asm198x/pull/93)) ([#125](https://github.com/asm198x/asm198x/pull/125))
+- *(pasmo)* assemble MACRO/ENDM with LOCAL-scoped labels ([#93](https://github.com/asm198x/asm198x/pull/93)) ([#123](https://github.com/asm198x/asm198x/pull/123))
+- *(sjasmplus)* say which macro a failing line came out of ([#122](https://github.com/asm198x/asm198x/pull/122))
+- *(sjasmplus)* repeat a block with DUP/EDUP and REPT/ENDR ([#121](https://github.com/asm198x/asm198x/pull/121))
+- *(sjasmplus)* let macros invoke macros, and refuse to crash on recursion ([#120](https://github.com/asm198x/asm198x/pull/120))
+- *(sjasmplus)* scope a macro's local labels to its expansion ([#119](https://github.com/asm198x/asm198x/pull/119))
+- *(sjasmplus)* assemble macros, matching the reference byte for byte ([#118](https://github.com/asm198x/asm198x/pull/118))
+- *(xtask)* measure how much of the spec the corpus actually arbitrates ([#114](https://github.com/asm198x/asm198x/pull/114))
+- *(verdict-corpus)* cover the 68000 sweep by tagging what we know diverges ([#112](https://github.com/asm198x/asm198x/pull/112))
+- *(verdict-corpus)* chunk the opcode sweep by mnemonic, and record it ([#111](https://github.com/asm198x/asm198x/pull/111))
+- *(verdict-corpus)* record the curriculum, and give CI the source to check it ([#109](https://github.com/asm198x/asm198x/pull/109))
+- *(verdict-corpus)* record both fuzzers, and name what they scope out ([#108](https://github.com/asm198x/asm198x/pull/108))
+- *(verdict-corpus)* record the differential probes, gaps included ([#107](https://github.com/asm198x/asm198x/pull/107))
+- *(verdict-corpus)* record the form audit, and replay it without the tools ([#106](https://github.com/asm198x/asm198x/pull/106))
+- *(verdict-corpus)* record what the reference assemblers actually did ([#103](https://github.com/asm198x/asm198x/pull/103))
+- *(cli)* answer --version, -V, and `version` ([#97](https://github.com/asm198x/asm198x/pull/97))
+
+### Fixed
+
+- *(macros)* let a label sit in front of a macro invocation ([#93](https://github.com/asm198x/asm198x/pull/93)) ([#124](https://github.com/asm198x/asm198x/pull/124))
+- *(asl)* let a leading gap move the load address, not pad the image ([#102](https://github.com/asm198x/asm198x/pull/102))
+
+### Other
+
+- *(differential)* record what the references do with macros ([#117](https://github.com/asm198x/asm198x/pull/117))
+- *(support)* capture which reference tool arbitrated, and which build ([#105](https://github.com/asm198x/asm198x/pull/105))
+- *(conformance)* tell a reference's refusal from its absence ([#104](https://github.com/asm198x/asm198x/pull/104))
+- *(differential)* repoint the sjasmplus gaps at their real issues ([#100](https://github.com/asm198x/asm198x/pull/100))
+
 ## [0.0.12](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.11...asm198x-v0.0.12) - 2026-08-19
 
 ### Added
