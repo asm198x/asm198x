@@ -397,6 +397,13 @@ fn run(args: &[String]) -> Result<String, String> {
         return Ok(usage());
     }
 
+    // Before the subcommand dispatch, so a bare `version` is answered rather
+    // than falling through to the default operation and being read as an input
+    // filename. git and cargo both accept the word and the flags; so do we.
+    if args[0] == "version" || args.iter().any(|a| a == "-V" || a == "--version") {
+        return Ok(version());
+    }
+
     // Assembling is the default when no subcommand is given, so `asm198x
     // prog.asm` keeps working. That is the overwhelmingly common invocation and
     // the only one external callers use (Code198x's capture harness drives it
@@ -1020,7 +1027,8 @@ fn usage() -> String {
      disassemble: asm198x disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\
      format:      asm198x fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
-     \x20            (canonical layout, comments + operand spelling preserved; Z80/8080/6800/1802/scmp/rgbasm/6809)\n\n\
+     \x20            (canonical layout, comments + operand spelling preserved; Z80/8080/6800/1802/scmp/rgbasm/6809)\n\
+     version:     asm198x --version (also -V, or `asm198x version`)\n\n\
      dialects (syntax): acme (C64 6502; also `6502`), ca65 (NES), vasm (Amiga\n\
      \x20                 68000), lwasm (6809), 65816 (ca65 native), huc6280\n\
      \x20                 (PC Engine ca65; also `pce`), rgbasm (Game Boy SM83;\n\
@@ -1035,6 +1043,15 @@ fn usage() -> String {
      \x20                 the dialect\n\n\
      Assembles retro CPU source to a flat binary, or disassembles one back."
         .to_string()
+}
+
+/// Name and version, as `asm198x 0.0.12`.
+///
+/// Read from the crate version at compile time rather than a string kept by
+/// hand, so it reports what was actually built. A version a binary states about
+/// itself is only worth having if it cannot drift from the binary.
+fn version() -> String {
+    format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
 }
 
 /// The `--message-format` mode: human summary (default) or machine-consumable
@@ -1192,6 +1209,19 @@ mod tests {
     use super::*;
     use asm198x::source::{MemoryLoader, SourceMap};
     use asm198x::{AsmError, FileId, Span};
+
+    /// Every spelling reports the same string, and that string is the crate
+    /// version — so a release cannot ship a binary that misstates which build
+    /// it is. `version` is checked as a subcommand because it used to fall
+    /// through to the input-file argument and fail with "cannot read version".
+    #[test]
+    fn every_version_spelling_reports_the_crate_version() {
+        let expected = format!("asm198x {}", env!("CARGO_PKG_VERSION"));
+        for spelling in ["--version", "-V", "version"] {
+            let args = vec![spelling.to_string()];
+            assert_eq!(run(&args).as_deref(), Ok(expected.as_str()), "{spelling}");
+        }
+    }
 
     /// A span in a non-root file renders that file's name from the table —
     /// `that-file.inc:12:8: error: …` — never the root input's.
