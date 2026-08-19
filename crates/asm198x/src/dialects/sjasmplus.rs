@@ -37,8 +37,8 @@
 use std::collections::BTreeMap;
 
 use crate::dialect::{Dialect, Oversize};
-use crate::dialects::macros;
-use crate::dialects::z80::{self, Expand, Z80Syntax};
+use crate::dialects::macros::{self, Expand};
+use crate::dialects::z80::{self, Z80Syntax};
 use crate::engine::{AsmError, Operation, Statement};
 use crate::source::{SourceLoader, SourceMap};
 

@@ -34,6 +34,7 @@ use super::mos6502::{
 };
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
+use crate::dialects::macros;
 use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
@@ -54,11 +55,12 @@ impl Dialect for Ca65_816 {
         // Route assembly through the semantic AST (0b straggler migration): parse
         // into a `Program`, then lower to the engine's statement stream —
         // byte-identical to the old direct parse (AE1).
-        crate::ast::lower(parse_program(source)?)
+        crate::ast::lower(parse_program(source, macros::Expand::Yes)?)
     }
 
     fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
-        Ok(Some(parse_program(source)?))
+        // The formatter must not expand — see `parse_program`.
+        Ok(Some(parse_program(source, macros::Expand::No)?))
     }
 
     /// The include-capable parse (language-surface U4): the interleaved,
@@ -90,14 +92,24 @@ impl Dialect for Ca65_816 {
 /// the target is never opened, so `--fmt` renders the directive verbatim and
 /// works with a missing target (U4, KTD1). Lazy resolution is
 /// [`parse_program_multi`]'s.
-pub(crate) fn parse_program(source: &str) -> Result<Program, AsmError> {
+pub(crate) fn parse_program(source: &str, mode: macros::Expand) -> Result<Program, AsmError> {
+    // Macros expand before parsing (#93), but only for assembly: the formatter
+    // asks with `Expand::No`, because laying source out must not replace a
+    // definition with its expansions.
+    let expanded = ca65_flat::expand_ca65(source, mode)?;
+    let text = macros::expanded_text(&expanded, source);
+    let origins = macros::line_origins(&expanded);
     let mut w = Walker::new();
-    for (i, raw) in source.lines().enumerate() {
-        if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
+    for (i, raw) in text.lines().enumerate() {
+        if let Some(d) = w
+            .walk_line(raw, i + 1, FileId(0))
+            .map_err(|e| macros::remap_lines(e, origins))?
+        {
             w.nodes.push(ca65_flat::unresolved_node(d));
         }
     }
-    w.flush_trailing(source.lines().count() as u32);
+    w.flush_trailing(text.lines().count() as u32);
+    macros::place_nodes(&mut w.nodes, origins);
     Ok(Program { nodes: w.nodes })
 }
 
@@ -184,6 +196,16 @@ impl Walker {
 }
 
 impl FlatWalk for Walker {
+    fn nodes_mut(&mut self) -> &mut Vec<Node> {
+        &mut self.nodes
+    }
+
+    /// The multi-file walk expands too, or macros would work when a file is
+    /// assembled alone and vanish the moment it is included from another.
+    fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
+        ca65_flat::expand_ca65(source, macros::Expand::Yes)
+    }
+
     fn walk_line(
         &mut self,
         raw: &str,
@@ -912,5 +934,115 @@ mod tests {
         assert_eq!(bytes(" stz $12\n"), vec![0x64, 0x12]);
         assert_eq!(bytes(" stz $1234,x\n"), vec![0x9E, 0x34, 0x12]);
         assert_eq!(bytes(" bra l\nl: rts\n"), vec![0x80, 0x00, 0x60]);
+    }
+
+    // ----- Macros (#93) -------------------------------------------------
+    //
+    // The grammar is the ca65 family's, in `ca65_flat`, so these cover
+    // ca65-huc6280 and the NES ca65 too — cc65 ships one assembler and the CPU
+    // is a flag. Every expectation is a byte string ca65 V2.19 produced for the
+    // same source.
+
+    /// The definition, the invocation, a parameter, and the `.mac` spelling.
+    /// The keyword is case-insensitive; the name is not.
+    #[test]
+    fn macros_expand() {
+        assert_eq!(
+            bytes(".macro nop2\n nop\n nop\n.endmacro\n nop2\n"),
+            vec![0xEA, 0xEA]
+        );
+        assert_eq!(
+            bytes(".macro ldav v\n lda #v\n.endmacro\n ldav 5\n"),
+            vec![0xA9, 0x05]
+        );
+        assert_eq!(bytes(".mac nop2\n nop\n.endmac\n nop2\n"), vec![0xEA]);
+        assert_eq!(bytes(".MACRO n1\n nop\n.ENDMACRO\n n1\n"), vec![0xEA]);
+        asm(".macro mac\n nop\n.endmacro\n MAC\n").expect_err("MAC is not mac");
+    }
+
+    /// Substitution is textual but not naive: word-bounded, string-safe, and
+    /// before the expression is evaluated.
+    #[test]
+    fn substitution_respects_words_and_strings() {
+        assert_eq!(
+            bytes("val = 7\n.macro m1 v\n lda #v\n lda val\n.byte \"v\"\n.endmacro\n m1 9\n"),
+            vec![0xA9, 0x09, 0xA5, 0x07, 0x76]
+        );
+        assert_eq!(
+            bytes(".macro m1 v\n lda #v*2\n.endmacro\n m1 5\n"),
+            vec![0xA9, 0x0A]
+        );
+    }
+
+    /// `.local` is the only thing that scopes a label to an expansion. A plain
+    /// label in the same place is global, and the second expansion collides —
+    /// `Symbol 'spin' is already defined`, which we must also refuse.
+    #[test]
+    fn only_dot_local_scopes_a_label_to_its_expansion() {
+        assert_eq!(
+            bytes(".macro delay\n.local spin\nspin: dex\n bne spin\n.endmacro\n delay\n delay\n"),
+            vec![0xCA, 0xD0, 0xFD, 0xCA, 0xD0, 0xFD]
+        );
+        asm(".macro delay\nspin: dex\n bne spin\n.endmacro\n delay\n delay\n")
+            .expect_err("a plain label is global and collides");
+    }
+
+    /// ca65's arity posture is neither of the other two dialects': too many is
+    /// an error, too few is not. A parameter that no emitting line reaches may
+    /// simply be omitted.
+    #[test]
+    fn too_many_arguments_is_an_error_but_too_few_is_not() {
+        let long =
+            asm(".macro m1 v\n lda #v\n.endmacro\n m1 1, 2\n").expect_err("too many parameters");
+        assert!(long.message.contains("too many parameters"), "{long:?}");
+        assert_eq!(
+            bytes(".macro m1 v, w\n lda #v\n.endmacro\n m1 9\n"),
+            vec![0xA9, 0x09]
+        );
+        asm(".macro m1 v, w\n lda #v\n ldx #w\n.endmacro\n m1 9\n")
+            .expect_err("`ldx #` has no value");
+    }
+
+    /// Macros compose, may invoke one defined later, and take a label in front
+    /// of the invocation — which binds to the expansion's first address.
+    #[test]
+    fn macros_compose_and_take_a_label() {
+        assert_eq!(
+            bytes(
+                ".macro inner v\n lda #v\n.endmacro\n.macro outer v\n inner v\n inner v+1\n.endmacro\n outer 3\n"
+            ),
+            vec![0xA9, 0x03, 0xA9, 0x04]
+        );
+        assert_eq!(
+            bytes(".macro outer\n inner\n.endmacro\n.macro inner\n nop\n.endmacro\n outer\n"),
+            vec![0xEA]
+        );
+        assert_eq!(
+            bytes(".macro m1 v\n lda #v\n.endmacro\nlbl: m1 9\n lda lbl\n"),
+            vec![0xA9, 0x09, 0xAD, 0x00, 0x00]
+        );
+    }
+
+    /// A self-recursive macro is refused with the macro named. ca65 refuses it
+    /// too (`Too many nested macro expansions`) — the one reference measured so
+    /// far that does not segfault.
+    #[test]
+    fn runaway_recursion_is_caught() {
+        let err = asm(".macro forever\n forever\n.endmacro\n forever\n").expect_err("recursive");
+        assert!(err.message.contains("forever"), "{err:?}");
+    }
+
+    /// The formatter lays source out; it does not rewrite programs, so it must
+    /// give the macro back rather than the lines it expands to.
+    ///
+    /// ca65's formatter cannot yet *format* one — its walk rejects `.macro` as
+    /// an unsupported directive, exactly as it did before macros existed.
+    /// Refusing is the safe half, and this pins it so closing the other half is
+    /// deliberate. See `decisions/macro-expansion-framework.md`.
+    #[test]
+    fn formatting_does_not_expand() {
+        let err = crate::format_ca65_816(".macro ldav v\n lda #v\n.endmacro\n ldav 5\n")
+            .expect_err("the walk does not know .macro");
+        assert!(err.message.contains(".macro"), "{err:?}");
     }
 }

@@ -299,6 +299,10 @@ fn file_name<'a>(
 }
 
 impl FlatWalk for Walker {
+    fn nodes_mut(&mut self) -> &mut Vec<Node> {
+        &mut self.nodes
+    }
+
     fn walk_line(
         &mut self,
         raw: &str,

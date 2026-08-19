@@ -25,6 +25,7 @@
 //! requirements rather than as a universal macro language"*, and this is the
 //! seam that keeps that honest.
 
+use crate::ast::Node;
 use crate::engine::AsmError;
 use crate::span::{ExpansionFrame, Span};
 
@@ -372,4 +373,97 @@ fn invocation(
     macros
         .contains_key(name)
         .then(|| (Some(head.to_string()), name.to_string(), split_args(args)))
+}
+
+// ---------------------------------------------------------------------------
+// Wiring the expander into a parse
+//
+// Expansion is a source pre-pass, so a parse that runs it is reading text the
+// author never wrote: line numbers shift, and whole lines exist that are in no
+// file. Everything below puts that back — and decides, explicitly, whether the
+// pre-pass runs at all.
+//
+// It lives here rather than in one dialect family because both need it, and
+// because the mistake it prevents is not obvious enough to leave to each
+// adopter. See `decisions/macro-expansion-framework.md`.
+// ---------------------------------------------------------------------------
+
+/// Whether a parse expands the dialect's macros.
+///
+/// Assembly expands, because that is what a macro is for. The **formatter must
+/// not**: `asm198x fmt` lays source out, and a formatter that replaced a
+/// definition with its expansions and deleted the definition would be rewriting
+/// the program instead — silently, over the author's file. So the two paths ask
+/// for different parses of the same text, and this is where they part.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Expand {
+    /// Expand macros: the assembly paths.
+    Yes,
+    /// Leave definitions and invocations as written: the formatter's parse.
+    No,
+}
+
+/// A dialect's source rewrite, held for as long as the parse borrows it.
+///
+/// `None` means the dialect rewrites nothing and the source is parsed as
+/// written — the case every dialect but the macro-capable ones is in.
+pub(crate) type Expansion = Option<(String, Vec<LineOrigin>)>;
+
+/// Run the dialect's rewrite, unless this parse is the formatter's.
+///
+/// Taking the rewrite as a closure keeps this free of any one dialect family's
+/// syntax trait, so the z80 and flat walks share it rather than each growing
+/// their own copy of the `Expand::No` check — the check being the whole point.
+pub(crate) fn expansion<F>(mode: Expand, source: &str, expand: F) -> Result<Expansion, AsmError>
+where
+    F: FnOnce(&str) -> Result<Expansion, AsmError>,
+{
+    match mode {
+        Expand::Yes => expand(source),
+        Expand::No => Ok(None),
+    }
+}
+
+/// The text to parse: the rewrite if there was one, else the source itself.
+pub(crate) fn expanded_text<'a>(expansion: &'a Expansion, source: &'a str) -> &'a str {
+    expansion.as_ref().map_or(source, |(text, _)| text.as_str())
+}
+
+/// Where each rewritten line came from, if the source was rewritten.
+pub(crate) fn line_origins(expansion: &Expansion) -> Option<&[LineOrigin]> {
+    expansion.as_ref().map(|(_, origins)| origins.as_slice())
+}
+
+/// Put every span in `nodes` back on the line the author wrote.
+pub(crate) fn place_nodes(nodes: &mut [Node], origins: Option<&[LineOrigin]>) {
+    let Some(origins) = origins else { return };
+    for node in nodes {
+        place(&mut node.span, origins);
+        if let Some(span) = node.operand_span.as_mut() {
+            place(span, origins);
+        }
+    }
+}
+
+/// Put a span back where the author would look: the line they wrote, and the
+/// expansions the text came through.
+pub(crate) fn place(span: &mut Span, origins: &[LineOrigin]) {
+    let Some(origin) = origins.get((span.line as usize).saturating_sub(1)) else {
+        return;
+    };
+    span.line = origin.line as u32;
+    span.expansion_frames.clone_from(&origin.frames);
+}
+
+/// Rewrite an error raised against rewritten source, so it names a real line
+/// and carries the expansions it came through.
+pub(crate) fn remap_lines(mut e: AsmError, origins: Option<&[LineOrigin]>) -> AsmError {
+    let Some(origins) = origins else { return e };
+    if let Some(origin) = origins.get(e.line.saturating_sub(1)) {
+        e.line = origin.line;
+    }
+    if let Some(span) = e.span.as_mut() {
+        place(span, origins);
+    }
+    e
 }

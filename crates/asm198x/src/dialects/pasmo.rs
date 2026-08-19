@@ -13,8 +13,8 @@
 //! governed by `decisions/macro-expansion-framework.md`.
 
 use crate::dialect::{Dialect, Oversize};
-use crate::dialects::macros;
-use crate::dialects::z80::{self, Expand, Z80Syntax};
+use crate::dialects::macros::{self, Expand};
+use crate::dialects::z80::{self, Z80Syntax};
 use crate::engine::{AsmError, Statement};
 use crate::source::{SourceLoader, SourceMap};
 
@@ -254,7 +254,7 @@ fn parameters(text: &str) -> Vec<String> {
 #[cfg(test)]
 mod tests {
     use crate::assemble_pasmonext as asm;
-    use crate::dialects::z80::Expand;
+    use crate::dialects::macros::Expand;
 
     /// U4 — comments are carried as AST trivia (leading own-line + trailing
     /// same-line), not stripped, and do not change the emitted bytes (AE1).

@@ -41,6 +41,7 @@
 //! the remaining bytes is an error.
 
 use crate::ast::{Node, Span, Symbol, Trivia};
+use crate::dialects::macros;
 use crate::engine::AsmError;
 use crate::source::{LoadError, MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
 use crate::span::FileId;
@@ -143,6 +144,22 @@ pub(crate) trait FlatWalk {
     /// Append a node the walk built (a label bound at the include point, an
     /// incbin's resolved payload).
     fn push_node(&mut self, node: Node);
+
+    /// The nodes parsed so far, so the walk can put a macro expansion's spans
+    /// back on the lines the author wrote.
+    fn nodes_mut(&mut self) -> &mut Vec<Node>;
+
+    /// Rewrite source before parsing — macro expansion (#93).
+    ///
+    /// `None`, the default, means the dialect rewrites nothing and its source
+    /// parses as written; every dialect on this walk but the ca65 family is in
+    /// that case. Overriding it is what gives a dialect macros on the
+    /// multi-file path as well as the single-source one, which is the step
+    /// easiest to forget — the CLI uses only the multi-file path.
+    fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
+        let _ = source;
+        Ok(None)
+    }
 }
 
 /// One file's leg of the multi-file walk (the z80 `walk_file` model): parse
@@ -162,14 +179,31 @@ pub(crate) fn walk_file<W: FlatWalk>(
     stack: &mut Vec<FileId>,
     sem: &WalkSemantics,
 ) -> Result<(), AsmError> {
-    for (i, raw) in source.lines().enumerate() {
+    // Each file expands on its own (#93): a macro does not reach across an
+    // include boundary, which is a deliberate hold rather than a measured
+    // answer. This is an assembly path, so it always expands — the formatter
+    // parses through `parse_program`, which asks separately.
+    let expanded = w.expand_source(source)?;
+    let text = macros::expanded_text(&expanded, source);
+    let origins = macros::line_origins(&expanded);
+    for (i, raw) in text.lines().enumerate() {
         let line = i + 1;
-        let Some(d) = w
+        // Nodes this line contributes, put back on the line the author wrote
+        // before an include pushes any of its own.
+        let start = w.nodes_mut().len();
+        let walked = w
             .walk_line(raw, line, file)
-            .map_err(|e| stamp_file(e, file))?
-        else {
+            .map_err(|e| stamp_file(macros::remap_lines(e, origins), file));
+        macros::place_nodes(&mut w.nodes_mut()[start..], origins);
+        let Some(mut d) = walked? else {
             continue;
         };
+        if let Some(origins) = origins {
+            macros::place(&mut d.span, origins);
+            if let Some(span) = d.operand_span.as_mut() {
+                macros::place(span, origins);
+            }
+        }
         let span = d.span;
         // Diagnostics point at the directive's operand (the file name) when
         // the parse knew its column, else the line.
@@ -575,6 +609,123 @@ pub(crate) fn directive_operand_span(
     crate::ast::operand_span(raw, rest, line as u32).map(|mut s| {
         s.file = file;
         s
+    })
+}
+
+// ---------------------------------------------------------------------------
+// Macros (#93)
+//
+// The mechanics live in [`crate::dialects::macros`]; this is the ca65 family's
+// grammar, measured against ca65 V2.19. One grammar serves ca65, ca65-816 and
+// ca65-huc6280, because cc65 ships one assembler and the CPU is a flag.
+//
+// ca65 agrees with sjasmplus on the header shape — the name is followed by
+// *space*, not a comma, and `.macro m1, v` is `Unexpected trailing garbage
+// characters` — and with pasmo on locals, which must be declared. Its arity
+// posture is a third one again:
+//
+//   * **too many** arguments is an error, `Too many macro parameters`;
+//   * **too few** substitutes empty, and the complaint arrives from whatever
+//     the emptied operand broke — or not at all, if the missing parameter is
+//     not reached (`.macro m1 v, w` invoked `m1 9` assembles, as long as `w`
+//     appears on no line that emits).
+//
+// Three dialects, three postures. That is why `fit_arguments` has no default.
+// ---------------------------------------------------------------------------
+
+/// The ca65 family's macro grammar.
+pub(crate) struct Ca65Macros;
+
+impl macros::MacroSyntax for Ca65Macros {
+    /// `.macro name [p1[, p2]...]`, or the `.mac` short spelling. The leading
+    /// dot is required; the keyword is matched case-insensitively and the name
+    /// is kept as written, since ca65 rejects a mis-cased call.
+    fn header(&self, line: &str) -> Option<(String, Vec<String>)> {
+        let text = macros::without_comment(line).trim();
+        let (kw, rest) = text.split_once(char::is_whitespace)?;
+        if !(kw.eq_ignore_ascii_case(".macro") || kw.eq_ignore_ascii_case(".mac")) {
+            return None;
+        }
+        let rest = rest.trim();
+        let (name, params) = match rest.split_once(char::is_whitespace) {
+            Some((name, tail)) => (name.trim(), name_list(tail)),
+            None => (rest, Vec::new()),
+        };
+        (!name.is_empty()).then(|| (name.to_string(), params))
+    }
+
+    fn is_end(&self, line: &str) -> bool {
+        let text = macros::without_comment(line).trim();
+        text.eq_ignore_ascii_case(".endmacro") || text.eq_ignore_ascii_case(".endmac")
+    }
+
+    fn end_keyword(&self) -> &'static str {
+        ".endmacro"
+    }
+
+    /// The names `.local` declares. Nothing else is local: a plain label in a
+    /// body is global, and a second expansion gets `Symbol 'spin' is already
+    /// defined`.
+    fn locals(&self, body: &[String]) -> Vec<String> {
+        let mut names = Vec::new();
+        for line in body {
+            let Some(declared) = local_declaration(line) else {
+                continue;
+            };
+            for name in declared {
+                if !names.contains(&name) {
+                    names.push(name);
+                }
+            }
+        }
+        names
+    }
+
+    /// A `.local` line declares; it does not assemble, so it leaves the body.
+    fn is_local_decl(&self, line: &str) -> bool {
+        local_declaration(line).is_some()
+    }
+
+    /// Too many is an error and too few is not — see the note above.
+    fn fit_arguments(
+        &self,
+        name: &str,
+        params: &[String],
+        mut args: Vec<String>,
+    ) -> Result<Vec<String>, String> {
+        if args.len() > params.len() {
+            return Err(format!("too many parameters for macro `{name}`"));
+        }
+        args.resize(params.len(), String::new());
+        Ok(args)
+    }
+}
+
+/// The names a `.local` line declares, or `None` if the line is not one.
+fn local_declaration(line: &str) -> Option<Vec<String>> {
+    let text = macros::without_comment(line).trim();
+    let (kw, rest) = text.split_once(char::is_whitespace)?;
+    kw.eq_ignore_ascii_case(".local")
+        .then(|| name_list(rest))
+        .filter(|names| !names.is_empty())
+}
+
+/// A comma-separated name list, empties dropped — shared by macro parameters
+/// and `.local` declarations, which ca65 spells the same way.
+fn name_list(text: &str) -> Vec<String> {
+    text.split(',')
+        .map(|p| p.trim().to_string())
+        .filter(|p| !p.is_empty())
+        .collect()
+}
+
+/// Expand the ca65 family's macros, unless this parse is the formatter's.
+pub(crate) fn expand_ca65(
+    source: &str,
+    mode: macros::Expand,
+) -> Result<macros::Expansion, AsmError> {
+    macros::expansion(mode, source, |s| {
+        macros::expand(&Ca65Macros, s).map(|e| Some((e.text, e.origins)))
     })
 }
 

@@ -35,23 +35,26 @@ match the parameter list.
 Because the dialects do not disagree about spelling. They disagree about
 meaning.
 
-| | sjasmplus 1.21.0 | pasmo 0.5.5 |
-|---|---|---|
-| header | `MACRO name p1 p2` | `MACRO name, p1, p2` *or* `name MACRO p1, p2` |
-| per-expansion locals | any `.dotted` label in the body | only what a `LOCAL` line declares |
-| a `.dotted` label in a body | scoped to the expansion | an ordinary label — the second invocation **collides** |
-| too many arguments | `Too many arguments for macro` | extras silently **dropped** |
-| too few arguments | `Not enough arguments for macro` | missing one substitutes **empty**, and the emptied operand raises the error |
+| | sjasmplus 1.21.0 | pasmo 0.5.5 | ca65 V2.19 |
+|---|---|---|---|
+| header | `MACRO name p1 p2` | `MACRO name, p1, p2` *or* `name MACRO p1, p2` | `.macro name p1, p2` (`.mac`) |
+| per-expansion locals | any `.dotted` label in the body | only what a `LOCAL` line declares | only what a `.local` line declares |
+| a `.dotted` label in a body | scoped to the expansion | an ordinary label — the second invocation **collides** | an ordinary label — **collides** |
+| too many arguments | `Too many arguments for macro` | extras silently **dropped** | `Too many macro parameters` |
+| too few arguments | `Not enough arguments for macro` | missing one substitutes **empty**, and the emptied operand raises the error | substitutes **empty** — and if no emitting line reaches it, assembles fine |
+| self-recursion | **segfault** (exit 139) | **segfault** (exit 139) | `Too many nested macro expansions` |
 
-The middle row is the one that settles it. The same source, `MACRO m` with
+The locals row is the one that settles it. The same source, a macro with
 `.spin nop` inside, invoked twice, assembles under sjasmplus and is rejected by
-pasmo. A house macro system that picked one of those behaviours would produce
-wrong bytes — silently, for one of the two — against source its users wrote for
-a real assembler. That is the opposite of the identity claim.
+the other two. A house macro system that picked one of those behaviours would
+produce wrong bytes — silently, for two of the three — against source its users
+wrote for a real assembler. That is the opposite of the identity claim.
 
-So `fit_arguments` has **no default implementation**. A new dialect must state
-its posture, because guessing between "reject" and "drop and continue" is
-exactly the kind of quiet wrongness the corpus exists to catch.
+Arity makes the same point from the other direction: three dialects, three
+postures, and ca65's is neither of the first two — it rejects too many and
+tolerates too few. So `fit_arguments` has **no default implementation**. A new
+dialect must state its posture, because guessing is exactly the kind of quiet
+wrongness the corpus exists to catch.
 
 This is the v1 scope's *"adopted against real dialect requirements rather than
 as a universal macro language"* ([`v1-scope.md`](v1-scope.md)), made structural.
@@ -101,6 +104,25 @@ fails rather than passes.
   sjasmplus formats them because the keyword pipeline keeps unrecognised lines
   verbatim. Pinned by a test so closing it is deliberate.
 
+- **2026-08-19 — the ca65 family** (#93). One grammar in `ca65_flat` serves
+  ca65, ca65-816 and ca65-huc6280, because cc65 ships one assembler and the CPU
+  is a flag. `.macro`/`.endmacro` with the `.mac` short spellings, `.local`
+  declarations, and the reject-too-many/tolerate-too-few posture. Fifteen facts
+  recorded against ca65 V2.19; the two `issue-93` markers it closed retired with
+  a supersede record.
+
+  The plumbing moved into `dialects/macros.rs` with this adoption — `Expand`,
+  the origin map, and the span-replacement helpers — so the flat walk and the
+  z80 walk share one vocabulary rather than each growing a copy of the
+  `Expand::No` check. The check being the thing worth not re-deriving.
+
+  `FlatWalk` gained an `expand_source` hook defaulting to no-op, so lwasm,
+  vasm, rgbasm and asl ride the same walk unchanged until each is probed.
+
+  **Known gap:** as with pasmo, ca65's formatter refuses a file containing
+  macros (`unsupported directive .macro`) rather than formatting it. Unchanged
+  from before, pinned by a test.
+
 ## Drift triggers
 
 Stop and re-consult if a change would:
@@ -118,7 +140,10 @@ Stop and re-consult if a change would:
   byte-identical crashing is not.
 - **Expand macros across an include boundary** without probing what the
   reference does. Each file expands on its own today, which is a deliberate
-  hold, not a considered answer.
+  hold, not a considered answer, and a multi-file test pins it.
+- **Add a dialect's macros to its single-source parse only.** The CLI assembles
+  through the multi-file entry point, so a hook in the wrong place passes every
+  library test and does nothing in the tool. It has happened once.
 
 See [`conditional-assembly-framework.md`](conditional-assembly-framework.md)
 (the same shared-core, demand-gated-adoption shape), [`syntax-stance.md`](syntax-stance.md)
