@@ -961,24 +961,76 @@ fn is_data(text: &str) -> bool {
 /// one call. The reference is the arbiter; a wrong opcode in the spec or bad
 /// disassembler output shows up as a mismatch. On failure it localises by
 /// reassembling each instruction alone.
+/// Run a reference assembler over source, returning its bytes or nothing.
+type Reassemble<'a> = dyn Fn(&str) -> Option<Vec<u8>> + 'a;
+
+/// One CPU's sweep: what to walk, and how to render, arbitrate and record it.
+///
+/// Grouped because the sweep now needs the arbiter's identity as well as its
+/// behaviour, and eight loose parameters is a call nobody can read.
+struct SweepSpec<'a> {
+    /// The CPU label, which is also its corpus file.
+    name: &'a str,
+    /// The executable whose identity signs the verdicts.
+    tool: &'a str,
+    /// The syntax the listing is written in.
+    dialect: &'a str,
+    disasm: &'a dyn Fn(&[u8], u32) -> Vec<asm198x::Line>,
+    listing: &'a dyn Fn(&[u8], u32) -> String,
+    reassemble: &'a Reassemble<'a>,
+    /// The invocation whose output is *recorded*, when it differs from the one
+    /// that arbitrates.
+    ///
+    /// Usually the same invocation that arbitrates. The 68000 records nothing,
+    /// because no vasm configuration produces what we produce:
+    ///
+    /// | source | ours | vasm default | vasm `-no-opt` |
+    /// |---|---|---|---|
+    /// | `lea (a0),a0` | `41D0` | *deleted* | `41D0` |
+    /// | `asl.w #1,d0` | `E340` | `D040` | `E340` |
+    /// | `adda.w #$10,a0` | `41E8…` | `41E8…` | `D0FC…` |
+    ///
+    /// We apply vasm's `adda`→`lea` transform but not its redundant-`lea`
+    /// deletion or `asl`→`add` rewrite, so we sit between its two
+    /// configurations. A recorded fact would be unreplayable by construction
+    /// under either, and recording one anyway would either fail replay on
+    /// correct output or need an exemption nothing could lift. Tracked as #110;
+    /// the sweep still arbitrates the 68000 literally under `-no-opt`.
+    record_with: Option<&'a Reassemble<'a>>,
+    skip: &'a dyn Fn(&str) -> bool,
+}
+
+/// Sweep an opcode space: disassemble every candidate, keep the
+/// position-independent instructions, and require the reference to reproduce
+/// them.
+///
+/// The instructions are grouped into **per-mnemonic chunks** rather than one
+/// blob per CPU. One blob answers only "does this whole CPU round-trip", so a
+/// single bad encoding fails the lot, and the corpus would hold one enormous
+/// fact that changes whenever any instruction changes. A chunk fails alone,
+/// localises to a mnemonic, and re-records only when that mnemonic's encodings
+/// move.
+///
+/// Chunks key on (CPU, mnemonic, chunk source text) — never a positional index
+/// (KTD5), so a disassembler change that reshuffles which instructions land in
+/// a chunk re-keys it honestly instead of silently rewriting an unrelated fact.
+/// Each chunk's listing is self-contained, carrying whatever header the CPU
+/// needs (the Z8000's `supmode on`), so it reassembles on its own.
 fn sweep(
-    name: &str,
+    spec: SweepSpec<'_>,
     candidates: &[Vec<u8>],
-    disasm: &dyn Fn(&[u8], u32) -> Vec<asm198x::Line>,
-    listing: &dyn Fn(&[u8], u32) -> String,
-    reassemble: &dyn Fn(&str) -> Option<Vec<u8>>,
-    skip: &dyn Fn(&str) -> bool,
     fails: &mut Vec<String>,
+    recorder: &mut support::verdicts::Recorder,
 ) -> usize {
     let (oa, ob) = (0x1000u32, 0x4000u32);
     let mut instrs: Vec<Vec<u8>> = Vec::new();
     for cand in candidates {
-        let la = disasm(cand, oa);
+        let la = (spec.disasm)(cand, oa);
         let Some(fa) = la.first() else { continue };
-        if is_data(&fa.text) || skip(&fa.text) {
+        if is_data(&fa.text) || (spec.skip)(&fa.text) {
             continue;
         }
-        let lb = disasm(cand, ob);
+        let lb = (spec.disasm)(cand, ob);
         match lb.first() {
             Some(fb) if fb.text == fa.text => instrs.push(fa.bytes.clone()),
             _ => {} // position-dependent (or undecodable at ob) — skip
@@ -987,29 +1039,74 @@ fn sweep(
     if instrs.is_empty() {
         return 0;
     }
-    let blob: Vec<u8> = instrs.concat();
-    let source = listing(&blob, oa);
-    if reassemble(&source).is_some_and(|a| a == blob) {
-        return instrs.len();
-    }
-    // Localise: find the first instruction the reference can't reproduce.
+
+    // Group by mnemonic — the first token of the disassembly. `BTreeMap` so the
+    // chunk order is deterministic, which is what lets a replay map a byte
+    // offset back to a case.
+    let mut chunks: std::collections::BTreeMap<String, Vec<Vec<u8>>> =
+        std::collections::BTreeMap::new();
     for instr in &instrs {
-        let text = disasm(instr, oa)
+        let text = (spec.disasm)(instr, oa)
             .first()
             .map_or_else(String::new, |l| l.text.clone());
-        match reassemble(&listing(instr, oa)) {
-            Some(b) if b == *instr => {}
-            Some(b) => {
-                fails.push(format!(
-                    "{name}: {instr:02X?} -> ref {b:02X?} (disasm `{text}`)"
-                ));
-                break;
+        let mnemonic = text
+            .split_whitespace()
+            .next()
+            .unwrap_or("?")
+            .to_ascii_lowercase();
+        chunks.entry(mnemonic).or_default().push(instr.clone());
+    }
+
+    for (mnemonic, group) in &chunks {
+        let blob: Vec<u8> = group.concat();
+        let source = (spec.listing)(&blob, oa);
+        if let Some(reference) = (spec.reassemble)(&source)
+            && reference == blob
+        {
+            // Record what the invocation we claim parity with produces. `None`
+            // means there is no such invocation for this CPU, so nothing is
+            // recorded — the chunk is still arbitrated, just not replayable.
+            let recorded = match spec.record_with {
+                Some(record_with) => record_with(&source),
+                None => None,
+            };
+            if let Some(recorded) = recorded {
+                recorder.record_bytes(
+                    support::verdicts::CaseRef {
+                        suite: Suite::SweepChunk,
+                        cpu: spec.name,
+                        tool: spec.tool,
+                        dialect: spec.dialect,
+                        case: format!("sweep chunk `{mnemonic}` ({} instructions)", group.len()),
+                        source: &source,
+                    },
+                    &recorded,
+                );
             }
-            None => {
-                fails.push(format!(
-                    "{name}: ref rejected {instr:02X?} (disasm `{text}`)"
-                ));
-                break;
+            continue;
+        }
+        // Localise inside the chunk: which instruction can the reference not
+        // reproduce on its own?
+        for instr in group {
+            let text = (spec.disasm)(instr, oa)
+                .first()
+                .map_or_else(String::new, |l| l.text.clone());
+            match (spec.reassemble)(&(spec.listing)(instr, oa)) {
+                Some(b) if b == *instr => {}
+                Some(b) => {
+                    fails.push(format!(
+                        "{}: {instr:02X?} -> ref {b:02X?} (disasm `{text}`, chunk `{mnemonic}`)",
+                        spec.name
+                    ));
+                    break;
+                }
+                None => {
+                    fails.push(format!(
+                        "{}: ref rejected {instr:02X?} (disasm `{text}`, chunk `{mnemonic}`)",
+                        spec.name
+                    ));
+                    break;
+                }
             }
         }
     }
@@ -1023,6 +1120,7 @@ fn spec_sweep_matches_reference() {
     fs::create_dir_all(&tmp).expect("temp dir");
     let mut fails: Vec<String> = Vec::new();
     let mut checked = 0usize;
+    let mut recorder = support::verdicts::Recorder::new();
 
     // --- 6809 / lwasm ------------------------------------------------------
     if have("lwasm") {
@@ -1049,13 +1147,19 @@ fn spec_sweep_matches_reference() {
             })
         };
         checked += sweep(
-            "6809",
+            SweepSpec {
+                name: "6809",
+                tool: "lwasm",
+                dialect: "lwasm",
+                disasm: &|b, o| asm198x::disassemble_6809(b, o as u16),
+                listing: &|b, o| asm198x::listing_6809(b, o as u16),
+                reassemble: &reasm,
+                record_with: Some(&reasm),
+                skip: &|_| false,
+            },
             &cands,
-            &|b, o| asm198x::disassemble_6809(b, o as u16),
-            &|b, o| asm198x::listing_6809(b, o as u16),
-            &reasm,
-            &|_| false,
             &mut fails,
+            &mut recorder,
         );
     } else {
         eprintln!("SKIP: `lwasm` not on PATH (6809 sweep)");
@@ -1091,13 +1195,19 @@ fn spec_sweep_matches_reference() {
             })
         };
         checked += sweep(
-            "68000",
+            SweepSpec {
+                name: "68000",
+                tool: "vasmm68k_mot",
+                dialect: "vasm",
+                disasm: &|b, o| asm198x::disassemble_68000(b, o),
+                listing: &|b, o| asm198x::listing_68000(b, o),
+                reassemble: &reasm,
+                record_with: None,
+                skip: &|_| false,
+            },
             &cands,
-            &|b, o| asm198x::disassemble_68000(b, o),
-            &|b, o| asm198x::listing_68000(b, o),
-            &reasm,
-            &|_| false,
             &mut fails,
+            &mut recorder,
         );
     } else {
         eprintln!("SKIP: `vasmm68k_mot` not on PATH (68000 sweep)");
@@ -1121,13 +1231,19 @@ fn spec_sweep_matches_reference() {
             })
         };
         checked += sweep(
-            "PDP-11",
+            SweepSpec {
+                name: "PDP-11",
+                tool: "asl",
+                dialect: "asl",
+                disasm: &|b, o| asm198x::disassemble_pdp11(b, o as u16),
+                listing: &|b, o| asm198x::listing_pdp11(b, o as u16),
+                reassemble: &reasm,
+                record_with: Some(&reasm),
+                skip: &|_| false,
+            },
             &cands,
-            &|b, o| asm198x::disassemble_pdp11(b, o as u16),
-            &|b, o| asm198x::listing_pdp11(b, o as u16),
-            &reasm,
-            &|_| false,
             &mut fails,
+            &mut recorder,
         );
     } else {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (PDP-11 sweep)");
@@ -1151,13 +1267,19 @@ fn spec_sweep_matches_reference() {
             })
         };
         checked += sweep(
-            "TMS9900",
+            SweepSpec {
+                name: "TMS9900",
+                tool: "asl",
+                dialect: "asl",
+                disasm: &|b, o| asm198x::disassemble_tms9900(b, o as u16),
+                listing: &|b, o| asm198x::listing_tms9900(b, o as u16),
+                reassemble: &reasm,
+                record_with: Some(&reasm),
+                skip: &|_| false,
+            },
             &cands,
-            &|b, o| asm198x::disassemble_tms9900(b, o as u16),
-            &|b, o| asm198x::listing_tms9900(b, o as u16),
-            &reasm,
-            &|_| false,
             &mut fails,
+            &mut recorder,
         );
     } else {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (TMS9900 sweep)");
@@ -1185,13 +1307,19 @@ fn spec_sweep_matches_reference() {
             })
         };
         checked += sweep(
-            "CP1610",
+            SweepSpec {
+                name: "CP1610",
+                tool: "asl",
+                dialect: "asl",
+                disasm: &|b, o| asm198x::disassemble_cp1610(b, o as u16),
+                listing: &|b, o| asm198x::listing_cp1610(b, o as u16),
+                reassemble: &reasm,
+                record_with: Some(&reasm),
+                skip: &|_| false,
+            },
             &cands,
-            &|b, o| asm198x::disassemble_cp1610(b, o as u16),
-            &|b, o| asm198x::listing_cp1610(b, o as u16),
-            &reasm,
-            &|_| false,
             &mut fails,
+            &mut recorder,
         );
     } else {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (CP1610 sweep)");
@@ -1225,13 +1353,19 @@ fn spec_sweep_matches_reference() {
             })
         };
         checked += sweep(
-            "Z8000",
+            SweepSpec {
+                name: "Z8000",
+                tool: "asl",
+                dialect: "asl",
+                disasm: &|b, o| asm198x::disassemble_z8000(b, o as u16),
+                listing: &|b, o| asm198x::listing_z8000(b, o as u16),
+                reassemble: &reasm,
+                record_with: Some(&reasm),
+                skip: &|_| false,
+            },
             &cands,
-            &|b, o| asm198x::disassemble_z8000(b, o as u16),
-            &|b, o| asm198x::listing_z8000(b, o as u16),
-            &reasm,
-            &|_| false,
             &mut fails,
+            &mut recorder,
         );
 
         // --- Zilog Z8001 / asl (segmented) ---------------------------------
@@ -1246,18 +1380,26 @@ fn spec_sweep_matches_reference() {
             .map(|w| vec![(w >> 8) as u8, w as u8, 0x80, 0x00, 0x12, 0x34])
             .collect();
         checked += sweep(
-            "Z8001",
+            SweepSpec {
+                name: "Z8001",
+                tool: "asl",
+                dialect: "asl",
+                disasm: &|b, o| asm198x::disassemble_z8001(b, o as u16),
+                listing: &|b, o| asm198x::listing_z8001(b, o as u16),
+                reassemble: &reasm,
+                record_with: Some(&reasm),
+                skip: &|_| false,
+            },
             &seg_cands,
-            &|b, o| asm198x::disassemble_z8001(b, o as u16),
-            &|b, o| asm198x::listing_z8001(b, o as u16),
-            &reasm,
-            &|_| false,
             &mut fails,
+            &mut recorder,
         );
     } else {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (Z8000 sweep)");
     }
 
+    let recorded = recorder.flush().expect("write the verdict corpus");
+    eprintln!("recorded {recorded} new sweep verdict(s)");
     eprintln!("swept {checked} decodable instructions against the reference tools");
     assert!(
         fails.is_empty(),
