@@ -366,6 +366,21 @@ const PROBES: &[Probe] = &[
         " MACRO inner v\n ld a,v\n ENDM\n MACRO outer w\n inner w\n ENDM\n outer 5\n"),
     ok ("sjasmplus", "macro invokes one defined later",
         " MACRO outer\n inner\n ENDM\n MACRO inner\n nop\n ENDM\n outer\n"),
+    // Repetition. The count is an expression over the environment, which is
+    // why it is evaluated with the conditionals rather than expanded with the
+    // macros.
+    ok ("sjasmplus", "DUP repeats its body",
+        " DUP 3\n nop\n EDUP\n"),
+    ok ("sjasmplus", "REPT/ENDR is the same block",
+        " REPT 3\n nop\n ENDR\n"),
+    ok ("sjasmplus", "DUP count is an expression",
+        "n equ 2\n DUP n+1\n nop\n EDUP\n"),
+    ok ("sjasmplus", "DUP nests",
+        " DUP 2\n DUP 2\n nop\n EDUP\n EDUP\n"),
+    ok ("sjasmplus", "a macro inside DUP",
+        " MACRO m\n nop\n ENDM\n DUP 2\n m\n EDUP\n"),
+    ok ("sjasmplus", "DUP inside a macro",
+        " MACRO m\n DUP 2\n nop\n EDUP\n ENDM\n m\n"),
     gap("lwasm", "macro definition and invocation",
         "nop2\tmacro\n nop\n nop\n endm\n nop2\n", 93),
     gap("lwasm", "macro with a positional parameter",

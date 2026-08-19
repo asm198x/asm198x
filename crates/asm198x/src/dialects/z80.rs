@@ -748,6 +748,27 @@ fn cond_keyword(word: &str) -> Option<CondKw> {
     })
 }
 
+/// Which end of a repetition block a word is, if either.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum RepeatKw {
+    Open,
+    Close,
+}
+
+/// `DUP`/`REPT` and `EDUP`/`ENDR`, under the same strict case rule the
+/// conditionals follow: all-lower or all-upper, never mixed — the reference
+/// rejects `Dup` as an unrecognised instruction.
+///
+/// The two spellings interchange: a block opened with `DUP` may be closed by
+/// `ENDR`, which the reference accepts and so do we.
+fn repeat_keyword(word: &str) -> Option<RepeatKw> {
+    Some(match word {
+        "dup" | "DUP" | "rept" | "REPT" => RepeatKw::Open,
+        "edup" | "EDUP" | "endr" | "ENDR" => RepeatKw::Close,
+        _ => return None,
+    })
+}
+
 /// The `DEFINE` directive's spellings (the same strict case rule — probe p34).
 fn is_define_word(word: &str) -> bool {
     matches!(word, "define" | "DEFINE")
@@ -864,6 +885,97 @@ impl<S: Z80Syntax> KwCx<'_, S> {
     /// Parse lines until `ELSE`/`ENDIF` (inside a block) or EOF, collecting
     /// nodes. `in_block` is false only at the top level, where a stray
     /// `ELSE`/`ENDIF` is an error (probe p43b's posture).
+    /// Collect a `DUP`/`REPT` block: its body is parsed as a block of its own
+    /// so nesting works, and its nodes keep the line numbers they had in the
+    /// file rather than restarting inside the body.
+    ///
+    /// The body is found by scanning for the matching close at depth zero, so
+    /// an inner block's `EDUP` does not end the outer one.
+    fn parse_repeat(
+        &mut self,
+        nodes: &mut Vec<Node>,
+        rest: &str,
+        label: Option<String>,
+        line: usize,
+    ) -> Result<(), AsmError> {
+        let start = self.pos;
+        let mut depth = 1usize;
+        let mut end = None;
+        let mut k = start;
+        while k < self.lines.len() {
+            let (code, _) = self.syntax.split_comment(self.lines[k]);
+            let (word, _) = split_first_word(code.trim());
+            match repeat_keyword(word) {
+                Some(RepeatKw::Open) => depth += 1,
+                Some(RepeatKw::Close) => {
+                    depth -= 1;
+                    if depth == 0 {
+                        end = Some(k);
+                        break;
+                    }
+                }
+                None => {}
+            }
+            k += 1;
+        }
+        let Some(end) = end else {
+            return Err(AsmError::new(line, "`DUP` has no matching `EDUP`"));
+        };
+
+        let mut sub = KwCx {
+            syntax: self.syntax,
+            set: self.set,
+            ext: self.ext,
+            file: self.file,
+            lines: self.lines[start..end].to_vec(),
+            pos: 0,
+            pending: Vec::new(),
+        };
+        let (mut body, _) = sub.parse_block(false)?;
+        for node in &mut body {
+            node.span.line += start as u32;
+            if let Some(span) = node.operand_span.as_mut() {
+                span.line += start as u32;
+            }
+        }
+        // A label before the block becomes its own node, exactly as it does
+        // before a conditional, so the block itself carries none.
+        let mut leading = std::mem::take(&mut self.pending);
+        if let Some(name) = label {
+            nodes.push(Node {
+                operand_span: None,
+                label: Some(Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }),
+                item: None,
+                source: String::new(),
+                span: Span::in_file(self.file, line as u32, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut leading),
+                    trailing: None,
+                },
+            });
+        }
+        nodes.push(Node {
+            operand_span: None,
+            label: None,
+            item: Some(crate::ast::Item::Repeat {
+                head: rest.to_string(),
+                body,
+            }),
+            source: rest.to_string(),
+            span: Span::in_file(self.file, line as u32, 1),
+            trivia: Trivia {
+                leading,
+                trailing: None,
+            },
+        });
+        self.pos = end + 1;
+        Ok(())
+    }
+
     fn parse_block(&mut self, in_block: bool) -> Result<(Vec<Node>, KwClose), AsmError> {
         let mut nodes = Vec::new();
         while self.pos < self.lines.len() {
@@ -888,6 +1000,20 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                 Err(_) => (None, code.trim()),
             };
             let (word, args) = split_first_word(rest);
+            if let Some(kw) = repeat_keyword(word) {
+                match kw {
+                    RepeatKw::Open => {
+                        self.parse_repeat(&mut nodes, rest, label, line)?;
+                        continue;
+                    }
+                    RepeatKw::Close => {
+                        return Err(AsmError::new(
+                            line,
+                            format!("`{word}` without a matching `DUP`"),
+                        ));
+                    }
+                }
+            }
             match cond_keyword(word) {
                 Some(CondKw::If | CondKw::IfDef | CondKw::IfNDef) => {
                     self.parse_conditional(&mut nodes, raw, rest, word, label, comment, line)?;
@@ -1405,6 +1531,17 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
 }
 
 impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
+    /// A repetition count folds exactly as a condition does — DEFINEs
+    /// substitute, then the expression folds against the `equ` constants. That
+    /// is what lets `DUP n+1` work where `n` is a constant, and why repetition
+    /// cannot be resolved before symbols exist.
+    fn count(&self, head: &str, line: u32) -> Result<i64, AsmError> {
+        let line = line as usize;
+        let (_, args) = split_first_word(head);
+        let expr = substitute_defines(args, &self.defines, line)?;
+        eval_condition_keyword(self.syntax, &expr, line, &self.consts)
+    }
+
     fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError> {
         let line = line as usize;
         let (word, args) = split_first_word(head);

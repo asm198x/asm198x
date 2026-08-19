@@ -235,6 +235,23 @@ pub(crate) enum Item {
         inline: bool,
         style: CondStyle,
     },
+    /// A repetition block (`DUP n` … `EDUP`, `REPT n` … `ENDR`): the head as
+    /// written, and the body to emit `n` times.
+    ///
+    /// Like [`Item::Conditional`] this is **evaluated**, never lowered — the
+    /// count is an expression over the environment (`DUP n+1` where `n` is an
+    /// `equ` constant assembles three times), so it cannot be resolved before
+    /// symbols exist. That is precisely why repetition lives here rather than
+    /// in a source pre-pass beside macro expansion.
+    ///
+    /// Locals inside the body are **not** scoped per iteration, unlike a macro
+    /// expansion's: the reference reports `Duplicate label` for a dot-local in
+    /// a repeated block, so scoping it would accept source the reference
+    /// refuses.
+    Repeat {
+        head: String,
+        body: Vec<Node>,
+    },
     /// A dialect-family-owned statement for a multi-pass CISC dialect (see
     /// [`NativeItem`]). The owning dialect's assembler reads it back; the shared
     /// layer treats it opaquely (emit renders from [`Node::source`], consulting
@@ -380,6 +397,21 @@ pub(crate) trait CondEval {
     /// # Errors
     /// Any per-line parse, range, or fold failure.
     fn lower(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError>;
+
+    /// Fold a repetition head (`DUP n+1`, `REPT 3`) to its iteration count.
+    ///
+    /// Defaults to refusing: a dialect that has no repetition should say so
+    /// rather than silently assembling the body once.
+    ///
+    /// # Errors
+    /// A malformed count, an undefined symbol, or a dialect without repetition.
+    fn count(&self, head: &str, line: u32) -> Result<i64, AsmError> {
+        let _ = head;
+        Err(AsmError::new(
+            line as usize,
+            "this dialect has no repetition block",
+        ))
+    }
 }
 
 /// Assemble by evaluating the conditional tree: prune the untaken branch of each
@@ -409,6 +441,19 @@ pub(crate) fn evaluate<D: CondEval>(
             evaluate(dialect, then_body, emit && taken, out)?;
             if let Some(else_body) = else_body {
                 evaluate(dialect, else_body, emit && !taken, out)?;
+            }
+        } else if let Some(Item::Repeat { head, body }) = &node.item {
+            // A skipped block still walks its body once with `emit = false`,
+            // exactly as an untaken conditional branch does, so nothing inside
+            // it defines anything. The count is only folded when live: an
+            // unreachable `DUP` must not fail on a symbol that was never set.
+            if emit {
+                let count = dialect.count(head, node.span.line)?;
+                for _ in 0..count.max(0) {
+                    evaluate(dialect, body, true, out)?;
+                }
+            } else {
+                evaluate(dialect, body, false, out)?;
             }
         } else if emit && (node.label.is_some() || !node.source.is_empty()) {
             dialect.lower(node, out)?;
@@ -512,6 +557,14 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             return Err(AsmError::new(
                 0,
                 "internal error: a conditional block is evaluated by the dialect, not lowered",
+            ));
+        }
+        // Repetition is evaluated for the same reason a conditional is: its
+        // count is an expression over the environment.
+        Item::Repeat { .. } => {
+            return Err(AsmError::new(
+                0,
+                "internal error: a repetition block is evaluated by the dialect, not lowered",
             ));
         }
         // A native (multi-pass CISC) item is assembled by its own dialect driver,

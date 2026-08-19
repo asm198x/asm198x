@@ -600,6 +600,77 @@ mod tests {
         );
     }
 
+    /// Repetition's count is an expression over the environment, so it folds
+    /// where conditions fold rather than in the macro pre-pass — `DUP n+1`
+    /// with `n equ 2` repeats three times.
+    #[test]
+    fn dup_repeats_its_body_a_computed_number_of_times() {
+        assert_eq!(
+            asm(" DUP 3\n nop\n EDUP\n").expect("assemble").bytes,
+            vec![0x00, 0x00, 0x00]
+        );
+        assert_eq!(
+            asm("n equ 2\n DUP n+1\n nop\n EDUP\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x00, 0x00, 0x00]
+        );
+        assert!(
+            asm(" DUP 0\n nop\n EDUP\n")
+                .expect("assemble")
+                .bytes
+                .is_empty(),
+            "zero repetitions emit nothing"
+        );
+    }
+
+    /// `REPT`/`ENDR` is the same block, and the spellings interchange — the
+    /// reference accepts a `DUP` closed by `ENDR`.
+    #[test]
+    fn rept_and_dup_are_the_same_block() {
+        let dup = asm(" DUP 2\n nop\n EDUP\n").expect("assemble").bytes;
+        assert_eq!(asm(" REPT 2\n nop\n ENDR\n").expect("assemble").bytes, dup);
+        assert_eq!(asm(" DUP 2\n nop\n ENDR\n").expect("assemble").bytes, dup);
+    }
+
+    /// Blocks nest, and interleave with macros in both directions.
+    #[test]
+    fn repetition_nests_and_composes_with_macros() {
+        assert_eq!(
+            asm(" DUP 2\n DUP 2\n nop\n EDUP\n EDUP\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x00; 4]
+        );
+        assert_eq!(
+            asm(" MACRO m\n nop\n ENDM\n DUP 2\n m\n EDUP\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x00, 0x00]
+        );
+        assert_eq!(
+            asm(" MACRO m\n DUP 2\n nop\n EDUP\n ENDM\n m\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x00, 0x00]
+        );
+    }
+
+    /// Mixed case is not a block keyword, matching the strict rule the
+    /// conditionals already follow — the reference calls `Dup` an unrecognised
+    /// instruction.
+    #[test]
+    fn a_mixed_case_repetition_keyword_is_not_one() {
+        assert_eq!(
+            asm(" dup 2\n nop\n edup\n").expect("assemble").bytes,
+            vec![0x00, 0x00]
+        );
+        assert!(
+            asm(" Dup 2\n nop\n Edup\n").is_err(),
+            "mixed case is not `DUP`"
+        );
+    }
+
     /// A self-recursive macro segfaults sjasmplus (exit 139). We decline to
     /// reproduce that: a crash is not a verdict about anyone's source, and an
     /// assembler that dies is worse than one that explains itself.
