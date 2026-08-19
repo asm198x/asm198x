@@ -1603,6 +1603,10 @@ impl Walker {
 }
 
 impl FlatWalk for Walker {
+    fn nodes_mut(&mut self) -> &mut Vec<crate::ast::Node> {
+        &mut self.nodes
+    }
+
     fn walk_line(
         &mut self,
         raw: &str,

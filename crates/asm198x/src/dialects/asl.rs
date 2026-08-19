@@ -278,6 +278,10 @@ impl<C: AslChip> Walker<C> {
 }
 
 impl<C: AslChip> FlatWalk for Walker<C> {
+    fn nodes_mut(&mut self) -> &mut Vec<Node> {
+        &mut self.nodes
+    }
+
     fn walk_line(
         &mut self,
         raw: &str,

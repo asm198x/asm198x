@@ -27,6 +27,7 @@ use std::cell::{Cell, RefCell};
 use std::collections::BTreeMap;
 
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
+use super::macros;
 use super::mos6502::{
     self, BytePrec, assignment_split, fold_const, is_ident, parse_number, split_data_items,
     split_first_word, split_top_level, string_literal,
@@ -178,7 +179,11 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
 pub(crate) fn assemble_with_debug(source: &str) -> Result<(Vec<u8>, DebugCapture), AsmError> {
-    let (rom, capture) = assemble_program(&parse_program(&isa::mos6502::SET, source)?)?;
+    let (rom, capture) = assemble_program(&parse_program(
+        &isa::mos6502::SET,
+        source,
+        macros::Expand::Yes,
+    )?)?;
     Ok((rom, capture.into_single()))
 }
 
@@ -695,17 +700,29 @@ fn anon_ref(tok: &str) -> Option<(char, usize)> {
 pub(crate) fn parse_program(
     set: &'static isa::InstructionSet,
     source: &str,
+    mode: macros::Expand,
 ) -> Result<crate::ast::Program, AsmError> {
+    // Macros expand before parsing (#93), but only for assembly: the formatter
+    // asks with `Expand::No`, because laying source out must not replace a
+    // definition with its expansions.
+    let expanded = ca65_flat::expand_ca65(source, mode)?;
+    let text = macros::expanded_text(&expanded, source);
+    let origins = macros::line_origins(&expanded);
     let mut w = Walker::new(set);
-    for (i, raw) in source.lines().enumerate() {
-        if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
+    for (i, raw) in text.lines().enumerate() {
+        if let Some(d) = w
+            .walk_line(raw, i + 1, FileId(0))
+            .map_err(|e| macros::remap_lines(e, origins))?
+        {
             // A `.include`/`.incbin` stays an unresolved item here (KTD1):
             // `--fmt` renders it verbatim without opening the target, and the
             // assembly projection rejects it with a multi-file pointer.
             w.nodes.push(ca65_flat::unresolved_node(d));
         }
     }
-    w.finish(source.lines().count() as u32)
+    let mut program = w.finish(text.lines().count() as u32)?;
+    macros::place_nodes(&mut program.nodes, origins);
+    Ok(program)
 }
 
 /// Parse a multi-file NES ca65 program (language-surface U5, KTD1): the
@@ -823,6 +840,16 @@ impl Walker {
 }
 
 impl FlatWalk for Walker {
+    fn nodes_mut(&mut self) -> &mut Vec<crate::ast::Node> {
+        &mut self.nodes
+    }
+
+    /// The multi-file walk expands too, or macros would work when a file is
+    /// assembled alone and vanish the moment it is included from another.
+    fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
+        ca65_flat::expand_ca65(source, macros::Expand::Yes)
+    }
+
     fn walk_line(
         &mut self,
         raw: &str,

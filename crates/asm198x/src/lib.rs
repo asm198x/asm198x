@@ -245,7 +245,8 @@ pub fn assemble_ca65_debug(
 /// Returns an [`AsmError`] on any parse failure.
 pub fn format_ca65(source: &str) -> Result<String, AsmError> {
     Ok(ast::emit(
-        &dialects::ca65::parse_program(&isa::mos6502::SET, source)?,
+        // The formatter must not expand macros — see the dialect's parse.
+        &dialects::ca65::parse_program(&isa::mos6502::SET, source, dialects::macros::Expand::No)?,
         false,
     ))
 }

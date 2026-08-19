@@ -1415,6 +1415,35 @@ fn ca65_816_include_matches_the_flattened_source() {
     assert_eq!(r.files, vec!["main.s".to_string(), "defs.s".to_string()]);
 }
 
+/// Macros expand on the **multi-file** path too, in every file (#93).
+///
+/// This is the wiring that is easy to leave out and impossible to notice from
+/// the library tests: the CLI assembles through this entry point, so a macro
+/// hooked only into the single-source parse works in `cargo test` and does
+/// nothing in the actual tool. It happened once already, to sjasmplus.
+///
+/// A macro does **not** reach across the include boundary — each file expands
+/// on its own, which is a deliberate hold rather than a measured answer, so
+/// the second half of this test pins the hold.
+#[test]
+fn ca65_816_macros_expand_in_every_included_file() {
+    let loader = MemoryLoader::new().text("mac.s", ".macro ldav v\n lda #v\n.endmacro\n ldav 1\n");
+    let src = ".macro two\n nop\n nop\n.endmacro\n two\n .include \"mac.s\"\n two\n";
+    let r = assemble_ca65_816_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(
+        r.bytes,
+        vec![0xEA, 0xEA, 0xA9, 0x01, 0xEA, 0xEA],
+        "both files expanded their own macros"
+    );
+
+    // `two` is defined in the root and invoked inside the include: out of
+    // scope, so the invocation is never expanded and fails to parse.
+    let loader = MemoryLoader::new().text("uses.s", " two\n");
+    let src = ".macro two\n nop\n nop\n.endmacro\n .include \"uses.s\"\n";
+    assemble_ca65_816_files(src, "main.s", &loader)
+        .expect_err("a macro does not cross the include boundary");
+}
+
 /// Three-deep nesting, code at every level, in include order; `.INCLUDE` is
 /// case-insensitive like every ca65 dot-keyword.
 #[test]

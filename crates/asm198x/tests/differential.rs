@@ -336,7 +336,7 @@ const PROBES: &[Probe] = &[
     // fidelity rather than a house macro system:
     //   MACRO name  / ENDM      sjasmplus, pasmo, rgbasm
     //   name MACRO  / ENDM      asl, lwasm, vasm, pasmo
-    //   .macro name / .endmacro ca65
+    //   .macro name / .endmacro ca65 (implemented)
     //   !macro name { }         acme
     gap("acme", "macro definition and invocation",
         "!macro nop2 {\n\tnop\n\tnop\n}\n+nop2\n", 93),
@@ -426,10 +426,44 @@ const PROBES: &[Probe] = &[
         "nop2\tmacro\n nop\n nop\n endm\n nop2\n", 93),
     gap("vasm", "macro with a positional parameter",
         "ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5\n", 93),
-    gap("ca65-816", "macro definition and invocation",
-        ".macro nop2\n nop\n nop\n.endmacro\n nop2\n", 93),
-    gap("ca65-816", "macro with a parameter",
-        ".macro ldav v\n lda #v\n.endmacro\n ldav 5\n", 93),
+    ok ("ca65-816", "macro definition and invocation",
+        ".macro nop2\n nop\n nop\n.endmacro\n nop2\n"),
+    ok ("ca65-816", "macro with a parameter",
+        ".macro ldav v\n lda #v\n.endmacro\n ldav 5\n"),
+    // ca65 takes a *space* after the name, like sjasmplus — `.macro m1, v` is
+    // `Unexpected trailing garbage characters` — and the short spelling too.
+    ok ("ca65-816", "macro parameters are comma-separated after a space",
+        ".macro m1 v, w\n lda #v\n ldx #w\n.endmacro\n m1 9, 7\n"),
+    ok ("ca65-816", "the .mac short spelling",
+        ".mac nop2\n nop\n nop\n.endmac\n nop2\n"),
+    ok ("ca65-816", "the keyword is case-insensitive",
+        ".MACRO nop2\n nop\n.ENDMACRO\n nop2\n"),
+    // Substitution is textual, word-bounded, string-safe, and runs before the
+    // expression is evaluated: `val` survives, the quoted `v` is a letter.
+    ok ("ca65-816", "substitution respects words and strings",
+        "val = 7\n.macro m1 v\n lda #v\n lda val\n.byte \"v\"\n.endmacro\n m1 9\n"),
+    ok ("ca65-816", "substitution precedes evaluation",
+        ".macro m1 v\n lda #v*2\n.endmacro\n m1 5\n"),
+    // `.local` is the only thing that scopes a label to an expansion; a plain
+    // one is global and the second expansion gets `already defined`.
+    ok ("ca65-816", ".local label, invoked twice",
+        ".macro delay\n.local spin\nspin: dex\n bne spin\n.endmacro\n delay\n delay\n"),
+    ok ("ca65-816", ".local declares several names",
+        ".macro delay\n.local spin, done\nspin: dex\ndone: bne spin\n.endmacro\n delay\n delay\n"),
+    ok ("ca65-816", "nested macro passes a parameter through",
+        ".macro inner v\n lda #v\n.endmacro\n.macro outer v\n inner v\n inner v+1\n.endmacro\n outer 3\n"),
+    ok ("ca65-816", "macro invokes one defined later",
+        ".macro outer\n inner\n.endmacro\n.macro inner\n nop\n.endmacro\n outer\n"),
+    ok ("ca65-816", "label in front of an invocation",
+        ".macro m1 v\n lda #v\n.endmacro\nlbl: m1 9\n lda lbl\n"),
+    // A third arity posture again: too many is an error, too few is not — the
+    // missing parameter substitutes empty and only complains if reached.
+    ok ("ca65-816", "a parameter that is never reached may be omitted",
+        ".macro m1 v, w\n lda #v\n.endmacro\n m1 9\n"),
+    ok ("ca65-816", "a multi-token argument substitutes whole",
+        ".macro m1 v\n lda #v\n.endmacro\n m1 5+3\n"),
+    ok ("ca65-816", "a string argument survives substitution",
+        ".macro m1 v\n .byte v\n.endmacro\n m1 \"hi\"\n"),
 
     // ---- z80n (Spectrum Next extension ISA), sjasmplus reference -------------
     ok ("z80n", "swapnib / mirror",      " swapnib\n mirror a\n"),

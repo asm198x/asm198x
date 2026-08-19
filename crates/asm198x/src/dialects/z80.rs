@@ -22,7 +22,9 @@
 use std::collections::BTreeMap;
 
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
-use crate::dialects::macros::LineOrigin;
+use crate::dialects::macros::{
+    Expand, LineOrigin, expanded_text, expansion, line_origins, place, place_nodes, remap_lines,
+};
 use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
 use crate::source::{MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
 use crate::span::FileId;
@@ -169,7 +171,7 @@ pub(crate) fn parse_program<S: Z80Syntax>(
     // A dialect may rewrite source before it is parsed (pasmo macros, #93).
     // Line numbers map back afterwards, so a diagnostic always names a line the
     // author wrote rather than one that existed only inside the expander.
-    let expanded = expansion(syntax, source, mode)?;
+    let expanded = expansion(mode, source, |s| syntax.expand_source(s))?;
     let text = expanded_text(&expanded, source);
     let origins = line_origins(&expanded);
     let mut w = Walker::new(syntax, set, ext);
@@ -246,7 +248,7 @@ fn walk_file<S: Z80Syntax>(
     // Each file expands on its own (#93). A macro therefore does not reach
     // across an include boundary — the reference's own scoping question, left
     // open deliberately rather than guessed at.
-    let expanded = expansion(w.syntax, source, Expand::Yes)?;
+    let expanded = expansion(Expand::Yes, source, |s| w.syntax.expand_source(s))?;
     let text = expanded_text(&expanded, source);
     let origins = line_origins(&expanded);
     for (i, raw) in text.lines().enumerate() {
@@ -849,7 +851,7 @@ pub(crate) fn parse_program_keyword<S: Z80Syntax>(
     // A dialect may rewrite source before it is parsed (sjasmplus macros,
     // #93). Line numbers are mapped back afterwards, so a diagnostic always
     // names a line the author wrote.
-    let expanded = expansion(syntax, source, mode)?;
+    let expanded = expansion(mode, source, |s| syntax.expand_source(s))?;
     let text = expanded_text(&expanded, source);
     let origins = line_origins(&expanded);
     let mut cx = KwCx {
@@ -882,79 +884,6 @@ pub(crate) fn parse_program_keyword<S: Z80Syntax>(
     }
     place_nodes(&mut nodes, origins);
     Ok(Program { nodes })
-}
-
-/// Whether a parse expands the dialect's macros.
-///
-/// Assembly expands, because that is what a macro is for. The **formatter must
-/// not**: `asm198x fmt` lays source out, and a formatter that replaced a
-/// definition with its expansions and deleted the definition would be rewriting
-/// the program instead — silently, over the author's file. So the two paths ask
-/// for different parses of the same text, and this is where they part.
-#[derive(Clone, Copy, PartialEq, Eq)]
-pub(crate) enum Expand {
-    /// Expand macros: the assembly paths.
-    Yes,
-    /// Leave definitions and invocations as written: the formatter's parse.
-    No,
-}
-
-/// A dialect's source rewrite, held for as long as the parse borrows it.
-///
-/// `None` means the dialect rewrites nothing and the source is parsed as
-/// written — the case every dialect but the macro-capable ones is in.
-type Expansion = Option<(String, Vec<LineOrigin>)>;
-
-/// Run the dialect's rewrite, unless this parse is the formatter's.
-fn expansion<S: Z80Syntax>(syntax: &S, source: &str, mode: Expand) -> Result<Expansion, AsmError> {
-    match mode {
-        Expand::Yes => syntax.expand_source(source),
-        Expand::No => Ok(None),
-    }
-}
-
-/// The text to parse: the rewrite if there was one, else the source itself.
-fn expanded_text<'a>(expansion: &'a Expansion, source: &'a str) -> &'a str {
-    expansion.as_ref().map_or(source, |(text, _)| text.as_str())
-}
-
-/// Where each rewritten line came from, if the source was rewritten.
-fn line_origins(expansion: &Expansion) -> Option<&[LineOrigin]> {
-    expansion.as_ref().map(|(_, origins)| origins.as_slice())
-}
-
-/// Put every span in `nodes` back on the line the author wrote.
-fn place_nodes(nodes: &mut [Node], origins: Option<&[LineOrigin]>) {
-    let Some(origins) = origins else { return };
-    for node in nodes {
-        place(&mut node.span, origins);
-        if let Some(span) = node.operand_span.as_mut() {
-            place(span, origins);
-        }
-    }
-}
-
-/// Put a span back where the author would look: the line they wrote, and the
-/// expansions the text came through.
-fn place(span: &mut Span, origins: &[LineOrigin]) {
-    let Some(origin) = origins.get((span.line as usize).saturating_sub(1)) else {
-        return;
-    };
-    span.line = origin.line as u32;
-    span.expansion_frames.clone_from(&origin.frames);
-}
-
-/// Rewrite an error raised against rewritten source, so it names a real line
-/// and carries the expansions it came through.
-fn remap_lines(mut e: AsmError, origins: Option<&[LineOrigin]>) -> AsmError {
-    let Some(origins) = origins else { return e };
-    if let Some(origin) = origins.get(e.line.saturating_sub(1)) {
-        e.line = origin.line;
-    }
-    if let Some(span) = e.span.as_mut() {
-        place(span, origins);
-    }
-    e
 }
 
 impl<S: Z80Syntax> KwCx<'_, S> {

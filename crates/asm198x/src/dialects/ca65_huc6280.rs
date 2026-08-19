@@ -34,6 +34,7 @@ use super::mos6502::{
 };
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
+use crate::dialects::macros;
 use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
@@ -54,11 +55,12 @@ impl Dialect for Ca65Huc6280 {
         // Route assembly through the semantic AST (0b straggler migration): parse
         // into a `Program`, then lower to the engine's statement stream —
         // byte-identical to the old direct parse.
-        crate::ast::lower(parse_program(source)?)
+        crate::ast::lower(parse_program(source, macros::Expand::Yes)?)
     }
 
     fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
-        Ok(Some(parse_program(source)?))
+        // The formatter must not expand — see `parse_program`.
+        Ok(Some(parse_program(source, macros::Expand::No)?))
     }
 
     /// The include-capable parse (language-surface U4): the interleaved,
@@ -92,14 +94,24 @@ impl Dialect for Ca65Huc6280 {
 /// the target is never opened, so `--fmt` renders the directive verbatim and
 /// works with a missing target (U4, KTD1). Lazy resolution is
 /// [`parse_program_multi`]'s.
-pub(crate) fn parse_program(source: &str) -> Result<Program, AsmError> {
+pub(crate) fn parse_program(source: &str, mode: macros::Expand) -> Result<Program, AsmError> {
+    // Macros expand before parsing (#93), but only for assembly: the formatter
+    // asks with `Expand::No`, because laying source out must not replace a
+    // definition with its expansions.
+    let expanded = ca65_flat::expand_ca65(source, mode)?;
+    let text = macros::expanded_text(&expanded, source);
+    let origins = macros::line_origins(&expanded);
     let mut w = Walker::new();
-    for (i, raw) in source.lines().enumerate() {
-        if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
+    for (i, raw) in text.lines().enumerate() {
+        if let Some(d) = w
+            .walk_line(raw, i + 1, FileId(0))
+            .map_err(|e| macros::remap_lines(e, origins))?
+        {
             w.nodes.push(ca65_flat::unresolved_node(d));
         }
     }
-    w.flush_trailing(source.lines().count() as u32);
+    w.flush_trailing(text.lines().count() as u32);
+    macros::place_nodes(&mut w.nodes, origins);
     Ok(Program { nodes: w.nodes })
 }
 
@@ -201,6 +213,16 @@ impl Walker {
 }
 
 impl FlatWalk for Walker {
+    fn nodes_mut(&mut self) -> &mut Vec<Node> {
+        &mut self.nodes
+    }
+
+    /// The multi-file walk expands too, or macros would work when a file is
+    /// assembled alone and vanish the moment it is included from another.
+    fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
+        ca65_flat::expand_ca65(source, macros::Expand::Yes)
+    }
+
     fn walk_line(
         &mut self,
         raw: &str,
@@ -804,6 +826,28 @@ mod tests {
         assert_eq!(
             bytes(" tai $1000, $2000, $0010\n"),
             vec![0xF3, 0x00, 0x10, 0x00, 0x20, 0x10, 0x00]
+        );
+    }
+
+    /// The macro grammar is the ca65 family's, in `ca65_flat`, so it arrives
+    /// here for free — which is worth one test rather than none, because
+    /// "for free" is a claim about wiring and the wiring is per-dialect.
+    ///
+    /// The HuC6280 body is deliberately native: `.local` scoping is proved on
+    /// this CPU's own encoder, not on the 65816's.
+    #[test]
+    fn macros_reach_this_dialect_too() {
+        assert_eq!(
+            bytes(".macro two\n nop\n nop\n.endmacro\n two\n"),
+            vec![0xEA, 0xEA]
+        );
+        assert_eq!(
+            bytes(".macro ldav v\n lda #v\n.endmacro\n ldav 5\n"),
+            vec![0xA9, 0x05]
+        );
+        assert_eq!(
+            bytes(".macro delay\n.local spin\nspin: dex\n bne spin\n.endmacro\n delay\n delay\n"),
+            vec![0xCA, 0xD0, 0xFD, 0xCA, 0xD0, 0xFD]
         );
     }
 }
