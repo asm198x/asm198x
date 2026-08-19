@@ -22,8 +22,18 @@ use crate::span::{FileId, Span};
 /// The result of a successful assembly: where it loads and the bytes to load.
 #[derive(Debug, Clone)]
 pub struct Assembly {
-    /// Load address (first origin directive, or 0 if none given).
+    /// Load address (first origin directive, or 0 if none given). On a dialect
+    /// whose toolchain reserves rather than materialises, a leading gap moves
+    /// this past the unwritten region — see `reserved_prefix`.
     pub origin: u16,
+    /// Address units of leading `org` gap or reservation dropped from the front
+    /// of the image, so `origin` is that far above where the source's own
+    /// addresses start (#90). Zero on every dialect that materialises its gaps.
+    ///
+    /// Debug offsets are relative to the source's origin — `origin -
+    /// reserved_prefix` — not to `origin`, because they are captured before the
+    /// trim. A consumer splitting them into sections uses this as the boundary.
+    pub reserved_prefix: u16,
     /// Assembled machine code, contiguous from `origin`.
     pub bytes: Vec<u8>,
     /// Resolved labels, for listings and debugging. Values are `i64` to hold
@@ -567,7 +577,7 @@ fn assemble_statements(
             Some(Operation::Align { andmask, value, .. }) => pc += (value - pc) & andmask,
         }
     }
-    let origin = origin.unwrap_or(0);
+    let mut origin = origin.unwrap_or(0);
 
     // Pass 2 — emit.
     let byte_policy = dialect.oversized_byte_policy();
@@ -577,6 +587,11 @@ fn assemble_statements(
     // on a dialect whose toolchain reserves rather than materialises, anything
     // past this point is trimmed (see `Dialect::trims_trailing_gap`).
     let mut written_len = 0usize;
+    // Where the first written byte landed. Anything before it is `org` gap or
+    // reservation, which `p2bin` does not put in the image at all — it starts
+    // the file at the lowest *written* address, so a leading gap shifts the
+    // load address instead of padding it.
+    let mut written_start: Option<usize> = None;
     let mut warnings: Vec<Warning> = Vec::new();
     let mut start: Option<u16> = None;
     let mut bytes: Vec<u8> = Vec::new();
@@ -842,6 +857,9 @@ fn assemble_statements(
         );
         if !matches!(s.op, Some(Operation::Org(_)) | Some(Operation::Reserve(_))) {
             written_len = bytes.len();
+            if bytes.len() > len_before {
+                written_start.get_or_insert(len_before);
+            }
         }
         if source_bearing && bytes.len() > len_before {
             debug.lines.push(LineRec {
@@ -889,14 +907,30 @@ fn assemble_statements(
         }
     }
 
-    // asl reserves rather than materialises: `p2bin` fills only the gaps inside
-    // the written range, so a trailing reservation is absent from the image.
+    // asl reserves rather than materialises: `p2bin` fills only the gaps *inside*
+    // the written range. Outside it, both ends fall away — a trailing
+    // reservation is absent from the image, and a leading one moves where the
+    // image starts rather than padding it. The two trims are the same rule read
+    // from each end, so they live together (#66, #90).
+    let mut reserved_prefix = 0u16;
     if dialect.trims_trailing_gap() {
         bytes.truncate(written_len);
+        match written_start {
+            Some(first) if first > 0 => {
+                bytes.drain(..first);
+                let units = first as i64 / addr_unit;
+                origin += units;
+                reserved_prefix = units as u16;
+            }
+            // Nothing was ever written, so `truncate` already emptied the image
+            // and there is no load address to move.
+            _ => {}
+        }
     }
 
     Ok(Assembly {
         origin: origin as u16,
+        reserved_prefix,
         bytes,
         symbols,
         start,

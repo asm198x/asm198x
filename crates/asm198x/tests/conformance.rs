@@ -1388,3 +1388,82 @@ fn differential_fuzz_bytewise() {
     );
     assert!(checked > 0, "no fuzzing ran — no tools present?");
 }
+
+/// #66 and #90 — unwritten space, arbitrated against the real pipeline for the
+/// whole asl family rather than the one chip the bugs were filed against.
+///
+/// `asl` reserves without writing, and `p2bin` materialises from the lowest
+/// written address to the highest. So the interior of the written range is
+/// filled (`$FF`), and both ends fall away: a trailing reservation is simply
+/// absent, and a leading one moves where the image starts. All three shapes are
+/// one rule read from different places, which is why they are probed together.
+///
+/// #85's lesson is why this sweeps the family: the reserve behaviour was
+/// *likely* uniform across the asl chips, and "likely" is what punished us.
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn unwritten_space_matches_p2bin_across_the_asl_family() {
+    if !(have("asl") && have("p2bin")) {
+        eprintln!("SKIP: `asl`/`p2bin` not on PATH");
+        return;
+    }
+    let tmp = std::env::temp_dir().join("asm198x-gaps");
+    let _ = fs::create_dir_all(&tmp);
+
+    type Assemble = fn(&str) -> Result<asm198x::AssemblyResult, asm198x::AsmError>;
+    // (our dialect, asl's CPU name, the reserve directive). Note asl spells the
+    // TMS7000 `TMS70C00`; the bare part number is not a CPU it knows.
+    let family: &[(&str, &str, &str, Assemble)] = &[
+        ("8080", "8080", "ds", asm198x::assemble_i8080),
+        ("6800", "6800", "rmb", asm198x::assemble_m6800),
+        ("1802", "1802", "ds", asm198x::assemble_1802),
+        ("8048", "8048", "ds", asm198x::assemble_8048),
+        ("scmp", "SC/MP", "ds", asm198x::assemble_scmp),
+        ("2650", "2650", "ds", asm198x::assemble_2650),
+        ("tms7000", "TMS70C00", "ds", asm198x::assemble_tms7000),
+    ];
+
+    let mut checked = 0usize;
+    let mut mismatches: Vec<String> = Vec::new();
+    for (dialect, cpu, res, assemble) in family {
+        for (shape, body) in [
+            ("leading", format!(" org 0\n {res} 3\n db 9\n")),
+            ("interior", format!(" org 0\n db 1\n {res} 2\n db 9\n")),
+            ("trailing", format!(" org 0\n db 9\n {res} 2\n")),
+            ("leading org gap", " org 0\n org 5\n db 9\n".to_string()),
+        ] {
+            let reference = ref_assemble(
+                &tmp,
+                &format!(" cpu {cpu}\n{body} end\n"),
+                "asm",
+                |src, out| {
+                    let obj = src.with_extension("p");
+                    let mut a = Command::new("asl");
+                    a.arg("-q").arg(src).arg("-o").arg(&obj);
+                    let mut b = Command::new("p2bin");
+                    b.arg(&obj).arg(out);
+                    vec![a, b]
+                },
+            );
+            let Some(reference) = reference else {
+                mismatches.push(format!("{dialect} {shape}: asl/p2bin rejected the probe"));
+                continue;
+            };
+            let ours = assemble(&body).expect("assemble").bytes;
+            checked += 1;
+            if ours != reference {
+                mismatches.push(format!(
+                    "{dialect} {shape}: ours {ours:02X?} vs asl+p2bin {reference:02X?}"
+                ));
+            }
+        }
+    }
+
+    assert!(
+        mismatches.is_empty(),
+        "{} of {checked} unwritten-space probes diverge:\n  {}",
+        mismatches.len(),
+        mismatches.join("\n  ")
+    );
+    assert!(checked > 0, "no probes ran — no tools present?");
+}

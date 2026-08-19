@@ -94,6 +94,7 @@ mod tests {
     fn asm(bytes: Vec<u8>, origin: u16, start: Option<u16>) -> AssemblyResult {
         crate::engine::Assembly {
             origin,
+            reserved_prefix: 0,
             bytes,
             symbols: std::collections::BTreeMap::new(),
             start,

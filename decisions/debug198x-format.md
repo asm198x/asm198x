@@ -198,6 +198,44 @@ reasoning. The draft never waits open-endedly by default.
   competent importer got it wrong, and closing it is the durable half of this
   note.
 
+- **2026-08-19 — a trimmed leading gap gets its own section (#90).** On the
+  asl-family dialects, `p2bin` starts the image at the lowest *written*
+  address, so a leading `org` gap or reservation is absent from the file
+  rather than padding it. Fixing the byte-level divergence moves
+  `Assembly::origin` above where the source's own addresses start, and that
+  collides with the format: `SymbolKind::Label` carries an **unsigned**
+  section-relative `offset`, so a label in the dropped region —
+  `buf: ds 256` before the code, ordinary assembly style rather than a corner
+  case — has no representable location.
+
+  The dropped region therefore becomes **its own section**: `name: "reserved"`,
+  `base` at the source's original origin, contributing no bytes to the image.
+  Symbols below the boundary are placed in it; line spans for it are dropped,
+  since a span describes bytes that exist and these do not. This is a usage
+  decision, **not a format change** — no field, record, or `format_version`
+  moved, and the freeze holds. It uses `sections` as the list it already is,
+  the way a BSS region has always been expressed.
+
+  Two consequences worth stating, because both are the kind that bite later:
+
+  - **`main` keeps section id 0.** The approved sketch numbered the reserved
+    section 0 and pushed `main` to 1, which reads better in isolation but
+    would renumber the one section every other sidecar has — changing the
+    output of every flat assemble on every dialect to accommodate a case
+    almost no source hits. A sidecar with no leading gap is byte-identical to
+    what shipped before this note; the reserved section takes the next free id
+    and appears only when there is one.
+  - **A consumer must not assume one section means one contiguous image.**
+    Emu198x reads these. A `reserved` section has a `base` and no bytes, so
+    anything that maps sections to file offsets by accumulating lengths needs
+    to skip it. That is already true of the ca65 and vasm linked paths, so it
+    is not a new class of thing — but it now reaches the flat path, which is
+    where a consumer is most likely to have assumed otherwise.
+
+  `AssemblyResult::reserved_prefix` carries the boundary to the emission
+  layer, additive under R7 and omitted from the JSON when zero.
+
+
 ## Coverage and accepted gaps
 
 The v0 corpus covers: z80-spectrum (flat engine + entry symbol), 6502-c64
