@@ -1,0 +1,4 @@
+# `cargo xtask <command>` — repository automation that is not part of the
+# shipped workspace. See xtask/src/main.rs.
+[alias]
+xtask = "run --quiet --package xtask --"

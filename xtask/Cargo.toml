@@ -1,0 +1,15 @@
+[package]
+name = "xtask"
+description = "Repository automation for Asm198x: arbitration-coverage accounting over the verdict corpus, and the per-release conformance ledger. Never shipped — `cargo xtask <command>` only."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+[dependencies]
+isa = { path = "../crates/isa" }
+verdict-corpus = { path = "../crates/verdict-corpus" }
+
+[lints]
+workspace = true

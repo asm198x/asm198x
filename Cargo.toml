@@ -20,6 +20,8 @@ members = [
     # Test infrastructure: the recorded reference-assembler verdicts CI replays
     # with no tools installed. Never a dependency of the shipped binary.
     "crates/verdict-corpus",
+    # Repository automation (`cargo xtask …`). Never shipped, never dist-ed.
+    "xtask",
 ]
 default-members = ["crates/asm198x"]
 

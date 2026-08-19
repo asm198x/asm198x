@@ -1,0 +1,99 @@
+//! `cargo xtask <command>` — repository automation.
+//!
+//! Not part of the shipped workspace: no binary anyone installs, excluded from
+//! `default-members`, untagged by release-plz and invisible to `dist`. It exists
+//! so accounting over the verdict corpus (#61) can be run and checked the same
+//! way locally and in CI, without a shell script that drifts from what the
+//! corpus actually holds.
+
+mod coverage;
+
+use std::path::PathBuf;
+use std::process::ExitCode;
+
+fn main() -> ExitCode {
+    let args: Vec<String> = std::env::args().skip(1).collect();
+    match args.first().map(String::as_str) {
+        Some("coverage") => run_coverage(&args[1..]),
+        Some(other) => {
+            eprintln!("xtask: unknown command `{other}`\n\n{}", usage());
+            ExitCode::FAILURE
+        }
+        None => {
+            println!("{}", usage());
+            ExitCode::SUCCESS
+        }
+    }
+}
+
+fn usage() -> String {
+    "cargo xtask — Asm198x repository automation\n\n\
+     commands:\n\
+     \x20 coverage            report arbitration coverage over the verdict corpus\n\
+     \x20 coverage --check    fail if any CPU's coverage fell below the stamp\n\
+     \x20 coverage --write    refresh the stamp\n"
+        .to_string()
+}
+
+/// The repository root: this crate's manifest directory's parent.
+fn repo() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR"))
+        .parent()
+        .map(PathBuf::from)
+        .unwrap_or_default()
+}
+
+fn run_coverage(args: &[String]) -> ExitCode {
+    let repo = repo();
+    let report = coverage::compute(&repo);
+    let rendered = coverage::render_stamp(&report);
+    let path = coverage::stamp_path(&repo);
+
+    if args.iter().any(|a| a == "--write") {
+        if let Err(e) = std::fs::write(&path, &rendered) {
+            eprintln!("xtask: could not write {}: {e}", path.display());
+            return ExitCode::FAILURE;
+        }
+        println!("wrote {}", path.display());
+        return ExitCode::SUCCESS;
+    }
+
+    if args.iter().any(|a| a == "--check") {
+        let Ok(existing) = std::fs::read_to_string(&path) else {
+            eprintln!(
+                "xtask: no coverage stamp at {} — create it with `cargo xtask coverage --write`",
+                path.display()
+            );
+            return ExitCode::FAILURE;
+        };
+        let regressions = coverage::regressions(&report, &coverage::parse_stamp(&existing));
+        if regressions.is_empty() {
+            println!("arbitration coverage holds against the stamp");
+            return ExitCode::SUCCESS;
+        }
+        eprintln!(
+            "arbitration coverage fell — {} CPU(s) now arbitrate less than the stamp records:",
+            regressions.len()
+        );
+        for drop in &regressions {
+            eprintln!(
+                "  {}: {}.{}% -> {}.{}%",
+                drop.cpu,
+                drop.was / 10,
+                drop.was % 10,
+                drop.now / 10,
+                drop.now % 10
+            );
+        }
+        eprintln!(
+            "\nSomething stopped being arbitrated. Either recover it with a live \
+             recording run, or accept the loss deliberately: `cargo xtask coverage \
+             --write`, and say in the commit which cases went and why. The stamp is \
+             the record of that debt, so it must not move silently."
+        );
+        return ExitCode::FAILURE;
+    }
+
+    print!("{rendered}");
+    ExitCode::SUCCESS
+}

@@ -64,3 +64,8 @@ git_tag_enable = false
 [[package]]
 name = "verdict-corpus"
 git_tag_enable = false
+
+# xtask is repository automation — no binary anyone installs, no consumers.
+[[package]]
+name = "xtask"
+git_tag_enable = false

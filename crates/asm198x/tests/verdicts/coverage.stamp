@@ -1,0 +1,46 @@
+# Arbitration coverage — forms with a recorded reference verdict.
+# Regenerate with `cargo xtask coverage --write`.
+# A drop here means a change stopped arbitrating something; say why
+# in the commit, and record the debt if it is not being recovered now.
+# Below 100% is not automatically wrong: the 8039 forbids the four
+# BUS-port ops its ROM-less bus is committed to, and the audit skips
+# them deliberately. What matters is the number not falling.
+1802	255/255	100.0%
+2650	245/245	100.0%
+6502	151/151	100.0%
+6800	197/197	100.0%
+65816	270/270	100.0%
+8039	210/214	98.1%
+8048	214/214	100.0%
+8080	244/244	100.0%
+F8	253/253	100.0%
+SC/MP	121/121	100.0%
+TMS7000	203/203	100.0%
+Z80	704/704	100.0%
+huc6280	234/234	100.0%
+sm83	504/504	100.0%
+#
+# Verdicts held, by CPU and suite (counted, not scored — these
+# suites have no denominator that ought to exist).
+# 1802	form=255
+# 2650	form=245
+# 6502	curriculum=97 form=151 fuzz=100 probe=22
+# 65816	form=270 probe=12
+# 6800	form=197
+# 68000	curriculum=53 fuzz=100 probe=19 sweep-chunk=160
+# 6809	fuzz=100 probe=13 sweep-chunk=89
+# 8039	form=210
+# 8048	form=214
+# 8080	form=244
+# CP1610	sweep-chunk=50
+# F8	form=253
+# PDP-11	sweep-chunk=78
+# SC/MP	form=121
+# TMS7000	form=203
+# TMS9900	sweep-chunk=56
+# Z80	curriculum=2 form=704 fuzz=100 probe=37
+# Z8000	sweep-chunk=96
+# Z8001	sweep-chunk=96
+# Z80N	probe=9
+# huc6280	form=234
+# sm83	form=504
