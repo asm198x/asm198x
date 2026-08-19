@@ -29,7 +29,11 @@
 
 use std::fs;
 use std::path::Path;
+
+mod support;
+
 use std::process::Command;
+use verdict_corpus::Suite;
 
 fn have(bin: &str) -> bool {
     Command::new(bin).output().is_ok()
@@ -185,19 +189,25 @@ fn reference(tmp: &Path, dialect: &str, body: &str) -> Option<Vec<u8>> {
 
 /// Assemble `body` with our library; `None` if we reject it.
 fn ours(dialect: &str, body: &str) -> Option<Vec<u8>> {
+    // Framing lives in `support::verdicts` so live arbitration and the tool-free
+    // replay assemble a probe identically. Two copies drifting by one line would
+    // make every replay lookup miss and leave that suite green while checking
+    // nothing (#61).
+    support::verdicts::assemble_probe(dialect, body)?.ok()
+}
+
+/// Which CPU's corpus a probe's verdict belongs in. `z80n` is kept apart from
+/// `Z80`: the Next's extension is a different instruction set, and filing its
+/// facts under the base CPU would make the corpus claim more than it knows.
+fn probe_cpu(dialect: &str) -> &'static str {
     match dialect {
-        // ACME requires `*=` before code/data, so give `ours` the same `$0000`
-        // origin the reference gets (both assemble at our fixed origin).
-        "acme" => asm198x::assemble_acme(&format!("* = $0000\n{body}"))
-            .ok()
-            .map(|a| a.bytes),
-        "pasmo" => asm198x::assemble_pasmo(body).ok().map(|a| a.bytes),
-        "sjasmplus" => asm198x::assemble_sjasmplus(body).ok().map(|a| a.bytes),
-        "z80n" => asm198x::assemble_sjasmplus_next(body).ok().map(|a| a.bytes),
-        "lwasm" => asm198x::assemble_lwasm(body).ok().map(|a| a.bytes),
-        "vasm" => asm198x::assemble_vasm(body).ok().map(|a| a.bytes),
-        "ca65-816" => asm198x::assemble_ca65_816(body).ok().map(|a| a.bytes),
-        _ => None,
+        "acme" => "6502",
+        "pasmo" | "sjasmplus" => "Z80",
+        "z80n" => "Z80N",
+        "lwasm" => "6809",
+        "vasm" => "68000",
+        "ca65-816" => "65816",
+        other => panic!("no corpus CPU for dialect `{other}`"),
     }
 }
 
@@ -381,6 +391,7 @@ fn source_matches_reference() {
     let mut fixed: Vec<String> = Vec::new();
     let mut checked = 0usize;
     let mut skipped_tools: Vec<&str> = Vec::new();
+    let mut recorder = support::verdicts::Recorder::new();
 
     for p in PROBES {
         let bin = tool(p.dialect);
@@ -396,6 +407,29 @@ fn source_matches_reference() {
             continue;
         };
         checked += 1;
+        recorder.record(
+            support::verdicts::CaseRef {
+                suite: Suite::Probe,
+                cpu: probe_cpu(p.dialect),
+                tool: bin,
+                dialect: p.dialect,
+                case: p.note.to_string(),
+                source: p.body,
+            },
+            match p.gap {
+                // A tracked gap is a divergence, not a plain fact: the
+                // reference accepts and we knowingly do not match. The issue
+                // number is the join id, so the recorded half and the `gap(..)`
+                // marker in this file stay tied to each other.
+                Some(issue) => verdict_corpus::Outcome::Divergence {
+                    divergence: format!("issue-{issue}"),
+                    hex: verdict_corpus::encode_hex(&reference),
+                },
+                None => verdict_corpus::Outcome::Bytes {
+                    hex: verdict_corpus::encode_hex(&reference),
+                },
+            },
+        );
         let mine = ours(p.dialect, p.body);
         let matches = mine.as_deref() == Some(reference.as_slice());
         match p.gap {
@@ -413,9 +447,11 @@ fn source_matches_reference() {
         }
     }
 
+    let recorded = recorder.flush().expect("write the verdict corpus");
     for bin in &skipped_tools {
         eprintln!("SKIP: `{bin}` not on PATH");
     }
+    eprintln!("recorded {recorded} new verdict(s)");
     eprintln!(
         "differential: {checked} reference-accepted snippets checked, \
          {} known gaps still open",

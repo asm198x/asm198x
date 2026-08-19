@@ -232,6 +232,11 @@ pub enum Resolution<'a> {
         outcome: &'a Outcome,
         /// Distinct binary digests that produced it, sorted.
         corroborations: Vec<&'a str>,
+        /// One of the agreeing records, for the fields the key does not carry —
+        /// which suite recorded it, which CPU and dialect. A replay needs those
+        /// to know how to re-run the case, and they are identical across the
+        /// records that agree.
+        verdict: &'a Verdict,
     },
     /// Live records disagree about what the arbiter did. Not resolvable by
     /// recency: it needs a [`Supersede`].
@@ -335,6 +340,7 @@ impl Corpus {
             return Some(Resolution::Fact {
                 outcome: &first.outcome,
                 corroborations,
+                verdict: first,
             });
         }
         Some(Resolution::Alarm { conflicting: live })
@@ -560,9 +566,11 @@ mod tests {
             Some(Resolution::Fact {
                 outcome,
                 corroborations,
+                verdict,
             }) => {
                 assert_eq!(outcome.bytes(), Some(vec![0x3E, 0x12]));
                 assert_eq!(corroborations, vec!["sha-a", "sha-b"]);
+                assert_eq!(verdict.cpu, "8080", "the fact carries a record to read");
             }
             other => panic!("expected one corroborated fact, got {other:?}"),
         }

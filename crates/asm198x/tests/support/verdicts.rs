@@ -151,34 +151,65 @@ impl Recorder {
     }
 }
 
-/// Assemble `source` with our own assembler for `cpu`.
+/// Assemble a **form-audit** case with our own assembler.
 ///
-/// `None` for a CPU the replay does not know how to drive — which must read as
-/// "not replayable" rather than as a pass, or a corpus could grow facts nothing
+/// Its source is a complete listing our disassembler wrote, so it needs no
+/// framing. `asl` serves nine CPUs, so the dialect alone cannot pick the
+/// assembler — the pair does.
+///
+/// `None` for a case this replay cannot drive, which must read as "not
+/// replayable" rather than as a pass, or the corpus could grow facts nothing
 /// ever checks.
-pub fn assemble_ours(cpu: &str, source: &str) -> Option<Result<Vec<u8>, String>> {
-    let result = match cpu {
-        "6502" => asm198x::assemble_acme(source),
-        "Z80" => asm198x::assemble_pasmo(source),
-        "65816" => asm198x::assemble_ca65_816(source),
-        "huc6280" => asm198x::assemble_ca65_huc6280(source),
-        "sm83" => asm198x::assemble_rgbasm(source),
-        "8080" => asm198x::assemble_i8080(source),
-        "6800" => asm198x::assemble_m6800(source),
-        "1802" => asm198x::assemble_1802(source),
-        "8048" => asm198x::assemble_8048(source),
-        "8039" => asm198x::assemble_8039(source),
-        "SC/MP" => asm198x::assemble_scmp(source),
-        "F8" => asm198x::assemble_f8(source),
-        "2650" => asm198x::assemble_2650(source),
-        "TMS7000" => asm198x::assemble_tms7000(source),
+pub fn assemble_form(cpu: &str, dialect: &str, source: &str) -> Option<Result<Vec<u8>, String>> {
+    let result = match (dialect, cpu) {
+        ("acme", _) => asm198x::assemble_acme(source),
+        ("pasmo", _) => asm198x::assemble_pasmo(source),
+        ("ca65", "65816") => asm198x::assemble_ca65_816(source),
+        ("ca65", "huc6280") => asm198x::assemble_ca65_huc6280(source),
+        ("rgbasm", _) => asm198x::assemble_rgbasm(source),
+        ("asl", "8080") => asm198x::assemble_i8080(source),
+        ("asl", "6800") => asm198x::assemble_m6800(source),
+        ("asl", "1802") => asm198x::assemble_1802(source),
+        ("asl", "8048") => asm198x::assemble_8048(source),
+        ("asl", "8039") => asm198x::assemble_8039(source),
+        ("asl", "SC/MP") => asm198x::assemble_scmp(source),
+        ("asl", "F8") => asm198x::assemble_f8(source),
+        ("asl", "2650") => asm198x::assemble_2650(source),
+        ("asl", "TMS7000") => asm198x::assemble_tms7000(source),
         _ => return None,
     };
-    Some(
-        result
-            .map(|r| r.bytes)
-            .map_err(|e| format!("we rejected the source: {e}")),
-    )
+    Some(ours(result))
+}
+
+/// Assemble a **differential probe** with our own assembler.
+///
+/// A probe is a bare snippet, so each dialect frames it the way that dialect
+/// requires — ACME insists on an origin before any code, for instance. Live
+/// arbitration and replay both come through here, so the framing cannot differ
+/// between recording a fact and checking it. Two copies of this, drifting by
+/// one line, would make every replay lookup miss and leave the suite green
+/// while checking nothing.
+pub fn assemble_probe(dialect: &str, body: &str) -> Option<Result<Vec<u8>, String>> {
+    let result = match dialect {
+        // ACME requires `*=` before code or data, and the reference is given
+        // the same $0000 origin.
+        "acme" => asm198x::assemble_acme(&format!("* = $0000\n{body}")),
+        "pasmo" => asm198x::assemble_pasmo(body),
+        "sjasmplus" => asm198x::assemble_sjasmplus(body),
+        "z80n" => asm198x::assemble_sjasmplus_next(body),
+        "lwasm" => asm198x::assemble_lwasm(body),
+        "vasm" => asm198x::assemble_vasm(body),
+        "ca65-816" => asm198x::assemble_ca65_816(body),
+        _ => return None,
+    };
+    Some(ours(result))
+}
+
+/// Shared tail: bytes, or why we would not produce any.
+fn ours(result: Result<asm198x::AssemblyResult, asm198x::AsmError>) -> Result<Vec<u8>, String> {
+    result
+        .map(|r| r.bytes)
+        .map_err(|e| format!("we rejected the source: {e}"))
 }
 
 /// What a replay pass found.
@@ -198,14 +229,15 @@ pub struct ReplayReport {
 /// Replay every committed verdict for `cpu`.
 pub fn replay_cpu(cpu: &str, report: &mut ReplayReport) {
     let path = corpus_path(cpu);
-    let corpus = match Corpus::read(&path) {
-        Ok(c) => c,
-        Err(e) => {
-            report.failures.push(format!("{cpu}: {e}"));
-            return;
-        }
-    };
+    match Corpus::read(&path) {
+        Ok(corpus) => replay_corpus(cpu, &corpus, report),
+        Err(e) => report.failures.push(format!("{cpu}: {e}")),
+    }
+}
 
+/// Replay a corpus that is already in hand, so the rules can be tested against
+/// a constructed one rather than only against what happens to be committed.
+pub fn replay_corpus(cpu: &str, corpus: &Corpus, report: &mut ReplayReport) {
     for (key, resolution) in corpus.resolved() {
         match resolution {
             Resolution::Alarm { conflicting } => {
@@ -216,27 +248,51 @@ pub fn replay_cpu(cpu: &str, report: &mut ReplayReport) {
                     key.identity,
                 ));
             }
-            Resolution::Fact { outcome, .. } => {
-                // Only byte outcomes are replayable here. A recorded rejection
-                // says the reference refused source we never claim to accept;
-                // pairing that with our own behaviour is a separate question.
+            Resolution::Fact {
+                outcome, verdict, ..
+            } => {
                 let Some(reference) = outcome.bytes() else {
+                    // A recorded rejection says the reference refused source we
+                    // never claim to accept. Pairing that against our own
+                    // behaviour is a separate question from byte identity.
                     continue;
                 };
-                let Some(ours) = assemble_ours(cpu, &key.source) else {
+                let ours = match verdict.suite {
+                    Suite::Form => assemble_form(&verdict.cpu, &verdict.dialect, &key.source),
+                    Suite::Probe => assemble_probe(&verdict.dialect, &key.source),
+                    // The sweep, fuzzer and curriculum suites record nothing
+                    // yet; when they do, they bring their own replay with them.
+                    Suite::SweepChunk | Suite::Fuzz | Suite::Curriculum => None,
+                };
+                let Some(ours) = ours else {
                     report.unreplayable += 1;
                     continue;
                 };
                 report.checked += 1;
+
+                // A divergence is a *tracked* difference: the reference accepts
+                // and we knowingly do not match. Agreement is therefore the
+                // failure — the gap closed and its marker is now a lie.
+                if let Outcome::Divergence { divergence, .. } = outcome {
+                    if ours.as_deref() == Ok(reference.as_slice()) {
+                        report.failures.push(format!(
+                            "{cpu}: tracked divergence `{divergence}` now matches the \
+                             reference — delete its marker so the ledger stays honest\n{}",
+                            key.source
+                        ));
+                    }
+                    continue;
+                }
+
                 match ours {
                     Ok(bytes) if bytes == reference => {}
                     Ok(bytes) => report.failures.push(format!(
-                        "{cpu}: ours {:02X?} vs reference {:02X?} for source:\n{}",
-                        bytes, reference, key.source
+                        "{cpu} [{}]: ours {:02X?} vs reference {:02X?} for source:\n{}",
+                        verdict.dialect, bytes, reference, key.source
                     )),
                     Err(e) => report.failures.push(format!(
-                        "{cpu}: {e}\nreference produced {reference:02X?} for source:\n{}",
-                        key.source
+                        "{cpu} [{}]: {e}\nreference produced {reference:02X?} for source:\n{}",
+                        verdict.dialect, key.source
                     )),
                 }
             }
@@ -262,4 +318,116 @@ pub fn recorded_cpus() -> Vec<String> {
     found.sort();
     found.dedup();
     found
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use verdict_corpus::{Record, encode_hex};
+
+    /// A corpus of exactly one fact about the 8080, whose source our own
+    /// assembler can read.
+    fn one_fact(outcome: Outcome) -> Corpus {
+        let verdict = Verdict {
+            suite: Suite::Form,
+            cpu: "8080".to_string(),
+            dialect: "asl".to_string(),
+            case: "mvi a,imm".to_string(),
+            source: "\tcpu 8080\n\torg 00000H\n\tmvi a,012H\n".to_string(),
+            arbiter: Arbiter {
+                tool: "asl".to_string(),
+                identity: "test".to_string(),
+                digest: "test".to_string(),
+            },
+            outcome,
+        };
+        let line = verdict_corpus::to_line(&Record::Verdict(Box::new(verdict))).expect("line");
+        Corpus::parse(&line).expect("parse")
+    }
+
+    fn replay(outcome: Outcome) -> ReplayReport {
+        let mut report = ReplayReport::default();
+        replay_corpus("8080", &one_fact(outcome), &mut report);
+        report
+    }
+
+    /// The ordinary case: the reference's bytes are ours too.
+    #[test]
+    fn a_fact_we_still_match_replays_clean() {
+        let report = replay(Outcome::Bytes {
+            hex: encode_hex(&[0x3E, 0x12]),
+        });
+        assert_eq!(report.checked, 1);
+        assert!(report.failures.is_empty(), "{:?}", report.failures);
+    }
+
+    /// The regression this whole net exists to catch, proven to fail rather
+    /// than assumed to.
+    #[test]
+    fn a_fact_we_no_longer_match_fails() {
+        let report = replay(Outcome::Bytes {
+            hex: encode_hex(&[0x3E, 0x99]),
+        });
+        assert_eq!(report.checked, 1);
+        assert_eq!(report.failures.len(), 1, "{:?}", report.failures);
+        assert!(
+            report.failures[0].contains("3E, 99"),
+            "{:?}",
+            report.failures
+        );
+    }
+
+    /// A tracked divergence is a claim that we *do not* match. While that holds,
+    /// replay is quiet.
+    #[test]
+    fn a_divergence_that_still_diverges_replays_clean() {
+        let report = replay(Outcome::Divergence {
+            divergence: "issue-99".to_string(),
+            hex: encode_hex(&[0x3E, 0x99]),
+        });
+        assert!(report.failures.is_empty(), "{:?}", report.failures);
+    }
+
+    /// And when the gap closes, the marker becomes a lie — so replay fails,
+    /// naming the divergence, rather than letting a stale ledger stand.
+    #[test]
+    fn a_divergence_that_now_matches_fails() {
+        let report = replay(Outcome::Divergence {
+            divergence: "issue-99".to_string(),
+            hex: encode_hex(&[0x3E, 0x12]),
+        });
+        assert_eq!(report.failures.len(), 1, "{:?}", report.failures);
+        assert!(
+            report.failures[0].contains("issue-99") && report.failures[0].contains("delete"),
+            "{:?}",
+            report.failures
+        );
+    }
+
+    /// A CPU no replay can drive counts as unreplayable, never as a pass.
+    #[test]
+    fn a_cpu_we_cannot_drive_is_not_a_silent_pass() {
+        let mut report = ReplayReport::default();
+        let corpus = one_fact(Outcome::Bytes {
+            hex: encode_hex(&[0x3E, 0x12]),
+        });
+        // Same corpus, but asked for under a CPU whose dialect pair is unknown.
+        let rewritten = corpus
+            .verdicts()
+            .map(|v| {
+                let mut v = v.clone();
+                v.dialect = "no-such-dialect".to_string();
+                Record::Verdict(Box::new(v))
+            })
+            .collect::<Vec<_>>();
+        let text = rewritten
+            .iter()
+            .map(|r| verdict_corpus::to_line(r).expect("line"))
+            .collect::<Vec<_>>()
+            .join("\n");
+        replay_corpus("8080", &Corpus::parse(&text).expect("parse"), &mut report);
+        assert_eq!(report.checked, 0);
+        assert_eq!(report.unreplayable, 1);
+        assert!(report.failures.is_empty());
+    }
 }
