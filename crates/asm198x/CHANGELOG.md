@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.12](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.11...asm198x-v0.0.12) - 2026-08-19
+
+### Added
+
+- *(dist)* ship shell and PowerShell installers
+- *(dist)* publish a Homebrew formula to asm198x/homebrew-tap
+- *(cli)* [**breaking**] make the operation a subcommand
+
+### Fixed
+
+- *(cli)* say where `fmt` sent its output
+
+### Other
+
+- Merge pull request #91 from asm198x/link-leading-gap-issue
+- *(dialect)* point the leading-gap note at its issue
+
 ## [0.0.11](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.10...asm198x-v0.0.11) - 2026-08-18
 
 ### Fixed
