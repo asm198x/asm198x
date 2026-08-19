@@ -24,6 +24,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use isa::m68k::{self, EaModes, Size, SizeEnc, Slot, ea};
 
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, Resolution, WalkDirective, WalkSemantics};
+use super::macros;
 use super::mos6502::{self, is_ident, split_data_items, split_first_word, string_literal};
 use crate::engine::{AsmError, BinOp, Expr, Warning};
 use crate::listing::{DebugCapture, DebugCaptureMulti};
@@ -239,7 +240,11 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
 /// if the source uses more than one non-empty section.
 pub(crate) fn assemble_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError> {
     let mut warnings = Vec::new();
-    let (sections, _) = assemble_core(&parse_program(source)?, true, &mut warnings)?;
+    let (sections, _) = assemble_core(
+        &parse_program(source, macros::Expand::Yes)?,
+        true,
+        &mut warnings,
+    )?;
     let bytes = flatten_one_section(&sections)?;
     Ok((bytes, warnings))
 }
@@ -304,7 +309,11 @@ fn rebase_flat_capture(sections: &[SecOut], capture: &mut DebugCaptureMulti) {
 /// section carries bytes (a flat binary can hold only one).
 pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, AsmError> {
     let mut warnings = Vec::new();
-    let (sections, _) = assemble_core(&parse_program(source)?, optimize, &mut warnings)?;
+    let (sections, _) = assemble_core(
+        &parse_program(source, macros::Expand::Yes)?,
+        optimize,
+        &mut warnings,
+    )?;
     flatten_one_section(&sections)
 }
 
@@ -330,7 +339,11 @@ pub(crate) fn assemble_exe(source: &str) -> Result<Vec<u8>, AsmError> {
     // The hunk-exe path discards warnings for now (the CLI surfaces them on the
     // flat path via `assemble_warned`); the bytes are unaffected either way.
     let mut warnings = Vec::new();
-    let (sections, _) = assemble_core(&parse_program(source)?, true, &mut warnings)?;
+    let (sections, _) = assemble_core(
+        &parse_program(source, macros::Expand::Yes)?,
+        true,
+        &mut warnings,
+    )?;
     Ok(serialize_hunkexe(&sections))
 }
 
@@ -343,7 +356,11 @@ pub(crate) fn assemble_warned_with_debug(
     source: &str,
 ) -> Result<(Vec<u8>, Vec<Warning>, DebugCapture), AsmError> {
     let mut warnings = Vec::new();
-    let (sections, mut capture) = assemble_core(&parse_program(source)?, true, &mut warnings)?;
+    let (sections, mut capture) = assemble_core(
+        &parse_program(source, macros::Expand::Yes)?,
+        true,
+        &mut warnings,
+    )?;
     let bytes = flatten_one_section(&sections)?;
     rebase_flat_capture(&sections, &mut capture);
     // The single-source API keeps its exact pre-multi-file record shape:
@@ -359,7 +376,11 @@ pub(crate) fn assemble_warned_with_debug(
 /// As [`assemble_exe`].
 pub(crate) fn assemble_exe_with_debug(source: &str) -> Result<(Vec<u8>, DebugCapture), AsmError> {
     let mut warnings = Vec::new();
-    let (sections, capture) = assemble_core(&parse_program(source)?, true, &mut warnings)?;
+    let (sections, capture) = assemble_core(
+        &parse_program(source, macros::Expand::Yes)?,
+        true,
+        &mut warnings,
+    )?;
     Ok((serialize_hunkexe(&sections), capture.into_single()))
 }
 
@@ -1486,14 +1507,28 @@ struct Line {
 /// Single-source: an `include`/`incbin` stays an **unresolved** item (KTD1) —
 /// `--fmt` renders the directive verbatim without opening the target, and the
 /// assembly projection rejects it with a pointer to the multi-file entry.
-pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
+pub(crate) fn parse_program(
+    source: &str,
+    mode: macros::Expand,
+) -> Result<crate::ast::Program, AsmError> {
+    // Macros expand before parsing (#93), but only for assembly: the formatter
+    // asks with `Expand::No`, because laying source out must not replace a
+    // definition with its expansions.
+    let expanded = expand_vasm(source, mode)?;
+    let text = macros::expanded_text(&expanded, source);
+    let origins = macros::line_origins(&expanded);
     let mut w = Walker::default();
-    for (i, raw) in source.lines().enumerate() {
-        if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
+    for (i, raw) in text.lines().enumerate() {
+        if let Some(d) = w
+            .walk_line(raw, i + 1, FileId(0))
+            .map_err(|e| macros::remap_lines(e, origins))?
+        {
             w.nodes.push(ca65_flat::unresolved_node(d));
         }
     }
-    Ok(w.finish(source.lines().count() as u32))
+    let mut program = w.finish(text.lines().count() as u32);
+    macros::place_nodes(&mut program.nodes, origins);
+    Ok(program)
 }
 
 /// Parse a multi-file 68000 program (language-surface U6, KTD1): the
@@ -1605,6 +1640,12 @@ impl Walker {
 impl FlatWalk for Walker {
     fn nodes_mut(&mut self) -> &mut Vec<crate::ast::Node> {
         &mut self.nodes
+    }
+
+    /// The multi-file walk expands too, or macros would work when a file is
+    /// assembled alone and vanish the moment it is included from another.
+    fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
+        expand_vasm(source, macros::Expand::Yes)
     }
 
     fn walk_line(
@@ -2302,4 +2343,97 @@ fn split_operands(args: &str) -> Vec<&str> {
     }
     out.push(args[start..].trim());
     out
+}
+
+// ---------------------------------------------------------------------------
+// Macros (#93)
+//
+// The mechanics live in [`crate::dialects::macros`]; this is vasm's grammar,
+// measured against vasm 1.9. It shares lwasm's positional parameters and
+// differs on both of the other axes:
+//
+//   * a definition may be written either way round, `name macro` or
+//     ` macro name`, where lwasm rejects the second (`Missing macro name`).
+//   * a per-expansion name is spelled `spin\@`, and `\@` is a *substitution*
+//     rather than a scoping rule — it may appear mid-name and in as many names
+//     as the body likes. lwasm's `?`/`@` suffixes are not vasm's.
+//
+// Arity is unchecked in both directions, like lwasm and pasmo: extras are
+// dropped, a missing argument substitutes empty and the emptied operand
+// complains (`number or identifier expected`).
+// ---------------------------------------------------------------------------
+
+/// vasm's macro grammar.
+struct VasmMacros;
+
+impl macros::MacroSyntax for VasmMacros {
+    /// `name macro` or ` macro name` — vasm takes both.
+    fn header(&self, line: &str) -> Option<(String, Vec<String>)> {
+        let text = macros::without_comment(line);
+        let trimmed = text.trim();
+        let (first, rest) = trimmed.split_once(char::is_whitespace)?;
+        if first.eq_ignore_ascii_case("macro") {
+            let name = rest.trim();
+            return (!name.is_empty()).then(|| (name.to_string(), Vec::new()));
+        }
+        // Name first: only in label position, or it is a mnemonic.
+        if text.starts_with(char::is_whitespace) {
+            return None;
+        }
+        rest.trim()
+            .eq_ignore_ascii_case("macro")
+            .then(|| (first.trim_end_matches(':').to_string(), Vec::new()))
+    }
+
+    fn is_end(&self, line: &str) -> bool {
+        macros::without_comment(line)
+            .trim()
+            .eq_ignore_ascii_case("endm")
+    }
+
+    fn end_keyword(&self) -> &'static str {
+        "endm"
+    }
+
+    /// None. vasm scopes no name by its spelling — a label in a body is
+    /// global, and a second expansion gets `label <spin> redefined`. Per
+    /// expansion uniqueness comes from [`expansion_token`](Self::expansion_token)
+    /// instead, which the author must ask for.
+    fn locals(&self, _body: &[String]) -> Vec<String> {
+        Vec::new()
+    }
+
+    /// `\1`, `\2`, … for as many arguments as the call site passed.
+    fn argument_names(&self, _declared: &[String], count: usize) -> Vec<String> {
+        (1..=count).map(|n| format!("\\{n}")).collect()
+    }
+
+    /// A backslash opens a positional parameter, so it must be inside the token
+    /// for substitution to see it.
+    fn is_symbol_char(&self, c: u8) -> bool {
+        c.is_ascii_alphanumeric() || c == b'_' || c == b'.' || c == b'\\'
+    }
+
+    /// `\@` numbers each expansion, so `spin\@` is a fresh label every time.
+    fn expansion_token(&self) -> Option<&'static str> {
+        Some("\\@")
+    }
+
+    /// vasm checks nothing: extras are dropped, and a missing argument
+    /// substitutes empty so the complaint arrives from the operand it emptied.
+    fn fit_arguments(
+        &self,
+        _name: &str,
+        _params: &[String],
+        args: Vec<String>,
+    ) -> Result<Vec<String>, String> {
+        Ok(args)
+    }
+}
+
+/// Expand vasm's macros, unless this parse is the formatter's.
+fn expand_vasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion, AsmError> {
+    macros::expansion(mode, source, |s| {
+        macros::expand(&VasmMacros, s).map(|e| Some((e.text, e.origins)))
+    })
 }

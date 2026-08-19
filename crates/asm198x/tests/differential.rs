@@ -335,7 +335,7 @@ const PROBES: &[Probe] = &[
     // The spellings do not converge, which is why #93 insists on per-dialect
     // fidelity rather than a house macro system:
     //   MACRO name  / ENDM      sjasmplus, pasmo, rgbasm
-    //   name MACRO  / ENDM      asl, lwasm, vasm, pasmo
+    //   name MACRO  / ENDM      asl, lwasm (implemented), vasm (implemented), pasmo
     //   .macro name / .endmacro ca65 (implemented)
     //   !macro name { }         acme
     gap("acme", "macro definition and invocation",
@@ -418,14 +418,40 @@ const PROBES: &[Probe] = &[
         " MACRO m\n nop\n ENDM\n DUP 2\n m\n EDUP\n"),
     ok ("sjasmplus", "DUP inside a macro",
         " MACRO m\n DUP 2\n nop\n EDUP\n ENDM\n m\n"),
-    gap("lwasm", "macro definition and invocation",
-        "nop2\tmacro\n nop\n nop\n endm\n nop2\n", 93),
-    gap("lwasm", "macro with a positional parameter",
-        "ldav\tmacro\n lda #\\1\n endm\n ldav 5\n", 93),
-    gap("vasm", "macro definition and invocation",
-        "nop2\tmacro\n nop\n nop\n endm\n nop2\n", 93),
-    gap("vasm", "macro with a positional parameter",
-        "ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5\n", 93),
+    ok ("lwasm", "macro definition and invocation",
+        "nop2\tmacro\n nop\n nop\n endm\n nop2\n"),
+    ok ("lwasm", "macro with a positional parameter",
+        "ldav\tmacro\n lda #\\1\n endm\n ldav 5\n"),
+    ok ("lwasm", "two positional parameters",
+        "ldav\tmacro\n lda #\\1\n ldb #\\2\n endm\n ldav 5,7\n"),
+    // lwasm marks a local with a `?` or `@` **suffix** — a third spelling of
+    // locals across four dialects, and one its own parser strips.
+    ok ("lwasm", "a ? suffix scopes a label to its expansion",
+        "delay\tmacro\nspin? deca\n bne spin?\n endm\n delay\n delay\n"),
+    ok ("lwasm", "an @ suffix does the same",
+        "delay\tmacro\nspin@ deca\n bne spin@\n endm\n delay\n delay\n"),
+    // Arity is unchecked: the extra argument is dropped rather than rejected.
+    ok ("lwasm", "extra arguments are dropped",
+        "ldav\tmacro\n lda #\\1\n endm\n ldav 5,9\n"),
+    ok ("vasm", "macro definition and invocation",
+        "nop2\tmacro\n nop\n nop\n endm\n nop2\n"),
+    ok ("vasm", "macro with a positional parameter",
+        "ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5\n"),
+    ok ("vasm", "two positional parameters",
+        "ldav\tmacro\n move.l #\\1,d0\n move.l #\\2,d1\n endm\n ldav 5,7\n"),
+    // vasm also takes the definition keyword-first, which lwasm rejects with
+    // `Missing macro name`.
+    ok ("vasm", "macro defined keyword-first",
+        " macro nop2\n nop\n endm\n nop2\n"),
+    // `\@` numbers the expansion, so `spin\@` is a fresh label each time. The
+    // bodies below take the label's *address* rather than branching to it:
+    // vasm's branch sizing under `-no-opt` is #110's business, not macros'.
+    ok ("vasm", "the \\@ counter makes a label unique per expansion",
+        "mk\tmacro\nspin\\@ nop\n move.l #spin\\@,d0\n endm\n mk\n mk\n"),
+    ok ("vasm", "several \\@ names in one body stay distinct",
+        "mk\tmacro\nspin\\@ nop\nother\\@ nop\n move.l #spin\\@,d0\n move.l #other\\@,d1\n endm\n mk\n mk\n"),
+    ok ("vasm", "extra arguments are dropped",
+        "ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5,9\n"),
     ok ("ca65-816", "macro definition and invocation",
         ".macro nop2\n nop\n nop\n.endmacro\n nop2\n"),
     ok ("ca65-816", "macro with a parameter",

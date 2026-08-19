@@ -63,6 +63,49 @@ pub(crate) trait MacroSyntax {
         false
     }
 
+    /// How an invocation's arguments are spelled inside the body.
+    ///
+    /// A dialect that names its parameters in the header uses that list, which
+    /// is the default. lwasm and vasm name nothing: a body refers to `\1`,
+    /// `\2`, so the spellings depend on how many arguments arrived rather than
+    /// on the definition, and a macro's arity is whatever its call site says.
+    fn argument_names(&self, declared: &[String], count: usize) -> Vec<String> {
+        let _ = count;
+        declared.to_vec()
+    }
+
+    /// A token the body may use to make a name unique per expansion, replaced
+    /// by the expansion's number wherever it appears.
+    ///
+    /// vasm's `\@` — `spin\@` gives a distinct label each time the macro is
+    /// used. It is a substitution, not a scoping rule, which is why it is a
+    /// token here and not part of [`locals`](Self::locals): it can appear in
+    /// the middle of a name, and in more than one name per body.
+    fn expansion_token(&self) -> Option<&'static str> {
+        None
+    }
+
+    /// Whether `c` can appear inside a symbol, for word-boundary-aware
+    /// substitution.
+    ///
+    /// The default is the set every dialect shares. lwasm adds `?` and `@`,
+    /// which it allows as *suffixes* marking a symbol local to the expansion —
+    /// so without this, renaming `spin?` would rename the `spin` in front of a
+    /// character the substitution could not see.
+    fn is_symbol_char(&self, c: u8) -> bool {
+        c.is_ascii_alphanumeric() || c == b'_' || c == b'.'
+    }
+
+    /// What a local is called in expansion number `n`.
+    ///
+    /// The default appends a suffix, which is invisible to every parser here.
+    /// lwasm needs to override it: its locals are marked by a trailing `?` or
+    /// `@` that lwasm's own parser strips and ours does not, so the marker has
+    /// to go rather than end up buried mid-name.
+    fn rename_local(&self, name: &str, n: usize) -> String {
+        format!("{name}__{n}")
+    }
+
     /// Reconcile an invocation's arguments with the macro's parameters,
     /// returning the list to substitute or the message to reject it with.
     ///
@@ -140,12 +183,17 @@ pub(crate) fn without_comment(line: &str) -> &str {
 /// Both properties were measured, and a naive `replace` gets both wrong: a
 /// parameter `v` would corrupt the symbol `val`, and `db "v"` would emit the
 /// argument instead of the letter.
-pub(crate) fn substitute(line: &str, names: &[String], values: &[String]) -> String {
+pub(crate) fn substitute<S: MacroSyntax>(
+    syntax: &S,
+    line: &str,
+    names: &[String],
+    values: &[String],
+) -> String {
     if names.is_empty() {
         return line.to_string();
     }
     let bytes = line.as_bytes();
-    let word = |c: u8| c.is_ascii_alphanumeric() || c == b'_' || c == b'.';
+    let word = |c: u8| syntax.is_symbol_char(c);
     let mut out = String::with_capacity(line.len());
     let mut quote: Option<u8> = None;
     let mut i = 0;
@@ -282,6 +330,7 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
             let args = syntax
                 .fit_arguments(&name, &def.params, args)
                 .map_err(|msg| AsmError::new(origin.line, msg))?;
+            let params = syntax.argument_names(&def.params, args.len());
             if depth == MAX_EXPANSION_DEPTH {
                 return Err(AsmError::new(
                     origin.line,
@@ -295,7 +344,7 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
             let locals = syntax.locals(&def.body);
             let renamed: Vec<String> = locals
                 .iter()
-                .map(|local| format!("{local}__{expansions}"))
+                .map(|local| syntax.rename_local(local, expansions))
                 .collect();
             // The new frame goes in front, so the innermost expansion is named
             // first — the order the `included from` notes already use.
@@ -316,13 +365,18 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
                 if syntax.is_local_decl(body_line) {
                     continue;
                 }
-                let with_args = substitute(body_line, &def.params, &args);
+                let mut text = substitute(syntax, body_line, &params, &args);
+                if let Some(token) = syntax.expansion_token() {
+                    // A plain textual swap: the token is not a symbol, so the
+                    // word-boundary rules above would never see it.
+                    text = text.replace(token, &expansions.to_string());
+                }
                 next.push((
                     LineOrigin {
                         line: origin.line,
                         frames: frames.clone(),
                     },
-                    substitute(&with_args, &locals, &renamed),
+                    substitute(syntax, &text, &locals, &renamed),
                 ));
             }
         }

@@ -21,6 +21,7 @@ use std::collections::BTreeMap;
 use isa::mos6809::{self, Kind};
 
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
+use super::macros;
 use super::mos6502::{self, BytePrec, fold_const, split_first_word};
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
@@ -45,11 +46,12 @@ impl Dialect for Lwasm {
         // migrate: its instructions carry a precomputed `Operation::Encoded`
         // (postbyte + extension bytes), which the AST holds verbatim as
         // `Item::Encoded` and the formatter re-emits via `Node::source`.
-        crate::ast::lower(parse_program(source)?)
+        crate::ast::lower(parse_program(source, macros::Expand::Yes)?)
     }
 
     fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
-        Ok(Some(parse_program(source)?))
+        // The formatter must not expand — see `parse_program`.
+        Ok(Some(parse_program(source, macros::Expand::No)?))
     }
 
     /// The include-capable parse (language-surface U4): the interleaved,
@@ -78,14 +80,24 @@ impl Dialect for Lwasm {
 /// the target is never opened, so `--fmt` renders the directive verbatim and
 /// works with a missing target (U4, KTD1). Lazy resolution is
 /// [`parse_program_multi`]'s.
-pub(crate) fn parse_program(source: &str) -> Result<Program, AsmError> {
+pub(crate) fn parse_program(source: &str, mode: macros::Expand) -> Result<Program, AsmError> {
+    // Macros expand before parsing (#93), but only for assembly: the formatter
+    // asks with `Expand::No`, because laying source out must not replace a
+    // definition with its expansions.
+    let expanded = expand_lwasm(source, mode)?;
+    let text = macros::expanded_text(&expanded, source);
+    let origins = macros::line_origins(&expanded);
     let mut w = Walker::new();
-    for (i, raw) in source.lines().enumerate() {
-        if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
+    for (i, raw) in text.lines().enumerate() {
+        if let Some(d) = w
+            .walk_line(raw, i + 1, FileId(0))
+            .map_err(|e| macros::remap_lines(e, origins))?
+        {
             w.nodes.push(ca65_flat::unresolved_node(d));
         }
     }
-    w.flush_trailing(source.lines().count() as u32);
+    w.flush_trailing(text.lines().count() as u32);
+    macros::place_nodes(&mut w.nodes, origins);
     Ok(Program { nodes: w.nodes })
 }
 
@@ -301,6 +313,12 @@ fn file_name<'a>(
 impl FlatWalk for Walker {
     fn nodes_mut(&mut self) -> &mut Vec<Node> {
         &mut self.nodes
+    }
+
+    /// The multi-file walk expands too, or macros would work when a file is
+    /// assembled alone and vanish the moment it is included from another.
+    fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
+        expand_lwasm(source, macros::Expand::Yes)
     }
 
     fn walk_line(
@@ -933,6 +951,124 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
     )
 }
 
+// ---------------------------------------------------------------------------
+// Macros (#93)
+//
+// The mechanics live in [`crate::dialects::macros`]; this is lwasm's grammar,
+// measured against lwasm 4.19. It is the first dialect here whose parameters
+// have no names at all:
+//
+//   * a definition is `name macro` — **only** that way round. lwasm rejects
+//     ` macro name` with `Missing macro name`, where vasm takes both.
+//   * the body refers to `\1`, `\2`, so a macro's arity is decided at the call
+//     site, not the definition. Extra arguments are dropped; a missing one
+//     substitutes empty, and the emptied operand complains (`Bad operand`).
+//   * a symbol ending in `?` or `@` is local to the expansion, and invisible
+//     outside it (`Undefined symbol spin?`). It is a *suffix*, not a
+//     declaration and not a prefix — a third spelling of locals across four
+//     dialects.
+//
+// `\@`, vasm's per-expansion counter, is not lwasm's: `spin\@` is
+// `Bad symbol (spin\@)`.
+// ---------------------------------------------------------------------------
+
+/// lwasm's macro grammar.
+struct LwasmMacros;
+
+impl macros::MacroSyntax for LwasmMacros {
+    /// `name macro` — name first, and only name first.
+    fn header(&self, line: &str) -> Option<(String, Vec<String>)> {
+        let text = macros::without_comment(line);
+        // A definition names its macro in label position, so an indented
+        // `macro` is not one.
+        if text.starts_with(char::is_whitespace) {
+            return None;
+        }
+        let (name, rest) = text.trim_end().split_once(char::is_whitespace)?;
+        rest.trim()
+            .eq_ignore_ascii_case("macro")
+            .then(|| (name.trim_end_matches(':').to_string(), Vec::new()))
+    }
+
+    fn is_end(&self, line: &str) -> bool {
+        macros::without_comment(line)
+            .trim()
+            .eq_ignore_ascii_case("endm")
+    }
+
+    fn end_keyword(&self) -> &'static str {
+        "endm"
+    }
+
+    /// `\1`, `\2`, … for as many arguments as the call site passed.
+    fn argument_names(&self, _declared: &[String], count: usize) -> Vec<String> {
+        (1..=count).map(|n| format!("\\{n}")).collect()
+    }
+
+    /// A `?` or `@` suffix marks a symbol local to the expansion, and a
+    /// backslash opens a positional parameter — neither is a symbol character
+    /// anywhere else, and both must be inside the token for substitution to
+    /// see them at all.
+    fn is_symbol_char(&self, c: u8) -> bool {
+        c.is_ascii_alphanumeric() || c == b'_' || c == b'.' || c == b'?' || c == b'@' || c == b'\\'
+    }
+
+    /// The marker goes with the rename. lwasm strips a local's `?`/`@` itself;
+    /// our parser would read it as an unexpected character mid-expression.
+    fn rename_local(&self, name: &str, n: usize) -> String {
+        format!("{}__{n}", name.trim_end_matches(['?', '@']))
+    }
+
+    /// The suffixed symbols the body mentions. Unlike the declared-locals
+    /// dialects this scans *uses* as well as definitions, because the suffix
+    /// is the whole declaration.
+    fn locals(&self, body: &[String]) -> Vec<String> {
+        let mut names = Vec::new();
+        for line in body {
+            let text = macros::without_comment(line);
+            let bytes = text.as_bytes();
+            let mut i = 0;
+            while i < bytes.len() {
+                if !self.is_symbol_char(bytes[i]) || (i > 0 && self.is_symbol_char(bytes[i - 1])) {
+                    i += 1;
+                    continue;
+                }
+                let start = i;
+                while i < bytes.len() && self.is_symbol_char(bytes[i]) {
+                    i += 1;
+                }
+                let token = &text[start..i];
+                if token.len() > 1
+                    && token.ends_with(['?', '@'])
+                    && !token.starts_with(['?', '@'])
+                    && !names.iter().any(|n| n == token)
+                {
+                    names.push(token.to_string());
+                }
+            }
+        }
+        names
+    }
+
+    /// lwasm checks nothing: extras are dropped, and a missing argument
+    /// substitutes empty so the complaint arrives from the operand it emptied.
+    fn fit_arguments(
+        &self,
+        _name: &str,
+        _params: &[String],
+        args: Vec<String>,
+    ) -> Result<Vec<String>, String> {
+        Ok(args)
+    }
+}
+
+/// Expand lwasm's macros, unless this parse is the formatter's.
+fn expand_lwasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion, AsmError> {
+    macros::expansion(mode, source, |s| {
+        macros::expand(&LwasmMacros, s).map(|e| Some((e.text, e.origins)))
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use crate::assemble_lwasm as asm;
@@ -1143,7 +1279,7 @@ mod tests {
     #[test]
     fn comments_are_carried_as_trivia() {
         let src = "* header\nstart   lda #$05   ; load\n        leax 5,x\n";
-        let prog = super::parse_program(src).expect("parses");
+        let prog = super::parse_program(src, crate::dialects::macros::Expand::Yes).expect("parses");
         assert!(
             prog.nodes[0]
                 .trivia
@@ -1175,5 +1311,88 @@ mod tests {
                 .bytes,
             "comments do not change bytes"
         );
+    }
+
+    // ----- Macros (#93) -------------------------------------------------
+    //
+    // Every expectation is a byte string lwasm 4.19 produced for the same
+    // source, with `--6809 --raw`.
+
+    /// A definition is `name macro` and only that way round — lwasm rejects
+    /// ` macro name` with `Missing macro name`, where vasm takes both.
+    #[test]
+    fn macros_expand() {
+        assert_eq!(
+            asm("nop2\tmacro\n nop\n nop\n endm\n nop2\n")
+                .expect("nop2")
+                .bytes,
+            vec![0x12, 0x12]
+        );
+        asm(" macro nop2\n nop\n endm\n nop2\n").expect_err("lwasm has no keyword-first form");
+    }
+
+    /// Parameters have no names: a body refers to `\1`, `\2`, so a macro's
+    /// arity is decided at the call site. Extras are dropped; a missing one
+    /// substitutes empty and the emptied operand complains.
+    #[test]
+    fn parameters_are_positional_and_unchecked() {
+        assert_eq!(
+            asm("ldav\tmacro\n lda #\\1\n endm\n ldav 5\n")
+                .expect("one")
+                .bytes,
+            vec![0x86, 0x05]
+        );
+        assert_eq!(
+            asm("ldav\tmacro\n lda #\\1\n ldb #\\2\n endm\n ldav 5,7\n")
+                .expect("two")
+                .bytes,
+            vec![0x86, 0x05, 0xC6, 0x07]
+        );
+        assert_eq!(
+            asm("ldav\tmacro\n lda #\\1\n endm\n ldav 5,9\n")
+                .expect("extras dropped")
+                .bytes,
+            vec![0x86, 0x05]
+        );
+        asm("ldav\tmacro\n lda #\\1\n endm\n ldav\n").expect_err("`lda #` has no value");
+    }
+
+    /// A `?` or `@` **suffix** marks a symbol local to the expansion — a third
+    /// spelling of locals across four dialects, and the only one that is not a
+    /// prefix or a declaration. lwasm strips the marker itself, so we must too:
+    /// leaving it in would put a `?` in the middle of a name our parser reads.
+    #[test]
+    fn a_suffix_scopes_a_label_to_its_expansion() {
+        for marker in ['?', '@'] {
+            let src = format!(
+                "delay\tmacro\nspin{marker} deca\n bne spin{marker}\n endm\n delay\n delay\n"
+            );
+            assert_eq!(
+                asm(&src).expect("two expansions").bytes,
+                vec![0x4A, 0x26, 0xFD, 0x4A, 0x26, 0xFD],
+                "{src}"
+            );
+        }
+        // Without the marker the label is global and the second use collides.
+        asm("delay\tmacro\nspin deca\n endm\n delay\n delay\n")
+            .expect_err("a plain label is global");
+    }
+
+    /// A local does not escape its expansion: lwasm answers `Undefined symbol
+    /// spin?` outside, and so must we.
+    #[test]
+    fn a_local_does_not_escape_its_expansion() {
+        asm("delay\tmacro\nspin? deca\n endm\n delay\n jmp spin?\n")
+            .expect_err("spin? is local to the expansion");
+    }
+
+    /// The formatter lays source out; it does not rewrite programs. lwasm's
+    /// walk cannot yet *format* a file with macros — it reads `macro` as an
+    /// instruction, exactly as before — but it must never expand one.
+    #[test]
+    fn formatting_does_not_expand() {
+        let err = crate::format_lwasm("ldav\tmacro\n lda #\\1\n endm\n ldav 5\n")
+            .expect_err("the walk does not know macro");
+        assert!(err.message.contains("macro"), "{err:?}");
     }
 }
