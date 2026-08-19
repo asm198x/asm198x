@@ -68,25 +68,123 @@ fn synth(form: &isa::Form) -> Vec<u8> {
     b
 }
 
-/// Run a reference assembler over `text`, returning the flat bytes it produced,
-/// or `None` if it rejected the source. `build` is given the input and output
-/// paths and must return the command (already configured) to run in `tmp`.
+/// What a reference assembler did with the source it was handed.
+///
+/// The distinction matters because a corpus records *facts about source text*
+/// (#61, R1). A tool that deliberately refused the source told us something
+/// about that source, and the refusal is as much a fact as any byte string. A
+/// tool that was missing, crashed, or could not be read from told us nothing
+/// about the source at all — recording that would put a fiction in the corpus
+/// and, worse, one that looks like a rejection.
+///
+/// Collapsing both into `None`, as this helper used to, makes the two
+/// indistinguishable. Every call site that only asks "bytes or not" is
+/// unaffected; recording is what needs them separated.
+#[derive(Debug)]
+enum RefOutcome {
+    /// It assembled, producing these bytes.
+    Bytes(Vec<u8>),
+    /// It refused the source, with a diagnostic attributable to the text.
+    Rejected {
+        /// What the tool said, for the record and for the human reading it.
+        diagnostic: String,
+    },
+    /// Nothing was learned about the source. **Never recordable.**
+    NonVerdict {
+        /// Why this run says nothing — a missing tool, a crash, an I/O failure.
+        reason: String,
+    },
+}
+
+impl RefOutcome {
+    /// The bytes-or-nothing view. Exactly the old return value, so an assertion
+    /// written against it cannot change meaning.
+    fn bytes(self) -> Option<Vec<u8>> {
+        match self {
+            Self::Bytes(b) => Some(b),
+            Self::Rejected { .. } | Self::NonVerdict { .. } => None,
+        }
+    }
+}
+
+/// Run a reference assembler over `text` and classify what happened. `build` is
+/// given the input and output paths and must return the commands (already
+/// configured) to run in `tmp`.
+///
+/// A non-zero exit is only a rejection if the tool **said** something: a silent
+/// failure, or one killed by a signal, is a non-verdict. That is deliberately
+/// conservative — misreading a crash as "the reference rejects this source"
+/// would record a fact that is not true and then enforce it forever.
+fn ref_outcome(
+    tmp: &Path,
+    text: &str,
+    ext: &str,
+    build: impl Fn(&Path, &Path) -> Vec<Command>,
+) -> RefOutcome {
+    let src = tmp.join(format!("conf.{ext}"));
+    let out = tmp.join("conf.out");
+    let _ = fs::remove_file(&out);
+    if let Err(e) = fs::write(&src, text) {
+        return RefOutcome::NonVerdict {
+            reason: format!("could not write {}: {e}", src.display()),
+        };
+    }
+    for mut cmd in build(&src, &out) {
+        let finished = match cmd.current_dir(tmp).output() {
+            Ok(o) => o,
+            Err(e) => {
+                return RefOutcome::NonVerdict {
+                    reason: format!("could not run the tool: {e}"),
+                };
+            }
+        };
+        if finished.status.success() {
+            continue;
+        }
+        // No exit code means a signal killed it — a crash never judges source.
+        let Some(code) = finished.status.code() else {
+            return RefOutcome::NonVerdict {
+                reason: "the tool was killed by a signal".to_string(),
+            };
+        };
+        let diagnostic = diagnostic_of(&finished);
+        if diagnostic.is_empty() {
+            return RefOutcome::NonVerdict {
+                reason: format!("the tool exited {code} without saying why"),
+            };
+        }
+        return RefOutcome::Rejected { diagnostic };
+    }
+    match fs::read(&out) {
+        Ok(bytes) => RefOutcome::Bytes(bytes),
+        Err(e) => RefOutcome::NonVerdict {
+            reason: format!("could not read {}: {e}", out.display()),
+        },
+    }
+}
+
+/// What the tool said, preferring stderr and falling back to stdout — some
+/// reference assemblers report errors on one, some on the other.
+fn diagnostic_of(finished: &std::process::Output) -> String {
+    let stderr = String::from_utf8_lossy(&finished.stderr).trim().to_string();
+    if stderr.is_empty() {
+        String::from_utf8_lossy(&finished.stdout).trim().to_string()
+    } else {
+        stderr
+    }
+}
+
+/// The bytes-or-nothing view of [`ref_outcome`], for the assertions that only
+/// ask whether the reference produced our bytes. U4 replaces these call sites
+/// one suite at a time as it teaches each to record, and this goes with the
+/// last of them.
 fn ref_assemble(
     tmp: &Path,
     text: &str,
     ext: &str,
     build: impl Fn(&Path, &Path) -> Vec<Command>,
 ) -> Option<Vec<u8>> {
-    let src = tmp.join(format!("conf.{ext}"));
-    let out = tmp.join("conf.out");
-    let _ = fs::remove_file(&out);
-    fs::write(&src, text).ok()?;
-    for mut cmd in build(&src, &out) {
-        if !cmd.current_dir(tmp).output().ok()?.status.success() {
-            return None;
-        }
-    }
-    fs::read(&out).ok()
+    ref_outcome(tmp, text, ext, build).bytes()
 }
 
 #[test]
@@ -1466,4 +1564,156 @@ fn unwritten_space_matches_p2bin_across_the_asl_family() {
         mismatches.join("\n  ")
     );
     assert!(checked > 0, "no probes ran — no tools present?");
+}
+
+// ---------------------------------------------------------------------------
+// `ref_outcome` classification (#61 U2).
+//
+// These are **not** `#[ignore]`d, and that is the point: they need no reference
+// assembler, only a shell, so the rule separating a fact from a non-fact is
+// itself checked on every PR. The suites that use the rule still need the real
+// tools; the rule does not.
+// ---------------------------------------------------------------------------
+
+/// A scratch directory of its own, so these never race the real suites.
+fn outcome_tmp(tag: &str) -> std::path::PathBuf {
+    let dir = std::env::temp_dir().join(format!("asm198x-refoutcome-{tag}"));
+    let _ = fs::create_dir_all(&dir);
+    dir
+}
+
+/// A clean run that produces an output file is bytes, and the bytes are what
+/// the tool wrote.
+#[test]
+fn a_clean_run_yields_the_bytes() {
+    let tmp = outcome_tmp("ok");
+    let outcome = ref_outcome(&tmp, "source", "asm", |_src, out| {
+        let mut c = Command::new("sh");
+        c.arg("-c")
+            .arg(format!("printf 'AB' > '{}'", out.display()));
+        vec![c]
+    });
+    assert!(
+        matches!(&outcome, RefOutcome::Bytes(b) if b == b"AB"),
+        "{outcome:?}"
+    );
+}
+
+/// A tool that exits non-zero *and says why* has judged the source. That is a
+/// verdict, and the diagnostic travels with it — without the diagnostic there
+/// is nothing tying the refusal to the text.
+#[test]
+fn a_refusal_with_a_diagnostic_is_a_verdict() {
+    let tmp = outcome_tmp("rejected");
+    let outcome = ref_outcome(&tmp, "source", "asm", |_src, _out| {
+        let mut c = Command::new("sh");
+        c.arg("-c")
+            .arg("echo 'error: value out of range' >&2; exit 1");
+        vec![c]
+    });
+    match &outcome {
+        RefOutcome::Rejected { diagnostic } => {
+            assert_eq!(diagnostic, "error: value out of range");
+        }
+        other => panic!("expected a rejection, got {other:?}"),
+    }
+}
+
+/// Some reference assemblers report errors on stdout rather than stderr, so a
+/// diagnostic there counts too — otherwise those tools' rejections would all be
+/// misfiled as crashes.
+#[test]
+fn a_diagnostic_on_stdout_counts_as_well() {
+    let tmp = outcome_tmp("stdout");
+    let outcome = ref_outcome(&tmp, "source", "asm", |_src, _out| {
+        let mut c = Command::new("sh");
+        c.arg("-c").arg("echo 'line 1: bad operand'; exit 2");
+        vec![c]
+    });
+    assert!(
+        matches!(&outcome, RefOutcome::Rejected { diagnostic } if diagnostic == "line 1: bad operand"),
+        "{outcome:?}"
+    );
+}
+
+/// A tool that fails silently has not judged anything. Reading that as a
+/// rejection would record "the reference refuses this source" on no evidence,
+/// and then enforce it forever.
+#[test]
+fn a_silent_failure_is_not_a_verdict() {
+    let tmp = outcome_tmp("silent");
+    let outcome = ref_outcome(&tmp, "source", "asm", |_src, _out| {
+        let mut c = Command::new("sh");
+        c.arg("-c").arg("exit 1");
+        vec![c]
+    });
+    assert!(
+        matches!(&outcome, RefOutcome::NonVerdict { reason } if reason.contains("without saying why")),
+        "{outcome:?}"
+    );
+}
+
+/// A crash is about the tool, never about the source.
+#[test]
+fn a_tool_killed_by_a_signal_is_not_a_verdict() {
+    let tmp = outcome_tmp("signal");
+    let outcome = ref_outcome(&tmp, "source", "asm", |_src, _out| {
+        let mut c = Command::new("sh");
+        c.arg("-c").arg("kill -9 $$");
+        vec![c]
+    });
+    assert!(
+        matches!(&outcome, RefOutcome::NonVerdict { reason } if reason.contains("signal")),
+        "{outcome:?}"
+    );
+}
+
+/// An absent tool is the ordinary state on a machine without the references —
+/// which is most machines, and the whole reason the corpus exists.
+#[test]
+fn an_absent_tool_is_not_a_verdict() {
+    let tmp = outcome_tmp("absent");
+    let outcome = ref_outcome(&tmp, "source", "asm", |_src, _out| {
+        vec![Command::new("asm198x-no-such-reference-tool")]
+    });
+    assert!(
+        matches!(&outcome, RefOutcome::NonVerdict { reason } if reason.contains("could not run")),
+        "{outcome:?}"
+    );
+}
+
+/// A run that succeeds but writes nothing is a non-verdict, not empty bytes.
+/// "The reference assembled this to zero bytes" is a very different claim from
+/// "the reference produced no output file", and only one of them is true.
+#[test]
+fn a_missing_output_file_is_not_empty_bytes() {
+    let tmp = outcome_tmp("nooutput");
+    let outcome = ref_outcome(&tmp, "source", "asm", |_src, _out| {
+        vec![Command::new("true")]
+    });
+    assert!(
+        matches!(&outcome, RefOutcome::NonVerdict { reason } if reason.contains("could not read")),
+        "{outcome:?}"
+    );
+}
+
+/// The bytes-only view is exactly the old return value: everything that is not
+/// bytes collapses to `None`, so no existing assertion changes meaning.
+#[test]
+fn the_bytes_view_collapses_every_non_byte_outcome() {
+    assert_eq!(RefOutcome::Bytes(vec![1, 2]).bytes(), Some(vec![1, 2]));
+    assert_eq!(
+        RefOutcome::Rejected {
+            diagnostic: "nope".to_string()
+        }
+        .bytes(),
+        None
+    );
+    assert_eq!(
+        RefOutcome::NonVerdict {
+            reason: "absent".to_string()
+        }
+        .bytes(),
+        None
+    );
 }
