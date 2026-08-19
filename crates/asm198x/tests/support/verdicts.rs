@@ -167,6 +167,8 @@ pub fn assemble_form(cpu: &str, dialect: &str, source: &str) -> Option<Result<Ve
         ("ca65", "65816") => asm198x::assemble_ca65_816(source),
         ("ca65", "huc6280") => asm198x::assemble_ca65_huc6280(source),
         ("rgbasm", _) => asm198x::assemble_rgbasm(source),
+        ("lwasm", _) => asm198x::assemble_lwasm(source),
+        ("vasm", _) => asm198x::assemble_vasm(source),
         ("asl", "8080") => asm198x::assemble_i8080(source),
         ("asl", "6800") => asm198x::assemble_m6800(source),
         ("asl", "1802") => asm198x::assemble_1802(source),
@@ -258,11 +260,16 @@ pub fn replay_corpus(cpu: &str, corpus: &Corpus, report: &mut ReplayReport) {
                     continue;
                 };
                 let ours = match verdict.suite {
-                    Suite::Form => assemble_form(&verdict.cpu, &verdict.dialect, &key.source),
+                    // A fuzz case's source is a full listing, like a form's —
+                    // the difference is how it was generated, not how it is
+                    // assembled.
+                    Suite::Form | Suite::Fuzz => {
+                        assemble_form(&verdict.cpu, &verdict.dialect, &key.source)
+                    }
                     Suite::Probe => assemble_probe(&verdict.dialect, &key.source),
-                    // The sweep, fuzzer and curriculum suites record nothing
-                    // yet; when they do, they bring their own replay with them.
-                    Suite::SweepChunk | Suite::Fuzz | Suite::Curriculum => None,
+                    // The sweep and curriculum suites record nothing yet; when
+                    // they do, they bring their own replay with them.
+                    Suite::SweepChunk | Suite::Curriculum => None,
                 };
                 let Some(ours) = ours else {
                     report.unreplayable += 1;

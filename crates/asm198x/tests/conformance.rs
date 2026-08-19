@@ -1368,6 +1368,7 @@ fn differential_fuzz() {
     fs::create_dir_all(&tmp).expect("temp dir");
     let mut fails: Vec<String> = Vec::new();
     let mut checked = 0usize;
+    let mut recorder = support::verdicts::Recorder::new();
     const PROGRAMS: usize = 100;
     const INSNS: usize = 6;
 
@@ -1456,7 +1457,20 @@ fn differential_fuzz() {
                 }
             });
             match reference {
-                Some(r) if r == bytes => checked += 1,
+                Some(r) if r == bytes => {
+                    checked += 1;
+                    recorder.record_bytes(
+                        support::verdicts::CaseRef {
+                            suite: Suite::Fuzz,
+                            cpu: cpu.name,
+                            tool: cpu.tool,
+                            dialect: cpu.tool,
+                            case: format!("fuzz program {p}"),
+                            source: &text,
+                        },
+                        &r,
+                    );
+                }
                 Some(r) => fails.push(format!(
                     "{} prog {p}: reference reasm differs ({} vs {} bytes)",
                     cpu.name,
@@ -1471,7 +1485,9 @@ fn differential_fuzz() {
         }
     }
 
+    let recorded = recorder.flush().expect("write the verdict corpus");
     eprintln!("fuzzed {checked} random programs (both assemblers vs the bytes)");
+    eprintln!("recorded {recorded} new verdict(s)");
     assert!(
         fails.is_empty(),
         "{} fuzz mismatch(es):\n  {}",
@@ -1509,6 +1525,7 @@ fn differential_fuzz_bytewise() {
     let mut fails: Vec<String> = Vec::new();
     let mut checked = 0usize;
     let mut scoped_out = 0usize;
+    let mut recorder = support::verdicts::Recorder::new();
     const PROGRAMS: usize = 100;
     const INSNS: usize = 6;
     let oa = 0x1000u32;
@@ -1604,6 +1621,17 @@ fn differential_fuzz_bytewise() {
             // The reference must reproduce the whole program too (ground truth).
             if ref_assemble(&tmp, &text, "asm", ref_build).as_deref() == Some(&blob[..]) {
                 checked += 1;
+                recorder.record_bytes(
+                    support::verdicts::CaseRef {
+                        suite: Suite::Fuzz,
+                        cpu: cpu.name,
+                        tool: cpu.tool,
+                        dialect: if cpu.name == "6809" { "lwasm" } else { "vasm" },
+                        case: format!("byte-wise fuzz program {p}"),
+                        source: &text,
+                    },
+                    &blob,
+                );
                 continue;
             }
             // Mismatch. Localise: does the reference reproduce each instruction on
@@ -1613,15 +1641,45 @@ fn differential_fuzz_bytewise() {
             // assembler round-trip can arbitrate, so scope it out, not a failure.
             // If every instruction reproduces alone but the program doesn't, the
             // composition itself diverges — a real bug.
-            let single_divergence = disasm(&blob, oa).iter().any(|line| {
+            let diverging = disasm(&blob, oa).into_iter().find_map(|line| {
                 let lt = match cpu.name {
                     "6809" => asm198x::listing_6809(&line.bytes, oa as u16),
                     _ => asm198x::listing_68000(&line.bytes, oa),
                 };
-                ref_assemble(&tmp, &lt, "asm", ref_build).as_deref() != Some(&line.bytes[..])
+                let reference = ref_assemble(&tmp, &lt, "asm", ref_build);
+                (reference.as_deref() != Some(&line.bytes[..]))
+                    .then_some((lt, line.bytes, reference))
             });
-            if single_divergence {
+            if let Some((lt, ours_bytes, reference)) = diverging {
                 scoped_out += 1;
+                // Record the *instruction*, not the program. The quirk belongs
+                // to one encoding, so keying it by content means two programs
+                // that trip the same canonicalisation record one divergence
+                // rather than two — and the id survives any reshuffle of the
+                // generated programs, which a positional index would not.
+                if let Some(reference) = reference {
+                    recorder.record(
+                        support::verdicts::CaseRef {
+                            suite: Suite::Fuzz,
+                            cpu: cpu.name,
+                            tool: cpu.tool,
+                            dialect: if cpu.name == "6809" { "lwasm" } else { "vasm" },
+                            case: format!(
+                                "canonicalisation of {}",
+                                verdict_corpus::encode_hex(&ours_bytes)
+                            ),
+                            source: &lt,
+                        },
+                        verdict_corpus::Outcome::Divergence {
+                            divergence: format!(
+                                "canonicalisation-{}-{}",
+                                cpu.name,
+                                verdict_corpus::encode_hex(&ours_bytes)
+                            ),
+                            hex: verdict_corpus::encode_hex(&reference),
+                        },
+                    );
+                }
             } else {
                 fails.push(format!(
                     "{} prog {p}: reference composes the program differently\n    {}",
@@ -1632,6 +1690,8 @@ fn differential_fuzz_bytewise() {
         }
     }
 
+    let recorded = recorder.flush().expect("write the verdict corpus");
+    eprintln!("recorded {recorded} new verdict(s)");
     eprintln!(
         "byte-wise fuzzed {checked} random programs (6809/68000); \
          {scoped_out} scoped out (reference canonicalises a single instruction differently)"
