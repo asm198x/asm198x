@@ -223,6 +223,12 @@ jobs:
           ASM198X_CODE_SAMPLES: ${{ github.workspace }}/_code198x
         run: cargo test -p asm198x --test verdict_replay -- --nocapture
 
+      # Replay proves what the corpus holds. Coverage proves the corpus still
+      # holds as much as it did — a change that quietly stops arbitrating
+      # something leaves replay green while proving less.
+      - name: Check arbitration coverage against the stamp
+        run: cargo xtask coverage --check
+
   # Cross-platform smoke compile. Proves the workspace builds on macOS
   # (primary dev host) and Windows without paying for a full test run
   # there. Assemblers pull no platform-specific deps, so no extra install.
