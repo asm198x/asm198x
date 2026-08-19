@@ -34,7 +34,9 @@ impl FileId {
 }
 
 /// One macro-expansion frame (a rustc-style defined-at / invoked-at record).
-/// Reserved now; idea 4's macro engine fills it. Empty in v1.
+/// Populated by the sjasmplus macro expander (#93); empty for every dialect
+/// that has no expansion. The shape was reserved for exactly this and did not
+/// change when it was filled.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct ExpansionFrame {
@@ -57,7 +59,10 @@ pub struct Span {
     /// operand (contract U3/KTD1). Byte, not character: a multi-byte UTF-8
     /// sequence earlier on the line advances it by its byte length.
     pub col: u32,
-    /// Empty in v1; populated when idea 4's macros land, without a type change.
+    /// The expansions this location came through, **innermost first** — the
+    /// same order as the `included from` chain. Empty unless the dialect
+    /// expands macros; filled without a type change, as the reservation
+    /// intended.
     #[serde(default)]
     pub expansion_frames: Vec<ExpansionFrame>,
     /// The resolved path of `file`, stamped from the result's file table for

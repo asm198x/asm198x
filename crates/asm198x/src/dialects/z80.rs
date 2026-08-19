@@ -24,19 +24,19 @@ use std::collections::BTreeMap;
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
 use crate::source::{MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
-use crate::span::FileId;
+use crate::span::{ExpansionFrame, FileId};
 
 /// The per-dialect surface: the parts of Z80 syntax that actually differ
 /// between assemblers. Everything else in this module is shared.
 pub(crate) trait Z80Syntax {
     /// Rewrite source before parsing, returning the new text and, per output
-    /// line, the 1-based source line it should report as.
+    /// line, where it came from.
     ///
     /// `None` — the default — means the dialect has nothing to expand, and the
     /// source is parsed as written. sjasmplus overrides it for macros (#93).
     /// Because every entry point funnels through `parse_program_keyword`, one
     /// hook covers the single-source, AST and include-capable paths alike.
-    fn expand_source(&self, _source: &str) -> Result<Option<(String, Vec<usize>)>, AsmError> {
+    fn expand_source(&self, _source: &str) -> Result<Option<(String, Vec<LineOrigin>)>, AsmError> {
         Ok(None)
     }
 
@@ -748,6 +748,21 @@ fn cond_keyword(word: &str) -> Option<CondKw> {
     })
 }
 
+/// Where one line of rewritten source came from.
+///
+/// The line number alone is enough to point a diagnostic at something the
+/// author wrote. The frames are what let it explain *why* that line failed —
+/// `in expansion of macro \`m\`` — which for generated code is most of the
+/// answer, because the failing text is often nowhere in the file.
+#[derive(Clone, Debug)]
+pub(crate) struct LineOrigin {
+    /// The 1-based source line this output line reports as.
+    pub(crate) line: usize,
+    /// The expansions this line came through, innermost first — the same order
+    /// the `included from` notes use.
+    pub(crate) frames: Vec<ExpansionFrame>,
+}
+
 /// Which end of a repetition block a word is, if either.
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum RepeatKw {
@@ -855,28 +870,34 @@ pub(crate) fn parse_program_keyword<S: Z80Syntax>(
     }
     if let Some(origins) = origins {
         for node in &mut nodes {
-            node.span.line = source_line(origins, node.span.line);
+            place(&mut node.span, origins);
             if let Some(span) = node.operand_span.as_mut() {
-                span.line = source_line(origins, span.line);
+                place(span, origins);
             }
         }
     }
     Ok(Program { nodes })
 }
 
-/// Map a line in rewritten source back to the line the author wrote.
-fn source_line(origins: &[usize], line: u32) -> u32 {
-    origins
-        .get((line as usize).saturating_sub(1))
-        .map_or(line, |n| *n as u32)
+/// Put a span back where the author would look: the line they wrote, and the
+/// expansions the text came through.
+fn place(span: &mut Span, origins: &[LineOrigin]) {
+    let Some(origin) = origins.get((span.line as usize).saturating_sub(1)) else {
+        return;
+    };
+    span.line = origin.line as u32;
+    span.expansion_frames.clone_from(&origin.frames);
 }
 
-/// Rewrite an error raised against rewritten source, so it names a real line.
-fn remap_lines(mut e: AsmError, origins: Option<&[usize]>) -> AsmError {
+/// Rewrite an error raised against rewritten source, so it names a real line
+/// and carries the expansions it came through.
+fn remap_lines(mut e: AsmError, origins: Option<&[LineOrigin]>) -> AsmError {
     let Some(origins) = origins else { return e };
-    e.line = source_line(origins, e.line as u32) as usize;
+    if let Some(origin) = origins.get(e.line.saturating_sub(1)) {
+        e.line = origin.line;
+    }
     if let Some(span) = e.span.as_mut() {
-        span.line = source_line(origins, span.line);
+        place(span, origins);
     }
     e
 }

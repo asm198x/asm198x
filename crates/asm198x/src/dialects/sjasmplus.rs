@@ -164,7 +164,10 @@ impl Z80Syntax for SjasmplusSyntax {
     /// Macros expand before parsing (#93). Returning the map lets the shared
     /// pipeline report every line against its source rather than against a
     /// line that only existed inside the expander.
-    fn expand_source(&self, source: &str) -> Result<Option<(String, Vec<usize>)>, AsmError> {
+    fn expand_source(
+        &self,
+        source: &str,
+    ) -> Result<Option<(String, Vec<z80::LineOrigin>)>, AsmError> {
         let expanded = expand_macros(source)?;
         Ok(Some((expanded.text, expanded.origins)))
     }
@@ -400,13 +403,14 @@ fn split_args(text: &str) -> Vec<String> {
     args
 }
 
-/// Expanded source, plus the source line each output line should report as.
+/// Expanded source, plus where each output line came from.
 pub(crate) struct Expanded {
     pub(crate) text: String,
-    /// `origins[i]` is the 1-based source line for output line `i + 1`. Lines
-    /// from an expansion report their **invocation** site, which is where a
-    /// reader looks first and what a diagnostic must name.
-    pub(crate) origins: Vec<usize>,
+    /// `origins[i]` describes output line `i + 1`: the source line it reports
+    /// as, and the expansions it came through. Lines from an expansion report
+    /// their **invocation** site — where a reader looks first — and carry the
+    /// frames that explain why text they cannot see in the file failed.
+    pub(crate) origins: Vec<z80::LineOrigin>,
 }
 
 /// How deep expansion may nest before we call it runaway.
@@ -426,8 +430,8 @@ pub(crate) fn expand_macros(source: &str) -> Result<Expanded, AsmError> {
     let lines: Vec<&str> = source.lines().collect();
     let mut macros: std::collections::HashMap<String, MacroDef> = std::collections::HashMap::new();
 
-    // Pass 1 — take the definitions out, keep everything else with its line.
-    let mut body: Vec<(usize, String)> = Vec::with_capacity(lines.len());
+    // Pass 1 — take the definitions out, keep everything else with its origin.
+    let mut body: Vec<(z80::LineOrigin, String)> = Vec::with_capacity(lines.len());
     let mut i = 0;
     while i < lines.len() {
         let raw = lines[i];
@@ -460,7 +464,13 @@ pub(crate) fn expand_macros(source: &str) -> Result<Expanded, AsmError> {
             i = j + 1;
             continue;
         }
-        body.push((line_no, raw.to_string()));
+        body.push((
+            z80::LineOrigin {
+                line: line_no,
+                frames: Vec::new(),
+            },
+            raw.to_string(),
+        ));
         i += 1;
     }
 
@@ -468,11 +478,12 @@ pub(crate) fn expand_macros(source: &str) -> Result<Expanded, AsmError> {
     // another macro, so this repeats rather than walking once.
     let mut expansions = 0usize;
     for depth in 0..=MAX_EXPANSION_DEPTH {
-        let mut next: Vec<(usize, String)> = Vec::with_capacity(body.len());
+        let mut next: Vec<(z80::LineOrigin, String)> = Vec::with_capacity(body.len());
         let mut expanded_any = false;
-        for (line_no, text) in &body {
+        for (origin, text) in &body {
+            let line_no = &origin.line;
             let Some((name, args)) = invocation(text, &macros) else {
-                next.push((*line_no, text.clone()));
+                next.push((origin.clone(), text.clone()));
                 continue;
             };
             let def = &macros[&name];
@@ -501,9 +512,23 @@ pub(crate) fn expand_macros(source: &str) -> Result<Expanded, AsmError> {
                 .iter()
                 .map(|local| format!("{local}__{expansions}"))
                 .collect();
+            // The new frame goes in front, so the innermost expansion is
+            // named first — the order the `included from` notes already use.
+            let mut frames = Vec::with_capacity(origin.frames.len() + 1);
+            frames.push(crate::span::ExpansionFrame {
+                macro_name: name.clone(),
+                invoked_at: Box::new(crate::span::Span::at(*line_no as u32, 0)),
+            });
+            frames.extend(origin.frames.iter().cloned());
             for body_line in &def.body {
                 let with_args = substitute(body_line, &def.params, &args);
-                next.push((*line_no, substitute(&with_args, &locals, &renamed)));
+                next.push((
+                    z80::LineOrigin {
+                        line: *line_no,
+                        frames: frames.clone(),
+                    },
+                    substitute(&with_args, &locals, &renamed),
+                ));
             }
         }
         body = next;
@@ -514,10 +539,10 @@ pub(crate) fn expand_macros(source: &str) -> Result<Expanded, AsmError> {
 
     let mut text = String::with_capacity(source.len());
     let mut origins = Vec::with_capacity(body.len());
-    for (line_no, line) in body {
+    for (origin, line) in body {
         text.push_str(&line);
         text.push('\n');
-        origins.push(line_no);
+        origins.push(origin);
     }
     Ok(Expanded { text, origins })
 }
@@ -597,6 +622,35 @@ mod tests {
                 .expect("assemble")
                 .bytes,
             vec![0x10, 0xFE, 0x10, 0xFE]
+        );
+    }
+
+    /// An error in generated code must say where the text came from: the
+    /// failing line is nowhere in the file the reader has open. Frames are
+    /// innermost first, matching the `included from` chain's order.
+    #[test]
+    fn an_error_in_an_expansion_carries_its_frames() {
+        let err = asm(" MACRO inner\n frobnicate\n ENDM\n MACRO outer\n inner\n ENDM\n outer\n")
+            .expect_err("frobnicate is not an instruction");
+        let span = err.span.as_ref().expect("a span");
+        let named: Vec<&str> = span
+            .expansion_frames
+            .iter()
+            .map(|f| f.macro_name.as_str())
+            .collect();
+        assert_eq!(named, vec!["inner", "outer"], "innermost first");
+        assert_eq!(span.line, 7, "and it points at the invocation");
+    }
+
+    /// Source with no macros is untouched — no frames, nothing to explain.
+    #[test]
+    fn an_error_outside_an_expansion_carries_none() {
+        let err = asm(" frobnicate\n").expect_err("not an instruction");
+        assert!(
+            err.span
+                .as_ref()
+                .is_none_or(|s| s.expansion_frames.is_empty()),
+            "{err:?}"
         );
     }
 
