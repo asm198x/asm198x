@@ -234,6 +234,32 @@ impl Z80Syntax for SjasmplusSyntax {
 // why `val*2` with `val = 5` assembles to `ld a,10`.
 // ---------------------------------------------------------------------------
 
+/// The dot-prefixed local labels a macro body **defines**.
+///
+/// These scope to the expansion rather than to the file, which is what lets a
+/// macro containing a loop be invoked more than once — most of what macros are
+/// for. A *plain* label in the same position stays global and collides on the
+/// second invocation; the reference reports `Duplicate label` there and so do
+/// we, which is why only the dotted ones are renamed.
+///
+/// Only names the body defines are renamed, so a body referring to a local
+/// defined outside it still refers to that one.
+fn defined_locals(body: &[String]) -> Vec<String> {
+    let mut names = Vec::new();
+    for line in body {
+        let text = without_comment(line);
+        if text.starts_with(char::is_whitespace) {
+            continue;
+        }
+        let token = text.split_whitespace().next().unwrap_or("");
+        let name = token.trim_end_matches(':');
+        if name.starts_with('.') && name.len() > 1 && !names.iter().any(|n| n == name) {
+            names.push(name.to_string());
+        }
+    }
+    names
+}
+
 /// A macro as collected by the pre-pass.
 struct MacroDef {
     /// Parameter names, in order. Matched case-sensitively.
@@ -389,6 +415,7 @@ pub(crate) fn expand_macros(source: &str) -> Result<Expanded, AsmError> {
     let mut macros: std::collections::HashMap<String, MacroDef> = std::collections::HashMap::new();
     let mut text = String::with_capacity(source.len());
     let mut origins = Vec::with_capacity(lines.len());
+    let mut expansions = 0usize;
     let mut i = 0;
 
     while i < lines.len() {
@@ -436,8 +463,16 @@ pub(crate) fn expand_macros(source: &str) -> Result<Expanded, AsmError> {
                     ),
                 ));
             }
+            // Each expansion gets its own copy of the locals it defines.
+            expansions += 1;
+            let locals = defined_locals(&def.body);
+            let renamed: Vec<String> = locals
+                .iter()
+                .map(|name| format!("{name}__{expansions}"))
+                .collect();
             for body_line in &def.body {
-                text.push_str(&substitute(body_line, &def.params, &args));
+                let with_args = substitute(body_line, &def.params, &args);
+                text.push_str(&substitute(&with_args, &locals, &renamed));
                 text.push('\n');
                 origins.push(line_no);
             }
@@ -470,6 +505,29 @@ mod tests {
             asm(" MACRO mac\n nop\n ENDM\n MAC\n").is_err(),
             "a macro name is case-sensitive"
         );
+    }
+
+    /// A macro containing a loop must be usable more than once — which is most
+    /// of what macros are for. The dot-local is scoped to the expansion, so the
+    /// second invocation does not collide with the first.
+    #[test]
+    fn a_macro_local_label_is_scoped_to_its_expansion() {
+        assert_eq!(
+            asm(" MACRO m\n.loc djnz .loc\n ENDM\n m\n m\n m\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x10, 0xFE, 0x10, 0xFE, 0x10, 0xFE]
+        );
+    }
+
+    /// A *plain* label in a macro body stays global, so a second invocation
+    /// collides — the reference reports `Duplicate label` for exactly this, so
+    /// scoping it would diverge from the tool we claim to match.
+    #[test]
+    fn a_plain_label_in_a_macro_body_stays_global() {
+        let err = asm(" MACRO m\nplain djnz plain\n ENDM\n m\n m\n")
+            .expect_err("the second expansion redefines `plain`");
+        assert!(err.message.contains("duplicate label"), "{err:?}");
     }
 
     /// Substitution respects word boundaries: a parameter `v` must leave the

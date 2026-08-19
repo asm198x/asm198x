@@ -352,6 +352,12 @@ const PROBES: &[Probe] = &[
         " MACRO nop2\n nop\n nop\n ENDM\n nop2\n"),
     ok ("sjasmplus", "macro with a parameter",
         " MACRO ldav val\n ld a,val\n ENDM\n ldav 5\n"),
+    // A macro with a loop is most of what macros are for, and it needs the
+    // dot-local to be scoped per expansion or the second invocation collides.
+    ok ("sjasmplus", "macro local label, invoked twice",
+        " MACRO m\n.loc djnz .loc\n ENDM\n m\n m\n"),
+    ok ("sjasmplus", "macro local label with a parameter",
+        " MACRO m v\n.l djnz .l\n ld a,v\n ENDM\n m 5\n m 6\n"),
     gap("lwasm", "macro definition and invocation",
         "nop2\tmacro\n nop\n nop\n endm\n nop2\n", 93),
     gap("lwasm", "macro with a positional parameter",
