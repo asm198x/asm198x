@@ -56,9 +56,11 @@ const fn ok(dialect: &'static str, note: &'static str, body: &'static str) -> Pr
         gap: None,
     }
 }
-// The open ledger: U8's out-of-surface sjasmplus conditional forms (ELSEIF,
-// colon-inline blocks, dotted spellings, multi-pass forward-symbol
-// conditions) are tracked by #67. Earlier batches (acme
+// The open ledger: U8's sjasmplus conditional forms are closed (#67) — ELSEIF
+// chains and the dotted spellings are adopted; the two that remain were not
+// conditional syntax at all and carry their own issues, `:` as a statement
+// separator (#98) and multi-pass forward-symbol conditions (#99). Earlier
+// batches (acme
 // `!pet`/`!align`/`!zone`/`!set`, ca65 `.dword`/`.dbyt`/`.asciiz`, sjasmplus
 // `byte`, lwasm `fill`/`zmb`/`fqb` — issue #26) are closed.
 const fn gap(dialect: &'static str, note: &'static str, body: &'static str, issue: u32) -> Probe {
@@ -298,12 +300,14 @@ const PROBES: &[Probe] = &[
         " .IF 1\n ld a,1\n .ENDIF\n"),
     ok ("sjasmplus", "dotted chain, lower case",
         " .if 0\n ld a,1\n .elseif 1\n ld a,2\n .endif\n"),
-    // #67, still open: colon-inline blocks are a separate bounded change, and
-    // conditions on forward/address symbols need the multi-pass resolution.
+    // Re-filed out of #67 (2026-08-19): neither is conditional syntax. `:`
+    // fails between plain instructions too, so it is a line-model change
+    // (#98); the forward label is a resolution-order property needing the
+    // reference's multi-pass convergence (#99).
     gap("sjasmplus", "colon-inline conditional",
-        " IF 1 : ld a,1 : ENDIF\n", 67),
+        " IF 1 : ld a,1 : ENDIF\n", 98),
     gap("sjasmplus", "IF on a forward label (multi-pass)",
-        " IF later\n ld a,1\n ENDIF\nlater: nop\n", 67),
+        " IF later\n ld a,1\n ENDIF\nlater: nop\n", 99),
 
     // ---- z80n (Spectrum Next extension ISA), sjasmplus reference -------------
     ok ("z80n", "swapnib / mirror",      " swapnib\n mirror a\n"),
