@@ -467,7 +467,11 @@ pub fn assemble_vasm_exe_files_debug(
 /// # Errors
 /// Returns an [`AsmError`] on any parse failure.
 pub fn format_vasm(source: &str) -> Result<String, AsmError> {
-    Ok(ast::emit(&dialects::vasm::parse_program(source)?, false))
+    // The formatter must not expand macros — see the dialect's parse.
+    Ok(ast::emit(
+        &dialects::vasm::parse_program(source, dialects::macros::Expand::No)?,
+        false,
+    ))
 }
 
 /// Assemble ca65-syntax 65816 source (native mode) into a flat binary — the
@@ -1597,6 +1601,98 @@ mod tests {
         // In-range forms of the same instructions raise no warning.
         let r = assemble_vasm_warned("\tmoveq #5,d0\n\taddq.w #3,d0\n\ttrap #7\n").expect("ok");
         assert!(r.warnings.is_empty());
+    }
+
+    // ----- vasm macros (#93) --------------------------------------------
+    //
+    // Every expectation is a byte string vasm 2.0b produced for the same
+    // source, with `-Fbin -no-opt`.
+
+    /// A definition may be written either way round — `name macro` or
+    /// ` macro name` — where lwasm takes only the first.
+    #[test]
+    fn vasm_macros_expand_in_both_header_spellings() {
+        assert_eq!(
+            assemble_vasm("nop2\tmacro\n nop\n nop\n endm\n nop2\n")
+                .expect("name first")
+                .bytes,
+            vec![0x4E, 0x71, 0x4E, 0x71]
+        );
+        assert_eq!(
+            assemble_vasm(" macro nop2\n nop\n endm\n nop2\n")
+                .expect("keyword first")
+                .bytes,
+            vec![0x4E, 0x71]
+        );
+    }
+
+    /// Parameters are positional, and unchecked in both directions.
+    #[test]
+    fn vasm_parameters_are_positional_and_unchecked() {
+        assert_eq!(
+            assemble_vasm("ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5\n")
+                .expect("one")
+                .bytes,
+            vec![0x20, 0x3C, 0x00, 0x00, 0x00, 0x05]
+        );
+        assert_eq!(
+            assemble_vasm("ldav\tmacro\n move.l #\\1,d0\n move.l #\\2,d1\n endm\n ldav 5,7\n")
+                .expect("two")
+                .bytes,
+            vec![0x20, 0x3C, 0, 0, 0, 5, 0x22, 0x3C, 0, 0, 0, 7]
+        );
+        assert_eq!(
+            assemble_vasm("ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5,9\n")
+                .expect("extras dropped")
+                .bytes,
+            vec![0x20, 0x3C, 0x00, 0x00, 0x00, 0x05]
+        );
+        assert!(
+            assemble_vasm("ldav\tmacro\n move.l #\\1,d0\n move.l #\\2,d1\n endm\n ldav 5\n")
+                .is_err(),
+            "an emptied operand must complain"
+        );
+    }
+
+    /// `\@` numbers each expansion, so `spin\@` is a fresh label every time.
+    ///
+    /// It is a substitution rather than a scoping rule, which is why it may
+    /// appear mid-name and in more than one name per body — and why vasm scopes
+    /// nothing by spelling: a plain label in a body is global and the second
+    /// expansion gets `label <spin> redefined`.
+    ///
+    /// The bodies take each label's *address* rather than branching to it. Our
+    /// backward branch sizing differs from vasm's under `-no-opt` (#110), which
+    /// would swamp what this test is actually about.
+    ///
+    /// The counterpart — that a *plain* label in a body collides on the second
+    /// expansion — is not asserted here, because our vasm dialect does not
+    /// detect duplicate labels at all, inside a macro or out (#126). ca65,
+    /// pasmo and lwasm do, and their tests pin it.
+    #[test]
+    fn vasm_expansion_counter_makes_a_label_unique() {
+        assert_eq!(
+            assemble_vasm("mk\tmacro\nspin\\@ nop\n move.l #spin\\@,d0\n endm\n mk\n mk\n")
+                .expect("two expansions")
+                .bytes,
+            vec![
+                0x4E, 0x71, 0x20, 0x3C, 0, 0, 0, 0, 0x4E, 0x71, 0x20, 0x3C, 0, 0, 0, 8
+            ]
+        );
+        // Two expansions, two distinct labels: the second `move.l` takes the
+        // address of its own `spin`, eight bytes on, not the first one's.
+        let one = assemble_vasm("mk\tmacro\nspin\\@ nop\n move.l #spin\\@,d0\n endm\n mk\n")
+            .expect("one expansion");
+        assert_eq!(one.bytes.len(), 8, "one expansion is half of two");
+    }
+
+    /// The formatter lays source out; it does not rewrite programs.
+    #[test]
+    fn vasm_formatting_does_not_expand() {
+        assert!(
+            format_vasm("ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5\n").is_err(),
+            "the walk does not know macro, and must not expand it either"
+        );
     }
 
     #[test]

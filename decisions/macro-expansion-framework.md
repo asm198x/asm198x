@@ -35,26 +35,36 @@ match the parameter list.
 Because the dialects do not disagree about spelling. They disagree about
 meaning.
 
-| | sjasmplus 1.21.0 | pasmo 0.5.5 | ca65 V2.19 |
-|---|---|---|---|
-| header | `MACRO name p1 p2` | `MACRO name, p1, p2` *or* `name MACRO p1, p2` | `.macro name p1, p2` (`.mac`) |
-| per-expansion locals | any `.dotted` label in the body | only what a `LOCAL` line declares | only what a `.local` line declares |
-| a `.dotted` label in a body | scoped to the expansion | an ordinary label — the second invocation **collides** | an ordinary label — **collides** |
-| too many arguments | `Too many arguments for macro` | extras silently **dropped** | `Too many macro parameters` |
-| too few arguments | `Not enough arguments for macro` | missing one substitutes **empty**, and the emptied operand raises the error | substitutes **empty** — and if no emitting line reaches it, assembles fine |
-| self-recursion | **segfault** (exit 139) | **segfault** (exit 139) | `Too many nested macro expansions` |
+| | sjasmplus 1.21.0 | pasmo 0.5.5 | ca65 V2.19 | lwasm 4.19 | vasm 2.0b |
+|---|---|---|---|---|---|
+| header | `MACRO name p1 p2` | `MACRO name, p1, p2` *or* `name MACRO p1, p2` | `.macro name p1, p2` (`.mac`) | `name macro` only | `name macro` *or* ` macro name` |
+| parameters | named | named | named | positional `\1`, `\2` | positional `\1`, `\2` |
+| per-expansion locals | any `.dotted` label | what `LOCAL` declares | what `.local` declares | a `?`/`@` **suffix** | none — `\@` substitutes a counter |
+| a plain label in a body | global, **collides** | global, **collides** | global, **collides** | global, **collides** | global, **collides** |
+| too many arguments | rejected | extras **dropped** | rejected | extras **dropped** | extras **dropped** |
+| too few arguments | rejected | substitutes **empty** | substitutes **empty** | substitutes **empty** | substitutes **empty** |
+| self-recursion | **segfault** (139) | **segfault** (139) | `Too many nested macro expansions` | — | — |
+
+Five dialects. **Four spellings of a per-expansion local** — prefix, two
+different declarations, and a suffix — plus one dialect that has none and makes
+you ask for a counter instead. Three arity postures. Three header shapes, one of
+which accepts two of them.
 
 The locals row is the one that settles it. The same source, a macro with
 `.spin nop` inside, invoked twice, assembles under sjasmplus and is rejected by
-the other two. A house macro system that picked one of those behaviours would
-produce wrong bytes — silently, for two of the three — against source its users
-wrote for a real assembler. That is the opposite of the identity claim.
+every other dialect measured. A house macro system that picked one of those
+behaviours would produce wrong bytes — silently, for four of the five — against
+source its users wrote for a real assembler. That is the opposite of the
+identity claim.
 
-Arity makes the same point from the other direction: three dialects, three
-postures, and ca65's is neither of the first two — it rejects too many and
-tolerates too few. So `fit_arguments` has **no default implementation**. A new
-dialect must state its posture, because guessing is exactly the kind of quiet
-wrongness the corpus exists to catch.
+So `fit_arguments` has **no default implementation**, and neither does
+`locals`. A new dialect must state both, because guessing is exactly the kind
+of quiet wrongness the corpus exists to catch.
+
+What *is* shared held up across all five without amendment: substitution stayed
+textual, word-bounded, string-safe, and ahead of evaluation every time. Only the
+edges of a symbol moved — lwasm counts `?`, `@` and `\` as symbol characters,
+which is `is_symbol_char`, not a new mechanism.
 
 This is the v1 scope's *"adopted against real dialect requirements rather than
 as a universal macro language"* ([`v1-scope.md`](v1-scope.md)), made structural.
@@ -123,13 +133,43 @@ fails rather than passes.
   macros (`unsupported directive .macro`) rather than formatting it. Unchanged
   from before, pinned by a test.
 
+- **2026-08-19 — lwasm and vasm** (#93). The first dialects whose parameters
+  have no names: a body refers to `\1`, `\2`, so a macro's arity is decided at
+  the call site rather than the definition. Three hooks were added, each for a
+  measurement rather than a hypothetical:
+
+  - `argument_names` — build `\1`…`\n` from how many arguments arrived, where a
+    named dialect uses the header's list.
+  - `is_symbol_char` — lwasm marks a local with a trailing `?` or `@`, and both
+    dialects open a parameter with `\`. None of the three is a symbol character
+    anywhere else, and substitution cannot see what it cannot tokenise.
+  - `expansion_token` — vasm's `\@`, a counter substituted wherever it appears.
+    It is not a scoping rule: it can sit mid-name and in several names per body,
+    which is why it is a token and not part of `locals`.
+
+  `rename_local` also gained an override, because lwasm's own parser strips the
+  `?`/`@` marker and ours does not — appending to `spin?` would bury a character
+  our expression parser rejects.
+
+  Thirteen facts recorded. The four `issue-93` markers this closed retired with
+  supersede records.
+
+  Two pre-existing divergences surfaced and were left where they belong: vasm's
+  backward branch sizing under `-no-opt` (#110, which this is another instance
+  of) and duplicate labels going undetected in our vasm dialect (#126). Neither
+  is a macro question, and the probes were written to avoid tripping over the
+  first.
+
 ## Drift triggers
 
 Stop and re-consult if a change would:
 
 - **Unify the dialects' macro grammar** — a common header parser, a shared
-  local-scoping rule, a default `fit_arguments`. The references disagree about
-  meaning, not spelling; see the table above.
+  local-scoping rule, a default `fit_arguments` or `locals`. Five dialects
+  produced four local mechanisms and three arity postures; see the table above.
+- **Add a hook to `MacroSyntax` for a case nobody measured.** Every one of them
+  exists because a reference did something the others did not. A hook with one
+  implementation and no probe behind it is a guess with a trait attached.
 - **Route the formatter through the expanding parse**, or collapse `Expand` back
   into a single mode "since assembly always expands anyway". It destroys source.
 - **Add macro support to a dialect from its manual** rather than from probes
