@@ -382,17 +382,42 @@ fn main() -> ExitCode {
     }
 }
 
+/// Which operation the invocation asks for. Named as a subcommand
+/// (`asm198x disasm …`), git/cargo style, per
+/// `decisions/packaging-and-cpu-roadmap.md`.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Mode {
+    Assemble,
+    Disassemble,
+    Format,
+}
+
 fn run(args: &[String]) -> Result<String, String> {
     if args.is_empty() || args.iter().any(|a| a == "-h" || a == "--help") {
         return Ok(usage());
     }
 
+    // Assembling is the default when no subcommand is given, so `asm198x
+    // prog.asm` keeps working. That is the overwhelmingly common invocation and
+    // the only one external callers use (Code198x's capture harness drives it
+    // that way), and the packaging decision rules out the `--disasm` *flag*, not
+    // a default operation.
+    let (mode, args) = match args[0].as_str() {
+        "asm" => (Mode::Assemble, &args[1..]),
+        "disasm" => (Mode::Disassemble, &args[1..]),
+        "fmt" => (Mode::Format, &args[1..]),
+        _ => (Mode::Assemble, args),
+    };
+    if args.is_empty() {
+        return Ok(usage());
+    }
+    let disassemble = mode == Mode::Disassemble;
+    let format = mode == Mode::Format;
+
     let mut input: Option<&str> = None;
     let mut output: Option<PathBuf> = None;
     let mut dialect: Option<&str> = None;
     let mut target: Option<&str> = None;
-    let mut disassemble = false;
-    let mut format = false;
     let mut exe = false;
     let mut sna = false;
     let mut prg = false;
@@ -448,8 +473,12 @@ fn run(args: &[String]) -> Result<String, String> {
                 let dir = args.get(i).ok_or("`-I` needs a directory")?;
                 include_dirs.push(PathBuf::from(dir));
             }
-            "--disasm" | "--disassemble" => disassemble = true,
-            "--fmt" | "--format" => format = true,
+            "--disasm" | "--disassemble" => {
+                return Err("`--disasm` is now a subcommand: `asm198x disasm <input.bin>`".into());
+            }
+            "--fmt" | "--format" => {
+                return Err("`--fmt` is now a subcommand: `asm198x fmt <input.asm>`".into());
+            }
             "--exe" | "--hunkexe" => exe = true,
             "--sna" => sna = true,
             "--prg" => prg = true,
@@ -608,7 +637,9 @@ fn run(args: &[String]) -> Result<String, String> {
             return Ok(format!("formatted {input} -> {}", path.display()));
         }
         print!("{formatted}");
-        return Ok(format!("formatted {input}"));
+        // Name the destination, as the `-o` arm does. "formatted <input>" alone
+        // reads as though the input were rewritten in place, which it is not.
+        return Ok(format!("formatted {input} -> stdout"));
     }
 
     // `--message-format=json`: emit the machine-consumable result (or its
@@ -971,7 +1002,9 @@ fn parse_u16(value: &str) -> Result<u16, String> {
 
 fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
-     assemble:    asm198x [--dialect <name>] [--cpu <target>] [-I <dir>]... <input> [-o <out.bin>]\n\
+     usage: asm198x [asm|disasm|fmt] [options] <input>\n\
+     \x20      (the operation is a subcommand; with none given, asm198x assembles)\n\n\
+     assemble:    asm198x [asm] [--dialect <name>] [--cpu <target>] [-I <dir>]... <input> [-o <out.bin>]\n\
      \x20            (add --message-format=json for a machine-readable result +\n\
      \x20             diagnostics on stdout; --message-format=human is the default;\n\
      \x20             -I adds an include-search directory, repeatable, in order)\n\
@@ -984,9 +1017,9 @@ fn usage() -> String {
      \x20             `name = $hex` table; --listing address/bytes/source rows —\n\
      \x20             defaults: input with .debug198x/.sym/.lst; flat dialects only\n\
      \x20             for now plus the ca65/vasm linked paths for --debug/--sym)\n\
-     disassemble: asm198x --disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
+     disassemble: asm198x disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\
-     format:      asm198x --fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
+     format:      asm198x fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
      \x20            (canonical layout, comments + operand spelling preserved; Z80/8080/6800/1802/scmp/rgbasm/6809)\n\n\
      dialects (syntax): acme (C64 6502; also `6502`), ca65 (NES), vasm (Amiga\n\
      \x20                 68000), lwasm (6809), 65816 (ca65 native), huc6280\n\
