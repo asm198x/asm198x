@@ -222,6 +222,7 @@ name = "xtask"
 version = "0.0.12"
 dependencies = [
  "isa",
+ "sha2",
  "verdict-corpus",
 ]
 
