@@ -7,6 +7,7 @@
 //! corpus actually holds.
 
 mod coverage;
+mod ledger;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -15,6 +16,10 @@ fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
         Some("coverage") => run_coverage(&args[1..]),
+        Some("ledger") => {
+            print!("{}", ledger::render(&repo()));
+            ExitCode::SUCCESS
+        }
         Some(other) => {
             eprintln!("xtask: unknown command `{other}`\n\n{}", usage());
             ExitCode::FAILURE
@@ -31,7 +36,8 @@ fn usage() -> String {
      commands:\n\
      \x20 coverage            report arbitration coverage over the verdict corpus\n\
      \x20 coverage --check    fail if any CPU's coverage fell below the stamp\n\
-     \x20 coverage --write    refresh the stamp\n"
+     \x20 coverage --write    refresh the stamp\n\
+     \x20 ledger              print the conformance ledger for this revision\n"
         .to_string()
 }
 
