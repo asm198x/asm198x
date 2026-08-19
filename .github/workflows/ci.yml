@@ -65,6 +65,21 @@ jobs:
       - name: Run Clippy
         run: cargo clippy --workspace --all-targets -- -D warnings
 
+      # The test infrastructure (#61) must never reach the shipped assembler.
+      # A dev-dependency is only dev-only until someone moves a line; this
+      # fails the build rather than letting it ship quietly.
+      - name: Assert the shipped binary links no test-only crate
+        run: |
+          tree=$(cargo tree -p asm198x --edges normal)
+          leaked=0
+          for crate in verdict-corpus sha2; do
+            if printf '%s\n' "$tree" | grep -qE "(^|[^-a-z])${crate} v"; then
+              echo "::error::${crate} is in the shipped binary's dependency tree"
+              leaked=1
+            fi
+          done
+          exit $leaked
+
   # Coverage is also the test runner: cargo-llvm-cov compiles and runs every
   # test under instrumentation, so one pass gives both the regression signal
   # and coverage metrics. Gated on fmt + clippy so a fast lint failure
