@@ -30,6 +30,8 @@ use std::fs;
 use std::path::Path;
 use std::process::Command;
 
+mod support;
+
 fn have(bin: &str) -> bool {
     Command::new(bin).output().is_ok()
 }
@@ -1716,4 +1718,48 @@ fn the_bytes_view_collapses_every_non_byte_outcome() {
         .bytes(),
         None
     );
+}
+
+/// Identify every reference tool this machine has, proving the probe table
+/// against the real binaries rather than against synthetic output.
+///
+/// `#[ignore]`d because it needs the tools — but unlike the audits it asserts
+/// nothing about *bytes*, only that a present tool can be identified. A tool
+/// that runs but cannot be identified is a silent hole in the corpus's
+/// provenance, so it fails loudly here rather than recording verdicts signed
+/// by nobody.
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn every_present_reference_tool_can_be_identified() {
+    const TOOLS: &[&str] = &[
+        "acme",
+        "ca65",
+        "ld65",
+        "pasmo",
+        "sjasmplus",
+        "lwasm",
+        "rgbasm",
+        "rgblink",
+        "asl",
+        "p2bin",
+        "vasmm68k_mot",
+    ];
+    let mut unidentified = Vec::new();
+    let mut seen = 0usize;
+    for tool in TOOLS {
+        if !have(tool) {
+            eprintln!("SKIP: {tool} not on PATH");
+            continue;
+        }
+        seen += 1;
+        match support::tool_identity::identify(tool) {
+            Some(id) => eprintln!("{tool}: {} [{}]", id.identity, &id.digest[..12]),
+            None => unidentified.push(*tool),
+        }
+    }
+    assert!(
+        unidentified.is_empty(),
+        "present but unidentifiable, so their verdicts would be unsigned: {unidentified:?}"
+    );
+    assert!(seen > 0, "no reference tools present at all");
 }
