@@ -300,11 +300,22 @@ impl Corpus {
 
     /// The verdicts this build understands, in file order, including retired
     /// ones.
+    ///
+    /// **De-duplicated by content.** An append-only NDJSON file merged from two
+    /// branches can end up holding one verdict twice; git resolves that as two
+    /// lines, but it is still one observation. Counting it twice would inflate
+    /// the ledger and could look like corroboration that never happened, so an
+    /// exact repeat is dropped on read. Two verdicts that differ in any field —
+    /// including the binary that produced them — are distinct and both kept.
     pub fn verdicts(&self) -> impl Iterator<Item = &Verdict> {
-        self.records.iter().filter_map(|r| match r {
-            Record::Verdict(v) => Some(&**v),
-            _ => None,
-        })
+        let mut seen = std::collections::HashSet::new();
+        self.records
+            .iter()
+            .filter_map(|r| match r {
+                Record::Verdict(v) => Some(&**v),
+                _ => None,
+            })
+            .filter(move |v| seen.insert(v.id()))
     }
 
     /// Ids retired by a supersede.
@@ -386,14 +397,21 @@ pub fn append(path: &Path, records: &[Record]) -> std::io::Result<()> {
     if let Some(parent) = path.parent() {
         std::fs::create_dir_all(parent)?;
     }
+    // Built whole, then written in one call. Appending line by line means an
+    // interrupted growth run can leave half a verdict on disk, which reads as a
+    // corrupt corpus rather than a shorter one. One write is not a guarantee,
+    // but it turns a likely failure into an unlikely one for the sizes involved.
+    let mut payload = String::new();
+    for record in records {
+        payload.push_str(&to_line(record)?);
+        payload.push('\n');
+    }
     let mut file = std::fs::OpenOptions::new()
         .create(true)
         .append(true)
         .open(path)?;
-    for record in records {
-        writeln!(file, "{}", to_line(record)?)?;
-    }
-    Ok(())
+    file.write_all(payload.as_bytes())?;
+    file.flush()
 }
 
 /// Serialize one record to its NDJSON line. Field order follows the struct
@@ -725,5 +743,49 @@ mod tests {
             other => panic!("expected a corroborated fact, got {other:?}"),
         }
         let _ = std::fs::remove_dir_all(&dir);
+    }
+}
+
+#[cfg(test)]
+mod merge_tests {
+    use super::*;
+
+    fn line(digest: &str) -> String {
+        to_line(&Record::Verdict(Box::new(Verdict {
+            suite: Suite::Form,
+            cpu: "8080".to_string(),
+            dialect: "asl".to_string(),
+            case: "nop".to_string(),
+            source: " nop\n".to_string(),
+            arbiter: Arbiter {
+                tool: "asl".to_string(),
+                identity: "1.42".to_string(),
+                digest: digest.to_string(),
+            },
+            outcome: Outcome::Bytes {
+                hex: "00".to_string(),
+            },
+        })))
+        .expect("line")
+    }
+
+    /// A doubled line is a merge artefact, not a second observation. Counting it
+    /// twice would inflate the ledger and read as corroboration that never
+    /// happened.
+    #[test]
+    fn an_exactly_repeated_verdict_counts_once() {
+        let doubled = format!("{}\n{}\n", line("sha-a"), line("sha-a"));
+        assert_eq!(
+            Corpus::parse(&doubled).expect("parse").verdicts().count(),
+            1
+        );
+    }
+
+    /// Two binaries behind one version are genuinely two observations, and both
+    /// survive — that is what makes corroboration meaningful.
+    #[test]
+    fn two_binaries_behind_one_version_both_survive() {
+        let pair = format!("{}\n{}\n", line("sha-a"), line("sha-b"));
+        assert_eq!(Corpus::parse(&pair).expect("parse").verdicts().count(), 2);
     }
 }
