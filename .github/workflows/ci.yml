@@ -162,6 +162,67 @@ jobs:
             target/llvm-cov/lcov.info
             target/llvm-cov/html
 
+  # The corpus replay, as a status of its own.
+  #
+  # It also runs inside `coverage` (which is the test runner), but that buries
+  # the project's central guarantee in a job named for something else. A
+  # contributor's PR should say plainly whether byte-identity still holds.
+  #
+  # The point of this job is that it needs **no reference assembler**, so it
+  # asserts that none is present. Without that, a runner image that started
+  # shipping one would quietly change what a green tick here means.
+  replay:
+    name: Replay
+    runs-on: ubuntu-latest
+    needs: [fmt, clippy]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Read pinned toolchain
+        id: toolchain
+        run: |
+          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
+          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.toolchain.outputs.channel }}
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: replay
+
+      - name: Assert no reference assembler is installed
+        run: |
+          found=""
+          for tool in acme ca65 ld65 pasmo sjasmplus lwasm rgbasm rgblink asl p2bin vasmm68k_mot; do
+            if command -v "$tool" >/dev/null 2>&1; then found="$found $tool"; fi
+          done
+          if [ -n "$found" ]; then
+            echo "::error::reference assemblers present, so this job no longer proves what it claims:$found"
+            exit 1
+          fi
+          echo "no reference assembler on PATH — replay stands on the corpus alone"
+
+      - name: Read the pinned curriculum revision
+        id: pin
+        run: echo "sha=$(cat crates/asm198x/tests/verdicts/code-samples.pin)" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the curriculum at that revision
+        uses: actions/checkout@v7
+        with:
+          repository: code198x/code-samples
+          ref: ${{ steps.pin.outputs.sha }}
+          path: _code198x/code-samples
+
+      - name: Replay the recorded verdicts
+        env:
+          ASM198X_CODE_SAMPLES: ${{ github.workspace }}/_code198x
+        run: cargo test -p asm198x --test verdict_replay -- --nocapture
+
   # Cross-platform smoke compile. Proves the workspace builds on macOS
   # (primary dev host) and Windows without paying for a full test run
   # there. Assemblers pull no platform-specific deps, so no extra install.
