@@ -337,11 +337,38 @@ const PROBES: &[Probe] = &[
     //   MACRO name  / ENDM      sjasmplus, pasmo, rgbasm
     //   name MACRO  / ENDM      asl, lwasm (implemented), vasm (implemented), pasmo
     //   .macro name / .endmacro ca65 (implemented)
-    //   !macro name { }         acme
-    gap("acme", "macro definition and invocation",
-        "!macro nop2 {\n\tnop\n\tnop\n}\n+nop2\n", 93),
-    gap("acme", "macro with a parameter",
-        "!macro ldav .v {\n\tlda #.v\n}\n+ldav 5\n", 93),
+    //   !macro name { }         acme (implemented)
+    ok ("acme", "macro definition and invocation",
+        "!macro nop2 {\n\tnop\n\tnop\n}\n+nop2\n"),
+    ok ("acme", "macro with a parameter",
+        "!macro ldav .v {\n\tlda #.v\n}\n+ldav 5\n"),
+    ok ("acme", "two parameters",
+        "!macro ldav .v, .w {\n\tlda #.v\n\tldx #.w\n}\n+ldav 5, 7\n"),
+    ok ("acme", "the keyword is case-insensitive",
+        "!MACRO nop2 {\n\tnop\n}\n+nop2\n"),
+    ok ("acme", "substitution precedes evaluation",
+        "!macro ldav .v {\n\tlda #.v*2\n}\n+ldav 5\n"),
+    // A `.dotted` label in a body is scoped to the expansion — sjasmplus's rule
+    // exactly, and the only thing the five other dialects made look universal.
+    ok ("acme", "a dotted label is scoped to its expansion",
+        "!macro delay {\n.spin\tdex\n\tbne .spin\n}\n+delay\n+delay\n"),
+    // The two structural properties. Braces nest inside a body, and both braces
+    // may share a line with code — an acme body is delimited at character
+    // level, not by a line the collector can recognise on its own.
+    ok ("acme", "braces nest inside a body",
+        "!macro m {\n\t!if 1 {\n\t\tnop\n\t}\n\tlda #1\n}\n+m\n"),
+    ok ("acme", "both braces may share a line with code",
+        "!macro nop2 { nop\n\tnop }\n+nop2\n"),
+    ok ("acme", "a brace inside a string closes nothing",
+        "!macro m {\n\t!text \"a}b\"\n\tnop\n}\n+m\n"),
+    // Arity is part of the macro's identity: two definitions of one name
+    // coexist, and the call site picks by count.
+    ok ("acme", "one name may carry two arities",
+        "!macro ldav .v {\n\tlda #.v\n}\n!macro ldav .v, .w {\n\tlda #.v\n\tldx #.w\n}\n+ldav 5\n+ldav 5, 7\n"),
+    ok ("acme", "nested macro invocation",
+        "!macro outer {\n\t+inner\n}\n!macro inner {\n\tnop\n}\n+outer\n"),
+    ok ("acme", "an indented invocation is still an invocation",
+        "!macro ldav .v {\n\tlda #.v\n}\n\t+ldav 5\n"),
     ok ("pasmo", "macro definition and invocation",
         " MACRO nop2\n nop\n nop\n ENDM\n nop2\n"),
     // pasmo wants a comma after the name before parameters, where sjasmplus

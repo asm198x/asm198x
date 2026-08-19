@@ -35,36 +35,61 @@ match the parameter list.
 Because the dialects do not disagree about spelling. They disagree about
 meaning.
 
-| | sjasmplus 1.21.0 | pasmo 0.5.5 | ca65 V2.19 | lwasm 4.19 | vasm 2.0b |
-|---|---|---|---|---|---|
-| header | `MACRO name p1 p2` | `MACRO name, p1, p2` *or* `name MACRO p1, p2` | `.macro name p1, p2` (`.mac`) | `name macro` only | `name macro` *or* ` macro name` |
-| parameters | named | named | named | positional `\1`, `\2` | positional `\1`, `\2` |
-| per-expansion locals | any `.dotted` label | what `LOCAL` declares | what `.local` declares | a `?`/`@` **suffix** | none — `\@` substitutes a counter |
-| a plain label in a body | global, **collides** | global, **collides** | global, **collides** | global, **collides** | global, **collides** |
-| too many arguments | rejected | extras **dropped** | rejected | extras **dropped** | extras **dropped** |
-| too few arguments | rejected | substitutes **empty** | substitutes **empty** | substitutes **empty** | substitutes **empty** |
-| self-recursion | **segfault** (139) | **segfault** (139) | `Too many nested macro expansions` | — | — |
+| | sjasmplus 1.21.0 | pasmo 0.5.5 | ca65 V2.19 | lwasm 4.19 | vasm 2.0b | acme 0.97 |
+|---|---|---|---|---|---|---|
+| header | `MACRO name p1 p2` | `MACRO name, p1` *or* `name MACRO p1` | `.macro name p1, p2` | `name macro` only | `name macro` *or* ` macro name` | `!macro name .p1 {` |
+| body ends at | `ENDM` | `ENDM` | `.endmacro` | `endm` | `endm` | the matching **`}`** |
+| call | `name args` | `name args` | `name args` | `name args` | `name args` | `+name args` |
+| parameters | named | named | named | positional `\1` | positional `\1` | named `.p` |
+| per-expansion locals | any `.dotted` label | what `LOCAL` declares | what `.local` declares | a `?`/`@` **suffix** | none — `\@` counter | any `.dotted` label |
+| a plain label in a body | global, **collides** | global, **collides** | global, **collides** | global, **collides** | global, **collides** | global, **collides** |
+| too many arguments | rejected | extras **dropped** | rejected | extras **dropped** | extras **dropped** | **a different macro** |
+| too few arguments | rejected | substitutes **empty** | substitutes **empty** | substitutes **empty** | substitutes **empty** | **a different macro** |
+| self-recursion | **segfault** (139) | **segfault** (139) | nesting limit | — | — | — |
 
-Five dialects. **Four spellings of a per-expansion local** — prefix, two
+Six dialects. **Four spellings of a per-expansion local** — a prefix (twice), two
 different declarations, and a suffix — plus one dialect that has none and makes
-you ask for a counter instead. Three arity postures. Three header shapes, one of
-which accepts two of them.
+you ask for a counter instead. **Four arity postures**, the last of which is not
+a posture at all: acme has no wrong number of arguments, only a name it has
+never heard of, because `ldav .v` and `ldav .v, .w` are two macros.
 
 The locals row is the one that settles it. The same source, a macro with
-`.spin nop` inside, invoked twice, assembles under sjasmplus and is rejected by
-every other dialect measured. A house macro system that picked one of those
-behaviours would produce wrong bytes — silently, for four of the five — against
-source its users wrote for a real assembler. That is the opposite of the
-identity claim.
+`.spin nop` inside, invoked twice, assembles under sjasmplus and acme and is
+rejected by the other four. A house macro system that picked one of those
+behaviours would produce wrong bytes — silently, for whichever dialects it
+disagreed with — against source its users wrote for a real assembler. That is
+the opposite of the identity claim.
 
 So `fit_arguments` has **no default implementation**, and neither does
 `locals`. A new dialect must state both, because guessing is exactly the kind
 of quiet wrongness the corpus exists to catch.
 
-What *is* shared held up across all five without amendment: substitution stayed
+What *is* shared held up across all six without amendment: substitution stayed
 textual, word-bounded, string-safe, and ahead of evaluation every time. Only the
 edges of a symbol moved — lwasm counts `?`, `@` and `\` as symbol characters,
 which is `is_symbol_char`, not a new mechanism.
+
+### What acme changed, and why it was worth changing
+
+The first five dialects cost a trait method each and left the shared mechanics
+alone. acme could not be fitted that way, and two properties of `expand` itself
+had to move:
+
+**Collecting a body is the dialect's job.** `collect` now takes the source lines
+and an index and hands back a definition, with a default that does exactly what
+the code did before — header line, then lines until `is_end`. acme overrides it
+to count brace depth at character level, because braces nest inside its bodies
+(`!if .v > 3 {` is ordinary), both braces share lines with code, and a `}` inside
+a string closes nothing. Delegating rather than parameterising means the five
+keyword dialects run the same collector they always did; the risk of the change
+sits entirely in the one dialect that needed it.
+
+**A name may carry several definitions.** The table is keyed by name to a *list*,
+and `select` picks one. The default takes the last defined, which is what an
+overwriting table did. acme picks by argument count.
+
+Both are seams rather than options: nothing chooses between behaviours at run
+time, and a dialect that says nothing gets what it had.
 
 This is the v1 scope's *"adopted against real dialect requirements rather than
 as a universal macro language"* ([`v1-scope.md`](v1-scope.md)), made structural.
@@ -160,13 +185,35 @@ fails rather than passes.
   is a macro question, and the probes were written to avoid tripping over the
   first.
 
+- **2026-08-19 — acme** (#93), the sixth and last. Brace-delimited bodies with
+  arity-dispatched overloads and `+name` calls; `.dotted` locals, which is
+  sjasmplus's rule and needed no new code. Twelve facts recorded against acme
+  0.97 — including the three shapes a line-oriented collector gets wrong — and
+  the last two `issue-93` markers retired. No macro gap markers remain.
+
+  Three unrelated acme divergences surfaced while probing and are filed as #128
+  rather than folded in: `!if` rejects a comparison, a zero-page label
+  assembles absolute, and `!byte` rejects a string. All three reproduce with no
+  macro involved, and the probes were written around them.
+
+  **Known gap:** acme's formatter refuses a file containing macros — its block
+  parser reads the body's closing brace as an unbalanced conditional close.
+  Unchanged from before, verified by running the old code, and pinned by a test.
+  That makes five of six dialects whose formatter refuses what it cannot lay
+  out; only sjasmplus round-trips a macro. Closing that is its own piece of work.
+
 ## Drift triggers
 
 Stop and re-consult if a change would:
 
 - **Unify the dialects' macro grammar** — a common header parser, a shared
-  local-scoping rule, a default `fit_arguments` or `locals`. Five dialects
-  produced four local mechanisms and three arity postures; see the table above.
+  local-scoping rule, a default `fit_arguments` or `locals`. Six dialects
+  produced four local mechanisms and four arity postures; see the table above.
+- **Parameterise the collector instead of delegating it** — a `BodyStyle` enum,
+  a "terminator" abstraction covering both keywords and braces. The two shapes
+  have nothing in common but their purpose: one reads lines, the other counts
+  characters and tracks string state. `collect` with a default is what keeps the
+  keyword dialects on untouched code.
 - **Add a hook to `MacroSyntax` for a case nobody measured.** Every one of them
   exists because a reference did something the others did not. A hook with one
   implementation and no probe behind it is a guess with a trait attached.

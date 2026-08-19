@@ -45,11 +45,21 @@ pub(crate) trait MacroSyntax {
     fn header(&self, line: &str) -> Option<(String, Vec<String>)>;
 
     /// Whether the line closes a definition.
-    fn is_end(&self, line: &str) -> bool;
+    ///
+    /// Only the default [`collect`](Self::collect) consults this, so a dialect
+    /// whose bodies are not line-terminated overrides that instead and leaves
+    /// this alone.
+    fn is_end(&self, line: &str) -> bool {
+        let _ = line;
+        false
+    }
 
     /// What that closing keyword is called, so an unterminated definition is
-    /// reported in the spelling the author is looking for.
-    fn end_keyword(&self) -> &'static str;
+    /// reported in the spelling the author is looking for. As
+    /// [`is_end`](Self::is_end), the default collector's business only.
+    fn end_keyword(&self) -> &'static str {
+        ""
+    }
 
     /// The names in `body` that are local to each expansion, and so must be
     /// renamed per invocation.
@@ -106,6 +116,56 @@ pub(crate) trait MacroSyntax {
         format!("{name}__{n}")
     }
 
+    /// Lift the definition starting at `lines[start]`, if one starts there.
+    ///
+    /// `None` means the line opens no definition. `Some(Err(..))` means it does
+    /// and the definition is malformed, with the message to report.
+    ///
+    /// The default collects a **line-terminated** body — the header line, then
+    /// every line up to the one [`is_end`](Self::is_end) recognises — which is
+    /// what four of the five keyword dialects need. acme overrides it because
+    /// its bodies are brace-delimited at character level: braces nest inside a
+    /// body, and both braces share lines with code.
+    fn collect(&self, lines: &[&str], start: usize) -> Option<Result<Definition, String>> {
+        let (name, params) = self.header(lines[start])?;
+        let mut body = Vec::new();
+        for (offset, line) in lines.iter().enumerate().skip(start + 1) {
+            if self.is_end(line) {
+                return Some(Ok(Definition {
+                    name,
+                    def: MacroDef { params, body },
+                    last_line: offset,
+                }));
+            }
+            body.push((*line).to_string());
+        }
+        Some(Err(format!(
+            "`macro {name}` has no matching `{}`",
+            self.end_keyword()
+        )))
+    }
+
+    /// Which definition of `name` an invocation passing `argc` arguments means.
+    ///
+    /// Every dialect but acme has one definition per name and takes it whatever
+    /// the count, leaving [`fit_arguments`](Self::fit_arguments) to reconcile —
+    /// so the default takes the last one defined, as an overwriting table did.
+    /// acme dispatches on the count itself: `ldav .v` and `ldav .v, .w` are two
+    /// macros, and a call matching neither is `Macro not defined`, not a bad
+    /// argument list.
+    fn select<'a>(&self, defs: &'a [MacroDef], argc: usize) -> Option<&'a MacroDef> {
+        let _ = argc;
+        defs.last()
+    }
+
+    /// The macro an invocation's first word names, if it names one.
+    ///
+    /// acme spells a call `+ldav`, and a bare `ldav` is not one; everyone else
+    /// writes the name alone, which is the default.
+    fn invocation_name<'a>(&self, head: &'a str) -> Option<&'a str> {
+        Some(head)
+    }
+
     /// Reconcile an invocation's arguments with the macro's parameters,
     /// returning the list to substitute or the message to reject it with.
     ///
@@ -145,9 +205,23 @@ pub(crate) struct Expanded {
 }
 
 /// A macro as collected by the pre-pass.
-struct MacroDef {
-    params: Vec<String>,
-    body: Vec<String>,
+pub(crate) struct MacroDef {
+    /// Parameter names, in order. Empty for a dialect whose parameters are
+    /// positional, where [`MacroSyntax::argument_names`] supplies them instead.
+    pub(crate) params: Vec<String>,
+    /// Body lines, verbatim, before substitution.
+    pub(crate) body: Vec<String>,
+}
+
+/// A definition the pre-pass lifted out of the source.
+pub(crate) struct Definition {
+    pub(crate) name: String,
+    pub(crate) def: MacroDef,
+    /// Index of the last line the definition occupies, so the pre-pass knows
+    /// where the file resumes. A brace-delimited dialect can end a definition
+    /// part-way along a line; whatever follows the closing brace is dropped,
+    /// which is what every reference measured does.
+    pub(crate) last_line: usize,
 }
 
 /// Strip a trailing comment, respecting string literals so a `;` inside quotes
@@ -269,7 +343,11 @@ pub(crate) fn split_args(text: &str) -> Vec<String> {
 /// the references resolve a name when they expand, not when they read.
 pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expanded, AsmError> {
     let lines: Vec<&str> = source.lines().collect();
-    let mut macros: std::collections::HashMap<String, MacroDef> = std::collections::HashMap::new();
+    // Definitions are grouped by name rather than replaced, because one dialect
+    // — acme — lets a name carry several, told apart by how many arguments they
+    // take. Where a dialect has only ever one, the group holds one.
+    let mut macros: std::collections::HashMap<String, Vec<MacroDef>> =
+        std::collections::HashMap::new();
 
     // Pass 1 — take the definitions out, keep everything else with its origin.
     let mut body: Vec<(LineOrigin, String)> = Vec::with_capacity(lines.len());
@@ -277,32 +355,14 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
     while i < lines.len() {
         let raw = lines[i];
         let line_no = i + 1;
-        if let Some((name, params)) = syntax.header(raw) {
-            let mut collected = Vec::new();
-            let mut j = i + 1;
-            let mut closed = false;
-            while j < lines.len() {
-                if syntax.is_end(lines[j]) {
-                    closed = true;
-                    break;
-                }
-                collected.push(lines[j].to_string());
-                j += 1;
-            }
-            if !closed {
-                return Err(AsmError::new(
-                    line_no,
-                    format!("`macro {name}` has no matching `{}`", syntax.end_keyword()),
-                ));
-            }
-            macros.insert(
+        if let Some(collected) = syntax.collect(&lines, i) {
+            let Definition {
                 name,
-                MacroDef {
-                    params,
-                    body: collected,
-                },
-            );
-            i = j + 1;
+                def,
+                last_line,
+            } = collected.map_err(|msg| AsmError::new(line_no, msg))?;
+            macros.entry(name).or_default().push(def);
+            i = last_line + 1;
             continue;
         }
         body.push((
@@ -322,11 +382,21 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
         let mut next: Vec<(LineOrigin, String)> = Vec::with_capacity(body.len());
         let mut expanded_any = false;
         for (origin, text) in &body {
-            let Some((label, name, args)) = invocation(text, &macros) else {
+            let Some((label, name, args)) = invocation(syntax, text, &macros) else {
                 next.push((origin.clone(), text.clone()));
                 continue;
             };
-            let def = &macros[&name];
+            let Some(def) = syntax.select(&macros[&name], args.len()) else {
+                // Only reachable where arity picks the definition: the name is
+                // known, but no definition takes this many arguments.
+                return Err(AsmError::new(
+                    origin.line,
+                    format!(
+                        "no definition of macro `{name}` takes {} argument(s)",
+                        args.len()
+                    ),
+                ));
+            };
             let args = syntax
                 .fit_arguments(&name, &def.params, args)
                 .map_err(|msg| AsmError::new(origin.line, msg))?;
@@ -405,17 +475,24 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
 /// on an `include` line follows. Missing it does not mis-assemble; it rejects
 /// the line outright as an unknown instruction, because the label is read as
 /// the mnemonic.
-fn invocation(
+fn invocation<S: MacroSyntax>(
+    syntax: &S,
     line: &str,
-    macros: &std::collections::HashMap<String, MacroDef>,
+    macros: &std::collections::HashMap<String, Vec<MacroDef>>,
 ) -> Option<(Option<String>, String, Vec<String>)> {
+    let named = |word: &str| {
+        syntax
+            .invocation_name(word)
+            .filter(|name| macros.contains_key(*name))
+            .map(str::to_string)
+    };
     let stripped = without_comment(line);
     let trimmed = stripped.trim();
     let (head, tail) = trimmed
         .split_once(char::is_whitespace)
         .unwrap_or((trimmed, ""));
-    if macros.contains_key(head) {
-        return Some((None, head.to_string(), split_args(tail)));
+    if let Some(name) = named(head) {
+        return Some((None, name, split_args(tail)));
     }
     // Only a word at column 0 can be a label; anywhere else it is a mnemonic,
     // and every reference measured takes the colon as optional.
@@ -423,10 +500,8 @@ fn invocation(
         return None;
     }
     let tail = tail.trim();
-    let (name, args) = tail.split_once(char::is_whitespace).unwrap_or((tail, ""));
-    macros
-        .contains_key(name)
-        .then(|| (Some(head.to_string()), name.to_string(), split_args(args)))
+    let (word, args) = tail.split_once(char::is_whitespace).unwrap_or((tail, ""));
+    named(word).map(|name| (Some(head.to_string()), name, split_args(args)))
 }
 
 // ---------------------------------------------------------------------------
