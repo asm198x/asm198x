@@ -58,3 +58,9 @@ git_tag_enable = false
 [[package]]
 name = "debug198x"
 git_tag_enable = false
+
+# verdict-corpus is test infrastructure — no binary, no consumers outside this
+# workspace's tests. It rides the lockstep version but earns no tag of its own.
+[[package]]
+name = "verdict-corpus"
+git_tag_enable = false

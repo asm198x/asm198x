@@ -17,6 +17,9 @@ members = [
     "crates/isa-disasm",
     "crates/debug198x",
     "crates/asm198x",
+    # Test infrastructure: the recorded reference-assembler verdicts CI replays
+    # with no tools installed. Never a dependency of the shipped binary.
+    "crates/verdict-corpus",
 ]
 default-members = ["crates/asm198x"]
 
