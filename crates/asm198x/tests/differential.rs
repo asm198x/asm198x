@@ -358,6 +358,14 @@ const PROBES: &[Probe] = &[
         " MACRO m\n.loc djnz .loc\n ENDM\n m\n m\n"),
     ok ("sjasmplus", "macro local label with a parameter",
         " MACRO m v\n.l djnz .l\n ld a,v\n ENDM\n m 5\n m 6\n"),
+    // Composition: a macro may invoke another, and may invoke one defined
+    // later in the file — the reference resolves names when it expands.
+    ok ("sjasmplus", "nested macro invocation",
+        " MACRO inner\n nop\n ENDM\n MACRO outer\n inner\n ENDM\n outer\n"),
+    ok ("sjasmplus", "nested macro passes a parameter through",
+        " MACRO inner v\n ld a,v\n ENDM\n MACRO outer w\n inner w\n ENDM\n outer 5\n"),
+    ok ("sjasmplus", "macro invokes one defined later",
+        " MACRO outer\n inner\n ENDM\n MACRO inner\n nop\n ENDM\n outer\n"),
     gap("lwasm", "macro definition and invocation",
         "nop2\tmacro\n nop\n nop\n endm\n nop2\n", 93),
     gap("lwasm", "macro with a positional parameter",

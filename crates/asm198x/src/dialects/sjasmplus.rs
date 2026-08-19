@@ -409,21 +409,31 @@ pub(crate) struct Expanded {
     pub(crate) origins: Vec<usize>,
 }
 
+/// How deep expansion may nest before we call it runaway.
+///
+/// sjasmplus itself has no limit: a self-recursive macro segfaults it (exit
+/// 139). We decline to reproduce that. A crash is not a verdict about anyone's
+/// source, and an assembler that dies is worse than one that explains itself,
+/// so this errors with the macro named instead.
+const MAX_EXPANSION_DEPTH: usize = 64;
+
 /// Collect macro definitions and expand their invocations.
+///
+/// Two passes, because a macro may invoke one defined **later** in the file —
+/// the reference resolves names when it expands, not when it reads. Collecting
+/// every definition first is what makes that work.
 pub(crate) fn expand_macros(source: &str) -> Result<Expanded, AsmError> {
     let lines: Vec<&str> = source.lines().collect();
     let mut macros: std::collections::HashMap<String, MacroDef> = std::collections::HashMap::new();
-    let mut text = String::with_capacity(source.len());
-    let mut origins = Vec::with_capacity(lines.len());
-    let mut expansions = 0usize;
-    let mut i = 0;
 
+    // Pass 1 — take the definitions out, keep everything else with its line.
+    let mut body: Vec<(usize, String)> = Vec::with_capacity(lines.len());
+    let mut i = 0;
     while i < lines.len() {
         let raw = lines[i];
         let line_no = i + 1;
-
         if let Some((name, params)) = macro_header(raw) {
-            let mut body = Vec::new();
+            let mut collected = Vec::new();
             let mut j = i + 1;
             let mut closed = false;
             while j < lines.len() {
@@ -431,7 +441,7 @@ pub(crate) fn expand_macros(source: &str) -> Result<Expanded, AsmError> {
                     closed = true;
                     break;
                 }
-                body.push(lines[j].to_string());
+                collected.push(lines[j].to_string());
                 j += 1;
             }
             if !closed {
@@ -440,52 +450,91 @@ pub(crate) fn expand_macros(source: &str) -> Result<Expanded, AsmError> {
                     format!("`macro {name}` has no matching `endm`"),
                 ));
             }
-            macros.insert(name, MacroDef { params, body });
+            macros.insert(
+                name,
+                MacroDef {
+                    params,
+                    body: collected,
+                },
+            );
             i = j + 1;
             continue;
         }
+        body.push((line_no, raw.to_string()));
+        i += 1;
+    }
 
-        // An invocation: the first token names a macro. Case-sensitive, as
-        // sjasmplus is for macro names though not for its keywords.
-        let stripped = without_comment(raw).trim();
-        let (head, tail) = stripped
-            .split_once(char::is_whitespace)
-            .unwrap_or((stripped, ""));
-        if let Some(def) = macros.get(head) {
-            let args = split_args(tail);
+    // Pass 2 — expand until nothing is left to expand. A body may invoke
+    // another macro, so this repeats rather than walking once.
+    let mut expansions = 0usize;
+    for depth in 0..=MAX_EXPANSION_DEPTH {
+        let mut next: Vec<(usize, String)> = Vec::with_capacity(body.len());
+        let mut expanded_any = false;
+        for (line_no, text) in &body {
+            let Some((name, args)) = invocation(text, &macros) else {
+                next.push((*line_no, text.clone()));
+                continue;
+            };
+            let def = &macros[&name];
             if args.len() != def.params.len() {
                 return Err(AsmError::new(
-                    line_no,
+                    *line_no,
                     format!(
-                        "macro `{head}` takes {} argument(s), but {} given",
+                        "macro `{name}` takes {} argument(s), but {} given",
                         def.params.len(),
                         args.len()
                     ),
                 ));
             }
-            // Each expansion gets its own copy of the locals it defines.
+            if depth == MAX_EXPANSION_DEPTH {
+                return Err(AsmError::new(
+                    *line_no,
+                    format!(
+                        "macro `{name}` is still expanding after {MAX_EXPANSION_DEPTH} levels — is it recursive?"
+                    ),
+                ));
+            }
+            expanded_any = true;
             expansions += 1;
             let locals = defined_locals(&def.body);
             let renamed: Vec<String> = locals
                 .iter()
-                .map(|name| format!("{name}__{expansions}"))
+                .map(|local| format!("{local}__{expansions}"))
                 .collect();
             for body_line in &def.body {
                 let with_args = substitute(body_line, &def.params, &args);
-                text.push_str(&substitute(&with_args, &locals, &renamed));
-                text.push('\n');
-                origins.push(line_no);
+                next.push((*line_no, substitute(&with_args, &locals, &renamed)));
             }
-            i += 1;
-            continue;
         }
+        body = next;
+        if !expanded_any {
+            break;
+        }
+    }
 
-        text.push_str(raw);
+    let mut text = String::with_capacity(source.len());
+    let mut origins = Vec::with_capacity(body.len());
+    for (line_no, line) in body {
+        text.push_str(&line);
         text.push('\n');
         origins.push(line_no);
-        i += 1;
     }
     Ok(Expanded { text, origins })
+}
+
+/// The macro a line invokes, if any, with its arguments. Names match
+/// case-sensitively, as sjasmplus matches them.
+fn invocation(
+    line: &str,
+    macros: &std::collections::HashMap<String, MacroDef>,
+) -> Option<(String, Vec<String>)> {
+    let stripped = without_comment(line).trim();
+    let (head, tail) = stripped
+        .split_once(char::is_whitespace)
+        .unwrap_or((stripped, ""));
+    macros
+        .contains_key(head)
+        .then(|| (head.to_string(), split_args(tail)))
 }
 
 #[cfg(test)]
@@ -518,6 +567,47 @@ mod tests {
                 .bytes,
             vec![0x10, 0xFE, 0x10, 0xFE, 0x10, 0xFE]
         );
+    }
+
+    /// Macros compose, and a macro may invoke one defined **later** — the
+    /// reference resolves a name when it expands, not when it reads, which is
+    /// why every definition is collected before anything expands.
+    #[test]
+    fn macros_nest_and_may_invoke_one_defined_later() {
+        assert_eq!(
+            asm(" MACRO inner v\n ld a,v\n ENDM\n MACRO outer w\n inner w\n ENDM\n outer 5\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x3E, 0x05]
+        );
+        assert_eq!(
+            asm(" MACRO outer\n inner\n ENDM\n MACRO inner\n nop\n ENDM\n outer\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x00]
+        );
+    }
+
+    /// Locals stay distinct through nesting: one outer expansion invoking the
+    /// same inner macro twice still gets two separate labels.
+    #[test]
+    fn locals_stay_distinct_through_nesting() {
+        assert_eq!(
+            asm(" MACRO m\n.loc djnz .loc\n ENDM\n MACRO two\n m\n m\n ENDM\n two\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x10, 0xFE, 0x10, 0xFE]
+        );
+    }
+
+    /// A self-recursive macro segfaults sjasmplus (exit 139). We decline to
+    /// reproduce that: a crash is not a verdict about anyone's source, and an
+    /// assembler that dies is worse than one that explains itself.
+    #[test]
+    fn runaway_recursion_is_reported_not_crashed_on() {
+        let err = asm(" MACRO recur\n recur\n ENDM\n recur\n").expect_err("recursive");
+        assert!(err.message.contains("recur"), "names the macro: {err:?}");
+        assert!(err.message.contains("recursive"), "{err:?}");
     }
 
     /// A *plain* label in a macro body stays global, so a second invocation
