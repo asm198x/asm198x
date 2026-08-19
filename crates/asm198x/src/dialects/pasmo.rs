@@ -6,9 +6,15 @@
 //! and directives. The `z80n` flag selects the **target** instruction set —
 //! plain Z80 (vanilla pasmo) or the Spectrum Next's Z80N (pasmonext) — which is
 //! a target property, not a syntax one (see `decisions/syntax-stance.md`).
+//!
+//! **Macros** (#93): `MACRO`/`ENDM` in both spellings, with `LOCAL`-declared
+//! per-expansion labels, over the shared expander in
+//! [`crate::dialects::macros`] — this module supplies only the grammar,
+//! governed by `decisions/macro-expansion-framework.md`.
 
 use crate::dialect::{Dialect, Oversize};
-use crate::dialects::z80::{self, Z80Syntax};
+use crate::dialects::macros;
+use crate::dialects::z80::{self, Expand, Z80Syntax};
 use crate::engine::{AsmError, Statement};
 use crate::source::{SourceLoader, SourceMap};
 
@@ -39,6 +45,9 @@ impl Dialect for Pasmo {
             self.instruction_set(),
             self.extension_set(),
             source,
+            // The formatter must not expand: it lays source out, and would
+            // otherwise write the expansions back in place of the macro.
+            Expand::No,
         )?))
     }
     /// The incbin-capable parse (language-surface U3): the same
@@ -68,6 +77,17 @@ impl Dialect for Pasmo {
 struct PasmoSyntax;
 
 impl Z80Syntax for PasmoSyntax {
+    /// Macros expand before parsing (#93). Returning the map lets the shared
+    /// pipeline report every line against its source rather than against a line
+    /// that only existed inside the expander.
+    fn expand_source(
+        &self,
+        source: &str,
+    ) -> Result<Option<(String, Vec<macros::LineOrigin>)>, AsmError> {
+        let expanded = macros::expand(&PasmoSyntax, source)?;
+        Ok(Some((expanded.text, expanded.origins)))
+    }
+
     fn strip_comment<'a>(&self, line: &'a str) -> &'a str {
         line.find(';').map_or(line, |idx| &line[..idx])
     }
@@ -115,9 +135,126 @@ impl Z80Syntax for PasmoSyntax {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Macros (#93)
+//
+// The mechanics live in [`crate::dialects::macros`]; this is pasmo's grammar,
+// measured against pasmo 0.5.5. It agrees with sjasmplus on the parts a user
+// would expect to be universal — the keyword is case-insensitive, a macro name
+// is case-sensitive, substitution is textual, word-bounded, string-safe, and
+// happens before expressions are evaluated — and differs on the two parts that
+// matter most in practice:
+//
+//   * a definition may be written either way round, `MACRO name, p1` or
+//     `name MACRO p1`, and the keyword-first spelling wants a **comma** after
+//     the name before its parameters;
+//   * a per-expansion local must be **declared**, with `LOCAL name`. A dotted
+//     label is not special here — spell a local `.loop` and pasmo gives you an
+//     ordinary label, which then collides on the second invocation.
+//
+// That second difference is why the local mechanism is part of the grammar
+// rather than the shared machinery. The two assemblers are not spelling one
+// idea differently; they disagree about which labels a macro scopes.
+// ---------------------------------------------------------------------------
+
+impl macros::MacroSyntax for PasmoSyntax {
+    /// `MACRO name[, p1[, p2]...]` or `name MACRO [p1[, p2]...]`.
+    fn header(&self, line: &str) -> Option<(String, Vec<String>)> {
+        let text = macros::without_comment(line).trim();
+        let (first, rest) = text.split_once(char::is_whitespace)?;
+        let rest = rest.trim();
+
+        if first.eq_ignore_ascii_case("macro") {
+            // Keyword first: the name is everything up to the comma that
+            // introduces the parameters, or the whole tail if there is none.
+            let (name, params) = match rest.split_once(',') {
+                Some((name, tail)) => (name.trim(), parameters(tail)),
+                None => (rest, Vec::new()),
+            };
+            return (!name.is_empty()).then(|| (name.to_string(), params));
+        }
+
+        // Name first, as a label would be written.
+        let (kw, tail) = rest.split_once(char::is_whitespace).unwrap_or((rest, ""));
+        if !kw.eq_ignore_ascii_case("macro") {
+            return None;
+        }
+        let name = first.trim_end_matches(':');
+        (!name.is_empty()).then(|| (name.to_string(), parameters(tail)))
+    }
+
+    /// `ENDM`, alone on its line.
+    fn is_end(&self, line: &str) -> bool {
+        macros::without_comment(line)
+            .trim()
+            .eq_ignore_ascii_case("endm")
+    }
+
+    fn end_keyword(&self) -> &'static str {
+        "endm"
+    }
+
+    /// pasmo checks nothing: extra arguments are dropped, and a missing one
+    /// substitutes as **empty**. That is not laxity we are copying for its own
+    /// sake — the resulting diagnostic is the one pasmo gives, raised by
+    /// whatever the empty operand broke (`ld a,` → a value was expected), at
+    /// the line inside the macro that broke.
+    fn fit_arguments(
+        &self,
+        _name: &str,
+        params: &[String],
+        mut args: Vec<String>,
+    ) -> Result<Vec<String>, String> {
+        args.truncate(params.len());
+        args.resize(params.len(), String::new());
+        Ok(args)
+    }
+
+    /// The names the body's `LOCAL` declarations introduce. Nothing else is
+    /// local, however it is spelled.
+    fn locals(&self, body: &[String]) -> Vec<String> {
+        let mut names = Vec::new();
+        for line in body {
+            let Some(declared) = local_declaration(line) else {
+                continue;
+            };
+            for name in declared {
+                if !names.contains(&name) {
+                    names.push(name);
+                }
+            }
+        }
+        names
+    }
+
+    /// A `LOCAL` line declares; it does not assemble, so it leaves the body.
+    fn is_local_decl(&self, line: &str) -> bool {
+        local_declaration(line).is_some()
+    }
+}
+
+/// The names a `LOCAL` line declares, or `None` if the line is not one.
+fn local_declaration(line: &str) -> Option<Vec<String>> {
+    let text = macros::without_comment(line).trim();
+    let (kw, rest) = text.split_once(char::is_whitespace)?;
+    kw.eq_ignore_ascii_case("local")
+        .then(|| parameters(rest))
+        .filter(|names| !names.is_empty())
+}
+
+/// A comma-separated name list, empties dropped — shared by macro parameters
+/// and `LOCAL` declarations, which pasmo spells the same way.
+fn parameters(text: &str) -> Vec<String> {
+    text.split(',')
+        .map(|p| p.trim().to_string())
+        .filter(|p| !p.is_empty())
+        .collect()
+}
+
 #[cfg(test)]
 mod tests {
     use crate::assemble_pasmonext as asm;
+    use crate::dialects::z80::Expand;
 
     /// U4 — comments are carried as AST trivia (leading own-line + trailing
     /// same-line), not stripped, and do not change the emitted bytes (AE1).
@@ -129,8 +266,14 @@ mod tests {
 
         let src = "; header\nstart:\n  ld a, 5   ; load five\n  ret\n";
         let d = Pasmo { z80n: false };
-        let prog = z80::parse_program(&PasmoSyntax, d.instruction_set(), d.extension_set(), src)
-            .expect("parses");
+        let prog = z80::parse_program(
+            &PasmoSyntax,
+            d.instruction_set(),
+            d.extension_set(),
+            src,
+            Expand::Yes,
+        )
+        .expect("parses");
 
         // The header comment is leading trivia on the first node (`start:`).
         assert!(
@@ -355,5 +498,136 @@ mod tests {
         );
         let err = crate::assemble_pasmo("        swapnib\n").expect_err("z80n off");
         assert!(err.message.contains("SWAPNIB"), "unexpected: {err}");
+    }
+
+    // ----- Macros (#93) -------------------------------------------------
+    //
+    // Every expectation below is a byte string pasmo 0.5.5 actually produced
+    // for the same source, not a reading of its manual.
+
+    /// Both spellings of a definition work, and substitution happens before the
+    /// expression is evaluated — `1+1` reaches the operand as text.
+    #[test]
+    fn a_macro_may_be_written_either_way_round() {
+        let keyword_first =
+            asm(" MACRO setv, val\n ld a,val\n ENDM\n setv 9\n setv 1+1\n").expect("keyword first");
+        assert_eq!(keyword_first.bytes, vec![0x3E, 0x09, 0x3E, 0x02]);
+        let name_first = asm("setv MACRO val\n ld a,val\n ENDM\n setv 9\n").expect("name first");
+        assert_eq!(name_first.bytes, vec![0x3E, 0x09]);
+    }
+
+    /// Substitution is textual but not naive: it respects word boundaries, so a
+    /// parameter `v` leaves the symbol `val` alone, and it does not reach inside
+    /// a string, so `defb "v"` emits the letter.
+    #[test]
+    fn substitution_respects_words_and_strings() {
+        let a = asm(
+            "val equ 7\n MACRO m1, v\n ld a,v\n ld hl,val\n defb \"v\"\n ld a,v*2\n ENDM\n m1 9\n",
+        )
+        .expect("substitution");
+        assert_eq!(
+            a.bytes,
+            vec![0x3E, 0x09, 0x21, 0x07, 0x00, 0x76, 0x3E, 0x12]
+        );
+    }
+
+    /// A macro containing a loop must be usable more than once — most of what
+    /// macros are for. Unlike sjasmplus, pasmo scopes nothing by spelling: the
+    /// label is per-expansion only because `LOCAL` says so.
+    #[test]
+    fn a_local_declaration_scopes_a_label_to_its_expansion() {
+        let a = asm(
+            "delay MACRO n1\n LOCAL spin\n ld b,n1\nspin djnz spin\n ENDM\n delay 4\n delay 5\n",
+        )
+        .expect("two expansions");
+        assert_eq!(
+            a.bytes,
+            vec![0x06, 0x04, 0x10, 0xFE, 0x06, 0x05, 0x10, 0xFE]
+        );
+    }
+
+    /// A `LOCAL` label is invisible outside the expansion that made it, so
+    /// referring to it from the file is an undefined symbol — pasmo says
+    /// `Symbol 'spin' is undefined` and so must we.
+    #[test]
+    fn a_local_does_not_escape_its_expansion() {
+        let err = asm(
+            "delay MACRO n1\n LOCAL spin\n ld b,n1\nspin djnz spin\n ENDM\n delay 4\n jp spin\n",
+        )
+        .expect_err("spin is local to the expansion");
+        assert!(err.message.contains("spin"), "{err:?}");
+    }
+
+    /// A dotted label is **not** local here, however familiar that spelling is
+    /// from sjasmplus. It is an ordinary label, so a second invocation collides
+    /// — which is the behaviour worth pinning, because the quiet alternative
+    /// would be to scope it and silently disagree with the reference.
+    #[test]
+    fn a_dotted_label_is_not_local() {
+        asm(" MACRO m1\n.spin nop\n ENDM\n m1\n m1\n")
+            .expect_err("the second expansion redefines .spin");
+    }
+
+    /// Macros compose, and one may invoke another defined later in the file.
+    #[test]
+    fn macros_nest() {
+        let a = asm(" MACRO inner, v\n ld a,v\n ENDM\n MACRO outer, v\n inner v\n inner v+1\n ENDM\n outer 3\n")
+            .expect("nested");
+        assert_eq!(a.bytes, vec![0x3E, 0x03, 0x3E, 0x04]);
+    }
+
+    /// pasmo checks no arity: extra arguments are dropped, and a missing one
+    /// substitutes empty, so the complaint comes from the operand it emptied.
+    #[test]
+    fn arity_is_not_checked() {
+        let extra = asm(" MACRO m1, v\n ld a,v\n ENDM\n m1 1,2\n").expect("extras dropped");
+        assert_eq!(extra.bytes, vec![0x3E, 0x01]);
+        asm(" MACRO m1, v, w\n ld a,v\n ld b,w\n ENDM\n m1 9\n").expect_err("`ld b,` has no value");
+    }
+
+    /// A macro name is case-sensitive even though its keyword is not, so a
+    /// mis-cased call is an unknown instruction rather than an expansion.
+    #[test]
+    fn the_keyword_is_case_insensitive_but_the_name_is_not() {
+        assert_eq!(
+            asm(" macro m1, v\n ld a,v\n endm\n m1 9\n")
+                .expect("lowercase keyword")
+                .bytes,
+            vec![0x3E, 0x09]
+        );
+        asm(" MACRO mac, v\n ld a,v\n ENDM\n MAC 9\n").expect_err("MAC is not mac");
+    }
+
+    /// The formatter does not expand — the same rule as sjasmplus, for the
+    /// same reason: laying source out must not rewrite the program.
+    ///
+    /// pasmo's formatter cannot yet *format* a file with macros either. Its
+    /// parse is the eager one, which reads `MACRO` as an instruction and
+    /// rejects it, exactly as it did before macros were implemented. Refusing
+    /// is the safe half of the answer and this pins it, so the day the other
+    /// half lands it is a deliberate change rather than a surprise.
+    #[test]
+    fn formatting_does_not_expand() {
+        let err = crate::format_pasmo(" MACRO setv, v\n ld a,v\n ENDM\n setv 9\n")
+            .expect_err("the eager parse does not know MACRO");
+        assert!(err.message.contains("MACRO"), "{err:?}");
+    }
+
+    /// A diagnostic must name a line the author wrote. An error inside a body
+    /// reports the **invocation**, which is where a reader looks first.
+    #[test]
+    fn an_error_inside_an_expansion_names_the_invocation() {
+        let err = asm(" nop\n MACRO bad\n frobnicate\n ENDM\n nop\n bad\n")
+            .expect_err("frobnicate is not an instruction");
+        assert_eq!(err.line, 6, "the invocation is on line 6: {err:?}");
+    }
+
+    /// A self-recursive macro **segfaults** pasmo (exit 139), exactly as it
+    /// segfaults sjasmplus. Byte-identical output is the goal; byte-identical
+    /// crashing is not. We stop and name the macro instead.
+    #[test]
+    fn runaway_recursion_is_caught() {
+        let err = asm(" MACRO forever\n forever\n ENDM\n forever\n").expect_err("recursive");
+        assert!(err.message.contains("forever"), "{err:?}");
     }
 }

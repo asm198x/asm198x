@@ -22,9 +22,10 @@
 use std::collections::BTreeMap;
 
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
+use crate::dialects::macros::LineOrigin;
 use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
 use crate::source::{MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
-use crate::span::{ExpansionFrame, FileId};
+use crate::span::FileId;
 
 /// The per-dialect surface: the parts of Z80 syntax that actually differ
 /// between assemblers. Everything else in this module is shared.
@@ -142,7 +143,7 @@ pub(crate) fn assemble<S: Z80Syntax>(
     // The Z80 front-end parses into the semantic AST (U3), then lowers it to the
     // engine's statement stream — byte-identical to the old direct parse (AE1).
     // Other CPUs stay on direct lowering behind this boundary (KTD6).
-    crate::ast::lower(parse_program(syntax, set, ext, source)?)
+    crate::ast::lower(parse_program(syntax, set, ext, source, Expand::Yes)?)
 }
 
 /// Parse Z80 source into the semantic [`Program`](crate::ast::Program) — the
@@ -163,10 +164,20 @@ pub(crate) fn parse_program<S: Z80Syntax>(
     set: &'static isa::InstructionSet,
     ext: Option<&'static isa::InstructionSet>,
     source: &str,
+    mode: Expand,
 ) -> Result<crate::ast::Program, AsmError> {
+    // A dialect may rewrite source before it is parsed (pasmo macros, #93).
+    // Line numbers map back afterwards, so a diagnostic always names a line the
+    // author wrote rather than one that existed only inside the expander.
+    let expanded = expansion(syntax, source, mode)?;
+    let text = expanded_text(&expanded, source);
+    let origins = line_origins(&expanded);
     let mut w = Walker::new(syntax, set, ext);
-    for (i, raw) in source.lines().enumerate() {
-        if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
+    for (i, raw) in text.lines().enumerate() {
+        if let Some(d) = w
+            .walk_line(raw, i + 1, FileId(0))
+            .map_err(|e| remap_lines(e, origins))?
+        {
             // Unresolved in the single-source parse: the target is never
             // opened (KTD1), so `--fmt` renders the verbatim source and works
             // with a missing file; `lower` rejects assembly with a pointer to
@@ -185,7 +196,8 @@ pub(crate) fn parse_program<S: Z80Syntax>(
             });
         }
     }
-    w.flush_trailing(source.lines().count() as u32);
+    w.flush_trailing(text.lines().count() as u32);
+    place_nodes(&mut w.nodes, origins);
     Ok(Program { nodes: w.nodes })
 }
 
@@ -231,14 +243,30 @@ fn walk_file<S: Z80Syntax>(
     loader: &dyn SourceLoader,
     stack: &mut Vec<FileId>,
 ) -> Result<(), AsmError> {
-    for (i, raw) in source.lines().enumerate() {
+    // Each file expands on its own (#93). A macro therefore does not reach
+    // across an include boundary — the reference's own scoping question, left
+    // open deliberately rather than guessed at.
+    let expanded = expansion(w.syntax, source, Expand::Yes)?;
+    let text = expanded_text(&expanded, source);
+    let origins = line_origins(&expanded);
+    for (i, raw) in text.lines().enumerate() {
         let line = i + 1;
-        let Some(d) = w
+        // Nodes this line contributes, so they can be put back on the line the
+        // author wrote before an include pushes any of its own.
+        let start = w.nodes.len();
+        let walked = w
             .walk_line(raw, line, file)
-            .map_err(|e| stamp_file(e, file))?
-        else {
+            .map_err(|e| stamp_file(remap_lines(e, origins), file));
+        place_nodes(&mut w.nodes[start..], origins);
+        let Some(mut d) = walked? else {
             continue;
         };
+        if let Some(origins) = origins {
+            place(&mut d.span, origins);
+            if let Some(span) = d.operand_span.as_mut() {
+                place(span, origins);
+            }
+        }
         let span = d.span;
         // Diagnostics point at the directive's operand (the file name) when
         // the parse knew its column, else the line.
@@ -748,21 +776,6 @@ fn cond_keyword(word: &str) -> Option<CondKw> {
     })
 }
 
-/// Where one line of rewritten source came from.
-///
-/// The line number alone is enough to point a diagnostic at something the
-/// author wrote. The frames are what let it explain *why* that line failed —
-/// `in expansion of macro \`m\`` — which for generated code is most of the
-/// answer, because the failing text is often nowhere in the file.
-#[derive(Clone, Debug)]
-pub(crate) struct LineOrigin {
-    /// The 1-based source line this output line reports as.
-    pub(crate) line: usize,
-    /// The expansions this line came through, innermost first — the same order
-    /// the `included from` notes use.
-    pub(crate) frames: Vec<ExpansionFrame>,
-}
-
 /// Which end of a repetition block a word is, if either.
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum RepeatKw {
@@ -831,15 +844,14 @@ pub(crate) fn parse_program_keyword<S: Z80Syntax>(
     ext: Option<&'static isa::InstructionSet>,
     file: FileId,
     source: &str,
+    mode: Expand,
 ) -> Result<Program, AsmError> {
     // A dialect may rewrite source before it is parsed (sjasmplus macros,
     // #93). Line numbers are mapped back afterwards, so a diagnostic always
     // names a line the author wrote.
-    let expanded = syntax.expand_source(source)?;
-    let (text, origins) = match &expanded {
-        Some((text, origins)) => (text.as_str(), Some(origins.as_slice())),
-        None => (source, None),
-    };
+    let expanded = expansion(syntax, source, mode)?;
+    let text = expanded_text(&expanded, source);
+    let origins = line_origins(&expanded);
     let mut cx = KwCx {
         syntax,
         set,
@@ -868,15 +880,58 @@ pub(crate) fn parse_program_keyword<S: Z80Syntax>(
             },
         });
     }
-    if let Some(origins) = origins {
-        for node in &mut nodes {
-            place(&mut node.span, origins);
-            if let Some(span) = node.operand_span.as_mut() {
-                place(span, origins);
-            }
+    place_nodes(&mut nodes, origins);
+    Ok(Program { nodes })
+}
+
+/// Whether a parse expands the dialect's macros.
+///
+/// Assembly expands, because that is what a macro is for. The **formatter must
+/// not**: `asm198x fmt` lays source out, and a formatter that replaced a
+/// definition with its expansions and deleted the definition would be rewriting
+/// the program instead — silently, over the author's file. So the two paths ask
+/// for different parses of the same text, and this is where they part.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Expand {
+    /// Expand macros: the assembly paths.
+    Yes,
+    /// Leave definitions and invocations as written: the formatter's parse.
+    No,
+}
+
+/// A dialect's source rewrite, held for as long as the parse borrows it.
+///
+/// `None` means the dialect rewrites nothing and the source is parsed as
+/// written — the case every dialect but the macro-capable ones is in.
+type Expansion = Option<(String, Vec<LineOrigin>)>;
+
+/// Run the dialect's rewrite, unless this parse is the formatter's.
+fn expansion<S: Z80Syntax>(syntax: &S, source: &str, mode: Expand) -> Result<Expansion, AsmError> {
+    match mode {
+        Expand::Yes => syntax.expand_source(source),
+        Expand::No => Ok(None),
+    }
+}
+
+/// The text to parse: the rewrite if there was one, else the source itself.
+fn expanded_text<'a>(expansion: &'a Expansion, source: &'a str) -> &'a str {
+    expansion.as_ref().map_or(source, |(text, _)| text.as_str())
+}
+
+/// Where each rewritten line came from, if the source was rewritten.
+fn line_origins(expansion: &Expansion) -> Option<&[LineOrigin]> {
+    expansion.as_ref().map(|(_, origins)| origins.as_slice())
+}
+
+/// Put every span in `nodes` back on the line the author wrote.
+fn place_nodes(nodes: &mut [Node], origins: Option<&[LineOrigin]>) {
+    let Some(origins) = origins else { return };
+    for node in nodes {
+        place(&mut node.span, origins);
+        if let Some(span) = node.operand_span.as_mut() {
+            place(span, origins);
         }
     }
-    Ok(Program { nodes })
 }
 
 /// Put a span back where the author would look: the line they wrote, and the
@@ -1488,7 +1543,8 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         }
         let contents = mcx.map.contents(id).unwrap_or_default().to_owned();
         mcx.stack.push(id);
-        let program = parse_program_keyword(self.syntax, self.set, self.ext, id, &contents)?;
+        let program =
+            parse_program_keyword(self.syntax, self.set, self.ext, id, &contents, Expand::Yes)?;
         let saved = self.current_file;
         self.current_file = id;
         let walked = crate::ast::evaluate(self, &program.nodes, true, out);
@@ -1623,7 +1679,7 @@ pub(crate) fn assemble_keyword<S: Z80Syntax>(
     ext: Option<&'static isa::InstructionSet>,
     source: &str,
 ) -> Result<Vec<Statement>, AsmError> {
-    let program = parse_program_keyword(syntax, set, ext, FileId(0), source)?;
+    let program = parse_program_keyword(syntax, set, ext, FileId(0), source, Expand::Yes)?;
     let mut eval = SjasmEval::new(syntax, set, ext, None);
     let mut out = Vec::new();
     crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
@@ -1641,7 +1697,7 @@ pub(crate) fn parse_program_multi_keyword<S: Z80Syntax>(
     loader: &dyn SourceLoader,
 ) -> Result<Vec<Statement>, AsmError> {
     let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
-    let program = parse_program_keyword(syntax, set, ext, FileId(0), &root)?;
+    let program = parse_program_keyword(syntax, set, ext, FileId(0), &root, Expand::Yes)?;
     let mut eval = SjasmEval::new(
         syntax,
         set,

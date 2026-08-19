@@ -23,14 +23,22 @@
 //! conditional adoption is demand-gated
 //! (`decisions/conditional-assembly-framework.md`).
 //!
-//! TODO: sjasmplus modules, macros, and `DUP`. `ELSEIF` and the dotted
-//! conditional spellings landed 2026-08-18; colon-inline blocks and
+//! **Macros** (#93): `MACRO`/`ENDM` with dot-prefixed locals scoped per
+//! expansion, over the shared expander in [`crate::dialects::macros`] — this
+//! module supplies only the grammar, governed by
+//! `decisions/macro-expansion-framework.md`. Repetition (`DUP`/`REPT`) is a
+//! conditional-framework item rather than a macro one, because its count is an
+//! expression over the environment.
+//!
+//! TODO: sjasmplus modules, and macros across include boundaries. `ELSEIF` and
+//! the dotted conditional spellings landed 2026-08-18; colon-inline blocks and
 //! conditions on forward symbols remain open under #67.
 
 use std::collections::BTreeMap;
 
 use crate::dialect::{Dialect, Oversize};
-use crate::dialects::z80::{self, Z80Syntax};
+use crate::dialects::macros;
+use crate::dialects::z80::{self, Expand, Z80Syntax};
 use crate::engine::{AsmError, Operation, Statement};
 use crate::source::{SourceLoader, SourceMap};
 
@@ -66,6 +74,9 @@ impl Dialect for Sjasmplus {
             self.extension_set(),
             crate::span::FileId(0),
             source,
+            // The formatter must not expand: it lays source out, and would
+            // otherwise write the expansions back in place of the macro.
+            Expand::No,
         )?))
     }
     /// The include-capable parse (language-surface U2, conditional-aware
@@ -167,8 +178,8 @@ impl Z80Syntax for SjasmplusSyntax {
     fn expand_source(
         &self,
         source: &str,
-    ) -> Result<Option<(String, Vec<z80::LineOrigin>)>, AsmError> {
-        let expanded = expand_macros(source)?;
+    ) -> Result<Option<(String, Vec<macros::LineOrigin>)>, AsmError> {
+        let expanded = macros::expand(&SjasmplusSyntax, source)?;
         Ok(Some((expanded.text, expanded.origins)))
     }
 
@@ -217,15 +228,12 @@ impl Z80Syntax for SjasmplusSyntax {
 }
 
 // ---------------------------------------------------------------------------
-// Macros (#93, first slice)
+// Macros (#93)
 //
-// Expansion is a source pre-pass: definitions are collected and removed,
-// invocations are replaced by their substituted bodies, and the result goes
-// through the ordinary parse unchanged. Only sjasmplus uses the keyword
-// pipeline, so this reaches no other dialect.
-//
-// Every rule below was measured against sjasmplus 1.21.0 rather than read from
-// its manual, and two of them are not what a reasonable person would guess:
+// The mechanics live in [`crate::dialects::macros`]; this is sjasmplus's
+// grammar. Every rule below was measured against sjasmplus 1.21.0 rather than
+// read from its manual, and two of them are not what a reasonable person would
+// guess:
 //
 //   * the `MACRO`/`ENDM` **keyword** is case-insensitive, but a macro **name**
 //     is case-sensitive — defining `mac` and calling `MAC` is an error;
@@ -237,329 +245,79 @@ impl Z80Syntax for SjasmplusSyntax {
 // why `val*2` with `val = 5` assembles to `ld a,10`.
 // ---------------------------------------------------------------------------
 
-/// The dot-prefixed local labels a macro body **defines**.
-///
-/// These scope to the expansion rather than to the file, which is what lets a
-/// macro containing a loop be invoked more than once — most of what macros are
-/// for. A *plain* label in the same position stays global and collides on the
-/// second invocation; the reference reports `Duplicate label` there and so do
-/// we, which is why only the dotted ones are renamed.
-///
-/// Only names the body defines are renamed, so a body referring to a local
-/// defined outside it still refers to that one.
-fn defined_locals(body: &[String]) -> Vec<String> {
-    let mut names = Vec::new();
-    for line in body {
-        let text = without_comment(line);
-        if text.starts_with(char::is_whitespace) {
-            continue;
+impl macros::MacroSyntax for SjasmplusSyntax {
+    /// `MACRO name [p1[, p2]...]` — the keyword matched case-insensitively, the
+    /// name kept as written.
+    fn header(&self, line: &str) -> Option<(String, Vec<String>)> {
+        let text = macros::without_comment(line).trim();
+        let (kw, rest) = text.split_once(char::is_whitespace)?;
+        if !kw.eq_ignore_ascii_case("macro") {
+            return None;
         }
-        let token = text.split_whitespace().next().unwrap_or("");
-        let name = token.trim_end_matches(':');
-        if name.starts_with('.') && name.len() > 1 && !names.iter().any(|n| n == name) {
-            names.push(name.to_string());
-        }
-    }
-    names
-}
-
-/// A macro as collected by the pre-pass.
-struct MacroDef {
-    /// Parameter names, in order. Matched case-sensitively.
-    params: Vec<String>,
-    /// Body lines, verbatim, before substitution.
-    body: Vec<String>,
-}
-
-/// Strip a trailing comment, respecting string literals so a `;` inside quotes
-/// is not mistaken for one.
-fn without_comment(line: &str) -> &str {
-    let bytes = line.as_bytes();
-    let mut quote: Option<u8> = None;
-    let mut i = 0;
-    while i < bytes.len() {
-        let c = bytes[i];
-        match quote {
-            Some(q) => {
-                if c == q {
-                    quote = None;
-                }
-            }
-            None => {
-                if c == b'"' || c == b'\'' {
-                    quote = Some(c);
-                } else if c == b';' || (c == b'/' && bytes.get(i + 1) == Some(&b'/')) {
-                    // sjasmplus takes both spellings.
-                    return &line[..i];
-                }
-            }
-        }
-        i += 1;
-    }
-    line
-}
-
-/// `MACRO name [p1[, p2]...]` — the keyword matched case-insensitively, the
-/// name kept as written.
-fn macro_header(line: &str) -> Option<(String, Vec<String>)> {
-    let text = without_comment(line).trim();
-    let (kw, rest) = text.split_once(char::is_whitespace)?;
-    if !kw.eq_ignore_ascii_case("macro") {
-        return None;
-    }
-    let rest = rest.trim();
-    let (name, params) = match rest.split_once(|c: char| c == ',' || c.is_whitespace()) {
-        Some((name, tail)) => (
-            name.trim(),
-            tail.split(',')
-                .map(|p| p.trim().to_string())
-                .filter(|p| !p.is_empty())
-                .collect(),
-        ),
-        None => (rest, Vec::new()),
-    };
-    (!name.is_empty()).then(|| (name.to_string(), params))
-}
-
-/// `ENDM`, alone on its line.
-fn is_endm(line: &str) -> bool {
-    without_comment(line).trim().eq_ignore_ascii_case("endm")
-}
-
-/// Replace whole-word occurrences of each parameter with its argument, leaving
-/// string literals untouched.
-fn substitute(line: &str, params: &[String], args: &[String]) -> String {
-    if params.is_empty() {
-        return line.to_string();
-    }
-    let bytes = line.as_bytes();
-    let word = |c: u8| c.is_ascii_alphanumeric() || c == b'_' || c == b'.';
-    let mut out = String::with_capacity(line.len());
-    let mut quote: Option<u8> = None;
-    let mut i = 0;
-    while i < bytes.len() {
-        let c = bytes[i];
-        if let Some(q) = quote {
-            out.push(c as char);
-            if c == q {
-                quote = None;
-            }
-            i += 1;
-            continue;
-        }
-        if c == b'"' || c == b'\'' {
-            quote = Some(c);
-            out.push(c as char);
-            i += 1;
-            continue;
-        }
-        if word(c) && (i == 0 || !word(bytes[i - 1])) {
-            let mut j = i;
-            while j < bytes.len() && word(bytes[j]) {
-                j += 1;
-            }
-            let token = &line[i..j];
-            match params.iter().position(|p| p == token) {
-                Some(k) => out.push_str(args.get(k).map_or("", String::as_str)),
-                None => out.push_str(token),
-            }
-            i = j;
-            continue;
-        }
-        out.push(c as char);
-        i += 1;
-    }
-    out
-}
-
-/// Split an invocation's argument list on commas outside strings.
-fn split_args(text: &str) -> Vec<String> {
-    let mut args = Vec::new();
-    let mut current = String::new();
-    let mut quote: Option<char> = None;
-    for c in text.chars() {
-        match quote {
-            Some(q) => {
-                current.push(c);
-                if c == q {
-                    quote = None;
-                }
-            }
-            None if c == '"' || c == '\'' => {
-                quote = Some(c);
-                current.push(c);
-            }
-            None if c == ',' => {
-                args.push(current.trim().to_string());
-                current = String::new();
-            }
-            None => current.push(c),
-        }
-    }
-    let last = current.trim();
-    if !last.is_empty() || !args.is_empty() {
-        args.push(last.to_string());
-    }
-    args
-}
-
-/// Expanded source, plus where each output line came from.
-pub(crate) struct Expanded {
-    pub(crate) text: String,
-    /// `origins[i]` describes output line `i + 1`: the source line it reports
-    /// as, and the expansions it came through. Lines from an expansion report
-    /// their **invocation** site — where a reader looks first — and carry the
-    /// frames that explain why text they cannot see in the file failed.
-    pub(crate) origins: Vec<z80::LineOrigin>,
-}
-
-/// How deep expansion may nest before we call it runaway.
-///
-/// sjasmplus itself has no limit: a self-recursive macro segfaults it (exit
-/// 139). We decline to reproduce that. A crash is not a verdict about anyone's
-/// source, and an assembler that dies is worse than one that explains itself,
-/// so this errors with the macro named instead.
-const MAX_EXPANSION_DEPTH: usize = 64;
-
-/// Collect macro definitions and expand their invocations.
-///
-/// Two passes, because a macro may invoke one defined **later** in the file —
-/// the reference resolves names when it expands, not when it reads. Collecting
-/// every definition first is what makes that work.
-pub(crate) fn expand_macros(source: &str) -> Result<Expanded, AsmError> {
-    let lines: Vec<&str> = source.lines().collect();
-    let mut macros: std::collections::HashMap<String, MacroDef> = std::collections::HashMap::new();
-
-    // Pass 1 — take the definitions out, keep everything else with its origin.
-    let mut body: Vec<(z80::LineOrigin, String)> = Vec::with_capacity(lines.len());
-    let mut i = 0;
-    while i < lines.len() {
-        let raw = lines[i];
-        let line_no = i + 1;
-        if let Some((name, params)) = macro_header(raw) {
-            let mut collected = Vec::new();
-            let mut j = i + 1;
-            let mut closed = false;
-            while j < lines.len() {
-                if is_endm(lines[j]) {
-                    closed = true;
-                    break;
-                }
-                collected.push(lines[j].to_string());
-                j += 1;
-            }
-            if !closed {
-                return Err(AsmError::new(
-                    line_no,
-                    format!("`macro {name}` has no matching `endm`"),
-                ));
-            }
-            macros.insert(
-                name,
-                MacroDef {
-                    params,
-                    body: collected,
-                },
-            );
-            i = j + 1;
-            continue;
-        }
-        body.push((
-            z80::LineOrigin {
-                line: line_no,
-                frames: Vec::new(),
-            },
-            raw.to_string(),
-        ));
-        i += 1;
+        let rest = rest.trim();
+        let (name, params) = match rest.split_once(|c: char| c == ',' || c.is_whitespace()) {
+            Some((name, tail)) => (
+                name.trim(),
+                tail.split(',')
+                    .map(|p| p.trim().to_string())
+                    .filter(|p| !p.is_empty())
+                    .collect(),
+            ),
+            None => (rest, Vec::new()),
+        };
+        (!name.is_empty()).then(|| (name.to_string(), params))
     }
 
-    // Pass 2 — expand until nothing is left to expand. A body may invoke
-    // another macro, so this repeats rather than walking once.
-    let mut expansions = 0usize;
-    for depth in 0..=MAX_EXPANSION_DEPTH {
-        let mut next: Vec<(z80::LineOrigin, String)> = Vec::with_capacity(body.len());
-        let mut expanded_any = false;
-        for (origin, text) in &body {
-            let line_no = &origin.line;
-            let Some((name, args)) = invocation(text, &macros) else {
-                next.push((origin.clone(), text.clone()));
+    /// `ENDM`, alone on its line.
+    fn is_end(&self, line: &str) -> bool {
+        macros::without_comment(line)
+            .trim()
+            .eq_ignore_ascii_case("endm")
+    }
+
+    fn end_keyword(&self) -> &'static str {
+        "endm"
+    }
+
+    /// sjasmplus rejects any mismatch, and says which way round it went.
+    fn fit_arguments(
+        &self,
+        name: &str,
+        params: &[String],
+        args: Vec<String>,
+    ) -> Result<Vec<String>, String> {
+        match args.len().cmp(&params.len()) {
+            std::cmp::Ordering::Greater => Err(format!("too many arguments for macro `{name}`")),
+            std::cmp::Ordering::Less => Err(format!("not enough arguments for macro `{name}`")),
+            std::cmp::Ordering::Equal => Ok(args),
+        }
+    }
+
+    /// The dot-prefixed labels a macro body **defines**.
+    ///
+    /// These scope to the expansion rather than to the file, which is what lets
+    /// a macro containing a loop be invoked more than once — most of what macros
+    /// are for. A *plain* label in the same position stays global and collides
+    /// on the second invocation; the reference reports `Duplicate label` there
+    /// and so do we, which is why only the dotted ones are renamed.
+    ///
+    /// Only names the body defines are renamed, so a body referring to a local
+    /// defined outside it still refers to that one.
+    fn locals(&self, body: &[String]) -> Vec<String> {
+        let mut names = Vec::new();
+        for line in body {
+            let text = macros::without_comment(line);
+            if text.starts_with(char::is_whitespace) {
                 continue;
-            };
-            let def = &macros[&name];
-            if args.len() != def.params.len() {
-                return Err(AsmError::new(
-                    *line_no,
-                    format!(
-                        "macro `{name}` takes {} argument(s), but {} given",
-                        def.params.len(),
-                        args.len()
-                    ),
-                ));
             }
-            if depth == MAX_EXPANSION_DEPTH {
-                return Err(AsmError::new(
-                    *line_no,
-                    format!(
-                        "macro `{name}` is still expanding after {MAX_EXPANSION_DEPTH} levels — is it recursive?"
-                    ),
-                ));
-            }
-            expanded_any = true;
-            expansions += 1;
-            let locals = defined_locals(&def.body);
-            let renamed: Vec<String> = locals
-                .iter()
-                .map(|local| format!("{local}__{expansions}"))
-                .collect();
-            // The new frame goes in front, so the innermost expansion is
-            // named first — the order the `included from` notes already use.
-            let mut frames = Vec::with_capacity(origin.frames.len() + 1);
-            frames.push(crate::span::ExpansionFrame {
-                macro_name: name.clone(),
-                invoked_at: Box::new(crate::span::Span::at(*line_no as u32, 0)),
-            });
-            frames.extend(origin.frames.iter().cloned());
-            for body_line in &def.body {
-                let with_args = substitute(body_line, &def.params, &args);
-                next.push((
-                    z80::LineOrigin {
-                        line: *line_no,
-                        frames: frames.clone(),
-                    },
-                    substitute(&with_args, &locals, &renamed),
-                ));
+            let token = text.split_whitespace().next().unwrap_or("");
+            let name = token.trim_end_matches(':');
+            if name.starts_with('.') && name.len() > 1 && !names.iter().any(|n| n == name) {
+                names.push(name.to_string());
             }
         }
-        body = next;
-        if !expanded_any {
-            break;
-        }
+        names
     }
-
-    let mut text = String::with_capacity(source.len());
-    let mut origins = Vec::with_capacity(body.len());
-    for (origin, line) in body {
-        text.push_str(&line);
-        text.push('\n');
-        origins.push(origin);
-    }
-    Ok(Expanded { text, origins })
-}
-
-/// The macro a line invokes, if any, with its arguments. Names match
-/// case-sensitively, as sjasmplus matches them.
-fn invocation(
-    line: &str,
-    macros: &std::collections::HashMap<String, MacroDef>,
-) -> Option<(String, Vec<String>)> {
-    let stripped = without_comment(line).trim();
-    let (head, tail) = stripped
-        .split_once(char::is_whitespace)
-        .unwrap_or((stripped, ""));
-    macros
-        .contains_key(head)
-        .then(|| (head.to_string(), split_args(tail)))
 }
 
 #[cfg(test)]
@@ -791,14 +549,42 @@ mod tests {
         assert_eq!(err.line, 6, "the invocation is on line 6: {err:?}");
     }
 
-    /// Arity is checked, and unterminated definitions are caught where they
-    /// begin rather than at end of file.
+    /// The formatter lays source out; it does not rewrite programs. Formatting
+    /// must therefore give the macro **back**, not the lines it expands to.
+    ///
+    /// This is a regression test with teeth: expansion is a source pre-pass, so
+    /// the obvious wiring — one hook on the shared parse — silently made `fmt`
+    /// inline every invocation and delete every definition. Over a file, in
+    /// place. The parse the formatter asks for is deliberately not the parse
+    /// assembly asks for (`z80::Expand`).
+    #[test]
+    fn formatting_preserves_a_macro_rather_than_expanding_it() {
+        let src = " MACRO setv v\n ld a,v\n ENDM\n setv 9\n";
+        let out = crate::format_sjasmplus(src).expect("formats");
+        assert!(out.contains("MACRO setv v"), "definition is gone: {out}");
+        assert!(out.contains("ENDM"), "terminator is gone: {out}");
+        assert!(out.contains("setv 9"), "invocation is gone: {out}");
+        assert!(!out.contains("ld a,9"), "expanded into the source: {out}");
+        // And assembly of the same text still expands, so the two paths really
+        // are different parses rather than one of them being broken.
+        assert_eq!(asm(src).expect("assembles").bytes, vec![0x3E, 0x09]);
+    }
+
+    /// Arity is checked in both directions, and unterminated definitions are
+    /// caught where they begin rather than at end of file.
+    ///
+    /// The two directions get different words because sjasmplus gives them
+    /// different words, and they are different mistakes: too many arguments
+    /// means the call is wrong, too few usually means the macro moved on.
     #[test]
     fn arity_and_termination_are_checked() {
-        let arity = asm(" MACRO m v\n ld a,v\n ENDM\n m\n").expect_err("too few arguments");
-        assert!(arity.message.contains("takes 1 argument"), "{arity:?}");
+        let short = asm(" MACRO m v\n ld a,v\n ENDM\n m\n").expect_err("too few arguments");
+        assert!(short.message.contains("not enough arguments"), "{short:?}");
+        let long = asm(" MACRO m v\n ld a,v\n ENDM\n m 1,2\n").expect_err("too many arguments");
+        assert!(long.message.contains("too many arguments"), "{long:?}");
         let open = asm(" MACRO m\n nop\n").expect_err("no endm");
         assert_eq!(open.line, 1, "reported where the definition opened");
+        assert!(open.message.contains("`endm`"), "{open:?}");
     }
 
     #[test]
