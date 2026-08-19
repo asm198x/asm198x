@@ -62,6 +62,7 @@
 
 use std::collections::{BTreeMap, BTreeSet};
 
+use super::macros;
 use super::mos6502::{
     self, BytePrec, assignment_split, fold_const, is_ident, parse_number, split_data_items,
     split_first_word, string_literal, top_level_rfind,
@@ -94,7 +95,7 @@ impl Dialect for Acme {
         // conditional now lives in the tree, not a second parse. No loader here:
         // a `!src`/`!bin` on this single-source path is an error pointing at the
         // multi-file entry points.
-        let program = parse_program(source)?;
+        let program = parse_program(source, macros::Expand::Yes)?;
         let mut eval = AcmeEval::new(self.instruction_set(), None);
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
@@ -116,7 +117,7 @@ impl Dialect for Acme {
             .contents(FileId(0))
             .map(str::to_owned)
             .unwrap_or_default();
-        let program = parse_program_in(FileId(0), &root)?;
+        let program = parse_program_in(FileId(0), &root, macros::Expand::Yes)?;
         let mut eval = AcmeEval::new(
             self.instruction_set(),
             Some(MultiCx {
@@ -136,7 +137,8 @@ impl Dialect for Acme {
     /// `Item::Conditional`, every other line's verbatim operation source. `emit`
     /// reformats this tree; `parse` evaluates it.
     fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
-        Ok(Some(parse_program(source)?))
+        // The formatter must not expand — see `parse_program_in`.
+        Ok(Some(parse_program(source, macros::Expand::No)?))
     }
 
     /// ACME binds constants with `name = value` (no colon), so the formatter
@@ -190,28 +192,44 @@ struct FmtCx<'a> {
 
 /// Parse ACME source into the source-preserving formatter AST (the root /
 /// single-source form: spans point into `FileId(0)`).
-pub(crate) fn parse_program(source: &str) -> Result<crate::ast::Program, AsmError> {
-    parse_program_in(FileId(0), source)
+pub(crate) fn parse_program(
+    source: &str,
+    mode: macros::Expand,
+) -> Result<crate::ast::Program, AsmError> {
+    parse_program_in(FileId(0), source, mode)
 }
 
 /// Parse one file of a multi-file ACME program: as [`parse_program`], with
 /// every span minted in `file` so diagnostics and line records name the
 /// include they came from (language-surface U4).
-fn parse_program_in(file: FileId, source: &str) -> Result<crate::ast::Program, AsmError> {
+fn parse_program_in(
+    file: FileId,
+    source: &str,
+    mode: macros::Expand,
+) -> Result<crate::ast::Program, AsmError> {
+    // Macros expand before parsing (#93), but only for assembly: the formatter
+    // asks with `Expand::No`, because laying source out must not replace a
+    // definition with its expansions.
+    let expanded = expand_acme(source, mode)?;
+    let text = macros::expanded_text(&expanded, source);
+    let origins = macros::line_origins(&expanded);
     let mut cx = FmtCx {
         set: &isa::mos6502::SET,
         file,
-        lines: source.lines().collect(),
+        lines: text.lines().collect(),
         pos: 0,
         pending: Vec::new(),
     };
-    let (mut nodes, closer) = cx.parse_block()?;
+    let (mut nodes, closer) = cx
+        .parse_block()
+        .map_err(|e| macros::remap_lines(e, origins))?;
     if closer != Closer::Eof {
         return Err(AsmError::new(cx.pos, "unbalanced `}` in conditional block"));
     }
     // Flush a trailing comment block so the formatter keeps it.
     let last = cx.lines.len();
     cx.flush_pending(&mut nodes, last);
+    macros::place_nodes(&mut nodes, origins);
     Ok(crate::ast::Program { nodes })
 }
 
@@ -877,7 +895,8 @@ impl<'a> AcmeEval<'a> {
         }
         let contents = mcx.map.contents(id).unwrap_or_default().to_owned();
         mcx.stack.push(id);
-        let program = parse_program_in(id, &contents).map_err(|e| stamp_file(e, id))?;
+        let program =
+            parse_program_in(id, &contents, macros::Expand::Yes).map_err(|e| stamp_file(e, id))?;
         let saved = self.current_file;
         self.current_file = id;
         let walked = crate::ast::evaluate(self, &program.nodes, true, out);
@@ -1841,6 +1860,205 @@ fn address_forces_absolute(operand: &str) -> bool {
         .is_some_and(|hex| hex.len() >= 3 && hex.bytes().all(|b| b.is_ascii_hexdigit()))
 }
 
+// ---------------------------------------------------------------------------
+// Macros (#93)
+//
+// The mechanics live in [`crate::dialects::macros`]; this is acme's grammar,
+// measured against acme 0.97. acme agrees with sjasmplus on locals — a
+// `.dotted` label in a body is scoped to the expansion — and is the only
+// dialect measured that differs from all five on *structure*:
+//
+//   * a body is **brace-delimited at character level**, not closed by a
+//     keyword. Braces nest inside a body (`!if .v > 3 {` is ordinary), both
+//     braces share lines with code (`!macro nop2 { nop` … `nop }`), and a `}`
+//     inside a string or a comment closes nothing. The opening `{` must be on
+//     the header line; alone on the next one it is `No string given`.
+//   * **arity is part of a macro's identity.** `ldav .v` and `ldav .v, .w` are
+//     two macros that coexist, dispatched on the count at the call site, and a
+//     call matching neither is `Macro not defined (or wrong signature)` — not
+//     an argument-list complaint. That is a fourth arity posture and a
+//     different model: acme has no wrong number of arguments, only a name it
+//     has never heard of.
+//   * a call is written `+ldav 5`. A bare `ldav` is not one.
+// ---------------------------------------------------------------------------
+
+/// acme's macro grammar.
+struct AcmeMacros;
+
+impl macros::MacroSyntax for AcmeMacros {
+    /// Unused: [`collect`](macros::MacroSyntax::collect) is overridden, because
+    /// an acme body is not delimited a line at a time.
+    fn header(&self, _line: &str) -> Option<(String, Vec<String>)> {
+        None
+    }
+
+    /// `!macro name [.p1[, .p2]...] {` … `}`, tracking brace depth so a nested
+    /// block inside the body does not end it early.
+    fn collect(&self, lines: &[&str], start: usize) -> Option<Result<macros::Definition, String>> {
+        let head = macros::without_comment(lines[start]);
+        let (kw, rest) = head
+            .trim()
+            .strip_prefix('!')?
+            .split_once(char::is_whitespace)?;
+        if !kw.eq_ignore_ascii_case("macro") {
+            return None;
+        }
+        // acme wants the brace here: on the next line by itself it is an error,
+        // so a header without one is a malformed definition and not a
+        // non-definition.
+        let Some((decl, after)) = rest.split_once('{') else {
+            return Some(Err("`!macro` needs its `{` on the same line".to_string()));
+        };
+        let decl = decl.trim();
+        let (name, params) = match decl.split_once(char::is_whitespace) {
+            Some((name, tail)) => (name.trim(), parameter_list(tail)),
+            None => (decl, Vec::new()),
+        };
+        if name.is_empty() {
+            return Some(Err("`!macro` has no name".to_string()));
+        }
+
+        let mut depth = 1usize;
+        let mut body = Vec::new();
+        // The header line may already carry body text after its brace.
+        if let Some(end) = close_brace(after, &mut depth) {
+            push_code(&mut body, &after[..end]);
+            return Some(Ok(definition(name, params, body, start)));
+        }
+        push_code(&mut body, after);
+
+        for (offset, line) in lines.iter().enumerate().skip(start + 1) {
+            let code = macros::without_comment(line);
+            if let Some(end) = close_brace(code, &mut depth) {
+                // Whatever follows the closing brace is dropped, as acme drops
+                // it. The comment cannot hold the brace — c4 pinned that — so
+                // the code prefix is the whole of this line's body text.
+                push_code(&mut body, &code[..end]);
+                return Some(Ok(definition(name, params, body, offset)));
+            }
+            body.push((*line).to_string());
+        }
+        Some(Err(format!("`!macro {name}` has no matching `}}`")))
+    }
+
+    /// A `.dotted` label the body defines is scoped to the expansion, which is
+    /// sjasmplus's rule exactly. A plain one stays global and the second
+    /// invocation gets `Symbol already defined`.
+    ///
+    /// Parameters are dotted too, but they are substituted before this runs, so
+    /// a parameter never reaches the rename.
+    fn locals(&self, body: &[String]) -> Vec<String> {
+        let mut names = Vec::new();
+        for line in body {
+            let text = macros::without_comment(line);
+            if text.starts_with(char::is_whitespace) {
+                continue;
+            }
+            let name = text
+                .split_whitespace()
+                .next()
+                .unwrap_or("")
+                .trim_end_matches(':');
+            if name.starts_with('.') && name.len() > 1 && !names.iter().any(|n| n == name) {
+                names.push(name.to_string());
+            }
+        }
+        names
+    }
+
+    /// A call is `+name`; a bare name is not one.
+    fn invocation_name<'a>(&self, head: &'a str) -> Option<&'a str> {
+        head.strip_prefix('+').filter(|name| !name.is_empty())
+    }
+
+    /// The argument count picks the macro, so two definitions of one name are
+    /// two macros and a count matching neither is a name acme does not know.
+    fn select<'a>(
+        &self,
+        defs: &'a [macros::MacroDef],
+        argc: usize,
+    ) -> Option<&'a macros::MacroDef> {
+        defs.iter().find(|def| def.params.len() == argc)
+    }
+
+    /// Nothing to reconcile: [`select`](Self::select) already matched the count
+    /// exactly, or reported that no definition takes it.
+    fn fit_arguments(
+        &self,
+        _name: &str,
+        _params: &[String],
+        args: Vec<String>,
+    ) -> Result<Vec<String>, String> {
+        Ok(args)
+    }
+}
+
+/// Assemble a [`macros::Definition`] from the parts `collect` gathered.
+fn definition(
+    name: &str,
+    params: Vec<String>,
+    body: Vec<String>,
+    last_line: usize,
+) -> macros::Definition {
+    macros::Definition {
+        name: name.to_string(),
+        def: macros::MacroDef { params, body },
+        last_line,
+    }
+}
+
+/// Push a fragment of a brace-sharing line, unless it is only whitespace.
+fn push_code(body: &mut Vec<String>, text: &str) {
+    if !text.trim().is_empty() {
+        body.push(text.to_string());
+    }
+}
+
+/// Track brace depth across one line of code, returning the index of the `}`
+/// that took the depth back to zero if it is on this line.
+///
+/// Braces inside a string literal are text, not structure: `!byte "}"` in a
+/// body closes nothing, which acme agrees with and a naive scan would not.
+fn close_brace(text: &str, depth: &mut usize) -> Option<usize> {
+    let mut quote: Option<u8> = None;
+    for (i, &c) in text.as_bytes().iter().enumerate() {
+        match quote {
+            Some(q) => {
+                if c == q {
+                    quote = None;
+                }
+            }
+            None => match c {
+                b'"' | b'\'' => quote = Some(c),
+                b'{' => *depth += 1,
+                b'}' => {
+                    *depth -= 1;
+                    if *depth == 0 {
+                        return Some(i);
+                    }
+                }
+                _ => {}
+            },
+        }
+    }
+    None
+}
+
+/// A comma-separated parameter list, empties dropped.
+fn parameter_list(text: &str) -> Vec<String> {
+    text.split(',')
+        .map(|p| p.trim().to_string())
+        .filter(|p| !p.is_empty())
+        .collect()
+}
+
+/// Expand acme's macros, unless this parse is the formatter's.
+fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, AsmError> {
+    macros::expansion(mode, source, |s| {
+        macros::expand(&AcmeMacros, s).map(|e| Some((e.text, e.origins)))
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
@@ -2296,5 +2514,151 @@ mod tests {
              }\n")
         .expect("nested");
         assert_eq!(a.bytes, vec![0xA9, 0x02]);
+    }
+
+    // ----- Macros (#93) -------------------------------------------------
+    //
+    // Every expectation is a byte string acme 0.97 produced for the same
+    // source. acme is the dialect that made the shared collector delegate:
+    // its bodies are brace-delimited at character level, and its macros are
+    // identified by arity as well as name.
+
+    /// Definition, invocation, parameters, and substitution ahead of
+    /// evaluation — the parts every dialect shares, spelled acme's way.
+    #[test]
+    fn macros_expand() {
+        assert_eq!(
+            asm("!macro nop2 {\n\tnop\n\tnop\n}\n+nop2\n")
+                .expect("nop2")
+                .bytes,
+            vec![0xEA, 0xEA]
+        );
+        assert_eq!(
+            asm("!macro ldav .v {\n\tlda #.v\n}\n+ldav 5\n")
+                .expect("one parameter")
+                .bytes,
+            vec![0xA9, 0x05]
+        );
+        assert_eq!(
+            asm("!macro ldav .v, .w {\n\tlda #.v\n\tldx #.w\n}\n+ldav 5, 7\n")
+                .expect("two parameters")
+                .bytes,
+            vec![0xA9, 0x05, 0xA2, 0x07]
+        );
+        assert_eq!(
+            asm("!macro ldav .v {\n\tlda #.v*2\n}\n+ldav 5\n")
+                .expect("substitution precedes evaluation")
+                .bytes,
+            vec![0xA9, 0x0A]
+        );
+        assert_eq!(
+            asm("!MACRO nop2 {\n\tnop\n}\n+nop2\n")
+                .expect("case-insensitive keyword")
+                .bytes,
+            vec![0xEA]
+        );
+    }
+
+    /// A body is delimited by braces at character level, so the collector must
+    /// count depth rather than recognise a line.
+    ///
+    /// Three things a line-oriented collector gets wrong, and acme accepts:
+    /// braces nesting inside a body, both braces sharing a line with code, and
+    /// a `}` inside a string closing nothing.
+    #[test]
+    fn a_body_is_delimited_by_braces_not_by_a_line() {
+        assert_eq!(
+            asm("!macro m {\n\t!if 1 {\n\t\tnop\n\t}\n\tlda #1\n}\n+m\n")
+                .expect("nested braces")
+                .bytes,
+            vec![0xEA, 0xA9, 0x01]
+        );
+        assert_eq!(
+            asm("!macro nop2 { nop\n\tnop }\n+nop2\n")
+                .expect("braces share lines with code")
+                .bytes,
+            vec![0xEA, 0xEA]
+        );
+        assert_eq!(
+            asm("!macro m {\n\t!text \"a}b\"\n\tnop\n}\n+m\n")
+                .expect("a brace in a string is text")
+                .bytes,
+            vec![0x61, 0x7D, 0x62, 0xEA]
+        );
+        // The opening brace must be on the header line: acme rejects one alone
+        // on the next, and so must we rather than swallowing the file.
+        asm("!macro nop2\n{\n\tnop\n}\n+nop2\n").expect_err("`{` must be on the header line");
+        asm("!macro nop2 {\n\tnop\n").expect_err("unterminated body");
+    }
+
+    /// Arity is part of a macro's identity. Two definitions of one name coexist
+    /// and the call site picks by count; a count matching neither is a macro
+    /// acme has never heard of, not a bad argument list.
+    #[test]
+    fn one_name_may_carry_several_arities() {
+        assert_eq!(
+            asm("!macro ldav .v {\n\tlda #.v\n}\n!macro ldav .v, .w {\n\tlda #.v\n\tldx #.w\n}\n+ldav 5\n+ldav 5, 7\n")
+                .expect("two arities")
+                .bytes,
+            vec![0xA9, 0x05, 0xA9, 0x05, 0xA2, 0x07]
+        );
+        let err = asm("!macro ldav .v {\n\tlda #.v\n}\n+ldav 5, 9\n")
+            .expect_err("no two-argument ldav exists");
+        assert!(err.message.contains("ldav"), "{err:?}");
+        asm("!macro ldav .v, .w {\n\tlda #.v\n}\n+ldav 5\n")
+            .expect_err("no one-argument ldav exists");
+    }
+
+    /// A `.dotted` label in a body is scoped to the expansion — sjasmplus's
+    /// rule exactly, and the one local mechanism two dialects agreed on. A
+    /// plain label stays global and the second invocation collides.
+    #[test]
+    fn a_dotted_label_is_scoped_to_its_expansion() {
+        assert_eq!(
+            asm("!macro delay {\n.spin\tdex\n\tbne .spin\n}\n+delay\n+delay\n")
+                .expect("two expansions")
+                .bytes,
+            vec![0xCA, 0xD0, 0xFD, 0xCA, 0xD0, 0xFD]
+        );
+        asm("!macro delay {\nspin\tdex\n}\n+delay\n+delay\n")
+            .expect_err("a plain label is global and collides");
+    }
+
+    /// A call is `+name`, and it may be indented. A bare name is **not** a
+    /// call: acme reads it as a label — warning `Label name not in leftmost
+    /// column` and emitting nothing — so the macro must not expand there.
+    #[test]
+    fn a_call_needs_its_plus() {
+        assert_eq!(
+            asm("!macro ldav .v {\n\tlda #.v\n}\n\t+ldav 5\n")
+                .expect("indented call")
+                .bytes,
+            vec![0xA9, 0x05]
+        );
+        let bare = asm("!macro nop2 {\n\tnop\n}\n\tnop2\n").expect("a label, not a call");
+        assert!(bare.bytes.is_empty(), "the macro must not have expanded");
+        assert!(
+            bare.symbols.contains_key("nop2"),
+            "acme binds it as a label"
+        );
+    }
+
+    /// The formatter lays source out; it does not rewrite programs.
+    ///
+    /// acme's formatter cannot yet *format* a file with macros — its block
+    /// parser reads the body's closing brace as an unbalanced conditional
+    /// close, exactly as it did before macros existed. Refusing is the safe
+    /// half of the answer; the half that matters here is that assembling the
+    /// same text still expands, so the two really are different parses rather
+    /// than one of them being broken. See
+    /// `decisions/macro-expansion-framework.md`.
+    #[test]
+    fn formatting_does_not_expand() {
+        let src = "*= $c000\n!macro ldav .v {\n\tlda #.v\n}\n+ldav 5\n";
+        crate::format_acme(src).expect_err("the block parser does not know `!macro`");
+        assert_eq!(
+            crate::assemble_acme(src).expect("assembles").bytes,
+            vec![0xA9, 0x05]
+        );
     }
 }
