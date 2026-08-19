@@ -956,11 +956,41 @@ fn render_error(input: &str, files: &[String], e: &asm198x::AsmError) -> String 
         .and_then(|span| files.get(span.file.0 as usize).map(|file| (span, file)));
     match resolved {
         Some((span, file)) if span.col != 0 => {
-            format!("{file}:{}:{}: error: {}", span.line, span.col, e.message)
+            format!(
+                "{file}:{}:{}: error: {}{}",
+                span.line,
+                span.col,
+                e.message,
+                render_expansion_notes(span)
+            )
         }
-        Some((span, file)) => format!("{file}:{}: error: {}", span.line, e.message),
+        Some((span, file)) => format!(
+            "{file}:{}: error: {}{}",
+            span.line,
+            e.message,
+            render_expansion_notes(span)
+        ),
         None => format!("{input}: {e}"),
     }
+}
+
+/// One rustc-style note per macro expansion the failing text came through,
+/// innermost first — the same order and shape as the `included from` chain.
+///
+/// Without these, an error in generated code points at an invocation and says
+/// nothing about why: the failing text is nowhere in the file the reader has
+/// open. The note is the difference between "line 6 is wrong" and "line 6
+/// expands a macro whose body is wrong".
+fn render_expansion_notes(span: &asm198x::Span) -> String {
+    span.expansion_frames
+        .iter()
+        .map(|frame| {
+            format!(
+                "\nin expansion of macro `{}` invoked at line {}",
+                frame.macro_name, frame.invoked_at.line
+            )
+        })
+        .collect()
 }
 
 /// One rustc-style `included from <file>:<line>` note per include-graph hop,

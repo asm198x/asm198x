@@ -414,6 +414,33 @@ pub(crate) trait CondEval {
     }
 }
 
+/// Attach the node's expansion frames to an error raised while lowering it.
+///
+/// A lowering error is built from a line number, so it arrives with no idea
+/// that the text came from a macro. The node knows, and it is the only thing
+/// that does — without this the diagnostic points at an invocation and cannot
+/// say why, which for generated code is most of the answer.
+///
+/// Only fills what is missing: an error that already carries frames keeps them.
+fn in_expansion_of(mut e: AsmError, node: &Node) -> AsmError {
+    if node.span.expansion_frames.is_empty() {
+        return e;
+    }
+    match e.span.as_mut() {
+        Some(span) if span.expansion_frames.is_empty() => {
+            span.expansion_frames
+                .clone_from(&node.span.expansion_frames);
+        }
+        Some(_) => {}
+        None => {
+            let mut span = node.span.clone();
+            span.col = 0;
+            e.span = Some(span);
+        }
+    }
+    e
+}
+
 /// Assemble by evaluating the conditional tree: prune the untaken branch of each
 /// [`Item::Conditional`] and lower every live content line through `dialect`. A
 /// skipped branch is walked with `emit = false` so it defines nothing — the rule
@@ -456,7 +483,9 @@ pub(crate) fn evaluate<D: CondEval>(
                 evaluate(dialect, body, false, out)?;
             }
         } else if emit && (node.label.is_some() || !node.source.is_empty()) {
-            dialect.lower(node, out)?;
+            dialect
+                .lower(node, out)
+                .map_err(|e| in_expansion_of(e, node))?;
         }
     }
     Ok(())
@@ -1126,7 +1155,10 @@ mod tests {
         assert_eq!(s.file, crate::span::FileId(0));
         assert_eq!(s.line, 7);
         assert_eq!(s.col, 9);
-        assert!(s.expansion_frames.is_empty(), "reserved, empty in v1");
+        assert!(
+            s.expansion_frames.is_empty(),
+            "a span built outside an expansion carries no frames"
+        );
     }
 
     /// KTD5 — an operand round-trips its source token text.
