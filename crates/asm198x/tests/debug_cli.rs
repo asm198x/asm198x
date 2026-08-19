@@ -30,6 +30,62 @@ five\tequ 5\n\
 \tret\n\
 data:\tdb 1,2,3,4,5,6,7,8,9,10\n";
 
+/// A leading reservation is not in the image (#90), so `origin` sits above
+/// where the source's addresses start — but `buf` is still a real label at a
+/// real address, and a section-relative offset cannot go negative. The dropped
+/// region gets its own section, based where the source began and holding no
+/// bytes, the way a BSS region does. `main` keeps id 0, so a sidecar with no
+/// leading gap is unchanged.
+#[test]
+fn a_trimmed_leading_reservation_gets_its_own_section() {
+    let r = asm198x::assemble_i8080("buf:\tds 3\nstart:\tdb 9\n").expect("assemble");
+    assert_eq!(
+        r.origin,
+        Some(3),
+        "the image starts at the first written byte"
+    );
+    let info = asm198x::debug_info(&r, "8080", "intel", "t.s");
+
+    let section = |name: &str| {
+        info.sections
+            .iter()
+            .find(|s| s.name == name)
+            .unwrap_or_else(|| panic!("no `{name}` section"))
+    };
+    assert_eq!(section("main").base, Some(3));
+    assert_eq!(
+        section("reserved").base,
+        Some(0),
+        "based where the source began"
+    );
+    assert_eq!(section("main").id, 0, "the emitted section keeps id 0");
+
+    let placed = |name: &str| match info
+        .symbols
+        .iter()
+        .find(|s| s.name == name)
+        .map(|s| &s.kind)
+    {
+        Some(debug198x::SymbolKind::Label {
+            section, offset, ..
+        }) => (*section, *offset),
+        other => panic!("{name} is not a label: {other:?}"),
+    };
+    assert_eq!(placed("buf"), (section("reserved").id, 0));
+    assert_eq!(placed("start"), (0, 0));
+
+    // Both still resolve to their real addresses, since `--sym` reads each
+    // symbol through its own section's base.
+    assert_eq!(asm198x::render_sym(&info), "buf = $0000\nstart = $0003\n");
+
+    // The reserved region contributes no bytes, so it carries no line span.
+    assert!(
+        info.lines.iter().all(|l| l.section == 0),
+        "spans only describe bytes that exist: {:?}",
+        info.lines
+    );
+}
+
 /// The `--sym` rendering: `name = $HEX`, sorted by name; labels absolute,
 /// constants by value (golden).
 #[test]

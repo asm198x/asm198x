@@ -465,6 +465,59 @@ mod tests {
         );
     }
 
+    /// asl reserves rather than materialising, and `p2bin` writes from the
+    /// lowest written address to the highest. So unwritten space at either end
+    /// is absent from the image: a trailing reservation is dropped, and a
+    /// leading one moves where the image starts (#66, #90). Only the interior
+    /// is filled. Each case is arbitrated against `asl`+`p2bin` in the
+    /// differential suite; these pin the same three shapes without the tools.
+    #[test]
+    fn unwritten_space_falls_away_at_both_ends() {
+        let interior = asm(" org 0\n db 1\n ds 2\n db 9\n").expect("assemble");
+        assert_eq!(interior.bytes, vec![0x01, 0xFF, 0xFF, 0x09]);
+        assert_eq!(
+            interior.origin,
+            Some(0),
+            "an interior gap is filled in place"
+        );
+
+        let trailing = asm(" org 0\n db 9\n ds 2\n").expect("assemble");
+        assert_eq!(
+            trailing.bytes,
+            vec![0x09],
+            "a trailing reservation is dropped"
+        );
+        assert_eq!(trailing.origin, Some(0));
+
+        let leading = asm(" org 0\n ds 3\n db 9\n").expect("assemble");
+        assert_eq!(
+            leading.bytes,
+            vec![0x09],
+            "a leading reservation is not fill"
+        );
+        assert_eq!(leading.origin, Some(3), "it moves the load address instead");
+        assert_eq!(leading.reserved_prefix, 3);
+    }
+
+    /// The rule is about *unwritten* space, not about `ds`. An `org` that skips
+    /// forward before anything is written moves the load address the same way,
+    /// which is why the trim keys on what was written rather than on the
+    /// directive that left the hole (#90).
+    #[test]
+    fn a_leading_org_gap_moves_the_load_address_too() {
+        let gapped = asm(" org 0\n org 5\n db 9\n").expect("assemble");
+        assert_eq!(gapped.bytes, vec![0x09]);
+        assert_eq!(gapped.origin, Some(5));
+        assert_eq!(gapped.reserved_prefix, 5);
+
+        // A plain `org 5` never wrote the low bytes either, so it is the same
+        // image — reached without a trim, and reporting no reserved prefix.
+        let plain = asm(" org 5\n db 9\n").expect("assemble");
+        assert_eq!(plain.bytes, gapped.bytes);
+        assert_eq!(plain.origin, Some(5));
+        assert_eq!(plain.reserved_prefix, 0);
+    }
+
     #[test]
     fn moves_and_immediates() {
         assert_eq!(bytes(" mov a,b\n"), vec![0x78]);

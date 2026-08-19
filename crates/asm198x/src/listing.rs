@@ -36,6 +36,32 @@ pub fn debug_info(
     } else {
         result.files.clone()
     };
+
+    // A dialect whose toolchain reserves rather than materialises drops a
+    // leading gap from the image, so `origin` sits above where the source's own
+    // addresses start (#90). The dropped region is still address space with
+    // symbols in it — `buf: ds 256` before the code is ordinary style — and a
+    // section-relative offset cannot go negative. So it gets a section of its
+    // own: based where the source began, contributing no bytes, exactly as a
+    // BSS region does. With no leading gap this collapses to the single
+    // section it has always been.
+    let split = u64::from(result.reserved_prefix);
+    let source_origin = result.origin.map(|o| u64::from(o) - split);
+    let mut sections = vec![debug198x::Section {
+        id: MAIN,
+        name: "main".to_string(),
+        base: result.origin.map(u64::from),
+        space: None,
+    }];
+    if split > 0 {
+        sections.push(debug198x::Section {
+            id: RESERVED,
+            name: "reserved".to_string(),
+            base: source_origin,
+            space: None,
+        });
+    }
+
     debug198x::DebugInfo {
         header: debug198x::Header {
             tool: "asm198x".to_string(),
@@ -45,26 +71,60 @@ pub fn debug_info(
             sources: sources.clone(),
             ..debug198x::Header::default()
         },
-        sections: vec![debug198x::Section {
-            id: 0,
-            name: "main".to_string(),
-            base: result.origin.map(u64::from),
-            space: None,
-        }],
-        symbols: result.debug.symbols.clone(),
+        sections,
+        symbols: result
+            .debug
+            .symbols
+            .iter()
+            .cloned()
+            .map(|s| place_symbol(s, split))
+            .collect(),
         lines: result
             .debug
             .lines
             .iter()
+            .filter(|l| l.offset >= split)
             .map(|l| debug198x::LineSpan {
                 file: path_in(&sources, l.file),
                 line: l.line,
-                section: 0,
-                offset: l.offset,
+                section: MAIN,
+                offset: l.offset - split,
                 length: l.length,
             })
             .collect(),
     }
+}
+
+/// Section ids for the flat path. `MAIN` is the emitted image and is always
+/// present, so it keeps id 0 — a sidecar with no leading gap is byte-identical
+/// to one produced before the reserved section existed. `RESERVED` takes the
+/// next id and appears only when a leading gap was trimmed.
+const MAIN: debug198x::SectionId = 0;
+const RESERVED: debug198x::SectionId = 1;
+
+/// Rebase one symbol onto the section its address falls in. Below `split` it
+/// belongs to the reserved region, which contributes no bytes to the image; at
+/// or above it, to the emitted image, whose offsets start again at zero.
+/// Constants carry a value rather than a location, so they are untouched.
+fn place_symbol(mut sym: debug198x::Symbol, split: u64) -> debug198x::Symbol {
+    let relocate = |section: &mut debug198x::SectionId, offset: &mut u64| {
+        if *offset >= split {
+            *section = MAIN;
+            *offset -= split;
+        } else {
+            *section = RESERVED;
+        }
+    };
+    match &mut sym.kind {
+        debug198x::SymbolKind::Label {
+            section, offset, ..
+        }
+        | debug198x::SymbolKind::Entry {
+            section, offset, ..
+        } => relocate(section, offset),
+        debug198x::SymbolKind::Const { .. } => {}
+    }
+    sym
 }
 
 /// Resolve `file` against a `FileId`-ordered sources table. An unresolvable

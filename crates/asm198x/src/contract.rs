@@ -37,6 +37,13 @@ use crate::span::Span;
 /// on a major shape change; today there is only version 1.
 pub const CONTRACT_VERSION: u32 = 1;
 
+/// `skip_serializing_if` for an additive numeric field: absent when zero, so a
+/// payload that predates the field is byte-identical to one that carries it.
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn is_zero(v: &u16) -> bool {
+    *v == 0
+}
+
 /// The default for a payload with no `version` (an older producer's), so
 /// deserialize stays additive: absent means the first version.
 fn current_contract_version() -> u32 {
@@ -63,6 +70,16 @@ pub struct AssemblyResult {
     /// hunk exe) whose bytes are the linker's, with no single meaningful origin.
     #[serde(default)]
     pub origin: Option<u16>,
+    /// Address units of leading `org` gap or reservation that are **not** in
+    /// `bytes`, so `origin` sits that far above where the source's own
+    /// addresses begin (#90). Non-zero only on the asl-family dialects, whose
+    /// `p2bin` starts the image at the lowest written address.
+    ///
+    /// Debug offsets are relative to `origin - reserved_prefix`, since they are
+    /// captured before the trim. Absent from the payload when zero, so every
+    /// existing consumer's JSON is unchanged.
+    #[serde(default, skip_serializing_if = "is_zero")]
+    pub reserved_prefix: u16,
     /// Resolved labels and constants. Empty for a linked image, which exposes no
     /// symbol table through the public API today.
     #[serde(default)]
@@ -104,6 +121,8 @@ impl AssemblyResult {
             version: CONTRACT_VERSION,
             bytes,
             origin: None,
+            // A linked image has no flat origin, so nothing to sit above.
+            reserved_prefix: 0,
             symbols: BTreeMap::new(),
             start: None,
             warnings: Vec::new(),
@@ -132,6 +151,7 @@ impl From<Assembly> for AssemblyResult {
             version: CONTRACT_VERSION,
             bytes: a.bytes,
             origin: Some(a.origin),
+            reserved_prefix: a.reserved_prefix,
             symbols: a.symbols,
             start: a.start,
             warnings: a.warnings,
