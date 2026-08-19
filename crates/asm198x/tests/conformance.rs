@@ -32,6 +32,8 @@ use std::process::Command;
 
 mod support;
 
+use verdict_corpus::Suite;
+
 fn have(bin: &str) -> bool {
     Command::new(bin).output().is_ok()
 }
@@ -196,6 +198,9 @@ fn spec_opcodes_match_reference() {
     fs::create_dir_all(&tmp).expect("temp dir");
     let mut fails: Vec<String> = Vec::new();
     let mut checked = 0usize;
+    // Live mode records what each reference did, so the tool-free replay can
+    // check the same facts on a machine that has none of them.
+    let mut recorder = support::verdicts::Recorder::new();
 
     // --- 6502 / acme -------------------------------------------------------
     if have("acme") {
@@ -212,6 +217,17 @@ fn spec_opcodes_match_reference() {
                     // acme `cbm` output is a 2-byte load address then data.
                     Some(r) if r.len() >= 2 => {
                         checked += 1;
+                        recorder.record_bytes(
+                            support::verdicts::CaseRef {
+                                suite: Suite::Form,
+                                cpu: "6502",
+                                tool: "acme",
+                                dialect: "acme",
+                                case: format!("{} {}", insn.mnemonic, form.mode),
+                                source: &text,
+                            },
+                            &r[2..],
+                        );
                         if r[2..] != bytes[..] {
                             fails.push(format!(
                                 "6502 {} {}: ours {:02X?} vs acme {:02X?}",
@@ -247,6 +263,17 @@ fn spec_opcodes_match_reference() {
                 match reference {
                     Some(r) => {
                         checked += 1;
+                        recorder.record_bytes(
+                            support::verdicts::CaseRef {
+                                suite: Suite::Form,
+                                cpu: "Z80",
+                                tool: "pasmo",
+                                dialect: "pasmo",
+                                case: format!("{} {}", insn.mnemonic, form.mode),
+                                source: &text,
+                            },
+                            &r,
+                        );
                         if r != bytes {
                             fails.push(format!(
                                 "Z80 {} {}: ours {:02X?} vs pasmo {:02X?}",
@@ -300,6 +327,17 @@ fn spec_opcodes_match_reference() {
                     match reference {
                         Some(r) => {
                             checked += 1;
+                            recorder.record_bytes(
+                                support::verdicts::CaseRef {
+                                    suite: Suite::Form,
+                                    cpu: "65816",
+                                    tool: "ca65",
+                                    dialect: "ca65",
+                                    case: format!("{} {}", insn.mnemonic, form.mode),
+                                    source: &text,
+                                },
+                                &r,
+                            );
                             if r != bytes {
                                 fails.push(format!(
                                     "65816 {} {}: ours {:02X?} vs ca65 {:02X?}",
@@ -354,6 +392,17 @@ fn spec_opcodes_match_reference() {
                     match reference {
                         Some(r) => {
                             checked += 1;
+                            recorder.record_bytes(
+                                support::verdicts::CaseRef {
+                                    suite: Suite::Form,
+                                    cpu: "huc6280",
+                                    tool: "ca65",
+                                    dialect: "ca65",
+                                    case: format!("{} {}", insn.mnemonic, form.mode),
+                                    source: &text,
+                                },
+                                &r,
+                            );
                             if r != bytes {
                                 fails.push(format!(
                                     "huc6280 {} {}: ours {:02X?} vs ca65 {:02X?}",
@@ -393,6 +442,17 @@ fn spec_opcodes_match_reference() {
                     // rgblink pads the ROM, so compare only the emitted prefix.
                     Some(r) if r.len() >= bytes.len() => {
                         checked += 1;
+                        recorder.record_bytes(
+                            support::verdicts::CaseRef {
+                                suite: Suite::Form,
+                                cpu: "sm83",
+                                tool: "rgbasm",
+                                dialect: "rgbasm",
+                                case: format!("{} {}", insn.mnemonic, form.mode),
+                                source: &text,
+                            },
+                            &r[..bytes.len()],
+                        );
                         if r[..bytes.len()] != bytes[..] {
                             fails.push(format!(
                                 "sm83 {} {}: ours {:02X?} vs rgbasm {:02X?}",
@@ -433,6 +493,17 @@ fn spec_opcodes_match_reference() {
                 match reference {
                     Some(r) => {
                         checked += 1;
+                        recorder.record_bytes(
+                            support::verdicts::CaseRef {
+                                suite: Suite::Form,
+                                cpu: "8080",
+                                tool: "asl",
+                                dialect: "asl",
+                                case: format!("{} {}", insn.mnemonic, form.mode),
+                                source: &text,
+                            },
+                            &r,
+                        );
                         if r != bytes {
                             fails.push(format!(
                                 "8080 {} {}: ours {:02X?} vs asl {:02X?}",
@@ -470,6 +541,17 @@ fn spec_opcodes_match_reference() {
                 match reference {
                     Some(r) => {
                         checked += 1;
+                        recorder.record_bytes(
+                            support::verdicts::CaseRef {
+                                suite: Suite::Form,
+                                cpu: "6800",
+                                tool: "asl",
+                                dialect: "asl",
+                                case: format!("{} {}", insn.mnemonic, form.mode),
+                                source: &text,
+                            },
+                            &r,
+                        );
                         if r != bytes {
                             fails.push(format!(
                                 "6800 {} {}: ours {:02X?} vs asl {:02X?}",
@@ -507,6 +589,17 @@ fn spec_opcodes_match_reference() {
                 match reference {
                     Some(r) => {
                         checked += 1;
+                        recorder.record_bytes(
+                            support::verdicts::CaseRef {
+                                suite: Suite::Form,
+                                cpu: "1802",
+                                tool: "asl",
+                                dialect: "asl",
+                                case: format!("{} {}", insn.mnemonic, form.mode),
+                                source: &text,
+                            },
+                            &r,
+                        );
                         if r != bytes {
                             fails.push(format!(
                                 "1802 {} {}: ours {:02X?} vs asl {:02X?}",
@@ -544,6 +637,17 @@ fn spec_opcodes_match_reference() {
                 match reference {
                     Some(r) => {
                         checked += 1;
+                        recorder.record_bytes(
+                            support::verdicts::CaseRef {
+                                suite: Suite::Form,
+                                cpu: "8048",
+                                tool: "asl",
+                                dialect: "asl",
+                                case: format!("{} {}", insn.mnemonic, form.mode),
+                                source: &text,
+                            },
+                            &r,
+                        );
                         if r != bytes {
                             fails.push(format!(
                                 "8048 {} {}: ours {:02X?} vs asl {:02X?}",
@@ -595,6 +699,17 @@ fn spec_opcodes_match_reference() {
                 match reference {
                     Some(r) => {
                         checked += 1;
+                        recorder.record_bytes(
+                            support::verdicts::CaseRef {
+                                suite: Suite::Form,
+                                cpu: "8039",
+                                tool: "asl",
+                                dialect: "asl",
+                                case: format!("{} {}", insn.mnemonic, form.mode),
+                                source: &text,
+                            },
+                            &r,
+                        );
                         if r != bytes {
                             fails.push(format!(
                                 "8039 {} {}: ours {:02X?} vs asl {:02X?}",
@@ -632,6 +747,17 @@ fn spec_opcodes_match_reference() {
                 match reference {
                     Some(r) => {
                         checked += 1;
+                        recorder.record_bytes(
+                            support::verdicts::CaseRef {
+                                suite: Suite::Form,
+                                cpu: "SC/MP",
+                                tool: "asl",
+                                dialect: "asl",
+                                case: format!("{} {}", insn.mnemonic, form.mode),
+                                source: &text,
+                            },
+                            &r,
+                        );
                         if r != bytes {
                             fails.push(format!(
                                 "SC/MP {} {}: ours {:02X?} vs asl {:02X?}",
@@ -669,6 +795,17 @@ fn spec_opcodes_match_reference() {
                 match reference {
                     Some(r) => {
                         checked += 1;
+                        recorder.record_bytes(
+                            support::verdicts::CaseRef {
+                                suite: Suite::Form,
+                                cpu: "F8",
+                                tool: "asl",
+                                dialect: "asl",
+                                case: format!("{} {}", insn.mnemonic, form.mode),
+                                source: &text,
+                            },
+                            &r,
+                        );
                         if r != bytes {
                             fails.push(format!(
                                 "F8 {} {}: ours {:02X?} vs asl {:02X?}",
@@ -713,6 +850,17 @@ fn spec_opcodes_match_reference() {
                 match reference {
                     Some(r) => {
                         checked += 1;
+                        recorder.record_bytes(
+                            support::verdicts::CaseRef {
+                                suite: Suite::Form,
+                                cpu: "2650",
+                                tool: "asl",
+                                dialect: "asl",
+                                case: format!("{} {}", insn.mnemonic, form.mode),
+                                source: &text,
+                            },
+                            &r,
+                        );
                         if r != bytes {
                             fails.push(format!(
                                 "2650 {} {}: ours {:02X?} vs asl {:02X?}",
@@ -750,6 +898,17 @@ fn spec_opcodes_match_reference() {
                 match reference {
                     Some(r) => {
                         checked += 1;
+                        recorder.record_bytes(
+                            support::verdicts::CaseRef {
+                                suite: Suite::Form,
+                                cpu: "TMS7000",
+                                tool: "asl",
+                                dialect: "asl",
+                                case: format!("{} {}", insn.mnemonic, form.mode),
+                                source: &text,
+                            },
+                            &r,
+                        );
                         if r != bytes {
                             fails.push(format!(
                                 "TMS7000 {} {}: ours {:02X?} vs asl {:02X?}",
@@ -770,7 +929,9 @@ fn spec_opcodes_match_reference() {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (TMS7000)");
     }
 
+    let recorded = recorder.flush().expect("write the verdict corpus");
     eprintln!("audited {checked} spec forms against the reference tools");
+    eprintln!("recorded {recorded} new verdict(s)");
     assert!(
         fails.is_empty(),
         "{} spec mismatch(es):\n  {}",

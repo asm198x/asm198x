@@ -545,7 +545,20 @@ fn resolve(
         }
         OperandSyntax::Accumulator => ("accumulator", None),
         OperandSyntax::Immediate(e) => ("immediate", Some(e)),
-        OperandSyntax::IndexedIndirect(e) => ("(indirect,x)", Some(e)),
+        // `(expr,x)` is the 6502's zero-page `(indirect,x)` for almost every
+        // mnemonic — but `jmp` has the 65C02/HuC6280 16-bit `(absolute,x)`
+        // form ($7C) and no zero-page one, so the spec's own vocabulary
+        // decides. The 65816 front-end resolves it the same way; hardcoding
+        // the zero-page label here made `jmp ($1234,x)` unassemblable while
+        // the spec, the disassembler and ca65 all accepted it.
+        OperandSyntax::IndexedIndirect(e) => {
+            let mode = if has("(absolute,x)") {
+                "(absolute,x)"
+            } else {
+                "(indirect,x)"
+            };
+            (mode, Some(e))
+        }
         OperandSyntax::IndirectIndexed(e) => ("(indirect),y", Some(e)),
         // `(expr)` is `jmp` indirect where the mnemonic has that form, else the
         // HuC6280/65C02 `(dp)` zero-page indirect.
@@ -678,6 +691,23 @@ mod tests {
 
     fn bytes(src: &str) -> Vec<u8> {
         asm(src).expect("assemble").bytes
+    }
+
+    /// `(expr,x)` means two different things depending on the mnemonic. For
+    /// almost every instruction it is the 6502's zero-page `(indirect,x)`; for
+    /// `jmp` it is the 65C02/HuC6280 16-bit `(absolute,x)` ($7C), which has no
+    /// zero-page counterpart.
+    ///
+    /// The front-end used to label both as zero-page, so `jmp ($1234,x)` was
+    /// unassemblable even though the spec carried the form, our disassembler
+    /// emitted it, and ca65 accepted it. Found by replaying the recorded ca65
+    /// verdicts (#61): the form audit could not see it, because it only ever
+    /// asks the *reference* to assemble what our disassembler writes — never
+    /// us.
+    #[test]
+    fn indexed_indirect_resolves_by_the_mnemonic_not_the_syntax() {
+        assert_eq!(bytes(" jmp ($1234,x)\n"), vec![0x7C, 0x34, 0x12]);
+        assert_eq!(bytes(" lda ($12,x)\n"), vec![0xA1, 0x12]);
     }
 
     #[test]
