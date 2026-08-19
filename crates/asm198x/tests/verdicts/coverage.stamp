@@ -24,11 +24,11 @@ sm83	504/504	100.0%
 # suites have no denominator that ought to exist).
 # 1802	form=255
 # 2650	form=245
-# 6502	curriculum=97 form=151 fuzz=100 probe=22
-# 65816	form=270 probe=12
+# 6502	curriculum=97 form=151 fuzz=100 probe=24
+# 65816	form=270 probe=14
 # 6800	form=197
-# 68000	curriculum=53 fuzz=100 probe=19 sweep-chunk=160
-# 6809	fuzz=100 probe=13 sweep-chunk=89
+# 68000	curriculum=53 fuzz=100 probe=21 sweep-chunk=160
+# 6809	fuzz=100 probe=15 sweep-chunk=89
 # 8039	form=210
 # 8048	form=214
 # 8080	form=244
@@ -38,7 +38,7 @@ sm83	504/504	100.0%
 # SC/MP	form=121
 # TMS7000	form=203
 # TMS9900	sweep-chunk=56
-# Z80	curriculum=2 form=704 fuzz=100 probe=37
+# Z80	curriculum=2 form=704 fuzz=100 probe=41
 # Z8000	sweep-chunk=96
 # Z8001	sweep-chunk=96
 # Z80N	probe=9
