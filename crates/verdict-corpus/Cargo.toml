@@ -1,0 +1,21 @@
+[package]
+name = "verdict-corpus"
+description = "Recorded reference-assembler verdicts for Asm198x: what acme, ca65, asl, pasmo, sjasmplus, vasm, lwasm and rgbasm actually produced for a given source text, committed so CI and contributors can replay the byte-identical guarantee with no reference tools installed. Test infrastructure — never a dependency of the shipped assembler."
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+
+# serde for the on-disk NDJSON; isa + isa-disasm for the shared case derivation
+# that recording and replay must agree on. The dependency direction is one-way:
+# asm198x's *tests* -> verdict-corpus. The shipped `asm198x` and `isa` never
+# depend on this crate (KTD1) — it is a dev-dependency and nothing else.
+[dependencies]
+serde = { workspace = true }
+serde_json = { workspace = true }
+isa = { path = "../isa" }
+isa-disasm = { path = "../isa-disasm" }
+
+[lints]
+workspace = true

@@ -29,3 +29,8 @@ serde_json = { workspace = true }
 
 [lints]
 workspace = true
+
+# Recorded reference-assembler verdicts, replayed by the tool-free suites.
+# Dev-only: the shipped binary must never link it (KTD1).
+[dev-dependencies]
+verdict-corpus = { path = "../verdict-corpus" }
