@@ -9,6 +9,7 @@
 mod coverage;
 mod grow;
 mod ledger;
+mod supersede;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -18,6 +19,35 @@ fn main() -> ExitCode {
     match args.first().map(String::as_str) {
         Some("coverage") => run_coverage(&args[1..]),
         Some("grow") => grow::run(&repo(), args.get(1).map(String::as_str)),
+        Some("supersede") => match (args.get(1), args.get(2)) {
+            (Some(tag), Some(reason)) => match supersede::run(&repo(), tag, reason, &args[3..]) {
+                Ok(retired) if retired.is_empty() => {
+                    eprintln!("xtask: no live verdict matches `{tag}`");
+                    ExitCode::FAILURE
+                }
+                Ok(retired) => {
+                    println!("retired {} verdict(s) tagged `{tag}`:", retired.len());
+                    for case in &retired {
+                        println!("  {case}");
+                    }
+                    ExitCode::SUCCESS
+                }
+                Err(e) => {
+                    eprintln!("xtask supersede: {e}");
+                    ExitCode::FAILURE
+                }
+            },
+            _ => {
+                eprintln!(
+                    "usage: cargo xtask supersede <divergence-tag> <reason> [filter...]\n\
+                     \n\
+                     Each filter must match the verdict's dialect or case, so one\n\
+                     issue's divergences can be retired as they close rather than\n\
+                     all at once."
+                );
+                ExitCode::FAILURE
+            }
+        },
         Some("ledger") => {
             print!("{}", ledger::render(&repo()));
             ExitCode::SUCCESS
@@ -40,7 +70,8 @@ fn usage() -> String {
      \x20 coverage --check    fail if any CPU's coverage fell below the stamp\n\
      \x20 coverage --write    refresh the stamp\n\
      \x20 ledger              print the conformance ledger for this revision\n\
-     \x20 grow [filter]       arbitrate what is not yet recorded (needs the tools)\n"
+     \x20 grow [filter]       arbitrate what is not yet recorded (needs the tools)\n\
+     \x20 supersede <tag> <why>  retire the verdicts carrying a divergence tag\n"
         .to_string()
 }
 

@@ -161,6 +161,14 @@ impl Z80Syntax for SjasmplusSyntax {
     }
 
     /// sjasmplus scopes leading-`.` labels under the most recent global label.
+    /// Macros expand before parsing (#93). Returning the map lets the shared
+    /// pipeline report every line against its source rather than against a
+    /// line that only existed inside the expander.
+    fn expand_source(&self, source: &str) -> Result<Option<(String, Vec<usize>)>, AsmError> {
+        let expanded = expand_macros(source)?;
+        Ok(Some((expanded.text, expanded.origins)))
+    }
+
     fn scopes_locals(&self) -> bool {
         true
     }
@@ -205,9 +213,320 @@ impl Z80Syntax for SjasmplusSyntax {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Macros (#93, first slice)
+//
+// Expansion is a source pre-pass: definitions are collected and removed,
+// invocations are replaced by their substituted bodies, and the result goes
+// through the ordinary parse unchanged. Only sjasmplus uses the keyword
+// pipeline, so this reaches no other dialect.
+//
+// Every rule below was measured against sjasmplus 1.21.0 rather than read from
+// its manual, and two of them are not what a reasonable person would guess:
+//
+//   * the `MACRO`/`ENDM` **keyword** is case-insensitive, but a macro **name**
+//     is case-sensitive — defining `mac` and calling `MAC` is an error;
+//   * substitution respects word boundaries (a parameter `v` leaves the symbol
+//     `val` alone) and does **not** reach inside string literals, so
+//     `db "v"` emits the letter, not the argument.
+//
+// Substitution is textual and happens before expression evaluation, which is
+// why `val*2` with `val = 5` assembles to `ld a,10`.
+// ---------------------------------------------------------------------------
+
+/// A macro as collected by the pre-pass.
+struct MacroDef {
+    /// Parameter names, in order. Matched case-sensitively.
+    params: Vec<String>,
+    /// Body lines, verbatim, before substitution.
+    body: Vec<String>,
+}
+
+/// Strip a trailing comment, respecting string literals so a `;` inside quotes
+/// is not mistaken for one.
+fn without_comment(line: &str) -> &str {
+    let bytes = line.as_bytes();
+    let mut quote: Option<u8> = None;
+    let mut i = 0;
+    while i < bytes.len() {
+        let c = bytes[i];
+        match quote {
+            Some(q) => {
+                if c == q {
+                    quote = None;
+                }
+            }
+            None => {
+                if c == b'"' || c == b'\'' {
+                    quote = Some(c);
+                } else if c == b';' || (c == b'/' && bytes.get(i + 1) == Some(&b'/')) {
+                    // sjasmplus takes both spellings.
+                    return &line[..i];
+                }
+            }
+        }
+        i += 1;
+    }
+    line
+}
+
+/// `MACRO name [p1[, p2]...]` — the keyword matched case-insensitively, the
+/// name kept as written.
+fn macro_header(line: &str) -> Option<(String, Vec<String>)> {
+    let text = without_comment(line).trim();
+    let (kw, rest) = text.split_once(char::is_whitespace)?;
+    if !kw.eq_ignore_ascii_case("macro") {
+        return None;
+    }
+    let rest = rest.trim();
+    let (name, params) = match rest.split_once(|c: char| c == ',' || c.is_whitespace()) {
+        Some((name, tail)) => (
+            name.trim(),
+            tail.split(',')
+                .map(|p| p.trim().to_string())
+                .filter(|p| !p.is_empty())
+                .collect(),
+        ),
+        None => (rest, Vec::new()),
+    };
+    (!name.is_empty()).then(|| (name.to_string(), params))
+}
+
+/// `ENDM`, alone on its line.
+fn is_endm(line: &str) -> bool {
+    without_comment(line).trim().eq_ignore_ascii_case("endm")
+}
+
+/// Replace whole-word occurrences of each parameter with its argument, leaving
+/// string literals untouched.
+fn substitute(line: &str, params: &[String], args: &[String]) -> String {
+    if params.is_empty() {
+        return line.to_string();
+    }
+    let bytes = line.as_bytes();
+    let word = |c: u8| c.is_ascii_alphanumeric() || c == b'_' || c == b'.';
+    let mut out = String::with_capacity(line.len());
+    let mut quote: Option<u8> = None;
+    let mut i = 0;
+    while i < bytes.len() {
+        let c = bytes[i];
+        if let Some(q) = quote {
+            out.push(c as char);
+            if c == q {
+                quote = None;
+            }
+            i += 1;
+            continue;
+        }
+        if c == b'"' || c == b'\'' {
+            quote = Some(c);
+            out.push(c as char);
+            i += 1;
+            continue;
+        }
+        if word(c) && (i == 0 || !word(bytes[i - 1])) {
+            let mut j = i;
+            while j < bytes.len() && word(bytes[j]) {
+                j += 1;
+            }
+            let token = &line[i..j];
+            match params.iter().position(|p| p == token) {
+                Some(k) => out.push_str(args.get(k).map_or("", String::as_str)),
+                None => out.push_str(token),
+            }
+            i = j;
+            continue;
+        }
+        out.push(c as char);
+        i += 1;
+    }
+    out
+}
+
+/// Split an invocation's argument list on commas outside strings.
+fn split_args(text: &str) -> Vec<String> {
+    let mut args = Vec::new();
+    let mut current = String::new();
+    let mut quote: Option<char> = None;
+    for c in text.chars() {
+        match quote {
+            Some(q) => {
+                current.push(c);
+                if c == q {
+                    quote = None;
+                }
+            }
+            None if c == '"' || c == '\'' => {
+                quote = Some(c);
+                current.push(c);
+            }
+            None if c == ',' => {
+                args.push(current.trim().to_string());
+                current = String::new();
+            }
+            None => current.push(c),
+        }
+    }
+    let last = current.trim();
+    if !last.is_empty() || !args.is_empty() {
+        args.push(last.to_string());
+    }
+    args
+}
+
+/// Expanded source, plus the source line each output line should report as.
+pub(crate) struct Expanded {
+    pub(crate) text: String,
+    /// `origins[i]` is the 1-based source line for output line `i + 1`. Lines
+    /// from an expansion report their **invocation** site, which is where a
+    /// reader looks first and what a diagnostic must name.
+    pub(crate) origins: Vec<usize>,
+}
+
+/// Collect macro definitions and expand their invocations.
+pub(crate) fn expand_macros(source: &str) -> Result<Expanded, AsmError> {
+    let lines: Vec<&str> = source.lines().collect();
+    let mut macros: std::collections::HashMap<String, MacroDef> = std::collections::HashMap::new();
+    let mut text = String::with_capacity(source.len());
+    let mut origins = Vec::with_capacity(lines.len());
+    let mut i = 0;
+
+    while i < lines.len() {
+        let raw = lines[i];
+        let line_no = i + 1;
+
+        if let Some((name, params)) = macro_header(raw) {
+            let mut body = Vec::new();
+            let mut j = i + 1;
+            let mut closed = false;
+            while j < lines.len() {
+                if is_endm(lines[j]) {
+                    closed = true;
+                    break;
+                }
+                body.push(lines[j].to_string());
+                j += 1;
+            }
+            if !closed {
+                return Err(AsmError::new(
+                    line_no,
+                    format!("`macro {name}` has no matching `endm`"),
+                ));
+            }
+            macros.insert(name, MacroDef { params, body });
+            i = j + 1;
+            continue;
+        }
+
+        // An invocation: the first token names a macro. Case-sensitive, as
+        // sjasmplus is for macro names though not for its keywords.
+        let stripped = without_comment(raw).trim();
+        let (head, tail) = stripped
+            .split_once(char::is_whitespace)
+            .unwrap_or((stripped, ""));
+        if let Some(def) = macros.get(head) {
+            let args = split_args(tail);
+            if args.len() != def.params.len() {
+                return Err(AsmError::new(
+                    line_no,
+                    format!(
+                        "macro `{head}` takes {} argument(s), but {} given",
+                        def.params.len(),
+                        args.len()
+                    ),
+                ));
+            }
+            for body_line in &def.body {
+                text.push_str(&substitute(body_line, &def.params, &args));
+                text.push('\n');
+                origins.push(line_no);
+            }
+            i += 1;
+            continue;
+        }
+
+        text.push_str(raw);
+        text.push('\n');
+        origins.push(line_no);
+        i += 1;
+    }
+    Ok(Expanded { text, origins })
+}
+
 #[cfg(test)]
 mod tests {
     use crate::assemble_sjasmplus as asm;
+
+    /// The keyword is case-insensitive but the **name** is not — measured
+    /// against sjasmplus 1.21.0, and not a combination anyone would guess.
+    /// Defining `mac` and calling `MAC` is an error there, so it must be here.
+    #[test]
+    fn the_macro_keyword_is_case_insensitive_but_the_name_is_not() {
+        assert_eq!(
+            asm(" macro m\n nop\n endm\n m\n").expect("assemble").bytes,
+            vec![0x00]
+        );
+        assert!(
+            asm(" MACRO mac\n nop\n ENDM\n MAC\n").is_err(),
+            "a macro name is case-sensitive"
+        );
+    }
+
+    /// Substitution respects word boundaries: a parameter `v` must leave the
+    /// symbol `val` alone. A naive replace would assemble `ld a,5al`.
+    #[test]
+    fn substitution_stops_at_word_boundaries() {
+        assert_eq!(
+            asm(" MACRO m v\nval equ 9\n ld a,val\n ENDM\n m 5\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x3E, 0x09]
+        );
+    }
+
+    /// And it does not reach inside string literals — `db "v"` emits the
+    /// letter, not the argument.
+    #[test]
+    fn substitution_does_not_reach_inside_strings() {
+        assert_eq!(
+            asm(" MACRO m v\n db \"v\"\n ENDM\n m 5\n")
+                .expect("assemble")
+                .bytes,
+            vec![b'v']
+        );
+    }
+
+    /// Substitution is textual and happens before the expression is evaluated,
+    /// so `val*2` with `val = 5` is `ld a,10`.
+    #[test]
+    fn a_parameter_substitutes_before_the_expression_is_evaluated() {
+        assert_eq!(
+            asm(" MACRO m val\n ld a,val*2\n ENDM\n m 5\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x3E, 0x0A]
+        );
+    }
+
+    /// A diagnostic must name a line the author wrote. An error inside a macro
+    /// body reports the **invocation**, which is where a reader looks first —
+    /// the expanded line number never existed in their file.
+    #[test]
+    fn an_error_inside_an_expansion_names_the_invocation() {
+        let err = asm(" nop\n MACRO bad\n frobnicate\n ENDM\n nop\n bad\n")
+            .expect_err("frobnicate is not an instruction");
+        assert_eq!(err.line, 6, "the invocation is on line 6: {err:?}");
+    }
+
+    /// Arity is checked, and unterminated definitions are caught where they
+    /// begin rather than at end of file.
+    #[test]
+    fn arity_and_termination_are_checked() {
+        let arity = asm(" MACRO m v\n ld a,v\n ENDM\n m\n").expect_err("too few arguments");
+        assert!(arity.message.contains("takes 1 argument"), "{arity:?}");
+        let open = asm(" MACRO m\n nop\n").expect_err("no endm");
+        assert_eq!(open.line, 1, "reported where the definition opened");
+    }
 
     #[test]
     fn number_formats() {

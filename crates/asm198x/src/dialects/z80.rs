@@ -29,6 +29,17 @@ use crate::span::FileId;
 /// The per-dialect surface: the parts of Z80 syntax that actually differ
 /// between assemblers. Everything else in this module is shared.
 pub(crate) trait Z80Syntax {
+    /// Rewrite source before parsing, returning the new text and, per output
+    /// line, the 1-based source line it should report as.
+    ///
+    /// `None` — the default — means the dialect has nothing to expand, and the
+    /// source is parsed as written. sjasmplus overrides it for macros (#93).
+    /// Because every entry point funnels through `parse_program_keyword`, one
+    /// hook covers the single-source, AST and include-capable paths alike.
+    fn expand_source(&self, _source: &str) -> Result<Option<(String, Vec<usize>)>, AsmError> {
+        Ok(None)
+    }
+
     /// Strip a line comment, returning the code before it.
     fn strip_comment<'a>(&self, line: &'a str) -> &'a str;
 
@@ -785,16 +796,26 @@ pub(crate) fn parse_program_keyword<S: Z80Syntax>(
     file: FileId,
     source: &str,
 ) -> Result<Program, AsmError> {
+    // A dialect may rewrite source before it is parsed (sjasmplus macros,
+    // #93). Line numbers are mapped back afterwards, so a diagnostic always
+    // names a line the author wrote.
+    let expanded = syntax.expand_source(source)?;
+    let (text, origins) = match &expanded {
+        Some((text, origins)) => (text.as_str(), Some(origins.as_slice())),
+        None => (source, None),
+    };
     let mut cx = KwCx {
         syntax,
         set,
         ext,
         file,
-        lines: source.lines().collect(),
+        lines: text.lines().collect(),
         pos: 0,
         pending: Vec::new(),
     };
-    let (mut nodes, close) = cx.parse_block(false).map_err(|e| stamp_file(e, file))?;
+    let (mut nodes, close) = cx
+        .parse_block(false)
+        .map_err(|e| remap_lines(stamp_file(e, file), origins))?;
     debug_assert!(close == KwClose::Eof, "top level only ends at EOF");
     // Flush a trailing comment block so the formatter keeps it.
     if !cx.pending.is_empty() {
@@ -811,7 +832,32 @@ pub(crate) fn parse_program_keyword<S: Z80Syntax>(
             },
         });
     }
+    if let Some(origins) = origins {
+        for node in &mut nodes {
+            node.span.line = source_line(origins, node.span.line);
+            if let Some(span) = node.operand_span.as_mut() {
+                span.line = source_line(origins, span.line);
+            }
+        }
+    }
     Ok(Program { nodes })
+}
+
+/// Map a line in rewritten source back to the line the author wrote.
+fn source_line(origins: &[usize], line: u32) -> u32 {
+    origins
+        .get((line as usize).saturating_sub(1))
+        .map_or(line, |n| *n as u32)
+}
+
+/// Rewrite an error raised against rewritten source, so it names a real line.
+fn remap_lines(mut e: AsmError, origins: Option<&[usize]>) -> AsmError {
+    let Some(origins) = origins else { return e };
+    e.line = source_line(origins, e.line as u32) as usize;
+    if let Some(span) = e.span.as_mut() {
+        span.line = source_line(origins, span.line);
+    }
+    e
 }
 
 impl<S: Z80Syntax> KwCx<'_, S> {
