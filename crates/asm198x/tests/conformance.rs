@@ -971,6 +971,9 @@ type Reassemble<'a> = dyn Fn(&str) -> Option<Vec<u8>> + 'a;
 struct SweepSpec<'a> {
     /// The CPU label, which is also its corpus file.
     name: &'a str,
+    /// The issue tracking a known difference between our output and the
+    /// arbiter's, where one exists. `None` where we expect to match everywhere.
+    divergence: Option<u32>,
     /// The executable whose identity signs the verdicts.
     tool: &'a str,
     /// The syntax the listing is written in.
@@ -981,8 +984,13 @@ struct SweepSpec<'a> {
     /// The invocation whose output is *recorded*, when it differs from the one
     /// that arbitrates.
     ///
-    /// Usually the same invocation that arbitrates. The 68000 records nothing,
-    /// because no vasm configuration produces what we produce:
+    /// Usually the same invocation that arbitrates.
+    ///
+    /// Where our own output differs from it, the chunk is recorded as a
+    /// **divergence** tagged with the issue tracking that difference, rather
+    /// than as a plain fact. That is the only honest way to record the 68000:
+    /// its sweep runs vasm with `-no-opt` so opcodes compare literally, and we
+    /// sit between vasm's two configurations (#110) —
     ///
     /// | source | ours | vasm default | vasm `-no-opt` |
     /// |---|---|---|---|
@@ -990,12 +998,10 @@ struct SweepSpec<'a> {
     /// | `asl.w #1,d0` | `E340` | `D040` | `E340` |
     /// | `adda.w #$10,a0` | `41E8…` | `41E8…` | `D0FC…` |
     ///
-    /// We apply vasm's `adda`→`lea` transform but not its redundant-`lea`
-    /// deletion or `asl`→`add` rewrite, so we sit between its two
-    /// configurations. A recorded fact would be unreplayable by construction
-    /// under either, and recording one anyway would either fail replay on
-    /// correct output or need an exemption nothing could lift. Tracked as #110;
-    /// the sweep still arbitrates the 68000 literally under `-no-opt`.
+    /// — so no invocation reproduces us. Recording the matching chunks as facts
+    /// and the differing ones as tracked divergences keeps the CPU covered,
+    /// pins the difference so it cannot drift unnoticed either way, and fails
+    /// the moment #110 is fixed, which is when the marker should go.
     record_with: Option<&'a Reassemble<'a>>,
     skip: &'a dyn Fn(&str) -> bool,
 }
@@ -1071,17 +1077,29 @@ fn sweep(
                 None => None,
             };
             if let Some(recorded) = recorded {
-                recorder.record_bytes(
-                    support::verdicts::CaseRef {
-                        suite: Suite::SweepChunk,
-                        cpu: spec.name,
-                        tool: spec.tool,
-                        dialect: spec.dialect,
-                        case: format!("sweep chunk `{mnemonic}` ({} instructions)", group.len()),
-                        source: &source,
-                    },
-                    &recorded,
-                );
+                let case = support::verdicts::CaseRef {
+                    suite: Suite::SweepChunk,
+                    cpu: spec.name,
+                    tool: spec.tool,
+                    dialect: spec.dialect,
+                    case: format!("sweep chunk `{mnemonic}` ({} instructions)", group.len()),
+                    source: &source,
+                };
+                // Ask our own assembler the same question the tool-free replay
+                // will. Where we already differ knowingly, record a tracked
+                // divergence rather than a fact our next run would fail on.
+                let ours = support::verdicts::assemble_form(spec.name, spec.dialect, &source)
+                    .and_then(Result::ok);
+                match spec.divergence {
+                    Some(issue) if ours.as_deref() != Some(recorded.as_slice()) => recorder.record(
+                        case,
+                        verdict_corpus::Outcome::Divergence {
+                            divergence: format!("issue-{issue}"),
+                            hex: verdict_corpus::encode_hex(&recorded),
+                        },
+                    ),
+                    _ => recorder.record_bytes(case, &recorded),
+                }
             }
             continue;
         }
@@ -1149,6 +1167,7 @@ fn spec_sweep_matches_reference() {
         checked += sweep(
             SweepSpec {
                 name: "6809",
+                divergence: None,
                 tool: "lwasm",
                 dialect: "lwasm",
                 disasm: &|b, o| asm198x::disassemble_6809(b, o as u16),
@@ -1197,12 +1216,13 @@ fn spec_sweep_matches_reference() {
         checked += sweep(
             SweepSpec {
                 name: "68000",
+                divergence: Some(110),
                 tool: "vasmm68k_mot",
                 dialect: "vasm",
                 disasm: &|b, o| asm198x::disassemble_68000(b, o),
                 listing: &|b, o| asm198x::listing_68000(b, o),
                 reassemble: &reasm,
-                record_with: None,
+                record_with: Some(&reasm),
                 skip: &|_| false,
             },
             &cands,
@@ -1233,6 +1253,7 @@ fn spec_sweep_matches_reference() {
         checked += sweep(
             SweepSpec {
                 name: "PDP-11",
+                divergence: None,
                 tool: "asl",
                 dialect: "asl",
                 disasm: &|b, o| asm198x::disassemble_pdp11(b, o as u16),
@@ -1269,6 +1290,7 @@ fn spec_sweep_matches_reference() {
         checked += sweep(
             SweepSpec {
                 name: "TMS9900",
+                divergence: None,
                 tool: "asl",
                 dialect: "asl",
                 disasm: &|b, o| asm198x::disassemble_tms9900(b, o as u16),
@@ -1309,6 +1331,7 @@ fn spec_sweep_matches_reference() {
         checked += sweep(
             SweepSpec {
                 name: "CP1610",
+                divergence: None,
                 tool: "asl",
                 dialect: "asl",
                 disasm: &|b, o| asm198x::disassemble_cp1610(b, o as u16),
@@ -1355,6 +1378,7 @@ fn spec_sweep_matches_reference() {
         checked += sweep(
             SweepSpec {
                 name: "Z8000",
+                divergence: None,
                 tool: "asl",
                 dialect: "asl",
                 disasm: &|b, o| asm198x::disassemble_z8000(b, o as u16),
@@ -1382,6 +1406,7 @@ fn spec_sweep_matches_reference() {
         checked += sweep(
             SweepSpec {
                 name: "Z8001",
+                divergence: None,
                 tool: "asl",
                 dialect: "asl",
                 disasm: &|b, o| asm198x::disassemble_z8001(b, o as u16),
