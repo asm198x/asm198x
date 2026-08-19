@@ -598,6 +598,26 @@ mod tests {
         asm(" MACRO mac, v\n ld a,v\n ENDM\n MAC 9\n").expect_err("MAC is not mac");
     }
 
+    /// A label may sit in front of an invocation, binding to the address the
+    /// expansion starts at, with or without its colon. Two of them in a row
+    /// must land two expansions apart.
+    #[test]
+    fn a_label_may_sit_in_front_of_an_invocation() {
+        for src in [
+            " MACRO m1, v\n ld a,v\n ENDM\nlbl: m1 9\n ld hl,lbl\n",
+            " MACRO m1, v\n ld a,v\n ENDM\nlbl m1 9\n ld hl,lbl\n",
+        ] {
+            assert_eq!(
+                asm(src).expect(src).bytes,
+                vec![0x3E, 0x09, 0x21, 0x00, 0x00],
+                "{src}"
+            );
+        }
+        let two = asm(" MACRO m1, v\n ld a,v\n ENDM\nlbl: m1 9\nlbl2: m1 8\n ld hl,lbl2\n")
+            .expect("two labelled invocations");
+        assert_eq!(two.bytes, vec![0x3E, 0x09, 0x3E, 0x08, 0x21, 0x02, 0x00]);
+    }
+
     /// The formatter does not expand — the same rule as sjasmplus, for the
     /// same reason: laying source out must not rewrite the program.
     ///

@@ -273,7 +273,7 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
         let mut next: Vec<(LineOrigin, String)> = Vec::with_capacity(body.len());
         let mut expanded_any = false;
         for (origin, text) in &body {
-            let Some((name, args)) = invocation(text, &macros) else {
+            let Some((label, name, args)) = invocation(text, &macros) else {
                 next.push((origin.clone(), text.clone()));
                 continue;
             };
@@ -304,6 +304,13 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
                 invoked_at: Box::new(Span::at(origin.line as u32, 0)),
             });
             frames.extend(origin.frames.iter().cloned());
+            // A label in front of the invocation is the author's own text, so
+            // it keeps their origin and gains no frame. Emitting it on its own
+            // line binds it to the expansion's first address, which is what the
+            // references do.
+            if let Some(label) = label {
+                next.push((origin.clone(), label));
+            }
             for body_line in &def.body {
                 if syntax.is_local_decl(body_line) {
                     continue;
@@ -334,17 +341,35 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
     Ok(Expanded { text, origins })
 }
 
-/// The macro a line invokes, if any, with its arguments. Names match
-/// case-sensitively, as every reference measured does.
+/// What a line invokes, if anything: the label in front of it, the macro's
+/// name, and its arguments. Names match case-sensitively, as every reference
+/// measured does.
+///
+/// The label matters. `lbl: m1 9` is accepted by every reference measured, and
+/// binds `lbl` to the address the expansion starts at — the same rule a label
+/// on an `include` line follows. Missing it does not mis-assemble; it rejects
+/// the line outright as an unknown instruction, because the label is read as
+/// the mnemonic.
 fn invocation(
     line: &str,
     macros: &std::collections::HashMap<String, MacroDef>,
-) -> Option<(String, Vec<String>)> {
-    let stripped = without_comment(line).trim();
-    let (head, tail) = stripped
+) -> Option<(Option<String>, String, Vec<String>)> {
+    let stripped = without_comment(line);
+    let trimmed = stripped.trim();
+    let (head, tail) = trimmed
         .split_once(char::is_whitespace)
-        .unwrap_or((stripped, ""));
+        .unwrap_or((trimmed, ""));
+    if macros.contains_key(head) {
+        return Some((None, head.to_string(), split_args(tail)));
+    }
+    // Only a word at column 0 can be a label; anywhere else it is a mnemonic,
+    // and every reference measured takes the colon as optional.
+    if stripped.starts_with(char::is_whitespace) {
+        return None;
+    }
+    let tail = tail.trim();
+    let (name, args) = tail.split_once(char::is_whitespace).unwrap_or((tail, ""));
     macros
-        .contains_key(head)
-        .then(|| (head.to_string(), split_args(tail)))
+        .contains_key(name)
+        .then(|| (Some(head.to_string()), name.to_string(), split_args(args)))
 }

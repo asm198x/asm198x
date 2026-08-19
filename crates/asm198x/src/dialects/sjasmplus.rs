@@ -549,6 +549,27 @@ mod tests {
         assert_eq!(err.line, 6, "the invocation is on line 6: {err:?}");
     }
 
+    /// A label may sit in front of an invocation, and binds to the address the
+    /// expansion starts at — the same rule a label on an `include` line
+    /// follows, and the colon is optional as everywhere else.
+    ///
+    /// Getting this wrong does not mis-assemble; it rejects the line, because
+    /// the label is read as the mnemonic. The reference assembles it.
+    #[test]
+    fn a_label_may_sit_in_front_of_an_invocation() {
+        for src in [
+            " MACRO m1 v\n ld a,v\n ENDM\nlbl: m1 9\n ld hl,lbl\n",
+            " MACRO m1 v\n ld a,v\n ENDM\nlbl m1 9\n ld hl,lbl\n",
+        ] {
+            // The label is at $0000: it precedes the expansion, not follows it.
+            assert_eq!(
+                asm(src).expect(src).bytes,
+                vec![0x3E, 0x09, 0x21, 0x00, 0x00],
+                "{src}"
+            );
+        }
+    }
+
     /// The formatter lays source out; it does not rewrite programs. Formatting
     /// must therefore give the macro **back**, not the lines it expands to.
     ///

@@ -372,6 +372,13 @@ const PROBES: &[Probe] = &[
     // pasmo checks no arity: the extra argument is dropped rather than
     // rejected. Recorded because it is surprising, and because the quiet
     // alternative — rejecting it — would emit nothing where pasmo emits code.
+    // A label in front of an invocation binds at the expansion's first address.
+    // Missing this rejects the line outright — the label reads as the mnemonic
+    // — so it is worth a probe in both dialects and in both spellings.
+    ok ("pasmo", "label in front of an invocation",
+        " MACRO m1, v\n ld a,v\n ENDM\nlbl: m1 9\n ld hl,lbl\n"),
+    ok ("pasmo", "label without a colon in front of an invocation",
+        " MACRO m1, v\n ld a,v\n ENDM\nlbl m1 9\n ld hl,lbl\n"),
     ok ("pasmo", "extra arguments are dropped",
         " MACRO m1, v\n ld a,v\n ENDM\n m1 1,2\n"),
     ok ("sjasmplus", "macro definition and invocation",
@@ -390,6 +397,10 @@ const PROBES: &[Probe] = &[
         " MACRO inner\n nop\n ENDM\n MACRO outer\n inner\n ENDM\n outer\n"),
     ok ("sjasmplus", "nested macro passes a parameter through",
         " MACRO inner v\n ld a,v\n ENDM\n MACRO outer w\n inner w\n ENDM\n outer 5\n"),
+    ok ("sjasmplus", "label in front of an invocation",
+        " MACRO m1 v\n ld a,v\n ENDM\nlbl: m1 9\n ld hl,lbl\n"),
+    ok ("sjasmplus", "label without a colon in front of an invocation",
+        " MACRO m1 v\n ld a,v\n ENDM\nlbl m1 9\n ld hl,lbl\n"),
     ok ("sjasmplus", "macro invokes one defined later",
         " MACRO outer\n inner\n ENDM\n MACRO inner\n nop\n ENDM\n outer\n"),
     // Repetition. The count is an expression over the environment, which is
