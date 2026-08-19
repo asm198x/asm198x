@@ -8,3 +8,6 @@ a.out
 
 # Vale synced package
 .vale/
+
+# mdBook build output; the book is built in CI and deployed from there.
+/docs/book/book/

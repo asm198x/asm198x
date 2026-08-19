@@ -171,6 +171,62 @@ jobs:
   # The point of this job is that it needs **no reference assembler**, so it
   # asserts that none is present. Without that, a runner image that started
   # shipping one would quietly change what a green tick here means.
+  docs:
+    name: Docs
+    runs-on: ubuntu-latest
+    needs: [fmt, clippy]
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Read pinned toolchain
+        id: toolchain
+        run: |
+          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
+          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.toolchain.outputs.channel }}
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: docs
+
+      # The book carries generated data beside prose. This is the gate that
+      # keeps the two in step: it regenerates every marked block and fails if
+      # the committed one differs. The list it generates from is the same one
+      # `--dialect` resolves against, so a dialect cannot be added without the
+      # book saying so.
+      - name: Check generated blocks are current
+        run: cargo xtask docs --check
+
+      - name: Install mdBook
+        uses: taiki-e/install-action@v2
+        with:
+          tool: mdbook
+
+      # `create-missing = false`, so a chapter listed in SUMMARY.md with no
+      # file fails here rather than shipping a dead link.
+      - name: Build the book
+        run: mdbook build docs/book
+
+      - name: Install Vale
+        uses: errata-ai/vale-action@reviewdog
+        with:
+          files: docs/book/src
+          fail_on_error: true
+          reporter: github-pr-check
+          # House198x runs at `suggestion` locally, which is the right level
+          # for a hook and the wrong one for a gate: suggestions are advice,
+          # not defects. CI blocks on the two levels that mean something is
+          # wrong.
+          vale_flags: "--minAlertLevel=warning"
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
   replay:
     name: Replay
     runs-on: ubuntu-latest
