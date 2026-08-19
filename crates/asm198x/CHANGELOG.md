@@ -11,6 +11,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- *(dist)* ship shell and PowerShell installers
 - *(dist)* publish a Homebrew formula to asm198x/homebrew-tap
 - *(cli)* [**breaking**] make the operation a subcommand
 
