@@ -1,0 +1,21 @@
+[book]
+title = "asm198x"
+description = "Assemblers and disassemblers for retro CPUs — one binary, source-compatible with the tools people already use."
+authors = ["Steve Hill"]
+language = "en"
+src = "src"
+
+[build]
+# A dead link in generated documentation is a broken promise about the thing
+# it documents, so it fails the build rather than shipping.
+create-missing = false
+
+[output.html]
+default-theme = "rust"
+git-repository-url = "https://github.com/asm198x/asm198x"
+edit-url-template = "https://github.com/asm198x/asm198x/edit/main/docs/book/{path}"
+site-url = "/docs/"
+
+[output.html.fold]
+enable = true
+level = 1

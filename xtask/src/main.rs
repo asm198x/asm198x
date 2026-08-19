@@ -7,6 +7,7 @@
 //! corpus actually holds.
 
 mod coverage;
+mod docs;
 mod grow;
 mod ledger;
 mod supersede;
@@ -48,6 +49,7 @@ fn main() -> ExitCode {
                 ExitCode::FAILURE
             }
         },
+        Some("docs") => run_docs(&args[1..]),
         Some("ledger") => {
             print!("{}", ledger::render(&repo()));
             ExitCode::SUCCESS
@@ -71,8 +73,48 @@ fn usage() -> String {
      \x20 coverage --write    refresh the stamp\n\
      \x20 ledger              print the conformance ledger for this revision\n\
      \x20 grow [filter]       arbitrate what is not yet recorded (needs the tools)\n\
-     \x20 supersede <tag> <why>  retire the verdicts carrying a divergence tag\n"
+     \x20 supersede <tag> <why>  retire the verdicts carrying a divergence tag\n\
+     \x20 docs                regenerate the book's generated blocks\n\
+     \x20 docs --check        fail if any generated block is stale\n"
         .to_string()
+}
+
+fn run_docs(args: &[String]) -> ExitCode {
+    let check = args.iter().any(|a| a == "--check");
+    let report = match docs::run(&repo(), check) {
+        Ok(report) => report,
+        Err(e) => {
+            eprintln!("xtask docs: {e}");
+            return ExitCode::FAILURE;
+        }
+    };
+
+    if report.stale.is_empty() {
+        println!(
+            "{} generated block(s) across {} page(s) are current",
+            report.blocks, report.scanned
+        );
+        return ExitCode::SUCCESS;
+    }
+
+    if check {
+        eprintln!(
+            "{} page(s) have a stale generated block:\n  {}\n\n\
+             The book carries generated data next to prose, and this one no \
+             longer matches what the binary produces. Regenerate with `cargo \
+             xtask docs` and commit the result — do not edit inside the \
+             markers, the next run overwrites it.",
+            report.stale.len(),
+            report.stale.join("\n  ")
+        );
+        return ExitCode::FAILURE;
+    }
+
+    println!("regenerated {} page(s):", report.stale.len());
+    for page in &report.stale {
+        println!("  {page}");
+    }
+    ExitCode::SUCCESS
 }
 
 /// The repository root: this crate's manifest directory's parent.
