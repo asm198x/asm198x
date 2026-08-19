@@ -319,6 +319,52 @@ const PROBES: &[Probe] = &[
     gap("sjasmplus", "IF on a forward label (multi-pass)",
         " IF later\n ld a,1\n ENDIF\nlater: nop\n", 99),
 
+    // ---- macros (#93) -------------------------------------------------------
+    // No dialect supports macros yet, so every one of these is a gap: the
+    // reference accepts it and we reject it. Recording them puts each
+    // reference's *actual* macro output in the corpus, so implementing a form
+    // has ground truth to build against rather than a reading of its manual —
+    // and the marker fails the suite the moment a form starts working, which
+    // is when it should be deleted.
+    //
+    // Every body below was verified accepted by its reference before being
+    // added. A body the reference rejects is silently skipped by this harness,
+    // so an unverified probe would contribute nothing while looking like
+    // coverage.
+    //
+    // The spellings do not converge, which is why #93 insists on per-dialect
+    // fidelity rather than a house macro system:
+    //   MACRO name  / ENDM      sjasmplus, pasmo, rgbasm
+    //   name MACRO  / ENDM      asl, lwasm, vasm, pasmo
+    //   .macro name / .endmacro ca65
+    //   !macro name { }         acme
+    gap("acme", "macro definition and invocation",
+        "!macro nop2 {\n\tnop\n\tnop\n}\n+nop2\n", 93),
+    gap("acme", "macro with a parameter",
+        "!macro ldav .v {\n\tlda #.v\n}\n+ldav 5\n", 93),
+    gap("pasmo", "macro definition and invocation",
+        " MACRO nop2\n nop\n nop\n ENDM\n nop2\n", 93),
+    // pasmo wants a comma after the name before parameters, where sjasmplus
+    // takes a space — the same keyword, a different grammar.
+    gap("pasmo", "macro with a parameter",
+        " MACRO ldav, val\n ld a,val\n ENDM\n ldav 5\n", 93),
+    gap("sjasmplus", "macro definition and invocation",
+        " MACRO nop2\n nop\n nop\n ENDM\n nop2\n", 93),
+    gap("sjasmplus", "macro with a parameter",
+        " MACRO ldav val\n ld a,val\n ENDM\n ldav 5\n", 93),
+    gap("lwasm", "macro definition and invocation",
+        "nop2\tmacro\n nop\n nop\n endm\n nop2\n", 93),
+    gap("lwasm", "macro with a positional parameter",
+        "ldav\tmacro\n lda #\\1\n endm\n ldav 5\n", 93),
+    gap("vasm", "macro definition and invocation",
+        "nop2\tmacro\n nop\n nop\n endm\n nop2\n", 93),
+    gap("vasm", "macro with a positional parameter",
+        "ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5\n", 93),
+    gap("ca65-816", "macro definition and invocation",
+        ".macro nop2\n nop\n nop\n.endmacro\n nop2\n", 93),
+    gap("ca65-816", "macro with a parameter",
+        ".macro ldav v\n lda #v\n.endmacro\n ldav 5\n", 93),
+
     // ---- z80n (Spectrum Next extension ISA), sjasmplus reference -------------
     ok ("z80n", "swapnib / mirror",      " swapnib\n mirror a\n"),
     ok ("z80n", "barrel shifts",         " bsla de,b\n bsrl de,b\n brlc de,b\n"),
