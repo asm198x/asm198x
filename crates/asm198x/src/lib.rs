@@ -35,6 +35,9 @@
 mod ast;
 mod contract;
 mod dialect;
+/// The dialect table: every spelling `--dialect` accepts, and what each is
+/// for. Public so the CLI and the reference generator read one list.
+pub mod dialect_table;
 mod dialects;
 mod engine;
 // Debug-record renderings: the `.debug198x` sidecar builder + `--sym` /

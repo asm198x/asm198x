@@ -79,37 +79,47 @@ impl Assembler {
         // `--dialect` was given. Z80 variants are handled via `z80n` above.
         let chip =
             target.filter(|t| !matches!(t.to_ascii_lowercase().as_str(), "z80" | "z80n" | "next"));
-        let key = dialect
+        let spelling = dialect
             .map(str::to_ascii_lowercase)
             .or_else(|| chip.map(str::to_ascii_lowercase));
-        match key.as_deref() {
+        // Aliases collapse to the canonical name in the table, so the arms
+        // below name each dialect once and a spelling with no row is refused
+        // before it gets here.
+        let key = match spelling.as_deref() {
+            Some(name) => match asm198x::dialect_table::canonical(name) {
+                Some(canonical) => Some(canonical),
+                None => {
+                    return Err(format!(
+                        "unknown dialect `{name}` (try acme, ca65, pasmo, pasmonext, or sjasmplus)"
+                    ));
+                }
+            },
+            None => None,
+        };
+        match key {
             // ACME is the default 6502 dialect (C64); ca65 targets the NES.
-            Some("acme" | "6502" | "mos6502") => Ok(Self::Acme),
-            Some("ca65" | "nes") => Ok(Self::Ca65),
-            Some("vasm" | "68000" | "m68k" | "mot") => Ok(Self::Vasm),
-            Some("lwasm" | "6809") => Ok(Self::Lwasm),
-            Some("65816" | "816" | "ca65-816") => Ok(Self::Ca65_816),
-            Some("huc6280" | "pce" | "pc-engine") => Ok(Self::Ca65Huc6280),
-            Some("rgbasm" | "sm83" | "gb" | "gameboy" | "game-boy") => Ok(Self::Rgbasm),
-            Some("8080" | "i8080" | "intel8080") => Ok(Self::I8080),
-            Some("6800" | "m6800") => Ok(Self::M6800),
-            Some("1802" | "cdp1802" | "cosmac") => Ok(Self::Cdp1802),
+            Some("acme") => Ok(Self::Acme),
+            Some("ca65") => Ok(Self::Ca65),
+            Some("vasm") => Ok(Self::Vasm),
+            Some("lwasm") => Ok(Self::Lwasm),
+            Some("65816") => Ok(Self::Ca65_816),
+            Some("huc6280") => Ok(Self::Ca65Huc6280),
+            Some("rgbasm") => Ok(Self::Rgbasm),
+            Some("8080") => Ok(Self::I8080),
+            Some("6800") => Ok(Self::M6800),
+            Some("1802") => Ok(Self::Cdp1802),
             // The ROM'd MCS-48 parts share the 8048's full set; the ROM-less kin
             // (8035/8039/8040, incl. CMOS) forbid the four BUS-port instructions.
-            Some("8048" | "i8048" | "mcs48" | "mcs-48" | "8049" | "8050" | "80c48" | "80c49") => {
-                Ok(Self::I8048 { romless: false })
-            }
-            Some("8035" | "8039" | "8040" | "80c35" | "80c39" | "80c40") => {
-                Ok(Self::I8048 { romless: true })
-            }
-            Some("scmp" | "sc/mp" | "ins8060") => Ok(Self::Scmp),
-            Some("f8" | "3850" | "f3850" | "channelf" | "channel-f") => Ok(Self::F8),
-            Some("2650" | "s2650" | "signetics2650") => Ok(Self::S2650),
-            Some("tms7000" | "7000" | "tms70c00") => Ok(Self::Tms7000),
-            Some("pdp11" | "pdp-11" | "lsi11" | "lsi-11") => Ok(Self::Pdp11),
-            Some("tms9900" | "9900" | "ti99") => Ok(Self::Tms9900),
-            Some("cp1610" | "cp1600" | "cp-1600" | "intellivision" | "intv") => Ok(Self::Cp1610),
-            Some("z8000" | "z8002") => Ok(Self::Z8000),
+            Some("8048") => Ok(Self::I8048 { romless: false }),
+            Some("8035") => Ok(Self::I8048 { romless: true }),
+            Some("scmp") => Ok(Self::Scmp),
+            Some("f8") => Ok(Self::F8),
+            Some("2650") => Ok(Self::S2650),
+            Some("tms7000") => Ok(Self::Tms7000),
+            Some("pdp11") => Ok(Self::Pdp11),
+            Some("tms9900") => Ok(Self::Tms9900),
+            Some("cp1610") => Ok(Self::Cp1610),
+            Some("z8000") => Ok(Self::Z8000),
             Some("z8001") => Ok(Self::Z8001),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
             // explicit --cpu/--target wins.
@@ -119,12 +129,13 @@ impl Assembler {
             Some("pasmonext") => Ok(Self::Pasmo {
                 z80n: z80n.unwrap_or(true),
             }),
-            Some("sjasmplus" | "sjasm") => Ok(Self::Sjasmplus {
+            Some("sjasmplus") => Ok(Self::Sjasmplus {
                 z80n: z80n.unwrap_or(false),
             }),
-            Some(other) => Err(format!(
-                "unknown dialect `{other}` (try acme, ca65, pasmo, pasmonext, or sjasmplus)"
-            )),
+            // Unreachable: `canonical` already refused anything with no row,
+            // so this arm fires only if the table gains an entry that
+            // resolution does not handle — which a test catches first.
+            Some(other) => Err(format!("dialect `{other}` has no assembler wired up")),
             // No --dialect: a Z80 target implies pasmo syntax; otherwise 6502/acme.
             None => match z80n {
                 Some(z) => Ok(Self::Pasmo { z80n: z }),
@@ -402,6 +413,25 @@ fn run(args: &[String]) -> Result<String, String> {
     // filename. git and cargo both accept the word and the flags; so do we.
     if args[0] == "version" || args.iter().any(|a| a == "-V" || a == "--version") {
         return Ok(version());
+    }
+
+    // `dialects` prints the table `--dialect` resolves against, `--markdown`
+    // in the shape the CLI reference wants. The reference lives in another
+    // repo and had drifted — five dialects missing, and the ROM-less MCS-48
+    // parts described as aliases of the 8048 when they refuse instructions it
+    // accepts. Generating the page's table from here is what stops that
+    // happening again; see `../docs/cli.md`.
+    if args[0] == "dialects" {
+        // Straight to stdout, not through the summary: this is the command's
+        // *output*, and `dialects --markdown` exists to be redirected into the
+        // reference. The summary channel is stderr, which is right for a
+        // usage screen and wrong for something meant to be piped.
+        if args.iter().any(|a| a == "--markdown") {
+            print!("{}", asm198x::dialect_table::markdown());
+        } else {
+            println!("{}", dialect_help());
+        }
+        return Ok(String::new());
     }
 
     // Assembling is the default when no subcommand is given, so `asm198x
@@ -1059,20 +1089,35 @@ fn usage() -> String {
      format:      asm198x fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
      \x20            (canonical layout, comments + operand spelling preserved; Z80/8080/6800/1802/scmp/rgbasm/6809)\n\
      version:     asm198x --version (also -V, or `asm198x version`)\n\n\
-     dialects (syntax): acme (C64 6502; also `6502`), ca65 (NES), vasm (Amiga\n\
-     \x20                 68000), lwasm (6809), 65816 (ca65 native), huc6280\n\
-     \x20                 (PC Engine ca65; also `pce`), rgbasm (Game Boy SM83;\n\
-     \x20                 also `sm83`/`gb`), 8080 (Intel syntax), 6800\n\
-     \x20                 (Motorola syntax), 1802 (COSMAC), 8048 (MCS-48;\n\
-     \x20                 ROM-less kin `8035`/`8039`/`8040`), scmp (SC/MP),\n\
-     \x20                 f8 (Fairchild F8; also `3850`/`channelf`), 2650\n\
-     \x20                 (Signetics 2650), tms7000 (TI TMS7000), pasmo,\n\
-     \x20                 pasmonext, sjasmplus\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
-     \x20                 the dialect\n\n\
-     Assembles retro CPU source to a flat binary, or disassembles one back."
+     \x20                 the dialect. --cpu also names a chip directly when\n\
+     \x20                 --dialect is absent (`--cpu 6809` is lwasm syntax).\n\n"
         .to_string()
+        + &dialect_help()
+        + "\nAssembles retro CPU source to a flat binary, or disassembles one back."
+}
+
+/// The `--help` dialect list, wrapped, from the one table resolution uses.
+///
+/// It used to be prose, and had drifted: five dialects were missing and the
+/// ROM-less MCS-48 parts were folded into the 8048's entry. Rendering it means
+/// `--help` cannot say something `--dialect` does not do.
+fn dialect_help() -> String {
+    const INDENT: &str = "                   ";
+    let mut lines = vec![String::from("dialects (--dialect):")];
+    for entry in asm198x::dialect_table::DIALECTS {
+        let aliases = if entry.aliases.is_empty() {
+            String::new()
+        } else {
+            format!("; also {}", entry.aliases.join("/"))
+        };
+        lines.push(format!(
+            "{INDENT}{:<10} {}{}",
+            entry.name, entry.blurb, aliases
+        ));
+    }
+    lines.join("\n")
 }
 
 /// Name and version, as `asm198x 0.0.12`.
