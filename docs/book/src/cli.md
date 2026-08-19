@@ -183,8 +183,11 @@ the syntax and `--cpu` the target.
 
 ## Exit status and diagnostics
 
-`0` on success, non-zero on failure. Diagnostics are rustc-shaped: a severity, a
-message, a `(file, line, column)` span, and a stable code.
+`0` on success, non-zero on failure. A diagnostic carries a severity, a
+message, a `(file, line, column)` span and a stable code. The human form prints
+what it knows — `asm198x: file:line:col: error: message`, dropping the column
+where the parse did not record one — and the full record, code included, is on
+the `--message-format=json` path.
 
 **stdout carries output; stderr carries everything else.** `disasm` and `fmt`
 write their result to stdout, `asm` writes bytes to a file, and the summary line
