@@ -178,6 +178,12 @@ pub fn assemble_form(cpu: &str, dialect: &str, source: &str) -> Option<Result<Ve
         ("asl", "F8") => asm198x::assemble_f8(source),
         ("asl", "2650") => asm198x::assemble_2650(source),
         ("asl", "TMS7000") => asm198x::assemble_tms7000(source),
+        // Sweep CPUs: no per-form audit, so these appear only as sweep chunks.
+        ("asl", "PDP-11") => asm198x::assemble_pdp11(source),
+        ("asl", "TMS9900") => asm198x::assemble_tms9900(source),
+        ("asl", "CP1610") => asm198x::assemble_cp1610(source),
+        ("asl", "Z8000") => asm198x::assemble_z8000(source),
+        ("asl", "Z8001") => asm198x::assemble_z8001(source),
         _ => return None,
     };
     Some(ours(result))
@@ -340,13 +346,15 @@ pub fn replay_corpus(cpu: &str, corpus: &Corpus, report: &mut ReplayReport) {
                     // A fuzz case's source is a full listing, like a form's —
                     // the difference is how it was generated, not how it is
                     // assembled.
-                    Suite::Form | Suite::Fuzz => {
+                    // A fuzz case and a sweep chunk are both full listings,
+                    // like a form's. What differs between the three suites is
+                    // how the case was generated, never how it is checked.
+                    Suite::Form | Suite::Fuzz | Suite::SweepChunk => {
                         assemble_form(&verdict.cpu, &verdict.dialect, &key.source)
                     }
                     Suite::Probe => assemble_probe(&verdict.dialect, &key.source),
-                    // The sweep and curriculum suites record nothing yet; when
-                    // they do, they bring their own replay with them.
-                    Suite::SweepChunk | Suite::Curriculum => None,
+                    // Handled above — its outcome is a digest, not bytes.
+                    Suite::Curriculum => None,
                 };
                 let Some(ours) = ours else {
                     report.unreplayable += 1;
