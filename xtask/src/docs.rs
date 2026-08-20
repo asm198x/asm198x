@@ -30,6 +30,10 @@ const CLOSE: &str = "<!-- /generated -->";
 
 /// What a run of the generator found or did.
 pub struct Report {
+    /// Whole pages the generator owns that were written (or would be).
+    pub stale_pages: Vec<String>,
+    /// Generated pages considered.
+    pub pages: usize,
     /// Files whose generated blocks were rewritten (or would be, under
     /// `--check`).
     pub stale: Vec<String>,
@@ -55,9 +59,15 @@ pub fn run(repo: &Path, check: bool) -> Result<Report, String> {
     let src = book_src(repo);
     let mut report = Report {
         stale: Vec::new(),
+        stale_pages: Vec::new(),
+        pages: 0,
         scanned: 0,
         blocks: 0,
     };
+
+    // Whole pages first: the instruction reference is generated in full, and
+    // `SUMMARY.md` needs its chapter list before a block pass reads the book.
+    write_pages(repo, check, &mut report)?;
 
     let mut files: Vec<PathBuf> = std::fs::read_dir(&src)
         .map_err(|e| format!("cannot read {}: {e}", src.display()))?
@@ -89,6 +99,33 @@ pub fn run(repo: &Path, check: bool) -> Result<Report, String> {
     }
 
     Ok(report)
+}
+
+/// Write the pages the generator owns entirely, and the `SUMMARY.md` block
+/// that lists them.
+///
+/// These are not prose with generated data in them — they have no hand-written
+/// part at all, so they are compared whole rather than block by block.
+fn write_pages(repo: &Path, check: bool, report: &mut Report) -> Result<(), String> {
+    let src = book_src(repo);
+    for page in crate::instructions::pages() {
+        report.pages += 1;
+        let path = src.join(&page.path);
+        if let Some(parent) = path.parent()
+            && !check
+        {
+            std::fs::create_dir_all(parent).map_err(|e| format!("{}: {e}", parent.display()))?;
+        }
+        let current = std::fs::read_to_string(&path).unwrap_or_default();
+        if current == page.body {
+            continue;
+        }
+        report.stale_pages.push(page.path.clone());
+        if !check {
+            std::fs::write(&path, &page.body).map_err(|e| format!("{}: {e}", path.display()))?;
+        }
+    }
+    Ok(())
 }
 
 /// Rewrite every generated block in one file, returning the new text and how
@@ -134,6 +171,7 @@ fn regenerate(source: &str, path: &Path) -> Result<(String, usize), String> {
 fn generate(command: &str, path: &Path) -> Result<String, String> {
     match command {
         "asm198x dialects --markdown" => Ok(asm198x::dialect_table::markdown()),
+        "xtask instructions --summary" => Ok(crate::instructions::summary_lines()),
         other => Err(format!(
             "{}: no generator for `{other}`\n\
              \n\
