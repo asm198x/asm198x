@@ -124,6 +124,10 @@ This CPU encodes an instruction as an opcode **word** whose operand fields are b
 | SEN | `00B8` | `NoArg` | Set N |
 | SCC | `00BF` | `NoArg` | Set all condition codes |
 
+## Machines
+
+DEC PDP-11
+
 ## Provenance
 
 This specification was authored from the following, in the family's primary reference library:

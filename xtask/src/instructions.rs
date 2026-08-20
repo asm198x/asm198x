@@ -271,6 +271,7 @@ fn render_word_cpu(cpu: &WordCpu) -> String {
             cell(row.summary)
         );
     }
+    out.push_str(&machines(cpu.module));
     out.push_str(&provenance(cpu.module));
     out
 }
@@ -351,6 +352,7 @@ fn render_m68k() -> String {
             );
         }
     }
+    out.push_str(&machines("m68k"));
     out.push_str(&provenance("m68k"));
     out
 }
@@ -487,6 +489,7 @@ fn render_mos6809() -> String {
             );
         }
     }
+    out.push_str(&machines("mos6809"));
     out.push_str(&provenance("mos6809"));
     out
 }
@@ -732,6 +735,7 @@ fn render_z8000() -> String {
             cell(i.summary)
         );
     }
+    out.push_str(&machines("z8000"));
     out.push_str(&provenance("z8000"));
     out
 }
@@ -791,6 +795,31 @@ pub fn summary_lines() -> String {
     out.push_str("  - [Motorola 6809](instructions/mos6809.md)\n");
     out.push_str("  - [Zilog Z8000](instructions/z8000.md)\n");
     out
+}
+
+/// The machines that used one CPU, linked into the Code198x catalogue.
+///
+/// An instruction set on its own is an abstraction; this is the join back to
+/// the hardware people actually had. A machine the catalogue has no page for is
+/// named without a link — it has not stopped existing, and a link to a 404
+/// would be worse than plain text.
+fn machines(module: &str) -> String {
+    let machines = isa::machines::machines_for(module);
+    if machines.is_empty() {
+        return String::new();
+    }
+    let listed = machines
+        .iter()
+        .map(|m| {
+            if m.catalogued {
+                format!("[{}](https://code198x.com/{}/)", cell(m.name), m.slug)
+            } else {
+                cell(m.name)
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(", ");
+    format!("\n## Machines\n\n{listed}\n")
 }
 
 /// The provenance footer for one CPU's page.
@@ -969,6 +998,7 @@ fn render_cpu(cpu: &Cpu) -> String {
             );
         }
     }
+    out.push_str(&machines(cpu.module));
     out.push_str(&provenance(cpu.module));
     out
 }
