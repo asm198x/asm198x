@@ -31,4 +31,5 @@
   - [GI CP1610](instructions/cp1610.md)
   - [Motorola 68000](instructions/m68k.md)
   - [Motorola 6809](instructions/mos6809.md)
+  - [Zilog Z8000](instructions/z8000.md)
 <!-- /generated -->

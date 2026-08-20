@@ -498,6 +498,233 @@ fn opcode_or_blank(opcode: &[u8]) -> String {
     )
 }
 
+/// The Z8000, whose spec is thirteen tables — one per instruction family, each
+/// with its own element type.
+///
+/// So the page is thirteen tables too. That is not a workaround: the families
+/// are the CPU's own distinction, and each has fields the others do not — a
+/// block move has a shape and a control nibble, an I/O instruction has a
+/// direction. Flattening them into one table would mean a row of mostly empty
+/// columns and would lose exactly the information a reader came for.
+///
+/// All thirteen types share `mnemonic` and `summary`, so every row is
+/// described. The columns beyond those are whatever the family actually has.
+fn render_z8000() -> String {
+    use isa::z8000;
+
+    let mut out = String::from("# Zilog Z8000\n\n");
+    out.push_str(&generated_note("z8000"));
+
+    let total = z8000::CONTROL.len()
+        + z8000::MONO.len()
+        + z8000::STACK.len()
+        + z8000::SHIFTS.len()
+        + z8000::EXTENDS.len()
+        + z8000::BITS.len()
+        + z8000::MULDIV.len()
+        + z8000::BLOCK.len()
+        + z8000::SIMPLE_IO.len()
+        + z8000::BLOCK_IO.len()
+        + z8000::CONTROLS.len()
+        + z8000::MISC.len()
+        + z8000::INSTRUCTIONS.len();
+
+    let _ = write!(
+        out,
+        "\n{total} instructions, words big-endian. Generated from \
+         [`crates/isa/src/z8000.rs`](https://github.com/asm198x/asm198x/blob/main/crates/isa/src/z8000.rs).\n\n\
+         The Z8000 is specified family by family, because the families genuinely \
+         differ: a block move carries a shape and a control nibble, an I/O \
+         instruction carries a direction, a shift carries whether its count is a \
+         following word. The tables below keep that structure, and each shows the \
+         columns its family actually has.\n\n\
+         Sizes are the operand widths a mnemonic assembles at. `Rn` is a word \
+         register, `@Rn` an indirect one, `addr` a direct address and `addr(Rn)` an \
+         indexed one.\n"
+    );
+
+    // --- the dyadic family, the one most source spends its time in ---------
+    out.push_str(
+        "\n## Arithmetic, logic and load\n\n\
+         The dyadic family: a destination register and a source in any of the \
+         addressing modes listed.\n\n\
+         | Mnemonic | Base | Size | Source modes | Summary |\n|---|---|---|---|---|\n",
+    );
+    for i in z8000::INSTRUCTIONS.iter().filter(|i| !i.store) {
+        let _ = writeln!(
+            out,
+            "| {} | `{:02X}` | {} | {} | {} |",
+            i.mnemonic,
+            i.base6,
+            i.size.suffix(),
+            cell(&z8000::mode_names(i.modes)),
+            cell(i.summary)
+        );
+    }
+
+    out.push_str(
+        "\n## Program control\n\n| Mnemonic | Base | Shape | Summary |\n|---|---|---|---|\n",
+    );
+    for i in z8000::CONTROL {
+        let _ = writeln!(
+            out,
+            "| {} | `{:04X}` | {} | {} |",
+            i.mnemonic,
+            i.base,
+            cell(i.kind.describe()),
+            cell(i.summary)
+        );
+    }
+
+    out.push_str(
+        "\n## Single-operand\n\n| Mnemonic | Base | Sub-op | Size | Summary |\n|---|---|---|---|---|\n",
+    );
+    for i in z8000::MONO {
+        let _ = writeln!(
+            out,
+            "| {} | `{:02X}` | `{:X}` | {} | {} |",
+            i.mnemonic,
+            i.base6,
+            i.subop,
+            i.size.suffix(),
+            cell(i.summary)
+        );
+    }
+
+    out.push_str("\n## Stack\n\n| Mnemonic | Base | Size | Summary |\n|---|---|---|---|\n");
+    for i in z8000::STACK {
+        let _ = writeln!(
+            out,
+            "| {} | `{:02X}` | {} | {} |",
+            i.mnemonic,
+            i.base6,
+            i.size.suffix(),
+            cell(i.summary)
+        );
+    }
+
+    out.push_str(
+        "\n## Shift and rotate\n\n| Mnemonic | Base | Size | Count | Summary |\n|---|---|---|---|---|\n",
+    );
+    for i in z8000::SHIFTS {
+        let _ = writeln!(
+            out,
+            "| {} | `{:02X}` | {} | {} | {} |",
+            i.mnemonic,
+            i.base6,
+            i.size.suffix(),
+            cell(i.kind.describe()),
+            cell(i.summary)
+        );
+    }
+
+    out.push_str("\n## Sign extend\n\n| Mnemonic | Sub-op | Size | Summary |\n|---|---|---|---|\n");
+    for i in z8000::EXTENDS {
+        let _ = writeln!(
+            out,
+            "| {} | `{:X}` | {} | {} |",
+            i.mnemonic,
+            i.subop,
+            i.size.suffix(),
+            cell(i.summary)
+        );
+    }
+
+    out.push_str("\n## Bit\n\n| Mnemonic | Base | Size | Summary |\n|---|---|---|---|\n");
+    for i in z8000::BITS {
+        let _ = writeln!(
+            out,
+            "| {} | `{:02X}` | {} | {} |",
+            i.mnemonic,
+            i.base6,
+            i.size.suffix(),
+            cell(i.summary)
+        );
+    }
+
+    out.push_str(
+        "\n## Multiply and divide\n\n| Mnemonic | Base | Destination | Source | Summary |\n|---|---|---|---|---|\n",
+    );
+    for i in z8000::MULDIV {
+        let _ = writeln!(
+            out,
+            "| {} | `{:02X}` | {} | {} | {} |",
+            i.mnemonic,
+            i.base6,
+            i.dest.suffix(),
+            i.src.suffix(),
+            cell(i.summary)
+        );
+    }
+
+    out.push_str(
+        "\n## Block move and compare\n\n| Mnemonic | Base | Size | Operands | Summary |\n|---|---|---|---|---|\n",
+    );
+    for i in z8000::BLOCK {
+        let _ = writeln!(
+            out,
+            "| {} | `{:02X}` | {} | {} | {} |",
+            i.mnemonic,
+            i.base6,
+            i.size.suffix(),
+            cell(i.shape.describe()),
+            cell(i.summary)
+        );
+    }
+
+    out.push_str(
+        "\n## Input and output\n\n| Mnemonic | Direction | Size | Summary |\n|---|---|---|---|\n",
+    );
+    for i in z8000::SIMPLE_IO {
+        let _ = writeln!(
+            out,
+            "| {} | {} | {} | {} |",
+            i.mnemonic,
+            if i.input { "in" } else { "out" },
+            i.size.suffix(),
+            cell(i.summary)
+        );
+    }
+
+    out.push_str("\n## Block input and output\n\n| Mnemonic | Size | Summary |\n|---|---|---|\n");
+    for i in z8000::BLOCK_IO {
+        let _ = writeln!(
+            out,
+            "| {} | {} | {} |",
+            i.mnemonic,
+            i.size.suffix(),
+            cell(i.summary)
+        );
+    }
+
+    out.push_str("\n## CPU control\n\n| Mnemonic | Operands | Summary |\n|---|---|---|\n");
+    for i in z8000::CONTROLS {
+        let _ = writeln!(
+            out,
+            "| {} | {} | {} |",
+            i.mnemonic,
+            cell(i.kind.describe()),
+            cell(i.summary)
+        );
+    }
+
+    out.push_str(
+        "\n## Other\n\n| Mnemonic | Top | Size | Operands | Summary |\n|---|---|---|---|---|\n",
+    );
+    for i in z8000::MISC {
+        let _ = writeln!(
+            out,
+            "| {} | `{:02X}` | {} | {} | {} |",
+            i.mnemonic,
+            i.top,
+            i.size.suffix(),
+            cell(i.kind.describe()),
+            cell(i.summary)
+        );
+    }
+    out
+}
+
 /// A page the generator owns entirely: path under the book's `src`, and its
 /// content.
 pub struct Page {
@@ -529,6 +756,10 @@ pub fn pages() -> Vec<Page> {
         body: render_mos6809(),
     });
     out.push(Page {
+        path: "instructions/z8000.md".to_string(),
+        body: render_z8000(),
+    });
+    out.push(Page {
         path: "instructions.md".to_string(),
         body: render_index(&cpus, &word_cpus()),
     });
@@ -547,6 +778,7 @@ pub fn summary_lines() -> String {
     }
     out.push_str("  - [Motorola 68000](instructions/m68k.md)\n");
     out.push_str("  - [Motorola 6809](instructions/mos6809.md)\n");
+    out.push_str("  - [Zilog Z8000](instructions/z8000.md)\n");
     out
 }
 
@@ -608,19 +840,13 @@ fn render_index(cpus: &[Cpu], word: &[WordCpu]) -> String {
     }
 
     out.push_str(
-        "\n[Motorola 68000](instructions/m68k.md) and [Motorola 6809](instructions/mos6809.md)\n\
-         each have a page of their own shape. The 68000 packs operand fields into the\n\
-         opcode word, so its forms give a base word rather than a byte count; the 6809\n\
-         groups by operand shape, because its indexed mode computes its own length\n\
-         from a postbyte.\n\n\
-         ## Not generated\n\n\
-         **Zilog Z8000** is the one CPU with no page here. Its specification is\n\
-         thirteen separate tables with thirteen element types, one per instruction\n\
-         family, rather than one list — so rendering it means thirteen renderers, or\n\
-         reshaping the spec first. The second is the better question to answer, and it\n\
-         is a question about the specification rather than about documentation. The\n\
-         Z8000 assembles and disassembles normally; only the reference table is\n\
-         missing.\n\n\
+        "\n[Motorola 68000](instructions/m68k.md), [Motorola 6809](instructions/mos6809.md)\n\
+         and [Zilog Z8000](instructions/z8000.md) each have a page of their own shape:\n\
+         the 68000 packs operand fields into the opcode word, so its forms give a base\n\
+         word rather than a byte count; the 6809 groups by operand shape, because its\n\
+         indexed mode computes its own length from a postbyte; and the Z8000 is\n\
+         specified family by family, because its families genuinely differ.\n\n\
+         Every CPU the assembler has a specification for is documented here.\n\n\
          ## Provenance\n\n\
          These specs are authored from datasheets in the family's primary reference\n\
          library, not extracted from an emulator's decode loop. That provenance is\n\
