@@ -109,8 +109,10 @@ Six items. Two are substantial; four are small.
      parallel work.
    - The docs-site plan's **v1 core** — R1 instruction references generated from
      `isa` with provenance links into the umbrella `reference/` library, R2 every
-     sample assembled by the real binary in CI, R3 mdBook plus the House198x Vale
-     lint promoted to a CI gate — in scope while it stays cheap. It is unblocked
+     sample assembled by the real binary in CI, R3's framework plus the House198x Vale
+     lint promoted to a CI gate — the framework is now the site itself, per
+     [`one-documentation-surface.md`](one-documentation-surface.md) (2026-08-20);
+     mdBook is withdrawn — in scope while it stays cheap. It is unblocked
      today per [`roadmap-sequencing.md`](roadmap-sequencing.md), and it is where
      the generated matrices land. Its later slots stay out.
 
