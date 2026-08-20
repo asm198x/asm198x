@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.14](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.13...asm198x-v0.0.14) - 2026-08-20
+
+### Added
+
+- *(docs)* assemble every book sample with the real binary (#61 R2) ([#134](https://github.com/asm198x/asm198x/pull/134))
+
 ## [0.0.13](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.12...asm198x-v0.0.13) - 2026-08-19
 
 ### Added
