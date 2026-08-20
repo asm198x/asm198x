@@ -346,6 +346,158 @@ fn render_m68k() -> String {
     out
 }
 
+/// The 6809, whose spec is organised by *operand shape* rather than by form.
+///
+/// An instruction is a mnemonic and a [`Kind`](isa::mos6809::Kind) — inherent,
+/// branch, register/memory, transfer or stack — and the kind carries the
+/// opcodes for whichever modes that shape allows. So the page groups by shape,
+/// which is the distinction the spec actually makes, instead of imposing a
+/// uniform table that would leave most cells empty.
+fn render_mos6809() -> String {
+    use isa::mos6809::Kind;
+
+    let mut out = String::from("# Motorola 6809\n\n");
+    out.push_str(&generated_note("mos6809"));
+    let _ = write!(
+        out,
+        "\n{} mnemonics, operands big-endian. Generated from \
+         [`crates/isa/src/mos6809.rs`](https://github.com/asm198x/asm198x/blob/main/crates/isa/src/mos6809.rs).\n\n\
+         The 6809's indexed mode computes its own length: a postbyte selects the \
+         indexing form, and how many bytes follow depends on which form. So the \
+         tables below give the opcode for each addressing mode an instruction \
+         supports, and the operand that follows is whatever the mode calls for.\n\n\
+         Instructions are grouped by operand shape, which is the distinction this \
+         CPU's specification draws.\n",
+        isa::mos6809::SET.len(),
+    );
+
+    // Register/memory first: it is most of the set, and the four-mode row is
+    // what a reader is usually looking for.
+    out.push_str(
+        "\n## Register and memory\n\n\
+         Each supports some subset of the four standard modes; a blank cell means \
+         the mode does not exist for that instruction. **Width** is the immediate's \
+         size in bytes.\n\n\
+         | Mnemonic | Immediate | Direct | Indexed | Extended | Width | Summary |\n\
+         |---|---|---|---|---|---|---|\n",
+    );
+    for insn in isa::mos6809::SET {
+        if let Kind::Mem {
+            imm,
+            direct,
+            indexed,
+            extended,
+            width,
+        } = &insn.kind
+        {
+            let _ = writeln!(
+                out,
+                "| {} | {} | {} | {} | {} | {} | {} |",
+                insn.mnemonic,
+                opcode_or_blank(imm),
+                opcode_or_blank(direct),
+                opcode_or_blank(indexed),
+                opcode_or_blank(extended),
+                width,
+                cell(isa::mos6809::summary(insn.mnemonic)),
+            );
+        }
+    }
+
+    out.push_str(
+        "\n## Inherent\n\n\
+         No operand — the opcode is the whole instruction.\n\n\
+         | Mnemonic | Opcode | Summary |\n|---|---|---|\n",
+    );
+    for insn in isa::mos6809::SET {
+        if let Kind::Inherent(opcode) = &insn.kind {
+            let _ = writeln!(
+                out,
+                "| {} | {} | {} |",
+                insn.mnemonic,
+                opcode_or_blank(opcode),
+                cell(isa::mos6809::summary(insn.mnemonic)),
+            );
+        }
+    }
+
+    out.push_str(
+        "\n## Branches\n\n\
+         Every branch has a short form with an 8-bit displacement and a long form \
+         with a 16-bit one. The assembler picks by range unless the source forces \
+         a spelling.\n\n\
+         | Mnemonic | Short | Long | Summary |\n|---|---|---|---|\n",
+    );
+    for insn in isa::mos6809::SET {
+        if let Kind::Branch { short, long } = &insn.kind {
+            let _ = writeln!(
+                out,
+                "| {} | {} | {} | {} |",
+                insn.mnemonic,
+                opcode_or_blank(short),
+                opcode_or_blank(long),
+                cell(isa::mos6809::summary(insn.mnemonic)),
+            );
+        }
+    }
+
+    out.push_str(
+        "\n## Transfer and exchange\n\n\
+         The opcode is followed by a postbyte packing two 4-bit register codes, \
+         source in the high nibble. Both registers must be the same width.\n\n\
+         | Mnemonic | Opcode | Summary |\n|---|---|---|\n",
+    );
+    for insn in isa::mos6809::SET {
+        if let Kind::Transfer(opcode) = &insn.kind {
+            let _ = writeln!(
+                out,
+                "| {} | `{:02X}` | {} |",
+                insn.mnemonic,
+                opcode,
+                cell(isa::mos6809::summary(insn.mnemonic)),
+            );
+        }
+    }
+
+    out.push_str(
+        "\n## Stack\n\n\
+         The opcode is followed by a one-byte register mask — `PC U/S Y X DP B A \
+         CC`, high bit first. Registers push in the order CC, A, B, DP, X, Y, U/S, \
+         PC and pull in reverse.\n\n\
+         | Mnemonic | Opcode | Stack | Summary |\n|---|---|---|---|\n",
+    );
+    for insn in isa::mos6809::SET {
+        if let Kind::Stack { opcode, u_stack } = &insn.kind {
+            let _ = writeln!(
+                out,
+                "| {} | `{:02X}` | {} | {} |",
+                insn.mnemonic,
+                opcode,
+                if *u_stack { "U" } else { "S" },
+                cell(isa::mos6809::summary(insn.mnemonic)),
+            );
+        }
+    }
+    out
+}
+
+/// An opcode sequence as hex, or a blank cell — an empty slice marks a mode the
+/// instruction does not have, which is a real fact about it and not missing
+/// data.
+fn opcode_or_blank(opcode: &[u8]) -> String {
+    if opcode.is_empty() {
+        return String::new();
+    }
+    format!(
+        "`{}`",
+        opcode
+            .iter()
+            .map(|b| format!("{b:02X}"))
+            .collect::<Vec<_>>()
+            .join(" ")
+    )
+}
+
 /// A page the generator owns entirely: path under the book's `src`, and its
 /// content.
 pub struct Page {
@@ -373,6 +525,10 @@ pub fn pages() -> Vec<Page> {
         body: render_m68k(),
     });
     out.push(Page {
+        path: "instructions/mos6809.md".to_string(),
+        body: render_mos6809(),
+    });
+    out.push(Page {
         path: "instructions.md".to_string(),
         body: render_index(&cpus, &word_cpus()),
     });
@@ -390,6 +546,7 @@ pub fn summary_lines() -> String {
         let _ = writeln!(out, "  - [{}](instructions/{}.md)", cpu.name, cpu.slug);
     }
     out.push_str("  - [Motorola 68000](instructions/m68k.md)\n");
+    out.push_str("  - [Motorola 6809](instructions/mos6809.md)\n");
     out
 }
 
@@ -451,19 +608,19 @@ fn render_index(cpus: &[Cpu], word: &[WordCpu]) -> String {
     }
 
     out.push_str(
-        "\n[Motorola 68000](instructions/m68k.md) has a page of its own shape again:\n\
-         it packs operand fields into the opcode word, so its forms give a base word\n\
-         and their operands rather than a byte count.\n\n\
+        "\n[Motorola 68000](instructions/m68k.md) and [Motorola 6809](instructions/mos6809.md)\n\
+         each have a page of their own shape. The 68000 packs operand fields into the\n\
+         opcode word, so its forms give a base word rather than a byte count; the 6809\n\
+         groups by operand shape, because its indexed mode computes its own length\n\
+         from a postbyte.\n\n\
          ## Not generated\n\n\
-         Two CPUs have no page here rather than a misleading one. Both assemble and\n\
-         disassemble normally; only the *reference table* is missing.\n\n\
-         **Zilog Z8000** — its spec is thirteen separate tables with thirteen element\n\
-         types, one per instruction family, rather than one list. Rendering it means\n\
-         thirteen renderers or a reshaped spec, and the second is the better question\n\
-         to answer first.\n\n\
-         **Motorola 6809** — computed operands: its postbyte selects an indexing mode\n\
-         whose length depends on the mode chosen. Its spec also carries no\n\
-         per-instruction summaries, so a table would be opcodes without prose.\n\n\
+         **Zilog Z8000** is the one CPU with no page here. Its specification is\n\
+         thirteen separate tables with thirteen element types, one per instruction\n\
+         family, rather than one list — so rendering it means thirteen renderers, or\n\
+         reshaping the spec first. The second is the better question to answer, and it\n\
+         is a question about the specification rather than about documentation. The\n\
+         Z8000 assembles and disassembles normally; only the reference table is\n\
+         missing.\n\n\
          ## Provenance\n\n\
          These specs are authored from datasheets in the family's primary reference\n\
          library, not extracted from an emulator's decode loop. That provenance is\n\

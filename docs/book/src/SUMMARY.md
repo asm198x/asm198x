@@ -30,4 +30,5 @@
   - [DEC PDP-11](instructions/pdp11.md)
   - [GI CP1610](instructions/cp1610.md)
   - [Motorola 68000](instructions/m68k.md)
+  - [Motorola 6809](instructions/mos6809.md)
 <!-- /generated -->
