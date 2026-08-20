@@ -11,6 +11,7 @@ mod docs;
 mod grow;
 mod instructions;
 mod ledger;
+mod machines;
 mod supersede;
 
 use std::path::PathBuf;
@@ -51,6 +52,30 @@ fn main() -> ExitCode {
             }
         },
         Some("docs") => run_docs(&args[1..]),
+        Some("machines") => match machines::check(&repo()) {
+            Ok(differences) if differences.is_empty() => {
+                println!("the copied CPU→machine mapping agrees with the library");
+                ExitCode::SUCCESS
+            }
+            Ok(differences) => {
+                eprintln!(
+                    "{} CPU(s) disagree with the reference library:\n  {}\n\n\
+                     The library is the source; update `isa::machines::MACHINES` \
+                     to match it.\n\n\
+                     This reads the library's working tree, so check which \
+                     branch it is on before editing: a wholesale slug \
+                     difference usually means the checkout predates a rename \
+                     rather than that the copy is wrong.",
+                    differences.len(),
+                    differences.join("\n  ")
+                );
+                ExitCode::FAILURE
+            }
+            Err(e) => {
+                eprintln!("xtask machines: {e}");
+                ExitCode::FAILURE
+            }
+        },
         Some("ledger") => {
             print!("{}", ledger::render(&repo()));
             ExitCode::SUCCESS
@@ -76,7 +101,9 @@ fn usage() -> String {
      \x20 grow [filter]       arbitrate what is not yet recorded (needs the tools)\n\
      \x20 supersede <tag> <why>  retire the verdicts carrying a divergence tag\n\
      \x20 docs                regenerate the book's generated blocks\n\
-     \x20 docs --check        fail if any generated block is stale\n"
+     \x20 docs --check        fail if any generated block is stale\n\
+     \x20 machines            check the copied CPU→machine mapping against\n\
+     \x20                     the umbrella reference library (needs it present)\n"
         .to_string()
 }
 

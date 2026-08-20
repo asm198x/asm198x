@@ -202,7 +202,14 @@ fn word_cpus() -> Vec<WordCpu> {
 /// silently becomes several mangled cells rather than failing, which is why
 /// there is a test on the rendered shape and not just on the build succeeding.
 fn cell(text: &str) -> String {
-    text.replace('|', "\\|")
+    // `<` is the dangerous one. Markdown passes inline HTML straight through,
+    // so a placeholder like `<ea>` is not text — it is an opening tag, and the
+    // renderer swallows it and everything up to a matching close. The 68000's
+    // operand column rendered *empty* for all 78 effective-address forms this
+    // way, and nothing looked wrong in the markdown.
+    text.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('|', "\\|")
 }
 
 /// The variant's name, via `Debug` — the specs derive it, and a hand-written
@@ -264,6 +271,7 @@ fn render_word_cpu(cpu: &WordCpu) -> String {
             cell(row.summary)
         );
     }
+    out.push_str(&machines(cpu.module));
     out.push_str(&provenance(cpu.module));
     out
 }
@@ -344,6 +352,7 @@ fn render_m68k() -> String {
             );
         }
     }
+    out.push_str(&machines("m68k"));
     out.push_str(&provenance("m68k"));
     out
 }
@@ -480,6 +489,7 @@ fn render_mos6809() -> String {
             );
         }
     }
+    out.push_str(&machines("mos6809"));
     out.push_str(&provenance("mos6809"));
     out
 }
@@ -725,6 +735,7 @@ fn render_z8000() -> String {
             cell(i.summary)
         );
     }
+    out.push_str(&machines("z8000"));
     out.push_str(&provenance("z8000"));
     out
 }
@@ -784,6 +795,31 @@ pub fn summary_lines() -> String {
     out.push_str("  - [Motorola 6809](instructions/mos6809.md)\n");
     out.push_str("  - [Zilog Z8000](instructions/z8000.md)\n");
     out
+}
+
+/// The machines that used one CPU, linked into the Code198x catalogue.
+///
+/// An instruction set on its own is an abstraction; this is the join back to
+/// the hardware people actually had. A machine the catalogue has no page for is
+/// named without a link — it has not stopped existing, and a link to a 404
+/// would be worse than plain text.
+fn machines(module: &str) -> String {
+    let machines = isa::machines::machines_for(module);
+    if machines.is_empty() {
+        return String::new();
+    }
+    let listed = machines
+        .iter()
+        .map(|m| {
+            if m.catalogued {
+                format!("[{}](https://code198x.com/{}/)", cell(m.name), m.slug)
+            } else {
+                cell(m.name)
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(", ");
+    format!("\n## Machines\n\n{listed}\n")
 }
 
 /// The provenance footer for one CPU's page.
@@ -962,6 +998,7 @@ fn render_cpu(cpu: &Cpu) -> String {
             );
         }
     }
+    out.push_str(&machines(cpu.module));
     out.push_str(&provenance(cpu.module));
     out
 }
@@ -1076,6 +1113,30 @@ mod tests {
                         n + 1
                     ),
                 }
+            }
+        }
+    }
+
+    /// A table cell must not carry a raw `<`.
+    ///
+    /// Markdown treats inline HTML as HTML. `<ea>` in the 68000's operand
+    /// column was parsed as a tag and rendered as nothing at all, so the
+    /// column was blank on the published page while the markdown source read
+    /// perfectly. Escaping happens in `cell`; this holds the escaping.
+    #[test]
+    fn no_generated_table_cell_carries_a_raw_angle_bracket() {
+        for page in pages() {
+            for (n, line) in page.body.lines().enumerate() {
+                if !line.starts_with('|') {
+                    continue;
+                }
+                assert!(
+                    !line.contains('<'),
+                    "{}:{}: table row carries a raw `<`, which markdown reads \
+                     as an HTML tag and drops:\n  {line}",
+                    page.path,
+                    n + 1
+                );
             }
         }
     }
