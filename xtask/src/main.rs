@@ -9,6 +9,7 @@
 mod coverage;
 mod docs;
 mod grow;
+mod instructions;
 mod ledger;
 mod supersede;
 
@@ -89,29 +90,36 @@ fn run_docs(args: &[String]) -> ExitCode {
         }
     };
 
-    if report.stale.is_empty() {
+    if report.stale.is_empty() && report.stale_pages.is_empty() {
         println!(
-            "{} generated block(s) across {} page(s) are current",
-            report.blocks, report.scanned
+            "{} generated block(s) across {} page(s), and {} generated page(s), are current",
+            report.blocks, report.scanned, report.pages
         );
         return ExitCode::SUCCESS;
     }
 
+    let stale: Vec<String> = report
+        .stale_pages
+        .iter()
+        .cloned()
+        .chain(report.stale.iter().cloned())
+        .collect();
+
     if check {
         eprintln!(
-            "{} page(s) have a stale generated block:\n  {}\n\n\
+            "{} page(s) are stale:\n  {}\n\n\
              The book carries generated data next to prose, and this one no \
              longer matches what the binary produces. Regenerate with `cargo \
              xtask docs` and commit the result — do not edit inside the \
              markers, the next run overwrites it.",
-            report.stale.len(),
-            report.stale.join("\n  ")
+            stale.len(),
+            stale.join("\n  ")
         );
         return ExitCode::FAILURE;
     }
 
-    println!("regenerated {} page(s):", report.stale.len());
-    for page in &report.stale {
+    println!("regenerated {} page(s):", stale.len());
+    for page in &stale {
         println!("  {page}");
     }
     ExitCode::SUCCESS
