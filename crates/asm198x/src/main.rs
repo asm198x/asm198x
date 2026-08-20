@@ -1125,8 +1125,13 @@ fn dialect_help() -> String {
 /// Read from the crate version at compile time rather than a string kept by
 /// hand, so it reports what was actually built. A version a binary states about
 /// itself is only worth having if it cannot drift from the binary.
+///
+/// The `v` prefix is house style across every surface that shows a version —
+/// the site, the docs, the release tags (`asm198x-v0.0.14`) — and the binary
+/// matches them so a reader never has to reconcile two spellings of the same
+/// build.
 fn version() -> String {
-    format!("{} {}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
+    format!("{} v{}", env!("CARGO_PKG_NAME"), env!("CARGO_PKG_VERSION"))
 }
 
 /// The `--message-format` mode: human summary (default) or machine-consumable
@@ -1291,7 +1296,7 @@ mod tests {
     /// through to the input-file argument and fail with "cannot read version".
     #[test]
     fn every_version_spelling_reports_the_crate_version() {
-        let expected = format!("asm198x {}", env!("CARGO_PKG_VERSION"));
+        let expected = format!("asm198x v{}", env!("CARGO_PKG_VERSION"));
         for spelling in ["--version", "-V", "version"] {
             let args = vec![spelling.to_string()];
             assert_eq!(run(&args).as_deref(), Ok(expected.as_str()), "{spelling}");

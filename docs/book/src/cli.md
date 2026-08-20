@@ -115,8 +115,9 @@ goes to stderr.
 asm198x --version        # also -V, or `asm198x version`
 ```
 
-Prints `asm198x <version>`. The version is compiled in from the crate version,
-so it names the build you are holding.
+Prints `asm198x v<version>` — the same `v`-prefixed spelling the site, the
+docs and the release tags use. The version is compiled in from the crate
+version, so it names the build you are holding.
 
 Added after v0.0.12. Earlier binaries answer none of the three spellings, so if
 `asm198x --version` reports an unknown flag, you are on v0.0.12 or older.
