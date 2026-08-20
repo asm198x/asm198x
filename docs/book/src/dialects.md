@@ -1,9 +1,8 @@
 # Dialects
 
-`--dialect` selects the **source syntax**, not the CPU. asm198x's identity claim
-is that real-world source for a machine assembles unchanged, so each front-end
-matches an existing assembler rather than inventing a house syntax. Pick the
-assembler the source was written for, not the machine it runs on.
+`--dialect` selects the **source syntax**, not the CPU. Each front-end matches
+an existing assembler, so pick the assembler the source was written for, not the
+machine it runs on.
 
 Where a dialect serves more than one CPU, `--cpu` picks the target — see
 [Targets](cli.md#targets).
@@ -37,15 +36,14 @@ Where a dialect serves more than one CPU, `--cpu` picks the target — see
 | `z8001` | Zilog Z8001, segmented |  |
 <!-- /generated -->
 
-Regenerate this table with `cargo xtask docs`. It comes from the same list
-`--dialect` resolves against, and the build fails if the two disagree, so a
-dialect cannot exist here without working or work without appearing here.
+This table comes from the same list `--dialect` resolves against, so it always
+matches what the assembler accepts.
 
 ## Picking one
 
-The dialect names the **assembler**, which is usually obvious from the source
-itself — `!macro` and `!byte` are ACME, `.macro` and `.segment` are ca65, a
-`\1` inside a macro body is lwasm or vasm.
+The dialect names the **assembler**, which the source itself usually shows:
+`!macro` and `!byte` are ACME, `.macro` and `.segment` are ca65, a `\1` inside a
+macro body is lwasm or vasm.
 
 Where a machine has a conventional choice:
 

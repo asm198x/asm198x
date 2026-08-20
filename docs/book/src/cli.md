@@ -4,7 +4,8 @@
 reformats source in place. One binary, no runtime dependencies, the same
 interface on macOS, Linux and Windows.
 
-This page is the reference. `asm198x --help` is the same surface in one screen.
+This page is the reference. `asm198x --help` gives the same information in one
+screen.
 
 ## Installing
 
@@ -19,8 +20,8 @@ brew install asm198x/tap/asm198x
 
 Homebrew asks you to trust a third-party formula the first time. Approving
 `asm198x/tap/asm198x` trusts that one formula; `brew trust --tap asm198x/tap`
-would trust everything the tap ever publishes, which is the broader promise —
-prefer the formula.
+would trust everything the tap publishes, now and in future. Prefer the
+formula.
 
 ```sh
 # macOS / Linux
@@ -49,8 +50,8 @@ asm198x [asm|disasm|fmt] [options] <input>
 `dialects` and `version` are queries rather than operations: they take no input
 and answer immediately.
 
-**Assembling is the default**, so a bare invocation assembles and `asm` is
-merely the explicit spelling:
+**Assembling is the default**, so a bare invocation assembles and `asm` is the
+explicit spelling:
 
 ```sh
 asm198x prog.asm -o prog.bin           # assemble
@@ -115,8 +116,7 @@ asm198x --version        # also -V, or `asm198x version`
 ```
 
 Prints `asm198x <version>`. The version is compiled in from the crate version,
-so it names the build you are actually holding rather than a string someone
-remembered to update.
+so it names the build you are holding.
 
 Added after v0.0.12. Earlier binaries answer none of the three spellings, so if
 `asm198x --version` reports an unknown flag, you are on v0.0.12 or older.
@@ -161,9 +161,8 @@ at v1.
 
 ## Dialects
 
-`--dialect` selects the **source syntax**, not the CPU. Real-world source for a
-machine should assemble unchanged, so each front-end matches an existing
-assembler rather than inventing a house syntax.
+`--dialect` selects the **source syntax**, not the CPU. Each front-end matches
+an existing assembler, so pick the assembler the source was written for.
 
 The full table — every dialect, what its syntax is for, and every spelling
 accepted — is on its own page: [Dialects](dialects.md). It is generated from the
@@ -191,10 +190,8 @@ the `--message-format=json` path.
 
 **stdout carries output; stderr carries everything else.** `disasm` and `fmt`
 write their result to stdout, `asm` writes bytes to a file, and the summary line
-and diagnostics go to stderr — so a pipeline gets the artifact and nothing else.
-The exception is `--message-format=json`, which puts its machine-readable
-payload on stdout by design.
+and diagnostics go to stderr, so a pipeline gets the artifact and nothing else.
 
-`--message-format=json` puts a machine-readable result on stdout — bytes,
-symbols and the full diagnostic list — for a build script or an editor. The
-human form stays on stderr.
+`--message-format=json` is the exception: it puts a machine-readable result on
+stdout — bytes, symbols and the full diagnostic list — for a build script or an
+editor. The human form stays on stderr.

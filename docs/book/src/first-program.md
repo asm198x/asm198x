@@ -1,8 +1,7 @@
 # A first program
 
-Two complete programs, one per machine family. Both assemble as written — every
-sample on this page is assembled by the real `asm198x` binary in CI, so if one
-had stopped working you would be reading a build failure instead of this page.
+Two complete programs, one per machine family. CI assembles every sample on
+this page with the real `asm198x` binary, so they assemble as written.
 
 ## Commodore 64, ACME syntax
 
@@ -91,19 +90,13 @@ and the column the value starts at:
 asm198x: fill.a:2:13: error: value 4660 does not fit in a byte
 ```
 
-That sample is checked in the *other* direction: CI asserts it is still refused,
-**and** that the complaint still says what this page quotes. An example of a
-failure that quietly started working would be as wrong as one that stopped, and
-a quoted diagnostic that drifted would be wrong in a way that is harder to
-notice.
-
 The address is `$c000`, so `lda #$1234` is not ambiguous — it is a byte-sized
-instruction given a word. Dropping the `#` makes it `lda $1234`, which is a
-perfectly good absolute load from address `$1234`.
+instruction given a word. Dropping the `#` makes it `lda $1234`, which is an
+absolute load from address `$1234`.
 
 ## Which dialect?
 
 `--dialect` names the **assembler**, not the machine — see
 [Dialects](dialects.md) for the full table and the conventional choice per
 machine. If you have existing source, the answer is whichever assembler it was
-written for; that is the whole point.
+written for.
