@@ -12,6 +12,7 @@ mod grow;
 mod instructions;
 mod ledger;
 mod machines;
+mod parity;
 mod supersede;
 
 use std::path::PathBuf;
@@ -21,6 +22,7 @@ fn main() -> ExitCode {
     let args: Vec<String> = std::env::args().skip(1).collect();
     match args.first().map(String::as_str) {
         Some("coverage") => run_coverage(&args[1..]),
+        Some("parity") => run_parity(&args[1..]),
         Some("grow") => grow::run(&repo(), args.get(1).map(String::as_str)),
         Some("supersede") => match (args.get(1), args.get(2)) {
             (Some(tag), Some(reason)) => match supersede::run(&repo(), tag, reason, &args[3..]) {
@@ -158,6 +160,44 @@ fn repo() -> PathBuf {
         .parent()
         .map(PathBuf::from)
         .unwrap_or_default()
+}
+
+fn run_parity(args: &[String]) -> ExitCode {
+    let repo = repo();
+    let report = parity::compute(&repo);
+    let path = parity::data_path(&repo);
+
+    if args.iter().any(|a| a == "--write") {
+        if let Err(e) = std::fs::write(&path, parity::render(&report)) {
+            eprintln!("xtask: could not write {}: {e}", path.display());
+            return ExitCode::FAILURE;
+        }
+        println!("wrote {}", path.display());
+        return ExitCode::SUCCESS;
+    }
+
+    if args.iter().any(|a| a == "--check") {
+        let Ok(existing) = std::fs::read_to_string(&path) else {
+            eprintln!(
+                "xtask: no parity data at {} — create it with `cargo xtask parity --write`",
+                path.display()
+            );
+            return ExitCode::FAILURE;
+        };
+        let regressions = parity::regressions(&report, &existing);
+        if regressions.is_empty() {
+            println!("curriculum parity holds against the committed figures");
+            return ExitCode::SUCCESS;
+        }
+        eprintln!("curriculum parity fell:");
+        for line in &regressions {
+            eprintln!("  {line}");
+        }
+        return ExitCode::FAILURE;
+    }
+
+    print!("{}", parity::render_summary(&report));
+    ExitCode::SUCCESS
 }
 
 fn run_coverage(args: &[String]) -> ExitCode {
