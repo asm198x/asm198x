@@ -34,21 +34,14 @@ instead of by form:
 | [DEC PDP-11](instructions/pdp11.md) | 96 | little-endian |
 | [GI CP1610](instructions/cp1610.md) | 30 | big-endian |
 
-[Motorola 68000](instructions/m68k.md) and [Motorola 6809](instructions/mos6809.md)
-each have a page of their own shape. The 68000 packs operand fields into the
-opcode word, so its forms give a base word rather than a byte count; the 6809
-groups by operand shape, because its indexed mode computes its own length
-from a postbyte.
+[Motorola 68000](instructions/m68k.md), [Motorola 6809](instructions/mos6809.md)
+and [Zilog Z8000](instructions/z8000.md) each have a page of their own shape:
+the 68000 packs operand fields into the opcode word, so its forms give a base
+word rather than a byte count; the 6809 groups by operand shape, because its
+indexed mode computes its own length from a postbyte; and the Z8000 is
+specified family by family, because its families genuinely differ.
 
-## Not generated
-
-**Zilog Z8000** is the one CPU with no page here. Its specification is
-thirteen separate tables with thirteen element types, one per instruction
-family, rather than one list — so rendering it means thirteen renderers, or
-reshaping the spec first. The second is the better question to answer, and it
-is a question about the specification rather than about documentation. The
-Z8000 assembles and disassembles normally; only the reference table is
-missing.
+Every CPU the assembler has a specification for is documented here.
 
 ## Provenance
 

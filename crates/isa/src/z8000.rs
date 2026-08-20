@@ -1641,6 +1641,125 @@ pub fn mode_of(mm: u8, field: u16) -> u8 {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Documentation accessors
+//
+// The generated instruction reference renders this CPU family by family, so it
+// needs each shape to say what it is. These sit beside the data rather than in
+// the documentation generator, so the reference cannot describe an encoding
+// this file disagrees with.
+// ---------------------------------------------------------------------------
+
+impl Size {
+    /// The operand-size suffix, as assembly writes it.
+    #[must_use]
+    pub fn suffix(&self) -> &'static str {
+        match self {
+            Size::Byte => "byte",
+            Size::Word => "word",
+            Size::Long => "long",
+            Size::Quad => "quad",
+            Size::Address => "address",
+        }
+    }
+}
+
+impl CtlKind {
+    /// One line naming the operand shape.
+    #[must_use]
+    pub fn describe(&self) -> &'static str {
+        match self {
+            CtlKind::Jump => "A memory operand, with a condition code in the low nibble",
+            CtlKind::Jr => "A condition code, then a word-scaled signed 8-bit PC offset",
+            CtlKind::Ret => "A condition code only",
+            CtlKind::Djnz => "A register, then a 7-bit backward word offset",
+            CtlKind::Calr => "A 12-bit backward word offset",
+        }
+    }
+}
+
+impl ShiftKind {
+    /// One line naming the operand shape.
+    #[must_use]
+    pub fn describe(&self) -> &'static str {
+        match self {
+            ShiftKind::Shift => {
+                "A signed count word follows — positive shifts left, negative right"
+            }
+            ShiftKind::Rotate => "By one or two, packed into the low nibble; no count word",
+        }
+    }
+}
+
+impl BlockShape {
+    /// One line naming the operand shape.
+    #[must_use]
+    pub fn describe(&self) -> &'static str {
+        match self {
+            BlockShape::Load => "Source pointer, destination pointer, count register",
+            BlockShape::Compare => "Source pointer, a data register, count and condition",
+            BlockShape::CompareString => {
+                "Two pointers, with a condition code in the control nibble"
+            }
+            BlockShape::Translate => {
+                "Destination pointer first, then source — the reverse of a load"
+            }
+        }
+    }
+}
+
+impl ControlKind {
+    /// One line naming the operand shape.
+    #[must_use]
+    pub fn describe(&self) -> &'static str {
+        match self {
+            ControlKind::Fixed(_) => "A fixed two-byte word, no operand",
+            ControlKind::Mreq => "A register in the high nibble",
+            ControlKind::Flag(_) => "A flag mask in the high nibble",
+            ControlKind::Intr(_) => "An interrupt-source list",
+            ControlKind::Ldctl(_) => "A register and a control register",
+            ControlKind::Ldps => "A memory operand holding a program status",
+            ControlKind::Sc => "A system-call number, 0-255",
+        }
+    }
+}
+
+impl MiscKind {
+    /// One line naming the operand shape.
+    #[must_use]
+    pub fn describe(&self) -> &'static str {
+        match self {
+            MiscKind::Tcc => "A condition code and a register",
+            MiscKind::Ldk => "A register and a 4-bit constant",
+            MiscKind::Rotdig => "Two byte registers, rotated a digit at a time",
+            MiscKind::Ldr => "A register and a PC-relative address",
+        }
+    }
+}
+
+/// The addressing modes a [`Insn::modes`] bitmask allows, as assembly writes
+/// them.
+/// Built one bit at a time rather than by matching whole combinations: a
+/// combination nobody anticipated then renders as the modes it really is,
+/// instead of falling through to a shrug. The reference is meant to save a
+/// reader the trip to the source, so "see the spec" is the one answer it must
+/// not give.
+#[must_use]
+pub fn mode_names(modes: u8) -> String {
+    [
+        (IM, "#n"),
+        (IR, "@Rn"),
+        (DA, "addr"),
+        (X, "addr(Rn)"),
+        (R, "Rn"),
+    ]
+    .iter()
+    .filter(|(bit, _)| modes & bit != 0)
+    .map(|(_, name)| *name)
+    .collect::<Vec<_>>()
+    .join(", ")
+}
+
 /// Find the (first) non-store instruction entry for a mnemonic. `LD`/`LDB`/`LDL`
 /// resolve to their **load** entry; the dialect selects the store entry itself
 /// when the destination is memory.
