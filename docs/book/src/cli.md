@@ -36,7 +36,7 @@ Or download an archive directly: `aarch64-apple-darwin`, `x86_64-apple-darwin`,
 `x86_64-unknown-linux-gnu`, `x86_64-pc-windows-msvc`.
 
 asm198x is **not** published to crates.io, so `cargo install asm198x` will not
-find it. That is deliberate — see the family's packaging decisions.
+find it. Use the installer or one of the archives above.
 
 ## Operations
 
