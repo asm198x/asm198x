@@ -158,6 +158,72 @@ pub struct Form {
     pub operands: &'static [Slot],
 }
 
+impl Slot {
+    /// How this operand is written in assembly, for the generated reference.
+    ///
+    /// Beside the data rather than in the documentation generator, so the
+    /// reference cannot describe an operand shape the spec disagrees with.
+    #[must_use]
+    pub fn symbol(&self) -> &'static str {
+        match self {
+            Slot::Ea { .. } => "<ea>",
+            Slot::Dn { .. } => "Dn",
+            Slot::An { .. } => "An",
+            Slot::Quick8 => "#imm8",
+            Slot::Quick3 { .. } => "#1-8",
+            Slot::BranchW => "disp16",
+            Slot::DispW => "disp16",
+            Slot::ImmWord => "#imm16",
+            Slot::ImmSized => "#imm",
+            Slot::RegList => "reglist",
+            Slot::AddrIndirect { .. } => "(An)",
+            Slot::Vec4 => "#vec",
+            Slot::Ccr => "CCR",
+            Slot::Sr => "SR",
+            Slot::Usp => "USP",
+            Slot::MovepDisp => "disp16",
+        }
+    }
+
+    /// One line naming what the operand is.
+    #[must_use]
+    pub fn describe(&self) -> &'static str {
+        match self {
+            Slot::Ea { .. } => "A general effective address",
+            Slot::Dn { .. } => "A data register number",
+            Slot::An { .. } => "An address register number",
+            Slot::Quick8 => "MOVEQ's signed 8-bit immediate",
+            Slot::Quick3 { .. } => "A 3-bit quick immediate, 8 encoded as 000",
+            Slot::BranchW => "A PC-relative branch displacement, word form",
+            Slot::DispW => "A DBcc displacement, always a word",
+            Slot::ImmWord => "An immediate as one extension word",
+            Slot::ImmSized => "An immediate sized by the instruction",
+            Slot::RegList => "A register-list mask",
+            Slot::AddrIndirect { .. } => "An address register in a fixed indirect mode",
+            Slot::Vec4 => "A 4-bit TRAP vector",
+            Slot::Ccr => "The condition-code register",
+            Slot::Sr => "The status register",
+            Slot::Usp => "The user stack pointer",
+            Slot::MovepDisp => "A MOVEP displacement word",
+        }
+    }
+}
+
+impl SizeEnc {
+    /// The sizes this form can be assembled at, as suffixes.
+    #[must_use]
+    pub fn sizes(&self) -> &'static str {
+        match self {
+            SizeEnc::Fixed(Size::B) => ".b",
+            SizeEnc::Fixed(Size::W) => ".w",
+            SizeEnc::Fixed(Size::L) => ".l",
+            SizeEnc::Std6 => ".b/.w/.l",
+            SizeEnc::Move => ".b/.w/.l",
+            SizeEnc::WL { .. } => ".w/.l",
+        }
+    }
+}
+
 /// One mnemonic and its forms.
 pub struct Insn {
     pub mnemonic: &'static str,
