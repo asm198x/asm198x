@@ -264,6 +264,7 @@ fn render_word_cpu(cpu: &WordCpu) -> String {
             cell(row.summary)
         );
     }
+    out.push_str(&provenance(cpu.module));
     out
 }
 
@@ -343,6 +344,7 @@ fn render_m68k() -> String {
             );
         }
     }
+    out.push_str(&provenance("m68k"));
     out
 }
 
@@ -478,6 +480,7 @@ fn render_mos6809() -> String {
             );
         }
     }
+    out.push_str(&provenance("mos6809"));
     out
 }
 
@@ -722,6 +725,7 @@ fn render_z8000() -> String {
             cell(i.summary)
         );
     }
+    out.push_str(&provenance("z8000"));
     out
 }
 
@@ -779,6 +783,39 @@ pub fn summary_lines() -> String {
     out.push_str("  - [Motorola 68000](instructions/m68k.md)\n");
     out.push_str("  - [Motorola 6809](instructions/mos6809.md)\n");
     out.push_str("  - [Zilog Z8000](instructions/z8000.md)\n");
+    out
+}
+
+/// The provenance footer for one CPU's page.
+///
+/// R1 asks each page to reach back into the primary reference library. The
+/// library is a private repository, so this names the documents and where they
+/// sit in it rather than pretending to offer a link — naming the document is
+/// what lets anyone holding the same datasheet check the spec against it.
+fn provenance(module: &str) -> String {
+    let sources = isa::provenance::sources_for(module);
+    if sources.is_empty() {
+        return String::new();
+    }
+    let mut out = String::from(
+        "\n## Provenance\n\nThis specification was authored from the following, in the \
+         family's primary reference library:\n\n",
+    );
+    for source in sources {
+        let year = source.year.map_or(String::new(), |y| format!(", {y}"));
+        let _ = writeln!(
+            out,
+            "- *{}* — {}{} (`{}`)",
+            cell(source.title),
+            cell(source.attribution),
+            year,
+            source.library
+        );
+    }
+    out.push_str(
+        "\nNot from any emulator's decode loop: an emulator is a reading of the \
+         hardware, and this is meant to be a reading of the documentation.\n",
+    );
     out
 }
 
@@ -848,12 +885,14 @@ fn render_index(cpus: &[Cpu], word: &[WordCpu]) -> String {
          specified family by family, because its families genuinely differ.\n\n\
          Every CPU the assembler has a specification for is documented here.\n\n\
          ## Provenance\n\n\
-         These specs are authored from datasheets in the family's primary reference\n\
-         library, not extracted from an emulator's decode loop. That provenance is\n\
-         recorded per module in prose today, and unevenly: ten of the nineteen carry\n\
-         a citation and nine do not. Linking each page to its datasheet is the\n\
-         other half of this reference, and it waits on the citation being data\n\
-         rather than a paragraph.\n",
+         Every page here says which documents its specification was authored from,\n\
+         and where they sit in the family's primary reference library. That library\n\
+         is a private repository, so a citation names the document rather than\n\
+         offering a link — naming it is what lets anyone holding the same datasheet\n\
+         check the specification against it.\n\n\
+         None of them is authored from an emulator's decode loop. An emulator is a\n\
+         reading of the hardware; these are meant to be a reading of the\n\
+         documentation, and the two are worth keeping apart.\n",
     );
     out
 }
@@ -923,6 +962,7 @@ fn render_cpu(cpu: &Cpu) -> String {
             );
         }
     }
+    out.push_str(&provenance(cpu.module));
     out
 }
 
@@ -1038,6 +1078,28 @@ mod tests {
                 }
             }
         }
+    }
+
+    /// No CPU is documented without saying where its specification came from.
+    ///
+    /// R1's whole claim is that these pages are a reading of the datasheets. A
+    /// page with no citation makes that claim without backing it, which is
+    /// worse than a page that does not exist — and it is the state nine of
+    /// these CPUs were in until the provenance table landed.
+    #[test]
+    fn every_generated_page_cites_its_sources() {
+        let uncited: Vec<String> = pages()
+            .iter()
+            .filter(|p| p.path.starts_with("instructions/"))
+            .filter(|p| !p.body.contains("## Provenance"))
+            .map(|p| p.path.clone())
+            .collect();
+        assert!(
+            uncited.is_empty(),
+            "these pages document a CPU without citing a source: {}\n\
+             Add the documents it was authored from to `isa::provenance::PROVENANCE`.",
+            uncited.join(", ")
+        );
     }
 
     #[test]

@@ -123,3 +123,11 @@ This CPU encodes an instruction as an opcode **word** whose operand fields are b
 | SEZ | `00B4` | `NoArg` | Set Z |
 | SEN | `00B8` | `NoArg` | Set N |
 | SCC | `00BF` | `NoArg` | Set all condition codes |
+
+## Provenance
+
+This specification was authored from the following, in the family's primary reference library:
+
+- *PDP-11 Processor Handbook, EB-19402-20* — Digital Equipment Corporation, 1981 (`by-topic/cpu-pdp11/`)
+
+Not from any emulator's decode loop: an emulator is a reading of the hardware, and this is meant to be a reading of the documentation.
