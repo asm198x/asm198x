@@ -183,10 +183,15 @@ the syntax and `--cpu` the target.
 ## Exit status and diagnostics
 
 `0` on success, non-zero on failure. A diagnostic carries a severity, a
-message, a `(file, line, column)` span and a stable code. The human form prints
-what it knows — `asm198x: file:line:col: error: message`, dropping the column
-where the parse did not record one — and the full record, code included, is on
-the `--message-format=json` path.
+message, a `(file, line, column)` span and a code. The human form prints what it
+knows — `asm198x: file:line:col: error: message`, dropping the column where the
+parse did not record one — and the full record is on the
+`--message-format=json` path.
+
+**Every diagnostic currently carries the code `AssemblyError`.** Codes are
+assigned as error sites are classified, and new ones are added without
+renumbering the existing ones, so a consumer can switch on a code today and keep
+working as more arrive. Until then the severity carries the same information.
 
 **stdout carries output; stderr carries everything else.** `disasm` and `fmt`
 write their result to stdout, `asm` writes bytes to a file, and the summary line
@@ -195,3 +200,28 @@ and diagnostics go to stderr, so a pipeline gets the artifact and nothing else.
 `--message-format=json` is the exception: it puts a machine-readable result on
 stdout — bytes, symbols and the full diagnostic list — for a build script or an
 editor. The human form stays on stderr.
+
+```json
+[
+  {
+    "span": {
+      "file": 0,
+      "line": 2,
+      "col": 13,
+      "expansion_frames": [],
+      "path": "fill.a"
+    },
+    "code": "AssemblyError",
+    "severity": "Error",
+    "message": "value 4660 does not fit in a byte",
+    "fix": null
+  }
+]
+```
+
+`file` is a file id; v1 assembles a single file, so it is always `0`. A `col` of
+`0` means the raising site knew no column — treat the span as the whole line.
+`expansion_frames` records the expansions a location came through, innermost
+first, and stays empty until a dialect expands macros. `fix` carries a suggested
+edit where one is available: a `description`, plus a `replacement` when the fix
+is a concrete piece of text to apply at the span.
