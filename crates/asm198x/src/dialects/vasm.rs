@@ -696,11 +696,21 @@ fn serialize_hunkexe(sections: &[SecOut]) -> Vec<u8> {
         }
 
         // HUNK_RELOC32: blocks of [count, target hunk, offsets…], target hunks
-        // ascending, offsets ascending, terminated by a zero count.
+        // ascending, offsets in the order the assembler recorded them,
+        // terminated by a zero count.
+        //
+        // Not sorted. vasm emits each block in discovery order, which is
+        // usually ascending and is not guaranteed to be: an expression resolved
+        // after the position it patches puts a lower offset later in the list.
+        // Sorting matched vasm everywhere that happened not to occur and
+        // diverged the moment it did — flock units 15-18 carry the same 142
+        // entries as vasm in a different order. A loader applies them all
+        // whatever the order, so this is invisible at runtime and fatal to
+        // byte-identity, which is the claim being made.
         if !s.relocs.is_empty() {
             push_u32(&mut out, 0x3ec);
             for target in 0..sections.len() {
-                let mut offs: Vec<u32> = s
+                let offs: Vec<u32> = s
                     .relocs
                     .iter()
                     .filter(|(_, t)| *t == target)
@@ -709,7 +719,6 @@ fn serialize_hunkexe(sections: &[SecOut]) -> Vec<u8> {
                 if offs.is_empty() {
                     continue;
                 }
-                offs.sort_unstable();
                 push_u32(&mut out, offs.len() as u32);
                 push_u32(&mut out, target as u32);
                 for o in offs {
@@ -846,6 +855,9 @@ fn encode(
     let mut word = form.base | size_bits(form.size, sz);
     let mut ext: Vec<u8> = Vec::new();
     let mut relocs: Vec<Reloc> = Vec::new();
+    // Parallel to `relocs`: whether each came from the destination operand.
+    // Used only to order them; see the reordering below.
+    let mut reloc_is_dest: Vec<bool> = Vec::new();
     let mut branch: Option<i64> = None;
     // MOVEM reverses its register mask when the effective address predecrements.
     let predec = operands
@@ -951,6 +963,7 @@ fn encode(
                 word |= field6 << shift;
                 if let Some(target_sec) = reloc {
                     relocs.push((pc_ext as u32, target_sec));
+                    reloc_is_dest.push(*dest);
                 }
                 ext.extend_from_slice(&words);
             }
@@ -960,6 +973,27 @@ fn encode(
             // `match_form` guarantees shapes fit, so other pairings can't occur.
             _ => return Err(AsmError::new(line, "internal: operand/slot mismatch")),
         }
+    }
+
+    // vasm records an instruction's relocations destination-first, not in the
+    // order its extension words are laid out. `move.w abs,abs` puts the source
+    // address at the lower offset and the destination at the higher one, and
+    // vasm still lists the destination first — so the RELOC32 table is not
+    // ascending, and sorting it or emitting in slot order both diverge.
+    //
+    // Invisible at runtime, since a loader applies every entry whatever the
+    // order, and fatal to byte-identity, which is the claim. Found by flock
+    // units 15-18, the first curriculum source to use the two-absolute form.
+    if reloc_is_dest.iter().any(|d| *d) {
+        let mut ordered: Vec<Reloc> = Vec::with_capacity(relocs.len());
+        for want_dest in [true, false] {
+            for (r, is_dest) in relocs.iter().zip(&reloc_is_dest) {
+                if *is_dest == want_dest {
+                    ordered.push(*r);
+                }
+            }
+        }
+        relocs = ordered;
     }
 
     if let Some(target) = branch {
