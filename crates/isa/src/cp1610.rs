@@ -59,6 +59,38 @@ pub struct Insn {
 }
 
 impl Class {
+    /// How this class lays its operand fields into the opcode word, as a
+    /// formula over `base`.
+    ///
+    /// Exists so the generated instruction reference can state the encoding
+    /// without a second copy of it living in the documentation generator. The
+    /// doc comments above explain each class for someone reading this file;
+    /// this is the same fact in the form a table needs.
+    #[must_use]
+    pub fn encoding(&self) -> &'static str {
+        match self {
+            Class::Implied => "base",
+            Class::RegUnary => "base | reg",
+            Class::GetStatus => "base | reg",
+            Class::RegReg => "base | src << 3 | dst",
+            Class::Shift => "base | (count - 1) << 2 | reg",
+        }
+    }
+
+    /// One line naming what the class is, for the reference's legend.
+    #[must_use]
+    pub fn describe(&self) -> &'static str {
+        match self {
+            Class::Implied => "Fixed opcode, no operand",
+            Class::RegUnary => "One register R0–R7 in the low three bits",
+            Class::GetStatus => "One register R0–R3 in the low two bits",
+            Class::RegReg => "Two registers — source in bits 5:3, destination in 2:0",
+            Class::Shift => "Register R0–R3, with a one-or-twice count in bit 2",
+        }
+    }
+}
+
+impl Class {
     /// The fixed (non-field) bits of the opcode word for this class — masking a
     /// (10-bit) word with it yields the `base` to look up. [`decode`] tries
     /// classes from the widest mask to the narrowest to disambiguate shared

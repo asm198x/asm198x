@@ -71,6 +71,52 @@ pub struct Insn {
 }
 
 impl Class {
+    /// How this class lays its operand fields into the opcode word, as a
+    /// formula over `base`.
+    ///
+    /// Exists so the generated instruction reference can state the encoding
+    /// without a second copy of it living in the documentation generator. The
+    /// doc comments above explain each class for someone reading this file;
+    /// this is the same fact in the form a table needs.
+    #[must_use]
+    pub fn encoding(&self) -> &'static str {
+        match self {
+            Class::DualGeneral => "base | Td<<10 | D<<6 | Ts<<4 | S",
+            Class::Jump => "base | (off & 0xFF)",
+            Class::Cru => "base | (disp & 0xFF)",
+            Class::DualRegDst => "base | D<<6 | Ts<<4 | S",
+            Class::Xop => "base | D<<6 | Ts<<4 | S",
+            Class::CruMulti => "base | (count & 0xF)<<6 | Ts<<4 | S",
+            Class::Shift => "base | count<<4 | W",
+            Class::SingleGeneral => "base | Ts<<4 | S",
+            Class::Control => "base",
+            Class::ImmReg => "base | W",
+            Class::ImmOnly => "base",
+            Class::StoreReg => "base | W",
+        }
+    }
+
+    /// One line naming what the class is, for the reference's legend.
+    #[must_use]
+    pub fn describe(&self) -> &'static str {
+        match self {
+            Class::DualGeneral => "Format I — two general operands",
+            Class::Jump => "Format II jump — word-scaled PC-relative",
+            Class::Cru => "Format II CRU-bit — signed CRU offset",
+            Class::DualRegDst => "Format III/IX — general source, register destination",
+            Class::Xop => "Format IX XOP — general source, XOP number 0–15",
+            Class::CruMulti => "Format IV — general source, CRU bit count 1–16",
+            Class::Shift => "Format V — workspace register, shift count 0–15",
+            Class::SingleGeneral => "Format VI — one general operand",
+            Class::Control => "Format VII — no operand, fixed opcode",
+            Class::ImmReg => "Format VIII — workspace register plus an immediate word",
+            Class::ImmOnly => "Format VIII — an immediate word, no register",
+            Class::StoreReg => "Format VIII — store into a workspace register",
+        }
+    }
+}
+
+impl Class {
     /// The fixed (non-field) bits of the opcode word for this class — masking a
     /// word with it yields the `base` to look up. [`decode`] tries classes from
     /// the widest mask to the narrowest to disambiguate shared opcode space.

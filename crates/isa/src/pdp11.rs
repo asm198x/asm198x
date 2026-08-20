@@ -80,6 +80,52 @@ pub struct Insn {
 }
 
 impl Class {
+    /// How this class lays its operand fields into the opcode word, as a
+    /// formula over `base`.
+    ///
+    /// Exists so the generated instruction reference can state the encoding
+    /// without a second copy of it living in the documentation generator. The
+    /// doc comments above explain each class for someone reading this file;
+    /// this is the same fact in the form a table needs.
+    #[must_use]
+    pub fn encoding(&self) -> &'static str {
+        match self {
+            Class::Double => "base | src6 << 6 | dst6",
+            Class::Single => "base | dst6",
+            Class::Branch => "base | (offset & 0xFF)",
+            Class::Sob => "base | reg << 6 | offset",
+            Class::Jsr => "base | reg << 6 | dst6",
+            Class::Rts => "base | reg",
+            Class::RegSrc => "base | reg << 6 | src6",
+            Class::Xor => "base | reg << 6 | dst6",
+            Class::Trap => "base | (n & 0xFF)",
+            Class::Mark => "base | (n & 0x3F)",
+            Class::Spl => "base | (n & 7)",
+            Class::NoArg => "base",
+        }
+    }
+
+    /// One line naming what the class is, for the reference's legend.
+    #[must_use]
+    pub fn describe(&self) -> &'static str {
+        match self {
+            Class::Double => "Two general operands, each a 6-bit mode/register field",
+            Class::Single => "One general operand",
+            Class::Branch => "Signed word-scaled PC offset",
+            Class::Sob => "Register plus a backward word offset",
+            Class::Jsr => "Register plus a destination operand",
+            Class::Rts => "Register in the low three bits",
+            Class::RegSrc => "Source operand plus a register",
+            Class::Xor => "Register plus a destination operand",
+            Class::Trap => "An 8-bit trap number",
+            Class::Mark => "A 6-bit count",
+            Class::Spl => "A 3-bit priority level",
+            Class::NoArg => "No operand, fixed opcode",
+        }
+    }
+}
+
+impl Class {
     /// The fixed (non-field) bits of the opcode word for this class — masking a
     /// word with it yields the `base` to look up. Ordering the decode from the
     /// widest mask to the narrowest disambiguates classes that share opcode

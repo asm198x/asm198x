@@ -113,6 +113,160 @@ fn cpus() -> Vec<Cpu> {
     ]
 }
 
+/// One CPU whose instructions are opcode *words* with operand fields inside
+/// them, rather than opcode bytes followed by operand bytes.
+///
+/// The three share a model — `Insn { mnemonic, base, class, summary }` over a
+/// per-CPU `Class` — so they share a renderer. What differs is the class set,
+/// and each class states its own bit layout, so the layouts live beside the
+/// spec instead of being restated here.
+struct WordCpu {
+    slug: &'static str,
+    module: &'static str,
+    name: &'static str,
+    endianness: isa::Endianness,
+    /// Flattened by the caller, because each CPU's `Class` is its own type.
+    rows: Vec<WordRow>,
+}
+
+struct WordRow {
+    mnemonic: &'static str,
+    base: u16,
+    class: &'static str,
+    encoding: &'static str,
+    describe: &'static str,
+    summary: &'static str,
+}
+
+/// The word-oriented CPUs, flattened into one shape.
+fn word_cpus() -> Vec<WordCpu> {
+    vec![
+        WordCpu {
+            slug: "tms9900",
+            module: "tms9900",
+            name: "TI TMS9900",
+            endianness: isa::Endianness::Big,
+            rows: isa::tms9900::INSTRUCTIONS
+                .iter()
+                .map(|i| WordRow {
+                    mnemonic: i.mnemonic,
+                    base: i.base,
+                    class: class_name(&i.class),
+                    encoding: i.class.encoding(),
+                    describe: i.class.describe(),
+                    summary: i.summary,
+                })
+                .collect(),
+        },
+        WordCpu {
+            slug: "pdp11",
+            module: "pdp11",
+            name: "DEC PDP-11",
+            endianness: isa::Endianness::Little,
+            rows: isa::pdp11::INSTRUCTIONS
+                .iter()
+                .map(|i| WordRow {
+                    mnemonic: i.mnemonic,
+                    base: i.base,
+                    class: class_name(&i.class),
+                    encoding: i.class.encoding(),
+                    describe: i.class.describe(),
+                    summary: i.summary,
+                })
+                .collect(),
+        },
+        WordCpu {
+            slug: "cp1610",
+            module: "cp1610",
+            name: "GI CP1610",
+            endianness: isa::Endianness::Big,
+            rows: isa::cp1610::INSTRUCTIONS
+                .iter()
+                .map(|i| WordRow {
+                    mnemonic: i.mnemonic,
+                    base: i.base,
+                    class: class_name(&i.class),
+                    encoding: i.class.encoding(),
+                    describe: i.class.describe(),
+                    summary: i.summary,
+                })
+                .collect(),
+        },
+    ]
+}
+
+/// Escape a value for a markdown table cell.
+///
+/// A `|` inside a cell ends it, even within a code span — and the encoding
+/// formulas are made of them (`base | src << 3 | dst`). Unescaped, such a row
+/// silently becomes several mangled cells rather than failing, which is why
+/// there is a test on the rendered shape and not just on the build succeeding.
+fn cell(text: &str) -> String {
+    text.replace('|', "\\|")
+}
+
+/// The variant's name, via `Debug` — the specs derive it, and a hand-written
+/// name table here would be a second copy of the class list to keep in step.
+fn class_name<C: std::fmt::Debug>(class: &C) -> &'static str {
+    // Leaked once per row, of which there are a few hundred for the life of a
+    // generator that runs and exits. The alternative is threading a lifetime
+    // through the row type for no gain.
+    Box::leak(format!("{class:?}").into_boxed_str())
+}
+
+fn render_word_cpu(cpu: &WordCpu) -> String {
+    let mut out = format!("# {}\n\n", cpu.name);
+    out.push_str(&generated_note(cpu.module));
+    let _ = write!(
+        out,
+        "\n{} instructions, {}. Generated from \
+         [`crates/isa/src/{}.rs`](https://github.com/asm198x/asm198x/blob/main/crates/isa/src/{}.rs).\n\n\
+         This CPU encodes an instruction as an opcode **word** whose operand fields \
+         are bits inside it, so there is no opcode-then-operands table to give. Each \
+         instruction has a *base* — the opcode word with its operand fields zeroed — \
+         and a *class* saying where those fields sit.\n",
+        cpu.rows.len(),
+        match cpu.endianness {
+            isa::Endianness::Little => "words little-endian",
+            isa::Endianness::Big => "words big-endian",
+        },
+        cpu.module,
+        cpu.module,
+    );
+
+    // The legend first: a reader meets the class names in the table below, and
+    // sending them elsewhere to decode a column is the sort of small rudeness
+    // that makes a reference tiring to use.
+    out.push_str("\n## Classes\n\n| Class | Encoding | Meaning |\n|---|---|---|\n");
+    let mut seen: Vec<&str> = Vec::new();
+    for row in &cpu.rows {
+        if seen.contains(&row.class) {
+            continue;
+        }
+        seen.push(row.class);
+        let _ = writeln!(
+            out,
+            "| `{}` | `{}` | {} |",
+            cell(row.class),
+            cell(row.encoding),
+            cell(row.describe)
+        );
+    }
+
+    out.push_str("\n## Instructions\n\n| Mnemonic | Base | Class | Summary |\n|---|---|---|---|\n");
+    for row in &cpu.rows {
+        let _ = writeln!(
+            out,
+            "| {} | `{:04X}` | `{}` | {} |",
+            cell(row.mnemonic),
+            row.base,
+            cell(row.class),
+            cell(row.summary)
+        );
+    }
+    out
+}
+
 /// A page the generator owns entirely: path under the book's `src`, and its
 /// content.
 pub struct Page {
@@ -131,9 +285,13 @@ pub fn pages() -> Vec<Page> {
             body: render_cpu(cpu),
         })
         .collect();
+    out.extend(word_cpus().iter().map(|cpu| Page {
+        path: format!("instructions/{}.md", cpu.slug),
+        body: render_word_cpu(cpu),
+    }));
     out.push(Page {
         path: "instructions.md".to_string(),
-        body: render_index(&cpus),
+        body: render_index(&cpus, &word_cpus()),
     });
     out
 }
@@ -144,6 +302,9 @@ pub fn summary_lines() -> String {
     let mut out = String::from("- [Instruction reference](instructions.md)\n");
     for cpu in cpus() {
         let _ = writeln!(out, "  - [{}](instructions/{}.md)", cpu.set.cpu, cpu.slug);
+    }
+    for cpu in word_cpus() {
+        let _ = writeln!(out, "  - [{}](instructions/{}.md)", cpu.name, cpu.slug);
     }
     out
 }
@@ -157,7 +318,7 @@ fn generated_note(module: &str) -> String {
     )
 }
 
-fn render_index(cpus: &[Cpu]) -> String {
+fn render_index(cpus: &[Cpu], word: &[WordCpu]) -> String {
     let mut out = String::from("# Instruction reference\n\n");
     out.push_str(&generated_note("*"));
     out.push_str(
@@ -186,15 +347,32 @@ fn render_index(cpus: &[Cpu]) -> String {
     }
 
     out.push_str(
+        "\nThese CPUs encode an instruction as an opcode **word** with its operand\n\
+         fields inside it, so they are listed by base opcode and encoding class\n\
+         instead of by form:\n\n\
+         | CPU | Instructions | Word order |\n|---|---|---|\n",
+    );
+    for cpu in word {
+        let _ = writeln!(
+            out,
+            "| [{}](instructions/{}.md) | {} | {} |",
+            cpu.name,
+            cpu.slug,
+            cpu.rows.len(),
+            match cpu.endianness {
+                isa::Endianness::Little => "little-endian",
+                isa::Endianness::Big => "big-endian",
+            }
+        );
+    }
+
+    out.push_str(
         "\n## Not generated\n\n\
-         Six CPUs encode with models a form table cannot describe, so they have no\n\
-         page here rather than a misleading one. All six assemble and disassemble\n\
-         normally; only the *reference table* is missing.\n\n\
-         **Word-oriented, class and base:** TI TMS9900, DEC PDP-11, GI CP1610 and\n\
-         Zilog Z8000. An instruction is an opcode *word* whose operand fields are\n\
-         bits within it, selected by a class mask — so there is no \"opcode bytes,\n\
-         then operand bytes\" to tabulate. The first three share one model and want\n\
-         one renderer between them.\n\n\
+         Three CPUs have no page here rather than a misleading one. All three\n\
+         assemble and disassemble normally; only the *reference table* is missing.\n\n\
+         **Zilog Z8000** — word-oriented like the three above, but its entries carry\n\
+         an operand-size and an addressing-mode bitmask as well as a class, so it\n\
+         needs more than their shared renderer gives.\n\n\
          **Motorola 68000** — field-packed effective addresses: an operand's meaning\n\
          lives in bit fields inside the opcode word, and how many extension words\n\
          follow depends on the mode those bits select.\n\n\
@@ -260,7 +438,7 @@ fn render_cpu(cpu: &Cpu) -> String {
             let _ = writeln!(
                 out,
                 "| {}{} | `{}` | {} | {} | {} | {} |",
-                form.mode,
+                cell(form.mode),
                 if form.undocumented {
                     " **undocumented**"
                 } else {
@@ -270,11 +448,11 @@ fn render_cpu(cpu: &Cpu) -> String {
                 operands(form.operands),
                 form.len(),
                 cycles(form.cycles),
-                if form.flags.is_empty() {
+                cell(if form.flags.is_empty() {
                     "—"
                 } else {
                     form.flags
-                },
+                }),
             );
         }
     }
@@ -363,6 +541,38 @@ mod tests {
 
     /// Slugs become file names and URLs, so a duplicate would silently have one
     /// page overwrite another.
+    /// Every generated table row has the column count its header promises.
+    ///
+    /// A stray `|` does not fail a build. Markdown splits the cell and carries
+    /// on, so the page renders a mangled row that nobody notices — and the
+    /// encoding formulas are made of pipes, so this is the mistake this
+    /// generator is most likely to make.
+    #[test]
+    fn no_generated_table_row_is_split_by_a_stray_pipe() {
+        for page in pages() {
+            let mut expected: Option<usize> = None;
+            for (n, line) in page.body.lines().enumerate() {
+                if !line.starts_with('|') {
+                    expected = None;
+                    continue;
+                }
+                // An escaped `\|` does not divide a cell.
+                let dividers = line.replace("\\|", "").matches('|').count();
+                match expected {
+                    None => expected = Some(dividers),
+                    Some(want) => assert_eq!(
+                        dividers,
+                        want,
+                        "{}:{}: row has {dividers} dividers where the table's \
+                         header has {want}:\n  {line}",
+                        page.path,
+                        n + 1
+                    ),
+                }
+            }
+        }
+    }
+
     #[test]
     fn slugs_are_unique() {
         let mut seen = std::collections::BTreeSet::new();

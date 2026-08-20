@@ -26,4 +26,7 @@
   - [Fairchild F8 (3850)](instructions/f8.md)
   - [Signetics 2650](instructions/s2650.md)
   - [Texas Instruments TMS7000](instructions/tms7000.md)
+  - [TI TMS9900](instructions/tms9900.md)
+  - [DEC PDP-11](instructions/pdp11.md)
+  - [GI CP1610](instructions/cp1610.md)
 <!-- /generated -->
