@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.15](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.14...asm198x-v0.0.15) - 2026-08-20
+
+### Added
+
+- *(cli)* prefix the reported version with v
+
 ## [0.0.14](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.13...asm198x-v0.0.14) - 2026-08-20
 
 ### Added
