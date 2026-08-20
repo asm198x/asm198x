@@ -5,7 +5,20 @@ version.workspace = true
 edition.workspace = true
 license.workspace = true
 repository.workspace = true
-publish = false
+# No `publish = false`, despite this crate never being published.
+#
+# `cargo package` verifies every workspace manifest, and refuses a path
+# dependency that carries no version requirement. Adding one is only possible
+# when the target is packageable: a versioned dependency on a `publish = false`
+# crate is looked up on crates.io, found missing, and fails resolution. So
+# `xtask`, which depends on this crate, could not be packaged while this line
+# was here — and release-plz runs `cargo package` to work out the next
+# versions, so nothing could be released at all.
+#
+# Publication is prevented where it is actually decided: release-plz.toml sets
+# `publish = false` for the whole workspace, and no crate here has ever been
+# pushed to crates.io. That is the same footing `isa`, `isa-disasm`,
+# `debug198x` and `asm198x` already stand on.
 
 # serde for the on-disk NDJSON; isa + isa-disasm for the shared case derivation
 # that recording and replay must agree on. The dependency direction is one-way:
@@ -14,8 +27,8 @@ publish = false
 [dependencies]
 serde = { workspace = true }
 serde_json = { workspace = true }
-isa = { path = "../isa" }
-isa-disasm = { path = "../isa-disasm" }
+isa = { path = "../isa", version = "0.0.13" }
+isa-disasm = { path = "../isa-disasm", version = "0.0.13" }
 
 [lints]
 workspace = true

@@ -8,11 +8,11 @@ repository.workspace = true
 publish = false
 
 [dependencies]
-isa = { path = "../crates/isa" }
+isa = { path = "../crates/isa", version = "0.0.13" }
 # The docs task generates from the same dialect table `--dialect` resolves
 # against, so the book cannot describe a surface the binary does not have.
-asm198x = { path = "../crates/asm198x" }
-verdict-corpus = { path = "../crates/verdict-corpus" }
+asm198x = { path = "../crates/asm198x", version = "0.0.13" }
+verdict-corpus = { path = "../crates/verdict-corpus", version = "0.0.13" }
 # Hashes the corpus so a ledger names exactly which corpus it describes.
 # xtask is never shipped, so this stays clear of the assembler's tree.
 sha2 = "0.10"
