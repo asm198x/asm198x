@@ -24,17 +24,24 @@ assembler does, not what someone remembered it did.
 | [Signetics 2650](instructions/s2650.md) | 71 | 245 | big-endian |
 | [Texas Instruments TMS7000](instructions/tms7000.md) | 63 | 203 | big-endian |
 
+These CPUs encode an instruction as an opcode **word** with its operand
+fields inside it, so they are listed by base opcode and encoding class
+instead of by form:
+
+| CPU | Instructions | Word order |
+|---|---|---|
+| [TI TMS9900](instructions/tms9900.md) | 69 | big-endian |
+| [DEC PDP-11](instructions/pdp11.md) | 96 | little-endian |
+| [GI CP1610](instructions/cp1610.md) | 30 | big-endian |
+
 ## Not generated
 
-Six CPUs encode with models a form table cannot describe, so they have no
-page here rather than a misleading one. All six assemble and disassemble
-normally; only the *reference table* is missing.
+Three CPUs have no page here rather than a misleading one. All three
+assemble and disassemble normally; only the *reference table* is missing.
 
-**Word-oriented, class and base:** TI TMS9900, DEC PDP-11, GI CP1610 and
-Zilog Z8000. An instruction is an opcode *word* whose operand fields are
-bits within it, selected by a class mask — so there is no "opcode bytes,
-then operand bytes" to tabulate. The first three share one model and want
-one renderer between them.
+**Zilog Z8000** — word-oriented like the three above, but its entries carry
+an operand-size and an addressing-mode bitmask as well as a class, so it
+needs more than their shared renderer gives.
 
 **Motorola 68000** — field-packed effective addresses: an operand's meaning
 lives in bit fields inside the opcode word, and how many extension words
