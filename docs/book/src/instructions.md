@@ -45,9 +45,12 @@ Every CPU the assembler has a specification for is documented here.
 
 ## Provenance
 
-These specs are authored from datasheets in the family's primary reference
-library, not extracted from an emulator's decode loop. That provenance is
-recorded per module in prose today, and unevenly: ten of the nineteen carry
-a citation and nine do not. Linking each page to its datasheet is the
-other half of this reference, and it waits on the citation being data
-rather than a paragraph.
+Every page here says which documents its specification was authored from,
+and where they sit in the family's primary reference library. That library
+is a private repository, so a citation names the document rather than
+offering a link — naming it is what lets anyone holding the same datasheet
+check the specification against it.
+
+None of them is authored from an emulator's decode loop. An emulator is a
+reading of the hardware; these are meant to be a reading of the
+documentation, and the two are worth keeping apart.
