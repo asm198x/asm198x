@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.16](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.15...asm198x-v0.0.16) - 2026-08-20
+
+### Fixed
+
+- *(vasm)* order hunk relocations the way vasm does, and check four times as much curriculum ([#144](https://github.com/asm198x/asm198x/pull/144))
+
 ## [0.0.15](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.14...asm198x-v0.0.15) - 2026-08-20
 
 ### Added
