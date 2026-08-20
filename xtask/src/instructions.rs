@@ -202,7 +202,14 @@ fn word_cpus() -> Vec<WordCpu> {
 /// silently becomes several mangled cells rather than failing, which is why
 /// there is a test on the rendered shape and not just on the build succeeding.
 fn cell(text: &str) -> String {
-    text.replace('|', "\\|")
+    // `<` is the dangerous one. Markdown passes inline HTML straight through,
+    // so a placeholder like `<ea>` is not text — it is an opening tag, and the
+    // renderer swallows it and everything up to a matching close. The 68000's
+    // operand column rendered *empty* for all 78 effective-address forms this
+    // way, and nothing looked wrong in the markdown.
+    text.replace('&', "&amp;")
+        .replace('<', "&lt;")
+        .replace('|', "\\|")
 }
 
 /// The variant's name, via `Debug` — the specs derive it, and a hand-written
@@ -1076,6 +1083,30 @@ mod tests {
                         n + 1
                     ),
                 }
+            }
+        }
+    }
+
+    /// A table cell must not carry a raw `<`.
+    ///
+    /// Markdown treats inline HTML as HTML. `<ea>` in the 68000's operand
+    /// column was parsed as a tag and rendered as nothing at all, so the
+    /// column was blank on the published page while the markdown source read
+    /// perfectly. Escaping happens in `cell`; this holds the escaping.
+    #[test]
+    fn no_generated_table_cell_carries_a_raw_angle_bracket() {
+        for page in pages() {
+            for (n, line) in page.body.lines().enumerate() {
+                if !line.starts_with('|') {
+                    continue;
+                }
+                assert!(
+                    !line.contains('<'),
+                    "{}:{}: table row carries a raw `<`, which markdown reads \
+                     as an HTML tag and drops:\n  {line}",
+                    page.path,
+                    n + 1
+                );
             }
         }
     }

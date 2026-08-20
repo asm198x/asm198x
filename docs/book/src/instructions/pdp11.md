@@ -10,16 +10,16 @@ This CPU encodes an instruction as an opcode **word** whose operand fields are b
 
 | Class | Encoding | Meaning |
 |---|---|---|
-| `Double` | `base \| src6 << 6 \| dst6` | Two general operands, each a 6-bit mode/register field |
+| `Double` | `base \| src6 &lt;&lt; 6 \| dst6` | Two general operands, each a 6-bit mode/register field |
 | `Single` | `base \| dst6` | One general operand |
-| `Branch` | `base \| (offset & 0xFF)` | Signed word-scaled PC offset |
-| `RegSrc` | `base \| reg << 6 \| src6` | Source operand plus a register |
-| `Xor` | `base \| reg << 6 \| dst6` | Register plus a destination operand |
-| `Sob` | `base \| reg << 6 \| offset` | Register plus a backward word offset |
-| `Jsr` | `base \| reg << 6 \| dst6` | Register plus a destination operand |
-| `Trap` | `base \| (n & 0xFF)` | An 8-bit trap number |
-| `Mark` | `base \| (n & 0x3F)` | A 6-bit count |
-| `Spl` | `base \| (n & 7)` | A 3-bit priority level |
+| `Branch` | `base \| (offset &amp; 0xFF)` | Signed word-scaled PC offset |
+| `RegSrc` | `base \| reg &lt;&lt; 6 \| src6` | Source operand plus a register |
+| `Xor` | `base \| reg &lt;&lt; 6 \| dst6` | Register plus a destination operand |
+| `Sob` | `base \| reg &lt;&lt; 6 \| offset` | Register plus a backward word offset |
+| `Jsr` | `base \| reg &lt;&lt; 6 \| dst6` | Register plus a destination operand |
+| `Trap` | `base \| (n &amp; 0xFF)` | An 8-bit trap number |
+| `Mark` | `base \| (n &amp; 0x3F)` | A 6-bit count |
+| `Spl` | `base \| (n &amp; 7)` | A 3-bit priority level |
 | `Rts` | `base \| reg` | Register in the low three bits |
 | `NoArg` | `base` | No operand, fixed opcode |
 
