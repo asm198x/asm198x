@@ -38,8 +38,39 @@ fn have(bin: &str) -> bool {
     Command::new(bin).output().is_ok()
 }
 
-/// The buildable `.asm` files: one per `unit-*` directory, directly inside it
-/// (not in a `snippets/` subdirectory).
+/// Every game directory under a machine's assembly tree.
+///
+/// Enumerated rather than named. Naming them meant a track was invisible to
+/// this suite until someone remembered to add it, and four `meet-the-machine`
+/// tracks sat unchecked that way — the assembler was never asked about them,
+/// which reads identically to passing.
+fn games(machine: &Path) -> Vec<PathBuf> {
+    let Ok(entries) = fs::read_dir(machine) else {
+        return Vec::new();
+    };
+    let mut out: Vec<PathBuf> = entries
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| p.is_dir())
+        .collect();
+    out.sort();
+    out
+}
+
+/// The buildable `.asm` files in a project.
+///
+/// The curriculum stores a unit one of two ways, and both are buildable:
+///
+/// - a single `.asm` directly in the `unit-*` directory; or
+/// - a **cumulative build** in `steps/`, one file per step, each of which
+///   carries its own `org` and `end` and runs on its own.
+///
+/// Only the first was collected before, so a step-based track yielded nothing —
+/// the whole Spectrum curriculum was invisible apart from one unit that happens
+/// to keep a stray `.asm` at the top level.
+///
+/// `snippets/` is still skipped: those are fragments quoted by the prose, not
+/// programs, and `capture/` holds screenshot scripts rather than source.
 fn main_asms(project: &Path) -> Vec<PathBuf> {
     let mut out = Vec::new();
     let Ok(units) = fs::read_dir(project) else {
@@ -55,32 +86,48 @@ fn main_asms(project: &Path) -> Vec<PathBuf> {
         if !is_unit {
             continue;
         }
-        if let Ok(files) = fs::read_dir(&dir) {
-            for f in files.flatten() {
-                let fp = f.path();
-                if fp.extension().and_then(|e| e.to_str()) == Some("asm") {
-                    out.push(fp);
-                }
-            }
-        }
+        push_asms(&dir, &mut out);
+        push_asms(&dir.join("steps"), &mut out);
     }
     out.sort();
     out
 }
 
+/// Append every `.asm` directly inside `dir`, if it exists.
+fn push_asms(dir: &Path, out: &mut Vec<PathBuf>) {
+    let Ok(files) = fs::read_dir(dir) else {
+        return;
+    };
+    for f in files.flatten() {
+        let fp = f.path();
+        if fp.is_file() && fp.extension().and_then(|e| e.to_str()) == Some("asm") {
+            out.push(fp);
+        }
+    }
+}
+
 fn label(file: &Path) -> String {
-    let unit = file
-        .parent()
-        .and_then(|p| p.file_name())
-        .and_then(|n| n.to_str())
+    // .../<project>/<unit-NN>/<name>.asm, or .../<unit-NN>/steps/<step-NN>.asm.
+    let parts: Vec<&str> = file
+        .components()
+        .filter_map(|c| c.as_os_str().to_str())
+        .collect();
+    let Some(i) = parts.iter().rposition(|c| c.starts_with("unit-")) else {
+        return "?".to_string();
+    };
+    let proj = i
+        .checked_sub(1)
+        .and_then(|j| parts.get(j))
+        .copied()
         .unwrap_or("?");
-    let proj = file
-        .parent()
-        .and_then(|p| p.parent())
-        .and_then(|p| p.file_name())
-        .and_then(|n| n.to_str())
-        .unwrap_or("?");
-    format!("{proj}/{unit}")
+    let unit = parts[i];
+    // A step names itself; a unit with one main file does not need to.
+    if parts.len() > i + 2 {
+        let stem = file.file_stem().and_then(|s| s.to_str()).unwrap_or("?");
+        format!("{proj}/{unit}/{stem}")
+    } else {
+        format!("{proj}/{unit}")
+    }
 }
 
 /// Run a reference command in `tmp` and return the bytes it wrote to `out`.
@@ -226,10 +273,7 @@ fn curriculum_is_byte_identical() {
     // --- 6502 / acme (C64) -------------------------------------------------
     if have("acme") {
         let c64 = root.join("code-samples/commodore-64/assembly");
-        let files: Vec<_> = main_asms(&c64.join("starfield"))
-            .into_iter()
-            .chain(main_asms(&c64.join("sid-symphony")))
-            .collect();
+        let files: Vec<_> = games(&c64).iter().flat_map(|g| main_asms(g)).collect();
         for file in &files {
             let src = fs::read_to_string(file).expect("read source");
             let ours = asm198x::assemble_acme(&src).expect("acme assemble");
@@ -272,10 +316,7 @@ fn curriculum_is_byte_identical() {
     // --- 6502 / ca65 + ld65 (NES) -----------------------------------------
     if have("ca65") && have("ld65") {
         let nes = root.join("code-samples/nintendo-entertainment-system/assembly");
-        let files: Vec<_> = main_asms(&nes.join("dash"))
-            .into_iter()
-            .chain(main_asms(&nes.join("neon-nexus")))
-            .collect();
+        let files: Vec<_> = games(&nes).iter().flat_map(|g| main_asms(g)).collect();
         for file in &files {
             let src = fs::read_to_string(file).expect("read source");
             let ours = asm198x::assemble_ca65(&src).expect("ca65 assemble");
@@ -318,8 +359,8 @@ fn curriculum_is_byte_identical() {
     }
 
     // --- Z80 / PasmoNext + sjasmplus (Spectrum, Gloaming) ------------------
-    let gloaming = root.join("code-samples/sinclair-zx-spectrum/assembly/gloaming");
-    let z80_files = main_asms(&gloaming);
+    let spectrum = root.join("code-samples/sinclair-zx-spectrum/assembly");
+    let z80_files: Vec<_> = games(&spectrum).iter().flat_map(|g| main_asms(g)).collect();
     if have("pasmo") {
         for file in &z80_files {
             let src = fs::read_to_string(file).expect("read source");
@@ -396,10 +437,7 @@ fn curriculum_is_byte_identical() {
     // --- 68000 / vasm (Amiga, signal + exodus) ----------------------------
     if have("vasmm68k_mot") {
         let amiga = root.join("code-samples/commodore-amiga/assembly");
-        let files: Vec<_> = main_asms(&amiga.join("signal"))
-            .into_iter()
-            .chain(main_asms(&amiga.join("exodus")))
-            .collect();
+        let files: Vec<_> = games(&amiga).iter().flat_map(|g| main_asms(g)).collect();
         for file in &files {
             let src = fs::read_to_string(file).expect("read source");
             // Hunk executable (every unit): loadable-image parity — compare with
