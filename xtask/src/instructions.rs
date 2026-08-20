@@ -7,11 +7,11 @@
 //!
 //! # What is not here
 //!
-//! **Provenance links.** R1 also wants each page to link into the umbrella
-//! `reference/` datasheet library. The spec has no field for it: ten of the
-//! nineteen modules carry a `**Provenance.**` paragraph in their doc comment
-//! and nine — including 6502, Z80 and 65816 — carry nothing. Generating a
-//! citation would mean inventing one, which is worse than having none.
+//! **Provenance links.** R1 asks each page to link into the umbrella
+//! `reference/` datasheet library. Pages name their sources instead, from
+//! `isa::provenance`. The library is private, and
+//! `decisions/citing-restricted-provenance-sources.md` rules out linking
+//! restricted material regardless of where it is held.
 //!
 //! **Six CPUs.** The 68000, 6809, TMS9900, PDP-11, CP1610 and Z8000 encode
 //! with models a form table cannot describe, and are listed on the index page
@@ -822,36 +822,28 @@ fn machines(module: &str) -> String {
     format!("\n## Machines\n\n{listed}\n")
 }
 
-/// The provenance footer for one CPU's page.
+/// The source list for one CPU's page.
 ///
-/// R1 asks each page to reach back into the primary reference library. The
-/// library is a private repository, so this names the documents and where they
-/// sit in it rather than pretending to offer a link — naming the document is
-/// what lets anyone holding the same datasheet check the spec against it.
+/// Covers R1. Sources are named rather than linked: the reference library is a
+/// private repository, and `decisions/citing-restricted-provenance-sources.md`
+/// rules out linking restricted material in any case. `Source::library` still
+/// records where each document sits, for use inside this repo.
 fn provenance(module: &str) -> String {
     let sources = isa::provenance::sources_for(module);
     if sources.is_empty() {
         return String::new();
     }
-    let mut out = String::from(
-        "\n## Provenance\n\nThis specification was authored from the following, in the \
-         family's primary reference library:\n\n",
-    );
+    let mut out = String::from("\n## Sources\n\nEncodings on this page were taken from:\n\n");
     for source in sources {
         let year = source.year.map_or(String::new(), |y| format!(", {y}"));
         let _ = writeln!(
             out,
-            "- *{}* — {}{} (`{}`)",
+            "- *{}* — {}{}",
             cell(source.title),
             cell(source.attribution),
-            year,
-            source.library
+            year
         );
     }
-    out.push_str(
-        "\nNot from any emulator's decode loop: an emulator is a reading of the \
-         hardware, and this is meant to be a reading of the documentation.\n",
-    );
     out
 }
 
@@ -870,8 +862,8 @@ fn render_index(cpus: &[Cpu], word: &[WordCpu]) -> String {
     out.push_str(
         "\nOne page per CPU, generated from the instruction-set specification the\n\
          assembler encodes with. A spec change regenerates these pages, and CI fails\n\
-         if a committed page has fallen behind — so what you read here is what the\n\
-         assembler does, not what someone remembered it did.\n\n",
+         if a committed page has fallen behind. Each page lists the manuals and\n\
+         datasheets its specification was written from.\n\n",
     );
 
     let _ = writeln!(out, "| CPU | Mnemonics | Forms | Byte order |");
@@ -919,16 +911,7 @@ fn render_index(cpus: &[Cpu], word: &[WordCpu]) -> String {
          word rather than a byte count; the 6809 groups by operand shape, because its\n\
          indexed mode computes its own length from a postbyte; and the Z8000 is\n\
          specified family by family, because its families genuinely differ.\n\n\
-         Every CPU the assembler has a specification for is documented here.\n\n\
-         ## Provenance\n\n\
-         Every page here says which documents its specification was authored from,\n\
-         and where they sit in the family's primary reference library. That library\n\
-         is a private repository, so a citation names the document rather than\n\
-         offering a link — naming it is what lets anyone holding the same datasheet\n\
-         check the specification against it.\n\n\
-         None of them is authored from an emulator's decode loop. An emulator is a\n\
-         reading of the hardware; these are meant to be a reading of the\n\
-         documentation, and the two are worth keeping apart.\n",
+         Every CPU the assembler has a specification for is documented here.\n",
     );
     out
 }
@@ -1143,16 +1126,15 @@ mod tests {
 
     /// No CPU is documented without saying where its specification came from.
     ///
-    /// R1's whole claim is that these pages are a reading of the datasheets. A
-    /// page with no citation makes that claim without backing it, which is
-    /// worse than a page that does not exist — and it is the state nine of
-    /// these CPUs were in until the provenance table landed.
+    /// R1 rests on these pages being a reading of the datasheets, so an
+    /// uncited page is not evidence of anything. Nine CPUs were uncited before
+    /// the provenance table landed.
     #[test]
     fn every_generated_page_cites_its_sources() {
         let uncited: Vec<String> = pages()
             .iter()
             .filter(|p| p.path.starts_with("instructions/"))
-            .filter(|p| !p.body.contains("## Provenance"))
+            .filter(|p| !p.body.contains("## Sources"))
             .map(|p| p.path.clone())
             .collect();
         assert!(

@@ -454,10 +454,8 @@ Delay
 
 Science of Cambridge MK14
 
-## Provenance
+## Sources
 
-This specification was authored from the following, in the family's primary reference library:
+Encodings on this page were taken from:
 
-- *SC/MP Technical Description, 4200079A* — National Semiconductor (`by-topic/cpu-scmp/`)
-
-Not from any emulator's decode loop: an emulator is a reading of the hardware, and this is meant to be a reading of the documentation.
+- *SC/MP Technical Description, 4200079A* — National Semiconductor

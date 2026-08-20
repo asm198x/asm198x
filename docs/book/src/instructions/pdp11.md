@@ -128,10 +128,8 @@ This CPU encodes an instruction as an opcode **word** whose operand fields are b
 
 DEC PDP-11
 
-## Provenance
+## Sources
 
-This specification was authored from the following, in the family's primary reference library:
+Encodings on this page were taken from:
 
-- *PDP-11 Processor Handbook, EB-19402-20* — Digital Equipment Corporation, 1981 (`by-topic/cpu-pdp11/`)
-
-Not from any emulator's decode loop: an emulator is a reading of the hardware, and this is meant to be a reading of the documentation.
+- *PDP-11 Processor Handbook, EB-19402-20* — Digital Equipment Corporation, 1981

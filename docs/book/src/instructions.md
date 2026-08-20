@@ -4,8 +4,8 @@
 
 One page per CPU, generated from the instruction-set specification the
 assembler encodes with. A spec change regenerates these pages, and CI fails
-if a committed page has fallen behind — so what you read here is what the
-assembler does, not what someone remembered it did.
+if a committed page has fallen behind. Each page lists the manuals and
+datasheets its specification was written from.
 
 | CPU | Mnemonics | Forms | Byte order |
 |---|---|---|---|
@@ -42,15 +42,3 @@ indexed mode computes its own length from a postbyte; and the Z8000 is
 specified family by family, because its families genuinely differ.
 
 Every CPU the assembler has a specification for is documented here.
-
-## Provenance
-
-Every page here says which documents its specification was authored from,
-and where they sit in the family's primary reference library. That library
-is a private repository, so a citation names the document rather than
-offering a link — naming it is what lets anyone holding the same datasheet
-check the specification against it.
-
-None of them is authored from an emulator's decode loop. An emulator is a
-reading of the hardware; these are meant to be a reading of the
-documentation, and the two are worth keeping apart.
