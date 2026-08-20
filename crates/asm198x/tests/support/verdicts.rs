@@ -230,18 +230,10 @@ pub fn sha256_hex(bytes: &[u8]) -> String {
 
 /// The Code198x checkout the curriculum suite reads from.
 ///
-/// `ASM198X_CODE_SAMPLES` wins when set, which is how CI points at a checkout
-/// inside the workspace; otherwise the sibling container two levels above, as
-/// on a development machine. Shared so recording and replay never disagree
-/// about where the curriculum is.
+/// Re-exported from `verdict_corpus` so recording, replay and the parity
+/// figures all resolve the checkout the same way.
 pub fn code_samples_root() -> Option<PathBuf> {
-    if let Some(dir) = std::env::var_os("ASM198X_CODE_SAMPLES") {
-        let p = PathBuf::from(dir);
-        return p.is_dir().then_some(p);
-    }
-    let p = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../../../Code198x");
-    let p = p.canonicalize().ok()?;
-    p.is_dir().then_some(p)
+    verdict_corpus::curriculum::root()
 }
 
 /// The key for a curriculum verdict.

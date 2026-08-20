@@ -40,70 +40,16 @@ fn have(bin: &str) -> bool {
 
 /// Every game directory under a machine's assembly tree.
 ///
-/// Enumerated rather than named. Naming them meant a track was invisible to
-/// this suite until someone remembered to add it, and four `meet-the-machine`
-/// tracks sat unchecked that way — the assembler was never asked about them,
-/// which reads identically to passing.
+/// The rule for what counts as curriculum source lives in `verdict_corpus`, so
+/// this suite and the published parity figures walk the same set. See that
+/// module for why it is not duplicated here.
 fn games(machine: &Path) -> Vec<PathBuf> {
-    let Ok(entries) = fs::read_dir(machine) else {
-        return Vec::new();
-    };
-    let mut out: Vec<PathBuf> = entries
-        .flatten()
-        .map(|e| e.path())
-        .filter(|p| p.is_dir())
-        .collect();
-    out.sort();
-    out
+    verdict_corpus::curriculum::games(machine)
 }
 
 /// The buildable `.asm` files in a project.
-///
-/// The curriculum stores a unit one of two ways, and both are buildable:
-///
-/// - a single `.asm` directly in the `unit-*` directory; or
-/// - a **cumulative build** in `steps/`, one file per step, each of which
-///   carries its own `org` and `end` and runs on its own.
-///
-/// Only the first was collected before, so a step-based track yielded nothing —
-/// the whole Spectrum curriculum was invisible apart from one unit that happens
-/// to keep a stray `.asm` at the top level.
-///
-/// `snippets/` is still skipped: those are fragments quoted by the prose, not
-/// programs, and `capture/` holds screenshot scripts rather than source.
 fn main_asms(project: &Path) -> Vec<PathBuf> {
-    let mut out = Vec::new();
-    let Ok(units) = fs::read_dir(project) else {
-        return out;
-    };
-    for unit in units.flatten() {
-        let dir = unit.path();
-        let is_unit = dir.is_dir()
-            && dir
-                .file_name()
-                .and_then(|n| n.to_str())
-                .is_some_and(|n| n.starts_with("unit-"));
-        if !is_unit {
-            continue;
-        }
-        push_asms(&dir, &mut out);
-        push_asms(&dir.join("steps"), &mut out);
-    }
-    out.sort();
-    out
-}
-
-/// Append every `.asm` directly inside `dir`, if it exists.
-fn push_asms(dir: &Path, out: &mut Vec<PathBuf>) {
-    let Ok(files) = fs::read_dir(dir) else {
-        return;
-    };
-    for f in files.flatten() {
-        let fp = f.path();
-        if fp.is_file() && fp.extension().and_then(|e| e.to_str()) == Some("asm") {
-            out.push(fp);
-        }
-    }
+    verdict_corpus::curriculum::sources(project)
 }
 
 fn label(file: &Path) -> String {

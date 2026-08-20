@@ -494,6 +494,7 @@ impl fmt::Display for ParseError {
 
 impl std::error::Error for ParseError {}
 
+pub mod curriculum;
 pub mod derive;
 
 #[cfg(test)]
