@@ -218,6 +218,142 @@ macro_rules! op {
 }
 
 /// The 6809 instruction set (a representative subset; grows mechanically).
+/// One-line descriptions, keyed by mnemonic.
+///
+/// **Provenance.** Authored from Motorola's *MC6809-MC6809E 8-Bit
+/// Microprocessor Programming Manual* (1981) and the MC6809E datasheet (1984),
+/// both in the primary library at `reference/by-topic/cpu-6809/`, via the
+/// distilled `cpu-6809-reference.md` there.
+///
+/// A separate table rather than a field on [`Insn`], because the instruction
+/// table is built from terse constructors — `Insn::mem("lda", …)` — and
+/// threading a string through all five of them would bury the opcodes this
+/// file exists to state. [`summary`] resolves it, and a test asserts the two
+/// tables agree in both directions, so neither a missing description nor a
+/// stale one for a removed instruction can go unnoticed.
+const SUMMARIES: &[(&str, &str)] = &[
+    ("lda", "Load accumulator A"),
+    ("ldb", "Load accumulator B"),
+    ("sta", "Store accumulator A"),
+    ("stb", "Store accumulator B"),
+    ("ldd", "Load D"),
+    ("std", "Store D"),
+    ("ldx", "Load index register X"),
+    ("stx", "Store index register X"),
+    ("ldy", "Load index register Y"),
+    ("sty", "Store index register Y"),
+    ("ldu", "Load user stack pointer"),
+    ("stu", "Store user stack pointer"),
+    ("lds", "Load hardware stack pointer"),
+    ("sts", "Store hardware stack pointer"),
+    ("adda", "Add to accumulator A"),
+    ("addb", "Add to accumulator B"),
+    ("addd", "Add to D"),
+    ("suba", "Subtract from accumulator A"),
+    ("subb", "Subtract from accumulator B"),
+    ("subd", "Subtract from D"),
+    ("cmpa", "Compare accumulator A"),
+    ("cmpb", "Compare accumulator B"),
+    ("cmpx", "Compare index register X"),
+    ("cmpu", "Compare user stack pointer"),
+    ("cmps", "Compare hardware stack pointer"),
+    ("anda", "Logical AND with accumulator A"),
+    ("andb", "Logical AND with accumulator B"),
+    ("ora", "Logical OR with accumulator A"),
+    ("orb", "Logical OR with accumulator B"),
+    ("eora", "Exclusive OR with accumulator A"),
+    ("eorb", "Exclusive OR with accumulator B"),
+    ("andcc", "AND the condition-code register with an immediate"),
+    ("orcc", "OR the condition-code register with an immediate"),
+    ("clr", "Clear memory"),
+    ("inc", "Increment memory"),
+    ("dec", "Decrement memory"),
+    ("tst", "Test memory"),
+    ("com", "Complement memory"),
+    ("neg", "Negate memory"),
+    ("lsr", "Logical shift right"),
+    ("ror", "Rotate right through carry"),
+    ("asr", "Arithmetic shift right"),
+    ("asl", "Arithmetic shift left"),
+    ("lsl", "Logical shift left (the same opcode as ASL)"),
+    ("rol", "Rotate left through carry"),
+    ("jmp", "Jump"),
+    ("jsr", "Jump to subroutine"),
+    ("leax", "Load effective address into X"),
+    ("leay", "Load effective address into Y"),
+    ("leau", "Load effective address into U"),
+    ("leas", "Load effective address into S"),
+    ("nop", "No operation"),
+    ("sync", "Synchronise to interrupt"),
+    ("rts", "Return from subroutine"),
+    ("rti", "Return from interrupt"),
+    ("swi", "Software interrupt"),
+    ("swi2", "Software interrupt 2"),
+    ("swi3", "Software interrupt 3"),
+    ("abx", "Add B to X, unsigned"),
+    ("mul", "Multiply A by B, unsigned, into D"),
+    ("sex", "Sign-extend B into A"),
+    ("daa", "Decimal adjust A after a BCD add"),
+    ("clra", "Clear accumulator A"),
+    ("clrb", "Clear accumulator B"),
+    ("nega", "Negate accumulator A"),
+    ("negb", "Negate accumulator B"),
+    ("coma", "Complement accumulator A"),
+    ("comb", "Complement accumulator B"),
+    ("inca", "Increment accumulator A"),
+    ("incb", "Increment accumulator B"),
+    ("deca", "Decrement accumulator A"),
+    ("decb", "Decrement accumulator B"),
+    ("tsta", "Test accumulator A"),
+    ("tstb", "Test accumulator B"),
+    ("lsra", "Logical shift right accumulator A"),
+    ("lsrb", "Logical shift right accumulator B"),
+    ("rora", "Rotate accumulator A right through carry"),
+    ("rorb", "Rotate accumulator B right through carry"),
+    ("asra", "Arithmetic shift right accumulator A"),
+    ("asrb", "Arithmetic shift right accumulator B"),
+    ("asla", "Arithmetic shift left accumulator A"),
+    ("aslb", "Arithmetic shift left accumulator B"),
+    ("lsla", "Logical shift left accumulator A"),
+    ("lslb", "Logical shift left accumulator B"),
+    ("rola", "Rotate accumulator A left through carry"),
+    ("rolb", "Rotate accumulator B left through carry"),
+    ("tfr", "Transfer one register to another"),
+    ("exg", "Exchange two registers"),
+    ("pshs", "Push registers onto the hardware stack"),
+    ("puls", "Pull registers from the hardware stack"),
+    ("pshu", "Push registers onto the user stack"),
+    ("pulu", "Pull registers from the user stack"),
+    ("bra", "Branch always"),
+    ("brn", "Branch never"),
+    ("bhi", "Branch if higher"),
+    ("bls", "Branch if lower or same"),
+    ("bcc", "Branch if carry clear"),
+    ("bhs", "Branch if higher or same"),
+    ("bcs", "Branch if carry set"),
+    ("blo", "Branch if lower"),
+    ("bne", "Branch if not equal"),
+    ("beq", "Branch if equal"),
+    ("bvc", "Branch if overflow clear"),
+    ("bvs", "Branch if overflow set"),
+    ("bpl", "Branch if plus"),
+    ("bmi", "Branch if minus"),
+    ("bge", "Branch if greater or equal"),
+    ("blt", "Branch if less than"),
+    ("bgt", "Branch if greater than"),
+    ("ble", "Branch if less or equal"),
+    ("bsr", "Branch to subroutine"),
+];
+
+/// The one-line description for a mnemonic, or `""` if it has none.
+#[must_use]
+pub fn summary(mnemonic: &str) -> &'static str {
+    SUMMARIES
+        .iter()
+        .find(|(m, _)| *m == mnemonic)
+        .map_or("", |(_, d)| *d)
+}
+
 pub static SET: &[Insn] = &[
     // --- 8-bit loads/stores --------------------------------------------------
     Insn::mem("lda", op![0x86], op![0x96], op![0xA6], op![0xB6], 1),
@@ -384,3 +520,36 @@ pub static SET: &[Insn] = &[
     Insn::branch("ble", op![0x2F], op![0x10, 0x2F]),
     Insn::branch("bsr", op![0x8D], op![0x17]),
 ];
+
+#[cfg(test)]
+mod summary_tests {
+    use super::{SET, SUMMARIES, summary};
+
+    /// Every instruction has a description, and every description belongs to an
+    /// instruction.
+    ///
+    /// The two tables are separate, so they can drift apart in both directions:
+    /// a new instruction with no description, or a description left behind by
+    /// one that was renamed or removed. Neither shows up as a build failure,
+    /// and the second is the quieter of the two — a stale entry that simply
+    /// never matches anything.
+    #[test]
+    fn summaries_and_instructions_agree() {
+        let missing: Vec<&str> = SET
+            .iter()
+            .filter(|i| summary(i.mnemonic).is_empty())
+            .map(|i| i.mnemonic)
+            .collect();
+        assert!(missing.is_empty(), "no description for: {missing:?}");
+
+        let orphaned: Vec<&str> = SUMMARIES
+            .iter()
+            .map(|(m, _)| *m)
+            .filter(|m| !SET.iter().any(|i| i.mnemonic == *m))
+            .collect();
+        assert!(
+            orphaned.is_empty(),
+            "described, but no such instruction: {orphaned:?}"
+        );
+    }
+}

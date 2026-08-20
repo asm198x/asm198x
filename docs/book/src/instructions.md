@@ -34,23 +34,21 @@ instead of by form:
 | [DEC PDP-11](instructions/pdp11.md) | 96 | little-endian |
 | [GI CP1610](instructions/cp1610.md) | 30 | big-endian |
 
-[Motorola 68000](instructions/m68k.md) has a page of its own shape again:
-it packs operand fields into the opcode word, so its forms give a base word
-and their operands rather than a byte count.
+[Motorola 68000](instructions/m68k.md) and [Motorola 6809](instructions/mos6809.md)
+each have a page of their own shape. The 68000 packs operand fields into the
+opcode word, so its forms give a base word rather than a byte count; the 6809
+groups by operand shape, because its indexed mode computes its own length
+from a postbyte.
 
 ## Not generated
 
-Two CPUs have no page here rather than a misleading one. Both assemble and
-disassemble normally; only the *reference table* is missing.
-
-**Zilog Z8000** — its spec is thirteen separate tables with thirteen element
-types, one per instruction family, rather than one list. Rendering it means
-thirteen renderers or a reshaped spec, and the second is the better question
-to answer first.
-
-**Motorola 6809** — computed operands: its postbyte selects an indexing mode
-whose length depends on the mode chosen. Its spec also carries no
-per-instruction summaries, so a table would be opcodes without prose.
+**Zilog Z8000** is the one CPU with no page here. Its specification is
+thirteen separate tables with thirteen element types, one per instruction
+family, rather than one list — so rendering it means thirteen renderers, or
+reshaping the spec first. The second is the better question to answer, and it
+is a question about the specification rather than about documentation. The
+Z8000 assembles and disassembles normally; only the reference table is
+missing.
 
 ## Provenance
 
