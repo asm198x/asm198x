@@ -29,4 +29,5 @@
   - [TI TMS9900](instructions/tms9900.md)
   - [DEC PDP-11](instructions/pdp11.md)
   - [GI CP1610](instructions/cp1610.md)
+  - [Motorola 68000](instructions/m68k.md)
 <!-- /generated -->

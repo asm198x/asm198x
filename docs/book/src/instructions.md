@@ -34,24 +34,23 @@ instead of by form:
 | [DEC PDP-11](instructions/pdp11.md) | 96 | little-endian |
 | [GI CP1610](instructions/cp1610.md) | 30 | big-endian |
 
+[Motorola 68000](instructions/m68k.md) has a page of its own shape again:
+it packs operand fields into the opcode word, so its forms give a base word
+and their operands rather than a byte count.
+
 ## Not generated
 
-Three CPUs have no page here rather than a misleading one. All three
-assemble and disassemble normally; only the *reference table* is missing.
+Two CPUs have no page here rather than a misleading one. Both assemble and
+disassemble normally; only the *reference table* is missing.
 
-**Zilog Z8000** — word-oriented like the three above, but its entries carry
-an operand-size and an addressing-mode bitmask as well as a class, so it
-needs more than their shared renderer gives.
+**Zilog Z8000** — its spec is thirteen separate tables with thirteen element
+types, one per instruction family, rather than one list. Rendering it means
+thirteen renderers or a reshaped spec, and the second is the better question
+to answer first.
 
-**Motorola 68000** — field-packed effective addresses: an operand's meaning
-lives in bit fields inside the opcode word, and how many extension words
-follow depends on the mode those bits select.
-
-**Motorola 6809** — computed operands. Its postbyte selects an indexing
-mode whose length depends on the mode chosen.
-
-The same field-packed gap affects the spec-query and cycle-analyzer work,
-so the answer wants deciding once rather than three times.
+**Motorola 6809** — computed operands: its postbyte selects an indexing mode
+whose length depends on the mode chosen. Its spec also carries no
+per-instruction summaries, so a table would be opcodes without prose.
 
 ## Provenance
 

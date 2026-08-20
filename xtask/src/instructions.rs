@@ -267,6 +267,85 @@ fn render_word_cpu(cpu: &WordCpu) -> String {
     out
 }
 
+/// The 68000, which has its own model again: a mnemonic and a summary, then
+/// forms carrying a base opcode *word*, a size encoding, and operand slots.
+///
+/// Close to the byte-oriented model in shape, and nothing like it underneath —
+/// an operand's bits live inside the opcode word, and how many extension words
+/// follow depends on the effective address those bits select. So the table
+/// gives the base word and what the operands are, not a byte count.
+fn render_m68k() -> String {
+    let mut out = String::from("# Motorola 68000\n\n");
+    out.push_str(&generated_note("m68k"));
+
+    let forms: usize = isa::m68k::SET
+        .instructions
+        .iter()
+        .map(|i| i.forms.len())
+        .sum();
+    let _ = write!(
+        out,
+        "\n{} mnemonics, {} forms, words big-endian. Generated from \
+         [`crates/isa/src/m68k.rs`](https://github.com/asm198x/asm198x/blob/main/crates/isa/src/m68k.rs).\n\n\
+         The 68000 packs operand fields into the opcode word itself, and how many \
+         extension words follow depends on the effective address those fields \
+         select — so a form gives its **base** opcode word, the sizes it assembles \
+         at, and its operands, rather than a fixed byte count.\n\n\
+         This is the curriculum subset, and it grows: a mnemonic absent here is \
+         absent from the assembler too.\n",
+        isa::m68k::SET.instructions.len(),
+        forms,
+    );
+
+    out.push_str("\n## Operands\n\n| Written | Meaning |\n|---|---|\n");
+    let mut seen: Vec<&str> = Vec::new();
+    for slot in isa::m68k::SET
+        .instructions
+        .iter()
+        .flat_map(|i| i.forms)
+        .flat_map(|f| f.operands)
+    {
+        if seen.contains(&slot.symbol()) {
+            continue;
+        }
+        seen.push(slot.symbol());
+        let _ = writeln!(
+            out,
+            "| `{}` | {} |",
+            cell(slot.symbol()),
+            cell(slot.describe())
+        );
+    }
+
+    for instruction in isa::m68k::SET.instructions {
+        let _ = write!(
+            out,
+            "\n## {}\n\n{}\n\n",
+            instruction.mnemonic, instruction.summary
+        );
+        out.push_str("| Sizes | Base word | Operands |\n|---|---|---|\n");
+        for form in instruction.forms {
+            let operands = if form.operands.is_empty() {
+                "—".to_string()
+            } else {
+                form.operands
+                    .iter()
+                    .map(|o| o.symbol())
+                    .collect::<Vec<_>>()
+                    .join(", ")
+            };
+            let _ = writeln!(
+                out,
+                "| {} | `{:04X}` | {} |",
+                cell(form.size.sizes()),
+                form.base,
+                cell(&operands)
+            );
+        }
+    }
+    out
+}
+
 /// A page the generator owns entirely: path under the book's `src`, and its
 /// content.
 pub struct Page {
@@ -290,6 +369,10 @@ pub fn pages() -> Vec<Page> {
         body: render_word_cpu(cpu),
     }));
     out.push(Page {
+        path: "instructions/m68k.md".to_string(),
+        body: render_m68k(),
+    });
+    out.push(Page {
         path: "instructions.md".to_string(),
         body: render_index(&cpus, &word_cpus()),
     });
@@ -306,6 +389,7 @@ pub fn summary_lines() -> String {
     for cpu in word_cpus() {
         let _ = writeln!(out, "  - [{}](instructions/{}.md)", cpu.name, cpu.slug);
     }
+    out.push_str("  - [Motorola 68000](instructions/m68k.md)\n");
     out
 }
 
@@ -367,19 +451,19 @@ fn render_index(cpus: &[Cpu], word: &[WordCpu]) -> String {
     }
 
     out.push_str(
-        "\n## Not generated\n\n\
-         Three CPUs have no page here rather than a misleading one. All three\n\
-         assemble and disassemble normally; only the *reference table* is missing.\n\n\
-         **Zilog Z8000** — word-oriented like the three above, but its entries carry\n\
-         an operand-size and an addressing-mode bitmask as well as a class, so it\n\
-         needs more than their shared renderer gives.\n\n\
-         **Motorola 68000** — field-packed effective addresses: an operand's meaning\n\
-         lives in bit fields inside the opcode word, and how many extension words\n\
-         follow depends on the mode those bits select.\n\n\
-         **Motorola 6809** — computed operands. Its postbyte selects an indexing\n\
-         mode whose length depends on the mode chosen.\n\n\
-         The same field-packed gap affects the spec-query and cycle-analyzer work,\n\
-         so the answer wants deciding once rather than three times.\n\n\
+        "\n[Motorola 68000](instructions/m68k.md) has a page of its own shape again:\n\
+         it packs operand fields into the opcode word, so its forms give a base word\n\
+         and their operands rather than a byte count.\n\n\
+         ## Not generated\n\n\
+         Two CPUs have no page here rather than a misleading one. Both assemble and\n\
+         disassemble normally; only the *reference table* is missing.\n\n\
+         **Zilog Z8000** — its spec is thirteen separate tables with thirteen element\n\
+         types, one per instruction family, rather than one list. Rendering it means\n\
+         thirteen renderers or a reshaped spec, and the second is the better question\n\
+         to answer first.\n\n\
+         **Motorola 6809** — computed operands: its postbyte selects an indexing mode\n\
+         whose length depends on the mode chosen. Its spec also carries no\n\
+         per-instruction summaries, so a table would be opcodes without prose.\n\n\
          ## Provenance\n\n\
          These specs are authored from datasheets in the family's primary reference\n\
          library, not extracted from an emulator's decode loop. That provenance is\n\
