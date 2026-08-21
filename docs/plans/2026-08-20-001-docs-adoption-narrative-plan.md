@@ -320,6 +320,26 @@ The introduction shrinks to orientation and stops trying to sell, because `/why`
     - *`fmt` and `disasm` are linked rather than repeated*, since steps 9 and 10
       gave both their own worked pages.
 12. **`/compare`.** The generated version table is available today; schedule it against how much hand-written feature comparison it needs.
+    - *Done 2026-08-21, and the answer to "how much hand-written comparison" is
+      none.* The page says outright that it makes no claim about what any other
+      assembler can do, and why: a feature table is a claim about software we do
+      not control and do not track, so it goes wrong on their release schedule
+      without anyone touching it — the failure the rest of these pages exist to
+      avoid. Writing one from memory would be worse.
+    - *What it offers instead* is the comparison we can stand behind: the tools
+      we measured against with each one's own version self-report
+      (`xtask compare --markdown`, from `Arbiter.identity`), what we produce, and
+      every place we knowingly differ.
+    - *The version column says "what we measured against", not "current".* That
+      is what lets the table stay true when a reference tool ships — it records
+      an observation rather than a claim about the world.
+    - *A cross-check fell out of it:* the per-tool verdict counts sum to 5,625,
+      which is the figure `/why` reports from a different query over the same
+      corpus.
+
+**Sequencing complete.** Steps 1–12 are done. Search remains deferred (see
+Outstanding Questions), and the landing page's own parity figures moved to
+generated in step 3.
 
 Per-dialect worked programs are not sequenced here. They land on the generated dialect pages when those exist, which is the v1 bar's step 6.
 

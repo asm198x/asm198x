@@ -6,6 +6,7 @@
 //! way locally and in CI, without a shell script that drifts from what the
 //! corpus actually holds.
 
+mod compare;
 mod coverage;
 mod divergences;
 mod docs;
