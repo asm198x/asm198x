@@ -18,7 +18,7 @@ lists all 24, and what each one is the syntax of.
 
 ## What arrives with it
 
-| | Scope |
+| Capability | Scope |
 |---|---|
 | One binary, 20 CPUs | One install for every machine you target, rather than a toolchain per machine |
 | `fmt` — canonical layout, idempotent | Z80, 8080, 6800, CDP1802, SC/MP, SM83 and 6809 |
