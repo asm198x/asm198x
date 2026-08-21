@@ -15,6 +15,21 @@
       "items": [
         {
           "children": [],
+          "slug": "quickstart",
+          "title": "Quickstart"
+        },
+        {
+          "children": [],
+          "slug": "install",
+          "title": "Install"
+        }
+      ],
+      "title": "Start here"
+    },
+    {
+      "items": [
+        {
+          "children": [],
           "slug": "guide/first-program",
           "title": "A first program"
         },

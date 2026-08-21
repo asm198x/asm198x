@@ -9,35 +9,12 @@ screen.
 
 ## Installing
 
-Each release attaches an installer and platform archives to its
-[GitHub Release](https://github.com/asm198x/asm198x/releases), and publishes a
-Homebrew formula.
-
 ```sh
-# Homebrew (macOS, Linux)
 brew install asm198x/tap/asm198x
 ```
 
-Homebrew asks you to trust a third-party formula the first time. Approving
-`asm198x/tap/asm198x` trusts that one formula; `brew trust --tap asm198x/tap`
-would trust everything the tap publishes, now and in future. Prefer the
-formula.
-
-```sh
-# macOS / Linux
-curl --proto '=https' --tlsv1.2 -LsSf https://github.com/asm198x/asm198x/releases/latest/download/asm198x-installer.sh | sh
-```
-
-```powershell
-# Windows
-irm https://github.com/asm198x/asm198x/releases/latest/download/asm198x-installer.ps1 | iex
-```
-
-Or download an archive directly: `aarch64-apple-darwin`, `x86_64-apple-darwin`,
-`x86_64-unknown-linux-gnu`, `x86_64-pc-windows-msvc`.
-
-asm198x is **not** published to crates.io, so `cargo install asm198x` will not
-find it. Use the installer or one of the archives above.
+Installer scripts, platform archives and the reason `cargo install` will not
+find it are on [Install](../install.md).
 
 ## Operations
 
