@@ -9,10 +9,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.23](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.22...asm198x-v0.0.23) - 2026-08-21
 
-### Other
+### Added
 
-- /why understated fmt and disasm by most of their coverage ([#171](https://github.com/asm198x/asm198x/pull/171))
-- Explain multi-file projects, with the resolution anchors generated ([#168](https://github.com/asm198x/asm198x/pull/168))
+- Four guide pages, covering the things the options table names and nothing
+  explained: **projects in more than one file**, **when assembling is not the
+  last step**, **keeping source tidy** and **reading a binary back**.
+  ([#168](https://github.com/asm198x/asm198x/pull/168),
+  [#170](https://github.com/asm198x/asm198x/pull/170),
+  [#172](https://github.com/asm198x/asm198x/pull/172))
+- A relative `include` resolves against a different directory depending on the
+  dialect — the including file's own, that plus each enclosing includer's, or
+  the root input's — each pinned against its own reference assembler. That was
+  true before and stated nowhere. The table is generated from
+  `asm198x::includes::resolution()`, a new public accessor that most dialects
+  answer straight off the semantics their multi-file walk runs on.
+  ([#168](https://github.com/asm198x/asm198x/pull/168))
+- Every listing, diagnostic and formatted example on the new pages is compared
+  against what the binary prints, so a page cannot describe output the tool no
+  longer produces. ([#172](https://github.com/asm198x/asm198x/pull/172))
+
+### Fixed
+
+- *Why asm198x* understated two capabilities by most of their coverage. It said
+  `fmt` handled seven CPU families and not the 6502, and that `disasm` read
+  6502 and Z80. Both cover **every dialect**. A test now runs each operation for
+  every name `--dialect` accepts, so the claim fails the build if it stops being
+  true. ([#171](https://github.com/asm198x/asm198x/pull/171))
 
 ## [0.0.22](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.21...asm198x-v0.0.22) - 2026-08-21
 
