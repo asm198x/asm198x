@@ -37,4 +37,4 @@ verdict-corpus = { path = "../verdict-corpus" }
 # Hashes each reference assembler's binary, so a verdict records which build
 # produced it. Dev-only: the shipped assembler must never link it, which
 # `cargo tree -p asm198x --edges normal` asserts in CI.
-sha2 = "0.10"
+sha2 = "0.11"
