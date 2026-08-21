@@ -39,11 +39,38 @@ use std::collections::BTreeMap;
 use crate::dialect::{Dialect, Oversize};
 use crate::dialects::macros::{self, Expand};
 use crate::dialects::z80::{self, Z80Syntax};
+use crate::directives::{Category, Directive, Pattern};
 use crate::engine::{AsmError, Operation, Statement};
 use crate::source::{SourceLoader, SourceMap};
 
 /// The sjasmplus Z80 dialect. `z80n` selects the target instruction set
 /// (sjasmplus emits Z80N when targeting the Next).
+/// What sjasmplus accepts beyond the shared Z80 base.
+///
+/// `bytes` overrides the base entry rather than adding a second one:
+/// sjasmplus spells `db` four ways and adds `byte`, and two entries claiming
+/// one concept would show as two rows in a matrix.
+///
+/// `include` is here and is not in pasmo's list, which is the difference this
+/// declaration exists to make visible.
+pub const DIRECTIVES: &[Directive] = &[
+    Directive {
+        id: "bytes",
+        pattern: Pattern::Exact(&["defb", "db", "defm", "dm", "byte"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "include",
+        pattern: Pattern::Exact(&["include"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "incbin",
+        pattern: Pattern::Exact(&["incbin"]),
+        category: Category::Operation,
+    },
+];
+
 pub(crate) struct Sjasmplus {
     pub(crate) z80n: bool,
 }

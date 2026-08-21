@@ -15,11 +15,26 @@
 use crate::dialect::{Dialect, Oversize};
 use crate::dialects::macros::{self, Expand};
 use crate::dialects::z80::{self, Z80Syntax};
+use crate::directives::{Category, Directive, Pattern};
 use crate::engine::{AsmError, Statement};
 use crate::source::{SourceLoader, SourceMap};
 
 /// The pasmo-family Z80 dialect. `z80n` selects the target: `false` for a plain
 /// Z80 (vanilla pasmo), `true` for the Spectrum Next's Z80N (pasmonext).
+/// What pasmo accepts beyond the shared Z80 base.
+///
+/// `incbin` and **no include**. That is not an oversight in this list: pasmo's
+/// include is unimplemented, so a multi-file pasmo project does not assemble.
+/// Declaring the absence is the point — a generated matrix shows sjasmplus with
+/// an `include` row and pasmo without one, where before the difference could
+/// only be found by assembling a project and reading `unknown instruction
+/// INCLUDE`.
+pub const DIRECTIVES: &[Directive] = &[Directive {
+    id: "incbin",
+    pattern: Pattern::Exact(&["incbin"]),
+    category: Category::Operation,
+}];
+
 pub(crate) struct Pasmo {
     pub(crate) z80n: bool,
 }
