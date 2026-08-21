@@ -8,11 +8,11 @@ repository.workspace = true
 publish = false
 
 [dependencies]
-isa = { path = "../crates/isa", version = "0.0.21" }
+isa = { path = "../crates/isa", version = "0.0.22" }
 # The docs task generates from the same dialect table `--dialect` resolves
 # against, so the book cannot describe a surface the binary does not have.
-asm198x = { path = "../crates/asm198x", version = "0.0.21" }
-verdict-corpus = { path = "../crates/verdict-corpus", version = "0.0.21" }
+asm198x = { path = "../crates/asm198x", version = "0.0.22" }
+verdict-corpus = { path = "../crates/verdict-corpus", version = "0.0.22" }
 # The parity data file carries reference-tool identity strings, which contain
 # quotes and parentheses. Hand-rolled JSON escaping is a bug waiting; this is
 # the same workspace dependency four other crates already use.
