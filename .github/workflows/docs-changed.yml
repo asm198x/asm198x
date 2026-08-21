@@ -1,0 +1,45 @@
+name: Docs changed
+
+# Tell the site when the documentation moves.
+#
+# `asm198x.github.io` has always listened for this dispatch and nothing has ever
+# sent it, so the only automatic path from a documentation change to a published
+# page was that repository's cron. A change could wait days.
+#
+# Sending it needs write access to the site repository, which `GITHUB_TOKEN`
+# does not have — it is scoped to this repository alone. The step is skipped
+# when no token is configured rather than failing on every documentation push;
+# the site's daily cron remains the backstop until one exists.
+#
+# To enable: create a fine-grained token with `contents: write` on
+# `asm198x/asm198x.github.io` and store it as `SITE_DISPATCH_TOKEN`.
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "docs/**"
+
+permissions: {}
+
+jobs:
+  notify:
+    name: Notify the site
+    runs-on: ubuntu-latest
+    steps:
+      - name: Dispatch to asm198x.github.io
+        env:
+          TOKEN: ${{ secrets.SITE_DISPATCH_TOKEN }}
+        run: |
+          if [ -z "${TOKEN}" ]; then
+            echo "::notice::SITE_DISPATCH_TOKEN is not set; the site will pick this up on its next scheduled build"
+            exit 0
+          fi
+          curl --fail --silent --show-error \
+            -X POST \
+            -H "Accept: application/vnd.github+json" \
+            -H "Authorization: Bearer ${TOKEN}" \
+            -H "X-GitHub-Api-Version: 2022-11-28" \
+            https://api.github.com/repos/asm198x/asm198x.github.io/dispatches \
+            -d '{"event_type":"docs-changed"}'
+          echo "asked asm198x.github.io to rebuild"
