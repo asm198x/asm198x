@@ -12,6 +12,7 @@
 - [A first program](guide/first-program.md)
 - [The command line](reference/cli.md)
 - [Dialects](reference/dialects.md)
+- [Where we differ](divergences.md)
 
 # Reference
 

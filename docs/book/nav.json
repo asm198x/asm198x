@@ -42,6 +42,11 @@
           "children": [],
           "slug": "reference/dialects",
           "title": "Dialects"
+        },
+        {
+          "children": [],
+          "slug": "divergences",
+          "title": "Where we differ"
         }
       ],
       "title": "Using it"
