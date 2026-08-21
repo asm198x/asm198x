@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.19](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.18...asm198x-v0.0.19) - 2026-08-21
+
+### Other
+
+- *(docs)* lay the pages out at the URLs they are published at ([#153](https://github.com/asm198x/asm198x/pull/153))
+
 ## [0.0.18](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.17...asm198x-v0.0.18) - 2026-08-21
 
 ### Changed
