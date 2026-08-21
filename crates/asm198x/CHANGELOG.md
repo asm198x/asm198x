@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.23](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.22...asm198x-v0.0.23) - 2026-08-21
+
+### Other
+
+- /why understated fmt and disasm by most of their coverage ([#171](https://github.com/asm198x/asm198x/pull/171))
+- Explain multi-file projects, with the resolution anchors generated ([#168](https://github.com/asm198x/asm198x/pull/168))
+
 ## [0.0.22](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.21...asm198x-v0.0.22) - 2026-08-21
 
 ### Added
