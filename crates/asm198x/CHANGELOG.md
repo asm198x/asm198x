@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.22](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.21...asm198x-v0.0.22) - 2026-08-21
+
+### Added
+
+- *(directives)* declare the remaining dialects' vocabularies ([#164](https://github.com/asm198x/asm198x/pull/164))
+- *(directives)* convert the asl-family dialects to the declared surface ([#163](https://github.com/asm198x/asm198x/pull/163))
+- *(directives)* declare directive vocabularies as data ([#162](https://github.com/asm198x/asm198x/pull/162))
+
+### Other
+
+- Check what the binary prints, not only that it assembles ([#167](https://github.com/asm198x/asm198x/pull/167))
+- Prove the declared directive surface, and generate the migration table from it ([#165](https://github.com/asm198x/asm198x/pull/165))
+
 ## [0.0.21](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.20...asm198x-v0.0.21) - 2026-08-21
 
 ### Added
