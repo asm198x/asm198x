@@ -470,6 +470,26 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // Walk-handled, as in `ca65`: the multi-file walk reads these, never
+    // `parse_directive`. Declared because the surface describes the dialect.
+    Directive {
+        id: "include",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["include"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "incbin",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["incbin"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
 ];
 
 fn parse_directive(

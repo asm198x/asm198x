@@ -35,20 +35,41 @@ searched in the order given:
 asm198x --dialect acme -I src -I lib main.asm -o main.bin
 ```
 
-Each dialect keeps its own spelling of the include directive, because your
-source already has one:
+Each dialect keeps its own spelling, because your source already has one. The
+table is generated from the same declarations the assembler dispatches from, so
+a dialect that gains an include appears here without anyone remembering to add
+it:
 
-| Dialect | Spelling | Supported |
+<!-- generated: xtask includes --markdown -->
+| Dialect | Source file | Binary file |
 |---|---|---|
-| acme | `!source "file"` | Yes |
-| ca65 | `.include "file"` | Yes |
-| sjasmplus | `include "file"` | Yes |
-| vasm | `include "file"` | Yes |
-| pasmo | `include "file"` | **Not yet** |
+| `acme` | `!src`, `!source` | `!bin`, `!binary` |
+| `ca65` | `.include` | `.incbin` |
+| `65816` | `.include` | `.incbin` |
+| `huc6280` | `.include` | `.incbin` |
+| `vasm` | `include` | `incbin` |
+| `lwasm` | `include`, `use` | `includebin` |
+| `rgbasm` | `include` | `incbin` |
+| `pasmo` | — | `incbin` |
+| `sjasmplus` | `include` | `incbin` |
+| `8080` | `include` | `binclude` |
+| `6800` | `include` | `binclude` |
+| `1802` | `include` | `binclude` |
+| `8048` | `include` | `binclude` |
+| `scmp` | `include` | `binclude` |
+| `f8` | `include` | `binclude` |
+| `2650` | `include` | `binclude` |
+| `tms7000` | `include` | `binclude` |
+| `pdp11` | `include` | `binclude` |
+| `tms9900` | `include` | `binclude` |
+| `cp1610` | `include` | `binclude` |
+| `z8000` | `include` | `binclude` |
+<!-- /generated -->
 
-A multi-file pasmo project will not assemble today. It is the one front door
-where the include mechanism has not landed, and it is the thing to check first
-if that is your project.
+A dash means we do not read that directive yet, not that the dialect has no
+such thing — every reference tool here has both. Today there is one: a
+multi-file **pasmo** project will not assemble, and it is the thing to check
+first if that is your project.
 
 ## The output your build already expects
 

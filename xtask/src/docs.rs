@@ -169,6 +169,7 @@ fn generate(command: &str, path: &Path, repo: &Path) -> Result<String, String> {
         "asm198x dialects --markdown" => Ok(asm198x::dialect_table::markdown()),
         "xtask instructions --summary" => Ok(crate::instructions::summary_lines()),
         "xtask divergences --markdown" => Ok(crate::divergences::markdown(repo)),
+        "xtask includes --markdown" => Ok(crate::includes::markdown()),
         other => Err(format!(
             "{}: no generator for `{other}`\n\
              \n\

@@ -10,6 +10,7 @@ mod coverage;
 mod divergences;
 mod docs;
 mod grow;
+mod includes;
 mod instructions;
 mod ledger;
 mod machines;

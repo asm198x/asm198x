@@ -176,7 +176,7 @@ impl Directive {
 /// id and answer for the category in the same match — a `KnownUnsupported`
 /// spelling needs to be told apart from an unknown one at the point of refusal.
 #[must_use]
-pub fn lookup(surface: &'static [Directive], word: &str) -> Option<&'static Directive> {
+pub fn lookup<'a>(surface: &'a [Directive], word: &str) -> Option<&'a Directive> {
     surface.iter().find(|d| d.matches(word))
 }
 
@@ -184,7 +184,27 @@ pub fn lookup(surface: &'static [Directive], word: &str) -> Option<&'static Dire
 pub struct DialectSurface {
     /// The `--dialect` name this surface belongs to.
     pub dialect: &'static str,
-    pub directives: &'static [Directive],
+    pub directives: Vec<Directive>,
+}
+
+/// Compose a dialect's surface from a shared base plus its own entries.
+///
+/// An entry in `own` with the same id as one in `base` **replaces** it, which
+/// is how sjasmplus adds `byte` to the `db` family without the base and the
+/// dialect both claiming a spelling. Anything in `base` the dialect does not
+/// override is carried through.
+///
+/// This is why a surface is owned rather than borrowed: pasmo and sjasmplus
+/// share most of a vocabulary and differ in exactly the way that matters, and
+/// a generator needs to see each dialect's own answer rather than the base's.
+#[must_use]
+pub fn compose(base: &[Directive], own: &[Directive]) -> Vec<Directive> {
+    let overridden: Vec<&str> = own.iter().map(|d| d.id).collect();
+    base.iter()
+        .filter(|d| !overridden.contains(&d.id))
+        .chain(own.iter())
+        .copied()
+        .collect()
 }
 
 /// Every dialect that dispatches through a declaration (R7).
@@ -193,84 +213,107 @@ pub struct DialectSurface {
 /// it has not been converted yet — which is a fact worth being able to state,
 /// rather than one to discover by finding no row for it.
 #[must_use]
-pub fn surfaces() -> &'static [DialectSurface] {
+pub fn surfaces() -> Vec<DialectSurface> {
     use crate::dialects;
-    &[
+    vec![
+        DialectSurface {
+            dialect: "pasmo",
+            directives: compose(
+                dialects::z80::COMMON_DIRECTIVES,
+                dialects::pasmo::DIRECTIVES,
+            ),
+        },
+        DialectSurface {
+            dialect: "sjasmplus",
+            directives: compose(
+                dialects::z80::COMMON_DIRECTIVES,
+                dialects::sjasmplus::DIRECTIVES,
+            ),
+        },
         DialectSurface {
             dialect: "rgbasm",
-            directives: dialects::rgbasm::DIRECTIVES,
+            directives: dialects::rgbasm::DIRECTIVES.to_vec(),
         },
         DialectSurface {
             dialect: "ca65",
-            directives: dialects::ca65::DIRECTIVES,
+            directives: dialects::ca65::DIRECTIVES.to_vec(),
         },
         DialectSurface {
             dialect: "65816",
-            directives: dialects::ca65_816::DIRECTIVES,
+            directives: dialects::ca65_816::DIRECTIVES.to_vec(),
         },
         DialectSurface {
             dialect: "huc6280",
-            directives: dialects::ca65_huc6280::DIRECTIVES,
+            directives: dialects::ca65_huc6280::DIRECTIVES.to_vec(),
         },
         DialectSurface {
             dialect: "acme",
-            directives: dialects::acme::DIRECTIVES,
+            directives: dialects::acme::DIRECTIVES.to_vec(),
         },
         DialectSurface {
             dialect: "lwasm",
-            directives: dialects::lwasm::DIRECTIVES,
+            directives: dialects::lwasm::DIRECTIVES.to_vec(),
         },
         DialectSurface {
             dialect: "vasm",
-            directives: dialects::vasm::DIRECTIVES,
+            directives: dialects::vasm::DIRECTIVES.to_vec(),
         },
         DialectSurface {
             dialect: "1802",
-            directives: dialects::cdp1802::DIRECTIVES,
+            directives: compose(
+                dialects::asl::WALK_DIRECTIVES,
+                dialects::cdp1802::DIRECTIVES,
+            ),
         },
         DialectSurface {
             dialect: "8080",
-            directives: dialects::i8080::DIRECTIVES,
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::i8080::DIRECTIVES),
         },
         DialectSurface {
             dialect: "6800",
-            directives: dialects::m6800::DIRECTIVES,
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::m6800::DIRECTIVES),
         },
         DialectSurface {
             dialect: "8048",
-            directives: dialects::i8048::DIRECTIVES,
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::i8048::DIRECTIVES),
         },
         DialectSurface {
             dialect: "scmp",
-            directives: dialects::scmp::DIRECTIVES,
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::scmp::DIRECTIVES),
         },
         DialectSurface {
             dialect: "2650",
-            directives: dialects::s2650::DIRECTIVES,
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::s2650::DIRECTIVES),
         },
         DialectSurface {
             dialect: "tms7000",
-            directives: dialects::tms7000::DIRECTIVES,
+            directives: compose(
+                dialects::asl::WALK_DIRECTIVES,
+                dialects::tms7000::DIRECTIVES,
+            ),
         },
         DialectSurface {
             dialect: "f8",
-            directives: dialects::f8::DIRECTIVES,
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::f8::DIRECTIVES),
         },
         DialectSurface {
             dialect: "cp1610",
-            directives: dialects::cp1610::DIRECTIVES,
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::cp1610::DIRECTIVES),
         },
         DialectSurface {
             dialect: "pdp11",
-            directives: dialects::pdp11::DIRECTIVES,
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::pdp11::DIRECTIVES),
         },
         DialectSurface {
             dialect: "tms9900",
-            directives: dialects::tms9900::DIRECTIVES,
+            directives: compose(
+                dialects::asl::WALK_DIRECTIVES,
+                dialects::tms9900::DIRECTIVES,
+            ),
         },
         DialectSurface {
             dialect: "z8000",
-            directives: dialects::z8000::DIRECTIVES,
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::z8000::DIRECTIVES),
         },
     ]
 }
@@ -279,7 +322,7 @@ pub fn surfaces() -> &'static [DialectSurface] {
 mod surface_invariants {
     //! Holds across every converted dialect, so a new one cannot land broken.
 
-    use super::{Category, surfaces};
+    use super::surfaces;
 
     #[test]
     fn ids_are_unique_within_a_dialect() {
@@ -298,7 +341,7 @@ mod surface_invariants {
         // which is the ordering bug `Sized` matching was built to retire.
         for surface in surfaces() {
             let mut seen: Vec<String> = Vec::new();
-            for directive in surface.directives {
+            for directive in &surface.directives {
                 for spelling in directive.spellings() {
                     let lower = spelling.to_ascii_lowercase();
                     assert!(
@@ -315,7 +358,7 @@ mod surface_invariants {
     #[test]
     fn every_entry_has_at_least_one_spelling() {
         for surface in surfaces() {
-            for directive in surface.directives {
+            for directive in &surface.directives {
                 assert!(
                     !directive.spellings().is_empty(),
                     "{}: `{}` declares no spelling",
@@ -329,10 +372,10 @@ mod surface_invariants {
     #[test]
     fn a_declared_spelling_finds_its_own_entry() {
         for surface in surfaces() {
-            for directive in surface.directives {
+            for directive in &surface.directives {
                 for spelling in &directive.spellings() {
                     assert_eq!(
-                        super::lookup(surface.directives, spelling).map(|d| d.id),
+                        super::lookup(&surface.directives, spelling).map(|d| d.id),
                         Some(directive.id),
                         "{}: `{spelling}` should reach `{}`",
                         surface.dialect,
@@ -343,17 +386,65 @@ mod surface_invariants {
         }
     }
 
+    /// The difference this whole surface exists to make visible.
+    ///
+    /// sjasmplus takes `include`; pasmo does not, because pasmo's include is
+    /// unimplemented and a multi-file pasmo project therefore does not
+    /// assemble. Before the declaration that could only be found by assembling
+    /// one and reading `unknown instruction INCLUDE`. Now it is a row that is
+    /// present in one surface and absent from the other, and this asserts it —
+    /// so implementing pasmo's include will fail here and make someone update
+    /// the declaration, rather than leaving the matrix quietly wrong.
     #[test]
-    fn nothing_is_declared_unsupported_yet() {
-        // The category exists for pasmo's include and asl's semantic
-        // pseudo-ops. Neither is declared yet, so this records that the count
-        // is zero rather than leaving it unstated.
-        let count = surfaces()
+    fn the_two_z80_dialects_differ_where_they_actually_differ() {
+        let of = |name: &str| {
+            surfaces()
+                .into_iter()
+                .find(|s| s.dialect == name)
+                .unwrap_or_else(|| panic!("`{name}` has a declared surface"))
+        };
+        let pasmo = of("pasmo");
+        let sjasmplus = of("sjasmplus");
+
+        assert!(
+            super::lookup(&sjasmplus.directives, "include").is_some(),
+            "sjasmplus takes `include`"
+        );
+        assert!(
+            super::lookup(&pasmo.directives, "include").is_none(),
+            "pasmo has no include — if this now fails, the declaration needs the row"
+        );
+
+        // Both take incbin, so the difference is include and not file
+        // inclusion in general.
+        for surface in [&pasmo, &sjasmplus] {
+            assert!(
+                super::lookup(&surface.directives, "incbin").is_some(),
+                "{} takes `incbin`",
+                surface.dialect
+            );
+        }
+    }
+
+    /// Composition replaces an entry rather than adding a second claimant.
+    #[test]
+    fn an_overridden_entry_does_not_appear_twice() {
+        let sjasmplus = surfaces()
+            .into_iter()
+            .find(|s| s.dialect == "sjasmplus")
+            .expect("declared");
+        let bytes: Vec<&str> = sjasmplus
+            .directives
             .iter()
-            .flat_map(|s| s.directives.iter())
-            .filter(|d| d.category == Category::KnownUnsupported)
-            .count();
-        assert_eq!(count, 0);
+            .filter(|d| d.id == "bytes")
+            .map(|d| d.id)
+            .collect();
+        assert_eq!(bytes.len(), 1, "`bytes` should be declared once");
+
+        // And the override is the richer one: sjasmplus adds `byte` to the
+        // base's four spellings.
+        let entry = super::lookup(&sjasmplus.directives, "byte").expect("sjasmplus takes `byte`");
+        assert_eq!(entry.id, "bytes");
     }
 }
 
