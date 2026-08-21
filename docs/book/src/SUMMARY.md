@@ -2,6 +2,11 @@
 
 [asm198x](introduction.md)
 
+# Start here
+
+- [Quickstart](quickstart.md)
+- [Install](install.md)
+
 # Using it
 
 - [A first program](guide/first-program.md)
