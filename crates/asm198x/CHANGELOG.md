@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.18](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.17...asm198x-v0.0.18) - 2026-08-21
+
+### Changed
+
+- The documentation is published as part of <https://asm198x.github.io> rather
+  than as a separate book behind `/docs/`. mdBook is withdrawn; the pages
+  themselves are unchanged and still live in this repository, beside the code
+  they describe. ([#148](https://github.com/asm198x/asm198x/pull/148))
+
 ## [0.0.17](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.16...asm198x-v0.0.17) - 2026-08-21
 
 ### Fixed

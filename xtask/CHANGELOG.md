@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.18](https://github.com/asm198x/asm198x/compare/xtask-v0.0.17...xtask-v0.0.18) - 2026-08-21
+
+### Added
+
+- *(xtask)* carry the nav and the dead-link gate without mdBook ([#148](https://github.com/asm198x/asm198x/pull/148))
+- *(xtask)* generate the curriculum parity figures from the corpus ([#146](https://github.com/asm198x/asm198x/pull/146))
+
 ## [0.0.17](https://github.com/asm198x/asm198x/compare/xtask-v0.0.16...xtask-v0.0.17) - 2026-08-21
 
 ### Added
