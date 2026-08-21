@@ -52,6 +52,22 @@ fn main_asms(project: &Path) -> Vec<PathBuf> {
     verdict_corpus::curriculum::sources(project)
 }
 
+/// Whether `file` shares its directory with another `.asm`, so the label needs
+/// the filename to tell them apart.
+fn shares_dir(file: &Path) -> bool {
+    let Some(dir) = file.parent() else {
+        return false;
+    };
+    let Ok(entries) = fs::read_dir(dir) else {
+        return false;
+    };
+    entries
+        .flatten()
+        .filter(|e| e.path().extension().and_then(|x| x.to_str()) == Some("asm"))
+        .count()
+        > 1
+}
+
 fn label(file: &Path) -> String {
     // .../<project>/<unit-NN>/<name>.asm, or .../<unit-NN>/steps/<step-NN>.asm.
     let parts: Vec<&str> = file
@@ -67,8 +83,13 @@ fn label(file: &Path) -> String {
         .copied()
         .unwrap_or("?");
     let unit = parts[i];
-    // A step names itself; a unit with one main file does not need to.
-    if parts.len() > i + 2 {
+    // A step names itself. So does a file that shares its directory: six
+    // Spectrum units hold two programs each, and without this both were
+    // labelled `meet-the-machine/unit-02`. The corpus stored them correctly
+    // either way — a key is path, variant and content digest — but a failure
+    // read `pasmonext assemble: meet-the-machine/unit-02` without saying which
+    // of the two broke, and a corpus diff showed two lines with one name.
+    if parts.len() > i + 2 || shares_dir(file) {
         let stem = file.file_stem().and_then(|s| s.to_str()).unwrap_or("?");
         format!("{proj}/{unit}/{stem}")
     } else {
