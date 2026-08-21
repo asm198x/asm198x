@@ -192,6 +192,11 @@ The types and one small conversion prove the shape (U1); vasm proves the family 
 
 ### U4. The remaining dialects
 
+- **In progress 2026-08-21.** lwasm and acme done; the ca65 family, rgbasm and z80 remain.
+- **lwasm** spells several concepts two ways — `fcb` and `.byte` are the same directive — so those are alternative spellings rather than a sigil applied to a name, and `Exact` carries both.
+- **acme is the first real `Sigilled` user, and the first dialect whose dispatch is split.** Its directives are read in three places: the data and layout ones in `parse_directive`, `!src`/`!bin`/`!zone` walk-handled in `AcmeEval::lower` because a zone switch is evaluation state, and the conditionals in the scanner before parsing. The declaration covers all of them, because it describes the dialect rather than any one parser; only the first group dispatches from it. The original loud fall-through is preserved for a misrouted directive.
+- **The sigil is put back for the lookup.** `parse_directive` receives the name already stripped, and matching the bare name would quietly make the sigil optional — the exact behaviour change U5's probes ruled out. Verified: bare `byte` is still refused.
+- **R5 verified:** 627 curriculum comparisons including 138 C64 sources against real acme, plus differential, conformance and the corpus replay.
 - **Goal:** acme, the ca65 family, rgbasm, z80, lwasm converted.
 - **Requirements:** R2, R3, R5.
 - **Dependencies:** U3.

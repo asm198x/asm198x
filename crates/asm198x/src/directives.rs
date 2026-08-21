@@ -197,6 +197,14 @@ pub fn surfaces() -> &'static [DialectSurface] {
     use crate::dialects;
     &[
         DialectSurface {
+            dialect: "acme",
+            directives: dialects::acme::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "lwasm",
+            directives: dialects::lwasm::DIRECTIVES,
+        },
+        DialectSurface {
             dialect: "vasm",
             directives: dialects::vasm::DIRECTIVES,
         },
