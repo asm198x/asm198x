@@ -306,6 +306,19 @@ The introduction shrinks to orientation and stops trying to sell, because `/why`
       Understating drift is the expensive kind — an overstated claim is
       corrected by a reader who tries it. Fixed and made a test.
 11. **Widen `/guide/first-program`** to the five front doors, with `fmt` and `disasm` examples alongside.
+    - *Done 2026-08-21.* NES (ca65), Amiga (vasm) and CoCo (lwasm) join the C64
+      and Spectrum programs, all five assembled by CI. It also settles the
+      forward reference the quickstart already made to "the same five front
+      doors".
+    - *Each carries the thing its machine makes you know*, since a program that
+      only assembles teaches nothing: the NES pair of `bit $2002` waits that
+      code works without on some emulators and not on hardware; the Amiga
+      program not taking the machine over, so the OS repaints whatever it writes;
+      the 6809's `sta ,x+` as the C64 loop with the bookkeeping folded into the
+      addressing mode; and the CoCo origin as a decision about the target rather
+      than about the assembler.
+    - *`fmt` and `disasm` are linked rather than repeated*, since steps 9 and 10
+      gave both their own worked pages.
 12. **`/compare`.** The generated version table is available today; schedule it against how much hand-written feature comparison it needs.
 
 Per-dialect worked programs are not sequenced here. They land on the generated dialect pages when those exist, which is the v1 bar's step 6.
