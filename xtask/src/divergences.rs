@@ -180,7 +180,7 @@ pub fn corpus_summary(repo: &Path) -> CorpusSummary {
 }
 
 /// Every corpus file, sorted so a run reports the same way twice.
-fn corpus_files(repo: &Path) -> Vec<std::path::PathBuf> {
+pub fn corpus_files(repo: &Path) -> Vec<std::path::PathBuf> {
     let dir = repo.join("crates/asm198x/tests/verdicts");
     let Ok(entries) = std::fs::read_dir(&dir) else {
         return Vec::new();

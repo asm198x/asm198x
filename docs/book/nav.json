@@ -32,6 +32,11 @@
           "children": [],
           "slug": "migrate",
           "title": "Moving a project across"
+        },
+        {
+          "children": [],
+          "slug": "compare",
+          "title": "Compared with what you have"
         }
       ],
       "title": "Start here"
