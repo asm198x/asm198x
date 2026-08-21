@@ -247,6 +247,17 @@ The introduction shrinks to orientation and stops trying to sell, because `/why`
 6. **`/migrate`.** The entry point for the user the tool is aimed at.
 7. **`/divergences`**, generated from the verdict corpus. Makes the trust argument checkable rather than asserted.
 8. **Shrink the introduction** to orientation, once `/why` carries the pitch.
+   - *Done 2026-08-21.* It was making the pitch and the trust argument both, so
+     a reader met the differential suites, the corpus and the round trips twice
+     before reaching a command. It points instead: four doors by what the reader
+     came for. The note on how the book is built stays — it is orientation, not
+     argument.
+   - *Also done, and not in the step:* `/why`'s evidence figures are generated
+     (`xtask evidence --markdown`). Two of them had already drifted — 5,637
+     verdicts against a corpus holding 5,625 live ones, and "nine differences"
+     conflating six tracked differences with their nine recorded cases. Taken
+     now for step 3's reason: a page whose whole argument is *you can check
+     rather than believe* cannot be quietly wrong about its own evidence.
 9. **Extend `book_samples.rs`** with `fmt`, `disasm` and `output` modes. Everything below depends on it, and it retires the unchecked JSON block on `cli.md`.
 10. **The `/guide/` pages** — multi-file and linking first, since those are referenced today and explained nowhere, then formatting and reading-a-binary, which are the first worked examples `fmt` and `disasm` have ever had.
 11. **Widen `/guide/first-program`** to the five front doors, with `fmt` and `disasm` examples alongside.
