@@ -50,6 +50,11 @@
         },
         {
           "children": [],
+          "slug": "guide/linking",
+          "title": "When assembling is not the last step"
+        },
+        {
+          "children": [],
           "slug": "reference/cli",
           "title": "The command line"
         },

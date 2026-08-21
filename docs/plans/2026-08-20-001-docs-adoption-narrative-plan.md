@@ -277,6 +277,21 @@ The introduction shrinks to orientation and stops trying to sell, because `/why`
    - *A mode nothing uses is a checker nobody is checked by,* so the suite fails
      if any of the four is unexercised.
 10. **The `/guide/` pages** — multi-file and linking first, since those are referenced today and explained nowhere, then formatting and reading-a-binary, which are the first worked examples `fmt` and `disasm` have ever had.
+    - *Multi-file done 2026-08-21.* The fact a reader needs was worse than
+      undocumented, it was unstatable: a relative include anchors differently in
+      each dialect family, and the facts lived in `pub(crate)` consts.
+      `asm198x::includes::resolution()` is the accessor a generator reads —
+      derived from each dialect's `WalkSemantics` const where there is one,
+      stated and test-held for acme and the Z80 pair where there is not.
+    - *Linking done 2026-08-21.* The ca65 NROM link and vasm's hunk executable,
+      with the relocatable-hunk consequence that changes how you write code
+      (PC-relative within a section only), and the distinction from `--prg` and
+      `--sna`, which wrap rather than build.
+    - *Deliberately no counts on the linking page.* The decision log's "all 32
+      buildable NES units" has moved on — the corpus records 51 NES sources
+      today. Restating a figure by hand on the day two of them were fixed would
+      have been the joke writing itself; the page points at `/why`, which counts.
+    - *Formatting and reading-a-binary remain.*
 11. **Widen `/guide/first-program`** to the five front doors, with `fmt` and `disasm` examples alongside.
 12. **`/compare`.** The generated version table is available today; schedule it against how much hand-written feature comparison it needs.
 
