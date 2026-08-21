@@ -285,6 +285,16 @@ jobs:
       - name: Check arbitration coverage against the stamp
         run: cargo xtask coverage --check
 
+      # The published parity figures are derived from the corpus, so they go
+      # stale silently. This fails when a machine verifies fewer sources than
+      # the committed figures record, and — because this job has the curriculum
+      # checked out at the pin — when a curriculum file has no verdict at all.
+      # That second case is the one that hid four `meet-the-machine` tracks.
+      - name: Check curriculum parity against the committed figures
+        env:
+          ASM198X_CODE_SAMPLES: ${{ github.workspace }}/_code198x
+        run: cargo xtask parity --check
+
   # Cross-platform smoke compile. Proves the workspace builds on macOS
   # (primary dev host) and Windows without paying for a full test run
   # there. Assemblers pull no platform-specific deps, so no extra install.

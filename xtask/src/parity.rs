@@ -1,0 +1,349 @@
+//! `cargo xtask parity` — what the curriculum suite has actually proved.
+//!
+//! The site's front door makes a claim per machine: this curriculum assembles
+//! byte-for-byte to what the reference tool produces. Those numbers were typed
+//! by hand and drifted — the page said 80 C64 units, 32 NES, 20 Spectrum, when
+//! the corpus held 138, 51 and 161. A figure nobody can regenerate is a figure
+//! nobody notices going stale.
+//!
+//! # Counted, not scored
+//!
+//! There is no percentage here, for the reason `coverage` gives: a denominator
+//! has to be real. "64 of 97 units" would divide by a unit count that includes
+//! units carrying no assembly at all, which is an invented denominator dressed
+//! as a measurement.
+//!
+//! What is real is the file set — `verdict_corpus::curriculum` defines it, and
+//! the suite walks exactly it. So the honest figure is a count of sources with
+//! a recorded verdict, the reference tool that gave it, and, when a checkout is
+//! present, whether any source in that set has no verdict yet.
+//!
+//! # Sources against comparisons
+//!
+//! They differ, and both are worth having. The Spectrum's 161 sources are each
+//! arbitrated by two independent tools, and 37 of the Amiga's 69 are built both
+//! as a hunk executable and as a flat binary. 419 sources, 617 comparisons.
+//!
+//! # What is not counted
+//!
+//! The 6809 and 65816 sections compare hand-written stand-in programs, because
+//! no curriculum exists for those machines yet. They are real comparisons and
+//! they are not curriculum parity, so they are not in this file.
+
+use std::collections::{BTreeMap, BTreeSet};
+use std::path::{Path, PathBuf};
+
+use verdict_corpus::{Corpus, Suite};
+
+/// The generated data file, committed so the site can read it without a
+/// Code198x checkout — the same trust model as the corpus it is derived from.
+const DATA: &str = "crates/asm198x/tests/verdicts/parity.json";
+
+/// The curriculum revision the recorded verdicts describe.
+const PIN: &str = "crates/asm198x/tests/verdicts/code-samples.pin";
+
+/// One reference tool's contribution to a machine's parity.
+struct ArbiterCount {
+    tool: String,
+    /// The tool's behavioural self-report — the corpus keys on this, so it is
+    /// what "which version" actually means here.
+    identity: String,
+    variants: BTreeSet<String>,
+    comparisons: usize,
+}
+
+/// What one machine's curriculum has recorded against it.
+pub struct MachineParity {
+    slug: String,
+    cpu: String,
+    /// Distinct curriculum files with at least one live verdict.
+    sources: usize,
+    /// Verdicts over those files: a file built two ways, or arbitrated by two
+    /// tools, counts once for each.
+    comparisons: usize,
+    /// Files the shape rule finds in the checkout, when one is present.
+    in_checkout: Option<usize>,
+    /// Files present in the checkout with no verdict — the gap that matters.
+    unverified: Vec<String>,
+    arbiters: Vec<ArbiterCount>,
+}
+
+/// The whole picture.
+pub struct Report {
+    pin: Option<String>,
+    machines: Vec<MachineParity>,
+    /// Whether a Code198x checkout was readable when this was generated. Without
+    /// one the file still describes the corpus, but cannot say what is missing.
+    checkout_seen: bool,
+}
+
+impl Report {
+    /// Distinct sources across every machine.
+    fn sources(&self) -> usize {
+        self.machines.iter().map(|m| m.sources).sum()
+    }
+
+    /// Comparisons across every machine.
+    fn comparisons(&self) -> usize {
+        self.machines.iter().map(|m| m.comparisons).sum()
+    }
+
+    /// Every source the checkout holds that has no verdict.
+    fn unverified(&self) -> usize {
+        self.machines.iter().map(|m| m.unverified.len()).sum()
+    }
+}
+
+/// Take a curriculum key apart: `<relpath>#<variant>@<digest>`.
+fn parse_key(key: &str) -> Option<(&str, &str)> {
+    let (path, rest) = key.split_once('#')?;
+    let (variant, _digest) = rest.split_once('@')?;
+    Some((path, variant))
+}
+
+/// The machine slug in a curriculum relpath: `code-samples/<slug>/assembly/…`.
+fn machine_of(relpath: &str) -> Option<&str> {
+    let rest = relpath.strip_prefix("code-samples/")?;
+    let (slug, tail) = rest.split_once('/')?;
+    tail.starts_with("assembly/").then_some(slug)
+}
+
+/// Read every corpus file and build the report.
+#[must_use]
+pub fn compute(repo: &Path) -> Report {
+    let dir = repo.join("crates/asm198x/tests/verdicts");
+    let mut by_machine: BTreeMap<String, Machine> = BTreeMap::new();
+
+    let Ok(entries) = std::fs::read_dir(&dir) else {
+        return Report {
+            pin: None,
+            machines: Vec::new(),
+            checkout_seen: false,
+        };
+    };
+    let mut files: Vec<PathBuf> = entries
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| p.extension().and_then(|e| e.to_str()) == Some("ndjson"))
+        .collect();
+    files.sort();
+
+    for path in files {
+        let Ok(corpus) = Corpus::read(&path) else {
+            continue;
+        };
+        let retired = corpus.retired();
+        for verdict in corpus.verdicts() {
+            if verdict.suite != Suite::Curriculum {
+                continue;
+            }
+            if retired.contains(&verdict.id().as_str()) {
+                continue;
+            }
+            let Some((relpath, variant)) = parse_key(&verdict.source) else {
+                continue;
+            };
+            let Some(slug) = machine_of(relpath) else {
+                continue;
+            };
+            let m = by_machine.entry(slug.to_string()).or_default();
+            m.cpu = verdict.cpu.clone();
+            m.sources.insert(relpath.to_string());
+            m.comparisons += 1;
+            let a = m
+                .arbiters
+                .entry((
+                    verdict.arbiter.tool.clone(),
+                    verdict.arbiter.identity.clone(),
+                ))
+                .or_default();
+            a.0 += 1;
+            a.1.insert(variant.to_string());
+        }
+    }
+
+    let root = verdict_corpus::curriculum::root();
+    let machines = by_machine
+        .into_iter()
+        .map(|(slug, m)| {
+            let (in_checkout, unverified) = match &root {
+                Some(root) => {
+                    let dir = root.join(format!("code-samples/{slug}/assembly"));
+                    let found = verdict_corpus::curriculum::machine_sources(&dir);
+                    let missing: Vec<String> = found
+                        .iter()
+                        .filter_map(|p| p.strip_prefix(root).ok())
+                        .map(|p| p.to_string_lossy().replace('\\', "/"))
+                        .filter(|rel| !m.sources.contains(rel))
+                        .collect();
+                    (Some(found.len()), missing)
+                }
+                None => (None, Vec::new()),
+            };
+            let mut arbiters: Vec<ArbiterCount> = m
+                .arbiters
+                .into_iter()
+                .map(|((tool, identity), (comparisons, variants))| ArbiterCount {
+                    tool,
+                    identity,
+                    variants,
+                    comparisons,
+                })
+                .collect();
+            arbiters.sort_by(|a, b| a.tool.cmp(&b.tool).then(a.identity.cmp(&b.identity)));
+            MachineParity {
+                slug,
+                cpu: m.cpu,
+                sources: m.sources.len(),
+                comparisons: m.comparisons,
+                in_checkout,
+                unverified,
+                arbiters,
+            }
+        })
+        .collect();
+
+    Report {
+        pin: std::fs::read_to_string(repo.join(PIN))
+            .ok()
+            .map(|s| s.trim().to_string()),
+        machines,
+        checkout_seen: root.is_some(),
+    }
+}
+
+/// Accumulator while reading the corpus.
+#[derive(Default)]
+struct Machine {
+    cpu: String,
+    sources: BTreeSet<String>,
+    comparisons: usize,
+    arbiters: BTreeMap<(String, String), (usize, BTreeSet<String>)>,
+}
+
+/// Render the report as the committed JSON.
+#[must_use]
+pub fn render(report: &Report) -> String {
+    let machines: Vec<serde_json::Value> = report
+        .machines
+        .iter()
+        .map(|m| {
+            let arbiters: Vec<serde_json::Value> = m
+                .arbiters
+                .iter()
+                .map(|a| {
+                    serde_json::json!({
+                        "tool": a.tool,
+                        "identity": a.identity,
+                        "variants": a.variants.iter().collect::<Vec<_>>(),
+                        "comparisons": a.comparisons,
+                    })
+                })
+                .collect();
+            let mut obj = serde_json::json!({
+                "slug": m.slug,
+                "cpu": m.cpu,
+                "sources": m.sources,
+                "comparisons": m.comparisons,
+                "arbiters": arbiters,
+            });
+            if let Some(n) = m.in_checkout {
+                obj["in_checkout"] = n.into();
+            }
+            if !m.unverified.is_empty() {
+                obj["unverified"] = m.unverified.clone().into();
+            }
+            obj
+        })
+        .collect();
+
+    let doc = serde_json::json!({
+        "note": "Generated by `cargo xtask parity --write`. Counts of recorded byte-identity verdicts over the Code198x curriculum at `pin`. Do not edit by hand.",
+        "pin": report.pin,
+        "checkout_seen": report.checkout_seen,
+        "machines": machines,
+        "totals": {
+            "sources": report.sources(),
+            "comparisons": report.comparisons(),
+        },
+    });
+    let mut out = serde_json::to_string_pretty(&doc).unwrap_or_default();
+    out.push('\n');
+    out
+}
+
+/// Where the data file lives under `repo`.
+#[must_use]
+pub fn data_path(repo: &Path) -> PathBuf {
+    repo.join(DATA)
+}
+
+/// A human summary, for the default (no-flag) run.
+#[must_use]
+pub fn render_summary(report: &Report) -> String {
+    use std::fmt::Write as _;
+    let mut out = String::new();
+    for m in &report.machines {
+        let tools: Vec<&str> = m.arbiters.iter().map(|a| a.tool.as_str()).collect();
+        let _ = writeln!(
+            out,
+            "{:<32} {:>4} sources  {:>4} comparisons  {}",
+            m.slug,
+            m.sources,
+            m.comparisons,
+            tools.join(" + ")
+        );
+        for rel in &m.unverified {
+            let _ = writeln!(out, "{:<32}   no verdict: {rel}", "");
+        }
+    }
+    let _ = writeln!(
+        out,
+        "{:<32} {:>4} sources  {:>4} comparisons",
+        "total",
+        report.sources(),
+        report.comparisons()
+    );
+    if !report.checkout_seen {
+        let _ = writeln!(
+            out,
+            "no Code198x checkout: counts describe the corpus, gaps cannot be reported"
+        );
+    }
+    out
+}
+
+/// Whether the corpus still backs at least what the committed file records.
+///
+/// A machine that verifies fewer sources than the file says is the regression
+/// worth failing on: something stopped being checked while the suite stayed
+/// green. A machine verifying *more* is ordinary growth.
+#[must_use]
+pub fn regressions(report: &Report, committed: &str) -> Vec<String> {
+    let Ok(old) = serde_json::from_str::<serde_json::Value>(committed) else {
+        return vec!["the committed parity.json is not valid JSON".to_string()];
+    };
+    let mut out = Vec::new();
+    let Some(machines) = old["machines"].as_array() else {
+        return out;
+    };
+    for was in machines {
+        let slug = was["slug"].as_str().unwrap_or_default();
+        let before = was["sources"].as_u64().unwrap_or_default() as usize;
+        let now = report
+            .machines
+            .iter()
+            .find(|m| m.slug == slug)
+            .map_or(0, |m| m.sources);
+        if now < before {
+            out.push(format!("{slug}: {before} sources -> {now}"));
+        }
+    }
+    if report.unverified() > 0 {
+        out.push(format!(
+            "{} curriculum source(s) in the checkout have no verdict",
+            report.unverified()
+        ));
+    }
+    out
+}

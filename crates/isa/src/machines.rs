@@ -86,6 +86,23 @@ pub const MACHINES: &[Cpu] = &[
                 name: "Oric Atmos",
                 catalogued: true,
             },
+            // The 6510 is a 6502 with an I/O port bolted on, and the same
+            // instruction set — so `mos6502` is the spec a C64 or C128 author
+            // assembles against, and these are the machines they are writing
+            // for. The library files them under `cpu-6510`, which is correct
+            // about the chip; this table is keyed on the instruction set, and
+            // leaving them out meant the best-known 6502 machine of all
+            // appeared on no page.
+            Machine {
+                slug: "commodore-64",
+                name: "Commodore 64",
+                catalogued: true,
+            },
+            Machine {
+                slug: "commodore-128",
+                name: "Commodore 128",
+                catalogued: true,
+            },
         ],
     },
     Cpu {

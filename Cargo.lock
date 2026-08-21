@@ -223,6 +223,7 @@ version = "0.0.16"
 dependencies = [
  "asm198x",
  "isa",
+ "serde_json",
  "sha2",
  "verdict-corpus",
 ]
