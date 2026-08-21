@@ -61,6 +61,26 @@ disassembles as 6502, otherwise Z80 — so pass `-d` when the default is wrong.
 `--org` sets the address the first byte is placed at, which changes how branch
 and absolute operands render.
 
+<!-- sample: acme, file: fill.a -->
+```asm
+* = $c000
+        lda #$51
+        rts
+```
+
+Assembled and read back with `asm198x disasm -d acme --org 0xc000 fill.a.bin`:
+
+<!-- output: fill.a, disasm --org 0xc000 -->
+```asm
+        *= $C000
+        LDA #$51
+        RTS
+```
+
+The origin is not in the binary — a flat binary is bytes and nothing else — so
+`--org` is how you tell the disassembler where they were meant to live. Leave it
+out and the same bytes read as if they sat at `$0000`.
+
 ### `fmt` — reformat
 
 ```
@@ -74,6 +94,28 @@ idempotent, and formatted source reassembles to the same bytes.
 
 Writes to **stdout** unless `-o` is given; it never rewrites the input in place.
 To format a file over itself, write to a new path and move it.
+
+<!-- sample: pasmo, file: border.asm -->
+```asm
+; Set the border colour.
+start:  ld a,1
+    out ($fe),a
+        ret
+```
+
+`asm198x fmt -d pasmo border.asm` writes:
+
+<!-- output: border.asm, fmt -->
+```asm
+; Set the border colour.
+start:
+        ld a,1
+        out ($fe),a
+        ret
+```
+
+The label takes its own line, the operations line up, and the comment is
+untouched — including its wording and its position above the code.
 
 ### `dialects` — list what `--dialect` accepts
 
@@ -179,13 +221,23 @@ and diagnostics go to stderr, so a pipeline gets the artifact and nothing else.
 stdout — bytes, symbols and the full diagnostic list — for a build script or an
 editor. The human form stays on stderr.
 
+<!-- sample: acme, file: fill.a, refuses: does not fit in a byte -->
+```asm
+* = $c000
+        !byte $1234
+```
+
+That source is refused, and `--message-format=json` reports it like this. The
+payload is one line on the wire; it is shown indented here:
+
+<!-- output: fill.a, json -->
 ```json
 [
   {
     "span": {
       "file": 0,
       "line": 2,
-      "col": 13,
+      "col": 15,
       "expansion_frames": [],
       "path": "fill.a"
     },
