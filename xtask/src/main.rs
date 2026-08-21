@@ -114,10 +114,22 @@ fn run_docs(args: &[String]) -> ExitCode {
     let check = args.iter().any(|a| a == "--check");
     let repo = repo();
 
-    // The nav is generated from SUMMARY.md and the dead-link gate reads the
-    // same parse, so a chapter with no file fails here — where the source
-    // lives — rather than in the site build. This is mdBook's `create-missing
-    // = false`, kept after mdBook was withdrawn.
+    let report = match docs::run(&repo, check) {
+        Ok(report) => report,
+        Err(e) => {
+            eprintln!("xtask docs: {e}");
+            return ExitCode::FAILURE;
+        }
+    };
+
+    // Read after `docs::run`, not before. SUMMARY.md carries a generated block
+    // of its own, so checking the nav first means a page that moved fails the
+    // integrity check on the stale block and blocks the very run that would
+    // regenerate it.
+    //
+    // The dead-link gate reads this same parse, so a chapter with no file fails
+    // here — where the source lives — rather than in the site build. This is
+    // mdBook's `create-missing = false`, kept after mdBook was withdrawn.
     let sections = match nav::read(&repo) {
         Ok(sections) => sections,
         Err(e) => {
@@ -150,14 +162,6 @@ fn run_docs(args: &[String]) -> ExitCode {
         eprintln!("xtask docs: could not write {}: {e}", nav_path.display());
         return ExitCode::FAILURE;
     }
-
-    let report = match docs::run(&repo, check) {
-        Ok(report) => report,
-        Err(e) => {
-            eprintln!("xtask docs: {e}");
-            return ExitCode::FAILURE;
-        }
-    };
 
     if nav_stale && check {
         eprintln!(

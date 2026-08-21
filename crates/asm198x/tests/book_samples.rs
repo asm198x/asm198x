@@ -155,20 +155,21 @@ fn assemble(sample: &Sample, index: usize) -> Result<(), String> {
 #[test]
 fn every_book_sample_assembles() {
     let src = book_src();
-    let mut pages: Vec<PathBuf> = std::fs::read_dir(&src)
-        .unwrap_or_else(|e| panic!("cannot read {}: {e}", src.display()))
-        .filter_map(Result::ok)
-        .map(|e| e.path())
-        .filter(|p| p.extension().is_some_and(|e| e == "md"))
-        .collect();
-    pages.sort();
+    // Recursive: the pages sit under `reference/` and `guide/` so that a file's
+    // path is the URL it is published at. A flat scan found two pages and no
+    // samples at all — the guard at the end of this test is what caught it.
+    let pages = verdict_corpus::files::markdown_files(&src)
+        .unwrap_or_else(|e| panic!("cannot walk {}: {e}", src.display()));
 
     let mut samples = Vec::new();
     for page in &pages {
+        // The path from the book root, not just the file name: two pages in
+        // different directories can share one, and a failure has to say which.
         let name = page
-            .file_name()
-            .map(|n| n.to_string_lossy().into_owned())
-            .unwrap_or_default();
+            .strip_prefix(&src)
+            .unwrap_or(page)
+            .to_string_lossy()
+            .into_owned();
         let text = std::fs::read_to_string(page).expect("read page");
         samples.extend(samples_in(&name, &text).unwrap_or_else(|e| panic!("{e}")));
     }
