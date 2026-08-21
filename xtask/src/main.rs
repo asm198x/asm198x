@@ -143,11 +143,12 @@ fn run_docs(args: &[String]) -> ExitCode {
     let nav_path = nav::nav_path(&repo);
     let rendered_nav = nav::render(&sections);
     let nav_stale = std::fs::read_to_string(&nav_path).ok().as_deref() != Some(&rendered_nav);
-    if nav_stale && !check {
-        if let Err(e) = std::fs::write(&nav_path, &rendered_nav) {
-            eprintln!("xtask docs: could not write {}: {e}", nav_path.display());
-            return ExitCode::FAILURE;
-        }
+    if nav_stale
+        && !check
+        && let Err(e) = std::fs::write(&nav_path, &rendered_nav)
+    {
+        eprintln!("xtask docs: could not write {}: {e}", nav_path.display());
+        return ExitCode::FAILURE;
     }
 
     let report = match docs::run(&repo, check) {

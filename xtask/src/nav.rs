@@ -240,11 +240,11 @@ fn collect_md(root: &Path, dir: &Path, out: &mut Vec<String>) -> Result<(), Stri
         let path = entry.path();
         if path.is_dir() {
             collect_md(root, &path, out)?;
-        } else if path.extension().and_then(|e| e.to_str()) == Some("md") {
-            if let Ok(rel) = path.strip_prefix(root) {
-                let slug = rel.with_extension("");
-                out.push(slug.to_string_lossy().replace('\\', "/"));
-            }
+        } else if path.extension().and_then(|e| e.to_str()) == Some("md")
+            && let Ok(rel) = path.strip_prefix(root)
+        {
+            let slug = rel.with_extension("");
+            out.push(slug.to_string_lossy().replace('\\', "/"));
         }
     }
     Ok(())
