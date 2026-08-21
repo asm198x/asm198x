@@ -35,6 +35,7 @@ use super::mos6502::{
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
 use crate::dialects::macros;
+use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
@@ -442,18 +443,113 @@ fn parse_op(
 }
 
 /// Parse a `.directive`.
+/// What this dialect accepts beyond its instruction set.
+///
+/// The `.` is required: a bare `byte` is a *label definition* in ca65, and
+/// real ca65 answers "':' expected" for it. `Sigilled { required: true }`
+/// is what keeps that true — see `crate::directives`.
+pub const DIRECTIVES: &[Directive] = &[
+    Directive {
+        id: "ignored",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &[
+                "setcpu", "segment", "smart", "p816", "i16", "a16", "i8", "a8",
+            ],
+            required: true,
+        },
+        category: Category::Ignored,
+    },
+    Directive {
+        id: "org",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["org"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "bytes",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["byte", "byt"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "words",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["word", "addr"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "dword",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["dword"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "dbyt",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["dbyt"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "asciiz",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["asciiz"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "res",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["res"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+];
+
 fn parse_directive(
     dir: &str,
     env: &BTreeMap<String, i64>,
     line: usize,
 ) -> Result<Option<Operation>, AsmError> {
     let (name, rest) = split_first_word(dir);
-    match name.to_ascii_lowercase().as_str() {
+    // Dispatch through the declared surface. The name arrives with the `.`
+    // already stripped by the caller, so it is put back for the lookup: the
+    // declaration is what says the sigil is mandatory, and matching the bare
+    // name here would quietly make it optional.
+    let sigilled = format!(".{}", name.to_ascii_lowercase());
+    let Some(entry) = lookup(DIRECTIVES, &sigilled) else {
+        return Err(AsmError::new(
+            line,
+            format!("unsupported directive `.{name}`"),
+        ));
+    };
+    if entry.category == Category::Ignored {
+        return Ok(None);
+    }
+    match entry.id {
         // Placement/CPU directives are no-ops in the flat model (one origin).
-        "setcpu" | "segment" | "smart" | "p816" | "i16" | "a16" | "i8" | "a8" => Ok(None),
         "org" => Ok(Some(Operation::Org(value(rest, line)?))),
-        "byte" | "byt" => Ok(Some(Operation::Bytes(byte_list(rest, line)?))),
-        "word" | "addr" => Ok(Some(Operation::Words(value_list(rest, line)?))),
+        "bytes" => Ok(Some(Operation::Bytes(byte_list(rest, line)?))),
+        "words" => Ok(Some(Operation::Words(value_list(rest, line)?))),
         // `.dword` — 32-bit little-endian. Emitted as width-4 computed pieces so
         // symbolic values resolve in pass two (the 65816 is little-endian).
         "dword" => Ok(Some(Operation::Encoded(
@@ -484,7 +580,7 @@ fn parse_directive(
         "res" => parse_res(rest, env, line),
         other => Err(AsmError::new(
             line,
-            format!("unsupported directive `.{other}`"),
+            format!("`{other}` is declared but not dispatched"),
         )),
     }
 }

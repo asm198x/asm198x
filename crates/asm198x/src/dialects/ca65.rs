@@ -32,6 +32,7 @@ use super::mos6502::{
     self, BytePrec, assignment_split, fold_const, is_ident, parse_number, split_data_items,
     split_first_word, split_top_level, string_literal,
 };
+use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, Expr, Operation};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
@@ -1215,6 +1216,130 @@ fn parse_op(
     Ok(Kind::Insn { operand, mnemonic })
 }
 
+/// What this dialect accepts beyond the 6502 instruction set.
+///
+/// The `.` is required: a bare `byte` is a *label definition* in ca65, and real
+/// ca65 answers "':' expected" for it. `Sigilled { required: true }` is what
+/// keeps that true — see `crate::directives`.
+///
+/// Dispatch is split, and the declaration covers all of it because it describes
+/// the dialect rather than any one parser. The data directives reach
+/// [`parse_directive`]; `.include` and `.incbin` are walk-handled; `.segment`
+/// is read where segments are assigned; the macro spellings are expanded before
+/// parsing.
+pub const DIRECTIVES: &[Directive] = &[
+    Directive {
+        id: "bytes",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["byte", "byt"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "words",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["word", "addr"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "dbyt",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["dbyt"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "dword",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["dword"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "asciiz",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["asciiz"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "res",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["res"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // Dispatched elsewhere: walk-handled, segment-assigned, or macro-expanded
+    // before parsing.
+    Directive {
+        id: "include",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["include"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "incbin",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["incbin"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "segment",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["segment"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "macro",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["macro", "mac"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "endmacro",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["endmacro", "endmac"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "local",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["local"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+];
+
 fn parse_directive(
     anons: &AnonCtx,
     current_global: &str,
@@ -1223,14 +1348,24 @@ fn parse_directive(
     line: usize,
 ) -> Result<Kind, AsmError> {
     let (name, rest) = split_first_word(directive);
-    match name.to_ascii_lowercase().as_str() {
-        "byte" | "byt" => Ok(Kind::Bytes(parse_data_list(
+    // Dispatch through the declared surface. The name arrives with the `.`
+    // already stripped, so it is put back for the lookup: matching the bare
+    // name here would quietly make the sigil optional.
+    let sigilled = format!(".{}", name.to_ascii_lowercase());
+    let Some(entry) = lookup(DIRECTIVES, &sigilled) else {
+        return Err(AsmError::new(
+            line,
+            format!("unsupported directive `.{name}`"),
+        ));
+    };
+    match entry.id {
+        "bytes" => Ok(Kind::Bytes(parse_data_list(
             anons,
             current_global,
             rest,
             line,
         )?)),
-        "word" | "addr" => Ok(Kind::Words(parse_value_list(
+        "words" => Ok(Kind::Words(parse_value_list(
             anons,
             current_global,
             rest,
@@ -1255,9 +1390,13 @@ fn parse_directive(
             line,
         )?)),
         "res" => parse_res(anons, current_global, consts, rest, line),
-        other => Err(AsmError::new(
+        // Declared, and dispatched elsewhere: `.include`/`.incbin` are
+        // walk-handled, `.segment` is read where segments are assigned, and the
+        // macro spellings are expanded before parsing. Reaching here means a
+        // path misrouted one, which the original fall-through reported loudly.
+        _ => Err(AsmError::new(
             line,
-            format!("unsupported directive `.{other}`"),
+            format!("unsupported directive `.{name}`"),
         )),
     }
 }
