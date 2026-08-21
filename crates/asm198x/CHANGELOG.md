@@ -11,14 +11,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- *(directives)* declare the remaining dialects' vocabularies ([#164](https://github.com/asm198x/asm198x/pull/164))
-- *(directives)* convert the asl-family dialects to the declared surface ([#163](https://github.com/asm198x/asm198x/pull/163))
-- *(directives)* declare directive vocabularies as data ([#162](https://github.com/asm198x/asm198x/pull/162))
+- Every dialect's directive vocabulary is now **declared data the parser
+  dispatches from**, so a spelling the declaration does not carry cannot be
+  accepted. Twenty-one dialects, with a test proving each declared spelling is
+  recognised and each undeclared one refused.
+  ([#162](https://github.com/asm198x/asm198x/pull/162),
+  [#163](https://github.com/asm198x/asm198x/pull/163),
+  [#164](https://github.com/asm198x/asm198x/pull/164),
+  [#165](https://github.com/asm198x/asm198x/pull/165))
+- The multi-file table on *Moving a project across* is generated from those
+  declarations. It covers every dialect rather than five, and shows pasmo's
+  missing `include` as the one gap.
+  ([#165](https://github.com/asm198x/asm198x/pull/165))
+- `fmt` and `disasm` have worked examples on the command-line page — both were
+  described in prose and never shown. Formatting turns out to move a label onto
+  its own line. ([#167](https://github.com/asm198x/asm198x/pull/167))
 
-### Other
+### Fixed
 
-- Check what the binary prints, not only that it assembles ([#167](https://github.com/asm198x/asm198x/pull/167))
-- Prove the declared directive surface, and generate the migration table from it ([#165](https://github.com/asm198x/asm198x/pull/165))
+- The `--message-format=json` example on the command-line page reported column
+  13 where the assembler reports 15, and had no source sample it was the output
+  of. Every output block in the book — diagnostics, JSON, formatted listings and
+  disassembly — is now compared against what the binary prints.
+  ([#167](https://github.com/asm198x/asm198x/pull/167))
+- The evidence figures on *Why asm198x* had drifted: 5,637 recorded verdicts
+  against a corpus holding 5,625 live ones, and "nine differences" where nine is
+  the number of recorded cases across six tracked differences. They are counted
+  from the corpus now. ([#166](https://github.com/asm198x/asm198x/pull/166))
+
+### Changed
+
+- The introduction is orientation rather than a second pitch, now that *Why
+  asm198x* carries the argument.
+  ([#166](https://github.com/asm198x/asm198x/pull/166))
 
 ## [0.0.21](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.20...asm198x-v0.0.21) - 2026-08-21
 
