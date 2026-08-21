@@ -9,5 +9,6 @@ a.out
 # Vale synced package
 .vale/
 
-# mdBook build output; the book is built in CI and deployed from there.
+# mdBook's build output. mdBook is withdrawn, but a stale local `book/` from
+# before the change should still never be committed.
 /docs/book/book/

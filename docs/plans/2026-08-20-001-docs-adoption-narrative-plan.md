@@ -235,8 +235,12 @@ The introduction shrinks to orientation and stops trying to sell, because `/why`
 ## Sequencing
 
 1. ~~Settle the diagnostics claim and correct `cli.md`.~~ Done 2026-08-20.
-2. **Render the docs from the site, and withdraw mdBook.** The enabling step: Astro builds every page from the existing `_asm198x/` checkout, and the three things mdBook provided are replaced — the `create-missing = false` dead-link gate, search across the reference, and nav from `SUMMARY.md`. Nothing below is blocked on it except by rendering, but everything below is cheaper after it.
+2. **Render the docs from the site, and withdraw mdBook.** The enabling step: Astro builds every page from the existing `_asm198x/` checkout, and the three things mdBook provided are replaced — the `create-missing = false` dead-link gate, search across the reference, and nav from `SUMMARY.md`.
+   - *Done 2026-08-21, assembler half.* `cargo xtask docs` generates `docs/book/nav.json` from SUMMARY.md; `--check` fails on a listed chapter with no file, a page listed nowhere, or a stale nav. The mdBook CI step and `book.toml` are gone. The site does not parse SUMMARY.md — the nav is generated here and read there, for the reason the decision record gives.
+   - *Outstanding:* the site rendering the pages, and **search**, which is the one replacement with no design settled yet.
 3. **Landing-page parity figures, the documented version, and `/releases`.** All three are the same shape of work — a checkable value moving out of hand-written markup into something generated here and consumed there. The parity figures come first within this step, since they are already published and already able to rot.
+   - *Done 2026-08-21:* the parity figures (`cargo xtask parity`, `crates/asm198x/tests/verdicts/parity.json`, gated in CI) and the documented version. Taken out of order, ahead of step 2, because the published figures were wrong — the page claimed 80 C64 units, 32 NES and 20 Spectrum against a corpus holding 138, 51 and 161.
+   - *Outstanding:* `/releases`.
 4. **`/quickstart` and `/install`.** A quickstart without install instructions is incomplete, so they land together: the quickstart carries the one-liner, `/install` carries the platforms, archives and troubleshooting lifted out of `cli.md`.
 5. **`/why`.** Highest leverage per page, no new machinery, and it is what the sibling sites link to.
 6. **`/migrate`.** The entry point for the user the tool is aimed at.
@@ -253,4 +257,11 @@ Steps 3–12 are independent of that bar and can run beside it. None block on th
 
 ## Outstanding Questions
 
-None open. All four questions raised on 2026-08-20 are settled above.
+**Search.** The decision record requires it — "21 generated instruction pages today, 45 once the dialect matrices land. Reference without search is worse than no reference" — and it is the one thing mdBook provided that has no replacement designed. Two shapes:
+
+| Option | Cost | Notes |
+|---|---|---|
+| Pagefind | A build dependency | The conventional choice for a static Astro site. Indexes the built output, no index to maintain, good ranking. |
+| A generated index | No dependency | 25 pages today. The instruction pages are structured, so an index keyed on mnemonic and heading would answer the question people actually bring to a reference — "where is `SBC`" — better than full text ranks it. |
+
+Not decided. The four questions raised on 2026-08-20 are settled above.
