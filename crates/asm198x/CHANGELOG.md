@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.20](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.19...asm198x-v0.0.20) - 2026-08-21
+
+### Added
+
+- A quickstart and an install page. The quickstart assembles one program for
+  the C64, the Spectrum and the Amiga, showing that only `--dialect` and the
+  output flag change between them. All three are assembled by CI with the real
+  binary. ([#154](https://github.com/asm198x/asm198x/pull/154))
+
+### Changed
+
+- `The command line` keeps a one-line Homebrew command and points at the new
+  install page for platforms, archives and the crates.io note.
+
 ## [0.0.19](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.18...asm198x-v0.0.19) - 2026-08-21
 
 ### Other
