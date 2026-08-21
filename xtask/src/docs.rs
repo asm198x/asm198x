@@ -69,14 +69,10 @@ pub fn run(repo: &Path, check: bool) -> Result<Report, String> {
     // `SUMMARY.md` needs its chapter list before a block pass reads the book.
     write_pages(repo, check, &mut report)?;
 
-    let mut files: Vec<PathBuf> = std::fs::read_dir(&src)
-        .map_err(|e| format!("cannot read {}: {e}", src.display()))?
-        .filter_map(Result::ok)
-        .map(|entry| entry.path())
-        .filter(|path| path.extension().is_some_and(|e| e == "md"))
-        .collect();
-    // Deterministic order, so a failure names the same file every run.
-    files.sort();
+    // Recursive, and sorted so a failure names the same file every run. The
+    // pages are not flat — a page's path under `src` is the URL it is published
+    // at — and a flat scan quietly skips every one of them that moved.
+    let files = crate::nav::markdown_files(&src)?;
 
     for path in files {
         report.scanned += 1;

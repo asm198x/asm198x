@@ -754,28 +754,28 @@ pub fn pages() -> Vec<Page> {
     let mut out: Vec<Page> = cpus
         .iter()
         .map(|cpu| Page {
-            path: format!("instructions/{}.md", cpu.slug),
+            path: format!("reference/instructions/{}.md", cpu.slug),
             body: render_cpu(cpu),
         })
         .collect();
     out.extend(word_cpus().iter().map(|cpu| Page {
-        path: format!("instructions/{}.md", cpu.slug),
+        path: format!("reference/instructions/{}.md", cpu.slug),
         body: render_word_cpu(cpu),
     }));
     out.push(Page {
-        path: "instructions/m68k.md".to_string(),
+        path: "reference/instructions/m68k.md".to_string(),
         body: render_m68k(),
     });
     out.push(Page {
-        path: "instructions/mos6809.md".to_string(),
+        path: "reference/instructions/mos6809.md".to_string(),
         body: render_mos6809(),
     });
     out.push(Page {
-        path: "instructions/z8000.md".to_string(),
+        path: "reference/instructions/z8000.md".to_string(),
         body: render_z8000(),
     });
     out.push(Page {
-        path: "instructions.md".to_string(),
+        path: "reference/instructions.md".to_string(),
         body: render_index(&cpus, &word_cpus()),
     });
     out
@@ -784,16 +784,24 @@ pub fn pages() -> Vec<Page> {
 /// The `SUMMARY.md` lines listing the instruction reference, so a new CPU
 /// appears in the sidebar without anyone remembering to add it.
 pub fn summary_lines() -> String {
-    let mut out = String::from("- [Instruction reference](instructions.md)\n");
+    let mut out = String::from("- [Instruction reference](reference/instructions.md)\n");
     for cpu in cpus() {
-        let _ = writeln!(out, "  - [{}](instructions/{}.md)", cpu.set.cpu, cpu.slug);
+        let _ = writeln!(
+            out,
+            "  - [{}](reference/instructions/{}.md)",
+            cpu.set.cpu, cpu.slug
+        );
     }
     for cpu in word_cpus() {
-        let _ = writeln!(out, "  - [{}](instructions/{}.md)", cpu.name, cpu.slug);
+        let _ = writeln!(
+            out,
+            "  - [{}](reference/instructions/{}.md)",
+            cpu.name, cpu.slug
+        );
     }
-    out.push_str("  - [Motorola 68000](instructions/m68k.md)\n");
-    out.push_str("  - [Motorola 6809](instructions/mos6809.md)\n");
-    out.push_str("  - [Zilog Z8000](instructions/z8000.md)\n");
+    out.push_str("  - [Motorola 68000](reference/instructions/m68k.md)\n");
+    out.push_str("  - [Motorola 6809](reference/instructions/mos6809.md)\n");
+    out.push_str("  - [Zilog Z8000](reference/instructions/z8000.md)\n");
     out
 }
 

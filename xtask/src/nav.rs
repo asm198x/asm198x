@@ -219,6 +219,8 @@ pub fn integrity(repo: &Path, sections: &[Section]) -> Result<Vec<String>, Strin
         }
     }
 
+    problems.extend(cross_links(&src)?);
+
     let mut on_disk = Vec::new();
     collect_md(&src, &src, &mut on_disk)?;
     on_disk.sort();
@@ -232,17 +234,86 @@ pub fn integrity(repo: &Path, sections: &[Section]) -> Result<Vec<String>, Strin
     Ok(problems)
 }
 
+/// Links between pages that point at a file which is not there.
+///
+/// mdBook rewrote `[Dialects](dialects.md)` to `dialects.html` and resolved it
+/// against the page. The site does not rewrite the target's extension, and a
+/// link to a page that has moved is a 404 either way — which is what happened
+/// to every cross-link in the book the day mdBook was withdrawn, including the
+/// twenty-one in the instruction index.
+///
+/// So the targets are checked here, against the filesystem, at the same time as
+/// the nav. Only relative `.md` links are considered: an external URL is not
+/// this repository's to verify, and an anchor is resolved by the browser.
+///
+/// # Errors
+/// If the book source cannot be walked or read.
+fn cross_links(src: &Path) -> Result<Vec<String>, String> {
+    let mut problems = Vec::new();
+    for path in markdown_files(src)? {
+        let text = std::fs::read_to_string(&path)
+            .map_err(|e| format!("cannot read {}: {e}", path.display()))?;
+        let dir = path.parent().unwrap_or(src);
+        let rel = path
+            .strip_prefix(src)
+            .unwrap_or(&path)
+            .display()
+            .to_string();
+
+        for target in link_targets(&text) {
+            // Strip the anchor; the file is what has to exist.
+            let file = target.split('#').next().unwrap_or(&target);
+            if file.is_empty() || !file.ends_with(".md") {
+                continue;
+            }
+            if file.contains("://") || file.starts_with('/') {
+                continue;
+            }
+            if !dir.join(file).exists() {
+                problems.push(format!("{rel} links to `{target}`, which does not exist"));
+            }
+        }
+    }
+    Ok(problems)
+}
+
+/// Every `](target)` in some markdown.
+fn link_targets(text: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    let bytes: Vec<char> = text.chars().collect();
+    let mut i = 0;
+    while i + 1 < bytes.len() {
+        if bytes[i] == ']' && bytes[i + 1] == '(' {
+            let start = i + 2;
+            let mut j = start;
+            while j < bytes.len() && bytes[j] != ')' && bytes[j] != '\n' {
+                j += 1;
+            }
+            if j < bytes.len() && bytes[j] == ')' {
+                out.push(bytes[start..j].iter().collect());
+                i = j;
+            }
+        }
+        i += 1;
+    }
+    out
+}
+
+/// Every `.md` under `dir`, at any depth.
+///
+/// Shared with the book-sample suite, which needs the same set — see
+/// `verdict_corpus::files` for why it is not written twice.
+///
+/// # Errors
+/// If a directory cannot be read.
+pub fn markdown_files(dir: &Path) -> Result<Vec<PathBuf>, String> {
+    verdict_corpus::files::markdown_files(dir)
+}
+
 /// Every `.md` under `dir`, as slugs relative to `root`.
 fn collect_md(root: &Path, dir: &Path, out: &mut Vec<String>) -> Result<(), String> {
-    let entries =
-        std::fs::read_dir(dir).map_err(|e| format!("cannot read {}: {e}", dir.display()))?;
-    for entry in entries.flatten() {
-        let path = entry.path();
-        if path.is_dir() {
-            collect_md(root, &path, out)?;
-        } else if path.extension().and_then(|e| e.to_str()) == Some("md")
-            && let Ok(rel) = path.strip_prefix(root)
-        {
+    for path in markdown_files(dir)? {
+        if let Ok(rel) = path.strip_prefix(root) {
             let slug = rel.with_extension("");
             out.push(slug.to_string_lossy().replace('\\', "/"));
         }

@@ -496,6 +496,7 @@ impl std::error::Error for ParseError {}
 
 pub mod curriculum;
 pub mod derive;
+pub mod files;
 
 #[cfg(test)]
 mod tests {

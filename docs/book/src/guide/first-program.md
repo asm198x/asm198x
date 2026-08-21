@@ -97,6 +97,6 @@ absolute load from address `$1234`.
 ## Which dialect?
 
 `--dialect` names the **assembler**, not the machine — see
-[Dialects](dialects.md) for the full table and the conventional choice per
+[Dialects](../reference/dialects.md) for the full table and the conventional choice per
 machine. If you have existing source, the answer is whichever assembler it was
 written for.
