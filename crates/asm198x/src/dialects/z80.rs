@@ -79,10 +79,18 @@ pub(crate) trait Z80Syntax {
     }
 
     /// Whether `word` is this dialect's include directive (language-surface
-    /// U2). Off by default: sjasmplus overrides for `INCLUDE`; pasmo's
-    /// include lands in U4. An include is walk-handled (a verbatim item in
-    /// the single-source parse, a lazy load in the multi-file walk), never an
-    /// [`Operation`].
+    /// U2).
+    ///
+    /// Off by default. sjasmplus overrides it for `INCLUDE`; pasmo does not
+    /// implement one, so a multi-file pasmo project does not assemble.
+    ///
+    /// That gap was in no unit's scope until 2026-08-21: this comment used to
+    /// say it landed in U4, and U4's roster did not name pasmo. The plan is
+    /// corrected; the underlying problem is that the units batch dialects when
+    /// the unit of work is (dialect × directive).
+    ///
+    /// An include is walk-handled — a verbatim item in the single-source parse,
+    /// a lazy load in the multi-file walk — never an [`Operation`].
     fn is_include(&self, word: &str) -> bool {
         let _ = word;
         false

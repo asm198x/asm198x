@@ -115,9 +115,15 @@ Measured across `crates/asm198x/src/dialects/`:
 
 ### Outstanding Questions
 
-- **The sigil convention — decide before U5.** Two models exist in-tree: sigil-in-the-spelling (acme `"!zone"`, ca65 `".incbin"`) and sigil-stripped-before-match (sjasmplus conditionals, 2026-08-18). A declared surface must pick one. Stripping is tidier for a matrix (one row per directive, sigil as a dialect property) but changes what some dialects accept — if acme strips `!`, does bare `zone` become valid? It must not. So stripping needs to be *conditional on the dialect requiring the sigil*, which is a third model and the likely answer. **This is the one place the plan can change behaviour, so it is decided explicitly, per dialect, with probes.**
+- ~~**The sigil convention — decide before U5.**~~ **Decided 2026-08-21**, see U5. Two models existed in-tree: sigil-in-the-spelling (acme `"!zone"`, ca65 `".incbin"`) and sigil-stripped-before-match (sjasmplus conditionals, 2026-08-18). A declared surface must pick one. Stripping is tidier for a matrix (one row per directive, sigil as a dialect property) but changes what some dialects accept — if acme strips `!`, does bare `zone` become valid? It must not. So stripping needs to be *conditional on the dialect requiring the sigil*, which is a third model and the likely answer. **This is the one place the plan can change behaviour, so it is decided explicitly, per dialect, with probes.**
 - Whether `Ignored` entries need a per-spelling reason for documentation, or whether one category is enough.
-- Whether a **`KnownUnsupported`** category is needed. [#87](https://github.com/asm198x/asm198x/issues/87) asks what to do with asl's semantic pseudo-ops (`radix`, `phase`, `align`, `charset`, …): they cannot be ignored without mis-assembling, and today they fail as *unknown mnemonics*, which misdescribes the problem. If the answer for any of them is "reject, but say what it is", the declaration needs a category for it.
+- ~~Whether a **`KnownUnsupported`** category is needed.~~ **Answered 2026-08-21: yes.** [#87](https://github.com/asm198x/asm198x/issues/87) asks what to do with asl's semantic pseudo-ops (`radix`, `phase`, `align`, `charset`, …): they cannot be ignored without mis-assembling, and today they fail as *unknown mnemonics*, which misdescribes the problem.
+
+  A second instance settles it. `include` is unimplemented for pasmo, and the diagnostic is `unknown instruction INCLUDE` — which tells a reader their source is invalid when real pasmo assembles it. The two cases differ in cause (a semantic pseudo-op we decline to fake; a directive not yet written) and are identical in effect: the assembler reports "no such thing" for something that demonstrably is a thing.
+
+  A reader cannot act on that. "Not supported yet" is a decision about their project; "not valid syntax" is a bug report they will write against their own source. The category exists to keep those apart, so the declaration carries the spelling with the reason it is refused, and the diagnostic can say so.
+
+  It also makes the gap countable, which is the point of the surface: a `KnownUnsupported` row is visible in a generated matrix, where a missing row is only discoverable by tripping over it — which is how the pasmo gap was found.
 - Whether the stable id in R1 is the canonical spelling or a separate symbol — matters only when two dialects share a spelling with different meanings (`end`).
 
 ### Sources
@@ -151,6 +157,7 @@ The types and one small conversion prove the shape (U1); vasm proves the family 
 
 ### U1. `Directive` pattern types + lookup, proved on one dialect
 
+- **Landed 2026-08-21.** `crates/asm198x/src/directives.rs` carries `Directive`, `Pattern::Exact`, `Category` (including `KnownUnsupported`, per the answered question below) and `lookup`. cdp1802 dispatches through it. R5 verified: the differential suite and the full corpus replay are byte-identical. `Pattern::Sized` is U2's to add, when vasm needs it.
 - **Goal:** The declaration types exist and one dialect dispatches through them.
 - **Requirements:** R1, R2, R3 (one dialect).
 - **Files:** a new `crates/asm198x/src/directives.rs`; `crates/asm198x/src/dialects/cdp1802.rs` (8 arms, one ignore arm — the smallest complete example).
@@ -159,6 +166,10 @@ The types and one small conversion prove the shape (U1); vasm proves the family 
 
 ### U2. vasm — the stem+size family form
 
+- **Landed 2026-08-21.** The central assumption holds: `Pattern::Sized { stem, separator, sizes, bare }` expresses `dc`/`dcb`/`ds` as three entries carrying their size vocabulary, and the types needed no revision.
+- **Better than the unit asked for.** It required the lookup to *preserve* the `dcb`-before-`dc` ordering as a property of matching. Splitting the word at the separator and matching the **stem** removes the constraint instead: `dcb.w` yields the stem `dcb`, which only one entry claims, so the entries can be declared in any order. `dc` is deliberately declared first, and a test asserts `dcb.w` still reaches `dcb`.
+- **A refinement the unit did not anticipate.** Matching recognises the stem and leaves the suffix to the arm body, so `dc.x` still reports `bad data size` instead of falling through to be refused as an unknown mnemonic. `sizes` therefore documents rather than enforces — which is what R7 needs it for anyway.
+- **R5 verified:** differential against real vasm, the full corpus replay, and 627 curriculum comparisons with zero new verdicts.
 - **Goal:** The family form carries a real generated vocabulary.
 - **Requirements:** R1, R6; R5 for vasm.
 - **Dependencies:** U1.
@@ -187,6 +198,17 @@ The types and one small conversion prove the shape (U1); vasm proves the family 
 
 ### U5. The sigil convention
 
+- **Decided and typed 2026-08-21.** The third model, as the plan suspected: the sigil is a declared property of the entry carrying whether it is **required**. `Pattern::Sigilled { sigil, names, required }` is in `directives.rs` with tests; applying it per dialect is what remains of this unit.
+- **Settled by probe, not by preference.** Ours and the reference tools, all three agreeing:
+
+  | Dialect | Sigilled | Bare |
+  |---|---|---|
+  | acme | `!byte` accepted | refused — real acme: *"Label name not in leftmost column"* |
+  | ca65 | `.byte` accepted | refused — real ca65: *"':' expected"* |
+  | sjasmplus | `.if` accepted | `if` accepted too |
+
+- **Why not strip everywhere.** In acme and ca65 a bare `byte` is a valid *label definition*. Stripping would not merely accept an extra spelling; it would change what a label means. The plan asked "if acme strips `!`, does bare `zone` become valid? It must not" — the probes show why that is a correctness answer rather than a taste one.
+- **Why not sigil-in-the-spelling everywhere.** sjasmplus takes both forms, so every conditional would need two entries and the matrix would lose the tidiness that motivated stripping.
 - **Goal:** One model for sigils across the tree, decided and applied.
 - **Requirements:** R1, R2; the Outstanding Question.
 - **Dependencies:** U4.

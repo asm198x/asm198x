@@ -26,6 +26,7 @@ use super::mos6502::{
     split_top_level, string_literal,
 };
 use crate::dialect::Dialect;
+use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, Expr, Operation, Statement};
 use crate::source::{SourceLoader, SourceMap};
 
@@ -208,6 +209,39 @@ fn split_label(code: &str) -> (Option<String>, &str) {
     }
 }
 
+/// What this dialect accepts beyond its instruction set.
+///
+/// asl is the reference for the CDP1802, and these are the spellings it takes.
+/// The ignored ones emit no bytes and change no encoding, so accepting and
+/// discarding them lets source that carries them assemble unchanged.
+pub const DIRECTIVES: &[Directive] = &[
+    Directive {
+        id: "org",
+        pattern: Pattern::Exact(&["org"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "bytes",
+        pattern: Pattern::Exact(&["db", "dc", "byte"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "words",
+        pattern: Pattern::Exact(&["dw", "word"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "reserve",
+        pattern: Pattern::Exact(&["ds", "rmb"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "ignored",
+        pattern: Pattern::Exact(&["cpu", "end", "title", "page", "aseg", "listing"]),
+        category: Category::Ignored,
+    },
+];
+
 fn parse_op(
     set: &'static isa::InstructionSet,
     rest: &str,
@@ -215,13 +249,39 @@ fn parse_op(
     line: usize,
 ) -> Result<Option<Operation>, AsmError> {
     let (word, args) = split_first_word(rest);
-    let op = match word.to_ascii_lowercase().as_str() {
-        "cpu" | "end" | "title" | "page" | "aseg" | "listing" => return Ok(None),
-        "org" => Operation::Org(value(args, line)?),
-        "db" | "dc" | "byte" => Operation::Bytes(byte_list(args, line)?),
-        "dw" | "word" => Operation::Words(value_list(args, line)?),
-        "ds" | "rmb" => parse_ds(args, consts, line)?,
-        _ => {
+
+    // Dispatch through the declared surface, not through the spelling: a
+    // directive this dialect does not declare cannot be accepted here, which
+    // is what makes the declaration a description of the dialect rather than
+    // a copy of one. See `crate::directives`.
+    let op = match lookup(DIRECTIVES, word) {
+        Some(directive) => match directive.category {
+            Category::Ignored => return Ok(None),
+            Category::KnownUnsupported => {
+                return Err(AsmError::new(
+                    line,
+                    format!(
+                        "`{word}` is a real directive here and asm198x does not implement it yet"
+                    ),
+                ));
+            }
+            Category::Operation => match directive.id {
+                "org" => Operation::Org(value(args, line)?),
+                "bytes" => Operation::Bytes(byte_list(args, line)?),
+                "words" => Operation::Words(value_list(args, line)?),
+                "reserve" => parse_ds(args, consts, line)?,
+                // Unreachable while the declaration and this match agree, and
+                // `every_declared_directive_is_dispatched` is what keeps them
+                // agreeing.
+                other => {
+                    return Err(AsmError::new(
+                        line,
+                        format!("`{other}` is declared but not dispatched"),
+                    ));
+                }
+            },
+        },
+        None => {
             let mn = word.to_ascii_uppercase();
             let (mode, operands) = resolve(set, &mn, args, consts, line)?;
             Operation::Instruction {
@@ -323,6 +383,91 @@ fn resolve(
         .form(&label)
         .ok_or_else(|| AsmError::new(line, format!("`{mn}` has no register {n} (valid 0..15)")))?;
     Ok((f.mode, vec![]))
+}
+
+#[cfg(test)]
+mod directive_surface {
+    //! R3/R4: dispatch flows through the declaration, and the two agree.
+
+    use super::{DIRECTIVES, parse_op};
+    use crate::assemble_1802 as asm;
+    use crate::directives::Category;
+    use std::collections::BTreeMap;
+
+    /// Every spelling the surface declares is accepted by the parser.
+    ///
+    /// Accepted means "not rejected as an unknown mnemonic". A directive that
+    /// needs an argument still fails without one; what this asserts is that the
+    /// word itself is recognised, which is what the declaration claims.
+    #[test]
+    fn every_declared_spelling_is_recognised() {
+        let consts = BTreeMap::new();
+        for directive in DIRECTIVES {
+            for spelling in &directive.spellings() {
+                let line = format!("{spelling} 1");
+                let result = parse_op(&isa::cdp1802::SET, &line, &consts, 1);
+                if let Err(e) = &result {
+                    assert!(
+                        !e.to_string().contains("unknown"),
+                        "`{spelling}` is declared but the parser does not know it: {e}"
+                    );
+                }
+            }
+        }
+    }
+
+    /// A word the surface does not declare is not treated as a directive.
+    ///
+    /// R3 is the point: the declaration is the only route to a directive, so a
+    /// word outside it falls through to instruction resolution and is refused
+    /// as a mnemonic. `include` would be the obvious probe and is the wrong
+    /// one — the asl-family chips do implement it, which the plan's roster for
+    /// that work does not yet say.
+    #[test]
+    fn an_undeclared_spelling_is_not_a_directive() {
+        let err = asm(" frobnicate 1\n").expect_err("not a directive here");
+        assert!(
+            err.to_string().to_lowercase().contains("unknown"),
+            "expected an unknown-mnemonic rejection, got: {err}"
+        );
+    }
+
+    /// Every `Operation` entry has a dispatch arm.
+    ///
+    /// The arm bodies match on `directive.id`, and a declared id with no arm
+    /// would reach the fallback that reports it as undispatched. This proves
+    /// none does, so the declaration and the dispatch cannot drift apart.
+    #[test]
+    fn every_declared_directive_is_dispatched() {
+        let consts = BTreeMap::new();
+        for directive in DIRECTIVES {
+            if directive.category != Category::Operation {
+                continue;
+            }
+            let spelling = directive.spellings()[0].clone();
+            let line = format!("{spelling} 1");
+            if let Err(e) = parse_op(&isa::cdp1802::SET, &line, &consts, 1) {
+                assert!(
+                    !e.to_string().contains("declared but not dispatched"),
+                    "`{}` has no dispatch arm",
+                    directive.id
+                );
+            }
+        }
+    }
+
+    /// The ignored spellings still assemble to nothing, as they did before the
+    /// conversion.
+    #[test]
+    fn ignored_directives_emit_no_bytes() {
+        for spelling in ["cpu", "end", "title", "page", "aseg", "listing"] {
+            let src = format!(" {spelling} whatever\n");
+            assert!(
+                asm(&src).expect("assembles").bytes.is_empty(),
+                "`{spelling}` should emit nothing"
+            );
+        }
+    }
 }
 
 #[cfg(test)]

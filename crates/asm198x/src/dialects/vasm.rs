@@ -26,6 +26,7 @@ use isa::m68k::{self, EaModes, Size, SizeEnc, Slot, ea};
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, Resolution, WalkDirective, WalkSemantics};
 use super::macros;
 use super::mos6502::{self, is_ident, split_data_items, split_first_word, string_literal};
+use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, BinOp, Expr, Warning};
 use crate::listing::{DebugCapture, DebugCaptureMulti};
 use crate::source::{SourceLoader, SourceMap};
@@ -2009,6 +2010,60 @@ fn split_label(code: &str, line: usize) -> Result<(Option<String>, &str), AsmErr
     Ok((Some(name.to_string()), rest))
 }
 
+/// What this dialect accepts beyond the 68000 instruction set.
+///
+/// `dc`, `dcb` and `ds` are declared as families rather than an enumerated
+/// cross-product (R6): one entry each, carrying the size vocabulary. The old
+/// dispatch used `strip_prefix`, which made `dcb` before `dc` load-bearing —
+/// matching on the stem retires that, so these can be declared in any order.
+pub const DIRECTIVES: &[Directive] = &[
+    Directive {
+        id: "equ",
+        pattern: Pattern::Exact(&["equ", "="]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "even",
+        pattern: Pattern::Exact(&["even"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "section",
+        pattern: Pattern::Exact(&["section"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "dc",
+        pattern: Pattern::Sized {
+            stem: "dc",
+            separator: '.',
+            sizes: &["b", "w", "l"],
+            bare: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "dcb",
+        pattern: Pattern::Sized {
+            stem: "dcb",
+            separator: '.',
+            sizes: &["b", "w", "l"],
+            bare: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "ds",
+        pattern: Pattern::Sized {
+            stem: "ds",
+            separator: '.',
+            sizes: &["b", "w", "l"],
+            bare: true,
+        },
+        category: Category::Operation,
+    },
+];
+
 fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, AsmError> {
     if rest.is_empty() {
         return Ok(Stmt::Empty);
@@ -2016,28 +2071,35 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
     let (word, args) = split_first_word(rest);
     let lower = word.to_ascii_lowercase();
 
-    if lower == "equ" || lower == "=" {
-        let name = label
-            .clone()
-            .ok_or_else(|| AsmError::new(line, "`equ` needs a label"))?;
-        return Ok(Stmt::Equ(name, parse_value(args, line)?));
-    }
-    if lower == "even" {
-        return Ok(Stmt::Even);
-    }
-    if lower == "section" {
-        return Ok(parse_section(args, line));
-    }
-    if let Some(sz) = lower.strip_prefix("dcb") {
-        // dcb.x count,value — reserve `count` items of `value`. Stage 1: treat
-        // as a constant-sized run (value defaults to 0 if omitted).
-        return parse_dcb(sz, args, line);
-    }
-    if let Some(sz) = lower.strip_prefix("dc") {
-        return Ok(Stmt::Dc(data_size(sz, line)?, parse_data_list(args, line)?));
-    }
-    if let Some(sz) = lower.strip_prefix("ds") {
-        return Ok(Stmt::Ds(data_size(sz, line)?, parse_value(args, line)?));
+    // Dispatch through the declared surface. The size suffix is left to the
+    // arm bodies: matching recognises the stem so `dc.x` still reports a bad
+    // data size instead of falling through as an unknown mnemonic.
+    if let Some(directive) = lookup(DIRECTIVES, &lower) {
+        let suffix = lower
+            .split_once('.')
+            .map_or("", |(_, tail)| &lower[lower.len() - tail.len()..]);
+        return match directive.id {
+            "equ" => {
+                let name = label
+                    .clone()
+                    .ok_or_else(|| AsmError::new(line, "`equ` needs a label"))?;
+                Ok(Stmt::Equ(name, parse_value(args, line)?))
+            }
+            "even" => Ok(Stmt::Even),
+            "section" => Ok(parse_section(args, line)),
+            // dcb.x count,value — reserve `count` items of `value`. Stage 1:
+            // treat as a constant-sized run (value defaults to 0 if omitted).
+            "dcb" => parse_dcb(suffix, args, line),
+            "dc" => Ok(Stmt::Dc(
+                data_size(suffix, line)?,
+                parse_data_list(args, line)?,
+            )),
+            "ds" => Ok(Stmt::Ds(data_size(suffix, line)?, parse_value(args, line)?)),
+            other => Err(AsmError::new(
+                line,
+                format!("`{other}` is declared but not dispatched"),
+            )),
+        };
     }
 
     let (mnemonic, size) = split_size(word, line)?;
@@ -2470,4 +2532,98 @@ fn expand_vasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
     macros::expansion(mode, source, |s| {
         macros::expand(&VasmMacros, s).map(|e| Some((e.text, e.origins)))
     })
+}
+
+#[cfg(test)]
+mod directive_surface {
+    //! R3/R4/R6: dispatch flows through the declaration, the families are
+    //! declared as families, and the two cannot drift apart.
+
+    use super::DIRECTIVES;
+    use crate::assemble_vasm as asm;
+    use crate::directives::{Category, lookup};
+
+    fn bytes(body: &str) -> Vec<u8> {
+        asm(&format!("        section code,code\n        {body}\n"))
+            .expect("assembles")
+            .bytes
+    }
+
+    /// R6: one entry per family, not an enumerated cross-product.
+    #[test]
+    fn the_data_families_are_declared_as_families() {
+        for (id, expected) in [
+            ("dc", vec!["dc", "dc.b", "dc.w", "dc.l"]),
+            ("dcb", vec!["dcb", "dcb.b", "dcb.w", "dcb.l"]),
+            ("ds", vec!["ds", "ds.b", "ds.w", "ds.l"]),
+        ] {
+            let entry = DIRECTIVES
+                .iter()
+                .find(|d| d.id == id)
+                .unwrap_or_else(|| panic!("`{id}` is declared"));
+            assert_eq!(entry.spellings(), expected, "{id}");
+        }
+    }
+
+    /// The ordering constraint the old `strip_prefix` dispatch carried is gone:
+    /// `dc` is declared before `dcb`, and `dcb.w` still reaches `dcb`.
+    #[test]
+    fn a_longer_stem_is_not_swallowed_by_a_shorter_one() {
+        assert_eq!(lookup(DIRECTIVES, "dcb.w").map(|d| d.id), Some("dcb"));
+        assert_eq!(lookup(DIRECTIVES, "dcb").map(|d| d.id), Some("dcb"));
+        assert_eq!(bytes("dcb.w 2,3"), vec![0x00, 0x03, 0x00, 0x03]);
+        assert_eq!(bytes("dc.w 3"), vec![0x00, 0x03]);
+    }
+
+    /// A bare stem keeps its documented default, unchanged by the conversion.
+    #[test]
+    fn a_bare_stem_still_means_byte() {
+        assert_eq!(bytes("dc 1"), vec![0x01]);
+        assert_eq!(bytes("dcb 2,3"), vec![0x03, 0x03]);
+    }
+
+    /// An unknown size reaches its stem, so the arm reports the real problem
+    /// rather than the word being refused as an unknown mnemonic.
+    #[test]
+    fn an_unknown_size_keeps_its_own_diagnostic() {
+        for body in ["dc.x 1", "dcb.x 1,2", "ds.q 1"] {
+            let err =
+                asm(&format!("        section code,code\n        {body}\n")).expect_err("bad size");
+            assert!(
+                err.to_string().contains("bad data size"),
+                "`{body}` should report a bad data size, got: {err}"
+            );
+        }
+    }
+
+    /// R3: every declared spelling is recognised as a directive.
+    #[test]
+    fn every_declared_spelling_is_recognised() {
+        for directive in DIRECTIVES {
+            if directive.category != Category::Operation {
+                continue;
+            }
+            for spelling in &directive.spellings() {
+                assert_eq!(
+                    lookup(DIRECTIVES, spelling).map(|d| d.id),
+                    Some(directive.id),
+                    "`{spelling}` should reach `{}`",
+                    directive.id
+                );
+            }
+        }
+    }
+
+    /// A word outside the declaration is not a directive: it falls through to
+    /// instruction resolution.
+    #[test]
+    fn an_undeclared_spelling_is_not_a_directive() {
+        assert!(lookup(DIRECTIVES, "frobnicate").is_none());
+        let err =
+            asm("        section code,code\n        frobnicate 1\n").expect_err("not a thing");
+        assert!(
+            !err.to_string().contains("declared but not dispatched"),
+            "should be refused as a mnemonic, got: {err}"
+        );
+    }
 }
