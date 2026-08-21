@@ -49,6 +49,7 @@ use super::mos6502::{
 };
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
+use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, Expr, Operation, Statement};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
@@ -530,6 +531,28 @@ fn is_local_or_ident(s: &str) -> bool {
 }
 
 /// Parse the operation part of a line: a directive or an instruction.
+/// What this dialect accepts beyond its instruction set.
+///
+/// asl is the reference for this chip. The ignored spellings emit no bytes
+/// and change no encoding, so source carrying them assembles unchanged.
+pub const DIRECTIVES: &[Directive] = &[
+    Directive {
+        id: "bytes",
+        pattern: Pattern::Exact(&["db"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "words",
+        pattern: Pattern::Exact(&["dw"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "reserve",
+        pattern: Pattern::Exact(&["ds"]),
+        category: Category::Operation,
+    },
+];
+
 fn parse_op(
     set: &'static isa::InstructionSet,
     rest: &str,
@@ -538,11 +561,32 @@ fn parse_op(
     line: usize,
 ) -> Result<Option<Operation>, AsmError> {
     let (word, args) = split_first_word(rest);
-    let op = match word.to_ascii_lowercase().as_str() {
-        "db" => Operation::Bytes(byte_list(args, line)?),
-        "dw" => Operation::Words(value_list(args, line)?),
-        "ds" => parse_ds(args, consts, line)?,
-        _ => {
+    // Dispatch through the declared surface: a spelling the declaration
+    // does not carry cannot be accepted here. See `crate::directives`.
+    let op = match lookup(DIRECTIVES, word) {
+        Some(directive) => match directive.category {
+            Category::Ignored => return Ok(None),
+            Category::KnownUnsupported => {
+                return Err(AsmError::new(
+                    line,
+                    format!(
+                        "`{word}` is a real directive here and asm198x does not implement it yet"
+                    ),
+                ));
+            }
+            Category::Operation => match directive.id {
+                "bytes" => Operation::Bytes(byte_list(args, line)?),
+                "words" => Operation::Words(value_list(args, line)?),
+                "reserve" => parse_ds(args, consts, line)?,
+                other => {
+                    return Err(AsmError::new(
+                        line,
+                        format!("`{other}` is declared but not dispatched"),
+                    ));
+                }
+            },
+        },
+        None => {
             let mn = word.to_ascii_uppercase();
             let (mode, operands) = resolve(set, &mn, args, consts, line)?;
             Operation::Instruction {
