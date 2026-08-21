@@ -180,6 +180,159 @@ pub fn lookup(surface: &'static [Directive], word: &str) -> Option<&'static Dire
     surface.iter().find(|d| d.matches(word))
 }
 
+/// One dialect's declared surface, named.
+pub struct DialectSurface {
+    /// The `--dialect` name this surface belongs to.
+    pub dialect: &'static str,
+    pub directives: &'static [Directive],
+}
+
+/// Every dialect that dispatches through a declaration (R7).
+///
+/// This is the accessor a documentation generator reads. A dialect absent from
+/// it has not been converted yet — which is a fact worth being able to state,
+/// rather than one to discover by finding no row for it.
+#[must_use]
+pub fn surfaces() -> &'static [DialectSurface] {
+    use crate::dialects;
+    &[
+        DialectSurface {
+            dialect: "vasm",
+            directives: dialects::vasm::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "1802",
+            directives: dialects::cdp1802::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "8080",
+            directives: dialects::i8080::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "6800",
+            directives: dialects::m6800::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "8048",
+            directives: dialects::i8048::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "scmp",
+            directives: dialects::scmp::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "2650",
+            directives: dialects::s2650::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "tms7000",
+            directives: dialects::tms7000::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "f8",
+            directives: dialects::f8::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "cp1610",
+            directives: dialects::cp1610::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "pdp11",
+            directives: dialects::pdp11::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "tms9900",
+            directives: dialects::tms9900::DIRECTIVES,
+        },
+        DialectSurface {
+            dialect: "z8000",
+            directives: dialects::z8000::DIRECTIVES,
+        },
+    ]
+}
+
+#[cfg(test)]
+mod surface_invariants {
+    //! Holds across every converted dialect, so a new one cannot land broken.
+
+    use super::{Category, surfaces};
+
+    #[test]
+    fn ids_are_unique_within_a_dialect() {
+        for surface in surfaces() {
+            let mut ids: Vec<&str> = surface.directives.iter().map(|d| d.id).collect();
+            ids.sort_unstable();
+            let before = ids.len();
+            ids.dedup();
+            assert_eq!(before, ids.len(), "{} has a duplicate id", surface.dialect);
+        }
+    }
+
+    #[test]
+    fn no_spelling_is_claimed_twice_within_a_dialect() {
+        // Two entries answering to one word means the first wins silently,
+        // which is the ordering bug `Sized` matching was built to retire.
+        for surface in surfaces() {
+            let mut seen: Vec<String> = Vec::new();
+            for directive in surface.directives {
+                for spelling in directive.spellings() {
+                    let lower = spelling.to_ascii_lowercase();
+                    assert!(
+                        !seen.contains(&lower),
+                        "{}: `{spelling}` is claimed by more than one entry",
+                        surface.dialect
+                    );
+                    seen.push(lower);
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn every_entry_has_at_least_one_spelling() {
+        for surface in surfaces() {
+            for directive in surface.directives {
+                assert!(
+                    !directive.spellings().is_empty(),
+                    "{}: `{}` declares no spelling",
+                    surface.dialect,
+                    directive.id
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn a_declared_spelling_finds_its_own_entry() {
+        for surface in surfaces() {
+            for directive in surface.directives {
+                for spelling in &directive.spellings() {
+                    assert_eq!(
+                        super::lookup(surface.directives, spelling).map(|d| d.id),
+                        Some(directive.id),
+                        "{}: `{spelling}` should reach `{}`",
+                        surface.dialect,
+                        directive.id
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn nothing_is_declared_unsupported_yet() {
+        // The category exists for pasmo's include and asl's semantic
+        // pseudo-ops. Neither is declared yet, so this records that the count
+        // is zero rather than leaving it unstated.
+        let count = surfaces()
+            .iter()
+            .flat_map(|s| s.directives.iter())
+            .filter(|d| d.category == Category::KnownUnsupported)
+            .count();
+        assert_eq!(count, 0);
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
