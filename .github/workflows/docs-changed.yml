@@ -28,8 +28,18 @@ on:
   #
   # Missing this cost a live 404: the site's header linked `/why/` while the
   # published revision still predated the page.
-  release:
-    types: [published]
+  #
+  # It listens for the **Release workflow finishing**, not for `release:
+  # published`, and the difference is not a style choice. `release.yml` creates
+  # the release with `gh release create` under `secrets.GITHUB_TOKEN`, and
+  # GitHub does not start workflows from events raised by that token — the
+  # recursion guard. So a `release: types: [published]` trigger here could never
+  # fire, and never did: across two releases every run of this workflow was a
+  # `push`, and the site stayed a release behind until an unrelated docs change
+  # happened along. `workflow_run` is exempt from the guard.
+  workflow_run:
+    workflows: [Release]
+    types: [completed]
 
 permissions: {}
 
@@ -37,6 +47,14 @@ jobs:
   notify:
     name: Notify the site
     runs-on: ubuntu-latest
+    # A `workflow_run` fires for every Release run, including the dry-run plan
+    # on a pull request and any that failed. Only a successful release from a
+    # tag push has published anything for the site to pick up. A `push` to
+    # `docs/` arrives with no `workflow_run` payload and passes the first test.
+    if: >-
+      github.event_name != 'workflow_run' ||
+      (github.event.workflow_run.conclusion == 'success' &&
+       github.event.workflow_run.event == 'push')
     steps:
       - name: Dispatch to asm198x.github.io
         env:
