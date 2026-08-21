@@ -9,6 +9,7 @@
 mod coverage;
 mod divergences;
 mod docs;
+mod evidence;
 mod grow;
 mod includes;
 mod instructions;
