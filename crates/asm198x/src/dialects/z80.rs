@@ -25,6 +25,7 @@ use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialects::macros::{
     Expand, LineOrigin, expanded_text, expansion, line_origins, place, place_nodes, remap_lines,
 };
+use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
 use crate::source::{MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
 use crate::span::FileId;
@@ -2038,12 +2039,53 @@ fn parse_op<S: Z80Syntax>(
 // Common directives
 // ---------------------------------------------------------------------------
 
-/// Directives both pasmo and sjasmplus share.
+/// The directives pasmo and sjasmplus share.
+///
+/// A **base**, not either dialect's full surface. sjasmplus adds `INCLUDE` and
+/// the conditionals; pasmo adds nothing here and notably has no include, which
+/// is why a multi-file pasmo project does not assemble. Composing each
+/// dialect's own entries on top of this base is what would let `surfaces()`
+/// state that difference rather than leave it to be discovered.
+pub(crate) const COMMON_DIRECTIVES: &[Directive] = &[
+    Directive {
+        id: "org",
+        pattern: Pattern::Exact(&["org"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "equ",
+        pattern: Pattern::Exact(&["equ"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "bytes",
+        pattern: Pattern::Exact(&["defb", "db", "defm", "dm"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "words",
+        pattern: Pattern::Exact(&["defw", "dw"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "reserve",
+        pattern: Pattern::Exact(&["defs", "ds"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "end",
+        pattern: Pattern::Exact(&["end"]),
+        category: Category::Operation,
+    },
+];
+
+/// Whether `word` is one of them.
+///
+/// Reads the declaration rather than repeating it: this predicate and
+/// [`common_directive`] used to carry the same eleven spellings separately, so
+/// adding one meant remembering both.
 pub(crate) fn is_common_directive(word: &str) -> bool {
-    matches!(
-        word.to_ascii_lowercase().as_str(),
-        "org" | "equ" | "defb" | "db" | "defm" | "dm" | "defw" | "dw" | "defs" | "ds" | "end"
-    )
+    lookup(COMMON_DIRECTIVES, word).is_some()
 }
 
 /// Parse a common directive. `defs`/`ds` reserve a constant-folded number of
@@ -2055,12 +2097,15 @@ pub(crate) fn common_directive<S: Z80Syntax>(
     line: usize,
     consts: &BTreeMap<String, i64>,
 ) -> Result<Option<Operation>, AsmError> {
-    Ok(match word.to_ascii_lowercase().as_str() {
+    let Some(entry) = lookup(COMMON_DIRECTIVES, word) else {
+        return Err(AsmError::new(line, format!("unknown directive `{word}`")));
+    };
+    Ok(match entry.id {
         "org" => Some(Operation::Org(parse_value(syntax, args, line)?)),
         "equ" => Some(Operation::Equ(parse_value(syntax, args, line)?)),
-        "defb" | "db" | "defm" | "dm" => Some(Operation::Bytes(parse_list(syntax, args, line)?)),
-        "defw" | "dw" => Some(Operation::Words(parse_list(syntax, args, line)?)),
-        "defs" | "ds" => {
+        "bytes" => Some(Operation::Bytes(parse_list(syntax, args, line)?)),
+        "words" => Some(Operation::Words(parse_list(syntax, args, line)?)),
+        "reserve" => {
             // The count must be known at parse time (it sets the statement's
             // size), but it need not be a bare literal — fold any expression of
             // `equ` constants, e.g. `ds MAX_TORCHES * 2`.
@@ -2074,7 +2119,12 @@ pub(crate) fn common_directive<S: Z80Syntax>(
         // `.sna` snapshot needs the start address — capture it when given.
         "end" if args.trim().is_empty() => None,
         "end" => Some(Operation::Entry(parse_value(syntax, args, line)?)),
-        other => return Err(AsmError::new(line, format!("unknown directive `{other}`"))),
+        other => {
+            return Err(AsmError::new(
+                line,
+                format!("`{other}` is declared but not dispatched"),
+            ));
+        }
     })
 }
 

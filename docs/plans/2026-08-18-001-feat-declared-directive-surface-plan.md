@@ -192,7 +192,9 @@ The types and one small conversion prove the shape (U1); vasm proves the family 
 
 ### U4. The remaining dialects
 
-- **In progress 2026-08-21.** lwasm and acme done; the ca65 family, rgbasm and z80 remain.
+- **Landed 2026-08-21**, with one piece deliberately left: lwasm, acme, the ca65 family (ca65, 65816, huc6280), rgbasm and the shared z80 base are converted. Eighteen dialect surfaces are declared.
+- **The z80 base is a base, not a surface.** `COMMON_DIRECTIVES` carries what pasmo and sjasmplus share, and is not registered in `surfaces()` under either name, because they are not the same: sjasmplus adds `INCLUDE` and the conditionals, and pasmo adds nothing — which is exactly the gap that started this work. Composing each dialect's own entries on top of the base is the remaining piece, and it is what would let `surfaces()` *state* the pasmo include gap rather than leave it to be found by assembling a multi-file project.
+- It also retired a duplication: `is_common_directive` and `common_directive` carried the same eleven spellings separately, so adding one meant remembering both.
 - **lwasm** spells several concepts two ways — `fcb` and `.byte` are the same directive — so those are alternative spellings rather than a sigil applied to a name, and `Exact` carries both.
 - **acme is the first real `Sigilled` user, and the first dialect whose dispatch is split.** Its directives are read in three places: the data and layout ones in `parse_directive`, `!src`/`!bin`/`!zone` walk-handled in `AcmeEval::lower` because a zone switch is evaluation state, and the conditionals in the scanner before parsing. The declaration covers all of them, because it describes the dialect rather than any one parser; only the first group dispatches from it. The original loud fall-through is preserved for a misrouted directive.
 - **The sigil is put back for the lookup.** `parse_directive` receives the name already stripped, and matching the bare name would quietly make the sigil optional — the exact behaviour change U5's probes ruled out. Verified: bare `byte` is still refused.
