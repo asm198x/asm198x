@@ -78,7 +78,7 @@ pub fn run(repo: &Path, check: bool) -> Result<Report, String> {
         report.scanned += 1;
         let original =
             std::fs::read_to_string(&path).map_err(|e| format!("{}: {e}", path.display()))?;
-        let (rewritten, blocks) = regenerate(&original, &path)?;
+        let (rewritten, blocks) = regenerate(&original, &path, repo)?;
         report.blocks += blocks;
         if rewritten == original {
             continue;
@@ -126,7 +126,7 @@ fn write_pages(repo: &Path, check: bool, report: &mut Report) -> Result<(), Stri
 
 /// Rewrite every generated block in one file, returning the new text and how
 /// many blocks it held.
-fn regenerate(source: &str, path: &Path) -> Result<(String, usize), String> {
+fn regenerate(source: &str, path: &Path, repo: &Path) -> Result<(String, usize), String> {
     let mut out = String::with_capacity(source.len());
     let mut rest = source;
     let mut blocks = 0;
@@ -149,7 +149,7 @@ fn regenerate(source: &str, path: &Path) -> Result<(String, usize), String> {
 
         out.push_str(&rest[..body_start]);
         out.push('\n');
-        out.push_str(&generate(command, path)?);
+        out.push_str(&generate(command, path, repo)?);
         out.push_str(&rest[close_at..close_at + CLOSE.len()]);
 
         rest = &rest[close_at + CLOSE.len()..];
@@ -164,10 +164,11 @@ fn regenerate(source: &str, path: &Path) -> Result<(String, usize), String> {
 /// Commands are matched, not shelled out to. A documentation generator that
 /// ran arbitrary strings out of a markdown file would be a way to execute
 /// whatever a pull request put there.
-fn generate(command: &str, path: &Path) -> Result<String, String> {
+fn generate(command: &str, path: &Path, repo: &Path) -> Result<String, String> {
     match command {
         "asm198x dialects --markdown" => Ok(asm198x::dialect_table::markdown()),
         "xtask instructions --summary" => Ok(crate::instructions::summary_lines()),
+        "xtask divergences --markdown" => Ok(crate::divergences::markdown(repo)),
         other => Err(format!(
             "{}: no generator for `{other}`\n\
              \n\

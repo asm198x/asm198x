@@ -7,6 +7,7 @@
 //! corpus actually holds.
 
 mod coverage;
+mod divergences;
 mod docs;
 mod grow;
 mod instructions;

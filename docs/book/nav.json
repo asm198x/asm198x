@@ -15,6 +15,11 @@
       "items": [
         {
           "children": [],
+          "slug": "why",
+          "title": "Why asm198x"
+        },
+        {
+          "children": [],
           "slug": "quickstart",
           "title": "Quickstart"
         },
@@ -42,6 +47,11 @@
           "children": [],
           "slug": "reference/dialects",
           "title": "Dialects"
+        },
+        {
+          "children": [],
+          "slug": "divergences",
+          "title": "Where we differ"
         }
       ],
       "title": "Using it"
