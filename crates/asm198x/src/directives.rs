@@ -56,6 +56,35 @@ pub enum Pattern {
     /// with a nonsense size. Splitting at the separator makes `dcb.w` yield the
     /// stem `dcb`, which only one entry claims — so the entries can be declared
     /// in any order and the matching is what keeps them apart.
+    /// A name behind a sigil: acme's `!byte`, ca65's `.byte`, sjasmplus's
+    /// `.if`.
+    ///
+    /// `required` is the whole point, and it is a fact about the dialect
+    /// rather than a house style. Probed 2026-08-21 against the reference
+    /// tools:
+    ///
+    /// | Dialect | Sigilled | Bare |
+    /// |---|---|---|
+    /// | acme | `!byte` | refused — read as a label |
+    /// | ca65 | `.byte` | refused — read as a label |
+    /// | sjasmplus | `.if` | accepted |
+    ///
+    /// Stripping the sigil everywhere would not merely accept an extra
+    /// spelling in acme and ca65: a bare `byte` is a valid *label definition*
+    /// there, so accepting it as a directive changes what a label means. Real
+    /// acme answers "Label name not in leftmost column" and real ca65 answers
+    /// "':' expected". Carrying the sigil in every spelling instead would
+    /// misdescribe sjasmplus, which takes both forms.
+    ///
+    /// So the sigil is declared, with its optionality, and both facts are
+    /// testable rather than accidents of which branch a parser took.
+    Sigilled {
+        sigil: char,
+        names: &'static [&'static str],
+        /// Whether the sigil must be present. `false` means the bare name is
+        /// also valid — which is true of sjasmplus and of neither other.
+        required: bool,
+    },
     Sized {
         stem: &'static str,
         /// The character introducing the suffix.
@@ -87,6 +116,17 @@ impl Directive {
     pub fn spellings(&self) -> Vec<String> {
         match self.pattern {
             Pattern::Exact(list) => list.iter().map(|s| (*s).to_string()).collect(),
+            Pattern::Sigilled {
+                sigil,
+                names,
+                required,
+            } => {
+                let mut out: Vec<String> = names.iter().map(|n| format!("{sigil}{n}")).collect();
+                if !required {
+                    out.extend(names.iter().map(|n| (*n).to_string()));
+                }
+                out
+            }
             Pattern::Sized {
                 stem,
                 separator,
@@ -109,6 +149,14 @@ impl Directive {
     pub fn matches(&self, word: &str) -> bool {
         match self.pattern {
             Pattern::Exact(list) => list.iter().any(|s| s.eq_ignore_ascii_case(word)),
+            Pattern::Sigilled {
+                sigil,
+                names,
+                required,
+            } => match word.strip_prefix(sigil) {
+                Some(name) => names.iter().any(|n| n.eq_ignore_ascii_case(name)),
+                None => !required && names.iter().any(|n| n.eq_ignore_ascii_case(word)),
+            },
             Pattern::Sized {
                 stem,
                 separator,
@@ -244,6 +292,66 @@ mod tests {
     fn sized_spellings_expand_for_a_generator() {
         let entry = lookup(SIZED, "dc").expect("declared");
         assert_eq!(entry.spellings(), vec!["dc", "dc.b", "dc.w", "dc.l"]);
+    }
+
+    const REQUIRED: &[Directive] = &[Directive {
+        id: "byte",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["byte", "by"],
+            required: true,
+        },
+        category: Category::Operation,
+    }];
+
+    const OPTIONAL: &[Directive] = &[Directive {
+        id: "if",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["if"],
+            required: false,
+        },
+        category: Category::Operation,
+    }];
+
+    #[test]
+    fn a_required_sigil_is_required() {
+        // acme and ca65: a bare `byte` is a label definition, not a directive.
+        // Accepting it here would change what a label means.
+        assert_eq!(lookup(REQUIRED, "!byte").map(|d| d.id), Some("byte"));
+        assert_eq!(lookup(REQUIRED, "!by").map(|d| d.id), Some("byte"));
+        assert!(lookup(REQUIRED, "byte").is_none());
+        assert!(lookup(REQUIRED, "by").is_none());
+    }
+
+    #[test]
+    fn an_optional_sigil_takes_both_forms() {
+        // sjasmplus takes `if` and `.if`, and the reference does too.
+        assert_eq!(lookup(OPTIONAL, ".if").map(|d| d.id), Some("if"));
+        assert_eq!(lookup(OPTIONAL, "if").map(|d| d.id), Some("if"));
+    }
+
+    #[test]
+    fn a_sigil_does_not_make_an_undeclared_name_valid() {
+        assert!(lookup(REQUIRED, "!nonsense").is_none());
+        assert!(lookup(OPTIONAL, ".nonsense").is_none());
+    }
+
+    #[test]
+    fn sigilled_matching_ignores_case() {
+        assert_eq!(lookup(REQUIRED, "!BYTE").map(|d| d.id), Some("byte"));
+        assert_eq!(lookup(OPTIONAL, "IF").map(|d| d.id), Some("if"));
+    }
+
+    #[test]
+    fn sigilled_spellings_expand_by_optionality() {
+        let required = lookup(REQUIRED, "!byte").expect("declared");
+        assert_eq!(required.spellings(), vec!["!byte", "!by"]);
+
+        // The bare form appears only where it is genuinely valid, so a matrix
+        // built from this cannot claim acme takes `byte`.
+        let optional = lookup(OPTIONAL, ".if").expect("declared");
+        assert_eq!(optional.spellings(), vec![".if", "if"]);
     }
 
     #[test]

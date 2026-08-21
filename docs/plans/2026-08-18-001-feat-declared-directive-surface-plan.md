@@ -115,7 +115,7 @@ Measured across `crates/asm198x/src/dialects/`:
 
 ### Outstanding Questions
 
-- **The sigil convention — decide before U5.** Two models exist in-tree: sigil-in-the-spelling (acme `"!zone"`, ca65 `".incbin"`) and sigil-stripped-before-match (sjasmplus conditionals, 2026-08-18). A declared surface must pick one. Stripping is tidier for a matrix (one row per directive, sigil as a dialect property) but changes what some dialects accept — if acme strips `!`, does bare `zone` become valid? It must not. So stripping needs to be *conditional on the dialect requiring the sigil*, which is a third model and the likely answer. **This is the one place the plan can change behaviour, so it is decided explicitly, per dialect, with probes.**
+- ~~**The sigil convention — decide before U5.**~~ **Decided 2026-08-21**, see U5. Two models existed in-tree: sigil-in-the-spelling (acme `"!zone"`, ca65 `".incbin"`) and sigil-stripped-before-match (sjasmplus conditionals, 2026-08-18). A declared surface must pick one. Stripping is tidier for a matrix (one row per directive, sigil as a dialect property) but changes what some dialects accept — if acme strips `!`, does bare `zone` become valid? It must not. So stripping needs to be *conditional on the dialect requiring the sigil*, which is a third model and the likely answer. **This is the one place the plan can change behaviour, so it is decided explicitly, per dialect, with probes.**
 - Whether `Ignored` entries need a per-spelling reason for documentation, or whether one category is enough.
 - ~~Whether a **`KnownUnsupported`** category is needed.~~ **Answered 2026-08-21: yes.** [#87](https://github.com/asm198x/asm198x/issues/87) asks what to do with asl's semantic pseudo-ops (`radix`, `phase`, `align`, `charset`, …): they cannot be ignored without mis-assembling, and today they fail as *unknown mnemonics*, which misdescribes the problem.
 
@@ -198,6 +198,17 @@ The types and one small conversion prove the shape (U1); vasm proves the family 
 
 ### U5. The sigil convention
 
+- **Decided and typed 2026-08-21.** The third model, as the plan suspected: the sigil is a declared property of the entry carrying whether it is **required**. `Pattern::Sigilled { sigil, names, required }` is in `directives.rs` with tests; applying it per dialect is what remains of this unit.
+- **Settled by probe, not by preference.** Ours and the reference tools, all three agreeing:
+
+  | Dialect | Sigilled | Bare |
+  |---|---|---|
+  | acme | `!byte` accepted | refused — real acme: *"Label name not in leftmost column"* |
+  | ca65 | `.byte` accepted | refused — real ca65: *"':' expected"* |
+  | sjasmplus | `.if` accepted | `if` accepted too |
+
+- **Why not strip everywhere.** In acme and ca65 a bare `byte` is a valid *label definition*. Stripping would not merely accept an extra spelling; it would change what a label means. The plan asked "if acme strips `!`, does bare `zone` become valid? It must not" — the probes show why that is a correctness answer rather than a taste one.
+- **Why not sigil-in-the-spelling everywhere.** sjasmplus takes both forms, so every conditional would need two entries and the matrix would lose the tidiness that motivated stripping.
 - **Goal:** One model for sigils across the tree, decided and applied.
 - **Requirements:** R1, R2; the Outstanding Question.
 - **Dependencies:** U4.
