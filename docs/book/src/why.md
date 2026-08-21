@@ -21,15 +21,17 @@ lists all 24, and what each one is the syntax of.
 | Capability | Scope |
 |---|---|
 | One binary, 20 CPUs | One install for every machine you target, rather than a toolchain per machine |
-| `fmt` — canonical layout, idempotent | Z80, 8080, 6800, CDP1802, SC/MP, SM83 and 6809 |
-| `disasm`, round-trip verified | 6502 and Z80 |
+| `fmt` — canonical layout, idempotent | Every dialect |
+| `disasm` | Every dialect |
 | `--prg`, `--sna`, `--exe` | The loader format comes out of the assembler, not a later packaging step |
 | `--message-format=json` | Structured results and diagnostics, for editors and build scripts |
 | `--debug` | A Debug198x sidecar for source-level debugging; flat dialects, plus the ca65 and vasm linked paths |
 | `--sym`, `--listing` | A symbol table and an address/bytes/source listing |
 
-The scope column is the point. `fmt` covers seven CPU families and not the
-6502; `disasm` reads two. Those are the shipped surfaces, not a roadmap.
+The scope column is the point, and it is checked rather than claimed: a test
+runs `fmt` and `disasm` for every name `--dialect` accepts, so "every dialect"
+fails the build on the day it stops being true. These are the shipped surfaces,
+not a roadmap.
 
 ## Why trust it with a project that already builds
 

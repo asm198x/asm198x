@@ -174,3 +174,62 @@ fn the_rom_less_mcs48_parts_refuse_what_the_8048_accepts() {
         "the ROM-less parts reserve the bus, so this must be refused"
     );
 }
+
+/// Every dialect the table documents can be **formatted**.
+///
+/// `fmt` grew per dialect and finished quietly: the last unsupported-dialect
+/// fallback in `main.rs` is gone, and nothing said so outside a comment. *Why
+/// asm198x* was still telling readers the formatter covered seven CPU families
+/// and not the 6502, which understated the tool by most of it — the drift that
+/// matters more than the overstating kind, because it loses the reader who
+/// would have been served.
+///
+/// The empty source is the same idiom the assemble test uses, and for the same
+/// reason: it exercises argument parse, dialect resolution, the AST front-end
+/// and emit, without the test becoming a test of its fixture.
+#[test]
+fn every_documented_dialect_formats() {
+    let source = empty_source();
+    for entry in DIALECTS {
+        let out = bin()
+            .args(["fmt", "--dialect", entry.name])
+            .arg(&source)
+            .output()
+            .expect("run asm198x");
+        assert!(
+            out.status.success(),
+            "`{}` does not format: {}",
+            entry.name,
+            String::from_utf8_lossy(&out.stderr).trim()
+        );
+    }
+}
+
+/// Every dialect the table documents can be **disassembled** for.
+///
+/// Same story as the formatter: twenty disassemblers are wired to twenty-two
+/// dispatch arms, and the page said "6502 and Z80".
+///
+/// Two bytes rather than an empty file, so the disassembler has something to
+/// decode. Whatever the bytes mean on a given CPU, the run must succeed —
+/// undecodable bytes are rendered as data, which is a disassembly and not a
+/// failure.
+#[test]
+fn every_documented_dialect_disassembles() {
+    let path = std::env::temp_dir().join("asm198x-cli-dialects-two.bin");
+    std::fs::write(&path, [0x00, 0x00]).expect("write temp binary");
+    for entry in DIALECTS {
+        let out = bin()
+            .args(["disasm", "--dialect", entry.name])
+            .arg(&path)
+            .output()
+            .expect("run asm198x");
+        assert!(
+            out.status.success(),
+            "`{}` does not disassemble: {}",
+            entry.name,
+            String::from_utf8_lossy(&out.stderr).trim()
+        );
+    }
+    let _ = std::fs::remove_file(&path);
+}
