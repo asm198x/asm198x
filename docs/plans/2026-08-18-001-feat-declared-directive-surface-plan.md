@@ -117,7 +117,13 @@ Measured across `crates/asm198x/src/dialects/`:
 
 - **The sigil convention — decide before U5.** Two models exist in-tree: sigil-in-the-spelling (acme `"!zone"`, ca65 `".incbin"`) and sigil-stripped-before-match (sjasmplus conditionals, 2026-08-18). A declared surface must pick one. Stripping is tidier for a matrix (one row per directive, sigil as a dialect property) but changes what some dialects accept — if acme strips `!`, does bare `zone` become valid? It must not. So stripping needs to be *conditional on the dialect requiring the sigil*, which is a third model and the likely answer. **This is the one place the plan can change behaviour, so it is decided explicitly, per dialect, with probes.**
 - Whether `Ignored` entries need a per-spelling reason for documentation, or whether one category is enough.
-- Whether a **`KnownUnsupported`** category is needed. [#87](https://github.com/asm198x/asm198x/issues/87) asks what to do with asl's semantic pseudo-ops (`radix`, `phase`, `align`, `charset`, …): they cannot be ignored without mis-assembling, and today they fail as *unknown mnemonics*, which misdescribes the problem. If the answer for any of them is "reject, but say what it is", the declaration needs a category for it.
+- ~~Whether a **`KnownUnsupported`** category is needed.~~ **Answered 2026-08-21: yes.** [#87](https://github.com/asm198x/asm198x/issues/87) asks what to do with asl's semantic pseudo-ops (`radix`, `phase`, `align`, `charset`, …): they cannot be ignored without mis-assembling, and today they fail as *unknown mnemonics*, which misdescribes the problem.
+
+  A second instance settles it. `include` is unimplemented for pasmo, and the diagnostic is `unknown instruction INCLUDE` — which tells a reader their source is invalid when real pasmo assembles it. The two cases differ in cause (a semantic pseudo-op we decline to fake; a directive not yet written) and are identical in effect: the assembler reports "no such thing" for something that demonstrably is a thing.
+
+  A reader cannot act on that. "Not supported yet" is a decision about their project; "not valid syntax" is a bug report they will write against their own source. The category exists to keep those apart, so the declaration carries the spelling with the reason it is refused, and the diagnostic can say so.
+
+  It also makes the gap countable, which is the point of the surface: a `KnownUnsupported` row is visible in a generated matrix, where a missing row is only discoverable by tripping over it — which is how the pasmo gap was found.
 - Whether the stable id in R1 is the canonical spelling or a separate symbol — matters only when two dialects share a spelling with different meanings (`end`).
 
 ### Sources

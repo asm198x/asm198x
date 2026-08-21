@@ -237,7 +237,8 @@ Per-dialect directive spellings the skins target (from reference documentation; 
 
 ### U4. Include/incbin across the remaining flat-engine dialects
 
-- **Goal:** The mechanism reaches the rest of the roster: acme, the ca65-flat family (6502 flat, 65816, HuC6280), rgbasm, lwasm, and the asl-syntax chips — each spelling probed, skinned, and differentially validated.
+- **Goal:** The mechanism reaches the rest of the roster: **pasmo**, acme, the ca65-flat family (6502 flat, 65816, HuC6280), rgbasm, lwasm, and the asl-syntax chips — each spelling probed, skinned, and differentially validated.
+- **Corrected 2026-08-21.** pasmo was in no unit's scope. U2 covered include for sjasmplus only; U3 covered *incbin* for sjasmplus and pasmo; this unit's roster omitted pasmo; U5 and U6 are the ca65-NES and vasm paths. `dialects/z80.rs` said "pasmo's include lands in U4", which this list contradicted, so the one pointer that existed was wrong. Found by testing all five front doors while writing `/migrate`: `include` works for acme, ca65, sjasmplus and vasm, and is refused for pasmo, so a multi-file pasmo project does not assemble. The roster is also **behind reality** — acme and the ca65-flat family already work — which is the same tracking gap in the other direction. Both are symptoms of batching by dialect when the unit of work is (dialect × directive); [`2026-08-18-001`](2026-08-18-001-feat-declared-directive-surface-plan.md) is the fix.
 - **Requirements:** R1, R2, R6; completes AE1's ca65 spelling on the flat path.
 - **Dependencies:** U2, U3.
 - **Files:** `crates/asm198x/src/dialects/{acme,ca65,ca65_816,ca65_huc6280,rgbasm,lwasm}.rs` and the asl-family dialect modules; `tests/differential.rs` probes per dialect.
