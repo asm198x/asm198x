@@ -29,15 +29,15 @@ use std::path::Path;
 use verdict_corpus::{Corpus, Outcome};
 
 /// One tracked difference, aggregated across every verdict that names it.
-struct Divergence {
+pub struct Divergence {
     cpus: BTreeSet<String>,
     dialects: BTreeSet<String>,
     tools: BTreeSet<String>,
-    cases: usize,
+    pub cases: usize,
 }
 
 /// Read the corpus and group every divergence by its join id.
-fn collect(repo: &Path) -> BTreeMap<String, Divergence> {
+pub fn collect(repo: &Path) -> BTreeMap<String, Divergence> {
     let dir = repo.join("crates/asm198x/tests/verdicts");
     let mut out: BTreeMap<String, Divergence> = BTreeMap::new();
 
@@ -129,4 +129,67 @@ fn link(id: &str) -> String {
 
 fn join(set: &BTreeSet<String>) -> String {
     set.iter().cloned().collect::<Vec<_>>().join(", ")
+}
+
+/// What the corpus holds, for the evidence block on `/why`.
+pub struct CorpusSummary {
+    /// The reference tools that arbitrated something, by the binary's own name.
+    pub tools: Vec<String>,
+    /// How many instruction sets each of those tools arbitrated.
+    pub cpus_per_tool: BTreeMap<String, usize>,
+    /// How many instruction sets have a live verdict.
+    pub cpus: usize,
+    /// Live verdicts — retired ones are not evidence of anything current.
+    pub verdicts: usize,
+}
+
+/// Count the corpus the same way the replay suite reads it, so a figure on the
+/// page and a figure in CI cannot disagree.
+#[must_use]
+pub fn corpus_summary(repo: &Path) -> CorpusSummary {
+    let mut tools = BTreeSet::new();
+    let mut cpus = BTreeSet::new();
+    let mut per_tool: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+    let mut verdicts = 0;
+
+    for path in corpus_files(repo) {
+        let Ok(corpus) = Corpus::read(&path) else {
+            continue;
+        };
+        let retired = corpus.retired();
+        for verdict in corpus.verdicts() {
+            if retired.contains(&verdict.id().as_str()) {
+                continue;
+            }
+            verdicts += 1;
+            tools.insert(verdict.arbiter.tool.clone());
+            cpus.insert(verdict.cpu.clone());
+            per_tool
+                .entry(verdict.arbiter.tool.clone())
+                .or_default()
+                .insert(verdict.cpu.clone());
+        }
+    }
+
+    CorpusSummary {
+        tools: tools.into_iter().collect(),
+        cpus_per_tool: per_tool.into_iter().map(|(k, v)| (k, v.len())).collect(),
+        cpus: cpus.len(),
+        verdicts,
+    }
+}
+
+/// Every corpus file, sorted so a run reports the same way twice.
+fn corpus_files(repo: &Path) -> Vec<std::path::PathBuf> {
+    let dir = repo.join("crates/asm198x/tests/verdicts");
+    let Ok(entries) = std::fs::read_dir(&dir) else {
+        return Vec::new();
+    };
+    let mut files: Vec<_> = entries
+        .flatten()
+        .map(|e| e.path())
+        .filter(|p| p.extension().and_then(|e| e.to_str()) == Some("ndjson"))
+        .collect();
+    files.sort();
+    files
 }

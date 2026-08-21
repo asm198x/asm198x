@@ -35,24 +35,26 @@ The scope column is the point. `fmt` covers seven CPU families and not the
 
 Because you can check, rather than take it on faith.
 
+<!-- generated: xtask evidence --markdown -->
 **Every CPU is arbitrated against a real assembler.** The differential suites
-assemble the same source with the reference tool and compare bytes. Eight tools
-across twenty-two instruction sets: ACME, ca65, lwasm, pasmo, sjasmplus, vasm,
-RGBDS, and Macro Assembler AS, which covers the fourteen less-travelled ones.
+assemble the same source with the reference tool and compare bytes. 8 tools
+across 22 instruction sets: ACME, ca65, lwasm, pasmo, RGBDS, sjasmplus, vasm and
+Macro Assembler AS, which covers the 14 less-travelled ones.
 
-**What they produced is recorded, not remembered.** 5,637 verdicts, each keyed
+**What they produced is recorded, not remembered.** 5,625 verdicts, each keyed
 on the reference tool's own version string, committed to this repository. CI
 replays every one of them on machines with none of those tools installed, so a
-change that alters our output fails against what the real assembler actually
-did — not against a fixture somebody wrote by hand.
+change that alters our output fails against what the real assembler did — not
+against a fixture somebody wrote by hand.
 
 **The curriculum assembles byte-identically.** 419 assembly sources from the
-Code198x curriculum, across the C64, the NES, the Spectrum and the Amiga, in 617
+Code198x curriculum, across the C64, the Amiga, the NES and the Spectrum, in 617
 comparisons. Every one matches the reference tool.
 
-**Where we differ is published.** Nine differences are known and tracked, and
-[the list](divergences.md) says what each one is. A tracked difference that
+**Where we differ is published.** 6 tracked differences across 9 recorded cases,
+and [the list](divergences.md) says what each one is. A tracked difference that
 silently stops being a difference fails the build.
+<!-- /generated -->
 
 That last one is the argument. Parity is a claim you would have to believe; a
 list of where we do not match is one you can read before deciding.
