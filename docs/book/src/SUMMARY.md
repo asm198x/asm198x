@@ -4,6 +4,7 @@
 
 # Start here
 
+- [Why asm198x](why.md)
 - [Quickstart](quickstart.md)
 - [Install](install.md)
 

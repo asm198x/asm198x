@@ -15,6 +15,11 @@
       "items": [
         {
           "children": [],
+          "slug": "why",
+          "title": "Why asm198x"
+        },
+        {
+          "children": [],
           "slug": "quickstart",
           "title": "Quickstart"
         },
