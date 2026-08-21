@@ -152,7 +152,7 @@ pub(crate) fn parse_program_multi(
 /// rgbasm's probe-pinned multi-file semantics: root-anchored resolution (the
 /// cwd stance mapped to our input directory) and the no-negatives incbin
 /// window.
-const SEMANTICS: ca65_flat::WalkSemantics = ca65_flat::WalkSemantics {
+pub(crate) const SEMANTICS: ca65_flat::WalkSemantics = ca65_flat::WalkSemantics {
     resolution: ca65_flat::Resolution::Root,
     window: slice_incbin,
     include_default_ext: None,

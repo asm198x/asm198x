@@ -45,6 +45,11 @@
         },
         {
           "children": [],
+          "slug": "guide/multi-file",
+          "title": "Projects in more than one file"
+        },
+        {
+          "children": [],
           "slug": "reference/cli",
           "title": "The command line"
         },

@@ -138,7 +138,7 @@ pub(crate) fn parse_program_multi(
 /// (then `-I`; no ancestor hops — a root-directory copy is *not* found from
 /// inside a subdirectory include) and the negative-offset-from-EOF
 /// `includebin` window.
-const SEMANTICS: ca65_flat::WalkSemantics = ca65_flat::WalkSemantics {
+pub(crate) const SEMANTICS: ca65_flat::WalkSemantics = ca65_flat::WalkSemantics {
     resolution: ca65_flat::Resolution::Requester,
     window: slice_includebin,
     include_default_ext: None,
