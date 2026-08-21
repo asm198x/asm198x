@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.21](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.20...asm198x-v0.0.21) - 2026-08-21
+
+### Added
+
+- `Where we differ` — every known difference from the reference assemblers,
+  generated from the verdict corpus. Six tracked differences across nine
+  recorded cases. ([#158](https://github.com/asm198x/asm198x/pull/158))
+- `Why asm198x` — what adopting it costs and what arrives with it, with each
+  capability's scope stated. ([#158](https://github.com/asm198x/asm198x/pull/158))
+
 ## [0.0.20](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.19...asm198x-v0.0.20) - 2026-08-21
 
 ### Added
