@@ -12,6 +12,7 @@ mod grow;
 mod instructions;
 mod ledger;
 mod machines;
+mod nav;
 mod parity;
 mod supersede;
 
@@ -111,7 +112,45 @@ fn usage() -> String {
 
 fn run_docs(args: &[String]) -> ExitCode {
     let check = args.iter().any(|a| a == "--check");
-    let report = match docs::run(&repo(), check) {
+    let repo = repo();
+
+    // The nav is generated from SUMMARY.md and the dead-link gate reads the
+    // same parse, so a chapter with no file fails here — where the source
+    // lives — rather than in the site build. This is mdBook's `create-missing
+    // = false`, kept after mdBook was withdrawn.
+    let sections = match nav::read(&repo) {
+        Ok(sections) => sections,
+        Err(e) => {
+            eprintln!("xtask docs: {e}");
+            return ExitCode::FAILURE;
+        }
+    };
+    match nav::integrity(&repo, &sections) {
+        Ok(problems) if !problems.is_empty() => {
+            eprintln!("the documentation nav does not match the pages:");
+            for p in &problems {
+                eprintln!("  {p}");
+            }
+            return ExitCode::FAILURE;
+        }
+        Ok(_) => {}
+        Err(e) => {
+            eprintln!("xtask docs: {e}");
+            return ExitCode::FAILURE;
+        }
+    }
+
+    let nav_path = nav::nav_path(&repo);
+    let rendered_nav = nav::render(&sections);
+    let nav_stale = std::fs::read_to_string(&nav_path).ok().as_deref() != Some(&rendered_nav);
+    if nav_stale && !check {
+        if let Err(e) = std::fs::write(&nav_path, &rendered_nav) {
+            eprintln!("xtask docs: could not write {}: {e}", nav_path.display());
+            return ExitCode::FAILURE;
+        }
+    }
+
+    let report = match docs::run(&repo, check) {
         Ok(report) => report,
         Err(e) => {
             eprintln!("xtask docs: {e}");
@@ -119,10 +158,27 @@ fn run_docs(args: &[String]) -> ExitCode {
         }
     };
 
+    if nav_stale && check {
+        eprintln!(
+            "docs/book/nav.json is stale.\n\n\
+             The site renders its navigation from it, so a SUMMARY.md change \
+             that does not reach it moves the pages without moving the nav. \
+             Regenerate with `cargo xtask docs` and commit the result."
+        );
+        return ExitCode::FAILURE;
+    }
+
     if report.stale.is_empty() && report.stale_pages.is_empty() {
+        if nav_stale {
+            println!("wrote {}", nav_path.display());
+        }
         println!(
-            "{} generated block(s) across {} page(s), and {} generated page(s), are current",
-            report.blocks, report.scanned, report.pages
+            "{} generated block(s) across {} page(s), and {} generated page(s), are current; \
+             the nav lists {} page(s), all present",
+            report.blocks,
+            report.scanned,
+            report.pages,
+            nav::slugs(&sections).len()
         );
         return ExitCode::SUCCESS;
     }
@@ -147,6 +203,9 @@ fn run_docs(args: &[String]) -> ExitCode {
         return ExitCode::FAILURE;
     }
 
+    if nav_stale {
+        println!("wrote {}", nav_path.display());
+    }
     println!("regenerated {} page(s):", stale.len());
     for page in &stale {
         println!("  {page}");

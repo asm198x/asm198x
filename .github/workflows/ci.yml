@@ -200,18 +200,14 @@ jobs:
       # the committed one differs. The list it generates from is the same one
       # `--dialect` resolves against, so a dialect cannot be added without the
       # book saying so.
-      - name: Check generated blocks are current
+      #
+      # It also carries what mdBook used to: a chapter listed in SUMMARY.md
+      # with no file fails here rather than shipping a dead link, which is
+      # `create-missing = false` moved into the repo that owns the source. It
+      # additionally fails on a page the nav lists nowhere — mdBook tolerated
+      # those, but the nav is now the site's only route to a page.
+      - name: Check the docs, their generated blocks and their nav
         run: cargo xtask docs --check
-
-      - name: Install mdBook
-        uses: taiki-e/install-action@v2
-        with:
-          tool: mdbook
-
-      # `create-missing = false`, so a chapter listed in SUMMARY.md with no
-      # file fails here rather than shipping a dead link.
-      - name: Build the book
-        run: mdbook build docs/book
 
       - name: Install Vale
         uses: errata-ai/vale-action@reviewdog
