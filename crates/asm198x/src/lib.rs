@@ -39,6 +39,7 @@ mod dialect;
 /// for. Public so the CLI and the reference generator read one list.
 pub mod dialect_table;
 mod dialects;
+pub mod directives;
 mod engine;
 // Debug-record renderings: the `.debug198x` sidecar builder + `--sym` /
 // `--listing` text views of the same captured record (Debug198x U3, KTD2).

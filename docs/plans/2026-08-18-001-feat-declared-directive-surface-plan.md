@@ -157,6 +157,7 @@ The types and one small conversion prove the shape (U1); vasm proves the family 
 
 ### U1. `Directive` pattern types + lookup, proved on one dialect
 
+- **Landed 2026-08-21.** `crates/asm198x/src/directives.rs` carries `Directive`, `Pattern::Exact`, `Category` (including `KnownUnsupported`, per the answered question below) and `lookup`. cdp1802 dispatches through it. R5 verified: the differential suite and the full corpus replay are byte-identical. `Pattern::Sized` is U2's to add, when vasm needs it.
 - **Goal:** The declaration types exist and one dialect dispatches through them.
 - **Requirements:** R1, R2, R3 (one dialect).
 - **Files:** a new `crates/asm198x/src/directives.rs`; `crates/asm198x/src/dialects/cdp1802.rs` (8 arms, one ignore arm — the smallest complete example).
