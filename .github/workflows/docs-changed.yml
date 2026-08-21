@@ -20,6 +20,17 @@ on:
     paths:
       - "docs/**"
 
+  # A release is the other way documentation reaches readers: when the code has
+  # moved since the last one, the site pins the pages to the tag, so a release is
+  # exactly when the pages it carries become publishable. This cannot ride the
+  # `push` trigger above — `paths` filters apply to the whole event, and a release
+  # commit touches manifests rather than `docs/`, so it would be filtered out.
+  #
+  # Missing this cost a live 404: the site's header linked `/why/` while the
+  # published revision still predated the page.
+  release:
+    types: [published]
+
 permissions: {}
 
 jobs:
