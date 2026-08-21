@@ -55,6 +55,16 @@
         },
         {
           "children": [],
+          "slug": "guide/formatting",
+          "title": "Keeping source tidy"
+        },
+        {
+          "children": [],
+          "slug": "guide/reading-a-binary",
+          "title": "Reading a binary back"
+        },
+        {
+          "children": [],
           "slug": "reference/cli",
           "title": "The command line"
         },

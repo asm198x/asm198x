@@ -291,7 +291,20 @@ The introduction shrinks to orientation and stops trying to sell, because `/why`
       buildable NES units" has moved on — the corpus records 51 NES sources
       today. Restating a figure by hand on the day two of them were fixed would
       have been the joke writing itself; the page points at `/why`, which counts.
-    - *Formatting and reading-a-binary remain.*
+    - *Formatting done 2026-08-21.* What `fmt` changes, what it deliberately
+      does not touch, the two properties that make it safe on a project you have
+      not read (idempotent, byte-identical), and the two-step in-place edit and
+      CI check — because it writes to stdout and never rewrites in place.
+    - *Reading a binary done 2026-08-21.* `--org` shown as two disassemblies of
+      one file, so the moved `BNE` target makes the relative-displacement point
+      by itself; the data fallback as the tell that a boundary is wrong rather
+      than as a failure; and the reassembles-to-the-same-bytes round trip.
+    - *Step 10 complete.* Both pages' listings are checked output blocks, so
+      every line of disassembly and formatting shown is what the binary printed.
+    - *It found `/why` wrong twice more.* The capability table claimed `fmt`
+      covered seven CPU families and `disasm` two; both cover every dialect.
+      Understating drift is the expensive kind — an overstated claim is
+      corrected by a reader who tries it. Fixed and made a test.
 11. **Widen `/guide/first-program`** to the five front doors, with `fmt` and `disasm` examples alongside.
 12. **`/compare`.** The generated version table is available today; schedule it against how much hand-written feature comparison it needs.
 
