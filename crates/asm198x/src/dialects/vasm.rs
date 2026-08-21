@@ -41,7 +41,7 @@ use crate::span::FileId;
 /// [`FsLoader`](crate::source::FsLoader) stance, then the `-I` dirs — the same
 /// mapping rgbasm's probe pinned. The incbin window is [`vasm_incbin_window`];
 /// there is no include extension defaulting.
-const VASM_SEMANTICS: WalkSemantics = WalkSemantics {
+pub(crate) const VASM_SEMANTICS: WalkSemantics = WalkSemantics {
     resolution: Resolution::Root,
     window: vasm_incbin_window,
     include_default_ext: None,

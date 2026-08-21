@@ -170,6 +170,7 @@ fn generate(command: &str, path: &Path, repo: &Path) -> Result<String, String> {
         "xtask instructions --summary" => Ok(crate::instructions::summary_lines()),
         "xtask divergences --markdown" => Ok(crate::divergences::markdown(repo)),
         "xtask includes --markdown" => Ok(crate::includes::markdown()),
+        "xtask includes --anchors" => Ok(crate::includes::anchors()),
         "xtask evidence --markdown" => Ok(crate::evidence::markdown(repo)),
         other => Err(format!(
             "{}: no generator for `{other}`\n\

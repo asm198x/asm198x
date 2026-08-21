@@ -41,6 +41,9 @@ pub mod dialect_table;
 mod dialects;
 pub mod directives;
 mod engine;
+/// Where each dialect resolves a relative include. Public so a documentation
+/// generator reads the same facts the multi-file walks use.
+pub mod includes;
 // Debug-record renderings: the `.debug198x` sidecar builder + `--sym` /
 // `--listing` text views of the same captured record (Debug198x U3, KTD2).
 mod listing;

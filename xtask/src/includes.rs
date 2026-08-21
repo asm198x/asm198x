@@ -17,6 +17,7 @@ use std::fmt::Write as _;
 
 use asm198x::dialect_table;
 use asm198x::directives::{self, Directive};
+use asm198x::includes::{self, Anchor};
 
 /// Every spelling of one entry, as inline code, or a dash if the dialect has
 /// no such entry.
@@ -51,6 +52,35 @@ pub fn markdown() -> String {
             entry.name,
             spellings(&surface.directives, "include"),
             spellings(&surface.directives, "incbin"),
+        );
+    }
+    out
+}
+
+/// Where each dialect looks for a relative include.
+///
+/// The rows come from [`asm198x::includes::resolution`], which most dialects
+/// answer straight off the semantics const their multi-file walk runs on — so
+/// the table and the behaviour are one fact rather than two that agree today.
+pub fn anchors() -> String {
+    let mut out =
+        String::from("| Dialect | Looked for in | A request with no extension |\n|---|---|---|\n");
+    let rows = includes::resolution();
+    for entry in dialect_table::DIALECTS {
+        let Some(row) = rows.iter().find(|r| r.dialect == entry.name) else {
+            continue;
+        };
+        let extensionless = match (row.anchor, row.default_extension) {
+            (Anchor::None, _) => "—".to_string(),
+            (_, Some(ext)) => format!("`defs` tries `defs.{ext}` first"),
+            (_, None) => "taken as spelled".to_string(),
+        };
+        let _ = writeln!(
+            out,
+            "| `{}` | {} | {} |",
+            entry.name,
+            row.anchor.describe(),
+            extensionless
         );
     }
     out
