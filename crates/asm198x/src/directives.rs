@@ -44,6 +44,28 @@ pub enum Category {
 pub enum Pattern {
     /// One or more literal spellings, matched case-insensitively.
     Exact(&'static [&'static str]),
+    /// A stem carrying an optional size suffix: vasm's `dc`, `dc.b`, `dc.w`.
+    ///
+    /// Matching recognises the **stem**, not the suffix, and the arm body
+    /// validates the size. That keeps `dc.x` reporting `bad data size` instead
+    /// of falling through to be refused as an unknown mnemonic, which is a
+    /// worse answer to the same mistake.
+    ///
+    /// It also retires an ordering constraint. Dispatch used `strip_prefix`,
+    /// so `dcb` had to be tried before `dc` or every `dcb` parsed as a `dc`
+    /// with a nonsense size. Splitting at the separator makes `dcb.w` yield the
+    /// stem `dcb`, which only one entry claims — so the entries can be declared
+    /// in any order and the matching is what keeps them apart.
+    Sized {
+        stem: &'static str,
+        /// The character introducing the suffix.
+        separator: char,
+        /// The sizes the dialect documents, for a generator. Not enforced
+        /// here — see above.
+        sizes: &'static [&'static str],
+        /// Whether the bare stem is a valid spelling on its own.
+        bare: bool,
+    },
 }
 
 /// One declared directive.
@@ -58,21 +80,45 @@ pub struct Directive {
 }
 
 impl Directive {
-    /// Every spelling this entry accepts, for a generator.
+    /// Every spelling this entry accepts, expanded, for a generator (R7).
+    ///
+    /// Allocates, and is not on the assembling path — [`Self::matches`] is.
     #[must_use]
-    pub fn spellings(&self) -> &'static [&'static str] {
+    pub fn spellings(&self) -> Vec<String> {
         match self.pattern {
-            Pattern::Exact(list) => list,
+            Pattern::Exact(list) => list.iter().map(|s| (*s).to_string()).collect(),
+            Pattern::Sized {
+                stem,
+                separator,
+                sizes,
+                bare,
+            } => {
+                let mut out = Vec::with_capacity(sizes.len() + usize::from(bare));
+                if bare {
+                    out.push(stem.to_string());
+                }
+                out.extend(sizes.iter().map(|s| format!("{stem}{separator}{s}")));
+                out
+            }
         }
     }
 
-    /// Whether `word` is one of them. Case-insensitive: no dialect here
+    /// Whether `word` names this entry. Case-insensitive: no dialect here
     /// distinguishes `DB` from `db`.
     #[must_use]
     pub fn matches(&self, word: &str) -> bool {
-        self.spellings()
-            .iter()
-            .any(|s| s.eq_ignore_ascii_case(word))
+        match self.pattern {
+            Pattern::Exact(list) => list.iter().any(|s| s.eq_ignore_ascii_case(word)),
+            Pattern::Sized {
+                stem,
+                separator,
+                bare,
+                ..
+            } => match word.split_once(separator) {
+                Some((head, _)) => head.eq_ignore_ascii_case(stem),
+                None => bare && word.eq_ignore_ascii_case(stem),
+            },
+        }
     }
 }
 
@@ -142,6 +188,77 @@ mod tests {
     #[test]
     fn spellings_are_reachable_for_a_generator() {
         let entry = lookup(SURFACE, "dc").expect("declared");
-        assert_eq!(entry.spellings(), &["db", "dc", "byte"]);
+        assert_eq!(entry.spellings(), vec!["db", "dc", "byte"]);
+    }
+
+    const SIZED: &[Directive] = &[
+        // Declared `dc` first on purpose: with `strip_prefix` dispatch this
+        // order was a bug, and matching on the stem is what makes it not one.
+        Directive {
+            id: "dc",
+            pattern: Pattern::Sized {
+                stem: "dc",
+                separator: '.',
+                sizes: &["b", "w", "l"],
+                bare: true,
+            },
+            category: Category::Operation,
+        },
+        Directive {
+            id: "dcb",
+            pattern: Pattern::Sized {
+                stem: "dcb",
+                separator: '.',
+                sizes: &["b", "w", "l"],
+                bare: true,
+            },
+            category: Category::Operation,
+        },
+    ];
+
+    #[test]
+    fn a_sized_stem_matches_bare_and_suffixed() {
+        for word in ["dc", "dc.b", "dc.w", "dc.l", "DC.W"] {
+            assert_eq!(lookup(SIZED, word).map(|d| d.id), Some("dc"), "{word}");
+        }
+    }
+
+    #[test]
+    fn a_longer_stem_is_not_swallowed_by_a_shorter_one() {
+        // The ordering constraint the old dispatch carried, as a property of
+        // matching: `dcb` is declared second and still wins its own spellings.
+        for word in ["dcb", "dcb.w", "dcb.l"] {
+            assert_eq!(lookup(SIZED, word).map(|d| d.id), Some("dcb"), "{word}");
+        }
+    }
+
+    #[test]
+    fn an_unknown_size_still_reaches_its_stem() {
+        // So the arm body can say `bad data size`, rather than the word
+        // falling through to be refused as an unknown mnemonic.
+        assert_eq!(lookup(SIZED, "dc.x").map(|d| d.id), Some("dc"));
+        assert_eq!(lookup(SIZED, "dcb.x").map(|d| d.id), Some("dcb"));
+    }
+
+    #[test]
+    fn sized_spellings_expand_for_a_generator() {
+        let entry = lookup(SIZED, "dc").expect("declared");
+        assert_eq!(entry.spellings(), vec!["dc", "dc.b", "dc.w", "dc.l"]);
+    }
+
+    #[test]
+    fn a_stem_without_bare_needs_its_suffix() {
+        const NO_BARE: &[Directive] = &[Directive {
+            id: "sized",
+            pattern: Pattern::Sized {
+                stem: "xx",
+                separator: '.',
+                sizes: &["b"],
+                bare: false,
+            },
+            category: Category::Operation,
+        }];
+        assert!(lookup(NO_BARE, "xx").is_none());
+        assert!(lookup(NO_BARE, "xx.b").is_some());
     }
 }

@@ -166,6 +166,10 @@ The types and one small conversion prove the shape (U1); vasm proves the family 
 
 ### U2. vasm — the stem+size family form
 
+- **Landed 2026-08-21.** The central assumption holds: `Pattern::Sized { stem, separator, sizes, bare }` expresses `dc`/`dcb`/`ds` as three entries carrying their size vocabulary, and the types needed no revision.
+- **Better than the unit asked for.** It required the lookup to *preserve* the `dcb`-before-`dc` ordering as a property of matching. Splitting the word at the separator and matching the **stem** removes the constraint instead: `dcb.w` yields the stem `dcb`, which only one entry claims, so the entries can be declared in any order. `dc` is deliberately declared first, and a test asserts `dcb.w` still reaches `dcb`.
+- **A refinement the unit did not anticipate.** Matching recognises the stem and leaves the suffix to the arm body, so `dc.x` still reports `bad data size` instead of falling through to be refused as an unknown mnemonic. `sizes` therefore documents rather than enforces — which is what R7 needs it for anyway.
+- **R5 verified:** differential against real vasm, the full corpus replay, and 627 curriculum comparisons with zero new verdicts.
 - **Goal:** The family form carries a real generated vocabulary.
 - **Requirements:** R1, R6; R5 for vasm.
 - **Dependencies:** U1.

@@ -403,7 +403,7 @@ mod directive_surface {
     fn every_declared_spelling_is_recognised() {
         let consts = BTreeMap::new();
         for directive in DIRECTIVES {
-            for spelling in directive.spellings() {
+            for spelling in &directive.spellings() {
                 let line = format!("{spelling} 1");
                 let result = parse_op(&isa::cdp1802::SET, &line, &consts, 1);
                 if let Err(e) = &result {
@@ -444,7 +444,7 @@ mod directive_surface {
             if directive.category != Category::Operation {
                 continue;
             }
-            let spelling = directive.spellings()[0];
+            let spelling = directive.spellings()[0].clone();
             let line = format!("{spelling} 1");
             if let Err(e) = parse_op(&isa::cdp1802::SET, &line, &consts, 1) {
                 assert!(
