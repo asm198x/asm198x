@@ -13,6 +13,7 @@
 
 - [A first program](guide/first-program.md)
 - [Projects in more than one file](guide/multi-file.md)
+- [When assembling is not the last step](guide/linking.md)
 - [The command line](reference/cli.md)
 - [Dialects](reference/dialects.md)
 - [Where we differ](divergences.md)
