@@ -27,8 +27,8 @@ repository.workspace = true
 [dependencies]
 serde = { workspace = true }
 serde_json = { workspace = true }
-isa = { path = "../isa", version = "0.0.16" }
-isa-disasm = { path = "../isa-disasm", version = "0.0.16" }
+isa = { path = "../isa", version = "0.0.17" }
+isa-disasm = { path = "../isa-disasm", version = "0.0.17" }
 
 [lints]
 workspace = true
