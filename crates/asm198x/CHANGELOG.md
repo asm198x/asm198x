@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.17](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.16...asm198x-v0.0.17) - 2026-08-21
+
+### Fixed
+
+- *(isa)* list the C64 on the 6502 page, and derive the parity figures ([#146](https://github.com/asm198x/asm198x/pull/146))
+
 ## [0.0.16](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.15...asm198x-v0.0.16) - 2026-08-20
 
 ### Fixed

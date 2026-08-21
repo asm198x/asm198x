@@ -16,9 +16,9 @@ homepage.workspace = true
 # verify the manifest — release-plz runs it to compute the release diff, and
 # path deps without a version fail packaging. release-plz keeps it in sync on
 # each bump. Local builds use the path; the version is only for packaging.
-isa = { path = "../isa", version = "0.0.16" }
-isa-disasm = { path = "../isa-disasm", version = "0.0.16" }
-debug198x = { path = "../debug198x", version = "0.0.16" }
+isa = { path = "../isa", version = "0.0.17" }
+isa-disasm = { path = "../isa-disasm", version = "0.0.17" }
+debug198x = { path = "../debug198x", version = "0.0.17" }
 # serde derive for the public `AssemblyResult` contract (U1). Already on the CLI
 # path transitively via debug198x; this makes the derive macro available directly.
 serde = { workspace = true }
