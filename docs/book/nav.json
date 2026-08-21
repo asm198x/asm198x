@@ -27,6 +27,11 @@
           "children": [],
           "slug": "install",
           "title": "Install"
+        },
+        {
+          "children": [],
+          "slug": "migrate",
+          "title": "Moving a project across"
         }
       ],
       "title": "Start here"
