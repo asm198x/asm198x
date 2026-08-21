@@ -79,13 +79,14 @@ asm198x --dialect pasmonext --sna border.asm -o border.sna
 `lda` takes one byte. Give it two and the assembler says so, naming the line
 and the column the value starts at:
 
-<!-- sample: acme, refuses: value 4660 does not fit in a byte -->
+<!-- sample: acme, file: fill.a, refuses: value 4660 does not fit in a byte -->
 ```asm
 * = $c000
         lda #$1234
         rts
 ```
 
+<!-- output: fill.a, output -->
 ```text
 asm198x: fill.a:2:13: error: value 4660 does not fit in a byte
 ```

@@ -228,7 +228,7 @@ The introduction shrinks to orientation and stops trying to sell, because `/why`
 - **The `/compare` version table** — generatable today from `Arbiter.identity` in the verdict corpus.
 - **The documented version** — from `steps.release.outputs.ref`, or `cargo xtask docs` for an inline block.
 - **Diagnostic codes** — not generatable into anything useful while one variant exists.
-- **Everything under `/guide/`** — hand-written task narratives with no derivable source. R2 keeps their assembly samples honest today; their `fmt`, `disasm` and output blocks stay unverified until the checker grows the three modes above.
+- **Everything under `/guide/`** — hand-written task narratives with no derivable source. R2 keeps their assembly samples honest today, and since step 9 their `fmt`, `disasm` and output blocks are checked too.
 
 ---
 
@@ -259,6 +259,23 @@ The introduction shrinks to orientation and stops trying to sell, because `/why`
      now for step 3's reason: a page whose whole argument is *you can check
      rather than believe* cannot be quietly wrong about its own evidence.
 9. **Extend `book_samples.rs`** with `fmt`, `disasm` and `output` modes. Everything below depends on it, and it retires the unchecked JSON block on `cli.md`.
+   - *Done 2026-08-21.* Four modes rather than three: `output` (the human
+     diagnostic, on stderr), `json`, `fmt` and `disasm`. A sample is named after
+     the file it is written as, and a block directly below it claims what the
+     binary prints. Each runs in the sample's own directory, so a path in the
+     output is the name the page shows.
+   - *A mode may carry arguments* (`disasm --org 0xc000`), so a page documenting
+     a flag can show what the flag does.
+   - *`json` compares the parsed document*, not the text, so `cli.md` shows the
+     payload indented while the binary emits one line.
+   - *The JSON block was wrong twice over:* column 13 where the assembler
+     reports 15, and no source sample at all — a payload with nothing to be the
+     output of. Both fixed.
+   - *`fmt` and `disasm` gained the worked examples their reference sections
+     described and never showed.* `fmt` moves a label onto its own line, which
+     "labels at column 0, operations indented" does not say.
+   - *A mode nothing uses is a checker nobody is checked by,* so the suite fails
+     if any of the four is unexercised.
 10. **The `/guide/` pages** — multi-file and linking first, since those are referenced today and explained nowhere, then formatting and reading-a-binary, which are the first worked examples `fmt` and `disasm` have ever had.
 11. **Widen `/guide/first-program`** to the five front doors, with `fmt` and `disasm` examples alongside.
 12. **`/compare`.** The generated version table is available today; schedule it against how much hand-written feature comparison it needs.
