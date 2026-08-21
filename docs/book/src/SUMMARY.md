@@ -7,6 +7,7 @@
 - [Why asm198x](why.md)
 - [Quickstart](quickstart.md)
 - [Install](install.md)
+- [Moving a project across](migrate.md)
 
 # Using it
 
