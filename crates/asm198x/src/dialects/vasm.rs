@@ -2062,6 +2062,19 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // Walk-handled, like acme's `!src`/`!bin`: `parse_op` never sees these,
+    // the multi-file walk does. Declared because the surface describes the
+    // dialect rather than whichever parser inside it reads the line.
+    Directive {
+        id: "include",
+        pattern: Pattern::Exact(&["include"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "incbin",
+        pattern: Pattern::Exact(&["incbin"]),
+        category: Category::Operation,
+    },
 ];
 
 fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, AsmError> {

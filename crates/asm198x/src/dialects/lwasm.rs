@@ -499,6 +499,19 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["end"]),
         category: Category::Ignored,
     },
+    // Walk-handled. `use` is lwasm's own second spelling of `include`, so it
+    // is an alternative spelling of one entry rather than a directive of its
+    // own — the same call `fcb`/`.byte` already get here.
+    Directive {
+        id: "include",
+        pattern: Pattern::Exact(&["include", "use"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "incbin",
+        pattern: Pattern::Exact(&["includebin"]),
+        category: Category::Operation,
+    },
 ];
 
 fn parse_op(

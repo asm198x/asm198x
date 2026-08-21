@@ -56,6 +56,28 @@ use crate::span::FileId;
 
 use super::mos6502::{fold_const, split_first_word, split_top_level};
 
+use crate::directives::{Category, Directive, Pattern};
+
+/// The file directives every asl-syntax chip accepts, handled by the walk in
+/// this module rather than by any chip's `parse_op`.
+///
+/// They are declared all the same. The surface describes the **dialect**, not
+/// one parser inside it — the same split acme's `!src`/`!bin` already have —
+/// and a matrix built from a surface that only knew about `parse_op` would say
+/// twelve dialects cannot include a file, which is the opposite of true.
+pub const WALK_DIRECTIVES: &[Directive] = &[
+    Directive {
+        id: "include",
+        pattern: Pattern::Exact(&["include"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "incbin",
+        pattern: Pattern::Exact(&["binclude"]),
+        category: Category::Operation,
+    },
+];
+
 /// asl's probe-pinned multi-file semantics, shared by eleven of the twelve
 /// chips: requester-directory resolution, the strict `BINCLUDE` window, and
 /// the `.inc` extension default on `INCLUDE`.

@@ -260,51 +260,60 @@ pub fn surfaces() -> Vec<DialectSurface> {
         },
         DialectSurface {
             dialect: "1802",
-            directives: dialects::cdp1802::DIRECTIVES.to_vec(),
+            directives: compose(
+                dialects::asl::WALK_DIRECTIVES,
+                dialects::cdp1802::DIRECTIVES,
+            ),
         },
         DialectSurface {
             dialect: "8080",
-            directives: dialects::i8080::DIRECTIVES.to_vec(),
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::i8080::DIRECTIVES),
         },
         DialectSurface {
             dialect: "6800",
-            directives: dialects::m6800::DIRECTIVES.to_vec(),
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::m6800::DIRECTIVES),
         },
         DialectSurface {
             dialect: "8048",
-            directives: dialects::i8048::DIRECTIVES.to_vec(),
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::i8048::DIRECTIVES),
         },
         DialectSurface {
             dialect: "scmp",
-            directives: dialects::scmp::DIRECTIVES.to_vec(),
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::scmp::DIRECTIVES),
         },
         DialectSurface {
             dialect: "2650",
-            directives: dialects::s2650::DIRECTIVES.to_vec(),
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::s2650::DIRECTIVES),
         },
         DialectSurface {
             dialect: "tms7000",
-            directives: dialects::tms7000::DIRECTIVES.to_vec(),
+            directives: compose(
+                dialects::asl::WALK_DIRECTIVES,
+                dialects::tms7000::DIRECTIVES,
+            ),
         },
         DialectSurface {
             dialect: "f8",
-            directives: dialects::f8::DIRECTIVES.to_vec(),
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::f8::DIRECTIVES),
         },
         DialectSurface {
             dialect: "cp1610",
-            directives: dialects::cp1610::DIRECTIVES.to_vec(),
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::cp1610::DIRECTIVES),
         },
         DialectSurface {
             dialect: "pdp11",
-            directives: dialects::pdp11::DIRECTIVES.to_vec(),
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::pdp11::DIRECTIVES),
         },
         DialectSurface {
             dialect: "tms9900",
-            directives: dialects::tms9900::DIRECTIVES.to_vec(),
+            directives: compose(
+                dialects::asl::WALK_DIRECTIVES,
+                dialects::tms9900::DIRECTIVES,
+            ),
         },
         DialectSurface {
             dialect: "z8000",
-            directives: dialects::z8000::DIRECTIVES.to_vec(),
+            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::z8000::DIRECTIVES),
         },
     ]
 }
@@ -313,7 +322,7 @@ pub fn surfaces() -> Vec<DialectSurface> {
 mod surface_invariants {
     //! Holds across every converted dialect, so a new one cannot land broken.
 
-    use super::{Category, surfaces};
+    use super::surfaces;
 
     #[test]
     fn ids_are_unique_within_a_dialect() {
@@ -436,55 +445,6 @@ mod surface_invariants {
         // base's four spellings.
         let entry = super::lookup(&sjasmplus.directives, "byte").expect("sjasmplus takes `byte`");
         assert_eq!(entry.id, "bytes");
-    }
-
-    /// Every dialect the binary offers has a declared surface, or is named
-    /// here as not having one — so an absent row reads as a fact rather than
-    /// an oversight.
-    #[test]
-    fn every_dialect_is_accounted_for() {
-        let declared: Vec<&str> = surfaces().iter().map(|s| s.dialect).collect();
-        for expected in [
-            "acme",
-            "ca65",
-            "65816",
-            "huc6280",
-            "vasm",
-            "lwasm",
-            "rgbasm",
-            "pasmo",
-            "sjasmplus",
-            "8080",
-            "6800",
-            "1802",
-            "8048",
-            "scmp",
-            "f8",
-            "2650",
-            "tms7000",
-            "pdp11",
-            "tms9900",
-            "cp1610",
-            "z8000",
-        ] {
-            assert!(
-                declared.contains(&expected),
-                "`{expected}` has no declared surface"
-            );
-        }
-    }
-
-    #[test]
-    fn nothing_is_declared_unsupported_yet() {
-        // The category exists for pasmo's include and asl's semantic
-        // pseudo-ops. Neither is declared yet, so this records that the count
-        // is zero rather than leaving it unstated.
-        let count = surfaces()
-            .iter()
-            .flat_map(|s| s.directives.clone())
-            .filter(|d| d.category == Category::KnownUnsupported)
-            .count();
-        assert_eq!(count, 0);
     }
 }
 

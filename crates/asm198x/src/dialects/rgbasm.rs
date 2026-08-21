@@ -551,6 +551,17 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["ds"]),
         category: Category::Operation,
     },
+    // Walk-handled, not seen by `parse_op`.
+    Directive {
+        id: "include",
+        pattern: Pattern::Exact(&["include"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "incbin",
+        pattern: Pattern::Exact(&["incbin"]),
+        category: Category::Operation,
+    },
 ];
 
 fn parse_op(
