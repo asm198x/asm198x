@@ -33,6 +33,7 @@ use super::mos6502::{
     split_top_level, string_literal,
 };
 use crate::dialect::Dialect;
+use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, BinOp, Expr, Operation, Piece, Statement};
 use crate::source::{SourceLoader, SourceMap};
 
@@ -196,6 +197,38 @@ fn split_label(code: &str) -> (Option<String>, &str) {
     }
 }
 
+/// What this dialect accepts beyond its instruction set.
+///
+/// asl is the reference for this chip. The ignored spellings emit no bytes
+/// and change no encoding, so source carrying them assembles unchanged.
+pub const DIRECTIVES: &[Directive] = &[
+    Directive {
+        id: "org",
+        pattern: Pattern::Exact(&["org"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "bytes",
+        pattern: Pattern::Exact(&["db", "dc", "byte"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "words",
+        pattern: Pattern::Exact(&["dw", "word"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "reserve",
+        pattern: Pattern::Exact(&["rmb", "dfs"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "ignored",
+        pattern: Pattern::Exact(&["cpu", "end", "title", "page", "aseg", "listing"]),
+        category: Category::Ignored,
+    },
+];
+
 fn parse_op(
     set: &'static isa::InstructionSet,
     rest: &str,
@@ -203,15 +236,33 @@ fn parse_op(
     line: usize,
 ) -> Result<Option<Operation>, AsmError> {
     let (word, args) = split_first_word(rest);
-    let op = match word.to_ascii_lowercase().as_str() {
-        "cpu" | "end" | "title" | "page" | "aseg" | "listing" => return Ok(None),
-        "org" => Operation::Org(value(args, line)?),
-        "db" | "dc" | "byte" => Operation::Bytes(byte_list(args, line)?),
-        "dw" | "word" => Operation::Words(value_list(args, line)?),
-        // `ds` is the F8 "decrement scratchpad" mnemonic (matching `asl`), so
-        // reserve space with `rmb`/`dfs`, not `ds`.
-        "rmb" | "dfs" => parse_ds(args, consts, line)?,
-        _ => resolve(set, &word.to_ascii_uppercase(), args, consts, line)?,
+    // Dispatch through the declared surface: a spelling the declaration
+    // does not carry cannot be accepted here. See `crate::directives`.
+    let op = match lookup(DIRECTIVES, word) {
+        Some(directive) => match directive.category {
+            Category::Ignored => return Ok(None),
+            Category::KnownUnsupported => {
+                return Err(AsmError::new(
+                    line,
+                    format!(
+                        "`{word}` is a real directive here and asm198x does not implement it yet"
+                    ),
+                ));
+            }
+            Category::Operation => match directive.id {
+                "org" => Operation::Org(value(args, line)?),
+                "bytes" => Operation::Bytes(byte_list(args, line)?),
+                "words" => Operation::Words(value_list(args, line)?),
+                "reserve" => parse_ds(args, consts, line)?,
+                other => {
+                    return Err(AsmError::new(
+                        line,
+                        format!("`{other}` is declared but not dispatched"),
+                    ));
+                }
+            },
+        },
+        None => resolve(set, &word.to_ascii_uppercase(), args, consts, line)?,
     };
     Ok(Some(op))
 }

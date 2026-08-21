@@ -68,6 +68,7 @@ use super::mos6502::{
     split_first_word, string_literal, top_level_rfind,
 };
 use crate::dialect::Dialect;
+use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, Expr, Operation, Statement};
 use crate::source::{MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
 use crate::span::FileId;
@@ -1658,6 +1659,132 @@ fn parse_op(
 // Directives
 // ---------------------------------------------------------------------------
 
+/// What this dialect accepts beyond the 6502 instruction set.
+///
+/// The `!` is required, which is not a house style but a fact about acme: a
+/// bare `byte` is a *label definition* there, and real acme answers "Label name
+/// not in leftmost column" for it. `Sigilled { required: true }` is what keeps
+/// that true — see `crate::directives`.
+///
+/// Dispatch is split across three paths and the declaration covers all of them,
+/// because it describes the dialect rather than any one parser. `!src`, `!bin`
+/// and `!zone` are walk-handled in [`AcmeEval::lower`] — a zone switch is
+/// evaluation state, not an operation — and the conditionals are read by the
+/// scanner before this point. Only the data and layout directives reach
+/// [`parse_directive`].
+pub const DIRECTIVES: &[Directive] = &[
+    Directive {
+        id: "bytes",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["byte", "by", "8"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "words",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["word", "wo", "16"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "fill",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["fill"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "align",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["align"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "text",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["text", "tx"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "scr",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["scr"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "pet",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["pet"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // Walk-handled: these never reach `parse_directive`.
+    Directive {
+        id: "include",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["src", "source"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "incbin",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["bin", "binary"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "zone",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["zone", "zn"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "set",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["set"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // Read by the conditional scanner before parsing.
+    Directive {
+        id: "conditional",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["if", "ifdef", "ifndef"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+];
+
 fn parse_directive(
     anons: &Anons,
     zone: &str,
@@ -1666,21 +1793,36 @@ fn parse_directive(
     line: usize,
 ) -> Result<Operation, AsmError> {
     let (name, rest) = split_first_word(directive);
-    match name.to_ascii_lowercase().as_str() {
-        "byte" | "by" | "8" => Ok(Operation::Bytes(parse_list(anons, zone, rest, line)?)),
-        "word" | "wo" | "16" => Ok(Operation::Words(parse_list(anons, zone, rest, line)?)),
+    // Dispatch through the declared surface. `directive` arrives with the `!`
+    // already stripped by the caller, so the sigil is put back for the lookup —
+    // the declaration is what says the sigil is mandatory, and matching the
+    // bare name here would quietly make it optional.
+    let sigilled = format!("!{}", name.to_ascii_lowercase());
+    let Some(entry) = lookup(DIRECTIVES, &sigilled) else {
+        return Err(AsmError::new(
+            line,
+            format!("unsupported directive `!{name}`"),
+        ));
+    };
+    match entry.id {
+        "bytes" => Ok(Operation::Bytes(parse_list(anons, zone, rest, line)?)),
+        "words" => Ok(Operation::Words(parse_list(anons, zone, rest, line)?)),
         "fill" => parse_fill(anons, zone, env, rest, line),
         "align" => parse_align(anons, zone, env, rest, line),
-        "text" | "tx" => parse_text(anons, zone, rest, line, |c| c),
+        "text" => parse_text(anons, zone, rest, line, |c| c),
         "scr" => parse_text(anons, zone, rest, line, screen_code),
         "pet" => parse_text(anons, zone, rest, line, petscii),
         // `!zone`/`!zn` never reaches here: it is walk-handled in
         // [`AcmeEval::lower`] (U7 — a zone switch is evaluation state, like
         // `!src`), so the fall-through reports it loudly if a new path ever
         // misroutes it.
-        other => Err(AsmError::new(
+        // Declared, and dispatched elsewhere: `!src`, `!bin` and `!zone` are
+        // walk-handled in [`AcmeEval::lower`], and the conditionals are read by
+        // the scanner. Reaching here means a path misrouted one, which the
+        // original fall-through reported loudly and this keeps reporting.
+        _ => Err(AsmError::new(
             line,
-            format!("unsupported directive `!{other}`"),
+            format!("unsupported directive `!{name}`"),
         )),
     }
 }

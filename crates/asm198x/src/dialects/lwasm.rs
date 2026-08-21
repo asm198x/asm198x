@@ -25,6 +25,7 @@ use super::macros;
 use super::mos6502::{self, BytePrec, fold_const, split_first_word};
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
+use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
@@ -447,6 +448,59 @@ fn split_label(code: &str) -> (Option<String>, &str) {
 }
 
 /// Parse the operation part (after any label): a pseudo-op or an instruction.
+/// What this dialect accepts beyond the 6809 instruction set.
+///
+/// lwasm spells several concepts two ways — `fcb` and `.byte` are the same
+/// directive — so these are alternative spellings rather than a sigil applied
+/// to a name, and `Exact` carries both.
+pub const DIRECTIVES: &[Directive] = &[
+    Directive {
+        id: "org",
+        pattern: Pattern::Exact(&["org"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "equ",
+        pattern: Pattern::Exact(&["equ"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "bytes",
+        pattern: Pattern::Exact(&["fcb", ".byte"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "words",
+        pattern: Pattern::Exact(&["fdb", ".word"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "fcc",
+        pattern: Pattern::Exact(&["fcc"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "fqb",
+        pattern: Pattern::Exact(&["fqb"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "reserve",
+        pattern: Pattern::Exact(&["rmb", ".ds", "zmb"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "fill",
+        pattern: Pattern::Exact(&["fill"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "end",
+        pattern: Pattern::Exact(&["end"]),
+        category: Category::Ignored,
+    },
+];
+
 fn parse_op(
     rest: &str,
     env: &BTreeMap<String, i64>,
@@ -454,17 +508,32 @@ fn parse_op(
 ) -> Result<Option<Operation>, AsmError> {
     let (mnem, operand) = split_first_word(rest);
     let m = mnem.to_ascii_lowercase();
-    match m.as_str() {
-        "org" => Ok(Some(Operation::Org(value(operand, line)?))),
-        "equ" => Ok(Some(Operation::Equ(value(operand, line)?))),
-        "fcb" | ".byte" => Ok(Some(Operation::Bytes(list(operand, line)?))),
-        "fdb" | ".word" => Ok(Some(Operation::Words(list(operand, line)?))),
-        "fcc" => Ok(Some(parse_fcc(operand, line)?)),
-        "fqb" => Ok(Some(parse_fqb(operand, line)?)),
-        "rmb" | ".ds" | "zmb" => parse_rmb(operand, env, line),
-        "fill" => parse_fill(operand, env, line),
-        "end" => Ok(None), // marks the end of source; emits nothing
-        _ => Ok(Some(parse_instruction(&m, operand, env, line)?)),
+    // Dispatch through the declared surface: a spelling the declaration does
+    // not carry cannot be accepted here. See `crate::directives`.
+    let Some(directive) = lookup(DIRECTIVES, &m) else {
+        return Ok(Some(parse_instruction(&m, operand, env, line)?));
+    };
+    match directive.category {
+        // `end` marks the end of source; it emits nothing.
+        Category::Ignored => Ok(None),
+        Category::KnownUnsupported => Err(AsmError::new(
+            line,
+            format!("`{m}` is a real directive here and asm198x does not implement it yet"),
+        )),
+        Category::Operation => match directive.id {
+            "org" => Ok(Some(Operation::Org(value(operand, line)?))),
+            "equ" => Ok(Some(Operation::Equ(value(operand, line)?))),
+            "bytes" => Ok(Some(Operation::Bytes(list(operand, line)?))),
+            "words" => Ok(Some(Operation::Words(list(operand, line)?))),
+            "fcc" => Ok(Some(parse_fcc(operand, line)?)),
+            "fqb" => Ok(Some(parse_fqb(operand, line)?)),
+            "reserve" => parse_rmb(operand, env, line),
+            "fill" => parse_fill(operand, env, line),
+            other => Err(AsmError::new(
+                line,
+                format!("`{other}` is declared but not dispatched"),
+            )),
+        },
     }
 }
 
