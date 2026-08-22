@@ -6,7 +6,7 @@ type: feat
 date: 2026-08-22
 topic: repetition
 artifact_contract: ce-unified-plan/v1
-artifact_readiness: implementation-ready
+artifact_readiness: blocked-on-decision
 product_contract_source: probe-survey
 execution: code
 ---
@@ -18,8 +18,11 @@ execution: code
 - **Objective:** Repetition blocks in every dialect whose reference has them.
   One dialect has it today; five references have it and we refuse all five.
 - **Product authority:** Steve Hill.
-- **Open blockers:** U3 needs a decision on the shared trait's shape before it
-  starts. U1 and U2 do not, and go first.
+- **Open blockers:** **All units.** Repetition is not an isolated feature —
+  four of the five dialects have no block-structured pipeline at all, and
+  putting one under them is the adopt-on-demand recipe that
+  `conditional-assembly-framework.md` gates. See *The blocker* below. Nothing
+  here should start until that gate is answered.
 
 ---
 
@@ -78,12 +81,60 @@ manual-reading implementation would have assumed:
    measured.** That is already what `Item::Repeat`'s doc comment says and why
    it does not scope locals per iteration. Five more references now agree.
 
+### The blocker: this is the adopt-on-demand gate, not plumbing
+
+The section above was written before reading the pipeline, and its sizing was
+wrong. Corrected by measurement:
+
+**Only two dialects run `ast::evaluate` at all** — acme and sjasmplus. Every
+other dialect assembles through `ast::lower`, which has no block structure and
+which *rejects* an `Item::Repeat` outright ("a repetition block is evaluated by
+the dialect, not lowered"). So the mechanism is not waiting to be reused by
+pasmo, vasm, rgbasm and ca65; there is nowhere in their pipelines to put it.
+
+The same measurement shows repetition is not the only thing missing. None of
+those four supports **conditionals** either, and every one of their references
+does:
+
+| dialect | `IF` in the reference | in us |
+|---|---|---|
+| pasmo | `IF`/`ELSE`/`ENDIF` — assembles | `unknown instruction \`IF\`` |
+| ca65 | `.if`/`.endif` | `unsupported directive \`.if\`` |
+| rgbasm | `IF`/`ENDC` | `unknown instruction \`IF\`` |
+| vasm | `ifne`/`endif` | `unknown instruction \`IFNE\`` |
+
+That absence is a **decision, not an oversight**.
+[`conditional-assembly-framework.md`](../../decisions/conditional-assembly-framework.md)
+models the evaluator as shared and adopted *per dialect, on demand* — "when a
+real program needs it, not speculatively" — and its 2026-07-07 note closes with
+"further adopters remain demand-gated". Its four-step recipe is exactly the
+work this plan would do: implement the evaluator, recognise the syntax, **route
+the dialect's assembler through `ast::evaluate`**, add an `emit` branch.
+[`roadmap-sequencing.md`](../../decisions/roadmap-sequencing.md) restates it as
+a sequencing principle — "no speculative keyword parsers 'for later'" — and
+[`macro-expansion-framework.md`](../../decisions/macro-expansion-framework.md)
+names it the same shape.
+
+So doing U1 as written would put a keyword-block pipeline under four dialects
+without the gate being opened, which is the thing three decision records
+separately forbid.
+
+**The argument for opening it exists and is already accepted elsewhere.** [#93]
+made it for macros in as many words: curriculum demand is not the instrument,
+because *we wrote the curriculum and it avoids what the toolchain does not
+support*, so the driver is external source compatibility. Period source for
+these machines uses conditionals and repetition heavily. That reasoning applies
+to this gap unchanged — but extending a gate is an amendment to a binding
+record, not a judgement call inside a plan.
+
 ### Key Decisions
 
-- **The dialects without a loop variable go first, together.** pasmo, vasm and
-  rgbasm's plain `REPT` need no new mechanism: they fold a count and hand it to
-  the `evaluate` that already exists. Landing them proves the shape carries
-  beyond sjasmplus before anything is generalised for the harder three.
+- **The dialects without a loop variable go first, together** — *if the gate
+  opens.* pasmo, vasm and rgbasm's plain `REPT` need no new **repetition**
+  mechanism once their assembler runs through `ast::evaluate`: they fold a
+  count and hand it to the walk that already exists. Getting them there is the
+  adoption recipe, and it delivers conditionals at the same time, because it is
+  the same pipeline.
 - **The loop variable is a separate unit, and it needs a decision first.** The
   shared trait's hook is `fn count(&self, head, line) -> Result<i64, _>`, which
   cannot express "and bind `v` to this value on this iteration". Extending it
@@ -120,6 +171,10 @@ declarations and the tests.
 
 **Out of scope:**
 
+- **Opening the adopt-on-demand gate.** This plan cannot grant itself the
+  permission three decision records withhold. If the gate opens, the amendment
+  is a change to `conditional-assembly-framework.md` with its own reasoning.
+
 - **Modules and namespaces** — the third item in [#93]'s scope list, and
   unrelated machinery.
 - **rgbasm's `FOR` over a string list**, `BREAK`, and the rest of rgbds'
@@ -139,6 +194,11 @@ declarations and the tests.
 
 ### Outstanding Questions
 
+- **Does the adopt-on-demand gate open for these four dialects?** The blocking
+  question, and the user's. If yes, the unit list below is preceded by an
+  adoption unit per dialect and the scope roughly doubles — but it delivers
+  conditionals as well as repetition, since they are one pipeline. If no, the
+  only dialect that can gain repetition is acme, whose `!for` is U3.
 - **How should a loop variable reach the body?** Two shapes, and the choice is
   the user's because it changes an interface every dialect implements:
   1. **Widen `count`** to return a description of the iteration — the values
@@ -155,10 +215,12 @@ declarations and the tests.
 
 ## Implementation Units
 
-### U1. Repetition for pasmo and vasm
+### U1. Repetition for pasmo and vasm — *blocked on the gate*
 
-The two plainest cases, and the two that prove the existing mechanism carries.
-Both fold a count and have no loop variable.
+The two plainest cases **once each dialect is on the evaluate pipeline**. Both
+fold a count and have no loop variable; neither has anywhere to put an
+`Item::Repeat` today. Each needs the four-step adoption first, which is the
+larger half of the unit and is not costed here because the gate may not open.
 
 pasmo's walk recognises `REPT` case-insensitively and closes on `ENDM`,
 building an `Item::Repeat`; `count` folds the head's expression through the
@@ -172,7 +234,7 @@ generated page.
 zero; a forward-referenced count refused in pasmo as pasmo refuses it; the
 formatter round trip.
 
-### U2. Repetition for rgbasm's `REPT`
+### U2. Repetition for rgbasm's `REPT` — *blocked on the gate*
 
 `REPT n` … `ENDR`, no loop variable, closed by `ENDR` only — `ENDM` is
 `Unterminated loop`. Same shape as U1; separate because rgbasm is a separate
@@ -181,6 +243,9 @@ family and its `FOR` waits on U3.
 **Verified by:** byte-identical output against real `rgbasm`.
 
 ### U3. The loop variable — ca65, rgbasm's `FOR`, acme's `!for` (proposed)
+
+**acme's half is the one unit here that the gate does not block**, because acme
+already runs `ast::evaluate`. It needs only the trait-shape decision.
 
 Blocked on the *Outstanding Questions* decision. Once the trait's shape is
 settled, the three dialects are independent of each other and each is arbitrated
