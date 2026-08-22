@@ -7,6 +7,30 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.24](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.23...asm198x-v0.0.24) - 2026-08-22
+
+### Added
+
+- **The documentation is searchable again.** mdBook carried search and its
+  withdrawal left none. The index is generated from the pages themselves, so
+  every mnemonic on all twenty-one CPU pages is findable with the line that
+  describes it — searching `SBC` reaches the 6502, HuC6280, 65C816, SM83 and
+  Z80 sections directly. Headings rather than full text, which is also what
+  answers a prose question: "Where a relative include is looked for" beats
+  every page that happens to use the word.
+  ([#179](https://github.com/asm198x/asm198x/pull/179))
+- Every dialect's macro and conditional vocabulary is declared, so a generated
+  matrix shows which dialects have macros, repetition and conditional assembly
+  rather than only the directives that reach the operation parser. Probing for
+  it corrected a long-standing assumption: `equ` is part of the label grammar,
+  not a directive. ([#178](https://github.com/asm198x/asm198x/pull/178))
+
+### Changed
+
+- `sha2` 0.10 → 0.11. Test and tooling only; the shipped binary does not link
+  it and its output is unchanged.
+  ([#151](https://github.com/asm198x/asm198x/pull/151))
+
 ## [0.0.23](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.22...asm198x-v0.0.23) - 2026-08-21
 
 ### Added
