@@ -6,6 +6,7 @@
 //! way locally and in CI, without a shell script that drifts from what the
 //! corpus actually holds.
 
+mod changelog;
 mod compare;
 mod coverage;
 mod divergences;
@@ -58,6 +59,16 @@ fn main() -> ExitCode {
                 ExitCode::FAILURE
             }
         },
+        Some("changelog") => match changelog::check(&repo()) {
+            Ok(summary) => {
+                println!("{summary}");
+                ExitCode::SUCCESS
+            }
+            Err(e) => {
+                eprintln!("xtask changelog: {e}");
+                ExitCode::FAILURE
+            }
+        },
         Some("docs") => run_docs(&args[1..]),
         Some("machines") => match machines::check(&repo()) {
             Ok(differences) if differences.is_empty() => {
@@ -107,6 +118,7 @@ fn usage() -> String {
      \x20 ledger              print the conformance ledger for this revision\n\
      \x20 grow [filter]       arbitrate what is not yet recorded (needs the tools)\n\
      \x20 supersede <tag> <why>  retire the verdicts carrying a divergence tag\n\
+     \x20 changelog           fail if the newest release entry still reads like a draft\n\
      \x20 docs                regenerate the book's generated blocks\n\
      \x20 docs --check        fail if any generated block is stale\n\
      \x20 machines            check the copied CPU→machine mapping against\n\

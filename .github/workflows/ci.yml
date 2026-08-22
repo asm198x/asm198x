@@ -209,6 +209,15 @@ jobs:
       - name: Check the docs, their generated blocks and their nav
         run: cargo xtask docs --check
 
+      # `/releases` publishes CHANGELOG.md, so its newest entry is reader-facing
+      # prose. release-plz drafts it from commit subjects, files anything with no
+      # conventional-commit prefix under `Other` as its raw subject, and cannot
+      # see `docs/` at all — v0.0.23 was mostly four new guide pages and the
+      # draft mentioned none of them. This fails while the newest entry still
+      # reads like that draft. See `decisions/changelog-is-authored.md`.
+      - name: Check the newest changelog entry is written for a reader
+        run: cargo xtask changelog
+
       - name: Install Vale
         uses: errata-ai/vale-action@reviewdog
         with:
