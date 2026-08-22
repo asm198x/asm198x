@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.25](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.24...asm198x-v0.0.25) - 2026-08-22
+
+### Other
+
+- pasmo gains conditionals and repetition, and the formatter stops deleting loop bodies ([#187](https://github.com/asm198x/asm198x/pull/187))
+- Every dialect's formatter now formats what its assembler assembles ([#184](https://github.com/asm198x/asm198x/pull/184))
+- Assert the formatter reads what the assembler reads ([#183](https://github.com/asm198x/asm198x/pull/183))
+- Say which failure it is: pasmo's unimplemented include, and one wording for an unknown word ([#181](https://github.com/asm198x/asm198x/pull/181))
+
 ## [0.0.24](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.23...asm198x-v0.0.24) - 2026-08-22
 
 ### Added
