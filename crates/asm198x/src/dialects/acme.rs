@@ -1783,6 +1783,18 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // Scanner-handled, like the conditionals above: the macro expander reads
+    // these before `parse_directive` is reached. Declared for the same reason
+    // `!src` and `!zone` are — the surface describes the dialect.
+    Directive {
+        id: "macro",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["macro"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
 ];
 
 fn parse_directive(

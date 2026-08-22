@@ -490,6 +490,17 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // Expander-handled, before `parse_directive` is reached. The opener only:
+    // `.endmacro`/`.endmac` close the block rather than naming a directive.
+    Directive {
+        id: "macro",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["macro", "mac"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
 ];
 
 fn parse_directive(
@@ -545,7 +556,7 @@ fn parse_directive(
         "res" => parse_res(rest, env, line),
         other => Err(AsmError::new(
             line,
-            format!("`{other}` is declared but not dispatched"),
+            format!("`.{name}` is declared (`{other}`) but not dispatched here"),
         )),
     }
 }

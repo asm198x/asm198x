@@ -147,7 +147,7 @@ Measured across `crates/asm198x/src/dialects/`:
 
 ### Sequencing
 
-**U1 → U2 → U3 → U4 → U5 → U6**, with U7 proposed after them.
+**U1 → U2 → U3 → U4 → U5 → U6 → U7.**
 
 The types and one small conversion prove the shape (U1); vasm proves the family form before the bulk (U2, per KTD1); the asl-family bulk is the repetitive middle (U3); the remaining dialects carry the awkward cases (U4); the sigil decision lands as its own change because it is the only behaviour-visible one (U5); the completeness test and generator seam close it (U6).
 
@@ -262,24 +262,45 @@ The types and one small conversion prove the shape (U1); vasm proves the family 
 - **Approach:** For every dialect: assert each declared spelling is accepted, and that a spelling outside the declaration is rejected. `Dialect::directives()` returns the entries with families expanded and categories attached.
 - **Test scenarios:** a spelling removed from a declaration makes its dialect's tests fail; a dialect with no declaration is visibly absent from the accessor, not silently empty.
 
-### U7. The vocabulary read outside `parse_op` (proposed)
+### U7. The vocabulary read outside `parse_op`
 
-- **Not started.** U6 declared the file directives because the generator's
-  first consumer would otherwise have published the opposite of the truth. They
-  are not the only spellings accepted outside a dialect's `parse_op`.
-- **What is still undeclared:** `equ` in the twelve asl chips, parsed as part of
-  `NAME EQU expr` by the line splitter; the macro block keywords
-  (`macro`/`endm`/`local`, ca65's `.mac`/`.endmac`/`.local`) handled by the
-  expander before parsing, in pasmo, sjasmplus, lwasm, vasm and the ca65 family.
-- **So R3 is proven for what is declared, and is not yet true of everything
-  accepted.** U6's test cannot see this: it proves declared → accepted, and the
-  other direction has no mechanical source to check against.
-- **The open question is a modelling one, not a mechanical one.** The plan
-  already rules acme's `}` out as block syntax rather than vocabulary, and
-  rules acme's conditionals in. `macro`/`endm` sit between those two rulings and
-  need the same explicit call, per dialect, before they are declared. `equ` does
-  not — it is plain vocabulary a matrix should show, and it is the cheaper half
-  of this unit.
+- **Landed 2026-08-22**, and a probe rewrote most of what this unit was going to
+  say.
+- **The method.** Rather than trust a hand list, each candidate word is
+  assembled and its error compared against a **control** — a nonsense word of
+  the same shape. A word whose failure is indistinguishable from nonsense is not
+  accepted; one whose failure differs is. Two false readings had to be designed
+  out: the control must reach the same parser (a sigilled candidate against a
+  sigilled control, or acme's mandatory-origin error makes every word look
+  accepted), and the word must be blanked only where it is **quoted**, because
+  "instruction" contains "struct" and every dialect looked like it accepted
+  `struct`.
+- **`equ` is not an undeclared directive, and this unit previously said it was.**
+  It is the second word of `NAME EQU expr`, read by the line splitter as part of
+  the label grammar. A bare `equ` is an unknown mnemonic in every asl-syntax
+  chip. The "cheaper half" of this unit did not exist.
+- **What was genuinely accepted and undeclared** was the macro and conditional
+  vocabulary: `macro` in pasmo, sjasmplus and vasm; `.macro`/`.mac` in the ca65
+  variants; `!macro` in acme; and in sjasmplus the repetition (`dup`/`rept`) and
+  conditional (`if`/`ifdef`/`ifndef`) frameworks with `define`.
+- **The modelling call, settled: one entry per construct, named by its opener.**
+  `ENDM`, `EDUP`, `ELSE` and `ENDIF` are parts of a block rather than vocabulary
+  of their own — the same call this plan already made for acme's `}`. A matrix
+  answering "does this dialect have macros" wants one row, not two. It also
+  keeps R4 honest: pasmo's `ENDM` is *not* accepted on its own, because the
+  scanner looks for it only inside a body.
+- **An asymmetry worth recording.** A stray `ENDIF` in sjasmplus says "without a
+  matching IF"; a stray `ENDM` is an unknown mnemonic. Same dialect, two
+  standards for the same shape of mistake. That is a diagnostic gap rather than
+  a vocabulary one, and is not fixed here.
+- **One diagnostic changed.** `.macro` on the ca65 **formatter** path used to
+  report "unsupported directive"; now that it is declared it reaches the
+  declared-but-not-dispatched fall-through. The message names the spelling the
+  source used rather than the entry id, and says it was not dispatched *here* —
+  which is truer, since the dialect does support `.macro` when assembling and it
+  is the formatter that does not expand.
+- **R5 verified:** differential, corpus replay and the curriculum comparisons,
+  byte-identical, zero new verdicts.
 
 ### A diagnostics finding, recorded here because U6 is where it surfaced
 

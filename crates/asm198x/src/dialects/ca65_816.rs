@@ -543,6 +543,17 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // Expander-handled, before `parse_directive` is reached. The opener only:
+    // `.endmacro`/`.endmac` close the block rather than naming a directive.
+    Directive {
+        id: "macro",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["macro", "mac"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
 ];
 
 fn parse_directive(
@@ -598,9 +609,14 @@ fn parse_directive(
             Ok(Some(Operation::Bytes(out)))
         }
         "res" => parse_res(rest, env, line),
+        // Declared and dispatched elsewhere, or misrouted. `.macro`/`.mac`
+        // reach here on the **formatter** path, which does not expand: the
+        // expander consumes them when assembling and the walk does not know
+        // them, so the message names the spelling the source used rather than
+        // the entry id, and says where it was not handled.
         other => Err(AsmError::new(
             line,
-            format!("`{other}` is declared but not dispatched"),
+            format!("`.{name}` is declared (`{other}`) but not dispatched here"),
         )),
     }
 }
@@ -1151,10 +1167,11 @@ mod tests {
     /// The formatter lays source out; it does not rewrite programs, so it must
     /// give the macro back rather than the lines it expands to.
     ///
-    /// ca65's formatter cannot yet *format* one — its walk rejects `.macro` as
-    /// an unsupported directive, exactly as it did before macros existed.
-    /// Refusing is the safe half, and this pins it so closing the other half is
-    /// deliberate. See `decisions/macro-expansion-framework.md`.
+    /// ca65's formatter cannot yet *format* one — the walk does not expand, and
+    /// `.macro` is consumed by the expander on the assembling path, so it
+    /// arrives here declared and undispatched. Refusing is the safe half, and
+    /// this pins it so closing the other half is deliberate. See
+    /// `decisions/macro-expansion-framework.md`.
     #[test]
     fn formatting_does_not_expand() {
         let err = crate::format_ca65_816(".macro ldav v\n lda #v\n.endmacro\n ldav 5\n")

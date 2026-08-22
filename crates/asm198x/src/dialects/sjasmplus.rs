@@ -69,6 +69,40 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["incbin"]),
         category: Category::Operation,
     },
+    // Scanner- and expander-handled, like acme's conditionals: these never
+    // reach `parse_op`, because the macro expander and the conditional walk
+    // consume them first. Declared all the same — the surface describes the
+    // dialect, and a matrix showing sjasmplus with no macros and no `IF` would
+    // be describing whichever parser happened to read the line.
+    //
+    // **One entry per construct, named by its opener.** `ENDM`, `EDUP`, `ELSE`
+    // and `ENDIF` are parts of a block rather than vocabulary of their own, the
+    // same call the plan already made for acme's `}`. A matrix answering "does
+    // this dialect have macros" wants one row, not two.
+    Directive {
+        id: "macro",
+        pattern: Pattern::Exact(&["macro"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "repeat",
+        pattern: Pattern::Exact(&["dup", "rept"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "conditional",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["if", "ifdef", "ifndef"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "define",
+        pattern: Pattern::Exact(&["define"]),
+        category: Category::Operation,
+    },
 ];
 
 pub(crate) struct Sjasmplus {
