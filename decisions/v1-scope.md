@@ -93,9 +93,8 @@ Six items. Two are substantial; four are small.
      a shell installer and a Homebrew tap are cargo-dist configuration.
    - A CLI reference. `--help` is dense and complete, and it is the only CLI
      documentation that exists.
-   - Per-dialect directive matrices, **generated from the conformance corpus** —
-     not hand-authored. There are 21 dialect front-ends and **one** dialect
-     reference document (`dialects/6502.md` in the org docs repo, itself carrying
+   - Per-dialect directive matrices, **generated rather than hand-authored**.
+     There are 21 dialect front-ends and **one** dialect reference document (`dialects/6502.md` in the org docs repo, itself carrying
      a caveat that its gap notes may be stale). Source-compatibility is the
      product's identity, so per-dialect fidelity is what a user most needs
      written down and it is the least written down — but hand-writing 21 pages is
@@ -105,8 +104,24 @@ Six items. Two are substantial; four are small.
      That plan already wires directive matrices as a **generated slot** fed by the
      conformance corpus, which is item 2 above. The corpus pays off twice — it
      makes the guarantee provable *and* it is the source the dialect
-     documentation generates from. This item is downstream of item 2, not
-     parallel work.
+     documentation generates from.
+
+     *Amended 2026-08-22.* This item said the matrices generate **from the
+     conformance corpus**, and were "downstream of item 2, not parallel work".
+     Both are narrower than the truth, and the correction matters because it
+     changes what has to exist first.
+
+     The matrix has three inputs. The corpus is keyed on **source text**, not
+     directives, so it cannot say which directives a front-end accepts — and
+     tagging verdicts from our own parser fixes the wrong half, because the most
+     valuable cells are divergences and a parser cannot tag what it rejects. So
+     the **spine** comes from `asm198x::directives::surfaces()`, the declared
+     surface built for exactly this (#89, landed 2026-08-22); the corpus
+     supplies **agreement**; and the `gap()` markers in `tests/differential.rs`
+     supply the **known gaps**.
+
+     All three exist today. The matrices are downstream of the declared surface,
+     and the corpus fills in a column.
    - The docs-site plan's **v1 core** — R1 instruction references generated from
      `isa` with provenance links into the umbrella `reference/` library, R2 every
      sample assembled by the real binary in CI, R3's framework plus the House198x Vale

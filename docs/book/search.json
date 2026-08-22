@@ -433,6 +433,489 @@
       "slug": "reference/cli"
     },
     {
+      "context": "RCA COSMAC CDP1802.",
+      "page": "1802",
+      "slug": "reference/dialects/1802"
+    },
+    {
+      "context": "7 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "1802",
+      "slug": "reference/dialects/1802"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "1802",
+      "slug": "reference/dialects/1802"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "1802",
+      "slug": "reference/dialects/1802"
+    },
+    {
+      "context": "Signetics 2650.",
+      "page": "2650",
+      "slug": "reference/dialects/2650"
+    },
+    {
+      "context": "7 directives, 17 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "2650",
+      "slug": "reference/dialects/2650"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "2650",
+      "slug": "reference/dialects/2650"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "2650",
+      "slug": "reference/dialects/2650"
+    },
+    {
+      "context": "65816, ca65 syntax.",
+      "page": "65816",
+      "slug": "reference/dialects/65816"
+    },
+    {
+      "context": "11 directives, 21 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "65816",
+      "slug": "reference/dialects/65816"
+    },
+    {
+      "context": "A relative request is looked for in the including file's directory, then each enclosing includer's, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "65816",
+      "slug": "reference/dialects/65816"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "65816",
+      "slug": "reference/dialects/65816"
+    },
+    {
+      "context": "Motorola 6800, Motorola syntax.",
+      "page": "6800",
+      "slug": "reference/dialects/6800"
+    },
+    {
+      "context": "7 directives, 15 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "6800",
+      "slug": "reference/dialects/6800"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "6800",
+      "slug": "reference/dialects/6800"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "6800",
+      "slug": "reference/dialects/6800"
+    },
+    {
+      "context": "MCS-48 with on-chip ROM.",
+      "page": "8048",
+      "slug": "reference/dialects/8048"
+    },
+    {
+      "context": "7 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "8048",
+      "slug": "reference/dialects/8048"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "8048",
+      "slug": "reference/dialects/8048"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "8048",
+      "slug": "reference/dialects/8048"
+    },
+    {
+      "context": "Intel 8080, Intel syntax.",
+      "page": "8080",
+      "slug": "reference/dialects/8080"
+    },
+    {
+      "context": "7 directives, 17 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "8080",
+      "slug": "reference/dialects/8080"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "8080",
+      "slug": "reference/dialects/8080"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "8080",
+      "slug": "reference/dialects/8080"
+    },
+    {
+      "context": "C64 6502, ACME syntax.",
+      "page": "acme",
+      "slug": "reference/dialects/acme"
+    },
+    {
+      "context": "13 directives, 23 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "acme",
+      "slug": "reference/dialects/acme"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "acme",
+      "slug": "reference/dialects/acme"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "acme",
+      "slug": "reference/dialects/acme"
+    },
+    {
+      "context": "NES 6502, ca65 syntax (assemble + link).",
+      "page": "ca65",
+      "slug": "reference/dialects/ca65"
+    },
+    {
+      "context": "12 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "ca65",
+      "slug": "reference/dialects/ca65"
+    },
+    {
+      "context": "A relative request is looked for in the including file's directory, then each enclosing includer's, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "ca65",
+      "slug": "reference/dialects/ca65"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "ca65",
+      "slug": "reference/dialects/ca65"
+    },
+    {
+      "context": "GI CP1610 (Intellivision).",
+      "page": "cp1610",
+      "slug": "reference/dialects/cp1610"
+    },
+    {
+      "context": "6 directives, 17 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "cp1610",
+      "slug": "reference/dialects/cp1610"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "cp1610",
+      "slug": "reference/dialects/cp1610"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "cp1610",
+      "slug": "reference/dialects/cp1610"
+    },
+    {
+      "context": "Fairchild F8 (3850), Channel F.",
+      "page": "f8",
+      "slug": "reference/dialects/f8"
+    },
+    {
+      "context": "7 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "f8",
+      "slug": "reference/dialects/f8"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "f8",
+      "slug": "reference/dialects/f8"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "f8",
+      "slug": "reference/dialects/f8"
+    },
+    {
+      "context": "PC Engine HuC6280, ca65 syntax.",
+      "page": "huc6280",
+      "slug": "reference/dialects/huc6280"
+    },
+    {
+      "context": "11 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "huc6280",
+      "slug": "reference/dialects/huc6280"
+    },
+    {
+      "context": "A relative request is looked for in the including file's directory, then each enclosing includer's, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "huc6280",
+      "slug": "reference/dialects/huc6280"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "huc6280",
+      "slug": "reference/dialects/huc6280"
+    },
+    {
+      "context": "6809, lwasm syntax.",
+      "page": "lwasm",
+      "slug": "reference/dialects/lwasm"
+    },
+    {
+      "context": "11 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "lwasm",
+      "slug": "reference/dialects/lwasm"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "lwasm",
+      "slug": "reference/dialects/lwasm"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "lwasm",
+      "slug": "reference/dialects/lwasm"
+    },
+    {
+      "context": "Z80, pasmo syntax.",
+      "page": "pasmo",
+      "slug": "reference/dialects/pasmo"
+    },
+    {
+      "context": "8 directives, 13 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "pasmo",
+      "slug": "reference/dialects/pasmo"
+    },
+    {
+      "context": "This dialect has no include directive yet, so a project in more than one file does not assemble. It is the one front door where that is true — see Projects in more than one file.",
+      "heading": "Projects in more than one file",
+      "page": "pasmo",
+      "slug": "reference/dialects/pasmo"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "pasmo",
+      "slug": "reference/dialects/pasmo"
+    },
+    {
+      "context": "DEC PDP-11.",
+      "page": "pdp11",
+      "slug": "reference/dialects/pdp11"
+    },
+    {
+      "context": "6 directives, 17 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "pdp11",
+      "slug": "reference/dialects/pdp11"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "pdp11",
+      "slug": "reference/dialects/pdp11"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "pdp11",
+      "slug": "reference/dialects/pdp11"
+    },
+    {
+      "context": "Game Boy SM83, RGBDS syntax.",
+      "page": "rgbasm",
+      "slug": "reference/dialects/rgbasm"
+    },
+    {
+      "context": "5 directives, 5 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "rgbasm",
+      "slug": "reference/dialects/rgbasm"
+    },
+    {
+      "context": "A relative request is looked for in the root input's directory, however deep the request, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "rgbasm",
+      "slug": "reference/dialects/rgbasm"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "rgbasm",
+      "slug": "reference/dialects/rgbasm"
+    },
+    {
+      "context": "National SC/MP (INS8060).",
+      "page": "scmp",
+      "slug": "reference/dialects/scmp"
+    },
+    {
+      "context": "7 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "scmp",
+      "slug": "reference/dialects/scmp"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "scmp",
+      "slug": "reference/dialects/scmp"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "scmp",
+      "slug": "reference/dialects/scmp"
+    },
+    {
+      "context": "Z80, sjasmplus syntax.",
+      "page": "sjasmplus",
+      "slug": "reference/dialects/sjasmplus"
+    },
+    {
+      "context": "12 directives, 24 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "sjasmplus",
+      "slug": "reference/dialects/sjasmplus"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "sjasmplus",
+      "slug": "reference/dialects/sjasmplus"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "sjasmplus",
+      "slug": "reference/dialects/sjasmplus"
+    },
+    {
+      "context": "TI TMS7000.",
+      "page": "tms7000",
+      "slug": "reference/dialects/tms7000"
+    },
+    {
+      "context": "7 directives, 20 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "tms7000",
+      "slug": "reference/dialects/tms7000"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "tms7000",
+      "slug": "reference/dialects/tms7000"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "tms7000",
+      "slug": "reference/dialects/tms7000"
+    },
+    {
+      "context": "TI TMS9900 (TI-99/4A).",
+      "page": "tms9900",
+      "slug": "reference/dialects/tms9900"
+    },
+    {
+      "context": "6 directives, 18 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "tms9900",
+      "slug": "reference/dialects/tms9900"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "tms9900",
+      "slug": "reference/dialects/tms9900"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "tms9900",
+      "slug": "reference/dialects/tms9900"
+    },
+    {
+      "context": "Amiga 68000, vasm Motorola syntax.",
+      "page": "vasm",
+      "slug": "reference/dialects/vasm"
+    },
+    {
+      "context": "9 directives, 19 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "vasm",
+      "slug": "reference/dialects/vasm"
+    },
+    {
+      "context": "A relative request is looked for in the root input's directory, however deep the request, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "vasm",
+      "slug": "reference/dialects/vasm"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "vasm",
+      "slug": "reference/dialects/vasm"
+    },
+    {
+      "context": "Zilog Z8000, non-segmented.",
+      "page": "z8000",
+      "slug": "reference/dialects/z8000"
+    },
+    {
+      "context": "6 directives, 18 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "heading": "Directives",
+      "page": "z8000",
+      "slug": "reference/dialects/z8000"
+    },
+    {
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
+      "heading": "Projects in more than one file",
+      "page": "z8000",
+      "slug": "reference/dialects/z8000"
+    },
+    {
+      "context": "- Dialects — every dialect and what each is the syntax of",
+      "heading": "Elsewhere",
+      "page": "z8000",
+      "slug": "reference/dialects/z8000"
+    },
+    {
       "context": "--dialect selects the source syntax, not the CPU. Each front-end matches",
       "page": "Dialects",
       "slug": "reference/dialects"

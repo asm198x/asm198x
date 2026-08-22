@@ -104,7 +104,22 @@ pub fn run(repo: &Path, check: bool) -> Result<Report, String> {
 /// part at all, so they are compared whole rather than block by block.
 fn write_pages(repo: &Path, check: bool, report: &mut Report) -> Result<(), String> {
     let src = book_src(repo);
-    for page in crate::instructions::pages() {
+    let generated: Vec<(String, String)> = crate::instructions::pages()
+        .into_iter()
+        .map(|p| (p.path, p.body))
+        .chain(
+            crate::dialect_pages::pages()
+                .into_iter()
+                .map(|p| (p.path, p.body)),
+        )
+        .collect();
+    for page in generated
+        .iter()
+        .map(|(path, body)| crate::instructions::Page {
+            path: path.clone(),
+            body: body.clone(),
+        })
+    {
         report.pages += 1;
         let path = src.join(&page.path);
         if let Some(parent) = path.parent()
@@ -168,6 +183,7 @@ fn generate(command: &str, path: &Path, repo: &Path) -> Result<String, String> {
     match command {
         "asm198x dialects --markdown" => Ok(asm198x::dialect_table::markdown()),
         "xtask instructions --summary" => Ok(crate::instructions::summary_lines()),
+        "xtask dialects --summary" => Ok(crate::dialect_pages::summary_lines()),
         "xtask divergences --markdown" => Ok(crate::divergences::markdown(repo)),
         "xtask includes --markdown" => Ok(crate::includes::markdown()),
         "xtask includes --anchors" => Ok(crate::includes::anchors()),

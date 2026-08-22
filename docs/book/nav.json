@@ -74,7 +74,113 @@
           "title": "The command line"
         },
         {
-          "children": [],
+          "children": [
+            {
+              "children": [],
+              "slug": "reference/dialects/acme",
+              "title": "acme"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/ca65",
+              "title": "ca65"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/65816",
+              "title": "65816"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/huc6280",
+              "title": "huc6280"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/vasm",
+              "title": "vasm"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/lwasm",
+              "title": "lwasm"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/rgbasm",
+              "title": "rgbasm"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/pasmo",
+              "title": "pasmo"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/sjasmplus",
+              "title": "sjasmplus"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/8080",
+              "title": "8080"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/6800",
+              "title": "6800"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/1802",
+              "title": "1802"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/8048",
+              "title": "8048"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/scmp",
+              "title": "scmp"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/f8",
+              "title": "f8"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/2650",
+              "title": "2650"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/tms7000",
+              "title": "tms7000"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/pdp11",
+              "title": "pdp11"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/tms9900",
+              "title": "tms9900"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/cp1610",
+              "title": "cp1610"
+            },
+            {
+              "children": [],
+              "slug": "reference/dialects/z8000",
+              "title": "z8000"
+            }
+          ],
           "slug": "reference/dialects",
           "title": "Dialects"
         },
