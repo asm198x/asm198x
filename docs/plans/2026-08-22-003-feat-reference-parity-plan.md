@@ -158,9 +158,16 @@ macros for rgbasm.
 
 ### Outstanding Questions
 
-- **How does a native multi-pass dialect evaluate a conditional?** ca65 and
-  vasm project the tree to their own `Parsed` form and run their own passes, so
-  there is no `CondEval` seam. Three shapes, none obviously right:
+- ~~**How does a native multi-pass dialect evaluate a conditional?**~~
+  **Answered 2026-08-22** in
+  [`conditionals-in-multipass-dialects.md`](../../decisions/conditionals-in-multipass-dialects.md):
+  **shape 1**, and it is not a multi-pass problem at all. Neither reference
+  permits a forward reference in a condition — ca65 says `Constant expression
+  expected`, vasm says `expression must be constant` — so a condition folds
+  once, sequentially, before layout. ca65 conditions cannot see the location
+  counter or even a backward label; vasm's can see `*`, and the value is the
+  **pre-relaxation** address, which is what stops a condition and the optimiser
+  feeding each other. The three shapes considered were:
   1. **Project through the conditional** — `parsed_from_program` walks
      `Item::Conditional`, folds the condition against the constants gathered so
      far, and projects only the live branch. Keeps the tree model; needs the
@@ -212,12 +219,25 @@ a macro and a repetition.
 
 Reuses whatever U2 establishes for the parse/lower split.
 
-### U4. ca65 conditionals and repetition (blocked on the design question)
+### U4. ca65 conditionals and repetition — **unblocked**
+
+`parsed_from_program` folds each `Item::Conditional` / `Item::Repeat` head
+against the `=` constants gathered so far, in source order, and projects only
+the live branch. No layout state: a ca65 condition cannot reach any.
 
 `.repeat n[, var]` gives the loop variable its second consumer, which is the
 first real test of whether `Iteration::Over` generalised past acme.
 
-### U5. vasm conditionals and repetition (blocked on the same question)
+**Verified by:** byte-identical output against real `ca65 + ld65`, including a
+forward reference in a condition **refused** as ca65 refuses it, a definition
+in an untaken branch staying invisible, and the formatter round trip.
+
+### U5. vasm conditionals and repetition — **unblocked**
+
+The same sweep, carrying a running unrelaxed program counter so `*` folds to
+the pre-relaxation address. The probe that pinned this belongs in the corpus:
+a `bra` the optimiser shortens, with a condition after it whose outcome differs
+between the relaxed and unrelaxed address.
 
 ---
 
