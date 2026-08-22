@@ -181,6 +181,10 @@ impl Z80Syntax for SjasmplusSyntax {
         z80::is_define_word(word)
     }
 
+    fn constant_sources(&self) -> &'static str {
+        "a value defined with `equ` or `DEFINE` above"
+    }
+
     fn strip_comment<'a>(&self, line: &'a str) -> &'a str {
         // The earlier of `;` and `//` starts the comment.
         let semi = line.find(';');
@@ -1068,5 +1072,47 @@ mod tests {
             asm("        If 1\n        ld a,1\n        Endif\n").is_err(),
             "p11"
         );
+    }
+
+    /// Formatting a repetition changes the layout and not the program.
+    ///
+    /// This is a regression test for shipped **data loss**: `emit` had no arm
+    /// for `Item::Repeat`, so the node fell through to the plain-line case,
+    /// which renders its head — and the body and closer were dropped on the
+    /// floor. `fmt` is documented as safe to run over source you have not
+    /// read, and it was deleting loop bodies.
+    #[test]
+    fn a_formatted_repetition_keeps_its_body() {
+        for src in [
+            " DUP 3\n nop\n EDUP\n ret\n",
+            " REPT 2\n inc a\n ENDR\n ret\n",
+            " dup 2\n nop\n edup\n ret\n",
+            " DUP 2\n DUP 3\n nop\n EDUP\n inc a\n EDUP\n ret\n",
+        ] {
+            let before = asm(src).expect(src).bytes;
+            let formatted = crate::format_sjasmplus(src).expect(src);
+            let after = asm(&formatted)
+                .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+                .bytes;
+            assert_eq!(
+                before, after,
+                "formatting changed the program:\n{formatted}"
+            );
+
+            let again = crate::format_sjasmplus(&formatted).expect("formats");
+            assert_eq!(formatted, again, "{formatted}");
+        }
+    }
+
+    /// The closer keeps the spelling and the case the author wrote. sjasmplus
+    /// takes `EDUP` and `ENDR` for either opener, so choosing one would be the
+    /// formatter rewriting a line rather than laying it out.
+    #[test]
+    fn a_repetitions_closer_is_not_respelled() {
+        let out = crate::format_sjasmplus(" DUP 2\n nop\n ENDR\n").expect("formats");
+        assert!(out.contains("ENDR"), "{out}");
+        assert!(!out.contains("EDUP"), "the closer was respelled:\n{out}");
+        let lower = crate::format_sjasmplus(" dup 2\n nop\n edup\n").expect("formats");
+        assert!(lower.contains("edup"), "the closer was re-cased:\n{lower}");
     }
 }

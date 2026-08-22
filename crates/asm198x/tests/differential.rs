@@ -1597,6 +1597,17 @@ fn multi_file_source_matches_reference() {
 /// before being added — so a body this crate assembles is one it has no excuse
 /// for refusing to lay out.
 ///
+/// # Accepting is not enough
+///
+/// The first version of this test asked only whether the formatter *refused*,
+/// and that let a worse defect through: `fmt` rendered a repetition block's
+/// head and silently dropped its body and closer, so the source came back
+/// shorter and still formatted cleanly. `fmt` is documented as safe to run
+/// over source you have not read, so "did not refuse" is the weaker half of
+/// the property. The formatted text must also **assemble to the same bytes**,
+/// which is what catches a formatter that loses a line rather than one that
+/// balks at it.
+///
 /// # The ledger
 ///
 /// Known divergences are listed with the dialect and the reason. A listed one
@@ -1605,25 +1616,77 @@ fn multi_file_source_matches_reference() {
 #[test]
 fn the_formatter_reads_what_the_assembler_reads() {
     let mut refused: Vec<String> = Vec::new();
+    let mut lost: Vec<String> = Vec::new();
     let mut checked = 0;
 
     for probe in PROBES {
         // Only bodies we actually assemble. A probe we reject is #93's problem
         // or a recorded gap, and not evidence about the formatter.
-        if support::verdicts::assemble_probe(probe.dialect, probe.body)
-            .and_then(Result::ok)
-            .is_none()
-        {
+        let Some(Ok(before)) = support::verdicts::assemble_probe(probe.dialect, probe.body) else {
             continue;
-        }
+        };
         let Some(outcome) = support::verdicts::format_probe(probe.dialect, probe.body) else {
             continue;
         };
         checked += 1;
-        if let Err(why) = outcome {
-            refused.push(format!("{} — {}: {why}", probe.dialect, probe.note));
+        let formatted = match outcome {
+            Ok(text) => text,
+            Err(why) => {
+                refused.push(format!("{} — {}: {why}", probe.dialect, probe.note));
+                continue;
+            }
+        };
+        // The layout changed; the program must not have.
+        match support::verdicts::assemble_probe(probe.dialect, &formatted) {
+            Some(Ok(after)) if after == before => {}
+            Some(Ok(_)) => lost.push(format!(
+                "{} — {}: formatted source assembles to different bytes",
+                probe.dialect, probe.note
+            )),
+            Some(Err(why)) => lost.push(format!(
+                "{} — {}: formatted source will not assemble: {why}",
+                probe.dialect, probe.note
+            )),
+            None => {}
         }
     }
+
+    let unexpected_loss: Vec<&String> = lost
+        .iter()
+        .filter(|l| {
+            !FORMATTER_ROUND_TRIP_GAPS
+                .iter()
+                .any(|(d, note)| l.starts_with(&format!("{d} — {note}:")))
+        })
+        .collect();
+    assert!(
+        unexpected_loss.is_empty(),
+        "{} source(s) survive formatting with a different program:\n  {}",
+        unexpected_loss.len(),
+        unexpected_loss
+            .iter()
+            .map(|s| s.as_str())
+            .collect::<Vec<_>>()
+            .join("\n  ")
+    );
+    let healed: Vec<&(&str, &str)> = FORMATTER_ROUND_TRIP_GAPS
+        .iter()
+        .filter(|(d, note)| {
+            !lost
+                .iter()
+                .any(|l| l.starts_with(&format!("{d} — {note}:")))
+        })
+        .collect();
+    assert!(
+        healed.is_empty(),
+        "{} listed round-trip gap(s) now round-trip — delete their row:\n  {}",
+        healed.len(),
+        healed
+            .iter()
+            .map(|(d, note)| format!("{d}: {note}"))
+            .collect::<Vec<_>>()
+            .join("\n  ")
+    );
 
     eprintln!("checked {checked} assembling probe(s) against the formatter");
     assert!(
@@ -1686,3 +1749,21 @@ fn the_formatter_reads_what_the_assembler_reads() {
 /// Deleting a row is how a fix is recorded, and the test fails if a row
 /// outlives the problem.
 const FORMATTER_GAPS: &[(&str, &str)] = &[];
+
+/// Sources this crate assembles, and formats, and then cannot assemble ([#186]).
+///
+/// A weaker failure than a refusal and a worse one: the formatter accepts the
+/// file, so nothing looks wrong until the result is built. Keyed by dialect and
+/// probe note; a row that starts round-tripping fails the test, as on
+/// [`FORMATTER_GAPS`].
+///
+/// Both rows are the same defect and it is not the formatter's. ca65 accepts a
+/// label in any column and we accept one only at column 0, so indenting a macro
+/// body — which is correct ca65 layout — moves its label somewhere our own
+/// parser will not read it. Fixing the parser deletes both rows.
+///
+/// [#186]: https://github.com/asm198x/asm198x/issues/186
+const FORMATTER_ROUND_TRIP_GAPS: &[(&str, &str)] = &[
+    ("ca65-816", ".local label, invoked twice"),
+    ("ca65-816", ".local declares several names"),
+];

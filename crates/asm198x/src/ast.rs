@@ -251,6 +251,15 @@ pub(crate) enum Item {
     Repeat {
         head: String,
         body: Vec<Node>,
+        /// The closing keyword exactly as the author wrote it (`EDUP`, `ENDR`,
+        /// `endm`).
+        ///
+        /// Carried rather than reconstructed because it is not derivable: a
+        /// sjasmplus block opened with `DUP` may be closed by either `EDUP` or
+        /// `ENDR`, and pasmo closes with `ENDM` — the same word that closes a
+        /// macro. Reconstructing it would mean the formatter choosing a
+        /// spelling on the author's behalf, and there is no correct choice.
+        close: String,
     },
     /// A dialect-family-owned statement for a multi-pass CISC dialect (see
     /// [`NativeItem`]). The owning dialect's assembler reads it back; the shared
@@ -487,7 +496,7 @@ pub(crate) fn evaluate<D: CondEval>(
             if let Some(else_body) = else_body {
                 evaluate(dialect, else_body, emit && !taken, out)?;
             }
-        } else if let Some(Item::Repeat { head, body }) = &node.item {
+        } else if let Some(Item::Repeat { head, body, .. }) = &node.item {
             // A skipped block still walks its body once with `emit = false`,
             // exactly as an untaken conditional branch does, so nothing inside
             // it defines anything. The count is only folded when live: an
@@ -850,6 +859,24 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
                     equ_label_colon,
                 ),
             }
+            continue;
+        }
+        // A repetition renders its head, its body one level in, and the closer
+        // the author wrote. Without this arm the node falls through to the
+        // plain-line case below, which renders `node.source` — the head alone —
+        // and **drops the body and the closer on the floor**. That is not a
+        // cosmetic failure: `fmt` is documented as safe to run over source you
+        // have not read, and a formatter that deletes a loop body is the exact
+        // opposite.
+        if let Some(Item::Repeat { head, body, close }) = &node.item {
+            out.push_str(INDENT);
+            out.push_str(head);
+            trailing(&mut *out);
+            out.push('\n');
+            emit_nodes(body, out, equ_label_colon, INDENT);
+            out.push_str(INDENT);
+            out.push_str(close);
+            out.push('\n');
             continue;
         }
         // A verbatim line is already a line: no indent, no label placement, no

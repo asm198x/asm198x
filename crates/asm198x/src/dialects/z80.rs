@@ -151,6 +151,17 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// How this dialect's diagnostics name the ways a constant can be bound —
+    /// the tail of "`n` must be a constant here (…)".
+    ///
+    /// Stated rather than derived, because the failure it prevents is a
+    /// message that tells the reader to reach for a directive their assembler
+    /// does not have. Two dialects share this condition parser and only one of
+    /// them has `DEFINE`.
+    fn constant_sources(&self) -> &'static str {
+        "a value defined with `equ` above"
+    }
+
     /// Whether `word` is this dialect's binary-inclusion directive
     /// (language-surface U3). Off by default; sjasmplus and pasmo override for
     /// `INCBIN`. Like an include, an incbin is walk-handled: a verbatim item
@@ -558,7 +569,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                 Some(RepeatKw::Close) => {
                     depth -= 1;
                     if depth == 0 {
-                        end = Some(k);
+                        end = Some((k, code.trim().to_string()));
                         break;
                     }
                 }
@@ -566,8 +577,12 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             }
             k += 1;
         }
-        let Some(end) = end else {
-            return Err(AsmError::new(line, "`DUP` has no matching `EDUP`"));
+        let Some((end, close)) = end else {
+            let (opener, _) = split_first_word(rest);
+            return Err(AsmError::new(
+                line,
+                format!("`{opener}` block is never closed"),
+            ));
         };
 
         let mut sub = KwCx {
@@ -614,6 +629,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             item: Some(crate::ast::Item::Repeat {
                 head: rest.to_string(),
                 body,
+                close: close.to_string(),
             }),
             source: rest.to_string(),
             span: Span::in_file(self.file, line as u32, 1),
@@ -699,7 +715,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                     RepeatKw::Close => {
                         return Err(AsmError::new(
                             line,
-                            format!("`{word}` without a matching `DUP`"),
+                            format!("`{word}` closes a repetition block that was never opened"),
                         ));
                     }
                 }
@@ -1450,6 +1466,7 @@ fn eval_condition_keyword<S: Z80Syntax>(
         pos: 0,
         line,
         consts,
+        sources: syntax.constant_sources(),
     }
     .or_expr()
 }
@@ -1461,6 +1478,9 @@ struct CondParser<'a> {
     pos: usize,
     line: usize,
     consts: &'a BTreeMap<String, i64>,
+    /// This dialect's phrasing for where a constant may come from
+    /// ([`Z80Syntax::constant_sources`]).
+    sources: &'static str,
 }
 
 impl CondParser<'_> {
@@ -1614,11 +1634,12 @@ impl CondParser<'_> {
         match tok {
             Tok::Num(n) => Ok(n),
             Tok::Sym(s) => self.consts.get(&s).copied().ok_or_else(|| {
+                let sources = self.sources;
                 AsmError::new(
                     self.line,
                     format!(
                         "`{s}` must be a constant here (a number, an expression of \
-                         constants, or a value defined with `equ` or `DEFINE` above)"
+                         constants, or {sources})"
                     ),
                 )
             }),
