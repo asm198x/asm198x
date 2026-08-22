@@ -167,6 +167,20 @@ impl Dialect for Sjasmplus {
 struct SjasmplusSyntax;
 
 impl Z80Syntax for SjasmplusSyntax {
+    /// sjasmplus is the dialect the shared keyword vocabulary was measured
+    /// against, so its adoption is the free functions unchanged.
+    fn cond_keyword(&self, word: &str) -> Option<z80::CondKw> {
+        z80::cond_keyword(word)
+    }
+
+    fn repeat_keyword(&self, word: &str) -> Option<z80::RepeatKw> {
+        z80::repeat_keyword(word)
+    }
+
+    fn is_define_word(&self, word: &str) -> bool {
+        z80::is_define_word(word)
+    }
+
     fn strip_comment<'a>(&self, line: &'a str) -> &'a str {
         // The earlier of `;` and `//` starts the comment.
         let semi = line.find(';');

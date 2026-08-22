@@ -36,18 +36,30 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     // Expander-handled: the macro scanner consumes this before `parse_op` sees
-    // a line. Declared because the surface describes the dialect — and the
-    // comparison with sjasmplus is the point, since that dialect has macros
-    // *and* a conditional framework pasmo deliberately does not.
+    // a line. Declared because the surface describes the dialect.
     //
     // `ENDM` is not declared: it is part of the block rather than vocabulary of
     // its own. It is also not accepted on its own here — the scanner looks for
-    // it only inside a body, so a stray one is an unknown mnemonic, where a
-    // stray `ENDIF` in sjasmplus says "without a matching IF". That asymmetry
-    // is a diagnostic gap rather than a vocabulary one.
+    // it only inside a body, so a stray one is an unknown mnemonic.
     Directive {
         id: "macro",
         pattern: Pattern::Exact(&["macro"]),
+        category: Category::Operation,
+    },
+    // Walk-handled: the structure parse reads these into `Item::Conditional`
+    // before `parse_op` sees a line.
+    //
+    // pasmo's whole conditional vocabulary is these three, and the omissions
+    // are the interesting half of the row: sjasmplus adds `ifdef`, `ifndef`,
+    // `elseif` and a dotted spelling of each, and pasmo has none of them. Both
+    // dialects now share one parser, so the surface is what keeps them apart —
+    // see `PasmoSyntax::cond_keyword`.
+    //
+    // `Exact` and not `Sigilled`: the dotted forms are sjasmplus's alone. The
+    // case-insensitivity is not expressible here and is pinned by test.
+    Directive {
+        id: "conditional",
+        pattern: Pattern::Exact(&["if", "else", "endif"]),
         category: Category::Operation,
     },
     // Declared, and declared **unsupported**. Real pasmo assembles `include`;
@@ -78,7 +90,7 @@ impl Dialect for Pasmo {
         self.z80n.then_some(&isa::z80::NEXT)
     }
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        z80::assemble(
+        z80::assemble_keyword(
             &PasmoSyntax,
             self.instruction_set(),
             self.extension_set(),
@@ -86,10 +98,11 @@ impl Dialect for Pasmo {
         )
     }
     fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
-        Ok(Some(z80::parse_program(
+        Ok(Some(z80::parse_program_keyword(
             &PasmoSyntax,
             self.instruction_set(),
             self.extension_set(),
+            crate::span::FileId(0),
             source,
             // The formatter must not expand: it lays source out, and would
             // otherwise write the expansions back in place of the macro.
@@ -105,13 +118,13 @@ impl Dialect for Pasmo {
         map: &mut SourceMap,
         loader: &dyn SourceLoader,
     ) -> Result<Vec<Statement>, AsmError> {
-        crate::ast::lower(z80::parse_program_multi(
+        z80::parse_program_multi_keyword(
             &PasmoSyntax,
             self.instruction_set(),
             self.extension_set(),
             map,
             loader,
-        )?)
+        )
     }
     /// pasmo silently truncates an over-range byte to its low 8 bits.
     fn oversized_byte_policy(&self) -> Oversize {
@@ -160,6 +173,34 @@ impl Z80Syntax for PasmoSyntax {
     /// expander agree on what opens, closes and invokes a definition.
     fn macro_line(&self, line: &str, known: &dyn Fn(&str) -> bool) -> macros::MacroLine {
         macros::macro_line(self, line, known)
+    }
+
+    /// `IF` / `ELSE` / `ENDIF`, case-insensitively, and **nothing else**.
+    ///
+    /// Measured against pasmo 0.5.5, not read from its manual. Every spelling
+    /// sjasmplus has and pasmo does not is a spelling we must refuse:
+    ///
+    /// | form | pasmo |
+    /// |---|---|
+    /// | `IF`, `ELSE`, `ENDIF` | yes, any case (`if`, `If`, `IF`) |
+    /// | `IFDEF`, `IFNDEF` | **no** — neither exists |
+    /// | `ELSEIF` | **no** — `Unexpected '0000' used as instruction` |
+    /// | `ENDC` | **no** — `ERROR detected after end of file` |
+    /// | the dotted `.IF` spellings | **no** |
+    ///
+    /// The case rule is the sharpest difference from sjasmplus, whose keywords
+    /// must be all-lower or all-upper so that `If` stays an ordinary
+    /// identifier. pasmo has no such rule.
+    fn cond_keyword(&self, word: &str) -> Option<z80::CondKw> {
+        Some(if word.eq_ignore_ascii_case("if") {
+            z80::CondKw::If
+        } else if word.eq_ignore_ascii_case("else") {
+            z80::CondKw::Else
+        } else if word.eq_ignore_ascii_case("endif") {
+            z80::CondKw::EndIf
+        } else {
+            return None;
+        })
     }
 
     /// pasmo numbers: `$hex`/`0xhex`, `%binary`, `'c'` char, decimal, and the
@@ -322,10 +363,11 @@ mod tests {
 
         let src = "; header\nstart:\n  ld a, 5   ; load five\n  ret\n";
         let d = Pasmo { z80n: false };
-        let prog = z80::parse_program(
+        let prog = z80::parse_program_keyword(
             &PasmoSyntax,
             d.instruction_set(),
             d.extension_set(),
+            crate::span::FileId(0),
             src,
             Expand::Yes,
         )
@@ -732,5 +774,148 @@ mod tests {
     fn runaway_recursion_is_caught() {
         let err = asm(" MACRO forever\n forever\n ENDM\n forever\n").expect_err("recursive");
         assert!(err.message.contains("forever"), "{err:?}");
+    }
+
+    // -----------------------------------------------------------------------
+    // Conditionals. pasmo is the third `CondEval` adopter
+    // (`decisions/conditional-assembly-framework.md`, 2026-08-22), and the
+    // point of adopting it is that its surface is the *narrowest* of the
+    // candidates: what it refuses matters as much as what it takes. Every
+    // expectation below was measured against pasmo 0.5.5.
+    // -----------------------------------------------------------------------
+
+    /// The taken branch assembles and the other one does not exist.
+    #[test]
+    fn a_conditional_picks_one_branch() {
+        assert_eq!(
+            asm(" org 0\n IF 1\n nop\n ELSE\n inc a\n ENDIF\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x00]
+        );
+        assert_eq!(
+            asm(" org 0\n IF 0\n nop\n ELSE\n inc a\n ENDIF\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x3C]
+        );
+    }
+
+    /// pasmo's keywords are **case-insensitive**, which is the sharpest
+    /// difference from sjasmplus — there `If` is an ordinary identifier,
+    /// because the reference accepts only the all-lower and all-upper
+    /// spellings. Both dialects share this parser, so a mixed-case keyword is
+    /// where a shared vocabulary would show.
+    #[test]
+    fn a_keyword_may_be_written_in_any_case() {
+        for src in [
+            " org 0\n IF 1\n nop\n ENDIF\n",
+            " org 0\n if 1\n nop\n endif\n",
+            " org 0\n If 1\n nop\n Endif\n",
+        ] {
+            assert_eq!(asm(src).expect(src).bytes, vec![0x00], "{src}");
+        }
+    }
+
+    /// An untaken branch may hold anything — pasmo never reads it, and neither
+    /// do we. `frobnicate` is not an instruction in any branch that assembles.
+    #[test]
+    fn an_untaken_branch_is_never_read() {
+        assert_eq!(
+            asm(" org 0\n IF 0\n frobnicate\n ENDIF\n ret\n")
+                .expect("assembles")
+                .bytes,
+            vec![0xC9]
+        );
+    }
+
+    /// The condition folds against the live environment, so an `equ` above it
+    /// counts — and a symbol defined *below* it does not, which is pasmo's
+    /// posture and not a limitation of the fold.
+    #[test]
+    fn a_condition_folds_against_the_constants_above_it() {
+        assert_eq!(
+            asm(" org 0\nn equ 3\n IF n > 2\n nop\n ENDIF\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x00]
+        );
+        asm(" org 0\n IF n\n nop\n ENDIF\nn equ 1\n").expect_err("pasmo: Symbol 'n' is undefined");
+    }
+
+    /// Nesting, tracked while skipping.
+    #[test]
+    fn conditionals_nest() {
+        assert_eq!(
+            asm(" org 0\n IF 1\n IF 1\n nop\n ENDIF\n inc a\n ENDIF\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x00, 0x3C]
+        );
+    }
+
+    /// **What pasmo does not have.** sjasmplus has all four of these and pasmo
+    /// has none, so sharing the keyword parser is exactly where they could
+    /// leak in. Each is refused because `PasmoSyntax::cond_keyword` never
+    /// names it — `IFDEF` stays an unknown instruction, and its `ENDIF` is
+    /// then a closer with nothing open.
+    #[test]
+    fn the_spellings_pasmo_lacks_are_refused() {
+        for (src, what) in [
+            (" org 0\nn equ 1\n IFDEF n\n nop\n ENDIF\n", "IFDEF"),
+            (" org 0\n IFNDEF n\n nop\n ENDIF\n", "IFNDEF"),
+            (" org 0\n IF 1\n nop\n ELSEIF 0\n inc a\n ENDIF\n", "ELSEIF"),
+            (" org 0\n IF 1\n nop\n ENDC\n", "ENDC"),
+            (" org 0\n .IF 1\n nop\n .ENDIF\n", "the dotted spellings"),
+        ] {
+            asm(src).expect_err(what);
+        }
+    }
+
+    /// An unbalanced block is refused at both ends, as pasmo refuses it
+    /// (`IF without ENDIF` / `ENDIF without IF`).
+    #[test]
+    fn an_unbalanced_block_is_refused() {
+        let open = asm(" org 0\n IF 1\n nop\n").expect_err("no ENDIF");
+        assert!(open.message.contains("ENDIF"), "{open:?}");
+        let stray = asm(" org 0\n nop\n ENDIF\n").expect_err("no IF");
+        assert!(stray.message.contains("IF"), "{stray:?}");
+    }
+
+    /// Macros survive the move onto the keyword pipeline. They are copied
+    /// through the walk that now parses conditionals, and a definition inside
+    /// a conditional is still a definition.
+    #[test]
+    fn macros_still_work_on_the_keyword_pipeline() {
+        assert_eq!(
+            asm(" org 0\nsetv MACRO v\n ld a,v\n ENDM\n setv 9\n ret\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x3E, 0x09, 0xC9]
+        );
+        assert_eq!(
+            asm(" org 0\nsetv MACRO v\n ld a,v\n ENDM\n IF 1\n setv 9\n ENDIF\n ret\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x3E, 0x09, 0xC9]
+        );
+    }
+
+    /// Formatting a conditional changes the layout and not the program.
+    #[test]
+    fn a_formatted_conditional_assembles_to_the_same_bytes() {
+        let src = " org 0\nn equ 1\n IF n\n ld a,5\n ELSE\n inc a\n ENDIF\n ret\n";
+        let before = asm(src).expect("assembles").bytes;
+        let formatted = crate::format_pasmo(src).expect("formats");
+        let after = asm(&formatted)
+            .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+            .bytes;
+        assert_eq!(
+            before, after,
+            "formatting changed the program:\n{formatted}"
+        );
+
+        let again = crate::format_pasmo(&formatted).expect("formats");
+        assert_eq!(formatted, again, "{formatted}");
     }
 }
