@@ -213,6 +213,26 @@ pub fn assemble_probe(dialect: &str, body: &str) -> Option<Result<Vec<u8>, Strin
     Some(ours(result))
 }
 
+/// Format a probe body, with the **same framing** `assemble_probe` gives it.
+///
+/// The framing has to match or the invariant that uses this compares two
+/// different sources: acme's probes are assembled with a `* = $0000` prepended,
+/// and a formatter handed the bare body would fail for want of an origin rather
+/// than for the reason under test.
+pub fn format_probe(dialect: &str, body: &str) -> Option<Result<String, String>> {
+    let result = match dialect {
+        "acme" => asm198x::format_acme(&format!("* = $0000\n{body}")),
+        "pasmo" => asm198x::format_pasmo(body),
+        "sjasmplus" => asm198x::format_sjasmplus(body),
+        "z80n" => asm198x::format_sjasmplus_next(body),
+        "lwasm" => asm198x::format_lwasm(body),
+        "vasm" => asm198x::format_vasm(body),
+        "ca65-816" => asm198x::format_ca65_816(body),
+        _ => return None,
+    };
+    Some(result.map_err(|e| e.to_string()))
+}
+
 /// Shared tail: bytes, or why we would not produce any.
 fn ours(result: Result<asm198x::AssemblyResult, asm198x::AsmError>) -> Result<Vec<u8>, String> {
     result
