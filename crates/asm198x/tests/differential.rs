@@ -1685,7 +1685,5 @@ fn the_formatter_reads_what_the_assembler_reads() {
 /// the test above fails if a row outlives the problem.
 const FORMATTER_GAPS: &[(&str, &str)] = &[
     ("pasmo", "unknown instruction `MACRO`"),
-    ("lwasm", "unknown instruction `macro`"),
     ("acme", "unbalanced `}` in conditional block"),
-    ("vasm", "`macro` is declared but not dispatched"),
 ];

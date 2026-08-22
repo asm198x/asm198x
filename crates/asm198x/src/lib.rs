@@ -1694,12 +1694,44 @@ mod tests {
     }
 
     /// The formatter lays source out; it does not rewrite programs.
+    ///
+    /// This used to assert the walk **refused** a macro. That was true and
+    /// pinned a limitation rather than a property. The definition is copied
+    /// through verbatim now, and what is worth pinning is that the copy is
+    /// faithful — including the column, which vasm's `name macro` spelling
+    /// depends on.
     #[test]
     fn vasm_formatting_does_not_expand() {
+        let src = "ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5\n";
+        let out = format_vasm(src).expect("the walk copies a definition");
+
+        // The macro survives as a macro rather than as its expansion.
+        assert!(out.contains("macro"), "{out}");
+        assert!(out.contains("endm"), "{out}");
+        assert!(out.contains("ldav 5"), "{out}");
+        assert!(!out.contains("#5"), "expanded into the output:\n{out}");
+
+        // And the name stays in column 0. Indented, real vasm answers
+        // `unknown mnemonic <ldav>` — the whole reason this line is copied
+        // verbatim rather than laid out.
         assert!(
-            format_vasm("ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5\n").is_err(),
-            "the walk does not know macro, and must not expand it either"
+            out.lines().any(|l| l.starts_with("ldav")),
+            "the macro name left column 0:\n{out}"
         );
+    }
+
+    /// Formatting a vasm macro changes the layout and not the program.
+    #[test]
+    fn vasm_formatted_macro_assembles_to_the_same_bytes() {
+        let src = "ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5\n";
+        let before = assemble_vasm(src).expect("assembles").bytes;
+        let formatted = format_vasm(src).expect("formats");
+        let after = assemble_vasm(&formatted).expect("the formatted source assembles");
+        assert_eq!(
+            before, after.bytes,
+            "formatting changed the program:\n{formatted}"
+        );
+        assert_eq!(formatted, format_vasm(&formatted).expect("formats"));
     }
 
     #[test]

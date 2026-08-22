@@ -16,7 +16,7 @@
 //! addressing (the postbyte) and the register-list ops (`tfr`/`exg`/`pshs`/
 //! `puls`) are the next increment.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use isa::mos6809::{self, Kind};
 
@@ -190,6 +190,11 @@ struct Walker {
     /// to the next one. Comments never reach the encoder, so bytes are
     /// unchanged.
     pending_leading: Vec<Comment>,
+    /// Whether the walk is inside a macro definition it is copying rather than
+    /// reading. Only the formatter's parse ever sets it.
+    in_macro: bool,
+    /// The macros defined so far, so an invocation is recognised too.
+    macro_names: BTreeSet<String>,
     nodes: Vec<Node>,
 }
 
@@ -198,6 +203,8 @@ impl Walker {
         Self {
             env: BTreeMap::new(),
             pending_leading: Vec::new(),
+            in_macro: false,
+            macro_names: BTreeSet::new(),
             nodes: Vec::new(),
         }
     }
@@ -342,6 +349,40 @@ impl FlatWalk for Walker {
             text: text.to_string(),
             span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
         });
+
+        // A macro definition is copied verbatim, column included: lwasm spells
+        // one `name macro` and *only* that way — its own header parser refuses
+        // an indented `macro`, which is the same rule real lwasm applies. See
+        // `Item::Verbatim`.
+        //
+        // A body is a template rather than code (`\1` is not an expression), so
+        // nothing between the header and the close is parsed.
+        {
+            use crate::dialects::macros::MacroSyntax as _;
+            let text = code.trim();
+            let opened = LwasmMacros.header(code);
+            let invoked = text.split_whitespace().next().unwrap_or("");
+            if self.in_macro || opened.is_some() || self.macro_names.contains(invoked) {
+                if let Some((name, _)) = opened {
+                    self.macro_names.insert(name);
+                    self.in_macro = true;
+                } else if LwasmMacros.is_end(text) {
+                    self.in_macro = false;
+                }
+                self.nodes.push(Node {
+                    operand_span: None,
+                    label: None,
+                    item: Some(crate::ast::Item::Verbatim),
+                    source: code.trim_end().to_string(),
+                    span: Span::in_file(file, line as u32, 1),
+                    trivia: Trivia {
+                        leading: std::mem::take(&mut self.pending_leading),
+                        trailing,
+                    },
+                });
+                return Ok(None);
+            }
+        }
 
         let (label, rest) = split_label(code);
         // `include`/`use`/`includebin` are walk-handled, not directives: the
@@ -1468,13 +1509,40 @@ mod tests {
             .expect_err("spin? is local to the expansion");
     }
 
-    /// The formatter lays source out; it does not rewrite programs. lwasm's
-    /// walk cannot yet *format* a file with macros — it reads `macro` as an
-    /// instruction, exactly as before — but it must never expand one.
+    /// The formatter lays source out; it does not rewrite programs.
+    ///
+    /// This used to assert the walk **refused** a macro, which pinned a
+    /// limitation rather than a property. The definition is copied verbatim
+    /// now — column included, because lwasm names its macro in label position
+    /// and *only* there.
     #[test]
     fn formatting_does_not_expand() {
-        let err = crate::format_lwasm("ldav\tmacro\n lda #\\1\n endm\n ldav 5\n")
-            .expect_err("the walk does not know macro");
-        assert!(err.message.contains("macro"), "{err:?}");
+        let src = "ldav\tmacro\n lda #\\1\n endm\n ldav 5\n";
+        let out = crate::format_lwasm(src).expect("the walk copies a definition");
+
+        assert!(out.contains("macro"), "{out}");
+        assert!(out.contains("endm"), "{out}");
+        assert!(out.contains("ldav 5"), "{out}");
+        assert!(!out.contains("lda #5"), "expanded into the output:\n{out}");
+        assert!(
+            out.lines().any(|l| l.starts_with("ldav")),
+            "the macro name left column 0:\n{out}"
+        );
+    }
+
+    /// Formatting a macro changes the layout and not the program.
+    #[test]
+    fn a_formatted_macro_assembles_to_the_same_bytes() {
+        let src = "ldav\tmacro\n lda #\\1\n endm\n ldav 5\n";
+        let before = asm(src).expect("assembles").bytes;
+        let formatted = crate::format_lwasm(src).expect("formats");
+        let after = asm(&formatted)
+            .expect("the formatted source assembles")
+            .bytes;
+        assert_eq!(
+            before, after,
+            "formatting changed the program:\n{formatted}"
+        );
+        assert_eq!(formatted, crate::format_lwasm(&formatted).expect("formats"));
     }
 }
