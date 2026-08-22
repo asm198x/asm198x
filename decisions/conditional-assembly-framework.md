@@ -168,4 +168,12 @@ See [`asm198x-and-shared-isa-spec.md`](../../../decisions/asm198x-and-shared-isa
 (the AST layer) and the plan `docs/plans/2026-07-04-005-feat-ir-ast-layer-plan.md`
 (U6 / idea 4).
 
+## See also
+
+- [`conditionals-in-multipass-dialects.md`](conditionals-in-multipass-dialects.md)
+  — how ca65 and vasm evaluate a conditional, where step 3 of the recipe above
+  has nothing to route. Measured 2026-08-22: neither reference permits a
+  forward reference in a condition, so it is a sequential fold and not a
+  multi-pass problem.
+
 [#93]: https://github.com/asm198x/asm198x/issues/93
