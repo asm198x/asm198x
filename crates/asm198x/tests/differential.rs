@@ -1688,5 +1688,4 @@ const FORMATTER_GAPS: &[(&str, &str)] = &[
     ("lwasm", "unknown instruction `macro`"),
     ("acme", "unbalanced `}` in conditional block"),
     ("vasm", "`macro` is declared but not dispatched"),
-    ("ca65-816", "is declared (`macro`) but not dispatched here"),
 ];
