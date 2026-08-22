@@ -19,7 +19,7 @@ verdict-corpus = { path = "../crates/verdict-corpus", version = "0.0.23" }
 serde_json = { workspace = true }
 # Hashes the corpus so a ledger names exactly which corpus it describes.
 # xtask is never shipped, so this stays clear of the assembler's tree.
-sha2 = "0.10"
+sha2 = "0.11"
 
 [lints]
 workspace = true
