@@ -10,7 +10,7 @@
 //! the surface is another crate, so a seam that works only from inside this one
 //! is not the seam it needs.
 
-use asm198x::directives::{Category, DialectSurface};
+use asm198x::directives::Category;
 use asm198x::{AsmError, AssemblyResult, dialect_table, directives};
 
 type Assemble = fn(&str) -> Result<AssemblyResult, AsmError>;
@@ -92,22 +92,27 @@ fn every_declared_spelling_is_recognised() {
     }
 }
 
-/// A word no dialect declares assembles nowhere.
+/// A word no dialect declares is refused as an unknown instruction, everywhere.
 ///
 /// This is the other half of R3: the declaration is the only route in, so
 /// something outside it falls through to instruction resolution and is turned
 /// away. `include` would be the obvious probe and is the wrong one — most of
 /// these dialects implement it.
 ///
-/// The assertion is that it fails, not how, because the failure is worded
-/// three ways and one of them names nothing at all: `unknown instruction
-/// `frobnicate``, ``frobnicate` has no form for operands `1``, and the ca65
-/// family's `no suitable addressing mode for this operand`. A reader given the
-/// third has to guess whether they mistyped the mnemonic or the operand. That
-/// is a diagnostic gap rather than a dispatch one, so it is recorded here and
-/// not fixed here.
+/// The assertion used to be that it fails, not how, because the refusal was
+/// worded three ways and one of them named nothing: `` `x` has no form for
+/// operands `1` `` implied the word existed, and the ca65 family's `no suitable
+/// addressing mode for this operand` pointed at an operand that was never the
+/// problem. Five dialects check the mnemonic before touching operands now, so
+/// the wording is one thing and this asserts it.
+///
+/// **acme names the operand rather than the probe, and that is correct.** An
+/// indented bare word is a *label* in acme, so `frobnicate 1` reads as a label
+/// and a mnemonic `1` — which is what real acme does too (it accepts it with
+/// "Label name not in leftmost column", probed 2026-08-22). The unknown
+/// instruction genuinely is `1`.
 #[test]
-fn an_undeclared_spelling_assembles_nowhere() {
+fn an_undeclared_spelling_is_refused_as_an_unknown_instruction() {
     for surface in directives::surfaces() {
         let assemble = assembler(surface.dialect);
         assert!(
@@ -115,9 +120,10 @@ fn an_undeclared_spelling_assembles_nowhere() {
             "{}: the probe must not be a declared spelling",
             surface.dialect
         );
+        let err = assemble(" frobnicate 1\n").expect_err("not a word anywhere");
         assert!(
-            assemble(" frobnicate 1\n").is_err(),
-            "{}: `frobnicate` is not a directive and not an instruction",
+            err.to_string().contains("unknown instruction"),
+            "{}: refused, but not as an unknown instruction: {err}",
             surface.dialect
         );
     }
@@ -173,21 +179,46 @@ fn every_selectable_dialect_is_accounted_for() {
     }
 }
 
-/// Nothing is declared `KnownUnsupported` yet, stated rather than left unsaid.
+/// Every `KnownUnsupported` spelling is refused as one, and says so.
 ///
-/// The category exists for pasmo's include and asl's semantic pseudo-ops
-/// (#87). When either lands, this count changes and someone reads the row.
+/// The category spent two plans with no members and a test asserting the count
+/// was zero. It has one now — pasmo's `include` — and the useful invariant is
+/// not how many there are but that each one draws a diagnostic saying the
+/// directive is real and unimplemented, rather than the unknown-mnemonic
+/// refusal that sends a reader to check their own source.
 #[test]
-fn the_known_unsupported_count_is_zero() {
-    let unsupported: Vec<String> = directives::surfaces()
-        .iter()
-        .flat_map(|s: &DialectSurface| {
-            s.directives
-                .iter()
-                .filter(|d| d.category == Category::KnownUnsupported)
-                .map(|d| format!("{}: {}", s.dialect, d.id))
-                .collect::<Vec<_>>()
-        })
-        .collect();
-    assert!(unsupported.is_empty(), "{unsupported:?}");
+fn a_known_unsupported_spelling_says_which_it_is() {
+    let mut checked = 0;
+    for surface in directives::surfaces() {
+        let assemble = assembler(surface.dialect);
+        for directive in &surface.directives {
+            if directive.category != Category::KnownUnsupported {
+                continue;
+            }
+            for spelling in &directive.spellings() {
+                let source = format!(" {spelling} \"x\"\n");
+                let err = assemble(&source).expect_err("declared unimplemented");
+                let message = err.to_string();
+                assert!(
+                    message.contains("does not implement"),
+                    "{}: `{spelling}` is declared unsupported and refuses as \
+                     something else: {message}",
+                    surface.dialect
+                );
+                assert!(
+                    !refused_by_name(&err, spelling),
+                    "{}: `{spelling}` still reads as an unknown word: {message}",
+                    surface.dialect
+                );
+                checked += 1;
+            }
+        }
+    }
+    // A category nothing declares is a category nothing checks. It was empty
+    // for two plans; this is what notices if it empties again.
+    assert!(
+        checked > 0,
+        "no dialect declares a `KnownUnsupported` spelling — pasmo's `include` \
+         should be one"
+    );
 }

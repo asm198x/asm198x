@@ -205,6 +205,10 @@ impl Z80Syntax for SjasmplusSyntax {
         word.eq_ignore_ascii_case("incbin")
     }
 
+    fn own_directives(&self) -> &'static [crate::directives::Directive] {
+        DIRECTIVES
+    }
+
     /// sjasmplus's `INCBIN "file"[,offset[,length]]` takes the full tail,
     /// including the probe-pinned negative from-the-end forms.
     fn incbin_offset_length(&self) -> bool {

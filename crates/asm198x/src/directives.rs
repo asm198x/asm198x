@@ -322,7 +322,7 @@ pub fn surfaces() -> Vec<DialectSurface> {
 mod surface_invariants {
     //! Holds across every converted dialect, so a new one cannot land broken.
 
-    use super::surfaces;
+    use super::{Category, surfaces};
 
     #[test]
     fn ids_are_unique_within_a_dialect() {
@@ -388,13 +388,16 @@ mod surface_invariants {
 
     /// The difference this whole surface exists to make visible.
     ///
-    /// sjasmplus takes `include`; pasmo does not, because pasmo's include is
-    /// unimplemented and a multi-file pasmo project therefore does not
-    /// assemble. Before the declaration that could only be found by assembling
-    /// one and reading `unknown instruction INCLUDE`. Now it is a row that is
-    /// present in one surface and absent from the other, and this asserts it —
-    /// so implementing pasmo's include will fail here and make someone update
-    /// the declaration, rather than leaving the matrix quietly wrong.
+    /// sjasmplus takes `include`. pasmo has one and asm198x does not implement
+    /// it, so a multi-file pasmo project does not assemble — and the two facts
+    /// are now told apart by **category** rather than by one dialect having a
+    /// row and the other having nothing.
+    ///
+    /// That distinction is the point. An absent row says "this dialect has no
+    /// such directive"; a `KnownUnsupported` row says "it has one and we do not
+    /// implement it", which is what is true here and what a reader can act on.
+    /// Implementing it means changing this category, and this test is what
+    /// makes someone do that.
     #[test]
     fn the_two_z80_dialects_differ_where_they_actually_differ() {
         let of = |name: &str| {
@@ -406,21 +409,25 @@ mod surface_invariants {
         let pasmo = of("pasmo");
         let sjasmplus = of("sjasmplus");
 
-        assert!(
-            super::lookup(&sjasmplus.directives, "include").is_some(),
-            "sjasmplus takes `include`"
+        assert_eq!(
+            super::lookup(&sjasmplus.directives, "include").map(|d| d.category),
+            Some(Category::Operation),
+            "sjasmplus implements `include`"
         );
-        assert!(
-            super::lookup(&pasmo.directives, "include").is_none(),
-            "pasmo has no include — if this now fails, the declaration needs the row"
+        assert_eq!(
+            super::lookup(&pasmo.directives, "include").map(|d| d.category),
+            Some(Category::KnownUnsupported),
+            "pasmo has `include` and we do not implement it — if this now says \
+             Operation, the row and the code have parted company"
         );
 
-        // Both take incbin, so the difference is include and not file
-        // inclusion in general.
+        // Both take incbin, and both implement it, so the difference is the
+        // include and not file inclusion in general.
         for surface in [&pasmo, &sjasmplus] {
-            assert!(
-                super::lookup(&surface.directives, "incbin").is_some(),
-                "{} takes `incbin`",
+            assert_eq!(
+                super::lookup(&surface.directives, "incbin").map(|d| d.category),
+                Some(Category::Operation),
+                "{} implements `incbin`",
                 surface.dialect
             );
         }

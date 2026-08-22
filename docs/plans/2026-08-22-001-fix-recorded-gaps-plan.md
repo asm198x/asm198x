@@ -65,6 +65,12 @@ mnemonic or the operand.
 dialect, two standards for the same shape of mistake, because the conditional
 walk recognises its closer outside a block and the macro scanner does not.
 
+**G6. acme does not warn on an indented label.** Found while probing G2. Real
+acme accepts `        frobnicate` as a label and warns "Label name not in
+leftmost column"; we accept it silently. The bytes agree — this is a missing
+non-fatal warning, not a divergence in what assembles — so it is recorded and
+not scheduled.
+
 **G4. Five of six formatters refuse a file containing macros** ([#130]). U7
 touched the edge of this: `.macro` on the ca65 formatter path now reports
 "declared but not dispatched here" instead of "unsupported directive", which is
@@ -146,6 +152,27 @@ unknown-word message; the tests pinning both.
 
 ### U1. Declare pasmo's include as `KnownUnsupported`
 
+- **Landed 2026-08-22.** The category has a member after two plans, and pasmo's
+  page carries a row saying "Recognised, and not implemented" where it carried
+  nothing.
+- **Derived, not restated.** `Z80Syntax::own_directives()` hands dispatch the
+  dialect's own declaration, and `parse_op` refuses a `KnownUnsupported` entry
+  from that — so the diagnostic follows the category rather than a second list
+  of words to refuse specially, which is the drift the surface exists to remove.
+- **It broke the migration table, which is the useful part.** The generated
+  include table renders a spelling per dialect, so declaring pasmo's `include`
+  made that page claim pasmo supports it. Fixed by rendering the category:
+  a `KnownUnsupported` entry shows the spelling **and** "not implemented",
+  because "pasmo spells it `include` and we do not read it" is a different fact
+  from "pasmo has no include", and a dash for both would lose exactly the
+  distinction this unit adds.
+- **The invariant changed shape.** `nothing_is_declared_unsupported_yet` asserted
+  a count of zero; what matters is not how many there are but that each draws a
+  diagnostic naming it unimplemented, so that is what is asserted now — plus a
+  guard that the category has not emptied again.
+- **R4 verified:** differential, corpus replay and the curriculum comparisons
+  byte-identical, zero new verdicts.
+- **The asl half is still #87's**, and is not part of this.
 - **Goal:** The one case that needs no other decision first.
 - **Requirements:** R1, R2, R4 (pasmo half).
 - **Files:** `dialects/pasmo.rs`, `dialects/z80.rs`, `directives.rs`.
@@ -160,6 +187,32 @@ unknown-word message; the tests pinning both.
 
 ### U2. One wording for an unknown word
 
+- **Landed 2026-08-22**, and the probe found a different set of dialects than
+  G2 recorded.
+- **G2 was wrong about who.** It named "the Z80 family and rgbasm". The Z80
+  family is fine — `parse_op` checks `has_mnemonic` before resolving operands.
+  The five that were not: **rgbasm** and **8080** ("has no form for operands",
+  implying the word exists), **65816** ("no suitable addressing mode", naming
+  nothing), **huc6280** ("requires an operand"), and **tms7000** ("expected two
+  operands"). Two of those five were not in the note at all.
+- **The fix is the same in each:** check the mnemonic exists before touching
+  operands. An unknown word reaching mode resolution is what produces a message
+  about the operand.
+- **Order matters where a mnemonic is computed rather than held in the spec.**
+  tms7000's guard sits *after* the `TRAP n` arm — `TRAP` is encoded as
+  `0xFF - n` in the dialect and the spec carries no such mnemonic, so a guard
+  above it refuses a real instruction. Its unit test caught that immediately.
+  The condition-code aliases are remapped first for the same reason.
+- **acme names the operand, and that is correct.** An indented bare word is a
+  *label* there, so `frobnicate 1` reads as a label plus a mnemonic `1` — which
+  is what real acme does (probed 2026-08-22: it assembles with the warning
+  "Label name not in leftmost column"). The unknown instruction genuinely is
+  `1`.
+- **The R3 test tightened** from "an undeclared spelling fails" to "an
+  undeclared spelling is refused as an unknown instruction", which is only
+  assertable now that the wording is one thing.
+- **R4 verified:** differential, conformance, corpus replay and the curriculum
+  comparisons byte-identical, zero new verdicts.
 - **Goal:** The same refusal, naming the word, in every dialect.
 - **Requirements:** R3, R4.
 - **Dependencies:** U1, for a concrete contrast — an unknown word and a known

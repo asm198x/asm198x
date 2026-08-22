@@ -431,6 +431,20 @@ fn resolve(
         return Ok(Operation::Encoded(vec![Piece::Lit(0xFF - n as u8)]));
     }
 
+    // A word this instruction set does not have is refused as one, before any
+    // operand handling. Reaching the operand split first reported "expected two
+    // operands", which names nothing and points at operands that were never the
+    // problem.
+    //
+    // It sits **after** `TRAP`, not before: `TRAP n` is computed here rather
+    // than held in the spec (opcode `0xFF - n`), so the spec does not carry the
+    // mnemonic and a guard above this arm refuses a real instruction. The
+    // condition-code aliases above are remapped first for the same reason —
+    // `JLT` has to become `JN` before it is judged.
+    if set.instruction(mn).is_none() {
+        return Err(AsmError::new(line, format!("unknown instruction `{mn}`")));
+    }
+
     let ops: Vec<&str> = if args.trim().is_empty() {
         Vec::new()
     } else {

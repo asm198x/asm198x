@@ -50,7 +50,7 @@ it:
 | `vasm` | `include` | `incbin` |
 | `lwasm` | `include`, `use` | `includebin` |
 | `rgbasm` | `include` | `incbin` |
-| `pasmo` | — | `incbin` |
+| `pasmo` | `include` — **not implemented** | `incbin` |
 | `sjasmplus` | `include` | `incbin` |
 | `8080` | `include` | `binclude` |
 | `6800` | `include` | `binclude` |
@@ -66,10 +66,11 @@ it:
 | `z8000` | `include` | `binclude` |
 <!-- /generated -->
 
-A dash means we do not read that directive yet, not that the dialect has no
-such thing — every reference tool here has both. Today there is one: a
+**Not implemented** means the dialect has the directive and asm198x does not
+read it — your source is valid and the gap is here. Today there is one: a
 multi-file **pasmo** project will not assemble, and it is the thing to check
-first if that is your project.
+first if that is your project. A dash would mean the dialect has no such
+directive at all, and nothing here does.
 
 ## The output your build already expects
 
