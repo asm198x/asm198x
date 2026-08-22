@@ -45,6 +45,49 @@ and we have not built it.
 The tenth cell — lwasm repetition — is an *extension*, gated separately and out
 of scope here.
 
+### The mechanism: one shared cursor, seven dialects
+
+**Found 2026-08-22, after the units below were written, and it re-sizes them.**
+
+Every flat-walk dialect is driven by one generic function —
+`ca65_flat::walk_file<W: FlatWalk>` — and **seven dialects use it**: asl, ca65,
+ca65-816, huc6280, lwasm, rgbasm, vasm. It is a per-line loop that already
+brackets each line's output:
+
+```rust
+for (i, raw) in text.lines().enumerate() {
+    let start = w.nodes_mut().len();   // <- the bracket a block cursor needs
+    let walked = w.walk_line(raw, line, file);
+    ...
+}
+```
+
+A block cursor belongs **there**, not in each dialect. Give `FlatWalk` a
+defaulted classifier — the shape `Z80Syntax::cond_keyword` already uses,
+defaulting to "this dialect has no blocks" — and the loop becomes a recursive
+cursor grouping a head, its body and its closer into `Item::Conditional` or
+`Item::Repeat`. Each dialect then supplies its own spellings and its own
+evaluator, and nothing else moves.
+
+That collapses the per-dialect cost from "restructure a 1,500-line parse" to
+"declare your keywords and fold them".
+
+**It lands with its first consumer, not before.**
+[`roadmap-sequencing.md`](../../decisions/roadmap-sequencing.md) forbids a
+keyword parser built "for later", and the classifier's shape is only knowable
+against a real dialect. ca65 is that consumer: its design is settled
+([`conditionals-in-multipass-dialects.md`](../../decisions/conditionals-in-multipass-dialects.md)),
+its surface is measured, and 32 NES curriculum units are arbitrated
+byte-for-byte — the strongest regression net in the repository for a change to
+a walk seven dialects share.
+
+**What the cursor does not solve.** ca65, lwasm and rgbasm all fold `=`
+constants at *walk* time and consult them in `parse_op`, so a constant defined
+inside an untaken branch still binds. Whether that reaches the emitted bytes
+depends on whether the walk's result survives the layout pass, and it is the
+first thing each dialect's unit must measure — with the untaken-branch probe
+ca65 was already measured to enforce.
+
 ### The thing that makes this eight units and not one
 
 **The dialects are on three different pipelines, and only one of them takes the
@@ -219,7 +262,21 @@ a macro and a repetition.
 
 Reuses whatever U2 establishes for the parse/lower split.
 
-### U4. ca65 conditionals and repetition — **unblocked**
+### U4. ca65 conditionals and repetition — **unblocked; carries the shared cursor**
+
+The block cursor in `ca65_flat::walk_file` lands here, with ca65 as its first
+consumer, defaulted off so the other six dialects are unchanged until each
+declares its own keywords.
+
+ca65's measured surface: `.if` / `.else` / `.elseif` / `.endif`, `.ifdef`,
+`.ifndef`, and `.repeat n[, var]` / `.endrepeat`, all case-insensitive. Its loop
+variable is **0-based and scoped to the loop** — `lda #i` after `.endrepeat` is
+`Symbol 'i' is undefined`, where acme's `!for` variable survives its block. Two
+dialects, two rules, which is what `Iteration::Over` gets tested against. A
+negative `.repeat` count is a `Range error`; zero is simply no iterations.
+
+`.ifblank`, `.ifconst`, `.ifp02`, `.ifref` and kin stay unadopted — fringe
+spellings, demand-gated.
 
 `parsed_from_program` folds each `Item::Conditional` / `Item::Repeat` head
 against the `=` constants gathered so far, in source order, and projects only
