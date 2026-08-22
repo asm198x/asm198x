@@ -6,7 +6,7 @@ type: feat
 date: 2026-08-22
 topic: repetition
 artifact_contract: ce-unified-plan/v1
-artifact_readiness: blocked-on-decision
+artifact_readiness: in-progress
 product_contract_source: probe-survey
 execution: code
 ---
@@ -18,11 +18,11 @@ execution: code
 - **Objective:** Repetition blocks in every dialect whose reference has them.
   One dialect has it today; five references have it and we refuse all five.
 - **Product authority:** Steve Hill.
-- **Open blockers:** **All units.** Repetition is not an isolated feature —
-  four of the five dialects have no block-structured pipeline at all, and
-  putting one under them is the adopt-on-demand recipe that
-  `conditional-assembly-framework.md` gates. See *The blocker* below. Nothing
-  here should start until that gate is answered.
+- **Open blockers:** U2 and U3. **Answered 2026-08-22:** the gate opens for
+  **pasmo only**, recorded in `conditional-assembly-framework.md`'s dated note;
+  ca65, rgbasm and vasm stay gated individually. The loop variable takes shape
+  1 — one hook describing the iteration. See *The blocker* below for what the
+  question was.
 
 ---
 
@@ -199,8 +199,12 @@ declarations and the tests.
   adoption unit per dialect and the scope roughly doubles — but it delivers
   conditionals as well as repetition, since they are one pipeline. If no, the
   only dialect that can gain repetition is acme, whose `!for` is U3.
-- **How should a loop variable reach the body?** Two shapes, and the choice is
-  the user's because it changes an interface every dialect implements:
+- ~~**How should a loop variable reach the body?**~~ **Answered: shape 1.** One
+  hook returns the values to run over plus the name to bind, with today's
+  count-only case as the no-variable form. Not built yet — pasmo has no loop
+  variable, so building it now would be the speculative generality
+  `roadmap-sequencing.md` warns against. It lands with its first consumer,
+  which is acme's `!for`. The two shapes considered were:
   1. **Widen `count`** to return a description of the iteration — the values
      to run over and the name to bind, with today's count-only case as the
      no-variable form. One hook, and every dialect's answer stays declarative.
@@ -215,26 +219,36 @@ declarations and the tests.
 
 ## Implementation Units
 
-### U1. Repetition for pasmo and vasm — *blocked on the gate*
+### U1. Repetition for pasmo — **landed 2026-08-22**
 
-The two plainest cases **once each dialect is on the evaluate pipeline**. Both
-fold a count and have no loop variable; neither has anywhere to put an
-`Item::Repeat` today. Each needs the four-step adoption first, which is the
-larger half of the unit and is not costed here because the gate may not open.
+vasm was dropped from this unit: its gate did not open.
 
-pasmo's walk recognises `REPT` case-insensitively and closes on `ENDM`,
-building an `Item::Repeat`; `count` folds the head's expression through the
-existing environment. vasm's does the same for `rept`/`endr`.
+The adoption was the larger half, as expected, and it had one consequence the
+plan did not: pasmo was the *only* user of the eager `Walker` pipeline, so
+moving it left that parse with no consumer. 473 lines deleted, and the Z80
+family now has one parse instead of two.
 
-Declared on each dialect's directive surface, so the spelling appears on its
-generated page.
+`Z80Syntax` gained four defaulted hooks — `cond_keyword`, `repeat_keyword`,
+`is_define_word`, `constant_sources` — each defaulting to "this dialect has
+none of that". The default is what stops a shared pipeline handing a dialect
+sjasmplus's surface, and it was load-bearing in both directions: pasmo would
+otherwise have started accepting `IFDEF`, `IFNDEF`, `ELSEIF`, `ENDC`, the
+dotted spellings and `DEFINE`, and sjasmplus's strict all-lower-or-all-upper
+case rule would have been flattened onto pasmo, which is case-insensitive.
 
-**Verified by:** byte-identical output against real `pasmo` and real
-`vasmm68k_mot` for a nested block, a count naming a constant, and a count of
-zero; a forward-referenced count refused in pasmo as pasmo refuses it; the
-formatter round trip.
+**A shipped bug fell out of it.** `emit` had no arm for `Item::Repeat`, so
+`fmt` rendered a block's head and dropped its body and closer — silently,
+exit 0, on sjasmplus source, today. Fixed, and the test that should have caught
+it was strengthened: it asked only whether the formatter *refused*, and a
+formatter that deletes a line refuses nothing. It now assembles the formatted
+text and compares bytes, which promptly found a second defect in ca65 ([#186],
+ledgered).
 
-### U2. Repetition for rgbasm's `REPT` — *blocked on the gate*
+**Verified:** twenty-seven probes arbitrated against pasmo 0.5.5 across
+conditionals and repetition, byte-identical where it assembles and refused
+where it refuses; formatter round trip and idempotence for both constructs.
+
+### U2. Repetition for rgbasm's `REPT` — *blocked: rgbasm's gate is not open*
 
 `REPT n` … `ENDR`, no loop variable, closed by `ENDR` only — `ENDM` is
 `Unterminated loop`. Same shape as U1; separate because rgbasm is a separate
@@ -277,3 +291,5 @@ parsed, not copied.
 
 [#93]: https://github.com/asm198x/asm198x/issues/93
 [#130]: https://github.com/asm198x/asm198x/issues/130
+
+[#186]: https://github.com/asm198x/asm198x/issues/186
