@@ -1625,6 +1625,13 @@ struct Walker {
     /// to the next one. Comments never reach the encoder, so bytes are
     /// unchanged.
     pending_leading: Vec<crate::ast::Comment>,
+    /// Whether the walk is inside a macro definition it is copying rather than
+    /// reading. Only the formatter's parse ever sets it: the assembling path
+    /// expands definitions away before the walk sees a line.
+    in_macro: bool,
+    /// The macros defined so far, so an **invocation** is recognised too. A
+    /// call is not an instruction, and nothing else tells `two` from a typo.
+    macro_names: BTreeSet<String>,
     nodes: Vec<crate::ast::Node>,
 }
 
@@ -1704,6 +1711,46 @@ impl FlatWalk for Walker {
             text: text.to_string(),
             span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
         });
+
+        // A macro definition is copied, not read — and copied **verbatim**,
+        // because vasm spells one `name macro` with the name in the label
+        // column. Laying it out would move the name, and real vasm answers
+        // `unknown mnemonic <two>` to an indented one (probed 2026-08-22). Hence
+        // `Item::Verbatim` rather than the source-only node the ca65 walk uses:
+        // there the keyword carries a `.` and the column is free.
+        //
+        // A body is a template rather than code — `\1` and `\@` are not
+        // expressions — so no line between the header and the close is parsed.
+        {
+            use crate::dialects::macros::MacroSyntax as _;
+            let text = code.trim();
+            let opened = VasmMacros.header(text);
+            if self.in_macro
+                || opened.is_some()
+                || self
+                    .macro_names
+                    .contains(text.split_whitespace().next().unwrap_or(""))
+            {
+                if let Some((name, _)) = opened {
+                    self.macro_names.insert(name);
+                    self.in_macro = true;
+                } else if VasmMacros.is_end(text) {
+                    self.in_macro = false;
+                }
+                self.nodes.push(Node {
+                    operand_span: None,
+                    label: None,
+                    item: Some(crate::ast::Item::Verbatim),
+                    source: code.trim_end().to_string(),
+                    span: Span::in_file(file, line as u32, 1),
+                    trivia: Trivia {
+                        leading: std::mem::take(&mut self.pending_leading),
+                        trailing,
+                    },
+                });
+                return Ok(None);
+            }
+        }
 
         let (label, rest) = split_label(code, line)?;
         // A non-local label (including an `equ` name) opens a new scope; a

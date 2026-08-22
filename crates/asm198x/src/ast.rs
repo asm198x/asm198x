@@ -258,6 +258,24 @@ pub(crate) enum Item {
     /// only [`NativeItem::inline_label`]; [`lower`] rejects it — a native item is
     /// assembled by its dialect, never lowered to the engine).
     Native(Box<dyn NativeItem>),
+    /// A line copied through the formatter **exactly as written**, column
+    /// included. [`Node::source`] holds the whole line.
+    ///
+    /// Every other node is laid out: a label goes to column 0 and an operation
+    /// is indented. That is wrong for a line whose column carries meaning, and
+    /// a macro definition is the case. vasm spells one `name macro` with the
+    /// name in the **label column**, and indenting it changes what the line is:
+    /// real vasm answers `unknown mnemonic <two>` (probed 2026-08-22). Splitting
+    /// it into a label line and an indented `macro` fails too — `identifier
+    /// expected`. The formatter has no business rewriting `name macro` into the
+    /// keyword-first form that would survive indentation, because laying source
+    /// out is not the same as changing what it says.
+    ///
+    /// Only the formatter's parse produces one: the assembling path expands
+    /// macros away before the walk sees a line. [`lower`] rejects it for the
+    /// same reason [`Item::Native`] is rejected — reaching the engine with one
+    /// means a dialect routed a formatter-only node into an assembly.
+    Verbatim,
     /// An `INCLUDE "file"` directive (language-surface U2, KTD1): the request
     /// as written, **unresolved** — the single-source parse never opens the
     /// target, so `--fmt` renders the directive verbatim from [`Node::source`]
@@ -605,6 +623,16 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
                 "internal error: a native item is assembled by its dialect, not lowered",
             ));
         }
+        // A verbatim line exists only on the formatter's parse — the assembling
+        // path expands macros before the walk sees one — so reaching the engine
+        // with one means a dialect routed a formatter-only node into an
+        // assembly. Same guard, same reason as `Native` above.
+        Item::Verbatim => {
+            return Err(AsmError::new(
+                0,
+                "internal error: a verbatim line is the formatter's, not the engine's",
+            ));
+        }
         // `lower` rejects an include/incbin before reaching here (it needs the
         // node's span for the diagnostic); these arms guard a direct
         // `lower_item` call.
@@ -822,6 +850,14 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
                     equ_label_colon,
                 ),
             }
+            continue;
+        }
+        // A verbatim line is already a line: no indent, no label placement, no
+        // re-alignment. Written before anything else looks at it.
+        if matches!(node.item, Some(Item::Verbatim)) {
+            out.push_str(&node.source);
+            trailing(&mut *out);
+            out.push('\n');
             continue;
         }
         let label = node.label.as_ref().map(|s| s.name.as_str());

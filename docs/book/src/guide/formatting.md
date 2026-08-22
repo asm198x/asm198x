@@ -43,6 +43,12 @@ position. Operand spelling is left exactly as written — `$c000` is not
 re-cased, `screen + $100` is not folded, and a number written in binary stays
 binary. The formatter arranges lines; it does not rewrite what is on them.
 
+A **macro definition is copied exactly as written**, its own indentation kept.
+A body is a template rather than code — a parameter is not an operand, and a
+line of it may not be a whole instruction until the macro is called — so laying
+one out would mean guessing at text the assembler has not read yet. The
+definition comes back the way you wrote it, and so does every call to it.
+
 ## Why you can run it on a project you have not read
 
 Two properties, both tested:

@@ -156,6 +156,12 @@ impl Z80Syntax for PasmoSyntax {
         DIRECTIVES
     }
 
+    /// Delegated to this dialect's own macro grammar, so the walk and the
+    /// expander agree on what opens, closes and invokes a definition.
+    fn macro_line(&self, line: &str, known: &dyn Fn(&str) -> bool) -> macros::MacroLine {
+        macros::macro_line(self, line, known)
+    }
+
     /// pasmo numbers: `$hex`/`0xhex`, `%binary`, `'c'` char, decimal, and the
     /// radix *suffixes* `h` (hex), `b` (binary), `o`/`q` (octal).
     fn parse_number(&self, tok: &str, line: usize) -> Result<i64, AsmError> {
@@ -670,17 +676,44 @@ mod tests {
 
     /// The formatter does not expand — the same rule as sjasmplus, for the
     /// same reason: laying source out must not rewrite the program.
-    ///
-    /// pasmo's formatter cannot yet *format* a file with macros either. Its
-    /// parse is the eager one, which reads `MACRO` as an instruction and
-    /// rejects it, exactly as it did before macros were implemented. Refusing
-    /// is the safe half of the answer and this pins it, so the day the other
-    /// half lands it is a deliberate change rather than a surprise.
     #[test]
     fn formatting_does_not_expand() {
-        let err = crate::format_pasmo(" MACRO setv, v\n ld a,v\n ENDM\n setv 9\n")
-            .expect_err("the eager parse does not know MACRO");
-        assert!(err.message.contains("MACRO"), "{err:?}");
+        let out = crate::format_pasmo(" MACRO setv, v\n ld a,v\n ENDM\n setv 9\n")
+            .expect("the walk copies a definition");
+
+        // The macro survives as a macro. If it were expanded, `MACRO` would be
+        // gone and `ld a,9` would be in its place.
+        assert!(out.contains("MACRO setv, v"), "{out}");
+        assert!(out.contains("ENDM"), "{out}");
+        assert!(out.contains("setv 9"), "{out}");
+        assert!(!out.contains("ld a,9"), "expanded into the output:\n{out}");
+    }
+
+    /// Formatting a macro changes the layout and not the program.
+    ///
+    /// pasmo spells a definition either way round, so both spellings are held:
+    /// `name MACRO` puts the name in the *label* column, which is why the copy
+    /// is verbatim rather than re-laid-out.
+    #[test]
+    fn a_formatted_macro_assembles_to_the_same_bytes() {
+        for src in [
+            " MACRO setv, v\n ld a,v\n ENDM\n setv 9\n ret\n",
+            "setv MACRO v\n ld a,v\n ENDM\n setv 9\n ret\n",
+        ] {
+            let before = asm(src).expect(src).bytes;
+            let formatted = crate::format_pasmo(src).expect(src);
+            let after = asm(&formatted)
+                .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+                .bytes;
+            assert_eq!(
+                before, after,
+                "formatting changed the program:\n{formatted}"
+            );
+
+            // And formatting is idempotent, so a second run is a no-op.
+            let again = crate::format_pasmo(&formatted).expect("formats");
+            assert_eq!(formatted, again, "{formatted}");
+        }
     }
 
     /// A diagnostic must name a line the author wrote. An error inside a body

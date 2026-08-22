@@ -382,7 +382,9 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
         let mut next: Vec<(LineOrigin, String)> = Vec::with_capacity(body.len());
         let mut expanded_any = false;
         for (origin, text) in &body {
-            let Some((label, name, args)) = invocation(syntax, text, &macros) else {
+            let Some((label, name, args)) =
+                invocation(syntax, text, &|w: &str| macros.contains_key(w))
+            else {
                 next.push((origin.clone(), text.clone()));
                 continue;
             };
@@ -478,12 +480,12 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
 fn invocation<S: MacroSyntax>(
     syntax: &S,
     line: &str,
-    macros: &std::collections::HashMap<String, Vec<MacroDef>>,
+    known: &dyn Fn(&str) -> bool,
 ) -> Option<(Option<String>, String, Vec<String>)> {
     let named = |word: &str| {
         syntax
             .invocation_name(word)
-            .filter(|name| macros.contains_key(*name))
+            .filter(|name| known(name))
             .map(str::to_string)
     };
     let stripped = without_comment(line);
@@ -502,6 +504,40 @@ fn invocation<S: MacroSyntax>(
     let tail = tail.trim();
     let (word, args) = tail.split_once(char::is_whitespace).unwrap_or((tail, ""));
     named(word).map(|name| (Some(head.to_string()), name, split_args(args)))
+}
+
+/// What a line does to a macro definition, as far as a **walk** is concerned.
+///
+/// A formatter's walk needs to know only enough to copy a definition through
+/// untouched — never to read one. It asks the question here so that it and the
+/// expander cannot drift: the same grammar decides both, and a dialect that
+/// grew a second spelling grows it once.
+pub(crate) enum MacroLine {
+    /// Opens a definition, and names it.
+    Opens(String),
+    /// Closes the definition that is open.
+    Closes,
+    /// Invokes a macro already defined.
+    Invokes,
+    /// Does none of those.
+    None,
+}
+
+/// Which of those `line` is, given the names defined so far.
+pub(crate) fn macro_line<S: MacroSyntax>(
+    syntax: &S,
+    line: &str,
+    known: &dyn Fn(&str) -> bool,
+) -> MacroLine {
+    if let Some((name, _)) = syntax.header(line) {
+        MacroLine::Opens(name)
+    } else if syntax.is_end(line) {
+        MacroLine::Closes
+    } else if invocation(syntax, line, known).is_some() {
+        MacroLine::Invokes
+    } else {
+        MacroLine::None
+    }
 }
 
 // ---------------------------------------------------------------------------

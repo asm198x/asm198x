@@ -25,7 +25,7 @@
 //! back out, so a width flip inside an include sizes the includer's later
 //! immediates exactly as `ca65` does (probe-pinned).
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
 use super::mos6502::{
@@ -163,6 +163,15 @@ struct Walker {
     /// to the next one. Comments never reach the encoder, so bytes are
     /// unchanged.
     pending_leading: Vec<Comment>,
+    /// Whether the walk is inside a macro definition it is copying rather than
+    /// reading. Only the formatter's parse ever sets it: the assembling path
+    /// expands definitions away before the walk sees a line.
+    in_macro: bool,
+    /// The macros defined so far, so an **invocation** is recognised too. A
+    /// call is not an instruction, and the formatter has no other way to tell
+    /// `nop2` from a typo. Case-sensitive, because ca65 is: a mis-cased call is
+    /// an error there, not a call.
+    macro_names: BTreeSet<String>,
     nodes: Vec<Node>,
 }
 
@@ -173,6 +182,8 @@ impl Walker {
             a_width: 1,
             i_width: 1,
             pending_leading: Vec::new(),
+            in_macro: false,
+            macro_names: BTreeSet::new(),
             nodes: Vec::new(),
         }
     }
@@ -229,6 +240,43 @@ impl FlatWalk for Walker {
             text: text.to_string(),
             span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
         });
+
+        // A macro definition is copied, not read.
+        //
+        // It reaches here only on the formatter's parse — the assembling path
+        // expands definitions away first — and a body is a **template** rather
+        // than code: it can carry a parameter where a value goes, a `.local`
+        // declaration, or a label that only means something once expanded.
+        // Parsing those lines is what produced "`.macro` is declared but not
+        // dispatched here" and, before that, "unsupported directive `.macro`".
+        //
+        // So every line from the header to the close becomes a source-only
+        // node, which `emit` writes back verbatim. That is the treatment the
+        // width directives already get, for the reason given below: a node
+        // dropped here does not come back, and the round trip is the contract.
+        {
+            use crate::dialects::macros::MacroSyntax as _;
+            let text = code.trim();
+            let opened = ca65_flat::Ca65Macros.header(text);
+            if self.in_macro || opened.is_some() {
+                if let Some((name, _)) = opened {
+                    self.macro_names.insert(name);
+                }
+                self.in_macro = !ca65_flat::Ca65Macros.is_end(text);
+                self.nodes.push(Node {
+                    operand_span: None,
+                    label: None,
+                    item: None,
+                    source: text.to_string(),
+                    span: Span::in_file(file, line as u32, 1),
+                    trivia: Trivia {
+                        leading: std::mem::take(&mut self.pending_leading),
+                        trailing,
+                    },
+                });
+                return Ok(None);
+            }
+        }
 
         // A width directive mutates parse state and emits no bytes, but is kept
         // as a source-only node so the formatter reproduces it; dropping one
@@ -304,7 +352,11 @@ impl FlatWalk for Walker {
                 },
             }));
         }
-        let op = if rest.is_empty() {
+        // An invocation of a macro defined above. Like the definition it is
+        // copied rather than read: `nop2` is a call, and the encoder has no
+        // form for it because there is no such instruction.
+        let invoked = mos6502::split_first_word(rest.trim()).0;
+        let op = if rest.is_empty() || self.macro_names.contains(invoked) {
             None
         } else {
             parse_op(prim, ext, rest, self.a_width, self.i_width, &self.env, line)?
@@ -1171,18 +1223,48 @@ mod tests {
         assert!(err.message.contains("forever"), "{err:?}");
     }
 
-    /// The formatter lays source out; it does not rewrite programs, so it must
-    /// give the macro back rather than the lines it expands to.
+    /// The formatter lays source out; it does not rewrite programs, so it gives
+    /// the macro back rather than the lines it expands to.
     ///
-    /// ca65's formatter cannot yet *format* one — the walk does not expand, and
-    /// `.macro` is consumed by the expander on the assembling path, so it
-    /// arrives here declared and undispatched. Refusing is the safe half, and
-    /// this pins it so closing the other half is deliberate. See
+    /// This used to assert the opposite — that the walk *refused* `.macro` —
+    /// which was true and pinned a limitation rather than a property. The
+    /// definition and the invocation are copied verbatim now, so what is worth
+    /// pinning is that the copy is faithful. See
     /// `decisions/macro-expansion-framework.md`.
     #[test]
     fn formatting_does_not_expand() {
-        let err = crate::format_ca65_816(".macro ldav v\n lda #v\n.endmacro\n ldav 5\n")
-            .expect_err("the walk does not know .macro");
-        assert!(err.message.contains(".macro"), "{err:?}");
+        let src = ".macro ldav v\n lda #v\n.endmacro\nstart: ldav 5\n rts\n";
+        let out = crate::format_ca65_816(src).expect("the walk copies a definition");
+
+        // The macro survives as a macro. If it were expanded, `.macro` would be
+        // gone and `lda #5` would be in its place.
+        assert!(out.contains(".macro ldav v"), "{out}");
+        assert!(out.contains(".endmacro"), "{out}");
+        assert!(out.contains("ldav 5"), "{out}");
+        assert!(!out.contains("lda #5"), "expanded into the output:\n{out}");
+    }
+
+    /// Formatting a macro changes the layout and not the program.
+    ///
+    /// The round trip is the property that makes the formatter safe to run on
+    /// source you have not read, and a macro is where it is easiest to break:
+    /// a body is a template, so a walk that drops one line of it still produces
+    /// something that looks like source.
+    #[test]
+    fn a_formatted_macro_assembles_to_the_same_bytes() {
+        let src = ".macro ldav v\n lda #v\n.endmacro\nstart: ldav 5\n rts\n";
+        let before = asm(src).expect("assembles").bytes;
+        let formatted = crate::format_ca65_816(src).expect("formats");
+        let after = asm(&formatted)
+            .expect("the formatted source assembles")
+            .bytes;
+        assert_eq!(
+            before, after,
+            "formatting changed the program:\n{formatted}"
+        );
+
+        // And formatting is idempotent, so a second run is a no-op.
+        let again = crate::format_ca65_816(&formatted).expect("formats");
+        assert_eq!(formatted, again);
     }
 }
