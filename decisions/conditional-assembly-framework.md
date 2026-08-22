@@ -77,6 +77,38 @@ asl-family `IF … ENDIF` and lwasm/rgbasm follow the same shape):
   not curriculum demand. Includes resolve inside the walk, so a guarded
   include in an untaken branch never loads. Further adopters remain
   demand-gated.
+- **2026-08-22 — the gate admits external source compatibility as a driver,
+  and pasmo is the third adopter.** The demand test above was written as "a
+  real program or curriculum unit that needs it", and the curriculum half of
+  that is now known to be the wrong instrument. [#93] made the argument for
+  macros and it holds here unchanged: *we wrote the curriculum, and it avoids
+  what the toolchain does not support*, so a scan of our own samples can never
+  signal demand for a feature they were authored around. The driver is
+  real-world source compatibility, which is the same driver the sjasmplus
+  adoption above already ran on.
+
+  **What this does not do is open the gate for everyone.** ca65, rgbasm and
+  vasm each have conditionals in their references and none in us, and they stay
+  gated. pasmo goes first as the proving case: a third `CondEval` consumer
+  tests whether the recipe is a recipe or a coincidence, and it is the
+  narrowest surface of the four — measured against pasmo, not read from its
+  manual:
+
+  | form | pasmo |
+  |---|---|
+  | `IF` / `ELSE` / `ENDIF` | yes, and case-insensitive |
+  | `IFDEF`, `IFNDEF` | **no** — pasmo has neither |
+  | `ELSEIF` | **no** — an error in a live branch |
+  | `ENDC` as a closer | **no** |
+  | a label on the `IF` line | **an error**, though a label on a `REPT` line is fine |
+
+  That is four fewer forms than sjasmplus, so the adoption is the recipe with
+  the smallest possible surface — which is what makes it a test of the recipe
+  rather than of pasmo. Repetition (`REPT` … `ENDM`) rides the same pipeline
+  and lands with it; see `docs/plans/2026-08-22-002-feat-repetition-plan.md`
+  for the reference survey behind both.
+
+  The next adopter is not pre-approved. It needs its own note here.
 
 ## Drift triggers
 
@@ -85,8 +117,13 @@ Stop and re-consult if a change would:
 - **Build a generic keyword-block parser or a style-aware emit "for later"**,
   with no keyword dialect actually consuming it. Wait for the first real
   consumer — that is the whole point of the seam.
-- **Add conditional support to a dialect with no concrete driver** (no real
-  program or curriculum unit that needs it). Adoption is demand-gated.
+- **Add conditional support to a dialect with no concrete driver.** Adoption is
+  demand-gated, and each adopter is named in a dated note above before its
+  code is written. Real-world source compatibility counts as a driver (see the
+  2026-08-22 note); *curriculum* absence never counts as evidence against one,
+  because the curriculum was authored around what the toolchain supports.
+- **Read "pasmo is adopted" as "the rest are next".** ca65, rgbasm and vasm are
+  still gated, individually.
 - **Re-introduce a per-dialect conditional *preprocessor*** (a second parse that
   evaluates conditionals outside the tree), rather than a `CondEval` over the
   shared `Item::Conditional`. ACME's `process_block` was retired for exactly this
@@ -95,3 +132,5 @@ Stop and re-consult if a change would:
 See [`asm198x-and-shared-isa-spec.md`](../../../decisions/asm198x-and-shared-isa-spec.md)
 (the AST layer) and the plan `docs/plans/2026-07-04-005-feat-ir-ast-layer-plan.md`
 (U6 / idea 4).
+
+[#93]: https://github.com/asm198x/asm198x/issues/93

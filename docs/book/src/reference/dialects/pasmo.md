@@ -6,17 +6,19 @@ Z80, pasmo syntax.
 
 ## Directives
 
-9 directives, 14 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+11 directives, 18 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
 | `bytes` | `defb`, `db`, `defm`, `dm` |  |
+| `conditional` | `if`, `else`, `endif` |  |
 | `end` | `end` |  |
 | `equ` | `equ` |  |
 | `incbin` | `incbin` |  |
 | `include` | `include` | Recognised, and not implemented |
 | `macro` | `macro` |  |
 | `org` | `org` |  |
+| `repeat` | `rept` |  |
 | `reserve` | `defs`, `ds` |  |
 | `words` | `defw`, `dw` |  |
 

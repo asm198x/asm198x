@@ -23,8 +23,7 @@ use std::collections::BTreeMap;
 
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialects::macros::{
-    self, Expand, LineOrigin, expanded_text, expansion, line_origins, place, place_nodes,
-    remap_lines,
+    self, Expand, LineOrigin, expanded_text, expansion, line_origins, place_nodes, remap_lines,
 };
 use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
@@ -123,6 +122,46 @@ pub(crate) trait Z80Syntax {
         macros::MacroLine::None
     }
 
+    /// Which conditional keyword this word is, in **this dialect's** spelling.
+    ///
+    /// Defaulted to "none": a dialect has no conditionals until it adopts them,
+    /// which is a per-dialect, demand-gated decision recorded in
+    /// `decisions/conditional-assembly-framework.md`. The default is what keeps
+    /// the keyword pipeline from handing every Z80 dialect sjasmplus's
+    /// vocabulary the moment it routes through [`parse_program_keyword`] —
+    /// pasmo has no `IFDEF`, no `IFNDEF` and no `ELSEIF`, and accepting them
+    /// would be inventing a dialect.
+    fn cond_keyword(&self, word: &str) -> Option<CondKw> {
+        let _ = word;
+        None
+    }
+
+    /// Which end of a repetition block this word is, in this dialect's
+    /// spelling. Defaulted to "none", for the reason above.
+    fn repeat_keyword(&self, word: &str) -> Option<RepeatKw> {
+        let _ = word;
+        None
+    }
+
+    /// Whether this word opens a `DEFINE` (textual substitution). Defaulted to
+    /// "no": it is sjasmplus's, and a dialect without it must not accept the
+    /// spelling merely for sharing a pipeline.
+    fn is_define_word(&self, word: &str) -> bool {
+        let _ = word;
+        false
+    }
+
+    /// How this dialect's diagnostics name the ways a constant can be bound —
+    /// the tail of "`n` must be a constant here (…)".
+    ///
+    /// Stated rather than derived, because the failure it prevents is a
+    /// message that tells the reader to reach for a directive their assembler
+    /// does not have. Two dialects share this condition parser and only one of
+    /// them has `DEFINE`.
+    fn constant_sources(&self) -> &'static str {
+        "a value defined with `equ` above"
+    }
+
     /// Whether `word` is this dialect's binary-inclusion directive
     /// (language-surface U3). Off by default; sjasmplus and pasmo override for
     /// `INCBIN`. Like an include, an incbin is walk-handled: a verbatim item
@@ -166,216 +205,6 @@ pub(crate) trait Z80Syntax {
     }
 }
 
-/// Assemble Z80 source under `syntax` into the engine's statement stream, using
-/// `set` (and optional Z80N `ext`) for the instruction encodings. The **eager**
-/// pipeline — pasmo's, since U8: a keyword-conditional dialect (sjasmplus)
-/// routes through [`assemble_keyword`] instead, so its lines lower with the
-/// live conditional environment.
-pub(crate) fn assemble<S: Z80Syntax>(
-    syntax: &S,
-    set: &'static isa::InstructionSet,
-    ext: Option<&'static isa::InstructionSet>,
-    source: &str,
-) -> Result<Vec<Statement>, AsmError> {
-    // The Z80 front-end parses into the semantic AST (U3), then lowers it to the
-    // engine's statement stream — byte-identical to the old direct parse (AE1).
-    // Other CPUs stay on direct lowering behind this boundary (KTD6).
-    crate::ast::lower(parse_program(syntax, set, ext, source, Expand::Yes)?)
-}
-
-/// Parse Z80 source into the semantic [`Program`](crate::ast::Program) — the
-/// eager per-line parse (pasmo's; sjasmplus parses through
-/// [`parse_program_keyword`] since U8). Each line becomes a node carrying its
-/// scoped label, operation, and span; trivia is filled in U4. The scope
-/// resolution mirrors the old string-mangle exactly, so
-/// [`lower`](crate::ast::lower) reproduces the same statements.
-///
-/// An include or incbin directive (a dialect that answers
-/// [`Z80Syntax::is_include`] / [`Z80Syntax::is_incbin`]) becomes an
-/// **unresolved** [`Item::Include`](crate::ast::Item) /
-/// [`Item::Incbin`](crate::ast::Item) — the target is never opened, so
-/// `--fmt` renders the directive verbatim and works with a missing target
-/// (U2/U3, KTD1). Lazy resolution is [`parse_program_multi`]'s.
-pub(crate) fn parse_program<S: Z80Syntax>(
-    syntax: &S,
-    set: &'static isa::InstructionSet,
-    ext: Option<&'static isa::InstructionSet>,
-    source: &str,
-    mode: Expand,
-) -> Result<crate::ast::Program, AsmError> {
-    // A dialect may rewrite source before it is parsed (pasmo macros, #93).
-    // Line numbers map back afterwards, so a diagnostic always names a line the
-    // author wrote rather than one that existed only inside the expander.
-    let expanded = expansion(mode, source, |s| syntax.expand_source(s))?;
-    let text = expanded_text(&expanded, source);
-    let origins = line_origins(&expanded);
-    let mut w = Walker::new(syntax, set, ext);
-    for (i, raw) in text.lines().enumerate() {
-        if let Some(d) = w
-            .walk_line(raw, i + 1, FileId(0))
-            .map_err(|e| remap_lines(e, origins))?
-        {
-            // Unresolved in the single-source parse: the target is never
-            // opened (KTD1), so `--fmt` renders the verbatim source and works
-            // with a missing file; `lower` rejects assembly with a pointer to
-            // the multi-file entry points.
-            let item = match d.kind {
-                WalkDirective::Include { request } => crate::ast::Item::Include { request },
-                WalkDirective::Incbin { request, .. } => crate::ast::Item::Incbin { request },
-            };
-            w.nodes.push(Node {
-                operand_span: d.operand_span,
-                label: d.label,
-                item: Some(item),
-                source: d.source,
-                span: d.span,
-                trivia: d.trivia,
-            });
-        }
-    }
-    w.flush_trailing(text.lines().count() as u32);
-    place_nodes(&mut w.nodes, origins);
-    Ok(Program { nodes: w.nodes })
-}
-
-/// Parse a multi-file Z80 program (language-surface U2, KTD1): the
-/// **interleaved, environment-threaded walk**. The root (`FileId(0)` in
-/// `map`) parses line by line with the environment accumulated so far; when
-/// the walk reaches an include directive *live*, the target loads through
-/// `loader`, its lines parse with the same environment, and everything it
-/// defined — `equ` constants, the current global label — flows back out to
-/// the includer's subsequent lines. That outward flow is load-bearing: z80
-/// form selection (`bit`/`rst`/`ds`) consults the parse-time constants table,
-/// so an include-defined constant must be visible after the include point
-/// (probe-pinned against sjasmplus).
-///
-/// # Errors
-/// Any per-line parse failure (stamped with the file it occurred in), a
-/// missing include target, an include cycle (the active-stack check), or the
-/// [`MAX_INCLUDE_DEPTH`] backstop — all at the directive's span.
-pub(crate) fn parse_program_multi<S: Z80Syntax>(
-    syntax: &S,
-    set: &'static isa::InstructionSet,
-    ext: Option<&'static isa::InstructionSet>,
-    map: &mut SourceMap,
-    loader: &dyn SourceLoader,
-) -> Result<crate::ast::Program, AsmError> {
-    let mut w = Walker::new(syntax, set, ext);
-    let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
-    // The active include stack: cycle detection is membership (a file may be
-    // included twice *sequentially* — the reference re-reads it — but never
-    // while it is still open).
-    let mut stack = vec![FileId(0)];
-    walk_file(&mut w, &root, FileId(0), map, loader, &mut stack)?;
-    Ok(Program { nodes: w.nodes })
-}
-
-/// One file's leg of the multi-file walk: parse each line through the shared
-/// [`Walker`], and recurse into includes as they are reached.
-fn walk_file<S: Z80Syntax>(
-    w: &mut Walker<'_, S>,
-    source: &str,
-    file: FileId,
-    map: &mut SourceMap,
-    loader: &dyn SourceLoader,
-    stack: &mut Vec<FileId>,
-) -> Result<(), AsmError> {
-    // Each file expands on its own (#93). A macro therefore does not reach
-    // across an include boundary — the reference's own scoping question, left
-    // open deliberately rather than guessed at.
-    let expanded = expansion(Expand::Yes, source, |s| w.syntax.expand_source(s))?;
-    let text = expanded_text(&expanded, source);
-    let origins = line_origins(&expanded);
-    for (i, raw) in text.lines().enumerate() {
-        let line = i + 1;
-        // Nodes this line contributes, so they can be put back on the line the
-        // author wrote before an include pushes any of its own.
-        let start = w.nodes.len();
-        let walked = w
-            .walk_line(raw, line, file)
-            .map_err(|e| stamp_file(remap_lines(e, origins), file));
-        place_nodes(&mut w.nodes[start..], origins);
-        let Some(mut d) = walked? else {
-            continue;
-        };
-        if let Some(origins) = origins {
-            place(&mut d.span, origins);
-            if let Some(span) = d.operand_span.as_mut() {
-                place(span, origins);
-            }
-        }
-        let span = d.span;
-        // Diagnostics point at the directive's operand (the file name) when
-        // the parse knew its column, else the line.
-        let at = d.operand_span.clone().unwrap_or_else(|| span.clone());
-        match d.kind {
-            WalkDirective::Include { request } => {
-                // A label on the include line binds at the include point's
-                // address (probe-pinned), so it becomes a label-only node
-                // before the target's lines.
-                if d.label.is_some() {
-                    w.nodes.push(Node {
-                        operand_span: None,
-                        label: d.label,
-                        item: None,
-                        source: String::new(),
-                        span,
-                        trivia: d.trivia,
-                    });
-                }
-                if stack.len() >= MAX_INCLUDE_DEPTH {
-                    return Err(AsmError::at(
-                        at,
-                        format!("includes nested more than {MAX_INCLUDE_DEPTH} levels deep"),
-                    ));
-                }
-                let id = map
-                    .load(loader, &request, file, line as u32)
-                    .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
-                if stack.contains(&id) {
-                    let chain = stack
-                        .iter()
-                        .chain(std::iter::once(&id))
-                        .map(|f| map.path(*f).unwrap_or("?"))
-                        .collect::<Vec<_>>()
-                        .join(" -> ");
-                    return Err(AsmError::at(at, format!("include cycle: {chain}")));
-                }
-                let contents = map.contents(id).unwrap_or_default().to_owned();
-                stack.push(id);
-                walk_file(w, &contents, id, map, loader, stack)?;
-                stack.pop();
-            }
-            WalkDirective::Incbin {
-                request,
-                offset,
-                length,
-            } => {
-                // Resolved lazily, exactly like an include (KTD1): the asset
-                // loads only when the walk reaches the directive live. The
-                // binary path mints no FileId (KTD8) — the payload rides a
-                // node at the *directive's* span, which is where the missing
-                // asset / window diagnostics land too.
-                let from = map.path(file).map(str::to_owned);
-                let data = loader
-                    .load_binary(&request, from.as_deref())
-                    .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
-                let payload = slice_incbin(&data, offset, length)
-                    .map_err(|msg| AsmError::at(at.clone(), format!("`{request}`: {msg}")))?;
-                w.nodes.push(Node {
-                    operand_span: d.operand_span,
-                    label: d.label,
-                    item: Some(crate::ast::Item::Binary(payload)),
-                    source: d.source,
-                    span,
-                    trivia: d.trivia,
-                });
-            }
-        }
-    }
-    Ok(())
-}
-
 /// Stamp `file` onto a per-line parse error: the line-oriented helpers below
 /// (`split_label`, `parse_op`, the expression parser) know their line but not
 /// their file, so the walk supplies it at the one per-line boundary.
@@ -397,274 +226,6 @@ fn stamp_missing_file(mut e: AsmError, file: FileId) -> AsmError {
         e.span = Some(Span::in_file(file, e.line as u32, 0));
     }
     e
-}
-
-/// A walk-handled directive found by [`Walker::walk_line`], handed back for
-/// the driver to decide: the single-source parse keeps it as a verbatim item;
-/// the multi-file walk resolves it lazily (KTD1).
-struct DirectiveLine {
-    kind: WalkDirective,
-    /// A label on the directive line — it binds at the directive's address.
-    label: Option<Symbol>,
-    /// The verbatim directive text (`include "file.inc"`), for `--fmt`.
-    source: String,
-    span: Span,
-    operand_span: Option<Span>,
-    trivia: Trivia,
-}
-
-/// Which walk-handled directive a [`DirectiveLine`] carries.
-enum WalkDirective {
-    /// `INCLUDE "file"` — the target as the directive spelled it
-    /// (quotes/brackets stripped).
-    Include { request: String },
-    /// `INCBIN "file"[,offset[,length]]` (U3). The offset/length are folded to
-    /// parse-time constants (they set the statement's size, exactly like a
-    /// `ds` count); `None` means the argument was omitted. Negative values
-    /// keep sjasmplus's from-the-end meaning, applied when the asset's size is
-    /// known ([`slice_incbin`]).
-    Incbin {
-        request: String,
-        offset: Option<i64>,
-        length: Option<i64>,
-    },
-}
-
-/// The per-line parse walk shared by [`parse_program`] (single source) and
-/// [`parse_program_multi`] (the include-capable walk). The environment — the
-/// `equ` constants table, the current global label for local scoping, and
-/// pending comment trivia — lives here, so in the multi-file walk it threads
-/// *through* include boundaries in both directions (KTD1).
-struct Walker<'a, S: Z80Syntax> {
-    syntax: &'a S,
-    set: &'static isa::InstructionSet,
-    ext: Option<&'static isa::InstructionSet>,
-    /// Constants defined with `equ`, recorded as parsed. Opcode-embedded
-    /// operands (BIT n, IM n, RST n) must be known at parse time to pick the
-    /// form, so they resolve against this — not the engine's pass-2 symbols.
-    consts: BTreeMap<String, i64>,
-    /// The most recent global (non-`.`) label, for qualifying local labels.
-    current_global: Option<String>,
-    /// Own-line comments seen since the last node, attached as leading trivia
-    /// to the next node (U4). Comments never reach the encoder (AE1).
-    pending_leading: Vec<Comment>,
-    /// Whether the walk is inside a macro definition it is copying rather than
-    /// reading. Only the formatter's parse ever sets it.
-    in_macro: bool,
-    /// The macros defined so far, so an invocation is copied too.
-    macro_names: std::collections::BTreeSet<String>,
-    nodes: Vec<Node>,
-}
-
-impl<'a, S: Z80Syntax> Walker<'a, S> {
-    fn new(
-        syntax: &'a S,
-        set: &'static isa::InstructionSet,
-        ext: Option<&'static isa::InstructionSet>,
-    ) -> Self {
-        Self {
-            syntax,
-            set,
-            ext,
-            consts: BTreeMap::new(),
-            current_global: None,
-            pending_leading: Vec::new(),
-            in_macro: false,
-            macro_names: std::collections::BTreeSet::new(),
-            nodes: Vec::new(),
-        }
-    }
-
-    /// Parse one line with the live environment. An ordinary line pushes its
-    /// node (or nothing, for a blank/comment line) and returns `None`; a
-    /// walk-handled directive (include/incbin) is returned for the driver.
-    fn walk_line(
-        &mut self,
-        raw: &str,
-        line: usize,
-        file: FileId,
-    ) -> Result<Option<DirectiveLine>, AsmError> {
-        let (code, comment) = self.syntax.split_comment(raw);
-        if code.trim().is_empty() {
-            // A comment-only line becomes leading trivia for the next node; a
-            // blank line carries nothing.
-            if let Some(text) = comment {
-                self.pending_leading.push(Comment {
-                    text: text.to_string(),
-                    span: Span::in_file(file, line as u32, 1),
-                });
-            }
-            return Ok(None);
-        }
-
-        // A macro definition is copied, not read — and copied verbatim, because
-        // pasmo spells one either way round and `name MACRO` puts the name in
-        // the label column. A body is a template rather than code, so nothing
-        // between the header and the close is parsed. See `Item::Verbatim`.
-        //
-        // Only the formatter's parse reaches here with a definition intact: the
-        // assembling path expands it away first.
-        {
-            let what = self
-                .syntax
-                .macro_line(code, &|word: &str| self.macro_names.contains(word));
-            let copy = match what {
-                macros::MacroLine::Opens(name) => {
-                    self.macro_names.insert(name);
-                    self.in_macro = true;
-                    true
-                }
-                macros::MacroLine::Closes if self.in_macro => {
-                    self.in_macro = false;
-                    true
-                }
-                macros::MacroLine::Invokes => true,
-                _ => self.in_macro,
-            };
-            if copy {
-                let trailing = comment.map(|text| Comment {
-                    text: text.to_string(),
-                    span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
-                });
-                self.nodes.push(Node {
-                    operand_span: None,
-                    label: None,
-                    item: Some(crate::ast::Item::Verbatim),
-                    source: code.trim_end().to_string(),
-                    span: Span::in_file(file, line as u32, 1),
-                    trivia: Trivia {
-                        leading: std::mem::take(&mut self.pending_leading),
-                        trailing,
-                    },
-                });
-                return Ok(None);
-            }
-        }
-
-        let (label, rest) = split_label(self.syntax, self.set, self.ext, code, line)?;
-        // Includes and incbins are walk-handled, not Operations: the target
-        // must not be opened here (KTD1 — `--fmt` succeeds with a missing
-        // target; on the keyword pipeline, `SjasmEval` applies the same rule
-        // inside conditional branches, U8).
-        let (word, args) = split_first_word(rest);
-        let is_include = self.syntax.is_include(word);
-        let is_incbin = self.syntax.is_incbin(word);
-        let mut op = if is_include || is_incbin {
-            None
-        } else {
-            parse_op(self.syntax, self.set, self.ext, rest, line, &self.consts)?
-        };
-
-        // Resolve the label's scope into a `Symbol` (source name, scope, and the
-        // qualified name lowering emits). A leading-`.` label is local to the
-        // current scope; a plain label opens a new scope. Update the scope first,
-        // so a local reference on the same line (`done: jr .loop`) resolves
-        // against it — matching the old ordering.
-        let scoped = self.syntax.scopes_locals();
-        let symbol = label.map(|name| {
-            if scoped && name.starts_with('.') {
-                match &self.current_global {
-                    Some(g) => Symbol {
-                        qualified: format!("{g}{name}"),
-                        scope: Scope::Local {
-                            in_global: g.clone(),
-                        },
-                        name,
-                    },
-                    // A leading-`.` label with no enclosing global is left as-is
-                    // (the old code qualified only when a global existed).
-                    None => Symbol {
-                        qualified: name.clone(),
-                        scope: Scope::Global,
-                        name,
-                    },
-                }
-            } else {
-                if scoped {
-                    self.current_global = Some(name.clone());
-                }
-                Symbol {
-                    qualified: name.clone(),
-                    scope: Scope::Global,
-                    name,
-                }
-            }
-        });
-        if scoped && let Some(g) = &self.current_global {
-            op = op.map(|o| crate::ast::qualify_locals(o, g));
-        }
-
-        // `equ` binds its (qualified) label to a parse-time constant.
-        if let (Some(sym), Some(Operation::Equ(e))) = (&symbol, &op)
-            && let Some(v) = eval_const(e, &self.consts)
-        {
-            self.consts.insert(sym.qualified.clone(), v);
-        }
-        let trivia = Trivia {
-            leading: std::mem::take(&mut self.pending_leading),
-            trailing: comment.map(|text| Comment {
-                text: text.to_string(),
-                span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
-            }),
-        };
-        let operand_span = crate::ast::operand_span(raw, rest, line as u32).map(|mut s| {
-            s.file = file;
-            s
-        });
-        if is_include || is_incbin {
-            let kind = if is_include {
-                WalkDirective::Include {
-                    request: include_request(args, line)?,
-                }
-            } else {
-                let (request, offset, length) = incbin_args(self.syntax, args, line, &self.consts)?;
-                WalkDirective::Incbin {
-                    request,
-                    offset,
-                    length,
-                }
-            };
-            return Ok(Some(DirectiveLine {
-                kind,
-                label: symbol,
-                source: rest.trim().to_string(),
-                span: Span::in_file(file, line as u32, 1),
-                operand_span,
-                trivia,
-            }));
-        }
-        if symbol.is_none() && op.is_none() {
-            return Ok(None);
-        }
-        self.nodes.push(Node {
-            operand_span,
-            label: symbol,
-            item: op.map(crate::ast::item_from_operation),
-            source: rest.trim().to_string(),
-            span: Span::in_file(file, line as u32, 1),
-            trivia,
-        });
-        Ok(None)
-    }
-
-    /// Flush comments after the last node (a trailing comment block, or a
-    /// comment-only file) as a label-less, op-less node so the formatter keeps
-    /// them (they emit no bytes, so assembly is unaffected).
-    fn flush_trailing(&mut self, last_line: u32) {
-        if !self.pending_leading.is_empty() {
-            self.nodes.push(Node {
-                operand_span: None,
-                label: None,
-                item: None,
-                source: String::new(),
-                span: Span::at(last_line, 1),
-                trivia: Trivia {
-                    leading: std::mem::take(&mut self.pending_leading),
-                    trailing: None,
-                },
-            });
-        }
-    }
 }
 
 /// The file name of an include directive: `"file"`, `<file>`, or a bare
@@ -841,7 +402,7 @@ fn slice_incbin(data: &[u8], offset: Option<i64>, length: Option<i64>) -> Result
 /// the case rule (`.If` is rejected exactly as `If` is), and dotted and
 /// undotted spellings mix freely within one block, so `.IF … ENDIF` assembles.
 #[derive(Clone, Copy, PartialEq, Eq)]
-enum CondKw {
+pub(crate) enum CondKw {
     If,
     IfDef,
     IfNDef,
@@ -850,7 +411,7 @@ enum CondKw {
     EndIf,
 }
 
-fn cond_keyword(word: &str) -> Option<CondKw> {
+pub(crate) fn cond_keyword(word: &str) -> Option<CondKw> {
     // The dot is an optional prefix on every spelling, and strips before the
     // case test — so `.If` stays as unacceptable as `If`.
     let word = word.strip_prefix('.').unwrap_or(word);
@@ -867,7 +428,7 @@ fn cond_keyword(word: &str) -> Option<CondKw> {
 
 /// Which end of a repetition block a word is, if either.
 #[derive(Clone, Copy, PartialEq, Eq)]
-enum RepeatKw {
+pub(crate) enum RepeatKw {
     Open,
     Close,
 }
@@ -878,7 +439,7 @@ enum RepeatKw {
 ///
 /// The two spellings interchange: a block opened with `DUP` may be closed by
 /// `ENDR`, which the reference accepts and so do we.
-fn repeat_keyword(word: &str) -> Option<RepeatKw> {
+pub(crate) fn repeat_keyword(word: &str) -> Option<RepeatKw> {
     Some(match word {
         "dup" | "DUP" | "rept" | "REPT" => RepeatKw::Open,
         "edup" | "EDUP" | "endr" | "ENDR" => RepeatKw::Close,
@@ -887,7 +448,7 @@ fn repeat_keyword(word: &str) -> Option<RepeatKw> {
 }
 
 /// The `DEFINE` directive's spellings (the same strict case rule — probe p34).
-fn is_define_word(word: &str) -> bool {
+pub(crate) fn is_define_word(word: &str) -> bool {
     matches!(word, "define" | "DEFINE")
 }
 
@@ -920,6 +481,10 @@ struct KwCx<'a, S: Z80Syntax> {
     pos: usize,
     /// Own-line comments since the last node, attached as leading trivia.
     pending: Vec<Comment>,
+    /// Inside a macro definition, whose lines are copied and never read.
+    in_macro: bool,
+    /// The macros defined so far, so an invocation is copied too.
+    macro_names: std::collections::BTreeSet<String>,
 }
 
 /// Parse one file of a keyword-conditional program into the source-preserving
@@ -949,6 +514,8 @@ pub(crate) fn parse_program_keyword<S: Z80Syntax>(
         lines: text.lines().collect(),
         pos: 0,
         pending: Vec::new(),
+        in_macro: false,
+        macro_names: std::collections::BTreeSet::new(),
     };
     let (mut nodes, close) = cx
         .parse_block(false)
@@ -997,12 +564,12 @@ impl<S: Z80Syntax> KwCx<'_, S> {
         while k < self.lines.len() {
             let (code, _) = self.syntax.split_comment(self.lines[k]);
             let (word, _) = split_first_word(code.trim());
-            match repeat_keyword(word) {
+            match self.syntax.repeat_keyword(word) {
                 Some(RepeatKw::Open) => depth += 1,
                 Some(RepeatKw::Close) => {
                     depth -= 1;
                     if depth == 0 {
-                        end = Some(k);
+                        end = Some((k, code.trim().to_string()));
                         break;
                     }
                 }
@@ -1010,8 +577,12 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             }
             k += 1;
         }
-        let Some(end) = end else {
-            return Err(AsmError::new(line, "`DUP` has no matching `EDUP`"));
+        let Some((end, close)) = end else {
+            let (opener, _) = split_first_word(rest);
+            return Err(AsmError::new(
+                line,
+                format!("`{opener}` block is never closed"),
+            ));
         };
 
         let mut sub = KwCx {
@@ -1022,6 +593,8 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             lines: self.lines[start..end].to_vec(),
             pos: 0,
             pending: Vec::new(),
+            in_macro: false,
+            macro_names: self.macro_names.clone(),
         };
         let (mut body, _) = sub.parse_block(false)?;
         for node in &mut body {
@@ -1056,6 +629,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             item: Some(crate::ast::Item::Repeat {
                 head: rest.to_string(),
                 body,
+                close: close.to_string(),
             }),
             source: rest.to_string(),
             span: Span::in_file(self.file, line as u32, 1),
@@ -1084,6 +658,46 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                 }
                 continue;
             }
+            // A macro definition is copied, not read — and copied verbatim,
+            // because a dialect may spell one `name MACRO` with the name in the
+            // *label* column. See `Item::Verbatim`; this is the same rule the
+            // eager walk follows, and it must run before the keyword checks
+            // below: pasmo closes a repetition with `ENDM`, the same word that
+            // closes a macro, and the body has to be consumed first for that
+            // not to collide.
+            //
+            // Only the formatter's parse reaches here with a definition intact:
+            // the assembling path expands it away first.
+            {
+                let what = self
+                    .syntax
+                    .macro_line(code, &|word: &str| self.macro_names.contains(word));
+                let copy = match what {
+                    macros::MacroLine::Opens(name) => {
+                        self.macro_names.insert(name);
+                        self.in_macro = true;
+                        true
+                    }
+                    macros::MacroLine::Closes if self.in_macro => {
+                        self.in_macro = false;
+                        true
+                    }
+                    macros::MacroLine::Invokes => true,
+                    _ => self.in_macro,
+                };
+                if copy {
+                    nodes.push(Node {
+                        operand_span: None,
+                        label: None,
+                        item: Some(crate::ast::Item::Verbatim),
+                        source: code.trim_end().to_string(),
+                        span: Span::in_file(self.file, line as u32, 1),
+                        trivia: self.trivia(comment, code, line),
+                    });
+                    continue;
+                }
+            }
+
             // A label-split failure is deferred, not raised: an untaken
             // branch may hold anything (probe p31), so the whole line becomes
             // verbatim op source — a *live* line still errors when it lowers.
@@ -1092,7 +706,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                 Err(_) => (None, code.trim()),
             };
             let (word, args) = split_first_word(rest);
-            if let Some(kw) = repeat_keyword(word) {
+            if let Some(kw) = self.syntax.repeat_keyword(word) {
                 match kw {
                     RepeatKw::Open => {
                         self.parse_repeat(&mut nodes, rest, label, line)?;
@@ -1101,12 +715,12 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                     RepeatKw::Close => {
                         return Err(AsmError::new(
                             line,
-                            format!("`{word}` without a matching `DUP`"),
+                            format!("`{word}` closes a repetition block that was never opened"),
                         ));
                     }
                 }
             }
-            match cond_keyword(word) {
+            match self.syntax.cond_keyword(word) {
                 Some(CondKw::If | CondKw::IfDef | CondKw::IfNDef) => {
                     self.parse_conditional(&mut nodes, raw, rest, word, label, comment, line)?;
                 }
@@ -1440,7 +1054,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         let (word0, args0) = split_first_word(&node.source);
         // `DEFINE` is handled before substitution, so the name being defined
         // is never itself expanded; chained values expand at use (probe p24).
-        if is_define_word(word0) {
+        if self.syntax.is_define_word(word0) {
             if let Some(sym) = &node.label {
                 let name = sym.name.clone();
                 self.push_label(&name, node, out)?;
@@ -1638,7 +1252,7 @@ impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
     fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError> {
         let line = line as usize;
         let (word, args) = split_first_word(head);
-        let taken = match cond_keyword(word) {
+        let taken = match self.syntax.cond_keyword(word) {
             Some(kw @ (CondKw::IfDef | CondKw::IfNDef)) => {
                 // The reference tests the FIRST token, ignoring the rest
                 // (probe p48); the namespace is the case-sensitive DEFINE
@@ -1852,6 +1466,7 @@ fn eval_condition_keyword<S: Z80Syntax>(
         pos: 0,
         line,
         consts,
+        sources: syntax.constant_sources(),
     }
     .or_expr()
 }
@@ -1863,6 +1478,9 @@ struct CondParser<'a> {
     pos: usize,
     line: usize,
     consts: &'a BTreeMap<String, i64>,
+    /// This dialect's phrasing for where a constant may come from
+    /// ([`Z80Syntax::constant_sources`]).
+    sources: &'static str,
 }
 
 impl CondParser<'_> {
@@ -2016,11 +1634,12 @@ impl CondParser<'_> {
         match tok {
             Tok::Num(n) => Ok(n),
             Tok::Sym(s) => self.consts.get(&s).copied().ok_or_else(|| {
+                let sources = self.sources;
                 AsmError::new(
                     self.line,
                     format!(
                         "`{s}` must be a constant here (a number, an expression of \
-                         constants, or a value defined with `equ` or `DEFINE` above)"
+                         constants, or {sources})"
                     ),
                 )
             }),

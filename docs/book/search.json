@@ -714,7 +714,7 @@
       "slug": "reference/dialects/pasmo"
     },
     {
-      "context": "9 directives, 14 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "11 directives, 18 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "pasmo",
       "slug": "reference/dialects/pasmo"
