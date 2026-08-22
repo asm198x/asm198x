@@ -146,6 +146,27 @@ unknown-word message; the tests pinning both.
 
 ### U1. Declare pasmo's include as `KnownUnsupported`
 
+- **Landed 2026-08-22.** The category has a member after two plans, and pasmo's
+  page carries a row saying "Recognised, and not implemented" where it carried
+  nothing.
+- **Derived, not restated.** `Z80Syntax::own_directives()` hands dispatch the
+  dialect's own declaration, and `parse_op` refuses a `KnownUnsupported` entry
+  from that — so the diagnostic follows the category rather than a second list
+  of words to refuse specially, which is the drift the surface exists to remove.
+- **It broke the migration table, which is the useful part.** The generated
+  include table renders a spelling per dialect, so declaring pasmo's `include`
+  made that page claim pasmo supports it. Fixed by rendering the category:
+  a `KnownUnsupported` entry shows the spelling **and** "not implemented",
+  because "pasmo spells it `include` and we do not read it" is a different fact
+  from "pasmo has no include", and a dash for both would lose exactly the
+  distinction this unit adds.
+- **The invariant changed shape.** `nothing_is_declared_unsupported_yet` asserted
+  a count of zero; what matters is not how many there are but that each draws a
+  diagnostic naming it unimplemented, so that is what is asserted now — plus a
+  guard that the category has not emptied again.
+- **R4 verified:** differential, corpus replay and the curriculum comparisons
+  byte-identical, zero new verdicts.
+- **The asl half is still #87's**, and is not part of this.
 - **Goal:** The one case that needs no other decision first.
 - **Requirements:** R1, R2, R4 (pasmo half).
 - **Files:** `dialects/pasmo.rs`, `dialects/z80.rs`, `directives.rs`.

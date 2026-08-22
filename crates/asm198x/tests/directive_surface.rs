@@ -10,7 +10,7 @@
 //! the surface is another crate, so a seam that works only from inside this one
 //! is not the seam it needs.
 
-use asm198x::directives::{Category, DialectSurface};
+use asm198x::directives::Category;
 use asm198x::{AsmError, AssemblyResult, dialect_table, directives};
 
 type Assemble = fn(&str) -> Result<AssemblyResult, AsmError>;
@@ -173,21 +173,46 @@ fn every_selectable_dialect_is_accounted_for() {
     }
 }
 
-/// Nothing is declared `KnownUnsupported` yet, stated rather than left unsaid.
+/// Every `KnownUnsupported` spelling is refused as one, and says so.
 ///
-/// The category exists for pasmo's include and asl's semantic pseudo-ops
-/// (#87). When either lands, this count changes and someone reads the row.
+/// The category spent two plans with no members and a test asserting the count
+/// was zero. It has one now — pasmo's `include` — and the useful invariant is
+/// not how many there are but that each one draws a diagnostic saying the
+/// directive is real and unimplemented, rather than the unknown-mnemonic
+/// refusal that sends a reader to check their own source.
 #[test]
-fn the_known_unsupported_count_is_zero() {
-    let unsupported: Vec<String> = directives::surfaces()
-        .iter()
-        .flat_map(|s: &DialectSurface| {
-            s.directives
-                .iter()
-                .filter(|d| d.category == Category::KnownUnsupported)
-                .map(|d| format!("{}: {}", s.dialect, d.id))
-                .collect::<Vec<_>>()
-        })
-        .collect();
-    assert!(unsupported.is_empty(), "{unsupported:?}");
+fn a_known_unsupported_spelling_says_which_it_is() {
+    let mut checked = 0;
+    for surface in directives::surfaces() {
+        let assemble = assembler(surface.dialect);
+        for directive in &surface.directives {
+            if directive.category != Category::KnownUnsupported {
+                continue;
+            }
+            for spelling in &directive.spellings() {
+                let source = format!(" {spelling} \"x\"\n");
+                let err = assemble(&source).expect_err("declared unimplemented");
+                let message = err.to_string();
+                assert!(
+                    message.contains("does not implement"),
+                    "{}: `{spelling}` is declared unsupported and refuses as \
+                     something else: {message}",
+                    surface.dialect
+                );
+                assert!(
+                    !refused_by_name(&err, spelling),
+                    "{}: `{spelling}` still reads as an unknown word: {message}",
+                    surface.dialect
+                );
+                checked += 1;
+            }
+        }
+    }
+    // A category nothing declares is a category nothing checks. It was empty
+    // for two plans; this is what notices if it empties again.
+    assert!(
+        checked > 0,
+        "no dialect declares a `KnownUnsupported` spelling — pasmo's `include` \
+         should be one"
+    );
 }

@@ -50,6 +50,20 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["macro"]),
         category: Category::Operation,
     },
+    // Declared, and declared **unsupported**. Real pasmo assembles `include`;
+    // asm198x does not implement it, so a multi-file pasmo project does not
+    // build here.
+    //
+    // Refusing it as an unknown mnemonic — which is what happened until this
+    // row existed — tells the reader their source is invalid when it is not,
+    // and sends them to check their own file. The category exists to keep
+    // "not supported yet" apart from "not a thing", because only one of those
+    // is a decision the reader can act on.
+    Directive {
+        id: "include",
+        pattern: Pattern::Exact(&["include"]),
+        category: Category::KnownUnsupported,
+    },
 ];
 
 pub(crate) struct Pasmo {
@@ -136,6 +150,10 @@ impl Z80Syntax for PasmoSyntax {
     /// `End line expected but ','found`) and `<file>` a literal file name.
     fn is_incbin(&self, word: &str) -> bool {
         word.eq_ignore_ascii_case("incbin")
+    }
+
+    fn own_directives(&self) -> &'static [crate::directives::Directive] {
+        DIRECTIVES
     }
 
     /// pasmo numbers: `$hex`/`0xhex`, `%binary`, `'c'` char, decimal, and the

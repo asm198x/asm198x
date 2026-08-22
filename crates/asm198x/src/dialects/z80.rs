@@ -97,6 +97,19 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// This dialect's own declared directives, on top of
+    /// [`COMMON_DIRECTIVES`].
+    ///
+    /// Dispatch reads it for one thing the shared code cannot know: whether a
+    /// word is declared [`Category::KnownUnsupported`], and so must be refused
+    /// as a directive we do not implement rather than as a word that is not one.
+    /// Deriving that from the declaration keeps a single source — the
+    /// alternative is a second list of "words to refuse specially", which is
+    /// the drift the declared surface exists to remove.
+    fn own_directives(&self) -> &'static [crate::directives::Directive] {
+        &[]
+    }
+
     /// Whether `word` is this dialect's binary-inclusion directive
     /// (language-surface U3). Off by default; sjasmplus and pasmo override for
     /// `INCBIN`. Like an include, an incbin is walk-handled: a verbatim item
@@ -2019,6 +2032,20 @@ fn parse_op<S: Z80Syntax>(
     let (word, args) = split_first_word(rest);
     if syntax.is_directive(word) {
         return syntax.parse_directive(word, args, line, consts);
+    }
+    // A directive this dialect declares and does not implement. Refusing it as
+    // an unknown mnemonic would tell the reader their source is invalid, when
+    // the reference assembler takes it and the gap is ours.
+    if let Some(entry) = crate::directives::lookup(syntax.own_directives(), word)
+        && entry.category == crate::directives::Category::KnownUnsupported
+    {
+        return Err(AsmError::new(
+            line,
+            format!(
+                "`{word}` is a directive this dialect has and asm198x does not \
+                 implement — the source is valid and the gap is here, not in it"
+            ),
+        ));
     }
     let mnemonic = word.to_ascii_uppercase();
     if !has_mnemonic(set, ext, &mnemonic) {

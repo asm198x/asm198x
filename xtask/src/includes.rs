@@ -16,21 +16,31 @@
 use std::fmt::Write as _;
 
 use asm198x::dialect_table;
-use asm198x::directives::{self, Directive};
+use asm198x::directives::{self, Category, Directive};
 use asm198x::includes::{self, Anchor};
 
-/// Every spelling of one entry, as inline code, or a dash if the dialect has
-/// no such entry.
+/// Every spelling of one entry, as inline code.
+///
+/// Three outcomes, and the middle one is why this is not a one-liner. A dialect
+/// with no such entry gets a dash. One that declares it
+/// [`Category::KnownUnsupported`] gets the spelling **and** a note, because
+/// "pasmo spells it `include` and we do not implement it" is a different fact
+/// from "pasmo has no include", and a table that showed both as a dash would
+/// lose the distinction the category was added to make.
 fn spellings(directives: &[Directive], id: &str) -> String {
     let Some(entry) = directives.iter().find(|d| d.id == id) else {
         return "—".to_string();
     };
-    entry
+    let names = entry
         .spellings()
         .iter()
         .map(|s| format!("`{s}`"))
         .collect::<Vec<_>>()
-        .join(", ")
+        .join(", ");
+    if entry.category == Category::KnownUnsupported {
+        return format!("{names} — **not implemented**");
+    }
+    names
 }
 
 /// The table, ordered as the dialect table orders `--dialect` itself.
