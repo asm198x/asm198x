@@ -1750,20 +1750,17 @@ fn the_formatter_reads_what_the_assembler_reads() {
 /// outlives the problem.
 const FORMATTER_GAPS: &[(&str, &str)] = &[];
 
-/// Sources this crate assembles, and formats, and then cannot assemble ([#186]).
+/// Sources this crate assembles, and formats, and then cannot assemble.
 ///
-/// A weaker failure than a refusal and a worse one: the formatter accepts the
-/// file, so nothing looks wrong until the result is built. Keyed by dialect and
-/// probe note; a row that starts round-tripping fails the test, as on
+/// **Empty.** A weaker failure than a refusal and a worse one: the formatter
+/// accepts the file, so nothing looks wrong until the result is built. With no
+/// rows, any source whose program changes under `fmt` is reported.
+///
+/// Its two rows were both [#186] — ca65 makes a label with a colon and we
+/// required column 0, so indenting a macro body, which is correct ca65 layout,
+/// moved the label somewhere our own parser would not read it. Keyed by dialect
+/// and probe note; a row that starts round-tripping fails the test, as on
 /// [`FORMATTER_GAPS`].
 ///
-/// Both rows are the same defect and it is not the formatter's. ca65 accepts a
-/// label in any column and we accept one only at column 0, so indenting a macro
-/// body — which is correct ca65 layout — moves its label somewhere our own
-/// parser will not read it. Fixing the parser deletes both rows.
-///
 /// [#186]: https://github.com/asm198x/asm198x/issues/186
-const FORMATTER_ROUND_TRIP_GAPS: &[(&str, &str)] = &[
-    ("ca65-816", ".local label, invoked twice"),
-    ("ca65-816", ".local declares several names"),
-];
+const FORMATTER_ROUND_TRIP_GAPS: &[(&str, &str)] = &[];

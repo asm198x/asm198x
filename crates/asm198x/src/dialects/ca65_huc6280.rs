@@ -359,9 +359,15 @@ fn strip_comment(line: &str) -> &str {
 /// Split a `label:` from the rest of the line. ca65 labels require a trailing
 /// colon, so a colon-less column-0 word is the instruction or directive.
 fn split_label(code: &str) -> (Option<String>, &str) {
-    if code.starts_with([' ', '\t']) {
-        return (None, code.trim());
-    }
+    // No column rule: in ca65 the **colon** makes a label, not the column. A
+    // label may be indented (`        start: dex` assembles), and a first word
+    // without a colon is not a label wherever it sits — `start dex` at column 0
+    // is `':' expected`, not a definition. Both measured against ca65 2.19.
+    //
+    // The column test that used to be here made the formatter unsafe rather
+    // than merely strict: indenting a macro body is correct ca65 layout, so
+    // `fmt` moved a body's label off column 0 and produced source this parser
+    // would then refuse (#186).
     let trimmed = code.trim();
     let (word, remainder) = split_first_word(trimmed);
     match word.strip_suffix(':') {
@@ -980,6 +986,48 @@ mod tests {
         assert_eq!(
             bytes(".macro delay\n.local spin\nspin: dex\n bne spin\n.endmacro\n delay\n delay\n"),
             vec![0xCA, 0xD0, 0xFD, 0xCA, 0xD0, 0xFD]
+        );
+    }
+
+    /// A label is made by its **colon**, not by its column — ca65 assembles an
+    /// indented one and so do we (#186).
+    ///
+    /// The column rule this replaces did more than refuse valid source: it made
+    /// `fmt` unsafe. Indenting a macro body is correct ca65 layout, so the
+    /// formatter moved a body's label off column 0 and produced a file this
+    /// parser then refused. The round trip below is the property that broke.
+    #[test]
+    fn a_label_may_be_indented() {
+        let flush = crate::assemble_ca65_huc6280("start: dex\n bne start\n").expect("column 0");
+        let indented = crate::assemble_ca65_huc6280("        start: dex\n        bne start\n")
+            .expect("indented");
+        assert_eq!(flush.bytes, indented.bytes);
+    }
+
+    /// A first word without a colon is not a label wherever it sits, so an
+    /// ordinary indented instruction is unaffected.
+    #[test]
+    fn an_indented_instruction_is_not_read_as_a_label() {
+        let out =
+            crate::assemble_ca65_huc6280("        dex\n        dex\n").expect("two instructions");
+        assert_eq!(out.bytes.len(), 2, "{out:?}");
+    }
+
+    /// The formatter round trip over an indented label. huc6280 has no macros,
+    /// so it never meets #186's own trigger — but it shared the column rule,
+    /// and a parser that refuses source its reference accepts is a fidelity
+    /// bug whether or not the formatter can currently produce it.
+    #[test]
+    fn an_indented_label_survives_formatting() {
+        let src = "        start: dex\n        bne start\n";
+        let before = crate::assemble_ca65_huc6280(src).expect("assembles").bytes;
+        let formatted = crate::format_ca65_huc6280(src).expect("formats");
+        let after = crate::assemble_ca65_huc6280(&formatted)
+            .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+            .bytes;
+        assert_eq!(
+            before, after,
+            "formatting changed the program:\n{formatted}"
         );
     }
 }
