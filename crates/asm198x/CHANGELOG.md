@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.24](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.23...asm198x-v0.0.24) - 2026-08-22
+
+### Added
+
+- *(directives)* declare the macro and conditional vocabulary ([#178](https://github.com/asm198x/asm198x/pull/178))
+
+### Other
+
+- *(deps)* bump sha2 from 0.10.9 to 0.11.0 ([#151](https://github.com/asm198x/asm198x/pull/151))
+
 ## [0.0.23](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.22...asm198x-v0.0.23) - 2026-08-21
 
 ### Added
