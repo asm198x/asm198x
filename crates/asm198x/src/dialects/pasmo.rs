@@ -62,6 +62,17 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["if", "else", "endif"]),
         category: Category::Operation,
     },
+    // Walk-handled, like the conditionals above.
+    //
+    // `endm` is not declared here even though it closes a repetition, because
+    // it is already the macro block's closer and one word cannot be two rows.
+    // pasmo really does spell both ends of both constructs that way; sjasmplus
+    // has `dup`/`rept` closed by `edup`/`endr` and neither is pasmo's.
+    Directive {
+        id: "repeat",
+        pattern: Pattern::Exact(&["rept"]),
+        category: Category::Operation,
+    },
     // Declared, and declared **unsupported**. Real pasmo assembles `include`;
     // asm198x does not implement it, so a multi-file pasmo project does not
     // build here.
@@ -173,6 +184,29 @@ impl Z80Syntax for PasmoSyntax {
     /// expander agree on what opens, closes and invokes a definition.
     fn macro_line(&self, line: &str, known: &dyn Fn(&str) -> bool) -> macros::MacroLine {
         macros::macro_line(self, line, known)
+    }
+
+    /// `REPT n` … `ENDM`, case-insensitively — and **`ENDM`**, not `ENDR`.
+    ///
+    /// pasmo closes a repetition with the same word that closes a macro, and
+    /// refuses `ENDR` outright. Accepting both would be the tidier surface and
+    /// the wrong one; `syntax-stance.md` is fidelity over convergence.
+    ///
+    /// The sharing is safe because a macro definition is consumed by the walk
+    /// *before* this is consulted, so the `ENDM` that closes a body is never
+    /// offered here. pasmo itself refuses a `REPT` nested inside a macro — the
+    /// first `ENDM` ends the definition there too — so the two constructs
+    /// never legitimately overlap.
+    ///
+    /// `DUP`/`EDUP` are sjasmplus's and are not pasmo's.
+    fn repeat_keyword(&self, word: &str) -> Option<z80::RepeatKw> {
+        if word.eq_ignore_ascii_case("rept") {
+            Some(z80::RepeatKw::Open)
+        } else if word.eq_ignore_ascii_case("endm") {
+            Some(z80::RepeatKw::Close)
+        } else {
+            None
+        }
     }
 
     /// `IF` / `ELSE` / `ENDIF`, case-insensitively, and **nothing else**.
@@ -901,10 +935,135 @@ mod tests {
         );
     }
 
+    // -----------------------------------------------------------------------
+    // Repetition. Measured against pasmo 0.5.5.
+    // -----------------------------------------------------------------------
+
+    /// The body assembles once per iteration, and the count folds against the
+    /// constants above it — `REPT n+1` with `n equ 2` runs three times.
+    #[test]
+    fn a_repetition_assembles_its_body_n_times() {
+        assert_eq!(
+            asm(" org 0\n REPT 3\n nop\n ENDM\n ret\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x00, 0x00, 0x00, 0xC9]
+        );
+        assert_eq!(
+            asm(" org 0\nn equ 2\n REPT n+1\n nop\n ENDM\n ret\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x00, 0x00, 0x00, 0xC9]
+        );
+    }
+
+    /// A count of zero assembles the body no times, rather than once.
+    #[test]
+    fn a_repetition_of_zero_emits_nothing() {
+        assert_eq!(
+            asm(" org 0\n REPT 0\n nop\n ENDM\n ret\n")
+                .expect("assembles")
+                .bytes,
+            vec![0xC9]
+        );
+    }
+
+    /// Nesting, and a label on the head line — which pasmo allows here though
+    /// it refuses one on an `IF` line.
+    #[test]
+    fn repetitions_nest_and_may_carry_a_label() {
+        assert_eq!(
+            asm(" org 0\n REPT 2\n REPT 3\n nop\n ENDM\n inc a\n ENDM\n ret\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x00, 0x00, 0x00, 0x3C, 0x00, 0x00, 0x00, 0x3C, 0xC9]
+        );
+        assert_eq!(
+            asm(" org 0\nlbl: REPT 2\n nop\n ENDM\n ret\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x00, 0x00, 0xC9]
+        );
+    }
+
+    /// **`ENDM`, not `ENDR`.** pasmo closes a repetition with the macro
+    /// closer and refuses `ENDR`; sjasmplus, which shares this parser, has
+    /// `DUP`/`EDUP`/`ENDR` and not pasmo's spelling. Accepting the union would
+    /// be the tidier surface and the wrong one.
+    #[test]
+    fn the_closer_is_endm_and_the_sjasmplus_spellings_are_refused() {
+        asm(" org 0\n REPT 3\n nop\n ENDR\n ret\n").expect_err("`ENDR` is not pasmo's");
+        asm(" org 0\n DUP 3\n nop\n EDUP\n ret\n").expect_err("`DUP` is not pasmo's");
+    }
+
+    /// A macro and a repetition in one file, both closed by `ENDM`. The walk
+    /// consumes a definition before the repetition keywords are consulted, so
+    /// the body's `ENDM` never reaches them.
+    #[test]
+    fn a_macro_and_a_repetition_share_the_closer_without_colliding() {
+        assert_eq!(
+            asm(" org 0\nsetv MACRO v\n ld a,v\n ENDM\n REPT 2\n setv 9\n ENDM\n ret\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x3E, 0x09, 0x3E, 0x09, 0xC9]
+        );
+    }
+
+    /// A repetition in an untaken branch folds no count, so a count that could
+    /// not be folded is never reached — the shared walk's `emit = false` rule.
+    #[test]
+    fn a_repetition_in_an_untaken_branch_folds_nothing() {
+        assert_eq!(
+            asm(" org 0\n IF 0\n REPT undefined_symbol\n nop\n ENDM\n ENDIF\n ret\n")
+                .expect("assembles")
+                .bytes,
+            vec![0xC9]
+        );
+    }
+
+    /// A diagnostic names the words the source used, not another dialect's.
+    #[test]
+    fn an_unclosed_repetition_names_pasmos_own_keyword() {
+        let err = asm(" org 0\n REPT 3\n nop\n").expect_err("never closed");
+        assert!(err.message.contains("REPT"), "{err:?}");
+        assert!(
+            !err.message.contains("DUP"),
+            "sjasmplus's spelling: {err:?}"
+        );
+    }
+
+    /// The condition parser is shared with sjasmplus, and its "you need a
+    /// constant" diagnostic must not send a pasmo reader to `DEFINE` — a
+    /// directive pasmo does not have.
+    #[test]
+    fn a_diagnostic_never_names_a_directive_pasmo_lacks() {
+        let err = asm(" org 0\n IF nope\n nop\n ENDIF\n").expect_err("undefined");
+        assert!(err.message.contains("equ"), "{err:?}");
+        assert!(!err.message.contains("DEFINE"), "{err:?}");
+    }
+
     /// Formatting a conditional changes the layout and not the program.
     #[test]
     fn a_formatted_conditional_assembles_to_the_same_bytes() {
         let src = " org 0\nn equ 1\n IF n\n ld a,5\n ELSE\n inc a\n ENDIF\n ret\n";
+        let before = asm(src).expect("assembles").bytes;
+        let formatted = crate::format_pasmo(src).expect("formats");
+        let after = asm(&formatted)
+            .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+            .bytes;
+        assert_eq!(
+            before, after,
+            "formatting changed the program:\n{formatted}"
+        );
+
+        let again = crate::format_pasmo(&formatted).expect("formats");
+        assert_eq!(formatted, again, "{formatted}");
+    }
+
+    /// The same, for a repetition.
+    #[test]
+    fn a_formatted_repetition_assembles_to_the_same_bytes() {
+        let src = " org 0\nn equ 2\n REPT n+1\n ld a,5\n ENDM\n ret\n";
         let before = asm(src).expect("assembles").bytes;
         let formatted = crate::format_pasmo(src).expect("formats");
         let after = asm(&formatted)
