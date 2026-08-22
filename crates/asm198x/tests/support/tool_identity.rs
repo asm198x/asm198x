@@ -177,12 +177,30 @@ fn first_line_containing(out: &std::process::Output, marker: &str) -> Option<Str
         .map(|l| l.trim().to_string())
 }
 
+/// Lower-case hex, which is how every digest in the corpus is written.
+///
+/// sha2 0.11 returns a `hybrid_array::Array` rather than a `GenericArray`, and
+/// that type implements no `LowerHex`, so `format!("{:x}", …)` no longer
+/// compiles. `verdict_corpus::encode_hex` is the wrong replacement: it emits
+/// **upper**-case, for the byte payloads a verdict carries. Swapping the case
+/// of a recorded digest would change every `Verdict::id` and leave the corpus
+/// mixed, so the case is part of the format rather than a detail.
+fn hex_lower(bytes: &[u8]) -> String {
+    use std::fmt::Write as _;
+    bytes
+        .iter()
+        .fold(String::with_capacity(bytes.len() * 2), |mut out, b| {
+            let _ = write!(out, "{b:02x}");
+            out
+        })
+}
+
 /// SHA-256 of a file, lower-case hex.
 fn digest_of(path: &PathBuf) -> Option<String> {
     let bytes = std::fs::read(path).ok()?;
     let mut hasher = Sha256::new();
     hasher.update(&bytes);
-    Some(format!("{:x}", hasher.finalize()))
+    Some(hex_lower(hasher.finalize().as_slice()))
 }
 
 /// Find `tool` on `PATH`, so the binary can be hashed rather than merely run.

@@ -99,7 +99,7 @@ pub fn render(repo: &Path) -> String {
             h.update(name.as_bytes());
             h.update(bytes);
         }
-        format!("{:x}", h.finalize())
+        hex_lower(h.finalize().as_slice())
     };
 
     let cover: BTreeMap<String, coverage::Row> = coverage::compute(repo)
@@ -182,6 +182,24 @@ fn suite_of(v: &Verdict) -> String {
         Suite::Curriculum => "curriculum",
     }
     .to_string()
+}
+
+/// Lower-case hex, which is how every digest in the corpus is written.
+///
+/// sha2 0.11 returns a `hybrid_array::Array` rather than a `GenericArray`, and
+/// that type implements no `LowerHex`, so `format!("{:x}", …)` no longer
+/// compiles. `verdict_corpus::encode_hex` is the wrong replacement: it emits
+/// **upper**-case, for the byte payloads a verdict carries. Swapping the case
+/// of a recorded digest would change every `Verdict::id` and leave the corpus
+/// mixed, so the case is part of the format rather than a detail.
+fn hex_lower(bytes: &[u8]) -> String {
+    use std::fmt::Write as _;
+    bytes
+        .iter()
+        .fold(String::with_capacity(bytes.len() * 2), |mut out, b| {
+            let _ = write!(out, "{b:02x}");
+            out
+        })
 }
 
 #[cfg(test)]
