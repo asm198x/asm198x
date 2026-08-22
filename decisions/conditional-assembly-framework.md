@@ -109,6 +109,39 @@ asl-family `IF … ENDIF` and lwasm/rgbasm follow the same shape):
   for the reference survey behind both.
 
   The next adopter is not pre-approved. It needs its own note here.
+- **2026-08-22 (later) — the gate is retired. Every dialect gets what its
+  reference has.** Steve: *"Where functionality is currently only supported by
+  some dialects natively, support it in all."*
+
+  Demand-gating lasted one adopter past the amendment above, and the measurement
+  that killed it is worth keeping. Across macros, conditionals and repetition on
+  the seven main dialects there are **ten gaps, and nine of them are ours** —
+  the reference has the feature and we have not implemented it. Only lwasm's
+  repetition is a genuine absence in the reference.
+
+  | dialect | macros | conditionals | repetition |
+  |---|---|---|---|
+  | pasmo | yes | yes | yes |
+  | sjasmplus | yes | yes | yes |
+  | acme | yes | yes | missing (`!for`) |
+  | ca65 | yes | missing (`.if`) | missing (`.repeat`) |
+  | vasm | yes | missing (`ifne`) | missing (`rept`) |
+  | rgbasm | missing (`MACRO`) | missing (`IF`/`ENDC`) | missing (`REPT`) |
+  | lwasm | yes | missing (`ifne`/`endc`) | **the reference has none** |
+
+  So the gate was not holding back speculative generality. It was holding back
+  **fidelity work on features every one of these assemblers already has**, which
+  is the opposite of what it was written for. The identity claim is that
+  real-world source for a machine assembles unchanged, and nine cells above are
+  counter-examples to it.
+
+  **The new rule: a dialect gets a construct when its reference has one, and the
+  work is scheduled rather than gated.** This costs nothing the old rule was
+  protecting — each of the nine is arbitrated byte-for-byte against its own
+  reference, so none of it is invention, and `syntax-stance.md`'s per-dialect
+  fidelity still decides every spelling. What stays gated is the tenth cell:
+  giving a dialect a construct its reference does **not** have is an extension,
+  it has no arbiter, and it is a separate decision not taken here.
 
 ## Drift triggers
 
@@ -117,13 +150,15 @@ Stop and re-consult if a change would:
 - **Build a generic keyword-block parser or a style-aware emit "for later"**,
   with no keyword dialect actually consuming it. Wait for the first real
   consumer — that is the whole point of the seam.
-- **Add conditional support to a dialect with no concrete driver.** Adoption is
-  demand-gated, and each adopter is named in a dated note above before its
-  code is written. Real-world source compatibility counts as a driver (see the
-  2026-08-22 note); *curriculum* absence never counts as evidence against one,
-  because the curriculum was authored around what the toolchain supports.
-- **Read "pasmo is adopted" as "the rest are next".** ca65, rgbasm and vasm are
-  still gated, individually.
+- **Re-introduce the demand gate** — "no dialect needs this yet, so leave it".
+  Retired 2026-08-22 for the reason in the note above: it was gating fidelity
+  work, not speculation. *Curriculum* absence in particular is never evidence
+  against a feature, because the curriculum was authored around what the
+  toolchain supports and cannot signal demand for what it lacks.
+- **Give a dialect a construct its reference does not have**, on the grounds
+  that a sibling dialect has one. That is an extension, not parity: it has no
+  arbiter, and it accepts source the real tool rejects. lwasm repetition is the
+  known case. Decide it on its own terms, in its own record.
 - **Re-introduce a per-dialect conditional *preprocessor*** (a second parse that
   evaluates conditionals outside the tree), rather than a `CondEval` over the
   shared `Item::Conditional`. ACME's `process_block` was retired for exactly this
