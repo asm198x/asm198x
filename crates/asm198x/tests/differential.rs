@@ -1579,3 +1579,114 @@ fn multi_file_source_matches_reference() {
         "no probes checked — no reference tools present?"
     );
 }
+
+/// `fmt` must read what `asm` reads.
+///
+/// # The underlying problem, not the symptom
+///
+/// #130 records that five of six dialects refuse to format a file they will
+/// assemble. That is worth fixing on its own — someone who can assemble a macro
+/// will expect to format one, and "the formatter supports a subset of the
+/// assembler" is a hard thing to explain. But the reason it went unnoticed
+/// matters more: **nothing asserted the two paths agree**, and each refusal was
+/// pinned by a test asserting the refusal, which locks the divergence in rather
+/// than flagging it.
+///
+/// This is the missing assertion. Every probe body already carries the property
+/// that makes it a fair test — it was verified accepted by its own reference
+/// before being added — so a body this crate assembles is one it has no excuse
+/// for refusing to lay out.
+///
+/// # The ledger
+///
+/// Known divergences are listed with the dialect and the reason. A listed one
+/// that starts formatting fails the test, exactly as the `gap(...)` markers
+/// above do: a ledger nobody has to update is a ledger that stops being true.
+#[test]
+fn the_formatter_reads_what_the_assembler_reads() {
+    let mut refused: Vec<String> = Vec::new();
+    let mut checked = 0;
+
+    for probe in PROBES {
+        // Only bodies we actually assemble. A probe we reject is #93's problem
+        // or a recorded gap, and not evidence about the formatter.
+        if support::verdicts::assemble_probe(probe.dialect, probe.body)
+            .and_then(Result::ok)
+            .is_none()
+        {
+            continue;
+        }
+        let Some(outcome) = support::verdicts::format_probe(probe.dialect, probe.body) else {
+            continue;
+        };
+        checked += 1;
+        if let Err(why) = outcome {
+            refused.push(format!("{} — {}: {why}", probe.dialect, probe.note));
+        }
+    }
+
+    eprintln!("checked {checked} assembling probe(s) against the formatter");
+    assert!(
+        checked > 0,
+        "no probe assembled — the framing has drifted and this checks nothing"
+    );
+
+    // A divergence is expected only if the dialect **and the reason** are on
+    // the ledger. Keying on the dialect alone would swallow an unrelated
+    // formatter failure in a dialect that already has a row, which is the
+    // shape of blindness this test exists to end.
+    let expected = |r: &str| {
+        FORMATTER_GAPS
+            .iter()
+            .any(|(d, reason)| r.starts_with(&format!("{d} — ")) && r.contains(reason))
+    };
+    let unexpected: Vec<&String> = refused.iter().filter(|r| !expected(r)).collect();
+    assert!(
+        unexpected.is_empty(),
+        "{} source(s) assemble and will not format, and are not on the ledger:\n  {}",
+        unexpected.len(),
+        unexpected
+            .iter()
+            .map(|s| s.as_str())
+            .collect::<Vec<_>>()
+            .join("\n  ")
+    );
+
+    let fixed: Vec<&(&str, &str)> = FORMATTER_GAPS
+        .iter()
+        .filter(|(d, reason)| {
+            !refused
+                .iter()
+                .any(|r| r.starts_with(&format!("{d} — ")) && r.contains(reason))
+        })
+        .collect();
+    assert!(
+        fixed.is_empty(),
+        "{} listed formatter gap(s) now format — delete their row so the ledger stays honest:\n  {}",
+        fixed.len(),
+        fixed
+            .iter()
+            .map(|(d, n)| format!("{d}: {n}"))
+            .collect::<Vec<_>>()
+            .join("\n  ")
+    );
+}
+
+/// Sources this crate assembles and will not format (#130).
+///
+/// Each row is `(dialect, the reason its formatter gives)`. Both halves are
+/// matched: a dialect on this list that starts failing for a *different* reason
+/// is reported, because a row is a statement about one known cause and not a
+/// licence to fail.
+///
+/// Every row here is a macro. sjasmplus is the one dialect with none, and it is
+/// the one whose formatter was built after macros rather than before — which is
+/// the whole of the explanation. Deleting a row is how a fix is recorded, and
+/// the test above fails if a row outlives the problem.
+const FORMATTER_GAPS: &[(&str, &str)] = &[
+    ("pasmo", "unknown instruction `MACRO`"),
+    ("lwasm", "unknown instruction `macro`"),
+    ("acme", "unbalanced `}` in conditional block"),
+    ("vasm", "`macro` is declared but not dispatched"),
+    ("ca65-816", "is declared (`macro`) but not dispatched here"),
+];
