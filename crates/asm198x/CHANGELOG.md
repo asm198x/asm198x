@@ -9,12 +9,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.25](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.24...asm198x-v0.0.25) - 2026-08-22
 
-### Other
+### Fixed
 
-- pasmo gains conditionals and repetition, and the formatter stops deleting loop bodies ([#187](https://github.com/asm198x/asm198x/pull/187))
-- Every dialect's formatter now formats what its assembler assembles ([#184](https://github.com/asm198x/asm198x/pull/184))
-- Assert the formatter reads what the assembler reads ([#183](https://github.com/asm198x/asm198x/pull/183))
-- Say which failure it is: pasmo's unimplemented include, and one wording for an unknown word ([#181](https://github.com/asm198x/asm198x/pull/181))
+- **`fmt` deleted the body of every repetition block.** On sjasmplus source, a
+  `DUP` or `REPT` block came back as its head alone — the body and the closer
+  were dropped, silently, exit 0. Three lines in, one out. The guide describes
+  `fmt` as safe to run over a project you have not read and shows you how to
+  move the result over your original, so this is worth checking for if you have
+  formatted sjasmplus source with a loop in it. Now rendered in full, with the
+  closer kept exactly as you spelled it — `EDUP` stays `EDUP`, `endr` stays
+  lowercase. ([#187](https://github.com/asm198x/asm198x/pull/187))
+- **A diagnostic no longer names a directive your assembler does not have.**
+  pasmo's "must be a constant here" suggested `DEFINE`, which is sjasmplus's;
+  an unclosed pasmo repetition was reported as a missing `EDUP`, which is also
+  sjasmplus's. Each message now comes from the dialect you are assembling.
+  ([#187](https://github.com/asm198x/asm198x/pull/187))
+- **`include` in pasmo said your source was wrong when it was not.** Real pasmo
+  assembles it and we do not implement it, and refusing it as an unknown
+  mnemonic sent readers to check their own file. It now says the spelling is
+  recognised and unimplemented, which is a different thing and the one you can
+  act on. The same pass gave every dialect one wording for a word it does not
+  know. ([#181](https://github.com/asm198x/asm198x/pull/181))
+
+### Added
+
+- **Every dialect formats a file with macros in it.** ca65, vasm, lwasm, pasmo
+  and acme would each assemble a file and then refuse to lay it out — 35 source
+  files in the test corpus were in that state. A macro definition is now copied
+  through exactly as written, its own indentation kept, because a body is a
+  template rather than code: a parameter is not an operand, and a line of one
+  may not be a whole instruction until the macro is called.
+  ([#184](https://github.com/asm198x/asm198x/pull/184),
+  [#183](https://github.com/asm198x/asm198x/pull/183))
+- **pasmo: conditional assembly and repetition.** `IF` / `ELSE` / `ENDIF` and
+  `REPT n` … `ENDM`, in any case, with the count folding against the constants
+  above it. Both were in real pasmo and answered `unknown instruction` here.
+  Only the spellings pasmo actually has: `IFDEF`, `IFNDEF`, `ELSEIF`, `ENDC`,
+  the dotted forms, `DUP` and `ENDR` are all sjasmplus's, and all still
+  refused. ([#187](https://github.com/asm198x/asm198x/pull/187))
+
+### Changed
+
+- The formatting guide now says what happens to a macro — the definition comes
+  back with your indentation rather than the canonical one — and pasmo's dialect
+  page lists its new `if`/`else`/`endif` and `rept` spellings. That page is the
+  list the parser reads, so a spelling on it is one the assembler accepts and a
+  spelling missing from it is one it refuses.
+  ([#187](https://github.com/asm198x/asm198x/pull/187),
+  [#184](https://github.com/asm198x/asm198x/pull/184))
 
 ## [0.0.24](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.23...asm198x-v0.0.24) - 2026-08-22
 
