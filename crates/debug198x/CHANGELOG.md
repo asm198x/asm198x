@@ -7,6 +7,37 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.26](https://github.com/asm198x/asm198x/compare/debug198x-v0.0.25...debug198x-v0.0.26) - 2026-08-22
+
+### Added
+
+- *(debug198x)* let a section state the page it lives in
+
+### Fixed
+
+- *(debug198x)* [**breaking**] carry unknown space shapes, and withdraw `bank`
+- *(debug198x)* document the page as the join key, and prove it
+
+### Other
+
+- release v0.0.25 ([#182](https://github.com/asm198x/asm198x/pull/182))
+- release v0.0.24 ([#173](https://github.com/asm198x/asm198x/pull/173))
+- release v0.0.23 ([#169](https://github.com/asm198x/asm198x/pull/169))
+- release v0.0.22 ([#156](https://github.com/asm198x/asm198x/pull/156))
+- release v0.0.19 ([#150](https://github.com/asm198x/asm198x/pull/150))
+- release v0.0.17 ([#147](https://github.com/asm198x/asm198x/pull/147))
+- release v0.0.16 ([#145](https://github.com/asm198x/asm198x/pull/145))
+- release v0.0.15 ([#143](https://github.com/asm198x/asm198x/pull/143))
+- Let release-plz determine versions again, and cut v0.0.14 ([#142](https://github.com/asm198x/asm198x/pull/142))
+- release v0.0.13 ([#101](https://github.com/asm198x/asm198x/pull/101))
+- release v0.0.12 ([#92](https://github.com/asm198x/asm198x/pull/92))
+- release v0.0.11
+- release v0.0.10
+- *(debug198x)* tell readers to surface spaces they cannot read
+- Merge pull request #72 from asm198x/debug198x-section-space
+- release v0.0.7 ([#63](https://github.com/asm198x/asm198x/pull/63))
+- rename the dbg198x crate to debug198x
+
 ## [0.0.25](https://github.com/asm198x/asm198x/compare/debug198x-v0.0.24...debug198x-v0.0.25) - 2026-08-22
 
 ### Added
