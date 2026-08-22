@@ -9,6 +9,7 @@
 mod changelog;
 mod compare;
 mod coverage;
+mod dialect_pages;
 mod divergences;
 mod docs;
 mod evidence;
