@@ -29,11 +29,28 @@ use crate::source::{SourceLoader, SourceMap};
 /// an `include` row and pasmo without one, where before the difference could
 /// only be found by assembling a project and reading `unknown instruction
 /// INCLUDE`.
-pub const DIRECTIVES: &[Directive] = &[Directive {
-    id: "incbin",
-    pattern: Pattern::Exact(&["incbin"]),
-    category: Category::Operation,
-}];
+pub const DIRECTIVES: &[Directive] = &[
+    Directive {
+        id: "incbin",
+        pattern: Pattern::Exact(&["incbin"]),
+        category: Category::Operation,
+    },
+    // Expander-handled: the macro scanner consumes this before `parse_op` sees
+    // a line. Declared because the surface describes the dialect — and the
+    // comparison with sjasmplus is the point, since that dialect has macros
+    // *and* a conditional framework pasmo deliberately does not.
+    //
+    // `ENDM` is not declared: it is part of the block rather than vocabulary of
+    // its own. It is also not accepted on its own here — the scanner looks for
+    // it only inside a body, so a stray one is an unknown mnemonic, where a
+    // stray `ENDIF` in sjasmplus says "without a matching IF". That asymmetry
+    // is a diagnostic gap rather than a vocabulary one.
+    Directive {
+        id: "macro",
+        pattern: Pattern::Exact(&["macro"]),
+        category: Category::Operation,
+    },
+];
 
 pub(crate) struct Pasmo {
     pub(crate) z80n: bool,

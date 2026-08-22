@@ -2075,6 +2075,13 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["incbin"]),
         category: Category::Operation,
     },
+    // Expander-handled, before `parse_op` sees a line. The opener only: `endm`
+    // is part of the block, not vocabulary of its own.
+    Directive {
+        id: "macro",
+        pattern: Pattern::Exact(&["macro"]),
+        category: Category::Operation,
+    },
 ];
 
 fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, AsmError> {
