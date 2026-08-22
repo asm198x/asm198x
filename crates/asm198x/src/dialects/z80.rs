@@ -630,6 +630,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                 head: rest.to_string(),
                 body,
                 close: close.to_string(),
+                style: crate::ast::CondStyle::Keyword,
             }),
             source: rest.to_string(),
             span: Span::in_file(self.file, line as u32, 1),
@@ -1242,11 +1243,14 @@ impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
     /// substitute, then the expression folds against the `equ` constants. That
     /// is what lets `DUP n+1` work where `n` is a constant, and why repetition
     /// cannot be resolved before symbols exist.
-    fn count(&self, head: &str, line: u32) -> Result<i64, AsmError> {
+    /// Neither Z80 dialect's repetition names a variable: `DUP`, `REPT` and
+    /// pasmo's `REPT` all take a count and nothing else.
+    fn iteration(&self, head: &str, line: u32) -> Result<crate::ast::Iteration, AsmError> {
         let line = line as usize;
         let (_, args) = split_first_word(head);
         let expr = substitute_defines(args, &self.defines, line)?;
         eval_condition_keyword(self.syntax, &expr, line, &self.consts)
+            .map(crate::ast::Iteration::Times)
     }
 
     fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError> {

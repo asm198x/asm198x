@@ -8,7 +8,7 @@ C64 6502, ACME syntax.
 
 ## Directives
 
-13 directives, 23 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+14 directives, 24 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -20,6 +20,7 @@ C64 6502, ACME syntax.
 | `include` | `!src`, `!source` |  |
 | `macro` | `!macro` |  |
 | `pet` | `!pet` |  |
+| `repeat` | `!for` |  |
 | `scr` | `!scr` |  |
 | `set` | `!set` |  |
 | `text` | `!text`, `!tx` |  |
