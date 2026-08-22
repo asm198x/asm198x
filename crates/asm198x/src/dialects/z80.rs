@@ -23,7 +23,8 @@ use std::collections::BTreeMap;
 
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialects::macros::{
-    Expand, LineOrigin, expanded_text, expansion, line_origins, place, place_nodes, remap_lines,
+    self, Expand, LineOrigin, expanded_text, expansion, line_origins, place, place_nodes,
+    remap_lines,
 };
 use crate::directives::{Category, Directive, Pattern, lookup};
 use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
@@ -108,6 +109,18 @@ pub(crate) trait Z80Syntax {
     /// the drift the declared surface exists to remove.
     fn own_directives(&self) -> &'static [crate::directives::Directive] {
         &[]
+    }
+
+    /// What this line does to a macro definition, given the names defined so
+    /// far — the only thing a walk needs to know to copy one through untouched.
+    ///
+    /// Defaulted rather than required, and delegated to the dialect's own
+    /// [`MacroSyntax`](crate::dialects::macros::MacroSyntax) where there is
+    /// one. Making `Z80Syntax` a subtrait of that would oblige a future Z80
+    /// dialect with no macros to implement a grammar for them.
+    fn macro_line(&self, line: &str, known: &dyn Fn(&str) -> bool) -> macros::MacroLine {
+        let _ = (line, known);
+        macros::MacroLine::None
     }
 
     /// Whether `word` is this dialect's binary-inclusion directive
@@ -435,6 +448,11 @@ struct Walker<'a, S: Z80Syntax> {
     /// Own-line comments seen since the last node, attached as leading trivia
     /// to the next node (U4). Comments never reach the encoder (AE1).
     pending_leading: Vec<Comment>,
+    /// Whether the walk is inside a macro definition it is copying rather than
+    /// reading. Only the formatter's parse ever sets it.
+    in_macro: bool,
+    /// The macros defined so far, so an invocation is copied too.
+    macro_names: std::collections::BTreeSet<String>,
     nodes: Vec<Node>,
 }
 
@@ -451,6 +469,8 @@ impl<'a, S: Z80Syntax> Walker<'a, S> {
             consts: BTreeMap::new(),
             current_global: None,
             pending_leading: Vec::new(),
+            in_macro: false,
+            macro_names: std::collections::BTreeSet::new(),
             nodes: Vec::new(),
         }
     }
@@ -476,6 +496,51 @@ impl<'a, S: Z80Syntax> Walker<'a, S> {
             }
             return Ok(None);
         }
+
+        // A macro definition is copied, not read — and copied verbatim, because
+        // pasmo spells one either way round and `name MACRO` puts the name in
+        // the label column. A body is a template rather than code, so nothing
+        // between the header and the close is parsed. See `Item::Verbatim`.
+        //
+        // Only the formatter's parse reaches here with a definition intact: the
+        // assembling path expands it away first.
+        {
+            let what = self
+                .syntax
+                .macro_line(code, &|word: &str| self.macro_names.contains(word));
+            let copy = match what {
+                macros::MacroLine::Opens(name) => {
+                    self.macro_names.insert(name);
+                    self.in_macro = true;
+                    true
+                }
+                macros::MacroLine::Closes if self.in_macro => {
+                    self.in_macro = false;
+                    true
+                }
+                macros::MacroLine::Invokes => true,
+                _ => self.in_macro,
+            };
+            if copy {
+                let trailing = comment.map(|text| Comment {
+                    text: text.to_string(),
+                    span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
+                });
+                self.nodes.push(Node {
+                    operand_span: None,
+                    label: None,
+                    item: Some(crate::ast::Item::Verbatim),
+                    source: code.trim_end().to_string(),
+                    span: Span::in_file(file, line as u32, 1),
+                    trivia: Trivia {
+                        leading: std::mem::take(&mut self.pending_leading),
+                        trailing,
+                    },
+                });
+                return Ok(None);
+            }
+        }
+
         let (label, rest) = split_label(self.syntax, self.set, self.ext, code, line)?;
         // Includes and incbins are walk-handled, not Operations: the target
         // must not be opened here (KTD1 — `--fmt` succeeds with a missing

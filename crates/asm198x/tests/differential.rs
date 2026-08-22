@@ -1683,7 +1683,4 @@ fn the_formatter_reads_what_the_assembler_reads() {
 /// the one whose formatter was built after macros rather than before — which is
 /// the whole of the explanation. Deleting a row is how a fix is recorded, and
 /// the test above fails if a row outlives the problem.
-const FORMATTER_GAPS: &[(&str, &str)] = &[
-    ("pasmo", "unknown instruction `MACRO`"),
-    ("acme", "unbalanced `}` in conditional block"),
-];
+const FORMATTER_GAPS: &[(&str, &str)] = &[("acme", "unbalanced `}` in conditional block")];
