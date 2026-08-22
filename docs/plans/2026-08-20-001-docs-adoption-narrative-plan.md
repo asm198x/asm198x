@@ -347,11 +347,24 @@ Steps 3–12 are independent of that bar and can run beside it. None block on th
 
 ## Outstanding Questions
 
-**Search — deferred 2026-08-21.** Wanted, but below the remaining content pages in priority: a reference nobody can find is a smaller problem than a reference with no `/why`, `/quickstart` or `/install` around it. The decision record requires it — "21 generated instruction pages today, 45 once the dialect matrices land. Reference without search is worse than no reference" — and it is the one thing mdBook provided that has no replacement designed. Two shapes:
+**Search — done 2026-08-22, as a generated index.** The decision record required
+it — "21 generated instruction pages today, 45 once the dialect matrices land.
+Reference without search is worse than no reference" — and it was the one thing
+mdBook provided with no replacement designed.
 
-| Option | Cost | Notes |
-|---|---|---|
-| Pagefind | A build dependency | The conventional choice for a static Astro site. Indexes the built output, no index to maintain, good ranking. |
-| A generated index | No dependency | 25 pages today. The instruction pages are structured, so an index keyed on mnemonic and heading would answer the question people actually bring to a reference — "where is `SBC`" — better than full text ranks it. |
+**The generated index, not Pagefind**, and the reference's own shape decided it
+rather than the dependency question alone. Every mnemonic on the twenty-one CPU
+pages is already a heading with its description underneath, so indexing headings
+indexes every mnemonic for free, with the text that explains it. The prose pages'
+headings are the questions they answer, so someone hunting the include rules
+matches "Where a relative include is looked for" — which full-text ranking would
+bury under every page that says "include". It needs no build dependency, and it
+is 1,177 entries, 16K over the wire, against 400K of markdown most of which is
+instruction tables nobody searches by opcode byte.
 
-Not decided. The four questions raised on 2026-08-20 are settled above.
+Pagefind indexes built output and could sit alongside this later if full text is
+wanted; nothing here forecloses it.
+
+`cargo xtask docs` writes `docs/book/search.json` and `--check` fails when a
+heading has been added without the index catching up. The site reads it exactly
+as it reads the nav.
