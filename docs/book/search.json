@@ -1,0 +1,7032 @@
+{
+  "entries": [
+    {
+      "context": "You already have an assembler that works. This page is about what changes if you",
+      "page": "Compared with what you have",
+      "slug": "compare"
+    },
+    {
+      "context": "Your syntax. Every dialect here is somebody else's assembler. You keep the",
+      "heading": "What does not change",
+      "page": "Compared with what you have",
+      "slug": "compare"
+    },
+    {
+      "context": "This is the part worth checking rather than believing. Every recorded verdict",
+      "heading": "What we measured against",
+      "page": "Compared with what you have",
+      "slug": "compare"
+    },
+    {
+      "context": "Stated as what this tool does, because that is what we can vouch for:",
+      "heading": "What arrives with it",
+      "page": "Compared with what you have",
+      "slug": "compare"
+    },
+    {
+      "context": "It says nothing about what any other assembler can or cannot do.",
+      "heading": "What this page does not claim",
+      "page": "Compared with what you have",
+      "slug": "compare"
+    },
+    {
+      "context": "Every differential suite assembles the same source with a real assembler and",
+      "page": "Where we differ",
+      "slug": "divergences"
+    },
+    {
+      "context": "issue-98 — : as a statement separator. sjasmplus treats a colon as both",
+      "heading": "What each one is",
+      "page": "Where we differ",
+      "slug": "divergences"
+    },
+    {
+      "context": "A difference that stops being one. Macros used to be here: twelve recorded",
+      "heading": "What leaves this list",
+      "page": "Where we differ",
+      "slug": "divergences"
+    },
+    {
+      "context": "Differences nobody has found. The list covers what the differential suites",
+      "heading": "What is not here",
+      "page": "Where we differ",
+      "slug": "divergences"
+    },
+    {
+      "context": "Five complete programs, one per front door. CI assembles every sample on this",
+      "page": "A first program",
+      "slug": "guide/first-program"
+    },
+    {
+      "context": "Two loops rather than one, because a bne counts to 256 and the screen is",
+      "heading": "Commodore 64, ACME syntax",
+      "page": "A first program",
+      "slug": "guide/first-program"
+    },
+    {
+      "context": "That one command assembles and links: ca65 normally hands object files to",
+      "heading": "NES, ca65 syntax",
+      "page": "A first program",
+      "slug": "guide/first-program"
+    },
+    {
+      "context": "--sna writes a 48K snapshot an emulator will load directly, which needs an",
+      "heading": "ZX Spectrum, pasmo syntax",
+      "page": "A first program",
+      "slug": "guide/first-program"
+    },
+    {
+      "context": "--exe writes a hunk executable, which is what AmigaDOS loads and runs. Note",
+      "heading": "Amiga, vasm syntax",
+      "page": "A first program",
+      "slug": "guide/first-program"
+    },
+    {
+      "context": "sta ,x+ is the 6809 idiom the 6502 samples spell with an index register and a",
+      "heading": "Tandy CoCo, lwasm syntax",
+      "page": "A first program",
+      "slug": "guide/first-program"
+    },
+    {
+      "context": "lda takes one byte. Give it two and the assembler says so, naming the line",
+      "heading": "When it does not assemble",
+      "page": "A first program",
+      "slug": "guide/first-program"
+    },
+    {
+      "context": "Any of these can go straight back through the other two operations. Tidying the",
+      "heading": "What else these are good for",
+      "page": "A first program",
+      "slug": "guide/first-program"
+    },
+    {
+      "context": "--dialect names the assembler, not the machine — see",
+      "heading": "Which dialect?",
+      "page": "A first program",
+      "slug": "guide/first-program"
+    },
+    {
+      "context": "asm198x fmt lays source out canonically. It works on every dialect, and it is",
+      "page": "Keeping source tidy",
+      "slug": "guide/formatting"
+    },
+    {
+      "context": "Labels sit at column 0 and take their own line; operations are indented one",
+      "heading": "What it does to your source",
+      "page": "Keeping source tidy",
+      "slug": "guide/formatting"
+    },
+    {
+      "context": "Two properties, both tested:",
+      "heading": "Why you can run it on a project you have not read",
+      "page": "Keeping source tidy",
+      "slug": "guide/formatting"
+    },
+    {
+      "context": "fmt writes to stdout and never rewrites the input in place. That is",
+      "heading": "In a workflow",
+      "page": "Keeping source tidy",
+      "slug": "guide/formatting"
+    },
+    {
+      "context": "--cpu applies, for a dialect that serves more than one target. The debug",
+      "heading": "Notes",
+      "page": "Keeping source tidy",
+      "slug": "guide/formatting"
+    },
+    {
+      "context": "Most dialects here produce a flat binary at one origin: you name a file, you get",
+      "page": "When assembling is not the last step",
+      "slug": "guide/linking"
+    },
+    {
+      "context": "ca65 emits object files. A .nes ROM is what ld65 makes of them, using a",
+      "heading": "NES: ca65 assembles, ld65 links",
+      "page": "When assembling is not the last step",
+      "slug": "guide/linking"
+    },
+    {
+      "context": "--exe writes an AmigaDOS hunk executable rather than a flat binary:",
+      "heading": "Amiga: hunks, and who chooses the addresses",
+      "page": "When assembling is not the last step",
+      "slug": "guide/linking"
+    },
+    {
+      "context": "Those two are containers, not link steps. A .prg is the flat binary with a",
+      "heading": "What --prg and --sna are not",
+      "page": "When assembling is not the last step",
+      "slug": "guide/linking"
+    },
+    {
+      "context": "--debug and --sym work on both, and describe what the linker produced —",
+      "heading": "Debug artifacts on the linked paths",
+      "page": "When assembling is not the last step",
+      "slug": "guide/linking"
+    },
+    {
+      "context": "asm198x resolves includes itself. Point it at the root file, tell it where to",
+      "page": "Projects in more than one file",
+      "slug": "guide/multi-file"
+    },
+    {
+      "context": "The first place is the dialect's anchor, and this is where multi-file projects",
+      "heading": "Where a relative include is looked for",
+      "page": "Projects in more than one file",
+      "slug": "guide/multi-file"
+    },
+    {
+      "context": "A missing target names the request, the file that asked for it, and the line:",
+      "heading": "When it goes wrong",
+      "page": "Projects in more than one file",
+      "slug": "guide/multi-file"
+    },
+    {
+      "context": "The binary-include directive resolves through exactly the same search: the",
+      "heading": "Binary data",
+      "page": "Projects in more than one file",
+      "slug": "guide/multi-file"
+    },
+    {
+      "context": "The library's one-source entry points assemble one string and cannot resolve",
+      "heading": "What the single-file API does not do",
+      "page": "Projects in more than one file",
+      "slug": "guide/multi-file"
+    },
+    {
+      "context": "asm198x disasm turns bytes into source. It works for every dialect, and it",
+      "page": "Reading a binary back",
+      "slug": "guide/reading-a-binary"
+    },
+    {
+      "context": "Assembled, then read back with asm198x disasm -d acme --org 0xc000 fill.a.bin:",
+      "heading": "A worked example",
+      "page": "Reading a binary back",
+      "slug": "guide/reading-a-binary"
+    },
+    {
+      "context": "A flat binary is bytes and nothing else: it carries no record of where it was",
+      "heading": "--org is not cosmetic",
+      "page": "Reading a binary back",
+      "slug": "guide/reading-a-binary"
+    },
+    {
+      "context": "Data does not announce itself. The disassembler decodes what it can and emits",
+      "heading": "Bytes that are not instructions",
+      "page": "Reading a binary back",
+      "slug": "guide/reading-a-binary"
+    },
+    {
+      "context": "Feeding the listing back to the assembler produces the byte-for-byte original.",
+      "heading": "It reassembles",
+      "page": "Reading a binary back",
+      "slug": "guide/reading-a-binary"
+    },
+    {
+      "context": "disasm takes the CPU from --dialect: a 6502 dialect disassembles as 6502,",
+      "heading": "Picking the CPU",
+      "page": "Reading a binary back",
+      "slug": "guide/reading-a-binary"
+    },
+    {
+      "context": "One binary, no runtime dependencies, the same interface on macOS, Linux and",
+      "page": "Install",
+      "slug": "install"
+    },
+    {
+      "context": "Homebrew asks you to trust a third-party formula the first time. Approving",
+      "heading": "Homebrew",
+      "page": "Install",
+      "slug": "install"
+    },
+    {
+      "context": "These fetch the newest release, so the command stays right as versions move.",
+      "heading": "Installer script",
+      "page": "Install",
+      "slug": "install"
+    },
+    {
+      "context": "Each release attaches platform archives to its",
+      "heading": "Archives",
+      "page": "Install",
+      "slug": "install"
+    },
+    {
+      "context": "cargo install asm198x will not find it. The binary ships through the GitHub",
+      "heading": "Not on crates.io",
+      "page": "Install",
+      "slug": "install"
+    },
+    {
+      "context": "If the shell cannot find it, the binary is not on your PATH. The installer",
+      "heading": "Check it worked",
+      "page": "Install",
+      "slug": "install"
+    },
+    {
+      "context": "Every page on this site names the release it describes, at the end of the",
+      "heading": "Which version am I reading about?",
+      "page": "Install",
+      "slug": "install"
+    },
+    {
+      "context": "Assemblers and disassemblers for retro CPUs. One binary, no runtime",
+      "page": "asm198x",
+      "slug": "introduction"
+    },
+    {
+      "context": "Generated wherever it can be. The instruction reference comes from the",
+      "heading": "What this book is",
+      "page": "asm198x",
+      "slug": "introduction"
+    },
+    {
+      "context": "You do not port anything. Name the dialect your source is already written in",
+      "page": "Moving an existing project across",
+      "slug": "migrate"
+    },
+    {
+      "context": "The useful first step is not to switch. It is to build both ways and compare.",
+      "heading": "Prove it produces the same bytes",
+      "page": "Moving an existing project across",
+      "slug": "migrate"
+    },
+    {
+      "context": "-I adds a directory to the include search path. It is repeatable, and",
+      "heading": "Projects in more than one file",
+      "page": "Moving an existing project across",
+      "slug": "migrate"
+    },
+    {
+      "context": "If your build ends by wrapping a flat binary into a loadable file, that step",
+      "heading": "The output your build already expects",
+      "page": "Moving an existing project across",
+      "slug": "migrate"
+    },
+    {
+      "context": "Where we differ lists every known difference, what each one",
+      "heading": "What might not match",
+      "page": "Moving an existing project across",
+      "slug": "migrate"
+    },
+    {
+      "context": "Nothing stops you running both assemblers over the same source in CI and",
+      "heading": "Keeping both for a while",
+      "page": "Moving an existing project across",
+      "slug": "migrate"
+    },
+    {
+      "context": "Install the binary, assemble a program for the machine you care about, and run",
+      "page": "Quickstart",
+      "slug": "quickstart"
+    },
+    {
+      "context": "Homebrew, direct archives and the rest are on Install.",
+      "heading": "Install",
+      "page": "Quickstart",
+      "slug": "quickstart"
+    },
+    {
+      "context": "The same command assembles for all of them. What changes is --dialect, which",
+      "heading": "Pick a machine",
+      "page": "Quickstart",
+      "slug": "quickstart"
+    },
+    {
+      "context": "Load it in an emulator and RUN. The border turns green and control returns to",
+      "heading": "Commodore 64",
+      "page": "Quickstart",
+      "slug": "quickstart"
+    },
+    {
+      "context": "Open the snapshot. The border turns red and the program loops — a snapshot owns",
+      "heading": "ZX Spectrum",
+      "page": "Quickstart",
+      "slug": "quickstart"
+    },
+    {
+      "context": "That writes a loadable hunk executable, which is what AmigaDOS runs. It exits",
+      "heading": "Amiga",
+      "page": "Quickstart",
+      "slug": "quickstart"
+    },
+    {
+      "context": "- A first program — the same five front doors, with",
+      "heading": "What to read next",
+      "page": "Quickstart",
+      "slug": "quickstart"
+    },
+    {
+      "context": "asm198x assembles retro-CPU source to a flat binary, disassembles one back, or",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "Installer scripts, platform archives and the reason cargo install will not",
+      "heading": "Installing",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "The operation is a subcommand:",
+      "heading": "Operations",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "Reads one source file and writes a flat binary. With no -o, the output takes",
+      "heading": "asm — assemble",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "Writes a listing to stdout. The CPU follows the dialect: a 6502 dialect",
+      "heading": "disasm — disassemble",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "Canonical layout: labels at column 0, operations indented, own-line comments on",
+      "heading": "fmt — reformat",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "The --markdown form is what generates this page's dialect table, so the two",
+      "heading": "dialects — list what --dialect accepts",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "Prints asm198x v<version> — the same v-prefixed spelling the site, the",
+      "heading": "version — report the build",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "By default asm writes a flat binary. These wrap it for a machine's loader:",
+      "heading": "Output containers",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "Available on the flat dialects, plus the ca65 and vasm linked paths for",
+      "heading": "Debug artifacts",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "--dialect selects the source syntax, not the CPU. Each front-end matches",
+      "heading": "Dialects",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "--cpu picks a CPU where a dialect serves more than one. Today that is Z80:",
+      "heading": "Targets",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "0 on success, non-zero on failure. A diagnostic carries a severity, a",
+      "heading": "Exit status and diagnostics",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "--dialect selects the source syntax, not the CPU. Each front-end matches",
+      "page": "Dialects",
+      "slug": "reference/dialects"
+    },
+    {
+      "context": "The dialect names the assembler, which the source itself usually shows:",
+      "heading": "Picking one",
+      "page": "Dialects",
+      "slug": "reference/dialects"
+    },
+    {
+      "context": "79 mnemonics, 255 encoded forms, operands big-endian. Generated from `crates/isa/src/cdp1802.rs`.",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Load via N",
+      "heading": "LDN",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Increment register",
+      "heading": "INC",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Decrement register",
+      "heading": "DEC",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Load advance",
+      "heading": "LDA",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Store via N",
+      "heading": "STR",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Get low byte",
+      "heading": "GLO",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Get high byte",
+      "heading": "GHI",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Put low byte",
+      "heading": "PLO",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Put high byte",
+      "heading": "PHI",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Set program register",
+      "heading": "SEP",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Set data register",
+      "heading": "SEX",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Output",
+      "heading": "OUT",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Input",
+      "heading": "INP",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Idle",
+      "heading": "IDL",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Increment R(X)",
+      "heading": "IRX",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Return",
+      "heading": "RET",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Disable interrupts",
+      "heading": "DIS",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Load via X and advance",
+      "heading": "LDXA",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Store via X and decrement",
+      "heading": "STXD",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Add with carry",
+      "heading": "ADC",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Subtract D with borrow",
+      "heading": "SDB",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Shift right with carry",
+      "heading": "SHRC",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Subtract memory with borrow",
+      "heading": "SMB",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Save T",
+      "heading": "SAV",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Push X,P to stack",
+      "heading": "MARK",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Reset Q",
+      "heading": "REQ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Set Q",
+      "heading": "SEQ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Shift left with carry",
+      "heading": "SHLC",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Load via X",
+      "heading": "LDX",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Logical OR",
+      "heading": "OR",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Logical AND",
+      "heading": "AND",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Exclusive OR",
+      "heading": "XOR",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Add",
+      "heading": "ADD",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Subtract D",
+      "heading": "SD",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Shift right",
+      "heading": "SHR",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Subtract memory",
+      "heading": "SM",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Shift left",
+      "heading": "SHL",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "No operation",
+      "heading": "NOP",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long skip if Q = 0",
+      "heading": "LSNQ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long skip if D not zero",
+      "heading": "LSNZ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long skip if DF = 0",
+      "heading": "LSNF",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long skip",
+      "heading": "LSKP",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long skip if interrupts enabled",
+      "heading": "LSIE",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long skip if Q = 1",
+      "heading": "LSQ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long skip if D zero",
+      "heading": "LSZ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long skip if DF = 1",
+      "heading": "LSDF",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Add with carry immediate",
+      "heading": "ADCI",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Subtract D with borrow immediate",
+      "heading": "SDBI",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Subtract memory with borrow immediate",
+      "heading": "SMBI",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Load immediate",
+      "heading": "LDI",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "OR immediate",
+      "heading": "ORI",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "AND immediate",
+      "heading": "ANI",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Exclusive-OR immediate",
+      "heading": "XRI",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Add immediate",
+      "heading": "ADI",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Subtract D immediate",
+      "heading": "SDI",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Subtract memory immediate",
+      "heading": "SMI",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch",
+      "heading": "BR",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if Q = 1",
+      "heading": "BQ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if D = 0",
+      "heading": "BZ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if DF = 1",
+      "heading": "BDF",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if EF1",
+      "heading": "B1",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if EF2",
+      "heading": "B2",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if EF3",
+      "heading": "B3",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if EF4",
+      "heading": "B4",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "No short branch (skip)",
+      "heading": "NBR",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if Q = 0",
+      "heading": "BNQ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if D not zero",
+      "heading": "BNZ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if DF = 0",
+      "heading": "BNF",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if not EF1",
+      "heading": "BN1",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if not EF2",
+      "heading": "BN2",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if not EF3",
+      "heading": "BN3",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Branch if not EF4",
+      "heading": "BN4",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long branch",
+      "heading": "LBR",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long branch if Q = 1",
+      "heading": "LBQ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long branch if D = 0",
+      "heading": "LBZ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long branch if DF = 1",
+      "heading": "LBDF",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long branch if Q = 0",
+      "heading": "LBNQ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long branch if D not zero",
+      "heading": "LBNZ",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Long branch if DF = 0",
+      "heading": "LBNF",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "RCA COSMAC VIP",
+      "heading": "Machines",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "RCA CDP1802 (COSMAC)",
+      "slug": "reference/instructions/cdp1802"
+    },
+    {
+      "context": "30 instructions, words big-endian. Generated from `crates/isa/src/cp1610.rs`.",
+      "page": "GI CP1610",
+      "slug": "reference/instructions/cp1610"
+    },
+    {
+      "context": "Mattel Intellivision",
+      "heading": "Machines",
+      "page": "GI CP1610",
+      "slug": "reference/instructions/cp1610"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "GI CP1610",
+      "slug": "reference/instructions/cp1610"
+    },
+    {
+      "context": "47 mnemonics, 253 encoded forms, operands big-endian. Generated from `crates/isa/src/f8.rs`.",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Load register",
+      "heading": "LR",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Load A from scratchpad register",
+      "heading": "LR",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Store A to scratchpad register",
+      "heading": "LR",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Store PC1 into PC0 via K",
+      "heading": "PK",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Load A from memory (DC)",
+      "heading": "LM",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Store A to memory (DC)",
+      "heading": "ST",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Complement A",
+      "heading": "COM",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Add carry link to A",
+      "heading": "LNK",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Disable interrupt",
+      "heading": "DI",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Enable interrupt",
+      "heading": "EI",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Pop: PC1 into PC0",
+      "heading": "POP",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Increment A",
+      "heading": "INC",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "No operation",
+      "heading": "NOP",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Exchange DC and DC1",
+      "heading": "XDC",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Add memory to A",
+      "heading": "AM",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Decimal add memory to A",
+      "heading": "AMD",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "AND memory into A",
+      "heading": "NM",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "OR memory into A",
+      "heading": "OM",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "XOR memory into A",
+      "heading": "XM",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Compare memory with A",
+      "heading": "CM",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Add A to DC",
+      "heading": "ADC",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Shift A right",
+      "heading": "SR",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Shift A left",
+      "heading": "SL",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Load immediate to A",
+      "heading": "LI",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "AND immediate",
+      "heading": "NI",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "OR immediate",
+      "heading": "OI",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "XOR immediate",
+      "heading": "XI",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Add immediate",
+      "heading": "AI",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Compare immediate",
+      "heading": "CI",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Input port to A",
+      "heading": "IN",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Output A to port",
+      "heading": "OUT",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Call subroutine immediate",
+      "heading": "PI",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Jump immediate",
+      "heading": "JMP",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Load DC immediate",
+      "heading": "DCI",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Decrement scratchpad",
+      "heading": "DS",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Add scratchpad to A",
+      "heading": "AS",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Decimal add scratchpad to A",
+      "heading": "ASD",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "XOR scratchpad into A",
+      "heading": "XS",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "AND scratchpad into A",
+      "heading": "NS",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Load upper octal digit of ISAR",
+      "heading": "LISU",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Load lower octal digit of ISAR",
+      "heading": "LISL",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Load 4-bit immediate to A",
+      "heading": "LIS",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Input short port to A",
+      "heading": "INS",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Output A to short port",
+      "heading": "OUTS",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Branch on test mask true",
+      "heading": "BT",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Branch on test mask false",
+      "heading": "BF",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Branch if ISAR low octal != 7",
+      "heading": "BR7",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Fairchild Channel F",
+      "heading": "Machines",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Fairchild F8 (3850)",
+      "slug": "reference/instructions/f8"
+    },
+    {
+      "context": "73 mnemonics, 83 encoded forms, operands little-endian. Generated from `crates/isa/src/huc6280.rs`.",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Swap A and X",
+      "heading": "SAX",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Swap A and Y",
+      "heading": "SAY",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Swap X and Y",
+      "heading": "SXY",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Clear accumulator",
+      "heading": "CLA",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Clear X",
+      "heading": "CLX",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Clear Y",
+      "heading": "CLY",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Clock select low (slow)",
+      "heading": "CSL",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Clock select high (fast)",
+      "heading": "CSH",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Set T flag",
+      "heading": "SET",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Push X",
+      "heading": "PHX",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Push Y",
+      "heading": "PHY",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Pull X",
+      "heading": "PLX",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Pull Y",
+      "heading": "PLY",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Increment",
+      "heading": "INC",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Decrement",
+      "heading": "DEC",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch always",
+      "heading": "BRA",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Store zero",
+      "heading": "STZ",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Test and reset bits",
+      "heading": "TRB",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Test and set bits",
+      "heading": "TSB",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Bit test",
+      "heading": "BIT",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Jump",
+      "heading": "JMP",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "OR accumulator",
+      "heading": "ORA",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "AND accumulator",
+      "heading": "AND",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Exclusive-OR accumulator",
+      "heading": "EOR",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Add with carry",
+      "heading": "ADC",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Store accumulator",
+      "heading": "STA",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Load accumulator",
+      "heading": "LDA",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Compare accumulator",
+      "heading": "CMP",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Subtract with carry",
+      "heading": "SBC",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Store immediate to VDC address register",
+      "heading": "ST0",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Store immediate to VDC data (low)",
+      "heading": "ST1",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Store immediate to VDC data (high)",
+      "heading": "ST2",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Transfer A to MMU register",
+      "heading": "TAM",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Transfer MMU register to A",
+      "heading": "TMA",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Test memory bits against immediate",
+      "heading": "TST",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch to subroutine",
+      "heading": "BSR",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Block transfer, increment src + dst",
+      "heading": "TII",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Block transfer, decrement src + dst",
+      "heading": "TDD",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Block transfer, increment src, fixed dst",
+      "heading": "TIN",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Block transfer, increment src, alternate dst",
+      "heading": "TIA",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Block transfer, alternate src, increment dst",
+      "heading": "TAI",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "RMB0",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "RMB1",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "RMB2",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "RMB3",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "RMB4",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "RMB5",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "RMB6",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "RMB7",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "SMB0",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "SMB1",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "SMB2",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "SMB3",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "SMB4",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "SMB5",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "SMB6",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Reset/set memory bit",
+      "heading": "SMB7",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBR0",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBR1",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBR2",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBR3",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBR4",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBR5",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBR6",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBR7",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBS0",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBS1",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBS2",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBS3",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBS4",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBS5",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBS6",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Branch on memory bit",
+      "heading": "BBS7",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "NEC PC Engine",
+      "heading": "Machines",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Hudson HuC6280 (extension)",
+      "slug": "reference/instructions/huc6280"
+    },
+    {
+      "context": "58 mnemonics, 214 encoded forms, operands little-endian. Generated from `crates/isa/src/i8048.rs`.",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Add to A",
+      "heading": "ADD",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Add with carry to A",
+      "heading": "ADDC",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "AND with A",
+      "heading": "ANL",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "OR with A",
+      "heading": "ORL",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "XOR with A",
+      "heading": "XRL",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Increment",
+      "heading": "INC",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Decrement",
+      "heading": "DEC",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Clear",
+      "heading": "CLR",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Complement",
+      "heading": "CPL",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Decimal-adjust A",
+      "heading": "DA",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Swap nibbles of A",
+      "heading": "SWAP",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Rotate A left",
+      "heading": "RL",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Rotate A left through carry",
+      "heading": "RLC",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Rotate A right",
+      "heading": "RR",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Rotate A right through carry",
+      "heading": "RRC",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Input port to A",
+      "heading": "IN",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Input BUS to A",
+      "heading": "INS",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Output A to port",
+      "heading": "OUTL",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Move 4-bit port",
+      "heading": "MOVD",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "AND A to 4-bit port",
+      "heading": "ANLD",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "OR A to 4-bit port",
+      "heading": "ORLD",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Move",
+      "heading": "MOV",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Exchange A",
+      "heading": "XCH",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Exchange A low nibble",
+      "heading": "XCHD",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Move external data",
+      "heading": "MOVX",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Move program memory to A",
+      "heading": "MOVP",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Move page-3 program memory",
+      "heading": "MOVP3",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump indirect within page",
+      "heading": "JMPP",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Return",
+      "heading": "RET",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Return, restore PSW",
+      "heading": "RETR",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if carry",
+      "heading": "JC",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if no carry",
+      "heading": "JNC",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if A zero",
+      "heading": "JZ",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if A not zero",
+      "heading": "JNZ",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if T0 high",
+      "heading": "JT0",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if T0 low",
+      "heading": "JNT0",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if T1 high",
+      "heading": "JT1",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if T1 low",
+      "heading": "JNT1",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if F0 set",
+      "heading": "JF0",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if F1 set",
+      "heading": "JF1",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if timer flag",
+      "heading": "JTF",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if interrupt",
+      "heading": "JNI",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if A bit 0 set",
+      "heading": "JB0",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if A bit 1 set",
+      "heading": "JB1",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if A bit 2 set",
+      "heading": "JB2",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if A bit 3 set",
+      "heading": "JB3",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if A bit 4 set",
+      "heading": "JB4",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if A bit 5 set",
+      "heading": "JB5",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if A bit 6 set",
+      "heading": "JB6",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Jump if A bit 7 set",
+      "heading": "JB7",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Decrement and jump if not zero",
+      "heading": "DJNZ",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Enable",
+      "heading": "EN",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Disable",
+      "heading": "DIS",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Select bank",
+      "heading": "SEL",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Enable T0 clock output",
+      "heading": "ENT0",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Start timer/counter",
+      "heading": "STRT",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Stop timer/counter",
+      "heading": "STOP",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "No operation",
+      "heading": "NOP",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Magnavox Odyssey², Commodore Amiga",
+      "heading": "Machines",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Intel 8048 (MCS-48)",
+      "slug": "reference/instructions/i8048"
+    },
+    {
+      "context": "78 mnemonics, 244 encoded forms, operands little-endian. Generated from `crates/isa/src/i8080.rs`.",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "No operation",
+      "heading": "NOP",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Halt",
+      "heading": "HLT",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Enable interrupts",
+      "heading": "EI",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Disable interrupts",
+      "heading": "DI",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Exchange DE and HL",
+      "heading": "XCHG",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Exchange top of stack with HL",
+      "heading": "XTHL",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Move HL to SP",
+      "heading": "SPHL",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Move HL to PC",
+      "heading": "PCHL",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Rotate A left",
+      "heading": "RLC",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Rotate A right",
+      "heading": "RRC",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Rotate A left through carry",
+      "heading": "RAL",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Rotate A right through carry",
+      "heading": "RAR",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Decimal adjust A",
+      "heading": "DAA",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Complement A",
+      "heading": "CMA",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Set carry",
+      "heading": "STC",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Complement carry",
+      "heading": "CMC",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Move register",
+      "heading": "MOV",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Move immediate",
+      "heading": "MVI",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Load register pair immediate",
+      "heading": "LXI",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Load A direct",
+      "heading": "LDA",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Store A direct",
+      "heading": "STA",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Load HL direct",
+      "heading": "LHLD",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Store HL direct",
+      "heading": "SHLD",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Load A indirect",
+      "heading": "LDAX",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Store A indirect",
+      "heading": "STAX",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Add register",
+      "heading": "ADD",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Add register with carry",
+      "heading": "ADC",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Subtract register",
+      "heading": "SUB",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Subtract register with borrow",
+      "heading": "SBB",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "AND register",
+      "heading": "ANA",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "XOR register",
+      "heading": "XRA",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "OR register",
+      "heading": "ORA",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Compare register",
+      "heading": "CMP",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Add immediate",
+      "heading": "ADI",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Add immediate with carry",
+      "heading": "ACI",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Subtract immediate",
+      "heading": "SUI",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Subtract immediate with borrow",
+      "heading": "SBI",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "AND immediate",
+      "heading": "ANI",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "XOR immediate",
+      "heading": "XRI",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "OR immediate",
+      "heading": "ORI",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Compare immediate",
+      "heading": "CPI",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Increment register",
+      "heading": "INR",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Decrement register",
+      "heading": "DCR",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Increment register pair",
+      "heading": "INX",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Decrement register pair",
+      "heading": "DCX",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Add register pair to HL",
+      "heading": "DAD",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Push register pair",
+      "heading": "PUSH",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Pop register pair",
+      "heading": "POP",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Input from port",
+      "heading": "IN",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Output to port",
+      "heading": "OUT",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Jump",
+      "heading": "JMP",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Jump if not zero",
+      "heading": "JNZ",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Jump if zero",
+      "heading": "JZ",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Jump if no carry",
+      "heading": "JNC",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Jump if carry",
+      "heading": "JC",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Jump if parity odd",
+      "heading": "JPO",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Jump if parity even",
+      "heading": "JPE",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Jump if positive",
+      "heading": "JP",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Jump if minus",
+      "heading": "JM",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Call",
+      "heading": "CALL",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Call if not zero",
+      "heading": "CNZ",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Call if zero",
+      "heading": "CZ",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Call if no carry",
+      "heading": "CNC",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Call if carry",
+      "heading": "CC",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Call if parity odd",
+      "heading": "CPO",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Call if parity even",
+      "heading": "CPE",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Call if positive",
+      "heading": "CP",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Call if minus",
+      "heading": "CM",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Return",
+      "heading": "RET",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Return if not zero",
+      "heading": "RNZ",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Return if zero",
+      "heading": "RZ",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Return if no carry",
+      "heading": "RNC",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Return if carry",
+      "heading": "RC",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Return if parity odd",
+      "heading": "RPO",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Return if parity even",
+      "heading": "RPE",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Return if positive",
+      "heading": "RP",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Return if minus",
+      "heading": "RM",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Restart",
+      "heading": "RST",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "MITS Altair 8800, IMSAI 8080",
+      "heading": "Machines",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Intel 8080",
+      "slug": "reference/instructions/i8080"
+    },
+    {
+      "context": "107 mnemonics, 197 encoded forms, operands big-endian. Generated from `crates/isa/src/m6800.rs`.",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Subtract from A",
+      "heading": "SUBA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Subtract from B",
+      "heading": "SUBB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Compare A",
+      "heading": "CMPA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Compare B",
+      "heading": "CMPB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Subtract with carry from A",
+      "heading": "SBCA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Subtract with carry from B",
+      "heading": "SBCB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "AND A",
+      "heading": "ANDA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "AND B",
+      "heading": "ANDB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Bit test A",
+      "heading": "BITA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Bit test B",
+      "heading": "BITB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Load A",
+      "heading": "LDAA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Load B",
+      "heading": "LDAB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Exclusive-OR A",
+      "heading": "EORA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Exclusive-OR B",
+      "heading": "EORB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Add with carry to A",
+      "heading": "ADCA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Add with carry to B",
+      "heading": "ADCB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "OR A",
+      "heading": "ORAA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "OR B",
+      "heading": "ORAB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Add to A",
+      "heading": "ADDA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Add to B",
+      "heading": "ADDB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Store A",
+      "heading": "STAA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Store B",
+      "heading": "STAB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Compare index register",
+      "heading": "CPX",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Load stack pointer",
+      "heading": "LDS",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Load index register",
+      "heading": "LDX",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Store stack pointer",
+      "heading": "STS",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Store index register",
+      "heading": "STX",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Negate",
+      "heading": "NEG",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Complement",
+      "heading": "COM",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Logical shift right",
+      "heading": "LSR",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Rotate right",
+      "heading": "ROR",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Arithmetic shift right",
+      "heading": "ASR",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Arithmetic shift left",
+      "heading": "ASL",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Rotate left",
+      "heading": "ROL",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Decrement",
+      "heading": "DEC",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Increment",
+      "heading": "INC",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Test",
+      "heading": "TST",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Jump",
+      "heading": "JMP",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Clear",
+      "heading": "CLR",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Jump to subroutine",
+      "heading": "JSR",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch always",
+      "heading": "BRA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if higher",
+      "heading": "BHI",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if lower or same",
+      "heading": "BLS",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if carry clear",
+      "heading": "BCC",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if carry set",
+      "heading": "BCS",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if not equal",
+      "heading": "BNE",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if equal",
+      "heading": "BEQ",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if overflow clear",
+      "heading": "BVC",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if overflow set",
+      "heading": "BVS",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if plus",
+      "heading": "BPL",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if minus",
+      "heading": "BMI",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if greater or equal",
+      "heading": "BGE",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if less than",
+      "heading": "BLT",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if greater than",
+      "heading": "BGT",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch if less or equal",
+      "heading": "BLE",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Branch to subroutine",
+      "heading": "BSR",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "No operation",
+      "heading": "NOP",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Transfer A to CC",
+      "heading": "TAP",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Transfer CC to A",
+      "heading": "TPA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Increment X",
+      "heading": "INX",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Decrement X",
+      "heading": "DEX",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Clear overflow",
+      "heading": "CLV",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Set overflow",
+      "heading": "SEV",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Clear carry",
+      "heading": "CLC",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Set carry",
+      "heading": "SEC",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Clear interrupt mask",
+      "heading": "CLI",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Set interrupt mask",
+      "heading": "SEI",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Subtract B from A",
+      "heading": "SBA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Compare A with B",
+      "heading": "CBA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Transfer A to B",
+      "heading": "TAB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Transfer B to A",
+      "heading": "TBA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Decimal adjust A",
+      "heading": "DAA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Add B to A",
+      "heading": "ABA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Transfer SP to X",
+      "heading": "TSX",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Increment SP",
+      "heading": "INS",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Pull A",
+      "heading": "PULA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Pull B",
+      "heading": "PULB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Decrement SP",
+      "heading": "DES",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Transfer X to SP",
+      "heading": "TXS",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Push A",
+      "heading": "PSHA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Push B",
+      "heading": "PSHB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Return from subroutine",
+      "heading": "RTS",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Return from interrupt",
+      "heading": "RTI",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Wait for interrupt",
+      "heading": "WAI",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Software interrupt",
+      "heading": "SWI",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Negate A",
+      "heading": "NEGA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Negate B",
+      "heading": "NEGB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Complement A",
+      "heading": "COMA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Complement B",
+      "heading": "COMB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Logical shift right A",
+      "heading": "LSRA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Logical shift right B",
+      "heading": "LSRB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Rotate right A",
+      "heading": "RORA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Rotate right B",
+      "heading": "RORB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Arithmetic shift right A",
+      "heading": "ASRA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Arithmetic shift right B",
+      "heading": "ASRB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Arithmetic shift left A",
+      "heading": "ASLA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Arithmetic shift left B",
+      "heading": "ASLB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Rotate left A",
+      "heading": "ROLA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Rotate left B",
+      "heading": "ROLB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Decrement A",
+      "heading": "DECA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Decrement B",
+      "heading": "DECB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Increment A",
+      "heading": "INCA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Increment B",
+      "heading": "INCB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Test A",
+      "heading": "TSTA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Test B",
+      "heading": "TSTB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Clear A",
+      "heading": "CLRA",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Clear B",
+      "heading": "CLRB",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Motorola 6800",
+      "slug": "reference/instructions/m6800"
+    },
+    {
+      "context": "115 mnemonics, 162 forms, words big-endian. Generated from `crates/isa/src/m68k.rs`.",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Return from subroutine",
+      "heading": "RTS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "No operation",
+      "heading": "NOP",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Jump",
+      "heading": "JMP",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Jump to subroutine",
+      "heading": "JSR",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Return from exception",
+      "heading": "RTE",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Return and restore condition codes",
+      "heading": "RTR",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Trap on overflow",
+      "heading": "TRAPV",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Trap",
+      "heading": "TRAP",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Reset external devices",
+      "heading": "RESET",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Take the illegal-instruction trap",
+      "heading": "ILLEGAL",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Move quick (sign-extended 8-bit to long)",
+      "heading": "MOVEQ",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Move address",
+      "heading": "MOVEA",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Move data",
+      "heading": "MOVE",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Load effective address",
+      "heading": "LEA",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Add binary",
+      "heading": "ADD",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Add immediate",
+      "heading": "ADDI",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Subtract immediate",
+      "heading": "SUBI",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Compare immediate",
+      "heading": "CMPI",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Inclusive-OR immediate",
+      "heading": "ORI",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "AND immediate",
+      "heading": "ANDI",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Exclusive-OR immediate",
+      "heading": "EORI",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch always",
+      "heading": "BRA",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch to subroutine",
+      "heading": "BSR",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if equal",
+      "heading": "BEQ",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if not equal",
+      "heading": "BNE",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if higher",
+      "heading": "BHI",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if lower or same",
+      "heading": "BLS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if carry clear (higher or same)",
+      "heading": "BCC",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if carry set (lower)",
+      "heading": "BCS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if overflow clear",
+      "heading": "BVC",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if overflow set",
+      "heading": "BVS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if greater or equal",
+      "heading": "BGE",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if less than",
+      "heading": "BLT",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if greater than",
+      "heading": "BGT",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if less or equal",
+      "heading": "BLE",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if minus",
+      "heading": "BMI",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Branch if plus",
+      "heading": "BPL",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Subtract binary",
+      "heading": "SUB",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Logical AND",
+      "heading": "AND",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Logical OR",
+      "heading": "OR",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Compare",
+      "heading": "CMP",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Exclusive OR",
+      "heading": "EOR",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Unsigned multiply",
+      "heading": "MULU",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Unsigned divide",
+      "heading": "DIVU",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Signed multiply",
+      "heading": "MULS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Signed divide",
+      "heading": "DIVS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Add extended",
+      "heading": "ADDX",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Subtract extended",
+      "heading": "SUBX",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Add decimal with extend",
+      "heading": "ABCD",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Subtract decimal with extend",
+      "heading": "SBCD",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Compare memory with postincrement",
+      "heading": "CMPM",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Exchange registers",
+      "heading": "EXG",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Test (set flags)",
+      "heading": "TST",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Clear",
+      "heading": "CLR",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Negate",
+      "heading": "NEG",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Logical complement",
+      "heading": "NOT",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Negate with extend",
+      "heading": "NEGX",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Negate BCD with extend",
+      "heading": "NBCD",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Test and set (atomic)",
+      "heading": "TAS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Push effective address",
+      "heading": "PEA",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Link and allocate stack frame",
+      "heading": "LINK",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Unlink stack frame",
+      "heading": "UNLK",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Load status register and stop",
+      "heading": "STOP",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Check register against bounds",
+      "heading": "CHK",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Add quick",
+      "heading": "ADDQ",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Subtract quick",
+      "heading": "SUBQ",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Swap register halves",
+      "heading": "SWAP",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Sign-extend",
+      "heading": "EXT",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch (never on condition)",
+      "heading": "DBF",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch (alias of DBF)",
+      "heading": "DBRA",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless true",
+      "heading": "DBT",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless higher",
+      "heading": "DBHI",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless lower or same",
+      "heading": "DBLS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless carry clear",
+      "heading": "DBCC",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless carry set",
+      "heading": "DBCS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless not equal",
+      "heading": "DBNE",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless equal",
+      "heading": "DBEQ",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless overflow clear",
+      "heading": "DBVC",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless overflow set",
+      "heading": "DBVS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless plus",
+      "heading": "DBPL",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless minus",
+      "heading": "DBMI",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless greater or equal",
+      "heading": "DBGE",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless less than",
+      "heading": "DBLT",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless greater than",
+      "heading": "DBGT",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Decrement and branch unless less or equal",
+      "heading": "DBLE",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if not equal",
+      "heading": "SNE",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if equal",
+      "heading": "SEQ",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set always",
+      "heading": "ST",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set never (clear)",
+      "heading": "SF",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if higher",
+      "heading": "SHI",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if lower or same",
+      "heading": "SLS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if carry clear (higher or same)",
+      "heading": "SCC",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if carry set (lower)",
+      "heading": "SCS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if overflow clear",
+      "heading": "SVC",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if overflow set",
+      "heading": "SVS",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if plus",
+      "heading": "SPL",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if minus",
+      "heading": "SMI",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if greater or equal",
+      "heading": "SGE",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if less than",
+      "heading": "SLT",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if greater than",
+      "heading": "SGT",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Set if less or equal",
+      "heading": "SLE",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Logical shift left",
+      "heading": "LSL",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Logical shift right",
+      "heading": "LSR",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Arithmetic shift right",
+      "heading": "ASR",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Arithmetic shift left",
+      "heading": "ASL",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Rotate right through extend",
+      "heading": "ROXR",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Rotate left through extend",
+      "heading": "ROXL",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Rotate right",
+      "heading": "ROR",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Rotate left",
+      "heading": "ROL",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Test a bit",
+      "heading": "BTST",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Test and set a bit",
+      "heading": "BSET",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Test and change a bit",
+      "heading": "BCHG",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Test and clear a bit",
+      "heading": "BCLR",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Move multiple registers",
+      "heading": "MOVEM",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Move peripheral data",
+      "heading": "MOVEP",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Commodore Amiga",
+      "heading": "Machines",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Motorola 68000",
+      "slug": "reference/instructions/m68k"
+    },
+    {
+      "context": "56 mnemonics, 151 encoded forms, operands little-endian. Generated from `crates/isa/src/mos6502.rs`.",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Load accumulator",
+      "heading": "LDA",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Load X register",
+      "heading": "LDX",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Load Y register",
+      "heading": "LDY",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Store accumulator",
+      "heading": "STA",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Store X register",
+      "heading": "STX",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Store Y register",
+      "heading": "STY",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Transfer accumulator to X",
+      "heading": "TAX",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Transfer accumulator to Y",
+      "heading": "TAY",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Transfer X to accumulator",
+      "heading": "TXA",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Transfer Y to accumulator",
+      "heading": "TYA",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Transfer stack pointer to X",
+      "heading": "TSX",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Transfer X to stack pointer",
+      "heading": "TXS",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Push accumulator",
+      "heading": "PHA",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Pull accumulator",
+      "heading": "PLA",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Push processor status",
+      "heading": "PHP",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Pull processor status",
+      "heading": "PLP",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Increment X",
+      "heading": "INX",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Increment Y",
+      "heading": "INY",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Decrement X",
+      "heading": "DEX",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Decrement Y",
+      "heading": "DEY",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Increment memory",
+      "heading": "INC",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Decrement memory",
+      "heading": "DEC",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Add with carry",
+      "heading": "ADC",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Subtract with carry",
+      "heading": "SBC",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Logical AND",
+      "heading": "AND",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Logical inclusive OR",
+      "heading": "ORA",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Exclusive OR",
+      "heading": "EOR",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Compare accumulator",
+      "heading": "CMP",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Compare X register",
+      "heading": "CPX",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Compare Y register",
+      "heading": "CPY",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Bit test",
+      "heading": "BIT",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Arithmetic shift left",
+      "heading": "ASL",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Logical shift right",
+      "heading": "LSR",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Rotate left",
+      "heading": "ROL",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Rotate right",
+      "heading": "ROR",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Jump",
+      "heading": "JMP",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Jump to subroutine",
+      "heading": "JSR",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Return from subroutine",
+      "heading": "RTS",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Return from interrupt",
+      "heading": "RTI",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Force interrupt",
+      "heading": "BRK",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "No operation",
+      "heading": "NOP",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Branch if carry clear",
+      "heading": "BCC",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Branch if carry set",
+      "heading": "BCS",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Branch if equal",
+      "heading": "BEQ",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Branch if minus",
+      "heading": "BMI",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Branch if not equal",
+      "heading": "BNE",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Branch if positive",
+      "heading": "BPL",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Branch if overflow clear",
+      "heading": "BVC",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Branch if overflow set",
+      "heading": "BVS",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Clear carry",
+      "heading": "CLC",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Set carry",
+      "heading": "SEC",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Clear interrupt disable",
+      "heading": "CLI",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Set interrupt disable",
+      "heading": "SEI",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Clear decimal",
+      "heading": "CLD",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Set decimal",
+      "heading": "SED",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Clear overflow",
+      "heading": "CLV",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Nintendo Entertainment System, Apple II, Atari 8-bit, BBC Micro, Commodore VIC-20, Commodore PET, MOS KIM-1, Oric Atmos, Commodore 64, Commodore 128",
+      "heading": "Machines",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "MOS 6502",
+      "slug": "reference/instructions/mos6502"
+    },
+    {
+      "context": "53 mnemonics, 119 encoded forms, operands little-endian. Generated from `crates/isa/src/mos65816.rs`.",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "OR accumulator",
+      "heading": "ORA",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "AND accumulator",
+      "heading": "AND",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Exclusive-OR accumulator",
+      "heading": "EOR",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Add with carry",
+      "heading": "ADC",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Load accumulator",
+      "heading": "LDA",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Compare accumulator",
+      "heading": "CMP",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Subtract with carry",
+      "heading": "SBC",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Store accumulator",
+      "heading": "STA",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Load X register",
+      "heading": "LDX",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Load Y register",
+      "heading": "LDY",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Compare X",
+      "heading": "CPX",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Compare Y",
+      "heading": "CPY",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Bit test",
+      "heading": "BIT",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Store zero",
+      "heading": "STZ",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Increment",
+      "heading": "INC",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Decrement",
+      "heading": "DEC",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Test and reset bits",
+      "heading": "TRB",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Test and set bits",
+      "heading": "TSB",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Jump",
+      "heading": "JMP",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Jump long",
+      "heading": "JML",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Jump to subroutine",
+      "heading": "JSR",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Jump to subroutine long",
+      "heading": "JSL",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Push effective absolute address",
+      "heading": "PEA",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Push effective indirect address",
+      "heading": "PEI",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Push effective relative address",
+      "heading": "PER",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Branch long",
+      "heading": "BRL",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Branch always",
+      "heading": "BRA",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Reset status bits",
+      "heading": "REP",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Set status bits",
+      "heading": "SEP",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Transfer C to direct page",
+      "heading": "TCD",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Transfer direct page to C",
+      "heading": "TDC",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Transfer C to stack pointer",
+      "heading": "TCS",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Transfer stack pointer to C",
+      "heading": "TSC",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Transfer X to Y",
+      "heading": "TXY",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Transfer Y to X",
+      "heading": "TYX",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Exchange B and A",
+      "heading": "XBA",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Exchange carry and emulation",
+      "heading": "XCE",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Push data bank",
+      "heading": "PHB",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Pull data bank",
+      "heading": "PLB",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Push direct page",
+      "heading": "PHD",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Pull direct page",
+      "heading": "PLD",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Push program bank",
+      "heading": "PHK",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Push X",
+      "heading": "PHX",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Push Y",
+      "heading": "PHY",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Pull X",
+      "heading": "PLX",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Pull Y",
+      "heading": "PLY",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Wait for interrupt",
+      "heading": "WAI",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Stop the clock",
+      "heading": "STP",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Return from subroutine long",
+      "heading": "RTL",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Block move next",
+      "heading": "MVN",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Block move previous",
+      "heading": "MVP",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Co-processor enable",
+      "heading": "COP",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Reserved (no-op)",
+      "heading": "WDM",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Apple II, Nintendo Super Nintendo",
+      "heading": "Machines",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "WDC 65C816 (extension)",
+      "slug": "reference/instructions/mos65816"
+    },
+    {
+      "context": "111 mnemonics, operands big-endian. Generated from `crates/isa/src/mos6809.rs`.",
+      "page": "Motorola 6809",
+      "slug": "reference/instructions/mos6809"
+    },
+    {
+      "context": "Each supports some subset of the four standard modes; a blank cell means the mode does not exist for that instruction. Width is the immediate's size in bytes.",
+      "heading": "Register and memory",
+      "page": "Motorola 6809",
+      "slug": "reference/instructions/mos6809"
+    },
+    {
+      "context": "No operand — the opcode is the whole instruction.",
+      "heading": "Inherent",
+      "page": "Motorola 6809",
+      "slug": "reference/instructions/mos6809"
+    },
+    {
+      "context": "Every branch has a short form with an 8-bit displacement and a long form with a 16-bit one. The assembler picks by range unless the source forces a spelling.",
+      "heading": "Branches",
+      "page": "Motorola 6809",
+      "slug": "reference/instructions/mos6809"
+    },
+    {
+      "context": "The opcode is followed by a postbyte packing two 4-bit register codes, source in the high nibble. Both registers must be the same width.",
+      "heading": "Transfer and exchange",
+      "page": "Motorola 6809",
+      "slug": "reference/instructions/mos6809"
+    },
+    {
+      "context": "The opcode is followed by a one-byte register mask — PC U/S Y X DP B A CC, high bit first. Registers push in the order CC, A, B, DP, X, Y, U/S, PC and pull in reverse.",
+      "heading": "Stack",
+      "page": "Motorola 6809",
+      "slug": "reference/instructions/mos6809"
+    },
+    {
+      "context": "Dragon 32/64, Tandy TRS-80",
+      "heading": "Machines",
+      "page": "Motorola 6809",
+      "slug": "reference/instructions/mos6809"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Motorola 6809",
+      "slug": "reference/instructions/mos6809"
+    },
+    {
+      "context": "96 instructions, words little-endian. Generated from `crates/isa/src/pdp11.rs`.",
+      "page": "DEC PDP-11",
+      "slug": "reference/instructions/pdp11"
+    },
+    {
+      "context": "DEC PDP-11",
+      "heading": "Machines",
+      "page": "DEC PDP-11",
+      "slug": "reference/instructions/pdp11"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "DEC PDP-11",
+      "slug": "reference/instructions/pdp11"
+    },
+    {
+      "context": "71 mnemonics, 245 encoded forms, operands big-endian. Generated from `crates/isa/src/s2650.rs`.",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Load register zero",
+      "heading": "LODZ",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Load immediate",
+      "heading": "LODI",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Load relative",
+      "heading": "LODR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Load absolute",
+      "heading": "LODA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Store register zero",
+      "heading": "STRZ",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Store relative",
+      "heading": "STRR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Store absolute",
+      "heading": "STRA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Add to register zero",
+      "heading": "ADDZ",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Add immediate",
+      "heading": "ADDI",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Add relative",
+      "heading": "ADDR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Add absolute",
+      "heading": "ADDA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Subtract from register zero",
+      "heading": "SUBZ",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Subtract immediate",
+      "heading": "SUBI",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Subtract relative",
+      "heading": "SUBR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Subtract absolute",
+      "heading": "SUBA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Decimal adjust register",
+      "heading": "DAR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "AND to register zero",
+      "heading": "ANDZ",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "AND immediate",
+      "heading": "ANDI",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "AND relative",
+      "heading": "ANDR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "AND absolute",
+      "heading": "ANDA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Inclusive-OR to register zero",
+      "heading": "IORZ",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Inclusive-OR immediate",
+      "heading": "IORI",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Inclusive-OR relative",
+      "heading": "IORR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Inclusive-OR absolute",
+      "heading": "IORA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Exclusive-OR to register zero",
+      "heading": "EORZ",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Exclusive-OR immediate",
+      "heading": "EORI",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Exclusive-OR relative",
+      "heading": "EORR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Exclusive-OR absolute",
+      "heading": "EORA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Compare to register zero",
+      "heading": "COMZ",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Compare immediate",
+      "heading": "COMI",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Compare relative",
+      "heading": "COMR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Compare absolute",
+      "heading": "COMA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Rotate register right",
+      "heading": "RRR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Rotate register left",
+      "heading": "RRL",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch on condition true, relative",
+      "heading": "BCTR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch on condition true, absolute",
+      "heading": "BCTA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch on condition false, relative",
+      "heading": "BCFR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch on condition false, absolute",
+      "heading": "BCFA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch to subroutine on condition true, relative",
+      "heading": "BSTR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch to subroutine on condition true, absolute",
+      "heading": "BSTA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch to subroutine on condition false, relative",
+      "heading": "BSFR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch to subroutine on condition false, absolute",
+      "heading": "BSFA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch on register non-zero, relative",
+      "heading": "BRNR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch on register non-zero, absolute",
+      "heading": "BRNA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch on incrementing register, relative",
+      "heading": "BIRR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch on incrementing register, absolute",
+      "heading": "BIRA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch on decrementing register, relative",
+      "heading": "BDRR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch on decrementing register, absolute",
+      "heading": "BDRA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch to subroutine on non-zero register, relative",
+      "heading": "BSNR",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Branch to subroutine on non-zero register, absolute",
+      "heading": "BSNA",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Return from subroutine, conditional",
+      "heading": "RETC",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Return and enable interrupt, conditional",
+      "heading": "RETE",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Read control",
+      "heading": "REDC",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Read data",
+      "heading": "REDD",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Write control",
+      "heading": "WRTC",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Write data",
+      "heading": "WRTD",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Read extended",
+      "heading": "REDE",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Write extended",
+      "heading": "WRTE",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Load program status, upper",
+      "heading": "LPSU",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Load program status, lower",
+      "heading": "LPSL",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Store program status, upper",
+      "heading": "SPSU",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Store program status, lower",
+      "heading": "SPSL",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Clear program status, upper, masked",
+      "heading": "CPSU",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Clear program status, lower, masked",
+      "heading": "CPSL",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Preset program status, upper, masked",
+      "heading": "PPSU",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Preset program status, lower, masked",
+      "heading": "PPSL",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Test program status, upper, masked",
+      "heading": "TPSU",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Test program status, lower, masked",
+      "heading": "TPSL",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Halt, enter wait state",
+      "heading": "HALT",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "No operation",
+      "heading": "NOP",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Test under mask immediate",
+      "heading": "TMI",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Interton VC 4000, Emerson Arcadia 2001",
+      "heading": "Machines",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Signetics 2650",
+      "slug": "reference/instructions/s2650"
+    },
+    {
+      "context": "46 mnemonics, 121 encoded forms, operands little-endian. Generated from `crates/isa/src/scmp.rs`.",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Halt",
+      "heading": "HALT",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Exchange AC and E",
+      "heading": "XAE",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Clear carry/link",
+      "heading": "CCL",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Set carry/link",
+      "heading": "SCL",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Disable interrupt",
+      "heading": "DINT",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Enable interrupt",
+      "heading": "IEN",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Copy status to AC",
+      "heading": "CSA",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Copy AC to status",
+      "heading": "CAS",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "No operation",
+      "heading": "NOP",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Serial I/O",
+      "heading": "SIO",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Shift right",
+      "heading": "SR",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Shift right with link",
+      "heading": "SRL",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Rotate right",
+      "heading": "RR",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Rotate right with link",
+      "heading": "RRL",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Load AC from E",
+      "heading": "LDE",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "AND E into AC",
+      "heading": "ANE",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "OR E into AC",
+      "heading": "ORE",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "XOR E into AC",
+      "heading": "XRE",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Decimal add E to AC",
+      "heading": "DAE",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Add E to AC",
+      "heading": "ADE",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Complement-add E to AC",
+      "heading": "CAE",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Exchange pointer low with AC",
+      "heading": "XPAL",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Exchange pointer high with AC",
+      "heading": "XPAH",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Exchange pointer with PC",
+      "heading": "XPPC",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Load AC",
+      "heading": "LD",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Store AC",
+      "heading": "ST",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "AND to AC",
+      "heading": "AND",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "OR to AC",
+      "heading": "OR",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "XOR to AC",
+      "heading": "XOR",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Decimal add to AC",
+      "heading": "DAD",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Add to AC",
+      "heading": "ADD",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Complement-add to AC",
+      "heading": "CAD",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Increment and load",
+      "heading": "ILD",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Decrement and load",
+      "heading": "DLD",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Jump",
+      "heading": "JMP",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Jump if positive",
+      "heading": "JP",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Jump if zero",
+      "heading": "JZ",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Jump if not zero",
+      "heading": "JNZ",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Load immediate",
+      "heading": "LDI",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "AND immediate",
+      "heading": "ANI",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "OR immediate",
+      "heading": "ORI",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "XOR immediate",
+      "heading": "XRI",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Decimal-add immediate",
+      "heading": "DAI",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Add immediate",
+      "heading": "ADI",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Complement-add immediate",
+      "heading": "CAI",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Delay",
+      "heading": "DLY",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Science of Cambridge MK14",
+      "heading": "Machines",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "National SC/MP (INS8060)",
+      "slug": "reference/instructions/scmp"
+    },
+    {
+      "context": "46 mnemonics, 504 encoded forms, operands little-endian. Generated from `crates/isa/src/sm83.rs`.",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "No operation",
+      "heading": "NOP",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Stop / standby",
+      "heading": "STOP",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Halt CPU",
+      "heading": "HALT",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Disable interrupts",
+      "heading": "DI",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Enable interrupts",
+      "heading": "EI",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Rotate A left",
+      "heading": "RLCA",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Rotate A right",
+      "heading": "RRCA",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Rotate A left thru CY",
+      "heading": "RLA",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Rotate A right thru CY",
+      "heading": "RRA",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Decimal adjust A",
+      "heading": "DAA",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Complement A",
+      "heading": "CPL",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Set carry flag",
+      "heading": "SCF",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Complement carry flag",
+      "heading": "CCF",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Load",
+      "heading": "LD",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Load and increment HL",
+      "heading": "LDI",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Load and decrement HL",
+      "heading": "LDD",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Load high page",
+      "heading": "LDH",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Add",
+      "heading": "ADD",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Add with carry",
+      "heading": "ADC",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Subtract",
+      "heading": "SUB",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Subtract with carry",
+      "heading": "SBC",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Logical AND",
+      "heading": "AND",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Logical XOR",
+      "heading": "XOR",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Logical OR",
+      "heading": "OR",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Compare",
+      "heading": "CP",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Increment",
+      "heading": "INC",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Decrement",
+      "heading": "DEC",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Jump",
+      "heading": "JP",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Relative jump",
+      "heading": "JR",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Call subroutine",
+      "heading": "CALL",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Return",
+      "heading": "RET",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Return from interrupt",
+      "heading": "RETI",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Restart",
+      "heading": "RST",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Push",
+      "heading": "PUSH",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Pop",
+      "heading": "POP",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Rotate left",
+      "heading": "RLC",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Rotate right",
+      "heading": "RRC",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Rotate left thru CY",
+      "heading": "RL",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Rotate right thru CY",
+      "heading": "RR",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Shift left arithmetic",
+      "heading": "SLA",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Shift right arithmetic",
+      "heading": "SRA",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Swap nibbles",
+      "heading": "SWAP",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Shift right logical",
+      "heading": "SRL",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Test bit",
+      "heading": "BIT",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Reset bit",
+      "heading": "RES",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Set bit",
+      "heading": "SET",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Nintendo Game Boy",
+      "heading": "Machines",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Sharp SM83 (Game Boy)",
+      "slug": "reference/instructions/sm83"
+    },
+    {
+      "context": "63 mnemonics, 203 encoded forms, operands big-endian. Generated from `crates/isa/src/tms7000.rs`.",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Move",
+      "heading": "MOV",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Logical AND",
+      "heading": "AND",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Logical OR",
+      "heading": "OR",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Logical XOR",
+      "heading": "XOR",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Bit test and jump if one",
+      "heading": "BTJO",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Bit test and jump if zero",
+      "heading": "BTJZ",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Add",
+      "heading": "ADD",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Add with carry",
+      "heading": "ADC",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Subtract",
+      "heading": "SUB",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Subtract with borrow",
+      "heading": "SBB",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Multiply",
+      "heading": "MPY",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Compare",
+      "heading": "CMP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Decimal add with carry",
+      "heading": "DAC",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Decimal subtract with borrow",
+      "heading": "DSB",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Move (A/B source)",
+      "heading": "MOV",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Move to/from peripheral",
+      "heading": "MOVP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "AND with peripheral",
+      "heading": "ANDP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "OR with peripheral",
+      "heading": "ORP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "XOR with peripheral",
+      "heading": "XORP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Bit test peripheral and jump if one",
+      "heading": "BTJOP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Bit test peripheral and jump if zero",
+      "heading": "BTJZP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Load A",
+      "heading": "LDA",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Store A",
+      "heading": "STA",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Branch",
+      "heading": "BR",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Compare A",
+      "heading": "CMPA",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Call",
+      "heading": "CALL",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Move double (16-bit)",
+      "heading": "MOVD",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Decrement",
+      "heading": "DEC",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Increment",
+      "heading": "INC",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Invert",
+      "heading": "INV",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Clear",
+      "heading": "CLR",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Exchange with B",
+      "heading": "XCHB",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Swap nibbles",
+      "heading": "SWAP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Push",
+      "heading": "PUSH",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Pop",
+      "heading": "POP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Decrement double",
+      "heading": "DECD",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Rotate right",
+      "heading": "RR",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Rotate right through carry",
+      "heading": "RRC",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Rotate left",
+      "heading": "RL",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Rotate left through carry",
+      "heading": "RLC",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Decrement and jump if not zero",
+      "heading": "DJNZ",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Test A",
+      "heading": "TSTA",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Test B",
+      "heading": "TSTB",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Push status",
+      "heading": "PUSH",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Pop status",
+      "heading": "POP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Jump unconditional",
+      "heading": "JMP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Jump if negative",
+      "heading": "JN",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Jump if zero",
+      "heading": "JZ",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Jump if carry",
+      "heading": "JC",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Jump if positive",
+      "heading": "JP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Jump if positive or zero",
+      "heading": "JPZ",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Jump if not zero",
+      "heading": "JNZ",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Jump if no carry",
+      "heading": "JNC",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "No operation",
+      "heading": "NOP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Idle",
+      "heading": "IDLE",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Enable interrupts",
+      "heading": "EINT",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Disable interrupts",
+      "heading": "DINT",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Set carry",
+      "heading": "SETC",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Store stack pointer",
+      "heading": "STSP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Return from subroutine",
+      "heading": "RETS",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Return from interrupt",
+      "heading": "RETI",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Load stack pointer",
+      "heading": "LDSP",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Clear carry (= TSTA)",
+      "heading": "CLRC",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Texas Instruments TMS7000",
+      "slug": "reference/instructions/tms7000"
+    },
+    {
+      "context": "69 instructions, words big-endian. Generated from `crates/isa/src/tms9900.rs`.",
+      "page": "TI TMS9900",
+      "slug": "reference/instructions/tms9900"
+    },
+    {
+      "context": "Texas Instruments TI-99/4A",
+      "heading": "Machines",
+      "page": "TI TMS9900",
+      "slug": "reference/instructions/tms9900"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "TI TMS9900",
+      "slug": "reference/instructions/tms9900"
+    },
+    {
+      "context": "118 mnemonics, 704 encoded forms, operands little-endian. Generated from `crates/isa/src/z80.rs`.",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "No operation",
+      "heading": "NOP",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Load",
+      "heading": "LD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Exchange",
+      "heading": "EX",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Decrement B and jump if not zero",
+      "heading": "DJNZ",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Jump relative",
+      "heading": "JR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Add",
+      "heading": "ADD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Add with carry",
+      "heading": "ADC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Subtract",
+      "heading": "SUB",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Subtract with carry",
+      "heading": "SBC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Logical AND",
+      "heading": "AND",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Logical exclusive OR",
+      "heading": "XOR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Logical inclusive OR",
+      "heading": "OR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Compare with A",
+      "heading": "CP",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Increment",
+      "heading": "INC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Decrement",
+      "heading": "DEC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate A left circular",
+      "heading": "RLCA",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate A right circular",
+      "heading": "RRCA",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate A left through carry",
+      "heading": "RLA",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate A right through carry",
+      "heading": "RRA",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Decimal adjust A",
+      "heading": "DAA",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Complement A",
+      "heading": "CPL",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Set carry flag",
+      "heading": "SCF",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Complement carry flag",
+      "heading": "CCF",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Halt",
+      "heading": "HALT",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Push register pair",
+      "heading": "PUSH",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Pop register pair",
+      "heading": "POP",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Jump",
+      "heading": "JP",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Call subroutine",
+      "heading": "CALL",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Return",
+      "heading": "RET",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Restart",
+      "heading": "RST",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Output to port",
+      "heading": "OUT",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Input from port",
+      "heading": "IN",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Exchange register set",
+      "heading": "EXX",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Disable interrupts",
+      "heading": "DI",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Enable interrupts",
+      "heading": "EI",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Negate accumulator",
+      "heading": "NEG",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Return from NMI",
+      "heading": "RETN",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Return from interrupt",
+      "heading": "RETI",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate right decimal",
+      "heading": "RRD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate left decimal",
+      "heading": "RLD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Set interrupt mode",
+      "heading": "IM",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block load, increment",
+      "heading": "LDI",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block load, decrement",
+      "heading": "LDD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block load, inc, repeat",
+      "heading": "LDIR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block load, dec, repeat",
+      "heading": "LDDR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block compare, increment",
+      "heading": "CPI",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block compare, decrement",
+      "heading": "CPD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block compare, inc, repeat",
+      "heading": "CPIR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block compare, dec, repeat",
+      "heading": "CPDR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block input, increment",
+      "heading": "INI",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block input, decrement",
+      "heading": "IND",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block input, inc, repeat",
+      "heading": "INIR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block input, dec, repeat",
+      "heading": "INDR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block output, increment",
+      "heading": "OUTI",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block output, decrement",
+      "heading": "OUTD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block output, inc, repeat",
+      "heading": "OTIR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Block output, dec, repeat",
+      "heading": "OTDR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate left circular",
+      "heading": "RLC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate right circular",
+      "heading": "RRC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate left through carry",
+      "heading": "RL",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate right through carry",
+      "heading": "RR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Shift left arithmetic",
+      "heading": "SLA",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Shift right arithmetic",
+      "heading": "SRA",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Shift left logical (undocumented)",
+      "heading": "SLL",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Shift right logical",
+      "heading": "SRL",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Test bit",
+      "heading": "BIT",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Reset bit",
+      "heading": "RES",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Set bit",
+      "heading": "SET",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Add to IX",
+      "heading": "ADD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Add with carry, IX",
+      "heading": "ADC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Subtract, IX",
+      "heading": "SUB",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Subtract carry, IX",
+      "heading": "SBC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "AND, IX",
+      "heading": "AND",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "XOR, IX",
+      "heading": "XOR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "OR, IX",
+      "heading": "OR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Compare, IX",
+      "heading": "CP",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Increment IX",
+      "heading": "INC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Decrement IX",
+      "heading": "DEC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Push IX",
+      "heading": "PUSH",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Pop IX",
+      "heading": "POP",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Exchange IX",
+      "heading": "EX",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Jump IX",
+      "heading": "JP",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Load IX",
+      "heading": "LD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate left circular (IX+d)",
+      "heading": "RLC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate right circular (IX+d)",
+      "heading": "RRC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate left (IX+d)",
+      "heading": "RL",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate right (IX+d)",
+      "heading": "RR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Shift left arithmetic (IX+d)",
+      "heading": "SLA",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Shift right arithmetic (IX+d)",
+      "heading": "SRA",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Shift right logical (IX+d)",
+      "heading": "SRL",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Test bit (IX+d)",
+      "heading": "BIT",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Reset bit (IX+d)",
+      "heading": "RES",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Set bit (IX+d)",
+      "heading": "SET",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Add to IY",
+      "heading": "ADD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Add with carry, IY",
+      "heading": "ADC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Subtract, IY",
+      "heading": "SUB",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Subtract carry, IY",
+      "heading": "SBC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "AND, IY",
+      "heading": "AND",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "XOR, IY",
+      "heading": "XOR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "OR, IY",
+      "heading": "OR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Compare, IY",
+      "heading": "CP",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Increment IY",
+      "heading": "INC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Decrement IY",
+      "heading": "DEC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Push IY",
+      "heading": "PUSH",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Pop IY",
+      "heading": "POP",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Exchange IY",
+      "heading": "EX",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Jump IY",
+      "heading": "JP",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Load IY",
+      "heading": "LD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate left circular (IY+d)",
+      "heading": "RLC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate right circular (IY+d)",
+      "heading": "RRC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate left (IY+d)",
+      "heading": "RL",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Rotate right (IY+d)",
+      "heading": "RR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Shift left arithmetic (IY+d)",
+      "heading": "SLA",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Shift right arithmetic (IY+d)",
+      "heading": "SRA",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Shift right logical (IY+d)",
+      "heading": "SRL",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Test bit (IY+d)",
+      "heading": "BIT",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Reset bit (IY+d)",
+      "heading": "RES",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Set bit (IY+d)",
+      "heading": "SET",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Sinclair ZX Spectrum, Amstrad CPC, MSX, NEC PC-8801, Sega Master System",
+      "heading": "Machines",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "182 instructions, words big-endian. Generated from `crates/isa/src/z8000.rs`.",
+      "page": "Zilog Z8000",
+      "slug": "reference/instructions/z8000"
+    },
+    {
+      "context": "The dyadic family: a destination register and a source in any of the addressing modes listed.",
+      "heading": "Arithmetic, logic and load",
+      "page": "Zilog Z8000",
+      "slug": "reference/instructions/z8000"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Zilog Z8000",
+      "slug": "reference/instructions/z8000"
+    },
+    {
+      "context": "22 mnemonics, 30 encoded forms, operands little-endian. Generated from `crates/isa/src/z80.rs`.",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Swap the nibbles of A",
+      "heading": "SWAPNIB",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Mirror the bits of A",
+      "heading": "MIRROR",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "AND A with n, set flags only",
+      "heading": "TEST",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Barrel shift left arithmetic",
+      "heading": "BSLA",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Barrel shift right arithmetic",
+      "heading": "BSRA",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Barrel shift right logical",
+      "heading": "BSRL",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Barrel shift right feed",
+      "heading": "BSRF",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Barrel rotate left circular",
+      "heading": "BRLC",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "8x8 multiply DE into DE",
+      "heading": "MUL",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Add (Z80N)",
+      "heading": "ADD",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Push a 16-bit immediate",
+      "heading": "PUSH",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Output (HL) to port (C), inc HL",
+      "heading": "OUTINB",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Set a Next hardware register",
+      "heading": "NEXTREG",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Advance HL to the next pixel row",
+      "heading": "PIXELDN",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Compute pixel address into HL",
+      "heading": "PIXELAD",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Set A to the E pixel mask",
+      "heading": "SETAE",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Block load (transparent), inc",
+      "heading": "LDIX",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Load word, special",
+      "heading": "LDWS",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Block load (transparent), dec",
+      "heading": "LDDX",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Repeat LDIX",
+      "heading": "LDIRX",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Repeat LDIX over a pattern",
+      "heading": "LDPIRX",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Repeat LDDX",
+      "heading": "LDDRX",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Sinclair ZX Spectrum, Amstrad CPC, MSX, NEC PC-8801, Sega Master System",
+      "heading": "Machines",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "Encodings on this page were taken from:",
+      "heading": "Sources",
+      "page": "Zilog Z80N",
+      "slug": "reference/instructions/z80n"
+    },
+    {
+      "context": "One page per CPU, generated from the instruction-set specification the",
+      "page": "Instruction reference",
+      "slug": "reference/instructions"
+    },
+    {
+      "context": "Keep your source and your syntax. Gain tooling that did not exist for them.",
+      "page": "Why asm198x",
+      "slug": "why"
+    },
+    {
+      "context": "Every dialect asm198x reads is somebody else's assembler — ACME, ca65, pasmo,",
+      "heading": "There is nothing to port",
+      "page": "Why asm198x",
+      "slug": "why"
+    },
+    {
+      "context": "The scope column is the point, and it is checked rather than claimed: a test",
+      "heading": "What arrives with it",
+      "page": "Why asm198x",
+      "slug": "why"
+    },
+    {
+      "context": "Because you can check, rather than take it on faith.",
+      "heading": "Why trust it with a project that already builds",
+      "page": "Why asm198x",
+      "slug": "why"
+    },
+    {
+      "context": "It is not published to crates.io — cargo install asm198x will not find it.",
+      "heading": "What it will not do",
+      "page": "Why asm198x",
+      "slug": "why"
+    }
+  ],
+  "note": "Generated by `cargo xtask docs` from docs/book/src. The documentation site's search reads this. Do not edit by hand."
+}

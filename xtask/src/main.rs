@@ -19,6 +19,7 @@ mod ledger;
 mod machines;
 mod nav;
 mod parity;
+mod search;
 mod supersede;
 
 use std::path::PathBuf;
@@ -179,6 +180,36 @@ fn run_docs(args: &[String]) -> ExitCode {
         return ExitCode::FAILURE;
     }
 
+    // The search index, alongside the nav and for the same reason: mdBook
+    // carried search, its withdrawal left no replacement, and a reference of
+    // twenty-one generated instruction pages that nobody can search is worse
+    // than no reference. Generated here and read there, exactly as the nav is.
+    let index_path = crate::search::index_path(&repo);
+    let rendered_index = match crate::search::render(&repo) {
+        Ok(text) => text,
+        Err(e) => {
+            eprintln!("xtask docs: {e}");
+            return ExitCode::FAILURE;
+        }
+    };
+    let index_stale = std::fs::read_to_string(&index_path).ok().as_deref() != Some(&rendered_index);
+    if index_stale
+        && !check
+        && let Err(e) = std::fs::write(&index_path, &rendered_index)
+    {
+        eprintln!("xtask docs: could not write {}: {e}", index_path.display());
+        return ExitCode::FAILURE;
+    }
+    if index_stale && check {
+        eprintln!(
+            "docs/book/search.json is stale.\n\n\
+             The site's search reads it, so a heading added here without it \
+             reaching the index is a section nobody can find. Run `cargo xtask \
+             docs`."
+        );
+        return ExitCode::FAILURE;
+    }
+
     if nav_stale && check {
         eprintln!(
             "docs/book/nav.json is stale.\n\n\
@@ -224,6 +255,9 @@ fn run_docs(args: &[String]) -> ExitCode {
         return ExitCode::FAILURE;
     }
 
+    if index_stale && !check {
+        println!("wrote {}", index_path.display());
+    }
     if nav_stale {
         println!("wrote {}", nav_path.display());
     }
