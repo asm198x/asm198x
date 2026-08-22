@@ -76,6 +76,13 @@ touched the edge of this: `.macro` on the ca65 formatter path now reports
 "declared but not dispatched here" instead of "unsupported directive", which is
 a truer message for the same limitation and not a fix.
 
+- **Closed 2026-08-22**, outside this plan and against its own scope note below,
+  because it was asked for directly. All five formatters copy a definition
+  through instead of reading it: ca65, vasm, lwasm, pasmo, acme. The shared
+  parts are the `Item::Verbatim` node and `macros::macro_line`.
+  `FORMATTER_GAPS` is empty and stays in the tree as the strictest form of its
+  own test.
+
 **G5. The dialect pages have no arbitration column.** Recorded in the generator
 itself. The corpus's `dialect` field is a *suite* label, not a `--dialect` name:
 `asl` covers twelve chips at once, `vasm-bin`/`vasm-exe` are output legs, and
