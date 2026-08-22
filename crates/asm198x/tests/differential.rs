@@ -1674,13 +1674,15 @@ fn the_formatter_reads_what_the_assembler_reads() {
 
 /// Sources this crate assembles and will not format (#130).
 ///
-/// Each row is `(dialect, the reason its formatter gives)`. Both halves are
-/// matched: a dialect on this list that starts failing for a *different* reason
-/// is reported, because a row is a statement about one known cause and not a
-/// licence to fail.
+/// **Empty**, and that is the point: every dialect now formats everything it
+/// assembles. It stays because an empty ledger is the strictest form of the
+/// test above — with no rows, *any* source that assembles and will not format
+/// is reported.
 ///
-/// Every row here is a macro. sjasmplus is the one dialect with none, and it is
-/// the one whose formatter was built after macros rather than before — which is
-/// the whole of the explanation. Deleting a row is how a fix is recorded, and
-/// the test above fails if a row outlives the problem.
-const FORMATTER_GAPS: &[(&str, &str)] = &[("acme", "unbalanced `}` in conditional block")];
+/// Each row was `(dialect, the reason its formatter gives)`, both halves
+/// matched so that a listed dialect failing for a *different* reason was still
+/// reported. Every row was a macro: each dialect's formatter was written before
+/// its macros were, and a definition reached a walk that could only read code.
+/// Deleting a row is how a fix is recorded, and the test fails if a row
+/// outlives the problem.
+const FORMATTER_GAPS: &[(&str, &str)] = &[];

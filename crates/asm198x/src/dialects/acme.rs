@@ -328,6 +328,47 @@ impl<'a> FmtCx<'a> {
                 return Err(AsmError::new(line, format!("unexpected `{trimmed}`")));
             }
 
+            // A `!macro` definition is copied, not read. A body is a template
+            // rather than code — `.v` is a parameter and `+other` is a call, so
+            // neither is an operand this parse could lay out — and acme
+            // delimits one at character level, so the copy counts braces the
+            // way the expander does instead of looking for a keyword. See
+            // `Item::Verbatim`.
+            //
+            // Only the formatter's parse reaches here with a definition intact:
+            // the assembling path expands it away first.
+            if is_macro_head(trimmed) {
+                let mut leading = std::mem::take(&mut self.pending);
+                let mut depth = 0usize;
+                let mut closed = false;
+                while self.pos < self.lines.len() {
+                    let raw = self.lines[self.pos];
+                    let line = self.pos + 1;
+                    let (code, comment) = split_comment(raw);
+                    // A brace inside a string closes nothing, which is why this
+                    // is `close_brace` and not a byte count.
+                    closed = close_brace(code, &mut depth).is_some();
+                    nodes.push(self.verbatim_node(
+                        code,
+                        std::mem::take(&mut leading),
+                        comment,
+                        line,
+                    ));
+                    self.pos += 1;
+                    if closed {
+                        break;
+                    }
+                }
+                if !closed {
+                    // acme: "Found end-of-file instead of '}'".
+                    return Err(AsmError::new(
+                        self.pos,
+                        "unterminated `!macro` definition (missing `}`)",
+                    ));
+                }
+                continue;
+            }
+
             // A conditional head opens a block (one-line or multi-line).
             if is_conditional_head(trimmed) {
                 let node = self.parse_conditional(trimmed, comment, line)?;
@@ -559,6 +600,29 @@ impl<'a> FmtCx<'a> {
         }
     }
 
+    /// A line copied through the formatter exactly as written — the macro
+    /// case. The comment is carried as trivia so it is spaced canonically; the
+    /// code keeps its own column, because a body's layout is the author's.
+    fn verbatim_node(
+        &self,
+        code: &str,
+        leading: Vec<crate::ast::Comment>,
+        comment: Option<&str>,
+        line: usize,
+    ) -> crate::ast::Node {
+        crate::ast::Node {
+            operand_span: None,
+            label: None,
+            item: Some(crate::ast::Item::Verbatim),
+            source: code.trim_end().to_string(),
+            span: self.at(line, 1),
+            trivia: crate::ast::Trivia {
+                leading,
+                trailing: self.trailing(comment, line, 1),
+            },
+        }
+    }
+
     fn op_node(
         &self,
         operand_span: Option<crate::ast::Span>,
@@ -648,6 +712,15 @@ fn is_conditional_head(trimmed: &str) -> bool {
 /// `!zone`/`!zn` first word (case-insensitive, as acme reads directives) with
 /// a top-level `{`. Returns the `{`'s offset. A brace-less `!zone` line is an
 /// ordinary node (the walk-handled line form).
+/// Whether `trimmed` opens a `!macro` definition.
+///
+/// Only the keyword is checked, not the brace: acme wants the `{` on the header
+/// line, and a header without one is a *malformed definition* rather than a
+/// non-definition — the same reading [`AcmeMacros::collect`] takes.
+fn is_macro_head(trimmed: &str) -> bool {
+    split_first_word(trimmed).0.eq_ignore_ascii_case("!macro")
+}
+
 fn zone_block_open(trimmed: &str) -> Option<usize> {
     let word = split_first_word(trimmed).0.to_ascii_lowercase();
     if word == "!zone" || word == "!zn" {
@@ -2799,20 +2872,62 @@ mod tests {
 
     /// The formatter lays source out; it does not rewrite programs.
     ///
-    /// acme's formatter cannot yet *format* a file with macros — its block
-    /// parser reads the body's closing brace as an unbalanced conditional
-    /// close, exactly as it did before macros existed. Refusing is the safe
-    /// half of the answer; the half that matters here is that assembling the
-    /// same text still expands, so the two really are different parses rather
-    /// than one of them being broken. See
-    /// `decisions/macro-expansion-framework.md`.
+    /// The half that matters here is that assembling the same text still
+    /// expands, so the two really are different parses of it rather than one
+    /// of them being broken. See `decisions/macro-expansion-framework.md`.
     #[test]
     fn formatting_does_not_expand() {
         let src = "*= $c000\n!macro ldav .v {\n\tlda #.v\n}\n+ldav 5\n";
-        crate::format_acme(src).expect_err("the block parser does not know `!macro`");
+        let out = crate::format_acme(src).expect("the walk copies a definition");
+
+        // The macro survives as a macro. If it were expanded, `!macro` would be
+        // gone and `lda #5` would be in its place.
+        assert!(out.contains("!macro ldav .v {"), "{out}");
+        assert!(out.contains("+ldav 5"), "{out}");
+        assert!(!out.contains("lda #5"), "expanded into the output:\n{out}");
+
         assert_eq!(
             crate::assemble_acme(src).expect("assembles").bytes,
             vec![0xA9, 0x05]
         );
+    }
+
+    /// Formatting a macro changes the layout and not the program.
+    ///
+    /// acme is the one dialect measured whose bodies are brace-delimited at
+    /// *character* level, so the shapes here are the ones a line-at-a-time copy
+    /// gets wrong: both braces sharing a line with code, a nested block inside
+    /// a body, and a `}` inside a string or a character constant.
+    #[test]
+    fn a_formatted_macro_assembles_to_the_same_bytes() {
+        for src in [
+            "*= $c000\n!macro ldav .v {\n\tlda #.v\n}\n+ldav 5\n\trts\n",
+            "*= $c000\n!macro nop2 { nop\n\tnop }\n+nop2\n\trts\n",
+            "*= $c000\n!macro guard .v {\n\t!if .v >= 3 {\n\t\tlda #.v\n\t} else {\n\t\tlda #0\n\t}\n}\n+guard 5\n+guard 1\n\trts\n",
+            "*= $c000\n!macro brace {\n\t!byte '}'\n\t!text \"}\"\n}\n+brace\n\trts\n",
+        ] {
+            let before = crate::assemble_acme(src).expect(src).bytes;
+            let formatted = crate::format_acme(src).expect(src);
+            let after = crate::assemble_acme(&formatted)
+                .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+                .bytes;
+            assert_eq!(
+                before, after,
+                "formatting changed the program:\n{formatted}"
+            );
+
+            // And formatting is idempotent, so a second run is a no-op.
+            let again = crate::format_acme(&formatted).expect("formats");
+            assert_eq!(formatted, again, "{formatted}");
+        }
+    }
+
+    /// A definition that never closes is refused, rather than swallowing the
+    /// rest of the file as a body.
+    #[test]
+    fn an_unterminated_definition_is_refused() {
+        let err = crate::format_acme("*= $c000\n!macro ldav .v {\n\tlda #.v\n")
+            .expect_err("no closing brace");
+        assert!(err.message.contains("missing `}`"), "{err:?}");
     }
 }
