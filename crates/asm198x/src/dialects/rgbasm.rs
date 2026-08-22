@@ -699,6 +699,14 @@ fn resolve(
     consts: &BTreeMap<String, i64>,
     line: usize,
 ) -> Result<(&'static str, Vec<Expr>), AsmError> {
+    // A word this instruction set does not have is refused as one, before any
+    // operand handling. Reaching the mode resolution first makes an unknown
+    // word report as a bad operand — "has no form for operands", or worse a
+    // message naming nothing — which sends the reader to check the wrong half
+    // of their line.
+    if set.instruction(mn).is_none() {
+        return Err(AsmError::new(line, format!("unknown instruction `{mn}`")));
+    }
     let pieces = if args.trim().is_empty() {
         Vec::new()
     } else {

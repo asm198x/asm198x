@@ -710,6 +710,13 @@ fn resolve(
     env: &BTreeMap<String, i64>,
     line: usize,
 ) -> Result<(&'static str, Vec<Expr>), AsmError> {
+    // A word neither set has is refused as one, before any operand handling.
+    // Reaching the mode ladder first reports "no suitable addressing mode for
+    // this operand" — which names nothing at all, and points the reader at an
+    // operand that was never the problem.
+    if prim.instruction(mn).is_none() && ext.instruction(mn).is_none() {
+        return Err(AsmError::new(line, format!("unknown instruction `{mn}`")));
+    }
     let has = |mode: &str| prim.find_form(mn, mode).is_some() || ext.find_form(mn, mode).is_some();
     let t = operand.trim();
 

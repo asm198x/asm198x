@@ -92,22 +92,27 @@ fn every_declared_spelling_is_recognised() {
     }
 }
 
-/// A word no dialect declares assembles nowhere.
+/// A word no dialect declares is refused as an unknown instruction, everywhere.
 ///
 /// This is the other half of R3: the declaration is the only route in, so
 /// something outside it falls through to instruction resolution and is turned
 /// away. `include` would be the obvious probe and is the wrong one — most of
 /// these dialects implement it.
 ///
-/// The assertion is that it fails, not how, because the failure is worded
-/// three ways and one of them names nothing at all: `unknown instruction
-/// `frobnicate``, ``frobnicate` has no form for operands `1``, and the ca65
-/// family's `no suitable addressing mode for this operand`. A reader given the
-/// third has to guess whether they mistyped the mnemonic or the operand. That
-/// is a diagnostic gap rather than a dispatch one, so it is recorded here and
-/// not fixed here.
+/// The assertion used to be that it fails, not how, because the refusal was
+/// worded three ways and one of them named nothing: `` `x` has no form for
+/// operands `1` `` implied the word existed, and the ca65 family's `no suitable
+/// addressing mode for this operand` pointed at an operand that was never the
+/// problem. Five dialects check the mnemonic before touching operands now, so
+/// the wording is one thing and this asserts it.
+///
+/// **acme names the operand rather than the probe, and that is correct.** An
+/// indented bare word is a *label* in acme, so `frobnicate 1` reads as a label
+/// and a mnemonic `1` — which is what real acme does too (it accepts it with
+/// "Label name not in leftmost column", probed 2026-08-22). The unknown
+/// instruction genuinely is `1`.
 #[test]
-fn an_undeclared_spelling_assembles_nowhere() {
+fn an_undeclared_spelling_is_refused_as_an_unknown_instruction() {
     for surface in directives::surfaces() {
         let assemble = assembler(surface.dialect);
         assert!(
@@ -115,9 +120,10 @@ fn an_undeclared_spelling_assembles_nowhere() {
             "{}: the probe must not be a declared spelling",
             surface.dialect
         );
+        let err = assemble(" frobnicate 1\n").expect_err("not a word anywhere");
         assert!(
-            assemble(" frobnicate 1\n").is_err(),
-            "{}: `frobnicate` is not a directive and not an instruction",
+            err.to_string().contains("unknown instruction"),
+            "{}: refused, but not as an unknown instruction: {err}",
             surface.dialect
         );
     }
