@@ -376,6 +376,66 @@ impl<'a> FmtCx<'a> {
                 continue;
             }
 
+            // A `!for` block. Unlike `!macro` its body **is** code — it
+            // assembles once per iteration — so it is parsed here rather than
+            // copied, and unlike `!zone` it is a repetition, so it becomes an
+            // `Item::Repeat` the shared walk runs.
+            if let Some(open) = for_block_open(trimmed) {
+                let leading = std::mem::take(&mut self.pending);
+                let head = trimmed[..open].trim().to_string();
+                let after = trimmed[open + 1..].trim();
+                // One-line form: `!for i, 1, 2 { !byte i }`, which acme takes.
+                // Depth-matched, not first-brace: a nested `!for` on the same
+                // line closes twice and the inner `}` is not this block's.
+                let mut depth = 1usize;
+                if let Some(close) = close_brace(after, &mut depth) {
+                    let body_text = after[..close].trim();
+                    let tail = after[close + 1..].trim();
+                    if !tail.is_empty() {
+                        return Err(AsmError::new(
+                            line,
+                            format!("unexpected `{tail}` after the `!for` block's `}}`"),
+                        ));
+                    }
+                    // Parsed as a *block*, not a line: the body may itself be
+                    // a one-line `!for`, and `parse_line` knows no blocks.
+                    let mut body = Vec::new();
+                    if !body_text.is_empty() {
+                        let mut sub = FmtCx {
+                            set: self.set,
+                            file: self.file,
+                            lines: vec![body_text],
+                            pos: 0,
+                            pending: Vec::new(),
+                        };
+                        let (mut inner, _) = sub.parse_block()?;
+                        for node in &mut inner {
+                            node.span.line = line as u32;
+                            if let Some(span) = node.operand_span.as_mut() {
+                                span.line = line as u32;
+                            }
+                        }
+                        body = inner;
+                    }
+                    self.pos += 1;
+                    nodes.push(self.repeat_node(head, body, leading, comment, line));
+                    continue;
+                }
+                self.pos += 1;
+                if !after.is_empty() {
+                    return Err(AsmError::new(
+                        line,
+                        format!("unexpected `{after}` after the `!for` block's `{{`"),
+                    ));
+                }
+                let (body, closer) = self.parse_block()?;
+                if closer != Closer::Brace {
+                    return Err(AsmError::new(line, "`!for` block is never closed"));
+                }
+                nodes.push(self.repeat_node(head, body, leading, comment, line));
+                continue;
+            }
+
             // A `!zone [title] {` head opens a zone block (U7, probes
             // zh1-zh3/zh8): unlike a conditional there is no branch to prune,
             // so the head and its `}` stay in the tree as verbatim marker
@@ -623,6 +683,34 @@ impl<'a> FmtCx<'a> {
         }
     }
 
+    /// A repetition node in acme's brace style. The head is stored without its
+    /// `{`, which `emit` puts back — the same shape a brace conditional uses.
+    fn repeat_node(
+        &self,
+        head: String,
+        body: Vec<crate::ast::Node>,
+        leading: Vec<crate::ast::Comment>,
+        comment: Option<&str>,
+        line: usize,
+    ) -> crate::ast::Node {
+        crate::ast::Node {
+            operand_span: None,
+            label: None,
+            item: Some(crate::ast::Item::Repeat {
+                head: head.clone(),
+                body,
+                close: "}".to_string(),
+                style: crate::ast::CondStyle::Brace,
+            }),
+            source: head,
+            span: self.at(line, 1),
+            trivia: crate::ast::Trivia {
+                leading,
+                trailing: self.trailing(comment, line, 1),
+            },
+        }
+    }
+
     fn op_node(
         &self,
         operand_span: Option<crate::ast::Span>,
@@ -719,6 +807,15 @@ fn is_conditional_head(trimmed: &str) -> bool {
 /// non-definition — the same reading [`AcmeMacros::collect`] takes.
 fn is_macro_head(trimmed: &str) -> bool {
     split_first_word(trimmed).0.eq_ignore_ascii_case("!macro")
+}
+
+/// Where a `!for` block's opening brace is, if this line opens one.
+fn for_block_open(trimmed: &str) -> Option<usize> {
+    if split_first_word(trimmed).0.eq_ignore_ascii_case("!for") {
+        find_top(trimmed, b'{')
+    } else {
+        None
+    }
 }
 
 fn zone_block_open(trimmed: &str) -> Option<usize> {
@@ -1049,6 +1146,92 @@ impl crate::ast::CondEval for AcmeEval<'_> {
         // The shared walk raises condition errors without node context, so a
         // failure inside an included file is stamped here (U4).
         taken.map_err(|e| stamp_file(e, self.current_file))
+    }
+
+    /// acme's `!for` has **two** syntaxes and they do not agree about anything
+    /// except the name coming first. Measured against acme 0.97:
+    ///
+    /// | form | values | notes |
+    /// |---|---|---|
+    /// | `!for i, n` | `1 ..= n` | the *old* syntax; acme warns on every use |
+    /// | `!for i, a, b` | `a ..= b` | inclusive, and **counts down** when `b < a` |
+    ///
+    /// So `!for i, 3, 1` gives 3, 2, 1 — not an empty loop, and not 1, 2, 3.
+    /// That is the case [`Iteration::Over`] exists to carry: it is a list of
+    /// values, never a start plus an index, because no index rule recovers a
+    /// descending range without already knowing this one.
+    ///
+    /// `!for i, 0` is the old form's empty loop, and a negative count there is
+    /// an error in acme rather than an empty loop.
+    fn iteration(&self, head: &str, line: u32) -> Result<crate::ast::Iteration, AsmError> {
+        let line = line as usize;
+        let (_, args) = split_first_word(head.trim());
+        let mut parts = args.split(',').map(str::trim);
+        let name = parts
+            .next()
+            .filter(|n| !n.is_empty())
+            .ok_or_else(|| AsmError::new(line, "`!for` needs a variable name"))?;
+        let bounds: Vec<&str> = parts.filter(|p| !p.is_empty()).collect();
+        let fold = |text: &str| -> Result<i64, AsmError> {
+            fold_const(
+                &parse_value(&self.anons, &self.zone, text, line)?,
+                &self.env,
+                line,
+            )
+        };
+        let values: Vec<i64> = match bounds.as_slice() {
+            // Old syntax: 1 up to the count, and **empty** when the count is
+            // below 1. Counting down is the three-argument form's rule alone —
+            // sharing it here made `!for i, 0` run twice.
+            [count] => {
+                let n = fold(count)?;
+                if n < 0 {
+                    return Err(AsmError::new(
+                        line,
+                        format!(
+                            "`!for {name}, {n}`: acme rejects a negative count in the old \
+                             two-argument form"
+                        ),
+                    ));
+                }
+                (1..=n).collect()
+            }
+            // New syntax: inclusive both ends, descending when the end is below
+            // the start.
+            [a, b] => {
+                let (first, last) = (fold(a)?, fold(b)?);
+                if last >= first {
+                    (first..=last).collect()
+                } else {
+                    (last..=first).rev().collect()
+                }
+            }
+            _ => {
+                return Err(AsmError::new(
+                    line,
+                    "`!for` takes a name and either a count or a start and an end",
+                ));
+            }
+        };
+        Ok(crate::ast::Iteration::Over {
+            name: self.qualify_name(name.to_string()),
+            values,
+        })
+    }
+
+    /// The loop variable is bound like a `!set` name: **baked into each use at
+    /// lower time**, not left as a symbol for the engine to resolve.
+    ///
+    /// That is forced by when the value exists. A label reaches the engine as
+    /// `Expr::Sym` and resolves in a later pass against one symbol table, but a
+    /// loop variable holds a different value on every pass and there is no pass
+    /// for the engine to resolve it in. `!set` already had this problem and
+    /// `bake_set_vars` already solves it, so the loop variable joins that set
+    /// rather than growing a second mechanism.
+    fn bind_loop_var(&mut self, name: &str, value: i64, _line: u32) -> Result<(), AsmError> {
+        self.env.insert(name.to_string(), value);
+        self.set_names.insert(name.to_string());
+        Ok(())
     }
 
     fn lower(&mut self, node: &crate::ast::Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
@@ -1859,6 +2042,16 @@ pub const DIRECTIVES: &[Directive] = &[
     // Scanner-handled, like the conditionals above: the macro expander reads
     // these before `parse_directive` is reached. Declared for the same reason
     // `!src` and `!zone` are — the surface describes the dialect.
+    // Walk-handled: the structure parse reads `!for` into `Item::Repeat`.
+    Directive {
+        id: "repeat",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["for"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     Directive {
         id: "macro",
         pattern: Pattern::Sigilled {
@@ -2929,5 +3122,110 @@ mod tests {
         let err = crate::format_acme("*= $c000\n!macro ldav .v {\n\tlda #.v\n")
             .expect_err("no closing brace");
         assert!(err.message.contains("missing `}`"), "{err:?}");
+    }
+
+    // -----------------------------------------------------------------------
+    // `!for`. Measured against acme 0.97 — the two syntaxes agree on nothing
+    // but the name coming first.
+    // -----------------------------------------------------------------------
+
+    /// The old two-argument form runs `1 ..= n`.
+    #[test]
+    fn the_old_for_syntax_counts_from_one() {
+        assert_eq!(
+            crate::assemble_acme("*=$801\n!for i, 3 { !byte i }\n")
+                .expect("assembles")
+                .bytes,
+            vec![1, 2, 3]
+        );
+    }
+
+    /// The three-argument form is inclusive at both ends and **counts down**
+    /// when the end is below the start. `!for i, 3, 1` is 3, 2, 1 — not empty,
+    /// and not 1, 2, 3.
+    #[test]
+    fn the_new_for_syntax_is_inclusive_and_may_descend() {
+        for (src, want) in [
+            ("*=$801\n!for i, 5, 7 { !byte i }\n", vec![5, 6, 7]),
+            ("*=$801\n!for i, 3, 1 { !byte i }\n", vec![3, 2, 1]),
+            ("*=$801\n!for i, 4, 4 { !byte i }\n", vec![4]),
+        ] {
+            assert_eq!(crate::assemble_acme(src).expect(src).bytes, want, "{src}");
+        }
+    }
+
+    /// Descending belongs to the three-argument form **only**. Sharing the rule
+    /// made `!for i, 0` run its body twice, counting 1 down to 0.
+    #[test]
+    fn the_old_syntax_never_descends() {
+        assert_eq!(
+            crate::assemble_acme("*=$801\n!for i, 0 { !byte 9 }\n!byte $ff\n")
+                .expect("assembles")
+                .bytes,
+            vec![0xFF],
+            "the body must not run at all"
+        );
+        crate::assemble_acme("*=$801\n!for i, -2 { !byte 9 }\n")
+            .expect_err("acme rejects a negative count in the old form");
+    }
+
+    /// The loop variable is baked into each use, so it holds a different value
+    /// on each pass — a label could not, because the engine resolves those
+    /// once, in a later pass, against one table.
+    #[test]
+    fn the_loop_variable_is_live_in_the_body() {
+        assert_eq!(
+            crate::assemble_acme("*=$801\n!for i, 0, 3 {\n lda #i\n}\n")
+                .expect("assembles")
+                .bytes,
+            vec![0xA9, 0, 0xA9, 1, 0xA9, 2, 0xA9, 3]
+        );
+        // Bounds fold against the environment above the loop.
+        assert_eq!(
+            crate::assemble_acme("*=$801\nn = 2\n!for i, n, n+1 { !byte i }\n")
+                .expect("assembles")
+                .bytes,
+            vec![2, 3]
+        );
+    }
+
+    /// Nesting, in both the multi-line and the one-line form. The one-line case
+    /// is the one that breaks a naive parse: the body must be read as a block,
+    /// and its closing brace found by depth rather than by the first `}`.
+    #[test]
+    fn for_blocks_nest() {
+        for src in [
+            "*=$801\n!for i, 1, 2 { !for j, 1, 2 { !byte i*16+j } }\n",
+            "*=$801\n!for i, 1, 2 {\n\t!for j, 1, 2 {\n\t\t!byte i*16+j\n\t}\n}\n",
+        ] {
+            assert_eq!(
+                crate::assemble_acme(src).expect(src).bytes,
+                vec![0x11, 0x12, 0x21, 0x22],
+                "{src}"
+            );
+        }
+    }
+
+    /// Formatting a `!for` changes the layout and not the program.
+    ///
+    /// A one-line block comes back multi-line, which `!if` does not do — it
+    /// keeps an inline body. That is a layout choice rather than a rewrite: the
+    /// bytes are the same, the result is idempotent, and real acme assembles
+    /// it. Preserving the inline form is worth doing when a reader asks for it.
+    #[test]
+    fn a_formatted_for_assembles_to_the_same_bytes() {
+        let src = "*=$801\n!for i, 1, 3 {\n\tlda #i\n\tsta $400+i\n}\n!for j, 2 { !byte j }\n";
+        let before = crate::assemble_acme(src).expect("assembles").bytes;
+        let formatted = crate::format_acme(src).expect("formats");
+        let after = crate::assemble_acme(&formatted)
+            .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+            .bytes;
+        assert_eq!(
+            before, after,
+            "formatting changed the program:\n{formatted}"
+        );
+
+        let again = crate::format_acme(&formatted).expect("formats");
+        assert_eq!(formatted, again, "{formatted}");
     }
 }

@@ -260,6 +260,10 @@ pub(crate) enum Item {
         /// macro. Reconstructing it would mean the formatter choosing a
         /// spelling on the author's behalf, and there is no correct choice.
         close: String,
+        /// Which delimiters to render, exactly as [`Item::Conditional`] carries
+        /// them: acme's `!for … { }` is a brace block and `DUP`/`REPT` are
+        /// keyword blocks.
+        style: CondStyle,
     },
     /// A dialect-family-owned statement for a multi-pass CISC dialect (see
     /// [`NativeItem`]). The owning dialect's assembler reads it back; the shared
@@ -399,6 +403,23 @@ pub(crate) enum CondStyle {
 // Conditional evaluation — the shared framework (idea 4, generalised)
 // ---------------------------------------------------------------------------
 
+/// What one repetition head describes: how many passes, and what — if
+/// anything — each pass binds.
+///
+/// Two shapes rather than one list of values, because the cases differ in cost
+/// and in meaning. A plain `DUP 100000` should not materialise a hundred
+/// thousand integers to count to itself. And a dialect whose construct names a
+/// variable needs the **values**, not an index to reinterpret: acme's
+/// `!for i, 3, 1` counts *down*, giving 3, 2, 1, which no start-plus-index rule
+/// recovers without already knowing acme's rule.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum Iteration {
+    /// Run the body `n` times, binding nothing. Zero or negative runs it none.
+    Times(i64),
+    /// Run the body once per value, in order, binding each to `name`.
+    Over { name: String, values: Vec<i64> },
+}
+
 /// A dialect's conditional-assembly semantics, for the shared [`evaluate`] walk.
 /// The reusable part is the tree walk (prune the untaken branch, thread the
 /// live/skipped flag); the two dialect-specific parts are **evaluating a
@@ -417,6 +438,21 @@ pub(crate) trait CondEval {
     /// A malformed condition or an undefined symbol required to fold it.
     fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError>;
 
+    /// Bind a repetition's loop variable for the pass about to run.
+    ///
+    /// Called only for an [`Iteration::Over`], so a dialect whose construct
+    /// names no variable never implements it.
+    ///
+    /// # Errors
+    /// A dialect that reports a binding it cannot then make.
+    fn bind_loop_var(&mut self, name: &str, value: i64, line: u32) -> Result<(), AsmError> {
+        let _ = (name, value);
+        Err(AsmError::new(
+            line as usize,
+            "this dialect has no repetition loop variable",
+        ))
+    }
+
     /// Lower one content node (an instruction, directive, or `equ`/`=`/`!set`)
     /// to zero or more statements, updating the environment so a later condition
     /// sees the binding. Only ever called for a **live** node.
@@ -425,14 +461,15 @@ pub(crate) trait CondEval {
     /// Any per-line parse, range, or fold failure.
     fn lower(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError>;
 
-    /// Fold a repetition head (`DUP n+1`, `REPT 3`) to its iteration count.
+    /// Fold a repetition head (`DUP n+1`, `REPT 3`, `!for i, 1, 3`) into the
+    /// iteration it describes.
     ///
     /// Defaults to refusing: a dialect that has no repetition should say so
     /// rather than silently assembling the body once.
     ///
     /// # Errors
     /// A malformed count, an undefined symbol, or a dialect without repetition.
-    fn count(&self, head: &str, line: u32) -> Result<i64, AsmError> {
+    fn iteration(&self, head: &str, line: u32) -> Result<Iteration, AsmError> {
         let _ = head;
         Err(AsmError::new(
             line as usize,
@@ -502,9 +539,18 @@ pub(crate) fn evaluate<D: CondEval>(
             // it defines anything. The count is only folded when live: an
             // unreachable `DUP` must not fail on a symbol that was never set.
             if emit {
-                let count = dialect.count(head, node.span.line)?;
-                for _ in 0..count.max(0) {
-                    evaluate(dialect, body, true, out)?;
+                match dialect.iteration(head, node.span.line)? {
+                    Iteration::Times(n) => {
+                        for _ in 0..n.max(0) {
+                            evaluate(dialect, body, true, out)?;
+                        }
+                    }
+                    Iteration::Over { name, values } => {
+                        for value in values {
+                            dialect.bind_loop_var(&name, value, node.span.line)?;
+                            evaluate(dialect, body, true, out)?;
+                        }
+                    }
                 }
             } else {
                 evaluate(dialect, body, false, out)?;
@@ -868,14 +914,35 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
         // cosmetic failure: `fmt` is documented as safe to run over source you
         // have not read, and a formatter that deletes a loop body is the exact
         // opposite.
-        if let Some(Item::Repeat { head, body, close }) = &node.item {
-            out.push_str(INDENT);
-            out.push_str(head);
-            trailing(&mut *out);
-            out.push('\n');
-            emit_nodes(body, out, equ_label_colon, INDENT);
-            out.push_str(INDENT);
-            out.push_str(close);
+        if let Some(Item::Repeat {
+            head,
+            body,
+            close,
+            style,
+        }) = &node.item
+        {
+            match style {
+                // `DUP 3` … `EDUP`: head and closer are indented directives.
+                CondStyle::Keyword => {
+                    out.push_str(INDENT);
+                    out.push_str(head);
+                    trailing(&mut *out);
+                    out.push('\n');
+                    emit_nodes(body, out, equ_label_colon, INDENT);
+                    out.push_str(INDENT);
+                    out.push_str(close);
+                }
+                // `!for i, 1, 3 {` … `}`: the head sits at column 0 with its
+                // brace, exactly as a brace conditional's does.
+                CondStyle::Brace => {
+                    out.push_str(head);
+                    out.push_str(" {");
+                    trailing(&mut *out);
+                    out.push('\n');
+                    emit_nodes(body, out, equ_label_colon, INDENT);
+                    out.push_str(close);
+                }
+            }
             out.push('\n');
             continue;
         }
