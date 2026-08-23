@@ -9,17 +9,53 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.29](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.28...asm198x-v0.0.29) - 2026-08-23
 
-### Added
-
-- *(xtask)* measure how much of each reference's vocabulary we take ([#212](https://github.com/asm198x/asm198x/pull/212))
-- *(sjasmplus)* resolve conditions across passes, as the reference does ([#211](https://github.com/asm198x/asm198x/pull/211))
-- *(sjasmplus)* take `:` as a statement separator ([#210](https://github.com/asm198x/asm198x/pull/210))
-
 ### Fixed
 
-- raise the three advisories that were waiting on a warning channel ([#213](https://github.com/asm198x/asm198x/pull/213))
-- *(vasm)* refuse a name defined twice ([#209](https://github.com/asm198x/asm198x/pull/209))
-- close four of the six source-compatibility gaps (#205, #128) ([#207](https://github.com/asm198x/asm198x/pull/207))
+- **Source that eight reference assemblers accept and this one refused now
+  assembles.** Six of those refusals are closed in this release, and the
+  differential suite's ledger of known gaps is **empty** for the first time —
+  every snippet in it now matches its reference byte for byte.
+
+  - **sjasmplus** takes `:` between statements, as hand-written Spectrum source
+    does — `ld a,1 : ld b,2`. A label's own colon, `::`, a colon in a string or
+    a comment all stay put.
+    ([#210](https://github.com/asm198x/asm198x/pull/210))
+  - **sjasmplus** resolves a condition against a symbol defined further down the
+    file, across the same three passes the reference runs — and raises the same
+    two warnings, including when the passes never settle.
+    ([#211](https://github.com/asm198x/asm198x/pull/211))
+  - **sjasmplus** takes the name-first `name MACRO` spelling as well as
+    `MACRO name`. ([#207](https://github.com/asm198x/asm198x/pull/207))
+  - **acme** takes `<`, `>` and `<>` in `!if`, and a one-character string
+    wherever it wants a number — `!byte "a"`, `lda #"a"`.
+    ([#207](https://github.com/asm198x/asm198x/pull/207))
+
+- **acme sized a backward zero-page label as absolute** — `lda lbl` after
+  `lbl` at $00 emitted `AD 00 00` where acme emits `A5 00`. Wrong size and
+  wrong byte count, on source with nothing unusual in it. The only one of these
+  that changed bytes rather than refusing to assemble.
+  ([#207](https://github.com/asm198x/asm198x/pull/207))
+
+- **vasm accepted a name defined twice**, where vasm itself refuses the
+  program. That is the worst direction to differ in: an accidental collision
+  got a working binary here and a build failure there.
+  ([#209](https://github.com/asm198x/asm198x/pull/209))
+
+- **Three advisories the references raise are no longer silent** — sjasmplus on
+  a module left open at end of file, acme on an instruction that came out wider
+  than it needed to be, and vasm answering `unknown instruction` for a mnemonic
+  it knows. Matching a reference's bytes without its warnings was only half of
+  matching it. ([#213](https://github.com/asm198x/asm198x/pull/213))
+
+### Added
+
+- **`cargo xtask surface` reports how much of each reference's own vocabulary
+  this assembler takes.** It asks the tool: harvest the words in its binary,
+  offer each one back to it, and whatever it does not call unknown is
+  vocabulary. The existing coverage metric measures against *our* spec, so a
+  form we never wrote down is invisible to it — this one cannot be, and it
+  found the first thing it fixed. Needs the reference tools installed.
+  ([#212](https://github.com/asm198x/asm198x/pull/212))
 
 ## [0.0.28](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.27...asm198x-v0.0.28) - 2026-08-23
 
