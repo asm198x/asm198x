@@ -251,7 +251,9 @@ fn parse_op(
     };
     // Dispatch through the declared surface: a spelling the declaration
     // does not carry cannot be accepted here. See `crate::directives`.
-    let op = match lookup(DIRECTIVES, mnemonic) {
+    let op = match lookup(DIRECTIVES, mnemonic)
+        .or_else(|| lookup(super::asl::SEMANTIC_DIRECTIVES, mnemonic))
+    {
         Some(directive) => match directive.category {
             Category::Ignored => return Ok(None),
             Category::KnownUnsupported => {

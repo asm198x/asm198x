@@ -78,6 +78,138 @@ pub const WALK_DIRECTIVES: &[Directive] = &[
     },
 ];
 
+/// asl's chip-independent directives beyond the multi-file pair: the ones #87
+/// was filed to decide rather than sweep.
+///
+/// Every spelling here was offered to asl on 8080, CP-1600, 6800, Z8001 and
+/// SC/MP (asl 1.42, 2026-08-23) and recognised on all five, so the list is the
+/// family's rather than any chip's. `supmode` is the exception and stays with
+/// the chips that have a supervisor mode — asl answers `unknown instruction`
+/// for it on 8080, CP-1600, 6800 and SC/MP.
+///
+/// # Why most of them are refused rather than ignored
+///
+/// An ignore list is only honest for a directive that changes nothing.
+/// Sweeping a *semantic* directive into one assembles the wrong bytes and
+/// reports success, which is strictly worse than refusing it.
+///
+/// `relaxed` is the case that proves it, and it is the one that was already
+/// being ignored — on the CP1610, alone, for no probed reason. It switches asl
+/// to accepting foreign literal syntaxes, and it changes what an *existing*
+/// literal means:
+///
+/// ```text
+///              db 012      ->  0C     twelve, decimal
+///     relaxed on
+///              db 012      ->  0A     ten, octal
+/// ```
+///
+/// Ignoring that directive does not fail to assemble a program; it assembles a
+/// different one. So it is refused, and the refusal says the source is valid
+/// and the gap is ours — which is what `Category::KnownUnsupported` exists to
+/// say.
+pub const SEMANTIC_DIRECTIVES: &[Directive] = &[
+    // Inert: probed, byte-for-byte identical with and without.
+    Directive {
+        id: "listing-radix",
+        pattern: Pattern::Exact(&["outradix"]),
+        category: Category::Ignored,
+    },
+    // asl prints the text and reports **zero warnings** for `warning`, so both
+    // of these are messages to a console rather than anything the object
+    // carries. Dropping them changes no bytes.
+    Directive {
+        id: "diagnostic",
+        pattern: Pattern::Exact(&["message", "warning"]),
+        category: Category::Ignored,
+    },
+    Directive {
+        id: "printer-init",
+        pattern: Pattern::Exact(&["prtinit"]),
+        category: Category::Ignored,
+    },
+    // Writes a side file of shared symbols; the object is unchanged.
+    Directive {
+        id: "shared-symbols",
+        pattern: Pattern::Exact(&["shared"]),
+        category: Category::Ignored,
+    },
+    // Semantic. Each changes what the source means, so each is refused until
+    // it is implemented, with the probe that settled it named.
+    Directive {
+        // `db 012` is 12 without it and 10 with it.
+        id: "relaxed-literals",
+        pattern: Pattern::Exact(&["relaxed"]),
+        category: Category::KnownUnsupported,
+    },
+    Directive {
+        // `radix 16` makes `db 10` emit $10.
+        id: "radix",
+        pattern: Pattern::Exact(&["radix"]),
+        category: Category::KnownUnsupported,
+    },
+    Directive {
+        // Labels take addresses the output pointer never reaches.
+        id: "phase",
+        pattern: Pattern::Exact(&["phase", "dephase"]),
+        category: Category::KnownUnsupported,
+    },
+    Directive {
+        // Pads to the next multiple of *n*, for any `n` — `align 3` from $01
+        // reaches $03. Our `Operation::Align` is mask-based (ACME's
+        // `!align`), so this is a different operation and not another
+        // spelling of one we have.
+        id: "align-modulo",
+        pattern: Pattern::Exact(&["align"]),
+        category: Category::KnownUnsupported,
+    },
+    Directive {
+        // Defines symbols: `enum red,green` then `db green` emits 1.
+        id: "enum",
+        pattern: Pattern::Exact(&["enum"]),
+        category: Category::KnownUnsupported,
+    },
+    Directive {
+        // `charset 97,65` makes `db "a"` emit $41 instead of $61.
+        id: "charset",
+        pattern: Pattern::Exact(&["charset"]),
+        category: Category::KnownUnsupported,
+    },
+    Directive {
+        id: "segment",
+        pattern: Pattern::Exact(&["segment"]),
+        category: Category::KnownUnsupported,
+    },
+    Directive {
+        // Save and restore the directive state around a region. Inert only
+        // when nothing between them changed anything, which is not a property
+        // of the directive.
+        id: "save-state",
+        pattern: Pattern::Exact(&["save", "restore"]),
+        category: Category::KnownUnsupported,
+    },
+    Directive {
+        // An assertion that a region *fails*: `expect 1` with no error is
+        // itself an error. Ignoring it turns a failing build into a passing
+        // one, which is the worst direction available.
+        id: "expect",
+        pattern: Pattern::Exact(&["expect", "endexpect"]),
+        category: Category::KnownUnsupported,
+    },
+    Directive {
+        // Register assumptions the encoder is entitled to rely on.
+        id: "assume",
+        pattern: Pattern::Exact(&["assume"]),
+        category: Category::KnownUnsupported,
+    },
+    Directive {
+        // `sq function x,x*x` then `db sq(3)` emits 9.
+        id: "function",
+        pattern: Pattern::Exact(&["function"]),
+        category: Category::KnownUnsupported,
+    },
+];
+
 /// asl's probe-pinned multi-file semantics, shared by eleven of the twelve
 /// chips: requester-directory resolution, the strict `BINCLUDE` window, and
 /// the `.inc` extension default on `INCLUDE`.
@@ -567,5 +699,137 @@ mod tests {
         assert!(file_name(" \"a.inc", 1, "include").is_err());
         assert!(file_name(" \"\"", 1, "include").is_err());
         assert!(file_name("", 1, "include").is_err());
+    }
+}
+
+#[cfg(test)]
+mod semantic_tests {
+    use crate::assemble_i8080 as asm;
+
+    /// A directive that changes what the source means is refused, and the
+    /// refusal says whose gap it is. Sweeping these into an ignore list would
+    /// assemble a different program and report success (#87).
+    #[test]
+    fn a_semantic_directive_is_refused_as_a_known_directive() {
+        for d in [
+            "relaxed on",
+            "radix 16",
+            "phase 100h",
+            "dephase",
+            "align 4",
+            "enum a,b",
+            "charset 97,65",
+            "segment code",
+            "save",
+            "restore",
+            "expect 1",
+            "endexpect",
+            "assume",
+            "function",
+        ] {
+            let e = asm(&format!(" {d}\n db 10\n")).expect_err(d).to_string();
+            assert!(
+                e.contains("does not implement"),
+                "`{d}` should be refused as a real directive, got: {e}"
+            );
+        }
+    }
+
+    /// The inert ones, each probed byte-for-byte against asl before being
+    /// swept: they print, or they write a side file, and the object is the
+    /// same either way.
+    #[test]
+    fn an_inert_directive_is_accepted_and_dropped() {
+        for d in [
+            "outradix 16",
+            "message \"m\"",
+            "warning \"w\"",
+            "prtinit \"p\"",
+            "shared",
+        ] {
+            assert_eq!(
+                asm(&format!(" {d}\n db 10\n")).expect(d).bytes,
+                vec![10],
+                "`{d}` should change nothing"
+            );
+        }
+    }
+
+    /// `supmode` is the one spelling that is genuinely per-chip, and now
+    /// matches asl: it answers `unknown instruction` on a chip with no
+    /// supervisor mode, and takes it on one that has.
+    #[test]
+    fn supmode_belongs_to_the_chips_that_have_one() {
+        assert!(
+            asm(" supmode on\n db 10\n")
+                .expect_err("8080 has no supervisor mode")
+                .to_string()
+                .contains("unknown instruction"),
+        );
+        // Data rather than an instruction, so the assertion is about the
+        // directive and not about each chip's mnemonic set.
+        assert!(crate::assemble_z8000(" supmode on\n word 10\n").is_ok());
+        assert!(crate::assemble_tms9900(" supmode on\n word 10\n").is_ok());
+    }
+
+    /// Every asl chip's *declared* surface carries the family list, not just
+    /// its dispatch.
+    ///
+    /// This is pinned because it drifted while being written: three of the
+    /// twelve compose their surface over several lines, a search-and-replace
+    /// missed them, and their pages went on describing a vocabulary the parser
+    /// had already gained. Declared and dispatched disagreeing is the failure
+    /// the declared surface exists to prevent, so it is worth an assertion
+    /// rather than a careful edit.
+    #[test]
+    fn every_asl_chip_declares_the_family_list() {
+        let chips = [
+            "8080", "6800", "1802", "8048", "8039", "scmp", "f8", "2650", "tms7000", "pdp11",
+            "tms9900", "cp1610", "z8000", "z8001",
+        ];
+        for surface in crate::directives::surfaces() {
+            if !chips.contains(&surface.dialect) {
+                continue;
+            }
+            let declared: std::collections::BTreeSet<String> = surface
+                .directives
+                .iter()
+                .flat_map(crate::directives::Directive::spellings)
+                .collect();
+            for shared in super::SEMANTIC_DIRECTIVES {
+                for spelling in shared.spellings() {
+                    assert!(
+                        declared.contains(&spelling),
+                        "`{}` does not declare `{spelling}`",
+                        surface.dialect
+                    );
+                }
+            }
+        }
+    }
+    /// The CP1610 still ignores `relaxed`, and that is recorded rather than
+    /// accidental — our own listings need it until #214. Pinned so the
+    /// exception cannot spread quietly to another chip.
+    #[test]
+    fn cp1610_is_the_only_chip_that_still_ignores_relaxed() {
+        assert!(
+            crate::assemble_cp1610("    relaxed on\n    nop\n").is_ok(),
+            "the CP1610 exception, tracked by #214"
+        );
+        for (chip, src) in [
+            ("6800", " relaxed on\n nop\n"),
+            ("1802", " relaxed on\n idl\n"),
+        ] {
+            let r = match chip {
+                "6800" => crate::assemble_m6800(src),
+                _ => crate::assemble_1802(src),
+            };
+            assert!(
+                r.expect_err(chip)
+                    .to_string()
+                    .contains("does not implement"),
+                "`{chip}` must not inherit the exception"
+            );
+        }
     }
 }

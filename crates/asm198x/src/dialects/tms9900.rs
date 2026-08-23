@@ -214,7 +214,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     Directive {
         id: "ignored",
-        pattern: Pattern::Exact(&["cpu", "end", "title", "page", "aseg", "listing"]),
+        pattern: Pattern::Exact(&["cpu", "end", "title", "page", "aseg", "listing", "supmode"]),
         category: Category::Ignored,
     },
 ];
@@ -227,7 +227,9 @@ fn parse_op(
     let (word, args) = split_first_word(rest);
     // Dispatch through the declared surface: a spelling the declaration
     // does not carry cannot be accepted here. See `crate::directives`.
-    let op = match lookup(DIRECTIVES, word) {
+    let op = match lookup(DIRECTIVES, word)
+        .or_else(|| lookup(super::asl::SEMANTIC_DIRECTIVES, word))
+    {
         Some(directive) => match directive.category {
             Category::Ignored => return Ok(None),
             Category::KnownUnsupported => {
