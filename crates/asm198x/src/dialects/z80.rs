@@ -76,6 +76,14 @@ pub(crate) trait Z80Syntax {
         None
     }
 
+    /// Whether `:` separates statements as well as terminating a label, so one
+    /// source line may hold several (#98). Defaults off: pasmo has no such
+    /// form, and splitting on a character it treats as ordinary would invent a
+    /// dialect.
+    fn splits_on_colon(&self) -> bool {
+        false
+    }
+
     /// Whether `MODULE` scoping is live — the module stack prefixes label
     /// definitions and references, and a leading `@` escapes it. Defaults off,
     /// which also leaves `@` an invalid character everywhere else.
@@ -520,12 +528,107 @@ enum KwClose {
 /// formatter's inline `name: equ …` rendering). No evaluation happens here:
 /// no environment, no DEFINE table — [`SjasmEval`] supplies those on the live
 /// walk.
+/// One statement's worth of source, with where it came from.
+///
+/// The parse used to index its lines and derive the number from the position,
+/// which held while a line was a statement. A `:` line is several (#98), so the
+/// number travels with the text instead — which also removes the re-basing a
+/// nested block needed when it parsed a slice of its parent's lines.
+#[derive(Clone, Copy)]
+struct Src<'a> {
+    /// 1-based line in the (post-expansion) text.
+    line: u32,
+    /// 1-based column the statement starts at. Always 1 for a whole line.
+    col: u32,
+    text: &'a str,
+}
+
+/// Cut `text` into statements: one per line, or several where a dialect lets
+/// `:` separate them.
+///
+/// A `:` is a statement separator *except* when it terminates a label, and
+/// telling those apart is positional: the colon closing a label is the first
+/// one in its statement and has nothing but an identifier before it. So
+/// `lbl: ld a,1 : ld b,2` is two statements, the first of which keeps its
+/// label. `::` — sjasmplus's export form — closes a label as one token.
+///
+/// A colon inside `"…"` or `'…'` separates nothing, and neither does one in a
+/// comment: the comment is found first and travels with the statement it
+/// trails, so `ld a,1 ; a:b` stays whole.
+fn split_statements<'a, S: Z80Syntax>(syntax: &S, text: &'a str) -> Vec<Src<'a>> {
+    let mut out = Vec::new();
+    for (i, raw) in text.lines().enumerate() {
+        let line = i as u32 + 1;
+        if !syntax.splits_on_colon() {
+            out.push(Src {
+                line,
+                col: 1,
+                text: raw,
+            });
+            continue;
+        }
+        let (code, _) = syntax.split_comment(raw);
+        let bytes = code.as_bytes();
+        let (mut start, mut labelled) = (0usize, false);
+        let (mut in_str, mut in_char) = (false, false);
+        let mut cut = Vec::new();
+        for i in 0..bytes.len() {
+            match bytes[i] {
+                b'"' if !in_char => in_str = !in_str,
+                b'\'' if !in_str => in_char = !in_char,
+                b':' if !in_str && !in_char => {
+                    let head = code[start..i].trim();
+                    if !labelled && !head.is_empty() && is_ident(head) {
+                        labelled = true;
+                        continue;
+                    }
+                    // A second colon straight after the label's is `::`, not
+                    // an empty statement.
+                    if labelled && i > 0 && bytes[i - 1] == b':' && code[start..i - 1].trim() == ""
+                    {
+                        continue;
+                    }
+                    cut.push(i);
+                    start = i + 1;
+                    labelled = false;
+                }
+                _ => {}
+            }
+        }
+        if cut.is_empty() {
+            out.push(Src {
+                line,
+                col: 1,
+                text: raw,
+            });
+            continue;
+        }
+        // The comment trails the whole line, so it rides with the last
+        // statement — where a reader wrote it.
+        let mut from = 0usize;
+        for &at in &cut {
+            out.push(Src {
+                line,
+                col: from as u32 + 1,
+                text: &code[from..at],
+            });
+            from = at + 1;
+        }
+        out.push(Src {
+            line,
+            col: from as u32 + 1,
+            text: &raw[from..],
+        });
+    }
+    out
+}
+
 struct KwCx<'a, S: Z80Syntax> {
     syntax: &'a S,
     set: &'static isa::InstructionSet,
     ext: Option<&'static isa::InstructionSet>,
     file: FileId,
-    lines: Vec<&'a str>,
+    lines: Vec<Src<'a>>,
     /// The next line to read (0-based).
     pos: usize,
     /// Own-line comments since the last node, attached as leading trivia.
@@ -560,7 +663,7 @@ pub(crate) fn parse_program_keyword<S: Z80Syntax>(
         set,
         ext,
         file,
-        lines: text.lines().collect(),
+        lines: split_statements(syntax, text),
         pos: 0,
         pending: Vec::new(),
         in_macro: false,
@@ -611,7 +714,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
         let mut end = None;
         let mut k = start;
         while k < self.lines.len() {
-            let (code, _) = self.syntax.split_comment(self.lines[k]);
+            let (code, _) = self.syntax.split_comment(self.lines[k].text);
             let (word, _) = split_first_word(code.trim());
             match self.syntax.repeat_keyword(word) {
                 Some(RepeatKw::Open) => depth += 1,
@@ -645,13 +748,9 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             in_macro: false,
             macro_names: self.macro_names.clone(),
         };
-        let (mut body, _) = sub.parse_block(false)?;
-        for node in &mut body {
-            node.span.line += start as u32;
-            if let Some(span) = node.operand_span.as_mut() {
-                span.line += start as u32;
-            }
-        }
+        // No re-basing: a statement carries its own line number now, so the
+        // slice a nested block parses is already numbered absolutely.
+        let (body, _) = sub.parse_block(false)?;
         // A label before the block becomes its own node, exactly as it does
         // before a conditional, so the block itself carries none.
         let mut leading = std::mem::take(&mut self.pending);
@@ -695,15 +794,17 @@ impl<S: Z80Syntax> KwCx<'_, S> {
     fn parse_block(&mut self, in_block: bool) -> Result<(Vec<Node>, KwClose), AsmError> {
         let mut nodes = Vec::new();
         while self.pos < self.lines.len() {
-            let raw = self.lines[self.pos];
-            let line = self.pos + 1;
+            let src = self.lines[self.pos];
+            let raw = src.text;
+            let line = src.line as usize;
+            let col = src.col;
             self.pos += 1;
             let (code, comment) = self.syntax.split_comment(raw);
             if code.trim().is_empty() {
                 if let Some(text) = comment {
                     self.pending.push(Comment {
                         text: text.to_string(),
-                        span: Span::in_file(self.file, line as u32, 1),
+                        span: Span::in_file(self.file, line as u32, col),
                     });
                 }
                 continue;
@@ -741,7 +842,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                         label: None,
                         item: Some(crate::ast::Item::Verbatim),
                         source: code.trim_end().to_string(),
-                        span: Span::in_file(self.file, line as u32, 1),
+                        span: Span::in_file(self.file, line as u32, col),
                         trivia: self.trivia(comment, code, line),
                     });
                     continue;
@@ -785,7 +886,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                     if let Some(text) = comment {
                         self.pending.push(Comment {
                             text: text.to_string(),
-                            span: Span::in_file(self.file, line as u32, 1),
+                            span: Span::in_file(self.file, line as u32, col),
                         });
                     }
                     return Ok((nodes, KwClose::Else));
@@ -807,7 +908,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                     if let Some(text) = comment {
                         self.pending.push(Comment {
                             text: text.to_string(),
-                            span: Span::in_file(self.file, line as u32, 1),
+                            span: Span::in_file(self.file, line as u32, col),
                         });
                     }
                     return Ok((nodes, KwClose::EndIf));
@@ -822,7 +923,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                     if let Some(text) = comment {
                         self.pending.push(Comment {
                             text: text.to_string(),
-                            span: Span::in_file(self.file, line as u32, 1),
+                            span: Span::in_file(self.file, line as u32, col),
                         });
                     }
                     return Ok((nodes, KwClose::ElseIf(rest.to_string(), line)));
@@ -853,7 +954,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                         label: symbol,
                         item,
                         source: rest.to_string(),
-                        span: Span::in_file(self.file, line as u32, 1),
+                        span: Span::in_file(self.file, line as u32, col),
                         trivia: self.trivia(comment, code, line),
                     });
                 }
