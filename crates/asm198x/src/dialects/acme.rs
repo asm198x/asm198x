@@ -69,7 +69,7 @@ use super::mos6502::{
 };
 use crate::dialect::Dialect;
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, Expr, Operation, Statement};
+use crate::engine::{AsmError, Expr, Operation, Statement, Warning};
 use crate::source::{MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
 use crate::span::FileId;
 
@@ -104,6 +104,19 @@ impl Dialect for Acme {
         Ok(out)
     }
 
+    /// The advisories are ACME's own: an instruction that sized absolute
+    /// because its operand was still unknown, and whose value turned out to
+    /// fit a byte.
+    fn parse_warned(&self, source: &str) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
+        let program = parse_program(source, macros::Expand::Yes)?;
+        let mut eval = AcmeEval::new(self.instruction_set(), None);
+        let mut out = Vec::new();
+        crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        eval.resolve_anon_refs(&mut out)?;
+        let warnings = eval.oversized_warnings();
+        Ok((out, warnings))
+    }
+
     /// The include-capable parse (language-surface U4): the same evaluation
     /// walk as [`parse`](Self::parse), with a loader wired in — `!src` and
     /// `!bin` resolve *live* inside the walk (an untaken branch never loads,
@@ -131,6 +144,32 @@ impl Dialect for Acme {
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
         eval.resolve_anon_refs(&mut out)?;
         Ok(out)
+    }
+
+    /// [`parse_multi`](Self::parse_multi) with the same advisories.
+    fn parse_multi_warned(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
+        let root = map
+            .contents(FileId(0))
+            .map(str::to_owned)
+            .unwrap_or_default();
+        let program = parse_program_in(FileId(0), &root, macros::Expand::Yes)?;
+        let mut eval = AcmeEval::new(
+            self.instruction_set(),
+            Some(MultiCx {
+                map,
+                loader,
+                stack: vec![FileId(0)],
+            }),
+        );
+        let mut out = Vec::new();
+        crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        eval.resolve_anon_refs(&mut out)?;
+        let warnings = eval.oversized_warnings();
+        Ok((out, warnings))
     }
 
     /// The formatter parses through the same source-preserving front-end
@@ -858,6 +897,14 @@ struct MultiCx<'a> {
     stack: Vec<FileId>,
 }
 
+/// An instruction that sized absolute for want of a value, and the value it
+/// was waiting on.
+struct Oversize {
+    expr: Expr,
+    line: usize,
+    file: FileId,
+}
+
 /// ACME's [`CondEval`](crate::ast::CondEval): it owns the environment (`=`/`equ`
 /// constants and `!set` variables) and lowers each live line through
 /// [`parse_statement`], re-parsing from the node's (label, source) with the
@@ -888,6 +935,10 @@ struct AcmeEval<'a> {
     /// that is merely *probably* right would pick zero page on a bad guess and
     /// emit the wrong bytes, which is worse than the gap being fixed.
     pc: Option<i64>,
+    /// Instructions that took an absolute form only because their operand was
+    /// not yet resolvable. If the value turns out to fit a byte, ACME says so
+    /// — see [`AcmeEval::oversized_warnings`].
+    oversize: Vec<Oversize>,
     multi: Option<MultiCx<'a>>,
     /// The file the walk is currently inside — stamps condition-evaluation
     /// errors, which the shared walk raises without node context.
@@ -918,6 +969,7 @@ impl<'a> AcmeEval<'a> {
             // No origin yet. ACME requires `*=` before code, so the first
             // origin sets this before anything can be sized.
             pc: None,
+            oversize: Vec::new(),
             multi,
             current_file: FileId(0),
             zone: String::new(),
@@ -1328,6 +1380,7 @@ impl crate::ast::CondEval for AcmeEval<'_> {
         {
             self.env.insert(name.clone(), pc);
         }
+        self.note_oversize(op.as_ref(), line, file);
         self.advance(op.as_ref(), line);
         if !(label.is_none() && op.is_none()) {
             out.push(Statement {
@@ -1343,6 +1396,65 @@ impl crate::ast::CondEval for AcmeEval<'_> {
 }
 
 impl AcmeEval<'_> {
+    /// Record an instruction that took an absolute form only because its
+    /// operand could not be folded yet.
+    ///
+    /// **A forced-absolute literal is never one of these**, and that is what
+    /// makes the test this cheap. ACME reads `$0000` as 16-bit whatever its
+    /// value, but a literal always folds — so an operand that does *not* fold
+    /// cannot be one. Unfoldable and forced-absolute are disjoint, and only
+    /// the first can turn out to have fitted.
+    fn note_oversize(&mut self, op: Option<&Operation>, line: usize, file: FileId) {
+        let Some(Operation::Instruction {
+            mnemonic,
+            mode,
+            operands,
+        }) = op
+        else {
+            return;
+        };
+        let Some(index) = mode.strip_prefix("absolute") else {
+            return;
+        };
+        let [expr] = operands.as_slice() else { return };
+        if fold_const(expr, &self.env, line).is_ok() {
+            return;
+        }
+        // Only where a zero-page form existed to be chosen: `lda abs,y` has
+        // none, so its width was the CPU's decision and never ours.
+        if isa::mos6502::SET
+            .find_form(mnemonic, &format!("zeropage{index}"))
+            .is_none()
+        {
+            return;
+        }
+        self.oversize.push(Oversize {
+            expr: expr.clone(),
+            line,
+            file,
+        });
+    }
+
+    /// The advisories, once the walk has bound every label: an operand that
+    /// sized absolute and turned out to fit a byte.
+    ///
+    /// ACME's posture as well as its wording — it warns and assembles, so the
+    /// bytes are unchanged and the reader is told the instruction came out
+    /// wider than it needed to be.
+    fn oversized_warnings(&self) -> Vec<Warning> {
+        self.oversize
+            .iter()
+            .filter(|o| {
+                fold_const(&o.expr, &self.env, o.line).is_ok_and(|v| (0..=0xFF).contains(&v))
+            })
+            .map(|o| Warning {
+                line: o.line,
+                message: "using oversized addressing mode".to_string(),
+                file: o.file,
+            })
+            .collect()
+    }
+
     /// Move the location counter over `op`, or give up on knowing where it is.
     ///
     /// The width comes from [`crate::engine::next_pc`], the same rule the
@@ -3540,6 +3652,48 @@ mod tests {
                 .expect("assemble")
                 .bytes,
             vec![0xA9, 0x05, 0xB5, 0x00, 0xB9, 0x00, 0x00]
+        );
+    }
+
+    /// ACME warns when an instruction sized absolute for want of a value and
+    /// the value turned out to fit a byte. It warns and assembles, so the
+    /// bytes are unchanged either way.
+    #[test]
+    fn an_oversized_addressing_mode_is_reported() {
+        let warned = |src: &str| asm(src).expect("assemble").warnings.len();
+        assert_eq!(warned("* = $0000\n lda fwd\nfwd lda #5\n"), 1);
+        assert_eq!(
+            warned("* = $0000\n lda fwd,x\nfwd lda #5\n"),
+            1,
+            "an indexed form with a zero-page counterpart warns too"
+        );
+    }
+
+    /// The four cases that must stay silent, one for each way an absolute form
+    /// can be the right one.
+    #[test]
+    fn a_deliberate_absolute_is_not_oversized() {
+        let warned = |src: &str| asm(src).expect("assemble").warnings.len();
+        assert_eq!(
+            warned("* = $0000\n lda fwd\n* = $0100\nfwd lda #5\n"),
+            0,
+            "the value did not fit"
+        );
+        assert_eq!(
+            warned("* = $0000\nlbl lda #5\n lda $0000\n"),
+            0,
+            "a 4-digit literal is 16-bit by request — and always folds, which \
+             is what keeps it out of the candidate set"
+        );
+        assert_eq!(
+            warned("* = $0000\nlbl lda #5\n lda lbl\n"),
+            0,
+            "a backward label shrank, so nothing was oversized"
+        );
+        assert_eq!(
+            warned("* = $0000\n lda fwd,y\nfwd lda #5\n"),
+            0,
+            "`lda abs,y` has no zero-page form: the width was the CPU's call"
         );
     }
 }

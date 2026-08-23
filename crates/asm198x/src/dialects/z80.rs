@@ -538,6 +538,13 @@ enum KwClose {
 /// formatter's inline `name: equ …` rendering). No evaluation happens here:
 /// no environment, no DEFINE table — [`SjasmEval`] supplies those on the live
 /// walk.
+/// A `MODULE` that has been opened and not yet closed.
+struct OpenModule {
+    name: String,
+    line: usize,
+    file: FileId,
+}
+
 /// How a condition's forward references are answered, and what that cost.
 ///
 /// The reference runs three passes and reads an as-yet-undefined symbol as
@@ -1181,9 +1188,10 @@ struct SjasmEval<'a, S: Z80Syntax> {
     /// *unprefixed*: the module prefix wraps the result, so a local under
     /// `glob` inside module `foo` is `foo.glob.loc` (probe m25).
     current_global: Option<String>,
-    /// Open `MODULE` names, outermost first. Their dotted join prefixes every
-    /// label defined and every name referenced inside.
-    modules: Vec<String>,
+    /// Open `MODULE`s, outermost first. Their dotted join prefixes every label
+    /// defined and every name referenced inside; each carries where it was
+    /// opened, so leaving one open can be reported against the line that did.
+    modules: Vec<OpenModule>,
     /// Module-qualified reference → the bare name it falls back to. The
     /// reference tries the qualified name first and the *global* name second,
     /// with no walk-up through intermediate levels (probes m8/m13/m31); which
@@ -1296,13 +1304,28 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         if self.modules.is_empty() {
             String::new()
         } else {
-            format!("{}.", self.modules.join("."))
+            let names: Vec<&str> = self.modules.iter().map(|m| m.name.as_str()).collect();
+            format!("{}.", names.join("."))
         }
+    }
+
+    /// The innermost module left open at the end of the walk, if any, named by
+    /// its full dotted path — the reference reports one advisory naming that,
+    /// not one per open module.
+    fn unclosed_module(&self) -> Option<Warning> {
+        let last = self.modules.last()?;
+        let names: Vec<&str> = self.modules.iter().map(|m| m.name.as_str()).collect();
+        Some(Warning {
+            line: last.line,
+            message: format!("`ENDMODULE` missing for module `{}`", names.join(".")),
+            file: last.file,
+        })
     }
 
     /// Open or close a module scope. Nothing is emitted: a module is a naming
     /// rule, not an operation.
     fn lower_module(&mut self, kw: ModuleKw, args: &str, line: usize) -> Result<(), AsmError> {
+        let file = self.current_file;
         match kw {
             ModuleKw::Open => {
                 let name = args.trim();
@@ -1320,7 +1343,11 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
                 if !is_ident(name) {
                     return Err(AsmError::new(line, format!("bad module name `{name}`")));
                 }
-                self.modules.push(name.to_string());
+                self.modules.push(OpenModule {
+                    name: name.to_string(),
+                    line,
+                    file,
+                });
             }
             ModuleKw::Close => {
                 if self.modules.pop().is_none() {
@@ -1745,6 +1772,11 @@ fn run_passes<'a, S: Z80Syntax>(
             if let Some(f) = eval.forward.as_ref() {
                 warnings.append(&mut f.warnings.borrow_mut());
             }
+            // A module left open at end of file. The reference warns and
+            // assembles; so do we, now that there is somewhere to say it.
+            // Raised on pass 1 because the module structure does not change
+            // between passes, and raising it on each would say it three times.
+            warnings.extend(eval.unclosed_module());
             if !reached_forward {
                 return Ok((result, warnings));
             }

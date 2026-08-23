@@ -85,6 +85,29 @@ fn eval(e: &Expr, consts: &BTreeMap<String, i64>, here: i64, line: usize) -> Res
     e.eval_with(&|s| consts.get(s).copied(), Some(here), line)
 }
 
+/// The address-register spellings of `add`/`sub`/`cmp`. The spec encodes their
+/// forms under the base mnemonic, so these names never reach it — which is why
+/// they need naming here: without them, `adda d0,d1` is refused as an *unknown
+/// instruction*, when the mnemonic is fine and the operands are not.
+///
+/// vasm draws the same line: `zzqq` is "unknown mnemonic", while `adda d0,d1`
+/// is "instruction not supported on selected architecture". Telling a reader
+/// their mnemonic does not exist, when the reference knows it, is the mistake
+/// `Category::KnownUnsupported` exists to avoid one level up.
+const ADDRESS_ALIASES: &[&str] = &["ADDA", "SUBA", "CMPA"];
+
+/// The right refusal for a mnemonic the spec has no entry for: an alias that
+/// survived lowering is a *known* mnemonic used with operands it has no form
+/// for, and saying otherwise tells the reader their source is invalid when it
+/// is the operands that are wrong.
+fn unknown_or_unmatched(mnemonic: &str, line: usize) -> AsmError {
+    if ADDRESS_ALIASES.contains(&mnemonic) {
+        AsmError::new(line, format!("`{mnemonic}` has no form for those operands"))
+    } else {
+        AsmError::new(line, format!("unknown instruction `{mnemonic}`"))
+    }
+}
+
 /// Apply vasm's instruction-rewriting optimizations, returning the effective
 /// mnemonic and operands. Both rest only on the (constant) immediate, so they
 /// stay stable across relaxation rounds.
@@ -895,7 +918,7 @@ fn encode(
     let size = size_override.or(size);
     let insn = m68k::SET
         .instruction(mnemonic)
-        .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
+        .ok_or_else(|| unknown_or_unmatched(mnemonic, line))?;
     let sz = size.unwrap_or(Size::W);
     let form = match_form(insn, operands).ok_or_else(|| {
         AsmError::new(line, format!("`{mnemonic}` has no form for those operands"))
@@ -1342,7 +1365,7 @@ fn stmt_size(
             let written = size_override.or(*size);
             let insn = m68k::SET
                 .instruction(mnemonic)
-                .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
+                .ok_or_else(|| unknown_or_unmatched(mnemonic, line))?;
             let form = match_form(insn, operands).ok_or_else(|| {
                 AsmError::new(line, format!("`{mnemonic}` has no form for those operands"))
             })?;
@@ -3162,6 +3185,25 @@ mod directive_surface {
                 .bytes,
             vec![0x4E, 0x71, 0x4E, 0x71, 0x4E, 0x71, 0x4E, 0x71],
             "`.l` under `a` and under `b` are different names"
+        );
+    }
+
+    /// A mnemonic the reference knows is never refused as *unknown*. `adda`
+    /// with a data-register destination has no form — vasm says "instruction
+    /// not supported", not "unknown mnemonic", and the difference is whether
+    /// the reader goes looking for a typo.
+    #[test]
+    fn a_known_mnemonic_is_refused_for_its_operands() {
+        let err = |src: &str| crate::assemble_vasm(src).expect_err("refused").to_string();
+        assert!(err("\tadda\n").contains("`ADDA` has no form for those operands"));
+        assert!(err("\tadda d0,d1\n").contains("`ADDA` has no form for those operands"));
+        assert!(err("\tzzqq\n").contains("unknown instruction `ZZQQ`"));
+        assert_eq!(
+            crate::assemble_vasm("\tadda.l #4,a0\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x58, 0x88],
+            "the form that does exist is unaffected"
         );
     }
 }
