@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "asm198x"
-version = "0.0.27"
+version = "0.0.28"
 dependencies = [
  "debug198x",
  "isa",
@@ -56,7 +56,7 @@ dependencies = [
 
 [[package]]
 name = "debug198x"
-version = "0.0.27"
+version = "0.0.28"
 dependencies = [
  "serde",
  "serde_json",
@@ -84,11 +84,11 @@ dependencies = [
 
 [[package]]
 name = "isa"
-version = "0.0.27"
+version = "0.0.28"
 
 [[package]]
 name = "isa-disasm"
-version = "0.0.27"
+version = "0.0.28"
 dependencies = [
  "isa",
 ]
@@ -208,7 +208,7 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 
 [[package]]
 name = "verdict-corpus"
-version = "0.0.27"
+version = "0.0.28"
 dependencies = [
  "isa",
  "isa-disasm",
@@ -218,7 +218,7 @@ dependencies = [
 
 [[package]]
 name = "xtask"
-version = "0.0.27"
+version = "0.0.28"
 dependencies = [
  "asm198x",
  "isa",

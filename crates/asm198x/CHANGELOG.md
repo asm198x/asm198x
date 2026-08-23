@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.28](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.27...asm198x-v0.0.28) - 2026-08-23
+
+### Added
+
+- *(sjasmplus)* MODULE name scoping — the last item on #93 ([#206](https://github.com/asm198x/asm198x/pull/206))
+
+### Fixed
+
+- *(diagnostics)* expansion frames survive every expanding dialect ([#203](https://github.com/asm198x/asm198x/pull/203))
+
 ## [0.0.27](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.26...asm198x-v0.0.27) - 2026-08-23
 
 ### Added
