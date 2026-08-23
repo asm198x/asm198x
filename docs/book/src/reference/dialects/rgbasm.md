@@ -8,7 +8,7 @@ Game Boy SM83, RGBDS syntax.
 
 ## Directives
 
-7 directives, 11 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+8 directives, 12 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -16,6 +16,7 @@ Game Boy SM83, RGBDS syntax.
 | `conditional` | `if`, `elif`, `else`, `endc` |  |
 | `incbin` | `incbin` |  |
 | `include` | `include` |  |
+| `macro` | `macro` |  |
 | `repeat` | `rept`, `endr` |  |
 | `reserve` | `ds` |  |
 | `words` | `dw` |  |
