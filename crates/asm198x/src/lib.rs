@@ -1672,10 +1672,10 @@ mod tests {
     /// backward branch sizing differs from vasm's under `-no-opt` (#110), which
     /// would swamp what this test is actually about.
     ///
-    /// The counterpart — that a *plain* label in a body collides on the second
-    /// expansion — is not asserted here, because our vasm dialect does not
-    /// detect duplicate labels at all, inside a macro or out (#126). ca65,
-    /// pasmo and lwasm do, and their tests pin it.
+    /// The counterpart is asserted too: a *plain* label in a body collides on
+    /// the second expansion, which is the whole reason `\@` exists. It could
+    /// not be asserted until #126, because the dialect detected no duplicate
+    /// at all, inside a macro or out.
     #[test]
     fn vasm_expansion_counter_makes_a_label_unique() {
         assert_eq!(
@@ -1691,6 +1691,12 @@ mod tests {
         let one = assemble_vasm("mk\tmacro\nspin\\@ nop\n move.l #spin\\@,d0\n endm\n mk\n")
             .expect("one expansion");
         assert_eq!(one.bytes.len(), 8, "one expansion is half of two");
+        // And without the counter the two expansions collide, which is what
+        // makes it necessary — vasm answers `label <spin> redefined` (#126).
+        assert!(
+            assemble_vasm("mk\tmacro\nspin nop\n endm\n mk\n mk\n").is_err(),
+            "a plain label in a body collides on the second expansion"
+        );
     }
 
     /// The formatter lays source out; it does not rewrite programs.
