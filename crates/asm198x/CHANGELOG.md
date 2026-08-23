@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.30](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.29...asm198x-v0.0.30) - 2026-08-23
+
+### Added
+
+- *(asl)* decide every semantic directive, one at a time ([#215](https://github.com/asm198x/asm198x/pull/215))
+
+### Fixed
+
+- *(cp1610)* speak strict asl, and give the corpus a way to retire a listing ([#218](https://github.com/asm198x/asm198x/pull/218))
+
 ## [0.0.29](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.28...asm198x-v0.0.29) - 2026-08-23
 
 ### Fixed
