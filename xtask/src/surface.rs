@@ -76,6 +76,11 @@ struct Reference {
     args: &'static [&'static str],
     /// Substrings in the tool's output that mean "I do not know that word".
     unknown: &'static [&'static str],
+    /// Substrings that mean "I know it, and it is not for the target you asked
+    /// me to assemble for" — a 68881 mnemonic under `-m68000`, a 6309 one in
+    /// 6809 mode, a `.a16` outside 65816 mode. Counted, and counted apart:
+    /// see [`covered`]'s note on why they are not a gap.
+    off_target: &'static [&'static str],
     /// A word this tool certainly knows, for the self-check.
     known: &'static str,
     /// Does our spec declare this mnemonic? A predicate rather than a set,
@@ -93,6 +98,7 @@ struct Reference {
 const REFERENCES: &[Reference] = &[
     Reference {
         dialect: "acme",
+        off_target: &[],
         mnemonic: |m| isa::mos6502::SET.has_mnemonic(m),
         bin: "acme",
         ext: "a",
@@ -104,6 +110,7 @@ const REFERENCES: &[Reference] = &[
     },
     Reference {
         dialect: "sjasmplus",
+        off_target: &["Illegal instruction"],
         mnemonic: |m| isa::z80::SET.has_mnemonic(m) || isa::z80::NEXT.has_mnemonic(m),
         bin: "sjasmplus",
         ext: "asm",
@@ -115,6 +122,7 @@ const REFERENCES: &[Reference] = &[
     },
     Reference {
         dialect: "lwasm",
+        off_target: &["in 6809 mode"],
         mnemonic: |m| isa::mos6809::INSTRUCTION_SET.has_mnemonic(m),
         bin: "lwasm",
         ext: "asm",
@@ -126,6 +134,7 @@ const REFERENCES: &[Reference] = &[
     },
     Reference {
         dialect: "vasm",
+        off_target: &["not supported on selected architecture"],
         mnemonic: |m| isa::m68k::SET.instruction(m).is_some(),
         bin: "vasmm68k_mot",
         ext: "s",
@@ -137,6 +146,7 @@ const REFERENCES: &[Reference] = &[
     },
     Reference {
         dialect: "rgbasm",
+        off_target: &[],
         mnemonic: |m| isa::sm83::SET.has_mnemonic(m),
         bin: "rgbasm",
         ext: "asm",
@@ -148,6 +158,7 @@ const REFERENCES: &[Reference] = &[
     },
     Reference {
         dialect: "ca65",
+        off_target: &["is only valid in 65816 mode"],
         mnemonic: |m| isa::mos6502::SET.has_mnemonic(m),
         bin: "ca65",
         ext: "s",
@@ -176,11 +187,15 @@ pub fn run(repo: &Path, write: bool) -> String {
             continue;
         }
         let candidates = harvest(&bin);
-        let known: Vec<String> = candidates
-            .iter()
-            .filter(|c| recognised(r, &tmp, c))
-            .cloned()
-            .collect();
+        let mut known: Vec<String> = Vec::new();
+        let mut off_target = 0usize;
+        for c in &candidates {
+            match recognises(r, &tmp, c) {
+                Known::Yes => known.push(c.clone()),
+                Known::OffTarget => off_target += 1,
+                Known::No => {}
+            }
+        }
         let ours = our_spellings(r.dialect);
         // Fold case: every reference here matches its vocabulary
         // case-insensitively, so `!CPU` and `!cpu` are one word to it and one
@@ -196,13 +211,15 @@ pub fn run(repo: &Path, write: bool) -> String {
         total += uncovered.len();
         let _ = writeln!(
             body,
-            "\n## {} ({})\n# {} candidate(s) harvested, {} recognised, {} of those \
-             outside our surface",
+            "\n## {} ({})\n# {} candidate(s) harvested; {} recognised here, {} more the \
+             tool itself\n# refuses on this target; {} of the {} outside our surface",
             r.dialect,
             identity(&bin, r.bin),
             candidates.len(),
             known.len(),
+            off_target,
             uncovered.len(),
+            known.len(),
         );
         for w in &uncovered {
             let _ = writeln!(body, "{}", spell(r, w));
@@ -215,6 +232,19 @@ pub fn run(repo: &Path, write: bool) -> String {
          # {total} word(s) outside our surface, across the references installed\n\
          # here. A word, not a feature: a family of dotted spellings is often one\n\
          # rule, and one line here can be a week's work or an afternoon's.\n\
+         #\n\
+         # Words the tool refuses on the target we assemble for are counted\n\
+         # separately and are NOT in that total. A 68881 mnemonic under\n\
+         # -m68000, a 6309 one in 6809 mode, `.a16` outside 65816 mode: vasm,\n\
+         # lwasm and ca65 all refuse those themselves, so they measure the\n\
+         # width of a wider target rather than a gap in this one.\n\
+         #\n\
+         # What it still over-counts: a word that is vocabulary somewhere other\n\
+         # than statement position. rgbasm knows `af` as a register and `acos`\n\
+         # as an expression function, and both are offered here as operations,\n\
+         # so both read as missing. Some of those are real (we have no `acos`)\n\
+         # and some are not (we do take `af`). Reading a line here is still\n\
+         # cheaper than finding it, which is the point.\n\
          #\n\
          # Regenerate with `cargo xtask surface --write` (needs the reference\n\
          # tools installed; it questions each one a few thousand times, so it\n\
@@ -235,14 +265,14 @@ pub fn run(repo: &Path, write: bool) -> String {
 /// Prove the detector distinguishes a word this tool knows from one nothing
 /// could, before any conclusion is drawn from it.
 fn self_check(r: &Reference, tmp: &Path) -> Result<(), String> {
-    if recognised(r, tmp, "zzqqxxvv") {
+    if recognises(r, tmp, "zzqqxxvv") != Known::No {
         return Err(format!(
             "`{}` reports nothing recognisable for a nonsense word, so every \
              candidate would read as vocabulary",
             r.bin
         ));
     }
-    if !recognised(r, tmp, r.known) {
+    if recognises(r, tmp, r.known) != Known::Yes {
         return Err(format!(
             "`{}` reads `{}` as unknown, so its own vocabulary would read as a gap",
             r.bin, r.known
@@ -251,15 +281,27 @@ fn self_check(r: &Reference, tmp: &Path) -> Result<(), String> {
     Ok(())
 }
 
+/// What a reference makes of one word.
+#[derive(PartialEq, Eq, Clone, Copy)]
+enum Known {
+    /// Not vocabulary at all.
+    No,
+    /// Vocabulary, and available on the target we assemble for.
+    Yes,
+    /// Vocabulary, and the tool itself refuses it here — a 68881 mnemonic
+    /// under `-m68000`, a 6309 one in 6809 mode.
+    OffTarget,
+}
+
 /// Does this reference know `word`? Anything but its unknown-word answer counts
 /// — a word rejected for its *arguments* is a word the tool knows.
-fn recognised(r: &Reference, tmp: &Path, word: &str) -> bool {
+fn recognises(r: &Reference, tmp: &Path, word: &str) -> Known {
     let word = spell(r, word);
     let word = word.as_str();
     let src = tmp.join(format!("probe.{}", r.ext));
     let out = tmp.join("probe.out");
     if std::fs::write(&src, format!("{}\t{word}\n", r.prologue)).is_err() {
-        return false;
+        return Known::No;
     }
     let mut c = Command::new(r.bin);
     for a in r.args {
@@ -269,14 +311,20 @@ fn recognised(r: &Reference, tmp: &Path, word: &str) -> bool {
         );
     }
     let Ok(o) = c.current_dir(tmp).output() else {
-        return false;
+        return Known::No;
     };
     let text = format!(
         "{}{}",
         String::from_utf8_lossy(&o.stdout),
         String::from_utf8_lossy(&o.stderr)
     );
-    !r.unknown.iter().any(|u| text.contains(u))
+    if r.unknown.iter().any(|u| text.contains(u)) {
+        Known::No
+    } else if r.off_target.iter().any(|u| text.contains(u)) {
+        Known::OffTarget
+    } else {
+        Known::Yes
+    }
 }
 
 /// How this reference spells `word` as an operation. ACME stores `byte` in its
@@ -425,6 +473,7 @@ mod tests {
         sigil: "!",
         args: &[],
         unknown: &[],
+        off_target: &[],
         known: "!byte",
     };
 
@@ -454,6 +503,30 @@ mod tests {
         assert!(!out.contains("9bad"), "a word does not start with a digit");
     }
 
+    /// An off-target word is counted apart from a missing one, because it is
+    /// not a gap: vasm refuses a 68881 mnemonic under `-m68000` itself.
+    /// Conflating the two put **426 of vasm's 540** in a backlog they did not
+    /// belong in, and nearly doubled the headline figure.
+    #[test]
+    fn a_word_the_tool_refuses_on_this_target_is_not_a_gap() {
+        let vasm = REFERENCES
+            .iter()
+            .find(|r| r.dialect == "vasm")
+            .expect("vasm is in the table");
+        assert!(
+            vasm.off_target
+                .iter()
+                .any(|m| "error 9: instruction not supported on selected architecture".contains(m)),
+            "vasm's architecture refusal must be recognised as off-target"
+        );
+        assert!(
+            !vasm
+                .unknown
+                .iter()
+                .any(|m| "instruction not supported on selected architecture".contains(m)),
+            "and must not also read as unknown, which would drop it entirely"
+        );
+    }
     /// A directive we declare is covered even though offering it bare would be
     /// refused for its arguments — the false positive this test exists to pin.
     #[test]
