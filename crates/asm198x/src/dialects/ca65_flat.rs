@@ -128,6 +128,61 @@ pub(crate) const CA65_SEMANTICS: WalkSemantics = WalkSemantics {
 /// The per-line seam a flat ca65 dialect supplies to the shared walk: parse
 /// one line with the live environment, pushing ordinary nodes internally and
 /// handing a `.include`/`.incbin` back for the driver.
+/// What a line does to a block, as far as the shared cursor is concerned.
+///
+/// Deliberately about *structure* and not about meaning: the cursor groups
+/// lines and never asks what a condition says. Which spellings map to which
+/// arm is each dialect's own business — ca65's `.endif` and lwasm's `endc`
+/// are the same arm here and nothing else about them is shared.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub(crate) enum BlockKw {
+    /// Opens a conditional (`.if`, `.ifdef`, `ifne`, …).
+    CondOpen,
+    /// A chained leg that both closes the previous branch and opens the next
+    /// (`.elseif`).
+    ElseIf,
+    /// The final alternative (`.else`).
+    Else,
+    /// Closes a conditional (`.endif`, `endc`).
+    CondClose,
+    /// Opens a repetition (`.repeat`, `rept`).
+    RepeatOpen,
+    /// Closes a repetition (`.endrepeat`, `endr`).
+    RepeatClose,
+}
+
+/// How the walk treats an include or incbin it reaches.
+///
+/// Two callers, one cursor. The multi-file walk resolves lazily as each
+/// directive is reached (KTD1); the single-source parse never opens a target,
+/// so `--fmt` renders the directive verbatim and works with a missing file.
+/// Before the cursor existed these were two separate line loops, and only one
+/// of them would have gained block structure.
+pub(crate) enum Resolve<'a> {
+    Lazily {
+        map: &'a mut SourceMap,
+        loader: &'a dyn SourceLoader,
+        stack: &'a mut Vec<FileId>,
+        sem: &'a WalkSemantics,
+    },
+    Never,
+}
+
+/// How a [`walk_block`] leg ended.
+#[derive(PartialEq, Eq, Debug)]
+enum BlockClose {
+    Eof,
+    /// `.else` — the next leg is the final alternative.
+    Else,
+    /// `.elseif <cond>`, carrying its head text and line so the chain
+    /// round-trips as the flat chain the author wrote.
+    ElseIf(String, usize),
+    /// `.endif`.
+    CondClose,
+    /// `.endrepeat`.
+    RepeatClose,
+}
+
 pub(crate) trait FlatWalk {
     /// Parse one line of `file`. Ordinary lines push their node (or nothing)
     /// and return `None`; a walk-handled directive is returned unresolved.
@@ -148,6 +203,20 @@ pub(crate) trait FlatWalk {
     /// The nodes parsed so far, so the walk can put a macro expansion's spans
     /// back on the lines the author wrote.
     fn nodes_mut(&mut self) -> &mut Vec<Node>;
+
+    /// What this line does to a **block**, in this dialect's spelling.
+    ///
+    /// Defaulted to "nothing": a dialect on this walk has no block structure
+    /// until it declares one, and six of the seven do not yet. The default is
+    /// what keeps [`walk_file`]'s cursor from grouping lines in a dialect whose
+    /// reference has no conditionals — the same posture, and the same reason,
+    /// as `Z80Syntax::cond_keyword`.
+    ///
+    /// `code` is the line with its comment already stripped.
+    fn block_keyword(&self, code: &str) -> Option<BlockKw> {
+        let _ = code;
+        None
+    }
 
     /// Rewrite source before parsing — macro expansion (#93).
     ///
@@ -186,8 +255,313 @@ pub(crate) fn walk_file<W: FlatWalk>(
     let expanded = w.expand_source(source)?;
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
-    for (i, raw) in text.lines().enumerate() {
-        let line = i + 1;
+    let lines: Vec<&str> = text.lines().collect();
+    let mut pos = 0usize;
+    let closer = walk_block(
+        Cursor {
+            lines: &lines,
+            pos: &mut pos,
+            file,
+            origins,
+        },
+        w,
+        &mut Resolve::Lazily {
+            map,
+            loader,
+            stack,
+            sem,
+        },
+        false,
+    )?;
+    debug_assert!(closer == BlockClose::Eof, "a file only ends at EOF");
+    Ok(())
+}
+
+/// Parse one source with the same cursor, keeping every include unresolved —
+/// the single-source entry every dialect's `parse_program` uses, and the path
+/// the formatter takes.
+pub(crate) fn walk_source_expanded<W: FlatWalk>(
+    w: &mut W,
+    text: &str,
+    file: FileId,
+) -> Result<(), AsmError> {
+    let origins: Option<&[macros::LineOrigin]> = None;
+    let lines: Vec<&str> = text.lines().collect();
+    let mut pos = 0usize;
+    let closer = walk_block(
+        Cursor {
+            lines: &lines,
+            pos: &mut pos,
+            file,
+            origins,
+        },
+        w,
+        &mut Resolve::Never,
+        false,
+    )?;
+    debug_assert!(closer == BlockClose::Eof, "a file only ends at EOF");
+    Ok(())
+}
+
+/// The lines a [`walk_block`] leg reads, and where it is up to.
+struct Cursor<'a, 'b> {
+    lines: &'a [&'a str],
+    pos: &'b mut usize,
+    file: FileId,
+    origins: Option<&'a [macros::LineOrigin]>,
+}
+
+/// Parse lines into `w` until this leg's closer or EOF, grouping any block a
+/// dialect declares into an [`Item::Conditional`](crate::ast::Item) or
+/// [`Item::Repeat`](crate::ast::Item).
+///
+/// The cursor is **structural only**: it groups a head, a body and a closer,
+/// and never folds a condition. Which branch assembles is the dialect's
+/// projection or evaluator to decide, from the tree — see
+/// `decisions/conditionals-in-multipass-dialects.md` and
+/// `decisions/conditional-assembly-framework.md`. A dialect that declares no
+/// keywords never leaves the `None` arm and walks exactly as it did before.
+///
+/// `in_block` is false only at the top level, where a stray closer is a line
+/// like any other rather than the end of anything — lwasm accepts one and
+/// ca65 rejects it, so the *diagnostic* stays with the dialect.
+#[allow(clippy::too_many_arguments)]
+fn walk_block<W: FlatWalk>(
+    cx: Cursor<'_, '_>,
+    w: &mut W,
+    res: &mut Resolve<'_>,
+    in_block: bool,
+) -> Result<BlockClose, AsmError> {
+    let Cursor {
+        lines,
+        pos,
+        file,
+        origins,
+    } = cx;
+    while *pos < lines.len() {
+        let raw = lines[*pos];
+        let line = *pos + 1;
+        *pos += 1;
+
+        // Structure first, so a block keyword never reaches the line parser —
+        // which would refuse it as an unknown directive.
+        if let Some(kw) = w.block_keyword(strip_block_comment(raw)) {
+            let head = strip_block_comment(raw).trim().to_string();
+            match kw {
+                BlockKw::CondClose if in_block => return Ok(BlockClose::CondClose),
+                BlockKw::RepeatClose if in_block => return Ok(BlockClose::RepeatClose),
+                BlockKw::Else if in_block => return Ok(BlockClose::Else),
+                BlockKw::ElseIf if in_block => return Ok(BlockClose::ElseIf(head, line)),
+                BlockKw::CondOpen => {
+                    parse_conditional(
+                        Cursor {
+                            lines,
+                            pos,
+                            file,
+                            origins,
+                        },
+                        w,
+                        res,
+                        head,
+                        line,
+                    )?;
+                    continue;
+                }
+                BlockKw::RepeatOpen => {
+                    parse_repeat(
+                        Cursor {
+                            lines,
+                            pos,
+                            file,
+                            origins,
+                        },
+                        w,
+                        res,
+                        head,
+                        line,
+                    )?;
+                    continue;
+                }
+                // A closer at the top level, or one this leg does not expect.
+                // Handed to the line parser, which is where each dialect's own
+                // posture lives: ca65 errors, lwasm shrugs.
+                _ => {}
+            }
+        }
+
+        walk_one_line(w, raw, line, file, origins, res)?;
+    }
+    Ok(BlockClose::Eof)
+}
+
+/// Collect a conditional: the head line, each leg's body, and the closer.
+#[allow(clippy::too_many_arguments)]
+fn parse_conditional<W: FlatWalk>(
+    cx: Cursor<'_, '_>,
+    w: &mut W,
+    res: &mut Resolve<'_>,
+    head: String,
+    line: usize,
+) -> Result<(), AsmError> {
+    let Cursor {
+        lines,
+        pos,
+        file,
+        origins,
+    } = cx;
+    let start = w.nodes_mut().len();
+    let closed = walk_block(
+        Cursor {
+            lines,
+            pos,
+            file,
+            origins,
+        },
+        w,
+        res,
+        true,
+    )?;
+    let then_body: Vec<Node> = w.nodes_mut().split_off(start);
+    let else_body = match closed {
+        BlockClose::CondClose => None,
+        BlockClose::Else => {
+            let start = w.nodes_mut().len();
+            let end = walk_block(
+                Cursor {
+                    lines,
+                    pos,
+                    file,
+                    origins,
+                },
+                w,
+                res,
+                true,
+            )?;
+            if end != BlockClose::CondClose && end != BlockClose::Eof {
+                return Err(AsmError::at(
+                    Span::in_file(file, line as u32, 1),
+                    "conditional block is never closed".to_string(),
+                ));
+            }
+            Some(w.nodes_mut().split_off(start))
+        }
+        // An `elseif` leg is stored as a nested conditional in the else branch,
+        // which is the shape the evaluator walks and `emit` flattens back.
+        BlockClose::ElseIf(leg_head, leg_line) => {
+            let start = w.nodes_mut().len();
+            parse_conditional(
+                Cursor {
+                    lines,
+                    pos,
+                    file,
+                    origins,
+                },
+                w,
+                res,
+                leg_head,
+                leg_line,
+            )?;
+            Some(w.nodes_mut().split_off(start))
+        }
+        BlockClose::Eof => {
+            return Err(AsmError::at(
+                Span::in_file(file, line as u32, 1),
+                "conditional block is never closed".to_string(),
+            ));
+        }
+        BlockClose::RepeatClose => {
+            return Err(AsmError::at(
+                Span::in_file(file, line as u32, 1),
+                "a repetition closer ends a conditional block".to_string(),
+            ));
+        }
+    };
+    w.push_node(Node {
+        operand_span: None,
+        label: None,
+        item: Some(crate::ast::Item::Conditional {
+            head: head.clone(),
+            then_body,
+            else_body,
+            inline: false,
+            style: crate::ast::CondStyle::Keyword,
+        }),
+        source: head,
+        span: Span::in_file(file, line as u32, 1),
+        trivia: Trivia::default(),
+    });
+    Ok(())
+}
+
+/// Collect a repetition: the head line, the body, and the closer.
+#[allow(clippy::too_many_arguments)]
+fn parse_repeat<W: FlatWalk>(
+    cx: Cursor<'_, '_>,
+    w: &mut W,
+    res: &mut Resolve<'_>,
+    head: String,
+    line: usize,
+) -> Result<(), AsmError> {
+    let Cursor {
+        lines,
+        pos,
+        file,
+        origins,
+    } = cx;
+    let start = w.nodes_mut().len();
+    let closed = walk_block(
+        Cursor {
+            lines,
+            pos,
+            file,
+            origins,
+        },
+        w,
+        res,
+        true,
+    )?;
+    if closed != BlockClose::RepeatClose {
+        return Err(AsmError::at(
+            Span::in_file(file, line as u32, 1),
+            "repetition block is never closed".to_string(),
+        ));
+    }
+    let body: Vec<Node> = w.nodes_mut().split_off(start);
+    w.push_node(Node {
+        operand_span: None,
+        label: None,
+        item: Some(crate::ast::Item::Repeat {
+            head: head.clone(),
+            body,
+            close: String::new(),
+            style: crate::ast::CondStyle::Keyword,
+        }),
+        source: head,
+        span: Span::in_file(file, line as u32, 1),
+        trivia: Trivia::default(),
+    });
+    Ok(())
+}
+
+/// A line's comment removed for the structural test only. The dialect's own
+/// comment rules still apply when the line is parsed; this needs just enough to
+/// stop a trailing comment hiding a closer.
+fn strip_block_comment(raw: &str) -> &str {
+    let cut = raw.find(';').unwrap_or(raw.len());
+    &raw[..cut]
+}
+
+/// Parse one ordinary line, resolving an include or incbin as it is reached.
+#[allow(clippy::too_many_arguments)]
+fn walk_one_line<W: FlatWalk>(
+    w: &mut W,
+    raw: &str,
+    line: usize,
+    file: FileId,
+    origins: Option<&[macros::LineOrigin]>,
+    res: &mut Resolve<'_>,
+) -> Result<(), AsmError> {
+    {
         // Nodes this line contributes, put back on the line the author wrote
         // before an include pushes any of its own.
         let start = w.nodes_mut().len();
@@ -196,7 +570,7 @@ pub(crate) fn walk_file<W: FlatWalk>(
             .map_err(|e| stamp_file(macros::remap_lines(e, origins), file));
         macros::place_nodes(&mut w.nodes_mut()[start..], origins);
         let Some(mut d) = walked? else {
-            continue;
+            return Ok(());
         };
         if let Some(origins) = origins {
             macros::place(&mut d.span, origins);
@@ -204,10 +578,24 @@ pub(crate) fn walk_file<W: FlatWalk>(
                 macros::place(span, origins);
             }
         }
+        if !matches!(res, Resolve::Lazily { .. }) {
+            // Single-source: the target is never opened (KTD1).
+            w.push_node(unresolved_node(d));
+            return Ok(());
+        }
         let span = d.span;
         // Diagnostics point at the directive's operand (the file name) when
         // the parse knew its column, else the line.
         let at = d.operand_span.clone().unwrap_or_else(|| span.clone());
+        let Resolve::Lazily {
+            map,
+            loader,
+            stack,
+            sem,
+        } = res
+        else {
+            unreachable!("checked above")
+        };
         match d.kind {
             WalkDirective::Include { request } => {
                 // A label on the include line binds at the include point's
@@ -229,7 +617,7 @@ pub(crate) fn walk_file<W: FlatWalk>(
                         format!("includes nested more than {MAX_INCLUDE_DEPTH} levels deep"),
                     ));
                 }
-                let id = load_include_defaulted(map, loader, &request, stack, line as u32, sem)
+                let id = load_include_defaulted(map, *loader, &request, stack, line as u32, sem)
                     .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
                 // Cycle detection is membership of the *active* stack: ca65
                 // itself has none (a self-include dies on the OS's open-file
@@ -246,7 +634,7 @@ pub(crate) fn walk_file<W: FlatWalk>(
                 }
                 let contents = map.contents(id).unwrap_or_default().to_owned();
                 stack.push(id);
-                walk_file(w, &contents, id, map, loader, stack, sem)?;
+                walk_file(w, &contents, id, map, *loader, stack, sem)?;
                 stack.pop();
             }
             WalkDirective::Incbin {
@@ -258,7 +646,7 @@ pub(crate) fn walk_file<W: FlatWalk>(
                 // path mints no FileId (KTD8) — the payload rides a node at
                 // the *directive's* span, which is where the missing-asset /
                 // window diagnostics land too.
-                let data = load_binary(map, loader, &request, stack, sem.resolution)
+                let data = load_binary(map, *loader, &request, stack, sem.resolution)
                     .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
                 let payload = (sem.window)(&data, offset, size)
                     .map_err(|msg| AsmError::at(at.clone(), format!("`{request}`: {msg}")))?;
