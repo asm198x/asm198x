@@ -7,6 +7,48 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.26](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.25...asm198x-v0.0.26) - 2026-08-23
+
+### Added
+
+- **ca65 assembles conditionals and repetition.** `.if` / `.ifdef` / `.ifndef`
+  / `.elseif` / `.else` / `.endif`, and `.repeat n[, var]` / `.endrepeat`, in
+  any case. Real ca65 has had all of them since forever and asm198x answered
+  `unsupported directive`, so a NES project using any of them did not build.
+  The loop variable counts from **0** and stops existing at `.endrepeat`, both
+  matching ca65 — and a condition inside the body can read it.
+  ([#193](https://github.com/asm198x/asm198x/pull/193))
+- **acme assembles `!for`.** Both spellings: `!for i, n` counts 1 to `n`, and
+  `!for i, a, b` runs inclusive from `a` to `b` — **counting down** when `b` is
+  below `a`, which is what acme does and is simple to get wrong.
+  ([#190](https://github.com/asm198x/asm198x/pull/190))
+
+### Fixed
+
+- **A ca65 label may be indented.** `        start: dex` is legal ca65 and
+  asm198x refused it with `unknown instruction \`START:\``, because two of the
+  three ca65 front-ends required a label at column 0. In ca65 the *colon* makes
+  a label and the column is irrelevant.
+
+  It also made `fmt` unsafe, not just strict, which is how it was found:
+  indenting a macro body is correct ca65 layout, so the formatter moved a
+  body's label off column 0 and produced a file the same parser then refused.
+  If you have formatted ca65 source containing a macro whose body defines a
+  label, it is worth rebuilding.
+  ([#188](https://github.com/asm198x/asm198x/pull/188))
+
+### Changed
+
+- **A dialect now gets a construct when its reference has one.** Conditional
+  assembly used to be adopted per dialect only when something concrete demanded
+  it. Measuring the gaps ended that: of the ten missing across macros,
+  conditionals and repetition, **nine were features the reference already had
+  and asm198x had never implemented** — so the rule was holding back
+  compatibility work, not speculation. What stays gated is the reverse: giving
+  a dialect something its reference does **not** have, which would accept
+  source the real tool rejects.
+  ([#190](https://github.com/asm198x/asm198x/pull/190))
+
 ## [0.0.25](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.24...asm198x-v0.0.25) - 2026-08-22
 
 ### Fixed
