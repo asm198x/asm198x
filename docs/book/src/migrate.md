@@ -51,7 +51,7 @@ it:
 | `lwasm` | `include`, `use` | `includebin` |
 | `rgbasm` | `include` | `incbin` |
 | `pasmo` | `include` — **not implemented** | `incbin` |
-| `sjasmplus` | `include` | `incbin` |
+| `sjasmplus` | `.include`, `include` | `.incbin`, `incbin` |
 | `8080` | `include` | `binclude` |
 | `6800` | `include` | `binclude` |
 | `1802` | `include` | `binclude` |

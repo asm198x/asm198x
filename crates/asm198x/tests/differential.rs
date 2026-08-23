@@ -359,6 +359,17 @@ const PROBES: &[Probe] = &[
         " IF later = 0\n ld a,1\n ENDIF\nlater: nop\n"),
     ok ("sjasmplus", "a forward condition that never settles",
         " IF later < 2\n ld a,1\n ENDIF\nlater: nop\n"),
+    // The optional leading dot, which sjasmplus takes on every directive it
+    // has. The conditionals already had it (#67); this is the rest.
+    ok ("sjasmplus", "dotted data and origin directives",
+        " .org $10\n .db 1,2\n .defb 3\n .byte 4\n .dw $1234\n .ds 2\n"),
+    ok ("sjasmplus", "dotted equ and define",
+        "x .equ 5\n .define V 6\n .db x,V\n"),
+    ok ("sjasmplus", "dotted macro and repetition",
+        " .macro m\n .db 7\n .endm\n m\n .dup 2\n .db 8\n .edup\n"),
+    ok ("sjasmplus", "dotted module",
+        " .module foo\nbar: .db 1\n .endmodule\n .db foo.bar\n"),
+
     ok ("sjasmplus", "a backward condition needs no pass",
         "later: nop\n IF later\n ld a,1\n ENDIF\n"),
 

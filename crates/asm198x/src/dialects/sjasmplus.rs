@@ -208,11 +208,11 @@ impl Z80Syntax for SjasmplusSyntax {
     }
 
     fn repeat_keyword(&self, word: &str) -> Option<z80::RepeatKw> {
-        z80::repeat_keyword(word)
+        z80::repeat_keyword(undot(word))
     }
 
     fn module_keyword(&self, word: &str) -> Option<z80::ModuleKw> {
-        z80::module_keyword(word)
+        z80::module_keyword(undot(word))
     }
 
     /// The formatter must copy a macro definition rather than re-lay it out.
@@ -244,7 +244,11 @@ impl Z80Syntax for SjasmplusSyntax {
     }
 
     fn is_define_word(&self, word: &str) -> bool {
-        z80::is_define_word(word)
+        z80::is_define_word(undot(word))
+    }
+
+    fn is_equ_word(&self, word: &str) -> bool {
+        undot(word).eq_ignore_ascii_case("equ")
     }
 
     fn constant_sources(&self) -> &'static str {
@@ -272,6 +276,7 @@ impl Z80Syntax for SjasmplusSyntax {
     /// reads as an operation, not a label; the walk intercepts both before
     /// directive parsing.
     fn is_directive(&self, word: &str) -> bool {
+        let word = undot(word);
         word.eq_ignore_ascii_case("byte")
             || self.is_include(word)
             || self.is_incbin(word)
@@ -280,13 +285,13 @@ impl Z80Syntax for SjasmplusSyntax {
 
     /// sjasmplus's include directive (language-surface U2), walk-handled.
     fn is_include(&self, word: &str) -> bool {
-        word.eq_ignore_ascii_case("include")
+        undot(word).eq_ignore_ascii_case("include")
     }
 
     /// sjasmplus's binary-inclusion directive (language-surface U3),
     /// walk-handled like `include`.
     fn is_incbin(&self, word: &str) -> bool {
-        word.eq_ignore_ascii_case("incbin")
+        undot(word).eq_ignore_ascii_case("incbin")
     }
 
     fn own_directives(&self) -> &'static [crate::directives::Directive] {
@@ -312,6 +317,7 @@ impl Z80Syntax for SjasmplusSyntax {
         line: usize,
         consts: &BTreeMap<String, i64>,
     ) -> Result<Option<Operation>, AsmError> {
+        let word = undot(word);
         let word = if word.eq_ignore_ascii_case("byte") {
             "db"
         } else {
@@ -394,6 +400,20 @@ impl Z80Syntax for SjasmplusSyntax {
 // why `val*2` with `val = 5` assembles to `ld a,10`.
 // ---------------------------------------------------------------------------
 
+/// Strip sjasmplus's optional leading `.` from a directive word.
+///
+/// Every directive it has takes one — `.db`, `.org`, `.module`, `.equ` — and
+/// the conditionals already stripped it (#67). This is the same rule for the
+/// rest of the surface, and it belongs to *this* dialect: pasmo shares the Z80
+/// core and reads `.db` as an ordinary label.
+///
+/// Stripping before the case test is deliberate, and copies what the
+/// conditionals do: `.Db` stays as unacceptable as `Db` where a spelling is
+/// case-sensitive.
+fn undot(word: &str) -> &str {
+    word.strip_prefix('.').unwrap_or(word)
+}
+
 /// Split a macro header's tail into its leading word and the rest — the name
 /// and its parameters in the keyword-first form, the keyword and the
 /// parameters in the name-first one.
@@ -430,7 +450,7 @@ impl macros::MacroSyntax for SjasmplusSyntax {
         let text = macros::without_comment(line);
         let indented = text.starts_with(char::is_whitespace);
         let (first, rest) = text.trim().split_once(char::is_whitespace)?;
-        let (name, tail) = if first.eq_ignore_ascii_case("macro") {
+        let (name, tail) = if undot(first).eq_ignore_ascii_case("macro") {
             if !indented {
                 return None;
             }
@@ -440,7 +460,7 @@ impl macros::MacroSyntax for SjasmplusSyntax {
                 return None;
             }
             let (kw, tail) = split_macro_name(rest);
-            if !kw.eq_ignore_ascii_case("macro") {
+            if !undot(kw).eq_ignore_ascii_case("macro") {
                 return None;
             }
             (first.trim_end_matches(':'), tail)
@@ -458,9 +478,7 @@ impl macros::MacroSyntax for SjasmplusSyntax {
 
     /// `ENDM`, alone on its line.
     fn is_end(&self, line: &str) -> bool {
-        macros::without_comment(line)
-            .trim()
-            .eq_ignore_ascii_case("endm")
+        undot(macros::without_comment(line).trim()).eq_ignore_ascii_case("endm")
     }
 
     fn end_keyword(&self) -> &'static str {
@@ -511,6 +529,89 @@ impl macros::MacroSyntax for SjasmplusSyntax {
 #[cfg(test)]
 mod tests {
     use crate::assemble_sjasmplus as asm;
+
+    // -----------------------------------------------------------------------
+    // The optional leading dot. Probed against SjASMPlus 1.21.0, 2026-08-23:
+    // every directive it has takes one, `equ` included once it has a label.
+    // -----------------------------------------------------------------------
+
+    /// The whole surface, dotted. The conditionals already took a dot (#67);
+    /// this is the same rule for everything else, which is where most of
+    /// sjasmplus's remaining vocabulary gap was.
+    #[test]
+    fn every_directive_takes_an_optional_dot() {
+        let ok = |src: &str| asm(src).unwrap_or_else(|e| panic!("{src:?}: {e}")).bytes;
+        assert_eq!(ok(" .db 1,2\n"), vec![1, 2]);
+        assert_eq!(ok(" .defb 3\n"), vec![3]);
+        assert_eq!(ok(" .byte 4\n"), vec![4]);
+        assert_eq!(ok(" .dw $1234\n"), vec![0x34, 0x12]);
+        assert_eq!(ok(" .ds 2\n"), vec![0, 0]);
+        assert_eq!(
+            ok("x .equ 5\n .db x\n"),
+            vec![5],
+            "`equ`, once it has a label"
+        );
+        assert_eq!(ok(" .define V 5\n .db V\n"), vec![5]);
+        assert_eq!(ok(" .macro m\n .db 7\n .endm\n m\n"), vec![7]);
+        assert_eq!(ok(" .dup 2\n .db 8\n .edup\n"), vec![8, 8]);
+        assert_eq!(ok(" .rept 2\n .db 9\n .endr\n"), vec![9, 9]);
+        assert_eq!(ok(" .if 1\n .db 1\n .endif\n"), vec![1]);
+        assert_eq!(
+            ok(" .module foo\nbar: .db 1\n .endmodule\n .db foo.bar\n"),
+            vec![1, 0]
+        );
+        assert_eq!(
+            ok(" db 1\n"),
+            vec![1],
+            "and the bare spelling is unaffected"
+        );
+    }
+
+    /// The dot strips *before* the case test, as it does for the conditionals:
+    /// a spelling that is case-sensitive stays case-sensitive with one.
+    #[test]
+    fn the_dot_does_not_relax_the_case_rule() {
+        assert!(
+            asm(" .Dup 2\n .db 1\n .edup\n").is_err(),
+            "`.Dup` is as unacceptable as `Dup`"
+        );
+    }
+
+    /// The formatter keeps a dotted `equ`'s label on its line, as it does the
+    /// bare one. This is not a layout preference: `.equ` split from its label
+    /// does not assemble, and the differential's format-then-assemble check is
+    /// what caught it.
+    #[test]
+    fn the_formatter_keeps_a_dotted_equ_inline() {
+        let out = crate::format_sjasmplus("x .equ 5\n db x\n").expect("format");
+        assert_eq!(out, "x: .equ 5\n        db x\n");
+        assert_eq!(asm(&out).expect("reassemble").bytes, vec![5]);
+    }
+    /// pasmo shares the Z80 core and must not gain the form — it reads `.db`
+    /// as an ordinary label, and accepting it would invent a dialect.
+    #[test]
+    fn pasmo_does_not_take_a_dotted_directive() {
+        assert!(crate::assemble_pasmo(" .db 1\n").is_err());
+    }
+
+    /// Declared as well as dispatched. The surface is what the dialect pages
+    /// and `cargo xtask surface` read, and the two drifting apart is the
+    /// failure the declaration exists to prevent.
+    #[test]
+    fn the_dotted_spellings_are_declared() {
+        let declared: Vec<String> = crate::directives::surfaces()
+            .into_iter()
+            .filter(|s| s.dialect == "sjasmplus")
+            .flat_map(|s| s.directives)
+            .flat_map(|d| d.spellings())
+            .collect();
+        for spelling in [".db", ".org", ".equ", ".macro", ".module", ".include"] {
+            assert!(
+                declared.iter().any(|s| s == spelling),
+                "`{spelling}` is accepted and not declared"
+            );
+        }
+    }
 
     /// A module left open at end of file assembles, and now says so. The
     /// reference warns once, naming the *innermost* module by its full dotted

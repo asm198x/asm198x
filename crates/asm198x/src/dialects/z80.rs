@@ -76,6 +76,17 @@ pub(crate) trait Z80Syntax {
         None
     }
 
+    /// Whether `word` binds a label to a value on the same line, so the
+    /// formatter renders `name: equ …` inline rather than putting the label on
+    /// a line of its own.
+    ///
+    /// A hook rather than a literal because sjasmplus spells it `.equ` as well
+    /// (#93's dotted rule), and the formatter breaking a binding apart is not
+    /// a layout preference — the result does not assemble.
+    fn is_equ_word(&self, word: &str) -> bool {
+        word.eq_ignore_ascii_case("equ")
+    }
+
     /// Whether a condition may name a symbol defined later in the file,
     /// resolved by running the walk more than once (#99).
     ///
@@ -996,7 +1007,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                     // A plain line: verbatim op source. Only `equ` keeps an
                     // item, so the formatter renders `name: equ …` inline as
                     // the eager parse did; lowering re-parses from source.
-                    let item = if label.is_some() && word.eq_ignore_ascii_case("equ") {
+                    let item = if label.is_some() && self.syntax.is_equ_word(word) {
                         parse_value(self.syntax, args, line)
                             .ok()
                             .map(|e| crate::ast::item_from_operation(Operation::Equ(e)))
