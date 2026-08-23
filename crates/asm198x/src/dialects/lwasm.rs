@@ -47,7 +47,13 @@ impl Dialect for Lwasm {
         // migrate: its instructions carry a precomputed `Operation::Encoded`
         // (postbyte + extension bytes), which the AST holds verbatim as
         // `Item::Encoded` and the formatter re-emits via `Node::source`.
-        crate::ast::lower(parse_program(source, macros::Expand::Yes)?)
+        let program = parse_program(source, macros::Expand::Yes)?;
+        let mut eval = LwasmEval {
+            env: BTreeMap::new(),
+        };
+        let mut out = Vec::new();
+        crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        Ok(out)
     }
 
     fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
@@ -64,7 +70,13 @@ impl Dialect for Lwasm {
         map: &mut SourceMap,
         loader: &dyn SourceLoader,
     ) -> Result<Vec<Statement>, AsmError> {
-        crate::ast::lower(parse_program_multi(map, loader)?)
+        let program = parse_program_multi(map, loader)?;
+        let mut eval = LwasmEval {
+            env: BTreeMap::new(),
+        };
+        let mut out = Vec::new();
+        crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        Ok(out)
     }
 }
 
@@ -89,14 +101,10 @@ pub(crate) fn parse_program(source: &str, mode: macros::Expand) -> Result<Progra
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
     let mut w = Walker::new();
-    for (i, raw) in text.lines().enumerate() {
-        if let Some(d) = w
-            .walk_line(raw, i + 1, FileId(0))
-            .map_err(|e| macros::remap_lines(e, origins))?
-        {
-            w.nodes.push(ca65_flat::unresolved_node(d));
-        }
-    }
+    // The shared cursor: it groups `ifne`/`endc` blocks and keeps every include
+    // unresolved (KTD1), which is what `--fmt` needs.
+    ca65_flat::walk_source_expanded(&mut w, text, FileId(0))
+        .map_err(|e| macros::remap_lines(e, origins))?;
     w.flush_trailing(text.lines().count() as u32);
     macros::place_nodes(&mut w.nodes, origins);
     Ok(Program { nodes: w.nodes })
@@ -319,6 +327,29 @@ fn file_name<'a>(
 }
 
 impl FlatWalk for Walker {
+    /// lwasm's conditional vocabulary, measured against lwasm 4.24 and
+    /// case-insensitive.
+    ///
+    /// Every numeric form compares its expression against **zero** — `ifne 1`
+    /// is true, `iflt 1` is false — so each spelling is its own comparison
+    /// rather than a boolean test. Both `endc` **and** `endif` close, which is
+    /// one closer more than any other dialect measured here.
+    ///
+    /// `ifpragma` and `ifstr` are real lwasm and deliberately absent: pragma
+    /// strings and string conditions are their own surfaces, demand-gated.
+    fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
+        use ca65_flat::BlockKw;
+        let word = code.split_whitespace().next()?.to_ascii_lowercase();
+        Some(match word.as_str() {
+            "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifdef" | "ifndef" => {
+                BlockKw::CondOpen
+            }
+            "else" => BlockKw::Else,
+            "endc" | "endif" => BlockKw::CondClose,
+            _ => return None,
+        })
+    }
+
     fn nodes_mut(&mut self) -> &mut Vec<Node> {
         &mut self.nodes
     }
@@ -495,6 +526,23 @@ fn split_label(code: &str) -> (Option<String>, &str) {
 /// directive — so these are alternative spellings rather than a sigil applied
 /// to a name, and `Exact` carries both.
 pub const DIRECTIVES: &[Directive] = &[
+    // Walk-handled: the shared cursor reads these into `Item::Conditional`
+    // before `parse_op` sees a line.
+    //
+    // Every numeric form compares against **zero** rather than taking a
+    // boolean, which is why there are six of them and not one. Both `endc` and
+    // `endif` close — the only dialect measured here with two closers.
+    //
+    // `ifpragma` and `ifstr` are real lwasm and deliberately absent: pragma
+    // strings and string conditions are their own surfaces, demand-gated.
+    Directive {
+        id: "conditional",
+        pattern: Pattern::Exact(&[
+            "ifne", "ifeq", "ifgt", "ifge", "iflt", "ifle", "ifdef", "ifndef", "else", "endc",
+            "endif",
+        ]),
+        category: Category::Operation,
+    },
     Directive {
         id: "org",
         pattern: Pattern::Exact(&["org"]),
@@ -1192,6 +1240,118 @@ fn expand_lwasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion,
     })
 }
 
+// ---------------------------------------------------------------------------
+// Conditional evaluation — lwasm's `CondEval` (the adoption recipe's steps 1
+// and 3, `decisions/conditional-assembly-framework.md`).
+//
+// Why this dialect needs a real evaluator rather than a fold in the walk: an
+// `equ` decides lwasm's **addressing mode**, and the mode decides the
+// instruction's *size*. `sym equ $10` gives `96 10` (direct, two bytes) and
+// `sym equ $1234` gives `b6 12 34` (extended, three). Real lwasm refuses
+// `lda sym` outright when that `equ` sits in an untaken branch, so a binding
+// made while parsing both branches would silently choose direct where the
+// reference errors. Each live line therefore re-parses here, against the
+// environment as it actually stands — which is ACME's model unchanged.
+// ---------------------------------------------------------------------------
+
+/// lwasm's conditional evaluator: the `equ` environment, threaded through the
+/// walk so a later direct/extended choice sees only what a taken branch bound.
+struct LwasmEval {
+    env: BTreeMap<String, i64>,
+}
+
+impl crate::ast::CondEval for LwasmEval {
+    /// Fold one conditional head. Every numeric form compares against zero;
+    /// `ifdef`/`ifndef` test the environment for a name.
+    fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError> {
+        let line = line as usize;
+        let (word, args) = split_first_word(head.trim());
+        let word = word.to_ascii_lowercase();
+        let args = args.trim();
+        if word == "ifdef" || word == "ifndef" {
+            let name = args
+                .split_whitespace()
+                .next()
+                .ok_or_else(|| AsmError::new(line, format!("`{word}` needs a name")))?;
+            let defined = self.env.contains_key(name);
+            return Ok(if word == "ifdef" { defined } else { !defined });
+        }
+        if args.is_empty() {
+            return Err(AsmError::new(line, format!("`{word}` needs a condition")));
+        }
+        let value = fold_const(&value(args, line)?, &self.env, line).map_err(|_| {
+            AsmError::new(
+                line,
+                format!(
+                    "`{args}` must be a constant here — lwasm folds a condition against the \
+                     `equ` values above it"
+                ),
+            )
+        })?;
+        Ok(match word.as_str() {
+            "ifne" => value != 0,
+            "ifeq" => value == 0,
+            "ifgt" => value > 0,
+            "ifge" => value >= 0,
+            "iflt" => value < 0,
+            "ifle" => value <= 0,
+            _ => {
+                return Err(AsmError::new(
+                    line,
+                    format!("internal error: `{head}` is not a conditional head"),
+                ));
+            }
+        })
+    }
+
+    /// Lower one **live** line, re-parsing its operation against the current
+    /// environment so the direct/extended choice sees the live bindings.
+    fn lower(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
+        let line = node.span.line as usize;
+        // A walk-resolved payload keeps what the walk built: an `includebin`'s
+        // bytes cannot be rebuilt here, because resolving one needs the loader
+        // the walk had and this does not. Everything else re-parses.
+        let op = match &node.item {
+            Some(crate::ast::Item::Binary(payload)) => Some(Operation::Binary(payload.clone())),
+            Some(crate::ast::Item::Include { request }) => {
+                return Err(AsmError::at(
+                    node.span.clone(),
+                    format!(
+                        "cannot resolve `include \"{request}\"` here — the single-source \
+                         API assembles one file; use the multi-file entry point \
+                         (the CLI resolves includes automatically)"
+                    ),
+                ));
+            }
+            Some(crate::ast::Item::Incbin { request }) => {
+                return Err(AsmError::at(
+                    node.span.clone(),
+                    format!(
+                        "cannot resolve `includebin \"{request}\"` here — the single-source \
+                         API assembles one file; use the multi-file entry point \
+                         (the CLI resolves binary inclusions automatically)"
+                    ),
+                ));
+            }
+            _ if node.source.is_empty() => None,
+            _ => parse_op(&node.source, &self.env, line)?,
+        };
+        if let (Some(sym), Some(Operation::Equ(e))) = (node.label.as_ref(), &op)
+            && let Ok(v) = fold_const(e, &self.env, line)
+        {
+            self.env.insert(sym.qualified.clone(), v);
+        }
+        out.push(Statement {
+            line,
+            file: node.span.file,
+            label: node.label.as_ref().map(|s| s.qualified.clone()),
+            op,
+            operand_span: node.operand_span.clone(),
+        });
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::assemble_lwasm as asm;
@@ -1544,5 +1704,109 @@ mod tests {
             "formatting changed the program:\n{formatted}"
         );
         assert_eq!(formatted, crate::format_lwasm(&formatted).expect("formats"));
+    }
+
+    // -----------------------------------------------------------------------
+    // Conditionals. Measured against lwasm 4.25.
+    // -----------------------------------------------------------------------
+
+    /// Every numeric form compares its expression against **zero**, so each
+    /// spelling is its own comparison rather than a boolean test.
+    #[test]
+    fn each_comparison_tests_against_zero() {
+        // nop = $12, rts = $39.
+        for (src, want) in [
+            (" ifne 1\n nop\n endc\n rts\n", vec![0x12, 0x39]),
+            (" ifne 0\n nop\n endc\n rts\n", vec![0x39]),
+            (" ifeq 0\n nop\n endc\n rts\n", vec![0x12, 0x39]),
+            (" ifgt 1\n nop\n endc\n rts\n", vec![0x12, 0x39]),
+            (" ifge 0\n nop\n endc\n rts\n", vec![0x12, 0x39]),
+            (" iflt 1\n nop\n endc\n rts\n", vec![0x39]),
+            (" ifle 0\n nop\n endc\n rts\n", vec![0x12, 0x39]),
+        ] {
+            assert_eq!(crate::assemble_lwasm(src).expect(src).bytes, want, "{src}");
+        }
+    }
+
+    /// `endc` **and** `endif` both close — lwasm is the only dialect measured
+    /// here with two closers — and the keywords are case-insensitive.
+    #[test]
+    fn either_closer_ends_a_conditional() {
+        for src in [
+            " ifne 1\n nop\n endc\n rts\n",
+            " ifne 1\n nop\n endif\n rts\n",
+            " IFNE 1\n NOP\n ENDC\n RTS\n",
+        ] {
+            assert_eq!(
+                crate::assemble_lwasm(src).expect(src).bytes,
+                vec![0x12, 0x39],
+                "{src}"
+            );
+        }
+    }
+
+    /// **The reason this dialect needed a real evaluator.** An `equ` decides
+    /// lwasm's addressing mode, and the mode decides the instruction's *size*:
+    /// direct is two bytes, extended is three. A binding made while parsing
+    /// both branches would pick direct where the reference errors, so each live
+    /// line re-parses against the environment as it actually stands.
+    #[test]
+    fn an_untaken_branch_binds_nothing_that_could_change_a_size() {
+        // The untaken `equ $10` must not make this direct.
+        assert_eq!(
+            crate::assemble_lwasm(" ifne 0\nsym equ $10\n endc\nsym equ $1234\n lda sym\n")
+                .expect("assembles")
+                .bytes,
+            vec![0xB6, 0x12, 0x34],
+            "extended: three bytes"
+        );
+        // A taken one does.
+        assert_eq!(
+            crate::assemble_lwasm(" ifne 1\nsym equ $10\n endc\n lda sym\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x96, 0x10],
+            "direct: two bytes"
+        );
+    }
+
+    #[test]
+    fn conditionals_nest_and_take_an_else() {
+        assert_eq!(
+            crate::assemble_lwasm(" ifne 0\n nop\n else\n clra\n endc\n rts\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x4F, 0x39]
+        );
+        assert_eq!(
+            crate::assemble_lwasm(" ifne 1\n ifne 1\n nop\n endc\n rts\n endc\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x12, 0x39]
+        );
+    }
+
+    /// Formatting a conditional changes the layout and not the program.
+    ///
+    /// It does change one word: `endc` comes back as `endif` (#195). Both are
+    /// lwasm's and both assemble to the same bytes, so this pins the current
+    /// behaviour rather than blessing it — a fix will show up here as a failure.
+    #[test]
+    fn a_formatted_conditional_assembles_to_the_same_bytes() {
+        let src = "n equ 1\n ifne n\n lda #5\n else\n clra\n endc\n rts\n";
+        let before = crate::assemble_lwasm(src).expect("assembles").bytes;
+        let formatted = crate::format_lwasm(src).expect("formats");
+        let after = crate::assemble_lwasm(&formatted)
+            .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+            .bytes;
+        assert_eq!(
+            before, after,
+            "formatting changed the program:\n{formatted}"
+        );
+
+        let again = crate::format_lwasm(&formatted).expect("formats");
+        assert_eq!(formatted, again, "{formatted}");
+
+        assert!(formatted.contains("endif"), "#195: {formatted}");
     }
 }
