@@ -807,28 +807,26 @@ mod semantic_tests {
             }
         }
     }
-    /// The CP1610 still ignores `relaxed`, and that is recorded rather than
-    /// accidental — our own listings need it until #214. Pinned so the
-    /// exception cannot spread quietly to another chip.
+    /// No chip ignores `relaxed` any more (#214). The CP1610 was the last,
+    /// and only because `listing_cp1610` emitted hex strict CP-1600 asl
+    /// rejects; it speaks the chip's own `x'XXXX'` now, so the family rule has
+    /// no exception in it. Pinned so one cannot creep back.
     #[test]
-    fn cp1610_is_the_only_chip_that_still_ignores_relaxed() {
-        assert!(
-            crate::assemble_cp1610("    relaxed on\n    nop\n").is_ok(),
-            "the CP1610 exception, tracked by #214"
-        );
-        for (chip, src) in [
-            ("6800", " relaxed on\n nop\n"),
-            ("1802", " relaxed on\n idl\n"),
+    fn no_chip_ignores_relaxed() {
+        for (chip, r) in [
+            (
+                "cp1610",
+                crate::assemble_cp1610("    relaxed on\n    word 10\n"),
+            ),
+            ("6800", crate::assemble_m6800(" relaxed on\n fcb 10\n")),
+            ("1802", crate::assemble_1802(" relaxed on\n db 10\n")),
+            ("z8000", crate::assemble_z8000(" relaxed on\n word 10\n")),
         ] {
-            let r = match chip {
-                "6800" => crate::assemble_m6800(src),
-                _ => crate::assemble_1802(src),
-            };
             assert!(
                 r.expect_err(chip)
                     .to_string()
                     .contains("does not implement"),
-                "`{chip}` must not inherit the exception"
+                "`{chip}` must refuse a directive that changes what a literal means"
             );
         }
     }

@@ -198,12 +198,13 @@ been looked for.
 unused and kept — deleting the mechanism because nothing is currently broken is
 how the next gap gets recorded as a comment instead of as a failing marker.
 
-Two things this does *not* claim. The ledger measures the probes we wrote, and
-we chose them; `cargo xtask surface` supplies the denominator we did not choose
-and reads **1,084 words** outside our surface. And one over-acceptance is
-recorded rather than fixed — the CP1610 still ignores `relaxed`, because our own
-listings need it (#214). Item 4 is met on its own terms, which are that nothing
-of that shape is *open and unexplained*.
+One thing this does *not* claim: the ledger measures the probes we wrote, and
+we chose them. `cargo xtask surface` supplies the denominator we did not choose
+and reads **1,084 words** outside our surface.
+
+The one over-acceptance this record carried — the CP1610 ignoring `relaxed`
+because our own listings needed it — closed with #214, so the family rule now
+has no exception in it.
 
 ## Drift triggers
 

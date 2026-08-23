@@ -2732,7 +2732,7 @@ pub fn disassemble_cp1610(code: &[u8], origin: u16) -> Vec<Line> {
             out.push(Line {
                 addr: u32::from(addr),
                 bytes: vec![code[pos]],
-                text: format!("byte 0{:02X}H", code[pos]),
+                text: format!("byte x'{:02X}'", code[pos]),
             });
             pos += 1;
             continue;
@@ -2751,7 +2751,7 @@ pub fn disassemble_cp1610(code: &[u8], origin: u16) -> Vec<Line> {
                 out.push(Line {
                     addr: u32::from(addr),
                     bytes: code[pos..pos + 2].to_vec(),
-                    text: format!("word 0{word:04X}H"),
+                    text: format!("word x'{word:04X}'"),
                 });
                 pos += 2;
             }
@@ -2763,12 +2763,20 @@ pub fn disassemble_cp1610(code: &[u8], origin: u16) -> Vec<Line> {
 
 /// Render a CP1610 disassembly as reassemblable `asl` source (`cpu CP-1600`).
 ///
-/// `relaxed on` enables asl's Intel `h`-suffix hex in CP-1600 mode (which
-/// otherwise takes only decimal and its `x'…'` hex form), keeping the emitted
-/// numbers in the house-standard `0XXXXH` style shared with every other listing.
+/// Numbers are in asl's `x'XXXX'` form rather than the house-standard
+/// `0XXXXH` every other listing here uses, because **strict CP-1600 asl takes
+/// nothing else**: decimal and `x'…'`, not `0AAAAH`, not `$AAAA`, not
+/// `0xAAAA`.
+///
+/// This used to emit the house style and open with `relaxed on` to make asl
+/// accept it. That directive changes what a literal *means* — `012` is twelve
+/// without it and ten with it — so the asl family refuses it, and the CP1610
+/// was ignoring it for one reason: these listings needed it (#214). Speaking
+/// the chip's own dialect costs one unusual-looking number format and buys the
+/// family a rule with no exception in it.
 #[must_use]
 pub fn listing_cp1610(code: &[u8], origin: u16) -> String {
-    let mut s = format!("\tcpu CP-1600\n\trelaxed on\n\torg 0{origin:04X}H\n");
+    let mut s = format!("\tcpu CP-1600\n\torg x'{origin:04X}'\n");
     for line in disassemble_cp1610(code, origin) {
         s.push('\t');
         s.push_str(&line.text);
@@ -2802,7 +2810,7 @@ fn decode_cp1610(code: &[u8], pos: usize, addr: u16, after_sdbd: bool) -> Option
             pc.wrapping_add(mag)
         };
         let text = if word & 0x10 != 0 {
-            format!("bext 0{target:04X}H,{}", word & 0xF)
+            format!("bext x'{target:04X}',{}", word & 0xF)
         } else if word & 0xF == 8 {
             // Branch-never (a two-word no-op). Only the canonical `NOPP`
             // (opcode 0x208, zero magnitude) round-trips — asl always emits that
@@ -2813,7 +2821,7 @@ fn decode_cp1610(code: &[u8], pos: usize, addr: u16, after_sdbd: bool) -> Option
             "nopp".to_string()
         } else {
             format!(
-                "{} 0{target:04X}H",
+                "{} x'{target:04X}'",
                 isa::cp1610::BRANCH_CONDS[(word & 0xF) as usize]
             )
         };
@@ -2834,9 +2842,9 @@ fn decode_cp1610(code: &[u8], pos: usize, addr: u16, after_sdbd: bool) -> Option
                 }
                 let a = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
                 let text = if fam.store {
-                    format!("{mn} r{reg},0{a:04X}H")
+                    format!("{mn} r{reg},x'{a:04X}'")
                 } else {
-                    format!("{mn} 0{a:04X}H,r{reg}")
+                    format!("{mn} x'{a:04X}',r{reg}")
                 };
                 Some((text, 4))
             }
@@ -2861,13 +2869,13 @@ fn decode_cp1610(code: &[u8], pos: usize, addr: u16, after_sdbd: bool) -> Option
                     }
                     let lo = u16::from_be_bytes([code[pos + 2], code[pos + 3]]) & 0xFF;
                     let hi = u16::from_be_bytes([code[pos + 4], code[pos + 5]]) & 0xFF;
-                    Some((format!("{mn}i 0{:04X}H,r{reg}", (hi << 8) | lo), 6))
+                    Some((format!("{mn}i x'{:04X}',r{reg}", (hi << 8) | lo), 6))
                 } else {
                     if pos + 4 > code.len() {
                         return None;
                     }
                     let imm = u16::from_be_bytes([code[pos + 2], code[pos + 3]]);
-                    Some((format!("{mn}i 0{imm:04X}H,r{reg}"), 4))
+                    Some((format!("{mn}i x'{imm:04X}',r{reg}"), 4))
                 }
             }
         };
@@ -2889,10 +2897,10 @@ fn decode_cp1610(code: &[u8], pos: usize, addr: u16, after_sdbd: bool) -> Option
         }
         let text = if rr == 3 {
             let mn = ["j", "je", "jd"][ii as usize];
-            format!("{mn} 0{target:04X}H")
+            format!("{mn} x'{target:04X}'")
         } else {
             let mn = ["jsr", "jsre", "jsrd"][ii as usize];
-            format!("{mn} r{},0{target:04X}H", rr + 4)
+            format!("{mn} r{},x'{target:04X}'", rr + 4)
         };
         return Some((text, 6));
     }
