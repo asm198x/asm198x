@@ -604,6 +604,22 @@ const PROBES: &[Probe] = &[
     ok ("rgbasm", "rept count from a constant", "SECTION \"s\",ROM0[0]\nDEF N EQU 3\nREPT N\n nop\nENDR\n"),
     ok ("rgbasm", "nested rept", "SECTION \"s\",ROM0[0]\nREPT 2\nREPT 2\n nop\nENDR\n inc a\nENDR\n"),
 
+    // rgbasm macros: `MACRO name` … `ENDM` with positional `\\1` parameters.
+    // The old `name: MACRO` header is gone in rgbds 1.0 — `syntax error,
+    // unexpected MACRO` — so only the keyword-first form is ours to take.
+    ok ("rgbasm", "macro definition and invocation",
+        "SECTION \"s\",ROM0[0]\nMACRO m\n nop\nENDM\n m\n ret\n"),
+    ok ("rgbasm", "macro with a positional parameter",
+        "SECTION \"s\",ROM0[0]\nMACRO ldav\n ld a,\\1\nENDM\n ldav 5\n ret\n"),
+    ok ("rgbasm", "two positional parameters",
+        "SECTION \"s\",ROM0[0]\nMACRO two\n ld a,\\1\n ld b,\\2\nENDM\n two 1,2\n"),
+    ok ("rgbasm", "a macro invokes one defined earlier",
+        "SECTION \"s\",ROM0[0]\nMACRO inner\n nop\nENDM\nMACRO outer\n inner\nENDM\n outer\n"),
+    ok ("rgbasm", "a macro inside a conditional",
+        "SECTION \"s\",ROM0[0]\nMACRO m\n nop\nENDM\nIF 1\n m\nENDC\n"),
+    ok ("rgbasm", "a macro inside a repetition",
+        "SECTION \"s\",ROM0[0]\nMACRO m\n nop\nENDM\nREPT 3\n m\nENDR\n"),
+
     // ---- vasm / 68000 -------------------------------------------------------
     // Conditionals: numeric forms compare against zero, `ifd`/`ifnd` test a
     // symbol (`ifdef` is *not* vasm's — `unknown mnemonic`), and `endif` and

@@ -43,6 +43,7 @@
 use std::collections::BTreeMap;
 
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
+use super::macros;
 use super::mos6502::{
     self, BytePrec, Caret, ExprOpts, fold_const, is_ident, parse_number, split_data_items,
     split_first_word, split_top_level, string_literal,
@@ -66,7 +67,7 @@ impl Dialect for Rgbasm {
         // Route assembly through the semantic AST (U6): parse into a `Program`,
         // then lower to the engine's statement stream — byte-identical to the old
         // direct parse (AE1). Other CPUs stay on direct lowering (KTD6).
-        let program = parse_program(source)?;
+        let program = parse_program(source, macros::Expand::Yes)?;
         let mut eval = RgbasmEval {
             set: self.instruction_set(),
             consts: BTreeMap::new(),
@@ -78,7 +79,7 @@ impl Dialect for Rgbasm {
     }
 
     fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
-        Ok(Some(parse_program(source)?))
+        Ok(Some(parse_program(source, macros::Expand::No)?))
     }
 
     /// The include-capable parse (language-surface U4): the interleaved,
@@ -122,12 +123,20 @@ impl Dialect for Rgbasm {
 /// the target is never opened, so `--fmt` renders the directive verbatim and
 /// works with a missing target (U4, KTD1). Lazy resolution is
 /// [`parse_program_multi`]'s.
-pub(crate) fn parse_program(source: &str) -> Result<Program, AsmError> {
+pub(crate) fn parse_program(source: &str, mode: macros::Expand) -> Result<Program, AsmError> {
     let mut w = Walker::new();
+    // Macros expand before parsing (#93), but only for assembly: the
+    // formatter asks with `Expand::No`, because laying source out must not
+    // replace a definition with its expansions.
+    let expanded = expand_rgbasm(source, mode)?;
+    let text = macros::expanded_text(&expanded, source);
+    let origins = macros::line_origins(&expanded);
     // The shared cursor: it groups `IF`/`REPT` blocks and keeps every include
     // unresolved (KTD1), which is what `--fmt` needs.
-    ca65_flat::walk_source_expanded(&mut w, source, FileId(0))?;
-    w.flush_trailing(source.lines().count() as u32);
+    ca65_flat::walk_source_expanded(&mut w, text, FileId(0))
+        .map_err(|e| macros::remap_lines(e, origins))?;
+    w.flush_trailing(text.lines().count() as u32);
+    macros::place_nodes(&mut w.nodes, origins);
     Ok(Program { nodes: w.nodes })
 }
 
@@ -220,6 +229,10 @@ struct Walker {
     /// to the next one. Comments never reach the encoder, so bytes are
     /// unchanged.
     pending_leading: Vec<Comment>,
+    /// Inside a macro definition, whose lines are copied and never read.
+    in_macro: bool,
+    /// The macros defined so far, so an invocation is copied too.
+    macro_names: std::collections::BTreeSet<String>,
     nodes: Vec<Node>,
 }
 
@@ -229,6 +242,8 @@ impl Walker {
             consts: BTreeMap::new(),
             global: String::new(),
             pending_leading: Vec::new(),
+            in_macro: false,
+            macro_names: std::collections::BTreeSet::new(),
             nodes: Vec::new(),
         }
     }
@@ -307,6 +322,13 @@ impl FlatWalk for Walker {
     /// source the reference refuses. Unlike pasmo no word here means two
     /// things: `ENDC` closes a conditional, `ENDR` a repetition, `ENDM` a
     /// macro.
+    /// Macros expand on the multi-file path too — the step easiest to forget,
+    /// because the CLI uses only that path and every library test uses the
+    /// other.
+    fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
+        expand_rgbasm(source, macros::Expand::Yes)
+    }
+
     fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
         use ca65_flat::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_uppercase();
@@ -420,6 +442,37 @@ impl FlatWalk for Walker {
                 },
             }));
         }
+        // A macro definition is copied, not read: a body is a template rather
+        // than code, and only the formatter's parse ever reaches here with one
+        // intact — the assembling path expands it away first. See
+        // `Item::Verbatim`.
+        {
+            use crate::dialects::macros::MacroSyntax as _;
+            let text = code.trim();
+            let opened = RgbasmMacros.header(code);
+            let invoked = text.split_whitespace().next().unwrap_or("");
+            if self.in_macro || opened.is_some() || self.macro_names.contains(invoked) {
+                if let Some((name, _)) = opened {
+                    self.macro_names.insert(name);
+                    self.in_macro = true;
+                } else if RgbasmMacros.is_end(text) {
+                    self.in_macro = false;
+                }
+                self.nodes.push(Node {
+                    operand_span: None,
+                    label: None,
+                    item: Some(crate::ast::Item::Verbatim),
+                    source: code.trim_end().to_string(),
+                    span: Span::in_file(file, line as u32, 1),
+                    trivia: Trivia {
+                        leading: std::mem::take(&mut self.pending_leading),
+                        trailing,
+                    },
+                });
+                return Ok(None);
+            }
+        }
+
         let symbol = label.map(|name| self.symbol(name));
         let op = if rest.is_empty() {
             None
@@ -582,6 +635,14 @@ pub const DIRECTIVES: &[Directive] = &[
     // `FOR` is real rgbasm and absent: it binds a loop variable with an
     // exclusive stop and an optional step, and adopting it means the
     // `Iteration::Over` path rather than a count.
+    // Expander-handled: the macro scanner consumes a definition before the
+    // walk sees a line. `ENDM` is not declared — it is part of the block
+    // rather than vocabulary of its own.
+    Directive {
+        id: "macro",
+        pattern: Pattern::Exact(&["macro"]),
+        category: Category::Operation,
+    },
     Directive {
         id: "conditional",
         pattern: Pattern::Exact(&["if", "elif", "else", "endc"]),
@@ -1067,6 +1128,92 @@ impl crate::ast::CondEval for RgbasmEval {
     }
 }
 
+// ---------------------------------------------------------------------------
+// Macros (#93). The mechanics live in `crate::dialects::macros`; this is
+// rgbasm's grammar, measured against rgbds 1.0.3.
+//
+//   * the header is **keyword-first**: `MACRO name` … `ENDM`. The old
+//     `name: MACRO` form that rgbds once took is a `syntax error, unexpected
+//     MACRO` in 1.0, so accepting it would take source the reference refuses.
+//   * parameters are **positional** — a body says `\1`, `\2` — so, as in lwasm
+//     and vasm, the names depend on how many arguments arrived rather than on
+//     anything the definition declared.
+//   * a call is the macro's bare name, and an unknown one is `Undefined macro`.
+//
+// Not adopted, and demand-gated: `\#` (all arguments verbatim), `_NARG` (the
+// argument count) and `\@` (a per-expansion unique suffix).
+// ---------------------------------------------------------------------------
+
+/// rgbasm's macro grammar.
+struct RgbasmMacros;
+
+impl macros::MacroSyntax for RgbasmMacros {
+    /// `MACRO name` — keyword first, and only keyword first.
+    fn header(&self, line: &str) -> Option<(String, Vec<String>)> {
+        let text = macros::without_comment(line);
+        let (kw, rest) = text.trim().split_once(char::is_whitespace)?;
+        if !kw.eq_ignore_ascii_case("macro") {
+            return None;
+        }
+        let name = rest.trim().trim_end_matches(':');
+        (!name.is_empty() && !name.contains(char::is_whitespace))
+            .then(|| (name.to_string(), Vec::new()))
+    }
+
+    fn is_end(&self, line: &str) -> bool {
+        macros::without_comment(line)
+            .trim()
+            .eq_ignore_ascii_case("endm")
+    }
+
+    fn end_keyword(&self) -> &'static str {
+        "ENDM"
+    }
+
+    /// `\1`, `\2`, … for as many arguments as the call site passed.
+    fn argument_names(&self, _declared: &[String], count: usize) -> Vec<String> {
+        (1..=count).map(|n| format!("\\{n}")).collect()
+    }
+
+    /// A backslash opens a positional parameter, so it has to be inside the
+    /// token for substitution to see it at all.
+    fn is_symbol_char(&self, c: u8) -> bool {
+        c.is_ascii_alphanumeric() || c == b'_' || c == b'.' || c == b'\\'
+    }
+
+    /// rgbasm scopes nothing per expansion on its own: a plain label in a body
+    /// is global, and a second invocation is `already defined` — the reference
+    /// agrees, so there is nothing to rename.
+    fn locals(&self, _body: &[String]) -> Vec<String> {
+        Vec::new()
+    }
+
+    /// A fifth arity posture. rgbasm does not check the call at all: extra
+    /// arguments are **dropped silently**, and a missing one is an error where
+    /// the body *refers* to it — `Macro argument \2 not defined` — not where
+    /// it is called.
+    ///
+    /// So the call site never rejects anything, and a body that reads past the
+    /// arguments it got leaves `\2` unsubstituted, which fails at parse. The
+    /// reference errors on the same source; only the wording differs, and
+    /// diagnostics are not byte-compared.
+    fn fit_arguments(
+        &self,
+        _name: &str,
+        _params: &[String],
+        args: Vec<String>,
+    ) -> Result<Vec<String>, String> {
+        Ok(args)
+    }
+}
+
+/// Expand rgbasm's macros, unless this parse is the formatter's.
+fn expand_rgbasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion, AsmError> {
+    macros::expansion(mode, source, |s| {
+        macros::expand(&RgbasmMacros, s).map(|e| Some((e.text, e.origins)))
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use crate::assemble_rgbasm as asm;
@@ -1162,7 +1309,7 @@ mod tests {
     fn comments_are_carried_as_trivia() {
         let src =
             "; header\nSECTION \"c\", ROM0[$0]\nstart:\n ld a, $05   ; load\n.loop:\n jr .loop\n";
-        let prog = super::parse_program(src).expect("parses");
+        let prog = super::parse_program(src, super::macros::Expand::Yes).expect("parses");
         assert!(
             prog.nodes[0]
                 .trivia
@@ -1287,5 +1434,83 @@ mod tests {
             let again = crate::format_rgbasm(&formatted).expect("formats");
             assert_eq!(formatted, again, "{formatted}");
         }
+    }
+
+    /// `MACRO name` … `ENDM`, with positional `\\1` parameters.
+    #[test]
+    fn a_macro_expands_at_its_call_site() {
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nMACRO m\n nop\nENDM\n m\n ret\n"),
+            vec![0x00, 0xC9]
+        );
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nMACRO ldav\n ld a,\\1\nENDM\n ldav 5\n ret\n"),
+            vec![0x3E, 0x05, 0xC9]
+        );
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nMACRO two\n ld a,\\1\n ld b,\\2\nENDM\n two 1,2\n"),
+            vec![0x3E, 0x01, 0x06, 0x02]
+        );
+    }
+
+    /// **Keyword first, and only keyword first.** rgbds 1.0 answers the old
+    /// `name: MACRO` header with `syntax error, unexpected MACRO`, so taking it
+    /// would accept source the reference refuses.
+    #[test]
+    fn the_old_header_form_is_refused() {
+        crate::assemble_rgbasm("SECTION \"s\",ROM0[0]\nm: MACRO\n nop\nENDM\n m\n")
+            .expect_err("rgbds 1.0: syntax error, unexpected MACRO");
+    }
+
+    /// Extra arguments are dropped silently; a missing one fails where the body
+    /// refers to it, not at the call. Measured — it is a fifth arity posture
+    /// across the dialects here.
+    #[test]
+    fn extra_arguments_are_dropped_and_a_missing_one_fails_at_use() {
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nMACRO m\n ld a,\\1\nENDM\n m 5,9\n"),
+            vec![0x3E, 0x05]
+        );
+        crate::assemble_rgbasm("SECTION \"s\",ROM0[0]\nMACRO m\n ld a,\\2\nENDM\n m 5\n")
+            .expect_err("rgbds: Macro argument `\\2` not defined");
+    }
+
+    /// Macros compose with the blocks: a definition may be invoked from inside
+    /// a conditional or a repetition, and from another macro's body.
+    #[test]
+    fn macros_compose_with_conditionals_and_repetitions() {
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nMACRO m\n nop\nENDM\nIF 1\n m\nENDC\n"),
+            vec![0x00]
+        );
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nMACRO m\n nop\nENDM\nREPT 3\n m\nENDR\n"),
+            vec![0x00, 0x00, 0x00]
+        );
+        assert_eq!(
+            out(
+                "SECTION \"s\",ROM0[0]\nMACRO inner\n nop\nENDM\nMACRO outer\n inner\nENDM\n outer\n"
+            ),
+            vec![0x00]
+        );
+    }
+
+    /// The formatter lays source out; it does not expand.
+    #[test]
+    fn formatting_does_not_expand() {
+        let src = "SECTION \"s\",ROM0[0]\nMACRO ldav\n ld a,\\1\nENDM\n ldav 5\n";
+        let formatted = crate::format_rgbasm(src).expect("formats");
+        assert!(formatted.contains("MACRO ldav"), "{formatted}");
+        assert!(formatted.contains("ENDM"), "{formatted}");
+        assert!(!formatted.contains("ld a,5"), "expanded:\n{formatted}");
+
+        let before = out(src);
+        let after = crate::assemble_rgbasm(&formatted)
+            .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+            .bytes;
+        assert_eq!(
+            before, after,
+            "formatting changed the program:\n{formatted}"
+        );
     }
 }
