@@ -18,8 +18,9 @@ execution: code
 - **Objective:** `MODULE`/`ENDMODULE` name scoping in sjasmplus — the last
   untouched item on [#93].
 - **Product authority:** Steve Hill.
-- **Open blockers:** none. One deliberate divergence is recorded below
-  (unclosed-at-EOF advisory); it changes no bytes.
+- **Open blockers:** none. One divergence was recorded below (the
+  unclosed-at-EOF advisory) and has since been closed — see *The one
+  divergence*.
 
 ---
 
@@ -150,6 +151,11 @@ So: **accept it silently.** Bytes match the reference, which is what the
 identity claim is about; the advisory text does not. Erroring instead would
 reject source real sjasmplus takes, which is the worse failure. If a parse-time
 warning channel ever lands for another reason, this is a caller for it.
+
+**Closed 2026-08-23.** That channel landed with #99 — `parse_warned`, defaulted
+so no other dialect changed — and this was one of the three advisories waiting
+on it. The warning is now raised: one per program, naming the innermost open
+module by its full dotted path, as the reference does.
 
 ---
 

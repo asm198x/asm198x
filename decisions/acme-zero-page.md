@@ -48,8 +48,12 @@ is self-consistent, and no relaxation loop is needed.
 
 A **forward** reference genuinely is unknown, and stays absolute — which is
 what ACME does too, warning *"Using oversized addressing mode"* when the value
-later turns out to have fit. We match the bytes and not the warning;
-`Dialect::parse` has no channel for one.
+later turns out to have fit. We now say the same: a channel arrived with
+`Dialect::parse_warned` (see
+[`forward-conditions-and-passes.md`](forward-conditions-and-passes.md)), and
+the candidates are cheap to spot — a forced-absolute literal always folds and a
+forward symbol never does, so the two sets are disjoint and only the second can
+turn out to have fitted.
 
 ## Giving up is the safe direction
 
@@ -70,7 +74,6 @@ a wrong zero-page pick emits the wrong instruction.
 - It does not extend to other dialects. ca65 and vasm run their own multi-pass
   layout and have no need of it; the flat Z80 dialects size nothing from a
   value.
-- It does not reproduce ACME's oversized-addressing warning.
 
 ## Drift triggers
 

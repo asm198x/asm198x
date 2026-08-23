@@ -512,6 +512,36 @@ impl macros::MacroSyntax for SjasmplusSyntax {
 mod tests {
     use crate::assemble_sjasmplus as asm;
 
+    /// A module left open at end of file assembles, and now says so. The
+    /// reference warns once, naming the *innermost* module by its full dotted
+    /// path — not one advisory per open module (probe m19).
+    #[test]
+    fn an_unclosed_module_is_reported() {
+        let r = asm("    MODULE foo\nbar: db 1\n").expect("assemble");
+        assert_eq!(r.bytes, vec![0x01], "it still assembles");
+        assert_eq!(r.warnings.len(), 1);
+        assert!(
+            r.warnings[0]
+                .message
+                .contains("`ENDMODULE` missing for module `foo`")
+        );
+        assert_eq!(
+            r.warnings[0].line, 1,
+            "reported against the line that opened it"
+        );
+
+        let r = asm("    MODULE foo\n    MODULE baz\nbar: db 1\n").expect("assemble");
+        assert_eq!(r.warnings.len(), 1, "one advisory, not one per module");
+        assert!(r.warnings[0].message.contains("`foo.baz`"));
+
+        assert!(
+            asm("    MODULE foo\nbar: db 1\n    ENDMODULE\n")
+                .expect("assemble")
+                .warnings
+                .is_empty()
+        );
+    }
+
     // -----------------------------------------------------------------------
     // Forward-referenced conditions (#99,
     // `decisions/forward-conditions-and-passes.md`). Probed against SjASMPlus
@@ -1036,18 +1066,6 @@ mod tests {
         assert!(
             asm("    endmodule\nx: db 1\n").is_err(),
             "close with nothing open"
-        );
-    }
-
-    /// A module left open at EOF assembles (m19). The reference warns as well;
-    /// `Dialect::parse` has no warning channel, so the advisory is the one
-    /// deliberate divergence here — the bytes are what the identity claim is
-    /// about, and erroring would reject source sjasmplus takes.
-    #[test]
-    fn an_unclosed_module_still_assembles() {
-        assert_eq!(
-            asm("    MODULE foo\nbar: db 1\n").expect("assemble").bytes,
-            vec![0x01]
         );
     }
 
