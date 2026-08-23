@@ -179,8 +179,10 @@ enum BlockClose {
     ElseIf(String, usize),
     /// `.endif`.
     CondClose,
-    /// `.endrepeat`.
-    RepeatClose,
+    /// `.endrepeat` / `endr`, carrying the closer exactly as written so the
+    /// formatter re-emits the author's word — lwasm and vasm each have two
+    /// spellings, and choosing one would be a rewrite rather than a layout.
+    RepeatClose(String),
 }
 
 pub(crate) trait FlatWalk {
@@ -349,7 +351,7 @@ fn walk_block<W: FlatWalk>(
             let head = strip_block_comment(raw).trim().to_string();
             match kw {
                 BlockKw::CondClose if in_block => return Ok(BlockClose::CondClose),
-                BlockKw::RepeatClose if in_block => return Ok(BlockClose::RepeatClose),
+                BlockKw::RepeatClose if in_block => return Ok(BlockClose::RepeatClose(head)),
                 BlockKw::Else if in_block => return Ok(BlockClose::Else),
                 BlockKw::ElseIf if in_block => return Ok(BlockClose::ElseIf(head, line)),
                 BlockKw::CondOpen => {
@@ -469,7 +471,7 @@ fn parse_conditional<W: FlatWalk>(
                 "conditional block is never closed".to_string(),
             ));
         }
-        BlockClose::RepeatClose => {
+        BlockClose::RepeatClose(_) => {
             return Err(AsmError::at(
                 Span::in_file(file, line as u32, 1),
                 "a repetition closer ends a conditional block".to_string(),
@@ -520,12 +522,12 @@ fn parse_repeat<W: FlatWalk>(
         res,
         true,
     )?;
-    if closed != BlockClose::RepeatClose {
+    let BlockClose::RepeatClose(close) = closed else {
         return Err(AsmError::at(
             Span::in_file(file, line as u32, 1),
             "repetition block is never closed".to_string(),
         ));
-    }
+    };
     let body: Vec<Node> = w.nodes_mut().split_off(start);
     w.push_node(Node {
         operand_span: None,
@@ -533,7 +535,7 @@ fn parse_repeat<W: FlatWalk>(
         item: Some(crate::ast::Item::Repeat {
             head: head.clone(),
             body,
-            close: String::new(),
+            close,
             style: crate::ast::CondStyle::Keyword,
         }),
         source: head,

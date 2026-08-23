@@ -1553,14 +1553,10 @@ pub(crate) fn parse_program(
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
     let mut w = Walker::default();
-    for (i, raw) in text.lines().enumerate() {
-        if let Some(d) = w
-            .walk_line(raw, i + 1, FileId(0))
-            .map_err(|e| macros::remap_lines(e, origins))?
-        {
-            w.nodes.push(ca65_flat::unresolved_node(d));
-        }
-    }
+    // The shared cursor: it groups `if`/`rept` blocks and keeps every include
+    // unresolved (KTD1), which is what `--fmt` needs.
+    ca65_flat::walk_source_expanded(&mut w, text, FileId(0))
+        .map_err(|e| macros::remap_lines(e, origins))?;
     let mut program = w.finish(text.lines().count() as u32);
     macros::place_nodes(&mut program.nodes, origins);
     Ok(program)
@@ -1680,6 +1676,27 @@ impl Walker {
 }
 
 impl FlatWalk for Walker {
+    /// vasm's block vocabulary, measured against vasm 1.9 (m68k mot) and
+    /// case-insensitive.
+    ///
+    /// The numeric forms compare against **zero**, `ifd`/`ifnd` test whether a
+    /// symbol is defined — **not** `ifdef`, which vasm answers with `unknown
+    /// mnemonic` — and both `endif` and `endc` close.
+    fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
+        use ca65_flat::BlockKw;
+        let word = code.split_whitespace().next()?.to_ascii_lowercase();
+        Some(match word.as_str() {
+            "if" | "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifd" | "ifnd" => {
+                BlockKw::CondOpen
+            }
+            "else" => BlockKw::Else,
+            "endif" | "endc" => BlockKw::CondClose,
+            "rept" => BlockKw::RepeatOpen,
+            "endr" => BlockKw::RepeatClose,
+            _ => return None,
+        })
+    }
+
     fn nodes_mut(&mut self) -> &mut Vec<crate::ast::Node> {
         &mut self.nodes
     }
@@ -1936,9 +1953,155 @@ fn incbin_args(
 /// keeps meaning "one file, no includes" — with a pointer, not the old
 /// unknown-directive rejection.
 fn lines_from_program(program: &crate::ast::Program) -> Result<Vec<Line>, AsmError> {
-    use crate::ast::Item;
     let mut out = Vec::new();
-    for node in &program.nodes {
+    let mut env = BTreeMap::new();
+    // `REPTN` reads -1 outside any repetition, which is vasm's own answer and
+    // not an absence — `dc.b REPTN` at the top level emits $FF.
+    let mut reptn: Vec<i64> = Vec::new();
+    project_lines(&program.nodes, &mut out, &mut env, &mut reptn)?;
+    Ok(out)
+}
+
+/// vasm's `REPTN`: the innermost repetition's 0-based counter.
+const REPTN: &str = "REPTN";
+
+/// Project a run of nodes, folding conditionals and repetitions **once, in
+/// source order, before layout** — `decisions/conditionals-in-multipass-dialects.md`.
+fn project_lines(
+    nodes: &[crate::ast::Node],
+    out: &mut Vec<Line>,
+    env: &mut BTreeMap<String, i64>,
+    reptn: &mut Vec<i64>,
+) -> Result<(), AsmError> {
+    use crate::ast::Item;
+    for node in nodes {
+        match &node.item {
+            Some(Item::Conditional {
+                head,
+                then_body,
+                else_body,
+                ..
+            }) => {
+                if fold_vasm_condition(head, env, reptn, node.span.line as usize)? {
+                    project_lines(then_body, out, env, reptn)?;
+                } else if let Some(body) = else_body {
+                    project_lines(body, out, env, reptn)?;
+                }
+                continue;
+            }
+            Some(Item::Repeat { head, body, .. }) => {
+                let line = node.span.line as usize;
+                let (_, args) = split_first_word(head.trim());
+                let count = eval(
+                    &parse_value(args.trim(), line)?,
+                    &reptn_env(env, reptn),
+                    0,
+                    line,
+                )?;
+                // vasm runs a negative count zero times rather than refusing it,
+                // where ca65 answers `Range error`. Measured, not assumed.
+                for i in 0..count.max(0) {
+                    reptn.push(i);
+                    let done = project_lines(body, out, env, reptn);
+                    reptn.pop();
+                    done?;
+                }
+                continue;
+            }
+            _ => {}
+        }
+        project_one_line(node, out, env, reptn)?;
+    }
+    Ok(())
+}
+
+/// The environment a fold sees: the `equ` constants plus `REPTN`, which is the
+/// innermost repetition's counter, or -1 outside every one.
+fn reptn_env(env: &BTreeMap<String, i64>, reptn: &[i64]) -> BTreeMap<String, i64> {
+    let mut e = env.clone();
+    e.insert(REPTN.to_string(), reptn.last().copied().unwrap_or(-1));
+    e
+}
+
+/// Fold one conditional head.
+fn fold_vasm_condition(
+    head: &str,
+    env: &BTreeMap<String, i64>,
+    reptn: &[i64],
+    line: usize,
+) -> Result<bool, AsmError> {
+    let (word, args) = split_first_word(head.trim());
+    let word = word.to_ascii_lowercase();
+    let args = args.trim();
+    let env = reptn_env(env, reptn);
+    if word == "ifd" || word == "ifnd" {
+        let name = args
+            .split_whitespace()
+            .next()
+            .ok_or_else(|| AsmError::new(line, format!("`{word}` needs a name")))?;
+        let defined = env.contains_key(name);
+        return Ok(if word == "ifd" { defined } else { !defined });
+    }
+    if args.is_empty() {
+        return Err(AsmError::new(line, format!("`{word}` needs a condition")));
+    }
+    let expr = parse_value(args, line)?;
+    // `*` in a condition folds against the **unrelaxed** address in vasm, which
+    // this projection does not compute — it runs before layout, deliberately, so
+    // that a condition and the relaxation fixpoint cannot feed each other. A
+    // condition that reads `*` is refused rather than folded against the wrong
+    // address; see `decisions/conditionals-in-multipass-dialects.md`.
+    if mentions_pc(&expr) {
+        return Err(AsmError::new(
+            line,
+            "a condition on the location counter `*` is not supported here — vasm folds \
+             one against the *unrelaxed* address, which this pass does not compute",
+        ));
+    }
+    let value = eval(&expr, &env, 0, line).map_err(|_| {
+        AsmError::new(
+            line,
+            format!(
+                "`{args}` must be a constant here — vasm folds a condition against the \
+                 values above it, and refuses a forward reference"
+            ),
+        )
+    })?;
+    Ok(match word.as_str() {
+        "if" | "ifne" => value != 0,
+        "ifeq" => value == 0,
+        "ifgt" => value > 0,
+        "ifge" => value >= 0,
+        "iflt" => value < 0,
+        "ifle" => value <= 0,
+        _ => {
+            return Err(AsmError::new(
+                line,
+                format!("internal error: `{head}` is not a conditional head"),
+            ));
+        }
+    })
+}
+
+/// Whether an expression reads the location counter.
+fn mentions_pc(e: &Expr) -> bool {
+    match e {
+        Expr::Pc => true,
+        Expr::Lo(i) | Expr::Hi(i) | Expr::Bank(i) | Expr::Neg(i) => mentions_pc(i),
+        Expr::Bin(_, l, r) => mentions_pc(l) || mentions_pc(r),
+        Expr::Num(_) | Expr::Sym(_) => false,
+    }
+}
+
+/// Project one ordinary node.
+fn project_one_line(
+    node: &crate::ast::Node,
+    out: &mut Vec<Line>,
+    env: &mut BTreeMap<String, i64>,
+    reptn: &[i64],
+) -> Result<(), AsmError> {
+    use crate::ast::Item;
+    {
         let label = node.label.as_ref().map(|s| s.qualified.clone());
         let kind = match &node.item {
             Some(Item::Native(n)) => n
@@ -1970,8 +2133,17 @@ fn lines_from_program(program: &crate::ast::Program) -> Result<Vec<Line>, AsmErr
             None if label.is_some() => Stmt::Empty,
             // A comment-only flush node, or any other shared item (vasm
             // produces only native/binary items) — nothing to assemble.
-            _ => continue,
+            _ => return Ok(()),
         };
+        let mut kind = kind;
+        bake_reptn(&mut kind, reptn.last().copied().unwrap_or(-1));
+        // Bind an `equ` as it is projected, so a later condition folds against
+        // what a **taken** branch bound and nothing an untaken one held.
+        if let Stmt::Equ(name, e) = &kind
+            && let Ok(v) = eval(e, env, 0, node.span.line as usize)
+        {
+            env.insert(name.clone(), v);
+        }
         out.push(Line {
             line: node.span.line as usize,
             file: node.span.file,
@@ -1979,7 +2151,7 @@ fn lines_from_program(program: &crate::ast::Program) -> Result<Vec<Line>, AsmErr
             kind,
         });
     }
-    Ok(out)
+    Ok(())
 }
 
 /// Split a line into its code and its comment for carrying comments as AST
@@ -2003,6 +2175,50 @@ fn split_comment(line: &str) -> (&str, Option<&str>) {
 /// current at their line, so they always agree. [`parse_program`] applies this to
 /// each statement inline (the labels themselves are resolved as symbols are
 /// built), so the tree carries fully-qualified statements.
+/// Substitute `REPTN` for this pass's value in every expression a statement
+/// holds — the same walk `qualify_stmt` makes, for the same reason acme's and
+/// ca65's loop variables are baked: the value differs on every iteration, and a
+/// symbol resolves once, later, against one table.
+///
+/// Applied to **every** projected statement, not only those inside a `rept`,
+/// because vasm answers `REPTN` outside one with **-1** rather than leaving it
+/// undefined — `dc.b REPTN` at the top level emits `$FF`.
+fn bake_reptn(kind: &mut Stmt, value: i64) {
+    match kind {
+        Stmt::Equ(_, e) => bake_reptn_expr(e, value),
+        Stmt::Dc(_, items) => items.iter_mut().for_each(|e| bake_reptn_expr(e, value)),
+        Stmt::Ds(_, count) => bake_reptn_expr(count, value),
+        Stmt::Dcb(_, count, v) => {
+            bake_reptn_expr(count, value);
+            bake_reptn_expr(v, value);
+        }
+        Stmt::Insn { operands, .. } => operands.iter_mut().for_each(|o| bake_reptn_opnd(o, value)),
+        Stmt::Empty | Stmt::Even | Stmt::Section(..) | Stmt::Raw(_) => {}
+    }
+}
+
+fn bake_reptn_opnd(op: &mut Opnd, value: i64) {
+    match op {
+        Opnd::Abs(e) | Opnd::AbsW(e) | Opnd::AbsL(e) | Opnd::Imm(e) | Opnd::Idx { disp: e, .. } => {
+            bake_reptn_expr(e, value)
+        }
+        Opnd::Mem { disp: Some(e), .. } => bake_reptn_expr(e, value),
+        _ => {}
+    }
+}
+
+fn bake_reptn_expr(e: &mut Expr, value: i64) {
+    match e {
+        Expr::Sym(name) if name == REPTN => *e = Expr::Num(value),
+        Expr::Lo(i) | Expr::Hi(i) | Expr::Bank(i) | Expr::Neg(i) => bake_reptn_expr(i, value),
+        Expr::Bin(_, l, r) => {
+            bake_reptn_expr(l, value);
+            bake_reptn_expr(r, value);
+        }
+        _ => {}
+    }
+}
+
 fn qualify_stmt(kind: &mut Stmt, scope: &str) {
     match kind {
         Stmt::Equ(name, e) => {
@@ -2064,6 +2280,27 @@ fn split_label(code: &str, line: usize) -> Result<(Option<String>, &str), AsmErr
 /// dispatch used `strip_prefix`, which made `dcb` before `dc` load-bearing —
 /// matching on the stem retires that, so these can be declared in any order.
 pub const DIRECTIVES: &[Directive] = &[
+    // Walk-handled: the shared cursor reads these into `Item::Conditional` /
+    // `Item::Repeat` before `parse_op` sees a line.
+    //
+    // `ifd`/`ifnd` and **not** `ifdef` — vasm answers that one with `unknown
+    // mnemonic`, so declaring it would accept a spelling the reference refuses.
+    // Both `endif` and `endc` close.
+    Directive {
+        id: "conditional",
+        pattern: Pattern::Exact(&[
+            "if", "ifne", "ifeq", "ifgt", "ifge", "iflt", "ifle", "ifd", "ifnd", "else", "endif",
+            "endc",
+        ]),
+        category: Category::Operation,
+    },
+    // `REPTN` is not declared: it is a *symbol* the repetition binds, not a
+    // directive the parser looks up.
+    Directive {
+        id: "repeat",
+        pattern: Pattern::Exact(&["rept", "endr"]),
+        category: Category::Operation,
+    },
     Directive {
         id: "equ",
         pattern: Pattern::Exact(&["equ", "="]),
@@ -2692,5 +2929,130 @@ mod directive_surface {
             !err.to_string().contains("declared but not dispatched"),
             "should be refused as a mnemonic, got: {err}"
         );
+    }
+
+    // -----------------------------------------------------------------------
+    // Conditionals and repetition. Measured against vasm 1.9 (m68k mot).
+    // -----------------------------------------------------------------------
+
+    /// The numeric forms compare against **zero**; `ifd`/`ifnd` test a symbol.
+    #[test]
+    fn each_comparison_tests_against_zero() {
+        // nop = 4E71, rts = 4E75.
+        for (src, want) in [
+            ("\tifne 1\n\tnop\n\tendif\n", vec![0x4E, 0x71]),
+            ("\tifne 0\n\tnop\n\tendif\n\trts\n", vec![0x4E, 0x75]),
+            ("\tifeq 0\n\tnop\n\tendif\n", vec![0x4E, 0x71]),
+            ("\tifgt 1\n\tnop\n\tendif\n", vec![0x4E, 0x71]),
+            ("\tifge 0\n\tnop\n\tendif\n", vec![0x4E, 0x71]),
+            ("\tiflt 1\n\tnop\n\tendif\n\trts\n", vec![0x4E, 0x75]),
+            ("\tifle 0\n\tnop\n\tendif\n", vec![0x4E, 0x71]),
+            ("\tif 1\n\tnop\n\tendif\n", vec![0x4E, 0x71]),
+        ] {
+            assert_eq!(crate::assemble_vasm(src).expect(src).bytes, want, "{src}");
+        }
+    }
+
+    /// `ifd`/`ifnd` — and **not** `ifdef`, which vasm answers with `unknown
+    /// mnemonic`. Declaring that spelling would accept source vasm refuses.
+    #[test]
+    fn the_defined_tests_are_ifd_and_ifnd() {
+        assert_eq!(
+            crate::assemble_vasm("sym\tequ 1\n\tifd sym\n\tnop\n\tendif\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x4E, 0x71]
+        );
+        assert_eq!(
+            crate::assemble_vasm("\tifnd nosuch\n\tnop\n\tendif\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x4E, 0x71]
+        );
+        crate::assemble_vasm("sym\tequ 1\n\tifdef sym\n\tnop\n\tendif\n")
+            .expect_err("vasm: unknown mnemonic <ifdef>");
+    }
+
+    /// **`REPTN` is implicit** — vasm names no loop parameter — 0-based, and it
+    /// tracks the *innermost* repetition. Outside every one it reads **-1**,
+    /// which is why it is baked into each projected statement rather than only
+    /// those inside a `rept`.
+    #[test]
+    fn reptn_is_an_implicit_zero_based_counter() {
+        assert_eq!(
+            crate::assemble_vasm("\trept 3\n\tdc.b REPTN\n\tendr\n")
+                .expect("assembles")
+                .bytes,
+            vec![0, 1, 2]
+        );
+        assert_eq!(
+            crate::assemble_vasm("\trept 2\n\trept 2\n\tdc.b REPTN\n\tendr\n\tendr\n")
+                .expect("assembles")
+                .bytes,
+            vec![0, 1, 0, 1],
+            "the innermost loop's counter"
+        );
+        assert_eq!(
+            crate::assemble_vasm("\tdc.b REPTN\n")
+                .expect("assembles")
+                .bytes,
+            vec![0xFF],
+            "-1 outside every repetition"
+        );
+    }
+
+    /// A negative count runs the body no times — vasm's answer, where ca65
+    /// gives `Range error` for the same shape.
+    #[test]
+    fn a_negative_repeat_count_is_empty_rather_than_an_error() {
+        assert_eq!(
+            crate::assemble_vasm("\trept -1\n\tdc.b 1\n\tendr\n\tdc.b 2\n")
+                .expect("assembles")
+                .bytes,
+            vec![2]
+        );
+        assert_eq!(
+            crate::assemble_vasm("\trept 0\n\tdc.b 1\n\tendr\n\tdc.b 2\n")
+                .expect("assembles")
+                .bytes,
+            vec![2]
+        );
+    }
+
+    /// A condition on the location counter is refused rather than folded
+    /// against the wrong address. vasm folds one against the **unrelaxed**
+    /// address — measured — and this pass runs before layout deliberately, so
+    /// that a condition and the relaxation fixpoint cannot feed each other.
+    /// See `decisions/conditionals-in-multipass-dialects.md`.
+    #[test]
+    fn a_condition_on_the_location_counter_is_refused_not_guessed() {
+        let err =
+            crate::assemble_vasm("\tifne *\n\tnop\n\tendif\n").expect_err("not supported here");
+        assert!(err.message.contains("unrelaxed"), "{err:?}");
+    }
+
+    /// Formatting a block changes the layout and not the program — including
+    /// the closer, which keeps the author's spelling.
+    #[test]
+    fn a_formatted_block_assembles_to_the_same_bytes() {
+        for src in [
+            "n\tequ 1\n\tifne n\n\tnop\n\telse\n\trts\n\tendif\n",
+            "\trept 3\n\tdc.b REPTN\n\tendr\n",
+        ] {
+            let before = crate::assemble_vasm(src).expect(src).bytes;
+            let formatted = crate::format_vasm(src).expect(src);
+            let after = crate::assemble_vasm(&formatted)
+                .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+                .bytes;
+            assert_eq!(
+                before, after,
+                "formatting changed the program:\n{formatted}"
+            );
+            let again = crate::format_vasm(&formatted).expect("formats");
+            assert_eq!(formatted, again, "{formatted}");
+        }
+        // The repetition closer is the author's word, not a chosen one.
+        let out = crate::format_vasm("\trept 2\n\tnop\n\tendr\n").expect("formats");
+        assert!(out.contains("endr"), "{out}");
     }
 }

@@ -571,6 +571,42 @@ const PROBES: &[Probe] = &[
         " ifne 1\nsym equ $10\n endc\n lda sym\n"),
 
     // ---- vasm / 68000 -------------------------------------------------------
+    // Conditionals: numeric forms compare against zero, `ifd`/`ifnd` test a
+    // symbol (`ifdef` is *not* vasm's — `unknown mnemonic`), and `endif` and
+    // `endc` both close.
+    ok ("vasm", "ifne taken",      "\tifne 1\n\tnop\n\tendif\n\trts\n"),
+    ok ("vasm", "ifne not taken",  "\tifne 0\n\tnop\n\tendif\n\trts\n"),
+    ok ("vasm", "ifeq",            "\tifeq 0\n\tnop\n\tendif\n\trts\n"),
+    ok ("vasm", "ifgt",            "\tifgt 1\n\tnop\n\tendif\n\trts\n"),
+    ok ("vasm", "ifge",            "\tifge 0\n\tnop\n\tendif\n\trts\n"),
+    ok ("vasm", "iflt",            "\tiflt 1\n\tnop\n\tendif\n\trts\n"),
+    ok ("vasm", "ifle",            "\tifle 0\n\tnop\n\tendif\n\trts\n"),
+    ok ("vasm", "plain if",        "\tif 1\n\tnop\n\tendif\n\trts\n"),
+    ok ("vasm", "ifd",             "sym\tequ 1\n\tifd sym\n\tnop\n\tendif\n\trts\n"),
+    ok ("vasm", "ifnd",            "\tifnd nosuch\n\tnop\n\tendif\n\trts\n"),
+    ok ("vasm", "else",            "\tifne 0\n\tnop\n\telse\n\trts\n\tendif\n"),
+    ok ("vasm", "endc closes too", "\tifne 1\n\tnop\n\tendc\n\trts\n"),
+    ok ("vasm", "uppercase",       "\tIFNE 1\n\tNOP\n\tENDIF\n"),
+    ok ("vasm", "nested",          "\tifne 1\n\tifne 1\n\tnop\n\tendif\n\trts\n\tendif\n"),
+    ok ("vasm", "condition folds a constant",
+        "n\tequ 3\n\tifne n-3\n\tnop\n\tendif\n\trts\n"),
+    ok ("vasm", "an untaken branch defines nothing",
+        "\tifne 0\nsym\tequ 1\n\tendif\n\tdc.b 2\n"),
+
+    // Repetition. `REPTN` is an **implicit** 0-based counter — no named
+    // parameter — and it reads -1 outside any `rept`.
+    ok ("vasm", "rept",            "\trept 3\n\tnop\n\tendr\n"),
+    ok ("vasm", "rept 0",          "\trept 0\n\tnop\n\tendr\n\trts\n"),
+    ok ("vasm", "rept negative is empty", "\trept -1\n\tdc.b 1\n\tendr\n\tdc.b 2\n"),
+    ok ("vasm", "rept count from a constant",
+        "n\tequ 3\n\trept n\n\tdc.b 1\n\tendr\n"),
+    ok ("vasm", "REPTN counts from zero", "\trept 3\n\tdc.b REPTN\n\tendr\n"),
+    ok ("vasm", "REPTN is the innermost loop's",
+        "\trept 2\n\trept 2\n\tdc.b REPTN\n\tendr\n\tendr\n"),
+    ok ("vasm", "REPTN outside a rept is -1", "\tdc.b REPTN\n"),
+    ok ("vasm", "a condition inside a rept reads REPTN",
+        "\trept 3\n\tifne REPTN\n\tdc.b REPTN\n\tendif\n\tendr\n"),
+
     ok ("vasm", "moveq / move.l imm",    " moveq #1,d0\n move.l #$12345678,d0\n"),
     ok ("vasm", "old-style d(An)",       " move.w 4(a0),d0\n move.w 4(a0,d0.w),d1\n"),
     ok ("vasm", "predec / postinc",      " move.l -(a7),d0\n move.l (a0)+,d1\n"),

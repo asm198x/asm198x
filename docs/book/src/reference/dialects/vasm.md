@@ -8,10 +8,11 @@ Amiga 68000, vasm Motorola syntax.
 
 ## Directives
 
-9 directives, 19 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+11 directives, 33 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
+| `conditional` | `if`, `ifne`, `ifeq`, `ifgt`, `ifge`, `iflt`, `ifle`, `ifd`, `ifnd`, `else`, `endif`, `endc` |  |
 | `dc` | `dc`, `dc.b`, `dc.w`, `dc.l` |  |
 | `dcb` | `dcb`, `dcb.b`, `dcb.w`, `dcb.l` |  |
 | `ds` | `ds`, `ds.b`, `ds.w`, `ds.l` |  |
@@ -20,6 +21,7 @@ Amiga 68000, vasm Motorola syntax.
 | `incbin` | `incbin` |  |
 | `include` | `include` |  |
 | `macro` | `macro` |  |
+| `repeat` | `rept`, `endr` |  |
 | `section` | `section` |  |
 
 ## Projects in more than one file
