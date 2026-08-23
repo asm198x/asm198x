@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.29](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.28...asm198x-v0.0.29) - 2026-08-23
+
+### Added
+
+- *(xtask)* measure how much of each reference's vocabulary we take ([#212](https://github.com/asm198x/asm198x/pull/212))
+- *(sjasmplus)* resolve conditions across passes, as the reference does ([#211](https://github.com/asm198x/asm198x/pull/211))
+- *(sjasmplus)* take `:` as a statement separator ([#210](https://github.com/asm198x/asm198x/pull/210))
+
+### Fixed
+
+- raise the three advisories that were waiting on a warning channel ([#213](https://github.com/asm198x/asm198x/pull/213))
+- *(vasm)* refuse a name defined twice ([#209](https://github.com/asm198x/asm198x/pull/209))
+- close four of the six source-compatibility gaps (#205, #128) ([#207](https://github.com/asm198x/asm198x/pull/207))
+
 ## [0.0.28](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.27...asm198x-v0.0.28) - 2026-08-23
 
 ### Added
