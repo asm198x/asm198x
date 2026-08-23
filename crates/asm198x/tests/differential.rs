@@ -164,6 +164,21 @@ fn reference(tmp: &Path, dialect: &str, body: &str) -> Option<Vec<u8>> {
             run(vec![c])?;
             fs::read(&out).ok()
         }
+        // rgbasm assembles to an object file that rgblink turns into a binary,
+        // like ca65/ld65 below. `-x` keeps the image unpadded so the bytes are
+        // the program's and not a ROM's trailing fill.
+        "rgbasm" => {
+            let src = tmp.join("ref.asm");
+            let obj = tmp.join("ref.o");
+            fs::write(&src, body).ok()?;
+            let _ = fs::remove_file(&obj);
+            let mut a = Command::new("rgbasm");
+            a.arg("-o").arg(&obj).arg(&src);
+            let mut l = Command::new("rgblink");
+            l.arg("-x").arg("-o").arg(&out).arg(&obj);
+            run(vec![a, l])?;
+            fs::read(&out).ok()
+        }
         "ca65-816" => {
             let src = tmp.join("ref.s");
             let obj = tmp.join("ref.o");
@@ -207,6 +222,7 @@ fn probe_cpu(dialect: &str) -> &'static str {
         "lwasm" => "6809",
         "vasm" => "68000",
         "ca65-816" => "65816",
+        "rgbasm" => "SM83",
         other => panic!("no corpus CPU for dialect `{other}`"),
     }
 }
@@ -569,6 +585,24 @@ const PROBES: &[Probe] = &[
         " ifne 0\nsym equ $10\n endc\nsym equ $1234\n lda sym\n"),
     ok ("lwasm", "a taken branch's equ decides the mode",
         " ifne 1\nsym equ $10\n endc\n lda sym\n"),
+
+    // ---- rgbasm / SM83 ------------------------------------------------------
+    // Conditionals: `ELIF` rather than `ELSEIF`, and `ENDC` is the **only**
+    // closer — rgbds answers `ENDIF` with `Undefined macro`.
+    gap("rgbasm", "if taken", "SECTION \"s\",ROM0[0]\nIF 1\n nop\nENDC\n ret\n", 199),
+    gap("rgbasm", "if not taken", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nENDC\n ret\n", 199),
+    gap("rgbasm", "if/else", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nELSE\n ret\nENDC\n", 199),
+    gap("rgbasm", "elif", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nELIF 1\n ret\nENDC\n", 199),
+    gap("rgbasm", "condition folds a constant", "SECTION \"s\",ROM0[0]\nDEF N EQU 1\nIF N\n nop\nENDC\n ret\n", 199),
+    gap("rgbasm", "lowercase conditional", "SECTION \"s\",ROM0[0]\nif 1\n nop\nendc\n ret\n", 199),
+    gap("rgbasm", "nested conditionals", "SECTION \"s\",ROM0[0]\nIF 1\nIF 1\n nop\nENDC\n ret\nENDC\n", 199),
+    gap("rgbasm", "an untaken branch defines nothing", "SECTION \"s\",ROM0[0]\nIF 0\nDEF N EQU 1\nENDC\n ret\n", 199),
+    // Repetition.
+    gap("rgbasm", "rept", "SECTION \"s\",ROM0[0]\nREPT 3\n nop\nENDR\n", 199),
+    gap("rgbasm", "rept 0", "SECTION \"s\",ROM0[0]\nREPT 0\n nop\nENDR\n ret\n", 199),
+    gap("rgbasm", "lowercase rept", "SECTION \"s\",ROM0[0]\nrept 3\n nop\nendr\n", 199),
+    gap("rgbasm", "rept count from a constant", "SECTION \"s\",ROM0[0]\nDEF N EQU 3\nREPT N\n nop\nENDR\n", 199),
+    gap("rgbasm", "nested rept", "SECTION \"s\",ROM0[0]\nREPT 2\nREPT 2\n nop\nENDR\n inc a\nENDR\n", 199),
 
     // ---- vasm / 68000 -------------------------------------------------------
     // Conditionals: numeric forms compare against zero, `ifd`/`ifnd` test a
