@@ -365,6 +365,22 @@ const PROBES: &[Probe] = &[
     ok ("sjasmplus", "DEFINE is not module-scoped",
         " MODULE foo\n DEFINE V 5\n ENDMODULE\n db V\n"),
 
+    // #128 gaps 1 and 3 (2026-08-23). The comparison operators `<`, `>` and
+    // `<>` were missing because the first two collide with the byte prefixes;
+    // a one-character string is a value wherever acme wants a number.
+    ok ("acme", "!if relational operators",
+        "!if 5 > 3 {\n lda #1\n}\n!if 3 < 5 {\n lda #2\n}\n!if 5 <> 3 {\n lda #3\n}\n"),
+    ok ("acme", "!if relations that are false",
+        "!if 5 < 3 {\n lda #1\n}\n!if 3 > 5 {\n lda #2\n}\n!if 5 <> 5 {\n lda #3\n}\n lda #9\n"),
+    ok ("acme", "a byte prefix is not a comparison",
+        "!if <$1234 > 3 {\n lda #1\n}\n lda #<$1234\n lda #>$1234\n"),
+    ok ("acme", "!if on a whole left expression",
+        "!if 1 + 2 > 2 {\n lda #1\n}\n"),
+    ok ("acme", "a one-character string is a value",
+        " !byte \"a\"\n !byte (\"a\")\n !byte \"a\", \"b\"\n !word \"a\"\n lda #\"a\"\n lda \"a\"\n"),
+    ok ("acme", "a bare string condition is testable",
+        "!if \"a\" {\n lda #1\n}\n"),
+
     // ---- macros (#93) -------------------------------------------------------
     // sjasmplus and pasmo have macros; the rest are still gaps — the reference
     // accepts the body and we reject it. Recording a gap puts that reference's
