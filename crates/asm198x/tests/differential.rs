@@ -589,20 +589,20 @@ const PROBES: &[Probe] = &[
     // ---- rgbasm / SM83 ------------------------------------------------------
     // Conditionals: `ELIF` rather than `ELSEIF`, and `ENDC` is the **only**
     // closer — rgbds answers `ENDIF` with `Undefined macro`.
-    gap("rgbasm", "if taken", "SECTION \"s\",ROM0[0]\nIF 1\n nop\nENDC\n ret\n", 199),
-    gap("rgbasm", "if not taken", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nENDC\n ret\n", 199),
-    gap("rgbasm", "if/else", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nELSE\n ret\nENDC\n", 199),
-    gap("rgbasm", "elif", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nELIF 1\n ret\nENDC\n", 199),
-    gap("rgbasm", "condition folds a constant", "SECTION \"s\",ROM0[0]\nDEF N EQU 1\nIF N\n nop\nENDC\n ret\n", 199),
-    gap("rgbasm", "lowercase conditional", "SECTION \"s\",ROM0[0]\nif 1\n nop\nendc\n ret\n", 199),
-    gap("rgbasm", "nested conditionals", "SECTION \"s\",ROM0[0]\nIF 1\nIF 1\n nop\nENDC\n ret\nENDC\n", 199),
-    gap("rgbasm", "an untaken branch defines nothing", "SECTION \"s\",ROM0[0]\nIF 0\nDEF N EQU 1\nENDC\n ret\n", 199),
+    ok ("rgbasm", "if taken", "SECTION \"s\",ROM0[0]\nIF 1\n nop\nENDC\n ret\n"),
+    ok ("rgbasm", "if not taken", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nENDC\n ret\n"),
+    ok ("rgbasm", "if/else", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nELSE\n ret\nENDC\n"),
+    ok ("rgbasm", "elif", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nELIF 1\n ret\nENDC\n"),
+    ok ("rgbasm", "condition folds a constant", "SECTION \"s\",ROM0[0]\nDEF N EQU 1\nIF N\n nop\nENDC\n ret\n"),
+    ok ("rgbasm", "lowercase conditional", "SECTION \"s\",ROM0[0]\nif 1\n nop\nendc\n ret\n"),
+    ok ("rgbasm", "nested conditionals", "SECTION \"s\",ROM0[0]\nIF 1\nIF 1\n nop\nENDC\n ret\nENDC\n"),
+    ok ("rgbasm", "an untaken branch defines nothing", "SECTION \"s\",ROM0[0]\nIF 0\nDEF N EQU 1\nENDC\n ret\n"),
     // Repetition.
-    gap("rgbasm", "rept", "SECTION \"s\",ROM0[0]\nREPT 3\n nop\nENDR\n", 199),
-    gap("rgbasm", "rept 0", "SECTION \"s\",ROM0[0]\nREPT 0\n nop\nENDR\n ret\n", 199),
-    gap("rgbasm", "lowercase rept", "SECTION \"s\",ROM0[0]\nrept 3\n nop\nendr\n", 199),
-    gap("rgbasm", "rept count from a constant", "SECTION \"s\",ROM0[0]\nDEF N EQU 3\nREPT N\n nop\nENDR\n", 199),
-    gap("rgbasm", "nested rept", "SECTION \"s\",ROM0[0]\nREPT 2\nREPT 2\n nop\nENDR\n inc a\nENDR\n", 199),
+    ok ("rgbasm", "rept", "SECTION \"s\",ROM0[0]\nREPT 3\n nop\nENDR\n"),
+    ok ("rgbasm", "rept 0", "SECTION \"s\",ROM0[0]\nREPT 0\n nop\nENDR\n ret\n"),
+    ok ("rgbasm", "lowercase rept", "SECTION \"s\",ROM0[0]\nrept 3\n nop\nendr\n"),
+    ok ("rgbasm", "rept count from a constant", "SECTION \"s\",ROM0[0]\nDEF N EQU 3\nREPT N\n nop\nENDR\n"),
+    ok ("rgbasm", "nested rept", "SECTION \"s\",ROM0[0]\nREPT 2\nREPT 2\n nop\nENDR\n inc a\nENDR\n"),
 
     // ---- vasm / 68000 -------------------------------------------------------
     // Conditionals: numeric forms compare against zero, `ifd`/`ifnd` test a

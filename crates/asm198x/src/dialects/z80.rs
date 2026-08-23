@@ -904,6 +904,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             operand_span: None,
             label: None,
             item: Some(crate::ast::Item::Conditional {
+                close: String::new(),
                 head,
                 then_body,
                 else_body,

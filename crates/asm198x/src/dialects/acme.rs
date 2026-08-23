@@ -748,6 +748,7 @@ impl<'a> FmtCx<'a> {
             operand_span: None,
             label: None,
             item: Some(crate::ast::Item::Conditional {
+                close: "}".to_string(),
                 head,
                 then_body,
                 else_body,

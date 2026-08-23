@@ -1788,9 +1788,10 @@ mod tests {
 
     /// Formatting a conditional changes the layout and not the program.
     ///
-    /// It does change one word: `endc` comes back as `endif` (#195). Both are
-    /// lwasm's and both assemble to the same bytes, so this pins the current
-    /// behaviour rather than blessing it — a fix will show up here as a failure.
+    /// The closer keeps the author's word. lwasm takes `endc` and `endif`
+    /// alike, and the formatter used to render both as `endif` (#195) — which
+    /// looked cosmetic until rgbasm, whose *only* closer is `ENDC`, turned the
+    /// same bug into source the assembler would not take.
     #[test]
     fn a_formatted_conditional_assembles_to_the_same_bytes() {
         let src = "n equ 1\n ifne n\n lda #5\n else\n clra\n endc\n rts\n";
@@ -1807,6 +1808,9 @@ mod tests {
         let again = crate::format_lwasm(&formatted).expect("formats");
         assert_eq!(formatted, again, "{formatted}");
 
-        assert!(formatted.contains("endif"), "#195: {formatted}");
+        assert!(
+            formatted.contains("endc"),
+            "the author wrote `endc`: {formatted}"
+        );
     }
 }
