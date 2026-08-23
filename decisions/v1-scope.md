@@ -3,9 +3,10 @@
 **Status:** Active. Binding for Asm198x. Sets the v1.0 bar and the scope of the
 stability promise the version number makes.
 
-**Date:** 2026-08-18. **Amended 2026-08-23** — five of the six bar items are
-met; item 4 is restated as the *class* it was always reasoning about. See
-*Where the bar stands* below.
+**Date:** 2026-08-18. **Amended 2026-08-23** — item 4 is restated as the
+*class* it was always reasoning about, and **all six items are now met**. See
+*Where the bar stands* below. What remains is the decision to cut 1.0, which is
+not a bar item.
 
 ## The decision
 
@@ -172,25 +173,37 @@ written as outstanding work and had stopped describing the repository.
 | 1 | Macros | **Met.** #93 closed 2026-08-23 — macros, repetition, modules. |
 | 2 | Verdict corpus v1a | **Met.** 5,747 verdicts over 22 CPUs, replayed by a tools-free CI status of its own. |
 | 3 | Debug198x freeze | **Met.** Frozen at v1, 2026-08-18 ([`debug198x-format.md`](debug198x-format.md)). |
-| 4 | The gap class | **Open.** See below. |
+| 4 | The gap class | **Met.** Empty as of 2026-08-23; see below. |
 | 5 | CLI subcommands | **Met.** `asm198x [asm\|disasm\|fmt]`. |
 | 6 | Docs and distribution | **Met.** Shell, PowerShell and Homebrew installers with a tap; a hand-written CLI reference; 21 generated dialect pages. |
 
-Item 4 is the only one left, and it is what the amendment restates. Open
-members, 2026-08-23:
+Item 4 was the last one, and it closed the same day it was restated. The
+members, and how each left:
 
-- **#205** — sjasmplus accepts the name-first `name MACRO` spelling; we refuse it.
-- **#128** — acme: comparisons in `!if`, zero-page sizing, strings in `!byte`.
-- **#98** — sjasmplus `:` as a statement separator. Carved out of #67.
-- **#99** — conditions on forward-referenced symbols. Carved out of #67.
-- **#126** — vasm accepts duplicate labels silently. The other direction: we are
-  too permissive, which is the same claim failing the same way.
-- **#87** — asl semantic pseudo-ops. A scope decision rather than a gap; it
-  leaves the class by being decided, whichever way.
+| | how it closed |
+|---|---|
+| **#205** sjasmplus's name-first `name MACRO` | implemented |
+| **#128** acme `!if` comparisons, strings, zero-page sizing | implemented |
+| **#98** sjasmplus `:` as a statement separator | implemented |
+| **#99** conditions on forward-referenced symbols | implemented, as the reference's three passes |
+| **#126** vasm accepting duplicate labels | refused, as vasm does |
+| **#87** asl semantic pseudo-ops | decided one at a time: five swept, fourteen refused with a record |
 
-Three of these were found in the week before this amendment, while probing for
-other work. That is the argument for reading item 4 as a class: the two issues
-it named were the ones that happened to have been looked for.
+Three of them were found in the week before this amendment, while probing for
+other work. That is the argument for reading item 4 as a class rather than as a
+list: the two issues it originally named were the ones that happened to have
+been looked for.
+
+**The differential suite's gap ledger is empty**, and its `gap()` helper is
+unused and kept — deleting the mechanism because nothing is currently broken is
+how the next gap gets recorded as a comment instead of as a failing marker.
+
+Two things this does *not* claim. The ledger measures the probes we wrote, and
+we chose them; `cargo xtask surface` supplies the denominator we did not choose
+and reads **1,084 words** outside our surface. And one over-acceptance is
+recorded rather than fixed — the CP1610 still ignores `relaxed`, because our own
+listings need it (#214). Item 4 is met on its own terms, which are that nothing
+of that shape is *open and unexplained*.
 
 ## Drift triggers
 
