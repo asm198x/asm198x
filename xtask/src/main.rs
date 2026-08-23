@@ -22,6 +22,7 @@ mod nav;
 mod parity;
 mod search;
 mod supersede;
+mod surface;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -96,6 +97,11 @@ fn main() -> ExitCode {
                 ExitCode::FAILURE
             }
         },
+        Some("surface") => {
+            let write = args.iter().any(|a| a == "--write");
+            print!("{}", surface::run(&repo(), write));
+            ExitCode::SUCCESS
+        }
         Some("ledger") => {
             print!("{}", ledger::render(&repo()));
             ExitCode::SUCCESS
@@ -114,6 +120,8 @@ fn main() -> ExitCode {
 fn usage() -> String {
     "cargo xtask — Asm198x repository automation\n\n\
      commands:\n\
+     \x20 surface             report how much of each reference's own vocabulary we take\n\
+     \x20 surface --write     refresh the surface stamp\n\
      \x20 coverage            report arbitration coverage over the verdict corpus\n\
      \x20 coverage --check    fail if any CPU's coverage fell below the stamp\n\
      \x20 coverage --write    refresh the stamp\n\
