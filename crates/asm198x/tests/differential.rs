@@ -381,8 +381,8 @@ const PROBES: &[Probe] = &[
     // The spellings do not converge, which is why #93 insists on per-dialect
     // fidelity rather than a house macro system:
     //   MACRO name  / ENDM      sjasmplus, pasmo, rgbasm
-    //   name MACRO  / ENDM      asl, lwasm (implemented), vasm (implemented),
-    //                           pasmo, sjasmplus (#205)
+    //   name MACRO  / ENDM      asl, lwasm, vasm, pasmo, sjasmplus — all
+    //                           implemented
     //   .macro name / .endmacro ca65 (implemented)
     //   !macro name { }         acme (implemented)
     ok ("acme", "macro definition and invocation",
@@ -424,11 +424,16 @@ const PROBES: &[Probe] = &[
         " MACRO ldav, val\n ld a,val\n ENDM\n ldav 5\n"),
     // ...and it takes the definition the other way round too. So does
     // sjasmplus — the claim that it does not stood here unprobed until the
-    // module work measured it (#205), which is why nothing covered the form.
+    // module work measured it, which is why nothing covered the form. Both are
+    // arbitrated now (#205).
     ok ("pasmo", "macro defined name-first",
         "ldav MACRO val\n ld a,val\n ENDM\n ldav 5\n"),
-    gap("sjasmplus", "macro defined name-first",
-        "ldav MACRO val\n ld a,val\n ENDM\n ldav 5\n", 205),
+    ok ("sjasmplus", "macro defined name-first",
+        "ldav MACRO val\n ld a,val\n ENDM\n ldav 5\n"),
+    ok ("sjasmplus", "macro defined name-first, colon",
+        "ldav: MACRO val\n ld a,val\n ENDM\n ldav 5\n"),
+    ok ("sjasmplus", "macro defined name-first, no params",
+        "nop2 MACRO\n nop\n nop\n ENDM\n nop2\n"),
     // A macro with a loop is most of what macros are for. pasmo scopes nothing
     // by spelling: the label repeats cleanly only because `LOCAL` declares it.
     // The macro is called `delay`, not `m`: pasmo also knows the 8080 mnemonic
