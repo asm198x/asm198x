@@ -674,6 +674,60 @@ mod frame_tests {
         assert_eq!(err.line, 4);
     }
 
+    /// Every dialect that expands a macro now says so — the two paths a
+    /// diagnostic can take out of an expansion both carry the frames.
+    #[test]
+    fn every_expanding_dialect_reports_its_expansion() {
+        /// One dialect's assemble entry point.
+        type Assemble = fn(&str) -> Result<crate::AssemblyResult, crate::AsmError>;
+
+        let cases: &[(&str, Assemble, &str)] = &[
+            (
+                "sjasmplus",
+                crate::assemble_sjasmplus,
+                " MACRO bad\n frobnicate\n ENDM\n bad\n",
+            ),
+            (
+                "pasmo",
+                crate::assemble_pasmo,
+                " MACRO bad\n frobnicate\n ENDM\n bad\n",
+            ),
+            (
+                "lwasm",
+                crate::assemble_lwasm,
+                "bad macro\n frobnicate\n endm\n bad\n",
+            ),
+            (
+                "ca65-816",
+                crate::assemble_ca65_816,
+                ".macro bad\n frobnicate\n.endmacro\n bad\n",
+            ),
+        ];
+        for (name, assemble, src) in cases {
+            let err = assemble(src).expect_err(name);
+            let frames = err
+                .span
+                .as_ref()
+                .map(|s| s.expansion_frames.as_slice())
+                .unwrap_or_default();
+            assert_eq!(frames.len(), 1, "{name}: {err:?}");
+            assert_eq!(frames[0].macro_name, "bad", "{name}");
+        }
+
+        // vasm returns bare bytes rather than an `AssemblyResult`, and reaches
+        // this from the other direction: its errors come from the multi-pass
+        // layout, so its native statement carries the frames rather than a node
+        // attaching them as it lowers.
+        let err = crate::assemble_vasm("bad macro\n frobnicate\n endm\n bad\n").expect_err("vasm");
+        let frames = err
+            .span
+            .as_ref()
+            .map(|s| s.expansion_frames.as_slice())
+            .unwrap_or_default();
+        assert_eq!(frames.len(), 1, "vasm: {err:?}");
+        assert_eq!(frames[0].macro_name, "bad");
+    }
+
     /// An error outside any expansion gains nothing: this fills in only what a
     /// macro actually explains.
     #[test]

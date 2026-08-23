@@ -39,10 +39,10 @@ impl FileId {
 /// empty for one that does not. The shape was reserved for exactly this and did
 /// not change when it was filled.
 ///
-/// **vasm is the exception.** Its errors come from the multi-pass layout, long
-/// after the expansion's origins are out of scope, and its native `Line` has no
-/// span to carry them on — so a vasm diagnostic names the right line and does
-/// not yet say which macro produced it.
+/// A multi-pass dialect carries them differently: vasm's errors come from its
+/// layout and encode passes, long after the expansion's origins are out of
+/// scope, so its native statement carries the frames itself rather than
+/// attaching them from a node as it lowers.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct ExpansionFrame {
