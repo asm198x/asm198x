@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.27](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.26...asm198x-v0.0.27) - 2026-08-23
+
+### Added
+
+- *(rgbasm)* macros — the set is complete ([#202](https://github.com/asm198x/asm198x/pull/202))
+- *(rgbasm)* conditional assembly and repetition — the ninth gap ([#201](https://github.com/asm198x/asm198x/pull/201))
+- *(vasm)* conditional assembly and repetition ([#198](https://github.com/asm198x/asm198x/pull/198))
+- *(lwasm)* conditional assembly ([#196](https://github.com/asm198x/asm198x/pull/196))
+
+### Other
+
+- Wire rgbasm into the probe harness, and record what it cannot do ([#200](https://github.com/asm198x/asm198x/pull/200))
+
 ## [0.0.26](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.25...asm198x-v0.0.26) - 2026-08-23
 
 ### Added
