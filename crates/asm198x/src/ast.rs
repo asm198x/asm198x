@@ -230,6 +230,14 @@ pub(crate) enum Item {
     /// doing so by mistake.
     Conditional {
         head: String,
+        /// The closing keyword exactly as the author wrote it (`ENDIF`,
+        /// `endc`, `}`), or empty to derive it from the head's case and dot.
+        ///
+        /// Carried for the same reason [`Item::Repeat`] carries one, and it is
+        /// not cosmetic: rgbasm's only closer is `ENDC` and it refuses `ENDIF`
+        /// outright, so a formatter that picked the word wrote source the
+        /// assembler would not take.
+        close: String,
         then_body: Vec<Node>,
         else_body: Option<Vec<Node>>,
         inline: bool,
@@ -614,6 +622,80 @@ pub(crate) fn lower(program: Program) -> Result<Vec<Statement>, AsmError> {
         .collect()
 }
 
+/// Lower one item **without consuming it** — for a dialect whose evaluator
+/// holds `&Node` and must keep what its walk built.
+///
+/// A dialect that re-parses each live line (ACME, lwasm, rgbasm) still cannot
+/// re-parse *everything*: a directive its walk handled — rgbasm's `SECTION`, a
+/// resolved `INCBIN` payload — has no form the line parser could rebuild, and a
+/// blanket re-parse answers `unknown instruction` on it. This is the other half
+/// of that: keep the walk's item, cloned rather than moved.
+///
+/// A native payload cannot come through here. It is dialect-owned and opaque to
+/// the shared layer, so the dialect that made it reads it back itself.
+pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
+    Ok(match item {
+        Item::Instruction {
+            mnemonic,
+            mode,
+            operands,
+        } => Operation::Instruction {
+            mnemonic: mnemonic.clone(),
+            mode,
+            operands: operands
+                .iter()
+                .cloned()
+                .map(Operand::into_value)
+                .collect::<Result<_, _>>()?,
+        },
+        Item::Org(o) => Operation::Org(o.clone().into_value()?),
+        Item::Equ(o) => Operation::Equ(o.clone().into_value()?),
+        Item::Bytes(v) => Operation::Bytes(
+            v.iter()
+                .cloned()
+                .map(Operand::into_value)
+                .collect::<Result<_, _>>()?,
+        ),
+        Item::Words(v) => Operation::Words(
+            v.iter()
+                .cloned()
+                .map(Operand::into_value)
+                .collect::<Result<_, _>>()?,
+        ),
+        Item::Entry(o) => Operation::Entry(o.clone().into_value()?),
+        Item::Reserve(count) => Operation::Reserve(*count),
+        Item::Align {
+            andmask,
+            value,
+            fill,
+        } => Operation::Align {
+            andmask: *andmask,
+            value: *value,
+            fill: *fill,
+        },
+        Item::Binary(payload) => Operation::Binary(payload.clone()),
+        other => {
+            let what = match other {
+                Item::Conditional { .. } => "a conditional block",
+                Item::Repeat { .. } => "a repetition block",
+                Item::Native(_) => "a native item",
+                Item::Verbatim => "a verbatim line",
+                Item::Include { .. } => "an unresolved include",
+                Item::Incbin { .. } => "an unresolved incbin",
+                // A computed-operand payload (the 6809's postbyte + extension
+                // bytes). Its pieces are not `Clone`, and the dialects that
+                // build one re-parse their lines anyway, so no caller needs it.
+                Item::Encoded(_) => "a precomputed encoding",
+                _ => "this item",
+            };
+            return Err(AsmError::new(
+                0,
+                format!("internal error: {what} is not lowered by the shared path"),
+            ));
+        }
+    })
+}
+
 fn lower_item(item: Item) -> Result<Operation, AsmError> {
     Ok(match item {
         Item::Instruction {
@@ -884,6 +966,7 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
             else_body,
             inline,
             style,
+            close,
         }) = &node.item
         {
             match style {
@@ -903,6 +986,7 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
                     else_body.as_deref(),
                     out,
                     equ_label_colon,
+                    close,
                 ),
             }
             continue;
@@ -1125,6 +1209,7 @@ fn emit_conditional(
 /// style). `ELSE`/`ENDIF` follow the head keyword's case, so an all-lowercase
 /// source stays all-lowercase (the reference accepts only all-lower or
 /// all-upper spellings, probe-pinned).
+#[allow(clippy::too_many_arguments)]
 fn emit_keyword_conditional(
     node: &Node,
     head: &str,
@@ -1132,6 +1217,7 @@ fn emit_keyword_conditional(
     else_body: Option<&[Node]>,
     out: &mut String,
     equ_label_colon: bool,
+    close: &str,
 ) {
     const INDENT: &str = "        ";
     // `ELSE`/`ENDIF` follow the head's case and its dot, so `.if …` closes with
@@ -1178,8 +1264,17 @@ fn emit_keyword_conditional(
         break;
     }
     out.push_str(INDENT);
-    out.push_str(dot);
-    out.push_str(if upper { "ENDIF" } else { "endif" });
+    // The closer the author wrote, when the parse recorded one. Deriving it
+    // from the head only works where the dialect has a single spelling: rgbasm
+    // takes `ENDC` and refuses `ENDIF`, lwasm takes either, and choosing for
+    // them turns a layout pass into a rewrite — for rgbasm, into source it
+    // would not assemble.
+    if close.is_empty() {
+        out.push_str(dot);
+        out.push_str(if upper { "ENDIF" } else { "endif" });
+    } else {
+        out.push_str(close);
+    }
     out.push('\n');
 }
 
@@ -1447,6 +1542,7 @@ second:
             operand_span: None,
             label: None,
             item: Some(Item::Conditional {
+                close: String::new(),
                 head: "!if DEBUG = 1".into(),
                 then_body: vec![body],
                 else_body: None,
@@ -1477,6 +1573,7 @@ second:
             operand_span: None,
             label: None,
             item: Some(Item::Conditional {
+                close: String::new(),
                 head: "!ifndef FOO".into(),
                 then_body: vec![guard_body],
                 else_body: None,
@@ -1499,6 +1596,7 @@ second:
     #[test]
     fn conditional_block_rejects_lowering() {
         let cond = Item::Conditional {
+            close: String::new(),
             head: "!if X = 1".into(),
             then_body: vec![],
             else_body: None,
@@ -1533,6 +1631,7 @@ second:
             operand_span: None,
             label: None,
             item: Some(Item::Conditional {
+                close: String::new(),
                 head: "IF DEBUG = 1".into(),
                 then_body: vec![then_node],
                 else_body: Some(vec![else_node]),
@@ -1562,6 +1661,7 @@ second:
             operand_span: None,
             label: None,
             item: Some(Item::Conditional {
+                close: String::new(),
                 head: "ifdef FLAG".into(),
                 then_body: vec![body],
                 else_body: None,

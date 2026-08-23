@@ -177,8 +177,8 @@ enum BlockClose {
     /// `.elseif <cond>`, carrying its head text and line so the chain
     /// round-trips as the flat chain the author wrote.
     ElseIf(String, usize),
-    /// `.endif`.
-    CondClose,
+    /// `.endif` / `endc`, carrying the closer as written.
+    CondClose(String),
     /// `.endrepeat` / `endr`, carrying the closer exactly as written so the
     /// formatter re-emits the author's word — lwasm and vasm each have two
     /// spellings, and choosing one would be a rewrite rather than a layout.
@@ -350,7 +350,7 @@ fn walk_block<W: FlatWalk>(
         if let Some(kw) = w.block_keyword(strip_block_comment(raw)) {
             let head = strip_block_comment(raw).trim().to_string();
             match kw {
-                BlockKw::CondClose if in_block => return Ok(BlockClose::CondClose),
+                BlockKw::CondClose if in_block => return Ok(BlockClose::CondClose(head)),
                 BlockKw::RepeatClose if in_block => return Ok(BlockClose::RepeatClose(head)),
                 BlockKw::Else if in_block => return Ok(BlockClose::Else),
                 BlockKw::ElseIf if in_block => return Ok(BlockClose::ElseIf(head, line)),
@@ -424,8 +424,12 @@ fn parse_conditional<W: FlatWalk>(
         true,
     )?;
     let then_body: Vec<Node> = w.nodes_mut().split_off(start);
+    let mut closer = String::new();
     let else_body = match closed {
-        BlockClose::CondClose => None,
+        BlockClose::CondClose(text) => {
+            closer = text;
+            None
+        }
         BlockClose::Else => {
             let start = w.nodes_mut().len();
             let end = walk_block(
@@ -439,11 +443,15 @@ fn parse_conditional<W: FlatWalk>(
                 res,
                 true,
             )?;
-            if end != BlockClose::CondClose && end != BlockClose::Eof {
-                return Err(AsmError::at(
-                    Span::in_file(file, line as u32, 1),
-                    "conditional block is never closed".to_string(),
-                ));
+            match end {
+                BlockClose::CondClose(text) => closer = text,
+                BlockClose::Eof => {}
+                _ => {
+                    return Err(AsmError::at(
+                        Span::in_file(file, line as u32, 1),
+                        "conditional block is never closed".to_string(),
+                    ));
+                }
             }
             Some(w.nodes_mut().split_off(start))
         }
@@ -482,6 +490,7 @@ fn parse_conditional<W: FlatWalk>(
         operand_span: None,
         label: None,
         item: Some(crate::ast::Item::Conditional {
+            close: closer,
             head: head.clone(),
             then_body,
             else_body,

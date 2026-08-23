@@ -53,9 +53,9 @@ against a fixture somebody wrote by hand.
 Code198x curriculum, across the C64, the Amiga, the NES and the Spectrum, in 617
 comparisons. Every one matches the reference tool.
 
-**Where we differ is published.** 7 tracked differences across 22 recorded
-cases, and [the list](divergences.md) says what each one is. A tracked
-difference that silently stops being a difference fails the build.
+**Where we differ is published.** 6 tracked differences across 9 recorded cases,
+and [the list](divergences.md) says what each one is. A tracked difference that
+silently stops being a difference fails the build.
 <!-- /generated -->
 
 That last one is the argument. Parity is a claim you would have to believe; a

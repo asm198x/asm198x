@@ -66,7 +66,15 @@ impl Dialect for Rgbasm {
         // Route assembly through the semantic AST (U6): parse into a `Program`,
         // then lower to the engine's statement stream — byte-identical to the old
         // direct parse (AE1). Other CPUs stay on direct lowering (KTD6).
-        crate::ast::lower(parse_program(source)?)
+        let program = parse_program(source)?;
+        let mut eval = RgbasmEval {
+            set: self.instruction_set(),
+            consts: BTreeMap::new(),
+            global: String::new(),
+        };
+        let mut out = Vec::new();
+        crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        Ok(out)
     }
 
     fn parse_ast(&self, source: &str) -> Result<Option<crate::ast::Program>, AsmError> {
@@ -81,7 +89,15 @@ impl Dialect for Rgbasm {
         map: &mut SourceMap,
         loader: &dyn SourceLoader,
     ) -> Result<Vec<Statement>, AsmError> {
-        crate::ast::lower(parse_program_multi(map, loader)?)
+        let program = parse_program_multi(map, loader)?;
+        let mut eval = RgbasmEval {
+            set: self.instruction_set(),
+            consts: BTreeMap::new(),
+            global: String::new(),
+        };
+        let mut out = Vec::new();
+        crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        Ok(out)
     }
 
     /// rgbasm `equ` takes no colon on its label (`NAME equ …`); a colon would
@@ -108,11 +124,9 @@ impl Dialect for Rgbasm {
 /// [`parse_program_multi`]'s.
 pub(crate) fn parse_program(source: &str) -> Result<Program, AsmError> {
     let mut w = Walker::new();
-    for (i, raw) in source.lines().enumerate() {
-        if let Some(d) = w.walk_line(raw, i + 1, FileId(0))? {
-            w.nodes.push(ca65_flat::unresolved_node(d));
-        }
-    }
+    // The shared cursor: it groups `IF`/`REPT` blocks and keeps every include
+    // unresolved (KTD1), which is what `--fmt` needs.
+    ca65_flat::walk_source_expanded(&mut w, source, FileId(0))?;
     w.flush_trailing(source.lines().count() as u32);
     Ok(Program { nodes: w.nodes })
 }
@@ -285,6 +299,28 @@ impl Walker {
 }
 
 impl FlatWalk for Walker {
+    /// rgbasm's block vocabulary, measured against rgbds 1.0.3 and
+    /// case-insensitive.
+    ///
+    /// `ELIF` and not `ELSEIF`, and **`ENDC` is the only closer** — rgbds
+    /// answers `ENDIF` with `Undefined macro`, so accepting it would take
+    /// source the reference refuses. Unlike pasmo no word here means two
+    /// things: `ENDC` closes a conditional, `ENDR` a repetition, `ENDM` a
+    /// macro.
+    fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
+        use ca65_flat::BlockKw;
+        let word = code.split_whitespace().next()?.to_ascii_uppercase();
+        Some(match word.as_str() {
+            "IF" => BlockKw::CondOpen,
+            "ELIF" => BlockKw::ElseIf,
+            "ELSE" => BlockKw::Else,
+            "ENDC" => BlockKw::CondClose,
+            "REPT" => BlockKw::RepeatOpen,
+            "ENDR" => BlockKw::RepeatClose,
+            _ => return None,
+        })
+    }
+
     fn nodes_mut(&mut self) -> &mut Vec<Node> {
         &mut self.nodes
     }
@@ -536,6 +572,26 @@ fn is_local_or_ident(s: &str) -> bool {
 /// asl is the reference for this chip. The ignored spellings emit no bytes
 /// and change no encoding, so source carrying them assembles unchanged.
 pub const DIRECTIVES: &[Directive] = &[
+    // Walk-handled: the shared cursor reads these into `Item::Conditional` /
+    // `Item::Repeat` before `parse_op` sees a line.
+    //
+    // `ELIF` and not `ELSEIF`, and `ENDC` is the **only** conditional closer —
+    // rgbds answers `ENDIF` with `Undefined macro`, so declaring it would
+    // accept a spelling the reference refuses.
+    //
+    // `FOR` is real rgbasm and absent: it binds a loop variable with an
+    // exclusive stop and an optional step, and adopting it means the
+    // `Iteration::Over` path rather than a count.
+    Directive {
+        id: "conditional",
+        pattern: Pattern::Exact(&["if", "elif", "else", "endc"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "repeat",
+        pattern: Pattern::Exact(&["rept", "endr"]),
+        category: Category::Operation,
+    },
     Directive {
         id: "bytes",
         pattern: Pattern::Exact(&["db"]),
@@ -901,6 +957,116 @@ fn product(lists: &[Vec<Alternative>]) -> Vec<Vec<Alternative>> {
 // never constructs — no `end`-style directive), so the mangle lives in one
 // place; rgbasm's *scope rule* (the last non-`.` global) stays in [`Walker`].
 
+// ---------------------------------------------------------------------------
+// Conditional evaluation — rgbasm's `CondEval`.
+//
+// `ast::lower` rejects an `Item::Conditional`, so assembly runs through
+// `ast::evaluate`. Each live line re-parses against the constants as they
+// actually stand, because rgbasm threads them into `parse_op` and SM83's
+// `ldh [$FF40],a` selection reads them — a constant bound inside an untaken
+// branch could otherwise change an instruction.
+//
+// What does **not** re-parse is a line the walk handled as a directive.
+// `SECTION` has no form `parse_op` could rebuild, so a blanket re-parse answers
+// `unknown instruction \`SECTION\`` on line 1 of every file. Those keep the
+// walk's item through `lower_item_ref`.
+// ---------------------------------------------------------------------------
+
+/// rgbasm's conditional evaluator: the constant environment, threaded through
+/// the walk so a condition folds against what a taken branch bound.
+struct RgbasmEval {
+    set: &'static isa::InstructionSet,
+    consts: BTreeMap<String, i64>,
+    global: String,
+}
+
+impl crate::ast::CondEval for RgbasmEval {
+    fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError> {
+        let line = line as usize;
+        let (word, args) = split_first_word(head.trim());
+        let args = args.trim();
+        if args.is_empty() {
+            return Err(AsmError::new(line, format!("`{word}` needs a condition")));
+        }
+        let v = fold_const(&value(args, line)?, &self.consts, line).map_err(|_| {
+            AsmError::new(
+                line,
+                format!(
+                    "`{args}` must be a constant here — rgbasm folds a condition against the \
+                     values above it, and refuses a forward reference"
+                ),
+            )
+        })?;
+        Ok(v != 0)
+    }
+
+    /// `REPT n` names no loop variable; `FOR` does and is not adopted yet.
+    fn iteration(&self, head: &str, line: u32) -> Result<crate::ast::Iteration, AsmError> {
+        let line = line as usize;
+        let (_, args) = split_first_word(head.trim());
+        let n = fold_const(&value(args.trim(), line)?, &self.consts, line)?;
+        Ok(crate::ast::Iteration::Times(n))
+    }
+
+    fn lower(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
+        let line = node.span.line as usize;
+        if let Some(sym) = node.label.as_ref()
+            && !sym.name.starts_with('.')
+        {
+            self.global = sym.qualified.clone();
+        }
+        let op = match &node.item {
+            // Walk-handled: keep what it built rather than rebuilding it.
+            Some(crate::ast::Item::Binary(_)) => Some(crate::ast::lower_item_ref(
+                node.item.as_ref().expect("matched"),
+            )?),
+            Some(crate::ast::Item::Include { request }) => {
+                return Err(AsmError::at(
+                    node.span.clone(),
+                    format!(
+                        "cannot resolve `INCLUDE \"{request}\"` here — the single-source \
+                         API assembles one file; use the multi-file entry point \
+                         (the CLI resolves includes automatically)"
+                    ),
+                ));
+            }
+            Some(crate::ast::Item::Incbin { request }) => {
+                return Err(AsmError::at(
+                    node.span.clone(),
+                    format!(
+                        "cannot resolve `INCBIN \"{request}\"` here — the single-source \
+                         API assembles one file; use the multi-file entry point \
+                         (the CLI resolves binary inclusions automatically)"
+                    ),
+                ));
+            }
+            // The walk made nothing of this line, so neither does assembly —
+            // a bare `SECTION "a", ROM0` is the case, and re-parsing it would
+            // answer `unknown instruction` for a line the reference accepts.
+            None => None,
+            Some(it) => match parse_op(self.set, &node.source, &self.consts, &self.global, line) {
+                Ok(op) => op,
+                // A directive the walk handled and the line parser cannot
+                // rebuild — `SECTION "a", ROM0[0]`, which carries an origin.
+                Err(e) => Some(crate::ast::lower_item_ref(it).map_err(|_| e)?),
+            },
+        };
+        if let (Some(sym), Some(Operation::Equ(e))) = (node.label.as_ref(), &op)
+            && let Ok(v) = fold_const(e, &self.consts, line)
+        {
+            self.consts.insert(sym.qualified.clone(), v);
+        }
+        out.push(Statement {
+            line,
+            file: node.span.file,
+            label: node.label.as_ref().map(|s| s.qualified.clone()),
+            op,
+            operand_span: node.operand_span.clone(),
+        });
+        Ok(())
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use crate::assemble_rgbasm as asm;
@@ -1026,5 +1192,100 @@ mod tests {
             bytes("SECTION \"c\", ROM0[$0]\nstart:\n ld a, $05\n.loop:\n jr .loop\n"),
             "comments do not change bytes"
         );
+    }
+
+    // -----------------------------------------------------------------------
+    // Conditionals and repetition. Measured against rgbds 1.0.3.
+    // -----------------------------------------------------------------------
+
+    fn out(src: &str) -> Vec<u8> {
+        crate::assemble_rgbasm(src).expect(src).bytes
+    }
+
+    /// nop = $00, ret = $C9, inc a = $3C.
+    #[test]
+    fn a_conditional_picks_one_branch() {
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nIF 1\n nop\nENDC\n ret\n"),
+            vec![0x00, 0xC9]
+        );
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nIF 0\n nop\nELSE\n ret\nENDC\n"),
+            vec![0xC9]
+        );
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nIF 0\n nop\nELIF 1\n ret\nENDC\n"),
+            vec![0xC9]
+        );
+    }
+
+    /// **`ENDC` is the only closer.** rgbds answers `ENDIF` with `Undefined
+    /// macro`, and the chain keyword is `ELIF` rather than `ELSEIF` — two
+    /// spellings that every other dialect here would have led us to expect.
+    #[test]
+    fn the_spellings_rgbasm_lacks_are_refused() {
+        crate::assemble_rgbasm("SECTION \"s\",ROM0[0]\nIF 1\n nop\nENDIF\n")
+            .expect_err("rgbds: Undefined macro `ENDIF`");
+        crate::assemble_rgbasm("SECTION \"s\",ROM0[0]\nIF 0\n nop\nELSEIF 1\n ret\nENDC\n")
+            .expect_err("rgbds has ELIF, not ELSEIF");
+    }
+
+    #[test]
+    fn a_repetition_assembles_its_body_n_times() {
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nREPT 3\n nop\nENDR\n"),
+            vec![0x00, 0x00, 0x00]
+        );
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nREPT 0\n nop\nENDR\n ret\n"),
+            vec![0xC9]
+        );
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nREPT 2\nREPT 2\n nop\nENDR\n inc a\nENDR\n"),
+            vec![0x00, 0x00, 0x3C, 0x00, 0x00, 0x3C]
+        );
+    }
+
+    /// A constant defined with `DEF … EQU` above the block folds into it, and
+    /// one inside an untaken branch never binds.
+    #[test]
+    fn a_condition_folds_against_the_constants_above_it() {
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nDEF N EQU 1\nIF N\n nop\nENDC\n ret\n"),
+            vec![0x00, 0xC9]
+        );
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\nDEF N EQU 3\nREPT N\n nop\nENDR\n"),
+            vec![0x00, 0x00, 0x00]
+        );
+    }
+
+    /// `SECTION` is the reason the evaluator keeps what the walk built. The
+    /// line parser has no form for it, so a blanket re-parse answered
+    /// `unknown instruction \`SECTION\`` on line 1 of every file.
+    #[test]
+    fn a_walk_handled_directive_survives_the_re_parse() {
+        assert_eq!(out("SECTION \"s\",ROM0[0]\n nop\n"), vec![0x00]);
+    }
+
+    /// Formatting a block changes the layout and not the program.
+    #[test]
+    fn a_formatted_block_assembles_to_the_same_bytes() {
+        for src in [
+            "SECTION \"s\",ROM0[0]\nDEF N EQU 1\nIF N\n nop\nELSE\n ret\nENDC\n",
+            "SECTION \"s\",ROM0[0]\nREPT 3\n nop\nENDR\n",
+        ] {
+            let before = out(src);
+            let formatted = crate::format_rgbasm(src).expect(src);
+            let after = crate::assemble_rgbasm(&formatted)
+                .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+                .bytes;
+            assert_eq!(
+                before, after,
+                "formatting changed the program:\n{formatted}"
+            );
+            let again = crate::format_rgbasm(&formatted).expect("formats");
+            assert_eq!(formatted, again, "{formatted}");
+        }
     }
 }
