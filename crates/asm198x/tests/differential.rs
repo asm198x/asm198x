@@ -380,6 +380,19 @@ const PROBES: &[Probe] = &[
         " !byte \"a\"\n !byte (\"a\")\n !byte \"a\", \"b\"\n !word \"a\"\n lda #\"a\"\n lda \"a\"\n"),
     ok ("acme", "a bare string condition is testable",
         "!if \"a\" {\n lda #1\n}\n"),
+    // #128 gap 3: the one that changed bytes rather than rejecting source.
+    // A backward label with a low address sizes to zero page; a high one, a
+    // forward one, and a forced-absolute literal do not.
+    ok ("acme", "backward label sizes to zero page",
+        "lbl lda #5\n lda lbl\n"),
+    ok ("acme", "the counter follows data too",
+        " !byte 1,2,3\nlbl lda #5\n lda lbl\n"),
+    ok ("acme", "a forward label stays absolute",
+        " lda fwd\nfwd lda #5\n"),
+    ok ("acme", "zero-page sizing follows the mode",
+        "lbl lda #5\n lda lbl,x\n lda lbl,y\n"),
+    ok ("acme", "a 4-digit literal is 16-bit",
+        "lbl lda #5\n lda $0000\n"),
 
     // ---- macros (#93) -------------------------------------------------------
     // sjasmplus and pasmo have macros; the rest are still gaps — the reference

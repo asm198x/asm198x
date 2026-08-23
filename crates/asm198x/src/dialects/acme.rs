@@ -878,6 +878,16 @@ struct AcmeEval<'a> {
     env: BTreeMap<String, i64>,
     /// Names bound by `!set` (rebindable): each use is baked to its current value.
     set_names: BTreeSet<String>,
+    /// Where the location counter stands, so a label can be bound to its
+    /// address as it is defined — which is what lets a *backward* reference
+    /// size to zero page (`decisions/acme-zero-page.md`).
+    ///
+    /// `None` means "not known here", and the walk falls back to what it did
+    /// before: no label address enters `env`, so every label reference sizes
+    /// absolute. That is the safe direction, and it is deliberate — a counter
+    /// that is merely *probably* right would pick zero page on a bad guess and
+    /// emit the wrong bytes, which is worse than the gap being fixed.
+    pc: Option<i64>,
     multi: Option<MultiCx<'a>>,
     /// The file the walk is currently inside — stamps condition-evaluation
     /// errors, which the shared walk raises without node context.
@@ -905,6 +915,9 @@ impl<'a> AcmeEval<'a> {
             anons: Anons::default(),
             env: BTreeMap::new(),
             set_names: BTreeSet::new(),
+            // No origin yet. ACME requires `*=` before code, so the first
+            // origin sets this before anything can be sized.
+            pc: None,
             multi,
             current_file: FileId(0),
             zone: String::new(),
@@ -1307,6 +1320,15 @@ impl crate::ast::CondEval for AcmeEval<'_> {
         {
             self.env.insert(name.clone(), v);
         }
+        // A plain label names the address the counter is standing on. Binding
+        // it here — before the counter moves — is what makes a later reference
+        // to it foldable, and so sizeable to zero page when it is low.
+        if let (Some(name), Some(pc)) = (&label, self.pc)
+            && !matches!(op, Some(Operation::Equ(_)))
+        {
+            self.env.insert(name.clone(), pc);
+        }
+        self.advance(op.as_ref(), line);
         if !(label.is_none() && op.is_none()) {
             out.push(Statement {
                 line,
@@ -1317,6 +1339,32 @@ impl crate::ast::CondEval for AcmeEval<'_> {
             });
         }
         Ok(())
+    }
+}
+
+impl AcmeEval<'_> {
+    /// Move the location counter over `op`, or give up on knowing where it is.
+    ///
+    /// The width comes from [`crate::engine::next_pc`], the same rule the
+    /// engine's own address pass uses — a second copy here is how the two
+    /// would drift apart, and a drifted counter is wrong bytes rather than a
+    /// missed optimisation.
+    ///
+    /// Giving up is a real outcome and not a failure: an `*=` whose expression
+    /// does not fold yet, or an operation whose form the ISA cannot supply,
+    /// leaves the counter unknown for the rest of the walk. Every label from
+    /// that point on stays symbolic and sizes absolute, which is what this
+    /// dialect did everywhere before.
+    fn advance(&mut self, op: Option<&Operation>, line: usize) {
+        let Some(op) = op else { return };
+        if let Operation::Org(e) = op {
+            self.pc = fold_const(e, &self.env, line).ok();
+            return;
+        }
+        let Some(pc) = self.pc else { return };
+        // ACME's 6502 is one byte per address unit, and it has no CPU where
+        // that is not so.
+        self.pc = crate::engine::next_pc(op, pc, self.set, None, 1, line).ok();
     }
 }
 
@@ -3426,6 +3474,72 @@ mod tests {
                 .bytes,
             vec![0xA9, 0x05],
             "but a bare string is testable"
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // #128 gap 3 — zero-page sizing from a tracked location counter
+    // (`decisions/acme-zero-page.md`). Probed against acme 0.97, 2026-08-23.
+    // -----------------------------------------------------------------------
+
+    /// A backward label with a low address sizes to zero page, because by the
+    /// time it is referenced its address is fixed and nothing later can move
+    /// it. We emitted absolute — the wrong size *and* the wrong byte count.
+    #[test]
+    fn a_backward_label_sizes_to_zero_page() {
+        assert_eq!(
+            asm("* = $0000\nlbl lda #5\n lda lbl\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xA9, 0x05, 0xA5, 0x00]
+        );
+        assert_eq!(
+            asm("* = $0000\n !byte 1,2,3\nlbl lda #5\n lda lbl\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x01, 0x02, 0x03, 0xA9, 0x05, 0xA5, 0x03],
+            "the counter follows data as well as code"
+        );
+    }
+
+    /// The three cases that must *not* shrink: a high address, a forward
+    /// reference (the reference warns and stays wide), and an operand the
+    /// dialect forces absolute.
+    #[test]
+    fn only_a_known_low_address_shrinks() {
+        assert_eq!(
+            asm("* = $0200\nlbl lda #5\n lda lbl\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xA9, 0x05, 0xAD, 0x00, 0x02],
+            "a high address stays absolute"
+        );
+        assert_eq!(
+            asm("* = $0000\n lda fwd\nfwd lda #5\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xAD, 0x03, 0x00, 0xA9, 0x05],
+            "a forward reference is not yet known"
+        );
+        assert_eq!(
+            asm("* = $0000\nlbl lda #5\n lda $0000\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xA9, 0x05, 0xAD, 0x00, 0x00],
+            "a 4-digit hex literal is 16-bit whatever its value"
+        );
+    }
+
+    /// Indexed forms pick per addressing mode: `lda abs,x` has a zero-page
+    /// form and `lda abs,y` does not, so the same label sizes differently in
+    /// the two — which is the 6502's rule, not ours.
+    #[test]
+    fn zero_page_sizing_follows_the_addressing_mode() {
+        assert_eq!(
+            asm("* = $0000\nlbl lda #5\n lda lbl,x\n lda lbl,y\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xA9, 0x05, 0xB5, 0x00, 0xB9, 0x00, 0x00]
         );
     }
 }
