@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.26](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.25...asm198x-v0.0.26) - 2026-08-23
+
+### Added
+
+- *(ca65)* conditionals and repetition, on a cursor seven dialects share ([#193](https://github.com/asm198x/asm198x/pull/193))
+
+### Fixed
+
+- *(ca65)* a label is made by its colon, not by its column ([#188](https://github.com/asm198x/asm198x/pull/188))
+
+### Other
+
+- acme gains !for, and the demand gate is retired ([#190](https://github.com/asm198x/asm198x/pull/190))
+
 ## [0.0.25](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.24...asm198x-v0.0.25) - 2026-08-22
 
 ### Fixed
