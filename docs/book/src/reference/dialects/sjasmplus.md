@@ -8,7 +8,7 @@ Z80, sjasmplus syntax.
 
 ## Directives
 
-12 directives, 24 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+13 directives, 25 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -20,6 +20,7 @@ Z80, sjasmplus syntax.
 | `incbin` | `incbin` |  |
 | `include` | `include` |  |
 | `macro` | `macro` |  |
+| `module` | `module` |  |
 | `org` | `org` |  |
 | `repeat` | `dup`, `rept` |  |
 | `reserve` | `defs`, `ds` |  |

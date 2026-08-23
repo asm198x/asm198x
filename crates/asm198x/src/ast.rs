@@ -824,14 +824,29 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
 /// scope `start` resolves to `start.loop`. A non-local symbol, or an
 /// already-qualified `global.local`, is left untouched.
 pub(crate) fn qualify_locals(op: Operation, scope: &str) -> Operation {
+    map_syms(op, &mut |s| {
+        if s.starts_with('.') {
+            format!("{scope}{s}")
+        } else {
+            s
+        }
+    })
+}
+
+/// Rewrite every symbol name in an operation through `f`. The traversal is the
+/// same one local qualification needs, so both callers share it rather than
+/// keeping two twelve-arm copies: [`qualify_locals`] passes the leading-`.`
+/// rule, and sjasmplus's module repair pass passes a lookup over its alias
+/// table. `f` sees each name once and returns the name to use.
+pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> String) -> Operation {
     match op {
-        Operation::Org(e) => Operation::Org(qualify_expr(e, scope)),
-        Operation::Equ(e) => Operation::Equ(qualify_expr(e, scope)),
+        Operation::Org(e) => Operation::Org(map_sym_expr(e, f)),
+        Operation::Equ(e) => Operation::Equ(map_sym_expr(e, f)),
         Operation::Bytes(v) => {
-            Operation::Bytes(v.into_iter().map(|e| qualify_expr(e, scope)).collect())
+            Operation::Bytes(v.into_iter().map(|e| map_sym_expr(e, f)).collect())
         }
         Operation::Words(v) => {
-            Operation::Words(v.into_iter().map(|e| qualify_expr(e, scope)).collect())
+            Operation::Words(v.into_iter().map(|e| map_sym_expr(e, f)).collect())
         }
         Operation::Instruction {
             mnemonic,
@@ -840,13 +855,10 @@ pub(crate) fn qualify_locals(op: Operation, scope: &str) -> Operation {
         } => Operation::Instruction {
             mnemonic,
             mode,
-            operands: operands
-                .into_iter()
-                .map(|e| qualify_expr(e, scope))
-                .collect(),
+            operands: operands.into_iter().map(|e| map_sym_expr(e, f)).collect(),
         },
-        Operation::Entry(e) => Operation::Entry(qualify_expr(e, scope)),
-        // No sub-expressions to qualify: pre-encoded pieces, resolved binary
+        Operation::Entry(e) => Operation::Entry(map_sym_expr(e, f)),
+        // No sub-expressions to rewrite: pre-encoded pieces, resolved binary
         // payloads, and the constant-argument align.
         other @ (Operation::Encoded(_)
         | Operation::Binary(_)
@@ -855,22 +867,34 @@ pub(crate) fn qualify_locals(op: Operation, scope: &str) -> Operation {
     }
 }
 
+/// The expression half of [`map_syms`]: rewrite every symbol name through `f`,
+/// recursing through the expression tree.
+pub(crate) fn map_sym_expr(e: Expr, f: &mut impl FnMut(String) -> String) -> Expr {
+    match e {
+        Expr::Sym(s) => Expr::Sym(f(s)),
+        Expr::Num(_) | Expr::Pc => e,
+        Expr::Lo(b) => Expr::Lo(Box::new(map_sym_expr(*b, f))),
+        Expr::Hi(b) => Expr::Hi(Box::new(map_sym_expr(*b, f))),
+        Expr::Bank(b) => Expr::Bank(Box::new(map_sym_expr(*b, f))),
+        Expr::Neg(b) => Expr::Neg(Box::new(map_sym_expr(*b, f))),
+        Expr::Bin(op, l, r) => Expr::Bin(
+            op,
+            Box::new(map_sym_expr(*l, f)),
+            Box::new(map_sym_expr(*r, f)),
+        ),
+    }
+}
+
 /// The expression half of [`qualify_locals`]: prefix every leading-`.` symbol
 /// with `scope`, recursing through the expression tree.
 pub(crate) fn qualify_expr(e: Expr, scope: &str) -> Expr {
-    match e {
-        Expr::Sym(s) if s.starts_with('.') => Expr::Sym(format!("{scope}{s}")),
-        Expr::Sym(_) | Expr::Num(_) | Expr::Pc => e,
-        Expr::Lo(b) => Expr::Lo(Box::new(qualify_expr(*b, scope))),
-        Expr::Hi(b) => Expr::Hi(Box::new(qualify_expr(*b, scope))),
-        Expr::Bank(b) => Expr::Bank(Box::new(qualify_expr(*b, scope))),
-        Expr::Neg(b) => Expr::Neg(Box::new(qualify_expr(*b, scope))),
-        Expr::Bin(op, l, r) => Expr::Bin(
-            op,
-            Box::new(qualify_expr(*l, scope)),
-            Box::new(qualify_expr(*r, scope)),
-        ),
-    }
+    map_sym_expr(e, &mut |s| {
+        if s.starts_with('.') {
+            format!("{scope}{s}")
+        } else {
+            s
+        }
+    })
 }
 
 /// Build an [`Item`] from any [`Operation`] a dialect produced — total over the
