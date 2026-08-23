@@ -1467,9 +1467,12 @@ const MULTI_PROBES: &[MultiProbe] = &[
         files: &[
             (
                 "main.asm",
-                "\tcpu CP-1600\n\trelaxed on\n\torg 00000H\n\tinclude \"defs.inc\"\n\tmvii K,r0\n\tbinclude \"odd3.bin\"\nafter:\tword after\n\tbinclude \"data.bin\",2,3\n",
+                "\tcpu CP-1600\n\torg x'0000'\n\tinclude \"defs.inc\"\n\tmvii K,r0\n\tbinclude \"odd3.bin\"\nafter:\tword after\n\tbinclude \"data.bin\",2,3\n",
             ),
-            ("defs.inc", "K equ 5\n\tword 0AAAAH\n"),
+            // `x'AAAA'` rather than `0AAAAH`: strict CP-1600 asl takes its own
+            // hex form and nothing else, and the `relaxed on` that used to buy
+            // the Intel spelling is refused now (#214).
+            ("defs.inc", "K equ 5\n\tword x'AAAA'\n"),
         ],
     },
     // --- U6: the vasm (68000) multipass path ---

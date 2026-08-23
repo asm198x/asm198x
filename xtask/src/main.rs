@@ -33,6 +33,10 @@ fn main() -> ExitCode {
         Some("coverage") => run_coverage(&args[1..]),
         Some("parity") => run_parity(&args[1..]),
         Some("grow") => grow::run(&repo(), args.get(1).map(String::as_str)),
+        // The scope form: `--cpu <CPU> --suite <suite>... <reason>`. A listing
+        // change strands every verdict keyed on the text it used to emit, and
+        // those carry no divergence tag to select on (#214).
+        Some("supersede") if args.iter().any(|a| a == "--cpu") => run_supersede_scope(&args[1..]),
         Some("supersede") => match (args.get(1), args.get(2)) {
             (Some(tag), Some(reason)) => match supersede::run(&repo(), tag, reason, &args[3..]) {
                 Ok(retired) if retired.is_empty() => {
@@ -54,10 +58,16 @@ fn main() -> ExitCode {
             _ => {
                 eprintln!(
                     "usage: cargo xtask supersede <divergence-tag> <reason> [filter...]\n\
+                     \x20      cargo xtask supersede --cpu <CPU> --suite <suite>... <reason>\n\
                      \n\
                      Each filter must match the verdict's dialect or case, so one\n\
                      issue's divergences can be retired as they close rather than\n\
-                     all at once."
+                     all at once.\n\
+                     \n\
+                     The --cpu form retires by scope instead, for a change to the\n\
+                     text we hand the reference — a listing edit strands every\n\
+                     verdict keyed on the old text, and those carry no tag.\n\
+                     Suites: form, sweep-chunk, probe, fuzz, curriculum."
                 );
                 ExitCode::FAILURE
             }
@@ -278,6 +288,71 @@ fn run_docs(args: &[String]) -> ExitCode {
 }
 
 /// The repository root: this crate's manifest directory's parent.
+/// `supersede --cpu <CPU> --suite <suite>... <reason>`.
+fn run_supersede_scope(args: &[String]) -> ExitCode {
+    let mut cpu: Option<&str> = None;
+    let mut suites: Vec<verdict_corpus::Suite> = Vec::new();
+    let mut reason: Option<&str> = None;
+    let mut it = args.iter();
+    while let Some(a) = it.next() {
+        match a.as_str() {
+            "--cpu" => cpu = it.next().map(String::as_str),
+            "--suite" => match it.next().map(|s| parse_suite(s)) {
+                Some(Some(s)) => suites.push(s),
+                Some(None) => {
+                    eprintln!("xtask supersede: unknown suite");
+                    return ExitCode::FAILURE;
+                }
+                None => break,
+            },
+            other => reason = Some(other),
+        }
+    }
+    let (Some(cpu), Some(reason)) = (cpu, reason) else {
+        eprintln!("usage: cargo xtask supersede --cpu <CPU> --suite <suite>... <reason>");
+        return ExitCode::FAILURE;
+    };
+    if suites.is_empty() {
+        eprintln!(
+            "xtask supersede: --suite is required.\n\
+             \n\
+             Without it this would retire the CPU's curriculum and probe verdicts\n\
+             too, which no listing change touches — and retiring a true fact\n\
+             because it shares a file with a stale one is how a corpus shrinks."
+        );
+        return ExitCode::FAILURE;
+    }
+    match supersede::run_by_scope(&repo(), cpu, &suites, reason) {
+        Ok(retired) if retired.is_empty() => {
+            eprintln!("xtask: no live verdict matches that scope");
+            ExitCode::FAILURE
+        }
+        Ok(retired) => {
+            println!("retired {} verdict(s) for {cpu}:", retired.len());
+            for case in &retired {
+                println!("  {case}");
+            }
+            ExitCode::SUCCESS
+        }
+        Err(e) => {
+            eprintln!("xtask supersede: {e}");
+            ExitCode::FAILURE
+        }
+    }
+}
+
+fn parse_suite(s: &str) -> Option<verdict_corpus::Suite> {
+    use verdict_corpus::Suite;
+    Some(match s {
+        "form" => Suite::Form,
+        "sweep-chunk" => Suite::SweepChunk,
+        "probe" => Suite::Probe,
+        "fuzz" => Suite::Fuzz,
+        "curriculum" => Suite::Curriculum,
+        _ => return None,
+    })
+}
+
 fn repo() -> PathBuf {
     PathBuf::from(env!("CARGO_MANIFEST_DIR"))
         .parent()

@@ -239,27 +239,6 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["cpu", "end", "title", "page", "aseg", "listing"]),
         category: Category::Ignored,
     },
-    // The family refuses `relaxed`: it changes what a literal means, so
-    // ignoring it assembles a different program (see
-    // `asl::SEMANTIC_DIRECTIVES`). The CP1610 is the one chip that still
-    // accepts it, and the reason is ours rather than the source's.
-    //
-    // `listing_cp1610` emits Intel `0XXXXH` hex, which strict CP-1600 asl
-    // rejects — it takes decimal and `x'XXXX'` and nothing else — so every
-    // listing this project generates for the chip opens with `relaxed on`,
-    // and the verdict corpus is keyed on that text. Refusing the directive
-    // would refuse our own recorded source.
-    //
-    // The exit is #214: emit `x'XXXX'`, drop the prologue line, re-arbitrate
-    // the chip's sweep chunks. Until then this is a **known
-    // over-acceptance** — a CP1610 program relying on relaxed literals
-    // assembles here with the wrong values, where every other asl chip
-    // refuses it and says why.
-    Directive {
-        id: "relaxed-literals",
-        pattern: Pattern::Exact(&["relaxed"]),
-        category: Category::Ignored,
-    },
 ];
 
 fn parse_op(rest: &str, line: usize, after_sdbd: bool) -> Result<Option<Operation>, AsmError> {
@@ -315,8 +294,53 @@ fn value_list(args: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
         .collect()
 }
 
-/// Parse a CP1610 expression: Intel `h`-suffix hex, decimal, `'c'` character.
+/// Rewrite asl's CP-1600 hex — `x'1234'` — into the Intel `h`-suffix form the
+/// shared tokenizer reads.
+///
+/// It is the chip's *native* spelling and the only hex strict asl takes here:
+/// `0AAAAH`, `$AAAA` and `0xAAAA` are all refused on `cpu CP-1600` unless
+/// `relaxed on` is in force, and `relaxed` changes what other literals mean, so
+/// the family refuses it (#214). Our own listings speak `x'…'` for that reason,
+/// which makes reading it a requirement rather than a courtesy.
+///
+/// Done as a rewrite before tokenizing rather than as a token: to the shared
+/// lexer `x'41'` is an identifier followed by a character literal, and teaching
+/// it otherwise would change every dialect that shares it for one chip's form.
+/// Text inside `"…"` is left alone.
+fn strict_hex(raw: &str) -> std::borrow::Cow<'_, str> {
+    if !raw.contains('\'') {
+        return std::borrow::Cow::Borrowed(raw);
+    }
+    let bytes = raw.as_bytes();
+    let mut out = String::with_capacity(raw.len());
+    let (mut i, mut in_str) = (0usize, false);
+    while i < bytes.len() {
+        if bytes[i] == b'"' {
+            in_str = !in_str;
+        }
+        if !in_str
+            && (bytes[i] == b'x' || bytes[i] == b'X')
+            && bytes.get(i + 1) == Some(&b'\'')
+            && let Some(end) = bytes[i + 2..].iter().position(|&b| b == b'\'')
+            && end > 0
+            && bytes[i + 2..i + 2 + end].iter().all(u8::is_ascii_hexdigit)
+        {
+            out.push('0');
+            out.push_str(&raw[i + 2..i + 2 + end]);
+            out.push('h');
+            i += end + 3;
+            continue;
+        }
+        out.push(bytes[i] as char);
+        i += 1;
+    }
+    std::borrow::Cow::Owned(out)
+}
+
+/// Parse a CP1610 expression: asl's `x'1234'` hex, Intel `h`-suffix hex,
+/// decimal, `'c'` character.
 fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
+    let raw = &strict_hex(raw);
     mos6502::parse_expr(
         raw,
         line,
