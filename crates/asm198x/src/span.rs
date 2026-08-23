@@ -34,9 +34,15 @@ impl FileId {
 }
 
 /// One macro-expansion frame (a rustc-style defined-at / invoked-at record).
-/// Populated by the sjasmplus macro expander (#93); empty for every dialect
-/// that has no expansion. The shape was reserved for exactly this and did not
-/// change when it was filled.
+///
+/// Filled by the shared macro expander for every dialect that expands, and
+/// empty for one that does not. The shape was reserved for exactly this and did
+/// not change when it was filled.
+///
+/// A multi-pass dialect carries them differently: vasm's errors come from its
+/// layout and encode passes, long after the expansion's origins are out of
+/// scope, so its native statement carries the frames itself rather than
+/// attaching them from a node as it lowers.
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize)]
 #[non_exhaustive]
 pub struct ExpansionFrame {

@@ -624,11 +624,120 @@ pub(crate) fn place(span: &mut Span, origins: &[LineOrigin]) {
 /// and carries the expansions it came through.
 pub(crate) fn remap_lines(mut e: AsmError, origins: Option<&[LineOrigin]>) -> AsmError {
     let Some(origins) = origins else { return e };
-    if let Some(origin) = origins.get(e.line.saturating_sub(1)) {
+    let origin = origins.get(e.line.saturating_sub(1)).cloned();
+    if let Some(origin) = &origin {
         e.line = origin.line;
     }
-    if let Some(span) = e.span.as_mut() {
-        place(span, origins);
+    match e.span.as_mut() {
+        Some(span) => place(span, origins),
+        // An error raised while *parsing* expanded text carries no span, so
+        // fixing its line was all this used to do — and the frames went with
+        // it. A dialect whose walk reads a macro body eagerly raises every one
+        // of its errors here, which is why four dialects could expand a macro
+        // and still not say a diagnostic came from one.
+        //
+        // The span is minted line-granular (`col: 0`) because the parse knew no
+        // column either; it exists to carry the frames.
+        None => {
+            if let Some(origin) = origin
+                && !origin.frames.is_empty()
+            {
+                let mut span = Span::at(origin.line as u32, 0);
+                span.expansion_frames.clone_from(&origin.frames);
+                e.span = Some(span);
+            }
+        }
     }
     e
+}
+
+#[cfg(test)]
+mod frame_tests {
+    /// A diagnostic raised while **parsing** expanded text carries its frames.
+    ///
+    /// This is the half that was missing. A dialect whose walk reads a macro
+    /// body eagerly raises every one of its errors at parse time, with no span
+    /// — so remapping fixed the line and dropped the frames, and four dialects
+    /// could expand a macro and still not say a diagnostic came from one.
+    #[test]
+    fn a_parse_error_in_an_expansion_keeps_its_frames() {
+        let err = crate::assemble_lwasm("bad macro\n frobnicate\n endm\n bad\n")
+            .expect_err("frobnicate is not an instruction");
+        let span = err
+            .span
+            .as_ref()
+            .expect("a span was minted to carry the frames");
+        assert_eq!(span.col, 0, "line-granular: the parse knew no column");
+        assert_eq!(span.expansion_frames.len(), 1, "{span:?}");
+        assert_eq!(span.expansion_frames[0].macro_name, "bad");
+        // The line the author wrote, not the line inside the expansion.
+        assert_eq!(err.line, 4);
+    }
+
+    /// Every dialect that expands a macro now says so — the two paths a
+    /// diagnostic can take out of an expansion both carry the frames.
+    #[test]
+    fn every_expanding_dialect_reports_its_expansion() {
+        /// One dialect's assemble entry point.
+        type Assemble = fn(&str) -> Result<crate::AssemblyResult, crate::AsmError>;
+
+        let cases: &[(&str, Assemble, &str)] = &[
+            (
+                "sjasmplus",
+                crate::assemble_sjasmplus,
+                " MACRO bad\n frobnicate\n ENDM\n bad\n",
+            ),
+            (
+                "pasmo",
+                crate::assemble_pasmo,
+                " MACRO bad\n frobnicate\n ENDM\n bad\n",
+            ),
+            (
+                "lwasm",
+                crate::assemble_lwasm,
+                "bad macro\n frobnicate\n endm\n bad\n",
+            ),
+            (
+                "ca65-816",
+                crate::assemble_ca65_816,
+                ".macro bad\n frobnicate\n.endmacro\n bad\n",
+            ),
+        ];
+        for (name, assemble, src) in cases {
+            let err = assemble(src).expect_err(name);
+            let frames = err
+                .span
+                .as_ref()
+                .map(|s| s.expansion_frames.as_slice())
+                .unwrap_or_default();
+            assert_eq!(frames.len(), 1, "{name}: {err:?}");
+            assert_eq!(frames[0].macro_name, "bad", "{name}");
+        }
+
+        // vasm returns bare bytes rather than an `AssemblyResult`, and reaches
+        // this from the other direction: its errors come from the multi-pass
+        // layout, so its native statement carries the frames rather than a node
+        // attaching them as it lowers.
+        let err = crate::assemble_vasm("bad macro\n frobnicate\n endm\n bad\n").expect_err("vasm");
+        let frames = err
+            .span
+            .as_ref()
+            .map(|s| s.expansion_frames.as_slice())
+            .unwrap_or_default();
+        assert_eq!(frames.len(), 1, "vasm: {err:?}");
+        assert_eq!(frames[0].macro_name, "bad");
+    }
+
+    /// An error outside any expansion gains nothing: this fills in only what a
+    /// macro actually explains.
+    #[test]
+    fn an_error_outside_an_expansion_gains_nothing() {
+        let err = crate::assemble_lwasm(" frobnicate\n").expect_err("not an instruction");
+        assert!(
+            err.span
+                .as_ref()
+                .is_none_or(|s| s.expansion_frames.is_empty()),
+            "no expansion, no frames: {err:?}"
+        );
+    }
 }

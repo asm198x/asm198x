@@ -487,15 +487,14 @@ fn assemble_core(
                 && !word_branch[i]
                 && let Some(target) = relaxable_branch_target(&s.kind)
             {
-                let disp = eval(target, &consts, pc[sec], s.line)
-                    .map_err(|e| ca65_flat::stamp_file(e, s.file))?
+                let disp = eval(target, &consts, pc[sec], s.line).map_err(|e| stamp(e, s))?
                     - (pc[sec] + 2);
                 if disp == 0 || i8::try_from(disp).is_err() {
                     next[i] = true;
                 }
             }
             pc[sec] += stmt_size(&s.kind, &ctx, &consts, sec, word_branch[i], s.line)
-                .map_err(|e| ca65_flat::stamp_file(e, s.file))? as i64;
+                .map_err(|e| stamp(e, s))? as i64;
         }
         if next == word_branch {
             break;
@@ -518,7 +517,7 @@ fn assemble_core(
     for (i, s) in stmts.iter().enumerate() {
         // Pass-2 errors and warnings are stamped with the statement's file
         // (U6), so a failure inside an included file names that file.
-        let stamp = |e: AsmError| ca65_flat::stamp_file(e, s.file);
+        let stamp = |e: AsmError| stamp(e, s);
         let sec = sec_idx[i];
         let buf = &mut out[sec];
         if s.kind.aligns() && !buf.bytes.len().is_multiple_of(2) {
@@ -783,7 +782,7 @@ fn layout(
             consts.insert(label.clone(), pc[sec]);
         }
         pc[sec] += stmt_size(&s.kind, ctx, &consts, sec, word_branch[i], s.line)
-            .map_err(|e| ca65_flat::stamp_file(e, s.file))? as i64;
+            .map_err(|e| stamp(e, s))? as i64;
     }
     Ok((consts, pc))
 }
@@ -1522,6 +1521,14 @@ impl crate::ast::NativeItem for Stmt {
 
 struct Line {
     line: usize,
+    /// The macro expansions this statement's text came through, innermost
+    /// first — empty for a line the author wrote.
+    ///
+    /// vasm's errors come from the multi-pass layout and encode, long after the
+    /// expansion's origins are out of scope, so the frames have to travel with
+    /// the statement. Every other dialect attaches them from the node as it
+    /// lowers; this one has no lowering step to attach them in.
+    frames: Vec<crate::span::ExpansionFrame>,
     /// The file `line` counts within (language-surface U6): the root for a
     /// single-file assemble, an include's `FileId` otherwise. Layout/encode
     /// errors, warnings, and debug line records are stamped with it.
@@ -2147,11 +2154,28 @@ fn project_one_line(
         out.push(Line {
             line: node.span.line as usize,
             file: node.span.file,
+            frames: node.span.expansion_frames.clone(),
             label,
             kind,
         });
     }
     Ok(())
+}
+
+/// Stamp a statement's file **and** its expansion frames onto an error.
+///
+/// `stamp_file` alone leaves a diagnostic from inside a macro saying only what
+/// was wrong, never that the text was generated — which for generated code is
+/// most of the answer, because the failing line is nowhere in the file.
+fn stamp(e: AsmError, s: &Line) -> AsmError {
+    let mut e = ca65_flat::stamp_file(e, s.file);
+    if !s.frames.is_empty()
+        && let Some(span) = e.span.as_mut()
+        && span.expansion_frames.is_empty()
+    {
+        span.expansion_frames.clone_from(&s.frames);
+    }
+    e
 }
 
 /// Split a line into its code and its comment for carrying comments as AST
