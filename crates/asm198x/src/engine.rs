@@ -398,6 +398,44 @@ pub(crate) enum Piece {
     },
 }
 
+/// Where the location counter stands after `op`, given that it stood at `pc`
+/// before it. The one place an operation's width is decided.
+///
+/// It is shared because a dialect can need it too: ACME sizes a zero-page
+/// operand from the *value* of a backward label, which means its walk has to
+/// know addresses while it is still parsing (`decisions/acme-zero-page.md`).
+/// A second copy of these rules living in a front-end is how the two drift.
+///
+/// `Org` is not here. It sets the counter rather than advancing it, and its
+/// expression resolves against whichever symbol table the caller has — the
+/// engine's in pass 1, the walk's `env` in ACME. Nor are `Equ` and `Entry`,
+/// which emit nothing.
+pub(crate) fn next_pc(
+    op: &Operation,
+    pc: i64,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    addr_unit: i64,
+    line: usize,
+) -> Result<i64, AsmError> {
+    Ok(match op {
+        Operation::Bytes(items) => pc + items.len() as i64 / addr_unit,
+        Operation::Reserve(count) => pc + *count as i64,
+        // A binary payload occupies whole address units, the final partial unit
+        // zero-padded in pass 2 — so both passes count the same.
+        Operation::Binary(payload) => pc + payload.len().div_ceil(addr_unit as usize) as i64,
+        Operation::Words(items) => pc + 2 * items.len() as i64 / addr_unit,
+        Operation::Instruction { mnemonic, mode, .. } => {
+            pc + form(set, ext, mnemonic, mode, line)?.len() as i64 / addr_unit
+        }
+        Operation::Encoded(pieces) => pc + pieces.iter().map(Piece::len).sum::<i64>() / addr_unit,
+        Operation::Align { andmask, value, .. } => pc + ((value - pc) & andmask),
+        // Set the counter, bind a name, name an entry point — none of them a
+        // width. A caller that can reach these handles them itself.
+        Operation::Org(_) | Operation::Equ(_) | Operation::Entry(_) => pc,
+    })
+}
+
 impl Piece {
     fn len(&self) -> i64 {
         match self {
@@ -555,26 +593,9 @@ fn assemble_statements(
                     "program counter undefined — set an origin (`*=`) before any code or data",
                 ));
             }
-            Some(Operation::Bytes(items)) => pc += items.len() as i64 / addr_unit,
-            Some(Operation::Reserve(count)) => pc += *count as i64,
-            // A binary payload occupies whole address units, the final partial
-            // unit zero-padded in pass 2 — so both passes count the same.
-            Some(Operation::Binary(payload)) => {
-                pc += payload.len().div_ceil(addr_unit as usize) as i64;
+            Some(op) => {
+                pc = next_pc(op, pc, set, ext, addr_unit, s.line).map_err(|err| s.stamp(err))?;
             }
-            Some(Operation::Words(items)) => pc += 2 * items.len() as i64 / addr_unit,
-            Some(Operation::Instruction { mnemonic, mode, .. }) => {
-                pc += form(set, ext, mnemonic, mode, s.line)
-                    .map_err(|err| s.stamp(err))?
-                    .len() as i64
-                    / addr_unit;
-            }
-            Some(Operation::Encoded(pieces)) => {
-                pc += pieces.iter().map(Piece::len).sum::<i64>() / addr_unit;
-            }
-            Some(Operation::Equ(_)) => {}   // handled above
-            Some(Operation::Entry(_)) => {} // records a start address; emits nothing
-            Some(Operation::Align { andmask, value, .. }) => pc += (value - pc) & andmask,
         }
     }
     let mut origin = origin.unwrap_or(0);

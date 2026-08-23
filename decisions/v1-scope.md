@@ -3,7 +3,9 @@
 **Status:** Active. Binding for Asm198x. Sets the v1.0 bar and the scope of the
 stability promise the version number makes.
 
-**Date:** 2026-08-18.
+**Date:** 2026-08-18. **Amended 2026-08-23** — five of the six bar items are
+met; item 4 is restated as the *class* it was always reasoning about. See
+*Where the bar stands* below.
 
 ## The decision
 
@@ -80,8 +82,16 @@ Six items. Two are substantial; four are small.
 3. **Freeze Debug198x.** Leg 3 of the banked fixture's validation — the Emu198x
    paging cross-check — is the last open checklist item.
 
-4. **Fix the open accuracy bugs** (#66 8080 `ds` fill, #67 sjasmplus conditional
-   fringe). They are counter-examples to the exact claim 1.0 makes.
+4. **Empty the source-compatibility gap class.** Not two issues — the class.
+   The README's rule is that real-world source for a machine assembles
+   unchanged, and a form a reference accepts and we reject is a counter-example
+   to it. #66 and #67 were the two known members when this record was written;
+   closing them did not close the class, and #67 in particular was closed by
+   *carving two of its four forms out* into #98 and #99.
+
+   The bar is met when nothing of that shape is open. A form we deliberately
+   decline stays out of the class only if a decision record says why —
+   `syntax-stance.md`'s posture, not an empty issue list.
 
 5. **Move the CLI to subcommands.** `asm198x asm` / `asm198x disasm`, already
    decided in the packaging record for the Stage-3 checkpoint and deferred there
@@ -152,6 +162,36 @@ Bugs, then the cheap freeze, then the two substantial items, then the surface:
 6. Docs-site v1 core, carrying the dialect matrices generated in step 3
 7. Cut 1.0
 
+## Where the bar stands
+
+Measured 2026-08-23 against the artifacts, not against this record — which was
+written as outstanding work and had stopped describing the repository.
+
+| # | Item | State |
+|---|---|---|
+| 1 | Macros | **Met.** #93 closed 2026-08-23 — macros, repetition, modules. |
+| 2 | Verdict corpus v1a | **Met.** 5,747 verdicts over 22 CPUs, replayed by a tools-free CI status of its own. |
+| 3 | Debug198x freeze | **Met.** Frozen at v1, 2026-08-18 ([`debug198x-format.md`](debug198x-format.md)). |
+| 4 | The gap class | **Open.** See below. |
+| 5 | CLI subcommands | **Met.** `asm198x [asm\|disasm\|fmt]`. |
+| 6 | Docs and distribution | **Met.** Shell, PowerShell and Homebrew installers with a tap; a hand-written CLI reference; 21 generated dialect pages. |
+
+Item 4 is the only one left, and it is what the amendment restates. Open
+members, 2026-08-23:
+
+- **#205** — sjasmplus accepts the name-first `name MACRO` spelling; we refuse it.
+- **#128** — acme: comparisons in `!if`, zero-page sizing, strings in `!byte`.
+- **#98** — sjasmplus `:` as a statement separator. Carved out of #67.
+- **#99** — conditions on forward-referenced symbols. Carved out of #67.
+- **#126** — vasm accepts duplicate labels silently. The other direction: we are
+  too permissive, which is the same claim failing the same way.
+- **#87** — asl semantic pseudo-ops. A scope decision rather than a gap; it
+  leaves the class by being decided, whichever way.
+
+Three of these were found in the week before this amendment, while probing for
+other work. That is the argument for reading item 4 as a class: the two issues
+it named were the ones that happened to have been looked for.
+
 ## Drift triggers
 
 Re-consult this record before:
@@ -170,6 +210,12 @@ Re-consult this record before:
   See `rung1-wiring.md`.
 - *"Add \<feature\> to the 1.0 bar, it's nearly done."* → The bar is what makes
   the README's existing claims true. A feature that adds a *new* claim is 1.1.
+- *"#66 and #67 are closed, so item 4 is done."* → They were members of a class,
+  not the definition of it, and #67 was closed by moving half of it to #98 and
+  #99. Read *Where the bar stands* and check what is open of that shape.
+- *"Ship 1.0 with the gap class open; they are all narrow forms."* → Decided
+  2026-08-23: no. Narrowness is why they are cheap to close, not why they are
+  acceptable to ship. Every one of them is a file that does not assemble.
 - *"Ship 1.0 with the reference suites still `#[ignore]`d; they pass locally."* →
   That is the bus-factor-one trust chain #61 exists to remove, on the one claim
   the product is built around.

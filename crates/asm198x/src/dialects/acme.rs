@@ -878,6 +878,16 @@ struct AcmeEval<'a> {
     env: BTreeMap<String, i64>,
     /// Names bound by `!set` (rebindable): each use is baked to its current value.
     set_names: BTreeSet<String>,
+    /// Where the location counter stands, so a label can be bound to its
+    /// address as it is defined — which is what lets a *backward* reference
+    /// size to zero page (`decisions/acme-zero-page.md`).
+    ///
+    /// `None` means "not known here", and the walk falls back to what it did
+    /// before: no label address enters `env`, so every label reference sizes
+    /// absolute. That is the safe direction, and it is deliberate — a counter
+    /// that is merely *probably* right would pick zero page on a bad guess and
+    /// emit the wrong bytes, which is worse than the gap being fixed.
+    pc: Option<i64>,
     multi: Option<MultiCx<'a>>,
     /// The file the walk is currently inside — stamps condition-evaluation
     /// errors, which the shared walk raises without node context.
@@ -905,6 +915,9 @@ impl<'a> AcmeEval<'a> {
             anons: Anons::default(),
             env: BTreeMap::new(),
             set_names: BTreeSet::new(),
+            // No origin yet. ACME requires `*=` before code, so the first
+            // origin sets this before anything can be sized.
+            pc: None,
             multi,
             current_file: FileId(0),
             zone: String::new(),
@@ -1307,6 +1320,15 @@ impl crate::ast::CondEval for AcmeEval<'_> {
         {
             self.env.insert(name.clone(), v);
         }
+        // A plain label names the address the counter is standing on. Binding
+        // it here — before the counter moves — is what makes a later reference
+        // to it foldable, and so sizeable to zero page when it is low.
+        if let (Some(name), Some(pc)) = (&label, self.pc)
+            && !matches!(op, Some(Operation::Equ(_)))
+        {
+            self.env.insert(name.clone(), pc);
+        }
+        self.advance(op.as_ref(), line);
         if !(label.is_none() && op.is_none()) {
             out.push(Statement {
                 line,
@@ -1317,6 +1339,32 @@ impl crate::ast::CondEval for AcmeEval<'_> {
             });
         }
         Ok(())
+    }
+}
+
+impl AcmeEval<'_> {
+    /// Move the location counter over `op`, or give up on knowing where it is.
+    ///
+    /// The width comes from [`crate::engine::next_pc`], the same rule the
+    /// engine's own address pass uses — a second copy here is how the two
+    /// would drift apart, and a drifted counter is wrong bytes rather than a
+    /// missed optimisation.
+    ///
+    /// Giving up is a real outcome and not a failure: an `*=` whose expression
+    /// does not fold yet, or an operation whose form the ISA cannot supply,
+    /// leaves the counter unknown for the rest of the walk. Every label from
+    /// that point on stays symbolic and sizes absolute, which is what this
+    /// dialect did everywhere before.
+    fn advance(&mut self, op: Option<&Operation>, line: usize) {
+        let Some(op) = op else { return };
+        if let Operation::Org(e) = op {
+            self.pc = fold_const(e, &self.env, line).ok();
+            return;
+        }
+        let Some(pc) = self.pc else { return };
+        // ACME's 6502 is one byte per address unit, and it has no CPU where
+        // that is not so.
+        self.pc = crate::engine::next_pc(op, pc, self.set, None, 1, line).ok();
     }
 }
 
@@ -1727,10 +1775,21 @@ fn bake_expr(e: Expr, env: &BTreeMap<String, i64>, set_names: &BTreeSet<String>)
     }
 }
 
-/// Evaluate an `!if` condition: a comparison (`=`, `!=`, `<=`, `>=`) of two
-/// constant expressions, or a bare expression tested for non-zero. Single `<`/
-/// `>` comparisons are not supported (they collide with the byte prefixes); the
-/// curriculum uses only `=`.
+/// Evaluate an `!if` condition: a comparison of two constant expressions, or a
+/// bare expression tested for non-zero. Every operator the reference has —
+/// `=`, `!=`, `<>`, `<=`, `>=`, `<`, `>`.
+///
+/// The single `<` and `>` are the awkward ones, because ACME spells the
+/// low-byte and high-byte extracts with the same two characters (`lda #<v`).
+/// They are told apart by **position**: a `<` with an expression to its left is
+/// a comparison, and one with nothing to its left is a prefix. So `5 > 3`
+/// compares, `<v` extracts, and `<v > 3` does both — the scan finds the `<`
+/// first, sees nothing to its left, and keeps looking.
+///
+/// This is why they were left out originally, with the note that the
+/// curriculum only used `=`. The curriculum is not the instrument: it was
+/// written against what this assembler accepts, so it cannot signal demand for
+/// a form the assembler rejects — the same argument #93 makes about macros.
 fn eval_condition(
     anons: &Anons,
     zone: &str,
@@ -1741,20 +1800,75 @@ fn eval_condition(
     let value = |s: &str| -> Result<i64, AsmError> {
         fold_const(&parse_value(anons, zone, s, line)?, env, line)
     };
+    // A string is a type of its own to ACME, and **no operator applies to
+    // one** — `"a" = 97` is *"Cannot apply test for equality to string and
+    // number"*, the same refusal as `"a"+1`. A bare `!if "a"` is fine, so this
+    // guards the comparison operands rather than the condition.
+    let operand = |s: &str| -> Result<i64, AsmError> {
+        if lone_string_value(s.trim(), line).is_some() {
+            return Err(AsmError::new(
+                line,
+                format!("no operator applies to the string `{}`", s.trim()),
+            ));
+        }
+        value(s)
+    };
     let c = cond.trim();
     if let Some(i) = top_level_find(c, "!=") {
-        return Ok(value(&c[..i])? != value(&c[i + 2..])?);
+        return Ok(operand(&c[..i])? != operand(&c[i + 2..])?);
     }
     if let Some(i) = top_level_find(c, "<=") {
-        return Ok(value(&c[..i])? <= value(&c[i + 2..])?);
+        return Ok(operand(&c[..i])? <= operand(&c[i + 2..])?);
     }
     if let Some(i) = top_level_find(c, ">=") {
-        return Ok(value(&c[..i])? >= value(&c[i + 2..])?);
+        return Ok(operand(&c[..i])? >= operand(&c[i + 2..])?);
+    }
+    if let Some(i) = top_level_find(c, "<>") {
+        return Ok(operand(&c[..i])? != operand(&c[i + 2..])?);
     }
     if let Some(i) = top_level_lone_eq(c) {
-        return Ok(value(&c[..i])? == value(&c[i + 1..])?);
+        return Ok(operand(&c[..i])? == operand(&c[i + 1..])?);
+    }
+    if let Some(i) = infix_relation(c, b'<') {
+        return Ok(operand(&c[..i])? < operand(&c[i + 1..])?);
+    }
+    if let Some(i) = infix_relation(c, b'>') {
+        return Ok(operand(&c[..i])? > operand(&c[i + 1..])?);
     }
     Ok(value(c)? != 0)
+}
+
+/// The byte index of a top-level `op` used as a **comparison** rather than as a
+/// byte-extract prefix — that is, one with an expression to its left.
+///
+/// "An expression to its left" means non-empty text that does not end in an
+/// operator: `5 <` compares, `5 + <` does not, and neither does a bare `<`.
+/// The two-character operators are matched before this is reached, so a `<`
+/// found here is never the first half of `<=` or `<>`.
+fn infix_relation(s: &str, op: u8) -> Option<usize> {
+    let bytes = s.as_bytes();
+    let mut depth: i32 = 0;
+    let (mut in_char, mut in_str) = (false, false);
+    for i in 0..bytes.len() {
+        match bytes[i] {
+            b'\'' if !in_str => in_char = !in_char,
+            b'"' if !in_char => in_str = !in_str,
+            b'(' if !in_char && !in_str => depth += 1,
+            b')' if !in_char && !in_str => depth -= 1,
+            b if b == op && depth == 0 && !in_char && !in_str => {
+                let left = s[..i].trim_end();
+                let ends_in_operator = left
+                    .as_bytes()
+                    .last()
+                    .is_some_and(|c| b"+-*/&|^!<>=(,".contains(c));
+                if !left.is_empty() && !ends_in_operator {
+                    return Some(i);
+                }
+            }
+            _ => {}
+        }
+    }
+    None
 }
 
 /// Find `pat` at the top level (outside parentheses and strings).
@@ -2203,6 +2317,45 @@ fn parse_text(
     Ok(Operation::Bytes(bytes))
 }
 
+/// A `"…"` string standing alone as a value, which ACME accepts wherever it
+/// wants a number: `!byte "a"`, `!word "a"`, `lda #"a"`, `lda "a"` — and
+/// parenthesised, `!byte ("a")`.
+///
+/// It must hold exactly one character. ACME's own message is *"There's more
+/// than one character"*, because to ACME this is a **string** being coerced,
+/// not a character literal being lexed — which is also why it takes no
+/// operators: `"a"+1` is *"Cannot apply addition to string and number"*.
+///
+/// Recognising it here rather than in the tokenizer is what keeps that second
+/// half true. A string reached through this path is the whole value, so an
+/// expression using one as an operand never gets here and still fails to
+/// tokenize — a different message from ACME's, but the same answer.
+///
+/// `None` means "not a lone string, carry on"; `Some(Err(_))` means it was one
+/// and it was wrong.
+fn lone_string_value(trimmed: &str, line: usize) -> Option<Result<Expr, AsmError>> {
+    let mut inner = trimmed;
+    while let Some(stripped) = inner
+        .strip_prefix('(')
+        .and_then(|s| s.strip_suffix(')'))
+        .map(str::trim)
+    {
+        inner = stripped;
+    }
+    let body = inner.strip_prefix('"')?.strip_suffix('"')?;
+    if body.contains('"') {
+        return None;
+    }
+    let mut chars = body.chars();
+    Some(match (chars.next(), chars.next()) {
+        (Some(c), None) => Ok(Expr::Num(c as i64)),
+        _ => Err(AsmError::new(
+            line,
+            format!("`{inner}` is more than one character"),
+        )),
+    })
+}
+
 /// ACME's `!pet` conversion: ASCII to PETSCII (the default, unshifted set). The
 /// two swap letter case relative to each other — ASCII `A`–`Z` become `$C1`–`$DA`
 /// and ASCII `a`–`z` become `$41`–`$5A`; everything else passes through. Derived
@@ -2244,6 +2397,9 @@ fn parse_value(anons: &Anons, zone: &str, raw: &str, line: usize) -> Result<Expr
     let trimmed = raw.trim();
     if let Some((sign, level)) = anon_marker(trimmed) {
         return Ok(Expr::Sym(anon_ref_placeholder(sign, level, anons.vline)));
+    }
+    if let Some(expr) = lone_string_value(trimmed, line) {
+        return expr;
     }
     let expr = mos6502::parse_expr(
         raw,
@@ -3228,5 +3384,162 @@ mod tests {
 
         let again = crate::format_acme(&formatted).expect("formats");
         assert_eq!(formatted, again, "{formatted}");
+    }
+
+    // -----------------------------------------------------------------------
+    // #128 gaps 1 and 3. Probed against acme 0.97, 2026-08-23.
+    // -----------------------------------------------------------------------
+
+    /// `!if` has every comparison the reference has. `<` and `>` were left out
+    /// because they collide with the low-byte/high-byte prefixes, with a note
+    /// that the curriculum only used `=` — but the curriculum was written
+    /// against what this assembler accepts, so it cannot signal demand for a
+    /// form the assembler rejects.
+    #[test]
+    fn an_if_condition_takes_every_comparison() {
+        let taken = |c: &str| {
+            asm(&format!("* = $0000\n!if {c} {{\n lda #5\n}}\n"))
+                .unwrap_or_else(|e| panic!("`{c}`: {e}"))
+                .bytes
+                == vec![0xA9, 0x05]
+        };
+        assert!(taken("5 > 3"));
+        assert!(!taken("5 < 3"));
+        assert!(taken("3 < 5"));
+        assert!(!taken("3 > 5"));
+        assert!(taken("5 <> 3"));
+        assert!(!taken("5 <> 5"));
+        assert!(taken("5 >= 5"));
+        assert!(taken("5 <= 5"));
+        assert!(taken("5 = 5"));
+        assert!(taken("5 != 3"));
+        assert!(taken("1 + 2 > 2"), "the left side is a whole expression");
+    }
+
+    /// `<` and `>` are told apart from the byte prefixes by position: one with
+    /// an expression to its left compares, one with nothing to its left
+    /// extracts. `<$1234 > 3` does both — `$34` is 52, which is greater than 3.
+    #[test]
+    fn a_byte_prefix_is_not_a_comparison() {
+        assert_eq!(
+            asm("* = $0000\n!if <$1234 > 3 {\n lda #5\n}\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xA9, 0x05]
+        );
+        assert_eq!(
+            asm("* = $0000\n lda #<$1234\n lda #>$1234\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xA9, 0x34, 0xA9, 0x12],
+            "the prefixes still extract"
+        );
+    }
+
+    /// A `"…"` string of one character is a value wherever ACME wants a
+    /// number — and it is a *string* being coerced, not a character literal
+    /// being lexed, which is why it holds exactly one character and takes no
+    /// operators.
+    #[test]
+    fn a_one_character_string_is_a_value() {
+        let bytes = |src: &str| asm(src).unwrap_or_else(|e| panic!("{src}: {e}")).bytes;
+        assert_eq!(bytes("* = $0000\n !byte \"a\"\n"), vec![0x61]);
+        assert_eq!(bytes("* = $0000\n !byte (\"a\")\n"), vec![0x61]);
+        assert_eq!(bytes("* = $0000\n !byte \"a\", \"b\"\n"), vec![0x61, 0x62]);
+        assert_eq!(bytes("* = $0000\n !word \"a\"\n"), vec![0x61, 0x00]);
+        assert_eq!(bytes("* = $0000\n lda #\"a\"\n"), vec![0xA9, 0x61]);
+        assert_eq!(
+            bytes("* = $0000\n lda \"a\"\n"),
+            vec![0xA5, 0x61],
+            "it sizes like any other low value"
+        );
+    }
+
+    /// The other half of the string rule, and the reason it is recognised as a
+    /// whole value rather than lexed as a token: no operator applies to one.
+    #[test]
+    fn no_operator_applies_to_a_string() {
+        assert!(asm("* = $0000\n !byte \"a\"*1\n").is_err(), "arithmetic");
+        assert!(
+            asm("* = $0000\n !if \"a\" = 97 {\n lda #5\n}\n").is_err(),
+            "comparison"
+        );
+        assert!(
+            asm("* = $0000\n !byte \"ab\"\n").is_err(),
+            "more than one character"
+        );
+        assert_eq!(
+            asm("* = $0000\n!if \"a\" {\n lda #5\n}\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xA9, 0x05],
+            "but a bare string is testable"
+        );
+    }
+
+    // -----------------------------------------------------------------------
+    // #128 gap 3 — zero-page sizing from a tracked location counter
+    // (`decisions/acme-zero-page.md`). Probed against acme 0.97, 2026-08-23.
+    // -----------------------------------------------------------------------
+
+    /// A backward label with a low address sizes to zero page, because by the
+    /// time it is referenced its address is fixed and nothing later can move
+    /// it. We emitted absolute — the wrong size *and* the wrong byte count.
+    #[test]
+    fn a_backward_label_sizes_to_zero_page() {
+        assert_eq!(
+            asm("* = $0000\nlbl lda #5\n lda lbl\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xA9, 0x05, 0xA5, 0x00]
+        );
+        assert_eq!(
+            asm("* = $0000\n !byte 1,2,3\nlbl lda #5\n lda lbl\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x01, 0x02, 0x03, 0xA9, 0x05, 0xA5, 0x03],
+            "the counter follows data as well as code"
+        );
+    }
+
+    /// The three cases that must *not* shrink: a high address, a forward
+    /// reference (the reference warns and stays wide), and an operand the
+    /// dialect forces absolute.
+    #[test]
+    fn only_a_known_low_address_shrinks() {
+        assert_eq!(
+            asm("* = $0200\nlbl lda #5\n lda lbl\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xA9, 0x05, 0xAD, 0x00, 0x02],
+            "a high address stays absolute"
+        );
+        assert_eq!(
+            asm("* = $0000\n lda fwd\nfwd lda #5\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xAD, 0x03, 0x00, 0xA9, 0x05],
+            "a forward reference is not yet known"
+        );
+        assert_eq!(
+            asm("* = $0000\nlbl lda #5\n lda $0000\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xA9, 0x05, 0xAD, 0x00, 0x00],
+            "a 4-digit hex literal is 16-bit whatever its value"
+        );
+    }
+
+    /// Indexed forms pick per addressing mode: `lda abs,x` has a zero-page
+    /// form and `lda abs,y` does not, so the same label sizes differently in
+    /// the two — which is the 6502's rule, not ours.
+    #[test]
+    fn zero_page_sizing_follows_the_addressing_mode() {
+        assert_eq!(
+            asm("* = $0000\nlbl lda #5\n lda lbl,x\n lda lbl,y\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xA9, 0x05, 0xB5, 0x00, 0xB9, 0x00, 0x00]
+        );
     }
 }

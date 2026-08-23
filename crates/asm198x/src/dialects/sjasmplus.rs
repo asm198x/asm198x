@@ -200,6 +200,16 @@ impl Z80Syntax for SjasmplusSyntax {
         z80::module_keyword(word)
     }
 
+    /// The formatter must copy a macro definition rather than re-lay it out.
+    /// It survived without this while every spelling was indented — the
+    /// definition simply looked like an unrecognised line and came through
+    /// unchanged. The name-first spelling (#205) puts the name in the *label*
+    /// column, where the formatter peels it onto a line of its own and the
+    /// definition stops being one.
+    fn macro_line(&self, line: &str, known: &dyn Fn(&str) -> bool) -> macros::MacroLine {
+        macros::macro_line(self, line, known)
+    }
+
     /// sjasmplus scopes names under the open `MODULE`s (#93's third item).
     fn scopes_modules(&self) -> bool {
         true
@@ -356,27 +366,66 @@ impl Z80Syntax for SjasmplusSyntax {
 // why `val*2` with `val = 5` assembles to `ld a,10`.
 // ---------------------------------------------------------------------------
 
+/// Split a macro header's tail into its leading word and the rest — the name
+/// and its parameters in the keyword-first form, the keyword and the
+/// parameters in the name-first one.
+fn split_macro_name(rest: &str) -> (&str, &str) {
+    let rest = rest.trim();
+    match rest.split_once(char::is_whitespace) {
+        Some((word, tail)) => (word.trim(), tail.trim()),
+        None => (rest, ""),
+    }
+}
+
 impl macros::MacroSyntax for SjasmplusSyntax {
-    /// `MACRO name [p1[, p2]...]` — the keyword matched case-insensitively, the
-    /// name kept as written.
+    /// Two spellings, both the reference's (#205):
+    ///
+    /// ```text
+    ///     MACRO name [p1[, p2]...]     indented — the keyword leads
+    /// name[:] MACRO [p1[, p2]...]      column 0 — the name leads
+    /// ```
+    ///
+    /// The keyword matches case-insensitively; the name is kept as written and
+    /// stays case-sensitive at the call site.
+    ///
+    /// **Indentation decides which is which, and a line in the wrong column is
+    /// not a definition at all.** At column 0 the reference reads `MACRO` as a
+    /// label and the name after it as an instruction (probe n9); indented,
+    /// `mk MACRO a` is an unrecognised instruction rather than a definition
+    /// (probe n8). Both are errors there, and returning `None` makes them
+    /// errors here.
+    ///
+    /// Parameters are comma-separated in both forms, and a comma may not stand
+    /// between the keyword and the name in either (probes n10, n11) — which
+    /// the name check below rejects, where the previous grammar allowed it.
     fn header(&self, line: &str) -> Option<(String, Vec<String>)> {
-        let text = macros::without_comment(line).trim();
-        let (kw, rest) = text.split_once(char::is_whitespace)?;
-        if !kw.eq_ignore_ascii_case("macro") {
+        let text = macros::without_comment(line);
+        let indented = text.starts_with(char::is_whitespace);
+        let (first, rest) = text.trim().split_once(char::is_whitespace)?;
+        let (name, tail) = if first.eq_ignore_ascii_case("macro") {
+            if !indented {
+                return None;
+            }
+            split_macro_name(rest)
+        } else {
+            if indented {
+                return None;
+            }
+            let (kw, tail) = split_macro_name(rest);
+            if !kw.eq_ignore_ascii_case("macro") {
+                return None;
+            }
+            (first.trim_end_matches(':'), tail)
+        };
+        if name.is_empty() || name.contains(',') {
             return None;
         }
-        let rest = rest.trim();
-        let (name, params) = match rest.split_once(|c: char| c == ',' || c.is_whitespace()) {
-            Some((name, tail)) => (
-                name.trim(),
-                tail.split(',')
-                    .map(|p| p.trim().to_string())
-                    .filter(|p| !p.is_empty())
-                    .collect(),
-            ),
-            None => (rest, Vec::new()),
-        };
-        (!name.is_empty()).then(|| (name.to_string(), params))
+        let params = tail
+            .split(',')
+            .map(|p| p.trim().to_string())
+            .filter(|p| !p.is_empty())
+            .collect();
+        Some((name.to_string(), params))
     }
 
     /// `ENDM`, alone on its line.
@@ -434,6 +483,82 @@ impl macros::MacroSyntax for SjasmplusSyntax {
 #[cfg(test)]
 mod tests {
     use crate::assemble_sjasmplus as asm;
+
+    // -----------------------------------------------------------------------
+    // The two macro spellings (#205). Probes n1–n11 against SjASMPlus 1.21.0,
+    // run 2026-08-23.
+    // -----------------------------------------------------------------------
+
+    /// The reference takes the definition either way round, and the name-first
+    /// form carries parameters like the other (n1, n3, n4, n5).
+    #[test]
+    fn a_macro_may_be_defined_name_first() {
+        assert_eq!(
+            asm("mk MACRO a, b\n db a,b\n ENDM\n mk 1,2\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x01, 0x02]
+        );
+        assert_eq!(
+            asm("mk: MACRO a\n db a\n ENDM\n mk 3\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x03],
+            "the colon form is the same definition"
+        );
+        assert_eq!(
+            asm("mk macro a\n db a\n endm\n mk 4\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x04],
+            "the keyword is case-insensitive here too"
+        );
+        assert_eq!(
+            asm("mk MACRO\n nop\n ENDM\n mk\n").expect("assemble").bytes,
+            vec![0x00],
+            "no parameters"
+        );
+    }
+
+    /// Which spelling a line is depends on its **column**, and a line in the
+    /// wrong one is not a definition at all. The reference reads a column-0
+    /// `MACRO` as a label (n9), and an indented `mk MACRO a` as an
+    /// unrecognised instruction (n8). Both are errors there, and here.
+    #[test]
+    fn the_macro_spellings_are_told_apart_by_indentation() {
+        assert!(
+            asm(" mk MACRO a\n db a\n ENDM\n mk 8\n").is_err(),
+            "an indented name-first header is not a definition"
+        );
+        assert!(
+            asm("MACRO kw a\n db a\n ENDM\n kw 9\n").is_err(),
+            "a column-0 keyword-first header is not a definition"
+        );
+    }
+
+    /// Parameters are comma-separated in both spellings (n2, n7), and a comma
+    /// may not stand between the keyword and the name in either (n10, n11).
+    /// The last of these is a case the previous grammar accepted and the
+    /// reference does not.
+    #[test]
+    fn macro_parameters_are_comma_separated() {
+        assert!(
+            asm("mk MACRO a b\n db a,b\n ENDM\n mk 1,2\n").is_err(),
+            "space-separated parameters, name-first"
+        );
+        assert!(
+            asm(" MACRO kw a b\n db a,b\n ENDM\n kw 5,6\n").is_err(),
+            "space-separated parameters, keyword-first"
+        );
+        assert!(
+            asm("mk MACRO, a\n db a\n ENDM\n mk 10\n").is_err(),
+            "a comma after the keyword"
+        );
+        assert!(
+            asm(" MACRO kw, a\n db a\n ENDM\n kw 11\n").is_err(),
+            "a comma after the name — the reference calls it an illegal macro name"
+        );
+    }
 
     // -----------------------------------------------------------------------
     // Modules (#93's third item). Every case below is a probe against

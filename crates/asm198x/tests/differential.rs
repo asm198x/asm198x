@@ -365,6 +365,35 @@ const PROBES: &[Probe] = &[
     ok ("sjasmplus", "DEFINE is not module-scoped",
         " MODULE foo\n DEFINE V 5\n ENDMODULE\n db V\n"),
 
+    // #128 gaps 1 and 3 (2026-08-23). The comparison operators `<`, `>` and
+    // `<>` were missing because the first two collide with the byte prefixes;
+    // a one-character string is a value wherever acme wants a number.
+    ok ("acme", "!if relational operators",
+        "!if 5 > 3 {\n lda #1\n}\n!if 3 < 5 {\n lda #2\n}\n!if 5 <> 3 {\n lda #3\n}\n"),
+    ok ("acme", "!if relations that are false",
+        "!if 5 < 3 {\n lda #1\n}\n!if 3 > 5 {\n lda #2\n}\n!if 5 <> 5 {\n lda #3\n}\n lda #9\n"),
+    ok ("acme", "a byte prefix is not a comparison",
+        "!if <$1234 > 3 {\n lda #1\n}\n lda #<$1234\n lda #>$1234\n"),
+    ok ("acme", "!if on a whole left expression",
+        "!if 1 + 2 > 2 {\n lda #1\n}\n"),
+    ok ("acme", "a one-character string is a value",
+        " !byte \"a\"\n !byte (\"a\")\n !byte \"a\", \"b\"\n !word \"a\"\n lda #\"a\"\n lda \"a\"\n"),
+    ok ("acme", "a bare string condition is testable",
+        "!if \"a\" {\n lda #1\n}\n"),
+    // #128 gap 3: the one that changed bytes rather than rejecting source.
+    // A backward label with a low address sizes to zero page; a high one, a
+    // forward one, and a forced-absolute literal do not.
+    ok ("acme", "backward label sizes to zero page",
+        "lbl lda #5\n lda lbl\n"),
+    ok ("acme", "the counter follows data too",
+        " !byte 1,2,3\nlbl lda #5\n lda lbl\n"),
+    ok ("acme", "a forward label stays absolute",
+        " lda fwd\nfwd lda #5\n"),
+    ok ("acme", "zero-page sizing follows the mode",
+        "lbl lda #5\n lda lbl,x\n lda lbl,y\n"),
+    ok ("acme", "a 4-digit literal is 16-bit",
+        "lbl lda #5\n lda $0000\n"),
+
     // ---- macros (#93) -------------------------------------------------------
     // sjasmplus and pasmo have macros; the rest are still gaps — the reference
     // accepts the body and we reject it. Recording a gap puts that reference's
@@ -381,8 +410,8 @@ const PROBES: &[Probe] = &[
     // The spellings do not converge, which is why #93 insists on per-dialect
     // fidelity rather than a house macro system:
     //   MACRO name  / ENDM      sjasmplus, pasmo, rgbasm
-    //   name MACRO  / ENDM      asl, lwasm (implemented), vasm (implemented),
-    //                           pasmo, sjasmplus (#205)
+    //   name MACRO  / ENDM      asl, lwasm, vasm, pasmo, sjasmplus — all
+    //                           implemented
     //   .macro name / .endmacro ca65 (implemented)
     //   !macro name { }         acme (implemented)
     ok ("acme", "macro definition and invocation",
@@ -424,11 +453,16 @@ const PROBES: &[Probe] = &[
         " MACRO ldav, val\n ld a,val\n ENDM\n ldav 5\n"),
     // ...and it takes the definition the other way round too. So does
     // sjasmplus — the claim that it does not stood here unprobed until the
-    // module work measured it (#205), which is why nothing covered the form.
+    // module work measured it, which is why nothing covered the form. Both are
+    // arbitrated now (#205).
     ok ("pasmo", "macro defined name-first",
         "ldav MACRO val\n ld a,val\n ENDM\n ldav 5\n"),
-    gap("sjasmplus", "macro defined name-first",
-        "ldav MACRO val\n ld a,val\n ENDM\n ldav 5\n", 205),
+    ok ("sjasmplus", "macro defined name-first",
+        "ldav MACRO val\n ld a,val\n ENDM\n ldav 5\n"),
+    ok ("sjasmplus", "macro defined name-first, colon",
+        "ldav: MACRO val\n ld a,val\n ENDM\n ldav 5\n"),
+    ok ("sjasmplus", "macro defined name-first, no params",
+        "nop2 MACRO\n nop\n nop\n ENDM\n nop2\n"),
     // A macro with a loop is most of what macros are for. pasmo scopes nothing
     // by spelling: the label repeats cleanly only because `LOCAL` declares it.
     // The macro is called `delay`, not `m`: pasmo also knows the 8080 mnemonic
