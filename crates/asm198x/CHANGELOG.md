@@ -9,13 +9,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.30](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.29...asm198x-v0.0.30) - 2026-08-23
 
-### Added
-
-- *(asl)* decide every semantic directive, one at a time ([#215](https://github.com/asm198x/asm198x/pull/215))
-
 ### Fixed
 
-- *(cp1610)* speak strict asl, and give the corpus a way to retire a listing ([#218](https://github.com/asm198x/asm198x/pull/218))
+- **Nineteen `asl` directives that used to be refused as unknown mnemonics are
+  now answered properly.** Five change nothing and are accepted and dropped —
+  `outradix`, `message`, `warning`, `prtinit`, `shared`. Fourteen change what
+  the source *means*, and are refused with a diagnostic that says the source is
+  valid and the gap is ours rather than that the word does not exist:
+  `relaxed`, `radix`, `phase`/`dephase`, `align`, `enum`, `charset`, `segment`,
+  `save`/`restore`, `expect`/`endexpect`, `assume`, `function`.
+
+  The distinction is the point. `relaxed on` makes `db 012` emit ten instead of
+  twelve, so sweeping it into an ignore list would assemble a different program
+  and report success. Each of the nineteen was probed against asl on five chips
+  before being classified.
+  ([#215](https://github.com/asm198x/asm198x/pull/215))
+
+- **`supmode` is now accepted on the TMS9900**, which asl takes it on and we did
+  not. ([#215](https://github.com/asm198x/asm198x/pull/215))
+
+- **CP1610 listings speak strict asl.** `asm198x disasm` emitted Intel `0FFFFH`
+  hex for the chip and opened each listing with `relaxed on` to make asl accept
+  it. Strict `cpu CP-1600` takes its own `x'FFFF'` form and nothing else, so
+  that is what listings use now — and the assembler reads it, wherever it comes
+  from. ([#218](https://github.com/asm198x/asm198x/pull/218))
+
+### Added
+
+- **`cargo xtask supersede --cpu <CPU> --suite <suite>`** retires verdicts by
+  scope rather than by divergence tag. Changing a generated listing strands
+  every recorded fact keyed on the text it used to emit — those facts stay true
+  and stop being about source the project produces — and there was no way to
+  retire them. Maintainers only; the corpus stays append-only either way.
+  ([#218](https://github.com/asm198x/asm198x/pull/218))
 
 ## [0.0.29](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.28...asm198x-v0.0.29) - 2026-08-23
 
