@@ -30,9 +30,17 @@
 //! conditional-framework item rather than a macro one, because its count is an
 //! expression over the environment.
 //!
-//! TODO: sjasmplus modules, and macros across include boundaries. `ELSEIF` and
-//! the dotted conditional spellings landed 2026-08-18; colon-inline blocks and
-//! conditions on forward symbols remain open under #67.
+//! **Modules** (#93): `MODULE`/`ENDMODULE` prefix the names defined inside
+//! them, and a leading `@` escapes to the global scope. A reference has two
+//! candidates — the fully-qualified name and the bare global one, with no
+//! walk-up between — which is why the choice is repaired after the walk rather
+//! than made as each line is read. See
+//! `docs/plans/2026-08-23-001-feat-sjasmplus-modules-plan.md`.
+//!
+//! TODO: macros across include boundaries, and the name-first `name MACRO`
+//! spelling the reference also accepts (#205). `ELSEIF` and the dotted
+//! conditional spellings landed 2026-08-18; colon-inline blocks and conditions
+//! on forward symbols remain open under #67.
 
 use std::collections::BTreeMap;
 
@@ -101,6 +109,17 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "define",
         pattern: Pattern::Exact(&["define"]),
+        category: Category::Operation,
+    },
+    // Named by its opener, like the blocks above: `ENDMODULE`/`ENDMOD` are
+    // parts of the block rather than vocabulary of their own.
+    //
+    // Deliberately **not** in `is_directive`. The reference reads a column-0
+    // `MODULE` as a label and the name after it as an instruction (probe m27),
+    // so treating it as a directive would accept source sjasmplus rejects.
+    Directive {
+        id: "module",
+        pattern: Pattern::Exact(&["module"]),
         category: Category::Operation,
     },
 ];
@@ -175,6 +194,15 @@ impl Z80Syntax for SjasmplusSyntax {
 
     fn repeat_keyword(&self, word: &str) -> Option<z80::RepeatKw> {
         z80::repeat_keyword(word)
+    }
+
+    fn module_keyword(&self, word: &str) -> Option<z80::ModuleKw> {
+        z80::module_keyword(word)
+    }
+
+    /// sjasmplus scopes names under the open `MODULE`s (#93's third item).
+    fn scopes_modules(&self) -> bool {
+        true
     }
 
     fn is_define_word(&self, word: &str) -> bool {
@@ -406,6 +434,293 @@ impl macros::MacroSyntax for SjasmplusSyntax {
 #[cfg(test)]
 mod tests {
     use crate::assemble_sjasmplus as asm;
+
+    // -----------------------------------------------------------------------
+    // Modules (#93's third item). Every case below is a probe against
+    // SjASMPlus 1.21.0, run 2026-08-23 — the probe ids are the ones the plan
+    // (`docs/plans/2026-08-23-001-feat-sjasmplus-modules-plan.md`) tabulates.
+    // -----------------------------------------------------------------------
+
+    /// The base rule: a module prefixes the labels defined inside it, and the
+    /// qualified name is how the outside reaches them (m1). Nesting
+    /// concatenates with `.` (m5), and `ENDMOD` closes as well as `ENDMODULE`
+    /// (m7).
+    #[test]
+    fn a_module_prefixes_the_labels_defined_inside_it() {
+        assert_eq!(
+            asm("    MODULE foo\nbar: db 1\n    ENDMODULE\n    db foo.bar\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x01, 0x00]
+        );
+        assert_eq!(
+            asm(
+                "    MODULE foo\n    MODULE baz\nbar: db 1\n    ENDMODULE\n    \
+                 ENDMODULE\n    db foo.baz.bar\n"
+            )
+            .expect("assemble")
+            .bytes,
+            vec![0x01, 0x00]
+        );
+        assert_eq!(
+            asm("    MODULE foo\nbar: db 1\n    ENDMOD\n    db foo.bar\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x01, 0x00]
+        );
+    }
+
+    /// A reference has **two** candidates and only two: the fully-qualified
+    /// name, then the bare global one. Inside `foo`, `bar` finds `foo.bar`
+    /// (m2) and `top` finds the global `top` (m13) — but outside, `bar` finds
+    /// nothing (m3).
+    #[test]
+    fn a_reference_tries_the_qualified_name_then_the_global_one() {
+        assert_eq!(
+            asm("    MODULE foo\nbar: db 1\n    db bar\n    ENDMODULE\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x01, 0x00]
+        );
+        assert_eq!(
+            asm("top: db 9\n    MODULE foo\n    db top\n    ENDMODULE\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x09, 0x00]
+        );
+        assert!(
+            asm("    MODULE foo\nbar: db 1\n    ENDMODULE\n    db bar\n").is_err(),
+            "a module's name is not visible unqualified from outside"
+        );
+    }
+
+    /// The qualified candidate wins when both exist (m31) — so a module may
+    /// shadow a global of the same name without the outer one leaking in.
+    #[test]
+    fn the_qualified_candidate_wins_over_the_global_one() {
+        assert_eq!(
+            asm("x equ $AA\n    MODULE foo\nx equ $BB\n    db x\n    ENDMODULE\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xBB]
+        );
+    }
+
+    /// There is **no walk-up**: an inner module does not see an outer module's
+    /// unqualified names, only its own and the globals (m8, m32). This is the
+    /// rule that makes the two-candidate model a model rather than a shortcut,
+    /// so it gets its own test.
+    #[test]
+    fn an_inner_module_does_not_see_the_outer_modules_names() {
+        assert!(
+            asm(
+                "    MODULE foo\nouter: db 1\n    MODULE baz\n    db outer\n    \
+                 ENDMODULE\n    ENDMODULE\n"
+            )
+            .is_err(),
+            "`outer` is `foo.outer`; `foo.baz` reaches neither it nor a global"
+        );
+        assert_eq!(
+            asm("g equ $CC\n    MODULE foo\n    MODULE baz\n    db g\n    \
+                 ENDMODULE\n    ENDMODULE\n")
+            .expect("assemble")
+            .bytes,
+            vec![0xCC],
+            "the second candidate is the global, at any depth"
+        );
+    }
+
+    /// The choice between the two candidates cannot be made as the line is
+    /// read: either may be defined later (m33, m34). Both directions resolve.
+    #[test]
+    fn a_forward_reference_picks_the_right_candidate() {
+        assert_eq!(
+            asm("    MODULE foo\n    db bar\nbar equ $DD\n    ENDMODULE\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xDD]
+        );
+        assert_eq!(
+            asm("    MODULE foo\n    db g\n    ENDMODULE\ng equ $EE\n")
+                .expect("assemble")
+                .bytes,
+            vec![0xEE]
+        );
+    }
+
+    /// A leading `@` escapes module scoping — on a definition (m4, m15), on a
+    /// reference (m9), and on an already-dotted name (m30).
+    #[test]
+    fn an_at_sign_escapes_the_module_scope() {
+        assert_eq!(
+            asm("    MODULE foo\n@bar: db 1\n    ENDMODULE\n    db bar\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x01, 0x00]
+        );
+        assert_eq!(
+            asm(
+                "    MODULE foo\n    MODULE baz\n@bar: db 1\n    ENDMODULE\n    \
+                 ENDMODULE\n    db bar\n"
+            )
+            .expect("assemble")
+            .bytes,
+            vec![0x01, 0x00]
+        );
+        assert_eq!(
+            asm("    MODULE foo\nbar: db 1\n    ENDMODULE\ntop: db 2\n    \
+                 MODULE foo2\n    db @top\n    ENDMODULE\n")
+            .expect("assemble")
+            .bytes,
+            vec![0x01, 0x02, 0x01]
+        );
+        assert_eq!(
+            asm("    MODULE foo\nbar: db 1\n    ENDMODULE\n    db @foo.bar\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x01, 0x00]
+        );
+    }
+
+    /// Locals compose *under* modules, not beside them: the leading-`.` rule
+    /// runs first and the module prefix wraps its result, so `.loc` under
+    /// `glob` inside `foo` is `foo.glob.loc` (m6, m25).
+    #[test]
+    fn a_local_label_inside_a_module_is_qualified_by_both() {
+        assert_eq!(
+            asm("    MODULE foo\nglob:\n.loc: db 1\n    db glob.loc\n    ENDMODULE\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x01, 0x00]
+        );
+        assert_eq!(
+            asm("    MODULE foo\nglob:\n.loc: db 1\n    ENDMODULE\n    db foo.glob.loc\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x01, 0x00]
+        );
+    }
+
+    /// A macro is not module-scoped, but its *expansion* is: the labels a
+    /// macro defines take the prefix of wherever it was invoked (m18, m23).
+    #[test]
+    fn a_macro_expands_into_the_module_that_invoked_it() {
+        assert_eq!(
+            asm(
+                "    MACRO mk\nlbl: db 1\n    ENDM\n    MODULE foo\n    mk\n    \
+                 ENDMODULE\n    db foo.lbl\n"
+            )
+            .expect("assemble")
+            .bytes,
+            vec![0x01, 0x00]
+        );
+        assert_eq!(
+            asm("    MODULE foo\n    MACRO mk\n    db 1\n    ENDM\n    ENDMODULE\n    mk\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x01],
+            "the macro name itself stays global"
+        );
+    }
+
+    /// `DEFINE` is not module-scoped either (m24), and `equ` is (m11).
+    #[test]
+    fn equ_is_module_scoped_and_define_is_not() {
+        assert_eq!(
+            asm("    MODULE foo\nbar equ 7\n    ENDMODULE\n    db foo.bar\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x07]
+        );
+        assert_eq!(
+            asm("    MODULE foo\n    DEFINE V 5\n    ENDMODULE\n    db V\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x05]
+        );
+    }
+
+    /// Reopening a module name adds to it rather than starting again (m12).
+    #[test]
+    fn a_module_may_be_reopened() {
+        assert_eq!(
+            asm(
+                "    MODULE foo\nbar: db 1\n    ENDMODULE\n    MODULE foo\nbaz: db 2\n    \
+                 ENDMODULE\n    db foo.bar, foo.baz\n"
+            )
+            .expect("assemble")
+            .bytes,
+            vec![0x01, 0x02, 0x00, 0x01]
+        );
+    }
+
+    /// The keyword follows the same strict case rule as the conditionals and
+    /// repetition — all-lower or all-upper, never mixed (m21, m26).
+    #[test]
+    fn the_module_keyword_is_all_one_case() {
+        assert_eq!(
+            asm("    module foo\nbar: db 1\n    endmodule\n    db foo.bar\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x01, 0x00]
+        );
+        assert!(
+            asm("    Module foo\nbar: db 1\n    EndModule\n").is_err(),
+            "the reference answers `Module` with `Unrecognized instruction`"
+        );
+    }
+
+    /// The reference reads a column-0 `MODULE` as a *label* and the name after
+    /// it as an instruction (m27), so `MODULE` is deliberately absent from the
+    /// directive set that suppresses column-0 label parsing. Indentation is
+    /// load-bearing, in the reference and here.
+    #[test]
+    fn a_column_zero_module_is_a_label_not_a_directive() {
+        assert!(
+            asm("MODULE foo\nbar: db 1\nENDMODULE\n    db foo.bar\n").is_err(),
+            "`foo` is then an unknown instruction, as in the reference"
+        );
+    }
+
+    /// The three malformed cases: no name (m10), a dotted name, which is not a
+    /// nesting shorthand (m29), and a close with nothing open (m20).
+    #[test]
+    fn a_malformed_module_is_refused() {
+        assert!(
+            asm("    MODULE\nbar: db 1\n    ENDMODULE\n").is_err(),
+            "no name"
+        );
+        assert!(
+            asm("    MODULE foo.baz\nbar: db 1\n    ENDMODULE\n").is_err(),
+            "a dotted name is rejected, not read as nesting"
+        );
+        assert!(
+            asm("    endmodule\nx: db 1\n").is_err(),
+            "close with nothing open"
+        );
+    }
+
+    /// A module left open at EOF assembles (m19). The reference warns as well;
+    /// `Dialect::parse` has no warning channel, so the advisory is the one
+    /// deliberate divergence here — the bytes are what the identity claim is
+    /// about, and erroring would reject source sjasmplus takes.
+    #[test]
+    fn an_unclosed_module_still_assembles() {
+        assert_eq!(
+            asm("    MODULE foo\nbar: db 1\n").expect("assemble").bytes,
+            vec![0x01]
+        );
+    }
+
+    /// Modules are sjasmplus's alone: pasmo shares the whole Z80 core, and
+    /// must not pick the spelling up through it.
+    #[test]
+    fn pasmo_does_not_have_modules() {
+        assert!(
+            crate::assemble_pasmo("    MODULE foo\nbar: db 1\n    ENDMODULE\n").is_err(),
+            "pasmo has no MODULE"
+        );
+    }
 
     /// The keyword is case-insensitive but the **name** is not — measured
     /// against sjasmplus 1.21.0, and not a combination anyone would guess.

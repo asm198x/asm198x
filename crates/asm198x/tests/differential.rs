@@ -335,6 +335,36 @@ const PROBES: &[Probe] = &[
     gap("sjasmplus", "IF on a forward label (multi-pass)",
         " IF later\n ld a,1\n ENDIF\nlater: nop\n", 99),
 
+    // Modules (#93's third item, 2026-08-23). The error cases — no walk-up, a
+    // dotted module name, `ENDMODULE` with nothing open — are not here: this
+    // harness skips a body the reference rejects, so they live in the unit
+    // tests where the rejection itself is the assertion.
+    ok ("sjasmplus", "module qualifies its labels",
+        " MODULE foo\nbar: db 1\n ENDMODULE\n db foo.bar\n"),
+    ok ("sjasmplus", "nested modules concatenate",
+        " MODULE foo\n MODULE baz\nbar: db 1\n ENDMODULE\n ENDMODULE\n db foo.baz.bar\n"),
+    ok ("sjasmplus", "reference falls back to the global",
+        "top: db 9\n MODULE foo\n db top\n ENDMODULE\n"),
+    ok ("sjasmplus", "qualified candidate shadows the global",
+        "x equ $AA\n MODULE foo\nx equ $BB\n db x\n ENDMODULE\n"),
+    ok ("sjasmplus", "@ escapes the module scope",
+        " MODULE foo\n@bar: db 1\n ENDMODULE\n db bar\n MODULE baz\n db @bar\n ENDMODULE\n"),
+    ok ("sjasmplus", "locals qualify under modules",
+        " MODULE foo\nglob:\n.loc: db 1\n ENDMODULE\n db foo.glob.loc\n"),
+    ok ("sjasmplus", "forward reference inside a module",
+        " MODULE foo\n db bar\nbar equ $DD\n ENDMODULE\n db g\ng equ $EE\n"),
+    ok ("sjasmplus", "a module may be reopened",
+        " MODULE foo\nbar: db 1\n ENDMODULE\n MODULE foo\nbaz: db 2\n ENDMODULE\n \
+         db foo.bar, foo.baz\n"),
+    ok ("sjasmplus", "ENDMOD closes as well as ENDMODULE",
+        " MODULE foo\nbar: db 1\n ENDMOD\n db foo.bar\n"),
+    ok ("sjasmplus", "lowercase module spelling",
+        " module foo\nbar: db 1\n endmodule\n db foo.bar\n"),
+    ok ("sjasmplus", "a macro expands into the invoking module",
+        " MACRO mk\nlbl: db 1\n ENDM\n MODULE foo\n mk\n ENDMODULE\n db foo.lbl\n"),
+    ok ("sjasmplus", "DEFINE is not module-scoped",
+        " MODULE foo\n DEFINE V 5\n ENDMODULE\n db V\n"),
+
     // ---- macros (#93) -------------------------------------------------------
     // sjasmplus and pasmo have macros; the rest are still gaps — the reference
     // accepts the body and we reject it. Recording a gap puts that reference's
@@ -351,7 +381,8 @@ const PROBES: &[Probe] = &[
     // The spellings do not converge, which is why #93 insists on per-dialect
     // fidelity rather than a house macro system:
     //   MACRO name  / ENDM      sjasmplus, pasmo, rgbasm
-    //   name MACRO  / ENDM      asl, lwasm (implemented), vasm (implemented), pasmo
+    //   name MACRO  / ENDM      asl, lwasm (implemented), vasm (implemented),
+    //                           pasmo, sjasmplus (#205)
     //   .macro name / .endmacro ca65 (implemented)
     //   !macro name { }         acme (implemented)
     ok ("acme", "macro definition and invocation",
@@ -391,10 +422,13 @@ const PROBES: &[Probe] = &[
     // takes a space — the same keyword, a different grammar.
     ok ("pasmo", "macro with a parameter",
         " MACRO ldav, val\n ld a,val\n ENDM\n ldav 5\n"),
-    // ...and it takes the definition the other way round too, which sjasmplus
-    // does not.
+    // ...and it takes the definition the other way round too. So does
+    // sjasmplus — the claim that it does not stood here unprobed until the
+    // module work measured it (#205), which is why nothing covered the form.
     ok ("pasmo", "macro defined name-first",
         "ldav MACRO val\n ld a,val\n ENDM\n ldav 5\n"),
+    gap("sjasmplus", "macro defined name-first",
+        "ldav MACRO val\n ld a,val\n ENDM\n ldav 5\n", 205),
     // A macro with a loop is most of what macros are for. pasmo scopes nothing
     // by spelling: the label repeats cleanly only because `LOCAL` declares it.
     // The macro is called `delay`, not `m`: pasmo also knows the 8080 mnemonic

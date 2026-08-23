@@ -68,6 +68,21 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// Which end of a module block this word is, in this dialect's spelling.
+    /// Defaulted to "none": modules are sjasmplus's, and a dialect without
+    /// them must not silently accept the spelling.
+    fn module_keyword(&self, word: &str) -> Option<ModuleKw> {
+        let _ = word;
+        None
+    }
+
+    /// Whether `MODULE` scoping is live — the module stack prefixes label
+    /// definitions and references, and a leading `@` escapes it. Defaults off,
+    /// which also leaves `@` an invalid character everywhere else.
+    fn scopes_modules(&self) -> bool {
+        false
+    }
+
     /// Whether `word` names a directive. Defaults to the common set.
     fn is_directive(&self, word: &str) -> bool {
         is_common_directive(word)
@@ -443,6 +458,40 @@ pub(crate) fn repeat_keyword(word: &str) -> Option<RepeatKw> {
     Some(match word {
         "dup" | "DUP" | "rept" | "REPT" => RepeatKw::Open,
         "edup" | "EDUP" | "endr" | "ENDR" => RepeatKw::Close,
+        _ => return None,
+    })
+}
+
+/// Rewrite one reference under the open modules: `@name` escapes to the bare
+/// global name, anything else is qualified and its bare fallback recorded in
+/// `aliases` for [`SjasmEval::finish`] to choose between.
+fn module_ref(name: String, prefix: &str, aliases: &mut BTreeMap<String, String>) -> String {
+    if let Some(bare) = name.strip_prefix('@') {
+        return bare.to_string();
+    }
+    if prefix.is_empty() {
+        return name;
+    }
+    let qualified = format!("{prefix}{name}");
+    aliases.insert(qualified.clone(), name);
+    qualified
+}
+
+/// Which end of a `MODULE` block a word is.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub(crate) enum ModuleKw {
+    Open,
+    Close,
+}
+
+/// sjasmplus's module spelling: `MODULE` opens; `ENDMODULE` and `ENDMOD` both
+/// close. The same strict case rule the conditionals and repetition follow —
+/// all-lower or all-upper, never mixed: the reference answers `Module foo`
+/// with `Unrecognized instruction` (probe m26).
+pub(crate) fn module_keyword(word: &str) -> Option<ModuleKw> {
+    Some(match word {
+        "module" | "MODULE" => ModuleKw::Open,
+        "endmodule" | "ENDMODULE" | "endmod" | "ENDMOD" => ModuleKw::Close,
         _ => return None,
     })
 }
@@ -970,8 +1019,20 @@ struct SjasmEval<'a, S: Z80Syntax> {
     /// `DEFINE` bindings: name → verbatim replacement text (may be empty for
     /// the bare flag form). Case-sensitive (probe p22).
     defines: BTreeMap<String, String>,
-    /// The most recent global (non-`.`) label, for qualifying locals.
+    /// The most recent global (non-`.`) label, for qualifying locals. Kept
+    /// *unprefixed*: the module prefix wraps the result, so a local under
+    /// `glob` inside module `foo` is `foo.glob.loc` (probe m25).
     current_global: Option<String>,
+    /// Open `MODULE` names, outermost first. Their dotted join prefixes every
+    /// label defined and every name referenced inside.
+    modules: Vec<String>,
+    /// Module-qualified reference → the bare name it falls back to. The
+    /// reference tries the qualified name first and the *global* name second,
+    /// with no walk-up through intermediate levels (probes m8/m13/m31); which
+    /// one is right depends on what ends up defined, including by a definition
+    /// the walk has not reached yet, so the choice is repaired in
+    /// [`SjasmEval::finish`] once the whole stream is known.
+    aliases: BTreeMap<String, String>,
     multi: Option<MultiCx<'a>>,
     /// The file the walk is currently inside — stamps condition-evaluation
     /// errors, which the shared walk raises without node context.
@@ -992,6 +1053,8 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             consts: BTreeMap::new(),
             defines: BTreeMap::new(),
             current_global: None,
+            modules: Vec::new(),
+            aliases: BTreeMap::new(),
             multi,
             current_file: FileId(0),
         }
@@ -1016,16 +1079,98 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         } else {
             name.to_string()
         };
-        if self.syntax.scopes_locals() && name.starts_with('.') {
-            return Ok(match &self.current_global {
+        // `@name` opts out of both scopes and defines the bare global name
+        // (probes m4/m15) — it does not become the current global either.
+        if self.syntax.scopes_modules()
+            && let Some(bare) = name.strip_prefix('@')
+        {
+            return Ok(bare.to_string());
+        }
+        let scoped = if self.syntax.scopes_locals() && name.starts_with('.') {
+            match &self.current_global {
                 Some(g) => format!("{g}{name}"),
                 None => name,
-            });
+            }
+        } else {
+            if self.syntax.scopes_locals() {
+                self.current_global = Some(name.clone());
+            }
+            name
+        };
+        Ok(format!("{}{scoped}", self.module_prefix()))
+    }
+
+    /// The dotted prefix the open modules impose, `""` when none are open (so
+    /// a dialect without modules pays only an empty `format!`).
+    fn module_prefix(&self) -> String {
+        if self.modules.is_empty() {
+            String::new()
+        } else {
+            format!("{}.", self.modules.join("."))
         }
-        if self.syntax.scopes_locals() {
-            self.current_global = Some(name.clone());
+    }
+
+    /// Open or close a module scope. Nothing is emitted: a module is a naming
+    /// rule, not an operation.
+    fn lower_module(&mut self, kw: ModuleKw, args: &str, line: usize) -> Result<(), AsmError> {
+        match kw {
+            ModuleKw::Open => {
+                let name = args.trim();
+                if name.is_empty() {
+                    return Err(AsmError::new(line, "`MODULE` needs a name"));
+                }
+                // The reference rejects a dotted name rather than reading it as
+                // a nesting shorthand (probe m29).
+                if name.contains('.') {
+                    return Err(AsmError::new(
+                        line,
+                        format!("dots are not allowed in the module name `{name}`"),
+                    ));
+                }
+                if !is_ident(name) {
+                    return Err(AsmError::new(line, format!("bad module name `{name}`")));
+                }
+                self.modules.push(name.to_string());
+            }
+            ModuleKw::Close => {
+                if self.modules.pop().is_none() {
+                    return Err(AsmError::new(line, "`ENDMODULE` without `MODULE`"));
+                }
+            }
         }
-        Ok(name)
+        Ok(())
+    }
+
+    /// Choose between each module reference's two candidates, now that the
+    /// whole statement stream — and so the set of defined names — is known.
+    ///
+    /// A reference keeps its qualified spelling unless that name is undefined
+    /// *and* the bare one is defined. Keeping it when neither exists is what
+    /// makes the error name the same candidate the reference names.
+    fn finish(&mut self, mut out: Vec<Statement>) -> Vec<Statement> {
+        if self.aliases.is_empty() {
+            return out;
+        }
+        let mut defined: std::collections::BTreeSet<String> =
+            out.iter().filter_map(|s| s.label.clone()).collect();
+        defined.extend(self.consts.keys().cloned());
+        let fix: BTreeMap<&str, &str> = self
+            .aliases
+            .iter()
+            .filter(|(q, bare)| !defined.contains(*q) && defined.contains(*bare))
+            .map(|(q, bare)| (q.as_str(), bare.as_str()))
+            .collect();
+        if fix.is_empty() {
+            return out;
+        }
+        for st in &mut out {
+            if let Some(op) = st.op.take() {
+                st.op = Some(crate::ast::map_syms(op, &mut |s| {
+                    fix.get(s.as_str()).map_or(s, |bare| (*bare).to_string())
+                }));
+            }
+        }
+        out
     }
 
     /// Bind a directive line's label at the current address as a label-only
@@ -1079,6 +1224,9 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         // chained to a fixed point (probes p4/p5/p20/p21/p24).
         let src = substitute_defines(&node.source, &self.defines, line)?;
         let (word, args) = split_first_word(&src);
+        if let Some(kw) = self.syntax.module_keyword(word) {
+            return self.lower_module(kw, args, line);
+        }
         if self.syntax.is_include(word) {
             return self.lower_include(node, args, out);
         }
@@ -1099,6 +1247,13 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             && let Some(g) = &self.current_global
         {
             op = op.map(|o| crate::ast::qualify_locals(o, g));
+        }
+        // Module qualification wraps the local rule's result, matching the
+        // definition side: `.loc` under `glob` inside `foo` is `foo.glob.loc`.
+        if self.syntax.scopes_modules() {
+            let prefix = self.module_prefix();
+            let aliases = &mut self.aliases;
+            op = op.map(|o| crate::ast::map_syms(o, &mut |s| module_ref(s, &prefix, aliases)));
         }
         // `equ` binds its (qualified) label to a parse-time constant.
         if let (Some(q), Some(Operation::Equ(e))) = (&label, &op)
@@ -1318,7 +1473,7 @@ pub(crate) fn assemble_keyword<S: Z80Syntax>(
     let mut eval = SjasmEval::new(syntax, set, ext, None);
     let mut out = Vec::new();
     crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
-    Ok(out)
+    Ok(eval.finish(out))
 }
 
 /// Parse a multi-file keyword-conditional program to the engine's statement
@@ -1345,7 +1500,7 @@ pub(crate) fn parse_program_multi_keyword<S: Z80Syntax>(
     );
     let mut out = Vec::new();
     crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
-    Ok(out)
+    Ok(eval.finish(out))
 }
 
 /// Expand `DEFINE` names in one line of source, per the probe-pinned
@@ -1685,7 +1840,7 @@ fn split_label<'a, S: Z80Syntax>(
     if let Some(colon) = trimmed.find(':') {
         let before = &trimmed[..colon];
         if !before.contains(char::is_whitespace) {
-            if !is_ident(before.trim()) {
+            if !is_label_ident(syntax, before.trim()) {
                 return Err(AsmError::new(
                     line,
                     format!("invalid label `{}`", before.trim()),
@@ -1701,7 +1856,7 @@ fn split_label<'a, S: Z80Syntax>(
     if has_mnemonic(set, ext, &word.to_ascii_uppercase()) || syntax.is_directive(word) {
         return Ok((None, trimmed));
     }
-    if !is_ident(word) {
+    if !is_label_ident(syntax, word) {
         return Err(AsmError::new(line, format!("invalid label `{word}`")));
     }
     Ok((Some(word.to_string()), remainder))
@@ -2398,9 +2553,16 @@ fn tokenize_impl<S: Z80Syntax>(
                 let s: String = chars[start..i].iter().collect();
                 tokens.push(Tok::Num(syntax.parse_number(&s, line)?));
             }
-            // An identifier: letters, digits, `_`, `.` (not starting with a digit).
-            l if l.is_ascii_alphabetic() || l == '_' || l == '.' => {
+            // An identifier: letters, digits, `_`, `.` (not starting with a
+            // digit), and — where modules are live — a leading `@`, which
+            // names the global scope (probes m9/m30).
+            l if l.is_ascii_alphabetic()
+                || l == '_'
+                || l == '.'
+                || (l == '@' && syntax.scopes_modules()) =>
+            {
                 let start = i;
+                i += 1;
                 while i < chars.len()
                     && (chars[i].is_ascii_alphanumeric() || chars[i] == '_' || chars[i] == '.')
                 {
@@ -2554,6 +2716,16 @@ fn split_first_word(s: &str) -> (&str, &str) {
 
 /// An identifier: letters, digits, `_`, and `.` (the last so local-style labels
 /// like `.loop` read as ordinary names), not starting with a digit.
+/// A label name as this dialect spells it: [`is_ident`], plus the leading `@`
+/// that escapes module scoping where modules are live (probe m4).
+fn is_label_ident<S: Z80Syntax>(syntax: &S, s: &str) -> bool {
+    let s = s.trim();
+    match s.strip_prefix('@') {
+        Some(rest) if syntax.scopes_modules() => is_ident(rest),
+        _ => is_ident(s),
+    }
+}
+
 fn is_ident(s: &str) -> bool {
     let s = s.trim();
     let mut chars = s.chars();
