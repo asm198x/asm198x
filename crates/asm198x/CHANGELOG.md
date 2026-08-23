@@ -7,6 +7,44 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.28](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.27...asm198x-v0.0.28) - 2026-08-23
+
+### Added
+
+- **sjasmplus source using `MODULE` now assembles.** A module prefixes the names
+  defined inside it, `@` escapes to the global scope, nesting concatenates, and
+  `EQU` is scoped while macros and `DEFINE`s are not — which is how a Spectrum
+  project keeps two libraries from colliding. Resolution matches the reference
+  exactly, including the part that is easy to get wrong: a name inside a module
+  has two candidates, the fully-qualified one and the bare global one, and
+  nothing in between. An inner module does not see an outer one's unqualified
+  names. Twelve snippets are arbitrated byte-for-byte against SjASMPlus 1.21.0.
+  ([#206](https://github.com/asm198x/asm198x/pull/206))
+
+  One difference from the reference, which changes no bytes: it warns on a
+  module left open at end of file and assembles anyway. asm198x accepts it
+  silently.
+
+  This was the last of the three items in the macro stage. Macros, repetition
+  and modules are now all present in every dialect whose reference has them.
+
+### Fixed
+
+- **An error raised inside a macro expansion now says which macro it came
+  from.** Two things were dropping the defined-at/invoked-at chain: parse-time
+  errors lost it in every dialect, because the frames were only attached to an
+  error that already carried a source span, and vasm lost it everywhere,
+  because its errors are raised after the tree has been projected to its own
+  layout form. Both now print what the other dialects already printed:
+
+  ```text
+  asm198x: v.asm:4: error: unknown instruction `FROBNICATE`
+  in expansion of macro `bad` invoked at line 4
+  ```
+
+  Nested expansions list the whole chain, outermost last.
+  ([#203](https://github.com/asm198x/asm198x/pull/203))
+
 ## [0.0.27](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.26...asm198x-v0.0.27) - 2026-08-23
 
 ### Added
