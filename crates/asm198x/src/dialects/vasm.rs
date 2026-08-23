@@ -449,6 +449,8 @@ fn assemble_core(
     }
     let nsec = sec_meta.len();
 
+    check_redefinitions(&stmts)?;
+
     // Relocatable symbols and the section each lives in.
     let mut reloc: BTreeSet<String> = BTreeSet::new();
     let mut sec_of: BTreeMap<String, usize> = BTreeMap::new();
@@ -751,6 +753,53 @@ fn stmt_emits(kind: &Stmt) -> bool {
         kind,
         Stmt::Insn { .. } | Stmt::Dc(..) | Stmt::Ds(..) | Stmt::Dcb(..) | Stmt::Even | Stmt::Raw(_)
     )
+}
+
+/// Refuse a name defined twice (#126).
+///
+/// vasm has no rebindable form here — no `set` — so every label and every
+/// `equ` is a definition, and a repeat is an error however the two are
+/// spelled: label then label is *"label <x> redefined"*, and anything
+/// involving an `equ` is *"repeatedly defined symbol <x>"*. Both messages are
+/// carried through, because which one a reader gets tells them which
+/// definition the reference thought was the odd one.
+///
+/// This is its own pass rather than a check inside [`layout`], which re-runs
+/// per relaxation round and would report the same collision once a round.
+///
+/// The direction matters. Every other gap closed for the 1.0 bar was source
+/// the reference takes and we refused; this is the reverse, and worse for it —
+/// an accidental collision got a working binary from us and a build failure
+/// from vasm.
+fn check_redefinitions(stmts: &[Line]) -> Result<(), AsmError> {
+    let mut seen: BTreeMap<&str, bool> = BTreeMap::new();
+    for s in stmts {
+        let (name, is_equ) = match &s.kind {
+            Stmt::Equ(name, _) => (name.as_str(), true),
+            _ => match &s.label {
+                Some(label) => (label.as_str(), false),
+                None => continue,
+            },
+        };
+        match seen.insert(name, is_equ) {
+            // Two plain labels: vasm calls this a redefined *label*.
+            Some(false) if !is_equ => {
+                return Err(stamp(
+                    AsmError::new(s.line, format!("label `{name}` redefined")),
+                    s,
+                ));
+            }
+            // An `equ` on either side: a repeatedly defined *symbol*.
+            Some(_) => {
+                return Err(stamp(
+                    AsmError::new(s.line, format!("repeatedly defined symbol `{name}`")),
+                    s,
+                ));
+            }
+            None => {}
+        }
+    }
+    Ok(())
 }
 
 /// Walk every statement and bind labels and `equ` constants to their
@@ -3078,5 +3127,41 @@ mod directive_surface {
         // The repetition closer is the author's word, not a chosen one.
         let out = crate::format_vasm("\trept 2\n\tnop\n\tendr\n").expect("formats");
         assert!(out.contains("endr"), "{out}");
+    }
+
+    /// A name defined twice is refused, however the two are spelled (#126).
+    /// vasm has no rebindable form here, so every label and every `equ` is a
+    /// definition — and the message says which kind of collision it was, as
+    /// the reference's does.
+    #[test]
+    fn a_name_defined_twice_is_refused() {
+        let err = |src: &str| {
+            crate::assemble_vasm(src)
+                .expect_err("duplicate")
+                .to_string()
+        };
+        assert!(err("spin nop\nspin nop\n").contains("label `spin` redefined"));
+        assert!(err("lbl:\nlbl:\n nop\n").contains("label `lbl` redefined"));
+        assert!(err("a equ 1\na equ 2\n dc.b a\n").contains("repeatedly defined symbol `a`"));
+        assert!(err("lbl nop\nlbl equ 4\n").contains("repeatedly defined symbol `lbl`"));
+    }
+
+    /// The two things that must still assemble: distinct names, and the
+    /// local labels that repeat under different globals by design.
+    #[test]
+    fn distinct_names_and_locals_still_assemble() {
+        assert_eq!(
+            crate::assemble_vasm(" nop\nlbl nop\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x4E, 0x71, 0x4E, 0x71]
+        );
+        assert_eq!(
+            crate::assemble_vasm("a nop\n.l nop\nb nop\n.l nop\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x4E, 0x71, 0x4E, 0x71, 0x4E, 0x71, 0x4E, 0x71],
+            "`.l` under `a` and under `b` are different names"
+        );
     }
 }

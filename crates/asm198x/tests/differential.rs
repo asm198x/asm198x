@@ -394,6 +394,14 @@ const PROBES: &[Probe] = &[
     ok ("acme", "a 4-digit literal is 16-bit",
         "lbl lda #5\n lda $0000\n"),
 
+    // #126: the refusals cannot be probed here — this harness skips a body the
+    // reference rejects — so what is arbitrated is the other half, that the
+    // two shapes which *look* like duplicates still assemble.
+    ok ("vasm", "distinct labels assemble",
+        " nop\nlbl nop\n"),
+    ok ("vasm", "locals repeat under different globals",
+        "a nop\n.l nop\nb nop\n.l nop\n"),
+
     // ---- macros (#93) -------------------------------------------------------
     // sjasmplus and pasmo have macros; the rest are still gaps — the reference
     // accepts the body and we reject it. Recording a gap puts that reference's
