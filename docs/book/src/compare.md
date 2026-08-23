@@ -30,7 +30,7 @@ exactly which build of which assembler produced the bytes we compare with:
 | `ca65` | ca65 V2.18 - N/A | 3 | 582 |
 | `lwasm` | lwasm from lwtools 4.25 | 1 | 224 |
 | `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | 1 | 987 |
-| `rgbasm` | rgbasm v1.0.3 | 1 | 504 |
+| `rgbasm` | rgbasm v1.0.3 | 2 | 517 |
 | `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | 2 | 211 |
 | `vasmm68k_mot` | vasm 2.0b (c) in 2002-2025 Volker Barthelmann | 1 | 416 |
 <!-- /generated -->
