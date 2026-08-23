@@ -11,14 +11,55 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- *(rgbasm)* macros — the set is complete ([#202](https://github.com/asm198x/asm198x/pull/202))
-- *(rgbasm)* conditional assembly and repetition — the ninth gap ([#201](https://github.com/asm198x/asm198x/pull/201))
-- *(vasm)* conditional assembly and repetition ([#198](https://github.com/asm198x/asm198x/pull/198))
-- *(lwasm)* conditional assembly ([#196](https://github.com/asm198x/asm198x/pull/196))
+- **Every dialect now assembles the macros, conditionals and repetition its own
+  reference has.** This release finishes that: lwasm, vasm and rgbasm were the
+  last three, and the table is complete.
 
-### Other
+  | dialect | macros | conditionals | repetition |
+  |---|---|---|---|
+  | acme | yes | yes | yes |
+  | ca65 | yes | yes | yes |
+  | lwasm | yes | **new** | the reference has none |
+  | pasmo | yes | yes | yes |
+  | rgbasm | **new** | **new** | **new** |
+  | sjasmplus | yes | yes | yes |
+  | vasm | yes | **new** | **new** |
 
-- Wire rgbasm into the probe harness, and record what it cannot do ([#200](https://github.com/asm198x/asm198x/pull/200))
+  If you have been keeping a project on the real assembler because asm198x
+  refused a `!if`, an `ifne`, a `REPT` or a `MACRO`, that reason is gone.
+  ([#196](https://github.com/asm198x/asm198x/pull/196),
+  [#198](https://github.com/asm198x/asm198x/pull/198),
+  [#201](https://github.com/asm198x/asm198x/pull/201),
+  [#202](https://github.com/asm198x/asm198x/pull/202))
+
+- **Each dialect keeps its own spellings, including the ones that look like
+  mistakes.** vasm takes `ifd`/`ifnd` and rejects `ifdef`; rgbasm takes `ELIF`
+  and `ENDC` and rejects `ELSEIF` and `ENDIF`; lwasm takes `endc` *and* `endif`
+  and compares each of `ifne`/`ifeq`/`ifgt`/`ifge`/`iflt`/`ifle` against zero.
+  Every one of those was measured against the tool rather than read from a
+  manual, and a spelling a reference refuses is refused here too.
+
+- **Loop variables behave as each reference defines them**, which is four
+  different things: acme's `!for` counts from 1 and survives the block, ca65's
+  `.repeat` counts from 0 and stops existing at `.endrepeat`, vasm's `REPTN` is
+  implicit and reads **-1** outside any `rept`, and rgbasm's `REPT` has none.
+
+### Fixed
+
+- **`fmt` rewrote a conditional's closing keyword.** It rendered every
+  keyword-style closer as `ENDIF`, so lwasm's `endc` came back as `endif` —
+  harmless there, since lwasm takes both — and rgbasm's `ENDC` came back as
+  `ENDIF`, which **rgbasm does not accept**. Formatting an rgbasm file with a
+  conditional in it produced source that would not assemble. The closer is now
+  the word you wrote. ([#202](https://github.com/asm198x/asm198x/pull/202))
+
+### Changed
+
+- **rgbasm joined the differential corpus.** It had never been in it: the probe
+  harness knew rgbasm's name but had no arm to assemble with, so every rgbasm
+  probe was skipped and the suite stayed green while checking nothing. Wiring
+  it up published the gap, then this release closed it.
+  ([#200](https://github.com/asm198x/asm198x/pull/200))
 
 ## [0.0.26](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.25...asm198x-v0.0.26) - 2026-08-23
 
