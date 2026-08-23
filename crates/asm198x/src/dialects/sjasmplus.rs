@@ -215,6 +215,13 @@ impl Z80Syntax for SjasmplusSyntax {
         true
     }
 
+    /// sjasmplus takes `:` as a statement separator as well as a label
+    /// terminator (#98) — ` ld a,1 : ld b,2` is two instructions, and it is
+    /// how hand-written Spectrum source is often laid out.
+    fn splits_on_colon(&self) -> bool {
+        true
+    }
+
     fn is_define_word(&self, word: &str) -> bool {
         z80::is_define_word(word)
     }
@@ -483,6 +490,128 @@ impl macros::MacroSyntax for SjasmplusSyntax {
 #[cfg(test)]
 mod tests {
     use crate::assemble_sjasmplus as asm;
+
+    // -----------------------------------------------------------------------
+    // `:` as a statement separator (#98,
+    // `decisions/colon-separated-statements.md`). Probes s1-s11 against
+    // SjASMPlus 1.21.0, 2026-08-23.
+    // -----------------------------------------------------------------------
+
+    /// The plain case, which is what showed this was never about conditionals:
+    /// instructions separated by `:` failed exactly the way the colon-inline
+    /// `IF` did.
+    #[test]
+    fn a_colon_separates_statements() {
+        assert_eq!(
+            asm(" ld a,1 : ld b,2\n").expect("assemble").bytes,
+            vec![0x3E, 0x01, 0x06, 0x02]
+        );
+        assert_eq!(
+            asm(" ld a,1:ld b,2\n").expect("assemble").bytes,
+            vec![0x3E, 0x01, 0x06, 0x02],
+            "the spaces are not what makes it one"
+        );
+        assert_eq!(
+            asm(" ld a,1 : : ld b,2\n").expect("assemble").bytes,
+            vec![0x3E, 0x01, 0x06, 0x02],
+            "an empty statement between two colons is nothing"
+        );
+    }
+
+    /// The colon that closes a label is not a separator, and the rule that
+    /// tells them apart is positional: first in its statement, nothing but an
+    /// identifier before it. That covers a local label and `::` as well.
+    #[test]
+    fn a_labels_colon_is_not_a_separator() {
+        assert_eq!(
+            asm("lbl: ld a,1 : ld b,2\n djnz lbl\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x3E, 0x01, 0x06, 0x02, 0x10, 0xFA]
+        );
+        assert_eq!(
+            asm("glob:\n.l: ld a,1 : ld b,2\n").expect("assemble").bytes,
+            vec![0x3E, 0x01, 0x06, 0x02]
+        );
+        assert_eq!(
+            asm("gl:: ld a,1 : ld b,2\n").expect("assemble").bytes,
+            vec![0x3E, 0x01, 0x06, 0x02],
+            "`::` closes a label as one token"
+        );
+    }
+
+    /// A colon inside a literal separates nothing, and neither does one in a
+    /// comment — the comment is found first and rides with its statement.
+    #[test]
+    fn a_colon_in_a_literal_or_comment_separates_nothing() {
+        assert_eq!(
+            asm(" db \":\" : db 1\n").expect("assemble").bytes,
+            vec![0x3A, 0x01]
+        );
+        assert_eq!(
+            asm(" db ':' : db 1\n").expect("assemble").bytes,
+            vec![0x3A, 0x01]
+        );
+        assert_eq!(
+            asm(" ld a,1 ; a:b\n").expect("assemble").bytes,
+            vec![0x3E, 0x01]
+        );
+    }
+
+    /// A block may open, fill and close inside one line's statements — which
+    /// is the form #67 filed, and it falls out rather than being handled.
+    #[test]
+    fn a_conditional_fits_on_one_line() {
+        assert_eq!(
+            asm(" IF 1 : ld a,1 : ENDIF\n").expect("assemble").bytes,
+            vec![0x3E, 0x01]
+        );
+        assert_eq!(
+            asm(" IF 0 : ld a,1 : ENDIF\n ld b,2\n")
+                .expect("assemble")
+                .bytes,
+            vec![0x06, 0x02]
+        );
+    }
+
+    /// The formatter puts one statement on each line, which is what it already
+    /// did to a label sharing a line with an operation. Idempotent, and the
+    /// same bytes.
+    #[test]
+    fn the_formatter_expands_a_colon_line() {
+        let out = crate::format_sjasmplus("lbl: ld a,1 : ld b,2\n djnz lbl\n").expect("format");
+        assert_eq!(
+            out,
+            "lbl:\n        ld a,1\n        ld b,2\n        djnz lbl\n"
+        );
+        assert_eq!(
+            crate::format_sjasmplus(&out).expect("idempotent"),
+            out,
+            "formatting the output changes nothing further"
+        );
+    }
+
+    /// Each statement gets its own debug span, all naming the line they share.
+    /// Nothing collapses, which is why the frozen wire format needed no column.
+    #[test]
+    fn each_statement_on_a_colon_line_gets_its_own_span() {
+        let r = asm(" ld a,1 : ld b,2\n nop\n").expect("assemble");
+        let spans: Vec<_> = r
+            .debug
+            .lines
+            .iter()
+            .map(|s| (s.line, s.offset, s.length))
+            .collect();
+        assert_eq!(spans, vec![(1, 0, 2), (1, 2, 2), (2, 4, 1)]);
+    }
+
+    /// pasmo shares the whole Z80 core and must not pick the form up through
+    /// it — it has no colon separator, and splitting on a character it treats
+    /// as ordinary would invent a dialect.
+    #[test]
+    fn pasmo_does_not_split_on_a_colon() {
+        assert!(crate::assemble_pasmo(" ld a,1 : ld b,2\n").is_err());
+    }
 
     // -----------------------------------------------------------------------
     // The two macro spellings (#205). Probes n1–n11 against SjASMPlus 1.21.0,

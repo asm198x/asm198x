@@ -326,12 +326,23 @@ const PROBES: &[Probe] = &[
         " .IF 1\n ld a,1\n .ENDIF\n"),
     ok ("sjasmplus", "dotted chain, lower case",
         " .if 0\n ld a,1\n .elseif 1\n ld a,2\n .endif\n"),
-    // Re-filed out of #67 (2026-08-19): neither is conditional syntax. `:`
-    // fails between plain instructions too, so it is a line-model change
-    // (#98); the forward label is a resolution-order property needing the
-    // reference's multi-pass convergence (#99).
-    gap("sjasmplus", "colon-inline conditional",
-        " IF 1 : ld a,1 : ENDIF\n", 98),
+    // Re-filed out of #67 (2026-08-19): neither was conditional syntax. `:`
+    // failed between plain instructions too, so it was a line-model change,
+    // done as one (#98, `decisions/colon-separated-statements.md`). The
+    // forward label is a resolution-order property needing the reference's
+    // multi-pass convergence and is still open (#99).
+    ok ("sjasmplus", "colon-inline conditional",
+        " IF 1 : ld a,1 : ENDIF\n"),
+    ok ("sjasmplus", "colon between plain instructions",
+        " ld a,1 : ld b,2\n ld a,1:ld b,2\n"),
+    ok ("sjasmplus", "a label keeps its colon",
+        "lbl: ld a,1 : ld b,2\n djnz lbl\n"),
+    ok ("sjasmplus", "a colon in a literal separates nothing",
+        " db \":\" : db 1\n db ':' : db 2\n"),
+    ok ("sjasmplus", "local and export label colons",
+        "glob:\n.l: ld a,1 : ld b,2\ngl:: ld a,2 : ld b,3\n"),
+    ok ("sjasmplus", "colon-inline untaken branch",
+        " IF 0 : ld a,1 : ENDIF\n ld b,2\n"),
     gap("sjasmplus", "IF on a forward label (multi-pass)",
         " IF later\n ld a,1\n ENDIF\nlater: nop\n", 99),
 
