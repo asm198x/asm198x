@@ -223,6 +223,31 @@ fn asl_family() -> Vec<Directive> {
     )
 }
 
+/// Rewrite a surface so every `Exact` spelling also accepts a leading `.`.
+///
+/// sjasmplus takes one on every directive it has — `.db`, `.org`, `.module`,
+/// `.equ` — and the conditionals already declared it that way. Applying the
+/// rule to the composed surface says it once, rather than restating thirty
+/// spellings so a dialect can add a dot to each.
+///
+/// A `Sigilled` entry is left alone: it already carries whichever sigil rule it
+/// meant.
+fn optional_dot(dirs: Vec<Directive>) -> Vec<Directive> {
+    dirs.into_iter()
+        .map(|d| match d.pattern {
+            Pattern::Exact(names) => Directive {
+                pattern: Pattern::Sigilled {
+                    sigil: '.',
+                    names,
+                    required: false,
+                },
+                ..d
+            },
+            _ => d,
+        })
+        .collect()
+}
+
 pub fn surfaces() -> Vec<DialectSurface> {
     use crate::dialects;
     vec![
@@ -235,10 +260,10 @@ pub fn surfaces() -> Vec<DialectSurface> {
         },
         DialectSurface {
             dialect: "sjasmplus",
-            directives: compose(
+            directives: optional_dot(compose(
                 dialects::z80::COMMON_DIRECTIVES,
                 dialects::sjasmplus::DIRECTIVES,
-            ),
+            )),
         },
         DialectSurface {
             dialect: "rgbasm",

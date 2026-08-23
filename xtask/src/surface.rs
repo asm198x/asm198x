@@ -239,6 +239,12 @@ pub fn run(repo: &Path, write: bool) -> String {
          # lwasm and ca65 all refuse those themselves, so they measure the\n\
          # width of a wider target rather than a gap in this one.\n\
          #\n\
+         # What it misses: a spelling that differs from the harvested word by a\n\
+         # character the harvest does not keep. sjasmplus takes an optional\n\
+         # leading `.` on every directive, and a binary storing `db` yields\n\
+         # `db` — so the ~30 dotted spellings it also accepts were invisible\n\
+         # here until someone read the list and noticed the rule.\n\
+         #\n\
          # What it still over-counts: a word that is vocabulary somewhere other\n\
          # than statement position. rgbasm knows `af` as a register and `acos`\n\
          # as an expression function, and both are offered here as operations,\n\

@@ -8,23 +8,23 @@ Z80, sjasmplus syntax.
 
 ## Directives
 
-13 directives, 25 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+13 directives, 44 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
-| `bytes` | `defb`, `db`, `defm`, `dm`, `byte` |  |
+| `bytes` | `.defb`, `.db`, `.defm`, `.dm`, `.byte`, `defb`, `db`, `defm`, `dm`, `byte` |  |
 | `conditional` | `.if`, `.ifdef`, `.ifndef`, `if`, `ifdef`, `ifndef` |  |
-| `define` | `define` |  |
-| `end` | `end` |  |
-| `equ` | `equ` |  |
-| `incbin` | `incbin` |  |
-| `include` | `include` |  |
-| `macro` | `macro` |  |
-| `module` | `module` |  |
-| `org` | `org` |  |
-| `repeat` | `dup`, `rept` |  |
-| `reserve` | `defs`, `ds` |  |
-| `words` | `defw`, `dw` |  |
+| `define` | `.define`, `define` |  |
+| `end` | `.end`, `end` |  |
+| `equ` | `.equ`, `equ` |  |
+| `incbin` | `.incbin`, `incbin` |  |
+| `include` | `.include`, `include` |  |
+| `macro` | `.macro`, `macro` |  |
+| `module` | `.module`, `module` |  |
+| `org` | `.org`, `org` |  |
+| `repeat` | `.dup`, `.rept`, `dup`, `rept` |  |
+| `reserve` | `.defs`, `.ds`, `defs`, `ds` |  |
+| `words` | `.defw`, `.dw`, `defw`, `dw` |  |
 
 ## Projects in more than one file
 
