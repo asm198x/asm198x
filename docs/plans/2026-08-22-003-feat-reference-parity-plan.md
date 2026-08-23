@@ -83,10 +83,23 @@ a walk seven dialects share.
 
 **What the cursor does not solve.** ca65, lwasm and rgbasm all fold `=`
 constants at *walk* time and consult them in `parse_op`, so a constant defined
-inside an untaken branch still binds. Whether that reaches the emitted bytes
-depends on whether the walk's result survives the layout pass, and it is the
-first thing each dialect's unit must measure — with the untaken-branch probe
-ca65 was already measured to enforce.
+inside an untaken branch still binds.
+
+- **ca65: it does not reach the bytes.** Its layout pass re-decides sizing from
+  `Parsed.consts`, which the projection rebuilds while walking live branches
+  only. Landed 2026-08-22 with the untaken-branch probe passing.
+- **lwasm: it does reach the bytes, and it changes the instruction's size.**
+  Measured — real lwasm refuses `lda sym` when `sym`'s `equ` sits in an untaken
+  branch (`Undefined symbol sym`), and the value picks the addressing mode:
+  `equ $10` gives `96 10` (direct, two bytes) and `equ $1234` gives
+  `b6 12 34` (extended, three). A walk-time binding would silently choose
+  direct where lwasm errors. So lwasm's operand parse **must** move to
+  evaluation time, exactly as acme's did.
+
+  That is tractable rather than a rewrite: lwasm keeps each node's operation
+  text in `Node::source`, and its `parse_op(rest, env, line)` already takes the
+  environment as an argument — so `CondEval::lower` re-parses one line against
+  the live environment, which is acme's model unchanged.
 
 ### The thing that makes this eight units and not one
 
@@ -242,7 +255,18 @@ the engine resolves `Expr::Sym` once, in a later pass, against one table — it
 cannot express a value that differs per pass. `!set` had the same problem
 already solved, so the variable joined that mechanism.
 
-### U2. lwasm conditionals
+### U2. lwasm conditionals — cursor ready, needs the evaluate move
+
+`block_keyword` is a dozen lines. The unit is the pipeline: lwasm assembles
+through `ast::lower`, which rejects an `Item::Conditional`, so it moves to
+`ast::evaluate` over an `LwasmEval` whose `lower` re-parses from `Node::source`
+against the live environment. See the measured reason above — its walk-time
+binding changes an instruction's size, so this is not optional tidiness.
+
+Unlike ca65 there is no curriculum for 6809, so the differential and
+conformance suites are the whole net. Worth adding probes before the move
+rather than after.
+
 
 The full adoption, and the first dialect to need the parse/lower split. Its
 surface is surveyed above, including the two lenient postures — an unclosed
