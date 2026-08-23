@@ -710,17 +710,12 @@ pub(crate) fn parse_program(
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
     let mut w = Walker::new(set);
-    for (i, raw) in text.lines().enumerate() {
-        if let Some(d) = w
-            .walk_line(raw, i + 1, FileId(0))
-            .map_err(|e| macros::remap_lines(e, origins))?
-        {
-            // A `.include`/`.incbin` stays an unresolved item here (KTD1):
-            // `--fmt` renders it verbatim without opening the target, and the
-            // assembly projection rejects it with a multi-file pointer.
-            w.nodes.push(ca65_flat::unresolved_node(d));
-        }
-    }
+    // The shared cursor: it groups `.if`/`.repeat` blocks and keeps every
+    // include unresolved (KTD1), which is what `--fmt` needs — it renders the
+    // directive verbatim and works with a missing target. Macros expanded
+    // above, so this parse reads the expanded text.
+    ca65_flat::walk_source_expanded(&mut w, text, FileId(0))
+        .map_err(|e| macros::remap_lines(e, origins))?;
     let mut program = w.finish(text.lines().count() as u32)?;
     macros::place_nodes(&mut program.nodes, origins);
     Ok(program)
@@ -841,6 +836,28 @@ impl Walker {
 }
 
 impl FlatWalk for Walker {
+    /// ca65's block vocabulary, measured against ca65 2.19 and
+    /// case-insensitive: `.if` / `.ifdef` / `.ifndef`, `.elseif`, `.else`,
+    /// `.endif`, and `.repeat` / `.endrepeat`.
+    ///
+    /// `.ifblank`, `.ifconst`, `.ifp02`, `.ifref` and kin are real ca65 and
+    /// deliberately absent — fringe spellings stay demand-gated, and declaring
+    /// one here without folding it would group a block the projection cannot
+    /// evaluate.
+    fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
+        use ca65_flat::BlockKw;
+        let word = code.split_whitespace().next()?.to_ascii_lowercase();
+        Some(match word.as_str() {
+            ".if" | ".ifdef" | ".ifndef" => BlockKw::CondOpen,
+            ".elseif" => BlockKw::ElseIf,
+            ".else" => BlockKw::Else,
+            ".endif" => BlockKw::CondClose,
+            ".repeat" => BlockKw::RepeatOpen,
+            ".endrepeat" => BlockKw::RepeatClose,
+            _ => return None,
+        })
+    }
+
     fn nodes_mut(&mut self) -> &mut Vec<crate::ast::Node> {
         &mut self.nodes
     }
@@ -999,19 +1016,237 @@ impl FlatWalk for Walker {
 /// becomes an empty placed statement, and an `Item::Equ` node folds into the
 /// constant table in source order.
 fn parsed_from_program(program: &crate::ast::Program) -> Result<Parsed, AsmError> {
-    use crate::ast::{Item, Operand};
-    let mut seg = "CODE".to_string();
-    let mut stmts = Vec::new();
-    let mut label_seg: BTreeMap<String, String> = BTreeMap::new();
-    let mut consts: BTreeMap<String, i64> = BTreeMap::new();
+    let mut st = Projection {
+        seg: "CODE".to_string(),
+        stmts: Vec::new(),
+        label_seg: BTreeMap::new(),
+        consts: BTreeMap::new(),
+        loop_vars: Vec::new(),
+    };
+    project_nodes(&program.nodes, &mut st)?;
+    Ok(Parsed {
+        stmts: st.stmts,
+        label_seg: st.label_seg,
+        consts: st.consts,
+    })
+}
 
-    for node in &program.nodes {
+/// The projection's running state: everything a later line's fold can see.
+struct Projection {
+    seg: String,
+    stmts: Vec<Stmt>,
+    label_seg: BTreeMap<String, String>,
+    consts: BTreeMap<String, i64>,
+    /// Loop variables bound by enclosing `.repeat`s, innermost last. Kept apart
+    /// from `consts` because ca65 **scopes one to its loop** — `lda #i` after
+    /// `.endrepeat` is `Symbol 'i' is undefined`, where acme's `!for` variable
+    /// survives its block. Two dialects, two rules.
+    loop_vars: Vec<(String, i64)>,
+}
+
+impl Projection {
+    /// The constants a fold may see here: the file's, plus any enclosing loop
+    /// variables shadowing them.
+    fn env(&self) -> BTreeMap<String, i64> {
+        let mut env = self.consts.clone();
+        for (name, value) in &self.loop_vars {
+            env.insert(name.clone(), *value);
+        }
+        env
+    }
+}
+
+/// Project a run of nodes, folding any conditional or repetition **once, in
+/// source order, before layout** — `decisions/conditionals-in-multipass-dialects.md`.
+///
+/// No layout state is consulted because a ca65 condition cannot reach any: the
+/// reference refuses `*` and even a backward label in one, since a ca65 label is
+/// relocatable until `ld65` links it and so is never a constant expression.
+fn project_nodes(nodes: &[crate::ast::Node], st: &mut Projection) -> Result<(), AsmError> {
+    use crate::ast::Item;
+    for node in nodes {
+        match &node.item {
+            Some(Item::Conditional {
+                head,
+                then_body,
+                else_body,
+                ..
+            }) => {
+                if fold_condition(head, st, node.span.line as usize)? {
+                    project_nodes(then_body, st)?;
+                } else if let Some(body) = else_body {
+                    project_nodes(body, st)?;
+                }
+                continue;
+            }
+            Some(Item::Repeat { head, body, .. }) => {
+                let (count, var) = fold_repeat(head, st, node.span.line as usize)?;
+                for i in 0..count {
+                    if let Some(name) = &var {
+                        st.loop_vars.push((name.clone(), i));
+                    }
+                    let first = st.stmts.len();
+                    let out = project_nodes(body, st);
+                    if var.is_some() {
+                        // Bake this pass's value into everything the body just
+                        // produced, then drop the binding: ca65 scopes a loop
+                        // variable to its loop.
+                        let vars = st.loop_vars.clone();
+                        for stmt in &mut st.stmts[first..] {
+                            stmt.kind = bake_kind(&stmt.kind, &vars);
+                        }
+                        st.loop_vars.pop();
+                    }
+                    out?;
+                }
+                continue;
+            }
+            _ => {}
+        }
+        project_one(node, st)?;
+    }
+    Ok(())
+}
+
+/// Fold a `.if` / `.ifdef` / `.ifndef` / `.elseif` head.
+fn fold_condition(head: &str, st: &Projection, line: usize) -> Result<bool, AsmError> {
+    let (word, args) = split_first_word(head.trim());
+    let word = word.to_ascii_lowercase();
+    let args = args.trim();
+    let env = st.env();
+    match word.as_str() {
+        ".ifdef" | ".ifndef" => {
+            let name = args
+                .split_whitespace()
+                .next()
+                .ok_or_else(|| AsmError::new(line, format!("`{word}` needs a name")))?;
+            let defined = env.contains_key(name) || st.label_seg.contains_key(name);
+            Ok(if word == ".ifdef" { defined } else { !defined })
+        }
+        ".if" | ".elseif" => {
+            if args.is_empty() {
+                return Err(AsmError::new(line, format!("`{word}` needs a condition")));
+            }
+            let expr = parse_value(&AnonCtx::default(), "", args, line)?;
+            // ca65: `Constant expression expected` — a condition may not reach
+            // forward, and a ca65 label is never constant.
+            let value = fold_const(&expr, &env, line).map_err(|_| {
+                AsmError::new(
+                    line,
+                    format!(
+                        "`{args}` must be a constant here — ca65 folds a condition against the                          `=` constants above it, and refuses a label or a forward reference"
+                    ),
+                )
+            })?;
+            Ok(value != 0)
+        }
+        _ => Err(AsmError::new(
+            line,
+            format!("internal error: `{head}` is not a conditional head"),
+        )),
+    }
+}
+
+/// Fold a `.repeat n[, var]` head into its count and optional loop variable.
+fn fold_repeat(
+    head: &str,
+    st: &Projection,
+    line: usize,
+) -> Result<(i64, Option<String>), AsmError> {
+    let (_, args) = split_first_word(head.trim());
+    let (count_text, var) = match args.split_once(',') {
+        Some((c, v)) => (c.trim(), Some(v.trim().to_string())),
+        None => (args.trim(), None),
+    };
+    if count_text.is_empty() {
+        return Err(AsmError::new(line, "`.repeat` needs a count"));
+    }
+    let expr = parse_value(&AnonCtx::default(), "", count_text, line)?;
+    let count = fold_const(&expr, &st.env(), line)?;
+    // ca65: a negative count is `Range error`, where zero is no iterations.
+    if count < 0 {
+        return Err(AsmError::new(
+            line,
+            format!("`.repeat {count}`: a repetition count may not be negative"),
+        ));
+    }
+    Ok((count, var.filter(|v| !v.is_empty())))
+}
+
+/// Substitute a `.repeat`'s loop variables into an expression.
+///
+/// The value has to be **baked in**, not left as a symbol, for the same reason
+/// acme's `!for` variable is: ca65 resolves `Expr::Sym` once, in a later pass,
+/// against one table — and a loop variable holds a different value on every
+/// iteration, so there is no single entry that table could hold.
+fn bake_loop_vars(e: &Expr, vars: &[(String, i64)]) -> Expr {
+    match e {
+        Expr::Sym(name) => match vars.iter().rev().find(|(n, _)| n == name) {
+            // Innermost wins, so a nested `.repeat` may shadow an outer name.
+            Some((_, value)) => Expr::Num(*value),
+            None => e.clone(),
+        },
+        Expr::Lo(i) => Expr::Lo(Box::new(bake_loop_vars(i, vars))),
+        Expr::Hi(i) => Expr::Hi(Box::new(bake_loop_vars(i, vars))),
+        Expr::Bank(i) => Expr::Bank(Box::new(bake_loop_vars(i, vars))),
+        Expr::Neg(i) => Expr::Neg(Box::new(bake_loop_vars(i, vars))),
+        Expr::Bin(op, l, r) => Expr::Bin(
+            *op,
+            Box::new(bake_loop_vars(l, vars)),
+            Box::new(bake_loop_vars(r, vars)),
+        ),
+        Expr::Num(_) | Expr::Pc => e.clone(),
+    }
+}
+
+/// The same, over an operand.
+fn bake_operand(o: &mos6502::OperandSyntax, vars: &[(String, i64)]) -> mos6502::OperandSyntax {
+    use mos6502::OperandSyntax as O;
+    let b = |e: &Expr| bake_loop_vars(e, vars);
+    match o {
+        O::None => O::None,
+        O::Accumulator => O::Accumulator,
+        O::Immediate(e) => O::Immediate(b(e)),
+        O::Indirect(e) => O::Indirect(b(e)),
+        O::IndexedIndirect(e) => O::IndexedIndirect(b(e)),
+        O::IndirectIndexed(e) => O::IndirectIndexed(b(e)),
+        O::Indexed(e, i) => O::Indexed(b(e), *i),
+        O::Direct(e) => O::Direct(b(e)),
+    }
+}
+
+/// The same, over a statement kind.
+fn bake_kind(k: &Kind, vars: &[(String, i64)]) -> Kind {
+    let list = |es: &Vec<Expr>| es.iter().map(|e| bake_loop_vars(e, vars)).collect();
+    match k {
+        Kind::Bytes(es) => Kind::Bytes(list(es)),
+        Kind::Words(es) => Kind::Words(list(es)),
+        Kind::DBytes(es) => Kind::DBytes(list(es)),
+        Kind::DWords(es) => Kind::DWords(list(es)),
+        Kind::Insn { operand, mnemonic } => Kind::Insn {
+            operand: bake_operand(operand, vars),
+            mnemonic: mnemonic.clone(),
+        },
+        Kind::Empty => Kind::Empty,
+        Kind::Res(n, f) => Kind::Res(*n, *f),
+        Kind::Raw(b) => Kind::Raw(b.clone()),
+    }
+}
+
+/// Project one ordinary node — the body of the original projection loop.
+fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmError> {
+    use crate::ast::{Item, Operand};
+    let seg = &mut st.seg;
+    let stmts = &mut st.stmts;
+    let label_seg = &mut st.label_seg;
+    let consts = &mut st.consts;
+    {
         let line = node.span.line as usize;
         let file = node.span.file;
         match &node.item {
             Some(Item::Equ(Operand::Expr { value, .. })) => {
                 if let Some(sym) = node.label.as_ref()
-                    && let Ok(v) = fold_const(value, &consts, line)
+                    && let Ok(v) = fold_const(value, consts, line)
                 {
                     consts.insert(sym.qualified.clone(), v);
                 }
@@ -1078,7 +1313,7 @@ fn parsed_from_program(program: &crate::ast::Program) -> Result<Parsed, AsmError
             // (an empty placed statement), or a comment-only flush node (skipped).
             _ => {
                 if let Some(rest) = node.source.strip_prefix(".segment") {
-                    seg = rest.trim().trim_matches('"').to_string();
+                    *seg = rest.trim().trim_matches('"').to_string();
                 } else if let Some(sym) = node.label.as_ref() {
                     label_seg.insert(sym.qualified.clone(), seg.clone());
                     stmts.push(Stmt {
@@ -1092,11 +1327,7 @@ fn parsed_from_program(program: &crate::ast::Program) -> Result<Parsed, AsmError
             }
         }
     }
-    Ok(Parsed {
-        stmts,
-        label_seg,
-        consts,
-    })
+    Ok(())
 }
 
 /// Split a line into its code and its `;` comment for carrying comments as AST
@@ -1309,6 +1540,22 @@ pub const DIRECTIVES: &[Directive] = &[
             names: &["segment"],
             required: true,
         },
+        category: Category::Operation,
+    },
+    // Walk-handled: the shared cursor reads these into `Item::Conditional` /
+    // `Item::Repeat` before `parse_directive` sees a line.
+    //
+    // `.ifblank`, `.ifconst`, `.ifp02` and `.ifref` are real ca65 and
+    // deliberately absent — fringe spellings stay demand-gated, and declaring
+    // one without folding it would group a block the projection cannot read.
+    Directive {
+        id: "conditional",
+        pattern: Pattern::Exact(&[".if", ".ifdef", ".ifndef", ".elseif", ".else", ".endif"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "repeat",
+        pattern: Pattern::Exact(&[".repeat", ".endrepeat"]),
         category: Category::Operation,
     },
     Directive {
@@ -1656,5 +1903,92 @@ two:\n\
         let r = rom(src);
         // one@loop at $8000: jmp $8000. two@loop at $8003: jmp $8003.
         assert_eq!(&r[16..22], &[0x4C, 0x00, 0x80, 0x4C, 0x03, 0x80]);
+    }
+
+    // -----------------------------------------------------------------------
+    // Conditionals and repetition. Measured against ca65 2.19; folded once, in
+    // source order, before layout — `decisions/conditionals-in-multipass-dialects.md`.
+    // -----------------------------------------------------------------------
+
+    fn bytes(src: &str) -> Vec<u8> {
+        let rom = crate::assemble_ca65(src).expect(src).bytes;
+        // The NES ROM is header + 32K PRG; the code sits at the PRG's start.
+        rom[16..].to_vec()
+    }
+
+    #[test]
+    fn a_conditional_picks_one_branch() {
+        assert_eq!(bytes("N=1\n.if N\n nop\n.endif\n rts\n")[..2], [0xEA, 0x60]);
+        assert_eq!(bytes(".if 0\n nop\n.else\n rts\n.endif\n")[..1], [0x60]);
+        assert_eq!(
+            bytes(
+                ".if 0\n lda #1\n.elseif 0\n lda #2\n.elseif 1\n lda #3\n.else\n lda #4\n.endif\n"
+            )[..2],
+            [0xA9, 0x03]
+        );
+    }
+
+    /// `.ifdef` tests what is defined **above** it. A definition inside an
+    /// untaken branch is invisible afterwards, which is ca65's rule and the
+    /// shared walk's `emit = false` rule alike.
+    #[test]
+    fn an_untaken_branch_defines_nothing() {
+        assert_eq!(
+            bytes(".if 0\nN = 5\n.endif\n.ifdef N\n nop\n.endif\n rts\n")[..1],
+            [0x60]
+        );
+    }
+
+    /// A condition folds against the constants above it and **may not reach
+    /// forward** — ca65 answers `Constant expression expected`, and a ca65
+    /// label is never constant because `ld65` relocates it.
+    #[test]
+    fn a_condition_may_not_reach_forward() {
+        crate::assemble_ca65(".if later\n nop\n.endif\nlater = 1\n")
+            .expect_err("ca65: Constant expression expected");
+    }
+
+    #[test]
+    fn a_repetition_assembles_its_body_n_times() {
+        assert_eq!(
+            bytes(".repeat 3\n nop\n.endrepeat\n")[..3],
+            [0xEA, 0xEA, 0xEA]
+        );
+        assert_eq!(bytes(".repeat 0\n nop\n.endrepeat\n rts\n")[..1], [0x60]);
+        crate::assemble_ca65(".repeat -1\n nop\n.endrepeat\n").expect_err("ca65: Range error");
+    }
+
+    /// The loop variable is **0-based**, and baked into each use — ca65
+    /// resolves a symbol once, in a later pass, against one table, and a loop
+    /// variable holds a different value on every iteration.
+    #[test]
+    fn the_loop_variable_is_zero_based_and_live() {
+        assert_eq!(
+            bytes(".repeat 3, i\n lda #i\n.endrepeat\n")[..6],
+            [0xA9, 0x00, 0xA9, 0x01, 0xA9, 0x02]
+        );
+        assert_eq!(
+            bytes(".repeat 4, i\n .byte i*2\n.endrepeat\n")[..4],
+            [0, 2, 4, 6]
+        );
+        // A nested loop shadows, innermost first.
+        assert_eq!(
+            bytes(".repeat 2, i\n.repeat 2, j\n lda #i*16+j\n.endrepeat\n.endrepeat\n")[..8],
+            [0xA9, 0x00, 0xA9, 0x01, 0xA9, 0x10, 0xA9, 0x11]
+        );
+        // And a condition inside the body sees it.
+        assert_eq!(
+            bytes(".repeat 3, i\n.if i\n nop\n.endif\n.endrepeat\n rts\n")[..3],
+            [0xEA, 0xEA, 0x60]
+        );
+    }
+
+    /// **Scoped to the loop**, unlike acme's `!for` variable which survives its
+    /// block. Two dialects, two rules — which is the point of arbitrating each
+    /// against its own reference rather than sharing one.
+    #[test]
+    fn the_loop_variable_does_not_outlive_the_loop() {
+        crate::assemble_ca65(".repeat 2, i\n nop\n.endrepeat\n lda #i\n")
+            .expect_err("ca65: Symbol 'i' is undefined");
     }
 }
