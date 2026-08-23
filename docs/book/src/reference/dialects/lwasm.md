@@ -8,11 +8,12 @@
 
 ## Directives
 
-11 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+12 directives, 27 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
 | `bytes` | `fcb`, `.byte` |  |
+| `conditional` | `ifne`, `ifeq`, `ifgt`, `ifge`, `iflt`, `ifle`, `ifdef`, `ifndef`, `else`, `endc`, `endif` |  |
 | `end` | `end` | Accepted and discarded — it changes no bytes |
 | `equ` | `equ` |  |
 | `fcc` | `fcc` |  |

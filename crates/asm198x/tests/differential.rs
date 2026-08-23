@@ -544,6 +544,32 @@ const PROBES: &[Probe] = &[
     ok ("lwasm", "directive zmb",        " zmb 4\n"),
     ok ("lwasm", "directive fqb",        " fqb $12345678\n"),
 
+    // Conditionals. lwasm compares against **zero** rather than taking a
+    // boolean, so each spelling is its own comparison — and both `endc` and
+    // `endif` close, which is one word more than any other dialect measured.
+    ok ("lwasm", "ifne taken",           " ifne 1\n nop\n endc\n rts\n"),
+    ok ("lwasm", "ifne not taken",       " ifne 0\n nop\n endc\n rts\n"),
+    ok ("lwasm", "ifeq",                 " ifeq 0\n nop\n endc\n rts\n"),
+    ok ("lwasm", "ifgt",                 " ifgt 1\n nop\n endc\n rts\n"),
+    ok ("lwasm", "ifge",                 " ifge 0\n nop\n endc\n rts\n"),
+    ok ("lwasm", "iflt",                 " iflt 1\n nop\n endc\n rts\n"),
+    ok ("lwasm", "ifle",                 " ifle 0\n nop\n endc\n rts\n"),
+    ok ("lwasm", "else",                 " ifne 0\n nop\n else\n clra\n endc\n rts\n"),
+    ok ("lwasm", "endif closes too",     " ifne 1\n nop\n endif\n rts\n"),
+    ok ("lwasm", "ifdef",                "sym equ 1\n ifdef sym\n nop\n endc\n rts\n"),
+    ok ("lwasm", "ifndef",               " ifndef nosuch\n nop\n endc\n rts\n"),
+    ok ("lwasm", "uppercase keywords",   " IFNE 1\n NOP\n ENDC\n RTS\n"),
+    ok ("lwasm", "nested conditionals",  " ifne 1\n ifne 1\n nop\n endc\n rts\n endc\n"),
+    ok ("lwasm", "condition folds a constant",
+        "n equ 3\n ifne n-3\n nop\n endc\n rts\n"),
+    // An untaken branch defines nothing, and the definition it holds decides an
+    // instruction's *size* — `equ $10` is direct and two bytes, `equ $1234` is
+    // extended and three. A walk-time binding would silently pick direct.
+    ok ("lwasm", "an untaken branch's equ is invisible",
+        " ifne 0\nsym equ $10\n endc\nsym equ $1234\n lda sym\n"),
+    ok ("lwasm", "a taken branch's equ decides the mode",
+        " ifne 1\nsym equ $10\n endc\n lda sym\n"),
+
     // ---- vasm / 68000 -------------------------------------------------------
     ok ("vasm", "moveq / move.l imm",    " moveq #1,d0\n move.l #$12345678,d0\n"),
     ok ("vasm", "old-style d(An)",       " move.w 4(a0),d0\n move.w 4(a0,d0.w),d1\n"),
