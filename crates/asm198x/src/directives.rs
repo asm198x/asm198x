@@ -213,6 +213,16 @@ pub fn compose(base: &[Directive], own: &[Directive]) -> Vec<Directive> {
 /// it has not been converted yet — which is a fact worth being able to state,
 /// rather than one to discover by finding no row for it.
 #[must_use]
+/// The asl family's shared base: the multi-file pair plus the chip-independent
+/// directives #87 decided. Composed into every asl chip's surface, so a page
+/// or a coverage report sees the same list the parser dispatches through.
+fn asl_family() -> Vec<Directive> {
+    compose(
+        crate::dialects::asl::WALK_DIRECTIVES,
+        crate::dialects::asl::SEMANTIC_DIRECTIVES,
+    )
+}
+
 pub fn surfaces() -> Vec<DialectSurface> {
     use crate::dialects;
     vec![
@@ -260,60 +270,51 @@ pub fn surfaces() -> Vec<DialectSurface> {
         },
         DialectSurface {
             dialect: "1802",
-            directives: compose(
-                dialects::asl::WALK_DIRECTIVES,
-                dialects::cdp1802::DIRECTIVES,
-            ),
+            directives: compose(&asl_family(), dialects::cdp1802::DIRECTIVES),
         },
         DialectSurface {
             dialect: "8080",
-            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::i8080::DIRECTIVES),
+            directives: compose(&asl_family(), dialects::i8080::DIRECTIVES),
         },
         DialectSurface {
             dialect: "6800",
-            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::m6800::DIRECTIVES),
+            directives: compose(&asl_family(), dialects::m6800::DIRECTIVES),
         },
         DialectSurface {
             dialect: "8048",
-            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::i8048::DIRECTIVES),
+            directives: compose(&asl_family(), dialects::i8048::DIRECTIVES),
         },
         DialectSurface {
             dialect: "scmp",
-            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::scmp::DIRECTIVES),
+            directives: compose(&asl_family(), dialects::scmp::DIRECTIVES),
         },
         DialectSurface {
             dialect: "2650",
-            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::s2650::DIRECTIVES),
+            directives: compose(&asl_family(), dialects::s2650::DIRECTIVES),
         },
         DialectSurface {
             dialect: "tms7000",
-            directives: compose(
-                dialects::asl::WALK_DIRECTIVES,
-                dialects::tms7000::DIRECTIVES,
-            ),
+            directives: compose(&asl_family(), dialects::tms7000::DIRECTIVES),
         },
         DialectSurface {
             dialect: "f8",
-            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::f8::DIRECTIVES),
+            directives: compose(&asl_family(), dialects::f8::DIRECTIVES),
         },
         DialectSurface {
             dialect: "cp1610",
-            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::cp1610::DIRECTIVES),
+            directives: compose(&asl_family(), dialects::cp1610::DIRECTIVES),
         },
         DialectSurface {
             dialect: "pdp11",
-            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::pdp11::DIRECTIVES),
+            directives: compose(&asl_family(), dialects::pdp11::DIRECTIVES),
         },
         DialectSurface {
             dialect: "tms9900",
-            directives: compose(
-                dialects::asl::WALK_DIRECTIVES,
-                dialects::tms9900::DIRECTIVES,
-            ),
+            directives: compose(&asl_family(), dialects::tms9900::DIRECTIVES),
         },
         DialectSurface {
             dialect: "z8000",
-            directives: compose(dialects::asl::WALK_DIRECTIVES, dialects::z8000::DIRECTIVES),
+            directives: compose(&asl_family(), dialects::z8000::DIRECTIVES),
         },
     ]
 }

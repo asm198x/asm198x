@@ -254,7 +254,9 @@ fn parse_op(
     // directive this dialect does not declare cannot be accepted here, which
     // is what makes the declaration a description of the dialect rather than
     // a copy of one. See `crate::directives`.
-    let op = match lookup(DIRECTIVES, word) {
+    let op = match lookup(DIRECTIVES, word)
+        .or_else(|| lookup(super::asl::SEMANTIC_DIRECTIVES, word))
+    {
         Some(directive) => match directive.category {
             Category::Ignored => return Ok(None),
             Category::KnownUnsupported => {

@@ -438,7 +438,7 @@
       "slug": "reference/dialects/1802"
     },
     {
-      "context": "7 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "22 directives, 35 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "1802",
       "slug": "reference/dialects/1802"
@@ -461,7 +461,7 @@
       "slug": "reference/dialects/2650"
     },
     {
-      "context": "7 directives, 17 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "22 directives, 36 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "2650",
       "slug": "reference/dialects/2650"
@@ -507,7 +507,7 @@
       "slug": "reference/dialects/6800"
     },
     {
-      "context": "7 directives, 15 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "22 directives, 34 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "6800",
       "slug": "reference/dialects/6800"
@@ -530,7 +530,7 @@
       "slug": "reference/dialects/8048"
     },
     {
-      "context": "7 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "22 directives, 35 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "8048",
       "slug": "reference/dialects/8048"
@@ -553,7 +553,7 @@
       "slug": "reference/dialects/8080"
     },
     {
-      "context": "7 directives, 17 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "22 directives, 36 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "8080",
       "slug": "reference/dialects/8080"
@@ -622,7 +622,7 @@
       "slug": "reference/dialects/cp1610"
     },
     {
-      "context": "6 directives, 17 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "21 directives, 35 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "cp1610",
       "slug": "reference/dialects/cp1610"
@@ -645,7 +645,7 @@
       "slug": "reference/dialects/f8"
     },
     {
-      "context": "7 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "22 directives, 35 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "f8",
       "slug": "reference/dialects/f8"
@@ -737,7 +737,7 @@
       "slug": "reference/dialects/pdp11"
     },
     {
-      "context": "6 directives, 17 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "21 directives, 36 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "pdp11",
       "slug": "reference/dialects/pdp11"
@@ -783,7 +783,7 @@
       "slug": "reference/dialects/scmp"
     },
     {
-      "context": "7 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "22 directives, 35 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "scmp",
       "slug": "reference/dialects/scmp"
@@ -829,7 +829,7 @@
       "slug": "reference/dialects/tms7000"
     },
     {
-      "context": "7 directives, 20 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "22 directives, 39 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "tms7000",
       "slug": "reference/dialects/tms7000"
@@ -852,7 +852,7 @@
       "slug": "reference/dialects/tms9900"
     },
     {
-      "context": "6 directives, 18 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "21 directives, 38 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "tms9900",
       "slug": "reference/dialects/tms9900"
@@ -898,7 +898,7 @@
       "slug": "reference/dialects/z8000"
     },
     {
-      "context": "6 directives, 18 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "21 directives, 37 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "z8000",
       "slug": "reference/dialects/z8000"
