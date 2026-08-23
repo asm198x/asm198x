@@ -401,7 +401,23 @@ fn covered(r: &Reference, ours: &BTreeSet<String>, word: &str) -> bool {
     };
     match assemble(&format!("{}\t{}\n", r.prologue, spell(r, word))) {
         Ok(()) => true,
-        Err(e) => !e.contains("unknown instruction") && !e.contains("unsupported directive"),
+        Err(e) => {
+            // Every way this project says "we do not have that word". A
+            // dialect wording its refusal differently must be added here, or
+            // its gaps read as coverage.
+            ![
+                "unknown instruction",
+                "unsupported directive",
+                "is not a directive",
+                // The `KnownUnsupported` diagnostic. It is the *best* refusal
+                // this project has — it tells the reader their source is valid
+                // — and it is still a refusal. Reading it as coverage let a
+                // dialect reach zero by describing its gaps well.
+                "does not implement",
+            ]
+            .iter()
+            .any(|m| e.contains(m))
+        }
     }
 }
 
@@ -423,17 +439,24 @@ fn assembler(dialect: &str) -> Option<Assemble> {
     })
 }
 
-/// Every spelling our surface declares for `dialect`, sigil-stripped and
+/// Every spelling our surface declares **and implements**, sigil-stripped and
 /// lowercased, so a word is compared as a word.
 ///
 /// Declared rather than tried: offering a bare `!for` to our own assembler
 /// answers "unsupported directive" because it has no arguments, and counting
 /// that as a gap would inflate every total with directives we implement.
+///
+/// `KnownUnsupported` is excluded, and that is the point of saying "and
+/// implements". Declaring a directive we do not implement is how the
+/// diagnostic tells a reader their source is valid — it is not how the gap
+/// closes, and counting it as coverage let a dialect reach zero by describing
+/// its gaps well.
 fn our_spellings(dialect: &str) -> BTreeSet<String> {
     asm198x::directives::surfaces()
         .into_iter()
         .filter(|s| s.dialect == dialect)
         .flat_map(|s| s.directives)
+        .filter(|d| d.category != asm198x::directives::Category::KnownUnsupported)
         .flat_map(|d| d.spellings())
         .map(|s| s.trim_start_matches(['.', '!']).to_ascii_lowercase())
         .collect()
@@ -545,6 +568,26 @@ mod tests {
         );
     }
 
+    /// A directive we *declare* but do not implement is still a gap.
+    ///
+    /// This one was live: declaring ca65's 97 control commands as
+    /// `KnownUnsupported` took its count from 134 to **0**, because the
+    /// declared surface was read as coverage and the improved diagnostic
+    /// matched none of the refusal phrases. A dialect could reach zero by
+    /// describing its gaps well, which is the exact opposite of what this
+    /// measures.
+    #[test]
+    fn a_declared_gap_is_not_coverage() {
+        let ours = our_spellings("ca65");
+        assert!(
+            ours.contains("byte"),
+            "an implemented directive counts as covered"
+        );
+        assert!(
+            !ours.contains("export"),
+            "`.export` is declared and not implemented, so it is still a gap"
+        );
+    }
     /// The measured surface is not empty, and is keyed on `--dialect` names
     /// this build actually has — a table entry naming a dialect that no longer
     /// exists would silently measure nothing.
