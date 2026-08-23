@@ -1585,6 +1585,164 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // -----------------------------------------------------------------------
+    // What ca65 has and we do not.
+    //
+    // Declared rather than left to fall through, because the fall-through
+    // answers `unsupported directive` for `.zzqq` as well as for `.export` —
+    // and conflating "ca65 has this and we have not implemented it" with "this
+    // is not a thing" tells the reader to go looking for a typo. Same call as
+    // the asl family's (#87) and vasm's `adda`: the source is valid and the
+    // gap is ours, so the message should say so.
+    //
+    // Ninety-seven spellings, each confirmed in **statement position** against
+    // ca65 V2.18 — offered as a lone operation and, where that failed with
+    // `Unexpected '.X'`, offered again after a label to catch the label-first
+    // forms. The thirty-seven that failed both ways are ca65's
+    // pseudo-*functions* — `.lobyte`, `.strlen`, `.max`, `.sizeof` — which
+    // live inside expressions and are not directives at all. Declaring those
+    // here would name them in a place they never appear.
+    // segments and location
+    Directive {
+        id: "unsupported-segments",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &[
+                "code", "data", "bss", "rodata", "zeropage", "org", "reloc", "pushseg", "popseg",
+                "align",
+            ],
+            required: true,
+        },
+        category: Category::KnownUnsupported,
+    },
+    // symbol visibility
+    Directive {
+        id: "unsupported-symbol",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &[
+                "import",
+                "importzp",
+                "export",
+                "exportzp",
+                "global",
+                "globalzp",
+                "forceimport",
+                "autoimport",
+                "condes",
+                "constructor",
+                "destructor",
+                "interruptor",
+            ],
+            required: true,
+        },
+        category: Category::KnownUnsupported,
+    },
+    // scopes and blocks
+    Directive {
+        id: "unsupported-scopes",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &[
+                "proc", "endproc", "scope", "endscope", "struct", "union", "enum", "tag", "end",
+            ],
+            required: true,
+        },
+        category: Category::KnownUnsupported,
+    },
+    // macros
+    Directive {
+        id: "unsupported-macros",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &[
+                "define", "delmac", "delmacro", "macpack", "undef", "undefine", "ident", "concat",
+                "sprintf", "string", "left", "mid", "right",
+            ],
+            required: true,
+        },
+        category: Category::KnownUnsupported,
+    },
+    // conditionals over the assembler's own state
+    Directive {
+        id: "unsupported-conditionals",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &[
+                "ifblank", "ifconst", "ifnblank", "ifnconst", "ifnref", "ifp02", "ifp4510",
+                "ifp816", "ifpc02", "ifpsc02", "ifref",
+            ],
+            required: true,
+        },
+        category: Category::KnownUnsupported,
+    },
+    // CPU selection
+    Directive {
+        id: "unsupported-cpu",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &[
+                "setcpu", "pushcpu", "popcpu", "smart", "p02", "p4510", "p816", "pc02", "psc02",
+            ],
+            required: true,
+        },
+        category: Category::KnownUnsupported,
+    },
+    // diagnostics and listing
+    Directive {
+        id: "unsupported-diagnostics",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &[
+                "assert",
+                "error",
+                "fatal",
+                "warning",
+                "out",
+                "list",
+                "listbytes",
+                "pagelen",
+                "pagelength",
+                "linecont",
+                "fileopt",
+                "fopt",
+                "dbg",
+                "debuginfo",
+                "case",
+                "charmap",
+                "localchar",
+                "feature",
+                "null",
+            ],
+            required: true,
+        },
+        category: Category::KnownUnsupported,
+    },
+    // everything else ca65 has here
+    Directive {
+        id: "unsupported-everything",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &[
+                "bankbytes",
+                "bitand",
+                "bitnot",
+                "bitor",
+                "bitxor",
+                "faraddr",
+                "hibytes",
+                "lobytes",
+                "mod",
+                "not",
+                "or",
+                "shl",
+                "shr",
+                "xor",
+            ],
+            required: true,
+        },
+        category: Category::KnownUnsupported,
+    },
 ];
 
 fn parse_directive(
@@ -1602,9 +1760,18 @@ fn parse_directive(
     let Some(entry) = lookup(DIRECTIVES, &sigilled) else {
         return Err(AsmError::new(
             line,
-            format!("unsupported directive `.{name}`"),
+            format!("`.{name}` is not a directive ca65 has"),
         ));
     };
+    if entry.category == Category::KnownUnsupported {
+        return Err(AsmError::new(
+            line,
+            format!(
+                "`.{name}` is a real directive here and asm198x does not implement \
+                 it yet — the source is valid and the gap is ours"
+            ),
+        ));
+    }
     match entry.id {
         "bytes" => Ok(Kind::Bytes(parse_data_list(
             anons,
@@ -1990,5 +2157,54 @@ two:\n\
     fn the_loop_variable_does_not_outlive_the_loop() {
         crate::assemble_ca65(".repeat 2, i\n nop\n.endrepeat\n lda #i\n")
             .expect_err("ca65: Symbol 'i' is undefined");
+    }
+
+    /// A directive ca65 has and we do not is refused as *that*, and a word it
+    /// does not have is refused as that. The fall-through used to answer
+    /// `unsupported directive` for both, which tells a reader with valid
+    /// source to go looking for a typo.
+    #[test]
+    fn a_real_directive_is_told_apart_from_a_typo() {
+        let err = |src: &str| super::assemble(src).expect_err(src).to_string();
+        for d in [
+            ".export foo",
+            ".proc x",
+            ".org $200",
+            ".align 4",
+            ".macpack cpu",
+        ] {
+            let e = err(&format!("\t{d}\n"));
+            assert!(
+                e.contains("is a real directive here"),
+                "`{d}` should name itself a real ca65 directive, got: {e}"
+            );
+        }
+        assert!(
+            err("\t.zzqq\n").contains("is not a directive ca65 has"),
+            "and a word ca65 does not have should say so"
+        );
+    }
+
+    /// The declaration covers what ca65 accepts **in statement position**, and
+    /// not its pseudo-functions. `.lobyte` and `.strlen` live inside
+    /// expressions; naming them here would describe them in a place they never
+    /// appear, so they are deliberately absent.
+    #[test]
+    fn the_pseudo_functions_are_not_declared_as_directives() {
+        let declared: Vec<String> = crate::directives::surfaces()
+            .into_iter()
+            .filter(|s| s.dialect == "ca65")
+            .flat_map(|s| s.directives)
+            .flat_map(|d| d.spellings())
+            .collect();
+        for f in [".lobyte", ".strlen", ".max", ".sizeof", ".paramcount"] {
+            assert!(
+                !declared.iter().any(|s| s == f),
+                "`{f}` is an expression function, not a directive"
+            );
+        }
+        for d in [".export", ".proc", ".segment", ".byte"] {
+            assert!(declared.iter().any(|s| s == d), "`{d}` should be declared");
+        }
     }
 }
