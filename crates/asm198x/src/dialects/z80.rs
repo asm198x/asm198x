@@ -26,7 +26,7 @@ use crate::dialects::macros::{
     self, Expand, LineOrigin, expanded_text, expansion, line_origins, place_nodes, remap_lines,
 };
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, BinOp, Expr, Operation, Statement};
+use crate::engine::{AsmError, BinOp, Expr, Operation, Statement, Warning};
 use crate::source::{MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
 use crate::span::FileId;
 
@@ -74,6 +74,16 @@ pub(crate) trait Z80Syntax {
     fn module_keyword(&self, word: &str) -> Option<ModuleKw> {
         let _ = word;
         None
+    }
+
+    /// Whether a condition may name a symbol defined later in the file,
+    /// resolved by running the walk more than once (#99).
+    ///
+    /// Defaults off, which is the same parse-time-constant rule `ds` and
+    /// `incbin` arguments follow. sjasmplus turns it on because it does three
+    /// passes and its source relies on them; pasmo does not.
+    fn resolves_forward_conditions(&self) -> bool {
+        false
     }
 
     /// Whether `:` separates statements as well as terminating a label, so one
@@ -528,6 +538,53 @@ enum KwClose {
 /// formatter's inline `name: equ …` rendering). No evaluation happens here:
 /// no environment, no DEFINE table — [`SjasmEval`] supplies those on the live
 /// walk.
+/// How a condition's forward references are answered, and what that cost.
+///
+/// The reference runs three passes and reads an as-yet-undefined symbol as
+/// zero in the first, warning that it did. Later passes answer from the
+/// previous pass's addresses. That is reproduced rather than improved on:
+/// converging further than the reference would mean emitting different bytes
+/// from it, which is the opposite of the point.
+struct Forward {
+    /// Label and `equ` values from the previous pass. Empty on pass 1, which
+    /// is why a forward symbol reads as zero there.
+    seed: BTreeMap<String, i64>,
+    /// Set when a condition read a symbol `consts` could not answer — so the
+    /// driver knows this program depends on a later pass, and a program that
+    /// does not pay for one.
+    used: std::cell::Cell<bool>,
+    /// One advisory per condition that reached forward. Collected from pass 1,
+    /// where the symbol was genuinely unknown.
+    warnings: std::cell::RefCell<Vec<Warning>>,
+}
+
+impl Forward {
+    fn new(seed: BTreeMap<String, i64>) -> Self {
+        Self {
+            seed,
+            used: std::cell::Cell::new(false),
+            warnings: std::cell::RefCell::new(Vec::new()),
+        }
+    }
+
+    /// Answer a symbol the constant table could not, and remember that we had
+    /// to. Zero is the reference's answer for a symbol no pass has reached.
+    fn lookup(&self, name: &str, line: usize, file: FileId) -> i64 {
+        self.used.set(true);
+        match self.seed.get(name) {
+            Some(v) => *v,
+            None => {
+                self.warnings.borrow_mut().push(Warning {
+                    line,
+                    message: format!("forward reference of symbol `{name}`"),
+                    file,
+                });
+                0
+            }
+        }
+    }
+}
+
 /// One statement's worth of source, with where it came from.
 ///
 /// The parse used to index its lines and derive the number from the position,
@@ -1134,6 +1191,15 @@ struct SjasmEval<'a, S: Z80Syntax> {
     /// the walk has not reached yet, so the choice is repaired in
     /// [`SjasmEval::finish`] once the whole stream is known.
     aliases: BTreeMap<String, String>,
+    /// Present on a dialect that resolves conditions across passes (#99), and
+    /// the reason a `SjasmEval` is built once per pass rather than once.
+    forward: Option<Forward>,
+    /// Where the location counter stands, so a label binds to its address as
+    /// it is defined and a *backward* reference in a condition is answered by
+    /// `consts` — never by the forward path, which would warn about a symbol
+    /// the walk had already seen. `None` when the counter cannot be followed;
+    /// the forward path then covers it, one pass later.
+    pc: Option<i64>,
     multi: Option<MultiCx<'a>>,
     /// The file the walk is currently inside — stamps condition-evaluation
     /// errors, which the shared walk raises without node context.
@@ -1156,6 +1222,8 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             current_global: None,
             modules: Vec::new(),
             aliases: BTreeMap::new(),
+            forward: None,
+            pc: Some(0),
             multi,
             current_file: FileId(0),
         }
@@ -1199,6 +1267,27 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             name
         };
         Ok(format!("{}{scoped}", self.module_prefix()))
+    }
+
+    /// Move the counter over `op`, or give up on knowing where it is. The
+    /// width rule is [`crate::engine::next_pc`], shared with the engine's own
+    /// address pass — see `decisions/acme-zero-page.md` for why it is not
+    /// copied. Giving up costs a warning, not a wrong answer: the symbol falls
+    /// to the forward path and the next pass resolves it.
+    fn advance(&mut self, op: Option<&Operation>, line: usize) {
+        let Some(op) = op else { return };
+        if let Operation::Org(e) = op {
+            self.pc = eval_const(e, &self.consts);
+            return;
+        }
+        let Some(pc) = self.pc else { return };
+        self.pc = crate::engine::next_pc(op, pc, self.set, self.ext, 1, line).ok();
+    }
+
+    /// The forward-resolution state paired with the file a condition is being
+    /// read in, so an advisory names the right one.
+    fn fwd(&self) -> Option<(&Forward, FileId)> {
+        self.forward.as_ref().map(|f| (f, self.current_file))
     }
 
     /// The dotted prefix the open modules impose, `""` when none are open (so
@@ -1362,6 +1451,15 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         {
             self.consts.insert(q.clone(), v);
         }
+        // A plain label names the address the counter is standing on, so a
+        // condition below it folds against a value rather than reaching
+        // forward. Bound before the counter moves, as the label is.
+        if let (Some(q), Some(at)) = (&label, self.pc)
+            && !matches!(op, Some(Operation::Equ(_)))
+        {
+            self.consts.insert(q.clone(), at);
+        }
+        self.advance(op.as_ref(), line);
         if label.is_none() && op.is_none() {
             return Ok(());
         }
@@ -1506,7 +1604,7 @@ impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
         let line = line as usize;
         let (_, args) = split_first_word(head);
         let expr = substitute_defines(args, &self.defines, line)?;
-        eval_condition_keyword(self.syntax, &expr, line, &self.consts)
+        eval_condition_keyword(self.syntax, &expr, line, &self.consts, self.fwd())
             .map(crate::ast::Iteration::Times)
     }
 
@@ -1537,7 +1635,8 @@ impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
                 // DEFINEs substitute into the condition (probe p25) before it
                 // folds against the `equ` constants.
                 substitute_defines(args, &self.defines, line).and_then(|cond| {
-                    eval_condition_keyword(self.syntax, &cond, line, &self.consts).map(|v| v != 0)
+                    eval_condition_keyword(self.syntax, &cond, line, &self.consts, self.fwd())
+                        .map(|v| v != 0)
                 })
             }
             _ => Err(AsmError::new(
@@ -1564,17 +1663,141 @@ impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
 /// then the shared conditional walk over [`SjasmEval`] with no loader — an
 /// `INCLUDE`/`INCBIN` reached live errors with a pointer at the multi-file
 /// entry points.
+/// Where each label and `equ` lands, given one pass's statements — the seed
+/// the next pass answers forward references from.
+///
+/// This is the engine's address pass in miniature, over the same
+/// [`crate::engine::next_pc`] rule, and it is deliberately forgiving: a
+/// statement whose width or origin cannot be computed yet stops the counter
+/// rather than failing the pass. A pass that cannot place everything still
+/// places something, and the pass after it does better.
+fn pass_symbols(
+    stmts: &[Statement],
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    mut at: impl FnMut(&str, usize, FileId),
+) -> BTreeMap<String, i64> {
+    let mut symbols = BTreeMap::new();
+    let mut pc = Some(0i64);
+    for s in stmts {
+        if let (Some(name), Some(Operation::Equ(e))) = (&s.label, &s.op) {
+            if let Some(v) = eval_const(e, &symbols) {
+                symbols.insert(name.clone(), v);
+                at(name, s.line, s.file);
+            }
+            continue;
+        }
+        if let (Some(name), Some(here)) = (&s.label, pc) {
+            symbols.insert(name.clone(), here);
+            at(name, s.line, s.file);
+        }
+        let Some(op) = &s.op else { continue };
+        pc = match op {
+            Operation::Org(e) => eval_const(e, &symbols),
+            _ => pc.and_then(|at| crate::engine::next_pc(op, at, set, ext, 1, s.line).ok()),
+        };
+    }
+    symbols
+}
+
+/// Run the walk until forward references settle, or until the pass the
+/// reference stops at.
+///
+/// Three passes, because that is what sjasmplus does — it prints "Pass 3
+/// complete" on every file — and matching it is the whole point. A program
+/// whose first pass reached no forward symbol is finished there: the later
+/// passes would produce the same statements, and every program that does not
+/// use the feature would otherwise pay three times over.
+///
+/// **Convergence is not promised, because the reference does not promise it.**
+/// Given `IF later < 2` … `later:`, emitting the body moves `later` past 2 and
+/// the condition that admitted the body is false by the end. sjasmplus warns
+/// and ships that binary; so do we, with the same two warnings. Refusing would
+/// be defensible and would not be *the reference*.
+fn run_passes<'a, S: Z80Syntax>(
+    syntax: &'a S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    program: &Program,
+    mut multi: Option<MultiCx<'a>>,
+) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
+    const PASSES: usize = 3;
+    let mut warnings = Vec::new();
+    let mut seed = BTreeMap::new();
+    let mut previous: Option<BTreeMap<String, i64>> = None;
+    let mut result = Vec::new();
+    for pass in 1..=PASSES {
+        let mut eval = SjasmEval::new(syntax, set, ext, multi.take());
+        if syntax.resolves_forward_conditions() {
+            eval.forward = Some(Forward::new(std::mem::take(&mut seed)));
+        }
+        let mut out = Vec::new();
+        crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        result = eval.finish(out);
+        let mut defined_at: BTreeMap<String, (usize, FileId)> = BTreeMap::new();
+        let symbols = pass_symbols(&result, set, ext, |name, line, file| {
+            defined_at.insert(name.to_string(), (line, file));
+        });
+        let reached_forward = eval.forward.as_ref().is_some_and(|f| f.used.get());
+        if pass == 1 {
+            // The advisories belong to this pass: it is the one where the
+            // symbol was genuinely unknown and read as zero.
+            if let Some(f) = eval.forward.as_ref() {
+                warnings.append(&mut f.warnings.borrow_mut());
+            }
+            if !reached_forward {
+                return Ok((result, warnings));
+            }
+        }
+        multi = eval.multi;
+        if pass == PASSES {
+            // A label that still moved between the last two passes never
+            // settled, and the bytes below it describe a layout no pass
+            // agreed with. The reference says so rather than failing, and
+            // names both values.
+            if let Some(previous) = &previous {
+                for (name, now) in &symbols {
+                    if let Some(before) = previous.get(name)
+                        && before != now
+                    {
+                        let (line, file) = defined_at.get(name).copied().unwrap_or((0, FileId(0)));
+                        warnings.push(Warning {
+                            line,
+                            message: format!(
+                                "label `{name}` has a different value in pass {PASSES}: \
+                                 previous value {before} not equal {now}"
+                            ),
+                            file,
+                        });
+                    }
+                }
+            }
+            break;
+        }
+        previous = Some(symbols.clone());
+        seed = symbols;
+    }
+    Ok((result, warnings))
+}
+
 pub(crate) fn assemble_keyword<S: Z80Syntax>(
     syntax: &S,
     set: &'static isa::InstructionSet,
     ext: Option<&'static isa::InstructionSet>,
     source: &str,
 ) -> Result<Vec<Statement>, AsmError> {
+    Ok(assemble_keyword_warned(syntax, set, ext, source)?.0)
+}
+
+/// [`assemble_keyword`], keeping the advisories the passes raised (#99).
+pub(crate) fn assemble_keyword_warned<S: Z80Syntax>(
+    syntax: &S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    source: &str,
+) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
     let program = parse_program_keyword(syntax, set, ext, FileId(0), source, Expand::Yes)?;
-    let mut eval = SjasmEval::new(syntax, set, ext, None);
-    let mut out = Vec::new();
-    crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
-    Ok(eval.finish(out))
+    run_passes(syntax, set, ext, &program, None)
 }
 
 /// Parse a multi-file keyword-conditional program to the engine's statement
@@ -1587,21 +1810,34 @@ pub(crate) fn parse_program_multi_keyword<S: Z80Syntax>(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
 ) -> Result<Vec<Statement>, AsmError> {
+    Ok(parse_program_multi_keyword_warned(syntax, set, ext, map, loader)?.0)
+}
+
+/// [`parse_program_multi_keyword`], keeping the advisories the passes raised.
+///
+/// Re-walking is safe across an include boundary because [`SourceMap`] dedups
+/// by canonical path: a later pass resolves the same request to the same
+/// `FileId` and reads nothing from the backing store a second time.
+pub(crate) fn parse_program_multi_keyword_warned<S: Z80Syntax>(
+    syntax: &S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
     let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
     let program = parse_program_keyword(syntax, set, ext, FileId(0), &root, Expand::Yes)?;
-    let mut eval = SjasmEval::new(
+    run_passes(
         syntax,
         set,
         ext,
+        &program,
         Some(MultiCx {
             map,
             loader,
             stack: vec![FileId(0)],
         }),
-    );
-    let mut out = Vec::new();
-    crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
-    Ok(eval.finish(out))
+    )
 }
 
 /// Expand `DEFINE` names in one line of source, per the probe-pinned
@@ -1717,6 +1953,7 @@ fn eval_condition_keyword<S: Z80Syntax>(
     s: &str,
     line: usize,
     consts: &BTreeMap<String, i64>,
+    forward: Option<(&Forward, FileId)>,
 ) -> Result<i64, AsmError> {
     let tokens = tokenize_cond(syntax, s, line)?;
     if tokens.is_empty() {
@@ -1727,6 +1964,7 @@ fn eval_condition_keyword<S: Z80Syntax>(
         pos: 0,
         line,
         consts,
+        forward,
         sources: syntax.constant_sources(),
     }
     .or_expr()
@@ -1739,6 +1977,10 @@ struct CondParser<'a> {
     pos: usize,
     line: usize,
     consts: &'a BTreeMap<String, i64>,
+    /// Where a symbol the constant table cannot answer is resolved, on a
+    /// dialect that resolves conditions across passes. `None` keeps the
+    /// parse-time-constant rule and the diagnostic that explains it.
+    forward: Option<(&'a Forward, FileId)>,
     /// This dialect's phrasing for where a constant may come from
     /// ([`Z80Syntax::constant_sources`]).
     sources: &'static str,
@@ -1894,16 +2136,22 @@ impl CondParser<'_> {
         self.pos += 1;
         match tok {
             Tok::Num(n) => Ok(n),
-            Tok::Sym(s) => self.consts.get(&s).copied().ok_or_else(|| {
-                let sources = self.sources;
-                AsmError::new(
-                    self.line,
-                    format!(
-                        "`{s}` must be a constant here (a number, an expression of \
-                         constants, or {sources})"
-                    ),
-                )
-            }),
+            Tok::Sym(s) => match self.consts.get(&s).copied() {
+                Some(v) => Ok(v),
+                None => match self.forward {
+                    Some((fwd, file)) => Ok(fwd.lookup(&s, self.line, file)),
+                    None => {
+                        let sources = self.sources;
+                        Err(AsmError::new(
+                            self.line,
+                            format!(
+                                "`{s}` must be a constant here (a number, an expression of \
+                                 constants, or {sources})"
+                            ),
+                        ))
+                    }
+                },
+            },
             Tok::Pc => Err(AsmError::new(
                 self.line,
                 "the location counter `$` cannot be tested in a conditional here",

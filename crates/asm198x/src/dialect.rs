@@ -9,7 +9,7 @@
 //! ca65 both emit 6502), and one dialect may target several (vasm covers more
 //! than one CPU). See `decisions/syntax-stance.md`.
 
-use crate::engine::{AsmError, Statement};
+use crate::engine::{AsmError, Statement, Warning};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
 
@@ -42,6 +42,22 @@ pub(crate) trait Dialect {
     /// Returns an [`AsmError`] on any tokenising or mode-resolution failure.
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError>;
 
+    /// [`parse`](Self::parse), plus any non-fatal advisories the parse raised.
+    ///
+    /// The default returns none, so a dialect that has nothing to say is
+    /// unchanged. This exists because several references *warn* where they
+    /// could refuse — sjasmplus on a forward reference in a condition and on a
+    /// label whose value never settled, ACME on an oversized addressing mode —
+    /// and reproducing a reference's bytes without its warning is only half of
+    /// matching it. Reaching one of those without the channel would mean
+    /// shipping the same questionable binary in silence.
+    ///
+    /// # Errors
+    /// As [`parse`](Self::parse).
+    fn parse_warned(&self, source: &str) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
+        self.parse(source).map(|s| (s, Vec::new()))
+    }
+
     /// Parse a multi-file program (language-surface U2, KTD8): the root is
     /// `FileId(0)` in `map`, and an include-capable dialect resolves its
     /// include directives through `loader`, minting further ids in `map` as
@@ -52,6 +68,20 @@ pub(crate) trait Dialect {
     /// # Errors
     /// As [`parse`](Self::parse), plus include-resolution failures (missing
     /// target, cycle, depth) at the directive's span.
+    /// [`parse_multi`](Self::parse_multi), plus its advisories — the
+    /// multi-file half of [`parse_warned`](Self::parse_warned), defaulted the
+    /// same way.
+    ///
+    /// # Errors
+    /// As [`parse_multi`](Self::parse_multi).
+    fn parse_multi_warned(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
+        self.parse_multi(map, loader).map(|s| (s, Vec::new()))
+    }
+
     fn parse_multi(
         &self,
         map: &mut SourceMap,

@@ -60,13 +60,22 @@ const fn ok(dialect: &'static str, note: &'static str, body: &'static str) -> Pr
         gap: None,
     }
 }
-// The open ledger: U8's sjasmplus conditional forms are closed (#67) — ELSEIF
-// chains and the dotted spellings are adopted; the two that remain were not
-// conditional syntax at all and carry their own issues, `:` as a statement
-// separator (#98) and multi-pass forward-symbol conditions (#99). Earlier
-// batches (acme
-// `!pet`/`!align`/`!zone`/`!set`, ca65 `.dword`/`.dbyt`/`.asciiz`, sjasmplus
-// `byte`, lwasm `fill`/`zmb`/`fqb` — issue #26) are closed.
+// **The ledger is empty.** As of 2026-08-23 every probe here is an `ok` — no
+// form in this file is one the reference accepts and we refuse. That is the
+// 1.0 bar's item 4 (`decisions/v1-scope.md`), and it is a state to be kept
+// rather than a milestone to be passed: the next gap anyone measures gets a
+// marker below and this comment gets shorter.
+//
+// Closed in order: the U4d/#26 batch (acme `!pet`/`!align`/`!zone`/`!set`,
+// ca65 `.dword`/`.dbyt`/`.asciiz`, sjasmplus `byte`, lwasm
+// `fill`/`zmb`/`fqb`), then #67's conditional forms, then the two that were
+// never conditional syntax — `:` as a statement separator (#98) and
+// forward-symbol conditions (#99) — then #205 and #128.
+//
+// `gap` is unused today and kept anyway: deleting the mechanism because
+// nothing is currently broken is how the next gap gets recorded as a comment
+// instead of as a failing marker.
+#[allow(dead_code)]
 const fn gap(dialect: &'static str, note: &'static str, body: &'static str, issue: u32) -> Probe {
     Probe {
         dialect,
@@ -329,8 +338,9 @@ const PROBES: &[Probe] = &[
     // Re-filed out of #67 (2026-08-19): neither was conditional syntax. `:`
     // failed between plain instructions too, so it was a line-model change,
     // done as one (#98, `decisions/colon-separated-statements.md`). The
-    // forward label is a resolution-order property needing the reference's
-    // multi-pass convergence and is still open (#99).
+    // forward label was a resolution-order property needing the reference's
+    // three passes, adopted as those (#99,
+    // `decisions/forward-conditions-and-passes.md`).
     ok ("sjasmplus", "colon-inline conditional",
         " IF 1 : ld a,1 : ENDIF\n"),
     ok ("sjasmplus", "colon between plain instructions",
@@ -343,8 +353,14 @@ const PROBES: &[Probe] = &[
         "glob:\n.l: ld a,1 : ld b,2\ngl:: ld a,2 : ld b,3\n"),
     ok ("sjasmplus", "colon-inline untaken branch",
         " IF 0 : ld a,1 : ENDIF\n ld b,2\n"),
-    gap("sjasmplus", "IF on a forward label (multi-pass)",
-        " IF later\n ld a,1\n ENDIF\nlater: nop\n", 99),
+    ok ("sjasmplus", "IF on a forward label (multi-pass)",
+        " IF later\n ld a,1\n ENDIF\nlater: nop\n"),
+    ok ("sjasmplus", "a forward condition that changes the answer",
+        " IF later = 0\n ld a,1\n ENDIF\nlater: nop\n"),
+    ok ("sjasmplus", "a forward condition that never settles",
+        " IF later < 2\n ld a,1\n ENDIF\nlater: nop\n"),
+    ok ("sjasmplus", "a backward condition needs no pass",
+        "later: nop\n IF later\n ld a,1\n ENDIF\n"),
 
     // Modules (#93's third item, 2026-08-23). The error cases — no walk-up, a
     // dotted module name, `ENDMODULE` with nothing open — are not here: this

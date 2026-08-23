@@ -140,7 +140,15 @@ impl Dialect for Sjasmplus {
     /// `ast::evaluate` walk lowers each live line with the environment as of
     /// that point (an `equ` in a taken branch feeds later form selection).
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
-        z80::assemble_keyword(
+        Ok(self.parse_warned(source)?.0)
+    }
+    /// The advisories are sjasmplus's own: a condition that reached forward,
+    /// and a label that never settled (#99).
+    fn parse_warned(
+        &self,
+        source: &str,
+    ) -> Result<(Vec<Statement>, Vec<crate::engine::Warning>), AsmError> {
+        z80::assemble_keyword_warned(
             &SjasmplusSyntax,
             self.instruction_set(),
             self.extension_set(),
@@ -168,7 +176,14 @@ impl Dialect for Sjasmplus {
         map: &mut SourceMap,
         loader: &dyn SourceLoader,
     ) -> Result<Vec<Statement>, AsmError> {
-        z80::parse_program_multi_keyword(
+        Ok(self.parse_multi_warned(map, loader)?.0)
+    }
+    fn parse_multi_warned(
+        &self,
+        map: &mut SourceMap,
+        loader: &dyn SourceLoader,
+    ) -> Result<(Vec<Statement>, Vec<crate::engine::Warning>), AsmError> {
+        z80::parse_program_multi_keyword_warned(
             &SjasmplusSyntax,
             self.instruction_set(),
             self.extension_set(),
@@ -219,6 +234,12 @@ impl Z80Syntax for SjasmplusSyntax {
     /// terminator (#98) — ` ld a,1 : ld b,2` is two instructions, and it is
     /// how hand-written Spectrum source is often laid out.
     fn splits_on_colon(&self) -> bool {
+        true
+    }
+
+    /// sjasmplus resolves a condition against a symbol defined later in the
+    /// file, across its three passes (#99).
+    fn resolves_forward_conditions(&self) -> bool {
         true
     }
 
@@ -490,6 +511,70 @@ impl macros::MacroSyntax for SjasmplusSyntax {
 #[cfg(test)]
 mod tests {
     use crate::assemble_sjasmplus as asm;
+
+    // -----------------------------------------------------------------------
+    // Forward-referenced conditions (#99,
+    // `decisions/forward-conditions-and-passes.md`). Probed against SjASMPlus
+    // 1.21.0, 2026-08-23 — bytes *and* warnings.
+    // -----------------------------------------------------------------------
+
+    /// A condition may name a symbol defined below it. Pass 1 reads it as
+    /// zero and says so; later passes answer from the pass before.
+    #[test]
+    fn a_condition_may_reach_forward() {
+        let r = asm(" IF later\n ld a,1\n ENDIF\nlater: nop\n").expect("assemble");
+        assert_eq!(r.bytes, vec![0x00]);
+        assert_eq!(r.warnings.len(), 1);
+        assert!(
+            r.warnings[0]
+                .message
+                .contains("forward reference of symbol `later`")
+        );
+        assert_eq!(r.warnings[0].line, 1);
+    }
+
+    /// A backward reference is not a forward one, and must not say it is —
+    /// the walk binds each label to its address as it passes, so this folds
+    /// against a value and warns about nothing.
+    #[test]
+    fn a_backward_condition_needs_no_pass() {
+        let r = asm("later: nop\n IF later\n ld a,1\n ENDIF\n").expect("assemble");
+        assert_eq!(r.bytes, vec![0x00]);
+        assert!(r.warnings.is_empty(), "{:?}", r.warnings);
+    }
+
+    /// The case #99 was really about. Emitting the body moves `later` past 2,
+    /// so the condition that admitted the body is false by the end — and the
+    /// body is in the binary. The reference ships that and warns twice; so do
+    /// we, rather than converging further than it does or refusing what it
+    /// builds.
+    #[test]
+    fn a_condition_that_never_settles_warns_and_ships() {
+        let r = asm(" IF later < 2\n ld a,1\n ENDIF\nlater: nop\n").expect("assemble");
+        assert_eq!(r.bytes, vec![0x3E, 0x01, 0x00]);
+        assert_eq!(r.warnings.len(), 2, "{:?}", r.warnings);
+        assert!(
+            r.warnings[1]
+                .message
+                .contains("has a different value in pass 3")
+        );
+        assert!(
+            r.warnings[1]
+                .message
+                .contains("previous value 0 not equal 2")
+        );
+        assert_eq!(r.warnings[1].line, 4, "reported on the label's line");
+    }
+
+    /// pasmo shares the walk and must not gain the behaviour through it: it
+    /// keeps the parse-time-constant rule and the diagnostic that explains it.
+    #[test]
+    fn pasmo_still_requires_a_constant_condition() {
+        assert!(
+            crate::assemble_pasmo(" IF later\n ld a,1\n ENDIF\nlater: nop\n").is_err(),
+            "pasmo has no forward-condition adoption"
+        );
+    }
 
     // -----------------------------------------------------------------------
     // `:` as a statement separator (#98,

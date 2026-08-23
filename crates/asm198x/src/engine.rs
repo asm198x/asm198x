@@ -506,7 +506,8 @@ impl Statement {
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, AsmError> {
-    assemble_statements(dialect.parse(source)?, dialect)
+    let (statements, warnings) = dialect.parse_warned(source)?;
+    assemble_statements(statements, warnings, dialect)
 }
 
 /// Assemble a multi-file program (language-surface U2): the root is
@@ -523,7 +524,8 @@ pub(crate) fn assemble_multi(
     loader: &dyn SourceLoader,
     dialect: &dyn Dialect,
 ) -> Result<Assembly, AsmError> {
-    assemble_statements(dialect.parse_multi(map, loader)?, dialect)
+    let (statements, warnings) = dialect.parse_multi_warned(map, loader)?;
+    assemble_statements(statements, warnings, dialect)
 }
 
 /// The shared two-pass driver over an already-parsed statement stream — the
@@ -531,6 +533,7 @@ pub(crate) fn assemble_multi(
 /// multi-file paths cannot drift.
 fn assemble_statements(
     statements: Vec<Statement>,
+    parse_warnings: Vec<Warning>,
     dialect: &dyn Dialect,
 ) -> Result<Assembly, AsmError> {
     let set = dialect.instruction_set();
@@ -613,7 +616,9 @@ fn assemble_statements(
     // the file at the lowest *written* address, so a leading gap shifts the
     // load address instead of padding it.
     let mut written_start: Option<usize> = None;
-    let mut warnings: Vec<Warning> = Vec::new();
+    // The parse's advisories come first: they describe the source, and the
+    // layout's describe what the source turned into.
+    let mut warnings: Vec<Warning> = parse_warnings;
     let mut start: Option<u16> = None;
     let mut bytes: Vec<u8> = Vec::new();
     let mut debug = DebugData::default();
