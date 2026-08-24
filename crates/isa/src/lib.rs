@@ -14,6 +14,31 @@
 //! Everything is `&'static` data so a whole instruction set is a compile-time
 //! constant: zero dependencies, no allocation, diffable in review.
 
+/// One encoding row a spec declares — the unit the form audit arbitrates and
+/// the coverage metric counts.
+///
+/// Every spec in this crate enumerates its rows, whatever shape it authors
+/// them in ([`Form`] tables, the 6809's `Kind`, the word CPUs' `Class`), so a
+/// consumer can ask *what does this spec claim* without knowing which. See
+/// `decisions/every-spec-enumerates-its-forms.md`.
+///
+/// A row is **derived**, never authored: it is computed from the spec data
+/// beside it, so there is no second copy to fall out of step. It carries what
+/// is true of every encoding regardless of shape, and nothing else — an
+/// opcode-byte field would exclude the field-packed and computed-operand
+/// specs, which is the whole reason this type exists.
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub struct Row {
+    /// The mnemonic, as the spec spells it.
+    pub mnemonic: &'static str,
+    /// What distinguishes this encoding from the mnemonic's others: an
+    /// addressing-mode label for the byte-opcode specs, the branch length for
+    /// a 6809 branch, the class name for a word CPU.
+    pub mode: &'static str,
+    /// Undocumented / illegal opcode.
+    pub undocumented: bool,
+}
+
 /// A complete instruction set for one CPU.
 pub struct InstructionSet {
     /// Human name, e.g. `"MOS 6502"`.
@@ -47,6 +72,21 @@ impl InstructionSet {
     #[must_use]
     pub fn has_mnemonic(&self, mnemonic: &str) -> bool {
         self.instructions.iter().any(|i| i.mnemonic == mnemonic)
+    }
+
+    /// Every encoding row this set declares — one per [`Form`].
+    ///
+    /// The `Form` specs get this for free: a form *is* a row. The specs that
+    /// author their encodings some other way build the same rows from their
+    /// own shape, so a consumer can count or iterate either without caring.
+    pub fn rows(&self) -> impl Iterator<Item = Row> + '_ {
+        self.instructions.iter().flat_map(|i| {
+            i.forms.iter().map(|f| Row {
+                mnemonic: i.mnemonic,
+                mode: f.mode,
+                undocumented: f.undocumented,
+            })
+        })
     }
 }
 
@@ -214,3 +254,59 @@ pub mod tms7000;
 pub mod tms9900;
 pub mod z80;
 pub mod z8000;
+
+#[cfg(test)]
+mod row_tests {
+    /// [`InstructionSet::rows`] must agree with the count the coverage metric
+    /// already derives (`instructions.iter().map(|i| i.forms.len()).sum()`),
+    /// for every `Form` spec.
+    ///
+    /// This is what lets the metric move onto rows without a single reported
+    /// number changing. A denominator that shifted while the seam landed would
+    /// be indistinguishable from coverage falling, which is the one thing the
+    /// stamp exists to make legible.
+    #[test]
+    fn rows_agree_with_the_denominator_the_metric_already_uses() {
+        let sets: &[(&str, &crate::InstructionSet)] = &[
+            ("1802", &crate::cdp1802::SET),
+            ("2650", &crate::s2650::SET),
+            ("6502", &crate::mos6502::SET),
+            ("6800", &crate::m6800::SET),
+            ("65816", &crate::mos65816::SET),
+            ("8048", &crate::i8048::SET),
+            ("8080", &crate::i8080::SET),
+            ("F8", &crate::f8::SET),
+            ("SC/MP", &crate::scmp::SET),
+            ("TMS7000", &crate::tms7000::SET),
+            ("Z80", &crate::z80::SET),
+            ("HuC6280", &crate::huc6280::SET),
+            ("SM83", &crate::sm83::SET),
+            // The 68000 is absent deliberately. It authors its own `Form`
+            // inside its own `Spec` — `base: u16` plus a size encoding plus
+            // operand slots, with no mode label — so it is neither an
+            // `InstructionSet` nor covered by this agreement. Whether its
+            // field encoding enumerates as rows, or wants representatives
+            // rather than a product, is one of the open questions in
+            // `decisions/every-spec-enumerates-its-forms.md`.
+        ];
+        for (name, set) in sets {
+            let legacy: usize = set.instructions.iter().map(|i| i.forms.len()).sum();
+            assert_eq!(set.rows().count(), legacy, "{name}");
+            assert!(legacy > 0, "{name} declares no forms");
+        }
+    }
+
+    /// A row carries the form's `undocumented` flag rather than inventing one,
+    /// so the Z80's eight marked forms stay marked through the seam — which is
+    /// where the 6809's undocumented opcodes will hang once they exist.
+    #[test]
+    fn rows_carry_the_undocumented_marker() {
+        let marked = crate::z80::SET.rows().filter(|r| r.undocumented).count();
+        assert_eq!(marked, 8, "the Z80 declares eight undocumented forms");
+        assert_eq!(
+            crate::mos6809::rows().filter(|r| r.undocumented).count(),
+            0,
+            "the 6809 declares none yet"
+        );
+    }
+}

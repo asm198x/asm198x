@@ -45,6 +45,75 @@ pub enum Kind {
     Stack { opcode: u8, u_stack: bool },
 }
 
+impl Kind {
+    /// The mode labels this kind declares a row for, paired with whether the
+    /// slot is populated.
+    ///
+    /// `Kind::Mem` carries four slots and an empty slice means the mnemonic
+    /// has no form for that mode, so the emptiness is what decides whether a
+    /// row exists — not the variant.
+    const fn slots(&self) -> [(&'static str, bool); 4] {
+        match self {
+            Kind::Inherent(_) => [("inherent", true), ("", false), ("", false), ("", false)],
+            Kind::Branch { long, .. } => [
+                ("relative", true),
+                ("relative long", !long.is_empty()),
+                ("", false),
+                ("", false),
+            ],
+            Kind::Mem {
+                imm,
+                direct,
+                indexed,
+                extended,
+                ..
+            } => [
+                ("immediate", !imm.is_empty()),
+                ("direct", !direct.is_empty()),
+                ("indexed", !indexed.is_empty()),
+                ("extended", !extended.is_empty()),
+            ],
+            Kind::Transfer(_) => [
+                ("register pair", true),
+                ("", false),
+                ("", false),
+                ("", false),
+            ],
+            Kind::Stack { .. } => [
+                ("register set", true),
+                ("", false),
+                ("", false),
+                ("", false),
+            ],
+        }
+    }
+}
+
+/// Every encoding row this spec declares.
+///
+/// The 6809 authors its encodings as [`Kind`] rather than as
+/// [`Form`](crate::Form) tables, because indexed addressing uses a computed
+/// postbyte and has no fixed opcode string to tabulate. The rows are the same
+/// unit either way: one per mnemonic-and-mode the spec actually populates, so
+/// `lda` yields four and `nop` yields one.
+///
+/// `undocumented` is `false` throughout — this spec declares no undocumented
+/// opcodes today. See
+/// [#233](https://github.com/asm198x/asm198x/issues/233).
+pub fn rows() -> impl Iterator<Item = crate::Row> {
+    SET.iter().flat_map(|insn| {
+        insn.kind
+            .slots()
+            .into_iter()
+            .filter(|(_, present)| *present)
+            .map(move |(mode, _)| crate::Row {
+                mnemonic: insn.mnemonic,
+                mode,
+                undocumented: false,
+            })
+    })
+}
+
 impl Insn {
     const fn mem(
         mnemonic: &'static str,
@@ -588,5 +657,86 @@ mod summary_tests {
             orphaned.is_empty(),
             "described, but no such instruction: {orphaned:?}"
         );
+    }
+}
+
+#[cfg(test)]
+mod row_tests {
+    use super::{Kind, SET, rows};
+
+    /// A memory operation yields one row per populated mode, and an empty slot
+    /// is not a row. `jsr` has no immediate form, so it yields three where
+    /// `lda` yields four — which is the property a form audit needs: the count
+    /// is what the spec claims, not what the variant could hold.
+    #[test]
+    fn a_row_exists_only_where_the_spec_populates_a_mode() {
+        let modes = |m: &str| {
+            rows()
+                .filter(|r| r.mnemonic == m)
+                .map(|r| r.mode)
+                .collect::<Vec<_>>()
+        };
+        assert_eq!(
+            modes("lda"),
+            ["immediate", "direct", "indexed", "extended"],
+            "lda takes every mode"
+        );
+        assert_eq!(
+            modes("jsr"),
+            ["direct", "indexed", "extended"],
+            "jsr has no immediate form, and no row for one"
+        );
+        assert_eq!(modes("nop"), ["inherent"]);
+        assert_eq!(modes("tfr"), ["register pair"]);
+        assert_eq!(modes("pshs"), ["register set"]);
+    }
+
+    /// Every instruction contributes at least one row, so nothing the spec
+    /// declares can be invisible to a consumer counting rows. This is the
+    /// property #225 needed and did not have.
+    #[test]
+    fn every_instruction_contributes_a_row() {
+        for insn in SET {
+            assert!(
+                rows().any(|r| r.mnemonic == insn.mnemonic),
+                "`{}` declares no row",
+                insn.mnemonic
+            );
+        }
+        assert_eq!(
+            rows()
+                .map(|r| r.mnemonic)
+                .collect::<std::collections::BTreeSet<_>>()
+                .len(),
+            SET.iter()
+                .map(|i| i.mnemonic)
+                .collect::<std::collections::BTreeSet<_>>()
+                .len(),
+            "rows and the spec name the same mnemonics"
+        );
+    }
+
+    /// The rows are derived, so they cannot drift from the table they are
+    /// derived from: the count is exactly the populated slots.
+    #[test]
+    fn the_row_count_is_the_populated_slots() {
+        let expected: usize = SET
+            .iter()
+            .map(|insn| match &insn.kind {
+                Kind::Inherent(_) | Kind::Transfer(_) | Kind::Stack { .. } => 1,
+                Kind::Branch { long, .. } => 1 + usize::from(!long.is_empty()),
+                Kind::Mem {
+                    imm,
+                    direct,
+                    indexed,
+                    extended,
+                    ..
+                } => [imm, direct, indexed, extended]
+                    .iter()
+                    .filter(|s| !s.is_empty())
+                    .count(),
+            })
+            .sum();
+        assert_eq!(rows().count(), expected);
     }
 }
