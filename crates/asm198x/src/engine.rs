@@ -597,19 +597,72 @@ pub(crate) fn assemble_multi(
 /// The shared two-pass driver over an already-parsed statement stream — the
 /// single body behind [`assemble`] and [`assemble_multi`], so the single- and
 /// multi-file paths cannot drift.
+/// Lay a program's sections into one image.
+///
+/// The single placement implementation: the engine's own section path and the
+/// dialects whose toolchain builds a container (ca65's NES ROM) both come
+/// through here, so "where does a section go" is answered once
+/// (`decisions/sections-in-the-shared-engine.md`).
+///
+/// Sections are placed **by image position, not by source order** — a section
+/// may sit below one written before it, which is what an origin could never
+/// express. A section's position is its own `at` where it has one, since a
+/// banked or config-placed section is addressed somewhere the image does not
+/// put it, and otherwise its address.
+///
+/// `image_base` fixes where the image starts when the container does rather
+/// than the program; `image_size` pads it out. Both are `None`/no-op for a
+/// dialect whose image is just what the source wrote.
+pub(crate) fn lay_out(
+    mut runs: Vec<Run>,
+    gap_fill: u8,
+    addr_unit: i64,
+    image_base: Option<i64>,
+    image_size: impl Fn(&[u8]) -> Option<usize>,
+) -> Result<(i64, Vec<u8>), AsmError> {
+    runs.retain(|r| !r.bytes.is_empty());
+    if runs.is_empty() {
+        return Ok((image_base.unwrap_or(0), Vec::new()));
+    }
+    let placed = |r: &Run| r.at.unwrap_or(r.base);
+    runs.sort_by_key(placed);
+    let origin = image_base.unwrap_or(runs[0].base);
+    let first = image_base.unwrap_or_else(|| placed(&runs[0]));
+    let mut image: Vec<u8> = Vec::new();
+    for r in &runs {
+        let at = ((placed(r) - first) * addr_unit) as usize;
+        if at < image.len() {
+            return Err(AsmError::new(
+                0,
+                format!(
+                    "section `{}` at {:#06x} overlaps the section before it",
+                    r.name,
+                    placed(r)
+                ),
+            ));
+        }
+        image.resize(at, gap_fill);
+        image.extend_from_slice(&r.bytes);
+    }
+    if let Some(size) = image_size(&image) {
+        image.resize(size, gap_fill);
+    }
+    Ok((origin, image))
+}
+
 /// One section's placed bytes, closed off when the next section opens.
 ///
 /// The engine's whole section model: a program is a list of these, and a
 /// dialect with no section concept produces exactly one. Sections are internal
 /// — they are laid into the flat [`Assembly`] before anything outside the
 /// engine sees them (`decisions/sections-in-the-shared-engine.md`).
-struct Run {
-    name: String,
+pub(crate) struct Run {
+    pub(crate) name: String,
     /// The address the CPU sees these bytes at — what labels resolve to.
-    base: i64,
+    pub(crate) base: i64,
     /// Where the bytes sit in the image, when that differs from `base`.
-    at: Option<i64>,
-    bytes: Vec<u8>,
+    pub(crate) at: Option<i64>,
+    pub(crate) bytes: Vec<u8>,
 }
 
 // No written-range fields here: the reserve-rather-than-materialise trim
@@ -1081,50 +1134,10 @@ fn assemble_statements(
             at: section_at,
             bytes,
         });
-        runs.retain(|r| !r.bytes.is_empty());
-        if runs.is_empty() {
-            return Ok(Assembly {
-                origin: 0,
-                reserved_prefix: 0,
-                bytes: Vec::new(),
-                symbols,
-                start,
-                warnings,
-                debug,
-            });
-        }
-        // A section's place in the image is its own `at` where it has one —
-        // a banked or config-placed section is addressed somewhere the image
-        // does not put it — and otherwise its address.
-        //
-        // By image position, not by source order: a section may sit below one
-        // written before it, which is the case that made "lower a section to an
-        // `org`" fail with `cannot move origin backwards`.
-        let placed = |r: &Run| r.at.unwrap_or(r.base);
-        runs.sort_by_key(placed);
-        // The load address is the first section's, and it is only meaningful
-        // when nothing was placed independently of its address.
-        let origin_of_image = dialect.image_base().unwrap_or(runs[0].base);
-        let first = dialect.image_base().unwrap_or_else(|| placed(&runs[0]));
-        let mut image: Vec<u8> = Vec::new();
-        for r in &runs {
-            let at = ((placed(r) - first) * addr_unit) as usize;
-            if at < image.len() {
-                return Err(AsmError::new(
-                    0,
-                    format!(
-                        "section `{}` at {:#06x} overlaps the section before it",
-                        r.name,
-                        placed(r)
-                    ),
-                ));
-            }
-            image.resize(at, gap_fill);
-            image.extend_from_slice(&r.bytes);
-        }
-        if let Some(size) = dialect.image_size(&image) {
-            image.resize(size, gap_fill);
-        }
+        let (origin_of_image, image) =
+            lay_out(runs, gap_fill, addr_unit, dialect.image_base(), |img| {
+                dialect.image_size(img)
+            })?;
         return Ok(Assembly {
             origin: origin_of_image as u16,
             reserved_prefix: 0,

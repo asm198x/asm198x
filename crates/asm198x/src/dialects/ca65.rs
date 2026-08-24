@@ -61,27 +61,40 @@ const FILL: u8 = 0x00;
 /// a `meet-the-machine` program that places a label in `BSS` would land a page
 /// high. Nothing in either track does today, which is why one fixed table has
 /// held; the differential's inlined config matches this one deliberately.
-const NES_SEGMENTS: &[(&str, u32, bool)] = &[
-    ("ZEROPAGE", 0x0000, false),
-    ("OAM", 0x0200, false),
-    ("BSS", 0x0300, false),
-    ("HEADER", 0x0000, true),
-    ("CODE", 0x8000, true),
-    ("VECTORS", 0xFFFA, true),
-    ("CHARS", 0x0000, true),
+const NES_SEGMENTS: &[(&str, u32, Option<usize>)] = &[
+    ("ZEROPAGE", 0x0000, None),
+    ("OAM", 0x0200, None),
+    ("BSS", 0x0300, None),
+    ("HEADER", 0x0000, Some(0)),
+    ("CODE", 0x8000, Some(HEADER_SIZE)),
+    (
+        "VECTORS",
+        0xFFFA,
+        Some(HEADER_SIZE + 0xFFFA - PRG_BASE as usize),
+    ),
+    ("CHARS", 0x0000, Some(HEADER_SIZE + PRG_SIZE)),
 ];
 
-/// The base address of a segment, and whether it contributes bytes to the ROM.
+/// The base address of a segment, and where in the ROM its bytes land.
+///
+/// `file_at` is `None` for a segment that occupies address space and
+/// contributes no bytes — the zero page, RAM, the OAM shadow.
 struct SegInfo {
     base: u32,
-    in_file: bool,
+    file_at: Option<usize>,
+}
+
+impl SegInfo {
+    fn in_file(&self) -> bool {
+        self.file_at.is_some()
+    }
 }
 
 fn seg_info(seg: &str) -> Option<SegInfo> {
     NES_SEGMENTS
         .iter()
         .find(|(name, _, _)| *name == seg)
-        .map(|&(_, base, in_file)| SegInfo { base, in_file })
+        .map(|&(_, base, file_at)| SegInfo { base, file_at })
 }
 
 /// The segment each shorthand switches to. `.code` is `.segment "CODE"`, and
@@ -374,7 +387,7 @@ fn assemble_program(
         // reservations — ZEROPAGE/BSS `.res` — carry no bytes, so no span; the
         // HEADER segment is iNES file metadata, not CPU-addressed code, so its
         // records would alias CPU $0000 — skipped, per AE3's no-fabrication rule).
-        if size > 0 && info.in_file && stmt.seg != "HEADER" {
+        if size > 0 && info.in_file() && stmt.seg != "HEADER" {
             dbg_lines.push((
                 stmt.file,
                 stmt.line as u32,
@@ -411,7 +424,7 @@ fn assemble_program(
     // Emit pass: turn each placed item into bytes, per segment.
     let mut seg_bytes: BTreeMap<String, Vec<u8>> = BTreeMap::new();
     for (seg, addr, line, file, item) in placed {
-        if !seg_info(&seg).expect("seg").in_file {
+        if !seg_info(&seg).expect("seg").in_file() {
             continue; // bss/zp segments occupy address space but emit no file bytes
         }
         let buf = seg_bytes.entry(seg).or_default();
@@ -431,22 +444,30 @@ fn assemble_program(
 
 /// Lay the file segments into the NROM ROM image.
 fn link(seg_bytes: &BTreeMap<String, Vec<u8>>) -> Result<Vec<u8>, AsmError> {
-    let empty = Vec::new();
-    let get = |s: &str| seg_bytes.get(s).unwrap_or(&empty);
+    // Every segment the source wrote bytes into, as a run: addressed where the
+    // CPU sees it, placed where the config puts it in the file. The engine's
+    // `lay_out` does the rest, so the NES ROM is built by the same code that
+    // places a Game Boy bank or a flat program's single section.
+    let runs: Vec<crate::engine::Run> = NES_SEGMENTS
+        .iter()
+        .filter_map(|(name, base, file_at)| {
+            let bytes = seg_bytes.get(*name)?;
+            Some(crate::engine::Run {
+                name: (*name).to_string(),
+                base: i64::from(*base),
+                at: Some((*file_at)? as i64),
+                bytes: bytes.clone(),
+            })
+        })
+        .collect();
 
-    // iNES header (16 bytes, zero-padded).
-    let header = get("HEADER");
-    let mut rom = vec![FILL; HEADER_SIZE];
-    rom[..header.len().min(HEADER_SIZE)].copy_from_slice(&header[..header.len().min(HEADER_SIZE)]);
-
-    // PRG: CODE at $8000, VECTORS at $FFFA, gap filled.
-    let mut prg = vec![FILL; PRG_SIZE];
-    let code = get("CODE");
-    let vectors = get("VECTORS");
-    // CODE reaching the vector table would be silently overwritten by the
-    // VECTORS placement below — corrupted code and a debug record describing
-    // bytes that did not survive. Reject it, as ld65 does when an area fills.
-    if code.len() > (0xFFFA - PRG_BASE) as usize {
+    // CODE running into the vector table would be silently overwritten, giving
+    // corrupted code and a debug record describing bytes that did not survive.
+    // `lay_out` refuses the overlap, but names only the second segment; ld65
+    // names the area that filled, and so does this.
+    if let Some(code) = seg_bytes.get("CODE")
+        && code.len() > (0xFFFA - PRG_BASE) as usize
+    {
         return Err(AsmError::new(
             0,
             format!(
@@ -455,28 +476,11 @@ fn link(seg_bytes: &BTreeMap<String, Vec<u8>>) -> Result<Vec<u8>, AsmError> {
             ),
         ));
     }
-    place(&mut prg, 0, code, "CODE")?;
-    place(&mut prg, (0xFFFA - PRG_BASE) as usize, vectors, "VECTORS")?;
-    rom.extend_from_slice(&prg);
 
-    // CHR: CHARS from the start, filled.
-    let mut chr = vec![FILL; CHR_SIZE];
-    place(&mut chr, 0, get("CHARS"), "CHARS")?;
-    rom.extend_from_slice(&chr);
-
+    // The ROM is a fixed shape: 16-byte header, 32K PRG, 8K CHR, `$00` fill.
+    let size = HEADER_SIZE + PRG_SIZE + CHR_SIZE;
+    let (_, rom) = crate::engine::lay_out(runs, FILL, 1, Some(0), |_| Some(size))?;
     Ok(rom)
-}
-
-fn place(region: &mut [u8], at: usize, bytes: &[u8], name: &str) -> Result<(), AsmError> {
-    let end = at + bytes.len();
-    if end > region.len() {
-        return Err(AsmError::new(
-            0,
-            format!("segment `{name}` overflows its region"),
-        ));
-    }
-    region[at..end].copy_from_slice(bytes);
-    Ok(())
 }
 
 // ---------------------------------------------------------------------------
