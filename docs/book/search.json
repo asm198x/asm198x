@@ -5087,7 +5087,7 @@
       "slug": "reference/instructions/mos65816"
     },
     {
-      "context": "111 mnemonics, operands big-endian. Generated from `crates/isa/src/mos6809.rs`.",
+      "context": "120 mnemonics, operands big-endian. Generated from `crates/isa/src/mos6809.rs`.",
       "page": "Motorola 6809",
       "slug": "reference/instructions/mos6809"
     },
