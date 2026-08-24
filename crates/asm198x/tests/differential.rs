@@ -663,6 +663,10 @@ const PROBES: &[Probe] = &[
         "V = $12345678\n .word .loword(V)\n .word .hiword(V)\n .word .loword($1234)\n"),
     // Two-argument functions: the comma survives the operand split because it
     // is paren-aware, so `.word .max($100, $200)` stays one value.
+    // String arguments: consumed at parse time, yielding a number, so an
+    // expression still evaluates to an integer.
+    ok ("ca65-816", ".strlen",           " lda #.strlen(\"hello\")\n .byte .strlen(\"\")\n"),
+    ok ("ca65-816", ".strat picks a character", " lda #.strat(\"abc\", 1)\n"),
     ok ("ca65-816", ".max / .min",
         " lda #.max(3, 7)\n lda #.min(3, 7)\n"),
     ok ("ca65-816", "two-argument functions take expressions",

@@ -212,22 +212,60 @@ pub(crate) enum Caret {
     Power,
 }
 
+/// One argument to an expression function: a value, or a string literal.
+///
+/// Strings exist here and nowhere else in an expression. A function that
+/// *returns* a string — ca65's `.concat`/`.sprintf`, rgbasm's `STRCAT` — is a
+/// text-substitution feature rather than an expression one, and is not reached
+/// by this.
+#[derive(Debug, Clone)]
+pub(crate) enum ExprArg {
+    Value(Expr),
+    Text(String),
+}
+
+impl ExprArg {
+    /// The value, for a function whose argument must be one.
+    pub(crate) fn value(self, name: &str, line: usize) -> Result<Expr, AsmError> {
+        match self {
+            ExprArg::Value(e) => Ok(e),
+            ExprArg::Text(_) => Err(AsmError::new(
+                line,
+                format!("`{name}` takes a value, not a string"),
+            )),
+        }
+    }
+
+    /// The text, for a function whose argument must be a string.
+    pub(crate) fn text(self, name: &str, line: usize) -> Result<String, AsmError> {
+        match self {
+            ExprArg::Text(t) => Ok(t),
+            ExprArg::Value(_) => Err(AsmError::new(
+                line,
+                format!("`{name}` takes a string, not a value"),
+            )),
+        }
+    }
+}
+
 /// How a dialect turns an expression function call — `name(arg)` — into an
 /// [`Expr`]. See [`ExprOpts::function`].
 ///
 /// Three limits, each of which blocks a known group of reference functions and
 /// none of which is worked around here:
 ///
-/// - **No strings.** A string literal fails in the tokenizer, so the whole
-///   `STRLEN`/`STRCAT`/`STRFMT` family is out of reach until an expression can
-///   carry one — which is a question about what an `Expr` evaluates to, not
-///   just about lexing.
+/// - **No string-*returning* functions.** A string argument is fine — see
+///   [`ExprArg`] — because it is consumed at parse time and yields a number.
+///   A function that hands a string *back* (ca65's `.concat`/`.sprintf`,
+///   rgbasm's `STRCAT`/`STRFMT`) would need an expression to evaluate to
+///   something other than an `i64`, and those are a text-substitution feature
+///   rather than an expression one.
 /// - **No parse-position symbol knowledge.** ca65's `.defined(X)` is
 ///   *positional* — `0` before the definition and `1` after, probe-pinned —
 ///   so it needs the constants known so far, which this signature does not
 ///   carry. Folding it against the finished symbol table would answer `1`
 ///   both times.
-pub(crate) type ExprFn = fn(&str, Vec<Expr>, usize) -> Result<Expr, AsmError>;
+pub(crate) type ExprFn = fn(&str, Vec<ExprArg>, usize) -> Result<Expr, AsmError>;
 
 /// Expression-syntax knobs that vary by dialect. The bitwise/shift operators
 /// `& | << >>` are available in every dialect (the engine AST supports them);
@@ -312,6 +350,10 @@ enum Tok {
     Shr,
     /// Exponentiation (`^` in ACME, where it is *not* XOR).
     Pow,
+    /// A string literal. Only ever a **function argument** — see [`ExprArg`].
+    /// An expression still evaluates to an `i64`, so a string never becomes a
+    /// value; `.strlen("abc")` consumes it at parse time and yields a number.
+    Str(String),
     /// Argument separator inside a function call. Nothing else in an
     /// expression takes one — every caller splits its operand list on commas
     /// before an expression reaches here, and does so paren-aware, so a
@@ -400,6 +442,18 @@ fn tokenize(
                     Caret::Power => Tok::Pow,
                     Caret::Xor | Caret::BankOrXor => Tok::Xor,
                 });
+                i += 1;
+            }
+            '"' => {
+                let start = i + 1;
+                i += 1;
+                while i < chars.len() && chars[i] != '"' {
+                    i += 1;
+                }
+                if i >= chars.len() {
+                    return Err(AsmError::new(line, "unterminated string in expression"));
+                }
+                tokens.push(Tok::Str(chars[start..i].iter().collect()));
                 i += 1;
             }
             ',' => {
@@ -708,6 +762,17 @@ impl ExprParser {
         self.atom()
     }
 
+    /// One function argument: a string literal where the source wrote one,
+    /// otherwise an ordinary expression.
+    fn call_arg(&mut self) -> Result<ExprArg, AsmError> {
+        if let Some(Tok::Str(t)) = self.tokens.get(self.pos) {
+            let t = t.clone();
+            self.pos += 1;
+            return Ok(ExprArg::Text(t));
+        }
+        Ok(ExprArg::Value(self.expr()?))
+    }
+
     fn atom(&mut self) -> Result<Expr, AsmError> {
         let tok = self
             .tokens
@@ -729,10 +794,10 @@ impl ExprParser {
                 match (self.function, self.tokens.get(self.pos)) {
                     (Some(build), Some(Tok::LParen)) => {
                         self.pos += 1;
-                        let mut args = vec![self.expr()?];
+                        let mut args = vec![self.call_arg()?];
                         while matches!(self.tokens.get(self.pos), Some(Tok::Comma)) {
                             self.pos += 1;
-                            args.push(self.expr()?);
+                            args.push(self.call_arg()?);
                         }
                         if !matches!(self.tokens.get(self.pos), Some(Tok::RParen)) {
                             return Err(AsmError::new(

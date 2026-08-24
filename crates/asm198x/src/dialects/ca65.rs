@@ -2149,6 +2149,20 @@ mod tests {
             assert!(assemble(src).is_err(), "{why}");
         }
 
+        // A string argument yields a number; the wrong argument kind is named.
+        let t = rom(".code\n lda #.strlen(\"hello\")\n lda #.strat(\"abc\", 1)\n");
+        assert_eq!(&t[16..20], &[0xA9, 0x05, 0xA9, 0x62]);
+        for (src, want) in [
+            (".code\n lda #.strlen(5)\n", "takes a string, not a value"),
+            (
+                ".code\n lda #.lobyte(\"hi\")\n",
+                "takes a value, not a string",
+            ),
+        ] {
+            let e = assemble(src).expect_err(src).to_string();
+            assert!(e.contains(want), "expected `{want}`, got `{e}`");
+        }
+
         // A `.`-word we do not implement — with a plain argument, since a
         // string literal fails earlier, in the tokenizer.
         let err = assemble(".code\nV = 1\n lda #.sizeof(V)\n").expect_err("not implemented");
