@@ -31,9 +31,17 @@ appends `foo: EQU 0x00000000` to an export file. It belongs with `SAVEBIN`,
 under `multi-artifact-output.md`, and is not covered here.
 
 **5. Linker-table words stay `KnownUnsupported`.** ca65's `.condes`,
-`.constructor`, `.destructor`, `.interruptor` and vasm's `comm` and `weak` put
-bytes in the output through linker configuration we do not have. Those are real
+`.constructor`, `.destructor` and `.interruptor` build an ld65 table from
+linker-config features our fixed NROM layout does not declare. Those are real
 gaps and are counted as such.
+
+**Amended 2026-08-24, after doing it.** vasm's `comm` and `weak` were named
+here too, on the assumption that reserving common storage and marking a symbol
+weak must show in the output. They do not: in binary output both emit nothing
+and vasm asks only that the name be defined, so they are ordinary members of
+rule 1. `comm name,size` needed one correction of its own — only the first
+operand is a name, and checking the size as one would refuse every correct
+`comm`.
 
 ## What the references actually do
 
@@ -46,6 +54,8 @@ translation unit, assembly and linking fused.
 | vasm 2.0b | `xdef xref public global export import` | `xdef nope` → `warning 87: missing definition for symbol <nope>` **and** `error 3007: undefined symbol`. `xref other` buys nothing: `dc.l other` is the same `error 3007` with it or without |
 | rgbasm 1.0.3 | `EXPORT` | requires nothing by itself — `EXPORT nope` links to a ROM. Only a *reference* fails, at rgblink |
 | lwasm 4.25 | `export extdep extern external import` | refused: `Only supported for object target (EXPORT)` |
+| ca65 | `.forceimport` | **unsatisfiable**: defining the name is `already an import`, not defining it is an unresolved external at ld65 *even unreferenced* |
+| vasm | `xref import nref` | **unsatisfiable**: `error 86: external symbol <foo> must not be defined` when defined, `error 3007` when not |
 | sjasmplus 1.21.0 | `EXPORT` | writes an export file. Not visibility |
 | acme 0.97 | — | has none |
 
@@ -93,10 +103,31 @@ each of the five words, with an operand and without, and fails if lwasm accepts
 one. If lwtools changes its mind, the word stops being a refusal and becomes a
 gap, and the test is what says so.
 
+## What actually landed
+
+Three commits, one per dialect family, and the shape held: every word fell into
+rule 1, rule 3, or `Ignored`, and the count of each was not what the manuals
+suggested.
+
+| | words | where |
+|---|---|---|
+| must be defined | 7 vasm, 2 ca65 (`.export`, `.exportzp`) | a statement folded against the finished symbol table, so a name defined below the directive counts |
+| must not be defined | 2 ca65 (`.import`, `.importzp`) | checked where labels are placed, so the refusal points at the definition as ca65's does |
+| no check | 2 ca65 (`.global`, `.globalzp`), 1 ca65 switch (`.autoimport`), 2 vasm (`local`, `idnt`), 1 rgbasm (`EXPORT`) | `Ignored` |
+| refused | 5 lwasm, 3 vasm, 1 ca65 | `RefusedByReference` |
+
+Two behaviours were richer than "a check" and are implemented as themselves:
+`.export name := expr` defines the name it exports, and the `zp` spellings warn
+for a label outside the zero page — but never for a constant.
+
+`RefusedByReference` gained two more dialects the same day it was introduced,
+which answers the objection to adding it: it was not a category for one word in
+one tool.
+
 ## Consequences
 
-- The five lwasm words leave the outstanding count: 512 words outside our
-  surface, down to 507.
+- The refused and implemented words leave the outstanding count together: 512
+  words outside our surface, down to 485.
 - A dialect that wants `RefusedByReference` declares the reference's rule beside
   the word. `directives::refused_by_reference` renders it, so the wording cannot
   drift across the fourteen dispatch arms.
