@@ -338,19 +338,29 @@ fn a_real_directive_reads_differently_from_a_typo() {
 /// wrong layer.
 ///
 /// Pinned on the ones that were actually mis-swept, so the list cannot regain
-/// them quietly. They are a real ISA gap (#225), and that is where they belong.
+/// them quietly. Nine of them were a real ISA gap (#225) and are now in the
+/// spec, which is why they are asserted to *assemble*: an instruction that
+/// went missing again would fail here as loudly as one declared a directive.
 #[test]
 fn an_instruction_is_never_declared_a_directive() {
+    // The nine #225 closed. Each takes an immediate.
     for m in [
-        "adca", "adcb", "bita", "bitb", "cmpd", "cmpy", "cwai", "sbca", "sbcb", "reset",
+        "adca", "adcb", "bita", "bitb", "cmpd", "cmpy", "cwai", "sbca", "sbcb",
     ] {
-        let err = assembler("lwasm")(&format!("\t{m} #1\n"))
+        assembler("lwasm")(&format!("\t{m} #1\n"))
+            .unwrap_or_else(|e| panic!("`{m}` is a 6809 instruction and must assemble: {e}"));
+    }
+    // Still not implemented, and still not directives: lwasm's undocumented
+    // opcodes. `reset` and `hcf`/`rhf` take no operand, so a wrong answer here
+    // reads as a directive complaint rather than an unknown mnemonic.
+    for m in ["reset", "hcf", "rhf"] {
+        let err = assembler("lwasm")(&format!("\t{m}\n"))
             .err()
             .map(|e| e.message)
             .unwrap_or_default();
         assert!(
             err.contains("unknown instruction"),
-            "`{m}` is a 6809 instruction we lack, not a directive — got: {err}"
+            "`{m}` is an undocumented 6809 instruction we lack, not a directive — got: {err}"
         );
     }
 }

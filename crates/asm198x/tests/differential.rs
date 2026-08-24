@@ -663,6 +663,26 @@ const PROBES: &[Probe] = &[
         " db 1\n align 1\n db 2\n"),
     ok ("sjasmplus", "DUP inside a macro",
         " MACRO m\n DUP 2\n nop\n EDUP\n ENDM\n m\n"),
+    // #225: nine core 6809 instructions the spec had no row for at all —
+    // add/subtract-with-carry, bit test, two 16-bit compares and `cwai`. Every
+    // mode each one takes, because a missing mnemonic is missing in all of
+    // them, not only the immediate form the issue happened to tabulate.
+    ok ("lwasm", "add and subtract with carry, every mode",
+        "\tadca #$12\n\tadca <$34\n\tadca ,x\n\tadca >$5678\n\
+         \tadcb #$12\n\tadcb <$34\n\tadcb ,x\n\tadcb >$5678\n\
+         \tsbca #$12\n\tsbca <$34\n\tsbca ,x\n\tsbca >$5678\n\
+         \tsbcb #$12\n\tsbcb <$34\n\tsbcb ,x\n\tsbcb >$5678\n"),
+    ok ("lwasm", "bit test, every mode",
+        "\tbita #$12\n\tbita <$34\n\tbita ,x\n\tbita >$5678\n\
+         \tbitb #$12\n\tbitb <$34\n\tbitb ,x\n\tbitb >$5678\n"),
+    // `cmpd` and `cmpy` are `$10`-prefixed, which the module doc already
+    // claimed as uniform while the table carried neither.
+    ok ("lwasm", "the two $10-prefixed compares, every mode",
+        "\tcmpd #$1234\n\tcmpd <$34\n\tcmpd ,x\n\tcmpd >$5678\n\
+         \tcmpy #$1234\n\tcmpy <$34\n\tcmpy ,x\n\tcmpy >$5678\n"),
+    ok ("lwasm", "cwai is immediate only",
+        "\tcwai #$af\n\tandcc #$fe\n\torcc #$01\n"),
+
     ok ("lwasm", "macro definition and invocation",
         "nop2\tmacro\n nop\n nop\n endm\n nop2\n"),
     ok ("lwasm", "macro with a positional parameter",
