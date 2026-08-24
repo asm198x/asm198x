@@ -101,6 +101,9 @@ fn tool(dialect: &str) -> &'static str {
         // The NES assemble+link path (U5): ca65 + ld65 with the fixed nes.cfg.
         "ca65-nes" => "ca65",
         "rgbasm" => "rgbasm",
+        // Banked ROMs cannot use `-x` (it forces one 32K bank), so they get
+        // their own leg with the padded `rgblink` recipe.
+        "rgbasm-banked" => "rgbasm",
         // The asl chips (U4): one arbiter for the family (asl + p2bin).
         "8080" | "tms9900" | "cp1610" => "asl",
         other => panic!("no reference tool for dialect `{other}`"),
@@ -176,7 +179,7 @@ fn reference(tmp: &Path, dialect: &str, body: &str) -> Option<Vec<u8>> {
         // rgbasm assembles to an object file that rgblink turns into a binary,
         // like ca65/ld65 below. `-x` keeps the image unpadded so the bytes are
         // the program's and not a ROM's trailing fill.
-        "rgbasm" => {
+        "rgbasm" | "rgbasm-banked" => {
             let src = tmp.join("ref.asm");
             let obj = tmp.join("ref.o");
             fs::write(&src, body).ok()?;
@@ -184,7 +187,13 @@ fn reference(tmp: &Path, dialect: &str, body: &str) -> Option<Vec<u8>> {
             let mut a = Command::new("rgbasm");
             a.arg("-o").arg(&obj).arg(&src);
             let mut l = Command::new("rgblink");
-            l.arg("-x").arg("-o").arg(&out).arg(&obj);
+            // `-x` keeps the image unpadded, which is what a ROM0-only program
+            // should match. It also forces a single 32K bank, so a banked
+            // program is linked without it and compared against the padded ROM.
+            if dialect == "rgbasm" {
+                l.arg("-x");
+            }
+            l.arg("-o").arg(&out).arg(&obj);
             run(vec![a, l])?;
             fs::read(&out).ok()
         }
@@ -231,7 +240,7 @@ fn probe_cpu(dialect: &str) -> &'static str {
         "lwasm" => "6809",
         "vasm" => "68000",
         "ca65-816" => "65816",
-        "rgbasm" => "SM83",
+        "rgbasm" | "rgbasm-banked" => "SM83",
         other => panic!("no corpus CPU for dialect `{other}`"),
     }
 }
@@ -782,6 +791,17 @@ const PROBES: &[Probe] = &[
     // ---- rgbasm / SM83 ------------------------------------------------------
     // Conditionals: `ELIF` rather than `ELSEIF`, and `ENDC` is the **only**
     // closer — rgbds answers `ENDIF` with `Undefined macro`.
+    // A banked section is addressed at $4000 whichever bank holds it and lands
+    // at `bank * $4000` in the ROM, which an image position equal to an address
+    // cannot express. `rgblink` pads to `(highest bank + 1) * $4000`.
+    ok ("rgbasm-banked", "a banked section is placed by bank",
+        "SECTION \"f\",ROM0[$0]\n db $00\nSECTION \"p\",ROMX,BANK[2]\nhere:\n db $22\n dw here\n"),
+    ok ("rgbasm-banked", "a higher bank sizes the ROM",
+        "SECTION \"f\",ROM0[$0]\n db 1\nSECTION \"z\",ROMX,BANK[5]\n db 2\n"),
+    ok ("rgbasm-banked", "two banks, and labels in each",
+        "SECTION \"f\",ROM0[$0]\n dw a\n dw b\n\
+         SECTION \"p\",ROMX,BANK[1]\na: db $11\n\
+         SECTION \"q\",ROMX,BANK[3]\nb: db $33\n"),
     // Sections are placed by address, not by the order they were written.
     // Lowering a section to an `org` could only ever move forward, so this
     // failed with `cannot move origin backwards` until the engine grew a
@@ -1818,7 +1838,7 @@ fn multi_file_source_matches_reference() {
             continue;
         }
         // The rgbasm arm links with rgblink (RGBDS ships them together).
-        if p.dialect == "rgbasm" && !have("rgblink") {
+        if tool(p.dialect) == "rgbasm" && !have("rgblink") {
             eprintln!("SKIP: `rgblink` not on PATH");
             continue;
         }

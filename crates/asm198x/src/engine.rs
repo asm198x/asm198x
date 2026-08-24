@@ -367,7 +367,18 @@ pub(crate) enum Operation {
     /// chooses. Placement for those is not implemented: the section continues
     /// from the current address, which is what the dialects that have them did
     /// before this existed. `name` carries into the debug section table.
-    Section { name: String, base: Option<i64> },
+    ///
+    /// `at` is where the section's bytes sit **in the image**, when that is not
+    /// the same thing as where the CPU sees them. A banked Game Boy section is
+    /// addressed at `$4000` whichever bank it is in, and lands at
+    /// `bank * $4000` in the ROM; the NES segments are the same shape, with
+    /// file offsets a linker config fixes. `None` means the two coincide,
+    /// which is every flat dialect.
+    Section {
+        name: String,
+        base: Option<i64>,
+        at: Option<i64>,
+    },
     /// A diagnostic the **source** asked for: ACME's `!error`/`!warn`, lwasm's
     /// `error`, rgbasm's `FAIL`/`WARN`. `fatal` aborts the assembly; otherwise
     /// it joins the warnings and assembly continues.
@@ -594,7 +605,10 @@ pub(crate) fn assemble_multi(
 /// engine sees them (`decisions/sections-in-the-shared-engine.md`).
 struct Run {
     name: String,
+    /// The address the CPU sees these bytes at — what labels resolve to.
     base: i64,
+    /// Where the bytes sit in the image, when that differs from `base`.
+    at: Option<i64>,
     bytes: Vec<u8>,
 }
 
@@ -712,6 +726,7 @@ fn assemble_statements(
     // the flat engine unchanged.
     let mut runs: Vec<Run> = Vec::new();
     let mut section_name = String::new();
+    let mut section_at: Option<i64> = None;
     let mut debug = DebugData::default();
     for s in &statements {
         // The location counter (`$`) is the address of this statement's start,
@@ -731,7 +746,7 @@ fn assemble_statements(
                     gap_fill,
                 );
             }
-            Some(Operation::Section { name, base }) => {
+            Some(Operation::Section { name, base, at }) => {
                 // Close the run so far and start one at the new base. Bytes
                 // are per-section from here, so the location counter, the
                 // written-range trims and the 64K check all measure within
@@ -740,6 +755,7 @@ fn assemble_statements(
                     runs.push(Run {
                         name: std::mem::take(&mut section_name),
                         base: origin,
+                        at: section_at.take(),
                         bytes: std::mem::take(&mut bytes),
                     });
                     origin = *base;
@@ -747,6 +763,7 @@ fn assemble_statements(
                     written_start = None;
                 }
                 section_name = name.clone();
+                section_at = *at;
             }
             Some(Operation::Equ(_)) => {} // defines a symbol; emits nothing
             Some(Operation::Entry(e)) => {
@@ -1061,6 +1078,7 @@ fn assemble_statements(
         runs.push(Run {
             name: section_name,
             base: origin,
+            at: section_at,
             bytes,
         });
         runs.retain(|r| !r.bytes.is_empty());
@@ -1075,28 +1093,40 @@ fn assemble_statements(
                 debug,
             });
         }
-        // By address, not by source order: a section may be pinned below one
+        // A section's place in the image is its own `at` where it has one —
+        // a banked or config-placed section is addressed somewhere the image
+        // does not put it — and otherwise its address.
+        //
+        // By image position, not by source order: a section may sit below one
         // written before it, which is the case that made "lower a section to an
         // `org`" fail with `cannot move origin backwards`.
-        runs.sort_by_key(|r| r.base);
-        let first = runs[0].base;
+        let placed = |r: &Run| r.at.unwrap_or(r.base);
+        runs.sort_by_key(placed);
+        // The load address is the first section's, and it is only meaningful
+        // when nothing was placed independently of its address.
+        let origin_of_image = dialect.image_base().unwrap_or(runs[0].base);
+        let first = dialect.image_base().unwrap_or_else(|| placed(&runs[0]));
         let mut image: Vec<u8> = Vec::new();
         for r in &runs {
-            let at = ((r.base - first) * addr_unit) as usize;
+            let at = ((placed(r) - first) * addr_unit) as usize;
             if at < image.len() {
                 return Err(AsmError::new(
                     0,
                     format!(
                         "section `{}` at {:#06x} overlaps the section before it",
-                        r.name, r.base
+                        r.name,
+                        placed(r)
                     ),
                 ));
             }
             image.resize(at, gap_fill);
             image.extend_from_slice(&r.bytes);
         }
+        if let Some(size) = dialect.image_size(&image) {
+            image.resize(size, gap_fill);
+        }
         return Ok(Assembly {
-            origin: first as u16,
+            origin: origin_of_image as u16,
             reserved_prefix: 0,
             bytes: image,
             symbols,

@@ -217,6 +217,7 @@ pub(crate) enum Item {
     Section {
         name: String,
         base: Option<i64>,
+        at: Option<i64>,
     },
     /// A source-requested diagnostic (ACME `!error`/`!warn`, lwasm `error`,
     /// rgbasm `FAIL`/`WARN`). Like the aligns it has no emit arm: the
@@ -704,9 +705,10 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             fatal: *fatal,
             message: message.clone(),
         },
-        Item::Section { name, base } => Operation::Section {
+        Item::Section { name, base, at } => Operation::Section {
             name: name.clone(),
             base: *base,
+            at: *at,
         },
         Item::Binary(payload) => Operation::Binary(payload.clone()),
         other => {
@@ -771,7 +773,7 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
         },
         Item::AlignTo { modulus, fill } => Operation::AlignTo { modulus, fill },
         Item::Diagnose { fatal, message } => Operation::Diagnose { fatal, message },
-        Item::Section { name, base } => Operation::Section { name, base },
+        Item::Section { name, base, at } => Operation::Section { name, base, at },
         // No dialect lowers a conditional through the generic path — ACME
         // evaluates the tree in `dialects::acme::evaluate` — so this is
         // unreachable in practice; it guards against a mis-routed future dialect.
@@ -971,7 +973,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         },
         Operation::AlignTo { modulus, fill } => Item::AlignTo { modulus, fill },
         Operation::Diagnose { fatal, message } => Item::Diagnose { fatal, message },
-        Operation::Section { name, base } => Item::Section { name, base },
+        Operation::Section { name, base, at } => Item::Section { name, base, at },
     }
 }
 

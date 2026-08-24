@@ -59,6 +59,25 @@ use crate::span::FileId;
 pub(crate) struct Rgbasm;
 
 impl Dialect for Rgbasm {
+    /// A Game Boy ROM starts at file offset 0, whatever the program's lowest
+    /// section is: a lone `SECTION "p", ROMX, BANK[2]` still emits the 32K
+    /// before it (probe-pinned — `rgblink` writes 49152 bytes for that).
+    fn image_base(&self) -> Option<i64> {
+        Some(0)
+    }
+
+    /// A Game Boy ROM is a whole number of $4000 banks: `rgblink` writes
+    /// `(highest bank + 1) * $4000` bytes, with no rounding to a power of two
+    /// (three banks give 49152, six give 98304 — both probe-pinned).
+    ///
+    /// Only when a bank was actually used. A ROM0-only program keeps the exact
+    /// length it was written to, which is what `rgblink -x` emits and what
+    /// every existing probe compares.
+    fn image_size(&self, image: &[u8]) -> Option<usize> {
+        let banks = image.len().div_ceil(0x4000);
+        (banks > 1).then(|| banks * 0x4000)
+    }
+
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::sm83::SET
     }
@@ -379,11 +398,22 @@ impl FlatWalk for Walker {
             .to_ascii_uppercase()
             .starts_with("SECTION")
         {
+            let code = code.trim();
+            let bank = section_bank(code, line)?;
+            let pinned = section_origin(code, line)?
+                .map(|e| fold_const(&e, &self.consts, line))
+                .transpose()?;
+            // A banked section is addressed at $4000 whichever bank holds it,
+            // and lands at `bank * $4000` in the ROM. Bank 0 is `ROM0`, which
+            // is addressed and placed at the same $0000.
+            let (base, at) = match bank {
+                Some(n) if n > 0 => (Some(pinned.unwrap_or(ROMX_BASE)), Some(n * BANK_SIZE)),
+                _ => (pinned, None),
+            };
             let item = Some(crate::ast::item_from_operation(Operation::Section {
-                name: section_name(code.trim()),
-                base: section_origin(code.trim(), line)?
-                    .map(|e| fold_const(&e, &self.consts, line))
-                    .transpose()?,
+                name: section_name(code),
+                base,
+                at,
             }));
             self.nodes.push(Node {
                 operand_span: None,
@@ -534,8 +564,36 @@ fn strip_comment(line: &str) -> &str {
 
 /// `SECTION "name", TYPE[$addr]` → the origin, if the section pins one.
 fn section_origin(code: &str, line: usize) -> Result<Option<Expr>, AsmError> {
+    // Only the bracket on the *type*. `SECTION "p", ROMX, BANK[2]` has one
+    // bracketed number and it is not an address — reading the whole line put
+    // the bank number in the origin and every label in a banked section came
+    // out two bytes into the ROM.
+    let code = match code.to_ascii_uppercase().find("BANK") {
+        Some(i) => &code[..i],
+        None => code,
+    };
     match (code.find('['), code.rfind(']')) {
         (Some(a), Some(b)) if a < b => Ok(Some(value(code[a + 1..b].trim(), line)?)),
+        _ => Ok(None),
+    }
+}
+
+/// A Game Boy ROM bank, and where the CPU sees a banked one.
+const BANK_SIZE: i64 = 0x4000;
+const ROMX_BASE: i64 = 0x4000;
+
+/// The bank in `SECTION "n", ROMX, BANK[k]`, if the source named one.
+fn section_bank(code: &str, line: usize) -> Result<Option<i64>, AsmError> {
+    let upper = code.to_ascii_uppercase();
+    let Some(kw) = upper.find("BANK") else {
+        return Ok(None);
+    };
+    let tail = &code[kw + 4..];
+    match (tail.find('['), tail.find(']')) {
+        (Some(a), Some(b)) if a < b => match value(tail[a + 1..b].trim(), line)? {
+            Expr::Num(n) => Ok(Some(n)),
+            _ => Err(AsmError::new(line, "`BANK[...]` needs a constant")),
+        },
         _ => Ok(None),
     }
 }
@@ -1344,6 +1402,32 @@ mod tests {
         )
         .expect("assembles");
         assert_eq!(&out.bytes[..2], &[0x30, 0x00]);
+    }
+
+    /// A banked section is addressed at $4000 whichever bank holds it, and
+    /// lands at `bank * $4000` in the ROM — the two are different numbers, and
+    /// an image position equal to an address cannot hold both.
+    #[test]
+    fn a_banked_section_is_addressed_and_placed_differently() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"f\",ROM0[$0]\n db $00\nSECTION \"p\",ROMX,BANK[2]\nhere:\n db $22\n dw here\n",
+        )
+        .expect("assembles");
+        // Three banks, because bank 2 was used.
+        assert_eq!(out.bytes.len(), 3 * 0x4000);
+        assert_eq!(out.bytes[0x8000], 0x22);
+        // `here` is $4000, not its offset in the ROM.
+        assert_eq!(&out.bytes[0x8001..0x8003], &[0x00, 0x40]);
+    }
+
+    /// `BANK[n]` is bracketed like an origin and is not one. Reading the whole
+    /// line for brackets put the bank number in the origin, and every label in
+    /// a banked section came out low.
+    #[test]
+    fn a_bank_is_not_an_origin() {
+        let out = crate::assemble_rgbasm("SECTION \"p\",ROMX,BANK[2]\nhere:\n dw here\n")
+            .expect("assembles");
+        assert_eq!(&out.bytes[0x8000..0x8002], &[0x00, 0x40]);
     }
 
     /// Two sections claiming the same bytes is refused, not silently merged.
