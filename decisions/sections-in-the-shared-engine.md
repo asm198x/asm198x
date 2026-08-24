@@ -1,6 +1,6 @@
 # Decision: sections belong to the shared engine, not to the dialects that need them
 
-**Status:** Proposed. Binding for Asm198x once accepted. Generalises the bounded
+**Status:** Active. Binding for Asm198x (accepted 2026-08-24). Generalises the bounded
 linker sanctioned in [`syntax-stance.md`](syntax-stance.md) at the trigger that
 record named. Restores principle 2 of
 [`assemble-io-model.md`](assemble-io-model.md) and stays inside its principle 3.

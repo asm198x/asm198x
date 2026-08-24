@@ -782,6 +782,17 @@ const PROBES: &[Probe] = &[
     // ---- rgbasm / SM83 ------------------------------------------------------
     // Conditionals: `ELIF` rather than `ELSEIF`, and `ENDC` is the **only**
     // closer — rgbds answers `ENDIF` with `Undefined macro`.
+    // Sections are placed by address, not by the order they were written.
+    // Lowering a section to an `org` could only ever move forward, so this
+    // failed with `cannot move origin backwards` until the engine grew a
+    // section model.
+    ok ("rgbasm", "sections out of address order",
+        "SECTION \"c\",ROM0[$0]\n db $cc\nSECTION \"b\",ROM0[$20]\n db $bb\n\
+         SECTION \"a\",ROM0[$10]\n db $aa\n"),
+    ok ("rgbasm", "a section gap is filled",
+        "SECTION \"a\",ROM0[$0]\n db 1\nSECTION \"b\",ROM0[$4]\n db 2\n"),
+    ok ("rgbasm", "labels take their own section's base",
+        "SECTION \"c\",ROM0[$0]\n dw far\nSECTION \"f\",ROM0[$30]\nfar: db $99\n"),
     ok ("rgbasm", "if taken", "SECTION \"s\",ROM0[0]\nIF 1\n nop\nENDC\n ret\n"),
     ok ("rgbasm", "if not taken", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nENDC\n ret\n"),
     ok ("rgbasm", "if/else", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nELSE\n ret\nENDC\n"),

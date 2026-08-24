@@ -369,16 +369,22 @@ impl FlatWalk for Walker {
             span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
         });
 
-        // `SECTION "name", TYPE[$addr]` — a directive preserved verbatim; it
-        // lowers to an `Org` only when it pins an address (a flat binary ignores
-        // an address-less section, but the formatter still keeps the line).
+        // `SECTION "name", TYPE[$addr]` — a directive preserved verbatim, and
+        // an actual section rather than an origin in disguise. Lowering it to
+        // `Org` could only move the counter forward, so two pinned sections in
+        // descending address order — which `rgblink` places without complaint
+        // — failed with `cannot move origin backwards`.
         if code
             .trim_start()
             .to_ascii_uppercase()
             .starts_with("SECTION")
         {
-            let item = section_origin(code.trim(), line)?
-                .map(|org| crate::ast::item_from_operation(Operation::Org(org)));
+            let item = Some(crate::ast::item_from_operation(Operation::Section {
+                name: section_name(code.trim()),
+                base: section_origin(code.trim(), line)?
+                    .map(|e| fold_const(&e, &self.consts, line))
+                    .transpose()?,
+            }));
             self.nodes.push(Node {
                 operand_span: None,
                 label: None,
@@ -532,6 +538,15 @@ fn section_origin(code: &str, line: usize) -> Result<Option<Expr>, AsmError> {
         (Some(a), Some(b)) if a < b => Ok(Some(value(code[a + 1..b].trim(), line)?)),
         _ => Ok(None),
     }
+}
+
+/// The quoted name in `SECTION "name", TYPE[...]`, for the debug section table.
+/// Empty when the source did not quote one — rgbasm requires it, so an empty
+/// name means the line is malformed and the reference will say so.
+fn section_name(code: &str) -> String {
+    let mut parts = code.split('"');
+    parts.next();
+    parts.next().unwrap_or("").to_string()
 }
 
 /// A parsed constant definition: `name` is the symbol the engine binds;
@@ -1303,6 +1318,43 @@ fn expand_rgbasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion
 
 #[cfg(test)]
 mod tests {
+
+    /// A section is placed at its own base, whatever order the source wrote
+    /// them in — the thing an `org` could never express, since it can only
+    /// move forward.
+    #[test]
+    fn sections_are_placed_by_address_not_by_source_order() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"c\",ROM0[$0]\n db $cc\nSECTION \"b\",ROM0[$20]\n db $bb\n\
+             SECTION \"a\",ROM0[$10]\n db $aa\n",
+        )
+        .expect("assembles");
+        assert_eq!(out.bytes.len(), 0x21);
+        assert_eq!(out.bytes[0x00], 0xCC);
+        assert_eq!(out.bytes[0x10], 0xAA);
+        assert_eq!(out.bytes[0x20], 0xBB);
+    }
+
+    /// A label belongs to its own section, so it resolves against that
+    /// section's base rather than a running image offset.
+    #[test]
+    fn a_label_takes_its_own_sections_base() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"c\",ROM0[$0]\n dw far\nSECTION \"f\",ROM0[$30]\nfar: db $99\n",
+        )
+        .expect("assembles");
+        assert_eq!(&out.bytes[..2], &[0x30, 0x00]);
+    }
+
+    /// Two sections claiming the same bytes is refused, not silently merged.
+    #[test]
+    fn overlapping_sections_are_refused() {
+        let err = crate::assemble_rgbasm(
+            "SECTION \"a\",ROM0[$0]\n db 1,2,3,4\nSECTION \"b\",ROM0[$2]\n db 9\n",
+        )
+        .expect_err("overlap");
+        assert!(err.to_string().contains("overlaps"), "got `{err}`");
+    }
 
     /// `FAIL` stops, `WARN` notes and carries on, and neither fires from an
     /// untaken branch.

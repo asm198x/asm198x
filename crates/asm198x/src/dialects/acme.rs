@@ -1768,6 +1768,7 @@ fn substitute_anon_refs(
         | Operation::Align { .. }
         | Operation::AlignTo { .. }
         | Operation::Diagnose { .. }
+        | Operation::Section { .. }
         | Operation::Reserve(_)) => other,
     })
 }

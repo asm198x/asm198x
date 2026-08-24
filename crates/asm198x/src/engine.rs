@@ -355,6 +355,19 @@ pub(crate) enum Operation {
     /// offset 3). Approximating either with the other would diverge silently
     /// on exactly the source that distinguishes them.
     AlignTo { modulus: i64, fill: u8 },
+    /// Open a section: subsequent bytes are placed at `base` rather than
+    /// continuing from the current address, and the section's own bytes are
+    /// laid out independently of what came before.
+    ///
+    /// A dialect with no section concept never emits this and is a program of
+    /// exactly one implicit section based at its origin — which is what the
+    /// flat engine has always been.
+    ///
+    /// `base` is `None` for a section whose address its toolchain's linker
+    /// chooses. Placement for those is not implemented: the section continues
+    /// from the current address, which is what the dialects that have them did
+    /// before this existed. `name` carries into the debug section table.
+    Section { name: String, base: Option<i64> },
     /// A diagnostic the **source** asked for: ACME's `!error`/`!warn`, lwasm's
     /// `error`, rgbasm's `FAIL`/`WARN`. `fatal` aborts the assembly; otherwise
     /// it joins the warnings and assembly continues.
@@ -461,6 +474,8 @@ pub(crate) fn next_pc(
         Operation::AlignTo { modulus, .. } => pc + align_pad(pc, *modulus),
         // Emits nothing; it only speaks.
         Operation::Diagnose { .. } => pc,
+        // Moves the counter rather than advancing it; the caller sets it.
+        Operation::Section { .. } => pc,
         // Set the counter, bind a name, name an entry point — none of them a
         // width. A caller that can reach these handles them itself.
         Operation::Org(_) | Operation::Equ(_) | Operation::Entry(_) => pc,
@@ -571,6 +586,23 @@ pub(crate) fn assemble_multi(
 /// The shared two-pass driver over an already-parsed statement stream — the
 /// single body behind [`assemble`] and [`assemble_multi`], so the single- and
 /// multi-file paths cannot drift.
+/// One section's placed bytes, closed off when the next section opens.
+///
+/// The engine's whole section model: a program is a list of these, and a
+/// dialect with no section concept produces exactly one. Sections are internal
+/// — they are laid into the flat [`Assembly`] before anything outside the
+/// engine sees them (`decisions/sections-in-the-shared-engine.md`).
+struct Run {
+    name: String,
+    base: i64,
+    bytes: Vec<u8>,
+}
+
+// No written-range fields here: the reserve-rather-than-materialise trim
+// (`Dialect::trims_trailing_gap`) belongs to the asl family, and no asl dialect
+// has sections. A sectioned dialect that trimmed would need the range per
+// section, and this is where it would go.
+
 fn assemble_statements(
     statements: Vec<Statement>,
     parse_warnings: Vec<Warning>,
@@ -629,6 +661,14 @@ fn assemble_statements(
                 pc = v;
                 origin.get_or_insert(v);
             }
+            Some(Operation::Section {
+                base: Some(base), ..
+            }) => {
+                pc = *base;
+                origin.get_or_insert(*base);
+            }
+            // A section whose address its linker chooses: nothing to move to.
+            Some(Operation::Section { base: None, .. }) => {}
             Some(
                 Operation::Bytes(_)
                 | Operation::Words(_)
@@ -667,6 +707,11 @@ fn assemble_statements(
     let mut warnings: Vec<Warning> = parse_warnings;
     let mut start: Option<u16> = None;
     let mut bytes: Vec<u8> = Vec::new();
+    // Sections closed so far. A dialect with no section concept never opens
+    // one, leaves this empty, and takes the single-run path below — which is
+    // the flat engine unchanged.
+    let mut runs: Vec<Run> = Vec::new();
+    let mut section_name = String::new();
     let mut debug = DebugData::default();
     for s in &statements {
         // The location counter (`$`) is the address of this statement's start,
@@ -685,6 +730,23 @@ fn assemble_statements(
                     bytes.len() + ((target - cur) * addr_unit) as usize,
                     gap_fill,
                 );
+            }
+            Some(Operation::Section { name, base }) => {
+                // Close the run so far and start one at the new base. Bytes
+                // are per-section from here, so the location counter, the
+                // written-range trims and the 64K check all measure within
+                // this section rather than across the image.
+                if let Some(base) = base {
+                    runs.push(Run {
+                        name: std::mem::take(&mut section_name),
+                        base: origin,
+                        bytes: std::mem::take(&mut bytes),
+                    });
+                    origin = *base;
+                    written_len = 0;
+                    written_start = None;
+                }
+                section_name = name.clone();
             }
             Some(Operation::Equ(_)) => {} // defines a symbol; emits nothing
             Some(Operation::Entry(e)) => {
@@ -991,6 +1053,57 @@ fn assemble_statements(
         if origin + bytes.len().div_ceil(addr_unit as usize) as i64 > 0x1_0000 {
             return Err(s.err("program exceeds the 64K address space"));
         }
+    }
+
+    // Lay the sections into one image. Only a dialect that opened a section
+    // reaches this; the flat path below is unchanged for the other twenty.
+    if !runs.is_empty() {
+        runs.push(Run {
+            name: section_name,
+            base: origin,
+            bytes,
+        });
+        runs.retain(|r| !r.bytes.is_empty());
+        if runs.is_empty() {
+            return Ok(Assembly {
+                origin: 0,
+                reserved_prefix: 0,
+                bytes: Vec::new(),
+                symbols,
+                start,
+                warnings,
+                debug,
+            });
+        }
+        // By address, not by source order: a section may be pinned below one
+        // written before it, which is the case that made "lower a section to an
+        // `org`" fail with `cannot move origin backwards`.
+        runs.sort_by_key(|r| r.base);
+        let first = runs[0].base;
+        let mut image: Vec<u8> = Vec::new();
+        for r in &runs {
+            let at = ((r.base - first) * addr_unit) as usize;
+            if at < image.len() {
+                return Err(AsmError::new(
+                    0,
+                    format!(
+                        "section `{}` at {:#06x} overlaps the section before it",
+                        r.name, r.base
+                    ),
+                ));
+            }
+            image.resize(at, gap_fill);
+            image.extend_from_slice(&r.bytes);
+        }
+        return Ok(Assembly {
+            origin: first as u16,
+            reserved_prefix: 0,
+            bytes: image,
+            symbols,
+            start,
+            warnings,
+            debug,
+        });
     }
 
     // asl reserves rather than materialises: `p2bin` fills only the gaps *inside*

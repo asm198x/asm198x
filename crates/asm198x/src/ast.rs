@@ -211,6 +211,13 @@ pub(crate) enum Item {
         value: i64,
         fill: u8,
     },
+    /// A section opener (rgbasm `SECTION`). Like the aligns and diagnostics it
+    /// has no emit arm: the formatter re-emits it from [`Node::source`](Node),
+    /// so each dialect keeps its own spelling and attributes.
+    Section {
+        name: String,
+        base: Option<i64>,
+    },
     /// A source-requested diagnostic (ACME `!error`/`!warn`, lwasm `error`,
     /// rgbasm `FAIL`/`WARN`). Like the aligns it has no emit arm: the
     /// formatter re-emits it from [`Node::source`](Node).
@@ -697,6 +704,10 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             fatal: *fatal,
             message: message.clone(),
         },
+        Item::Section { name, base } => Operation::Section {
+            name: name.clone(),
+            base: *base,
+        },
         Item::Binary(payload) => Operation::Binary(payload.clone()),
         other => {
             let what = match other {
@@ -760,6 +771,7 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
         },
         Item::AlignTo { modulus, fill } => Operation::AlignTo { modulus, fill },
         Item::Diagnose { fatal, message } => Operation::Diagnose { fatal, message },
+        Item::Section { name, base } => Operation::Section { name, base },
         // No dialect lowers a conditional through the generic path — ACME
         // evaluates the tree in `dialects::acme::evaluate` — so this is
         // unreachable in practice; it guards against a mis-routed future dialect.
@@ -891,6 +903,7 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> String) -> O
         | Operation::Align { .. }
         | Operation::AlignTo { .. }
         | Operation::Diagnose { .. }
+        | Operation::Section { .. }
         | Operation::Reserve(_)) => other,
     }
 }
@@ -958,6 +971,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         },
         Operation::AlignTo { modulus, fill } => Item::AlignTo { modulus, fill },
         Operation::Diagnose { fatal, message } => Item::Diagnose { fatal, message },
+        Operation::Section { name, base } => Item::Section { name, base },
     }
 }
 
