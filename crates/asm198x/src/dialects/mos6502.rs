@@ -269,9 +269,32 @@ impl ExprArg {
 ///   rather than answer `1` both times.
 pub(crate) type ExprFn = fn(&str, Vec<ExprArg>, usize) -> Result<Expr, AsmError>;
 
+/// Which comparison spellings a dialect takes, and what it answers for true.
+/// Every field is probed, not inferred — see `docs/comparison-operators.md`.
+#[derive(Clone, Copy, Default)]
+pub(crate) struct Compare {
+    /// `=` as equality. lwasm has no such operator.
+    pub eq: bool,
+    /// `==` as equality (rgbasm, sjasmplus).
+    pub eq_eq: bool,
+    /// `<>` as inequality. sjasmplus refuses it.
+    pub ne_angle: bool,
+    /// `!=` as inequality (rgbasm, sjasmplus).
+    pub ne_bang: bool,
+    /// `<` and `>` as relations. Every dialect that compares at all has these,
+    /// **including** the ones where a leading `<` is the low-byte prefix: the
+    /// two never occupy the same position.
+    pub relational: bool,
+    /// `<=` and `>=`. lwasm refuses them.
+    pub ordered_eq: bool,
+    /// True is `$FF` rather than `1` (vasm, sjasmplus, pasmo).
+    pub minus_one: bool,
+}
+
 /// Expression-syntax knobs that vary by dialect. The bitwise/shift operators
 /// `& | << >>` are available in every dialect (the engine AST supports them);
-/// these knobs only vary the `<`/`>` byte-prefix behaviour and what `^` means.
+/// these knobs vary the `<`/`>` byte-prefix behaviour, what `^` means, and
+/// which comparisons exist.
 #[derive(Clone, Copy)]
 pub(crate) struct ExprOpts {
     /// Where the `<`/`>` byte-extraction operators sit in precedence.
@@ -301,6 +324,9 @@ pub(crate) struct ExprOpts {
     /// function whose argument is a *name* rather than a value (ca65's
     /// `.sizeof(Point)`) reads it back as an `Expr::Sym`.
     pub function: Option<ExprFn>,
+    /// Comparison support. `Default` is none, which is what a dialect whose
+    /// reference has no comparison operators wants.
+    pub compare: Compare,
 }
 
 /// Parse a value expression. `parse_number` lexes the dialect's numeric literal
@@ -322,6 +348,7 @@ pub(crate) fn parse_expr(
         prec: opts.prec,
         caret: opts.caret,
         function: opts.function,
+        compare_opts: opts.compare,
     };
     let expr = parser.expr()?;
     if parser.pos != parser.tokens.len() {
@@ -352,6 +379,10 @@ enum Tok {
     Shr,
     /// Exponentiation (`^` in ACME, where it is *not* XOR).
     Pow,
+    /// A comparison, in operator position. A leading `<`/`>` is still the
+    /// byte prefix where the dialect has one; these are only produced after a
+    /// value, where a prefix cannot appear.
+    Cmp(BinOp),
     /// A string literal. Only ever a **function argument** — see [`ExprArg`].
     /// An expression still evaluates to an `i64`, so a string never becomes a
     /// value; `.strlen("abc")` consumes it at parse time and yields a number.
@@ -373,6 +404,13 @@ fn tokenize(
     let mut tokens = Vec::new();
     let mut i = 0;
     while i < chars.len() {
+        // Whether the token before this one ended a value. A prefix operator
+        // can only appear where one did not; an infix comparison only where
+        // one did. That is the whole of how `<` tells its two meanings apart.
+        let after_value = matches!(
+            tokens.last(),
+            Some(Tok::Num(_) | Tok::Sym(_) | Tok::Star | Tok::RParen | Tok::Str(_))
+        );
         let c = chars[i];
         match c {
             ws if ws.is_whitespace() => i += 1,
@@ -398,13 +436,25 @@ fn tokenize(
                 tokens.push(Tok::Slash);
                 i += 1;
             }
-            // `<<`/`>>` are shifts everywhere; a lone `<`/`>` is a low/high-byte
-            // prefix only where `byte_prefix` is on (the 6502 family), otherwise
-            // it must have been the start of a shift.
+            // `<<`/`>>` are shifts everywhere. A lone `<`/`>` is a
+            // low/high-byte **prefix** where `byte_prefix` is on, and a
+            // **comparison** where one follows a value — the two never occupy
+            // the same position, which is why ca65 and acme have both
+            // (`docs/comparison-operators.md`).
             '<' => {
+                let c = opts.compare;
                 if chars.get(i + 1) == Some(&'<') {
                     tokens.push(Tok::Shl);
                     i += 2;
+                } else if after_value && c.ne_angle && chars.get(i + 1) == Some(&'>') {
+                    tokens.push(Tok::Cmp(BinOp::Ne));
+                    i += 2;
+                } else if after_value && c.ordered_eq && chars.get(i + 1) == Some(&'=') {
+                    tokens.push(Tok::Cmp(BinOp::Le));
+                    i += 2;
+                } else if after_value && c.relational {
+                    tokens.push(Tok::Cmp(BinOp::Lt));
+                    i += 1;
                 } else if opts.byte_prefix {
                     tokens.push(Tok::Lo);
                     i += 1;
@@ -413,15 +463,34 @@ fn tokenize(
                 }
             }
             '>' => {
+                let c = opts.compare;
                 if chars.get(i + 1) == Some(&'>') {
                     tokens.push(Tok::Shr);
                     i += 2;
+                } else if after_value && c.ordered_eq && chars.get(i + 1) == Some(&'=') {
+                    tokens.push(Tok::Cmp(BinOp::Ge));
+                    i += 2;
+                } else if after_value && c.relational {
+                    tokens.push(Tok::Cmp(BinOp::Gt));
+                    i += 1;
                 } else if opts.byte_prefix {
                     tokens.push(Tok::Hi);
                     i += 1;
                 } else {
                     return Err(AsmError::new(line, "expected `>>` (shift)"));
                 }
+            }
+            '=' if opts.compare.eq_eq && chars.get(i + 1) == Some(&'=') => {
+                tokens.push(Tok::Cmp(BinOp::Eq));
+                i += 2;
+            }
+            '=' if opts.compare.eq => {
+                tokens.push(Tok::Cmp(BinOp::Eq));
+                i += 1;
+            }
+            '!' if opts.compare.ne_bang && chars.get(i + 1) == Some(&'=') => {
+                tokens.push(Tok::Cmp(BinOp::Ne));
+                i += 2;
             }
             '&' => {
                 tokens.push(Tok::And);
@@ -538,10 +607,16 @@ struct ExprParser {
     prec: BytePrec,
     caret: Caret,
     function: Option<ExprFn>,
+    compare_opts: Compare,
 }
 
 impl ExprParser {
     fn expr(&mut self) -> Result<Expr, AsmError> {
+        self.compare()
+    }
+
+    /// The dialect's arithmetic ladder, below any comparison.
+    fn ladder(&mut self) -> Result<Expr, AsmError> {
         // Loose `<`/`>` wrap the whole expression to their right.
         if matches!(self.prec, BytePrec::Loose) {
             match self.tokens.get(self.pos) {
@@ -565,6 +640,28 @@ impl ExprParser {
         } else {
             self.add_sub()
         }
+    }
+
+    /// Comparisons, loosest of all — `a+1 = b*2` compares the sums. Non-
+    /// associative in practice, but chaining is harmless and no reference
+    /// refuses it, so the loop is left general.
+    ///
+    /// A dialect whose reference answers `$FF` for true gets the comparison
+    /// negated here, so `Expr` evaluation stays dialect-agnostic.
+    fn compare(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.ladder()?;
+        while let Some(Tok::Cmp(op)) = self.tokens.get(self.pos) {
+            let op = *op;
+            self.pos += 1;
+            let right = self.ladder()?;
+            let cmp = Expr::Bin(op, Box::new(left), Box::new(right));
+            left = if self.compare_opts.minus_one {
+                Expr::Neg(Box::new(cmp))
+            } else {
+                cmp
+            };
+        }
+        Ok(left)
     }
 
     // ---- ACME precedence ladder (loosest first): `|`, keyword `XOR`/`EOR`,
@@ -901,7 +998,19 @@ pub(crate) fn assignment_split(trimmed: &str) -> Option<usize> {
             let prev = i.checked_sub(1).map(|p| bytes[p]);
             let next = bytes.get(i + 1).copied();
             if !matches!(prev, Some(b'!' | b'<' | b'>' | b'=')) && next != Some(b'=') {
-                return Some(i);
+                // The left side has to be a *name* for this to be a
+                // definition. Without that check `.byte 2=2` reads as defining
+                // a symbol called `.byte 2`, which is what it did before `=`
+                // could be a comparison and nothing had reason to notice.
+                let left = trimmed[..i].trim();
+                let is_name = !left.is_empty()
+                    && (left == "*"
+                        || left.chars().all(|c| {
+                            c.is_ascii_alphanumeric() || matches!(c, '_' | '.' | '@' | ':')
+                        }));
+                if is_name {
+                    return Some(i);
+                }
             }
         }
     }
@@ -958,6 +1067,7 @@ mod tests {
     fn eval(raw: &str, prec: BytePrec) -> i64 {
         let env = BTreeMap::new();
         let opts = ExprOpts {
+            compare: Compare::default(),
             function: None,
             prec,
             byte_prefix: true,

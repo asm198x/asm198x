@@ -195,6 +195,16 @@ pub(crate) enum BinOp {
     Max,
     /// The smaller of the two (ca65 `.min`).
     Min,
+    /// The comparisons. Evaluation answers 1 or 0; a dialect whose reference
+    /// answers `$FF` for true wraps the comparison in a negation, so the tree
+    /// carries that and evaluation stays dialect-agnostic
+    /// (`docs/comparison-operators.md`).
+    Eq,
+    Ne,
+    Lt,
+    Gt,
+    Le,
+    Ge,
 }
 
 /// An expression in the shared engine IR. Each dialect parses its own operator
@@ -285,6 +295,12 @@ pub(crate) fn eval_binop(op: BinOp, a: i64, b: i64, line: usize) -> Result<i64, 
         BinOp::Shr => a.wrapping_shr(b as u32),
         // ca65's `.max`/`.min`. Binary operations rather than a dedicated node:
         // they take two values and produce one, which is what `BinOp` is for.
+        BinOp::Eq => i64::from(a == b),
+        BinOp::Ne => i64::from(a != b),
+        BinOp::Lt => i64::from(a < b),
+        BinOp::Gt => i64::from(a > b),
+        BinOp::Le => i64::from(a <= b),
+        BinOp::Ge => i64::from(a >= b),
         BinOp::Max => a.max(b),
         BinOp::Min => a.min(b),
         BinOp::Pow => {

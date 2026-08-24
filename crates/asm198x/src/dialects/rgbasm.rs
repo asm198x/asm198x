@@ -1032,6 +1032,15 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         parse_number,
         ExprOpts {
+            compare: mos6502::Compare {
+                eq: false,
+                eq_eq: true,
+                ne_angle: false,
+                ne_bang: true,
+                relational: true,
+                ordered_eq: true,
+                minus_one: false,
+            },
             function: Some(expr_function),
             bang_is_or: false,
             prec: BytePrec::Tight,

@@ -734,6 +734,15 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         parse_number,
         mos6502::ExprOpts {
+            compare: mos6502::Compare {
+                eq: true,
+                eq_eq: false,
+                ne_angle: true,
+                ne_bang: false,
+                relational: true,
+                ordered_eq: true,
+                minus_one: false,
+            },
             function: Some(super::ca65_flat::expr_function),
             bang_is_or: false,
             prec: BytePrec::Tight,

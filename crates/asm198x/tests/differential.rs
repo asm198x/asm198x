@@ -265,6 +265,8 @@ const PROBES: &[Probe] = &[
     ok ("acme", "operator >>",           " lda #16>>2\n"),
     ok ("acme", "directive !pet",        " !pet \"hi\"\n"),
     ok ("acme", "directive !align",      " !align 255,0\n lda #1\n"),
+    ok ("acme", "comparisons answer 1",  " !byte 2=2,2=3,2<>3,2<3,2>3\n"),
+    ok ("acme", "prefix and infix < together", " !byte <$1234,2<3\n"),
     ok ("acme", "directive !fill",       " !fill 4\n lda #1\n"),
     ok ("acme", "!fill with a value",    " !fill 3,$ff\n lda #1\n"),
     ok ("acme", "directive !scr",        " !scr \"abc\"\n"),
@@ -467,6 +469,13 @@ const PROBES: &[Probe] = &[
     ok ("vasm", "cnop one short takes 00", "\tdc.b $11,$22,$33\n\tcnop 0,4\n\tdc.b $99\n"),
     ok ("vasm", "cnop offset adds past the boundary", "\tdc.b $11\n\tcnop 2,4\n\tdc.b $99\n"),
     ok ("vasm", "cnop to an eight boundary", "\tdc.b $11\n\tcnop 0,8\n\tdc.b $99\n"),
+    // Comparisons. vasm answers $FF for true where the 6502 family answers 1
+    // (`docs/comparison-operators.md`).
+    ok ("vasm", "comparisons answer $FF",
+        "\tdc.b 2=2,2=3,2<>3,2<3,2>3,2<=3,2>=3\n"),
+    ok ("vasm", "a comparison binds looser than arithmetic",
+        "\tdc.b 1+1=2,2*2>3\n"),
+    ok ("vasm", "assert with a comparison",  "\tassert 2=2\n\tdc.b 9\n"),
     ok ("vasm", "a true assertion is silent",  "\tassert 1\n\tdc.b 1\n"),
     ok ("vasm", "even pads to a word",   "\tdc.b 1\n\teven\n\tdc.b 2\n"),
     ok ("vasm", "even on a word does nothing", "\tdc.b 1,2\n\teven\n\tdc.b 3\n"),
@@ -624,6 +633,10 @@ const PROBES: &[Probe] = &[
     ok ("sjasmplus", "the Next has eight slots",
         " DEVICE ZXSPECTRUMNEXT\n SLOT 7\n PAGE 223\n db 1\n"),
     // `ASSERT` passes silently and reaches forward to labels below it.
+    // The Z80 family has its own expression parser and no comparisons yet
+    // (#230). The facts are probed and written down; only the code is missing.
+    gap("sjasmplus", "comparisons answer $FF",
+        " db 2=2,2==2,2!=3,2<3,2>3,2<=3,2>=3\n", 230),
     ok ("sjasmplus", "a true assertion is silent",
         " ORG 0\n ASSERT 1\n db 1\n"),
     ok ("sjasmplus", "an assertion sees a later label",
@@ -676,6 +689,11 @@ const PROBES: &[Probe] = &[
         "ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5,9\n"),
     // Expression functions: the three byte extractions, which pick from a
     // 24-bit value the way the `<`/`>`/`^` prefixes do.
+    // `<` is the low-byte prefix *and* less-than, told apart by position.
+    ok ("ca65-816", "comparisons answer 1",
+        " .byte 2=2,2=3,2<>3,2<3,2>3,2<=3,2>=3\n"),
+    ok ("ca65-816", "a prefix < and an infix < in one list",
+        " .byte <$1234,2<3,>$1234\n"),
     ok ("ca65-816", ".lobyte / .hibyte / .bankbyte",
         "V = $123456\n lda #.lobyte(V)\n lda #.hibyte(V)\n lda #.bankbyte(V)\n"),
     ok ("ca65-816", "a function takes an expression",
@@ -796,6 +814,8 @@ const PROBES: &[Probe] = &[
     // `align` states the boundary itself, not a power of two — `align 3` after
     // a byte really does put the next item at offset 3 — and takes an optional
     // fill byte. Already-aligned pads nothing.
+    // lwasm has `<>` but neither `=` nor `<=`/`>=`.
+    ok ("lwasm", "comparisons answer 1",  " fcb 2<>3,2<3,2>3\n"),
     ok ("lwasm", "align pads to the boundary",
         " fcb 1\n align 4\n fcb 2\n"),
     ok ("lwasm", "align to a non-power-of-two boundary",
@@ -827,6 +847,8 @@ const PROBES: &[Probe] = &[
     // Lowering a section to an `org` could only ever move forward, so this
     // failed with `cannot move origin backwards` until the engine grew a
     // section model.
+    ok ("rgbasm", "comparisons are == and !=",
+        "SECTION \"s\",ROM0[0]\n db 2==2,2==3,2!=3,2<3,2>3,2<=3,2>=3\n"),
     ok ("rgbasm", "ASSERT and STATIC_ASSERT pass silently",
         "SECTION \"s\",ROM0[0]\n ASSERT 1\n STATIC_ASSERT 1, \"fine\"\n db 1\n"),
     ok ("rgbasm", "an assertion reaches forward",

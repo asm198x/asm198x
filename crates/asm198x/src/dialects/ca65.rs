@@ -2082,6 +2082,15 @@ fn parse_value(
         line,
         parse_number,
         mos6502::ExprOpts {
+            compare: mos6502::Compare {
+                eq: true,
+                eq_eq: false,
+                ne_angle: true,
+                ne_bang: false,
+                relational: true,
+                ordered_eq: true,
+                minus_one: false,
+            },
             function: Some(expr_function_positional),
             bang_is_or: false,
             prec: BytePrec::Tight,

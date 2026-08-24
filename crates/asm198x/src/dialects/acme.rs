@@ -2638,6 +2638,15 @@ fn parse_value(anons: &Anons, zone: &str, raw: &str, line: usize) -> Result<Expr
         line,
         parse_number,
         mos6502::ExprOpts {
+            compare: mos6502::Compare {
+                eq: true,
+                eq_eq: false,
+                ne_angle: true,
+                ne_bang: false,
+                relational: true,
+                ordered_eq: true,
+                minus_one: false,
+            },
             function: None,
             bang_is_or: false,
             prec: BytePrec::Loose,
