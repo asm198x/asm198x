@@ -284,6 +284,10 @@ const PROBES: &[Probe] = &[
 
     // ---- pasmo / z80 --------------------------------------------------------
     ok ("pasmo", "hex $ / binary %",     " ld a,$10\n ld b,%1010\n"),
+    // pasmo alone bounds a constant, and only upward: `$FFFF` assembles,
+    // `$10000` does not, and a negative is fine (#228).
+    ok ("pasmo", "a 16-bit constant",     "V equ $FFFF\n ld hl,V\n"),
+    ok ("pasmo", "a negative constant",   "V equ -5\n ld a,V\n"),
     ok ("pasmo", "defw / dw",            " defw $1234\n dw $5678\n"),
     ok ("pasmo", "defs / ds reserve",    " ld a,1\n defs 3\n ds 2\n ld b,2\n"),
     ok ("pasmo", "if taken",             " if 1\n nop\n endif\n ret\n"),
@@ -652,11 +656,11 @@ const PROBES: &[Probe] = &[
         " lda #.lobyte($1234+1)\n ldx #.hibyte($12ff+1)\n"),
     ok ("ca65-816", ".loword / .hiword",
         "V = $123456\n .word .loword(V)\n .word .hiword(V)\n .word .loword($1234)\n"),
-    // `.hiword` exists to reach bits 16-31, and the engine caps every dialect's
-    // `equ` at 24 bits — so the case the function is *for* is a live gap, and
-    // the corpus holds it as one rather than the probe stepping around it.
-    gap("ca65-816", ".hiword over a 32-bit constant",
-        "V = $12345678\n .word .loword(V)\n .word .hiword(V)\n .word .loword($1234)\n", 228),
+    // The case `.hiword` exists for: bits 16-31 of a 32-bit constant. A tracked
+    // divergence until the engine stopped capping every dialect's `equ` at a
+    // 65816 long address (#228).
+    ok ("ca65-816", ".hiword over a 32-bit constant",
+        "V = $12345678\n .word .loword(V)\n .word .hiword(V)\n .word .loword($1234)\n"),
     // Two-argument functions: the comma survives the operand split because it
     // is paren-aware, so `.word .max($100, $200)` stays one value.
     ok ("ca65-816", ".max / .min",

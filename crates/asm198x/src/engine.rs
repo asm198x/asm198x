@@ -597,9 +597,14 @@ fn assemble_statements(
                 .as_ref()
                 .ok_or_else(|| s.err("`equ` needs a label"))?;
             let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
-            // Constants may be 24-bit (65816 bank/long addresses).
-            if !(0..=0xFF_FFFF).contains(&v) {
-                return Err(s.err(format!("equ value {v} out of range 0..=16777215")));
+            if let Some(range) = dialect.equ_range()
+                && !range.contains(&v)
+            {
+                return Err(s.err(format!(
+                    "equ value {v} out of range {}..={}",
+                    range.start(),
+                    range.end()
+                )));
             }
             if symbols.insert(label.clone(), v).is_some() {
                 return Err(s.err(format!("duplicate label `{label}`")));

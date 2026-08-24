@@ -94,6 +94,13 @@ pub(crate) struct Pasmo {
 }
 
 impl Dialect for Pasmo {
+    /// pasmo is the one reference in the set that bounds a constant, and it
+    /// bounds only the top: `V equ $FFFF` assembles, `$10000` does not, and
+    /// `-65536` is accepted. Probed against pasmo 0.5.
+    fn equ_range(&self) -> Option<std::ops::RangeInclusive<i64>> {
+        Some(i64::MIN..=0xFFFF)
+    }
+
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::z80::SET
     }
@@ -384,6 +391,15 @@ fn parameters(text: &str) -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
+
+    /// pasmo is the only reference that bounds a constant, and only at the top.
+    #[test]
+    fn a_constant_is_bounded_upward_only() {
+        assert!(crate::assemble_pasmo("V equ $FFFF\n ld hl,V\n").is_ok());
+        assert!(crate::assemble_pasmo("V equ -5\n ld a,V\n").is_ok());
+        let err = crate::assemble_pasmo("V equ $10000\n ld a,1\n").expect_err("refused");
+        assert!(err.to_string().contains("out of range"), "got `{err}`");
+    }
     use crate::assemble_pasmonext as asm;
     use crate::dialects::macros::Expand;
 

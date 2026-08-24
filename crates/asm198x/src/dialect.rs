@@ -144,6 +144,24 @@ pub(crate) trait Dialect {
         1
     }
 
+    /// The values this dialect's toolchain accepts for an `equ`/`=` constant,
+    /// or `None` for no constraint.
+    ///
+    /// A property of the toolchain, not of the CPU. Probed against every
+    /// reference installed here: acme, sjasmplus, rgbasm, vasm, lwasm and ca65
+    /// all take `$12345678`, and acme, sjasmplus, rgbasm, vasm and lwasm all
+    /// take negatives. **pasmo alone constrains**, and only upward — `$FFFF`
+    /// assembles, `$10000` does not, while `-65536` is fine.
+    ///
+    /// So the default is no constraint, which matches six of the seven, and
+    /// pasmo narrows it. The engine previously checked every dialect against
+    /// `0..=0xFF_FFFF` — a 65816 long address applied to all twenty-one —
+    /// which refused source five references assemble, in both directions
+    /// (#228).
+    fn equ_range(&self) -> Option<std::ops::RangeInclusive<i64>> {
+        None
+    }
+
     /// The byte that fills space the source reserved but did not define — an
     /// `org` gap, or a `ds`/`rmb`/`res`/`block` reservation.
     ///
