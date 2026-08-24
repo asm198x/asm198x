@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 528 word(s) outside our surface, across the references installed
+# 525 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -69,7 +69,7 @@
 
 ## sjasmplus (SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus))
 # 4231 candidate(s) harvested; 264 recognised here, 24 more the tool itself
-# refuses on this target; 83 of the 264 outside our surface
+# refuses on this target; 80 of the 264 outside our surface
 abyte
 abytec
 abytez
@@ -83,7 +83,6 @@ dd
 defarray
 defdevice
 defh
-device
 dg
 dh
 disp
@@ -111,7 +110,6 @@ lua
 mmu
 opt
 output
-page
 relocate_table
 save3dos
 saveamsdos
@@ -129,7 +127,6 @@ setbreakpoint
 shellexec
 size
 sldopt
-slot
 struct
 tapout
 undefine
