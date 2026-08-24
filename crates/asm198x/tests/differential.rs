@@ -1782,6 +1782,30 @@ const MULTI_PROBES: &[MultiProbe] = &[
             "\tcpu 8080\n\torg 0\n\tdb 0aah\n\tdw 1234h\n\tdw 1,2\n\tdb 0bbh\n",
         )],
     },
+    // #227: asl's CP-1600 `byte` takes a 16-bit operand and emits its two
+    // bytes low-first, one byte per decle — so `byte x'1234'` is `0034 0012`
+    // and `byte 1` is `0001 0000`. Probed by reading the listing's location
+    // counter, which advances 2 per operand whatever the value.
+    //
+    // `binclude` differs, and that difference is asl's rather than ours: it
+    // advances one decle per byte while p2bin lays the bytes down packed. Both
+    // are probed here together so neither can be "fixed" into the other.
+    MultiProbe {
+        dialect: "cp1610",
+        binaries: &[],
+        note: "cp1610 byte accounting: each operand is two decles, low byte \
+               then high, a `word` beside it is one decle, and a string or \
+               character operand anywhere in the list silences the whole \
+               statement — the numeric operands beside it do not survive \
+               (#227)",
+        files: &[(
+            "main.asm",
+            "\tcpu CP-1600\n\torg x'0000'\n\tbyte 1,2,3\n\tword x'1234'\n\
+             \tbyte 4\n\tbyte x'1234'\n\tbyte x'FF'\n\tbyte x'100'\n\tbyte 0\n\
+             \tbyte \"AB\"\n\tbyte 'A'\n\tbyte \"AB\",1\n\tbyte 1,'A'\n\
+             \tword x'FFFF'\n",
+        )],
+    },
     MultiProbe {
         dialect: "cp1610",
         binaries: &[("odd3.bin", &[0x10, 0x11, 0x12]), ("data.bin", ASSET)],

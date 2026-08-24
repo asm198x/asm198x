@@ -224,14 +224,19 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["org"]),
         category: Category::Operation,
     },
+    // `byte` and `word` only. `db`, `dc.b`, `data`, `dw` and `dc.w` were
+    // declared here too and asl has none of them on this chip — each answers
+    // `unknown instruction` (asl 1.42, probed 2026-08-24). They came in with a
+    // sweep and were never checked against the tool, so source asl refuses
+    // assembled here.
     Directive {
         id: "bytes",
-        pattern: Pattern::Exact(&["byte", "db", "dc.b"]),
+        pattern: Pattern::Exact(&["byte"]),
         category: Category::Operation,
     },
     Directive {
         id: "words",
-        pattern: Pattern::Exact(&["word", "data", "dw", "dc.w"]),
+        pattern: Pattern::Exact(&["word"]),
         category: Category::Operation,
     },
     Directive {
@@ -268,7 +273,14 @@ fn parse_op(rest: &str, line: usize, after_sdbd: bool) -> Result<Option<Operatio
             }
             Category::Operation => match directive.id {
                 "org" => Operation::Org(value(args, line)?),
-                "bytes" => Operation::Bytes(byte_list(args, line)?),
+                // asl's CP-1600 `BYTE` takes a **16-bit** operand and emits
+                // its two bytes, low first, one byte per decle: `byte x'1234'`
+                // is the decle pair `0034 0012`, and `byte 1` is `0001 0000`.
+                // So it is a word list of half-selections, not a byte list —
+                // `Operation::Bytes` packs two raw bytes into a decle, which is
+                // what #227 saw. Probed against asl 1.42 by reading the
+                // listing's location counter, which advances 2 per operand.
+                "bytes" => Operation::Words(byte_operands(args, line)?),
                 "words" => Operation::Words(value_list(args, line)?),
                 other => {
                     return Err(AsmError::new(
@@ -283,16 +295,45 @@ fn parse_op(rest: &str, line: usize, after_sdbd: bool) -> Result<Option<Operatio
     Ok(Some(op))
 }
 
-fn byte_list(args: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
+/// The decles one `byte` operand list contributes.
+///
+/// asl's CP-1600 `BYTE` is not a byte list. Each operand is a **16-bit value**
+/// whose two bytes are emitted low-first, one byte per decle: `byte x'1234'`
+/// is `0034 0012` and `byte 1` is `0001 0000`. Read from asl 1.42's listing,
+/// whose location counter advances two per operand whatever the value.
+///
+/// A string or character operand anywhere in the list makes the **whole
+/// statement** contribute nothing. `byte "AB"`, `byte 'A'`, `byte 1,"AB"` and
+/// `byte "AB",1` all emit no decles and advance the counter by zero — the `1`
+/// does not survive its neighbour. asl reports `0 errors, 0 warnings` for
+/// every one of them, so this is a silent no-op rather than a refusal we could
+/// mistake it for.
+///
+/// It is a strange rule, and it is the reference's. Refusing these would fail
+/// source asl accepts, and emitting the numeric operands would put bytes in a
+/// file asl leaves empty.
+fn byte_operands(args: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
+    let items = split_data_items(args);
+    if items.iter().any(|i| is_text_operand(i)) {
+        return Ok(Vec::new());
+    }
     let mut out = Vec::new();
-    for item in split_data_items(args) {
-        if let Some(s) = string_literal(item) {
-            out.extend(s.bytes().map(|b| Expr::Num(i64::from(b))));
-        } else {
-            out.push(value(item, line)?);
-        }
+    for item in items {
+        let v = value(item, line)?;
+        out.push(Expr::Lo(Box::new(v.clone())));
+        out.push(Expr::Hi(Box::new(v)));
     }
     Ok(out)
+}
+
+/// A double-quoted string or a single-quoted character — the two operand
+/// shapes that silence a whole `byte` statement.
+fn is_text_operand(item: &str) -> bool {
+    let t = item.trim();
+    if string_literal(t).is_some() {
+        return true;
+    }
+    t.len() >= 2 && t.starts_with('\'') && t.ends_with('\'')
 }
 
 fn value_list(args: &str, line: usize) -> Result<Vec<Expr>, AsmError> {

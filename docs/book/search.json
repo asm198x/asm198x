@@ -622,7 +622,7 @@
       "slug": "reference/dialects/cp1610"
     },
     {
-      "context": "21 directives, 35 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "21 directives, 30 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "cp1610",
       "slug": "reference/dialects/cp1610"
