@@ -191,6 +191,10 @@ pub(crate) enum BinOp {
     Shr,
     /// Exponentiation (ACME's `^`): `a` raised to the power `b`.
     Pow,
+    /// The larger of the two (ca65 `.max`).
+    Max,
+    /// The smaller of the two (ca65 `.min`).
+    Min,
 }
 
 /// An expression in the shared engine IR. Each dialect parses its own operator
@@ -279,6 +283,10 @@ pub(crate) fn eval_binop(op: BinOp, a: i64, b: i64, line: usize) -> Result<i64, 
         BinOp::Xor => a ^ b,
         BinOp::Shl => a.wrapping_shl(b as u32),
         BinOp::Shr => a.wrapping_shr(b as u32),
+        // ca65's `.max`/`.min`. Binary operations rather than a dedicated node:
+        // they take two values and produce one, which is what `BinOp` is for.
+        BinOp::Max => a.max(b),
+        BinOp::Min => a.min(b),
         BinOp::Pow => {
             let exp = u32::try_from(b)
                 .map_err(|_| AsmError::new(line, "negative exponent in expression"))?;

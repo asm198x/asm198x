@@ -657,6 +657,14 @@ const PROBES: &[Probe] = &[
     // the corpus holds it as one rather than the probe stepping around it.
     gap("ca65-816", ".hiword over a 32-bit constant",
         "V = $12345678\n .word .loword(V)\n .word .hiword(V)\n .word .loword($1234)\n", 228),
+    // Two-argument functions: the comma survives the operand split because it
+    // is paren-aware, so `.word .max($100, $200)` stays one value.
+    ok ("ca65-816", ".max / .min",
+        " lda #.max(3, 7)\n lda #.min(3, 7)\n"),
+    ok ("ca65-816", "two-argument functions take expressions",
+        " lda #.max(1+1, 2*2)\n lda #.min(.max(1,5), 9)\n"),
+    ok ("ca65-816", "a call survives a data list split",
+        " .word .max($100, $200), $3\n"),
     ok ("ca65-816", "functions nest",
         " lda #.lobyte(.hibyte($123456))\n"),
     ok ("ca65-816", ".res reserves",     " lda #1\n .res 3\n lda #2\n"),

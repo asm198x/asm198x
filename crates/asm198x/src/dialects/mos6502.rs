@@ -218,10 +218,6 @@ pub(crate) enum Caret {
 /// Three limits, each of which blocks a known group of reference functions and
 /// none of which is worked around here:
 ///
-/// - **One argument.** The tokenizer has no comma, because every caller splits
-///   its operands on commas before an expression reaches it. ca65's
-///   `.max`/`.min` and rgbasm's `STRFMT` need that token. The callers' own
-///   splitter is already paren-aware, so it would keep `f(a,b)` intact.
 /// - **No strings.** A string literal fails in the tokenizer, so the whole
 ///   `STRLEN`/`STRCAT`/`STRFMT` family is out of reach until an expression can
 ///   carry one — which is a question about what an `Expr` evaluates to, not
@@ -316,6 +312,11 @@ enum Tok {
     Shr,
     /// Exponentiation (`^` in ACME, where it is *not* XOR).
     Pow,
+    /// Argument separator inside a function call. Nothing else in an
+    /// expression takes one — every caller splits its operand list on commas
+    /// before an expression reaches here, and does so paren-aware, so a
+    /// comma survives only inside `f(a,b)`.
+    Comma,
 }
 
 fn tokenize(
@@ -399,6 +400,10 @@ fn tokenize(
                     Caret::Power => Tok::Pow,
                     Caret::Xor | Caret::BankOrXor => Tok::Xor,
                 });
+                i += 1;
+            }
+            ',' => {
+                tokens.push(Tok::Comma);
                 i += 1;
             }
             '(' => {
@@ -724,15 +729,19 @@ impl ExprParser {
                 match (self.function, self.tokens.get(self.pos)) {
                     (Some(build), Some(Tok::LParen)) => {
                         self.pos += 1;
-                        let arg = self.expr()?;
+                        let mut args = vec![self.expr()?];
+                        while matches!(self.tokens.get(self.pos), Some(Tok::Comma)) {
+                            self.pos += 1;
+                            args.push(self.expr()?);
+                        }
                         if !matches!(self.tokens.get(self.pos), Some(Tok::RParen)) {
                             return Err(AsmError::new(
                                 self.line,
-                                format!("expected `)` closing `{s}(`"),
+                                format!("expected `,` or `)` in `{s}(...)`"),
                             ));
                         }
                         self.pos += 1;
-                        build(&s, vec![arg], self.line)
+                        build(&s, args, self.line)
                     }
                     _ => Ok(Expr::Sym(s)),
                 }

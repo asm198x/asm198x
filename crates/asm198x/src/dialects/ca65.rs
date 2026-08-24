@@ -2133,6 +2133,22 @@ mod tests {
         let w = rom(".code\nV = $123456\n .word .loword(V)\n .word .hiword(V)\n");
         assert_eq!(&w[16..20], &[0x56, 0x34, 0x12, 0x00]);
 
+        // Two arguments, and the wrong count refused rather than ignored.
+        let m = rom(".code\n lda #.max(3, 7)\n lda #.min(3, 7)\n lda #.min(.max(1,5), 9)\n");
+        assert_eq!(&m[16..22], &[0xA9, 0x07, 0xA9, 0x03, 0xA9, 0x05]);
+        for (src, why) in [
+            (
+                ".code\n lda #.max(3)\n",
+                "one argument to a two-argument function",
+            ),
+            (
+                ".code\n lda #.lobyte(1, 2)\n",
+                "two arguments to a one-argument function",
+            ),
+        ] {
+            assert!(assemble(src).is_err(), "{why}");
+        }
+
         // A `.`-word we do not implement — with a plain argument, since a
         // string literal fails earlier, in the tokenizer.
         let err = assemble(".code\nV = 1\n lda #.sizeof(V)\n").expect_err("not implemented");

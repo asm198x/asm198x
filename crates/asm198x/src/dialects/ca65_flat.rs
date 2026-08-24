@@ -1140,10 +1140,26 @@ pub(crate) fn expr_function(
     args: Vec<crate::engine::Expr>,
     line: usize,
 ) -> Result<crate::engine::Expr, AsmError> {
+    use crate::engine::BinOp as Op;
+    // The two-argument functions, before the one-argument ones claim `args`.
+    let pair = match name.to_ascii_lowercase().as_str() {
+        ".max" => Some(Op::Max),
+        ".min" => Some(Op::Min),
+        _ => None,
+    };
+    if let Some(op) = pair {
+        let [a, b]: [crate::engine::Expr; 2] = args
+            .try_into()
+            .map_err(|_| AsmError::new(line, format!("`{name}` takes two arguments")))?;
+        return Ok(crate::engine::Expr::Bin(op, Box::new(a), Box::new(b)));
+    }
     let mut args = args.into_iter();
     let arg = args
         .next()
         .ok_or_else(|| AsmError::new(line, format!("`{name}` needs an argument")))?;
+    if args.next().is_some() {
+        return Err(AsmError::new(line, format!("`{name}` takes one argument")));
+    }
     use crate::engine::{BinOp, Expr};
     // The word extractions have no node of their own and need none: masking
     // and shifting say the same thing with the arithmetic already in `Expr`.
