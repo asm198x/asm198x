@@ -86,6 +86,10 @@ Keep assemblers featherweight: no GUI, audio, emulator, or graphics dependencies
 
 ## Working rules for agents
 
+- Land work through a pull request and squash-merge it, with a
+  conventional-commit subject — see
+  [`decisions/branch-and-merge-workflow.md`](decisions/branch-and-merge-workflow.md).
+  `main` is unprotected, so the convention is the only thing holding.
 - Read the relevant decision record before changing crate boundaries, ISA modelling, syntax compatibility, diagnostics, or external formats.
 - Do not copy facts from emulator implementations into `isa`; use primary references and cite upward.
 - Prefer existing dialect/encoding patterns over adding special cases.
