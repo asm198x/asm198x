@@ -101,11 +101,31 @@ Recorded as open rather than guessed, because each one could change the shape:
 
 ## What this is worth
 
-- Six CPUs gain a form audit, so a missing or wrong row can be *caught* rather
-  than noticed.
-- The coverage metric stops having a blind spot it cannot report on, which is
-  the failure `xtask surface` exists to cover one level up — and it is the same
-  failure, one layer down.
+**Corrected 2026-08-24, after reading how the audit works.** This section first
+said the audit would let "a missing or wrong row be caught rather than noticed".
+The *missing* half is wrong, and it mattered enough to fix rather than soften: a
+spec-driven audit walks what the spec declares, so a row nobody declared is
+exactly as invisible to it as it was to the metric. What found
+[#225](https://github.com/asm198x/asm198x/issues/225) was `xtask surface`, which
+asks the **reference** for its vocabulary instead of asking us. The two
+mechanisms are complementary and are not substitutes:
+
+| question | answered by |
+|---|---|
+| does the reference have a word we do not? | `xtask surface` |
+| has every row we declare been put to a reference? | the form audit |
+| do our bytes match over byte space? | the opcode sweeps |
+
+So, accurately:
+
+- **Six CPUs gain a *scored* measure that every declared row has been
+  arbitrated.** They have sweep verdicts today, which do put bytes to the real
+  assembler — but over byte space, a set with no denominator that ought to
+  exist, which is why they are counted and not scored. What is new is that a
+  row we declare and never check becomes visible, and the number can fall when
+  someone adds a row without arbitrating it.
+- The coverage metric stops having a blind spot it cannot report on. That is a
+  narrower claim than the one this section made first, and it is the true one.
 - [#233](https://github.com/asm198x/asm198x/issues/233) gets a home for
   `undocumented` on the 6809, matching how the Z80 already carries its eight
   marked forms. Three unmarked rows would be worse than none: a row that looks
