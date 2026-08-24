@@ -348,6 +348,7 @@ mod row_tests {
             ("CP-1610", crate::cp1610::rows().collect()),
             ("PDP-11", crate::pdp11::rows().collect()),
             ("TMS9900", crate::tms9900::rows().collect()),
+            ("Z8000", crate::z8000::rows().collect()),
             ("Z80", crate::z80::SET.rows().collect()),
             ("6502", crate::mos6502::SET.rows().collect()),
             ("SM83", crate::sm83::SET.rows().collect()),
@@ -381,6 +382,53 @@ mod row_tests {
             assert_eq!(row.mode, insn.class.name());
             assert!(!row.mode.is_empty());
         }
+    }
+
+    /// The Z8000 is thirteen tables, and every one of them contributes.
+    ///
+    /// A chain that silently dropped a family would look exactly like a spec
+    /// that never had it — which is the failure #225 is a case of, one layer
+    /// down. So each table is asserted present by a mnemonic only it declares.
+    #[test]
+    fn every_z8000_family_reaches_the_rows() {
+        let rows: Vec<crate::Row> = crate::z8000::rows().collect();
+        let has = |m: &str| rows.iter().any(|r| r.mnemonic == m);
+        for (family, mnemonic) in [
+            ("dyadic", crate::z8000::INSTRUCTIONS[0].mnemonic),
+            ("control transfer", crate::z8000::CONTROL[0].mnemonic),
+            ("monadic", crate::z8000::MONO[0].mnemonic),
+            ("stack", crate::z8000::STACK[0].mnemonic),
+            ("shift", crate::z8000::SHIFTS[0].mnemonic),
+            ("extend", crate::z8000::EXTENDS[0].mnemonic),
+            ("bit", crate::z8000::BITS[0].mnemonic),
+            ("multiply/divide", crate::z8000::MULDIV[0].mnemonic),
+            ("block", crate::z8000::BLOCK[0].mnemonic),
+            ("simple I/O", crate::z8000::SIMPLE_IO[0].mnemonic),
+            ("block I/O", crate::z8000::BLOCK_IO[0].mnemonic),
+            ("control", crate::z8000::CONTROLS[0].mnemonic),
+            ("misc", crate::z8000::MISC[0].mnemonic),
+        ] {
+            assert!(has(mnemonic), "the {family} family reaches no row");
+        }
+        let entries = crate::z8000::INSTRUCTIONS.len()
+            + crate::z8000::CONTROL.len()
+            + crate::z8000::MONO.len()
+            + crate::z8000::STACK.len()
+            + crate::z8000::SHIFTS.len()
+            + crate::z8000::EXTENDS.len()
+            + crate::z8000::BITS.len()
+            + crate::z8000::MULDIV.len()
+            + crate::z8000::BLOCK.len()
+            + crate::z8000::SIMPLE_IO.len()
+            + crate::z8000::BLOCK_IO.len()
+            + crate::z8000::CONTROLS.len()
+            + crate::z8000::MISC.len();
+        assert!(
+            rows.len() >= entries,
+            "the two mode-bearing families expand, so rows ({}) cannot be fewer \
+             than entries ({entries})",
+            rows.len()
+        );
     }
 
     /// A row carries the form's `undocumented` flag rather than inventing one,
