@@ -29,6 +29,19 @@ distinct dialect struct. A dialect may *default* a target for tool fidelity
 (pasmo → plain Z80, so it rejects Z80N as the real tool does; pasmonext → Z80N),
 but the target is selectable independently (`--cpu z80|z80n`).
 
+**A diagnostic we add is not a divergence.** What this record protects is that
+source the reference accepts is accepted here and produces the same bytes.
+Saying *more* about it costs neither. So where a reference does something
+silently that will cost a reader an afternoon, we may warn — asl drops a whole
+CP-1600 `byte` statement when any operand is a string, numeric neighbours
+included, and reports nothing; we emit asl's bytes exactly and warn. Added
+2026-08-24 for that case.
+
+The limit is the same sentence: a warning, never a refusal, and never a byte.
+Refusing source the reference takes is out-converging, which is what
+`match-the-reference` forbids; a warning leaves every accepted program
+accepted and every byte where it was.
+
 The goal: real-world source for a machine assembles **unchanged**. Someone with
 a working acme C64 project, a ca65 NES project, or a PasmoNext Spectrum project
 should point Asm198x at it and get the same bytes out, without porting syntax.

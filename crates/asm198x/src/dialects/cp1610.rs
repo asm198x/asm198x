@@ -32,7 +32,7 @@ use super::mos6502::{
 };
 use crate::dialect::Dialect;
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, BinOp, Expr, Operation, Piece, Statement};
+use crate::engine::{AsmError, BinOp, DiagSeverity, Expr, Operation, Piece, Statement};
 use crate::source::{SourceLoader, SourceMap};
 use isa::cp1610::{Class, Insn};
 
@@ -280,7 +280,7 @@ fn parse_op(rest: &str, line: usize, after_sdbd: bool) -> Result<Option<Operatio
                 // `Operation::Bytes` packs two raw bytes into a decle, which is
                 // what #227 saw. Probed against asl 1.42 by reading the
                 // listing's location counter, which advances 2 per operand.
-                "bytes" => Operation::Words(byte_operands(args, line)?),
+                "bytes" => byte_directive(args, line)?,
                 "words" => Operation::Words(value_list(args, line)?),
                 other => {
                     return Err(AsmError::new(
@@ -295,7 +295,7 @@ fn parse_op(rest: &str, line: usize, after_sdbd: bool) -> Result<Option<Operatio
     Ok(Some(op))
 }
 
-/// The decles one `byte` operand list contributes.
+/// One `byte` statement.
 ///
 /// asl's CP-1600 `BYTE` is not a byte list. Each operand is a **16-bit value**
 /// whose two bytes are emitted low-first, one byte per decle: `byte x'1234'`
@@ -303,19 +303,28 @@ fn parse_op(rest: &str, line: usize, after_sdbd: bool) -> Result<Option<Operatio
 /// whose location counter advances two per operand whatever the value.
 ///
 /// A string or character operand anywhere in the list makes the **whole
-/// statement** contribute nothing. `byte "AB"`, `byte 'A'`, `byte 1,"AB"` and
-/// `byte "AB",1` all emit no decles and advance the counter by zero — the `1`
-/// does not survive its neighbour. asl reports `0 errors, 0 warnings` for
-/// every one of them, so this is a silent no-op rather than a refusal we could
-/// mistake it for.
+/// statement** emit nothing. `byte "AB"`, `byte 'A'`, `byte 1,"AB"` and
+/// `byte "AB",1` all contribute no decles and advance the counter by zero —
+/// the `1` does not survive its neighbour — and asl reports `0 errors, 0
+/// warnings` for every one.
 ///
-/// It is a strange rule, and it is the reference's. Refusing these would fail
-/// source asl accepts, and emitting the numeric operands would put bytes in a
-/// file asl leaves empty.
-fn byte_operands(args: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
+/// We emit the same nothing and **say so**. The bytes match asl exactly, which
+/// is what [`syntax-stance.md`] protects; the warning is ours, and it exists
+/// because a statement that vanishes without a word costs an afternoon to
+/// find. Adding a diagnostic is not out-converging — no source that asl
+/// accepts is refused here, and no byte changes.
+///
+/// [`syntax-stance.md`]: https://github.com/asm198x/asm198x/blob/main/decisions/syntax-stance.md
+fn byte_directive(args: &str, line: usize) -> Result<Operation, AsmError> {
     let items = split_data_items(args);
     if items.iter().any(|i| is_text_operand(i)) {
-        return Ok(Vec::new());
+        return Ok(Operation::Diagnose {
+            severity: DiagSeverity::Warning,
+            message: "asl drops this whole `byte` statement — an operand is a string or \
+                      character, and that silences the numeric operands beside it too. No \
+                      decles are emitted. Use `word` for text, or give each byte as a number"
+                .to_string(),
+        });
     }
     let mut out = Vec::new();
     for item in items {
@@ -323,7 +332,7 @@ fn byte_operands(args: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
         out.push(Expr::Lo(Box::new(v.clone())));
         out.push(Expr::Hi(Box::new(v)));
     }
-    Ok(out)
+    Ok(Operation::Words(out))
 }
 
 /// A double-quoted string or a single-quoted character — the two operand
@@ -773,5 +782,66 @@ fn shift_count(tok: &str, line: usize) -> Result<u16, AsmError> {
             line,
             format!("shift count must be 1 or 2, got `{other}`"),
         )),
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use crate::assemble_cp1610 as asm;
+
+    fn bytes(src: &str) -> Vec<u8> {
+        asm(&format!("\tcpu CP-1600\n\torg x'0000'\n{src}"))
+            .expect(src)
+            .bytes
+    }
+
+    /// asl's `BYTE` takes a 16-bit operand and emits its two bytes low-first,
+    /// one byte per decle — so an operand is two decles whatever its value,
+    /// and `word` beside it is one. Byte-compared against asl 1.42 + p2bin
+    /// (#227); the differential holds the arbitrated version.
+    #[test]
+    fn byte_emits_two_decles_per_operand() {
+        assert_eq!(bytes("\tbyte x'1234'\n"), vec![0x00, 0x34, 0x00, 0x12]);
+        assert_eq!(bytes("\tbyte 1\n"), vec![0x00, 0x01, 0x00, 0x00]);
+        assert_eq!(bytes("\tbyte x'100'\n"), vec![0x00, 0x00, 0x00, 0x01]);
+        assert_eq!(
+            bytes("\tbyte 1,2\n"),
+            vec![0x00, 0x01, 0x00, 0x00, 0x00, 0x02, 0x00, 0x00]
+        );
+        // A `word` is one decle, which is what makes `byte` the odd one.
+        assert_eq!(bytes("\tword x'1234'\n"), vec![0x12, 0x34]);
+    }
+
+    /// A string or character operand silences the whole statement — the
+    /// numeric operands beside it do not survive. asl says nothing about it;
+    /// we emit the same bytes and warn, which is additive rather than a
+    /// divergence: no source asl accepts is refused, and no byte changes.
+    ///
+    /// The wording is pinned here rather than diffed against a reference,
+    /// per `decisions/verifying-non-byte-behaviour.md`: the diagnostic is ours.
+    #[test]
+    fn a_text_operand_silences_the_statement_and_warns() {
+        for src in [
+            "\tbyte \"AB\"\n",
+            "\tbyte 'A'\n",
+            "\tbyte 1,\"AB\"\n",
+            "\tbyte \"AB\",1\n",
+            "\tbyte 1,'A'\n",
+        ] {
+            let out = asm(&format!(
+                "\tcpu CP-1600\n\torg x'0000'\n{src}\tword x'FFFF'\n"
+            ))
+            .unwrap_or_else(|e| panic!("{src} must still assemble: {e}"));
+            assert_eq!(out.bytes, vec![0xFF, 0xFF], "{src} emits no decles");
+            let w = out
+                .warnings
+                .first()
+                .unwrap_or_else(|| panic!("{src} must warn"));
+            assert!(w.message.contains("string or character"), "{w}");
+            assert!(w.message.contains("silences"), "{w}");
+        }
+        // And a numeric list warns about nothing.
+        let out = asm("\tcpu CP-1600\n\torg x'0000'\n\tbyte 1,2\n").expect("numeric");
+        assert!(out.warnings.is_empty(), "{:?}", out.warnings);
     }
 }
