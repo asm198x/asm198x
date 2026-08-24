@@ -151,7 +151,7 @@ fn word_cpus() -> Vec<WordCpu> {
                 .map(|i| WordRow {
                     mnemonic: i.mnemonic,
                     base: i.base,
-                    class: class_name(&i.class),
+                    class: i.class.name(),
                     encoding: i.class.encoding(),
                     describe: i.class.describe(),
                     summary: i.summary,
@@ -168,7 +168,7 @@ fn word_cpus() -> Vec<WordCpu> {
                 .map(|i| WordRow {
                     mnemonic: i.mnemonic,
                     base: i.base,
-                    class: class_name(&i.class),
+                    class: i.class.name(),
                     encoding: i.class.encoding(),
                     describe: i.class.describe(),
                     summary: i.summary,
@@ -185,7 +185,7 @@ fn word_cpus() -> Vec<WordCpu> {
                 .map(|i| WordRow {
                     mnemonic: i.mnemonic,
                     base: i.base,
-                    class: class_name(&i.class),
+                    class: i.class.name(),
                     encoding: i.class.encoding(),
                     describe: i.class.describe(),
                     summary: i.summary,
@@ -214,13 +214,6 @@ fn cell(text: &str) -> String {
 
 /// The variant's name, via `Debug` — the specs derive it, and a hand-written
 /// name table here would be a second copy of the class list to keep in step.
-fn class_name<C: std::fmt::Debug>(class: &C) -> &'static str {
-    // Leaked once per row, of which there are a few hundred for the life of a
-    // generator that runs and exits. The alternative is threading a lifetime
-    // through the row type for no gain.
-    Box::leak(format!("{class:?}").into_boxed_str())
-}
-
 fn render_word_cpu(cpu: &WordCpu) -> String {
     let mut out = format!("# {}\n\n", cpu.name);
     out.push_str(&generated_note(cpu.module));

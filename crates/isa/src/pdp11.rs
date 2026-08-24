@@ -80,6 +80,32 @@ pub struct Insn {
 }
 
 impl Class {
+    /// This class's name, for a [`Row`](crate::Row)'s mode and for the
+    /// generated reference.
+    ///
+    /// Beside the spec for the same reason [`encoding`](Class::encoding) and
+    /// [`describe`](Class::describe) are: the documentation generator used to
+    /// derive it by `Debug`-formatting and leaking the string, which reads a
+    /// name out of a derive rather than stating one, and allocates in a crate
+    /// that does not.
+    #[must_use]
+    pub const fn name(&self) -> &'static str {
+        match self {
+            Class::Double => "Double",
+            Class::Single => "Single",
+            Class::Branch => "Branch",
+            Class::Sob => "Sob",
+            Class::Jsr => "Jsr",
+            Class::Rts => "Rts",
+            Class::RegSrc => "RegSrc",
+            Class::Xor => "Xor",
+            Class::Trap => "Trap",
+            Class::Mark => "Mark",
+            Class::Spl => "Spl",
+            Class::NoArg => "NoArg",
+        }
+    }
+
     /// How this class lays its operand fields into the opcode word, as a
     /// formula over `base`.
     ///
@@ -785,3 +811,20 @@ pub const INSTRUCTIONS: &[Insn] = &[
         summary: "Set all condition codes",
     },
 ];
+
+/// Every encoding row this spec declares — one per entry.
+///
+/// A word CPU packs its operands into fields of a single opcode word, so one
+/// entry is one encoding and the [`Class`] is what distinguishes it. Register
+/// numbers and addressing-mode bits are field *values*, not separate rows:
+/// enumerating those would multiply the table by its own operand space and
+/// measure the CPU rather than the spec.
+///
+/// `undocumented` is `false` throughout — this spec declares none.
+pub fn rows() -> impl Iterator<Item = crate::Row> {
+    INSTRUCTIONS.iter().map(|insn| crate::Row {
+        mnemonic: insn.mnemonic,
+        mode: insn.class.name(),
+        undocumented: false,
+    })
+}
