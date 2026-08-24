@@ -505,8 +505,8 @@ fn assemble_core(
                 continue;
             }
             let sec = sec_idx[i];
-            if s.kind.aligns() && pc[sec] % 2 != 0 {
-                pc[sec] += 1;
+            if let Some(boundary) = s.kind.align_to(&consts, s.line).map_err(|e| stamp(e, s))? {
+                pc[sec] += align_pad(pc[sec], boundary);
             }
             if ctx.optimize
                 && !word_branch[i]
@@ -545,14 +545,15 @@ fn assemble_core(
         let stamp = |e: AsmError| stamp(e, s);
         let sec = sec_idx[i];
         let buf = &mut out[sec];
-        if s.kind.aligns() && !buf.bytes.len().is_multiple_of(2) {
-            buf.bytes.push(0);
+        if let Some(boundary) = s.kind.align_to(&consts, s.line).map_err(stamp)? {
+            let pad = align_pad(buf.bytes.len() as i64, boundary);
+            buf.bytes.extend(std::iter::repeat_n(0u8, pad as usize));
         }
-        // Span start is measured *after* the align pad: the hidden pad byte is
-        // fill, not this statement's emission (the padding rule — no span).
+        // Span start is measured *after* the align pad: the hidden pad bytes
+        // are fill, not this statement's emission (the padding rule — no span).
         let span_start = buf.bytes.len();
         match &s.kind {
-            Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) => {}
+            Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) | Stmt::Align(_) => {}
             Stmt::Raw(payload) => buf.bytes.extend_from_slice(payload),
             Stmt::Dc(size, items) => {
                 for e in items {
@@ -708,13 +709,18 @@ fn serialize_hunkexe(sections: &[SecOut]) -> Vec<u8> {
                 );
                 push_u32(&mut out, size_longs(s));
                 let mut data = s.bytes.clone();
-                // Code hunks pad to a longword with NOP (0x4e71); data with zero.
-                while !data.len().is_multiple_of(4) {
-                    if matches!(s.kind, HunkKind::Code) && data.len() % 4 == 2 {
-                        data.extend_from_slice(&[0x4e, 0x71]);
-                    } else {
-                        data.push(0);
-                    }
+                // Pad to a longword. A code hunk two bytes short takes a NOP
+                // (0x4e71) — a whole instruction word, which is the only thing
+                // a NOP can be; one or three bytes short there is no room for
+                // one, and vasm pads with zeros instead. The decision is made
+                // once from the length as it stands: padding a 17-byte code
+                // hunk to 18 and *then* calling it two short produces
+                // `00 4e 71` where vasm writes three zeros.
+                let short = (4 - data.len() % 4) % 4;
+                if matches!(s.kind, HunkKind::Code) && short == 2 {
+                    data.extend_from_slice(&[0x4e, 0x71]);
+                } else {
+                    data.extend(std::iter::repeat_n(0u8, short));
                 }
                 out.extend_from_slice(&data);
             }
@@ -847,8 +853,8 @@ fn layout(
             continue;
         }
         let sec = sec_idx[i];
-        if s.kind.aligns() && pc[sec] % 2 != 0 {
-            pc[sec] += 1;
+        if let Some(boundary) = s.kind.align_to(&consts, s.line).map_err(|e| stamp(e, s))? {
+            pc[sec] += align_pad(pc[sec], boundary);
         }
         if let Some(label) = &s.label {
             consts.insert(label.clone(), pc[sec]);
@@ -1349,7 +1355,7 @@ fn stmt_size(
     line: usize,
 ) -> Result<usize, AsmError> {
     Ok(match kind {
-        Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) => 0,
+        Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) | Stmt::Align(_) => 0,
         Stmt::Raw(payload) => payload.len(),
         Stmt::Dc(size, items) => items.len() * size.bytes(),
         Stmt::Ds(size, count) | Stmt::Dcb(size, count, _) => {
@@ -1548,6 +1554,11 @@ enum Stmt {
     Even,
     /// `section name,attr` — opens a new hunk of the given kind and memory flag.
     Section(HunkKind, MemFlag),
+    /// `align n` — pad to the next multiple of `2^n`, zero-filled. vasm's
+    /// operand is an **exponent**, not the boundary: `align 2` is a four-byte
+    /// boundary. Kept as an expression so it can name an `equ` constant, the
+    /// way `ds`/`dcb` counts do; it folds where the constants are in hand.
+    Align(Expr),
     Dc(DataSize, Vec<Expr>),
     /// `ds.x count` — reserve `count` zeroed items. The count is an expression so
     /// it can reference `equ` constants resolved in pass 1.
@@ -1568,12 +1579,41 @@ enum Stmt {
 }
 
 impl Stmt {
-    /// Whether this statement begins on an even address (instructions and `even`
-    /// align; `dc`/`ds` — and an `incbin` payload, probe-pinned — do not pad on
-    /// their own).
-    fn aligns(&self) -> bool {
-        matches!(self, Stmt::Insn { .. } | Stmt::Even)
+    /// The boundary this statement must begin on, if it insists on one.
+    /// Instructions and `even` begin on an even address; `dc`/`ds` — and an
+    /// `incbin` payload, probe-pinned — do not pad on their own. `align n`
+    /// carries whatever boundary it named.
+    fn align_to(
+        &self,
+        consts: &BTreeMap<String, i64>,
+        line: usize,
+    ) -> Result<Option<i64>, AsmError> {
+        Ok(match self {
+            Stmt::Insn { .. } | Stmt::Even => Some(2),
+            Stmt::Align(e) => Some(align_boundary(e, consts, line)?),
+            _ => None,
+        })
     }
+}
+
+/// Fold `align`'s exponent and turn it into the boundary it names.
+fn align_boundary(e: &Expr, consts: &BTreeMap<String, i64>, line: usize) -> Result<i64, AsmError> {
+    let exp = eval(e, consts, 0, line)?;
+    if !(0..=30).contains(&exp) {
+        return Err(AsmError::new(
+            line,
+            format!("`align` exponent {exp} is out of range"),
+        ));
+    }
+    Ok(1 << exp)
+}
+
+/// How far short of the next multiple of `boundary` an offset stands.
+fn align_pad(at: i64, boundary: i64) -> i64 {
+    if boundary <= 1 {
+        return 0;
+    }
+    (boundary - at.rem_euclid(boundary)) % boundary
 }
 
 // The 68000 statement is the family-owned native payload carried in the AST
@@ -2289,7 +2329,7 @@ fn bake_reptn(kind: &mut Stmt, value: i64) {
             bake_reptn_expr(v, value);
         }
         Stmt::Insn { operands, .. } => operands.iter_mut().for_each(|o| bake_reptn_opnd(o, value)),
-        Stmt::Empty | Stmt::Even | Stmt::Section(..) | Stmt::Raw(_) => {}
+        Stmt::Empty | Stmt::Even | Stmt::Section(..) | Stmt::Align(_) | Stmt::Raw(_) => {}
     }
 }
 
@@ -2330,7 +2370,7 @@ fn qualify_stmt(kind: &mut Stmt, scope: &str) {
             qualify_expr(value, scope);
         }
         Stmt::Insn { operands, .. } => operands.iter_mut().for_each(|o| qualify_opnd(o, scope)),
-        Stmt::Empty | Stmt::Even | Stmt::Section(..) | Stmt::Raw(_) => {}
+        Stmt::Empty | Stmt::Even | Stmt::Section(..) | Stmt::Align(_) | Stmt::Raw(_) => {}
     }
 }
 
@@ -2417,6 +2457,11 @@ pub const DIRECTIVES: &[Directive] = &[
     // the word (or after an argument, if one is given); the name reaches no
     // part of an executable hunk file, so only the kind and flag are kept.
     Directive {
+        id: "align",
+        pattern: Pattern::Exact(&["align"]),
+        category: Category::Operation,
+    },
+    Directive {
         id: "section_shorthand",
         pattern: Pattern::Exact(&[
             "code", "code_c", "code_f", "data", "data_c", "data_f", "bss", "bss_c", "bss_f",
@@ -2484,7 +2529,6 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "unsupported-vasm",
         pattern: Pattern::Exact(&[
             "ac68080",
-            "align",
             "assert",
             "auto",
             "basereg",
@@ -2626,6 +2670,7 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
             "even" => Ok(Stmt::Even),
             "section" => Ok(parse_section(args, line)),
             "section_shorthand" => Ok(section_from_attr(&lower)),
+            "align" => parse_align(args, line),
             // dcb.x count,value — reserve `count` items of `value`. Stage 1:
             // treat as a constant-sized run (value defaults to 0 if omitted).
             "dcb" => parse_dcb(suffix, args, line),
@@ -2660,6 +2705,13 @@ fn parse_section(args: &str, _line: usize) -> Stmt {
         .unwrap_or("")
         .to_ascii_lowercase();
     section_from_attr(&attr)
+}
+
+/// `align n` — pad to a `2^n` boundary. The operand is an exponent, so
+/// `align 2` means four bytes; folding it here keeps the statement's size a
+/// function of the program counter alone.
+fn parse_align(args: &str, line: usize) -> Result<Stmt, AsmError> {
+    Ok(Stmt::Align(parse_value(args.trim(), line)?))
 }
 
 /// The content kind and memory placement a section attribute names. Shared by
@@ -3093,6 +3145,33 @@ mod directive_surface {
         asm(&format!("        section code,code\n        {body}\n"))
             .expect("assembles")
             .bytes
+    }
+
+    /// vasm's `align` names an **exponent**: `align 2` is a four-byte
+    /// boundary, not a two-byte one. Zero-filled, and the operand may be an
+    /// `equ` constant like a `ds` count.
+    #[test]
+    fn align_takes_an_exponent_not_a_boundary() {
+        assert_eq!(
+            bytes("dc.b 1\n        align 2\n        dc.b 2"),
+            vec![1, 0, 0, 0, 2]
+        );
+        assert_eq!(
+            bytes("dc.b 1\n        align 1\n        dc.b 2"),
+            vec![1, 0, 2]
+        );
+        assert_eq!(bytes("dc.b 1\n        align 0\n        dc.b 2"), vec![1, 2]);
+        assert_eq!(
+            asm("N equ 2\n        section code,code\n        dc.b 1\n        align N\n        dc.b 2\n")
+                .expect("equ operand")
+                .bytes,
+            vec![1, 0, 0, 0, 2]
+        );
+        // Already on the boundary: nothing to pad.
+        assert_eq!(
+            bytes("dc.b 1,2,3,4\n        align 2\n        dc.b 9"),
+            vec![1, 2, 3, 4, 9]
+        );
     }
 
     /// The shorthands say the same thing as the long form: `code_c` is

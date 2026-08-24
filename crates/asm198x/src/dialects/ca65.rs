@@ -158,6 +158,14 @@ enum Kind {
     DWords(Vec<Expr>),
     /// `.res count [, fill]` — `count` bytes of `fill`.
     Res(usize, u8),
+    /// `.align boundary [, fill]` — pad to the next multiple of `boundary`
+    /// **within the segment**, not at an absolute address: ca65 emits an
+    /// alignment constraint and leaves aligning the segment itself to `ld65`,
+    /// which is why `.align 3` in CODE (based at `$8000`, not a multiple of 3)
+    /// lands at segment offset 3 and draws ld65's "isn't aligned properly"
+    /// warning rather than moving the bytes. The boundary need not be a power
+    /// of two.
+    Align(i64, u8),
     /// A resolved `.incbin` payload (language-surface U5): raw asset bytes at
     /// the directive's location in the active segment. Never parsed into a
     /// native node — the multi-file walk resolves the directive into a shared
@@ -359,7 +367,7 @@ fn assemble_program(
                 });
             }
         }
-        let (resolved, size) = resolve(set, stmt.kind, &size_env, stmt.line)
+        let (resolved, size) = resolve(set, stmt.kind, &size_env, off, stmt.line)
             .map_err(|e| ca65_flat::stamp_file(e, stmt.file))?;
         *offsets.get_mut(&stmt.seg).expect("segment offset") += size as u32;
         // A line span per byte-emitting statement (address-space-only
@@ -495,10 +503,18 @@ fn resolve(
     set: &'static isa::InstructionSet,
     kind: Kind,
     size_env: &BTreeMap<String, i64>,
+    off: u32,
     line: usize,
 ) -> Result<(Resolved, usize), AsmError> {
     Ok(match kind {
         Kind::Empty => (Resolved::Nothing, 0),
+        // The only statement whose size depends on where it stands: pad to the
+        // next multiple of the boundary, measured from the segment's start.
+        Kind::Align(boundary, fill) => {
+            let pad = (boundary - i64::from(off).rem_euclid(boundary)) % boundary;
+            let pad = usize::try_from(pad).expect("non-negative");
+            (Resolved::Fill(pad, fill), pad)
+        }
         Kind::Raw(v) => {
             let n = v.len();
             (Resolved::Raw(v), n)
@@ -1288,6 +1304,7 @@ fn bake_kind(k: &Kind, vars: &[(String, i64)]) -> Kind {
         },
         Kind::Empty => Kind::Empty,
         Kind::Res(n, f) => Kind::Res(*n, *f),
+        Kind::Align(m, f) => Kind::Align(*m, *f),
         Kind::Raw(b) => Kind::Raw(b.clone()),
     }
 }
@@ -1689,10 +1706,19 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     Directive {
+        id: "align",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["align"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
         id: "unsupported-segments",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["org", "reloc", "align"],
+            names: &["org", "reloc"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -1886,6 +1912,7 @@ fn parse_directive(
             line,
         )?)),
         "res" => parse_res(anons, current_global, consts, rest, line),
+        "align" => parse_align(anons, current_global, consts, rest, line),
         // Declared, and dispatched elsewhere: `.include`/`.incbin` are
         // walk-handled, `.segment` is read where segments are assigned, and the
         // macro spellings are expanded before parsing. Reaching here means a
@@ -1924,6 +1951,37 @@ fn parse_res(
         }
     };
     Ok(Kind::Res(count, fill))
+}
+
+/// `.align boundary [, fill]` — pad to the next multiple of `boundary` within
+/// the active segment. The boundary need not be a power of two, and the pad
+/// byte defaults to zero.
+fn parse_align(
+    anons: &AnonCtx,
+    current_global: &str,
+    consts: &BTreeMap<String, i64>,
+    rest: &str,
+    line: usize,
+) -> Result<Kind, AsmError> {
+    let mut parts = rest.splitn(2, ',');
+    let boundary_src = parts.next().unwrap_or("").trim();
+    let boundary = fold_const(
+        &parse_value(anons, current_global, boundary_src, line)?,
+        consts,
+        line,
+    )
+    .map_err(|_| AsmError::new(line, "`.align` boundary must be a constant"))?;
+    if boundary < 1 {
+        return Err(AsmError::new(line, "`.align` boundary must be positive"));
+    }
+    let fill = match parts.next() {
+        None => 0,
+        Some(v) => {
+            let n = fold_const(&parse_value(anons, current_global, v, line)?, consts, line)?;
+            u8::try_from(n).map_err(|_| AsmError::new(line, "`.align` fill must be a byte"))?
+        }
+    };
+    Ok(Kind::Align(boundary, fill))
 }
 
 /// `.byte` list: `"..."` strings expand to raw ASCII bytes; values are bytes.
@@ -2071,6 +2129,32 @@ mod tests {
         // `pos` is zero-page, `buf` is RAM at the config's $0300 (OAM has the
         // page below it).
         assert_eq!(&short[16..21], &[0xA5, 0x00, 0x8D, 0x00, 0x03]);
+    }
+
+    /// `.align` pads within the segment, so the boundary is measured from the
+    /// segment's start rather than from the CPU address — the distinction only
+    /// shows on a boundary the segment base is not itself a multiple of.
+    #[test]
+    fn align_pads_within_the_segment() {
+        // CODE is based at $8000, which is not a multiple of 3; the pad still
+        // lands the next byte at segment offset 3.
+        let r = rom(".code\n .byte 1\n .align 3\n .byte 2\n");
+        assert_eq!(&r[16..20], &[1, 0, 0, 2]);
+        let f = rom(".code\n .byte 1\n .align 4, $ff\n .byte 2\n");
+        assert_eq!(&f[16..21], &[1, 0xFF, 0xFF, 0xFF, 2]);
+        let none = rom(".code\n .byte 1,2,3,4\n .align 4\n .byte 9\n");
+        assert_eq!(&none[16..21], &[1, 2, 3, 4, 9]);
+    }
+
+    /// A label on the `.align` line binds *before* the pad, not after it —
+    /// probe-pinned, and the opposite of what an alignment directive reads like.
+    #[test]
+    fn a_label_on_an_align_line_binds_before_the_pad() {
+        let r = rom(
+            ".code\n .byte 1\nhere: .align 4\n .byte 2\n             .segment \"VECTORS\"\n .word here, 0, 0\n",
+        );
+        // $8001 — where `here` stood, not $8004 where the next byte landed.
+        assert_eq!(&r[16 + 0x7FFA..16 + 0x7FFC], &[0x01, 0x80]);
     }
 
     #[test]
@@ -2280,13 +2364,7 @@ two:\n\
     #[test]
     fn a_real_directive_is_told_apart_from_a_typo() {
         let err = |src: &str| super::assemble(src).expect_err(src).to_string();
-        for d in [
-            ".export foo",
-            ".proc x",
-            ".org $200",
-            ".align 4",
-            ".macpack cpu",
-        ] {
+        for d in [".export foo", ".proc x", ".org $200", ".macpack cpu"] {
             let e = err(&format!("\t{d}\n"));
             assert!(
                 e.contains("is a real directive here"),

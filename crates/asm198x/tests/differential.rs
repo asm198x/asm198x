@@ -1616,6 +1616,54 @@ const MULTI_PROBES: &[MultiProbe] = &[
     MultiProbe {
         dialect: "vasm-exe",
         binaries: &[],
+        note: "vasm `align` states an exponent, not a boundary: `align 2` is \
+               a four-byte boundary, zero-filled, and folds an equ constant. \
+               Already-aligned pads nothing, and the even-pad an instruction \
+               takes anyway is subsumed by a wider one",
+        files: &[(
+            "main.s",
+            "N equ 2\n\tsection code,code\n\tdc.b 1\n\talign 0\n\tdc.b 2\n\
+             \talign 1\n\tdc.b 3\n\talign N\n\tdc.b 4\n\talign 3\n\
+             \tmoveq #1,d0\n\tdc.b 5,6,7,8\n\talign 2\n\tdc.b 9\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "ca65 `.align` pads within the segment, not to an absolute \
+               address — `.align 3` in CODE (based at $8000, not a multiple \
+               of 3) lands at segment offset 3. The boundary need not be a \
+               power of two, takes an optional fill, and a label on the \
+               directive line binds *before* the pad",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .code\nreset: .byte 1\n\
+             here: .align 3\n .byte 2\n\
+             .align 4, $ff\n .byte 3\n\
+             .byte 4,5,6,7\n .align 4\n .byte 8\n\
+             .segment \"VECTORS\"\n .word here, reset, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "vasm-exe",
+        binaries: &[],
+        note: "the longword a code hunk is padded out to: two bytes short \
+               takes a NOP, one or three short take zeros (there is no room \
+               for a whole instruction word), and the choice is made from the \
+               length as it stands",
+        files: &[(
+            "main.s",
+            "\tsection code,code\n\tdc.b $aa\n\
+             \tsection two,code\n\tdc.b $aa,$bb\n\
+             \tsection three,code\n\tdc.b $aa,$bb,$cc\n\
+             \tsection four,code\n\tdc.b $aa,$bb,$cc,$dd\n\
+             \tsection d,data\n\tdc.b $aa,$bb\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "vasm-exe",
+        binaries: &[],
         note: "vasm section shorthands: each opens a section of its own kind, \
                and the `_c`/`_f` suffix carries the memory flag into the \
                hunk header",

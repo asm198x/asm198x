@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 538 word(s) outside our surface, across the references installed
+# 536 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -231,7 +231,7 @@ zmq
 
 ## vasm (vasm 2.0b (c) in 2002-2025 Volker Barthelmann)
 # 4215 candidate(s) harvested; 183 recognised here, 527 more the tool itself
-# refuses on this target; 105 of the 183 outside our surface
+# refuses on this target; 104 of the 183 outside our surface
 cpu32
 dr
 dw
@@ -245,7 +245,6 @@ weak
 xdef
 xref
 ac68080
-align
 assert
 auto
 basereg
@@ -465,8 +464,7 @@ __utc_year__
 
 ## ca65 (ca65 V2.18 - N/A)
 # 2906 candidate(s) harvested; 225 recognised here, 4 more the tool itself
-# refuses on this target; 127 of the 225 outside our surface
-.align
+# refuses on this target; 126 of the 225 outside our surface
 .asize
 .assert
 .autoimport
