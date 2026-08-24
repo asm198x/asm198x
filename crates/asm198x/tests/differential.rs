@@ -101,6 +101,9 @@ fn tool(dialect: &str) -> &'static str {
         // The NES assemble+link path (U5): ca65 + ld65 with the fixed nes.cfg.
         "ca65-nes" => "ca65",
         "rgbasm" => "rgbasm",
+        // Banked ROMs cannot use `-x` (it forces one 32K bank), so they get
+        // their own leg with the padded `rgblink` recipe.
+        "rgbasm-banked" => "rgbasm",
         // The asl chips (U4): one arbiter for the family (asl + p2bin).
         "8080" | "tms9900" | "cp1610" => "asl",
         other => panic!("no reference tool for dialect `{other}`"),
@@ -176,7 +179,7 @@ fn reference(tmp: &Path, dialect: &str, body: &str) -> Option<Vec<u8>> {
         // rgbasm assembles to an object file that rgblink turns into a binary,
         // like ca65/ld65 below. `-x` keeps the image unpadded so the bytes are
         // the program's and not a ROM's trailing fill.
-        "rgbasm" => {
+        "rgbasm" | "rgbasm-banked" => {
             let src = tmp.join("ref.asm");
             let obj = tmp.join("ref.o");
             fs::write(&src, body).ok()?;
@@ -184,7 +187,13 @@ fn reference(tmp: &Path, dialect: &str, body: &str) -> Option<Vec<u8>> {
             let mut a = Command::new("rgbasm");
             a.arg("-o").arg(&obj).arg(&src);
             let mut l = Command::new("rgblink");
-            l.arg("-x").arg("-o").arg(&out).arg(&obj);
+            // `-x` keeps the image unpadded, which is what a ROM0-only program
+            // should match. It also forces a single 32K bank, so a banked
+            // program is linked without it and compared against the padded ROM.
+            if dialect == "rgbasm" {
+                l.arg("-x");
+            }
+            l.arg("-o").arg(&out).arg(&obj);
             run(vec![a, l])?;
             fs::read(&out).ok()
         }
@@ -231,7 +240,7 @@ fn probe_cpu(dialect: &str) -> &'static str {
         "lwasm" => "6809",
         "vasm" => "68000",
         "ca65-816" => "65816",
-        "rgbasm" => "SM83",
+        "rgbasm" | "rgbasm-banked" => "SM83",
         other => panic!("no corpus CPU for dialect `{other}`"),
     }
 }
@@ -256,6 +265,13 @@ const PROBES: &[Probe] = &[
     ok ("acme", "operator >>",           " lda #16>>2\n"),
     ok ("acme", "directive !pet",        " !pet \"hi\"\n"),
     ok ("acme", "directive !align",      " !align 255,0\n lda #1\n"),
+    ok ("acme", "comparisons answer 1",  " !byte 2=2,2=3,2<>3,2<3,2>3\n"),
+    ok ("acme", "prefix and infix < together", " !byte <$1234,2<3\n"),
+    ok ("acme", "directive !fill",       " !fill 4\n lda #1\n"),
+    ok ("acme", "!fill with a value",    " !fill 3,$ff\n lda #1\n"),
+    ok ("acme", "directive !scr",        " !scr \"abc\"\n"),
+    ok ("acme", "!scr differs from !pet"," !scr \"@[]\"\n !pet \"@[]\"\n"),
+    ok ("acme", "!for counts a block",   " !for i, 1, 3 {\n lda #i\n }\n"),
     ok ("acme", "directive !zone",       " !zone main\n rts\n"),
     ok ("acme", "directive !set",        " !set n=5\n lda #n\n"),
     // U7: `!zone` scopes `.`-locals — reuse across named/bare zones, the
@@ -279,6 +295,16 @@ const PROBES: &[Probe] = &[
 
     // ---- pasmo / z80 --------------------------------------------------------
     ok ("pasmo", "hex $ / binary %",     " ld a,$10\n ld b,%1010\n"),
+    // pasmo alone bounds a constant, and only upward: `$FFFF` assembles,
+    // `$10000` does not, and a negative is fine (#228).
+    ok ("pasmo", "a 16-bit constant",     "V equ $FFFF\n ld hl,V\n"),
+    ok ("pasmo", "a negative constant",   "V equ -5\n ld a,V\n"),
+    ok ("pasmo", "defw / dw",            " defw $1234\n dw $5678\n"),
+    ok ("pasmo", "defs / ds reserve",    " ld a,1\n defs 3\n ds 2\n ld b,2\n"),
+    ok ("pasmo", "if taken",             " if 1\n nop\n endif\n ret\n"),
+    ok ("pasmo", "if not taken",         " if 0\n nop\n endif\n ret\n"),
+    ok ("pasmo", "if / else",            " if 0\n nop\n else\n ret\n endif\n"),
+    ok ("pasmo", "rept repeats a body",  " rept 3\n nop\n endm\n ret\n"),
     ok ("pasmo", "ix/iy displacement",   " ld a,(ix+5)\n ld b,(iy-3)\n"),
     ok ("pasmo", "ld (nn),hl",           " ld ($1234),hl\n"),
     ok ("pasmo", "bit / set / im / rst", " bit 7,a\n set 0,(hl)\n im 1\n rst 38\n"),
@@ -435,6 +461,34 @@ const PROBES: &[Probe] = &[
     // #126: the refusals cannot be probed here — this harness skips a body the
     // reference rejects — so what is arbitrated is the other half, that the
     // two shapes which *look* like duplicates still assemble.
+    // `cnop offset,alignment` aligns up, then adds the offset; the pad is a
+    // whole NOP word where one fits, with a leading $00 when it does not.
+    ok ("vasm", "cnop on the boundary",  "\tcnop 0,4\n\tdc.b $99\n"),
+    ok ("vasm", "cnop pads odd with 00+NOP", "\tdc.b $11\n\tcnop 0,4\n\tdc.b $99\n"),
+    ok ("vasm", "cnop pads even with NOP", "\tdc.b $11,$22\n\tcnop 0,4\n\tdc.b $99\n"),
+    ok ("vasm", "cnop one short takes 00", "\tdc.b $11,$22,$33\n\tcnop 0,4\n\tdc.b $99\n"),
+    ok ("vasm", "cnop offset adds past the boundary", "\tdc.b $11\n\tcnop 2,4\n\tdc.b $99\n"),
+    ok ("vasm", "cnop to an eight boundary", "\tdc.b $11\n\tcnop 0,8\n\tdc.b $99\n"),
+    // Comparisons. vasm answers $FF for true where the 6502 family answers 1
+    // (`docs/comparison-operators.md`).
+    ok ("vasm", "comparisons answer $FF",
+        "\tdc.b 2=2,2=3,2<>3,2<3,2>3,2<=3,2>=3\n"),
+    ok ("vasm", "a comparison binds looser than arithmetic",
+        "\tdc.b 1+1=2,2*2>3\n"),
+    ok ("vasm", "assert with a comparison",  "\tassert 2=2\n\tdc.b 9\n"),
+    // Print-style directives emit nothing; the bytes either side are the test.
+    ok ("vasm", "echo emits nothing",    "\techo \"n=\",5\n\tdc.b 1,2\n"),
+    // The seven visibility words emit nothing when their name is defined —
+    // the only shape that assembles in binary output. `comm`'s second operand
+    // is a size, not a name, and it reserves nothing here.
+    ok ("vasm", "visibility emits nothing",
+        "\txdef foo\n\tpublic foo\n\tglobal foo\n\texport foo\n\tentry foo\n\tweak foo\n\
+         \textrn foo\n\tcomm foo,4\n\tlocal foo\n\tidnt \"mod\"\nfoo:\tdc.b 1,2\n"),
+    ok ("vasm", "a true assertion is silent",  "\tassert 1\n\tdc.b 1\n"),
+    ok ("vasm", "even pads to a word",   "\tdc.b 1\n\teven\n\tdc.b 2\n"),
+    ok ("vasm", "even on a word does nothing", "\tdc.b 1,2\n\teven\n\tdc.b 3\n"),
+    ok ("vasm", "dcb repeats a value",   "\tdcb 3,$aa\n"),
+    ok ("vasm", "dcb.w and a default 0", "\tdcb.w 2,$1234\n\tdcb.b 2\n"),
     ok ("vasm", "distinct labels assemble",
         " nop\nlbl nop\n"),
     ok ("vasm", "locals repeat under different globals",
@@ -573,6 +627,40 @@ const PROBES: &[Probe] = &[
         " DUP 2\n DUP 2\n nop\n EDUP\n EDUP\n"),
     ok ("sjasmplus", "a macro inside DUP",
         " MACRO m\n nop\n ENDM\n DUP 2\n m\n EDUP\n"),
+    // `ALIGN` here is power-of-two only, defaults to 4 with no operand, and
+    // takes an optional fill byte.
+    // The device model. Two pages written at one address concatenate rather
+    // than colliding, because they are different memory
+    // (`docs/sjasmplus-device-model.md`).
+    ok ("sjasmplus", "two pages at one address concatenate",
+        " DEVICE ZXSPECTRUM128\n SLOT 3\n PAGE 1\n ORG $C000\n db $11\n PAGE 2\n db $22\n"),
+    ok ("sjasmplus", "a device changes no bytes",
+        " DEVICE ZXSPECTRUM48\n ORG $8000\n ld a,1\n ret\n"),
+    ok ("sjasmplus", "DEVICE NONE is no device",
+        " DEVICE NONE\n ld a,1\n"),
+    ok ("sjasmplus", "the Next has eight slots",
+        " DEVICE ZXSPECTRUMNEXT\n SLOT 7\n PAGE 223\n db 1\n"),
+    // `ASSERT` passes silently and reaches forward to labels below it.
+    ok ("sjasmplus", "comparisons answer $FF",
+        " db 2=2,2==2,2!=3,2<3,2>3,2<=3,2>=3\n"),
+    ok ("pasmo", "comparisons answer $FF",
+        " ld a,2=2\n ld b,2!=3\n ld c,2<3\n ld d,2>3\n ld e,2<=3\n ld h,2>=3\n"),
+    ok ("sjasmplus", "DISPLAY emits nothing",
+        " DISPLAY \"hi \", 5\n db 1,2\n"),
+    ok ("sjasmplus", "a true assertion is silent",
+        " ORG 0\n ASSERT 1\n db 1\n"),
+    ok ("sjasmplus", "an assertion sees a later label",
+        " ORG 0\nbeg: db 1,2\nfin:\n ASSERT fin-beg\n"),
+    ok ("sjasmplus", "align pads to the boundary",
+        " db 1\n align 4\n db 2\n"),
+    ok ("sjasmplus", "align defaults to 4",
+        " db 1\n align\n db 2\n"),
+    ok ("sjasmplus", "align takes a fill byte",
+        " db 1\n align 4,$ff\n db 2\n"),
+    ok ("sjasmplus", "align on the boundary pads nothing",
+        " db 1,2,3,4\n align 4\n db 9\n"),
+    ok ("sjasmplus", "align 1 pads nothing",
+        " db 1\n align 1\n db 2\n"),
     ok ("sjasmplus", "DUP inside a macro",
         " MACRO m\n DUP 2\n nop\n EDUP\n ENDM\n m\n"),
     ok ("lwasm", "macro definition and invocation",
@@ -609,6 +697,40 @@ const PROBES: &[Probe] = &[
         "mk\tmacro\nspin\\@ nop\nother\\@ nop\n move.l #spin\\@,d0\n move.l #other\\@,d1\n endm\n mk\n mk\n"),
     ok ("vasm", "extra arguments are dropped",
         "ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5,9\n"),
+    // Expression functions: the three byte extractions, which pick from a
+    // 24-bit value the way the `<`/`>`/`^` prefixes do.
+    // `<` is the low-byte prefix *and* less-than, told apart by position.
+    ok ("ca65-816", "comparisons answer 1",
+        " .byte 2=2,2=3,2<>3,2<3,2>3,2<=3,2>=3\n"),
+    ok ("ca65-816", "a prefix < and an infix < in one list",
+        " .byte <$1234,2<3,>$1234\n"),
+    ok ("ca65-816", ".lobyte / .hibyte / .bankbyte",
+        "V = $123456\n lda #.lobyte(V)\n lda #.hibyte(V)\n lda #.bankbyte(V)\n"),
+    ok ("ca65-816", "a function takes an expression",
+        " lda #.lobyte($1234+1)\n ldx #.hibyte($12ff+1)\n"),
+    ok ("ca65-816", ".loword / .hiword",
+        "V = $123456\n .word .loword(V)\n .word .hiword(V)\n .word .loword($1234)\n"),
+    // The case `.hiword` exists for: bits 16-31 of a 32-bit constant. A tracked
+    // divergence until the engine stopped capping every dialect's `equ` at a
+    // 65816 long address (#228).
+    ok ("ca65-816", ".hiword over a 32-bit constant",
+        "V = $12345678\n .word .loword(V)\n .word .hiword(V)\n .word .loword($1234)\n"),
+    // Two-argument functions: the comma survives the operand split because it
+    // is paren-aware, so `.word .max($100, $200)` stays one value.
+    // String arguments: consumed at parse time, yielding a number, so an
+    // expression still evaluates to an integer.
+    ok ("ca65-816", ".strlen",           " lda #.strlen(\"hello\")\n .byte .strlen(\"\")\n"),
+    ok ("ca65-816", ".strat picks a character", " lda #.strat(\"abc\", 1)\n"),
+    ok ("ca65-816", ".max / .min",
+        " lda #.max(3, 7)\n lda #.min(3, 7)\n"),
+    ok ("ca65-816", "two-argument functions take expressions",
+        " lda #.max(1+1, 2*2)\n lda #.min(.max(1,5), 9)\n"),
+    ok ("ca65-816", "a call survives a data list split",
+        " .word .max($100, $200), $3\n"),
+    ok ("ca65-816", "functions nest",
+        " lda #.lobyte(.hibyte($123456))\n"),
+    ok ("ca65-816", ".res reserves",     " lda #1\n .res 3\n lda #2\n"),
+    ok ("ca65-816", ".res takes a fill", " lda #1\n .res 3,$ff\n"),
     ok ("ca65-816", "macro definition and invocation",
         ".macro nop2\n nop\n nop\n.endmacro\n nop2\n"),
     ok ("ca65-816", "macro with a parameter",
@@ -699,10 +821,59 @@ const PROBES: &[Probe] = &[
         " ifne 0\nsym equ $10\n endc\nsym equ $1234\n lda sym\n"),
     ok ("lwasm", "a taken branch's equ decides the mode",
         " ifne 1\nsym equ $10\n endc\n lda sym\n"),
+    // `align` states the boundary itself, not a power of two — `align 3` after
+    // a byte really does put the next item at offset 3 — and takes an optional
+    // fill byte. Already-aligned pads nothing.
+    // lwasm has `<>` but neither `=` nor `<=`/`>=`.
+    ok ("lwasm", "comparisons answer 1",  " fcb 2<>3,2<3,2>3\n"),
+    ok ("lwasm", "align pads to the boundary",
+        " fcb 1\n align 4\n fcb 2\n"),
+    ok ("lwasm", "align to a non-power-of-two boundary",
+        " fcb 1\n align 3\n fcb 2\n"),
+    ok ("lwasm", "align takes a fill byte",
+        " fcb 1\n align 4,$ff\n fcb 2\n"),
+    ok ("lwasm", "align on the boundary pads nothing",
+        " fcb 1,2,3,4\n align 4\n fcb 9\n"),
 
     // ---- rgbasm / SM83 ------------------------------------------------------
     // Conditionals: `ELIF` rather than `ELSEIF`, and `ENDC` is the **only**
     // closer — rgbds answers `ENDIF` with `Undefined macro`.
+    // A banked section is addressed at $4000 whichever bank holds it and lands
+    // at `bank * $4000` in the ROM, which an image position equal to an address
+    // cannot express. `rgblink` pads to `(highest bank + 1) * $4000`.
+    // `BANK("name")` reaches forward — the section it names may be below it.
+    ok ("rgbasm-banked", "BANK reaches forward to its section",
+        "SECTION \"f\",ROM0[$0]\n db BANK(\"paged\")\n db BANK(\"f\")\n\
+         SECTION \"paged\",ROMX,BANK[2]\n db $22\n"),
+    ok ("rgbasm-banked", "a banked section is placed by bank",
+        "SECTION \"f\",ROM0[$0]\n db $00\nSECTION \"p\",ROMX,BANK[2]\nhere:\n db $22\n dw here\n"),
+    ok ("rgbasm-banked", "a higher bank sizes the ROM",
+        "SECTION \"f\",ROM0[$0]\n db 1\nSECTION \"z\",ROMX,BANK[5]\n db 2\n"),
+    ok ("rgbasm-banked", "two banks, and labels in each",
+        "SECTION \"f\",ROM0[$0]\n dw a\n dw b\n\
+         SECTION \"p\",ROMX,BANK[1]\na: db $11\n\
+         SECTION \"q\",ROMX,BANK[3]\nb: db $33\n"),
+    // Sections are placed by address, not by the order they were written.
+    // Lowering a section to an `org` could only ever move forward, so this
+    // failed with `cannot move origin backwards` until the engine grew a
+    // section model.
+    ok ("rgbasm", "comparisons are == and !=",
+        "SECTION \"s\",ROM0[0]\n db 2==2,2==3,2!=3,2<3,2>3,2<=3,2>=3\n"),
+    ok ("rgbasm", "EXPORT emits nothing and asks nothing",
+        "SECTION \"s\",ROM0[0]\nEXPORT foo\nfoo: db 1,2\nEXPORT nope\n"),
+    ok ("rgbasm", "PRINT and PRINTLN emit nothing",
+        "SECTION \"s\",ROM0[0]\n PRINT \"n=\", 5\n PRINTLN \"x\"\n db 1,2\n"),
+    ok ("rgbasm", "ASSERT and STATIC_ASSERT pass silently",
+        "SECTION \"s\",ROM0[0]\n ASSERT 1\n STATIC_ASSERT 1, \"fine\"\n db 1\n"),
+    ok ("rgbasm", "an assertion reaches forward",
+        "SECTION \"s\",ROM0[0]\n ASSERT fin-beg\nbeg: db 1,2\nfin:\n"),
+    ok ("rgbasm", "sections out of address order",
+        "SECTION \"c\",ROM0[$0]\n db $cc\nSECTION \"b\",ROM0[$20]\n db $bb\n\
+         SECTION \"a\",ROM0[$10]\n db $aa\n"),
+    ok ("rgbasm", "a section gap is filled",
+        "SECTION \"a\",ROM0[$0]\n db 1\nSECTION \"b\",ROM0[$4]\n db 2\n"),
+    ok ("rgbasm", "labels take their own section's base",
+        "SECTION \"c\",ROM0[$0]\n dw far\nSECTION \"f\",ROM0[$30]\nfar: db $99\n"),
     ok ("rgbasm", "if taken", "SECTION \"s\",ROM0[0]\nIF 1\n nop\nENDC\n ret\n"),
     ok ("rgbasm", "if not taken", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nENDC\n ret\n"),
     ok ("rgbasm", "if/else", "SECTION \"s\",ROM0[0]\nIF 0\n nop\nELSE\n ret\nENDC\n"),
@@ -1222,6 +1393,40 @@ const MULTI_PROBES: &[MultiProbe] = &[
         ],
     },
     MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "ca65 data and structure directives with no probe until now: \
+               .dbyt is big-endian where .word is little, .dword is 32-bit \
+               little, .asciiz appends the terminator, and .if/.repeat/.macro \
+               (with .local) fold before layout",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .segment \"CODE\"\n\
+             reset: .word $1234\n .dbyt $1234\n .dword $12345678\n\
+             .asciiz \"hi\"\n\
+             .if 1\n lda #1\n .else\n lda #2\n .endif\n\
+             .if 0\n lda #3\n .endif\n\
+             .repeat 3\n nop\n .endrepeat\n\
+             .macro twice arg\n .local spin\nspin: lda #arg\n bne spin\n .endmacro\n\
+             twice 7\n twice 8\n\
+             .segment \"VECTORS\"\n .word 0, reset, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-huc6280",
+        binaries: &[],
+        note: "HuC6280 leg: the same data and macro surface as the NES leg, \
+               reached through the flat ca65 path — .org, .word, .dbyt, \
+               .dword, .asciiz, .res and a .macro",
+        files: &[(
+            "main.s",
+            " .org $2000\n lda #$11\n .word $1234\n .dbyt $1234\n\
+             .dword $12345678\n .asciiz \"hi\"\n .res 3\n .res 2,$ff\n\
+             .macro ld2 a1, a2\n lda #a1\n ldx #a2\n .endmacro\n ld2 1,2\n",
+        )],
+    },
+    MultiProbe {
         dialect: "ca65-huc6280",
         binaries: &[],
         note: "nested .include with HuC6280 extension ops; an include-defined \
@@ -1394,6 +1599,83 @@ const MULTI_PROBES: &[MultiProbe] = &[
     MultiProbe {
         dialect: "ca65-nes",
         binaries: &[],
+        note: "`.defined` is positional: 0 above the definition and 1 below, \
+               in a condition and in an operand alike, and `.def` is the same \
+               function by a shorter name",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .segment \"CODE\"\n\
+             reset: lda #.defined(LATER)\n\
+             .if .defined(LATER)\n lda #$11\n .else\n lda #$22\n .endif\n\
+             LATER = 7\n\
+             lda #.defined(LATER)\n lda #.def(LATER)\n\
+             .if .defined(LATER)\n lda #$33\n .else\n lda #$44\n .endif\n\
+             .if .defined(NEVER)\n lda #$55\n .endif\n\
+             .segment \"VECTORS\"\n .word 0, reset, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "ca65 segment shorthands and the .pushseg/.popseg stack: \
+               `.code`/`.zeropage`/`.bss` place as their spelled-out \
+               segments, and a push/pop pair restores the segment the \
+               reservation interrupted (U5)",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .zeropage\npos: .res 1\n\
+             .bss\nbuf: .res 4\n\
+             .code\nreset: lda pos\n\
+             .pushseg\n.zeropage\ntmp: .res 1\n.popseg\n\
+             sta buf\n stx tmp\n\
+             .segment \"VECTORS\"\n .word 0, reset, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "the visibility words emit nothing in the shapes that assemble: \
+               `.export`/`.exportzp` over a name defined below, `.import` over \
+               a name nothing defines or reads, `.global` either way, and \
+               `.export k := 7` defining as it exports",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .segment \"ZEROPAGE\"\npos: .res 1\n\
+             .segment \"CODE\"\n\
+             .export reset, later\n .exportzp pos\n\
+             .import nothing_reads_this\n .global reset\n .global never_defined\n\
+             .export k := 7\n .autoimport +\n\
+             reset: lda #k\nlater: sta pos\n\
+             .segment \"VECTORS\"\n .word 0, reset, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "`.out`, `.warning` and a passing or warning `.assert` emit \
+               nothing: the bytes are the same with them present as without, \
+               and both still assemble (an address-dependent assertion ca65 \
+               defers to ld65, which we answer at the fused link)",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .segment \"CODE\"\n\
+             .out \"building\"\n\
+             .warning \"soft\", 5\n\
+             reset: nop\n\
+             .assert 1, error, \"never fires\"\n\
+             .assert later = $8001, error, \"moved\"\n\
+             .assert 0, warning, \"soft, assembles anyway\"\n\
+             later: lda #$07\n\
+             .segment \"VECTORS\"\n .word 0, reset, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
         note: "anonymous and cheap labels resolve across the .include \
                boundary in evaluation order on the NES path (U5)",
         files: &[
@@ -1468,6 +1750,17 @@ const MULTI_PROBES: &[MultiProbe] = &[
             // the requesting file's directory, the bytes would diverge.
             ("shared.inc", "K equ 99h\n\tbyte 99h\n"),
         ],
+    },
+    MultiProbe {
+        dialect: "8080",
+        binaries: &[],
+        note: "asl 8080 `dw` — 16-bit little-endian data beside the `db` the \
+               binclude probes already cover (`ds` stays out of probe scope: \
+               asl leaves a gap p2bin fills with $FF where we emit zeros)",
+        files: &[(
+            "main.asm",
+            "\tcpu 8080\n\torg 0\n\tdb 0aah\n\tdw 1234h\n\tdw 1,2\n\tdb 0bbh\n",
+        )],
     },
     MultiProbe {
         dialect: "cp1610",
@@ -1572,6 +1865,66 @@ const MULTI_PROBES: &[MultiProbe] = &[
             ("sw.inc", "\tsection two,data\n\tdc.b $01\n"),
         ],
     },
+    MultiProbe {
+        dialect: "vasm-exe",
+        binaries: &[],
+        note: "vasm `align` states an exponent, not a boundary: `align 2` is \
+               a four-byte boundary, zero-filled, and folds an equ constant. \
+               Already-aligned pads nothing, and the even-pad an instruction \
+               takes anyway is subsumed by a wider one",
+        files: &[(
+            "main.s",
+            "N equ 2\n\tsection code,code\n\tdc.b 1\n\talign 0\n\tdc.b 2\n\
+             \talign 1\n\tdc.b 3\n\talign N\n\tdc.b 4\n\talign 3\n\
+             \tmoveq #1,d0\n\tdc.b 5,6,7,8\n\talign 2\n\tdc.b 9\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "ca65 `.align` pads within the segment, not to an absolute \
+               address — `.align 3` in CODE (based at $8000, not a multiple \
+               of 3) lands at segment offset 3. The boundary need not be a \
+               power of two, takes an optional fill, and a label on the \
+               directive line binds *before* the pad",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .code\nreset: .byte 1\n\
+             here: .align 3\n .byte 2\n\
+             .align 4, $ff\n .byte 3\n\
+             .byte 4,5,6,7\n .align 4\n .byte 8\n\
+             .segment \"VECTORS\"\n .word here, reset, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "vasm-exe",
+        binaries: &[],
+        note: "the longword a code hunk is padded out to: two bytes short \
+               takes a NOP, one or three short take zeros (there is no room \
+               for a whole instruction word), and the choice is made from the \
+               length as it stands",
+        files: &[(
+            "main.s",
+            "\tsection code,code\n\tdc.b $aa\n\
+             \tsection two,code\n\tdc.b $aa,$bb\n\
+             \tsection three,code\n\tdc.b $aa,$bb,$cc\n\
+             \tsection four,code\n\tdc.b $aa,$bb,$cc,$dd\n\
+             \tsection d,data\n\tdc.b $aa,$bb\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "vasm-exe",
+        binaries: &[],
+        note: "vasm section shorthands: each opens a section of its own kind, \
+               and the `_c`/`_f` suffix carries the memory flag into the \
+               hunk header",
+        files: &[(
+            "main.s",
+            "\tcode\n\tmoveq #1,d0\n\tdata\n\tdc.w $1234\n\tbss\n\tds.w 4\n\
+             \tcode_c\n\tmoveq #2,d0\n\tdata_f\n\tdc.w $5678\n",
+        )],
+    },
 ];
 
 #[test]
@@ -1586,7 +1939,7 @@ fn multi_file_source_matches_reference() {
             continue;
         }
         // The rgbasm arm links with rgblink (RGBDS ships them together).
-        if p.dialect == "rgbasm" && !have("rgblink") {
+        if tool(p.dialect) == "rgbasm" && !have("rgblink") {
             eprintln!("SKIP: `rgblink` not on PATH");
             continue;
         }
@@ -1677,13 +2030,15 @@ fn multi_file_source_matches_reference() {
                     &cfg,
                     "MEMORY {\n\
                      \x20   ZP:     start = $00,    size = $100,   type = rw, file = \"\";\n\
-                     \x20   RAM:    start = $0200,  size = $600,   type = rw, file = \"\";\n\
+                     \x20   OAM:    start = $0200,  size = $100,   type = rw, file = \"\";\n\
+                     \x20   RAM:    start = $0300,  size = $500,   type = rw, file = \"\";\n\
                      \x20   HEADER: start = $0,     size = $10,    type = ro, file = %O, fill = yes;\n\
                      \x20   PRG:    start = $8000,  size = $8000,  type = ro, file = %O, fill = yes;\n\
                      \x20   CHR:    start = $0,     size = $2000,  type = ro, file = %O, fill = yes;\n\
                      }\n\
                      SEGMENTS {\n\
                      \x20   ZEROPAGE: load = ZP,     type = zp;\n\
+                     \x20   OAM:      load = OAM,    type = bss;\n\
                      \x20   BSS:      load = RAM,    type = bss;\n\
                      \x20   HEADER:   load = HEADER, type = ro;\n\
                      \x20   CODE:     load = PRG,    type = ro,  start = $8000;\n\

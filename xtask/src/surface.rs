@@ -172,7 +172,10 @@ const REFERENCES: &[Reference] = &[
 
 /// Report vocabulary coverage for every reference on this machine.
 pub fn run(repo: &Path, write: bool) -> String {
-    let tmp = std::env::temp_dir().join("asm198x-surface");
+    // Per-process, because every probe writes the same handful of filenames:
+    // two runs sharing a directory overwrite each other's source mid-question
+    // and the self-checks start failing, which is how the sharing was noticed.
+    let tmp = std::env::temp_dir().join(format!("asm198x-surface-{}", std::process::id()));
     let _ = std::fs::create_dir_all(&tmp);
     let mut out = String::new();
     let mut body = String::new();
@@ -265,6 +268,7 @@ pub fn run(repo: &Path, write: bool) -> String {
     if write {
         let _ = std::fs::write(repo.join(STAMP), &out);
     }
+    let _ = std::fs::remove_dir_all(&tmp);
     out
 }
 
@@ -583,9 +587,12 @@ mod tests {
             ours.contains("byte"),
             "an implemented directive counts as covered"
         );
+        // `.condes` rather than `.export`: `.export` became an implemented
+        // check once ca65 turned out to enforce one, and `.condes` needs
+        // linker-config features the fixed NROM layout does not declare.
         assert!(
-            !ours.contains("export"),
-            "`.export` is declared and not implemented, so it is still a gap"
+            !ours.contains("condes"),
+            "`.condes` is declared and not implemented, so it is still a gap"
         );
     }
     /// The measured surface is not empty, and is keyed on `--dialect` names

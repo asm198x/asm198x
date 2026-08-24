@@ -24,7 +24,7 @@
 //! the includer — probe-pinned).
 
 use std::cell::{Cell, RefCell};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
 use super::macros;
@@ -33,7 +33,7 @@ use super::mos6502::{
     split_first_word, split_top_level, string_literal,
 };
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, Expr, Operation};
+use crate::engine::{AsmError, DiagSeverity, Expr, Operation, Warning, WarningKind};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
 
@@ -54,27 +54,94 @@ const FILL: u8 = 0x00;
 /// these names. It mirrors the curriculum's `nes.cfg`; a segment outside it
 /// (e.g. `RODATA`) is rejected here for the same reason `ld65` rejects it with
 /// that config — there is no memory area to place it in.
-const NES_SEGMENTS: &[(&str, u32, bool)] = &[
-    ("ZEROPAGE", 0x0000, false),
-    ("OAM", 0x0200, false),
-    ("BSS", 0x0300, false),
-    ("HEADER", 0x0000, true),
-    ("CODE", 0x8000, true),
-    ("VECTORS", 0xFFFA, true),
-    ("CHARS", 0x0000, true),
+///
+/// The curriculum ships **two** `nes.cfg` variants: the `dash` track carries an
+/// `OAM` page at `$0200` and pushes `BSS` to `$0300`, and `meet-the-machine`
+/// omits `OAM` so `BSS` starts at `$0200`. This table is the `dash` layout, and
+/// a `meet-the-machine` program that places a label in `BSS` would land a page
+/// high. Nothing in either track does today, which is why one fixed table has
+/// held; the differential's inlined config matches this one deliberately.
+const NES_SEGMENTS: &[(&str, u32, Option<usize>)] = &[
+    ("ZEROPAGE", 0x0000, None),
+    ("OAM", 0x0200, None),
+    ("BSS", 0x0300, None),
+    ("HEADER", 0x0000, Some(0)),
+    ("CODE", 0x8000, Some(HEADER_SIZE)),
+    (
+        "VECTORS",
+        0xFFFA,
+        Some(HEADER_SIZE + 0xFFFA - PRG_BASE as usize),
+    ),
+    ("CHARS", 0x0000, Some(HEADER_SIZE + PRG_SIZE)),
 ];
 
-/// The base address of a segment, and whether it contributes bytes to the ROM.
+/// The base address of a segment, and where in the ROM its bytes land.
+///
+/// `file_at` is `None` for a segment that occupies address space and
+/// contributes no bytes — the zero page, RAM, the OAM shadow.
 struct SegInfo {
     base: u32,
-    in_file: bool,
+    file_at: Option<usize>,
+}
+
+impl SegInfo {
+    fn in_file(&self) -> bool {
+        self.file_at.is_some()
+    }
 }
 
 fn seg_info(seg: &str) -> Option<SegInfo> {
     NES_SEGMENTS
         .iter()
         .find(|(name, _, _)| *name == seg)
-        .map(|&(_, base, in_file)| SegInfo { base, in_file })
+        .map(|&(_, base, file_at)| SegInfo { base, file_at })
+}
+
+/// The segment each shorthand switches to. `.code` is `.segment "CODE"`, and
+/// so on down; `.data` and `.rodata` name segments the fixed NROM config has no
+/// memory area for, and are rejected at placement exactly as `ld65` rejects
+/// them ("Missing memory area assignment for segment 'RODATA'").
+fn segment_shorthand(word: &str) -> Option<&'static str> {
+    Some(match word {
+        ".code" => "CODE",
+        ".data" => "DATA",
+        ".bss" => "BSS",
+        ".rodata" => "RODATA",
+        ".zeropage" => "ZEROPAGE",
+        _ => return None,
+    })
+}
+
+/// Whether a line is one of the segment-switching directives, which parse into
+/// a source-only node rather than an item. `.segment` keeps the prefix test it
+/// has always had (its operand may abut the directive); the words that take no
+/// operand match whole, so `.codegen` is not `.code`.
+fn is_segment_directive(trimmed: &str) -> bool {
+    if trimmed.starts_with(".segment") {
+        return true;
+    }
+    let word = trimmed.split_whitespace().next().unwrap_or("");
+    word == ".pushseg" || word == ".popseg" || segment_shorthand(word).is_some()
+}
+
+/// What a segment-switching node does to the active segment.
+enum SegSwitch {
+    To(String),
+    Push,
+    Pop,
+}
+
+/// Read a source-only node back as a segment switch. `None` for any other
+/// item-less node (a label-only line, a comment flush).
+fn segment_switch(source: &str) -> Option<SegSwitch> {
+    if let Some(rest) = source.strip_prefix(".segment") {
+        return Some(SegSwitch::To(rest.trim().trim_matches('"').to_string()));
+    }
+    match source.split_whitespace().next().unwrap_or("") {
+        ".pushseg" => Some(SegSwitch::Push),
+        ".popseg" => Some(SegSwitch::Pop),
+        w => segment_shorthand(w).map(|name| SegSwitch::To(name.to_string())),
+    }
 }
 
 /// The valid segment names, for a rejection message.
@@ -104,6 +171,39 @@ enum Kind {
     DWords(Vec<Expr>),
     /// `.res count [, fill]` — `count` bytes of `fill`.
     Res(usize, u8),
+    /// `.out`, `.warning`, `.error` and `.fatal` — say something and emit
+    /// nothing. The severity decides what happens next: a note or a warning
+    /// carries on, an error stops. ca65 reports every `.error` and only the
+    /// first `.fatal`, a distinction a single-error result cannot show.
+    Message(DiagSeverity, String),
+    /// `.export`/`.exportzp`/`.import`/`.importzp`/`.global`/`.globalzp` — a
+    /// name this program makes visible to a linker. Assembly and linking are
+    /// fused over one translation unit here, so what survives is the part ca65
+    /// and ld65 enforce between them: see [`VisRule`].
+    Visible {
+        rule: VisRule,
+        /// The `zp` spellings, which draw ca65's `Symbol 'x' is absolute but
+        /// exported zeropage` warning for a label outside the zero page. A
+        /// constant never draws it, whatever its value.
+        zero_page: bool,
+        names: Vec<String>,
+        /// `.export name := expr` **defines** `name` as well as exporting it.
+        /// `.import` and `.global` refuse the form; only the export spellings
+        /// take it, and only for a single name.
+        define: Option<Expr>,
+    },
+    /// `.assert cond, action[, "message"]` — `error` stops, `warning` carries
+    /// on. The condition folds against the finished symbol table, so it may
+    /// name a label defined below it.
+    Assert(Expr, bool, String),
+    /// `.align boundary [, fill]` — pad to the next multiple of `boundary`
+    /// **within the segment**, not at an absolute address: ca65 emits an
+    /// alignment constraint and leaves aligning the segment itself to `ld65`,
+    /// which is why `.align 3` in CODE (based at `$8000`, not a multiple of 3)
+    /// lands at segment offset 3 and draws ld65's "isn't aligned properly"
+    /// warning rather than moving the bytes. The boundary need not be a power
+    /// of two.
+    Align(i64, u8),
     /// A resolved `.incbin` payload (language-surface U5): raw asset bytes at
     /// the directive's location in the active segment. Never parsed into a
     /// native node — the multi-file walk resolves the directive into a shared
@@ -169,8 +269,8 @@ fn seg_id(seg: &str) -> debug198x::SectionId {
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
-pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
-    assemble_with_debug(source).map(|(rom, _)| rom)
+pub(crate) fn assemble(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError> {
+    assemble_with_debug(source).map(|(rom, warnings, _)| (rom, warnings))
 }
 
 /// Assemble + link, also returning the debug [`Capture`] read out of layout
@@ -179,13 +279,15 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
-pub(crate) fn assemble_with_debug(source: &str) -> Result<(Vec<u8>, DebugCapture), AsmError> {
-    let (rom, capture) = assemble_program(&parse_program(
+pub(crate) fn assemble_with_debug(
+    source: &str,
+) -> Result<(Vec<u8>, Vec<Warning>, DebugCapture), AsmError> {
+    let (rom, warnings, capture) = assemble_program(&parse_program(
         &isa::mos6502::SET,
         source,
         macros::Expand::Yes,
     )?)?;
-    Ok((rom, capture.into_single()))
+    Ok((rom, warnings, capture.into_single()))
 }
 
 /// Assemble + link a **multi-file** NES program (language-surface U5): the
@@ -201,7 +303,7 @@ pub(crate) fn assemble_with_debug(source: &str) -> Result<(Vec<u8>, DebugCapture
 pub(crate) fn assemble_multi(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
-) -> Result<(Vec<u8>, DebugCaptureMulti), AsmError> {
+) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
     assemble_program(&parse_program_multi(&isa::mos6502::SET, map, loader)?)
 }
 
@@ -215,7 +317,7 @@ pub(crate) fn assemble_multi(
 /// failure.
 fn assemble_program(
     program: &crate::ast::Program,
-) -> Result<(Vec<u8>, DebugCaptureMulti), AsmError> {
+) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
     let set = &isa::mos6502::SET;
     // The AST is the single front-end IR: the parse built the source-preserving
     // `Program` (carrying each statement's native `Kind`, `=` constants, and the
@@ -255,6 +357,23 @@ fn assemble_program(
             },
         });
     }
+    // Every name an `.import` claims, before any label is placed: ca65 refuses
+    // the *definition* of an imported name, and reports it there, so the set
+    // has to be known before the label pass rather than gathered by it.
+    let imported: BTreeSet<String> = parsed
+        .stmts
+        .iter()
+        .filter_map(|s| match &s.kind {
+            Kind::Visible {
+                rule: VisRule::MustNotBeDefined,
+                names,
+                ..
+            } => Some(names.clone()),
+            _ => None,
+        })
+        .flatten()
+        .collect();
+
     for stmt in parsed.stmts {
         let info = seg_info(&stmt.seg).ok_or_else(|| {
             // Layout errors are stamped with the statement's file (U5), so a
@@ -281,6 +400,15 @@ fn assemble_program(
             // the encoder the last — a debugger would disagree with the bytes).
             // `addr_env` was seeded with the `=` constants, so this covers a
             // label colliding with a constant too.
+            if imported.contains(label) {
+                return Err(ca65_flat::stamp_file(
+                    AsmError::new(
+                        stmt.line,
+                        format!("symbol `{}` is already an import", display_label(label)),
+                    ),
+                    stmt.file,
+                ));
+            }
             if addr_env.insert(label.clone(), i64::from(addr)).is_some() {
                 return Err(ca65_flat::stamp_file(
                     AsmError::new(
@@ -305,14 +433,14 @@ fn assemble_program(
                 });
             }
         }
-        let (resolved, size) = resolve(set, stmt.kind, &size_env, stmt.line)
+        let (resolved, size) = resolve(set, stmt.kind, &size_env, off, stmt.line)
             .map_err(|e| ca65_flat::stamp_file(e, stmt.file))?;
         *offsets.get_mut(&stmt.seg).expect("segment offset") += size as u32;
         // A line span per byte-emitting statement (address-space-only
         // reservations — ZEROPAGE/BSS `.res` — carry no bytes, so no span; the
         // HEADER segment is iNES file metadata, not CPU-addressed code, so its
         // records would alias CPU $0000 — skipped, per AE3's no-fabrication rule).
-        if size > 0 && info.in_file && stmt.seg != "HEADER" {
+        if size > 0 && info.in_file() && stmt.seg != "HEADER" {
             dbg_lines.push((
                 stmt.file,
                 stmt.line as u32,
@@ -346,19 +474,38 @@ fn assemble_program(
         })
         .collect();
 
-    // Emit pass: turn each placed item into bytes, per segment.
+    // Emit pass: turn each placed item into bytes, per segment. Statements run
+    // in source order across segments, so `.out` notes come out in the order
+    // they were written.
     let mut seg_bytes: BTreeMap<String, Vec<u8>> = BTreeMap::new();
+    let mut warnings: Vec<Warning> = Vec::new();
     for (seg, addr, line, file, item) in placed {
-        if !seg_info(&seg).expect("seg").in_file {
+        // A diagnostic carries no bytes, so it is answered before the segment
+        // filter: an `.out` written inside BSS still prints.
+        let diagnostic = matches!(item, Resolved::Message(..) | Resolved::Assert(..));
+        if !diagnostic && !seg_info(&seg).expect("seg").in_file() {
             continue; // bss/zp segments occupy address space but emit no file bytes
         }
         let buf = seg_bytes.entry(seg).or_default();
-        emit(item, addr, &addr_env, buf, line).map_err(|e| ca65_flat::stamp_file(e, file))?;
+        emit(
+            item,
+            addr,
+            &Emit {
+                env: &addr_env,
+                label_seg: &parsed.label_seg,
+                file,
+                line,
+            },
+            buf,
+            &mut warnings,
+        )
+        .map_err(|e| ca65_flat::stamp_file(e, file))?;
     }
 
     let rom = link(&seg_bytes)?;
     Ok((
         rom,
+        warnings,
         DebugCaptureMulti {
             sections,
             symbols: dbg_symbols,
@@ -369,22 +516,30 @@ fn assemble_program(
 
 /// Lay the file segments into the NROM ROM image.
 fn link(seg_bytes: &BTreeMap<String, Vec<u8>>) -> Result<Vec<u8>, AsmError> {
-    let empty = Vec::new();
-    let get = |s: &str| seg_bytes.get(s).unwrap_or(&empty);
+    // Every segment the source wrote bytes into, as a run: addressed where the
+    // CPU sees it, placed where the config puts it in the file. The engine's
+    // `lay_out` does the rest, so the NES ROM is built by the same code that
+    // places a Game Boy bank or a flat program's single section.
+    let runs: Vec<crate::engine::Run> = NES_SEGMENTS
+        .iter()
+        .filter_map(|(name, base, file_at)| {
+            let bytes = seg_bytes.get(*name)?;
+            Some(crate::engine::Run {
+                name: (*name).to_string(),
+                base: i64::from(*base),
+                at: crate::engine::Place::At((*file_at)? as i64),
+                bytes: bytes.clone(),
+            })
+        })
+        .collect();
 
-    // iNES header (16 bytes, zero-padded).
-    let header = get("HEADER");
-    let mut rom = vec![FILL; HEADER_SIZE];
-    rom[..header.len().min(HEADER_SIZE)].copy_from_slice(&header[..header.len().min(HEADER_SIZE)]);
-
-    // PRG: CODE at $8000, VECTORS at $FFFA, gap filled.
-    let mut prg = vec![FILL; PRG_SIZE];
-    let code = get("CODE");
-    let vectors = get("VECTORS");
-    // CODE reaching the vector table would be silently overwritten by the
-    // VECTORS placement below — corrupted code and a debug record describing
-    // bytes that did not survive. Reject it, as ld65 does when an area fills.
-    if code.len() > (0xFFFA - PRG_BASE) as usize {
+    // CODE running into the vector table would be silently overwritten, giving
+    // corrupted code and a debug record describing bytes that did not survive.
+    // `lay_out` refuses the overlap, but names only the second segment; ld65
+    // names the area that filled, and so does this.
+    if let Some(code) = seg_bytes.get("CODE")
+        && code.len() > (0xFFFA - PRG_BASE) as usize
+    {
         return Err(AsmError::new(
             0,
             format!(
@@ -393,28 +548,11 @@ fn link(seg_bytes: &BTreeMap<String, Vec<u8>>) -> Result<Vec<u8>, AsmError> {
             ),
         ));
     }
-    place(&mut prg, 0, code, "CODE")?;
-    place(&mut prg, (0xFFFA - PRG_BASE) as usize, vectors, "VECTORS")?;
-    rom.extend_from_slice(&prg);
 
-    // CHR: CHARS from the start, filled.
-    let mut chr = vec![FILL; CHR_SIZE];
-    place(&mut chr, 0, get("CHARS"), "CHARS")?;
-    rom.extend_from_slice(&chr);
-
+    // The ROM is a fixed shape: 16-byte header, 32K PRG, 8K CHR, `$00` fill.
+    let size = HEADER_SIZE + PRG_SIZE + CHR_SIZE;
+    let (_, rom) = crate::engine::lay_out(runs, FILL, 1, Some(0), |_| Some(size))?;
     Ok(rom)
-}
-
-fn place(region: &mut [u8], at: usize, bytes: &[u8], name: &str) -> Result<(), AsmError> {
-    let end = at + bytes.len();
-    if end > region.len() {
-        return Err(AsmError::new(
-            0,
-            format!("segment `{name}` overflows its region"),
-        ));
-    }
-    region[at..end].copy_from_slice(bytes);
-    Ok(())
 }
 
 // ---------------------------------------------------------------------------
@@ -434,6 +572,36 @@ enum Resolved {
         form: &'static isa::Form,
         operands: Vec<Expr>,
     },
+    /// Something to say, carrying no bytes.
+    Message(DiagSeverity, String),
+    /// A condition to fold once every symbol is known, and what a failure does.
+    Assert(Expr, bool, String),
+    /// A visibility claim to check once every symbol is known.
+    Visible(VisRule, bool, Vec<String>),
+}
+
+/// What a visibility word asks of the name it carries, once assembly and
+/// linking are one step over one translation unit.
+///
+/// Probed against ca65 2.18 + ld65 on 2026-08-24. The three answers do not
+/// follow the export/import split the manual's headings suggest: `.global` is
+/// in neither camp, and `.forceimport` is in no camp at all — defining its name
+/// is `Symbol 'zz' is already an import` and not defining it is an unresolved
+/// external, so it is declared `Category::RefusedByReference` instead.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum VisRule {
+    /// `.export`, `.exportzp`. ca65 itself answers `Exported symbol 'nope' was
+    /// never defined`, whether or not anything references it.
+    MustBeDefined,
+    /// `.import`, `.importzp`. Defining the name is ca65's `Symbol 'zz' is
+    /// already an import`. Leaving it undefined is fine until something reads
+    /// it, and then it is an unresolved external — which is the ordinary
+    /// undefined-symbol refusal here.
+    MustNotBeDefined,
+    /// `.global`, `.globalzp` — export if the name is defined here, import if
+    /// it is not. Both are legal, so nothing is checked beyond the zero-page
+    /// warning the `zp` spelling carries.
+    EitherWay,
 }
 
 /// Resolve a parsed statement to an emittable item plus its byte size.
@@ -441,10 +609,18 @@ fn resolve(
     set: &'static isa::InstructionSet,
     kind: Kind,
     size_env: &BTreeMap<String, i64>,
+    off: u32,
     line: usize,
 ) -> Result<(Resolved, usize), AsmError> {
     Ok(match kind {
         Kind::Empty => (Resolved::Nothing, 0),
+        // The only statement whose size depends on where it stands: pad to the
+        // next multiple of the boundary, measured from the segment's start.
+        Kind::Align(boundary, fill) => {
+            let pad = (boundary - i64::from(off).rem_euclid(boundary)) % boundary;
+            let pad = usize::try_from(pad).expect("non-negative");
+            (Resolved::Fill(pad, fill), pad)
+        }
         Kind::Raw(v) => {
             let n = v.len();
             (Resolved::Raw(v), n)
@@ -466,6 +642,17 @@ fn resolve(
             (Resolved::DWords(v), n)
         }
         Kind::Res(count, fill) => (Resolved::Fill(count, fill), count),
+        Kind::Message(severity, text) => (Resolved::Message(severity, text), 0),
+        Kind::Visible {
+            rule,
+            zero_page,
+            names,
+            // The `:= expr` value is read where constants are collected, so by
+            // here the symbol is defined like any other and only the claim is
+            // left to check.
+            define: _,
+        } => (Resolved::Visible(rule, zero_page, names), 0),
+        Kind::Assert(cond, fatal, message) => (Resolved::Assert(cond, fatal, message), 0),
         Kind::Insn { operand, mnemonic } => {
             let insn = set
                 .instruction(&mnemonic)
@@ -483,17 +670,96 @@ fn resolve(
     })
 }
 
-/// Emit one resolved item's bytes at address `addr`.
+/// Where a statement is being emitted: the finished symbol table, every
+/// label's segment (so the `zp` spellings can tell a zero-page label from an
+/// absolute one — and both from a constant, which is neither), and the source
+/// position a refusal is stamped with.
+struct Emit<'a> {
+    env: &'a BTreeMap<String, i64>,
+    label_seg: &'a BTreeMap<String, String>,
+    file: FileId,
+    line: usize,
+}
+
+/// Emit one resolved item's bytes at address `addr`, appending any diagnostic
+/// the source asked for. `env` is the finished symbol table, so an `.assert`
+/// here may name a label defined below it.
 fn emit(
     item: Resolved,
     addr: u32,
-    env: &BTreeMap<String, i64>,
+    at: &Emit<'_>,
     out: &mut Vec<u8>,
-    line_for_errors: usize,
+    warnings: &mut Vec<Warning>,
 ) -> Result<(), AsmError> {
+    let (env, label_seg, file, line_for_errors) = (at.env, at.label_seg, at.file, at.line);
     let pc = i64::from(addr);
     match item {
         Resolved::Nothing => {}
+        Resolved::Message(severity, text) => match severity {
+            DiagSeverity::Error => return Err(AsmError::new(line_for_errors, text)),
+            DiagSeverity::Warning | DiagSeverity::Note => warnings.push(Warning {
+                line: line_for_errors,
+                message: text,
+                kind: if severity == DiagSeverity::Note {
+                    WarningKind::Note
+                } else {
+                    WarningKind::Advisory
+                },
+                file,
+            }),
+        },
+        Resolved::Visible(rule, zero_page, names) => {
+            for name in &names {
+                let defined = env.contains_key(name);
+                match rule {
+                    VisRule::MustBeDefined if !defined => {
+                        return Err(AsmError::new(
+                            line_for_errors,
+                            format!(
+                                "exported symbol `{}` was never defined",
+                                display_label(name)
+                            ),
+                        ));
+                    }
+                    VisRule::MustNotBeDefined if defined => {
+                        return Err(AsmError::new(
+                            line_for_errors,
+                            format!("symbol `{}` is already an import", display_label(name)),
+                        ));
+                    }
+                    _ => {}
+                }
+                // The zero-page warning is about *labels*: a constant is never
+                // "absolute" in the sense ca65 means, whatever its value.
+                if zero_page
+                    && let Some(segment) = label_seg.get(name)
+                    && segment != "ZEROPAGE"
+                {
+                    warnings.push(Warning {
+                        line: line_for_errors,
+                        message: format!(
+                            "symbol `{}` is absolute but exported zeropage",
+                            display_label(name)
+                        ),
+                        kind: WarningKind::Advisory,
+                        file,
+                    });
+                }
+            }
+        }
+        Resolved::Assert(cond, fatal, message) => {
+            if cond.eval(env, pc, line_for_errors)? == 0 {
+                if fatal {
+                    return Err(AsmError::new(line_for_errors, message));
+                }
+                warnings.push(Warning {
+                    line: line_for_errors,
+                    message,
+                    kind: WarningKind::Advisory,
+                    file,
+                });
+            }
+        }
         Resolved::Raw(bytes) => out.extend_from_slice(&bytes),
         Resolved::Fill(count, fill) => out.extend(std::iter::repeat_n(fill, count)),
         Resolved::Bytes(exprs) => {
@@ -895,10 +1161,12 @@ impl FlatWalk for Walker {
         });
         let span = Span::in_file(file, line as u32, 1);
 
-        // `.segment "NAME"` switches the active segment — kept as a source-only
-        // node so the formatter reproduces it; the projection reads it back to
-        // track the active segment (parse itself needs no segment state).
-        if trimmed.starts_with(".segment") {
+        // `.segment "NAME"`, its shorthands (`.code`, `.zeropage`, …) and the
+        // `.pushseg`/`.popseg` stack all switch the active segment — kept as
+        // source-only nodes so the formatter reproduces them; the projection
+        // reads them back to track the active segment (parse itself needs no
+        // segment state).
+        if is_segment_directive(trimmed) {
             self.nodes.push(Node {
                 operand_span: None,
                 label: None,
@@ -1018,6 +1286,7 @@ impl FlatWalk for Walker {
 fn parsed_from_program(program: &crate::ast::Program) -> Result<Parsed, AsmError> {
     let mut st = Projection {
         seg: "CODE".to_string(),
+        seg_stack: Vec::new(),
         stmts: Vec::new(),
         label_seg: BTreeMap::new(),
         consts: BTreeMap::new(),
@@ -1034,6 +1303,8 @@ fn parsed_from_program(program: &crate::ast::Program) -> Result<Parsed, AsmError
 /// The projection's running state: everything a later line's fold can see.
 struct Projection {
     seg: String,
+    /// Segments saved by `.pushseg`, innermost last; `.popseg` restores one.
+    seg_stack: Vec<String>,
     stmts: Vec<Stmt>,
     label_seg: BTreeMap<String, String>,
     consts: BTreeMap<String, i64>,
@@ -1093,7 +1364,7 @@ fn project_nodes(nodes: &[crate::ast::Node], st: &mut Projection) -> Result<(), 
                         // variable to its loop.
                         let vars = st.loop_vars.clone();
                         for stmt in &mut st.stmts[first..] {
-                            stmt.kind = bake_kind(&stmt.kind, &vars);
+                            stmt.kind = map_kind_syms(&stmt.kind, &loop_var_sub(&vars));
                         }
                         st.loop_vars.pop();
                     }
@@ -1128,6 +1399,9 @@ fn fold_condition(head: &str, st: &Projection, line: usize) -> Result<bool, AsmE
                 return Err(AsmError::new(line, format!("`{word}` needs a condition")));
             }
             let expr = parse_value(&AnonCtx::default(), "", args, line)?;
+            // `.if .defined(X)` — answered against what stands above this line,
+            // which is what makes `.defined` positional in the first place.
+            let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
             // ca65: `Constant expression expected` — a condition may not reach
             // forward, and a ca65 label is never constant.
             let value = fold_const(&expr, &env, line).map_err(|_| {
@@ -1179,30 +1453,40 @@ fn fold_repeat(
 /// acme's `!for` variable is: ca65 resolves `Expr::Sym` once, in a later pass,
 /// against one table — and a loop variable holds a different value on every
 /// iteration, so there is no single entry that table could hold.
-fn bake_loop_vars(e: &Expr, vars: &[(String, i64)]) -> Expr {
+fn map_expr_syms(e: &Expr, f: &dyn Fn(&str) -> Option<Expr>) -> Expr {
     match e {
-        Expr::Sym(name) => match vars.iter().rev().find(|(n, _)| n == name) {
-            // Innermost wins, so a nested `.repeat` may shadow an outer name.
-            Some((_, value)) => Expr::Num(*value),
-            None => e.clone(),
-        },
-        Expr::Lo(i) => Expr::Lo(Box::new(bake_loop_vars(i, vars))),
-        Expr::Hi(i) => Expr::Hi(Box::new(bake_loop_vars(i, vars))),
-        Expr::Bank(i) => Expr::Bank(Box::new(bake_loop_vars(i, vars))),
-        Expr::Neg(i) => Expr::Neg(Box::new(bake_loop_vars(i, vars))),
+        Expr::Sym(name) => f(name).unwrap_or_else(|| e.clone()),
+        Expr::Lo(i) => Expr::Lo(Box::new(map_expr_syms(i, f))),
+        Expr::Hi(i) => Expr::Hi(Box::new(map_expr_syms(i, f))),
+        Expr::Bank(i) => Expr::Bank(Box::new(map_expr_syms(i, f))),
+        Expr::Neg(i) => Expr::Neg(Box::new(map_expr_syms(i, f))),
         Expr::Bin(op, l, r) => Expr::Bin(
             *op,
-            Box::new(bake_loop_vars(l, vars)),
-            Box::new(bake_loop_vars(r, vars)),
+            Box::new(map_expr_syms(l, f)),
+            Box::new(map_expr_syms(r, f)),
         ),
         Expr::Num(_) | Expr::Pc => e.clone(),
     }
 }
 
+/// Substitute the enclosing `.repeat` loop variables. Innermost wins, so a
+/// nested `.repeat` may shadow an outer name.
+fn loop_var_sub(vars: &[(String, i64)]) -> impl Fn(&str) -> Option<Expr> + '_ {
+    move |name| {
+        vars.iter()
+            .rev()
+            .find(|(n, _)| n == name)
+            .map(|(_, v)| Expr::Num(*v))
+    }
+}
+
 /// The same, over an operand.
-fn bake_operand(o: &mos6502::OperandSyntax, vars: &[(String, i64)]) -> mos6502::OperandSyntax {
+fn map_operand_syms(
+    o: &mos6502::OperandSyntax,
+    f: &dyn Fn(&str) -> Option<Expr>,
+) -> mos6502::OperandSyntax {
     use mos6502::OperandSyntax as O;
-    let b = |e: &Expr| bake_loop_vars(e, vars);
+    let b = |e: &Expr| map_expr_syms(e, f);
     match o {
         O::None => O::None,
         O::Accumulator => O::Accumulator,
@@ -1216,19 +1500,33 @@ fn bake_operand(o: &mos6502::OperandSyntax, vars: &[(String, i64)]) -> mos6502::
 }
 
 /// The same, over a statement kind.
-fn bake_kind(k: &Kind, vars: &[(String, i64)]) -> Kind {
-    let list = |es: &Vec<Expr>| es.iter().map(|e| bake_loop_vars(e, vars)).collect();
+fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind {
+    let list = |es: &Vec<Expr>| es.iter().map(|e| map_expr_syms(e, f)).collect();
     match k {
         Kind::Bytes(es) => Kind::Bytes(list(es)),
         Kind::Words(es) => Kind::Words(list(es)),
         Kind::DBytes(es) => Kind::DBytes(list(es)),
         Kind::DWords(es) => Kind::DWords(list(es)),
         Kind::Insn { operand, mnemonic } => Kind::Insn {
-            operand: bake_operand(operand, vars),
+            operand: map_operand_syms(operand, f),
             mnemonic: mnemonic.clone(),
         },
         Kind::Empty => Kind::Empty,
         Kind::Res(n, f) => Kind::Res(*n, *f),
+        Kind::Align(m, f) => Kind::Align(*m, *f),
+        Kind::Message(sev, t) => Kind::Message(*sev, t.clone()),
+        Kind::Visible {
+            rule,
+            zero_page,
+            names,
+            define,
+        } => Kind::Visible {
+            rule: *rule,
+            zero_page: *zero_page,
+            names: names.clone(),
+            define: define.as_ref().map(|e| map_expr_syms(e, f)),
+        },
+        Kind::Assert(c, fatal, m) => Kind::Assert(map_expr_syms(c, f), *fatal, m.clone()),
         Kind::Raw(b) => Kind::Raw(b.clone()),
     }
 }
@@ -1237,6 +1535,7 @@ fn bake_kind(k: &Kind, vars: &[(String, i64)]) -> Kind {
 fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmError> {
     use crate::ast::{Item, Operand};
     let seg = &mut st.seg;
+    let seg_stack = &mut st.seg_stack;
     let stmts = &mut st.stmts;
     let label_seg = &mut st.label_seg;
     let consts = &mut st.consts;
@@ -1295,8 +1594,24 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                 let kind = payload
                     .as_any()
                     .downcast_ref::<Kind>()
-                    .expect("ca65 stores a Kind in every native node")
-                    .clone();
+                    .expect("ca65 stores a Kind in every native node");
+                // `.defined` is answered here, in source order, against what
+                // this point in the file has seen — which is the question ca65
+                // asks.
+                let kind = map_kind_syms(kind, &resolve_defined(consts, label_seg));
+                // `.export foo := 7` defines `foo` as well as exporting it, so
+                // it is collected here with the `=` constants rather than left
+                // to the visibility check, which would then find it undefined.
+                if let Kind::Visible {
+                    names,
+                    define: Some(value),
+                    ..
+                } = &kind
+                    && let Some(name) = names.first()
+                    && let Ok(v) = fold_const(value, consts, line)
+                {
+                    consts.insert(name.clone(), v);
+                }
                 let label = node.label.as_ref().map(|s| s.qualified.clone());
                 if let Some(l) = &label {
                     label_seg.insert(l.clone(), seg.clone());
@@ -1312,8 +1627,19 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
             // Item-less nodes: a `.segment` directive (tracked), a label-only line
             // (an empty placed statement), or a comment-only flush node (skipped).
             _ => {
-                if let Some(rest) = node.source.strip_prefix(".segment") {
-                    *seg = rest.trim().trim_matches('"').to_string();
+                if let Some(switch) = segment_switch(&node.source) {
+                    match switch {
+                        SegSwitch::To(name) => *seg = name,
+                        SegSwitch::Push => seg_stack.push(seg.clone()),
+                        // ca65 pops an empty stack with a diagnostic of its own;
+                        // ours is the parse-time refusal, so an unmatched
+                        // `.popseg` here leaves the active segment alone.
+                        SegSwitch::Pop => {
+                            if let Some(prev) = seg_stack.pop() {
+                                *seg = prev;
+                            }
+                        }
+                    }
                 } else if let Some(sym) = node.label.as_ref() {
                     label_seg.insert(sym.qualified.clone(), seg.clone());
                     stmts.push(Stmt {
@@ -1603,37 +1929,126 @@ pub const DIRECTIVES: &[Directive] = &[
     // live inside expressions and are not directives at all. Declaring those
     // here would name them in a place they never appear.
     // segments and location
+    // The segment shorthands, and the stack that saves and restores the active
+    // one. Each is `.segment "NAME"` by another name, so they are tracked in
+    // the same source-only node and cost nothing beyond the mapping.
+    Directive {
+        id: "segment-shorthand",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &[
+                "code", "data", "bss", "rodata", "zeropage", "pushseg", "popseg",
+            ],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "align",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["align"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "out",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["out"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "message",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["warning", "error", "fatal"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "assert",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["assert"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     Directive {
         id: "unsupported-segments",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &[
-                "code", "data", "bss", "rodata", "zeropage", "org", "reloc", "pushseg", "popseg",
-                "align",
-            ],
+            names: &["org", "reloc"],
             required: true,
         },
         category: Category::KnownUnsupported,
     },
-    // symbol visibility
+    // Symbol visibility, probed against ca65 2.18 + ld65 in the fused
+    // assemble+link this dialect performs. See
+    // `decisions/symbol-visibility-in-a-fused-assembler.md` and `VisRule`.
+    Directive {
+        id: "export",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["export", "exportzp"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "import",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["import", "importzp"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "global",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["global", "globalzp"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // `.forceimport` cannot be satisfied here: defining its name is ca65's
+    // `Symbol 'zz' is already an import`, and not defining it is an unresolved
+    // external at ld65 even with nothing referencing it — which is what the
+    // "force" means. The third dialect to need this category.
+    Directive {
+        id: "forceimport",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["forceimport"],
+            required: true,
+        },
+        category: Category::RefusedByReference(
+            "only usable when a linker resolves it from another module",
+        ),
+    },
+    // `.autoimport +`/`-` switches ca65's automatic import of runtime symbols.
+    // There is no runtime library to import from here, and it emits nothing.
+    Directive {
+        id: "autoimport",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["autoimport"],
+            required: true,
+        },
+        category: Category::Ignored,
+    },
     Directive {
         id: "unsupported-symbol",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &[
-                "import",
-                "importzp",
-                "export",
-                "exportzp",
-                "global",
-                "globalzp",
-                "forceimport",
-                "autoimport",
-                "condes",
-                "constructor",
-                "destructor",
-                "interruptor",
-            ],
+            names: &["condes", "constructor", "destructor", "interruptor"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -1694,11 +2109,6 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Sigilled {
             sigil: '.',
             names: &[
-                "assert",
-                "error",
-                "fatal",
-                "warning",
-                "out",
                 "list",
                 "listbytes",
                 "pagelen",
@@ -1763,6 +2173,18 @@ fn parse_directive(
             format!("`.{name}` is not a directive ca65 has"),
         ));
     };
+    // Accepted and discarded: it changes no bytes and cannot fail.
+    if entry.category == Category::Ignored {
+        return Ok(Kind::Empty);
+    }
+    if let Category::RefusedByReference(rule) = entry.category {
+        return Err(AsmError::new(
+            line,
+            // Named as the pair, because it is the pair that refuses: ca65
+            // rejects the definition and ld65 rejects its absence.
+            crate::directives::refused_by_reference("the ca65+ld65 pipeline", &sigilled, rule),
+        ));
+    }
     if entry.category == Category::KnownUnsupported {
         return Err(AsmError::new(
             line,
@@ -1804,6 +2226,39 @@ fn parse_directive(
             line,
         )?)),
         "res" => parse_res(anons, current_global, consts, rest, line),
+        "align" => parse_align(anons, current_global, consts, rest, line),
+        // `.out` is the strict one: ca65 answers a value list with
+        // `Unexpected trailing garbage characters`. The other three read a
+        // string and ignore whatever follows it on the line — probed, not
+        // assumed, because the two shapes read alike in the manual.
+        "out" => {
+            let text = rest.trim();
+            match text.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
+                Some(lit) => Ok(Kind::Message(DiagSeverity::Note, lit.to_string())),
+                None => Err(AsmError::new(line, "`.out` takes one string")),
+            }
+        }
+        "message" => {
+            let severity = if name.eq_ignore_ascii_case("warning") {
+                DiagSeverity::Warning
+            } else {
+                DiagSeverity::Error
+            };
+            Ok(Kind::Message(severity, leading_string(rest, line)?))
+        }
+        "assert" => parse_assert(anons, current_global, rest, line),
+        "export" | "import" | "global" => parse_visible(
+            match entry.id {
+                "export" => VisRule::MustBeDefined,
+                "import" => VisRule::MustNotBeDefined,
+                _ => VisRule::EitherWay,
+            },
+            name.to_ascii_lowercase().ends_with("zp"),
+            anons,
+            current_global,
+            rest,
+            line,
+        ),
         // Declared, and dispatched elsewhere: `.include`/`.incbin` are
         // walk-handled, `.segment` is read where segments are assigned, and the
         // macro spellings are expanded before parsing. Reaching here means a
@@ -1842,6 +2297,143 @@ fn parse_res(
         }
     };
     Ok(Kind::Res(count, fill))
+}
+
+/// A visibility operand as the symbol table keys it: a cheap local (`@name`)
+/// is scoped to its global the way its definition is, so the check looks the
+/// same name up that the label pass stored.
+fn vis_name(current_global: &str, raw: &str) -> String {
+    match raw.strip_prefix('@') {
+        Some(local) => cheap_key(current_global, local),
+        None => raw.to_string(),
+    }
+}
+
+/// `.export name[, name...]`, and the `:= expr` form that defines as it
+/// exports. ca65 takes the value form only on the export spellings and only for
+/// a single name; `.global bar := 9` and `.import baz := 3` are both
+/// `Unexpected trailing garbage characters`.
+fn parse_visible(
+    rule: VisRule,
+    zero_page: bool,
+    anons: &AnonCtx,
+    current_global: &str,
+    rest: &str,
+    line: usize,
+) -> Result<Kind, AsmError> {
+    let parts = split_top_level(rest, ',');
+    let mut names = Vec::new();
+    let mut define = None;
+    for part in &parts {
+        let part = part.trim();
+        if part.is_empty() {
+            continue;
+        }
+        if let Some((name, value)) = part.split_once(":=") {
+            if rule != VisRule::MustBeDefined {
+                return Err(AsmError::new(
+                    line,
+                    "only `.export` and `.exportzp` take `:=`",
+                ));
+            }
+            if parts.len() > 1 {
+                return Err(AsmError::new(line, "`:=` exports one name"));
+            }
+            names.push(vis_name(current_global, name.trim()));
+            define = Some(parse_value(anons, current_global, value.trim(), line)?);
+        } else {
+            names.push(vis_name(current_global, part));
+        }
+    }
+    if names.is_empty() {
+        return Err(AsmError::new(line, "a visibility directive needs a name"));
+    }
+    Ok(Kind::Visible {
+        rule,
+        zero_page,
+        names,
+        define,
+    })
+}
+
+/// The leading string of a `.warning`/`.error`/`.fatal` operand. ca65 reads
+/// one string constant and skips the rest of the line: `.warning "a", 5` and
+/// `.warning "a" "b"` both say `a` and nothing more.
+fn leading_string(rest: &str, line: usize) -> Result<String, AsmError> {
+    let rest = rest.trim_start();
+    let body = rest
+        .strip_prefix('"')
+        .ok_or_else(|| AsmError::new(line, "string constant expected"))?;
+    let end = body
+        .find('"')
+        .ok_or_else(|| AsmError::new(line, "unterminated string"))?;
+    Ok(body[..end].to_string())
+}
+
+/// `.assert cond, action[, "message"]`. The action decides whether a failure
+/// stops the assembly: `error` and `lderror` do, `warning` and `ldwarning`
+/// note it and carry on. With assembly and linking fused there is no moment
+/// between the two `ld` forms and the others.
+fn parse_assert(
+    anons: &AnonCtx,
+    current_global: &str,
+    rest: &str,
+    line: usize,
+) -> Result<Kind, AsmError> {
+    let parts = split_top_level(rest, ',');
+    let cond = parse_value(
+        anons,
+        current_global,
+        parts.first().copied().unwrap_or(""),
+        line,
+    )?;
+    let action = parts.get(1).map(|a| a.trim().to_ascii_lowercase());
+    let fatal = match action.as_deref() {
+        Some("error" | "lderror") => true,
+        Some("warning" | "ldwarning") => false,
+        _ => {
+            return Err(AsmError::new(
+                line,
+                "`.assert` needs an action: `warning`, `error`, `ldwarning` or `lderror`",
+            ));
+        }
+    };
+    let message = parts
+        .get(2)
+        .map(|m| m.trim().trim_matches('"').to_string())
+        .unwrap_or_else(|| "Assertion failed".to_string());
+    Ok(Kind::Assert(cond, fatal, message))
+}
+
+/// `.align boundary [, fill]` — pad to the next multiple of `boundary` within
+/// the active segment. The boundary need not be a power of two, and the pad
+/// byte defaults to zero.
+fn parse_align(
+    anons: &AnonCtx,
+    current_global: &str,
+    consts: &BTreeMap<String, i64>,
+    rest: &str,
+    line: usize,
+) -> Result<Kind, AsmError> {
+    let mut parts = rest.splitn(2, ',');
+    let boundary_src = parts.next().unwrap_or("").trim();
+    let boundary = fold_const(
+        &parse_value(anons, current_global, boundary_src, line)?,
+        consts,
+        line,
+    )
+    .map_err(|_| AsmError::new(line, "`.align` boundary must be a constant"))?;
+    if boundary < 1 {
+        return Err(AsmError::new(line, "`.align` boundary must be positive"));
+    }
+    let fill = match parts.next() {
+        None => 0,
+        Some(v) => {
+            let n = fold_const(&parse_value(anons, current_global, v, line)?, consts, line)?;
+            u8::try_from(n).map_err(|_| AsmError::new(line, "`.align` fill must be a byte"))?
+        }
+    };
+    Ok(Kind::Align(boundary, fill))
 }
 
 /// `.byte` list: `"..."` strings expand to raw ASCII bytes; values are bytes.
@@ -1922,6 +2514,16 @@ fn parse_value(
         line,
         parse_number,
         mos6502::ExprOpts {
+            compare: mos6502::Compare {
+                eq: true,
+                eq_eq: false,
+                ne_angle: true,
+                ne_bang: false,
+                relational: true,
+                ordered_eq: true,
+                minus_one: false,
+            },
+            function: Some(expr_function_positional),
             bang_is_or: false,
             prec: BytePrec::Tight,
             byte_prefix: true,
@@ -1929,6 +2531,52 @@ fn parse_value(
             at_is_pc: false,
         },
     )
+}
+
+/// Marks a `.defined(NAME)` the projection has yet to answer. `\u{1}` cannot
+/// appear in source, the same property `cheap_key` relies on.
+const DEFINED_MARK: &str = "\u{1}defined\u{1}";
+
+/// ca65's expression functions **plus** `.defined`/`.def`, which the flat
+/// legs cannot have.
+///
+/// `.defined(X)` is *positional* — `0` before the definition and `1` after,
+/// probe-pinned — and nothing is defined yet when the walk parses an
+/// expression. So it cannot fold here; it becomes a marker that the
+/// projection answers in source order, where the constants and labels seen so
+/// far are exactly the set ca65 is asking about.
+///
+/// The 65816 and HuC6280 legs run on the shared engine, which resolves symbols
+/// once at the end and so has no "so far" to consult. They keep refusing
+/// `.defined` rather than answering it wrongly.
+fn expr_function_positional(
+    name: &str,
+    args: Vec<mos6502::ExprArg>,
+    line: usize,
+) -> Result<Expr, AsmError> {
+    if !matches!(name.to_ascii_lowercase().as_str(), ".defined" | ".def") {
+        return ca65_flat::expr_function(name, args, line);
+    }
+    let [arg]: [_; 1] = args
+        .try_into()
+        .map_err(|_| AsmError::new(line, format!("`{name}` takes one argument")))?;
+    match arg.value(name, line)? {
+        Expr::Sym(sym) => Ok(Expr::Sym(format!("{DEFINED_MARK}{sym}"))),
+        _ => Err(AsmError::new(line, format!("`{name}` takes a symbol name"))),
+    }
+}
+
+/// Answer every `.defined` marker in an expression against what is defined so
+/// far. Anything else is left alone.
+fn resolve_defined<'a>(
+    consts: &'a BTreeMap<String, i64>,
+    labels: &'a BTreeMap<String, String>,
+) -> impl Fn(&str) -> Option<Expr> + 'a {
+    move |name| {
+        let sym = name.strip_prefix(DEFINED_MARK)?;
+        let known = consts.contains_key(sym) || labels.contains_key(sym);
+        Some(Expr::Num(i64::from(known)))
+    }
 }
 
 /// A collision-proof symbol key for a cheap local, scoped to its global.
@@ -1953,7 +2601,7 @@ mod tests {
     use super::assemble;
 
     fn rom(src: &str) -> Vec<u8> {
-        assemble(src).expect("assembles")
+        assemble(src).expect("assembles").0
     }
 
     #[test]
@@ -1975,6 +2623,132 @@ mod tests {
             msg.contains("CODE") && msg.contains("VECTORS"),
             "got `{msg}`"
         );
+    }
+
+    /// The expression-function seam: a name followed by `(` is a call, and an
+    /// unimplemented `.`-word says so rather than reading as an undefined
+    /// symbol.
+    #[test]
+    fn expression_functions_extract_bytes() {
+        let r = rom(".code\nV = $123456\n lda #.lobyte(V)\n lda #.hibyte(V)\n lda #.bankbyte(V)\n");
+        assert_eq!(&r[16..22], &[0xA9, 0x56, 0xA9, 0x34, 0xA9, 0x12]);
+        // Nested, and over an expression rather than a bare symbol.
+        let n = rom(".code\n lda #.lobyte($1234+1)\n lda #.lobyte(.hibyte($123456))\n");
+        assert_eq!(&n[16..20], &[0xA9, 0x35, 0xA9, 0x34]);
+
+        // The word extractions, which have no `Expr` node and need none.
+        let w = rom(".code\nV = $123456\n .word .loword(V)\n .word .hiword(V)\n");
+        assert_eq!(&w[16..20], &[0x56, 0x34, 0x12, 0x00]);
+
+        // Two arguments, and the wrong count refused rather than ignored.
+        let m = rom(".code\n lda #.max(3, 7)\n lda #.min(3, 7)\n lda #.min(.max(1,5), 9)\n");
+        assert_eq!(&m[16..22], &[0xA9, 0x07, 0xA9, 0x03, 0xA9, 0x05]);
+        for (src, why) in [
+            (
+                ".code\n lda #.max(3)\n",
+                "one argument to a two-argument function",
+            ),
+            (
+                ".code\n lda #.lobyte(1, 2)\n",
+                "two arguments to a one-argument function",
+            ),
+        ] {
+            assert!(assemble(src).is_err(), "{why}");
+        }
+
+        // A string argument yields a number; the wrong argument kind is named.
+        let t = rom(".code\n lda #.strlen(\"hello\")\n lda #.strat(\"abc\", 1)\n");
+        assert_eq!(&t[16..20], &[0xA9, 0x05, 0xA9, 0x62]);
+        for (src, want) in [
+            (".code\n lda #.strlen(5)\n", "takes a string, not a value"),
+            (
+                ".code\n lda #.lobyte(\"hi\")\n",
+                "takes a value, not a string",
+            ),
+        ] {
+            let e = assemble(src).expect_err(src).to_string();
+            assert!(e.contains(want), "expected `{want}`, got `{e}`");
+        }
+
+        // `.defined` is positional — the whole reason it is answered in the
+        // projection rather than folded while parsing.
+        let d = rom(
+            ".code\n lda #.defined(L)\nL = 7\n lda #.defined(L)\n lda #.def(L)\n\
+             .if .defined(L)\n lda #$33\n .else\n lda #$44\n .endif\n",
+        );
+        assert_eq!(
+            &d[16..24],
+            &[0xA9, 0x00, 0xA9, 0x01, 0xA9, 0x01, 0xA9, 0x33]
+        );
+        // A label counts as defined, not just an `=` constant.
+        let l = rom(".code\nhere: lda #1\n lda #.defined(here)\n");
+        assert_eq!(&l[18..20], &[0xA9, 0x01]);
+
+        // A `.`-word we do not implement — with a plain argument, since a
+        // string literal fails earlier, in the tokenizer.
+        let err = assemble(".code\nV = 1\n lda #.sizeof(V)\n").expect_err("not implemented");
+        assert!(
+            err.to_string().contains("not an expression function"),
+            "got `{err}`"
+        );
+    }
+
+    #[test]
+    fn the_segment_shorthands_are_their_spelled_out_segments() {
+        // `.code` is `.segment "CODE"`, `.zeropage` is ZEROPAGE, `.bss` is
+        // BSS — the same placement, reached by the shorter spelling.
+        let long = rom(".segment \"ZEROPAGE\"\npos: .res 1\n\
+             .segment \"BSS\"\nbuf: .res 4\n\
+             .segment \"CODE\"\n lda pos\n sta buf\n");
+        let short = rom(".zeropage\npos: .res 1\n.bss\nbuf: .res 4\n.code\n lda pos\n sta buf\n");
+        assert_eq!(long, short);
+        // `pos` is zero-page, `buf` is RAM at the config's $0300 (OAM has the
+        // page below it).
+        assert_eq!(&short[16..21], &[0xA5, 0x00, 0x8D, 0x00, 0x03]);
+    }
+
+    /// `.align` pads within the segment, so the boundary is measured from the
+    /// segment's start rather than from the CPU address — the distinction only
+    /// shows on a boundary the segment base is not itself a multiple of.
+    #[test]
+    fn align_pads_within_the_segment() {
+        // CODE is based at $8000, which is not a multiple of 3; the pad still
+        // lands the next byte at segment offset 3.
+        let r = rom(".code\n .byte 1\n .align 3\n .byte 2\n");
+        assert_eq!(&r[16..20], &[1, 0, 0, 2]);
+        let f = rom(".code\n .byte 1\n .align 4, $ff\n .byte 2\n");
+        assert_eq!(&f[16..21], &[1, 0xFF, 0xFF, 0xFF, 2]);
+        let none = rom(".code\n .byte 1,2,3,4\n .align 4\n .byte 9\n");
+        assert_eq!(&none[16..21], &[1, 2, 3, 4, 9]);
+    }
+
+    /// A label on the `.align` line binds *before* the pad, not after it —
+    /// probe-pinned, and the opposite of what an alignment directive reads like.
+    #[test]
+    fn a_label_on_an_align_line_binds_before_the_pad() {
+        let r = rom(
+            ".code\n .byte 1\nhere: .align 4\n .byte 2\n             .segment \"VECTORS\"\n .word here, 0, 0\n",
+        );
+        // $8001 — where `here` stood, not $8004 where the next byte landed.
+        assert_eq!(&r[16 + 0x7FFA..16 + 0x7FFC], &[0x01, 0x80]);
+    }
+
+    #[test]
+    fn popseg_restores_the_segment_pushseg_saved() {
+        // The reservation between the pair happens in ZEROPAGE; the code
+        // either side of it stays in CODE, contiguous across the interruption.
+        let r = rom(".code\n lda #1\n\
+             .pushseg\n.zeropage\ntmp: .res 1\n.popseg\n\
+             ldx #2\n");
+        assert_eq!(&r[16..20], &[0xA9, 0x01, 0xA2, 0x02]);
+    }
+
+    #[test]
+    fn a_shorthand_for_a_segment_the_config_lacks_is_rejected_too() {
+        // `ca65` accepts `.data`; `ld65` then has no memory area for it. The
+        // refusal is the same one the spelled-out form gets.
+        let err = assemble(".data\n .byte 1\n").expect_err("rejected");
+        assert!(err.to_string().contains("DATA"), "got `{err}`");
     }
 
     #[test]
@@ -2083,6 +2857,258 @@ two:\n\
         rom[16..].to_vec()
     }
 
+    /// `.out` prints its string and emits nothing. ca65 writes the text bare,
+    /// with no file/line prefix, so the note carries the text alone.
+    #[test]
+    fn out_is_a_note_and_emits_nothing() {
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.out \"hello there\"\nnop\n")
+            .expect("assembles");
+        assert_eq!(r.bytes[16], 0xEA);
+        let note = r.warnings.first().expect("one note");
+        assert_eq!(note.message, "hello there");
+        assert_eq!(note.kind, crate::engine::WarningKind::Note);
+        assert!(note.to_string().contains("note:"), "got `{note}`");
+    }
+
+    /// `.out` takes one string: ca65 answers a value list with `Unexpected
+    /// trailing garbage characters` and a bare number with `String constant
+    /// expected`. Both are refused here too.
+    #[test]
+    fn out_refuses_anything_but_one_string() {
+        for src in [
+            ".segment \"CODE\"\n.out \"a\", 5\n",
+            ".segment \"CODE\"\n.out 5\n",
+        ] {
+            let err = crate::assemble_ca65(src).expect_err(src);
+            assert!(err.to_string().contains("one string"), "got `{err}`");
+        }
+    }
+
+    /// `.export` and `.exportzp` require the name be defined somewhere in the
+    /// program — ca65 answers `Exported symbol 'nope' was never defined` with
+    /// nothing referencing it, which is what makes this a check and not a
+    /// no-op. The name may be defined below the directive.
+    #[test]
+    fn an_exported_name_must_be_defined() {
+        for word in [".export", ".exportzp"] {
+            let src = format!(".segment \"CODE\"\n{word} foo\nfoo: .byte 1\n");
+            crate::assemble_ca65(&src).expect("defined below");
+
+            let src = format!(".segment \"CODE\"\n{word} nope\n.byte 1\n");
+            let err = crate::assemble_ca65(&src).expect_err(word);
+            assert!(
+                err.to_string().contains("`nope` was never defined"),
+                "{word}: got `{err}`"
+            );
+        }
+        // A list, and repeating an export is not an error.
+        crate::assemble_ca65(
+            ".segment \"CODE\"\n.export foo, bar\n.export foo\nfoo: .byte 1\nbar: .byte 2\n",
+        )
+        .expect("a list");
+    }
+
+    /// `.export name := expr` defines the name as it exports it. Only the
+    /// export spellings take the form: ca65 answers `Unexpected trailing
+    /// garbage characters` for `.global bar := 9` and `.import baz := 3`.
+    #[test]
+    fn export_assigns_as_well_as_exports() {
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.export k := 7\n.byte k\n")
+            .expect("defines k");
+        assert_eq!(r.bytes[16], 7);
+        for word in [".global", ".import"] {
+            let src = format!(".segment \"CODE\"\n{word} v := 1\n.byte 1\n");
+            let err = crate::assemble_ca65(&src).expect_err(word);
+            assert!(err.to_string().contains("`:=`"), "{word}: got `{err}`");
+        }
+    }
+
+    /// `.import` claims a name defined elsewhere, so defining it here is
+    /// ca65's `Symbol 'zz' is already an import` — reported at the definition,
+    /// not at the import. Leaving it undefined is fine until something reads
+    /// it, and then it is the ordinary undefined-symbol refusal (ld65 calls it
+    /// an unresolved external).
+    #[test]
+    fn an_imported_name_may_not_be_defined_here() {
+        for word in [".import", ".importzp"] {
+            let src = format!(".segment \"CODE\"\n{word} zz\n.byte 1\n");
+            crate::assemble_ca65(&src).expect("unreferenced is fine");
+
+            let src = format!(".segment \"CODE\"\n{word} zz\n.byte 1\nzz: .byte 2\n");
+            let err = crate::assemble_ca65(&src).expect_err(word);
+            let message = err.to_string();
+            assert!(message.contains("already an import"), "{word}: {message}");
+            assert!(
+                message.contains("line 4"),
+                "reported at the definition: {message}"
+            );
+
+            let src = format!(".segment \"CODE\"\n{word} zz\n.byte zz\n");
+            crate::assemble_ca65(&src).expect_err("referencing it cannot resolve");
+        }
+    }
+
+    /// `.global` is export-if-defined and import-if-not, so both are legal and
+    /// there is nothing to check. The `zp` spelling still warns.
+    #[test]
+    fn global_checks_nothing_either_way() {
+        crate::assemble_ca65(".segment \"CODE\"\n.global g\ng: .byte 1\n").expect("defined");
+        crate::assemble_ca65(".segment \"CODE\"\n.global g\n.byte 1\n").expect("not defined");
+    }
+
+    /// The `zp` spellings warn for a **label** that is not in the zero page.
+    /// A constant never draws the warning, whatever its value — probed with
+    /// `K = 7` and `K = $10`, both silent.
+    #[test]
+    fn exporting_an_absolute_label_as_zeropage_warns() {
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.exportzp foo\nfoo: .byte 1\n")
+            .expect("assembles");
+        let w = r.warnings.first().expect("one warning");
+        assert!(w.message.contains("absolute but exported zeropage"), "{w}");
+
+        for quiet in [
+            ".segment \"ZEROPAGE\"\np: .res 1\n.segment \"CODE\"\n.exportzp p\n.byte 1\n",
+            ".segment \"CODE\"\nK = 7\n.exportzp K\n.byte 1\n",
+            ".segment \"CODE\"\nK = $10\n.exportzp K\n.byte 1\n",
+        ] {
+            let r = crate::assemble_ca65(quiet).expect(quiet);
+            assert!(r.warnings.is_empty(), "{quiet}: got {:?}", r.warnings);
+        }
+        // `.globalzp` carries the same warning — it exports when the name is
+        // defined here, and this one is.
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.globalzp foo\nfoo: .byte 1\n")
+            .expect("assembles");
+        assert_eq!(r.warnings.len(), 1);
+    }
+
+    /// `.forceimport` cannot be satisfied: defining the name is `already an
+    /// import`, and not defining it is an unresolved external at ld65 even
+    /// with nothing referencing it. Refused rather than counted a gap.
+    #[test]
+    fn forceimport_is_refused_as_the_reference_refuses_it() {
+        let err = crate::assemble_ca65(".segment \"CODE\"\n.forceimport zz\n.byte 1\n")
+            .expect_err("cannot be satisfied");
+        let message = err.to_string();
+        assert!(message.contains("linker resolves it"), "{message}");
+        assert!(!message.contains("does not implement"), "{message}");
+    }
+
+    /// `.autoimport +`/`-` switches ca65's automatic runtime imports. There is
+    /// no runtime library here and it emits nothing.
+    #[test]
+    fn autoimport_is_accepted_and_discarded() {
+        for sign in ["+", "-"] {
+            let r =
+                crate::assemble_ca65(&format!(".segment \"CODE\"\n.autoimport {sign}\n.byte 1\n"))
+                    .expect(sign);
+            assert_eq!(r.bytes[16], 1);
+        }
+    }
+
+    /// `.warning` says its piece and assembles; `.error` and `.fatal` do not.
+    /// ca65 prefixes the text with `User warning:`/`User error:` — its own
+    /// classification, not the source's words, so it is not reproduced.
+    #[test]
+    fn the_message_words_carry_their_severity() {
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.warning \"soft\"\nnop\n")
+            .expect("a warning assembles");
+        assert_eq!(r.bytes[16], 0xEA);
+        let w = r.warnings.first().expect("one warning");
+        assert_eq!(w.message, "soft");
+        assert_eq!(w.kind, crate::engine::WarningKind::Advisory);
+
+        for word in ["error", "fatal"] {
+            let src = format!(".segment \"CODE\"\n.{word} \"hard\"\nnop\n");
+            let err = crate::assemble_ca65(&src).expect_err(&src);
+            assert!(err.to_string().contains("hard"), "got `{err}`");
+        }
+    }
+
+    /// The message words read one string and skip the rest of the line, where
+    /// `.out` refuses the same shape. Both spellings were probed; the manual
+    /// reads alike for the two.
+    #[test]
+    fn a_message_word_ignores_what_follows_its_string() {
+        for src in [
+            ".segment \"CODE\"\n.warning \"a\", 5\nnop\n",
+            ".segment \"CODE\"\n.warning \"a\" \"b\"\nnop\n",
+        ] {
+            let r = crate::assemble_ca65(src).expect(src);
+            assert_eq!(r.warnings.first().expect("one warning").message, "a");
+        }
+        let err = crate::assemble_ca65(".segment \"CODE\"\n.warning 5\n").expect_err("no string");
+        assert!(err.to_string().contains("string constant"), "got `{err}`");
+    }
+
+    /// A message inside an untaken branch is never said: conditionals fold
+    /// before layout, so the statement does not reach the emit pass.
+    #[test]
+    fn a_message_in_an_untaken_branch_stays_quiet() {
+        let r = crate::assemble_ca65(
+            ".segment \"CODE\"\n.if 0\n.error \"no\"\n.warning \"nor\"\n.endif\nnop\n",
+        )
+        .expect("assembles");
+        assert!(r.warnings.is_empty(), "got `{:?}`", r.warnings);
+    }
+
+    /// `.assert` fires only when its condition is zero, and the action decides
+    /// whether that stops the assembly. The default message is ca65's own.
+    #[test]
+    fn assert_fires_on_zero_and_the_action_decides() {
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.assert 1, error, \"never\"\nnop\n")
+            .expect("true assertion is silent");
+        assert!(r.warnings.is_empty(), "got `{:?}`", r.warnings);
+
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.assert 0, warning, \"soft\"\nnop\n")
+            .expect("a warning assembles anyway");
+        assert_eq!(r.bytes[16], 0xEA);
+        let w = r.warnings.first().expect("one warning");
+        assert_eq!(w.message, "soft");
+        assert_eq!(w.kind, crate::engine::WarningKind::Advisory);
+
+        let err = crate::assemble_ca65(".segment \"CODE\"\n.assert 0, error, \"boom\"\nnop\n")
+            .expect_err("an error does not");
+        assert!(err.to_string().contains("boom"), "got `{err}`");
+
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.assert 0, warning\nnop\n")
+            .expect("assembles");
+        assert_eq!(
+            r.warnings.first().expect("one warning").message,
+            "Assertion failed"
+        );
+    }
+
+    /// The condition folds against the finished symbol table, so it may name a
+    /// label defined below it. Real ca65 defers such an assertion to `ld65`;
+    /// with assembly and linking fused there is no moment between the two.
+    #[test]
+    fn assert_sees_a_label_defined_below_it() {
+        let src = ".segment \"CODE\"\n.assert later = $8001, error, \"moved\"\nnop\nlater:\n";
+        crate::assemble_ca65(src).expect("the label is $8001");
+        let src = ".segment \"CODE\"\n.assert later = $1234, error, \"moved\"\nnop\nlater:\n";
+        let err = crate::assemble_ca65(src).expect_err("it is not $1234");
+        assert!(err.to_string().contains("moved"), "got `{err}`");
+    }
+
+    /// The four action words ca65 accepts, and nothing else. `lderror` and
+    /// `ldwarning` name the link stage, which is not a separate step here.
+    #[test]
+    fn assert_takes_the_four_action_words() {
+        for (action, fatal) in [
+            ("warning", false),
+            ("ldwarning", false),
+            ("error", true),
+            ("lderror", true),
+        ] {
+            let src = format!(".segment \"CODE\"\n.assert 0, {action}, \"m\"\nnop\n");
+            let r = crate::assemble_ca65(&src);
+            assert_eq!(r.is_err(), fatal, "{action}");
+        }
+        let err = crate::assemble_ca65(".segment \"CODE\"\n.assert 0, oops, \"m\"\n")
+            .expect_err("bad action");
+        assert!(err.to_string().contains("action"), "got `{err}`");
+    }
+
     #[test]
     fn a_conditional_picks_one_branch() {
         assert_eq!(bytes("N=1\n.if N\n nop\n.endif\n rts\n")[..2], [0xEA, 0x60]);
@@ -2166,13 +3192,11 @@ two:\n\
     #[test]
     fn a_real_directive_is_told_apart_from_a_typo() {
         let err = |src: &str| super::assemble(src).expect_err(src).to_string();
-        for d in [
-            ".export foo",
-            ".proc x",
-            ".org $200",
-            ".align 4",
-            ".macpack cpu",
-        ] {
+        // `.condes` rather than `.export`, which became an implemented check
+        // once ca65 turned out to enforce one. `.condes` builds an ld65
+        // constructor table from linker-config features our fixed layout does
+        // not declare, so it stays a gap by decision rather than by schedule.
+        for d in [".condes foo, 1", ".proc x", ".org $200", ".macpack cpu"] {
             let e = err(&format!("\t{d}\n"));
             assert!(
                 e.contains("is a real directive here"),

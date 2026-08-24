@@ -54,11 +54,16 @@ fn spellings(directive: &Directive) -> String {
 }
 
 /// What the assembler does with a directive, for a reader.
-fn category(category: Category) -> &'static str {
+fn category(category: Category) -> String {
     match category {
-        Category::Operation => "",
-        Category::Ignored => "Accepted and discarded — it changes no bytes",
-        Category::KnownUnsupported => "Recognised, and not implemented",
+        Category::Operation => String::new(),
+        Category::Ignored => "Accepted and discarded — it changes no bytes".to_string(),
+        Category::KnownUnsupported => "Recognised, and not implemented".to_string(),
+        // Not a gap: the reference refuses it for the output we emit, so
+        // refusing it is what matching the reference means.
+        Category::RefusedByReference(rule) => {
+            format!("Refused, as the reference refuses it — {rule}")
+        }
     }
 }
 

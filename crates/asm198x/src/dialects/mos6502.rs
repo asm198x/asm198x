@@ -212,9 +212,89 @@ pub(crate) enum Caret {
     Power,
 }
 
+/// One argument to an expression function: a value, or a string literal.
+///
+/// Strings exist here and nowhere else in an expression. A function that
+/// *returns* a string — ca65's `.concat`/`.sprintf`, rgbasm's `STRCAT` — is a
+/// text-substitution feature rather than an expression one, and is not reached
+/// by this.
+#[derive(Debug, Clone)]
+pub(crate) enum ExprArg {
+    Value(Expr),
+    Text(String),
+}
+
+impl ExprArg {
+    /// The value, for a function whose argument must be one.
+    pub(crate) fn value(self, name: &str, line: usize) -> Result<Expr, AsmError> {
+        match self {
+            ExprArg::Value(e) => Ok(e),
+            ExprArg::Text(_) => Err(AsmError::new(
+                line,
+                format!("`{name}` takes a value, not a string"),
+            )),
+        }
+    }
+
+    /// The text, for a function whose argument must be a string.
+    pub(crate) fn text(self, name: &str, line: usize) -> Result<String, AsmError> {
+        match self {
+            ExprArg::Text(t) => Ok(t),
+            ExprArg::Value(_) => Err(AsmError::new(
+                line,
+                format!("`{name}` takes a string, not a value"),
+            )),
+        }
+    }
+}
+
+/// How a dialect turns an expression function call — `name(arg)` — into an
+/// [`Expr`]. See [`ExprOpts::function`].
+///
+/// Three limits, each of which blocks a known group of reference functions and
+/// none of which is worked around here:
+///
+/// - **No string-*returning* functions.** A string argument is fine — see
+///   [`ExprArg`] — because it is consumed at parse time and yields a number.
+///   A function that hands a string *back* (ca65's `.concat`/`.sprintf`,
+///   rgbasm's `STRCAT`/`STRFMT`) would need an expression to evaluate to
+///   something other than an `i64`, and those are a text-substitution feature
+///   rather than an expression one.
+/// - **No parse-position symbol knowledge.** ca65's `.defined(X)` is
+///   *positional* — `0` before the definition and `1` after — and nothing is
+///   defined yet when a walk parses an expression, so it cannot fold here at
+///   all. A dialect whose pipeline visits statements in source order can
+///   answer it later; ca65 does, by emitting a marker its projection resolves.
+///   One whose symbols resolve once at the end cannot, and should refuse it
+///   rather than answer `1` both times.
+pub(crate) type ExprFn = fn(&str, Vec<ExprArg>, usize) -> Result<Expr, AsmError>;
+
+/// Which comparison spellings a dialect takes, and what it answers for true.
+/// Every field is probed, not inferred — see `docs/comparison-operators.md`.
+#[derive(Clone, Copy, Default)]
+pub(crate) struct Compare {
+    /// `=` as equality. lwasm has no such operator.
+    pub eq: bool,
+    /// `==` as equality (rgbasm, sjasmplus).
+    pub eq_eq: bool,
+    /// `<>` as inequality. sjasmplus refuses it.
+    pub ne_angle: bool,
+    /// `!=` as inequality (rgbasm, sjasmplus).
+    pub ne_bang: bool,
+    /// `<` and `>` as relations. Every dialect that compares at all has these,
+    /// **including** the ones where a leading `<` is the low-byte prefix: the
+    /// two never occupy the same position.
+    pub relational: bool,
+    /// `<=` and `>=`. lwasm refuses them.
+    pub ordered_eq: bool,
+    /// True is `$FF` rather than `1` (vasm, sjasmplus, pasmo).
+    pub minus_one: bool,
+}
+
 /// Expression-syntax knobs that vary by dialect. The bitwise/shift operators
 /// `& | << >>` are available in every dialect (the engine AST supports them);
-/// these knobs only vary the `<`/`>` byte-prefix behaviour and what `^` means.
+/// these knobs vary the `<`/`>` byte-prefix behaviour, what `^` means, and
+/// which comparisons exist.
 #[derive(Clone, Copy)]
 pub(crate) struct ExprOpts {
     /// Where the `<`/`>` byte-extraction operators sit in precedence.
@@ -235,6 +315,18 @@ pub(crate) struct ExprOpts {
     /// `6!1&3` = 7 (binds looser than `&`, like `|`). Off elsewhere — other
     /// dialects (e.g. rgbasm) give `!` a different meaning.
     pub bang_is_or: bool,
+    /// How this dialect builds an expression **function call** — a symbol
+    /// immediately followed by `(`, as in ca65's `.lobyte(addr)`. `None` (the
+    /// default) leaves `name(...)` a parse error, which is what it has always
+    /// been: no dialect gave a bare symbol a call meaning before.
+    ///
+    /// The builder receives the name as written and the parsed arguments, so a
+    /// function whose argument is a *name* rather than a value (ca65's
+    /// `.sizeof(Point)`) reads it back as an `Expr::Sym`.
+    pub function: Option<ExprFn>,
+    /// Comparison support. `Default` is none, which is what a dialect whose
+    /// reference has no comparison operators wants.
+    pub compare: Compare,
 }
 
 /// Parse a value expression. `parse_number` lexes the dialect's numeric literal
@@ -255,6 +347,8 @@ pub(crate) fn parse_expr(
         line,
         prec: opts.prec,
         caret: opts.caret,
+        function: opts.function,
+        compare_opts: opts.compare,
     };
     let expr = parser.expr()?;
     if parser.pos != parser.tokens.len() {
@@ -285,6 +379,19 @@ enum Tok {
     Shr,
     /// Exponentiation (`^` in ACME, where it is *not* XOR).
     Pow,
+    /// A comparison, in operator position. A leading `<`/`>` is still the
+    /// byte prefix where the dialect has one; these are only produced after a
+    /// value, where a prefix cannot appear.
+    Cmp(BinOp),
+    /// A string literal. Only ever a **function argument** — see [`ExprArg`].
+    /// An expression still evaluates to an `i64`, so a string never becomes a
+    /// value; `.strlen("abc")` consumes it at parse time and yields a number.
+    Str(String),
+    /// Argument separator inside a function call. Nothing else in an
+    /// expression takes one — every caller splits its operand list on commas
+    /// before an expression reaches here, and does so paren-aware, so a
+    /// comma survives only inside `f(a,b)`.
+    Comma,
 }
 
 fn tokenize(
@@ -297,6 +404,13 @@ fn tokenize(
     let mut tokens = Vec::new();
     let mut i = 0;
     while i < chars.len() {
+        // Whether the token before this one ended a value. A prefix operator
+        // can only appear where one did not; an infix comparison only where
+        // one did. That is the whole of how `<` tells its two meanings apart.
+        let after_value = matches!(
+            tokens.last(),
+            Some(Tok::Num(_) | Tok::Sym(_) | Tok::Star | Tok::RParen | Tok::Str(_))
+        );
         let c = chars[i];
         match c {
             ws if ws.is_whitespace() => i += 1,
@@ -322,13 +436,25 @@ fn tokenize(
                 tokens.push(Tok::Slash);
                 i += 1;
             }
-            // `<<`/`>>` are shifts everywhere; a lone `<`/`>` is a low/high-byte
-            // prefix only where `byte_prefix` is on (the 6502 family), otherwise
-            // it must have been the start of a shift.
+            // `<<`/`>>` are shifts everywhere. A lone `<`/`>` is a
+            // low/high-byte **prefix** where `byte_prefix` is on, and a
+            // **comparison** where one follows a value — the two never occupy
+            // the same position, which is why ca65 and acme have both
+            // (`docs/comparison-operators.md`).
             '<' => {
+                let c = opts.compare;
                 if chars.get(i + 1) == Some(&'<') {
                     tokens.push(Tok::Shl);
                     i += 2;
+                } else if after_value && c.ne_angle && chars.get(i + 1) == Some(&'>') {
+                    tokens.push(Tok::Cmp(BinOp::Ne));
+                    i += 2;
+                } else if after_value && c.ordered_eq && chars.get(i + 1) == Some(&'=') {
+                    tokens.push(Tok::Cmp(BinOp::Le));
+                    i += 2;
+                } else if after_value && c.relational {
+                    tokens.push(Tok::Cmp(BinOp::Lt));
+                    i += 1;
                 } else if opts.byte_prefix {
                     tokens.push(Tok::Lo);
                     i += 1;
@@ -337,15 +463,34 @@ fn tokenize(
                 }
             }
             '>' => {
+                let c = opts.compare;
                 if chars.get(i + 1) == Some(&'>') {
                     tokens.push(Tok::Shr);
                     i += 2;
+                } else if after_value && c.ordered_eq && chars.get(i + 1) == Some(&'=') {
+                    tokens.push(Tok::Cmp(BinOp::Ge));
+                    i += 2;
+                } else if after_value && c.relational {
+                    tokens.push(Tok::Cmp(BinOp::Gt));
+                    i += 1;
                 } else if opts.byte_prefix {
                     tokens.push(Tok::Hi);
                     i += 1;
                 } else {
                     return Err(AsmError::new(line, "expected `>>` (shift)"));
                 }
+            }
+            '=' if opts.compare.eq_eq && chars.get(i + 1) == Some(&'=') => {
+                tokens.push(Tok::Cmp(BinOp::Eq));
+                i += 2;
+            }
+            '=' if opts.compare.eq => {
+                tokens.push(Tok::Cmp(BinOp::Eq));
+                i += 1;
+            }
+            '!' if opts.compare.ne_bang && chars.get(i + 1) == Some(&'=') => {
+                tokens.push(Tok::Cmp(BinOp::Ne));
+                i += 2;
             }
             '&' => {
                 tokens.push(Tok::And);
@@ -368,6 +513,22 @@ fn tokenize(
                     Caret::Power => Tok::Pow,
                     Caret::Xor | Caret::BankOrXor => Tok::Xor,
                 });
+                i += 1;
+            }
+            '"' => {
+                let start = i + 1;
+                i += 1;
+                while i < chars.len() && chars[i] != '"' {
+                    i += 1;
+                }
+                if i >= chars.len() {
+                    return Err(AsmError::new(line, "unterminated string in expression"));
+                }
+                tokens.push(Tok::Str(chars[start..i].iter().collect()));
+                i += 1;
+            }
+            ',' => {
+                tokens.push(Tok::Comma);
                 i += 1;
             }
             '(' => {
@@ -445,10 +606,17 @@ struct ExprParser {
     line: usize,
     prec: BytePrec,
     caret: Caret,
+    function: Option<ExprFn>,
+    compare_opts: Compare,
 }
 
 impl ExprParser {
     fn expr(&mut self) -> Result<Expr, AsmError> {
+        self.compare()
+    }
+
+    /// The dialect's arithmetic ladder, below any comparison.
+    fn ladder(&mut self) -> Result<Expr, AsmError> {
         // Loose `<`/`>` wrap the whole expression to their right.
         if matches!(self.prec, BytePrec::Loose) {
             match self.tokens.get(self.pos) {
@@ -472,6 +640,28 @@ impl ExprParser {
         } else {
             self.add_sub()
         }
+    }
+
+    /// Comparisons, loosest of all — `a+1 = b*2` compares the sums. Non-
+    /// associative in practice, but chaining is harmless and no reference
+    /// refuses it, so the loop is left general.
+    ///
+    /// A dialect whose reference answers `$FF` for true gets the comparison
+    /// negated here, so `Expr` evaluation stays dialect-agnostic.
+    fn compare(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.ladder()?;
+        while let Some(Tok::Cmp(op)) = self.tokens.get(self.pos) {
+            let op = *op;
+            self.pos += 1;
+            let right = self.ladder()?;
+            let cmp = Expr::Bin(op, Box::new(left), Box::new(right));
+            left = if self.compare_opts.minus_one {
+                Expr::Neg(Box::new(cmp))
+            } else {
+                cmp
+            };
+        }
+        Ok(left)
     }
 
     // ---- ACME precedence ladder (loosest first): `|`, keyword `XOR`/`EOR`,
@@ -671,6 +861,17 @@ impl ExprParser {
         self.atom()
     }
 
+    /// One function argument: a string literal where the source wrote one,
+    /// otherwise an ordinary expression.
+    fn call_arg(&mut self) -> Result<ExprArg, AsmError> {
+        if let Some(Tok::Str(t)) = self.tokens.get(self.pos) {
+            let t = t.clone();
+            self.pos += 1;
+            return Ok(ExprArg::Text(t));
+        }
+        Ok(ExprArg::Value(self.expr()?))
+    }
+
     fn atom(&mut self) -> Result<Expr, AsmError> {
         let tok = self
             .tokens
@@ -680,7 +881,35 @@ impl ExprParser {
         self.pos += 1;
         match tok {
             Tok::Num(n) => Ok(Expr::Num(n)),
-            Tok::Sym(s) => Ok(Expr::Sym(s)),
+            Tok::Sym(s) => {
+                // `name(` is a call where the dialect has functions; anywhere
+                // else it stays a plain symbol and the `(` is the next token's
+                // problem.
+                //
+                // One argument only: the tokenizer has no comma, because every
+                // caller splits its operands on commas before an expression
+                // reaches here. A multi-argument function (`.max(a,b)`,
+                // rgbasm's `STRFMT`) needs that token first.
+                match (self.function, self.tokens.get(self.pos)) {
+                    (Some(build), Some(Tok::LParen)) => {
+                        self.pos += 1;
+                        let mut args = vec![self.call_arg()?];
+                        while matches!(self.tokens.get(self.pos), Some(Tok::Comma)) {
+                            self.pos += 1;
+                            args.push(self.call_arg()?);
+                        }
+                        if !matches!(self.tokens.get(self.pos), Some(Tok::RParen)) {
+                            return Err(AsmError::new(
+                                self.line,
+                                format!("expected `,` or `)` in `{s}(...)`"),
+                            ));
+                        }
+                        self.pos += 1;
+                        build(&s, args, self.line)
+                    }
+                    _ => Ok(Expr::Sym(s)),
+                }
+            }
             Tok::Star => Ok(Expr::Pc),
             Tok::LParen => {
                 let inner = self.expr()?;
@@ -769,7 +998,19 @@ pub(crate) fn assignment_split(trimmed: &str) -> Option<usize> {
             let prev = i.checked_sub(1).map(|p| bytes[p]);
             let next = bytes.get(i + 1).copied();
             if !matches!(prev, Some(b'!' | b'<' | b'>' | b'=')) && next != Some(b'=') {
-                return Some(i);
+                // The left side has to be a *name* for this to be a
+                // definition. Without that check `.byte 2=2` reads as defining
+                // a symbol called `.byte 2`, which is what it did before `=`
+                // could be a comparison and nothing had reason to notice.
+                let left = trimmed[..i].trim();
+                let is_name = !left.is_empty()
+                    && (left == "*"
+                        || left.chars().all(|c| {
+                            c.is_ascii_alphanumeric() || matches!(c, '_' | '.' | '@' | ':')
+                        }));
+                if is_name {
+                    return Some(i);
+                }
             }
         }
     }
@@ -826,6 +1067,8 @@ mod tests {
     fn eval(raw: &str, prec: BytePrec) -> i64 {
         let env = BTreeMap::new();
         let opts = ExprOpts {
+            compare: Compare::default(),
+            function: None,
             prec,
             byte_prefix: true,
             caret: Caret::Xor,

@@ -144,6 +144,46 @@ pub(crate) trait Dialect {
         1
     }
 
+    /// Where this dialect's image begins, when its container fixes that rather
+    /// than the program's own lowest section.
+    ///
+    /// A Game Boy ROM starts at file offset 0 whatever the program put there,
+    /// so a program of one section at `$10` still emits the leading sixteen
+    /// bytes. A flat dialect answers `None` and the image starts wherever the
+    /// program does.
+    fn image_base(&self) -> Option<i64> {
+        None
+    }
+
+    /// The size this dialect's toolchain pads a finished image to, given the
+    /// bytes placed so far, or `None` to leave it as laid out.
+    ///
+    /// Only a dialect whose container has a shape of its own answers: a Game
+    /// Boy ROM is a whole number of `$4000` banks, so `rgblink` writes
+    /// `(highest bank + 1) * $4000` bytes. Every flat dialect leaves the image
+    /// exactly as long as what was written.
+    fn image_size(&self, _image: &[u8]) -> Option<usize> {
+        None
+    }
+
+    /// The values this dialect's toolchain accepts for an `equ`/`=` constant,
+    /// or `None` for no constraint.
+    ///
+    /// A property of the toolchain, not of the CPU. Probed against every
+    /// reference installed here: acme, sjasmplus, rgbasm, vasm, lwasm and ca65
+    /// all take `$12345678`, and acme, sjasmplus, rgbasm, vasm and lwasm all
+    /// take negatives. **pasmo alone constrains**, and only upward — `$FFFF`
+    /// assembles, `$10000` does not, while `-65536` is fine.
+    ///
+    /// So the default is no constraint, which matches six of the seven, and
+    /// pasmo narrows it. The engine previously checked every dialect against
+    /// `0..=0xFF_FFFF` — a 65816 long address applied to all twenty-one —
+    /// which refused source five references assemble, in both directions
+    /// (#228).
+    fn equ_range(&self) -> Option<std::ops::RangeInclusive<i64>> {
+        None
+    }
+
     /// The byte that fills space the source reserved but did not define — an
     /// `org` gap, or a `ds`/`rmb`/`res`/`block` reservation.
     ///

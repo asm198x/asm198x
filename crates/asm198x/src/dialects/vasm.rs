@@ -269,7 +269,7 @@ pub(crate) fn assemble_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), A
         true,
         &mut warnings,
     )?;
-    let bytes = flatten_one_section(&sections)?;
+    let bytes = flatten_sections(&sections)?;
     Ok((bytes, warnings))
 }
 
@@ -289,7 +289,7 @@ pub(crate) fn assemble_warned_multi(
     let mut warnings = Vec::new();
     let (sections, mut capture) =
         assemble_core(&parse_program_multi(map, loader)?, true, &mut warnings)?;
-    let bytes = flatten_one_section(&sections)?;
+    let bytes = flatten_sections(&sections)?;
     rebase_flat_capture(&sections, &mut capture);
     Ok((bytes, warnings, capture))
 }
@@ -338,21 +338,40 @@ pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, Asm
         optimize,
         &mut warnings,
     )?;
-    flatten_one_section(&sections)
+    flatten_sections(&sections)
 }
 
 /// Reduce assembled sections to a single flat binary's bytes: empty is empty,
 /// one section is its bytes, and more than one is an error (`-Fbin` holds one).
-fn flatten_one_section(sections: &[SecOut]) -> Result<Vec<u8>, AsmError> {
-    let nonempty: Vec<&SecOut> = sections.iter().filter(|s| !s.bytes.is_empty()).collect();
-    match nonempty.as_slice() {
-        [] => Ok(Vec::new()),
-        [s] => Ok(s.bytes.clone()),
-        _ => Err(AsmError::new(
-            0,
-            "a flat binary holds one section; this source has several (use the executable output)",
-        )),
-    }
+/// Lay the sections into the flat image `-Fbin` writes.
+///
+/// A flat binary is not limited to one section: `vasmm68k_mot -Fbin` takes
+/// several and writes one image over them, refusing only where two *overlap*
+/// (`sections <one>:0-1 and <two>:0-1 must not overlap`). Placement is the
+/// engine's, so a flat vasm image, a NES ROM and a Game Boy bank are laid by
+/// one implementation.
+///
+/// Every section here is based at 0 today, so any two non-empty ones do
+/// overlap and are refused — which is what this did before, for a reason it
+/// stated wrongly. Sections stop coinciding once vasm's `org` is implemented,
+/// and this needs no change when they do.
+fn flatten_sections(sections: &[SecOut]) -> Result<Vec<u8>, AsmError> {
+    let runs = sections
+        .iter()
+        .map(|s| crate::engine::Run {
+            name: match s.kind {
+                HunkKind::Code => "code",
+                HunkKind::Data => "data",
+                HunkKind::Bss => "bss",
+            }
+            .to_string(),
+            base: 0,
+            at: crate::engine::Place::ByAddress,
+            bytes: s.bytes.clone(),
+        })
+        .collect();
+    let (_, image) = crate::engine::lay_out(runs, 0, 1, None, |_| None)?;
+    Ok(image)
 }
 
 /// Assemble to an Amiga hunk executable (`-Fhunkexe -kick1hunks`), optimizer on.
@@ -385,7 +404,7 @@ pub(crate) fn assemble_warned_with_debug(
         true,
         &mut warnings,
     )?;
-    let bytes = flatten_one_section(&sections)?;
+    let bytes = flatten_sections(&sections)?;
     rebase_flat_capture(&sections, &mut capture);
     // The single-source API keeps its exact pre-multi-file record shape:
     // every line lives in the root input (U6 adopts `DebugCaptureMulti`
@@ -505,8 +524,12 @@ fn assemble_core(
                 continue;
             }
             let sec = sec_idx[i];
-            if s.kind.aligns() && pc[sec] % 2 != 0 {
-                pc[sec] += 1;
+            if let Some((pad, _)) = s
+                .kind
+                .pad_at(pc[sec], &consts, s.line)
+                .map_err(|e| stamp(e, s))?
+            {
+                pc[sec] += pad;
             }
             if ctx.optimize
                 && !word_branch[i]
@@ -545,14 +568,53 @@ fn assemble_core(
         let stamp = |e: AsmError| stamp(e, s);
         let sec = sec_idx[i];
         let buf = &mut out[sec];
-        if s.kind.aligns() && !buf.bytes.len().is_multiple_of(2) {
-            buf.bytes.push(0);
+        if let Some((pad, fill)) = s
+            .kind
+            .pad_at(buf.bytes.len() as i64, &consts, s.line)
+            .map_err(stamp)?
+        {
+            buf.bytes.extend(fill.bytes(pad));
         }
-        // Span start is measured *after* the align pad: the hidden pad byte is
-        // fill, not this statement's emission (the padding rule — no span).
+        // Span start is measured *after* the align pad: the hidden pad bytes
+        // are fill, not this statement's emission (the padding rule — no span).
         let span_start = buf.bytes.len();
         match &s.kind {
-            Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) => {}
+            Stmt::Empty
+            | Stmt::Equ(..)
+            | Stmt::Even
+            | Stmt::Section(..)
+            | Stmt::Align(_)
+            | Stmt::Cnop(..) => {}
+            Stmt::Echo(text) => warnings.push(crate::engine::Warning {
+                line: s.line,
+                file: s.file,
+                message: text.clone(),
+                kind: crate::engine::WarningKind::Note,
+            }),
+            Stmt::Fail(message) => return Err(stamp(AsmError::new(s.line, message.clone()))),
+            Stmt::Visible(names) => {
+                for name in names {
+                    // vasm answers `error 3007: undefined symbol <nope>`, after
+                    // a warning naming which kind of visibility went unmet
+                    // (87 for `xdef`, 62 for `global`). The warning is its
+                    // classification of the same failure, so only the refusal
+                    // is reproduced.
+                    if !consts.contains_key(name) {
+                        return Err(stamp(AsmError::new(
+                            s.line,
+                            format!("undefined symbol `{name}`"),
+                        )));
+                    }
+                }
+            }
+            Stmt::Assert(cond, message) => {
+                if eval(cond, &consts, buf.bytes.len() as i64, s.line).map_err(stamp)? == 0 {
+                    return Err(stamp(AsmError::new(
+                        s.line,
+                        format!("assertion failed: {message}"),
+                    )));
+                }
+            }
             Stmt::Raw(payload) => buf.bytes.extend_from_slice(payload),
             Stmt::Dc(size, items) => {
                 for e in items {
@@ -708,13 +770,18 @@ fn serialize_hunkexe(sections: &[SecOut]) -> Vec<u8> {
                 );
                 push_u32(&mut out, size_longs(s));
                 let mut data = s.bytes.clone();
-                // Code hunks pad to a longword with NOP (0x4e71); data with zero.
-                while !data.len().is_multiple_of(4) {
-                    if matches!(s.kind, HunkKind::Code) && data.len() % 4 == 2 {
-                        data.extend_from_slice(&[0x4e, 0x71]);
-                    } else {
-                        data.push(0);
-                    }
+                // Pad to a longword. A code hunk two bytes short takes a NOP
+                // (0x4e71) — a whole instruction word, which is the only thing
+                // a NOP can be; one or three bytes short there is no room for
+                // one, and vasm pads with zeros instead. The decision is made
+                // once from the length as it stands: padding a 17-byte code
+                // hunk to 18 and *then* calling it two short produces
+                // `00 4e 71` where vasm writes three zeros.
+                let short = (4 - data.len() % 4) % 4;
+                if matches!(s.kind, HunkKind::Code) && short == 2 {
+                    data.extend_from_slice(&[0x4e, 0x71]);
+                } else {
+                    data.extend(std::iter::repeat_n(0u8, short));
                 }
                 out.extend_from_slice(&data);
             }
@@ -847,8 +914,12 @@ fn layout(
             continue;
         }
         let sec = sec_idx[i];
-        if s.kind.aligns() && pc[sec] % 2 != 0 {
-            pc[sec] += 1;
+        if let Some((pad, _)) = s
+            .kind
+            .pad_at(pc[sec], &consts, s.line)
+            .map_err(|e| stamp(e, s))?
+        {
+            pc[sec] += pad;
         }
         if let Some(label) = &s.label {
             consts.insert(label.clone(), pc[sec]);
@@ -1349,7 +1420,16 @@ fn stmt_size(
     line: usize,
 ) -> Result<usize, AsmError> {
     Ok(match kind {
-        Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) => 0,
+        Stmt::Empty
+        | Stmt::Equ(..)
+        | Stmt::Even
+        | Stmt::Section(..)
+        | Stmt::Align(_)
+        | Stmt::Cnop(..)
+        | Stmt::Fail(_)
+        | Stmt::Assert(..)
+        | Stmt::Echo(_)
+        | Stmt::Visible(_) => 0,
         Stmt::Raw(payload) => payload.len(),
         Stmt::Dc(size, items) => items.len() * size.bytes(),
         Stmt::Ds(size, count) | Stmt::Dcb(size, count, _) => {
@@ -1548,6 +1628,36 @@ enum Stmt {
     Even,
     /// `section name,attr` — opens a new hunk of the given kind and memory flag.
     Section(HunkKind, MemFlag),
+    /// `echo "text"[,value]` — print, emit nothing, carry on. Values render in
+    /// decimal here; each reference has its own radix.
+    Echo(String),
+    /// `assert <expr>[,message]` — stop the assembly when the expression is
+    /// zero. Held as a statement so the condition folds against the finished
+    /// symbol table: an assertion over a label defined later is the point of
+    /// having one.
+    Assert(Expr, String),
+    /// `xdef`/`public`/`global`/`export`/`entry`/`weak`/`extrn`/`comm` — a
+    /// name this program makes visible to a linker. There is no linker here
+    /// and no object file, so the only part that survives is the part vasm
+    /// itself enforces in binary output: the name must be defined somewhere in
+    /// the program. Held as a statement so the check runs against the finished
+    /// symbol table, the way `assert` does — vasm takes a name defined below.
+    Visible(Vec<String>),
+    /// `fail "message"` — stop the assembly where the source says to. Held as
+    /// a statement rather than raised at parse time because vasm has
+    /// conditional assembly, and a `fail` in an untaken branch must stay
+    /// silent.
+    Fail(String),
+    /// `cnop offset,alignment` — align **up** to `alignment`, then add
+    /// `offset`. Padding is a whole instruction word where one fits: an odd
+    /// pad takes a leading `$00` and the rest is `NOP` (`$4e71`), the same
+    /// "a NOP is a word or it is nothing" rule the hunk serialiser follows.
+    Cnop(Expr, Expr),
+    /// `align n` — pad to the next multiple of `2^n`, zero-filled. vasm's
+    /// operand is an **exponent**, not the boundary: `align 2` is a four-byte
+    /// boundary. Kept as an expression so it can name an `equ` constant, the
+    /// way `ds`/`dcb` counts do; it folds where the constants are in hand.
+    Align(Expr),
     Dc(DataSize, Vec<Expr>),
     /// `ds.x count` — reserve `count` zeroed items. The count is an expression so
     /// it can reference `equ` constants resolved in pass 1.
@@ -1568,12 +1678,81 @@ enum Stmt {
 }
 
 impl Stmt {
-    /// Whether this statement begins on an even address (instructions and `even`
-    /// align; `dc`/`ds` — and an `incbin` payload, probe-pinned — do not pad on
-    /// their own).
-    fn aligns(&self) -> bool {
-        matches!(self, Stmt::Insn { .. } | Stmt::Even)
+    /// The boundary this statement must begin on, if it insists on one.
+    /// Instructions and `even` begin on an even address; `dc`/`ds` — and an
+    /// `incbin` payload, probe-pinned — do not pad on their own. `align n`
+    /// carries whatever boundary it named.
+    fn pad_at(
+        &self,
+        at: i64,
+        consts: &BTreeMap<String, i64>,
+        line: usize,
+    ) -> Result<Option<(i64, PadFill)>, AsmError> {
+        Ok(match self {
+            Stmt::Insn { .. } | Stmt::Even => Some((align_pad(at, 2), PadFill::Zero)),
+            Stmt::Align(e) => Some((
+                align_pad(at, align_boundary(e, consts, line)?),
+                PadFill::Zero,
+            )),
+            Stmt::Cnop(offset, alignment) => {
+                let alignment = eval(alignment, consts, 0, line)?;
+                let offset = eval(offset, consts, 0, line)?;
+                if alignment < 1 {
+                    return Err(AsmError::new(line, "`cnop` alignment must be positive"));
+                }
+                Some((align_pad(at, alignment) + offset, PadFill::Nop))
+            }
+            _ => None,
+        })
     }
+}
+
+/// What a statement's alignment padding is made of.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum PadFill {
+    /// Zero bytes — `even`, `align`, and the implicit word alignment an
+    /// instruction takes.
+    Zero,
+    /// `NOP` (`$4e71`) instruction words, with a single leading `$00` when the
+    /// pad is odd and a whole word will not fit.
+    Nop,
+}
+
+impl PadFill {
+    /// The `pad` filler bytes this style produces.
+    fn bytes(self, pad: i64) -> Vec<u8> {
+        let pad = pad.max(0) as usize;
+        match self {
+            PadFill::Zero => vec![0u8; pad],
+            PadFill::Nop => {
+                let mut out = vec![0u8; pad % 2];
+                while out.len() < pad {
+                    out.extend_from_slice(&[0x4e, 0x71]);
+                }
+                out
+            }
+        }
+    }
+}
+
+/// Fold `align`'s exponent and turn it into the boundary it names.
+fn align_boundary(e: &Expr, consts: &BTreeMap<String, i64>, line: usize) -> Result<i64, AsmError> {
+    let exp = eval(e, consts, 0, line)?;
+    if !(0..=30).contains(&exp) {
+        return Err(AsmError::new(
+            line,
+            format!("`align` exponent {exp} is out of range"),
+        ));
+    }
+    Ok(1 << exp)
+}
+
+/// How far short of the next multiple of `boundary` an offset stands.
+fn align_pad(at: i64, boundary: i64) -> i64 {
+    if boundary <= 1 {
+        return 0;
+    }
+    (boundary - at.rem_euclid(boundary)) % boundary
 }
 
 // The 68000 statement is the family-owned native payload carried in the AST
@@ -2289,7 +2468,16 @@ fn bake_reptn(kind: &mut Stmt, value: i64) {
             bake_reptn_expr(v, value);
         }
         Stmt::Insn { operands, .. } => operands.iter_mut().for_each(|o| bake_reptn_opnd(o, value)),
-        Stmt::Empty | Stmt::Even | Stmt::Section(..) | Stmt::Raw(_) => {}
+        Stmt::Empty
+        | Stmt::Even
+        | Stmt::Section(..)
+        | Stmt::Align(_)
+        | Stmt::Cnop(..)
+        | Stmt::Fail(_)
+        | Stmt::Assert(..)
+        | Stmt::Echo(_)
+        | Stmt::Visible(_)
+        | Stmt::Raw(_) => {}
     }
 }
 
@@ -2330,7 +2518,16 @@ fn qualify_stmt(kind: &mut Stmt, scope: &str) {
             qualify_expr(value, scope);
         }
         Stmt::Insn { operands, .. } => operands.iter_mut().for_each(|o| qualify_opnd(o, scope)),
-        Stmt::Empty | Stmt::Even | Stmt::Section(..) | Stmt::Raw(_) => {}
+        Stmt::Empty
+        | Stmt::Even
+        | Stmt::Section(..)
+        | Stmt::Align(_)
+        | Stmt::Cnop(..)
+        | Stmt::Fail(_)
+        | Stmt::Assert(..)
+        | Stmt::Echo(_)
+        | Stmt::Visible(_)
+        | Stmt::Raw(_) => {}
     }
 }
 
@@ -2412,6 +2609,42 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["section"]),
         category: Category::Operation,
     },
+    // The shorthands: each opens a section whose attribute *is* the word, so
+    // `code_c` means `section CODE,code_c`. vasm names the new section after
+    // the word (or after an argument, if one is given); the name reaches no
+    // part of an executable hunk file, so only the kind and flag are kept.
+    Directive {
+        id: "align",
+        pattern: Pattern::Exact(&["align"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "cnop",
+        pattern: Pattern::Exact(&["cnop"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "fail",
+        pattern: Pattern::Exact(&["fail"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "assert",
+        pattern: Pattern::Exact(&["assert"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "echo",
+        pattern: Pattern::Exact(&["echo"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "section_shorthand",
+        pattern: Pattern::Exact(&[
+            "code", "code_c", "code_f", "data", "data_c", "data_f", "bss", "bss_c", "bss_f",
+        ]),
+        category: Category::Operation,
+    },
     Directive {
         id: "dc",
         pattern: Pattern::Sized {
@@ -2469,32 +2702,61 @@ pub const DIRECTIVES: &[Directive] = &[
     // as state. Its 68020+, FPU and Apollo mnemonics are deliberately absent:
     // vasm refuses those itself under `-m68000`, and
     // `68000-isa-completeness.md` scopes ours to the 68000.
+    // Symbol visibility, probed against vasm 2.0b in binary output — the only
+    // output we produce. Three answers, and the words do not group the way the
+    // manual's headings do; see
+    // `decisions/symbol-visibility-in-a-fused-assembler.md`.
+    //
+    // These seven take a name that must be **defined** in the program: vasm
+    // answers `error 3007: undefined symbol <nope>` otherwise, whether or not
+    // anything references it. `local` is absent because it requires nothing;
+    // `xref`, `import` and `nref` because they forbid the opposite.
+    Directive {
+        id: "visibility",
+        pattern: Pattern::Exact(&[
+            "xdef", "public", "global", "export", "entry", "weak", "extrn",
+        ]),
+        category: Category::Operation,
+    },
+    // `comm name,size` reserves linker-allocated common storage. In binary
+    // output it emits nothing and vasm still requires the name be defined, so
+    // it is the same check over the first operand only — the second is a size,
+    // not a name.
+    Directive {
+        id: "common",
+        pattern: Pattern::Exact(&["comm"]),
+        category: Category::Operation,
+    },
+    // The import side, and it cannot be used at all in binary output: vasm
+    // answers `error 86: external symbol <foo> must not be defined` when the
+    // name is defined here and `error 3007: undefined symbol` when it is not,
+    // so no program satisfies both. That is a refusal, not a gap — the second
+    // dialect to need the category, after lwasm.
+    Directive {
+        id: "external",
+        pattern: Pattern::Exact(&["xref", "import", "nref"]),
+        category: Category::RefusedByReference("only usable when the output is an object file"),
+    },
+    // `local name` requires nothing of the name and `idnt "mod"` names the
+    // object module. Both emit nothing and neither can fail.
+    Directive {
+        id: "ignored-visibility",
+        pattern: Pattern::Exact(&["local", "idnt"]),
+        category: Category::Ignored,
+    },
     Directive {
         id: "unsupported-vasm",
         pattern: Pattern::Exact(&[
             "ac68080",
-            "align",
-            "assert",
             "auto",
             "basereg",
             "blk",
-            "bss",
-            "bss_c",
-            "bss_f",
             "cargs",
             "clrfo",
             "clrso",
-            "cnop",
-            "code",
-            "code_c",
-            "code_f",
-            "comm",
             "comment",
             "cpu32",
             "cseg",
-            "data",
-            "data_c",
-            "data_f",
             "db",
             "debug",
             "dl",
@@ -2503,23 +2765,16 @@ pub const DIRECTIVES: &[Directive] = &[
             "dsource",
             "dw",
             "dx",
-            "echo",
             "einline",
             "elif",
             "elseif",
             "end",
             "endb",
             "endm",
-            "entry",
             "erem",
-            "export",
-            "extrn",
-            "fail",
             "far",
             "fo",
             "fpu",
-            "global",
-            "idnt",
             "if1",
             "if2",
             "ifb",
@@ -2532,7 +2787,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "ifp1",
             "ifpl",
             "image",
-            "import",
             "incdir",
             "initnear",
             "inline",
@@ -2545,7 +2799,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "list",
             "llen",
             "load",
-            "local",
             "machine",
             "mask2",
             "mexit",
@@ -2554,7 +2807,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "near",
             "nolist",
             "nopage",
-            "nref",
             "odd",
             "offset",
             "opt",
@@ -2565,7 +2817,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "popsection",
             "printt",
             "printv",
-            "public",
             "pushsection",
             "rem",
             "rorg",
@@ -2583,9 +2834,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "text",
             "ttl",
             "vdebug",
-            "weak",
-            "xdef",
-            "xref",
         ]),
         category: Category::KnownUnsupported,
     },
@@ -2605,6 +2853,16 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
         let suffix = lower
             .split_once('.')
             .map_or("", |(_, tail)| &lower[lower.len() - tail.len()..]);
+        if let crate::directives::Category::RefusedByReference(rule) = directive.category {
+            return Err(AsmError::new(
+                line,
+                crate::directives::refused_by_reference("vasm", &lower, rule),
+            ));
+        }
+        // Accepted and discarded: it changes no bytes and cannot fail.
+        if directive.category == crate::directives::Category::Ignored {
+            return Ok(Stmt::Empty);
+        }
         if directive.category == crate::directives::Category::KnownUnsupported {
             return Err(AsmError::new(
                 line,
@@ -2623,6 +2881,36 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
             }
             "even" => Ok(Stmt::Even),
             "section" => Ok(parse_section(args, line)),
+            "section_shorthand" => Ok(section_from_attr(&lower)),
+            "align" => parse_align(args, line),
+            "cnop" => parse_cnop(args, line),
+            "fail" => Ok(Stmt::Fail(args.trim().trim_matches('"').to_string())),
+            "echo" => Ok(Stmt::Echo(render_message(args, line, 10)?)),
+            "visibility" => Ok(Stmt::Visible(
+                split_operands(args)
+                    .iter()
+                    .map(|n| n.trim().to_string())
+                    .filter(|n| !n.is_empty())
+                    .collect(),
+            )),
+            // Only the first operand is a name; `comm buf,4` sizes the storage.
+            "common" => Ok(Stmt::Visible(
+                split_operands(args)
+                    .first()
+                    .map(|n| n.trim().to_string())
+                    .filter(|n| !n.is_empty())
+                    .into_iter()
+                    .collect(),
+            )),
+            "assert" => {
+                let parts = split_operands(args);
+                let cond = parse_value(parts.first().copied().unwrap_or("").trim(), line)?;
+                let message = parts
+                    .get(1)
+                    .map(|m| m.trim().trim_matches('"').to_string())
+                    .unwrap_or_default();
+                Ok(Stmt::Assert(cond, message))
+            }
             // dcb.x count,value — reserve `count` items of `value`. Stage 1:
             // treat as a constant-sized run (value defaults to 0 if omitted).
             "dcb" => parse_dcb(suffix, args, line),
@@ -2656,6 +2944,55 @@ fn parse_section(args: &str, _line: usize) -> Stmt {
         .copied()
         .unwrap_or("")
         .to_ascii_lowercase();
+    section_from_attr(&attr)
+}
+
+/// `align n` — pad to a `2^n` boundary. The operand is an exponent, so
+/// `align 2` means four bytes; folding it here keeps the statement's size a
+/// function of the program counter alone.
+fn parse_align(args: &str, line: usize) -> Result<Stmt, AsmError> {
+    Ok(Stmt::Align(parse_value(args.trim(), line)?))
+}
+
+/// Render a `"text", value, ...` list into one message, values in base
+/// `radix`. Each reference prints numbers its own way — vasm decimal, rgbasm
+/// `$5`, sjasmplus `0x0005` — and nothing compares console output, so the
+/// radix is the dialect's and the rest is its own business.
+fn render_message(args: &str, line: usize, radix: u32) -> Result<String, AsmError> {
+    let mut out = String::new();
+    for part in split_operands(args) {
+        let part = part.trim();
+        if let Some(text) = part.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
+            out.push_str(text);
+        } else if let Ok(Expr::Num(v)) = parse_value(part, line) {
+            match radix {
+                16 => out.push_str(&format!("${v:X}")),
+                _ => out.push_str(&v.to_string()),
+            }
+        } else {
+            out.push_str(part);
+        }
+    }
+    Ok(out)
+}
+
+/// `cnop offset,alignment` — both operands are required, and both may name an
+/// `equ` constant, so they fold where the constants are known.
+fn parse_cnop(args: &str, line: usize) -> Result<Stmt, AsmError> {
+    let parts = split_operands(args);
+    if parts.len() != 2 {
+        return Err(AsmError::new(line, "`cnop` needs `offset,alignment`"));
+    }
+    Ok(Stmt::Cnop(
+        parse_value(parts[0].trim(), line)?,
+        parse_value(parts[1].trim(), line)?,
+    ))
+}
+
+/// The content kind and memory placement a section attribute names. Shared by
+/// `section name,attr` and by the shorthands, where the directive word is the
+/// attribute: `bss_c` is `section BSS,bss_c`.
+fn section_from_attr(attr: &str) -> Stmt {
     let kind = if attr.contains("bss") {
         HunkKind::Bss
     } else if attr.contains("data") {
@@ -2691,9 +3028,16 @@ fn count_of(e: &Expr, consts: &BTreeMap<String, i64>, line: usize) -> Result<usi
     }
 }
 
+/// The item width a `dc`/`dcb`/`ds` suffix names.
+///
+/// **A bare directive is a word**, not a byte: `dc 1,2` assembles to
+/// `0001 0002`, `dcb 3,$aa` to three `$00aa` words, and `ds 2` to four zero
+/// bytes. Motorola syntax defaults to `.w` and vasm follows it; reading the
+/// empty suffix as a byte silently emitted a third of the data.
 fn data_size(suffix: &str, line: usize) -> Result<DataSize, AsmError> {
     match suffix.trim_start_matches('.') {
-        "b" | "" => Ok(DataSize::B),
+        "" => Ok(DataSize::W),
+        "b" => Ok(DataSize::B),
         "w" => Ok(DataSize::W),
         "l" => Ok(DataSize::L),
         other => Err(AsmError::new(line, format!("bad data size `.{other}`"))),
@@ -2932,6 +3276,16 @@ fn parse_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         mos6502::parse_number,
         mos6502::ExprOpts {
+            compare: mos6502::Compare {
+                eq: true,
+                eq_eq: false,
+                ne_angle: true,
+                ne_bang: false,
+                relational: true,
+                ordered_eq: true,
+                minus_one: true,
+            },
+            function: None,
             bang_is_or: true,
             prec: mos6502::BytePrec::Tight,
             byte_prefix: false,
@@ -3085,6 +3439,179 @@ mod directive_surface {
             .bytes
     }
 
+    /// `fail "msg"` stops where the source says to, and stays silent inside an
+    /// untaken conditional — the reason it is a statement and not a parse error.
+    #[test]
+    fn fail_stops_the_assembly_unless_the_branch_is_untaken() {
+        let err = asm("        section code,code\n        fail \"stop\"\n").expect_err("aborts");
+        assert!(err.to_string().contains("stop"), "got `{err}`");
+        assert_eq!(
+            // `ifeq <expr>` is "expr == 0", so this takes the first branch and
+            // the `fail` in the second is never reached.
+            bytes("ifeq 0\n        dc.b 1\n        else\n        fail \"never\"\n        endc"),
+            vec![1]
+        );
+    }
+
+    /// `echo` prints and emits nothing, and reaches the caller as a **note**
+    /// rather than a warning: the source asked to say it, the assembler is not
+    /// complaining about anything.
+    #[test]
+    fn echo_is_a_note_and_emits_nothing() {
+        // The warned entry point: `assemble_vasm` returns bytes only.
+        let out = crate::assemble_vasm_warned(
+            "        section code,code\n        echo \"n=\",5\n        dc.b 1,2\n",
+        )
+        .expect("assembles");
+        assert_eq!(out.bytes, vec![1, 2]);
+        let note = out.warnings.first().expect("one note");
+        assert_eq!(note.message, "n=5");
+        assert_eq!(note.kind, crate::engine::WarningKind::Note);
+        assert!(note.to_string().contains("note:"), "got `{note}`");
+    }
+
+    /// The seven words that make a name visible all reduce to one check in
+    /// binary output: the name must be defined. vasm answers `error 3007:
+    /// undefined symbol <nope>` otherwise — with no reference to it anywhere,
+    /// which is what makes this a check rather than a no-op.
+    #[test]
+    fn a_visible_name_must_be_defined() {
+        for word in [
+            "xdef", "public", "global", "export", "entry", "weak", "extrn",
+        ] {
+            let ok = format!("        section code,code\n        {word} foo\nfoo:    dc.b 1\n");
+            assert_eq!(bytes(&ok), vec![1], "{word} accepts a defined name");
+
+            let bad = format!("        section code,code\n        {word} nope\n        dc.b 1\n");
+            let err = asm(&bad).expect_err(word);
+            assert!(
+                err.to_string().contains("undefined symbol `nope`"),
+                "{word}: got `{err}`"
+            );
+        }
+    }
+
+    /// A list, and the name may be defined below — the check runs against the
+    /// finished symbol table, not in source order.
+    #[test]
+    fn visibility_takes_a_list_and_reaches_forward() {
+        assert_eq!(
+            bytes(
+                "        section code,code\n        xdef foo,bar\nfoo:    dc.b 1\nbar:    dc.b 2\n"
+            ),
+            vec![1, 2]
+        );
+    }
+
+    /// `comm name,size` reserves storage a linker would allocate. It emits
+    /// nothing here, and only its first operand is a name — checking the size
+    /// as one would refuse every correct `comm`.
+    #[test]
+    fn comm_checks_its_name_and_not_its_size() {
+        assert_eq!(
+            bytes(
+                "        section code,code\n        comm buf,4\nbuf:    dc.b 1\n        dc.b 2\n"
+            ),
+            vec![1, 2]
+        );
+        let err = asm("        section code,code\n        comm buf,4\n        dc.b 1\n")
+            .expect_err("buf is not defined");
+        assert!(err.to_string().contains("undefined symbol `buf`"), "{err}");
+    }
+
+    /// `local` and `idnt` change nothing and cannot fail, so they are accepted
+    /// and discarded — the one place in this family where that is the honest
+    /// answer.
+    #[test]
+    fn local_and_idnt_are_accepted_and_discarded() {
+        assert_eq!(
+            bytes(
+                "        section code,code\n        local zz\n        idnt \"mod\"\n        dc.b 1\n"
+            ),
+            vec![1]
+        );
+    }
+
+    /// `xref`, `import` and `nref` cannot be satisfied in binary output: vasm
+    /// answers `error 86: external symbol <foo> must not be defined` when the
+    /// name is defined and `error 3007: undefined symbol` when it is not. No
+    /// program passes both, so the word is refused rather than counted a gap.
+    #[test]
+    fn the_import_side_is_refused_as_the_reference_refuses_it() {
+        for word in ["xref", "import", "nref"] {
+            let err = asm(&format!(
+                "        section code,code\n        {word} other\n        dc.b 1\n"
+            ))
+            .expect_err(word);
+            let message = err.to_string();
+            assert!(message.contains("object file"), "{word}: got `{message}`");
+            assert!(
+                !message.contains("does not implement"),
+                "{word} claims a gap here, and there is none: {message}"
+            );
+        }
+    }
+
+    /// `assert` fires only when its expression is zero, and takes an optional
+    /// message.
+    #[test]
+    fn assert_fires_only_when_false() {
+        assert_eq!(bytes("assert 1\n        dc.b 9"), vec![9]);
+        let err = asm("        section code,code\n        assert 0,\"boom\"\n").expect_err("false");
+        assert!(err.to_string().contains("boom"), "got `{err}`");
+    }
+
+    /// vasm's `align` names an **exponent**: `align 2` is a four-byte
+    /// boundary, not a two-byte one. Zero-filled, and the operand may be an
+    /// `equ` constant like a `ds` count.
+    #[test]
+    fn align_takes_an_exponent_not_a_boundary() {
+        assert_eq!(
+            bytes("dc.b 1\n        align 2\n        dc.b 2"),
+            vec![1, 0, 0, 0, 2]
+        );
+        assert_eq!(
+            bytes("dc.b 1\n        align 1\n        dc.b 2"),
+            vec![1, 0, 2]
+        );
+        assert_eq!(bytes("dc.b 1\n        align 0\n        dc.b 2"), vec![1, 2]);
+        assert_eq!(
+            asm("N equ 2\n        section code,code\n        dc.b 1\n        align N\n        dc.b 2\n")
+                .expect("equ operand")
+                .bytes,
+            vec![1, 0, 0, 0, 2]
+        );
+        // Already on the boundary: nothing to pad.
+        assert_eq!(
+            bytes("dc.b 1,2,3,4\n        align 2\n        dc.b 9"),
+            vec![1, 2, 3, 4, 9]
+        );
+    }
+
+    /// The shorthands say the same thing as the long form: `code_c` is
+    /// `section CODE,code_c`, down to the chip-memory bit in the hunk header.
+    #[test]
+    fn each_section_shorthand_matches_its_long_form() {
+        for (short, long) in [
+            ("code", "section CODE,code"),
+            ("code_c", "section CODE,code_c"),
+            ("code_f", "section CODE,code_f"),
+            ("data", "section DATA,data"),
+            ("data_c", "section DATA,data_c"),
+            ("data_f", "section DATA,data_f"),
+            ("bss", "section BSS,bss"),
+            ("bss_c", "section BSS,bss_c"),
+            ("bss_f", "section BSS,bss_f"),
+        ] {
+            let body = |opener: &str| format!("\t{opener}\n\tmoveq #1,d0\n");
+            assert_eq!(
+                super::assemble_exe(&body(short)).expect("short assembles"),
+                super::assemble_exe(&body(long)).expect("long assembles"),
+                "`{short}` should be `{long}`"
+            );
+        }
+    }
+
     /// R6: one entry per family, not an enumerated cross-product.
     #[test]
     fn the_data_families_are_declared_as_families() {
@@ -3111,11 +3638,17 @@ mod directive_surface {
         assert_eq!(bytes("dc.w 3"), vec![0x00, 0x03]);
     }
 
-    /// A bare stem keeps its documented default, unchanged by the conversion.
+    /// A bare stem is a **word**, which is Motorola's default and vasm's.
+    ///
+    /// This test used to assert bytes and called that "the documented
+    /// default"; it was pinning our own bug, and no probe contradicted it
+    /// because none exercised a bare stem. `vasmm68k_mot` assembles `dc 1,2`
+    /// to `0001 0002` and `dcb 3,$aa` to three `$00aa` words.
     #[test]
-    fn a_bare_stem_still_means_byte() {
-        assert_eq!(bytes("dc 1"), vec![0x01]);
-        assert_eq!(bytes("dcb 2,3"), vec![0x03, 0x03]);
+    fn a_bare_stem_is_a_word() {
+        assert_eq!(bytes("dc 1"), vec![0x00, 0x01]);
+        assert_eq!(bytes("dcb 2,3"), vec![0x00, 0x03, 0x00, 0x03]);
+        assert_eq!(bytes("ds 1"), vec![0x00, 0x00]);
     }
 
     /// An unknown size reaches its stem, so the arm reports the real problem

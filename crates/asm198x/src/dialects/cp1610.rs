@@ -258,6 +258,14 @@ fn parse_op(rest: &str, line: usize, after_sdbd: bool) -> Result<Option<Operatio
                     ),
                 ));
             }
+            // Declared for `cp1610` only where asl itself refuses the word for the
+            // binary we emit; the refusal is the match, not a gap.
+            Category::RefusedByReference(rule) => {
+                return Err(AsmError::new(
+                    line,
+                    crate::directives::refused_by_reference("asl", word, rule),
+                ));
+            }
             Category::Operation => match directive.id {
                 "org" => Operation::Org(value(args, line)?),
                 "bytes" => Operation::Bytes(byte_list(args, line)?),
@@ -346,6 +354,8 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         parse_number_intel,
         ExprOpts {
+            compare: crate::dialects::mos6502::Compare::default(),
+            function: None,
             bang_is_or: false,
             prec: BytePrec::Tight,
             byte_prefix: false,

@@ -622,9 +622,30 @@ pub const DIRECTIVES: &[Directive] = &[
     // lwasm's 6309 instructions are absent for the reason vasm's 68020 ones
     // are: lwasm refuses them itself in 6809 mode.
     Directive {
+        id: "align",
+        pattern: Pattern::Exact(&["align"]),
+        category: Category::Operation,
+    },
+    // `error <text>` takes the rest of the line verbatim — no quotes, no
+    // expression list. lwasm reports it as "User Specified: <text>".
+    Directive {
+        id: "diagnose",
+        pattern: Pattern::Exact(&["error"]),
+        category: Category::Operation,
+    },
+    // The five words lwasm has and refuses for the output we produce. Probed
+    // against lwtools 4.25 with `--raw`, with an operand and without: each
+    // answers `Only supported for object target (EXPORT)`. asm198x emits a
+    // binary and never an object file, so that is every path there is — and
+    // refusing them is what matching lwasm means, not a gap.
+    Directive {
+        id: "object-target-only",
+        pattern: Pattern::Exact(&["export", "extdep", "extern", "external", "import"]),
+        category: Category::RefusedByReference("only supported for an object target"),
+    },
+    Directive {
         id: "unsupported-lwasm",
         pattern: Pattern::Exact(&[
-            "align",
             "bsz",
             "dephase",
             "dtb",
@@ -635,11 +656,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "endsect",
             "endsection",
             "endstruct",
-            "error",
-            "export",
-            "extdep",
-            "extern",
-            "external",
             "fcn",
             "fcs",
             "fcz",
@@ -651,7 +667,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "ifp2",
             "ifpragma",
             "ifstr",
-            "import",
             "incl",
             "includestr",
             "lib",
@@ -705,6 +720,12 @@ fn parse_op(
             line,
             format!("`{m}` is a real directive here and asm198x does not implement it yet"),
         )),
+        // Declared for `lwasm` only where lwasm itself refuses the word for the
+        // binary we emit; the refusal is the match, not a gap.
+        Category::RefusedByReference(rule) => Err(AsmError::new(
+            line,
+            crate::directives::refused_by_reference("lwasm", &m, rule),
+        )),
         Category::Operation => match directive.id {
             "org" => Ok(Some(Operation::Org(value(operand, line)?))),
             "equ" => Ok(Some(Operation::Equ(value(operand, line)?))),
@@ -714,6 +735,11 @@ fn parse_op(
             "fqb" => Ok(Some(parse_fqb(operand, line)?)),
             "reserve" => parse_rmb(operand, env, line),
             "fill" => parse_fill(operand, env, line),
+            "align" => parse_align(operand, env, line),
+            "diagnose" => Ok(Some(Operation::Diagnose {
+                severity: crate::engine::DiagSeverity::Error,
+                message: format!("User Specified: {}", operand.trim()),
+            })),
             other => Err(AsmError::new(
                 line,
                 format!("`{other}` is declared but not dispatched"),
@@ -734,6 +760,32 @@ fn parse_rmb(
     let n = usize::try_from(n)
         .map_err(|_| AsmError::new(line, "`rmb` count must be a non-negative constant"))?;
     Ok(Some(Operation::Bytes(vec![Expr::Num(0); n])))
+}
+
+/// `align boundary[,fill]` — pad to the next multiple of `boundary`. lwasm
+/// aligns to the boundary itself, not to a power of two, and `align 3` after a
+/// byte really does put the next item at offset 3. The operand is required
+/// (bare `align` is `Bad operand`), and the pad byte defaults to zero.
+fn parse_align(
+    operand: &str,
+    env: &BTreeMap<String, i64>,
+    line: usize,
+) -> Result<Option<Operation>, AsmError> {
+    let parts = mos6502::split_top_level(operand, ',');
+    if operand.trim().is_empty() || parts.is_empty() {
+        return Err(AsmError::new(line, "`align` needs a boundary"));
+    }
+    let modulus = fold_const(&value(parts[0].trim(), line)?, env, line)?;
+    if modulus < 1 {
+        return Err(AsmError::new(line, "`align` boundary must be positive"));
+    }
+    let fill = match parts.get(1) {
+        Some(f) => {
+            u8::try_from(fold_const(&value(f.trim(), line)?, env, line)? & 0xFF).expect("masked")
+        }
+        None => 0,
+    };
+    Ok(Some(Operation::AlignTo { modulus, fill }))
 }
 
 /// `fill value,count` — `count` copies of `value` (lwasm's order is value first,
@@ -1196,6 +1248,16 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         mos6502::parse_number,
         mos6502::ExprOpts {
+            compare: mos6502::Compare {
+                eq: false,
+                eq_eq: false,
+                ne_angle: true,
+                ne_bang: false,
+                relational: true,
+                ordered_eq: false,
+                minus_one: false,
+            },
+            function: None,
             bang_is_or: false,
             prec: BytePrec::Tight,
             byte_prefix: false,
@@ -1451,6 +1513,53 @@ mod tests {
         assert_eq!(
             asm("        ldx #$1234\n").expect("ldx").bytes,
             vec![0x8E, 0x12, 0x34]
+        );
+    }
+
+    /// `align` needs its boundary — bare `align` is `Bad operand` in lwasm,
+    /// and a boundary that cannot pad to anything is not a boundary.
+    /// `error <text>` takes the rest of the line verbatim and stops, and stays
+    /// silent inside an untaken conditional.
+    #[test]
+    fn error_stops_the_assembly_unless_the_branch_is_untaken() {
+        let err = asm(" fcb 1\n error stop here\n").expect_err("aborts");
+        assert!(err.to_string().contains("stop here"), "got `{err}`");
+        assert_eq!(
+            asm(" ifne 0\n error never\n endc\n fcb 1\n")
+                .expect("untaken")
+                .bytes,
+            vec![1]
+        );
+    }
+
+    #[test]
+    fn align_needs_a_positive_boundary() {
+        assert!(asm(" fcb 1\n align\n").is_err(), "bare `align`");
+        assert!(asm(" fcb 1\n align 0\n").is_err(), "`align 0`");
+        assert!(asm(" fcb 1\n align -4\n").is_err(), "a negative boundary");
+    }
+
+    /// The boundary is the boundary, not an exponent, and it need not be a
+    /// power of two — the two things a mask-based align would get wrong.
+    #[test]
+    fn align_pads_to_the_stated_boundary() {
+        assert_eq!(
+            asm(" fcb 1\n align 4\n fcb 2\n").expect("4").bytes,
+            vec![1, 0, 0, 0, 2]
+        );
+        assert_eq!(
+            asm(" fcb 1\n align 3\n fcb 2\n").expect("3").bytes,
+            vec![1, 0, 0, 2]
+        );
+        assert_eq!(
+            asm(" fcb 1\n align 4,$ff\n fcb 2\n").expect("fill").bytes,
+            vec![1, 0xFF, 0xFF, 0xFF, 2]
+        );
+        assert_eq!(
+            asm(" fcb 1,2,3,4\n align 4\n fcb 9\n")
+                .expect("aligned")
+                .bytes,
+            vec![1, 2, 3, 4, 9]
         );
     }
 

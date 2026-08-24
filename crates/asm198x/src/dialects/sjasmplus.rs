@@ -130,6 +130,54 @@ pub const DIRECTIVES: &[Directive] = &[
     // embedded Lua interpreter is not an assembler feature. For those,
     // refusing with a diagnostic that says the source is valid and the gap is
     // ours is the honest end state, not a staging post.
+    // The device model (`docs/sjasmplus-device-model.md`). `DEVICE` and `SLOT`
+    // emit nothing; `PAGE` opens a section, because two pages written at one
+    // address concatenate in the output rather than colliding.
+    Directive {
+        id: "device",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["device", "slot"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "page",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["page"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "display",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["display"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "assert",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["assert"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "align",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["align"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
     Directive {
         id: "unsupported-sjasmplus",
         pattern: Pattern::Sigilled {
@@ -138,8 +186,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "abyte",
                 "abytec",
                 "abytez",
-                "align",
-                "assert",
                 "binary",
                 "block",
                 "bplist",
@@ -153,11 +199,9 @@ pub const DIRECTIVES: &[Directive] = &[
                 "defg",
                 "defh",
                 "dephase",
-                "device",
                 "dg",
                 "dh",
                 "disp",
-                "display",
                 "dword",
                 "dz",
                 "emptytap",
@@ -188,7 +232,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "opt",
                 "outend",
                 "output",
-                "page",
                 "phase",
                 "relocate_end",
                 "relocate_start",
@@ -210,7 +253,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "shellexec",
                 "size",
                 "sldopt",
-                "slot",
                 "struct",
                 "tapend",
                 "tapout",
@@ -300,9 +342,139 @@ impl Dialect for Sjasmplus {
 }
 
 /// sjasmplus's surface syntax.
+/// The devices sjasmplus accepts, with the page and slot counts it bounds
+/// `PAGE`/`SLOT` by. Probed against 1.21.0 — see
+/// `docs/sjasmplus-device-model.md` for how, and for the two facts that are
+/// not guessable from the names (`ZXSPECTRUMNEXT` is 224 pages across 8 slots;
+/// `NOSLOT64K` is 32 pages in one).
+///
+/// `NONE` is absent on purpose: it behaves as no `DEVICE` line at all, with no
+/// bounds and no write check, so it is handled where the device is set rather
+/// than sitting here with fabricated numbers.
+const DEVICES: &[(&str, i64, i64)] = &[
+    ("ZXSPECTRUM48", 4, 4),
+    ("ZXSPECTRUM128", 8, 4),
+    ("ZXSPECTRUM256", 16, 4),
+    ("ZXSPECTRUM512", 32, 4),
+    ("ZXSPECTRUM1024", 64, 4),
+    ("ZXSPECTRUM2048", 128, 4),
+    ("ZXSPECTRUM4096", 256, 4),
+    ("ZXSPECTRUM8192", 512, 4),
+    ("ZXSPECTRUMNEXT", 224, 8),
+    ("AMSTRADCPC464", 4, 4),
+    ("AMSTRADCPC6128", 8, 4),
+    ("NOSLOT64K", 32, 1),
+];
+
+/// Check every `DEVICE`/`PAGE`/`SLOT` line against the device in force at that
+/// point, before anything is lowered.
+///
+/// A source pre-pass rather than a parse-time check because the bound depends
+/// on a *previous* line, and the syntax handle the parser holds has nowhere to
+/// keep that. Run over the macro-expanded text, so a `PAGE` a macro produced is
+/// checked like any other.
+///
+/// `PAGE`/`SLOT` with no device in force are unbounded, which is what
+/// sjasmplus does — both assemble happily with no `DEVICE` line at all.
+fn check_device_lines(source: &str) -> Result<(), AsmError> {
+    let mut device: Option<(&str, i64, i64)> = None;
+    for (n, raw) in source.lines().enumerate() {
+        let line = n + 1;
+        let code = raw.split(';').next().unwrap_or("").trim();
+        let (word, rest) = crate::dialects::mos6502::split_first_word(code);
+        let word = undot(word).to_ascii_uppercase();
+        let arg = rest.split(',').next().unwrap_or("").trim();
+        match word.as_str() {
+            "DEVICE" => {
+                let name = arg.to_ascii_uppercase();
+                if name == "NONE" {
+                    device = None;
+                } else {
+                    device =
+                        Some(*DEVICES.iter().find(|(d, _, _)| *d == name).ok_or_else(|| {
+                            // Not "unknown device": that reads as the
+                            // *directive* being unknown, and the surface
+                            // invariant reads it that way too.
+                            AsmError::new(line, format!("`{arg}` is not a device sjasmplus has"))
+                        })?);
+                }
+            }
+            "PAGE" | "SLOT" => {
+                let Some((name, pages, slots)) = device else {
+                    continue;
+                };
+                let Ok(n) = arg.parse::<i64>() else { continue };
+                let limit = if word == "PAGE" { pages } else { slots };
+                if !(0..limit).contains(&n) {
+                    return Err(AsmError::new(
+                        line,
+                        format!(
+                            "{} {n} is outside `{name}`, which has {limit}",
+                            word.to_ascii_lowercase(),
+                            limit = if word == "PAGE" {
+                                format!("{pages} pages")
+                            } else {
+                                format!("{slots} slots")
+                            }
+                        ),
+                    ));
+                }
+            }
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
 struct SjasmplusSyntax;
 
+impl SjasmplusSyntax {
+    /// `ALIGN [boundary[,fill]]` — pad to the next multiple of `boundary`.
+    ///
+    /// sjasmplus takes a **power of two** and refuses anything else outright
+    /// (`align 3` is `Illegal align: 3`), defaults the boundary to 4 when the
+    /// operand is omitted, and fills with zero unless told otherwise. All three
+    /// are probe-pinned against 1.21.0.
+    fn parse_align(
+        &self,
+        args: &str,
+        line: usize,
+        consts: &BTreeMap<String, i64>,
+    ) -> Result<Option<Operation>, AsmError> {
+        let parts: Vec<&str> = args.trim().split(',').map(str::trim).collect();
+        let modulus = match parts.first() {
+            None | Some(&"") => 4,
+            Some(n) => z80::literal(&z80::parse_value(self, n, line)?, consts, line)?,
+        };
+        if modulus < 1 || modulus & (modulus - 1) != 0 {
+            return Err(AsmError::new(line, format!("Illegal align: {modulus}")));
+        }
+        let fill = match parts.get(1) {
+            Some(f) => {
+                let v = z80::literal(&z80::parse_value(self, f, line)?, consts, line)?;
+                u8::try_from(v & 0xFF).expect("masked")
+            }
+            None => 0,
+        };
+        Ok(Some(Operation::AlignTo { modulus, fill }))
+    }
+}
+
 impl Z80Syntax for SjasmplusSyntax {
+    /// Comparisons in an expression, probed against the binary — see
+    /// `docs/comparison-operators.md`. Both answer `$FF` for true.
+    fn compare(&self) -> crate::dialects::mos6502::Compare {
+        crate::dialects::mos6502::Compare {
+            eq: true,
+            eq_eq: true,
+            ne_angle: false,
+            ne_bang: true,
+            relational: true,
+            ordered_eq: true,
+            minus_one: true,
+        }
+    }
+
     /// sjasmplus is the dialect the shared keyword vocabulary was measured
     /// against, so its adoption is the free functions unchanged.
     fn cond_keyword(&self, word: &str) -> Option<z80::CondKw> {
@@ -380,6 +552,12 @@ impl Z80Syntax for SjasmplusSyntax {
     fn is_directive(&self, word: &str) -> bool {
         let word = undot(word);
         word.eq_ignore_ascii_case("byte")
+            || word.eq_ignore_ascii_case("align")
+            || word.eq_ignore_ascii_case("device")
+            || word.eq_ignore_ascii_case("slot")
+            || word.eq_ignore_ascii_case("page")
+            || word.eq_ignore_ascii_case("assert")
+            || word.eq_ignore_ascii_case("display")
             || self.is_include(word)
             || self.is_incbin(word)
             || z80::is_common_directive(word)
@@ -411,7 +589,8 @@ impl Z80Syntax for SjasmplusSyntax {
         true
     }
 
-    /// `byte` is `db`; everything else is the shared common set.
+    /// `ALIGN` is sjasmplus's own; `byte` is `db`; everything else is the
+    /// shared common set.
     fn parse_directive(
         &self,
         word: &str,
@@ -420,6 +599,51 @@ impl Z80Syntax for SjasmplusSyntax {
         consts: &BTreeMap<String, i64>,
     ) -> Result<Option<Operation>, AsmError> {
         let word = undot(word);
+        if word.eq_ignore_ascii_case("align") {
+            return self.parse_align(args, line, consts);
+        }
+        // Validated by `check_device_lines` before any of this ran.
+        if word.eq_ignore_ascii_case("device") || word.eq_ignore_ascii_case("slot") {
+            return Ok(None);
+        }
+        if word.eq_ignore_ascii_case("display") {
+            // sjasmplus prints values as `0x0005`, and prefixes the line with
+            // `> `; the prefix is its own chrome, so only the text is kept.
+            let mut text = String::new();
+            for part in args.split(',') {
+                let part = part.trim();
+                match part.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
+                    Some(lit) => text.push_str(lit),
+                    None => {
+                        match z80::literal(&z80::parse_value(self, part, line)?, consts, line) {
+                            Ok(v) => text.push_str(&format!("0x{v:04X}")),
+                            Err(_) => text.push_str(part),
+                        }
+                    }
+                }
+            }
+            return Ok(Some(Operation::Diagnose {
+                severity: crate::engine::DiagSeverity::Note,
+                message: text,
+            }));
+        }
+        if word.eq_ignore_ascii_case("assert") {
+            // sjasmplus takes the whole tail as the expression and echoes it
+            // back in the message — `ASSERT 0, "x"` reports `0, "x"` rather
+            // than treating the tail as a message operand (probe-pinned).
+            return Ok(Some(Operation::Assert {
+                cond: z80::parse_value(self, args, line)?,
+                fatal: true,
+                message: format!("[ASSERT] Assertion failed: {}", args.trim()),
+            }));
+        }
+        if word.eq_ignore_ascii_case("page") {
+            return Ok(Some(Operation::Section {
+                name: format!("page {}", args.trim()),
+                base: None,
+                at: crate::engine::Place::Next,
+            }));
+        }
         let word = if word.eq_ignore_ascii_case("byte") {
             "db"
         } else {
@@ -437,6 +661,9 @@ impl Z80Syntax for SjasmplusSyntax {
         source: &str,
     ) -> Result<Option<(String, Vec<macros::LineOrigin>)>, AsmError> {
         let expanded = macros::expand(&SjasmplusSyntax, source)?;
+        // After expansion, so a `PAGE` a macro produced is checked like any
+        // other line.
+        check_device_lines(&expanded.text)?;
         Ok(Some((expanded.text, expanded.origins)))
     }
 
@@ -640,6 +867,73 @@ mod tests {
     /// The whole surface, dotted. The conditionals already took a dot (#67);
     /// this is the same rule for everything else, which is where most of
     /// sjasmplus's remaining vocabulary gap was.
+    /// The device model: pages are separate memory, so two written at one
+    /// address concatenate; the bounds come from the device.
+    #[test]
+    fn pages_are_separate_memory_bounded_by_the_device() {
+        let out =
+            asm(" DEVICE ZXSPECTRUM128\n SLOT 3\n PAGE 1\n ORG $C000\n db $11\n PAGE 2\n db $22\n")
+                .expect("assembles");
+        assert_eq!(out.bytes, vec![0x11, 0x22]);
+
+        // Bounds are the device's, and differ between them.
+        assert!(asm(" DEVICE ZXSPECTRUM48\n PAGE 3\n db 1\n").is_ok());
+        let err = asm(" DEVICE ZXSPECTRUM48\n PAGE 4\n db 1\n").expect_err("out of range");
+        assert!(err.to_string().contains("4 pages"), "got `{err}`");
+        assert!(asm(" DEVICE ZXSPECTRUM128\n PAGE 7\n db 1\n").is_ok());
+
+        // The Next is the one with eight slots and 224 pages.
+        assert!(asm(" DEVICE ZXSPECTRUMNEXT\n SLOT 7\n PAGE 223\n db 1\n").is_ok());
+        assert!(asm(" DEVICE ZXSPECTRUM128\n SLOT 4\n db 1\n").is_err());
+
+        // `NONE` is no device: no bounds, as with no `DEVICE` line at all.
+        assert!(asm(" DEVICE NONE\n PAGE 999\n db 1\n").is_ok());
+        assert!(asm(" PAGE 999\n db 1\n").is_ok());
+
+        let unknown = asm(" DEVICE NOTAREALMACHINE\n nop\n").expect_err("unknown");
+        assert!(
+            unknown.to_string().contains("is not a device"),
+            "got `{unknown}`"
+        );
+    }
+
+    /// Comparisons answer `$FF`, and the spellings are the dialect's own:
+    /// sjasmplus refuses `<>` where the 6502 family takes it.
+    #[test]
+    fn comparisons_answer_minus_one_in_the_dialects_own_spellings() {
+        let ok = |src: &str| asm(src).unwrap_or_else(|e| panic!("{src:?}: {e}")).bytes;
+        assert_eq!(
+            ok(" db 2=2,2==2,2!=3,2<3,2>3,2<=3,2>=3\n"),
+            vec![0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0x00]
+        );
+        assert!(asm(" db 2<>3\n").is_err(), "sjasmplus refuses `<>`");
+        // The shifts still lex as shifts.
+        assert_eq!(ok(" db 1<<3, 16>>2\n"), vec![8, 4]);
+    }
+
+    /// sjasmplus's `ALIGN` is power-of-two only and says so in as many words.
+    /// It defaults to 4 with no operand, and takes a fill byte.
+    #[test]
+    fn align_is_power_of_two_only() {
+        let ok = |src: &str| asm(src).unwrap_or_else(|e| panic!("{src:?}: {e}")).bytes;
+        assert_eq!(ok(" db 1\n align 4\n db 2\n"), vec![1, 0, 0, 0, 2]);
+        assert_eq!(
+            ok(" db 1\n align\n db 2\n"),
+            vec![1, 0, 0, 0, 2],
+            "defaults to 4"
+        );
+        assert_eq!(
+            ok(" db 1\n align 4,$ff\n db 2\n"),
+            vec![1, 0xFF, 0xFF, 0xFF, 2]
+        );
+        assert_eq!(ok(" db 1\n align 1\n db 2\n"), vec![1, 2]);
+        assert_eq!(ok(" db 1,2,3,4\n align 4\n db 9\n"), vec![1, 2, 3, 4, 9]);
+        let err = asm(" db 1\n align 3\n").expect_err("refused");
+        assert!(err.to_string().contains("Illegal align: 3"), "got `{err}`");
+        // The dotted spelling reaches the same parser.
+        assert_eq!(ok(" db 1\n .align 4\n db 2\n"), vec![1, 0, 0, 0, 2]);
+    }
+
     #[test]
     fn every_directive_takes_an_optional_dot() {
         let ok = |src: &str| asm(src).unwrap_or_else(|e| panic!("{src:?}: {e}")).bytes;

@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 556 word(s) outside our surface, across the references installed
+# 485 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -34,12 +34,10 @@
 
 ## acme (This is ACME, release 0.97 ("Zem"), 28 June 2020)
 # 1177 candidate(s) harvested; 74 recognised here, 2 more the tool itself
-# refuses on this target; 34 of the 74 outside our surface
+# refuses on this target; 31 of the 74 outside our surface
 !cpu
-!error
 !hex
 !rs
-!serious
 !subzone
 !to
 !xor
@@ -67,17 +65,14 @@
 !skip
 !symbollist
 !sz
-!warn
 !while
 
 ## sjasmplus (SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus))
 # 4231 candidate(s) harvested; 264 recognised here, 24 more the tool itself
-# refuses on this target; 84 of the 264 outside our surface
+# refuses on this target; 78 of the 264 outside our surface
 abyte
 abytec
 abytez
-align
-assert
 block
 bplist
 cspectmap
@@ -87,11 +82,9 @@ dd
 defarray
 defdevice
 defh
-device
 dg
 dh
 disp
-display
 dword
 emptytap
 emptytrd
@@ -115,7 +108,6 @@ lua
 mmu
 opt
 output
-page
 relocate_table
 save3dos
 saveamsdos
@@ -133,7 +125,6 @@ setbreakpoint
 shellexec
 size
 sldopt
-slot
 struct
 tapout
 undefine
@@ -160,18 +151,14 @@ unphase
 
 ## lwasm (lwasm from lwtools 4.25)
 # 2201 candidate(s) harvested; 257 recognised here, 94 more the tool itself
-# refuses on this target; 69 of the 257 outside our surface
+# refuses on this target; 62 of the 257 outside our surface
 dephase
 endm
 endsection
 endstruct
-error
-export
-extdep
 if
 ifp1
 ifp2
-import
 includestr
 macro
 os9
@@ -185,7 +172,6 @@ struct
 warning
 adca
 adcb
-align
 bita
 bitb
 bsz
@@ -197,8 +183,6 @@ dts
 emod
 ends
 endsect
-extern
-external
 fcn
 fcs
 fcz
@@ -233,39 +217,21 @@ zmq
 
 ## vasm (vasm 2.0b (c) in 2002-2025 Volker Barthelmann)
 # 4215 candidate(s) harvested; 183 recognised here, 527 more the tool itself
-# refuses on this target; 114 of the 183 outside our surface
-bss
-bss_c
-bss_f
-code
-code_c
-code_f
+# refuses on this target; 87 of the 183 outside our surface
 cpu32
-data
-data_c
-data_f
 dr
 dw
 dx
-export
 fpu
-local
 offset
 rs
-weak
-xdef
-xref
 ac68080
-align
-assert
 auto
 basereg
 blk
 cargs
 clrfo
 clrso
-cnop
-comm
 comment
 cseg
 db
@@ -273,21 +239,15 @@ debug
 dl
 dseg
 dsource
-echo
 einline
 elif
 elseif
 end
 endb
 endm
-entry
 erem
-extrn
-fail
 far
 fo
-global
-idnt
 if1
 if2
 ifb
@@ -300,7 +260,6 @@ ifnc
 ifp1
 ifpl
 image
-import
 incdir
 initnear
 inline
@@ -321,7 +280,6 @@ msource
 near
 nolist
 nopage
-nref
 odd
 opt
 org
@@ -331,7 +289,6 @@ plen
 popsection
 printt
 printv
-public
 pushsection
 rem
 rorg
@@ -351,12 +308,11 @@ vdebug
 
 ## rgbasm (rgbasm v1.0.3)
 # 3045 candidate(s) harvested; 306 recognised here, 0 more the tool itself
-# refuses on this target; 121 of the 306 outside our surface
+# refuses on this target; 114 of the 306 outside our surface
 acos
 af
 align
 asin
-assert
 atan
 atan2
 bank
@@ -382,8 +338,6 @@ endsection
 endu
 equ
 equs
-export
-fail
 fatal
 floor
 fmod
@@ -410,8 +364,6 @@ popc
 popo
 pops
 pow
-print
-println
 purge
 pushc
 pusho
@@ -433,7 +385,6 @@ sizeof
 sp
 sram
 startof
-static_assert
 strbyte
 strcat
 strchar
@@ -453,7 +404,6 @@ tan
 tzcount
 union
 vram
-warn
 wram0
 wramx
 _narg
@@ -476,11 +426,8 @@ __utc_year__
 
 ## ca65 (ca65 V2.18 - N/A)
 # 2906 candidate(s) harvested; 225 recognised here, 4 more the tool itself
-# refuses on this target; 134 of the 225 outside our surface
-.align
+# refuses on this target; 113 of the 225 outside our surface
 .asize
-.assert
-.autoimport
 .bank
 .bankbyte
 .bankbytes
@@ -489,16 +436,13 @@ __utc_year__
 .bitor
 .bitxor
 .blank
-.bss
 .case
 .charmap
-.code
 .concat
 .condes
 .const
 .constructor
 .cpu
-.data
 .dbg
 .debuginfo
 .def
@@ -516,20 +460,13 @@ __utc_year__
 .endstruct
 .endunion
 .enum
-.error
 .exitmac
 .exitmacro
-.export
-.exportzp
 .faraddr
-.fatal
 .feature
 .fileopt
 .fopt
-.forceimport
 .forceword
-.global
-.globalzp
 .hibyte
 .hibytes
 .hiword
@@ -545,8 +482,6 @@ __utc_year__
 .ifpc02
 .ifpsc02
 .ifref
-.import
-.importzp
 .interruptor
 .isize
 .ismnem
@@ -569,7 +504,6 @@ __utc_year__
 .null
 .or
 .org
-.out
 .p02
 .p4510
 .p816
@@ -578,16 +512,13 @@ __utc_year__
 .paramcount
 .pc02
 .popcpu
-.popseg
 .proc
 .psc02
 .pushcpu
-.pushseg
 .ref
 .referenced
 .reloc
 .right
-.rodata
 .scope
 .set
 .setcpu
@@ -607,7 +538,5 @@ __utc_year__
 .undefine
 .union
 .version
-.warning
 .xmatch
 .xor
-.zeropage

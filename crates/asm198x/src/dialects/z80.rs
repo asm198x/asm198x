@@ -231,6 +231,17 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// Which comparison spellings this dialect takes in an **expression**, and
+    /// what it answers for true. Defaults to none, which is what a dialect
+    /// whose reference has no comparison operators wants.
+    ///
+    /// Conditions are unaffected: the `IF` lexer has always admitted the
+    /// comparison operators and keeps doing so, whatever this says. See
+    /// `docs/comparison-operators.md` for the probed table.
+    fn compare(&self) -> crate::dialects::mos6502::Compare {
+        crate::dialects::mos6502::Compare::default()
+    }
+
     /// Parse a directive into an operation (`None` for ones that emit nothing,
     /// like `end`). Defaults to the common set. `consts` holds the `equ` values
     /// known so far, so a directive like `ds` can fold a constant-expression
@@ -596,6 +607,7 @@ impl Forward {
                     line,
                     message: format!("forward reference of symbol `{name}`"),
                     file,
+                    kind: crate::engine::WarningKind::Advisory,
                 });
                 0
             }
@@ -1330,6 +1342,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             line: last.line,
             message: format!("`ENDMODULE` missing for module `{}`", names.join(".")),
             file: last.file,
+            kind: crate::engine::WarningKind::Advisory,
         })
     }
 
@@ -1394,7 +1407,9 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         for st in &mut out {
             if let Some(op) = st.op.take() {
                 st.op = Some(crate::ast::map_syms(op, &mut |s| {
-                    fix.get(s.as_str()).map_or(s, |bare| (*bare).to_string())
+                    crate::engine::Expr::Sym(
+                        fix.get(s.as_str()).map_or(s, |bare| (*bare).to_string()),
+                    )
                 }));
             }
         }
@@ -1481,7 +1496,11 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         if self.syntax.scopes_modules() {
             let prefix = self.module_prefix();
             let aliases = &mut self.aliases;
-            op = op.map(|o| crate::ast::map_syms(o, &mut |s| module_ref(s, &prefix, aliases)));
+            op = op.map(|o| {
+                crate::ast::map_syms(o, &mut |s| {
+                    crate::engine::Expr::Sym(module_ref(s, &prefix, aliases))
+                })
+            });
         }
         // `equ` binds its (qualified) label to a parse-time constant.
         if let (Some(q), Some(Operation::Equ(e))) = (&label, &op)
@@ -1811,6 +1830,7 @@ fn run_passes<'a, S: Z80Syntax>(
                                  previous value {before} not equal {now}"
                             ),
                             file,
+                            kind: crate::engine::WarningKind::Advisory,
                         });
                     }
                 }
@@ -2273,6 +2293,17 @@ fn parse_op<S: Z80Syntax>(
     // an unknown mnemonic would tell the reader their source is invalid, when
     // the reference assembler takes it and the gap is ours.
     if let Some(entry) = crate::directives::lookup(syntax.own_directives(), word)
+        && let crate::directives::Category::RefusedByReference(rule) = entry.category
+    {
+        return Err(AsmError::new(
+            line,
+            // No dialect on this path declares one yet, so the tool is named
+            // generically rather than adding a trait hook for an arm nothing
+            // reaches — name it here when one does.
+            crate::directives::refused_by_reference("the reference assembler", word, rule),
+        ));
+    }
+    if let Some(entry) = crate::directives::lookup(syntax.own_directives(), word)
         && entry.category == crate::directives::Category::KnownUnsupported
     {
         return Err(AsmError::new(
@@ -2583,7 +2614,11 @@ fn emitted_tokens(mnemonic: &str, paren: bool) -> Vec<String> {
 
 /// Resolve an opcode-embedded operand to a parse-time constant (a number, an
 /// expression of constants, or an `equ` value above — but not a label).
-fn literal(expr: &Expr, consts: &BTreeMap<String, i64>, line: usize) -> Result<i64, AsmError> {
+pub(crate) fn literal(
+    expr: &Expr,
+    consts: &BTreeMap<String, i64>,
+    line: usize,
+) -> Result<i64, AsmError> {
     eval_const(expr, consts).ok_or_else(|| {
         AsmError::new(
             line,
@@ -2741,7 +2776,11 @@ fn string_literal(piece: &str) -> Option<&str> {
 /// Parse an operand value: an arithmetic expression over numbers, symbols, and
 /// `+`/`-`/`*`/`/` with C-style precedence and parentheses. Number literals are
 /// lexed by the dialect's [`Z80Syntax::parse_number`].
-fn parse_value<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Expr, AsmError> {
+pub(crate) fn parse_value<S: Z80Syntax>(
+    syntax: &S,
+    raw: &str,
+    line: usize,
+) -> Result<Expr, AsmError> {
     let tokens = tokenize(syntax, raw, line)?;
     if tokens.is_empty() {
         return Err(AsmError::new(line, "expected a value"));
@@ -2819,6 +2858,13 @@ fn tokenize_impl<S: Z80Syntax>(
     cond: bool,
 ) -> Result<Vec<Tok>, AsmError> {
     let chars: Vec<char> = raw.chars().collect();
+    // Inside a condition every comparison spelling is admitted, as it always
+    // was; outside one the dialect's table decides.
+    let cmp = if cond {
+        crate::dialects::mos6502::Compare::default()
+    } else {
+        syntax.compare()
+    };
     let mut tokens = Vec::new();
     let mut i = 0;
     while i < chars.len() {
@@ -2881,6 +2927,46 @@ fn tokenize_impl<S: Z80Syntax>(
             '<' if chars.get(i + 1) == Some(&'<') => {
                 tokens.push(Tok::Shl);
                 i += 2;
+            }
+            // Outside a condition the dialect's own table decides, because the
+            // spellings are not the same: sjasmplus refuses `<>`, pasmo
+            // refuses `==` and `<>` (`docs/comparison-operators.md`).
+            '=' if cmp.eq_eq && chars.get(i + 1) == Some(&'=') => {
+                tokens.push(Tok::Eq);
+                i += 2;
+            }
+            '=' if cmp.eq => {
+                tokens.push(Tok::Eq);
+                i += 1;
+            }
+            '!' if cmp.ne_bang && chars.get(i + 1) == Some(&'=') => {
+                tokens.push(Tok::Ne);
+                i += 2;
+            }
+            '<' if cmp.ne_angle && chars.get(i + 1) == Some(&'>') => {
+                tokens.push(Tok::Ne);
+                i += 2;
+            }
+            '<' if cmp.ordered_eq && chars.get(i + 1) == Some(&'=') => {
+                tokens.push(Tok::Le);
+                i += 2;
+            }
+            '<' if cmp.relational => {
+                tokens.push(Tok::Lt);
+                i += 1;
+            }
+            // `>>` is the shift and its arm sits below these, so exclude it
+            // here — otherwise a shift lexes as two comparisons.
+            '>' if cmp.ordered_eq
+                && chars.get(i + 1) == Some(&'=')
+                && chars.get(i + 1) != Some(&'>') =>
+            {
+                tokens.push(Tok::Ge);
+                i += 2;
+            }
+            '>' if cmp.relational && chars.get(i + 1) != Some(&'>') => {
+                tokens.push(Tok::Gt);
+                i += 1;
             }
             '<' if cond => {
                 if chars.get(i + 1) == Some(&'=') {
@@ -2983,7 +3069,29 @@ struct ExprParser {
 
 impl ExprParser {
     fn expr(&mut self) -> Result<Expr, AsmError> {
-        self.bit_or()
+        let mut left = self.bit_or()?;
+        while let Some(op) = self.compare_op() {
+            self.pos += 1;
+            let right = self.bit_or()?;
+            let cmp = Expr::Bin(op, Box::new(left), Box::new(right));
+            // Both Z80 dialects answer `$FF` for true, so the negation is
+            // unconditional here rather than a knob.
+            left = Expr::Neg(Box::new(cmp));
+        }
+        Ok(left)
+    }
+
+    /// The comparison at the cursor, if there is one.
+    fn compare_op(&self) -> Option<BinOp> {
+        Some(match self.tokens.get(self.pos)? {
+            Tok::Eq => BinOp::Eq,
+            Tok::Ne => BinOp::Ne,
+            Tok::Lt => BinOp::Lt,
+            Tok::Gt => BinOp::Gt,
+            Tok::Le => BinOp::Le,
+            Tok::Ge => BinOp::Ge,
+            _ => return None,
+        })
     }
 
     // Bitwise and shift operators, C-style: `|` loosest, then `^`, `&`, then the

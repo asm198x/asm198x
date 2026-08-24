@@ -94,6 +94,13 @@ pub(crate) struct Pasmo {
 }
 
 impl Dialect for Pasmo {
+    /// pasmo is the one reference in the set that bounds a constant, and it
+    /// bounds only the top: `V equ $FFFF` assembles, `$10000` does not, and
+    /// `-65536` is accepted. Probed against pasmo 0.5.
+    fn equ_range(&self) -> Option<std::ops::RangeInclusive<i64>> {
+        Some(i64::MIN..=0xFFFF)
+    }
+
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::z80::SET
     }
@@ -147,6 +154,20 @@ impl Dialect for Pasmo {
 struct PasmoSyntax;
 
 impl Z80Syntax for PasmoSyntax {
+    /// Comparisons in an expression, probed against the binary — see
+    /// `docs/comparison-operators.md`. Both answer `$FF` for true.
+    fn compare(&self) -> crate::dialects::mos6502::Compare {
+        crate::dialects::mos6502::Compare {
+            eq: true,
+            eq_eq: false,
+            ne_angle: false,
+            ne_bang: true,
+            relational: true,
+            ordered_eq: true,
+            minus_one: true,
+        }
+    }
+
     /// Macros expand before parsing (#93). Returning the map lets the shared
     /// pipeline report every line against its source rather than against a line
     /// that only existed inside the expander.
@@ -384,6 +405,30 @@ fn parameters(text: &str) -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
+
+    /// pasmo takes `=` and `!=` but refuses `==` and `<>`, and answers `$FF`.
+    #[test]
+    fn comparisons_use_pasmos_own_spellings() {
+        let a = |src: &str| crate::assemble_pasmo(src).expect(src).bytes;
+        assert_eq!(a(" ld a,2=2\n"), vec![0x3E, 0xFF]);
+        assert_eq!(a(" ld a,2!=3\n"), vec![0x3E, 0xFF]);
+        assert_eq!(a(" ld a,2>3\n"), vec![0x3E, 0x00]);
+        assert_eq!(a(" ld a,2<=3\n"), vec![0x3E, 0xFF]);
+        for refused in [" ld a,2==2\n", " ld a,2<>3\n"] {
+            assert!(crate::assemble_pasmo(refused).is_err(), "{refused:?}");
+        }
+        // `>>` is a shift, not two comparisons — it lexes below them.
+        assert_eq!(a(" ld a,16>>2\n"), vec![0x3E, 0x04]);
+    }
+
+    /// pasmo is the only reference that bounds a constant, and only at the top.
+    #[test]
+    fn a_constant_is_bounded_upward_only() {
+        assert!(crate::assemble_pasmo("V equ $FFFF\n ld hl,V\n").is_ok());
+        assert!(crate::assemble_pasmo("V equ -5\n ld a,V\n").is_ok());
+        let err = crate::assemble_pasmo("V equ $10000\n ld a,1\n").expect_err("refused");
+        assert!(err.to_string().contains("out of range"), "got `{err}`");
+    }
     use crate::assemble_pasmonext as asm;
     use crate::dialects::macros::Expand;
 

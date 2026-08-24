@@ -208,7 +208,7 @@ pub fn assemble_probe(dialect: &str, body: &str) -> Option<Result<Vec<u8>, Strin
         "lwasm" => asm198x::assemble_lwasm(body),
         "vasm" => asm198x::assemble_vasm(body),
         "ca65-816" => asm198x::assemble_ca65_816(body),
-        "rgbasm" => asm198x::assemble_rgbasm(body),
+        "rgbasm" | "rgbasm-banked" => asm198x::assemble_rgbasm(body),
         _ => return None,
     };
     Some(ours(result))

@@ -223,6 +223,54 @@ fn a_known_unsupported_spelling_says_which_it_is() {
     );
 }
 
+/// Every `RefusedByReference` spelling is refused, and the refusal says whose
+/// rule it is.
+///
+/// The distinction this category exists for is invisible in the source — the
+/// two refusals sit next to each other in every dispatch — so what keeps them
+/// apart is here. A `KnownUnsupported` word says asm198x does not implement it;
+/// one of these says the reference does not accept it either, for the output we
+/// produce, and must not claim a gap that is not there.
+#[test]
+fn a_refused_by_reference_spelling_says_whose_rule_it_is() {
+    let mut checked = 0;
+    for surface in directives::surfaces() {
+        let assemble = assembler(surface.dialect);
+        for directive in &surface.directives {
+            let Category::RefusedByReference(rule) = directive.category else {
+                continue;
+            };
+            for spelling in &directive.spellings() {
+                let source = format!(" {spelling} foo\n");
+                let err = assemble(&source).expect_err("refused by the reference");
+                let message = err.to_string();
+                assert!(
+                    message.contains(rule),
+                    "{}: `{spelling}` does not give the reference's rule: {message}",
+                    surface.dialect
+                );
+                assert!(
+                    !message.contains("does not implement"),
+                    "{}: `{spelling}` claims a gap in asm198x, and there is \
+                     none: {message}",
+                    surface.dialect
+                );
+                assert!(
+                    !refused_by_name(&err, spelling),
+                    "{}: `{spelling}` still reads as an unknown word: {message}",
+                    surface.dialect
+                );
+                checked += 1;
+            }
+        }
+    }
+    assert!(
+        checked > 0,
+        "no dialect declares a `RefusedByReference` spelling — lwasm's \
+         `export` should be one"
+    );
+}
+
 /// Every dialect tells a directive its reference *has* from a word nobody has.
 ///
 /// Four of the seven answered the same sentence for both when this was written,
@@ -233,12 +281,27 @@ fn a_known_unsupported_spelling_says_which_it_is() {
 fn a_real_directive_reads_differently_from_a_typo() {
     let cases: &[(&str, &str, &str, &str)] = &[
         ("acme", "* = $0000\n", "!to \"x\"", "!zzqq"),
-        ("ca65", "", ".export foo", ".zzqq"),
-        ("sjasmplus", "", "device ZXSPECTRUM48", "zzqq"),
+        // `.condes` rather than `.export`, which became an implemented check
+        // once ca65 turned out to enforce one. `.condes` builds an ld65
+        // constructor table from linker-config features our fixed NROM layout
+        // does not declare — a gap by decision, so it will not move here.
+        ("ca65", "", ".condes foo, 1", ".zzqq"),
+        // `device` sat here, then `display`; both are implemented now. The
+        // save family is deferred by decision rather than by schedule
+        // (`multi-artifact-output.md`), so it will not move under this test.
+        ("sjasmplus", "", "savebin \"x\",0,1", "zzqq"),
         ("sjasmplus", "", ".abyte 1", ".zzqq"),
-        ("lwasm", "", "import foo", "zzqq"),
-        ("vasm", "", "xdef foo", "zzqq"),
-        ("rgbasm", "SECTION \"s\",ROM0\n", "ASSERT 1", "ZZQQ"),
+        // `os9` (an OS-9 module header) rather than `import`: `import` moved
+        // to `RefusedByReference` when lwasm turned out to refuse it for a
+        // binary target. `os9` is deferred by decision — it writes a different
+        // artifact — so it will not move under this test either.
+        ("lwasm", "", "os9 foo", "zzqq"),
+        // `output "x"` (it names the output file) rather than `xdef`, which
+        // became an implemented check once vasm turned out to enforce one in
+        // binary output. `output` is deferred by decision — it writes a
+        // different artifact — so it will not move under this test either.
+        ("vasm", "", "output \"x\"", "zzqq"),
+        ("rgbasm", "SECTION \"s\",ROM0\n", "UNION", "ZZQQ"),
     ];
     for (dialect, prologue, real, fake) in cases {
         let assemble = assembler(dialect);

@@ -2108,6 +2108,195 @@ fn the_bytes_view_collapses_every_non_byte_outcome() {
     );
 }
 
+/// lwasm's five object-target words, arbitrated against lwasm rather than
+/// against the manual.
+///
+/// `export`, `extdep`, `extern`, `external` and `import` are declared
+/// [`Category::RefusedByReference`], which is a claim about *lwasm*: that it
+/// refuses them itself when the output is a binary. Everything else in the
+/// declared surface is a claim about us, checkable without a tool. This one is
+/// not, so it is checked with the tool — and it is the claim most likely to be
+/// wrong, because reading the manual would tell you these are ordinary
+/// directives.
+///
+/// If lwtools ever accepts them under `--raw`, they stop being refusals and
+/// become a gap, and this is what says so.
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn lwasm_refuses_its_object_target_words_for_a_binary() {
+    if !have("lwasm") {
+        eprintln!("SKIP: `lwasm` not on PATH");
+        return;
+    }
+    let tmp = std::env::temp_dir().join("asm198x-lwasm-objwords");
+    let _ = fs::create_dir_all(&tmp);
+
+    let mut wrong: Vec<String> = Vec::new();
+    for word in ["export", "extdep", "extern", "external", "import"] {
+        // With an operand and without: the answer is the same either way, so
+        // neither shape can be the one that happened to be probed.
+        for body in [format!(" {word}\n"), format!(" {word} foo\n")] {
+            let source = format!(" org 0\n{body}foo: fcb 1\n");
+            let outcome = ref_outcome(&tmp, &source, "asm", |src, out| {
+                let mut c = Command::new("lwasm");
+                c.arg("--6809").arg("--raw").arg("-o").arg(out).arg(src);
+                vec![c]
+            });
+            match &outcome {
+                RefOutcome::Rejected { diagnostic }
+                    if diagnostic.contains("Only supported for object target") => {}
+                other => wrong.push(format!("`{word}` with `{}`: {other:?}", body.trim())),
+            }
+            // And we refuse it too, naming lwasm's rule rather than a gap here.
+            let err = asm198x::assemble_lwasm(&source).expect_err("we refuse it as well");
+            let message = err.to_string();
+            if !message.contains("object target") || message.contains("does not implement") {
+                wrong.push(format!("`{word}` — ours reads wrong: {message}"));
+            }
+        }
+    }
+    assert!(
+        wrong.is_empty(),
+        "{} object-target probe(s) disagree:\n  {}",
+        wrong.len(),
+        wrong.join("\n  ")
+    );
+}
+
+/// vasm's three import-side words, arbitrated against vasm.
+///
+/// `xref`, `import` and `nref` are declared [`Category::RefusedByReference`],
+/// and unlike lwasm's five, vasm never says so: it answers `error 86: external
+/// symbol <foo> must not be defined` when the name is defined here and `error
+/// 3007: undefined symbol` when it is not. The refusal is the *pair* — no
+/// program satisfies both — so the pair is what is checked. A probe of either
+/// shape alone would read as an ordinary undefined-symbol rule.
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn vasm_refuses_its_import_side_words_for_a_binary() {
+    if !have("vasmm68k_mot") {
+        eprintln!("SKIP: `vasmm68k_mot` not on PATH");
+        return;
+    }
+    let tmp = std::env::temp_dir().join("asm198x-vasm-importwords");
+    let _ = fs::create_dir_all(&tmp);
+
+    let run = |source: &str| {
+        ref_outcome(&tmp, source, "s", |src, out| {
+            let mut c = Command::new("vasmm68k_mot");
+            c.arg("-Fbin").arg("-no-opt").arg("-o").arg(out).arg(src);
+            vec![c]
+        })
+    };
+
+    let mut wrong: Vec<String> = Vec::new();
+    for word in ["xref", "import", "nref"] {
+        let defined = format!("\tsection code,code\n\t{word} foo\nfoo:\tdc.b 1\n");
+        match &run(&defined) {
+            RefOutcome::Rejected { diagnostic } if diagnostic.contains("must not be defined") => {}
+            other => wrong.push(format!("`{word}` with the name defined: {other:?}")),
+        }
+        let undefined = format!("\tsection code,code\n\t{word} foo\n\tdc.b 1\n");
+        match &run(&undefined) {
+            RefOutcome::Rejected { diagnostic } if diagnostic.contains("undefined symbol") => {}
+            other => wrong.push(format!("`{word}` with the name undefined: {other:?}")),
+        }
+        // And the seven that *can* be satisfied still can, so this is a fact
+        // about these three rather than about visibility words in general.
+        let err = asm198x::assemble_vasm(&undefined).expect_err("we refuse it too");
+        if !err.to_string().contains("object file") {
+            wrong.push(format!("`{word}` — ours reads wrong: {err}"));
+        }
+    }
+    for word in [
+        "xdef", "public", "global", "export", "entry", "weak", "extrn",
+    ] {
+        let defined = format!("\tsection code,code\n\t{word} foo\nfoo:\tdc.b 1\n");
+        match &run(&defined) {
+            RefOutcome::Bytes(b) if b == &[1] => {}
+            other => wrong.push(format!("`{word}` with the name defined: {other:?}")),
+        }
+    }
+    assert!(
+        wrong.is_empty(),
+        "{} import-side probe(s) disagree:\n  {}",
+        wrong.len(),
+        wrong.join("\n  ")
+    );
+}
+
+/// ca65's `.forceimport`, arbitrated against ca65 **and** ld65.
+///
+/// It is declared [`Category::RefusedByReference`] on a claim no single tool
+/// makes: defining the name is ca65's `Symbol 'zz' is already an import`, and
+/// leaving it undefined is an ld65 unresolved external — with nothing
+/// referencing it, which is what separates `.forceimport` from `.import`. The
+/// pair is the refusal, so the pair is checked, and plain `.import` is checked
+/// beside it to prove the difference is real.
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn ca65_cannot_satisfy_forceimport_for_a_binary() {
+    if !(have("ca65") && have("ld65")) {
+        eprintln!("SKIP: `ca65`/`ld65` not on PATH");
+        return;
+    }
+    let tmp = std::env::temp_dir().join("asm198x-ca65-forceimport");
+    let _ = fs::create_dir_all(&tmp);
+    let cfg = tmp.join("flat.cfg");
+    fs::write(
+        &cfg,
+        "MEMORY { RAM: start=$8000, size=$100, file=%O; }\n\
+         SEGMENTS { CODE: load=RAM, type=rw; }\n",
+    )
+    .expect("write the config");
+
+    let run = |source: &str| {
+        ref_outcome(&tmp, source, "s", |src, out| {
+            let obj = src.with_extension("o");
+            let mut a = Command::new("ca65");
+            a.arg("-o").arg(&obj).arg(src);
+            let mut b = Command::new("ld65");
+            b.arg("-C").arg(&cfg).arg("-o").arg(out).arg(&obj);
+            vec![a, b]
+        })
+    };
+
+    let mut wrong: Vec<String> = Vec::new();
+    match &run(".segment \"CODE\"\n.forceimport zz\nzz: .byte 1\n") {
+        RefOutcome::Rejected { diagnostic } if diagnostic.contains("already an import") => {}
+        other => wrong.push(format!("forceimport with the name defined: {other:?}")),
+    }
+    match &run(".segment \"CODE\"\n.forceimport zz\n.byte 1\n") {
+        RefOutcome::Rejected { diagnostic } if diagnostic.contains("nresolved external") => {}
+        other => wrong.push(format!("forceimport with the name undefined: {other:?}")),
+    }
+    // Plain `.import`, unreferenced, links — so this is a fact about the
+    // `force`, not about imports.
+    match &run(".segment \"CODE\"\n.import zz\n.byte 1\n") {
+        RefOutcome::Bytes(b) if b == &[1] => {}
+        other => wrong.push(format!("plain import, unreferenced: {other:?}")),
+    }
+    // And `.export` of a name nothing defines is refused by ca65 itself, which
+    // is the check the export words carry here.
+    match &run(".segment \"CODE\"\n.export nope\n.byte 1\n") {
+        RefOutcome::Rejected { diagnostic } if diagnostic.contains("never defined") => {}
+        other => wrong.push(format!("export of an undefined name: {other:?}")),
+    }
+
+    let err = asm198x::assemble_ca65(".segment \"CODE\"\n.forceimport zz\n.byte 1\n")
+        .expect_err("we refuse it too");
+    if !err.to_string().contains("linker resolves it") {
+        wrong.push(format!("ours reads wrong: {err}"));
+    }
+
+    assert!(
+        wrong.is_empty(),
+        "{} forceimport probe(s) disagree:\n  {}",
+        wrong.len(),
+        wrong.join("\n  ")
+    );
+}
+
 /// Identify every reference tool this machine has, proving the probe table
 /// against the real binaries rather than against synthetic output.
 ///

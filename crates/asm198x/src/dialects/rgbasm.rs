@@ -59,6 +59,25 @@ use crate::span::FileId;
 pub(crate) struct Rgbasm;
 
 impl Dialect for Rgbasm {
+    /// A Game Boy ROM starts at file offset 0, whatever the program's lowest
+    /// section is: a lone `SECTION "p", ROMX, BANK[2]` still emits the 32K
+    /// before it (probe-pinned — `rgblink` writes 49152 bytes for that).
+    fn image_base(&self) -> Option<i64> {
+        Some(0)
+    }
+
+    /// A Game Boy ROM is a whole number of $4000 banks: `rgblink` writes
+    /// `(highest bank + 1) * $4000` bytes, with no rounding to a power of two
+    /// (three banks give 49152, six give 98304 — both probe-pinned).
+    ///
+    /// Only when a bank was actually used. A ROM0-only program keeps the exact
+    /// length it was written to, which is what `rgblink -x` emits and what
+    /// every existing probe compares.
+    fn image_size(&self, image: &[u8]) -> Option<usize> {
+        let banks = image.len().div_ceil(0x4000);
+        (banks > 1).then(|| banks * 0x4000)
+    }
+
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::sm83::SET
     }
@@ -75,6 +94,8 @@ impl Dialect for Rgbasm {
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        let banks = declared_banks(&out);
+        resolve_banks(&mut out, &banks)?;
         Ok(out)
     }
 
@@ -98,6 +119,8 @@ impl Dialect for Rgbasm {
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        let banks = declared_banks(&out);
+        resolve_banks(&mut out, &banks)?;
         Ok(out)
     }
 
@@ -369,16 +392,36 @@ impl FlatWalk for Walker {
             span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
         });
 
-        // `SECTION "name", TYPE[$addr]` — a directive preserved verbatim; it
-        // lowers to an `Org` only when it pins an address (a flat binary ignores
-        // an address-less section, but the formatter still keeps the line).
+        // `SECTION "name", TYPE[$addr]` — a directive preserved verbatim, and
+        // an actual section rather than an origin in disguise. Lowering it to
+        // `Org` could only move the counter forward, so two pinned sections in
+        // descending address order — which `rgblink` places without complaint
+        // — failed with `cannot move origin backwards`.
         if code
             .trim_start()
             .to_ascii_uppercase()
             .starts_with("SECTION")
         {
-            let item = section_origin(code.trim(), line)?
-                .map(|org| crate::ast::item_from_operation(Operation::Org(org)));
+            let code = code.trim();
+            let bank = section_bank(code, line)?;
+            let pinned = section_origin(code, line)?
+                .map(|e| fold_const(&e, &self.consts, line))
+                .transpose()?;
+            // A banked section is addressed at $4000 whichever bank holds it,
+            // and lands at `bank * $4000` in the ROM. Bank 0 is `ROM0`, which
+            // is addressed and placed at the same $0000.
+            let (base, at) = match bank {
+                Some(n) if n > 0 => (
+                    Some(pinned.unwrap_or(ROMX_BASE)),
+                    crate::engine::Place::At(n * BANK_SIZE),
+                ),
+                _ => (pinned, crate::engine::Place::ByAddress),
+            };
+            let item = Some(crate::ast::item_from_operation(Operation::Section {
+                name: section_name(code),
+                base,
+                at,
+            }));
             self.nodes.push(Node {
                 operand_span: None,
                 label: None,
@@ -528,10 +571,132 @@ fn strip_comment(line: &str) -> &str {
 
 /// `SECTION "name", TYPE[$addr]` → the origin, if the section pins one.
 fn section_origin(code: &str, line: usize) -> Result<Option<Expr>, AsmError> {
+    // Only the bracket on the *type*. `SECTION "p", ROMX, BANK[2]` has one
+    // bracketed number and it is not an address — reading the whole line put
+    // the bank number in the origin and every label in a banked section came
+    // out two bytes into the ROM.
+    let code = match code.to_ascii_uppercase().find("BANK") {
+        Some(i) => &code[..i],
+        None => code,
+    };
     match (code.find('['), code.rfind(']')) {
         (Some(a), Some(b)) if a < b => Ok(Some(value(code[a + 1..b].trim(), line)?)),
         _ => Ok(None),
     }
+}
+
+/// Marks a `BANK("name")` whose section may not have been seen yet. `\u{1}`
+/// cannot appear in source.
+const BANK_MARK: &str = "\u{1}bank\u{1}";
+
+/// rgbasm's expression functions. `BANK("name")` is the bank its section was
+/// given, and it reaches **forward** — `db BANK("paged")` above the section it
+/// names assembles — so it cannot fold while walking. It becomes a marker that
+/// [`resolve_banks`] answers once every `SECTION` in the program is known.
+fn expr_function(name: &str, args: Vec<mos6502::ExprArg>, line: usize) -> Result<Expr, AsmError> {
+    if !name.eq_ignore_ascii_case("bank") {
+        return Err(AsmError::new(
+            line,
+            format!(
+                "`{name}` is not an expression function asm198x implements yet — \
+                 the source is valid and the gap is ours"
+            ),
+        ));
+    }
+    let [arg]: [_; 1] = args
+        .try_into()
+        .map_err(|_| AsmError::new(line, "`BANK` takes one argument"))?;
+    Ok(Expr::Sym(format!("{BANK_MARK}{}", arg.text(name, line)?)))
+}
+
+/// Every section the program declared, and the bank it went in. A section with
+/// no `BANK[...]` is bank 0 — `ROM0` and the unbanked types all live there.
+fn declared_banks(ops: &[Statement]) -> BTreeMap<String, i64> {
+    ops.iter()
+        .filter_map(|st| match &st.op {
+            Some(Operation::Section { name, at, .. }) => Some((
+                name.clone(),
+                match at {
+                    crate::engine::Place::At(n) => n / BANK_SIZE,
+                    _ => 0,
+                },
+            )),
+            _ => None,
+        })
+        .collect()
+}
+
+/// Answer every `BANK` marker against the sections the program declared.
+fn resolve_banks(ops: &mut [Statement], banks: &BTreeMap<String, i64>) -> Result<(), AsmError> {
+    let mut missing = None;
+    for st in ops.iter_mut() {
+        if let Some(op) = st.op.take() {
+            st.op = Some(crate::ast::map_syms(
+                op,
+                &mut |sym| match sym.strip_prefix(BANK_MARK) {
+                    Some(name) => match banks.get(name) {
+                        Some(bank) => Expr::Num(*bank),
+                        None => {
+                            missing.get_or_insert_with(|| name.to_string());
+                            Expr::Num(0)
+                        }
+                    },
+                    None => Expr::Sym(sym),
+                },
+            ));
+        }
+    }
+    match missing {
+        Some(name) => Err(AsmError::new(0, format!("no section named `{name}`"))),
+        None => Ok(()),
+    }
+}
+
+/// A Game Boy ROM bank, and where the CPU sees a banked one.
+const BANK_SIZE: i64 = 0x4000;
+const ROMX_BASE: i64 = 0x4000;
+
+/// The bank in `SECTION "n", ROMX, BANK[k]`, if the source named one.
+fn section_bank(code: &str, line: usize) -> Result<Option<i64>, AsmError> {
+    let upper = code.to_ascii_uppercase();
+    let Some(kw) = upper.find("BANK") else {
+        return Ok(None);
+    };
+    let tail = &code[kw + 4..];
+    match (tail.find('['), tail.find(']')) {
+        (Some(a), Some(b)) if a < b => match value(tail[a + 1..b].trim(), line)? {
+            Expr::Num(n) => Ok(Some(n)),
+            _ => Err(AsmError::new(line, "`BANK[...]` needs a constant")),
+        },
+        _ => Ok(None),
+    }
+}
+
+/// Render a `"text", value, ...` list into one message. rgbasm prints numbers
+/// as `$5`; each reference has its own radix and nothing compares console
+/// output.
+fn render_message(args: &str, line: usize) -> Result<String, AsmError> {
+    let mut out = String::new();
+    for part in mos6502::split_top_level(args, ',') {
+        let part = part.trim();
+        if let Some(text) = part.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
+            out.push_str(text);
+        } else if let Ok(Expr::Num(v)) = value(part, line) {
+            out.push_str(&format!("${v:X}"));
+        } else {
+            out.push_str(part);
+        }
+    }
+    Ok(out)
+}
+
+/// The quoted name in `SECTION "name", TYPE[...]`, for the debug section table.
+/// Empty when the source did not quote one — rgbasm requires it, so an empty
+/// name means the line is malformed and the reference will say so.
+fn section_name(code: &str) -> String {
+    let mut parts = code.split('"');
+    parts.next();
+    parts.next().unwrap_or("").to_string()
 }
 
 /// A parsed constant definition: `name` is the symbol the engine binds;
@@ -704,17 +869,26 @@ pub const DIRECTIVES: &[Directive] = &[
     // Naming any of those here would describe them in a position they never
     // appear in.
     // assertions and diagnostics
+    // `FAIL "msg"` aborts, `WARN "msg"` notes and carries on.
     Directive {
-        id: "unsupported-assertions",
-        pattern: Pattern::Exact(&[
-            "assert",
-            "static_assert",
-            "fail",
-            "warn",
-            "print",
-            "println",
-        ]),
-        category: Category::KnownUnsupported,
+        id: "diagnose",
+        pattern: Pattern::Exact(&["fail", "warn"]),
+        category: Category::Operation,
+    },
+    // `ASSERT` checks at link time and `STATIC_ASSERT` while assembling; with
+    // assembly and linking fused there is no moment between them, so both are
+    // the same check here.
+    Directive {
+        id: "assert",
+        pattern: Pattern::Exact(&["assert", "static_assert"]),
+        category: Category::Operation,
+    },
+    // `PRINT` and `PRINTLN` differ only by a trailing newline, which a
+    // diagnostic carries no more than a line does.
+    Directive {
+        id: "print",
+        pattern: Pattern::Exact(&["print", "println"]),
+        category: Category::Operation,
     },
     // option and character-map state
     Directive {
@@ -733,10 +907,21 @@ pub const DIRECTIVES: &[Directive] = &[
         ]),
         category: Category::KnownUnsupported,
     },
+    // `EXPORT` is the one visibility word in any of the six references that
+    // asks nothing at all: `EXPORT nope` for a name defined nowhere links to a
+    // ROM without complaint, and only a *reference* to an undefined name fails
+    // — at rgblink, which is the ordinary undefined-symbol refusal here.
+    // Probed against rgbasm 1.0.3 + rgblink;
+    // `decisions/symbol-visibility-in-a-fused-assembler.md`.
+    Directive {
+        id: "export",
+        pattern: Pattern::Exact(&["export"]),
+        category: Category::Ignored,
+    },
     // symbol management
     Directive {
         id: "unsupported-symbol",
-        pattern: Pattern::Exact(&["export", "purge", "redef", "def", "shift"]),
+        pattern: Pattern::Exact(&["purge", "redef", "def", "shift"]),
         category: Category::KnownUnsupported,
     },
     // the RS counter
@@ -785,10 +970,43 @@ fn parse_op(
                     ),
                 ));
             }
+            // Declared for `rgbasm` only where rgbasm itself refuses the word for the
+            // binary we emit; the refusal is the match, not a gap.
+            Category::RefusedByReference(rule) => {
+                return Err(AsmError::new(
+                    line,
+                    crate::directives::refused_by_reference("rgbasm", word, rule),
+                ));
+            }
             Category::Operation => match directive.id {
                 "bytes" => Operation::Bytes(byte_list(args, line)?),
                 "words" => Operation::Words(value_list(args, line)?),
                 "reserve" => parse_ds(args, consts, line)?,
+                "assert" => {
+                    let parts = mos6502::split_top_level(args, ',');
+                    let cond = value(parts.first().copied().unwrap_or("").trim(), line)?;
+                    let message = parts
+                        .get(1)
+                        .map(|m| format!("Assertion failed: {}", m.trim().trim_matches('"')))
+                        .unwrap_or_else(|| "Assertion failed".to_string());
+                    Operation::Assert {
+                        cond,
+                        fatal: true,
+                        message,
+                    }
+                }
+                "print" => Operation::Diagnose {
+                    severity: crate::engine::DiagSeverity::Note,
+                    message: render_message(args, line)?,
+                },
+                "diagnose" => Operation::Diagnose {
+                    severity: if word.eq_ignore_ascii_case("fail") {
+                        crate::engine::DiagSeverity::Error
+                    } else {
+                        crate::engine::DiagSeverity::Warning
+                    },
+                    message: args.trim().trim_matches('"').to_string(),
+                },
                 other => {
                     return Err(AsmError::new(
                         line,
@@ -861,6 +1079,16 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         parse_number,
         ExprOpts {
+            compare: mos6502::Compare {
+                eq: false,
+                eq_eq: true,
+                ne_angle: false,
+                ne_bang: true,
+                relational: true,
+                ordered_eq: true,
+                minus_one: false,
+            },
+            function: Some(expr_function),
             bang_is_or: false,
             prec: BytePrec::Tight,
             byte_prefix: false,
@@ -1299,10 +1527,151 @@ fn expand_rgbasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion
 
 #[cfg(test)]
 mod tests {
+
+    /// A section is placed at its own base, whatever order the source wrote
+    /// them in — the thing an `org` could never express, since it can only
+    /// move forward.
+    #[test]
+    fn sections_are_placed_by_address_not_by_source_order() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"c\",ROM0[$0]\n db $cc\nSECTION \"b\",ROM0[$20]\n db $bb\n\
+             SECTION \"a\",ROM0[$10]\n db $aa\n",
+        )
+        .expect("assembles");
+        assert_eq!(out.bytes.len(), 0x21);
+        assert_eq!(out.bytes[0x00], 0xCC);
+        assert_eq!(out.bytes[0x10], 0xAA);
+        assert_eq!(out.bytes[0x20], 0xBB);
+    }
+
+    /// A label belongs to its own section, so it resolves against that
+    /// section's base rather than a running image offset.
+    #[test]
+    fn a_label_takes_its_own_sections_base() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"c\",ROM0[$0]\n dw far\nSECTION \"f\",ROM0[$30]\nfar: db $99\n",
+        )
+        .expect("assembles");
+        assert_eq!(&out.bytes[..2], &[0x30, 0x00]);
+    }
+
+    /// A banked section is addressed at $4000 whichever bank holds it, and
+    /// lands at `bank * $4000` in the ROM — the two are different numbers, and
+    /// an image position equal to an address cannot hold both.
+    #[test]
+    fn a_banked_section_is_addressed_and_placed_differently() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"f\",ROM0[$0]\n db $00\nSECTION \"p\",ROMX,BANK[2]\nhere:\n db $22\n dw here\n",
+        )
+        .expect("assembles");
+        // Three banks, because bank 2 was used.
+        assert_eq!(out.bytes.len(), 3 * 0x4000);
+        assert_eq!(out.bytes[0x8000], 0x22);
+        // `here` is $4000, not its offset in the ROM.
+        assert_eq!(&out.bytes[0x8001..0x8003], &[0x00, 0x40]);
+    }
+
+    /// `BANK[n]` is bracketed like an origin and is not one. Reading the whole
+    /// line for brackets put the bank number in the origin, and every label in
+    /// a banked section came out low.
+    #[test]
+    fn a_bank_is_not_an_origin() {
+        let out = crate::assemble_rgbasm("SECTION \"p\",ROMX,BANK[2]\nhere:\n dw here\n")
+            .expect("assembles");
+        assert_eq!(&out.bytes[0x8000..0x8002], &[0x00, 0x40]);
+    }
+
+    /// `BANK("name")` is answered after the whole program is known, because it
+    /// reaches forward: the section it names is often below the reference.
+    #[test]
+    fn bank_reaches_forward_to_its_section() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"f\",ROM0[$0]\n db BANK(\"paged\")\n db BANK(\"f\")\n\
+             SECTION \"paged\",ROMX,BANK[2]\n db $22\n",
+        )
+        .expect("assembles");
+        // The forward section's bank, then this one's — ROM0 is bank 0.
+        assert_eq!(&out.bytes[..2], &[0x02, 0x00]);
+    }
+
+    /// Naming a section that does not exist is an error, not bank 0.
+    #[test]
+    fn bank_of_an_unknown_section_is_refused() {
+        let err = crate::assemble_rgbasm("SECTION \"f\",ROM0[$0]\n db BANK(\"nope\")\n")
+            .expect_err("no such section");
+        assert!(err.to_string().contains("no section named"), "got `{err}`");
+    }
+
+    /// An assertion fires only when false, and sees labels defined below it —
+    /// which is why it is evaluated with the finished symbol table rather than
+    /// folded while parsing.
+    #[test]
+    fn an_assertion_fires_only_when_false_and_reaches_forward() {
+        assert!(
+            crate::assemble_rgbasm("SECTION \"s\",ROM0[0]\n ASSERT fin-beg\nbeg: db 1,2\nfin:\n")
+                .is_ok()
+        );
+        let err =
+            crate::assemble_rgbasm("SECTION \"s\",ROM0[0]\n STATIC_ASSERT 0, \"boom\"\n db 1\n")
+                .expect_err("false");
+        assert!(err.to_string().contains("boom"), "got `{err}`");
+        // No message given: the reference's own wording, without one.
+        let bare = crate::assemble_rgbasm("SECTION \"s\",ROM0[0]\n ASSERT 0\n").expect_err("false");
+        assert!(
+            bare.to_string().contains("Assertion failed"),
+            "got `{bare}`"
+        );
+    }
+
+    /// Two sections claiming the same bytes is refused, not silently merged.
+    #[test]
+    fn overlapping_sections_are_refused() {
+        let err = crate::assemble_rgbasm(
+            "SECTION \"a\",ROM0[$0]\n db 1,2,3,4\nSECTION \"b\",ROM0[$2]\n db 9\n",
+        )
+        .expect_err("overlap");
+        assert!(err.to_string().contains("overlaps"), "got `{err}`");
+    }
+
+    /// `FAIL` stops, `WARN` notes and carries on, and neither fires from an
+    /// untaken branch.
+    #[test]
+    fn source_requested_diagnostics() {
+        let src = "SECTION \"s\",ROM0[0]\n db 1\n";
+        let err = crate::assemble_rgbasm(&format!("{src} FAIL \"stop\"\n")).expect_err("aborts");
+        assert!(err.to_string().contains("stop"), "got `{err}`");
+
+        let out = crate::assemble_rgbasm(&format!("{src} WARN \"careful\"\n")).expect("warns");
+        assert_eq!(out.bytes, vec![1]);
+        assert!(
+            out.warnings.iter().any(|w| w.message.contains("careful")),
+            "got {:?}",
+            out.warnings
+        );
+
+        let quiet = crate::assemble_rgbasm(&format!("{src}IF 0\n FAIL \"never\"\nENDC\n"))
+            .expect("untaken");
+        assert_eq!(quiet.bytes, vec![1]);
+    }
     use crate::assemble_rgbasm as asm;
 
     fn bytes(src: &str) -> Vec<u8> {
         asm(src).expect("assemble").bytes
+    }
+
+    /// rgbasm's `EXPORT` asks nothing: a name defined nowhere and referenced
+    /// nowhere links to a ROM. The only failure is a *reference* to an
+    /// undefined name, which is the ordinary refusal and needs no help from
+    /// `EXPORT`. It is the one visibility word in any of the six references
+    /// that is honestly accept-and-discard.
+    #[test]
+    fn export_asks_nothing_of_its_name() {
+        assert_eq!(
+            bytes("SECTION \"s\",ROM0[0]\nEXPORT foo\nfoo: db 1,2\nEXPORT nope\n"),
+            vec![1, 2]
+        );
+        asm("SECTION \"s\",ROM0[0]\nEXPORT nope\n dw nope\n")
+            .expect_err("reading an undefined name still fails");
     }
 
     #[test]
@@ -1607,7 +1976,8 @@ mod tests {
                 .expect_err(body)
                 .to_string()
         };
-        for d in ["ASSERT 1", "PRINT \"x\"", "UNION", "OPT b.X", "PUSHS"] {
+        // `ASSERT` and `PRINT` used to be here; both are implemented now.
+        for d in ["UNION", "OPT b.X", "PUSHS"] {
             let e = err(d);
             assert!(
                 e.contains("is a real directive here"),

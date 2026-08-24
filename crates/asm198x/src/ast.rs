@@ -211,6 +211,37 @@ pub(crate) enum Item {
         value: i64,
         fill: u8,
     },
+    /// An assertion (`ASSERT`/`.assert`). Like the diagnostics it has no emit
+    /// arm: the formatter re-emits it from [`Node::source`](Node).
+    Assert {
+        cond: crate::engine::Expr,
+        fatal: bool,
+        message: String,
+    },
+    /// A section opener (rgbasm `SECTION`). Like the aligns and diagnostics it
+    /// has no emit arm: the formatter re-emits it from [`Node::source`](Node),
+    /// so each dialect keeps its own spelling and attributes.
+    Section {
+        name: String,
+        base: Option<i64>,
+        at: crate::engine::Place,
+    },
+    /// A source-requested diagnostic (ACME `!error`/`!warn`, lwasm `error`,
+    /// rgbasm `FAIL`/`WARN`). Like the aligns it has no emit arm: the
+    /// formatter re-emits it from [`Node::source`](Node).
+    Diagnose {
+        severity: crate::engine::DiagSeverity,
+        message: String,
+    },
+    /// The boundary-stating `align`/`.align` — a PC-dependent pad to the next
+    /// multiple of `modulus`, resolved in the engine. Like [`Item::Align`] it
+    /// has no emit arm: the formatter re-emits it via
+    /// [`Node::source`](Node), so each dialect keeps its own spelling
+    /// (`align 4`, `.align 4`, and vasm's exponent `align 2`).
+    AlignTo {
+        modulus: i64,
+        fill: u8,
+    },
     /// A conditional-assembly block (ACME `!if`/`!ifdef`/`!ifndef` … `{ … }` …
     /// `else { … }`, or a keyword dialect's `IF`/`IFDEF`/`IFNDEF` … `ELSE` …
     /// `ENDIF` — sjasmplus is the first, language-surface U8), kept as **tree
@@ -673,6 +704,28 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             value: *value,
             fill: *fill,
         },
+        Item::AlignTo { modulus, fill } => Operation::AlignTo {
+            modulus: *modulus,
+            fill: *fill,
+        },
+        Item::Diagnose { severity, message } => Operation::Diagnose {
+            severity: *severity,
+            message: message.clone(),
+        },
+        Item::Assert {
+            cond,
+            fatal,
+            message,
+        } => Operation::Assert {
+            cond: cond.clone(),
+            fatal: *fatal,
+            message: message.clone(),
+        },
+        Item::Section { name, base, at } => Operation::Section {
+            name: name.clone(),
+            base: *base,
+            at: *at,
+        },
         Item::Binary(payload) => Operation::Binary(payload.clone()),
         other => {
             let what = match other {
@@ -734,6 +787,18 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             value,
             fill,
         },
+        Item::AlignTo { modulus, fill } => Operation::AlignTo { modulus, fill },
+        Item::Diagnose { severity, message } => Operation::Diagnose { severity, message },
+        Item::Assert {
+            cond,
+            fatal,
+            message,
+        } => Operation::Assert {
+            cond,
+            fatal,
+            message,
+        },
+        Item::Section { name, base, at } => Operation::Section { name, base, at },
         // No dialect lowers a conditional through the generic path — ACME
         // evaluates the tree in `dialects::acme::evaluate` — so this is
         // unreachable in practice; it guards against a mis-routed future dialect.
@@ -825,11 +890,11 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
 /// already-qualified `global.local`, is left untouched.
 pub(crate) fn qualify_locals(op: Operation, scope: &str) -> Operation {
     map_syms(op, &mut |s| {
-        if s.starts_with('.') {
+        Expr::Sym(if s.starts_with('.') {
             format!("{scope}{s}")
         } else {
             s
-        }
+        })
     })
 }
 
@@ -838,7 +903,7 @@ pub(crate) fn qualify_locals(op: Operation, scope: &str) -> Operation {
 /// keeping two twelve-arm copies: [`qualify_locals`] passes the leading-`.`
 /// rule, and sjasmplus's module repair pass passes a lookup over its alias
 /// table. `f` sees each name once and returns the name to use.
-pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> String) -> Operation {
+pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Operation {
     match op {
         Operation::Org(e) => Operation::Org(map_sym_expr(e, f)),
         Operation::Equ(e) => Operation::Equ(map_sym_expr(e, f)),
@@ -863,15 +928,27 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> String) -> O
         other @ (Operation::Encoded(_)
         | Operation::Binary(_)
         | Operation::Align { .. }
+        | Operation::AlignTo { .. }
+        | Operation::Diagnose { .. }
+        | Operation::Section { .. }
         | Operation::Reserve(_)) => other,
+        Operation::Assert {
+            cond,
+            fatal,
+            message,
+        } => Operation::Assert {
+            cond: map_sym_expr(cond, f),
+            fatal,
+            message,
+        },
     }
 }
 
 /// The expression half of [`map_syms`]: rewrite every symbol name through `f`,
 /// recursing through the expression tree.
-pub(crate) fn map_sym_expr(e: Expr, f: &mut impl FnMut(String) -> String) -> Expr {
+pub(crate) fn map_sym_expr(e: Expr, f: &mut impl FnMut(String) -> Expr) -> Expr {
     match e {
-        Expr::Sym(s) => Expr::Sym(f(s)),
+        Expr::Sym(s) => f(s),
         Expr::Num(_) | Expr::Pc => e,
         Expr::Lo(b) => Expr::Lo(Box::new(map_sym_expr(*b, f))),
         Expr::Hi(b) => Expr::Hi(Box::new(map_sym_expr(*b, f))),
@@ -889,11 +966,11 @@ pub(crate) fn map_sym_expr(e: Expr, f: &mut impl FnMut(String) -> String) -> Exp
 /// with `scope`, recursing through the expression tree.
 pub(crate) fn qualify_expr(e: Expr, scope: &str) -> Expr {
     map_sym_expr(e, &mut |s| {
-        if s.starts_with('.') {
+        Expr::Sym(if s.starts_with('.') {
             format!("{scope}{s}")
         } else {
             s
-        }
+        })
     })
 }
 
@@ -928,6 +1005,18 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
             value,
             fill,
         },
+        Operation::AlignTo { modulus, fill } => Item::AlignTo { modulus, fill },
+        Operation::Diagnose { severity, message } => Item::Diagnose { severity, message },
+        Operation::Assert {
+            cond,
+            fatal,
+            message,
+        } => Item::Assert {
+            cond,
+            fatal,
+            message,
+        },
+        Operation::Section { name, base, at } => Item::Section { name, base, at },
     }
 }
 

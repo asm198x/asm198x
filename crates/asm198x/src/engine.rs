@@ -143,6 +143,12 @@ impl std::error::Error for AsmError {}
 pub struct Warning {
     pub line: usize,
     pub message: String,
+    /// Whether this is the assembler flagging something, or the source asking
+    /// to say it. Additive with a default, so payloads that predate it load
+    /// and serialize unchanged (`core-contract-freeze.md` names `Warning` in
+    /// the additive set).
+    #[serde(default, skip_serializing_if = "WarningKind::is_advisory")]
+    pub kind: WarningKind,
     /// The file `line` counts within (language-surface U2) — a warning raised
     /// inside an include names that include. Additive per KTD7: absent means
     /// the root, and a root value is not serialized, so pre-multi-file
@@ -151,22 +157,49 @@ pub struct Warning {
     pub file: FileId,
 }
 
+/// What a [`Warning`] is: the assembler's own advisory, or text the source
+/// asked to print.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub enum WarningKind {
+    /// The assembler flagging questionable source — an immediate too wide for
+    /// its operand, a value that will not converge.
+    #[default]
+    Advisory,
+    /// Text the source asked to print: rgbasm's `PRINT`, sjasmplus's
+    /// `DISPLAY`, vasm's `echo`, ca65's `.out`. Not a complaint.
+    Note,
+}
+
+impl WarningKind {
+    pub(crate) fn is_advisory(&self) -> bool {
+        matches!(self, WarningKind::Advisory)
+    }
+}
+
 impl Warning {
     pub(crate) fn new(line: usize, message: impl Into<String>) -> Self {
         Self {
             line,
             message: message.into(),
             file: FileId(0),
+            kind: WarningKind::Advisory,
         }
     }
 }
 
 impl fmt::Display for Warning {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // A note is the source speaking, not the assembler complaining, so it
+        // does not call itself a warning.
+        let label = match self.kind {
+            WarningKind::Note => "note",
+            _ => "warning",
+        };
         if self.line == 0 {
-            write!(f, "warning: {}", self.message)
+            write!(f, "{label}: {}", self.message)
         } else {
-            write!(f, "line {}: warning: {}", self.line, self.message)
+            write!(f, "line {}: {label}: {}", self.line, self.message)
         }
     }
 }
@@ -191,6 +224,20 @@ pub(crate) enum BinOp {
     Shr,
     /// Exponentiation (ACME's `^`): `a` raised to the power `b`.
     Pow,
+    /// The larger of the two (ca65 `.max`).
+    Max,
+    /// The smaller of the two (ca65 `.min`).
+    Min,
+    /// The comparisons. Evaluation answers 1 or 0; a dialect whose reference
+    /// answers `$FF` for true wraps the comparison in a negation, so the tree
+    /// carries that and evaluation stays dialect-agnostic
+    /// (`docs/comparison-operators.md`).
+    Eq,
+    Ne,
+    Lt,
+    Gt,
+    Le,
+    Ge,
 }
 
 /// An expression in the shared engine IR. Each dialect parses its own operator
@@ -279,6 +326,16 @@ pub(crate) fn eval_binop(op: BinOp, a: i64, b: i64, line: usize) -> Result<i64, 
         BinOp::Xor => a ^ b,
         BinOp::Shl => a.wrapping_shl(b as u32),
         BinOp::Shr => a.wrapping_shr(b as u32),
+        // ca65's `.max`/`.min`. Binary operations rather than a dedicated node:
+        // they take two values and produce one, which is what `BinOp` is for.
+        BinOp::Eq => i64::from(a == b),
+        BinOp::Ne => i64::from(a != b),
+        BinOp::Lt => i64::from(a < b),
+        BinOp::Gt => i64::from(a > b),
+        BinOp::Le => i64::from(a <= b),
+        BinOp::Ge => i64::from(a >= b),
+        BinOp::Max => a.max(b),
+        BinOp::Min => a.min(b),
         BinOp::Pow => {
             let exp = u32::try_from(b)
                 .map_err(|_| AsmError::new(line, "negative exponent in expression"))?;
@@ -336,6 +393,60 @@ pub(crate) enum Operation {
     /// engine passes; `andmask`/`value`/`fill` are folded to constants by the
     /// dialect. The pad is `(value - pc) & andmask`.
     Align { andmask: i64, value: i64, fill: u8 },
+    /// Advance the program counter to the next multiple of `modulus`, filling
+    /// the gap with `fill` — the `align`/`.align` of every dialect that states
+    /// a boundary rather than ACME's mask/value pair. A `modulus` of 1 or less
+    /// pads nothing.
+    ///
+    /// Deliberately not folded into [`Operation::Align`]: a mask can only
+    /// express a power-of-two boundary, and both ca65 and lwasm pad to a
+    /// non-power-of-two one (`.align 3` after a byte lands the next item at
+    /// offset 3). Approximating either with the other would diverge silently
+    /// on exactly the source that distinguishes them.
+    AlignTo { modulus: i64, fill: u8 },
+    /// Open a section: subsequent bytes are placed at `base` rather than
+    /// continuing from the current address, and the section's own bytes are
+    /// laid out independently of what came before.
+    ///
+    /// A dialect with no section concept never emits this and is a program of
+    /// exactly one implicit section based at its origin — which is what the
+    /// flat engine has always been.
+    ///
+    /// `base` is `None` for a section whose address its toolchain's linker
+    /// chooses. Placement for those is not implemented: the section continues
+    /// from the current address, which is what the dialects that have them did
+    /// before this existed. `name` carries into the debug section table.
+    ///
+    /// `at` says where the section's bytes sit **in the image**, when that is
+    /// not the same thing as where the CPU sees them.
+    Section {
+        name: String,
+        base: Option<i64>,
+        at: Place,
+    },
+    /// A diagnostic the **source** asked for: ACME's `!error`/`!warn`, lwasm's
+    /// `error`, rgbasm's `FAIL`/`WARN`. `fatal` aborts the assembly; otherwise
+    /// it joins the warnings and assembly continues.
+    ///
+    /// An operation rather than a parse-time error on purpose: every dialect
+    /// that has one also has conditional assembly, and `!error` inside an
+    /// untaken `!if` must stay silent. Raising it at parse time would fire on
+    /// a branch the program never takes.
+    Diagnose {
+        severity: DiagSeverity,
+        message: String,
+    },
+    /// An assertion the source asked for: `ASSERT`/`assert`/`.assert`. The
+    /// diagnostic fires when `cond` evaluates to zero.
+    ///
+    /// Evaluated in the emit pass rather than at parse, because an assertion
+    /// reaches **forward** — `assert end-start = 2` above both labels is the
+    /// point of having one, and both vasm and rgbasm take it.
+    Assert {
+        cond: Expr,
+        fatal: bool,
+        message: String,
+    },
     /// Reserve `count` address units without emitting source-derived data (the
     /// `ds`/`rmb`/`res`/`block` directives). Deliberately **not**
     /// [`Operation::Bytes`] of zeros: what fills reserved space is a property of
@@ -430,10 +541,24 @@ pub(crate) fn next_pc(
         }
         Operation::Encoded(pieces) => pc + pieces.iter().map(Piece::len).sum::<i64>() / addr_unit,
         Operation::Align { andmask, value, .. } => pc + ((value - pc) & andmask),
+        Operation::AlignTo { modulus, .. } => pc + align_pad(pc, *modulus),
+        // Emit nothing; they only speak.
+        Operation::Diagnose { .. } | Operation::Assert { .. } => pc,
+        // Moves the counter rather than advancing it; the caller sets it.
+        Operation::Section { .. } => pc,
         // Set the counter, bind a name, name an entry point — none of them a
         // width. A caller that can reach these handles them itself.
         Operation::Org(_) | Operation::Equ(_) | Operation::Entry(_) => pc,
     })
+}
+
+/// How far short of the next multiple of `modulus` the counter stands. Zero
+/// when already there, and for a `modulus` of 1 or less (no boundary to reach).
+fn align_pad(pc: i64, modulus: i64) -> i64 {
+    if modulus <= 1 {
+        return 0;
+    }
+    (modulus - pc.rem_euclid(modulus)) % modulus
 }
 
 impl Piece {
@@ -531,6 +656,123 @@ pub(crate) fn assemble_multi(
 /// The shared two-pass driver over an already-parsed statement stream — the
 /// single body behind [`assemble`] and [`assemble_multi`], so the single- and
 /// multi-file paths cannot drift.
+/// Where a section's bytes sit in the image.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Place {
+    /// Wherever its address puts it — every flat dialect, and any section whose
+    /// toolchain places it by where the CPU sees it.
+    ByAddress,
+    /// At a fixed offset the container fixes: a Game Boy bank at
+    /// `bank * $4000`, a NES segment at the offset its linker config gives it.
+    /// The section is addressed somewhere the image does not put it.
+    At(i64),
+    /// Immediately after the section before it, whatever either is addressed
+    /// at. sjasmplus's `PAGE` is this: two pages written at the same `ORG`
+    /// concatenate in the output rather than colliding, because they are
+    /// different memory.
+    Next,
+}
+
+/// Lay a program's sections into one image.
+///
+/// The single placement implementation: the engine's own section path and the
+/// dialects whose toolchain builds a container (ca65's NES ROM) both come
+/// through here, so "where does a section go" is answered once
+/// (`decisions/sections-in-the-shared-engine.md`).
+///
+/// Sections are placed **by image position, not by source order** — a section
+/// may sit below one written before it, which is what an origin could never
+/// express. A section's position is its own `at` where it has one, since a
+/// banked or config-placed section is addressed somewhere the image does not
+/// put it, and otherwise its address.
+///
+/// `image_base` fixes where the image starts when the container does rather
+/// than the program; `image_size` pads it out. Both are `None`/no-op for a
+/// dialect whose image is just what the source wrote.
+pub(crate) fn lay_out(
+    mut runs: Vec<Run>,
+    gap_fill: u8,
+    addr_unit: i64,
+    image_base: Option<i64>,
+    image_size: impl Fn(&[u8]) -> Option<usize>,
+) -> Result<(i64, Vec<u8>), AsmError> {
+    runs.retain(|r| !r.bytes.is_empty());
+    if runs.is_empty() {
+        return Ok((image_base.unwrap_or(0), Vec::new()));
+    }
+    // A `Next` section belongs immediately after the one before it, whatever
+    // either is addressed at, so fold it in before anything is placed. What is
+    // left all has a place of its own and sorts by it.
+    let mut merged: Vec<Run> = Vec::new();
+    for r in runs {
+        match (r.at, merged.last_mut()) {
+            (Place::Next, Some(prev)) => prev.bytes.extend_from_slice(&r.bytes),
+            _ => merged.push(r),
+        }
+    }
+    let mut runs = merged;
+
+    let placed = |r: &Run| match r.at {
+        Place::At(n) => n,
+        _ => r.base,
+    };
+    runs.sort_by_key(placed);
+    let origin = image_base.unwrap_or(runs[0].base);
+    let first = image_base.unwrap_or_else(|| placed(&runs[0]));
+    let mut image: Vec<u8> = Vec::new();
+    for r in &runs {
+        let at = ((placed(r) - first) * addr_unit) as usize;
+        if at < image.len() {
+            return Err(AsmError::new(
+                0,
+                format!(
+                    "section `{}` at {:#06x} overlaps the section before it",
+                    r.name,
+                    placed(r)
+                ),
+            ));
+        }
+        image.resize(at, gap_fill);
+        image.extend_from_slice(&r.bytes);
+    }
+    if let Some(size) = image_size(&image) {
+        image.resize(size, gap_fill);
+    }
+    Ok((origin, image))
+}
+
+/// How loud a source-requested diagnostic is.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum DiagSeverity {
+    /// Stops the assembly: `!error`, `!serious`, `FAIL`, lwasm's `error`.
+    Error,
+    /// Notes and carries on: `!warn`, `WARN`.
+    Warning,
+    /// Text the source asked to print, and not a complaint about anything:
+    /// `DISPLAY`, `echo`, `PRINT`, `.out`.
+    Note,
+}
+
+/// One section's placed bytes, closed off when the next section opens.
+///
+/// The engine's whole section model: a program is a list of these, and a
+/// dialect with no section concept produces exactly one. Sections are internal
+/// — they are laid into the flat [`Assembly`] before anything outside the
+/// engine sees them (`decisions/sections-in-the-shared-engine.md`).
+pub(crate) struct Run {
+    pub(crate) name: String,
+    /// The address the CPU sees these bytes at — what labels resolve to.
+    pub(crate) base: i64,
+    /// Where the bytes sit in the image, when that differs from `base`.
+    pub(crate) at: Place,
+    pub(crate) bytes: Vec<u8>,
+}
+
+// No written-range fields here: the reserve-rather-than-materialise trim
+// (`Dialect::trims_trailing_gap`) belongs to the asl family, and no asl dialect
+// has sections. A sectioned dialect that trimmed would need the range per
+// section, and this is where it would go.
+
 fn assemble_statements(
     statements: Vec<Statement>,
     parse_warnings: Vec<Warning>,
@@ -557,9 +799,14 @@ fn assemble_statements(
                 .as_ref()
                 .ok_or_else(|| s.err("`equ` needs a label"))?;
             let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
-            // Constants may be 24-bit (65816 bank/long addresses).
-            if !(0..=0xFF_FFFF).contains(&v) {
-                return Err(s.err(format!("equ value {v} out of range 0..=16777215")));
+            if let Some(range) = dialect.equ_range()
+                && !range.contains(&v)
+            {
+                return Err(s.err(format!(
+                    "equ value {v} out of range {}..={}",
+                    range.start(),
+                    range.end()
+                )));
             }
             if symbols.insert(label.clone(), v).is_some() {
                 return Err(s.err(format!("duplicate label `{label}`")));
@@ -584,13 +831,22 @@ fn assemble_statements(
                 pc = v;
                 origin.get_or_insert(v);
             }
+            Some(Operation::Section {
+                base: Some(base), ..
+            }) => {
+                pc = *base;
+                origin.get_or_insert(*base);
+            }
+            // A section whose address its linker chooses: nothing to move to.
+            Some(Operation::Section { base: None, .. }) => {}
             Some(
                 Operation::Bytes(_)
                 | Operation::Words(_)
                 | Operation::Instruction { .. }
                 | Operation::Encoded(_)
                 | Operation::Binary(_)
-                | Operation::Align { .. },
+                | Operation::Align { .. }
+                | Operation::AlignTo { .. },
             ) if require_origin && origin.is_none() => {
                 return Err(s.err(
                     "program counter undefined — set an origin (`*=`) before any code or data",
@@ -621,6 +877,12 @@ fn assemble_statements(
     let mut warnings: Vec<Warning> = parse_warnings;
     let mut start: Option<u16> = None;
     let mut bytes: Vec<u8> = Vec::new();
+    // Sections closed so far. A dialect with no section concept never opens
+    // one, leaves this empty, and takes the single-run path below — which is
+    // the flat engine unchanged.
+    let mut runs: Vec<Run> = Vec::new();
+    let mut section_name = String::new();
+    let mut section_at = Place::ByAddress;
     let mut debug = DebugData::default();
     for s in &statements {
         // The location counter (`$`) is the address of this statement's start,
@@ -640,6 +902,27 @@ fn assemble_statements(
                     gap_fill,
                 );
             }
+            Some(Operation::Section { name, base, at }) => {
+                // Close the run so far and start one at the new base. Bytes
+                // are per-section from here, so the location counter, the
+                // written-range trims and the 64K check all measure within
+                // this section rather than across the image.
+                if base.is_some() || *at == Place::Next {
+                    runs.push(Run {
+                        name: std::mem::take(&mut section_name),
+                        base: origin,
+                        at: std::mem::replace(&mut section_at, Place::ByAddress),
+                        bytes: std::mem::take(&mut bytes),
+                    });
+                    if let Some(base) = base {
+                        origin = *base;
+                    }
+                    written_len = 0;
+                    written_start = None;
+                }
+                section_name = name.clone();
+                section_at = *at;
+            }
             Some(Operation::Equ(_)) => {} // defines a symbol; emits nothing
             Some(Operation::Entry(e)) => {
                 let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
@@ -656,6 +939,43 @@ fn assemble_statements(
                 let pad = (value - pc) & andmask;
                 bytes.extend(std::iter::repeat_n(*fill, pad as usize));
             }
+            Some(Operation::AlignTo { modulus, fill }) => {
+                let pad = align_pad(pc, *modulus);
+                bytes.extend(std::iter::repeat_n(*fill, pad as usize));
+            }
+            Some(Operation::Assert {
+                cond,
+                fatal,
+                message,
+            }) if cond
+                .eval(&symbols, pc, s.line)
+                .map_err(|err| s.stamp(err))?
+                == 0 =>
+            {
+                if *fatal {
+                    return Err(s.err(message));
+                }
+                warnings.push(Warning {
+                    line: s.line,
+                    file: s.file,
+                    message: message.clone(),
+                    kind: crate::engine::WarningKind::Advisory,
+                });
+            }
+            // An assertion that holds says nothing.
+            Some(Operation::Assert { .. }) => {}
+            Some(Operation::Diagnose { severity, message }) => match severity {
+                DiagSeverity::Error => return Err(s.err(message)),
+                DiagSeverity::Warning | DiagSeverity::Note => warnings.push(Warning {
+                    line: s.line,
+                    file: s.file,
+                    message: message.clone(),
+                    kind: match severity {
+                        DiagSeverity::Note => WarningKind::Note,
+                        _ => WarningKind::Advisory,
+                    },
+                }),
+            },
             Some(Operation::Bytes(items)) => {
                 for e in items {
                     let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
@@ -675,6 +995,7 @@ fn assemble_statements(
                         line: s.line,
                         message: "binary inclusion included no data".to_string(),
                         file: s.file,
+                        kind: crate::engine::WarningKind::Advisory,
                     });
                 }
                 bytes.extend_from_slice(payload);
@@ -933,6 +1254,30 @@ fn assemble_statements(
         }
     }
 
+    // Lay the sections into one image. Only a dialect that opened a section
+    // reaches this; the flat path below is unchanged for the other twenty.
+    if !runs.is_empty() {
+        runs.push(Run {
+            name: section_name,
+            base: origin,
+            at: section_at,
+            bytes,
+        });
+        let (origin_of_image, image) =
+            lay_out(runs, gap_fill, addr_unit, dialect.image_base(), |img| {
+                dialect.image_size(img)
+            })?;
+        return Ok(Assembly {
+            origin: origin_of_image as u16,
+            reserved_prefix: 0,
+            bytes: image,
+            symbols,
+            start,
+            warnings,
+            debug,
+        });
+    }
+
     // asl reserves rather than materialises: `p2bin` fills only the gaps *inside*
     // the written range. Outside it, both ends fall away — a trailing
     // reservation is absent from the image, and a leading one moves where the
@@ -1055,6 +1400,7 @@ fn emit_byte(
                     line: s.line,
                     message: format!("value {v} truncated to a byte"),
                     file: s.file,
+                    kind: crate::engine::WarningKind::Advisory,
                 });
             }
         }

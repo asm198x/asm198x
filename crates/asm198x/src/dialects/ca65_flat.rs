@@ -1128,6 +1128,109 @@ pub(crate) fn expand_ca65(
     })
 }
 
+/// ca65's expression functions. Only the three byte extractions so far — they
+/// are the ones the shared `Expr` already has nodes for, so they cost nothing
+/// beyond the name.
+///
+/// An unknown name is refused here rather than left to resolve as a symbol: in
+/// ca65 a `.`-prefixed word is never an ordinary identifier, so `.zzz(1)` is a
+/// typo for a function and saying so beats "undefined symbol `.zzz`".
+pub(crate) fn expr_function(
+    name: &str,
+    args: Vec<super::mos6502::ExprArg>,
+    line: usize,
+) -> Result<crate::engine::Expr, AsmError> {
+    use crate::engine::BinOp as Op;
+    use crate::engine::Expr;
+    let lower = name.to_ascii_lowercase();
+
+    // The string functions. A string is consumed here and yields a number, so
+    // an expression still evaluates to an `i64` — see `ExprArg`.
+    match lower.as_str() {
+        ".strlen" => {
+            let [t]: [_; 1] = take(name, args, 1, line)?;
+            return Ok(Expr::Num(t.text(name, line)?.chars().count() as i64));
+        }
+        ".strat" => {
+            let [t, i]: [_; 2] = take(name, args, 2, line)?;
+            let text = t.text(name, line)?;
+            let Expr::Num(idx) = i.value(name, line)? else {
+                return Err(AsmError::new(line, "`.strat` index must be a constant"));
+            };
+            let ch = usize::try_from(idx)
+                .ok()
+                .and_then(|n| text.chars().nth(n))
+                .ok_or_else(|| {
+                    AsmError::new(line, format!("`.strat` index {idx} is past the string"))
+                })?;
+            return Ok(Expr::Num(ch as i64));
+        }
+        _ => {}
+    }
+
+    // The two-argument value functions, before the one-argument ones claim `args`.
+    let pair = match lower.as_str() {
+        ".max" => Some(Op::Max),
+        ".min" => Some(Op::Min),
+        _ => None,
+    };
+    if let Some(op) = pair {
+        let [a, b]: [_; 2] = take(name, args, 2, line)?;
+        return Ok(Expr::Bin(
+            op,
+            Box::new(a.value(name, line)?),
+            Box::new(b.value(name, line)?),
+        ));
+    }
+    let [arg]: [_; 1] = take(name, args, 1, line)?;
+    let arg = arg.value(name, line)?;
+    use crate::engine::BinOp;
+    // The word extractions have no node of their own and need none: masking
+    // and shifting say the same thing with the arithmetic already in `Expr`.
+    let mask = |e: Expr| Expr::Bin(BinOp::And, Box::new(e), Box::new(Expr::Num(0xFFFF)));
+    match name.to_ascii_lowercase().as_str() {
+        ".loword" => return Ok(mask(arg)),
+        ".hiword" => {
+            return Ok(mask(Expr::Bin(
+                BinOp::Shr,
+                Box::new(arg),
+                Box::new(Expr::Num(16)),
+            )));
+        }
+        _ => {}
+    }
+    let wrap: fn(Box<Expr>) -> Expr = match name.to_ascii_lowercase().as_str() {
+        ".lobyte" => Expr::Lo,
+        ".hibyte" => Expr::Hi,
+        ".bankbyte" => Expr::Bank,
+        _ if name.starts_with('.') => {
+            return Err(AsmError::new(
+                line,
+                format!(
+                    "`{name}` is not an expression function asm198x implements yet —                      the source is valid and the gap is ours"
+                ),
+            ));
+        }
+        // Not a ca65 function name at all: a plain symbol the source then
+        // parenthesised, which is its own error further up.
+        _ => return Err(AsmError::new(line, format!("`{name}` is not a function"))),
+    };
+    Ok(wrap(Box::new(arg)))
+}
+
+/// Exactly `n` arguments, or a diagnostic naming the function.
+fn take<const N: usize>(
+    name: &str,
+    args: Vec<super::mos6502::ExprArg>,
+    n: usize,
+    line: usize,
+) -> Result<[super::mos6502::ExprArg; N], AsmError> {
+    args.try_into().map_err(|_| {
+        let plural = if n == 1 { "argument" } else { "arguments" };
+        AsmError::new(line, format!("`{name}` takes {n} {plural}"))
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
