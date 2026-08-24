@@ -478,6 +478,12 @@ const PROBES: &[Probe] = &[
     ok ("vasm", "assert with a comparison",  "\tassert 2=2\n\tdc.b 9\n"),
     // Print-style directives emit nothing; the bytes either side are the test.
     ok ("vasm", "echo emits nothing",    "\techo \"n=\",5\n\tdc.b 1,2\n"),
+    // The seven visibility words emit nothing when their name is defined —
+    // the only shape that assembles in binary output. `comm`'s second operand
+    // is a size, not a name, and it reserves nothing here.
+    ok ("vasm", "visibility emits nothing",
+        "\txdef foo\n\tpublic foo\n\tglobal foo\n\texport foo\n\tentry foo\n\tweak foo\n\
+         \textrn foo\n\tcomm foo,4\n\tlocal foo\n\tidnt \"mod\"\nfoo:\tdc.b 1,2\n"),
     ok ("vasm", "a true assertion is silent",  "\tassert 1\n\tdc.b 1\n"),
     ok ("vasm", "even pads to a word",   "\tdc.b 1\n\teven\n\tdc.b 2\n"),
     ok ("vasm", "even on a word does nothing", "\tdc.b 1,2\n\teven\n\tdc.b 3\n"),

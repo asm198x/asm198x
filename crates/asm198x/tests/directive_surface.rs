@@ -292,7 +292,11 @@ fn a_real_directive_reads_differently_from_a_typo() {
         // binary target. `os9` is deferred by decision — it writes a different
         // artifact — so it will not move under this test either.
         ("lwasm", "", "os9 foo", "zzqq"),
-        ("vasm", "", "xdef foo", "zzqq"),
+        // `output "x"` (it names the output file) rather than `xdef`, which
+        // became an implemented check once vasm turned out to enforce one in
+        // binary output. `output` is deferred by decision — it writes a
+        // different artifact — so it will not move under this test either.
+        ("vasm", "", "output \"x\"", "zzqq"),
         ("rgbasm", "SECTION \"s\",ROM0\n", "UNION", "ZZQQ"),
     ];
     for (dialect, prologue, real, fake) in cases {

@@ -592,6 +592,21 @@ fn assemble_core(
                 kind: crate::engine::WarningKind::Note,
             }),
             Stmt::Fail(message) => return Err(stamp(AsmError::new(s.line, message.clone()))),
+            Stmt::Visible(names) => {
+                for name in names {
+                    // vasm answers `error 3007: undefined symbol <nope>`, after
+                    // a warning naming which kind of visibility went unmet
+                    // (87 for `xdef`, 62 for `global`). The warning is its
+                    // classification of the same failure, so only the refusal
+                    // is reproduced.
+                    if !consts.contains_key(name) {
+                        return Err(stamp(AsmError::new(
+                            s.line,
+                            format!("undefined symbol `{name}`"),
+                        )));
+                    }
+                }
+            }
             Stmt::Assert(cond, message) => {
                 if eval(cond, &consts, buf.bytes.len() as i64, s.line).map_err(stamp)? == 0 {
                     return Err(stamp(AsmError::new(
@@ -1413,7 +1428,8 @@ fn stmt_size(
         | Stmt::Cnop(..)
         | Stmt::Fail(_)
         | Stmt::Assert(..)
-        | Stmt::Echo(_) => 0,
+        | Stmt::Echo(_)
+        | Stmt::Visible(_) => 0,
         Stmt::Raw(payload) => payload.len(),
         Stmt::Dc(size, items) => items.len() * size.bytes(),
         Stmt::Ds(size, count) | Stmt::Dcb(size, count, _) => {
@@ -1620,6 +1636,13 @@ enum Stmt {
     /// symbol table: an assertion over a label defined later is the point of
     /// having one.
     Assert(Expr, String),
+    /// `xdef`/`public`/`global`/`export`/`entry`/`weak`/`extrn`/`comm` — a
+    /// name this program makes visible to a linker. There is no linker here
+    /// and no object file, so the only part that survives is the part vasm
+    /// itself enforces in binary output: the name must be defined somewhere in
+    /// the program. Held as a statement so the check runs against the finished
+    /// symbol table, the way `assert` does — vasm takes a name defined below.
+    Visible(Vec<String>),
     /// `fail "message"` — stop the assembly where the source says to. Held as
     /// a statement rather than raised at parse time because vasm has
     /// conditional assembly, and a `fail` in an untaken branch must stay
@@ -2453,6 +2476,7 @@ fn bake_reptn(kind: &mut Stmt, value: i64) {
         | Stmt::Fail(_)
         | Stmt::Assert(..)
         | Stmt::Echo(_)
+        | Stmt::Visible(_)
         | Stmt::Raw(_) => {}
     }
 }
@@ -2502,6 +2526,7 @@ fn qualify_stmt(kind: &mut Stmt, scope: &str) {
         | Stmt::Fail(_)
         | Stmt::Assert(..)
         | Stmt::Echo(_)
+        | Stmt::Visible(_)
         | Stmt::Raw(_) => {}
     }
 }
@@ -2677,6 +2702,48 @@ pub const DIRECTIVES: &[Directive] = &[
     // as state. Its 68020+, FPU and Apollo mnemonics are deliberately absent:
     // vasm refuses those itself under `-m68000`, and
     // `68000-isa-completeness.md` scopes ours to the 68000.
+    // Symbol visibility, probed against vasm 2.0b in binary output — the only
+    // output we produce. Three answers, and the words do not group the way the
+    // manual's headings do; see
+    // `decisions/symbol-visibility-in-a-fused-assembler.md`.
+    //
+    // These seven take a name that must be **defined** in the program: vasm
+    // answers `error 3007: undefined symbol <nope>` otherwise, whether or not
+    // anything references it. `local` is absent because it requires nothing;
+    // `xref`, `import` and `nref` because they forbid the opposite.
+    Directive {
+        id: "visibility",
+        pattern: Pattern::Exact(&[
+            "xdef", "public", "global", "export", "entry", "weak", "extrn",
+        ]),
+        category: Category::Operation,
+    },
+    // `comm name,size` reserves linker-allocated common storage. In binary
+    // output it emits nothing and vasm still requires the name be defined, so
+    // it is the same check over the first operand only — the second is a size,
+    // not a name.
+    Directive {
+        id: "common",
+        pattern: Pattern::Exact(&["comm"]),
+        category: Category::Operation,
+    },
+    // The import side, and it cannot be used at all in binary output: vasm
+    // answers `error 86: external symbol <foo> must not be defined` when the
+    // name is defined here and `error 3007: undefined symbol` when it is not,
+    // so no program satisfies both. That is a refusal, not a gap — the second
+    // dialect to need the category, after lwasm.
+    Directive {
+        id: "external",
+        pattern: Pattern::Exact(&["xref", "import", "nref"]),
+        category: Category::RefusedByReference("only usable when the output is an object file"),
+    },
+    // `local name` requires nothing of the name and `idnt "mod"` names the
+    // object module. Both emit nothing and neither can fail.
+    Directive {
+        id: "ignored-visibility",
+        pattern: Pattern::Exact(&["local", "idnt"]),
+        category: Category::Ignored,
+    },
     Directive {
         id: "unsupported-vasm",
         pattern: Pattern::Exact(&[
@@ -2687,7 +2754,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "cargs",
             "clrfo",
             "clrso",
-            "comm",
             "comment",
             "cpu32",
             "cseg",
@@ -2705,15 +2771,10 @@ pub const DIRECTIVES: &[Directive] = &[
             "end",
             "endb",
             "endm",
-            "entry",
             "erem",
-            "export",
-            "extrn",
             "far",
             "fo",
             "fpu",
-            "global",
-            "idnt",
             "if1",
             "if2",
             "ifb",
@@ -2726,7 +2787,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "ifp1",
             "ifpl",
             "image",
-            "import",
             "incdir",
             "initnear",
             "inline",
@@ -2739,7 +2799,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "list",
             "llen",
             "load",
-            "local",
             "machine",
             "mask2",
             "mexit",
@@ -2748,7 +2807,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "near",
             "nolist",
             "nopage",
-            "nref",
             "odd",
             "offset",
             "opt",
@@ -2759,7 +2817,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "popsection",
             "printt",
             "printv",
-            "public",
             "pushsection",
             "rem",
             "rorg",
@@ -2777,9 +2834,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "text",
             "ttl",
             "vdebug",
-            "weak",
-            "xdef",
-            "xref",
         ]),
         category: Category::KnownUnsupported,
     },
@@ -2805,6 +2859,10 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
                 crate::directives::refused_by_reference("vasm", &lower, rule),
             ));
         }
+        // Accepted and discarded: it changes no bytes and cannot fail.
+        if directive.category == crate::directives::Category::Ignored {
+            return Ok(Stmt::Empty);
+        }
         if directive.category == crate::directives::Category::KnownUnsupported {
             return Err(AsmError::new(
                 line,
@@ -2828,6 +2886,22 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
             "cnop" => parse_cnop(args, line),
             "fail" => Ok(Stmt::Fail(args.trim().trim_matches('"').to_string())),
             "echo" => Ok(Stmt::Echo(render_message(args, line, 10)?)),
+            "visibility" => Ok(Stmt::Visible(
+                split_operands(args)
+                    .iter()
+                    .map(|n| n.trim().to_string())
+                    .filter(|n| !n.is_empty())
+                    .collect(),
+            )),
+            // Only the first operand is a name; `comm buf,4` sizes the storage.
+            "common" => Ok(Stmt::Visible(
+                split_operands(args)
+                    .first()
+                    .map(|n| n.trim().to_string())
+                    .filter(|n| !n.is_empty())
+                    .into_iter()
+                    .collect(),
+            )),
             "assert" => {
                 let parts = split_operands(args);
                 let cond = parse_value(parts.first().copied().unwrap_or("").trim(), line)?;
@@ -3394,6 +3468,88 @@ mod directive_surface {
         assert_eq!(note.message, "n=5");
         assert_eq!(note.kind, crate::engine::WarningKind::Note);
         assert!(note.to_string().contains("note:"), "got `{note}`");
+    }
+
+    /// The seven words that make a name visible all reduce to one check in
+    /// binary output: the name must be defined. vasm answers `error 3007:
+    /// undefined symbol <nope>` otherwise — with no reference to it anywhere,
+    /// which is what makes this a check rather than a no-op.
+    #[test]
+    fn a_visible_name_must_be_defined() {
+        for word in [
+            "xdef", "public", "global", "export", "entry", "weak", "extrn",
+        ] {
+            let ok = format!("        section code,code\n        {word} foo\nfoo:    dc.b 1\n");
+            assert_eq!(bytes(&ok), vec![1], "{word} accepts a defined name");
+
+            let bad = format!("        section code,code\n        {word} nope\n        dc.b 1\n");
+            let err = asm(&bad).expect_err(word);
+            assert!(
+                err.to_string().contains("undefined symbol `nope`"),
+                "{word}: got `{err}`"
+            );
+        }
+    }
+
+    /// A list, and the name may be defined below — the check runs against the
+    /// finished symbol table, not in source order.
+    #[test]
+    fn visibility_takes_a_list_and_reaches_forward() {
+        assert_eq!(
+            bytes(
+                "        section code,code\n        xdef foo,bar\nfoo:    dc.b 1\nbar:    dc.b 2\n"
+            ),
+            vec![1, 2]
+        );
+    }
+
+    /// `comm name,size` reserves storage a linker would allocate. It emits
+    /// nothing here, and only its first operand is a name — checking the size
+    /// as one would refuse every correct `comm`.
+    #[test]
+    fn comm_checks_its_name_and_not_its_size() {
+        assert_eq!(
+            bytes(
+                "        section code,code\n        comm buf,4\nbuf:    dc.b 1\n        dc.b 2\n"
+            ),
+            vec![1, 2]
+        );
+        let err = asm("        section code,code\n        comm buf,4\n        dc.b 1\n")
+            .expect_err("buf is not defined");
+        assert!(err.to_string().contains("undefined symbol `buf`"), "{err}");
+    }
+
+    /// `local` and `idnt` change nothing and cannot fail, so they are accepted
+    /// and discarded — the one place in this family where that is the honest
+    /// answer.
+    #[test]
+    fn local_and_idnt_are_accepted_and_discarded() {
+        assert_eq!(
+            bytes(
+                "        section code,code\n        local zz\n        idnt \"mod\"\n        dc.b 1\n"
+            ),
+            vec![1]
+        );
+    }
+
+    /// `xref`, `import` and `nref` cannot be satisfied in binary output: vasm
+    /// answers `error 86: external symbol <foo> must not be defined` when the
+    /// name is defined and `error 3007: undefined symbol` when it is not. No
+    /// program passes both, so the word is refused rather than counted a gap.
+    #[test]
+    fn the_import_side_is_refused_as_the_reference_refuses_it() {
+        for word in ["xref", "import", "nref"] {
+            let err = asm(&format!(
+                "        section code,code\n        {word} other\n        dc.b 1\n"
+            ))
+            .expect_err(word);
+            let message = err.to_string();
+            assert!(message.contains("object file"), "{word}: got `{message}`");
+            assert!(
+                !message.contains("does not implement"),
+                "{word} claims a gap here, and there is none: {message}"
+            );
+        }
     }
 
     /// `assert` fires only when its expression is zero, and takes an optional
