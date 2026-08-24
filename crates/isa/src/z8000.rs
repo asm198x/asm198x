@@ -63,6 +63,20 @@ pub enum CtlKind {
     Calr,
 }
 
+impl CtlKind {
+    /// This kind's name, for a [`Row`](crate::Row)'s mode.
+    #[must_use]
+    pub const fn name(&self) -> &'static str {
+        match self {
+            CtlKind::Jump => "Jump",
+            CtlKind::Jr => "Jr",
+            CtlKind::Ret => "Ret",
+            CtlKind::Djnz => "Djnz",
+            CtlKind::Calr => "Calr",
+        }
+    }
+}
+
 /// One program-control mnemonic.
 pub struct Ctl {
     pub mnemonic: &'static str,
@@ -446,6 +460,17 @@ pub enum ShiftKind {
     Rotate,
 }
 
+impl ShiftKind {
+    /// This kind's name, for a [`Row`](crate::Row)'s mode.
+    #[must_use]
+    pub const fn name(&self) -> &'static str {
+        match self {
+            ShiftKind::Shift => "Shift",
+            ShiftKind::Rotate => "Rotate",
+        }
+    }
+}
+
 use ShiftKind::{Rotate, Shift as ShiftK};
 
 /// One shift or rotate mnemonic.
@@ -816,6 +841,19 @@ pub enum BlockShape {
     /// `TRxB / TRTxB @Rd, @Rs, Rc` — dest pointer in word 1, source pointer in
     /// word 2 (the reverse of `LDx`); byte only, R1 (`RH1`) implied.
     Translate,
+}
+
+impl BlockShape {
+    /// This kind's name, for a [`Row`](crate::Row)'s mode.
+    #[must_use]
+    pub const fn name(&self) -> &'static str {
+        match self {
+            BlockShape::Load => "Load",
+            BlockShape::Compare => "Compare",
+            BlockShape::CompareString => "CompareString",
+            BlockShape::Translate => "Translate",
+        }
+    }
 }
 
 /// One block / string instruction.
@@ -1397,6 +1435,22 @@ pub enum ControlKind {
     Sc,
 }
 
+impl ControlKind {
+    /// This kind's name, for a [`Row`](crate::Row)'s mode.
+    #[must_use]
+    pub const fn name(&self) -> &'static str {
+        match self {
+            ControlKind::Fixed(_) => "Fixed",
+            ControlKind::Mreq => "Mreq",
+            ControlKind::Flag(_) => "Flag",
+            ControlKind::Intr(_) => "Intr",
+            ControlKind::Ldctl(_) => "Ldctl",
+            ControlKind::Ldps => "Ldps",
+            ControlKind::Sc => "Sc",
+        }
+    }
+}
+
 /// One CPU-control instruction.
 pub struct Control {
     pub mnemonic: &'static str,
@@ -1516,6 +1570,19 @@ pub enum MiscKind {
     /// load, `reg` in the low nibble then a signed 16-bit `target − (PC + 4)`
     /// offset word. The load top byte is per size; the store form is `top | 2`.
     Ldr,
+}
+
+impl MiscKind {
+    /// This kind's name, for a [`Row`](crate::Row)'s mode.
+    #[must_use]
+    pub const fn name(&self) -> &'static str {
+        match self {
+            MiscKind::Tcc => "Tcc",
+            MiscKind::Ldk => "Ldk",
+            MiscKind::Rotdig => "Rotdig",
+            MiscKind::Ldr => "Ldr",
+        }
+    }
 }
 
 /// One miscellaneous instruction.
@@ -2064,3 +2131,147 @@ pub const INSTRUCTIONS: &[Insn] = &[
         summary: "Load address",
     },
 ];
+
+/// The addressing-mode names behind the [`IM`]…[`R`] bits, in bit order.
+const MODE_NAMES: [(u8, &str); 5] = [
+    (IM, "immediate"),
+    (IR, "indirect register"),
+    (DA, "direct address"),
+    (X, "indexed"),
+    (R, "register"),
+];
+
+/// The same modes for a **store** form, whose memory operand is the
+/// destination rather than the source.
+///
+/// The direction is part of the encoding, not a detail: `LD` has a load entry
+/// and a store entry that allow the same addressing modes, so a row labelled
+/// only by the mode would name the same encoding twice and hide one of them.
+const STORE_MODE_NAMES: [(u8, &str); 5] = [
+    (IM, "immediate, store"),
+    (IR, "indirect register, store"),
+    (DA, "direct address, store"),
+    (X, "indexed, store"),
+    (R, "register, store"),
+];
+
+/// The modes a `modes` bitmask allows, as row labels.
+fn modes_of(modes: u8, store: bool) -> impl Iterator<Item = &'static str> {
+    let names = if store { STORE_MODE_NAMES } else { MODE_NAMES };
+    names
+        .into_iter()
+        .filter(move |(bit, _)| modes & bit != 0)
+        .map(|(_, name)| name)
+}
+
+/// Every encoding row this spec declares.
+///
+/// The Z8000 is authored as **thirteen tables with thirteen row types**, one
+/// per instruction family, because the families encode nothing like each
+/// other: a dyadic operation carries an addressing-mode field, a block move
+/// carries a shape and a control nibble, a control instruction may be a whole
+/// fixed word. There is no single table to iterate, so the rows chain them.
+///
+/// Two of the thirteen carry an explicit **addressing-mode bitmask** — the
+/// dyadic family and `Jump`-kind control transfers — and those enumerate one
+/// row per allowed mode, because that is the axis the spec itself distinguishes
+/// on. The other eleven have no such axis: one entry is one encoding, and the
+/// family or kind names it.
+///
+/// `undocumented` is `false` throughout — this spec declares none.
+pub fn rows() -> impl Iterator<Item = crate::Row> {
+    let row = |mnemonic, mode| crate::Row {
+        mnemonic,
+        mode,
+        undocumented: false,
+    };
+
+    // The two families with a mode axis.
+    let dyadic = INSTRUCTIONS
+        .iter()
+        .flat_map(move |i| modes_of(i.modes, i.store).map(move |m| row(i.mnemonic, m)));
+    let control_transfer = CONTROL.iter().flat_map(move |c| {
+        let per_mode: Vec<&'static str> = modes_of(c.modes, false).collect();
+        let kind = c.kind.name();
+        // A non-`Jump` kind carries no mask, and names itself instead.
+        let labels = if per_mode.is_empty() {
+            vec![kind]
+        } else {
+            per_mode
+        };
+        labels.into_iter().map(move |m| row(c.mnemonic, m))
+    });
+
+    // The eleven without one: an entry is an encoding, named by its family.
+    let mono = MONO.iter().map(move |i| row(i.mnemonic, "monadic"));
+    let stack = STACK.iter().map(move |i| row(i.mnemonic, "stack"));
+    let shifts = SHIFTS.iter().map(move |i| row(i.mnemonic, i.kind.name()));
+    let extends = EXTENDS.iter().map(move |i| row(i.mnemonic, "extend"));
+    let bits = BITS.iter().map(move |i| row(i.mnemonic, "bit"));
+    let muldiv = MULDIV
+        .iter()
+        .map(move |i| row(i.mnemonic, "multiply/divide"));
+    let block = BLOCK.iter().map(move |i| row(i.mnemonic, i.shape.name()));
+    let simple_io = SIMPLE_IO.iter().map(move |i| row(i.mnemonic, "port"));
+    let block_io = BLOCK_IO.iter().map(move |i| row(i.mnemonic, "block port"));
+    let controls = CONTROLS.iter().map(move |i| row(i.mnemonic, i.kind.name()));
+    let misc = MISC.iter().map(move |i| row(i.mnemonic, i.kind.name()));
+
+    dyadic
+        .chain(control_transfer)
+        .chain(mono)
+        .chain(stack)
+        .chain(shifts)
+        .chain(extends)
+        .chain(bits)
+        .chain(muldiv)
+        .chain(block)
+        .chain(simple_io)
+        .chain(block_io)
+        .chain(controls)
+        .chain(misc)
+}
+
+#[cfg(test)]
+mod row_tests {
+    /// The mode-bearing families expand and the rest do not, so the row count
+    /// is the entry count plus what the two bitmasks add. Stated as the shape
+    /// rather than a fixed number, which would only pin today's table sizes.
+    #[test]
+    fn only_the_mode_bearing_families_expand() {
+        let dyadic_rows = super::INSTRUCTIONS
+            .iter()
+            .map(|i| super::modes_of(i.modes, i.store).count())
+            .sum::<usize>();
+        assert!(
+            dyadic_rows > super::INSTRUCTIONS.len(),
+            "the dyadic family carries a mode axis and must expand"
+        );
+        for (name, count, entries) in [
+            ("monadic", super::MONO.len(), super::MONO.len()),
+            ("bit", super::BITS.len(), super::BITS.len()),
+        ] {
+            assert_eq!(
+                count, entries,
+                "{name} has no mode axis and must not expand"
+            );
+        }
+    }
+
+    /// A store form is a distinct encoding from the load it shares an
+    /// addressing mode with. `LD` declares both, and labelling a row by the
+    /// mode alone would name one encoding twice and lose the other — which the
+    /// distinct-modes invariant caught the first time this was written.
+    #[test]
+    fn a_store_form_is_its_own_row() {
+        let rows: Vec<crate::Row> = super::rows().filter(|r| r.mnemonic == "LD").collect();
+        assert!(
+            rows.iter().any(|r| r.mode == "indirect register"),
+            "LD declares a load form"
+        );
+        assert!(
+            rows.iter().any(|r| r.mode == "indirect register, store"),
+            "LD declares a store form, and it is not the load"
+        );
+    }
+}
