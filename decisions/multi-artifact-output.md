@@ -1,6 +1,6 @@
 # Decision: a source may produce several artifacts — the library describes them, the CLI writes them
 
-**Status:** Proposed. Binding for Asm198x once accepted. Implements the
+**Status:** Active. Binding for Asm198x (accepted 2026-08-24). Implements the
 multi-output case [`assemble-io-model.md`](assemble-io-model.md) already
 specifies, within the additive-change rules of
 [`core-contract-freeze.md`](core-contract-freeze.md).
@@ -78,6 +78,42 @@ what happened, give the host a control rather than a veto:
 None. `AssemblyResult` is `#[non_exhaustive]` and `core-contract-freeze.md` is
 explicit that "additive fields never bump it", so `CONTRACT_VERSION` stays at 1
 and older payloads keep loading.
+
+## The formats are the family's, not this repository's
+
+**Amended on acceptance, 2026-08-24.** A container is not an Asm198x private
+matter, and the implementation must not treat it as one. Every format in scope
+here is handled by more than one sibling: Asm198x **writes** it, Emu198x
+**loads** it, Build198x **masters** media containing it, and Cat198x
+**identifies** it. Four readings of one byte layout.
+
+So a container's layout is a fact under
+[`shared-hardware-reference-canon.md`](../../../decisions/shared-hardware-reference-canon.md)
+like any other: it goes to `reference/`/`syntheses/` first, and the serialiser
+here cites upward. It is not derived from an emulator's loader, and it is not
+worked out at the keyboard from a file that happened to load.
+
+That upstream already exists for the first two Spectrum targets.
+`syntheses/zx-spectrum/tape-loading-format.md` documents the TAP file format
+(§4) and the TZX file format (§5) alongside the physical encoding they frame,
+so `SAVETAP` has something to cite on the day it is written.
+
+**Whether the formats eventually want a shared *executable* layer is not
+decided here, deliberately.** The family has two such layers already — the ISA
+spec in Asm198x and `mediaspec` in Build198x
+([`shared-media-spec.md`](../../../decisions/shared-media-spec.md)) — and both
+recorded the same deferral: one crate until a second consumer makes the split
+real. The second consumer here is Emu198x's loader reading a layout Asm198x
+writes. Write the first containers in this workspace citing the primary
+library; when Emu198x needs the same layout, that is the moment a shared layer
+earns itself, and it is an umbrella decision when it comes, not this one.
+
+What follows from the amendment now, and binds:
+
+- A format's byte layout is cited to `reference/`/`syntheses/` in the
+  serialiser's doc comments, or the fact is added there first.
+- A gap in the primary library is filled there, not worked around here.
+- No container layout is transcribed from an emulator, ours or anyone's.
 
 ## Open, deliberately
 
