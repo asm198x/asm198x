@@ -48,11 +48,18 @@ struct Cpu {
     forms: usize,
 }
 
-/// Every CPU with a form audit. The 8039 is the ROM-less MCS-48 kin: it shares
-/// the 8048's spec but is arbitrated separately, so it is counted separately.
+/// Every CPU whose spec declares rows. The 8039 is the ROM-less MCS-48 kin: it
+/// shares the 8048's spec but is arbitrated separately, so it is counted
+/// separately — and the Z8001 stands in the same relation to the Z8000.
+///
+/// The denominator is [`isa::InstructionSet::rows`] and its per-module
+/// equivalents, not a form count, so the specs that author their encodings
+/// some other way are here too (`decisions/every-spec-enumerates-its-forms.md`).
+/// For the `Form` specs the two are the same number, asserted in `isa` — this
+/// change moves the source of the denominator without moving any denominator.
 fn cpus() -> Vec<Cpu> {
     fn total(set: &isa::InstructionSet) -> usize {
-        set.instructions.iter().map(|i| i.forms.len()).sum()
+        set.rows().count()
     }
     vec![
         Cpu {
@@ -114,6 +121,33 @@ fn cpus() -> Vec<Cpu> {
         Cpu {
             name: "sm83",
             forms: total(&isa::sm83::SET),
+        },
+        // The specs that author their encodings outside `InstructionSet`.
+        // They have had no denominator until now, which is why a missing
+        // mnemonic could not lower a score — see #225, and the record.
+        Cpu {
+            name: "6809",
+            forms: isa::mos6809::rows().count(),
+        },
+        Cpu {
+            name: "CP1610",
+            forms: isa::cp1610::rows().count(),
+        },
+        Cpu {
+            name: "PDP-11",
+            forms: isa::pdp11::rows().count(),
+        },
+        Cpu {
+            name: "TMS9900",
+            forms: isa::tms9900::rows().count(),
+        },
+        Cpu {
+            name: "Z8000",
+            forms: isa::z8000::rows().count(),
+        },
+        Cpu {
+            name: "Z8001",
+            forms: isa::z8000::rows().count(),
         },
     ]
 }
