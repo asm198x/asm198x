@@ -865,11 +865,11 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
 /// already-qualified `global.local`, is left untouched.
 pub(crate) fn qualify_locals(op: Operation, scope: &str) -> Operation {
     map_syms(op, &mut |s| {
-        if s.starts_with('.') {
+        Expr::Sym(if s.starts_with('.') {
             format!("{scope}{s}")
         } else {
             s
-        }
+        })
     })
 }
 
@@ -878,7 +878,7 @@ pub(crate) fn qualify_locals(op: Operation, scope: &str) -> Operation {
 /// keeping two twelve-arm copies: [`qualify_locals`] passes the leading-`.`
 /// rule, and sjasmplus's module repair pass passes a lookup over its alias
 /// table. `f` sees each name once and returns the name to use.
-pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> String) -> Operation {
+pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Operation {
     match op {
         Operation::Org(e) => Operation::Org(map_sym_expr(e, f)),
         Operation::Equ(e) => Operation::Equ(map_sym_expr(e, f)),
@@ -912,9 +912,9 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> String) -> O
 
 /// The expression half of [`map_syms`]: rewrite every symbol name through `f`,
 /// recursing through the expression tree.
-pub(crate) fn map_sym_expr(e: Expr, f: &mut impl FnMut(String) -> String) -> Expr {
+pub(crate) fn map_sym_expr(e: Expr, f: &mut impl FnMut(String) -> Expr) -> Expr {
     match e {
-        Expr::Sym(s) => Expr::Sym(f(s)),
+        Expr::Sym(s) => f(s),
         Expr::Num(_) | Expr::Pc => e,
         Expr::Lo(b) => Expr::Lo(Box::new(map_sym_expr(*b, f))),
         Expr::Hi(b) => Expr::Hi(Box::new(map_sym_expr(*b, f))),
@@ -932,11 +932,11 @@ pub(crate) fn map_sym_expr(e: Expr, f: &mut impl FnMut(String) -> String) -> Exp
 /// with `scope`, recursing through the expression tree.
 pub(crate) fn qualify_expr(e: Expr, scope: &str) -> Expr {
     map_sym_expr(e, &mut |s| {
-        if s.starts_with('.') {
+        Expr::Sym(if s.starts_with('.') {
             format!("{scope}{s}")
         } else {
             s
-        }
+        })
     })
 }
 

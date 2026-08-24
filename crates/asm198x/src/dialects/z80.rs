@@ -1394,7 +1394,9 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         for st in &mut out {
             if let Some(op) = st.op.take() {
                 st.op = Some(crate::ast::map_syms(op, &mut |s| {
-                    fix.get(s.as_str()).map_or(s, |bare| (*bare).to_string())
+                    crate::engine::Expr::Sym(
+                        fix.get(s.as_str()).map_or(s, |bare| (*bare).to_string()),
+                    )
                 }));
             }
         }
@@ -1481,7 +1483,11 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         if self.syntax.scopes_modules() {
             let prefix = self.module_prefix();
             let aliases = &mut self.aliases;
-            op = op.map(|o| crate::ast::map_syms(o, &mut |s| module_ref(s, &prefix, aliases)));
+            op = op.map(|o| {
+                crate::ast::map_syms(o, &mut |s| {
+                    crate::engine::Expr::Sym(module_ref(s, &prefix, aliases))
+                })
+            });
         }
         // `equ` binds its (qualified) label to a parse-time constant.
         if let (Some(q), Some(Operation::Equ(e))) = (&label, &op)

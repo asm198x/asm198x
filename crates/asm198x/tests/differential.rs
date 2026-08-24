@@ -794,6 +794,10 @@ const PROBES: &[Probe] = &[
     // A banked section is addressed at $4000 whichever bank holds it and lands
     // at `bank * $4000` in the ROM, which an image position equal to an address
     // cannot express. `rgblink` pads to `(highest bank + 1) * $4000`.
+    // `BANK("name")` reaches forward — the section it names may be below it.
+    ok ("rgbasm-banked", "BANK reaches forward to its section",
+        "SECTION \"f\",ROM0[$0]\n db BANK(\"paged\")\n db BANK(\"f\")\n\
+         SECTION \"paged\",ROMX,BANK[2]\n db $22\n"),
     ok ("rgbasm-banked", "a banked section is placed by bank",
         "SECTION \"f\",ROM0[$0]\n db $00\nSECTION \"p\",ROMX,BANK[2]\nhere:\n db $22\n dw here\n"),
     ok ("rgbasm-banked", "a higher bank sizes the ROM",

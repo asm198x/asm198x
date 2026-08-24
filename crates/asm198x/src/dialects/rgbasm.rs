@@ -94,6 +94,8 @@ impl Dialect for Rgbasm {
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        let banks = declared_banks(&out);
+        resolve_banks(&mut out, &banks)?;
         Ok(out)
     }
 
@@ -117,6 +119,8 @@ impl Dialect for Rgbasm {
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        let banks = declared_banks(&out);
+        resolve_banks(&mut out, &banks)?;
         Ok(out)
     }
 
@@ -578,6 +582,69 @@ fn section_origin(code: &str, line: usize) -> Result<Option<Expr>, AsmError> {
     }
 }
 
+/// Marks a `BANK("name")` whose section may not have been seen yet. `\u{1}`
+/// cannot appear in source.
+const BANK_MARK: &str = "\u{1}bank\u{1}";
+
+/// rgbasm's expression functions. `BANK("name")` is the bank its section was
+/// given, and it reaches **forward** — `db BANK("paged")` above the section it
+/// names assembles — so it cannot fold while walking. It becomes a marker that
+/// [`resolve_banks`] answers once every `SECTION` in the program is known.
+fn expr_function(name: &str, args: Vec<mos6502::ExprArg>, line: usize) -> Result<Expr, AsmError> {
+    if !name.eq_ignore_ascii_case("bank") {
+        return Err(AsmError::new(
+            line,
+            format!(
+                "`{name}` is not an expression function asm198x implements yet — \
+                 the source is valid and the gap is ours"
+            ),
+        ));
+    }
+    let [arg]: [_; 1] = args
+        .try_into()
+        .map_err(|_| AsmError::new(line, "`BANK` takes one argument"))?;
+    Ok(Expr::Sym(format!("{BANK_MARK}{}", arg.text(name, line)?)))
+}
+
+/// Every section the program declared, and the bank it went in. A section with
+/// no `BANK[...]` is bank 0 — `ROM0` and the unbanked types all live there.
+fn declared_banks(ops: &[Statement]) -> BTreeMap<String, i64> {
+    ops.iter()
+        .filter_map(|st| match &st.op {
+            Some(Operation::Section { name, at, .. }) => {
+                Some((name.clone(), at.unwrap_or(0) / BANK_SIZE))
+            }
+            _ => None,
+        })
+        .collect()
+}
+
+/// Answer every `BANK` marker against the sections the program declared.
+fn resolve_banks(ops: &mut [Statement], banks: &BTreeMap<String, i64>) -> Result<(), AsmError> {
+    let mut missing = None;
+    for st in ops.iter_mut() {
+        if let Some(op) = st.op.take() {
+            st.op = Some(crate::ast::map_syms(
+                op,
+                &mut |sym| match sym.strip_prefix(BANK_MARK) {
+                    Some(name) => match banks.get(name) {
+                        Some(bank) => Expr::Num(*bank),
+                        None => {
+                            missing.get_or_insert_with(|| name.to_string());
+                            Expr::Num(0)
+                        }
+                    },
+                    None => Expr::Sym(sym),
+                },
+            ));
+        }
+    }
+    match missing {
+        Some(name) => Err(AsmError::new(0, format!("no section named `{name}`"))),
+        None => Ok(()),
+    }
+}
+
 /// A Game Boy ROM bank, and where the CPU sees a banked one.
 const BANK_SIZE: i64 = 0x4000;
 const ROMX_BASE: i64 = 0x4000;
@@ -937,7 +1004,7 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         parse_number,
         ExprOpts {
-            function: None,
+            function: Some(expr_function),
             bang_is_or: false,
             prec: BytePrec::Tight,
             byte_prefix: false,
@@ -1428,6 +1495,27 @@ mod tests {
         let out = crate::assemble_rgbasm("SECTION \"p\",ROMX,BANK[2]\nhere:\n dw here\n")
             .expect("assembles");
         assert_eq!(&out.bytes[0x8000..0x8002], &[0x00, 0x40]);
+    }
+
+    /// `BANK("name")` is answered after the whole program is known, because it
+    /// reaches forward: the section it names is often below the reference.
+    #[test]
+    fn bank_reaches_forward_to_its_section() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"f\",ROM0[$0]\n db BANK(\"paged\")\n db BANK(\"f\")\n\
+             SECTION \"paged\",ROMX,BANK[2]\n db $22\n",
+        )
+        .expect("assembles");
+        // The forward section's bank, then this one's — ROM0 is bank 0.
+        assert_eq!(&out.bytes[..2], &[0x02, 0x00]);
+    }
+
+    /// Naming a section that does not exist is an error, not bank 0.
+    #[test]
+    fn bank_of_an_unknown_section_is_refused() {
+        let err = crate::assemble_rgbasm("SECTION \"f\",ROM0[$0]\n db BANK(\"nope\")\n")
+            .expect_err("no such section");
+        assert!(err.to_string().contains("no section named"), "got `{err}`");
     }
 
     /// Two sections claiming the same bytes is refused, not silently merged.
