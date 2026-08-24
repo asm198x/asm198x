@@ -136,7 +136,8 @@ pub fn assemble_acme_files(
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_ca65(source: &str) -> Result<AssemblyResult, AsmError> {
-    dialects::ca65::assemble(source).map(AssemblyResult::image)
+    dialects::ca65::assemble(source)
+        .map(|(rom, warnings)| AssemblyResult::image_warned(rom, warnings))
 }
 
 /// The source map every multi-file entry point starts from: the root at
@@ -179,8 +180,8 @@ pub fn assemble_ca65_files(
 ) -> Result<AssemblyResult, MultiFileError> {
     let mut map = new_source_map(input_path, source);
     match dialects::ca65::assemble_multi(&mut map, loader) {
-        Ok((rom, _)) => {
-            let mut result = AssemblyResult::image(rom);
+        Ok((rom, warnings, _)) => {
+            let mut result = AssemblyResult::image_warned(rom, warnings);
             result.files = map.file_table();
             Ok(result)
         }
@@ -209,10 +210,10 @@ pub fn assemble_ca65_files_debug(
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
     let mut map = new_source_map(input_path, source);
     match dialects::ca65::assemble_multi(&mut map, loader) {
-        Ok((rom, capture)) => {
+        Ok((rom, warnings, capture)) => {
             let files = map.file_table();
             let info = listing::capture_debug_info_multi(capture, "6502", "ca65", files.clone());
-            let mut result = AssemblyResult::image(rom);
+            let mut result = AssemblyResult::image_warned(rom, warnings);
             result.files = files;
             Ok((result, info))
         }
@@ -236,9 +237,9 @@ pub fn assemble_ca65_debug(
     source: &str,
     source_path: &str,
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), AsmError> {
-    let (rom, capture) = dialects::ca65::assemble_with_debug(source)?;
+    let (rom, warnings, capture) = dialects::ca65::assemble_with_debug(source)?;
     Ok((
-        AssemblyResult::image(rom),
+        AssemblyResult::image_warned(rom, warnings),
         listing::capture_debug_info(capture, "6502", "ca65", source_path),
     ))
 }

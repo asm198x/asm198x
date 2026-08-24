@@ -33,7 +33,7 @@ use super::mos6502::{
     split_first_word, split_top_level, string_literal,
 };
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, Expr, Operation};
+use crate::engine::{AsmError, DiagSeverity, Expr, Operation, Warning, WarningKind};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
 
@@ -171,6 +171,15 @@ enum Kind {
     DWords(Vec<Expr>),
     /// `.res count [, fill]` — `count` bytes of `fill`.
     Res(usize, u8),
+    /// `.out`, `.warning`, `.error` and `.fatal` — say something and emit
+    /// nothing. The severity decides what happens next: a note or a warning
+    /// carries on, an error stops. ca65 reports every `.error` and only the
+    /// first `.fatal`, a distinction a single-error result cannot show.
+    Message(DiagSeverity, String),
+    /// `.assert cond, action[, "message"]` — `error` stops, `warning` carries
+    /// on. The condition folds against the finished symbol table, so it may
+    /// name a label defined below it.
+    Assert(Expr, bool, String),
     /// `.align boundary [, fill]` — pad to the next multiple of `boundary`
     /// **within the segment**, not at an absolute address: ca65 emits an
     /// alignment constraint and leaves aligning the segment itself to `ld65`,
@@ -244,8 +253,8 @@ fn seg_id(seg: &str) -> debug198x::SectionId {
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
-pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
-    assemble_with_debug(source).map(|(rom, _)| rom)
+pub(crate) fn assemble(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError> {
+    assemble_with_debug(source).map(|(rom, warnings, _)| (rom, warnings))
 }
 
 /// Assemble + link, also returning the debug [`Capture`] read out of layout
@@ -254,13 +263,15 @@ pub(crate) fn assemble(source: &str) -> Result<Vec<u8>, AsmError> {
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
-pub(crate) fn assemble_with_debug(source: &str) -> Result<(Vec<u8>, DebugCapture), AsmError> {
-    let (rom, capture) = assemble_program(&parse_program(
+pub(crate) fn assemble_with_debug(
+    source: &str,
+) -> Result<(Vec<u8>, Vec<Warning>, DebugCapture), AsmError> {
+    let (rom, warnings, capture) = assemble_program(&parse_program(
         &isa::mos6502::SET,
         source,
         macros::Expand::Yes,
     )?)?;
-    Ok((rom, capture.into_single()))
+    Ok((rom, warnings, capture.into_single()))
 }
 
 /// Assemble + link a **multi-file** NES program (language-surface U5): the
@@ -276,7 +287,7 @@ pub(crate) fn assemble_with_debug(source: &str) -> Result<(Vec<u8>, DebugCapture
 pub(crate) fn assemble_multi(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
-) -> Result<(Vec<u8>, DebugCaptureMulti), AsmError> {
+) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
     assemble_program(&parse_program_multi(&isa::mos6502::SET, map, loader)?)
 }
 
@@ -290,7 +301,7 @@ pub(crate) fn assemble_multi(
 /// failure.
 fn assemble_program(
     program: &crate::ast::Program,
-) -> Result<(Vec<u8>, DebugCaptureMulti), AsmError> {
+) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
     let set = &isa::mos6502::SET;
     // The AST is the single front-end IR: the parse built the source-preserving
     // `Program` (carrying each statement's native `Kind`, `=` constants, and the
@@ -421,19 +432,27 @@ fn assemble_program(
         })
         .collect();
 
-    // Emit pass: turn each placed item into bytes, per segment.
+    // Emit pass: turn each placed item into bytes, per segment. Statements run
+    // in source order across segments, so `.out` notes come out in the order
+    // they were written.
     let mut seg_bytes: BTreeMap<String, Vec<u8>> = BTreeMap::new();
+    let mut warnings: Vec<Warning> = Vec::new();
     for (seg, addr, line, file, item) in placed {
-        if !seg_info(&seg).expect("seg").in_file() {
+        // A diagnostic carries no bytes, so it is answered before the segment
+        // filter: an `.out` written inside BSS still prints.
+        let diagnostic = matches!(item, Resolved::Message(..) | Resolved::Assert(..));
+        if !diagnostic && !seg_info(&seg).expect("seg").in_file() {
             continue; // bss/zp segments occupy address space but emit no file bytes
         }
         let buf = seg_bytes.entry(seg).or_default();
-        emit(item, addr, &addr_env, buf, line).map_err(|e| ca65_flat::stamp_file(e, file))?;
+        emit(item, addr, &addr_env, buf, &mut warnings, file, line)
+            .map_err(|e| ca65_flat::stamp_file(e, file))?;
     }
 
     let rom = link(&seg_bytes)?;
     Ok((
         rom,
+        warnings,
         DebugCaptureMulti {
             sections,
             symbols: dbg_symbols,
@@ -500,6 +519,10 @@ enum Resolved {
         form: &'static isa::Form,
         operands: Vec<Expr>,
     },
+    /// Something to say, carrying no bytes.
+    Message(DiagSeverity, String),
+    /// A condition to fold once every symbol is known, and what a failure does.
+    Assert(Expr, bool, String),
 }
 
 /// Resolve a parsed statement to an emittable item plus its byte size.
@@ -540,6 +563,8 @@ fn resolve(
             (Resolved::DWords(v), n)
         }
         Kind::Res(count, fill) => (Resolved::Fill(count, fill), count),
+        Kind::Message(severity, text) => (Resolved::Message(severity, text), 0),
+        Kind::Assert(cond, fatal, message) => (Resolved::Assert(cond, fatal, message), 0),
         Kind::Insn { operand, mnemonic } => {
             let insn = set
                 .instruction(&mnemonic)
@@ -557,17 +582,47 @@ fn resolve(
     })
 }
 
-/// Emit one resolved item's bytes at address `addr`.
+/// Emit one resolved item's bytes at address `addr`, appending any diagnostic
+/// the source asked for. `env` is the finished symbol table, so an `.assert`
+/// here may name a label defined below it.
 fn emit(
     item: Resolved,
     addr: u32,
     env: &BTreeMap<String, i64>,
     out: &mut Vec<u8>,
+    warnings: &mut Vec<Warning>,
+    file: FileId,
     line_for_errors: usize,
 ) -> Result<(), AsmError> {
     let pc = i64::from(addr);
     match item {
         Resolved::Nothing => {}
+        Resolved::Message(severity, text) => match severity {
+            DiagSeverity::Error => return Err(AsmError::new(line_for_errors, text)),
+            DiagSeverity::Warning | DiagSeverity::Note => warnings.push(Warning {
+                line: line_for_errors,
+                message: text,
+                kind: if severity == DiagSeverity::Note {
+                    WarningKind::Note
+                } else {
+                    WarningKind::Advisory
+                },
+                file,
+            }),
+        },
+        Resolved::Assert(cond, fatal, message) => {
+            if cond.eval(env, pc, line_for_errors)? == 0 {
+                if fatal {
+                    return Err(AsmError::new(line_for_errors, message));
+                }
+                warnings.push(Warning {
+                    line: line_for_errors,
+                    message,
+                    kind: WarningKind::Advisory,
+                    file,
+                });
+            }
+        }
         Resolved::Raw(bytes) => out.extend_from_slice(&bytes),
         Resolved::Fill(count, fill) => out.extend(std::iter::repeat_n(fill, count)),
         Resolved::Bytes(exprs) => {
@@ -1322,6 +1377,8 @@ fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind {
         Kind::Empty => Kind::Empty,
         Kind::Res(n, f) => Kind::Res(*n, *f),
         Kind::Align(m, f) => Kind::Align(*m, *f),
+        Kind::Message(sev, t) => Kind::Message(*sev, t.clone()),
+        Kind::Assert(c, fatal, m) => Kind::Assert(map_expr_syms(c, f), *fatal, m.clone()),
         Kind::Raw(b) => Kind::Raw(b.clone()),
     }
 }
@@ -1735,6 +1792,33 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     Directive {
+        id: "out",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["out"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "message",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["warning", "error", "fatal"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "assert",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["assert"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
         id: "unsupported-segments",
         pattern: Pattern::Sigilled {
             sigil: '.',
@@ -1822,11 +1906,6 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Sigilled {
             sigil: '.',
             names: &[
-                "assert",
-                "error",
-                "fatal",
-                "warning",
-                "out",
                 "list",
                 "listbytes",
                 "pagelen",
@@ -1933,6 +2012,26 @@ fn parse_directive(
         )?)),
         "res" => parse_res(anons, current_global, consts, rest, line),
         "align" => parse_align(anons, current_global, consts, rest, line),
+        // `.out` is the strict one: ca65 answers a value list with
+        // `Unexpected trailing garbage characters`. The other three read a
+        // string and ignore whatever follows it on the line — probed, not
+        // assumed, because the two shapes read alike in the manual.
+        "out" => {
+            let text = rest.trim();
+            match text.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
+                Some(lit) => Ok(Kind::Message(DiagSeverity::Note, lit.to_string())),
+                None => Err(AsmError::new(line, "`.out` takes one string")),
+            }
+        }
+        "message" => {
+            let severity = if name.eq_ignore_ascii_case("warning") {
+                DiagSeverity::Warning
+            } else {
+                DiagSeverity::Error
+            };
+            Ok(Kind::Message(severity, leading_string(rest, line)?))
+        }
+        "assert" => parse_assert(anons, current_global, rest, line),
         // Declared, and dispatched elsewhere: `.include`/`.incbin` are
         // walk-handled, `.segment` is read where segments are assigned, and the
         // macro spellings are expanded before parsing. Reaching here means a
@@ -1971,6 +2070,55 @@ fn parse_res(
         }
     };
     Ok(Kind::Res(count, fill))
+}
+
+/// The leading string of a `.warning`/`.error`/`.fatal` operand. ca65 reads
+/// one string constant and skips the rest of the line: `.warning "a", 5` and
+/// `.warning "a" "b"` both say `a` and nothing more.
+fn leading_string(rest: &str, line: usize) -> Result<String, AsmError> {
+    let rest = rest.trim_start();
+    let body = rest
+        .strip_prefix('"')
+        .ok_or_else(|| AsmError::new(line, "string constant expected"))?;
+    let end = body
+        .find('"')
+        .ok_or_else(|| AsmError::new(line, "unterminated string"))?;
+    Ok(body[..end].to_string())
+}
+
+/// `.assert cond, action[, "message"]`. The action decides whether a failure
+/// stops the assembly: `error` and `lderror` do, `warning` and `ldwarning`
+/// note it and carry on. With assembly and linking fused there is no moment
+/// between the two `ld` forms and the others.
+fn parse_assert(
+    anons: &AnonCtx,
+    current_global: &str,
+    rest: &str,
+    line: usize,
+) -> Result<Kind, AsmError> {
+    let parts = split_top_level(rest, ',');
+    let cond = parse_value(
+        anons,
+        current_global,
+        parts.first().copied().unwrap_or(""),
+        line,
+    )?;
+    let action = parts.get(1).map(|a| a.trim().to_ascii_lowercase());
+    let fatal = match action.as_deref() {
+        Some("error" | "lderror") => true,
+        Some("warning" | "ldwarning") => false,
+        _ => {
+            return Err(AsmError::new(
+                line,
+                "`.assert` needs an action: `warning`, `error`, `ldwarning` or `lderror`",
+            ));
+        }
+    };
+    let message = parts
+        .get(2)
+        .map(|m| m.trim().trim_matches('"').to_string())
+        .unwrap_or_else(|| "Assertion failed".to_string());
+    Ok(Kind::Assert(cond, fatal, message))
 }
 
 /// `.align boundary [, fill]` — pad to the next multiple of `boundary` within
@@ -2169,7 +2317,7 @@ mod tests {
     use super::assemble;
 
     fn rom(src: &str) -> Vec<u8> {
-        assemble(src).expect("assembles")
+        assemble(src).expect("assembles").0
     }
 
     #[test]
@@ -2423,6 +2571,137 @@ two:\n\
         let rom = crate::assemble_ca65(src).expect(src).bytes;
         // The NES ROM is header + 32K PRG; the code sits at the PRG's start.
         rom[16..].to_vec()
+    }
+
+    /// `.out` prints its string and emits nothing. ca65 writes the text bare,
+    /// with no file/line prefix, so the note carries the text alone.
+    #[test]
+    fn out_is_a_note_and_emits_nothing() {
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.out \"hello there\"\nnop\n")
+            .expect("assembles");
+        assert_eq!(r.bytes[16], 0xEA);
+        let note = r.warnings.first().expect("one note");
+        assert_eq!(note.message, "hello there");
+        assert_eq!(note.kind, crate::engine::WarningKind::Note);
+        assert!(note.to_string().contains("note:"), "got `{note}`");
+    }
+
+    /// `.out` takes one string: ca65 answers a value list with `Unexpected
+    /// trailing garbage characters` and a bare number with `String constant
+    /// expected`. Both are refused here too.
+    #[test]
+    fn out_refuses_anything_but_one_string() {
+        for src in [
+            ".segment \"CODE\"\n.out \"a\", 5\n",
+            ".segment \"CODE\"\n.out 5\n",
+        ] {
+            let err = crate::assemble_ca65(src).expect_err(src);
+            assert!(err.to_string().contains("one string"), "got `{err}`");
+        }
+    }
+
+    /// `.warning` says its piece and assembles; `.error` and `.fatal` do not.
+    /// ca65 prefixes the text with `User warning:`/`User error:` — its own
+    /// classification, not the source's words, so it is not reproduced.
+    #[test]
+    fn the_message_words_carry_their_severity() {
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.warning \"soft\"\nnop\n")
+            .expect("a warning assembles");
+        assert_eq!(r.bytes[16], 0xEA);
+        let w = r.warnings.first().expect("one warning");
+        assert_eq!(w.message, "soft");
+        assert_eq!(w.kind, crate::engine::WarningKind::Advisory);
+
+        for word in ["error", "fatal"] {
+            let src = format!(".segment \"CODE\"\n.{word} \"hard\"\nnop\n");
+            let err = crate::assemble_ca65(&src).expect_err(&src);
+            assert!(err.to_string().contains("hard"), "got `{err}`");
+        }
+    }
+
+    /// The message words read one string and skip the rest of the line, where
+    /// `.out` refuses the same shape. Both spellings were probed; the manual
+    /// reads alike for the two.
+    #[test]
+    fn a_message_word_ignores_what_follows_its_string() {
+        for src in [
+            ".segment \"CODE\"\n.warning \"a\", 5\nnop\n",
+            ".segment \"CODE\"\n.warning \"a\" \"b\"\nnop\n",
+        ] {
+            let r = crate::assemble_ca65(src).expect(src);
+            assert_eq!(r.warnings.first().expect("one warning").message, "a");
+        }
+        let err = crate::assemble_ca65(".segment \"CODE\"\n.warning 5\n").expect_err("no string");
+        assert!(err.to_string().contains("string constant"), "got `{err}`");
+    }
+
+    /// A message inside an untaken branch is never said: conditionals fold
+    /// before layout, so the statement does not reach the emit pass.
+    #[test]
+    fn a_message_in_an_untaken_branch_stays_quiet() {
+        let r = crate::assemble_ca65(
+            ".segment \"CODE\"\n.if 0\n.error \"no\"\n.warning \"nor\"\n.endif\nnop\n",
+        )
+        .expect("assembles");
+        assert!(r.warnings.is_empty(), "got `{:?}`", r.warnings);
+    }
+
+    /// `.assert` fires only when its condition is zero, and the action decides
+    /// whether that stops the assembly. The default message is ca65's own.
+    #[test]
+    fn assert_fires_on_zero_and_the_action_decides() {
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.assert 1, error, \"never\"\nnop\n")
+            .expect("true assertion is silent");
+        assert!(r.warnings.is_empty(), "got `{:?}`", r.warnings);
+
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.assert 0, warning, \"soft\"\nnop\n")
+            .expect("a warning assembles anyway");
+        assert_eq!(r.bytes[16], 0xEA);
+        let w = r.warnings.first().expect("one warning");
+        assert_eq!(w.message, "soft");
+        assert_eq!(w.kind, crate::engine::WarningKind::Advisory);
+
+        let err = crate::assemble_ca65(".segment \"CODE\"\n.assert 0, error, \"boom\"\nnop\n")
+            .expect_err("an error does not");
+        assert!(err.to_string().contains("boom"), "got `{err}`");
+
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.assert 0, warning\nnop\n")
+            .expect("assembles");
+        assert_eq!(
+            r.warnings.first().expect("one warning").message,
+            "Assertion failed"
+        );
+    }
+
+    /// The condition folds against the finished symbol table, so it may name a
+    /// label defined below it. Real ca65 defers such an assertion to `ld65`;
+    /// with assembly and linking fused there is no moment between the two.
+    #[test]
+    fn assert_sees_a_label_defined_below_it() {
+        let src = ".segment \"CODE\"\n.assert later = $8001, error, \"moved\"\nnop\nlater:\n";
+        crate::assemble_ca65(src).expect("the label is $8001");
+        let src = ".segment \"CODE\"\n.assert later = $1234, error, \"moved\"\nnop\nlater:\n";
+        let err = crate::assemble_ca65(src).expect_err("it is not $1234");
+        assert!(err.to_string().contains("moved"), "got `{err}`");
+    }
+
+    /// The four action words ca65 accepts, and nothing else. `lderror` and
+    /// `ldwarning` name the link stage, which is not a separate step here.
+    #[test]
+    fn assert_takes_the_four_action_words() {
+        for (action, fatal) in [
+            ("warning", false),
+            ("ldwarning", false),
+            ("error", true),
+            ("lderror", true),
+        ] {
+            let src = format!(".segment \"CODE\"\n.assert 0, {action}, \"m\"\nnop\n");
+            let r = crate::assemble_ca65(&src);
+            assert_eq!(r.is_err(), fatal, "{action}");
+        }
+        let err = crate::assemble_ca65(".segment \"CODE\"\n.assert 0, oops, \"m\"\n")
+            .expect_err("bad action");
+        assert!(err.to_string().contains("action"), "got `{err}`");
     }
 
     #[test]

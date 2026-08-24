@@ -1628,6 +1628,27 @@ const MULTI_PROBES: &[MultiProbe] = &[
     MultiProbe {
         dialect: "ca65-nes",
         binaries: &[],
+        note: "`.out`, `.warning` and a passing or warning `.assert` emit \
+               nothing: the bytes are the same with them present as without, \
+               and both still assemble (an address-dependent assertion ca65 \
+               defers to ld65, which we answer at the fused link)",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .segment \"CODE\"\n\
+             .out \"building\"\n\
+             .warning \"soft\", 5\n\
+             reset: nop\n\
+             .assert 1, error, \"never fires\"\n\
+             .assert later = $8001, error, \"moved\"\n\
+             .assert 0, warning, \"soft, assembles anyway\"\n\
+             later: lda #$07\n\
+             .segment \"VECTORS\"\n .word 0, reset, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
         note: "anonymous and cheap labels resolve across the .include \
                boundary in evaluation order on the NES path (U5)",
         files: &[

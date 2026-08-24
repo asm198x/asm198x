@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 525 word(s) outside our surface, across the references installed
+# 512 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -69,11 +69,10 @@
 
 ## sjasmplus (SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus))
 # 4231 candidate(s) harvested; 264 recognised here, 24 more the tool itself
-# refuses on this target; 80 of the 264 outside our surface
+# refuses on this target; 78 of the 264 outside our surface
 abyte
 abytec
 abytez
-assert
 block
 bplist
 cspectmap
@@ -86,7 +85,6 @@ defh
 dg
 dh
 disp
-display
 dword
 emptytap
 emptytrd
@@ -224,7 +222,7 @@ zmq
 
 ## vasm (vasm 2.0b (c) in 2002-2025 Volker Barthelmann)
 # 4215 candidate(s) harvested; 183 recognised here, 527 more the tool itself
-# refuses on this target; 102 of the 183 outside our surface
+# refuses on this target; 100 of the 183 outside our surface
 cpu32
 dr
 dw
@@ -238,7 +236,6 @@ weak
 xdef
 xref
 ac68080
-assert
 auto
 basereg
 blk
@@ -253,7 +250,6 @@ debug
 dl
 dseg
 dsource
-echo
 einline
 elif
 elseif
@@ -330,12 +326,11 @@ vdebug
 
 ## rgbasm (rgbasm v1.0.3)
 # 3045 candidate(s) harvested; 306 recognised here, 0 more the tool itself
-# refuses on this target; 119 of the 306 outside our surface
+# refuses on this target; 115 of the 306 outside our surface
 acos
 af
 align
 asin
-assert
 atan
 atan2
 bank
@@ -388,8 +383,6 @@ popc
 popo
 pops
 pow
-print
-println
 purge
 pushc
 pusho
@@ -411,7 +404,6 @@ sizeof
 sp
 sram
 startof
-static_assert
 strbyte
 strcat
 strchar
@@ -453,9 +445,8 @@ __utc_year__
 
 ## ca65 (ca65 V2.18 - N/A)
 # 2906 candidate(s) harvested; 225 recognised here, 4 more the tool itself
-# refuses on this target; 126 of the 225 outside our surface
+# refuses on this target; 121 of the 225 outside our surface
 .asize
-.assert
 .autoimport
 .bank
 .bankbyte
@@ -489,13 +480,11 @@ __utc_year__
 .endstruct
 .endunion
 .enum
-.error
 .exitmac
 .exitmacro
 .export
 .exportzp
 .faraddr
-.fatal
 .feature
 .fileopt
 .fopt
@@ -542,7 +531,6 @@ __utc_year__
 .null
 .or
 .org
-.out
 .p02
 .p4510
 .p816
@@ -577,6 +565,5 @@ __utc_year__
 .undefine
 .union
 .version
-.warning
 .xmatch
 .xor
