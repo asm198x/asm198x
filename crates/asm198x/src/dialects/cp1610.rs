@@ -224,14 +224,19 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["org"]),
         category: Category::Operation,
     },
+    // `byte` and `word` only. `db`, `dc.b`, `data`, `dw` and `dc.w` were
+    // declared here too and asl has none of them on this chip — each answers
+    // `unknown instruction` (asl 1.42, probed 2026-08-24). They came in with a
+    // sweep and were never checked against the tool, so source asl refuses
+    // assembled here.
     Directive {
         id: "bytes",
-        pattern: Pattern::Exact(&["byte", "db", "dc.b"]),
+        pattern: Pattern::Exact(&["byte"]),
         category: Category::Operation,
     },
     Directive {
         id: "words",
-        pattern: Pattern::Exact(&["word", "data", "dw", "dc.w"]),
+        pattern: Pattern::Exact(&["word"]),
         category: Category::Operation,
     },
     Directive {
