@@ -269,7 +269,7 @@ pub(crate) fn assemble_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), A
         true,
         &mut warnings,
     )?;
-    let bytes = flatten_one_section(&sections)?;
+    let bytes = flatten_sections(&sections)?;
     Ok((bytes, warnings))
 }
 
@@ -289,7 +289,7 @@ pub(crate) fn assemble_warned_multi(
     let mut warnings = Vec::new();
     let (sections, mut capture) =
         assemble_core(&parse_program_multi(map, loader)?, true, &mut warnings)?;
-    let bytes = flatten_one_section(&sections)?;
+    let bytes = flatten_sections(&sections)?;
     rebase_flat_capture(&sections, &mut capture);
     Ok((bytes, warnings, capture))
 }
@@ -338,21 +338,40 @@ pub(crate) fn assemble_with(source: &str, optimize: bool) -> Result<Vec<u8>, Asm
         optimize,
         &mut warnings,
     )?;
-    flatten_one_section(&sections)
+    flatten_sections(&sections)
 }
 
 /// Reduce assembled sections to a single flat binary's bytes: empty is empty,
 /// one section is its bytes, and more than one is an error (`-Fbin` holds one).
-fn flatten_one_section(sections: &[SecOut]) -> Result<Vec<u8>, AsmError> {
-    let nonempty: Vec<&SecOut> = sections.iter().filter(|s| !s.bytes.is_empty()).collect();
-    match nonempty.as_slice() {
-        [] => Ok(Vec::new()),
-        [s] => Ok(s.bytes.clone()),
-        _ => Err(AsmError::new(
-            0,
-            "a flat binary holds one section; this source has several (use the executable output)",
-        )),
-    }
+/// Lay the sections into the flat image `-Fbin` writes.
+///
+/// A flat binary is not limited to one section: `vasmm68k_mot -Fbin` takes
+/// several and writes one image over them, refusing only where two *overlap*
+/// (`sections <one>:0-1 and <two>:0-1 must not overlap`). Placement is the
+/// engine's, so a flat vasm image, a NES ROM and a Game Boy bank are laid by
+/// one implementation.
+///
+/// Every section here is based at 0 today, so any two non-empty ones do
+/// overlap and are refused — which is what this did before, for a reason it
+/// stated wrongly. Sections stop coinciding once vasm's `org` is implemented,
+/// and this needs no change when they do.
+fn flatten_sections(sections: &[SecOut]) -> Result<Vec<u8>, AsmError> {
+    let runs = sections
+        .iter()
+        .map(|s| crate::engine::Run {
+            name: match s.kind {
+                HunkKind::Code => "code",
+                HunkKind::Data => "data",
+                HunkKind::Bss => "bss",
+            }
+            .to_string(),
+            base: 0,
+            at: None,
+            bytes: s.bytes.clone(),
+        })
+        .collect();
+    let (_, image) = crate::engine::lay_out(runs, 0, 1, None, |_| None)?;
+    Ok(image)
 }
 
 /// Assemble to an Amiga hunk executable (`-Fhunkexe -kick1hunks`), optimizer on.
@@ -385,7 +404,7 @@ pub(crate) fn assemble_warned_with_debug(
         true,
         &mut warnings,
     )?;
-    let bytes = flatten_one_section(&sections)?;
+    let bytes = flatten_sections(&sections)?;
     rebase_flat_capture(&sections, &mut capture);
     // The single-source API keeps its exact pre-multi-file record shape:
     // every line lives in the root input (U6 adopts `DebugCaptureMulti`
