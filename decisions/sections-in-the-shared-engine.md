@@ -23,6 +23,9 @@ exactly the two dialects with sections, and that is not a coincidence:
 `Assembly` is one `origin` and one contiguous `bytes`, so a dialect with
 sections cannot say what it means in that type and has to leave.
 
+**Amended 2026-08-24, after doing it.** That reading was right for ca65 and
+only half right for vasm — see "What actually moved" below.
+
 Leaving costs each of them its own layout pass, its own label placement, and its
 own construction of the debug section table. Today that is two hand-rolls, which
 is tolerable. rgbasm's banks and sjasmplus's `device`/`page`/`slot` are now in
@@ -100,6 +103,44 @@ Three places currently express a section model the engine refuses to hold:
 - **A standalone linker and object format.** Forbidden by
   `assemble-io-model.md` principle 3 and out of scope per
   `packaging-and-cpu-roadmap.md` § 3.
+
+## What actually moved
+
+Recorded after implementation, because the prediction above was not quite
+right and the next person should not go looking for a consolidation that is
+not there.
+
+**The model needed a dimension the record did not anticipate.** A section's
+address and its position in the image are different numbers. A Game Boy `ROMX`
+section is addressed at `$4000` in whichever bank holds it and lands at
+`bank * $4000` in the ROM; a NES `HEADER` is at file offset 0 and is not CPU
+addressable at all. So a run carries both, and `image_base`/`image_size` moved
+to the dialect as the container facts they are.
+
+**ca65 mapped exactly.** Its `link` placed four segments at file offsets
+hard-coded in the function body; those became data beside the addresses they
+belong with, and `in_file` stopped being a separate boolean — a segment is in
+the file exactly when it has an offset to be at.
+
+**vasm had one third of what the record assumed.** Its flat path moved, and
+fixed a wrong claim on the way: `flatten_one_section` refused a second section
+because "a flat binary holds one section", which is not what vasm does — it
+lays several into one image and refuses only where two *overlap*. But vasm does
+not bypass the engine only because it has sections:
+
+- its **hunk executable** is a container — per-hunk headers, relocation blocks,
+  longword padding — not an image with sections laid into it, and principle 3
+  of `assemble-io-model.md` puts native serialisers in the dialect;
+- its **multipass** is branch relaxation, which is an optimiser and not
+  placement at all.
+
+Neither belongs in a shared layout. The claim "the dialects that bypass the
+engine are exactly the dialects that have sections" should be read as: that is
+*a* reason all of them bypass it, and the only one this record addresses.
+
+**The payoff is in the dialects that came after.** rgbasm's sections, its banks
+and its ROM sizing were built on the shared model rather than a fourth private
+layout, which is the growth this record existed to stop.
 
 ## Drift triggers
 
