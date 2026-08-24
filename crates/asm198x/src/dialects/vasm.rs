@@ -2412,6 +2412,17 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["section"]),
         category: Category::Operation,
     },
+    // The shorthands: each opens a section whose attribute *is* the word, so
+    // `code_c` means `section CODE,code_c`. vasm names the new section after
+    // the word (or after an argument, if one is given); the name reaches no
+    // part of an executable hunk file, so only the kind and flag are kept.
+    Directive {
+        id: "section_shorthand",
+        pattern: Pattern::Exact(&[
+            "code", "code_c", "code_f", "data", "data_c", "data_f", "bss", "bss_c", "bss_f",
+        ]),
+        category: Category::Operation,
+    },
     Directive {
         id: "dc",
         pattern: Pattern::Sized {
@@ -2478,23 +2489,14 @@ pub const DIRECTIVES: &[Directive] = &[
             "auto",
             "basereg",
             "blk",
-            "bss",
-            "bss_c",
-            "bss_f",
             "cargs",
             "clrfo",
             "clrso",
             "cnop",
-            "code",
-            "code_c",
-            "code_f",
             "comm",
             "comment",
             "cpu32",
             "cseg",
-            "data",
-            "data_c",
-            "data_f",
             "db",
             "debug",
             "dl",
@@ -2623,6 +2625,7 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
             }
             "even" => Ok(Stmt::Even),
             "section" => Ok(parse_section(args, line)),
+            "section_shorthand" => Ok(section_from_attr(&lower)),
             // dcb.x count,value — reserve `count` items of `value`. Stage 1:
             // treat as a constant-sized run (value defaults to 0 if omitted).
             "dcb" => parse_dcb(suffix, args, line),
@@ -2656,6 +2659,13 @@ fn parse_section(args: &str, _line: usize) -> Stmt {
         .copied()
         .unwrap_or("")
         .to_ascii_lowercase();
+    section_from_attr(&attr)
+}
+
+/// The content kind and memory placement a section attribute names. Shared by
+/// `section name,attr` and by the shorthands, where the directive word is the
+/// attribute: `bss_c` is `section BSS,bss_c`.
+fn section_from_attr(attr: &str) -> Stmt {
     let kind = if attr.contains("bss") {
         HunkKind::Bss
     } else if attr.contains("data") {
@@ -3083,6 +3093,30 @@ mod directive_surface {
         asm(&format!("        section code,code\n        {body}\n"))
             .expect("assembles")
             .bytes
+    }
+
+    /// The shorthands say the same thing as the long form: `code_c` is
+    /// `section CODE,code_c`, down to the chip-memory bit in the hunk header.
+    #[test]
+    fn each_section_shorthand_matches_its_long_form() {
+        for (short, long) in [
+            ("code", "section CODE,code"),
+            ("code_c", "section CODE,code_c"),
+            ("code_f", "section CODE,code_f"),
+            ("data", "section DATA,data"),
+            ("data_c", "section DATA,data_c"),
+            ("data_f", "section DATA,data_f"),
+            ("bss", "section BSS,bss"),
+            ("bss_c", "section BSS,bss_c"),
+            ("bss_f", "section BSS,bss_f"),
+        ] {
+            let body = |opener: &str| format!("\t{opener}\n\tmoveq #1,d0\n");
+            assert_eq!(
+                super::assemble_exe(&body(short)).expect("short assembles"),
+                super::assemble_exe(&body(long)).expect("long assembles"),
+                "`{short}` should be `{long}`"
+            );
+        }
     }
 
     /// R6: one entry per family, not an enumerated cross-product.

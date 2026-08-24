@@ -1394,6 +1394,24 @@ const MULTI_PROBES: &[MultiProbe] = &[
     MultiProbe {
         dialect: "ca65-nes",
         binaries: &[],
+        note: "ca65 segment shorthands and the .pushseg/.popseg stack: \
+               `.code`/`.zeropage`/`.bss` place as their spelled-out \
+               segments, and a push/pop pair restores the segment the \
+               reservation interrupted (U5)",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .zeropage\npos: .res 1\n\
+             .bss\nbuf: .res 4\n\
+             .code\nreset: lda pos\n\
+             .pushseg\n.zeropage\ntmp: .res 1\n.popseg\n\
+             sta buf\n stx tmp\n\
+             .segment \"VECTORS\"\n .word 0, reset, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
         note: "anonymous and cheap labels resolve across the .include \
                boundary in evaluation order on the NES path (U5)",
         files: &[
@@ -1572,6 +1590,18 @@ const MULTI_PROBES: &[MultiProbe] = &[
             ("sw.inc", "\tsection two,data\n\tdc.b $01\n"),
         ],
     },
+    MultiProbe {
+        dialect: "vasm-exe",
+        binaries: &[],
+        note: "vasm section shorthands: each opens a section of its own kind, \
+               and the `_c`/`_f` suffix carries the memory flag into the \
+               hunk header",
+        files: &[(
+            "main.s",
+            "\tcode\n\tmoveq #1,d0\n\tdata\n\tdc.w $1234\n\tbss\n\tds.w 4\n\
+             \tcode_c\n\tmoveq #2,d0\n\tdata_f\n\tdc.w $5678\n",
+        )],
+    },
 ];
 
 #[test]
@@ -1677,13 +1707,15 @@ fn multi_file_source_matches_reference() {
                     &cfg,
                     "MEMORY {\n\
                      \x20   ZP:     start = $00,    size = $100,   type = rw, file = \"\";\n\
-                     \x20   RAM:    start = $0200,  size = $600,   type = rw, file = \"\";\n\
+                     \x20   OAM:    start = $0200,  size = $100,   type = rw, file = \"\";\n\
+                     \x20   RAM:    start = $0300,  size = $500,   type = rw, file = \"\";\n\
                      \x20   HEADER: start = $0,     size = $10,    type = ro, file = %O, fill = yes;\n\
                      \x20   PRG:    start = $8000,  size = $8000,  type = ro, file = %O, fill = yes;\n\
                      \x20   CHR:    start = $0,     size = $2000,  type = ro, file = %O, fill = yes;\n\
                      }\n\
                      SEGMENTS {\n\
                      \x20   ZEROPAGE: load = ZP,     type = zp;\n\
+                     \x20   OAM:      load = OAM,    type = bss;\n\
                      \x20   BSS:      load = RAM,    type = bss;\n\
                      \x20   HEADER:   load = HEADER, type = ro;\n\
                      \x20   CODE:     load = PRG,    type = ro,  start = $8000;\n\

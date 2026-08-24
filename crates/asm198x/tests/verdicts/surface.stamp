@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 556 word(s) outside our surface, across the references installed
+# 540 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -233,17 +233,8 @@ zmq
 
 ## vasm (vasm 2.0b (c) in 2002-2025 Volker Barthelmann)
 # 4215 candidate(s) harvested; 183 recognised here, 527 more the tool itself
-# refuses on this target; 114 of the 183 outside our surface
-bss
-bss_c
-bss_f
-code
-code_c
-code_f
+# refuses on this target; 105 of the 183 outside our surface
 cpu32
-data
-data_c
-data_f
 dr
 dw
 dx
@@ -476,7 +467,7 @@ __utc_year__
 
 ## ca65 (ca65 V2.18 - N/A)
 # 2906 candidate(s) harvested; 225 recognised here, 4 more the tool itself
-# refuses on this target; 134 of the 225 outside our surface
+# refuses on this target; 127 of the 225 outside our surface
 .align
 .asize
 .assert
@@ -489,16 +480,13 @@ __utc_year__
 .bitor
 .bitxor
 .blank
-.bss
 .case
 .charmap
-.code
 .concat
 .condes
 .const
 .constructor
 .cpu
-.data
 .dbg
 .debuginfo
 .def
@@ -578,16 +566,13 @@ __utc_year__
 .paramcount
 .pc02
 .popcpu
-.popseg
 .proc
 .psc02
 .pushcpu
-.pushseg
 .ref
 .referenced
 .reloc
 .right
-.rodata
 .scope
 .set
 .setcpu
@@ -610,4 +595,3 @@ __utc_year__
 .warning
 .xmatch
 .xor
-.zeropage

@@ -54,6 +54,13 @@ const FILL: u8 = 0x00;
 /// these names. It mirrors the curriculum's `nes.cfg`; a segment outside it
 /// (e.g. `RODATA`) is rejected here for the same reason `ld65` rejects it with
 /// that config — there is no memory area to place it in.
+///
+/// The curriculum ships **two** `nes.cfg` variants: the `dash` track carries an
+/// `OAM` page at `$0200` and pushes `BSS` to `$0300`, and `meet-the-machine`
+/// omits `OAM` so `BSS` starts at `$0200`. This table is the `dash` layout, and
+/// a `meet-the-machine` program that places a label in `BSS` would land a page
+/// high. Nothing in either track does today, which is why one fixed table has
+/// held; the differential's inlined config matches this one deliberately.
 const NES_SEGMENTS: &[(&str, u32, bool)] = &[
     ("ZEROPAGE", 0x0000, false),
     ("OAM", 0x0200, false),
@@ -75,6 +82,53 @@ fn seg_info(seg: &str) -> Option<SegInfo> {
         .iter()
         .find(|(name, _, _)| *name == seg)
         .map(|&(_, base, in_file)| SegInfo { base, in_file })
+}
+
+/// The segment each shorthand switches to. `.code` is `.segment "CODE"`, and
+/// so on down; `.data` and `.rodata` name segments the fixed NROM config has no
+/// memory area for, and are rejected at placement exactly as `ld65` rejects
+/// them ("Missing memory area assignment for segment 'RODATA'").
+fn segment_shorthand(word: &str) -> Option<&'static str> {
+    Some(match word {
+        ".code" => "CODE",
+        ".data" => "DATA",
+        ".bss" => "BSS",
+        ".rodata" => "RODATA",
+        ".zeropage" => "ZEROPAGE",
+        _ => return None,
+    })
+}
+
+/// Whether a line is one of the segment-switching directives, which parse into
+/// a source-only node rather than an item. `.segment` keeps the prefix test it
+/// has always had (its operand may abut the directive); the words that take no
+/// operand match whole, so `.codegen` is not `.code`.
+fn is_segment_directive(trimmed: &str) -> bool {
+    if trimmed.starts_with(".segment") {
+        return true;
+    }
+    let word = trimmed.split_whitespace().next().unwrap_or("");
+    word == ".pushseg" || word == ".popseg" || segment_shorthand(word).is_some()
+}
+
+/// What a segment-switching node does to the active segment.
+enum SegSwitch {
+    To(String),
+    Push,
+    Pop,
+}
+
+/// Read a source-only node back as a segment switch. `None` for any other
+/// item-less node (a label-only line, a comment flush).
+fn segment_switch(source: &str) -> Option<SegSwitch> {
+    if let Some(rest) = source.strip_prefix(".segment") {
+        return Some(SegSwitch::To(rest.trim().trim_matches('"').to_string()));
+    }
+    match source.split_whitespace().next().unwrap_or("") {
+        ".pushseg" => Some(SegSwitch::Push),
+        ".popseg" => Some(SegSwitch::Pop),
+        w => segment_shorthand(w).map(|name| SegSwitch::To(name.to_string())),
+    }
 }
 
 /// The valid segment names, for a rejection message.
@@ -895,10 +949,12 @@ impl FlatWalk for Walker {
         });
         let span = Span::in_file(file, line as u32, 1);
 
-        // `.segment "NAME"` switches the active segment — kept as a source-only
-        // node so the formatter reproduces it; the projection reads it back to
-        // track the active segment (parse itself needs no segment state).
-        if trimmed.starts_with(".segment") {
+        // `.segment "NAME"`, its shorthands (`.code`, `.zeropage`, …) and the
+        // `.pushseg`/`.popseg` stack all switch the active segment — kept as
+        // source-only nodes so the formatter reproduces them; the projection
+        // reads them back to track the active segment (parse itself needs no
+        // segment state).
+        if is_segment_directive(trimmed) {
             self.nodes.push(Node {
                 operand_span: None,
                 label: None,
@@ -1018,6 +1074,7 @@ impl FlatWalk for Walker {
 fn parsed_from_program(program: &crate::ast::Program) -> Result<Parsed, AsmError> {
     let mut st = Projection {
         seg: "CODE".to_string(),
+        seg_stack: Vec::new(),
         stmts: Vec::new(),
         label_seg: BTreeMap::new(),
         consts: BTreeMap::new(),
@@ -1034,6 +1091,8 @@ fn parsed_from_program(program: &crate::ast::Program) -> Result<Parsed, AsmError
 /// The projection's running state: everything a later line's fold can see.
 struct Projection {
     seg: String,
+    /// Segments saved by `.pushseg`, innermost last; `.popseg` restores one.
+    seg_stack: Vec<String>,
     stmts: Vec<Stmt>,
     label_seg: BTreeMap<String, String>,
     consts: BTreeMap<String, i64>,
@@ -1237,6 +1296,7 @@ fn bake_kind(k: &Kind, vars: &[(String, i64)]) -> Kind {
 fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmError> {
     use crate::ast::{Item, Operand};
     let seg = &mut st.seg;
+    let seg_stack = &mut st.seg_stack;
     let stmts = &mut st.stmts;
     let label_seg = &mut st.label_seg;
     let consts = &mut st.consts;
@@ -1312,8 +1372,19 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
             // Item-less nodes: a `.segment` directive (tracked), a label-only line
             // (an empty placed statement), or a comment-only flush node (skipped).
             _ => {
-                if let Some(rest) = node.source.strip_prefix(".segment") {
-                    *seg = rest.trim().trim_matches('"').to_string();
+                if let Some(switch) = segment_switch(&node.source) {
+                    match switch {
+                        SegSwitch::To(name) => *seg = name,
+                        SegSwitch::Push => seg_stack.push(seg.clone()),
+                        // ca65 pops an empty stack with a diagnostic of its own;
+                        // ours is the parse-time refusal, so an unmatched
+                        // `.popseg` here leaves the active segment alone.
+                        SegSwitch::Pop => {
+                            if let Some(prev) = seg_stack.pop() {
+                                *seg = prev;
+                            }
+                        }
+                    }
                 } else if let Some(sym) = node.label.as_ref() {
                     label_seg.insert(sym.qualified.clone(), seg.clone());
                     stmts.push(Stmt {
@@ -1603,14 +1674,25 @@ pub const DIRECTIVES: &[Directive] = &[
     // live inside expressions and are not directives at all. Declaring those
     // here would name them in a place they never appear.
     // segments and location
+    // The segment shorthands, and the stack that saves and restores the active
+    // one. Each is `.segment "NAME"` by another name, so they are tracked in
+    // the same source-only node and cost nothing beyond the mapping.
+    Directive {
+        id: "segment-shorthand",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &[
+                "code", "data", "bss", "rodata", "zeropage", "pushseg", "popseg",
+            ],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     Directive {
         id: "unsupported-segments",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &[
-                "code", "data", "bss", "rodata", "zeropage", "org", "reloc", "pushseg", "popseg",
-                "align",
-            ],
+            names: &["org", "reloc", "align"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -1975,6 +2057,38 @@ mod tests {
             msg.contains("CODE") && msg.contains("VECTORS"),
             "got `{msg}`"
         );
+    }
+
+    #[test]
+    fn the_segment_shorthands_are_their_spelled_out_segments() {
+        // `.code` is `.segment "CODE"`, `.zeropage` is ZEROPAGE, `.bss` is
+        // BSS — the same placement, reached by the shorter spelling.
+        let long = rom(".segment \"ZEROPAGE\"\npos: .res 1\n\
+             .segment \"BSS\"\nbuf: .res 4\n\
+             .segment \"CODE\"\n lda pos\n sta buf\n");
+        let short = rom(".zeropage\npos: .res 1\n.bss\nbuf: .res 4\n.code\n lda pos\n sta buf\n");
+        assert_eq!(long, short);
+        // `pos` is zero-page, `buf` is RAM at the config's $0300 (OAM has the
+        // page below it).
+        assert_eq!(&short[16..21], &[0xA5, 0x00, 0x8D, 0x00, 0x03]);
+    }
+
+    #[test]
+    fn popseg_restores_the_segment_pushseg_saved() {
+        // The reservation between the pair happens in ZEROPAGE; the code
+        // either side of it stays in CODE, contiguous across the interruption.
+        let r = rom(".code\n lda #1\n\
+             .pushseg\n.zeropage\ntmp: .res 1\n.popseg\n\
+             ldx #2\n");
+        assert_eq!(&r[16..20], &[0xA9, 0x01, 0xA2, 0x02]);
+    }
+
+    #[test]
+    fn a_shorthand_for_a_segment_the_config_lacks_is_rejected_too() {
+        // `ca65` accepts `.data`; `ld65` then has no memory area for it. The
+        // refusal is the same one the spelled-out form gets.
+        let err = assemble(".data\n .byte 1\n").expect_err("rejected");
+        assert!(err.to_string().contains("DATA"), "got `{err}`");
     }
 
     #[test]
