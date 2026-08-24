@@ -7,6 +7,127 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.31](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.30...asm198x-v0.0.31) - 2026-08-24
+
+The release that closes four directive families across every reference at once —
+diagnostics, assertions, comparisons and symbol visibility — and rebuilds
+placement so the dialects with sections stop hand-rolling their own. Source that
+uses any of these assembles now where it was refused before.
+
+### Added
+
+- **Comparison operators in expressions**, in all seven dialects that have them.
+  Two facts here are per-dialect data, not a shared rule: **true is `$FF` in
+  vasm, sjasmplus and pasmo and `1` in ca65, acme, rgbasm and lwasm** — `dc.b
+  2=2` is `$FF` and `.byte 2=2` is `$01` from the same source shape — and the
+  accepted spellings differ, with sjasmplus refusing `<>`, pasmo refusing both
+  `==` and `<>`, and lwasm refusing `=`, `<=` and `>=`. Each was probed against
+  the tool rather than read from a manual.
+  ([#231](https://github.com/asm198x/asm198x/pull/231),
+  [#229](https://github.com/asm198x/asm198x/issues/229),
+  [#230](https://github.com/asm198x/asm198x/issues/230))
+
+- **Assertions**: sjasmplus `ASSERT`, vasm `assert`, rgbasm `ASSERT` and
+  `STATIC_ASSERT`, ca65 `.assert`. They fold after the symbols resolve, because
+  an assertion **reaches forward** — `ASSERT fin-beg` above both labels is the
+  point of having one. ca65's takes an action operand, so `warning` assembles
+  anyway and `error` does not.
+  ([#231](https://github.com/asm198x/asm198x/pull/231))
+
+- **Directives that say something**: vasm `echo`, rgbasm `PRINT`/`PRINTLN`,
+  sjasmplus `DISPLAY`, ca65 `.out` for text; acme `!error`/`!serious`/`!warn`,
+  lwasm `error`, rgbasm `FAIL`/`WARN`, ca65 `.warning`/`.error`/`.fatal` for
+  diagnostics. Print-style output arrives as a new `WarningKind::Note` rather
+  than as a warning — it is not a complaint — and each reference's own radix is
+  used, so a value reads `5` under vasm, `$5` under rgbasm and `0x0005` under
+  sjasmplus.
+  ([#231](https://github.com/asm198x/asm198x/pull/231))
+
+- **Symbol visibility across every reference.** In a fused assemble-and-link
+  these are checks rather than no-ops, and accepting them silently would take
+  source the reference refuses: ca65 `.export`/`.exportzp` and vasm
+  `xdef`/`public`/`global`/`export`/`entry`/`weak`/`extrn`/`comm` require the
+  name be defined; ca65 `.import`/`.importzp` require that it is not; ca65
+  `.global`/`.globalzp`/`.autoimport`, vasm `local`/`idnt` and rgbasm `EXPORT`
+  ask nothing. `.export name := expr` defines the name it exports, and the `zp`
+  spellings warn for a label outside the zero page but never for a constant.
+  ([#231](https://github.com/asm198x/asm198x/pull/231))
+
+- **sjasmplus's `DEVICE`, `PAGE` and `SLOT`.** Thirteen devices with their real
+  page and slot bounds, and the write check that comes with them — which is on
+  the 64K address space rather than on total memory, so a program that overruns
+  `$FFFF` is refused even on a device with 8MB of pages. Two pages written at
+  one address **concatenate** rather than colliding.
+  ([#231](https://github.com/asm198x/asm198x/pull/231))
+
+- **ca65 expression functions**: `.lobyte`, `.hibyte`, `.bankbyte`, `.loword`,
+  `.hiword`, `.max`, `.min`, `.strlen`, `.strat`, and `.defined`/`.def`.
+  `.defined` is answered **in source order** — 0 above the definition and 1
+  below — while rgbasm's `BANK()` is answered after the whole program is read,
+  because it reaches forward. Opposite treatments, and a careless test passes
+  either way.
+  ([#231](https://github.com/asm198x/asm198x/pull/231))
+
+- **Alignment and padding**: ca65 `.align`, sjasmplus `ALIGN`, vasm
+  `align`/`cnop`, and ACME's pad-to-a-stated-boundary, which is not the
+  alignment ACME already had. vasm's operand is an **exponent** — `align 2` is a
+  four-byte boundary — and its `cnop` pads with whole `NOP` words where one
+  fits.
+  ([#231](https://github.com/asm198x/asm198x/pull/231))
+
+- **Segment shorthands** for the two dialects that have segments: ca65's
+  `.code`/`.zeropage`/`.bss` place as their spelled-out segments, and
+  `.pushseg`/`.popseg` restore the segment a reservation interrupted.
+  ([#231](https://github.com/asm198x/asm198x/pull/231))
+
+- **The directives each reference has that asm198x does not** are now declared
+  rather than absent, so they are refused as real directives with a diagnostic
+  saying the gap is ours — not as unknown words, which sends a reader with valid
+  source looking for a typo. Ninety-seven for ca65, thirty-three for rgbasm, and
+  the remaining four references swept the same way.
+  ([#222](https://github.com/asm198x/asm198x/pull/222),
+  [#223](https://github.com/asm198x/asm198x/pull/223),
+  [#224](https://github.com/asm198x/asm198x/pull/224))
+
+- **sjasmplus takes the optional leading dot on every directive**, so `.db` and
+  `db` are one word to it and to us.
+  ([#221](https://github.com/asm198x/asm198x/pull/221))
+
+### Fixed
+
+- **`equ` was capped at 24 bits in every dialect, and three references allow
+  more.** ca65, vasm and rgbasm all take a 32-bit constant, and pasmo turns out
+  to be the only reference that bounds one at all. Each dialect now states its
+  own range.
+  ([#228](https://github.com/asm198x/asm198x/issues/228))
+
+- **Nine 6809 instructions were being reported as directives** by lwasm's
+  declared surface. An instruction declared a directive points the reader at the
+  wrong layer.
+  ([#226](https://github.com/asm198x/asm198x/pull/226))
+
+- **`xtask surface` counted a wider target as a gap**, and two concurrent runs
+  corrupted each other's probe files — one run reported 386 words where the true
+  figure was 538. Each run now gets its own scratch directory.
+  ([#219](https://github.com/asm198x/asm198x/pull/219),
+  [#231](https://github.com/asm198x/asm198x/pull/231))
+
+### Changed
+
+- **A word the reference itself refuses now says so.** `lwasm export` is
+  `Only supported for object target`; vasm's `xref`, `import` and `nref` cannot
+  be satisfied in binary output at all; ca65's `.forceimport` is unresolvable
+  either way. These used to be refused with "the source is valid and the gap is
+  ours", which is wrong in both halves and sends a reader off to wait for a
+  feature that is never coming. They are no longer counted as outstanding work.
+  ([#231](https://github.com/asm198x/asm198x/pull/231))
+
+- **Placement is one implementation.** The NES ROM, a Game Boy bank, a sjasmplus
+  page and a flat program's single section are laid out by the same code, where
+  ca65 and vasm previously each hand-rolled a pass. `Warning` gains a `kind`
+  field, additively.
+  ([#231](https://github.com/asm198x/asm198x/pull/231))
+
 ## [0.0.30](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.29...asm198x-v0.0.30) - 2026-08-23
 
 ### Fixed
