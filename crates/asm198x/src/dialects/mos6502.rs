@@ -214,6 +214,23 @@ pub(crate) enum Caret {
 
 /// How a dialect turns an expression function call — `name(arg)` — into an
 /// [`Expr`]. See [`ExprOpts::function`].
+///
+/// Three limits, each of which blocks a known group of reference functions and
+/// none of which is worked around here:
+///
+/// - **One argument.** The tokenizer has no comma, because every caller splits
+///   its operands on commas before an expression reaches it. ca65's
+///   `.max`/`.min` and rgbasm's `STRFMT` need that token. The callers' own
+///   splitter is already paren-aware, so it would keep `f(a,b)` intact.
+/// - **No strings.** A string literal fails in the tokenizer, so the whole
+///   `STRLEN`/`STRCAT`/`STRFMT` family is out of reach until an expression can
+///   carry one — which is a question about what an `Expr` evaluates to, not
+///   just about lexing.
+/// - **No parse-position symbol knowledge.** ca65's `.defined(X)` is
+///   *positional* — `0` before the definition and `1` after, probe-pinned —
+///   so it needs the constants known so far, which this signature does not
+///   carry. Folding it against the finished symbol table would answer `1`
+///   both times.
 pub(crate) type ExprFn = fn(&str, Vec<Expr>, usize) -> Result<Expr, AsmError>;
 
 /// Expression-syntax knobs that vary by dialect. The bitwise/shift operators
