@@ -211,6 +211,15 @@ pub(crate) enum Item {
         value: i64,
         fill: u8,
     },
+    /// The boundary-stating `align`/`.align` — a PC-dependent pad to the next
+    /// multiple of `modulus`, resolved in the engine. Like [`Item::Align`] it
+    /// has no emit arm: the formatter re-emits it via
+    /// [`Node::source`](Node), so each dialect keeps its own spelling
+    /// (`align 4`, `.align 4`, and vasm's exponent `align 2`).
+    AlignTo {
+        modulus: i64,
+        fill: u8,
+    },
     /// A conditional-assembly block (ACME `!if`/`!ifdef`/`!ifndef` … `{ … }` …
     /// `else { … }`, or a keyword dialect's `IF`/`IFDEF`/`IFNDEF` … `ELSE` …
     /// `ENDIF` — sjasmplus is the first, language-surface U8), kept as **tree
@@ -673,6 +682,10 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             value: *value,
             fill: *fill,
         },
+        Item::AlignTo { modulus, fill } => Operation::AlignTo {
+            modulus: *modulus,
+            fill: *fill,
+        },
         Item::Binary(payload) => Operation::Binary(payload.clone()),
         other => {
             let what = match other {
@@ -734,6 +747,7 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             value,
             fill,
         },
+        Item::AlignTo { modulus, fill } => Operation::AlignTo { modulus, fill },
         // No dialect lowers a conditional through the generic path — ACME
         // evaluates the tree in `dialects::acme::evaluate` — so this is
         // unreachable in practice; it guards against a mis-routed future dialect.
@@ -863,6 +877,7 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> String) -> O
         other @ (Operation::Encoded(_)
         | Operation::Binary(_)
         | Operation::Align { .. }
+        | Operation::AlignTo { .. }
         | Operation::Reserve(_)) => other,
     }
 }
@@ -928,6 +943,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
             value,
             fill,
         },
+        Operation::AlignTo { modulus, fill } => Item::AlignTo { modulus, fill },
     }
 }
 

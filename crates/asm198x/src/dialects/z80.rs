@@ -2583,7 +2583,11 @@ fn emitted_tokens(mnemonic: &str, paren: bool) -> Vec<String> {
 
 /// Resolve an opcode-embedded operand to a parse-time constant (a number, an
 /// expression of constants, or an `equ` value above — but not a label).
-fn literal(expr: &Expr, consts: &BTreeMap<String, i64>, line: usize) -> Result<i64, AsmError> {
+pub(crate) fn literal(
+    expr: &Expr,
+    consts: &BTreeMap<String, i64>,
+    line: usize,
+) -> Result<i64, AsmError> {
     eval_const(expr, consts).ok_or_else(|| {
         AsmError::new(
             line,
@@ -2741,7 +2745,11 @@ fn string_literal(piece: &str) -> Option<&str> {
 /// Parse an operand value: an arithmetic expression over numbers, symbols, and
 /// `+`/`-`/`*`/`/` with C-style precedence and parentheses. Number literals are
 /// lexed by the dialect's [`Z80Syntax::parse_number`].
-fn parse_value<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Expr, AsmError> {
+pub(crate) fn parse_value<S: Z80Syntax>(
+    syntax: &S,
+    raw: &str,
+    line: usize,
+) -> Result<Expr, AsmError> {
     let tokens = tokenize(syntax, raw, line)?;
     if tokens.is_empty() {
         return Err(AsmError::new(line, "expected a value"));

@@ -1766,6 +1766,7 @@ fn substitute_anon_refs(
         other @ (Operation::Encoded(_)
         | Operation::Binary(_)
         | Operation::Align { .. }
+        | Operation::AlignTo { .. }
         | Operation::Reserve(_)) => other,
     })
 }

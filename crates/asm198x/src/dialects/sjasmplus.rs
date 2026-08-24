@@ -131,6 +131,15 @@ pub const DIRECTIVES: &[Directive] = &[
     // refusing with a diagnostic that says the source is valid and the gap is
     // ours is the honest end state, not a staging post.
     Directive {
+        id: "align",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["align"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
+    Directive {
         id: "unsupported-sjasmplus",
         pattern: Pattern::Sigilled {
             sigil: '.',
@@ -138,7 +147,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "abyte",
                 "abytec",
                 "abytez",
-                "align",
                 "assert",
                 "binary",
                 "block",
@@ -302,6 +310,38 @@ impl Dialect for Sjasmplus {
 /// sjasmplus's surface syntax.
 struct SjasmplusSyntax;
 
+impl SjasmplusSyntax {
+    /// `ALIGN [boundary[,fill]]` — pad to the next multiple of `boundary`.
+    ///
+    /// sjasmplus takes a **power of two** and refuses anything else outright
+    /// (`align 3` is `Illegal align: 3`), defaults the boundary to 4 when the
+    /// operand is omitted, and fills with zero unless told otherwise. All three
+    /// are probe-pinned against 1.21.0.
+    fn parse_align(
+        &self,
+        args: &str,
+        line: usize,
+        consts: &BTreeMap<String, i64>,
+    ) -> Result<Option<Operation>, AsmError> {
+        let parts: Vec<&str> = args.trim().split(',').map(str::trim).collect();
+        let modulus = match parts.first() {
+            None | Some(&"") => 4,
+            Some(n) => z80::literal(&z80::parse_value(self, n, line)?, consts, line)?,
+        };
+        if modulus < 1 || modulus & (modulus - 1) != 0 {
+            return Err(AsmError::new(line, format!("Illegal align: {modulus}")));
+        }
+        let fill = match parts.get(1) {
+            Some(f) => {
+                let v = z80::literal(&z80::parse_value(self, f, line)?, consts, line)?;
+                u8::try_from(v & 0xFF).expect("masked")
+            }
+            None => 0,
+        };
+        Ok(Some(Operation::AlignTo { modulus, fill }))
+    }
+}
+
 impl Z80Syntax for SjasmplusSyntax {
     /// sjasmplus is the dialect the shared keyword vocabulary was measured
     /// against, so its adoption is the free functions unchanged.
@@ -380,6 +420,7 @@ impl Z80Syntax for SjasmplusSyntax {
     fn is_directive(&self, word: &str) -> bool {
         let word = undot(word);
         word.eq_ignore_ascii_case("byte")
+            || word.eq_ignore_ascii_case("align")
             || self.is_include(word)
             || self.is_incbin(word)
             || z80::is_common_directive(word)
@@ -411,7 +452,8 @@ impl Z80Syntax for SjasmplusSyntax {
         true
     }
 
-    /// `byte` is `db`; everything else is the shared common set.
+    /// `ALIGN` is sjasmplus's own; `byte` is `db`; everything else is the
+    /// shared common set.
     fn parse_directive(
         &self,
         word: &str,
@@ -420,6 +462,9 @@ impl Z80Syntax for SjasmplusSyntax {
         consts: &BTreeMap<String, i64>,
     ) -> Result<Option<Operation>, AsmError> {
         let word = undot(word);
+        if word.eq_ignore_ascii_case("align") {
+            return self.parse_align(args, line, consts);
+        }
         let word = if word.eq_ignore_ascii_case("byte") {
             "db"
         } else {
@@ -640,6 +685,29 @@ mod tests {
     /// The whole surface, dotted. The conditionals already took a dot (#67);
     /// this is the same rule for everything else, which is where most of
     /// sjasmplus's remaining vocabulary gap was.
+    /// sjasmplus's `ALIGN` is power-of-two only and says so in as many words.
+    /// It defaults to 4 with no operand, and takes a fill byte.
+    #[test]
+    fn align_is_power_of_two_only() {
+        let ok = |src: &str| asm(src).unwrap_or_else(|e| panic!("{src:?}: {e}")).bytes;
+        assert_eq!(ok(" db 1\n align 4\n db 2\n"), vec![1, 0, 0, 0, 2]);
+        assert_eq!(
+            ok(" db 1\n align\n db 2\n"),
+            vec![1, 0, 0, 0, 2],
+            "defaults to 4"
+        );
+        assert_eq!(
+            ok(" db 1\n align 4,$ff\n db 2\n"),
+            vec![1, 0xFF, 0xFF, 0xFF, 2]
+        );
+        assert_eq!(ok(" db 1\n align 1\n db 2\n"), vec![1, 2]);
+        assert_eq!(ok(" db 1,2,3,4\n align 4\n db 9\n"), vec![1, 2, 3, 4, 9]);
+        let err = asm(" db 1\n align 3\n").expect_err("refused");
+        assert!(err.to_string().contains("Illegal align: 3"), "got `{err}`");
+        // The dotted spelling reaches the same parser.
+        assert_eq!(ok(" db 1\n .align 4\n db 2\n"), vec![1, 0, 0, 0, 2]);
+    }
+
     #[test]
     fn every_directive_takes_an_optional_dot() {
         let ok = |src: &str| asm(src).unwrap_or_else(|e| panic!("{src:?}: {e}")).bytes;

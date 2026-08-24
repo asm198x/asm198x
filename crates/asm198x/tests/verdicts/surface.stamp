@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 540 word(s) outside our surface, across the references installed
+# 538 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -72,11 +72,10 @@
 
 ## sjasmplus (SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus))
 # 4231 candidate(s) harvested; 264 recognised here, 24 more the tool itself
-# refuses on this target; 84 of the 264 outside our surface
+# refuses on this target; 83 of the 264 outside our surface
 abyte
 abytec
 abytez
-align
 assert
 block
 bplist
@@ -160,7 +159,7 @@ unphase
 
 ## lwasm (lwasm from lwtools 4.25)
 # 2201 candidate(s) harvested; 257 recognised here, 94 more the tool itself
-# refuses on this target; 69 of the 257 outside our surface
+# refuses on this target; 68 of the 257 outside our surface
 dephase
 endm
 endsection
@@ -185,7 +184,6 @@ struct
 warning
 adca
 adcb
-align
 bita
 bitb
 bsz

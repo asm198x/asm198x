@@ -573,6 +573,18 @@ const PROBES: &[Probe] = &[
         " DUP 2\n DUP 2\n nop\n EDUP\n EDUP\n"),
     ok ("sjasmplus", "a macro inside DUP",
         " MACRO m\n nop\n ENDM\n DUP 2\n m\n EDUP\n"),
+    // `ALIGN` here is power-of-two only, defaults to 4 with no operand, and
+    // takes an optional fill byte.
+    ok ("sjasmplus", "align pads to the boundary",
+        " db 1\n align 4\n db 2\n"),
+    ok ("sjasmplus", "align defaults to 4",
+        " db 1\n align\n db 2\n"),
+    ok ("sjasmplus", "align takes a fill byte",
+        " db 1\n align 4,$ff\n db 2\n"),
+    ok ("sjasmplus", "align on the boundary pads nothing",
+        " db 1,2,3,4\n align 4\n db 9\n"),
+    ok ("sjasmplus", "align 1 pads nothing",
+        " db 1\n align 1\n db 2\n"),
     ok ("sjasmplus", "DUP inside a macro",
         " MACRO m\n DUP 2\n nop\n EDUP\n ENDM\n m\n"),
     ok ("lwasm", "macro definition and invocation",
@@ -699,6 +711,17 @@ const PROBES: &[Probe] = &[
         " ifne 0\nsym equ $10\n endc\nsym equ $1234\n lda sym\n"),
     ok ("lwasm", "a taken branch's equ decides the mode",
         " ifne 1\nsym equ $10\n endc\n lda sym\n"),
+    // `align` states the boundary itself, not a power of two — `align 3` after
+    // a byte really does put the next item at offset 3 — and takes an optional
+    // fill byte. Already-aligned pads nothing.
+    ok ("lwasm", "align pads to the boundary",
+        " fcb 1\n align 4\n fcb 2\n"),
+    ok ("lwasm", "align to a non-power-of-two boundary",
+        " fcb 1\n align 3\n fcb 2\n"),
+    ok ("lwasm", "align takes a fill byte",
+        " fcb 1\n align 4,$ff\n fcb 2\n"),
+    ok ("lwasm", "align on the boundary pads nothing",
+        " fcb 1,2,3,4\n align 4\n fcb 9\n"),
 
     // ---- rgbasm / SM83 ------------------------------------------------------
     // Conditionals: `ELIF` rather than `ELSEIF`, and `ENDC` is the **only**

@@ -336,6 +336,17 @@ pub(crate) enum Operation {
     /// engine passes; `andmask`/`value`/`fill` are folded to constants by the
     /// dialect. The pad is `(value - pc) & andmask`.
     Align { andmask: i64, value: i64, fill: u8 },
+    /// Advance the program counter to the next multiple of `modulus`, filling
+    /// the gap with `fill` — the `align`/`.align` of every dialect that states
+    /// a boundary rather than ACME's mask/value pair. A `modulus` of 1 or less
+    /// pads nothing.
+    ///
+    /// Deliberately not folded into [`Operation::Align`]: a mask can only
+    /// express a power-of-two boundary, and both ca65 and lwasm pad to a
+    /// non-power-of-two one (`.align 3` after a byte lands the next item at
+    /// offset 3). Approximating either with the other would diverge silently
+    /// on exactly the source that distinguishes them.
+    AlignTo { modulus: i64, fill: u8 },
     /// Reserve `count` address units without emitting source-derived data (the
     /// `ds`/`rmb`/`res`/`block` directives). Deliberately **not**
     /// [`Operation::Bytes`] of zeros: what fills reserved space is a property of
@@ -430,10 +441,20 @@ pub(crate) fn next_pc(
         }
         Operation::Encoded(pieces) => pc + pieces.iter().map(Piece::len).sum::<i64>() / addr_unit,
         Operation::Align { andmask, value, .. } => pc + ((value - pc) & andmask),
+        Operation::AlignTo { modulus, .. } => pc + align_pad(pc, *modulus),
         // Set the counter, bind a name, name an entry point — none of them a
         // width. A caller that can reach these handles them itself.
         Operation::Org(_) | Operation::Equ(_) | Operation::Entry(_) => pc,
     })
+}
+
+/// How far short of the next multiple of `modulus` the counter stands. Zero
+/// when already there, and for a `modulus` of 1 or less (no boundary to reach).
+fn align_pad(pc: i64, modulus: i64) -> i64 {
+    if modulus <= 1 {
+        return 0;
+    }
+    (modulus - pc.rem_euclid(modulus)) % modulus
 }
 
 impl Piece {
@@ -590,7 +611,8 @@ fn assemble_statements(
                 | Operation::Instruction { .. }
                 | Operation::Encoded(_)
                 | Operation::Binary(_)
-                | Operation::Align { .. },
+                | Operation::Align { .. }
+                | Operation::AlignTo { .. },
             ) if require_origin && origin.is_none() => {
                 return Err(s.err(
                     "program counter undefined — set an origin (`*=`) before any code or data",
@@ -654,6 +676,10 @@ fn assemble_statements(
                 fill,
             }) => {
                 let pad = (value - pc) & andmask;
+                bytes.extend(std::iter::repeat_n(*fill, pad as usize));
+            }
+            Some(Operation::AlignTo { modulus, fill }) => {
+                let pad = align_pad(pc, *modulus);
                 bytes.extend(std::iter::repeat_n(*fill, pad as usize));
             }
             Some(Operation::Bytes(items)) => {
