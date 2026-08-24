@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 558 word(s) outside our surface, across the references installed
+# 556 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -33,12 +33,11 @@
 # half.
 
 ## acme (This is ACME, release 0.97 ("Zem"), 28 June 2020)
-# 1177 candidate(s) harvested; 76 recognised here, 0 more the tool itself
-# refuses on this target; 36 of the 76 outside our surface
+# 1177 candidate(s) harvested; 74 recognised here, 2 more the tool itself
+# refuses on this target; 34 of the 74 outside our surface
 !cpu
 !error
 !hex
-!rl
 !rs
 !serious
 !subzone
@@ -46,7 +45,6 @@
 !xor
 !addr
 !address
-!al
 !as
 !be16
 !be24

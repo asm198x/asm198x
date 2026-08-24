@@ -2288,6 +2288,55 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // What ACME has here and we do not.
+    //
+    // 34 spellings against 0.97. `!al` and `!rl` are absent: ACME answers
+    // "Chosen CPU does not support long registers" for them on a 6502, so they
+    // belong to a wider target.
+    Directive {
+        id: "unsupported-acme",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &[
+                "addr",
+                "address",
+                "as",
+                "be16",
+                "be24",
+                "be32",
+                "cbm",
+                "convtab",
+                "cpu",
+                "ct",
+                "do",
+                "endoffile",
+                "eof",
+                "error",
+                "fi",
+                "hex",
+                "initmem",
+                "le16",
+                "le24",
+                "le32",
+                "pseudopc",
+                "raw",
+                "realpc",
+                "rs",
+                "scrxor",
+                "serious",
+                "skip",
+                "subzone",
+                "symbollist",
+                "sz",
+                "to",
+                "warn",
+                "while",
+                "xor",
+            ],
+            required: true,
+        },
+        category: Category::KnownUnsupported,
+    },
 ];
 
 fn parse_directive(
@@ -2306,9 +2355,18 @@ fn parse_directive(
     let Some(entry) = lookup(DIRECTIVES, &sigilled) else {
         return Err(AsmError::new(
             line,
-            format!("unsupported directive `!{name}`"),
+            format!("`!{name}` is not a pseudo opcode ACME has"),
         ));
     };
+    if entry.category == Category::KnownUnsupported {
+        return Err(AsmError::new(
+            line,
+            format!(
+                "`!{name}` is a real pseudo opcode here and asm198x does not \
+                 implement it yet — the source is valid and the gap is ours"
+            ),
+        ));
+    }
     match entry.id {
         "bytes" => Ok(Operation::Bytes(parse_list(anons, zone, rest, line)?)),
         "words" => Ok(Operation::Words(parse_list(anons, zone, rest, line)?)),

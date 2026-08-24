@@ -8,7 +8,7 @@ C64 6502, ACME syntax.
 
 ## Directives
 
-14 directives, 24 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+15 directives, 58 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -24,8 +24,11 @@ C64 6502, ACME syntax.
 | `scr` | `!scr` |  |
 | `set` | `!set` |  |
 | `text` | `!text`, `!tx` |  |
+| `unsupported-acme` | `!addr`, `!address`, `!as`, `!be16`, `!be24`, `!be32`, `!cbm`, `!convtab`, `!cpu`, `!ct`, `!do`, `!endoffile`, `!eof`, `!error`, `!fi`, `!hex`, `!initmem`, `!le16`, `!le24`, `!le32`, `!pseudopc`, `!raw`, `!realpc`, `!rs`, `!scrxor`, `!serious`, `!skip`, `!subzone`, `!symbollist`, `!sz`, `!to`, `!warn`, `!while`, `!xor` | Recognised, and not implemented |
 | `words` | `!word`, `!wo`, `!16` |  |
 | `zone` | `!zone`, `!zn` |  |
+
+Instruction mnemonics are not listed here — they come from the instruction-set spec and have their own reference.
 
 ## Projects in more than one file
 
