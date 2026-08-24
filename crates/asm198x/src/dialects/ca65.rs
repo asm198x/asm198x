@@ -2062,6 +2062,7 @@ fn parse_value(
         line,
         parse_number,
         mos6502::ExprOpts {
+            function: Some(ca65_flat::expr_function),
             bang_is_or: false,
             prec: BytePrec::Tight,
             byte_prefix: true,
@@ -2114,6 +2115,26 @@ mod tests {
         assert!(
             msg.contains("CODE") && msg.contains("VECTORS"),
             "got `{msg}`"
+        );
+    }
+
+    /// The expression-function seam: a name followed by `(` is a call, and an
+    /// unimplemented `.`-word says so rather than reading as an undefined
+    /// symbol.
+    #[test]
+    fn expression_functions_extract_bytes() {
+        let r = rom(".code\nV = $123456\n lda #.lobyte(V)\n lda #.hibyte(V)\n lda #.bankbyte(V)\n");
+        assert_eq!(&r[16..22], &[0xA9, 0x56, 0xA9, 0x34, 0xA9, 0x12]);
+        // Nested, and over an expression rather than a bare symbol.
+        let n = rom(".code\n lda #.lobyte($1234+1)\n lda #.lobyte(.hibyte($123456))\n");
+        assert_eq!(&n[16..20], &[0xA9, 0x35, 0xA9, 0x34]);
+
+        // A `.`-word we do not implement — with a plain argument, since a
+        // string literal fails earlier, in the tokenizer.
+        let err = assemble(".code\nV = 1\n lda #.sizeof(V)\n").expect_err("not implemented");
+        assert!(
+            err.to_string().contains("not an expression function"),
+            "got `{err}`"
         );
     }
 

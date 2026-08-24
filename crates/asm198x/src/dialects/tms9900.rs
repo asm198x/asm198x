@@ -283,6 +283,7 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         parse_number_intel,
         ExprOpts {
+            function: None,
             bang_is_or: false,
             prec: BytePrec::Tight,
             byte_prefix: false,

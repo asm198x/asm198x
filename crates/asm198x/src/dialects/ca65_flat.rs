@@ -1128,6 +1128,42 @@ pub(crate) fn expand_ca65(
     })
 }
 
+/// ca65's expression functions. Only the three byte extractions so far — they
+/// are the ones the shared `Expr` already has nodes for, so they cost nothing
+/// beyond the name.
+///
+/// An unknown name is refused here rather than left to resolve as a symbol: in
+/// ca65 a `.`-prefixed word is never an ordinary identifier, so `.zzz(1)` is a
+/// typo for a function and saying so beats "undefined symbol `.zzz`".
+pub(crate) fn expr_function(
+    name: &str,
+    args: Vec<crate::engine::Expr>,
+    line: usize,
+) -> Result<crate::engine::Expr, AsmError> {
+    let mut args = args.into_iter();
+    let arg = args
+        .next()
+        .ok_or_else(|| AsmError::new(line, format!("`{name}` needs an argument")))?;
+    use crate::engine::Expr;
+    let wrap: fn(Box<Expr>) -> Expr = match name.to_ascii_lowercase().as_str() {
+        ".lobyte" => Expr::Lo,
+        ".hibyte" => Expr::Hi,
+        ".bankbyte" => Expr::Bank,
+        _ if name.starts_with('.') => {
+            return Err(AsmError::new(
+                line,
+                format!(
+                    "`{name}` is not an expression function asm198x implements yet —                      the source is valid and the gap is ours"
+                ),
+            ));
+        }
+        // Not a ca65 function name at all: a plain symbol the source then
+        // parenthesised, which is its own error further up.
+        _ => return Err(AsmError::new(line, format!("`{name}` is not a function"))),
+    };
+    Ok(wrap(Box::new(arg)))
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;

@@ -644,6 +644,14 @@ const PROBES: &[Probe] = &[
         "mk\tmacro\nspin\\@ nop\nother\\@ nop\n move.l #spin\\@,d0\n move.l #other\\@,d1\n endm\n mk\n mk\n"),
     ok ("vasm", "extra arguments are dropped",
         "ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5,9\n"),
+    // Expression functions: the three byte extractions, which pick from a
+    // 24-bit value the way the `<`/`>`/`^` prefixes do.
+    ok ("ca65-816", ".lobyte / .hibyte / .bankbyte",
+        "V = $123456\n lda #.lobyte(V)\n lda #.hibyte(V)\n lda #.bankbyte(V)\n"),
+    ok ("ca65-816", "a function takes an expression",
+        " lda #.lobyte($1234+1)\n ldx #.hibyte($12ff+1)\n"),
+    ok ("ca65-816", "functions nest",
+        " lda #.lobyte(.hibyte($123456))\n"),
     ok ("ca65-816", ".res reserves",     " lda #1\n .res 3\n lda #2\n"),
     ok ("ca65-816", ".res takes a fill", " lda #1\n .res 3,$ff\n"),
     ok ("ca65-816", "macro definition and invocation",

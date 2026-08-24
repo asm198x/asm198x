@@ -212,6 +212,10 @@ pub(crate) enum Caret {
     Power,
 }
 
+/// How a dialect turns an expression function call — `name(arg)` — into an
+/// [`Expr`]. See [`ExprOpts::function`].
+pub(crate) type ExprFn = fn(&str, Vec<Expr>, usize) -> Result<Expr, AsmError>;
+
 /// Expression-syntax knobs that vary by dialect. The bitwise/shift operators
 /// `& | << >>` are available in every dialect (the engine AST supports them);
 /// these knobs only vary the `<`/`>` byte-prefix behaviour and what `^` means.
@@ -235,6 +239,15 @@ pub(crate) struct ExprOpts {
     /// `6!1&3` = 7 (binds looser than `&`, like `|`). Off elsewhere — other
     /// dialects (e.g. rgbasm) give `!` a different meaning.
     pub bang_is_or: bool,
+    /// How this dialect builds an expression **function call** — a symbol
+    /// immediately followed by `(`, as in ca65's `.lobyte(addr)`. `None` (the
+    /// default) leaves `name(...)` a parse error, which is what it has always
+    /// been: no dialect gave a bare symbol a call meaning before.
+    ///
+    /// The builder receives the name as written and the parsed arguments, so a
+    /// function whose argument is a *name* rather than a value (ca65's
+    /// `.sizeof(Point)`) reads it back as an `Expr::Sym`.
+    pub function: Option<ExprFn>,
 }
 
 /// Parse a value expression. `parse_number` lexes the dialect's numeric literal
@@ -255,6 +268,7 @@ pub(crate) fn parse_expr(
         line,
         prec: opts.prec,
         caret: opts.caret,
+        function: opts.function,
     };
     let expr = parser.expr()?;
     if parser.pos != parser.tokens.len() {
@@ -445,6 +459,7 @@ struct ExprParser {
     line: usize,
     prec: BytePrec,
     caret: Caret,
+    function: Option<ExprFn>,
 }
 
 impl ExprParser {
@@ -680,7 +695,31 @@ impl ExprParser {
         self.pos += 1;
         match tok {
             Tok::Num(n) => Ok(Expr::Num(n)),
-            Tok::Sym(s) => Ok(Expr::Sym(s)),
+            Tok::Sym(s) => {
+                // `name(` is a call where the dialect has functions; anywhere
+                // else it stays a plain symbol and the `(` is the next token's
+                // problem.
+                //
+                // One argument only: the tokenizer has no comma, because every
+                // caller splits its operands on commas before an expression
+                // reaches here. A multi-argument function (`.max(a,b)`,
+                // rgbasm's `STRFMT`) needs that token first.
+                match (self.function, self.tokens.get(self.pos)) {
+                    (Some(build), Some(Tok::LParen)) => {
+                        self.pos += 1;
+                        let arg = self.expr()?;
+                        if !matches!(self.tokens.get(self.pos), Some(Tok::RParen)) {
+                            return Err(AsmError::new(
+                                self.line,
+                                format!("expected `)` closing `{s}(`"),
+                            ));
+                        }
+                        self.pos += 1;
+                        build(&s, vec![arg], self.line)
+                    }
+                    _ => Ok(Expr::Sym(s)),
+                }
+            }
             Tok::Star => Ok(Expr::Pc),
             Tok::LParen => {
                 let inner = self.expr()?;
@@ -826,6 +865,7 @@ mod tests {
     fn eval(raw: &str, prec: BytePrec) -> i64 {
         let env = BTreeMap::new();
         let opts = ExprOpts {
+            function: None,
             prec,
             byte_prefix: true,
             caret: Caret::Xor,

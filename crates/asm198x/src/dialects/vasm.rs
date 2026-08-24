@@ -3109,6 +3109,7 @@ fn parse_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         mos6502::parse_number,
         mos6502::ExprOpts {
+            function: None,
             bang_is_or: true,
             prec: mos6502::BytePrec::Tight,
             byte_prefix: false,
