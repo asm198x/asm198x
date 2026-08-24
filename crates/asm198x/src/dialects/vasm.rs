@@ -2753,9 +2753,16 @@ fn count_of(e: &Expr, consts: &BTreeMap<String, i64>, line: usize) -> Result<usi
     }
 }
 
+/// The item width a `dc`/`dcb`/`ds` suffix names.
+///
+/// **A bare directive is a word**, not a byte: `dc 1,2` assembles to
+/// `0001 0002`, `dcb 3,$aa` to three `$00aa` words, and `ds 2` to four zero
+/// bytes. Motorola syntax defaults to `.w` and vasm follows it; reading the
+/// empty suffix as a byte silently emitted a third of the data.
 fn data_size(suffix: &str, line: usize) -> Result<DataSize, AsmError> {
     match suffix.trim_start_matches('.') {
-        "b" | "" => Ok(DataSize::B),
+        "" => Ok(DataSize::W),
+        "b" => Ok(DataSize::B),
         "w" => Ok(DataSize::W),
         "l" => Ok(DataSize::L),
         other => Err(AsmError::new(line, format!("bad data size `.{other}`"))),
@@ -3224,11 +3231,17 @@ mod directive_surface {
         assert_eq!(bytes("dc.w 3"), vec![0x00, 0x03]);
     }
 
-    /// A bare stem keeps its documented default, unchanged by the conversion.
+    /// A bare stem is a **word**, which is Motorola's default and vasm's.
+    ///
+    /// This test used to assert bytes and called that "the documented
+    /// default"; it was pinning our own bug, and no probe contradicted it
+    /// because none exercised a bare stem. `vasmm68k_mot` assembles `dc 1,2`
+    /// to `0001 0002` and `dcb 3,$aa` to three `$00aa` words.
     #[test]
-    fn a_bare_stem_still_means_byte() {
-        assert_eq!(bytes("dc 1"), vec![0x01]);
-        assert_eq!(bytes("dcb 2,3"), vec![0x03, 0x03]);
+    fn a_bare_stem_is_a_word() {
+        assert_eq!(bytes("dc 1"), vec![0x00, 0x01]);
+        assert_eq!(bytes("dcb 2,3"), vec![0x00, 0x03, 0x00, 0x03]);
+        assert_eq!(bytes("ds 1"), vec![0x00, 0x00]);
     }
 
     /// An unknown size reaches its stem, so the arm reports the real problem

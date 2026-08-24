@@ -256,6 +256,11 @@ const PROBES: &[Probe] = &[
     ok ("acme", "operator >>",           " lda #16>>2\n"),
     ok ("acme", "directive !pet",        " !pet \"hi\"\n"),
     ok ("acme", "directive !align",      " !align 255,0\n lda #1\n"),
+    ok ("acme", "directive !fill",       " !fill 4\n lda #1\n"),
+    ok ("acme", "!fill with a value",    " !fill 3,$ff\n lda #1\n"),
+    ok ("acme", "directive !scr",        " !scr \"abc\"\n"),
+    ok ("acme", "!scr differs from !pet"," !scr \"@[]\"\n !pet \"@[]\"\n"),
+    ok ("acme", "!for counts a block",   " !for i, 1, 3 {\n lda #i\n }\n"),
     ok ("acme", "directive !zone",       " !zone main\n rts\n"),
     ok ("acme", "directive !set",        " !set n=5\n lda #n\n"),
     // U7: `!zone` scopes `.`-locals — reuse across named/bare zones, the
@@ -279,6 +284,12 @@ const PROBES: &[Probe] = &[
 
     // ---- pasmo / z80 --------------------------------------------------------
     ok ("pasmo", "hex $ / binary %",     " ld a,$10\n ld b,%1010\n"),
+    ok ("pasmo", "defw / dw",            " defw $1234\n dw $5678\n"),
+    ok ("pasmo", "defs / ds reserve",    " ld a,1\n defs 3\n ds 2\n ld b,2\n"),
+    ok ("pasmo", "if taken",             " if 1\n nop\n endif\n ret\n"),
+    ok ("pasmo", "if not taken",         " if 0\n nop\n endif\n ret\n"),
+    ok ("pasmo", "if / else",            " if 0\n nop\n else\n ret\n endif\n"),
+    ok ("pasmo", "rept repeats a body",  " rept 3\n nop\n endm\n ret\n"),
     ok ("pasmo", "ix/iy displacement",   " ld a,(ix+5)\n ld b,(iy-3)\n"),
     ok ("pasmo", "ld (nn),hl",           " ld ($1234),hl\n"),
     ok ("pasmo", "bit / set / im / rst", " bit 7,a\n set 0,(hl)\n im 1\n rst 38\n"),
@@ -435,6 +446,10 @@ const PROBES: &[Probe] = &[
     // #126: the refusals cannot be probed here — this harness skips a body the
     // reference rejects — so what is arbitrated is the other half, that the
     // two shapes which *look* like duplicates still assemble.
+    ok ("vasm", "even pads to a word",   "\tdc.b 1\n\teven\n\tdc.b 2\n"),
+    ok ("vasm", "even on a word does nothing", "\tdc.b 1,2\n\teven\n\tdc.b 3\n"),
+    ok ("vasm", "dcb repeats a value",   "\tdcb 3,$aa\n"),
+    ok ("vasm", "dcb.w and a default 0", "\tdcb.w 2,$1234\n\tdcb.b 2\n"),
     ok ("vasm", "distinct labels assemble",
         " nop\nlbl nop\n"),
     ok ("vasm", "locals repeat under different globals",
@@ -621,6 +636,8 @@ const PROBES: &[Probe] = &[
         "mk\tmacro\nspin\\@ nop\nother\\@ nop\n move.l #spin\\@,d0\n move.l #other\\@,d1\n endm\n mk\n mk\n"),
     ok ("vasm", "extra arguments are dropped",
         "ldav\tmacro\n move.l #\\1,d0\n endm\n ldav 5,9\n"),
+    ok ("ca65-816", ".res reserves",     " lda #1\n .res 3\n lda #2\n"),
+    ok ("ca65-816", ".res takes a fill", " lda #1\n .res 3,$ff\n"),
     ok ("ca65-816", "macro definition and invocation",
         ".macro nop2\n nop\n nop\n.endmacro\n nop2\n"),
     ok ("ca65-816", "macro with a parameter",
@@ -1245,6 +1262,40 @@ const MULTI_PROBES: &[MultiProbe] = &[
         ],
     },
     MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "ca65 data and structure directives with no probe until now: \
+               .dbyt is big-endian where .word is little, .dword is 32-bit \
+               little, .asciiz appends the terminator, and .if/.repeat/.macro \
+               (with .local) fold before layout",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .segment \"CODE\"\n\
+             reset: .word $1234\n .dbyt $1234\n .dword $12345678\n\
+             .asciiz \"hi\"\n\
+             .if 1\n lda #1\n .else\n lda #2\n .endif\n\
+             .if 0\n lda #3\n .endif\n\
+             .repeat 3\n nop\n .endrepeat\n\
+             .macro twice arg\n .local spin\nspin: lda #arg\n bne spin\n .endmacro\n\
+             twice 7\n twice 8\n\
+             .segment \"VECTORS\"\n .word 0, reset, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-huc6280",
+        binaries: &[],
+        note: "HuC6280 leg: the same data and macro surface as the NES leg, \
+               reached through the flat ca65 path — .org, .word, .dbyt, \
+               .dword, .asciiz, .res and a .macro",
+        files: &[(
+            "main.s",
+            " .org $2000\n lda #$11\n .word $1234\n .dbyt $1234\n\
+             .dword $12345678\n .asciiz \"hi\"\n .res 3\n .res 2,$ff\n\
+             .macro ld2 a1, a2\n lda #a1\n ldx #a2\n .endmacro\n ld2 1,2\n",
+        )],
+    },
+    MultiProbe {
         dialect: "ca65-huc6280",
         binaries: &[],
         note: "nested .include with HuC6280 extension ops; an include-defined \
@@ -1509,6 +1560,17 @@ const MULTI_PROBES: &[MultiProbe] = &[
             // the requesting file's directory, the bytes would diverge.
             ("shared.inc", "K equ 99h\n\tbyte 99h\n"),
         ],
+    },
+    MultiProbe {
+        dialect: "8080",
+        binaries: &[],
+        note: "asl 8080 `dw` — 16-bit little-endian data beside the `db` the \
+               binclude probes already cover (`ds` stays out of probe scope: \
+               asl leaves a gap p2bin fills with $FF where we emit zeros)",
+        files: &[(
+            "main.asm",
+            "\tcpu 8080\n\torg 0\n\tdb 0aah\n\tdw 1234h\n\tdw 1,2\n\tdb 0bbh\n",
+        )],
     },
     MultiProbe {
         dialect: "cp1610",
