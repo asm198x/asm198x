@@ -633,10 +633,10 @@ const PROBES: &[Probe] = &[
     ok ("sjasmplus", "the Next has eight slots",
         " DEVICE ZXSPECTRUMNEXT\n SLOT 7\n PAGE 223\n db 1\n"),
     // `ASSERT` passes silently and reaches forward to labels below it.
-    // The Z80 family has its own expression parser and no comparisons yet
-    // (#230). The facts are probed and written down; only the code is missing.
-    gap("sjasmplus", "comparisons answer $FF",
-        " db 2=2,2==2,2!=3,2<3,2>3,2<=3,2>=3\n", 230),
+    ok ("sjasmplus", "comparisons answer $FF",
+        " db 2=2,2==2,2!=3,2<3,2>3,2<=3,2>=3\n"),
+    ok ("pasmo", "comparisons answer $FF",
+        " ld a,2=2\n ld b,2!=3\n ld c,2<3\n ld d,2>3\n ld e,2<=3\n ld h,2>=3\n"),
     ok ("sjasmplus", "a true assertion is silent",
         " ORG 0\n ASSERT 1\n db 1\n"),
     ok ("sjasmplus", "an assertion sees a later label",

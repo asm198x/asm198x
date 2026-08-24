@@ -10,14 +10,20 @@ single shared implementation would have got wrong.
 |---|---|---|---|---|---|---|---|
 | vasm | `$FF` | ✓ | | ✓ | | ✓ | ✓ |
 | sjasmplus | `$FF` | ✓ | ✓ | ✗ | ✓ | ✓ | ✓ |
-| pasmo | `$FF` | ✓ | | | | ✓ | |
+| pasmo | `$FF` | ✓ | ✗ | ✗ | ✓ | ✓ | ✓ |
 | ca65 | `1` | ✓ | | ✓ | | ✓ | ✓ |
 | acme | `1` | ✓ | | ✓ | | ✓ | ✓ |
 | rgbasm | `1` | | ✓ | | ✓ | ✓ | ✓ |
 | lwasm | `1` | ✗ | | ✓ | | ✓ | ✗ |
 
 `✗` is a form the reference **refuses**, checked rather than assumed:
-sjasmplus rejects `<>`, and lwasm rejects both `=` and `<=`/`>=`.
+sjasmplus rejects `<>`; pasmo rejects both `==` and `<>`; lwasm rejects `=` and
+`<=`/`>=`.
+
+The pasmo row was first written from a two-case probe (`=` and `<`) and the
+rest left blank, which read as "has neither". It has `!=`, `<=` and `>=`; only
+`==` and `<>` are refused. Filling a table from the cases you happened to try
+is how a blank becomes a false claim.
 
 ## True is not always 1
 

@@ -231,6 +231,17 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// Which comparison spellings this dialect takes in an **expression**, and
+    /// what it answers for true. Defaults to none, which is what a dialect
+    /// whose reference has no comparison operators wants.
+    ///
+    /// Conditions are unaffected: the `IF` lexer has always admitted the
+    /// comparison operators and keeps doing so, whatever this says. See
+    /// `docs/comparison-operators.md` for the probed table.
+    fn compare(&self) -> crate::dialects::mos6502::Compare {
+        crate::dialects::mos6502::Compare::default()
+    }
+
     /// Parse a directive into an operation (`None` for ones that emit nothing,
     /// like `end`). Defaults to the common set. `consts` holds the `equ` values
     /// known so far, so a directive like `ds` can fold a constant-expression
@@ -2833,6 +2844,13 @@ fn tokenize_impl<S: Z80Syntax>(
     cond: bool,
 ) -> Result<Vec<Tok>, AsmError> {
     let chars: Vec<char> = raw.chars().collect();
+    // Inside a condition every comparison spelling is admitted, as it always
+    // was; outside one the dialect's table decides.
+    let cmp = if cond {
+        crate::dialects::mos6502::Compare::default()
+    } else {
+        syntax.compare()
+    };
     let mut tokens = Vec::new();
     let mut i = 0;
     while i < chars.len() {
@@ -2895,6 +2913,46 @@ fn tokenize_impl<S: Z80Syntax>(
             '<' if chars.get(i + 1) == Some(&'<') => {
                 tokens.push(Tok::Shl);
                 i += 2;
+            }
+            // Outside a condition the dialect's own table decides, because the
+            // spellings are not the same: sjasmplus refuses `<>`, pasmo
+            // refuses `==` and `<>` (`docs/comparison-operators.md`).
+            '=' if cmp.eq_eq && chars.get(i + 1) == Some(&'=') => {
+                tokens.push(Tok::Eq);
+                i += 2;
+            }
+            '=' if cmp.eq => {
+                tokens.push(Tok::Eq);
+                i += 1;
+            }
+            '!' if cmp.ne_bang && chars.get(i + 1) == Some(&'=') => {
+                tokens.push(Tok::Ne);
+                i += 2;
+            }
+            '<' if cmp.ne_angle && chars.get(i + 1) == Some(&'>') => {
+                tokens.push(Tok::Ne);
+                i += 2;
+            }
+            '<' if cmp.ordered_eq && chars.get(i + 1) == Some(&'=') => {
+                tokens.push(Tok::Le);
+                i += 2;
+            }
+            '<' if cmp.relational => {
+                tokens.push(Tok::Lt);
+                i += 1;
+            }
+            // `>>` is the shift and its arm sits below these, so exclude it
+            // here — otherwise a shift lexes as two comparisons.
+            '>' if cmp.ordered_eq
+                && chars.get(i + 1) == Some(&'=')
+                && chars.get(i + 1) != Some(&'>') =>
+            {
+                tokens.push(Tok::Ge);
+                i += 2;
+            }
+            '>' if cmp.relational && chars.get(i + 1) != Some(&'>') => {
+                tokens.push(Tok::Gt);
+                i += 1;
             }
             '<' if cond => {
                 if chars.get(i + 1) == Some(&'=') {
@@ -2997,7 +3055,29 @@ struct ExprParser {
 
 impl ExprParser {
     fn expr(&mut self) -> Result<Expr, AsmError> {
-        self.bit_or()
+        let mut left = self.bit_or()?;
+        while let Some(op) = self.compare_op() {
+            self.pos += 1;
+            let right = self.bit_or()?;
+            let cmp = Expr::Bin(op, Box::new(left), Box::new(right));
+            // Both Z80 dialects answer `$FF` for true, so the negation is
+            // unconditional here rather than a knob.
+            left = Expr::Neg(Box::new(cmp));
+        }
+        Ok(left)
+    }
+
+    /// The comparison at the cursor, if there is one.
+    fn compare_op(&self) -> Option<BinOp> {
+        Some(match self.tokens.get(self.pos)? {
+            Tok::Eq => BinOp::Eq,
+            Tok::Ne => BinOp::Ne,
+            Tok::Lt => BinOp::Lt,
+            Tok::Gt => BinOp::Gt,
+            Tok::Le => BinOp::Le,
+            Tok::Ge => BinOp::Ge,
+            _ => return None,
+        })
     }
 
     // Bitwise and shift operators, C-style: `|` loosest, then `^`, `&`, then the

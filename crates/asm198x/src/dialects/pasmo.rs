@@ -154,6 +154,20 @@ impl Dialect for Pasmo {
 struct PasmoSyntax;
 
 impl Z80Syntax for PasmoSyntax {
+    /// Comparisons in an expression, probed against the binary — see
+    /// `docs/comparison-operators.md`. Both answer `$FF` for true.
+    fn compare(&self) -> crate::dialects::mos6502::Compare {
+        crate::dialects::mos6502::Compare {
+            eq: true,
+            eq_eq: false,
+            ne_angle: false,
+            ne_bang: true,
+            relational: true,
+            ordered_eq: true,
+            minus_one: true,
+        }
+    }
+
     /// Macros expand before parsing (#93). Returning the map lets the shared
     /// pipeline report every line against its source rather than against a line
     /// that only existed inside the expander.
@@ -391,6 +405,21 @@ fn parameters(text: &str) -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
+
+    /// pasmo takes `=` and `!=` but refuses `==` and `<>`, and answers `$FF`.
+    #[test]
+    fn comparisons_use_pasmos_own_spellings() {
+        let a = |src: &str| crate::assemble_pasmo(src).expect(src).bytes;
+        assert_eq!(a(" ld a,2=2\n"), vec![0x3E, 0xFF]);
+        assert_eq!(a(" ld a,2!=3\n"), vec![0x3E, 0xFF]);
+        assert_eq!(a(" ld a,2>3\n"), vec![0x3E, 0x00]);
+        assert_eq!(a(" ld a,2<=3\n"), vec![0x3E, 0xFF]);
+        for refused in [" ld a,2==2\n", " ld a,2<>3\n"] {
+            assert!(crate::assemble_pasmo(refused).is_err(), "{refused:?}");
+        }
+        // `>>` is a shift, not two comparisons — it lexes below them.
+        assert_eq!(a(" ld a,16>>2\n"), vec![0x3E, 0x04]);
+    }
 
     /// pasmo is the only reference that bounds a constant, and only at the top.
     #[test]

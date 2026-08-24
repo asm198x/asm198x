@@ -453,6 +453,20 @@ impl SjasmplusSyntax {
 }
 
 impl Z80Syntax for SjasmplusSyntax {
+    /// Comparisons in an expression, probed against the binary — see
+    /// `docs/comparison-operators.md`. Both answer `$FF` for true.
+    fn compare(&self) -> crate::dialects::mos6502::Compare {
+        crate::dialects::mos6502::Compare {
+            eq: true,
+            eq_eq: true,
+            ne_angle: false,
+            ne_bang: true,
+            relational: true,
+            ordered_eq: true,
+            minus_one: true,
+        }
+    }
+
     /// sjasmplus is the dialect the shared keyword vocabulary was measured
     /// against, so its adoption is the free functions unchanged.
     fn cond_keyword(&self, word: &str) -> Option<z80::CondKw> {
@@ -851,6 +865,20 @@ mod tests {
             unknown.to_string().contains("is not a device"),
             "got `{unknown}`"
         );
+    }
+
+    /// Comparisons answer `$FF`, and the spellings are the dialect's own:
+    /// sjasmplus refuses `<>` where the 6502 family takes it.
+    #[test]
+    fn comparisons_answer_minus_one_in_the_dialects_own_spellings() {
+        let ok = |src: &str| asm(src).unwrap_or_else(|e| panic!("{src:?}: {e}")).bytes;
+        assert_eq!(
+            ok(" db 2=2,2==2,2!=3,2<3,2>3,2<=3,2>=3\n"),
+            vec![0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0xFF, 0x00]
+        );
+        assert!(asm(" db 2<>3\n").is_err(), "sjasmplus refuses `<>`");
+        // The shifts still lex as shifts.
+        assert_eq!(ok(" db 1<<3, 16>>2\n"), vec![8, 4]);
     }
 
     /// sjasmplus's `ALIGN` is power-of-two only and says so in as many words.
