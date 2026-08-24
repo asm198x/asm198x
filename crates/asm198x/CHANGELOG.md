@@ -7,6 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.32](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.31...asm198x-v0.0.32) - 2026-08-24
+
+### Added
+
+- *(cp1610)* warn when a text operand silences a byte statement ([#237](https://github.com/asm198x/asm198x/pull/237))
+
+### Fixed
+
+- *(cp1610)* byte takes a 16-bit operand, not a byte ([#235](https://github.com/asm198x/asm198x/pull/235))
+- *(6809)* add the nine instructions the spec had no row for ([#225](https://github.com/asm198x/asm198x/pull/225))
+
 ## [0.0.31](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.30...asm198x-v0.0.31) - 2026-08-24
 
 The release that closes four directive families across every reference at once —
