@@ -650,6 +650,13 @@ const PROBES: &[Probe] = &[
         "V = $123456\n lda #.lobyte(V)\n lda #.hibyte(V)\n lda #.bankbyte(V)\n"),
     ok ("ca65-816", "a function takes an expression",
         " lda #.lobyte($1234+1)\n ldx #.hibyte($12ff+1)\n"),
+    ok ("ca65-816", ".loword / .hiword",
+        "V = $123456\n .word .loword(V)\n .word .hiword(V)\n .word .loword($1234)\n"),
+    // `.hiword` exists to reach bits 16-31, and the engine caps every dialect's
+    // `equ` at 24 bits — so the case the function is *for* is a live gap, and
+    // the corpus holds it as one rather than the probe stepping around it.
+    gap("ca65-816", ".hiword over a 32-bit constant",
+        "V = $12345678\n .word .loword(V)\n .word .hiword(V)\n .word .loword($1234)\n", 228),
     ok ("ca65-816", "functions nest",
         " lda #.lobyte(.hibyte($123456))\n"),
     ok ("ca65-816", ".res reserves",     " lda #1\n .res 3\n lda #2\n"),

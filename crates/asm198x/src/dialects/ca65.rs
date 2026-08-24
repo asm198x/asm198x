@@ -2129,6 +2129,10 @@ mod tests {
         let n = rom(".code\n lda #.lobyte($1234+1)\n lda #.lobyte(.hibyte($123456))\n");
         assert_eq!(&n[16..20], &[0xA9, 0x35, 0xA9, 0x34]);
 
+        // The word extractions, which have no `Expr` node and need none.
+        let w = rom(".code\nV = $123456\n .word .loword(V)\n .word .hiword(V)\n");
+        assert_eq!(&w[16..20], &[0x56, 0x34, 0x12, 0x00]);
+
         // A `.`-word we do not implement — with a plain argument, since a
         // string literal fails earlier, in the tokenizer.
         let err = assemble(".code\nV = 1\n lda #.sizeof(V)\n").expect_err("not implemented");

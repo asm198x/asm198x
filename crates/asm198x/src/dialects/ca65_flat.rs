@@ -1144,7 +1144,21 @@ pub(crate) fn expr_function(
     let arg = args
         .next()
         .ok_or_else(|| AsmError::new(line, format!("`{name}` needs an argument")))?;
-    use crate::engine::Expr;
+    use crate::engine::{BinOp, Expr};
+    // The word extractions have no node of their own and need none: masking
+    // and shifting say the same thing with the arithmetic already in `Expr`.
+    let mask = |e: Expr| Expr::Bin(BinOp::And, Box::new(e), Box::new(Expr::Num(0xFFFF)));
+    match name.to_ascii_lowercase().as_str() {
+        ".loword" => return Ok(mask(arg)),
+        ".hiword" => {
+            return Ok(mask(Expr::Bin(
+                BinOp::Shr,
+                Box::new(arg),
+                Box::new(Expr::Num(16)),
+            )));
+        }
+        _ => {}
+    }
     let wrap: fn(Box<Expr>) -> Expr = match name.to_ascii_lowercase().as_str() {
         ".lobyte" => Expr::Lo,
         ".hibyte" => Expr::Hi,
