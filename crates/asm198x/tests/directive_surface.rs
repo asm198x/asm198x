@@ -281,7 +281,11 @@ fn a_refused_by_reference_spelling_says_whose_rule_it_is() {
 fn a_real_directive_reads_differently_from_a_typo() {
     let cases: &[(&str, &str, &str, &str)] = &[
         ("acme", "* = $0000\n", "!to \"x\"", "!zzqq"),
-        ("ca65", "", ".export foo", ".zzqq"),
+        // `.condes` rather than `.export`, which became an implemented check
+        // once ca65 turned out to enforce one. `.condes` builds an ld65
+        // constructor table from linker-config features our fixed NROM layout
+        // does not declare — a gap by decision, so it will not move here.
+        ("ca65", "", ".condes foo, 1", ".zzqq"),
         // `device` sat here, then `display`; both are implemented now. The
         // save family is deferred by decision rather than by schedule
         // (`multi-artifact-output.md`), so it will not move under this test.

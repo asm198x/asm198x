@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 494 word(s) outside our surface, across the references installed
+# 485 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -308,7 +308,7 @@ vdebug
 
 ## rgbasm (rgbasm v1.0.3)
 # 3045 candidate(s) harvested; 306 recognised here, 0 more the tool itself
-# refuses on this target; 115 of the 306 outside our surface
+# refuses on this target; 114 of the 306 outside our surface
 acos
 af
 align
@@ -338,7 +338,6 @@ endsection
 endu
 equ
 equs
-export
 fatal
 floor
 fmod
@@ -427,9 +426,8 @@ __utc_year__
 
 ## ca65 (ca65 V2.18 - N/A)
 # 2906 candidate(s) harvested; 225 recognised here, 4 more the tool itself
-# refuses on this target; 121 of the 225 outside our surface
+# refuses on this target; 113 of the 225 outside our surface
 .asize
-.autoimport
 .bank
 .bankbyte
 .bankbytes
@@ -464,16 +462,11 @@ __utc_year__
 .enum
 .exitmac
 .exitmacro
-.export
-.exportzp
 .faraddr
 .feature
 .fileopt
 .fopt
-.forceimport
 .forceword
-.global
-.globalzp
 .hibyte
 .hibytes
 .hiword
@@ -489,8 +482,6 @@ __utc_year__
 .ifpc02
 .ifpsc02
 .ifref
-.import
-.importzp
 .interruptor
 .isize
 .ismnem

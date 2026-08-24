@@ -24,7 +24,7 @@
 //! the includer — probe-pinned).
 
 use std::cell::{Cell, RefCell};
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
 use super::macros;
@@ -176,6 +176,22 @@ enum Kind {
     /// carries on, an error stops. ca65 reports every `.error` and only the
     /// first `.fatal`, a distinction a single-error result cannot show.
     Message(DiagSeverity, String),
+    /// `.export`/`.exportzp`/`.import`/`.importzp`/`.global`/`.globalzp` — a
+    /// name this program makes visible to a linker. Assembly and linking are
+    /// fused over one translation unit here, so what survives is the part ca65
+    /// and ld65 enforce between them: see [`VisRule`].
+    Visible {
+        rule: VisRule,
+        /// The `zp` spellings, which draw ca65's `Symbol 'x' is absolute but
+        /// exported zeropage` warning for a label outside the zero page. A
+        /// constant never draws it, whatever its value.
+        zero_page: bool,
+        names: Vec<String>,
+        /// `.export name := expr` **defines** `name` as well as exporting it.
+        /// `.import` and `.global` refuse the form; only the export spellings
+        /// take it, and only for a single name.
+        define: Option<Expr>,
+    },
     /// `.assert cond, action[, "message"]` — `error` stops, `warning` carries
     /// on. The condition folds against the finished symbol table, so it may
     /// name a label defined below it.
@@ -341,6 +357,23 @@ fn assemble_program(
             },
         });
     }
+    // Every name an `.import` claims, before any label is placed: ca65 refuses
+    // the *definition* of an imported name, and reports it there, so the set
+    // has to be known before the label pass rather than gathered by it.
+    let imported: BTreeSet<String> = parsed
+        .stmts
+        .iter()
+        .filter_map(|s| match &s.kind {
+            Kind::Visible {
+                rule: VisRule::MustNotBeDefined,
+                names,
+                ..
+            } => Some(names.clone()),
+            _ => None,
+        })
+        .flatten()
+        .collect();
+
     for stmt in parsed.stmts {
         let info = seg_info(&stmt.seg).ok_or_else(|| {
             // Layout errors are stamped with the statement's file (U5), so a
@@ -367,6 +400,15 @@ fn assemble_program(
             // the encoder the last — a debugger would disagree with the bytes).
             // `addr_env` was seeded with the `=` constants, so this covers a
             // label colliding with a constant too.
+            if imported.contains(label) {
+                return Err(ca65_flat::stamp_file(
+                    AsmError::new(
+                        stmt.line,
+                        format!("symbol `{}` is already an import", display_label(label)),
+                    ),
+                    stmt.file,
+                ));
+            }
             if addr_env.insert(label.clone(), i64::from(addr)).is_some() {
                 return Err(ca65_flat::stamp_file(
                     AsmError::new(
@@ -445,8 +487,19 @@ fn assemble_program(
             continue; // bss/zp segments occupy address space but emit no file bytes
         }
         let buf = seg_bytes.entry(seg).or_default();
-        emit(item, addr, &addr_env, buf, &mut warnings, file, line)
-            .map_err(|e| ca65_flat::stamp_file(e, file))?;
+        emit(
+            item,
+            addr,
+            &Emit {
+                env: &addr_env,
+                label_seg: &parsed.label_seg,
+                file,
+                line,
+            },
+            buf,
+            &mut warnings,
+        )
+        .map_err(|e| ca65_flat::stamp_file(e, file))?;
     }
 
     let rom = link(&seg_bytes)?;
@@ -523,6 +576,32 @@ enum Resolved {
     Message(DiagSeverity, String),
     /// A condition to fold once every symbol is known, and what a failure does.
     Assert(Expr, bool, String),
+    /// A visibility claim to check once every symbol is known.
+    Visible(VisRule, bool, Vec<String>),
+}
+
+/// What a visibility word asks of the name it carries, once assembly and
+/// linking are one step over one translation unit.
+///
+/// Probed against ca65 2.18 + ld65 on 2026-08-24. The three answers do not
+/// follow the export/import split the manual's headings suggest: `.global` is
+/// in neither camp, and `.forceimport` is in no camp at all — defining its name
+/// is `Symbol 'zz' is already an import` and not defining it is an unresolved
+/// external, so it is declared `Category::RefusedByReference` instead.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum VisRule {
+    /// `.export`, `.exportzp`. ca65 itself answers `Exported symbol 'nope' was
+    /// never defined`, whether or not anything references it.
+    MustBeDefined,
+    /// `.import`, `.importzp`. Defining the name is ca65's `Symbol 'zz' is
+    /// already an import`. Leaving it undefined is fine until something reads
+    /// it, and then it is an unresolved external — which is the ordinary
+    /// undefined-symbol refusal here.
+    MustNotBeDefined,
+    /// `.global`, `.globalzp` — export if the name is defined here, import if
+    /// it is not. Both are legal, so nothing is checked beyond the zero-page
+    /// warning the `zp` spelling carries.
+    EitherWay,
 }
 
 /// Resolve a parsed statement to an emittable item plus its byte size.
@@ -564,6 +643,15 @@ fn resolve(
         }
         Kind::Res(count, fill) => (Resolved::Fill(count, fill), count),
         Kind::Message(severity, text) => (Resolved::Message(severity, text), 0),
+        Kind::Visible {
+            rule,
+            zero_page,
+            names,
+            // The `:= expr` value is read where constants are collected, so by
+            // here the symbol is defined like any other and only the claim is
+            // left to check.
+            define: _,
+        } => (Resolved::Visible(rule, zero_page, names), 0),
         Kind::Assert(cond, fatal, message) => (Resolved::Assert(cond, fatal, message), 0),
         Kind::Insn { operand, mnemonic } => {
             let insn = set
@@ -582,18 +670,28 @@ fn resolve(
     })
 }
 
+/// Where a statement is being emitted: the finished symbol table, every
+/// label's segment (so the `zp` spellings can tell a zero-page label from an
+/// absolute one — and both from a constant, which is neither), and the source
+/// position a refusal is stamped with.
+struct Emit<'a> {
+    env: &'a BTreeMap<String, i64>,
+    label_seg: &'a BTreeMap<String, String>,
+    file: FileId,
+    line: usize,
+}
+
 /// Emit one resolved item's bytes at address `addr`, appending any diagnostic
 /// the source asked for. `env` is the finished symbol table, so an `.assert`
 /// here may name a label defined below it.
 fn emit(
     item: Resolved,
     addr: u32,
-    env: &BTreeMap<String, i64>,
+    at: &Emit<'_>,
     out: &mut Vec<u8>,
     warnings: &mut Vec<Warning>,
-    file: FileId,
-    line_for_errors: usize,
 ) -> Result<(), AsmError> {
+    let (env, label_seg, file, line_for_errors) = (at.env, at.label_seg, at.file, at.line);
     let pc = i64::from(addr);
     match item {
         Resolved::Nothing => {}
@@ -610,6 +708,45 @@ fn emit(
                 file,
             }),
         },
+        Resolved::Visible(rule, zero_page, names) => {
+            for name in &names {
+                let defined = env.contains_key(name);
+                match rule {
+                    VisRule::MustBeDefined if !defined => {
+                        return Err(AsmError::new(
+                            line_for_errors,
+                            format!(
+                                "exported symbol `{}` was never defined",
+                                display_label(name)
+                            ),
+                        ));
+                    }
+                    VisRule::MustNotBeDefined if defined => {
+                        return Err(AsmError::new(
+                            line_for_errors,
+                            format!("symbol `{}` is already an import", display_label(name)),
+                        ));
+                    }
+                    _ => {}
+                }
+                // The zero-page warning is about *labels*: a constant is never
+                // "absolute" in the sense ca65 means, whatever its value.
+                if zero_page
+                    && let Some(segment) = label_seg.get(name)
+                    && segment != "ZEROPAGE"
+                {
+                    warnings.push(Warning {
+                        line: line_for_errors,
+                        message: format!(
+                            "symbol `{}` is absolute but exported zeropage",
+                            display_label(name)
+                        ),
+                        kind: WarningKind::Advisory,
+                        file,
+                    });
+                }
+            }
+        }
         Resolved::Assert(cond, fatal, message) => {
             if cond.eval(env, pc, line_for_errors)? == 0 {
                 if fatal {
@@ -1378,6 +1515,17 @@ fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind {
         Kind::Res(n, f) => Kind::Res(*n, *f),
         Kind::Align(m, f) => Kind::Align(*m, *f),
         Kind::Message(sev, t) => Kind::Message(*sev, t.clone()),
+        Kind::Visible {
+            rule,
+            zero_page,
+            names,
+            define,
+        } => Kind::Visible {
+            rule: *rule,
+            zero_page: *zero_page,
+            names: names.clone(),
+            define: define.as_ref().map(|e| map_expr_syms(e, f)),
+        },
         Kind::Assert(c, fatal, m) => Kind::Assert(map_expr_syms(c, f), *fatal, m.clone()),
         Kind::Raw(b) => Kind::Raw(b.clone()),
     }
@@ -1451,6 +1599,19 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                 // this point in the file has seen — which is the question ca65
                 // asks.
                 let kind = map_kind_syms(kind, &resolve_defined(consts, label_seg));
+                // `.export foo := 7` defines `foo` as well as exporting it, so
+                // it is collected here with the `=` constants rather than left
+                // to the visibility check, which would then find it undefined.
+                if let Kind::Visible {
+                    names,
+                    define: Some(value),
+                    ..
+                } = &kind
+                    && let Some(name) = names.first()
+                    && let Ok(v) = fold_const(value, consts, line)
+                {
+                    consts.insert(name.clone(), v);
+                }
                 let label = node.label.as_ref().map(|s| s.qualified.clone());
                 if let Some(l) = &label {
                     label_seg.insert(l.clone(), seg.clone());
@@ -1827,25 +1988,67 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::KnownUnsupported,
     },
-    // symbol visibility
+    // Symbol visibility, probed against ca65 2.18 + ld65 in the fused
+    // assemble+link this dialect performs. See
+    // `decisions/symbol-visibility-in-a-fused-assembler.md` and `VisRule`.
+    Directive {
+        id: "export",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["export", "exportzp"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "import",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["import", "importzp"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "global",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["global", "globalzp"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // `.forceimport` cannot be satisfied here: defining its name is ca65's
+    // `Symbol 'zz' is already an import`, and not defining it is an unresolved
+    // external at ld65 even with nothing referencing it — which is what the
+    // "force" means. The third dialect to need this category.
+    Directive {
+        id: "forceimport",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["forceimport"],
+            required: true,
+        },
+        category: Category::RefusedByReference(
+            "only usable when a linker resolves it from another module",
+        ),
+    },
+    // `.autoimport +`/`-` switches ca65's automatic import of runtime symbols.
+    // There is no runtime library to import from here, and it emits nothing.
+    Directive {
+        id: "autoimport",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["autoimport"],
+            required: true,
+        },
+        category: Category::Ignored,
+    },
     Directive {
         id: "unsupported-symbol",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &[
-                "import",
-                "importzp",
-                "export",
-                "exportzp",
-                "global",
-                "globalzp",
-                "forceimport",
-                "autoimport",
-                "condes",
-                "constructor",
-                "destructor",
-                "interruptor",
-            ],
+            names: &["condes", "constructor", "destructor", "interruptor"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -1970,10 +2173,16 @@ fn parse_directive(
             format!("`.{name}` is not a directive ca65 has"),
         ));
     };
+    // Accepted and discarded: it changes no bytes and cannot fail.
+    if entry.category == Category::Ignored {
+        return Ok(Kind::Empty);
+    }
     if let Category::RefusedByReference(rule) = entry.category {
         return Err(AsmError::new(
             line,
-            crate::directives::refused_by_reference("ca65", &sigilled, rule),
+            // Named as the pair, because it is the pair that refuses: ca65
+            // rejects the definition and ld65 rejects its absence.
+            crate::directives::refused_by_reference("the ca65+ld65 pipeline", &sigilled, rule),
         ));
     }
     if entry.category == Category::KnownUnsupported {
@@ -2038,6 +2247,18 @@ fn parse_directive(
             Ok(Kind::Message(severity, leading_string(rest, line)?))
         }
         "assert" => parse_assert(anons, current_global, rest, line),
+        "export" | "import" | "global" => parse_visible(
+            match entry.id {
+                "export" => VisRule::MustBeDefined,
+                "import" => VisRule::MustNotBeDefined,
+                _ => VisRule::EitherWay,
+            },
+            name.to_ascii_lowercase().ends_with("zp"),
+            anons,
+            current_global,
+            rest,
+            line,
+        ),
         // Declared, and dispatched elsewhere: `.include`/`.incbin` are
         // walk-handled, `.segment` is read where segments are assigned, and the
         // macro spellings are expanded before parsing. Reaching here means a
@@ -2076,6 +2297,63 @@ fn parse_res(
         }
     };
     Ok(Kind::Res(count, fill))
+}
+
+/// A visibility operand as the symbol table keys it: a cheap local (`@name`)
+/// is scoped to its global the way its definition is, so the check looks the
+/// same name up that the label pass stored.
+fn vis_name(current_global: &str, raw: &str) -> String {
+    match raw.strip_prefix('@') {
+        Some(local) => cheap_key(current_global, local),
+        None => raw.to_string(),
+    }
+}
+
+/// `.export name[, name...]`, and the `:= expr` form that defines as it
+/// exports. ca65 takes the value form only on the export spellings and only for
+/// a single name; `.global bar := 9` and `.import baz := 3` are both
+/// `Unexpected trailing garbage characters`.
+fn parse_visible(
+    rule: VisRule,
+    zero_page: bool,
+    anons: &AnonCtx,
+    current_global: &str,
+    rest: &str,
+    line: usize,
+) -> Result<Kind, AsmError> {
+    let parts = split_top_level(rest, ',');
+    let mut names = Vec::new();
+    let mut define = None;
+    for part in &parts {
+        let part = part.trim();
+        if part.is_empty() {
+            continue;
+        }
+        if let Some((name, value)) = part.split_once(":=") {
+            if rule != VisRule::MustBeDefined {
+                return Err(AsmError::new(
+                    line,
+                    "only `.export` and `.exportzp` take `:=`",
+                ));
+            }
+            if parts.len() > 1 {
+                return Err(AsmError::new(line, "`:=` exports one name"));
+            }
+            names.push(vis_name(current_global, name.trim()));
+            define = Some(parse_value(anons, current_global, value.trim(), line)?);
+        } else {
+            names.push(vis_name(current_global, part));
+        }
+    }
+    if names.is_empty() {
+        return Err(AsmError::new(line, "a visibility directive needs a name"));
+    }
+    Ok(Kind::Visible {
+        rule,
+        zero_page,
+        names,
+        define,
+    })
 }
 
 /// The leading string of a `.warning`/`.error`/`.fatal` operand. ca65 reads
@@ -2606,6 +2884,127 @@ two:\n\
         }
     }
 
+    /// `.export` and `.exportzp` require the name be defined somewhere in the
+    /// program — ca65 answers `Exported symbol 'nope' was never defined` with
+    /// nothing referencing it, which is what makes this a check and not a
+    /// no-op. The name may be defined below the directive.
+    #[test]
+    fn an_exported_name_must_be_defined() {
+        for word in [".export", ".exportzp"] {
+            let src = format!(".segment \"CODE\"\n{word} foo\nfoo: .byte 1\n");
+            crate::assemble_ca65(&src).expect("defined below");
+
+            let src = format!(".segment \"CODE\"\n{word} nope\n.byte 1\n");
+            let err = crate::assemble_ca65(&src).expect_err(word);
+            assert!(
+                err.to_string().contains("`nope` was never defined"),
+                "{word}: got `{err}`"
+            );
+        }
+        // A list, and repeating an export is not an error.
+        crate::assemble_ca65(
+            ".segment \"CODE\"\n.export foo, bar\n.export foo\nfoo: .byte 1\nbar: .byte 2\n",
+        )
+        .expect("a list");
+    }
+
+    /// `.export name := expr` defines the name as it exports it. Only the
+    /// export spellings take the form: ca65 answers `Unexpected trailing
+    /// garbage characters` for `.global bar := 9` and `.import baz := 3`.
+    #[test]
+    fn export_assigns_as_well_as_exports() {
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.export k := 7\n.byte k\n")
+            .expect("defines k");
+        assert_eq!(r.bytes[16], 7);
+        for word in [".global", ".import"] {
+            let src = format!(".segment \"CODE\"\n{word} v := 1\n.byte 1\n");
+            let err = crate::assemble_ca65(&src).expect_err(word);
+            assert!(err.to_string().contains("`:=`"), "{word}: got `{err}`");
+        }
+    }
+
+    /// `.import` claims a name defined elsewhere, so defining it here is
+    /// ca65's `Symbol 'zz' is already an import` — reported at the definition,
+    /// not at the import. Leaving it undefined is fine until something reads
+    /// it, and then it is the ordinary undefined-symbol refusal (ld65 calls it
+    /// an unresolved external).
+    #[test]
+    fn an_imported_name_may_not_be_defined_here() {
+        for word in [".import", ".importzp"] {
+            let src = format!(".segment \"CODE\"\n{word} zz\n.byte 1\n");
+            crate::assemble_ca65(&src).expect("unreferenced is fine");
+
+            let src = format!(".segment \"CODE\"\n{word} zz\n.byte 1\nzz: .byte 2\n");
+            let err = crate::assemble_ca65(&src).expect_err(word);
+            let message = err.to_string();
+            assert!(message.contains("already an import"), "{word}: {message}");
+            assert!(
+                message.contains("line 4"),
+                "reported at the definition: {message}"
+            );
+
+            let src = format!(".segment \"CODE\"\n{word} zz\n.byte zz\n");
+            crate::assemble_ca65(&src).expect_err("referencing it cannot resolve");
+        }
+    }
+
+    /// `.global` is export-if-defined and import-if-not, so both are legal and
+    /// there is nothing to check. The `zp` spelling still warns.
+    #[test]
+    fn global_checks_nothing_either_way() {
+        crate::assemble_ca65(".segment \"CODE\"\n.global g\ng: .byte 1\n").expect("defined");
+        crate::assemble_ca65(".segment \"CODE\"\n.global g\n.byte 1\n").expect("not defined");
+    }
+
+    /// The `zp` spellings warn for a **label** that is not in the zero page.
+    /// A constant never draws the warning, whatever its value — probed with
+    /// `K = 7` and `K = $10`, both silent.
+    #[test]
+    fn exporting_an_absolute_label_as_zeropage_warns() {
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.exportzp foo\nfoo: .byte 1\n")
+            .expect("assembles");
+        let w = r.warnings.first().expect("one warning");
+        assert!(w.message.contains("absolute but exported zeropage"), "{w}");
+
+        for quiet in [
+            ".segment \"ZEROPAGE\"\np: .res 1\n.segment \"CODE\"\n.exportzp p\n.byte 1\n",
+            ".segment \"CODE\"\nK = 7\n.exportzp K\n.byte 1\n",
+            ".segment \"CODE\"\nK = $10\n.exportzp K\n.byte 1\n",
+        ] {
+            let r = crate::assemble_ca65(quiet).expect(quiet);
+            assert!(r.warnings.is_empty(), "{quiet}: got {:?}", r.warnings);
+        }
+        // `.globalzp` carries the same warning — it exports when the name is
+        // defined here, and this one is.
+        let r = crate::assemble_ca65(".segment \"CODE\"\n.globalzp foo\nfoo: .byte 1\n")
+            .expect("assembles");
+        assert_eq!(r.warnings.len(), 1);
+    }
+
+    /// `.forceimport` cannot be satisfied: defining the name is `already an
+    /// import`, and not defining it is an unresolved external at ld65 even
+    /// with nothing referencing it. Refused rather than counted a gap.
+    #[test]
+    fn forceimport_is_refused_as_the_reference_refuses_it() {
+        let err = crate::assemble_ca65(".segment \"CODE\"\n.forceimport zz\n.byte 1\n")
+            .expect_err("cannot be satisfied");
+        let message = err.to_string();
+        assert!(message.contains("linker resolves it"), "{message}");
+        assert!(!message.contains("does not implement"), "{message}");
+    }
+
+    /// `.autoimport +`/`-` switches ca65's automatic runtime imports. There is
+    /// no runtime library here and it emits nothing.
+    #[test]
+    fn autoimport_is_accepted_and_discarded() {
+        for sign in ["+", "-"] {
+            let r =
+                crate::assemble_ca65(&format!(".segment \"CODE\"\n.autoimport {sign}\n.byte 1\n"))
+                    .expect(sign);
+            assert_eq!(r.bytes[16], 1);
+        }
+    }
+
     /// `.warning` says its piece and assembles; `.error` and `.fatal` do not.
     /// ca65 prefixes the text with `User warning:`/`User error:` — its own
     /// classification, not the source's words, so it is not reproduced.
@@ -2793,7 +3192,11 @@ two:\n\
     #[test]
     fn a_real_directive_is_told_apart_from_a_typo() {
         let err = |src: &str| super::assemble(src).expect_err(src).to_string();
-        for d in [".export foo", ".proc x", ".org $200", ".macpack cpu"] {
+        // `.condes` rather than `.export`, which became an implemented check
+        // once ca65 turned out to enforce one. `.condes` builds an ld65
+        // constructor table from linker-config features our fixed layout does
+        // not declare, so it stays a gap by decision rather than by schedule.
+        for d in [".condes foo, 1", ".proc x", ".org $200", ".macpack cpu"] {
             let e = err(&format!("\t{d}\n"));
             assert!(
                 e.contains("is a real directive here"),

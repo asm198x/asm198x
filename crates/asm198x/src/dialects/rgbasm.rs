@@ -907,10 +907,21 @@ pub const DIRECTIVES: &[Directive] = &[
         ]),
         category: Category::KnownUnsupported,
     },
+    // `EXPORT` is the one visibility word in any of the six references that
+    // asks nothing at all: `EXPORT nope` for a name defined nowhere links to a
+    // ROM without complaint, and only a *reference* to an undefined name fails
+    // — at rgblink, which is the ordinary undefined-symbol refusal here.
+    // Probed against rgbasm 1.0.3 + rgblink;
+    // `decisions/symbol-visibility-in-a-fused-assembler.md`.
+    Directive {
+        id: "export",
+        pattern: Pattern::Exact(&["export"]),
+        category: Category::Ignored,
+    },
     // symbol management
     Directive {
         id: "unsupported-symbol",
-        pattern: Pattern::Exact(&["export", "purge", "redef", "def", "shift"]),
+        pattern: Pattern::Exact(&["purge", "redef", "def", "shift"]),
         category: Category::KnownUnsupported,
     },
     // the RS counter
@@ -1646,6 +1657,21 @@ mod tests {
 
     fn bytes(src: &str) -> Vec<u8> {
         asm(src).expect("assemble").bytes
+    }
+
+    /// rgbasm's `EXPORT` asks nothing: a name defined nowhere and referenced
+    /// nowhere links to a ROM. The only failure is a *reference* to an
+    /// undefined name, which is the ordinary refusal and needs no help from
+    /// `EXPORT`. It is the one visibility word in any of the six references
+    /// that is honestly accept-and-discard.
+    #[test]
+    fn export_asks_nothing_of_its_name() {
+        assert_eq!(
+            bytes("SECTION \"s\",ROM0[0]\nEXPORT foo\nfoo: db 1,2\nEXPORT nope\n"),
+            vec![1, 2]
+        );
+        asm("SECTION \"s\",ROM0[0]\nEXPORT nope\n dw nope\n")
+            .expect_err("reading an undefined name still fails");
     }
 
     #[test]

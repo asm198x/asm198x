@@ -859,6 +859,8 @@ const PROBES: &[Probe] = &[
     // section model.
     ok ("rgbasm", "comparisons are == and !=",
         "SECTION \"s\",ROM0[0]\n db 2==2,2==3,2!=3,2<3,2>3,2<=3,2>=3\n"),
+    ok ("rgbasm", "EXPORT emits nothing and asks nothing",
+        "SECTION \"s\",ROM0[0]\nEXPORT foo\nfoo: db 1,2\nEXPORT nope\n"),
     ok ("rgbasm", "PRINT and PRINTLN emit nothing",
         "SECTION \"s\",ROM0[0]\n PRINT \"n=\", 5\n PRINTLN \"x\"\n db 1,2\n"),
     ok ("rgbasm", "ASSERT and STATIC_ASSERT pass silently",
@@ -1628,6 +1630,25 @@ const MULTI_PROBES: &[MultiProbe] = &[
              .code\nreset: lda pos\n\
              .pushseg\n.zeropage\ntmp: .res 1\n.popseg\n\
              sta buf\n stx tmp\n\
+             .segment \"VECTORS\"\n .word 0, reset, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "the visibility words emit nothing in the shapes that assemble: \
+               `.export`/`.exportzp` over a name defined below, `.import` over \
+               a name nothing defines or reads, `.global` either way, and \
+               `.export k := 7` defining as it exports",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .segment \"ZEROPAGE\"\npos: .res 1\n\
+             .segment \"CODE\"\n\
+             .export reset, later\n .exportzp pos\n\
+             .import nothing_reads_this\n .global reset\n .global never_defined\n\
+             .export k := 7\n .autoimport +\n\
+             reset: lda #k\nlater: sta pos\n\
              .segment \"VECTORS\"\n .word 0, reset, 0\n",
         )],
     },

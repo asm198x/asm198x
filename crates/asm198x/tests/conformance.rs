@@ -2225,6 +2225,78 @@ fn vasm_refuses_its_import_side_words_for_a_binary() {
     );
 }
 
+/// ca65's `.forceimport`, arbitrated against ca65 **and** ld65.
+///
+/// It is declared [`Category::RefusedByReference`] on a claim no single tool
+/// makes: defining the name is ca65's `Symbol 'zz' is already an import`, and
+/// leaving it undefined is an ld65 unresolved external — with nothing
+/// referencing it, which is what separates `.forceimport` from `.import`. The
+/// pair is the refusal, so the pair is checked, and plain `.import` is checked
+/// beside it to prove the difference is real.
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn ca65_cannot_satisfy_forceimport_for_a_binary() {
+    if !(have("ca65") && have("ld65")) {
+        eprintln!("SKIP: `ca65`/`ld65` not on PATH");
+        return;
+    }
+    let tmp = std::env::temp_dir().join("asm198x-ca65-forceimport");
+    let _ = fs::create_dir_all(&tmp);
+    let cfg = tmp.join("flat.cfg");
+    fs::write(
+        &cfg,
+        "MEMORY { RAM: start=$8000, size=$100, file=%O; }\n\
+         SEGMENTS { CODE: load=RAM, type=rw; }\n",
+    )
+    .expect("write the config");
+
+    let run = |source: &str| {
+        ref_outcome(&tmp, source, "s", |src, out| {
+            let obj = src.with_extension("o");
+            let mut a = Command::new("ca65");
+            a.arg("-o").arg(&obj).arg(src);
+            let mut b = Command::new("ld65");
+            b.arg("-C").arg(&cfg).arg("-o").arg(out).arg(&obj);
+            vec![a, b]
+        })
+    };
+
+    let mut wrong: Vec<String> = Vec::new();
+    match &run(".segment \"CODE\"\n.forceimport zz\nzz: .byte 1\n") {
+        RefOutcome::Rejected { diagnostic } if diagnostic.contains("already an import") => {}
+        other => wrong.push(format!("forceimport with the name defined: {other:?}")),
+    }
+    match &run(".segment \"CODE\"\n.forceimport zz\n.byte 1\n") {
+        RefOutcome::Rejected { diagnostic } if diagnostic.contains("nresolved external") => {}
+        other => wrong.push(format!("forceimport with the name undefined: {other:?}")),
+    }
+    // Plain `.import`, unreferenced, links — so this is a fact about the
+    // `force`, not about imports.
+    match &run(".segment \"CODE\"\n.import zz\n.byte 1\n") {
+        RefOutcome::Bytes(b) if b == &[1] => {}
+        other => wrong.push(format!("plain import, unreferenced: {other:?}")),
+    }
+    // And `.export` of a name nothing defines is refused by ca65 itself, which
+    // is the check the export words carry here.
+    match &run(".segment \"CODE\"\n.export nope\n.byte 1\n") {
+        RefOutcome::Rejected { diagnostic } if diagnostic.contains("never defined") => {}
+        other => wrong.push(format!("export of an undefined name: {other:?}")),
+    }
+
+    let err = asm198x::assemble_ca65(".segment \"CODE\"\n.forceimport zz\n.byte 1\n")
+        .expect_err("we refuse it too");
+    if !err.to_string().contains("linker resolves it") {
+        wrong.push(format!("ours reads wrong: {err}"));
+    }
+
+    assert!(
+        wrong.is_empty(),
+        "{} forceimport probe(s) disagree:\n  {}",
+        wrong.len(),
+        wrong.join("\n  ")
+    );
+}
+
 /// Identify every reference tool this machine has, proving the probe table
 /// against the real binaries rather than against synthetic output.
 ///
