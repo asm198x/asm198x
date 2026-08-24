@@ -1,10 +1,16 @@
 # Decision: compare everything the run produced, not just the output file
 
-**Status:** Proposed. Binding for Asm198x once accepted. Extends
+**Status:** Active. Binding for Asm198x (accepted 2026-08-24). Extends
 [`spec-conformance-and-fuzzing.md`](spec-conformance-and-fuzzing.md), which owns
 how correctness is checked.
 
 **Date:** 2026-08-24.
+
+**Accepted as the verification story for
+[`multi-artifact-output.md`](multi-artifact-output.md).** That record went
+Active the same day and commits the assembler to writing files a source names.
+A harness that compares one output file cannot see any of them, so this is what
+makes that work checkable rather than merely written.
 
 ## The decision
 

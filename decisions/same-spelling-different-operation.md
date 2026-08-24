@@ -1,6 +1,6 @@
 # Decision: the IR models what a directive means, not what it is spelled
 
-**Status:** Proposed. Binding for Asm198x once accepted. A working rule for the
+**Status:** Active. Binding for Asm198x (accepted 2026-08-24). A working rule for the
 shared IR, under [`assemble-io-model.md`](assemble-io-model.md) principle 2 (one
 internal representation) and [`syntax-stance.md`](syntax-stance.md).
 
