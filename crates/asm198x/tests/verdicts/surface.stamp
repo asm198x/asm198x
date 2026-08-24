@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 536 word(s) outside our surface, across the references installed
+# 528 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -34,12 +34,10 @@
 
 ## acme (This is ACME, release 0.97 ("Zem"), 28 June 2020)
 # 1177 candidate(s) harvested; 74 recognised here, 2 more the tool itself
-# refuses on this target; 34 of the 74 outside our surface
+# refuses on this target; 31 of the 74 outside our surface
 !cpu
-!error
 !hex
 !rs
-!serious
 !subzone
 !to
 !xor
@@ -67,7 +65,6 @@
 !skip
 !symbollist
 !sz
-!warn
 !while
 
 ## sjasmplus (SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus))
@@ -159,12 +156,11 @@ unphase
 
 ## lwasm (lwasm from lwtools 4.25)
 # 2201 candidate(s) harvested; 257 recognised here, 94 more the tool itself
-# refuses on this target; 68 of the 257 outside our surface
+# refuses on this target; 67 of the 257 outside our surface
 dephase
 endm
 endsection
 endstruct
-error
 export
 extdep
 if
@@ -231,7 +227,7 @@ zmq
 
 ## vasm (vasm 2.0b (c) in 2002-2025 Volker Barthelmann)
 # 4215 candidate(s) harvested; 183 recognised here, 527 more the tool itself
-# refuses on this target; 104 of the 183 outside our surface
+# refuses on this target; 102 of the 183 outside our surface
 cpu32
 dr
 dw
@@ -252,7 +248,6 @@ blk
 cargs
 clrfo
 clrso
-cnop
 comm
 comment
 cseg
@@ -271,7 +266,6 @@ endm
 entry
 erem
 extrn
-fail
 far
 fo
 global
@@ -339,7 +333,7 @@ vdebug
 
 ## rgbasm (rgbasm v1.0.3)
 # 3045 candidate(s) harvested; 306 recognised here, 0 more the tool itself
-# refuses on this target; 121 of the 306 outside our surface
+# refuses on this target; 119 of the 306 outside our surface
 acos
 af
 align
@@ -371,7 +365,6 @@ endu
 equ
 equs
 export
-fail
 fatal
 floor
 fmod
@@ -441,7 +434,6 @@ tan
 tzcount
 union
 vram
-warn
 wram0
 wramx
 _narg
