@@ -760,7 +760,7 @@
       "slug": "reference/dialects/rgbasm"
     },
     {
-      "context": "8 directives, 12 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "13 directives, 45 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "rgbasm",
       "slug": "reference/dialects/rgbasm"

@@ -679,6 +679,89 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["incbin"]),
         category: Category::Operation,
     },
+    // -----------------------------------------------------------------------
+    // What rgbasm has here and we do not.
+    //
+    // Declared so the diagnostic stops saying `unknown instruction` for a word
+    // the reference has — the same call as ca65's and the asl family's. It
+    // changes no bytes; it changes whether a reader with valid source goes
+    // looking for a typo.
+    //
+    // Thirty-three spellings, each confirmed in **statement position** against
+    // rgbasm 1.0.3. The rest of what rgbasm knows and we do not is not
+    // directive vocabulary and is deliberately absent:
+    //
+    // - **Registers** — `af`, `bc`, `hli`. Operand vocabulary, and ours.
+    // - **Built-in functions** — `strlen`, `sizeof`, `bank`, `cos`, `strfmt`,
+    //   and the fixed-point pair rgbasm's parser names `FDIV`/`FMUL`. They
+    //   live inside expressions.
+    // - **Predefined symbols** — `__DATE__`, `_NARG`, `_RS`. Case-sensitively
+    //   uppercase: rgbasm answers `Undefined macro` for `__date__` and warns
+    //   that `__DATE__` is deprecated, which is how the two were told apart.
+    // - **Section attributes** — `ROM0`, `WRAMX`, `FRAGMENT`. Operands of
+    //   `SECTION`, not statements.
+    //
+    // Naming any of those here would describe them in a position they never
+    // appear in.
+    // assertions and diagnostics
+    Directive {
+        id: "unsupported-assertions",
+        pattern: Pattern::Exact(&[
+            "assert",
+            "static_assert",
+            "fail",
+            "warn",
+            "print",
+            "println",
+        ]),
+        category: Category::KnownUnsupported,
+    },
+    // option and character-map state
+    Directive {
+        id: "unsupported-option",
+        pattern: Pattern::Exact(&[
+            "opt",
+            "popo",
+            "pusho",
+            "popc",
+            "pushc",
+            "pops",
+            "pushs",
+            "charmap",
+            "newcharmap",
+            "setcharmap",
+        ]),
+        category: Category::KnownUnsupported,
+    },
+    // symbol management
+    Directive {
+        id: "unsupported-symbol",
+        pattern: Pattern::Exact(&["export", "purge", "redef", "def", "shift"]),
+        category: Category::KnownUnsupported,
+    },
+    // the RS counter
+    Directive {
+        id: "unsupported-the",
+        pattern: Pattern::Exact(&["rsset", "rsreset"]),
+        category: Category::KnownUnsupported,
+    },
+    // blocks and layout
+    Directive {
+        id: "unsupported-blocks",
+        pattern: Pattern::Exact(&[
+            "union",
+            "nextu",
+            "endu",
+            "load",
+            "endl",
+            "align",
+            "for",
+            "break",
+            "endsection",
+            "dl",
+        ]),
+        category: Category::KnownUnsupported,
+    },
 ];
 
 fn parse_op(
@@ -1512,5 +1595,54 @@ mod tests {
             before, after,
             "formatting changed the program:\n{formatted}"
         );
+    }
+
+    /// A directive rgbasm has and we do not names itself as one; a word it does
+    /// not have stays an unknown instruction. The same sentence for both told a
+    /// reader with valid source to go looking for a typo.
+    #[test]
+    fn a_real_directive_is_told_apart_from_a_typo() {
+        let err = |body: &str| {
+            crate::assemble_rgbasm(&format!("\tSECTION \"s\",ROM0\n\t{body}\n"))
+                .expect_err(body)
+                .to_string()
+        };
+        for d in ["ASSERT 1", "PRINT \"x\"", "UNION", "OPT b.X", "PUSHS"] {
+            let e = err(d);
+            assert!(
+                e.contains("is a real directive here"),
+                "`{d}` should name itself a real rgbasm directive, got: {e}"
+            );
+        }
+        assert!(err("ZZQQ").contains("unknown instruction"));
+    }
+
+    /// Only *statement* vocabulary is declared. rgbasm's registers, built-in
+    /// functions, predefined symbols and section attributes are all words it
+    /// knows and we may or may not have, in positions that are not this one —
+    /// naming them here would describe them where they never appear.
+    #[test]
+    fn only_statement_vocabulary_is_declared() {
+        let declared: Vec<String> = crate::directives::surfaces()
+            .into_iter()
+            .filter(|s| s.dialect == "rgbasm")
+            .flat_map(|s| s.directives)
+            .flat_map(|d| d.spellings())
+            .map(|s| s.to_ascii_lowercase())
+            .collect();
+        for absent in [
+            "af", "hli", "strlen", "sizeof", "cos", "__date__", "_narg", "rom0",
+        ] {
+            assert!(
+                !declared.iter().any(|s| s == absent),
+                "`{absent}` is not statement vocabulary"
+            );
+        }
+        for present in ["assert", "print", "union", "align", "db"] {
+            assert!(
+                declared.iter().any(|s| s == present),
+                "`{present}` should be declared"
+            );
+        }
     }
 }
