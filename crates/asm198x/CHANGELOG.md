@@ -9,14 +9,50 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.32](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.31...asm198x-v0.0.32) - 2026-08-24
 
-### Added
-
-- *(cp1610)* warn when a text operand silences a byte statement ([#237](https://github.com/asm198x/asm198x/pull/237))
+Two correctness fixes, both bigger than the issues that reported them. If you
+assemble CP-1600 source, **this release changes your output** — see below.
 
 ### Fixed
 
-- *(cp1610)* byte takes a 16-bit operand, not a byte ([#235](https://github.com/asm198x/asm198x/pull/235))
-- *(6809)* add the nine instructions the spec had no row for ([#225](https://github.com/asm198x/asm198x/pull/225))
+- **The CP-1600 `byte` directive emitted the wrong bytes, and said nothing.**
+  asl's `BYTE` takes a **16-bit** operand and emits its two bytes low-first, one
+  byte per decle: `byte x'1234'` is the decle pair `0034 0012`, and `byte 1` is
+  `0001 0000`. asm198x read the operand as 8 bits and packed one raw byte per
+  item, so `byte 1,2,3` produced three bytes where asl writes six decles. Any
+  CP-1600 program with a `byte` table was building a different image from the
+  one asl builds. It now matches, byte for byte.
+
+  The issue behind this suspected `byte` and `binclude` of disagreeing with each
+  other. They never did — asl's listing shows one rule, one byte per decle, and
+  only `byte` was misread.
+  ([#235](https://github.com/asm198x/asm198x/pull/235),
+  [#227](https://github.com/asm198x/asm198x/issues/227))
+
+- **Nine 6809 instructions were missing**, and lwasm-syntax source using any of
+  them was refused outright: `adca`, `adcb`, `sbca`, `sbcb`, `bita`, `bitb`,
+  `cmpd`, `cmpy` and `cwai`. Add and subtract with carry, bit test, the two
+  16-bit compares and wait-for-interrupt — `bita` and `cmpd` appear in ordinary
+  6809 source. All four addressing modes each, 33 forms, every encoding read
+  from lwasm and cross-checked against Motorola's 1981 programming manual.
+  ([#232](https://github.com/asm198x/asm198x/pull/232),
+  [#225](https://github.com/asm198x/asm198x/issues/225))
+
+### Changed
+
+- **Five CP-1600 spellings are no longer accepted: `db`, `dc.b`, `data`, `dw`
+  and `dc.w`.** asl has none of them on this chip — each is an unknown
+  instruction there — so source using them was never valid CP-1600 asl source,
+  and asm198x accepting them meant a program that built here failed against the
+  tool it claims compatibility with. If your source uses them, replace them with
+  `byte` and `word`.
+  ([#235](https://github.com/asm198x/asm198x/pull/235))
+
+- **A CP-1600 `byte` statement with a string or character operand now warns.**
+  asl drops the whole statement — `byte 1,"AB"` emits nothing, the `1`
+  included — and reports neither an error nor a warning. The bytes are
+  unchanged and still match asl exactly; asm198x now tells you the statement
+  produced nothing, and that the numeric operands beside the text went with it.
+  ([#237](https://github.com/asm198x/asm198x/pull/237))
 
 ## [0.0.31](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.30...asm198x-v0.0.31) - 2026-08-24
 
