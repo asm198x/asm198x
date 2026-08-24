@@ -1767,6 +1767,7 @@ fn substitute_anon_refs(
         | Operation::Binary(_)
         | Operation::Align { .. }
         | Operation::AlignTo { .. }
+        | Operation::Diagnose { .. }
         | Operation::Reserve(_)) => other,
     })
 }
@@ -2184,6 +2185,23 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // The source speaking for itself: `!error` and `!serious` stop the
+    // assembly, `!warn` notes and carries on. All three render their operand
+    // list the way the data directives do, so `!warn "at ", *` reports the
+    // address.
+    //
+    // `!serious` differs from `!error` only in that ACME abandons the pass
+    // immediately rather than collecting further errors first. We stop on the
+    // first error either way, so the two are one behaviour here.
+    Directive {
+        id: "diagnose",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["error", "serious", "warn"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     Directive {
         id: "align",
         pattern: Pattern::Sigilled {
@@ -2312,7 +2330,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "do",
                 "endoffile",
                 "eof",
-                "error",
                 "fi",
                 "hex",
                 "initmem",
@@ -2324,13 +2341,11 @@ pub const DIRECTIVES: &[Directive] = &[
                 "realpc",
                 "rs",
                 "scrxor",
-                "serious",
                 "skip",
                 "subzone",
                 "symbollist",
                 "sz",
                 "to",
-                "warn",
                 "while",
                 "xor",
             ],
@@ -2372,6 +2387,7 @@ fn parse_directive(
         "bytes" => Ok(Operation::Bytes(parse_list(anons, zone, rest, line)?)),
         "words" => Ok(Operation::Words(parse_list(anons, zone, rest, line)?)),
         "fill" => parse_fill(anons, zone, env, rest, line),
+        "diagnose" => Ok(parse_diagnose(anons, zone, env, name, rest, line)),
         "align" => parse_align(anons, zone, env, rest, line),
         "text" => parse_text(anons, zone, rest, line, |c| c),
         "scr" => parse_text(anons, zone, rest, line, screen_code),
@@ -2394,6 +2410,41 @@ fn parse_directive(
 /// `!fill amount [, value]` — `amount` bytes of `value` (default 0). Both fold
 /// against the parse-time `env` (so a `= const` like `MAX_NOTES` works), because
 /// the size has to be known before pass two assigns addresses.
+/// `!error`/`!warn` — the source's own diagnostic. The operand is the same
+/// comma list the data directives take: strings go through verbatim and values
+/// are rendered, so `!warn "at ", *` names the address.
+///
+/// Infallible on purpose. A bad operand here must not become a *different*
+/// error than the one the source asked for, and an unfoldable value in an
+/// untaken branch must not fail at all — the message carries the source text
+/// when it cannot be folded.
+fn parse_diagnose(
+    anons: &Anons,
+    zone: &str,
+    env: &BTreeMap<String, i64>,
+    name: &str,
+    rest: &str,
+    line: usize,
+) -> Operation {
+    let mut message = String::new();
+    for part in mos6502::split_top_level(rest, ',') {
+        let part = part.trim();
+        if let Some(text) = part.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
+            message.push_str(text);
+        } else if let Ok(v) =
+            parse_value(anons, zone, part, line).and_then(|e| fold_const(&e, env, line))
+        {
+            message.push_str(&v.to_string());
+        } else {
+            message.push_str(part);
+        }
+    }
+    Operation::Diagnose {
+        fatal: !name.eq_ignore_ascii_case("warn"),
+        message,
+    }
+}
+
 fn parse_fill(
     anons: &Anons,
     zone: &str,
@@ -3070,6 +3121,34 @@ mod tests {
         // `<`/`>` byte operators apply to a baked set-var.
         let c = asm("!set p=$1234\n lda #<p\n ldx #>p\n").expect("byte ops");
         assert_eq!(c.bytes, vec![0xA9, 0x34, 0xA2, 0x12]);
+    }
+
+    /// `!error` stops; `!warn` notes and carries on. Both render their operand
+    /// list, and — the reason they are operations rather than parse errors —
+    /// neither fires from a branch the program does not take.
+    #[test]
+    fn source_requested_diagnostics() {
+        let err = asm("*= $1000\n!error \"stop \", 7\n").expect_err("aborts");
+        assert!(err.to_string().contains("stop 7"), "got `{err}`");
+
+        let out = asm("*= $1000\n lda #1\n!warn \"careful \", 5\n rts\n").expect("warns");
+        assert_eq!(out.bytes, vec![0xA9, 0x01, 0x60]);
+        assert!(
+            out.warnings.iter().any(|w| w.message.contains("careful 5")),
+            "got {:?}",
+            out.warnings
+        );
+
+        // `!serious` is `!error` with a different word on it.
+        let grave = asm("*= $1000\n!serious \"very bad\"\n").expect_err("aborts");
+        assert!(grave.to_string().contains("very bad"), "got `{grave}`");
+
+        // The whole point of lowering these rather than raising them at parse.
+        for d in ["!error", "!serious"] {
+            let quiet =
+                asm(&format!("*= $1000\n!if 0 {{\n{d} \"never\"\n}}\n rts\n")).expect("untaken");
+            assert_eq!(quiet.bytes, vec![0x60], "{d}");
+        }
     }
 
     #[test]

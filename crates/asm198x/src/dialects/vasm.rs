@@ -505,8 +505,12 @@ fn assemble_core(
                 continue;
             }
             let sec = sec_idx[i];
-            if let Some(boundary) = s.kind.align_to(&consts, s.line).map_err(|e| stamp(e, s))? {
-                pc[sec] += align_pad(pc[sec], boundary);
+            if let Some((pad, _)) = s
+                .kind
+                .pad_at(pc[sec], &consts, s.line)
+                .map_err(|e| stamp(e, s))?
+            {
+                pc[sec] += pad;
             }
             if ctx.optimize
                 && !word_branch[i]
@@ -545,15 +549,24 @@ fn assemble_core(
         let stamp = |e: AsmError| stamp(e, s);
         let sec = sec_idx[i];
         let buf = &mut out[sec];
-        if let Some(boundary) = s.kind.align_to(&consts, s.line).map_err(stamp)? {
-            let pad = align_pad(buf.bytes.len() as i64, boundary);
-            buf.bytes.extend(std::iter::repeat_n(0u8, pad as usize));
+        if let Some((pad, fill)) = s
+            .kind
+            .pad_at(buf.bytes.len() as i64, &consts, s.line)
+            .map_err(stamp)?
+        {
+            buf.bytes.extend(fill.bytes(pad));
         }
         // Span start is measured *after* the align pad: the hidden pad bytes
         // are fill, not this statement's emission (the padding rule — no span).
         let span_start = buf.bytes.len();
         match &s.kind {
-            Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) | Stmt::Align(_) => {}
+            Stmt::Empty
+            | Stmt::Equ(..)
+            | Stmt::Even
+            | Stmt::Section(..)
+            | Stmt::Align(_)
+            | Stmt::Cnop(..) => {}
+            Stmt::Fail(message) => return Err(stamp(AsmError::new(s.line, message.clone()))),
             Stmt::Raw(payload) => buf.bytes.extend_from_slice(payload),
             Stmt::Dc(size, items) => {
                 for e in items {
@@ -853,8 +866,12 @@ fn layout(
             continue;
         }
         let sec = sec_idx[i];
-        if let Some(boundary) = s.kind.align_to(&consts, s.line).map_err(|e| stamp(e, s))? {
-            pc[sec] += align_pad(pc[sec], boundary);
+        if let Some((pad, _)) = s
+            .kind
+            .pad_at(pc[sec], &consts, s.line)
+            .map_err(|e| stamp(e, s))?
+        {
+            pc[sec] += pad;
         }
         if let Some(label) = &s.label {
             consts.insert(label.clone(), pc[sec]);
@@ -1355,7 +1372,13 @@ fn stmt_size(
     line: usize,
 ) -> Result<usize, AsmError> {
     Ok(match kind {
-        Stmt::Empty | Stmt::Equ(..) | Stmt::Even | Stmt::Section(..) | Stmt::Align(_) => 0,
+        Stmt::Empty
+        | Stmt::Equ(..)
+        | Stmt::Even
+        | Stmt::Section(..)
+        | Stmt::Align(_)
+        | Stmt::Cnop(..)
+        | Stmt::Fail(_) => 0,
         Stmt::Raw(payload) => payload.len(),
         Stmt::Dc(size, items) => items.len() * size.bytes(),
         Stmt::Ds(size, count) | Stmt::Dcb(size, count, _) => {
@@ -1554,6 +1577,16 @@ enum Stmt {
     Even,
     /// `section name,attr` — opens a new hunk of the given kind and memory flag.
     Section(HunkKind, MemFlag),
+    /// `fail "message"` — stop the assembly where the source says to. Held as
+    /// a statement rather than raised at parse time because vasm has
+    /// conditional assembly, and a `fail` in an untaken branch must stay
+    /// silent.
+    Fail(String),
+    /// `cnop offset,alignment` — align **up** to `alignment`, then add
+    /// `offset`. Padding is a whole instruction word where one fits: an odd
+    /// pad takes a leading `$00` and the rest is `NOP` (`$4e71`), the same
+    /// "a NOP is a word or it is nothing" rule the hunk serialiser follows.
+    Cnop(Expr, Expr),
     /// `align n` — pad to the next multiple of `2^n`, zero-filled. vasm's
     /// operand is an **exponent**, not the boundary: `align 2` is a four-byte
     /// boundary. Kept as an expression so it can name an `equ` constant, the
@@ -1583,16 +1616,56 @@ impl Stmt {
     /// Instructions and `even` begin on an even address; `dc`/`ds` — and an
     /// `incbin` payload, probe-pinned — do not pad on their own. `align n`
     /// carries whatever boundary it named.
-    fn align_to(
+    fn pad_at(
         &self,
+        at: i64,
         consts: &BTreeMap<String, i64>,
         line: usize,
-    ) -> Result<Option<i64>, AsmError> {
+    ) -> Result<Option<(i64, PadFill)>, AsmError> {
         Ok(match self {
-            Stmt::Insn { .. } | Stmt::Even => Some(2),
-            Stmt::Align(e) => Some(align_boundary(e, consts, line)?),
+            Stmt::Insn { .. } | Stmt::Even => Some((align_pad(at, 2), PadFill::Zero)),
+            Stmt::Align(e) => Some((
+                align_pad(at, align_boundary(e, consts, line)?),
+                PadFill::Zero,
+            )),
+            Stmt::Cnop(offset, alignment) => {
+                let alignment = eval(alignment, consts, 0, line)?;
+                let offset = eval(offset, consts, 0, line)?;
+                if alignment < 1 {
+                    return Err(AsmError::new(line, "`cnop` alignment must be positive"));
+                }
+                Some((align_pad(at, alignment) + offset, PadFill::Nop))
+            }
             _ => None,
         })
+    }
+}
+
+/// What a statement's alignment padding is made of.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum PadFill {
+    /// Zero bytes — `even`, `align`, and the implicit word alignment an
+    /// instruction takes.
+    Zero,
+    /// `NOP` (`$4e71`) instruction words, with a single leading `$00` when the
+    /// pad is odd and a whole word will not fit.
+    Nop,
+}
+
+impl PadFill {
+    /// The `pad` filler bytes this style produces.
+    fn bytes(self, pad: i64) -> Vec<u8> {
+        let pad = pad.max(0) as usize;
+        match self {
+            PadFill::Zero => vec![0u8; pad],
+            PadFill::Nop => {
+                let mut out = vec![0u8; pad % 2];
+                while out.len() < pad {
+                    out.extend_from_slice(&[0x4e, 0x71]);
+                }
+                out
+            }
+        }
     }
 }
 
@@ -2329,7 +2402,13 @@ fn bake_reptn(kind: &mut Stmt, value: i64) {
             bake_reptn_expr(v, value);
         }
         Stmt::Insn { operands, .. } => operands.iter_mut().for_each(|o| bake_reptn_opnd(o, value)),
-        Stmt::Empty | Stmt::Even | Stmt::Section(..) | Stmt::Align(_) | Stmt::Raw(_) => {}
+        Stmt::Empty
+        | Stmt::Even
+        | Stmt::Section(..)
+        | Stmt::Align(_)
+        | Stmt::Cnop(..)
+        | Stmt::Fail(_)
+        | Stmt::Raw(_) => {}
     }
 }
 
@@ -2370,7 +2449,13 @@ fn qualify_stmt(kind: &mut Stmt, scope: &str) {
             qualify_expr(value, scope);
         }
         Stmt::Insn { operands, .. } => operands.iter_mut().for_each(|o| qualify_opnd(o, scope)),
-        Stmt::Empty | Stmt::Even | Stmt::Section(..) | Stmt::Align(_) | Stmt::Raw(_) => {}
+        Stmt::Empty
+        | Stmt::Even
+        | Stmt::Section(..)
+        | Stmt::Align(_)
+        | Stmt::Cnop(..)
+        | Stmt::Fail(_)
+        | Stmt::Raw(_) => {}
     }
 }
 
@@ -2462,6 +2547,16 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     Directive {
+        id: "cnop",
+        pattern: Pattern::Exact(&["cnop"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "fail",
+        pattern: Pattern::Exact(&["fail"]),
+        category: Category::Operation,
+    },
+    Directive {
         id: "section_shorthand",
         pattern: Pattern::Exact(&[
             "code", "code_c", "code_f", "data", "data_c", "data_f", "bss", "bss_c", "bss_f",
@@ -2536,7 +2631,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "cargs",
             "clrfo",
             "clrso",
-            "cnop",
             "comm",
             "comment",
             "cpu32",
@@ -2560,7 +2654,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "erem",
             "export",
             "extrn",
-            "fail",
             "far",
             "fo",
             "fpu",
@@ -2671,6 +2764,8 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
             "section" => Ok(parse_section(args, line)),
             "section_shorthand" => Ok(section_from_attr(&lower)),
             "align" => parse_align(args, line),
+            "cnop" => parse_cnop(args, line),
+            "fail" => Ok(Stmt::Fail(args.trim().trim_matches('"').to_string())),
             // dcb.x count,value — reserve `count` items of `value`. Stage 1:
             // treat as a constant-sized run (value defaults to 0 if omitted).
             "dcb" => parse_dcb(suffix, args, line),
@@ -2712,6 +2807,19 @@ fn parse_section(args: &str, _line: usize) -> Stmt {
 /// function of the program counter alone.
 fn parse_align(args: &str, line: usize) -> Result<Stmt, AsmError> {
     Ok(Stmt::Align(parse_value(args.trim(), line)?))
+}
+
+/// `cnop offset,alignment` — both operands are required, and both may name an
+/// `equ` constant, so they fold where the constants are known.
+fn parse_cnop(args: &str, line: usize) -> Result<Stmt, AsmError> {
+    let parts = split_operands(args);
+    if parts.len() != 2 {
+        return Err(AsmError::new(line, "`cnop` needs `offset,alignment`"));
+    }
+    Ok(Stmt::Cnop(
+        parse_value(parts[0].trim(), line)?,
+        parse_value(parts[1].trim(), line)?,
+    ))
 }
 
 /// The content kind and memory placement a section attribute names. Shared by
@@ -3152,6 +3260,20 @@ mod directive_surface {
         asm(&format!("        section code,code\n        {body}\n"))
             .expect("assembles")
             .bytes
+    }
+
+    /// `fail "msg"` stops where the source says to, and stays silent inside an
+    /// untaken conditional — the reason it is a statement and not a parse error.
+    #[test]
+    fn fail_stops_the_assembly_unless_the_branch_is_untaken() {
+        let err = asm("        section code,code\n        fail \"stop\"\n").expect_err("aborts");
+        assert!(err.to_string().contains("stop"), "got `{err}`");
+        assert_eq!(
+            // `ifeq <expr>` is "expr == 0", so this takes the first branch and
+            // the `fail` in the second is never reached.
+            bytes("ifeq 0\n        dc.b 1\n        else\n        fail \"never\"\n        endc"),
+            vec![1]
+        );
     }
 
     /// vasm's `align` names an **exponent**: `align 2` is a four-byte

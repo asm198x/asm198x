@@ -211,6 +211,13 @@ pub(crate) enum Item {
         value: i64,
         fill: u8,
     },
+    /// A source-requested diagnostic (ACME `!error`/`!warn`, lwasm `error`,
+    /// rgbasm `FAIL`/`WARN`). Like the aligns it has no emit arm: the
+    /// formatter re-emits it from [`Node::source`](Node).
+    Diagnose {
+        fatal: bool,
+        message: String,
+    },
     /// The boundary-stating `align`/`.align` — a PC-dependent pad to the next
     /// multiple of `modulus`, resolved in the engine. Like [`Item::Align`] it
     /// has no emit arm: the formatter re-emits it via
@@ -686,6 +693,10 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             modulus: *modulus,
             fill: *fill,
         },
+        Item::Diagnose { fatal, message } => Operation::Diagnose {
+            fatal: *fatal,
+            message: message.clone(),
+        },
         Item::Binary(payload) => Operation::Binary(payload.clone()),
         other => {
             let what = match other {
@@ -748,6 +759,7 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             fill,
         },
         Item::AlignTo { modulus, fill } => Operation::AlignTo { modulus, fill },
+        Item::Diagnose { fatal, message } => Operation::Diagnose { fatal, message },
         // No dialect lowers a conditional through the generic path — ACME
         // evaluates the tree in `dialects::acme::evaluate` — so this is
         // unreachable in practice; it guards against a mis-routed future dialect.
@@ -878,6 +890,7 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> String) -> O
         | Operation::Binary(_)
         | Operation::Align { .. }
         | Operation::AlignTo { .. }
+        | Operation::Diagnose { .. }
         | Operation::Reserve(_)) => other,
     }
 }
@@ -944,6 +957,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
             fill,
         },
         Operation::AlignTo { modulus, fill } => Item::AlignTo { modulus, fill },
+        Operation::Diagnose { fatal, message } => Item::Diagnose { fatal, message },
     }
 }
 

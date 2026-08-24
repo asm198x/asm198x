@@ -626,6 +626,13 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["align"]),
         category: Category::Operation,
     },
+    // `error <text>` takes the rest of the line verbatim — no quotes, no
+    // expression list. lwasm reports it as "User Specified: <text>".
+    Directive {
+        id: "diagnose",
+        pattern: Pattern::Exact(&["error"]),
+        category: Category::Operation,
+    },
     Directive {
         id: "unsupported-lwasm",
         pattern: Pattern::Exact(&[
@@ -639,7 +646,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "endsect",
             "endsection",
             "endstruct",
-            "error",
             "export",
             "extdep",
             "extern",
@@ -719,6 +725,10 @@ fn parse_op(
             "reserve" => parse_rmb(operand, env, line),
             "fill" => parse_fill(operand, env, line),
             "align" => parse_align(operand, env, line),
+            "diagnose" => Ok(Some(Operation::Diagnose {
+                fatal: true,
+                message: format!("User Specified: {}", operand.trim()),
+            })),
             other => Err(AsmError::new(
                 line,
                 format!("`{other}` is declared but not dispatched"),
@@ -1487,6 +1497,20 @@ mod tests {
 
     /// `align` needs its boundary — bare `align` is `Bad operand` in lwasm,
     /// and a boundary that cannot pad to anything is not a boundary.
+    /// `error <text>` takes the rest of the line verbatim and stops, and stays
+    /// silent inside an untaken conditional.
+    #[test]
+    fn error_stops_the_assembly_unless_the_branch_is_untaken() {
+        let err = asm(" fcb 1\n error stop here\n").expect_err("aborts");
+        assert!(err.to_string().contains("stop here"), "got `{err}`");
+        assert_eq!(
+            asm(" ifne 0\n error never\n endc\n fcb 1\n")
+                .expect("untaken")
+                .bytes,
+            vec![1]
+        );
+    }
+
     #[test]
     fn align_needs_a_positive_boundary() {
         assert!(asm(" fcb 1\n align\n").is_err(), "bare `align`");

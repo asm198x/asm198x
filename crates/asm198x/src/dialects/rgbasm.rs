@@ -704,16 +704,15 @@ pub const DIRECTIVES: &[Directive] = &[
     // Naming any of those here would describe them in a position they never
     // appear in.
     // assertions and diagnostics
+    // `FAIL "msg"` aborts, `WARN "msg"` notes and carries on.
+    Directive {
+        id: "diagnose",
+        pattern: Pattern::Exact(&["fail", "warn"]),
+        category: Category::Operation,
+    },
     Directive {
         id: "unsupported-assertions",
-        pattern: Pattern::Exact(&[
-            "assert",
-            "static_assert",
-            "fail",
-            "warn",
-            "print",
-            "println",
-        ]),
+        pattern: Pattern::Exact(&["assert", "static_assert", "print", "println"]),
         category: Category::KnownUnsupported,
     },
     // option and character-map state
@@ -789,6 +788,10 @@ fn parse_op(
                 "bytes" => Operation::Bytes(byte_list(args, line)?),
                 "words" => Operation::Words(value_list(args, line)?),
                 "reserve" => parse_ds(args, consts, line)?,
+                "diagnose" => Operation::Diagnose {
+                    fatal: word.eq_ignore_ascii_case("fail"),
+                    message: args.trim().trim_matches('"').to_string(),
+                },
                 other => {
                     return Err(AsmError::new(
                         line,
@@ -1299,6 +1302,27 @@ fn expand_rgbasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion
 
 #[cfg(test)]
 mod tests {
+
+    /// `FAIL` stops, `WARN` notes and carries on, and neither fires from an
+    /// untaken branch.
+    #[test]
+    fn source_requested_diagnostics() {
+        let src = "SECTION \"s\",ROM0[0]\n db 1\n";
+        let err = crate::assemble_rgbasm(&format!("{src} FAIL \"stop\"\n")).expect_err("aborts");
+        assert!(err.to_string().contains("stop"), "got `{err}`");
+
+        let out = crate::assemble_rgbasm(&format!("{src} WARN \"careful\"\n")).expect("warns");
+        assert_eq!(out.bytes, vec![1]);
+        assert!(
+            out.warnings.iter().any(|w| w.message.contains("careful")),
+            "got {:?}",
+            out.warnings
+        );
+
+        let quiet = crate::assemble_rgbasm(&format!("{src}IF 0\n FAIL \"never\"\nENDC\n"))
+            .expect("untaken");
+        assert_eq!(quiet.bytes, vec![1]);
+    }
     use crate::assemble_rgbasm as asm;
 
     fn bytes(src: &str) -> Vec<u8> {

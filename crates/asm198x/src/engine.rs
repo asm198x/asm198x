@@ -347,6 +347,15 @@ pub(crate) enum Operation {
     /// offset 3). Approximating either with the other would diverge silently
     /// on exactly the source that distinguishes them.
     AlignTo { modulus: i64, fill: u8 },
+    /// A diagnostic the **source** asked for: ACME's `!error`/`!warn`, lwasm's
+    /// `error`, rgbasm's `FAIL`/`WARN`. `fatal` aborts the assembly; otherwise
+    /// it joins the warnings and assembly continues.
+    ///
+    /// An operation rather than a parse-time error on purpose: every dialect
+    /// that has one also has conditional assembly, and `!error` inside an
+    /// untaken `!if` must stay silent. Raising it at parse time would fire on
+    /// a branch the program never takes.
+    Diagnose { fatal: bool, message: String },
     /// Reserve `count` address units without emitting source-derived data (the
     /// `ds`/`rmb`/`res`/`block` directives). Deliberately **not**
     /// [`Operation::Bytes`] of zeros: what fills reserved space is a property of
@@ -442,6 +451,8 @@ pub(crate) fn next_pc(
         Operation::Encoded(pieces) => pc + pieces.iter().map(Piece::len).sum::<i64>() / addr_unit,
         Operation::Align { andmask, value, .. } => pc + ((value - pc) & andmask),
         Operation::AlignTo { modulus, .. } => pc + align_pad(pc, *modulus),
+        // Emits nothing; it only speaks.
+        Operation::Diagnose { .. } => pc,
         // Set the counter, bind a name, name an entry point — none of them a
         // width. A caller that can reach these handles them itself.
         Operation::Org(_) | Operation::Equ(_) | Operation::Entry(_) => pc,
@@ -681,6 +692,16 @@ fn assemble_statements(
             Some(Operation::AlignTo { modulus, fill }) => {
                 let pad = align_pad(pc, *modulus);
                 bytes.extend(std::iter::repeat_n(*fill, pad as usize));
+            }
+            Some(Operation::Diagnose { fatal, message }) => {
+                if *fatal {
+                    return Err(s.err(message));
+                }
+                warnings.push(Warning {
+                    line: s.line,
+                    file: s.file,
+                    message: message.clone(),
+                });
             }
             Some(Operation::Bytes(items)) => {
                 for e in items {

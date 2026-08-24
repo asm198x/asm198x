@@ -446,6 +446,14 @@ const PROBES: &[Probe] = &[
     // #126: the refusals cannot be probed here — this harness skips a body the
     // reference rejects — so what is arbitrated is the other half, that the
     // two shapes which *look* like duplicates still assemble.
+    // `cnop offset,alignment` aligns up, then adds the offset; the pad is a
+    // whole NOP word where one fits, with a leading $00 when it does not.
+    ok ("vasm", "cnop on the boundary",  "\tcnop 0,4\n\tdc.b $99\n"),
+    ok ("vasm", "cnop pads odd with 00+NOP", "\tdc.b $11\n\tcnop 0,4\n\tdc.b $99\n"),
+    ok ("vasm", "cnop pads even with NOP", "\tdc.b $11,$22\n\tcnop 0,4\n\tdc.b $99\n"),
+    ok ("vasm", "cnop one short takes 00", "\tdc.b $11,$22,$33\n\tcnop 0,4\n\tdc.b $99\n"),
+    ok ("vasm", "cnop offset adds past the boundary", "\tdc.b $11\n\tcnop 2,4\n\tdc.b $99\n"),
+    ok ("vasm", "cnop to an eight boundary", "\tdc.b $11\n\tcnop 0,8\n\tdc.b $99\n"),
     ok ("vasm", "even pads to a word",   "\tdc.b 1\n\teven\n\tdc.b 2\n"),
     ok ("vasm", "even on a word does nothing", "\tdc.b 1,2\n\teven\n\tdc.b 3\n"),
     ok ("vasm", "dcb repeats a value",   "\tdcb 3,$aa\n"),
