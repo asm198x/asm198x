@@ -98,15 +98,28 @@ That upstream already exists for the first two Spectrum targets.
 (§4) and the TZX file format (§5) alongside the physical encoding they frame,
 so `SAVETAP` has something to cite on the day it is written.
 
-**Whether the formats eventually want a shared *executable* layer is not
-decided here, deliberately.** The family has two such layers already — the ISA
-spec in Asm198x and `mediaspec` in Build198x
-([`shared-media-spec.md`](../../../decisions/shared-media-spec.md)) — and both
-recorded the same deferral: one crate until a second consumer makes the split
-real. The second consumer here is Emu198x's loader reading a layout Asm198x
-writes. Write the first containers in this workspace citing the primary
-library; when Emu198x needs the same layout, that is the moment a shared layer
-earns itself, and it is an umbrella decision when it comes, not this one.
+**The formats graduate to Format198x.** The family already has the org for
+exactly this — `format198x/format198x`, a workspace of independent,
+dependency-free crates that read and write the on-disk formats of 1970s–1990s
+computers, released separately and usable by any Rust tool or emulator rather
+than only by us. `format-commodore-amiga-adf` is the first, and the README
+already names the next candidates and the rule they arrive by: *"More formats
+(C64 D64, Spectrum TAP, and others) graduate here from their originating
+projects as they earn a standalone consumer."*
+
+So the sequence is settled, not open. Write the serialiser here, citing the
+primary library; when a second consumer appears — Emu198x's loader reading a
+layout Asm198x writes is the obvious one — the format graduates to a
+`format-sinclair-zx-spectrum-tap` crate and this workspace depends on it.
+
+That has a consequence for how the first one is written, and it binds:
+**write it graduation-ready.** Format198x's conventions are
+`format-{manufacturer}-{system}-{format}` naming, `core`/`std` only,
+deterministic bytes for the same inputs, and a typed error rather than a panic
+on malformed input. A serialiser written to those constraints from the start
+graduates by moving; one written against `AssemblyResult` and `AsmError`
+graduates by being rewritten. Keep the layout code free of this crate's types
+and behind a seam the artifact list calls into.
 
 What follows from the amendment now, and binds:
 
@@ -114,6 +127,9 @@ What follows from the amendment now, and binds:
   serialiser's doc comments, or the fact is added there first.
 - A gap in the primary library is filled there, not worked around here.
 - No container layout is transcribed from an emulator, ours or anyone's.
+- Layout code stays free of `AssemblyResult`, `AsmError` and the engine's
+  types, so a format graduates to Format198x by moving rather than by being
+  rewritten.
 
 ## Open, deliberately
 
