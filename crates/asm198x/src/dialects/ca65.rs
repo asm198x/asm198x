@@ -1168,7 +1168,7 @@ fn project_nodes(nodes: &[crate::ast::Node], st: &mut Projection) -> Result<(), 
                         // variable to its loop.
                         let vars = st.loop_vars.clone();
                         for stmt in &mut st.stmts[first..] {
-                            stmt.kind = bake_kind(&stmt.kind, &vars);
+                            stmt.kind = map_kind_syms(&stmt.kind, &loop_var_sub(&vars));
                         }
                         st.loop_vars.pop();
                     }
@@ -1203,6 +1203,9 @@ fn fold_condition(head: &str, st: &Projection, line: usize) -> Result<bool, AsmE
                 return Err(AsmError::new(line, format!("`{word}` needs a condition")));
             }
             let expr = parse_value(&AnonCtx::default(), "", args, line)?;
+            // `.if .defined(X)` — answered against what stands above this line,
+            // which is what makes `.defined` positional in the first place.
+            let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
             // ca65: `Constant expression expected` — a condition may not reach
             // forward, and a ca65 label is never constant.
             let value = fold_const(&expr, &env, line).map_err(|_| {
@@ -1254,30 +1257,40 @@ fn fold_repeat(
 /// acme's `!for` variable is: ca65 resolves `Expr::Sym` once, in a later pass,
 /// against one table — and a loop variable holds a different value on every
 /// iteration, so there is no single entry that table could hold.
-fn bake_loop_vars(e: &Expr, vars: &[(String, i64)]) -> Expr {
+fn map_expr_syms(e: &Expr, f: &dyn Fn(&str) -> Option<Expr>) -> Expr {
     match e {
-        Expr::Sym(name) => match vars.iter().rev().find(|(n, _)| n == name) {
-            // Innermost wins, so a nested `.repeat` may shadow an outer name.
-            Some((_, value)) => Expr::Num(*value),
-            None => e.clone(),
-        },
-        Expr::Lo(i) => Expr::Lo(Box::new(bake_loop_vars(i, vars))),
-        Expr::Hi(i) => Expr::Hi(Box::new(bake_loop_vars(i, vars))),
-        Expr::Bank(i) => Expr::Bank(Box::new(bake_loop_vars(i, vars))),
-        Expr::Neg(i) => Expr::Neg(Box::new(bake_loop_vars(i, vars))),
+        Expr::Sym(name) => f(name).unwrap_or_else(|| e.clone()),
+        Expr::Lo(i) => Expr::Lo(Box::new(map_expr_syms(i, f))),
+        Expr::Hi(i) => Expr::Hi(Box::new(map_expr_syms(i, f))),
+        Expr::Bank(i) => Expr::Bank(Box::new(map_expr_syms(i, f))),
+        Expr::Neg(i) => Expr::Neg(Box::new(map_expr_syms(i, f))),
         Expr::Bin(op, l, r) => Expr::Bin(
             *op,
-            Box::new(bake_loop_vars(l, vars)),
-            Box::new(bake_loop_vars(r, vars)),
+            Box::new(map_expr_syms(l, f)),
+            Box::new(map_expr_syms(r, f)),
         ),
         Expr::Num(_) | Expr::Pc => e.clone(),
     }
 }
 
+/// Substitute the enclosing `.repeat` loop variables. Innermost wins, so a
+/// nested `.repeat` may shadow an outer name.
+fn loop_var_sub(vars: &[(String, i64)]) -> impl Fn(&str) -> Option<Expr> + '_ {
+    move |name| {
+        vars.iter()
+            .rev()
+            .find(|(n, _)| n == name)
+            .map(|(_, v)| Expr::Num(*v))
+    }
+}
+
 /// The same, over an operand.
-fn bake_operand(o: &mos6502::OperandSyntax, vars: &[(String, i64)]) -> mos6502::OperandSyntax {
+fn map_operand_syms(
+    o: &mos6502::OperandSyntax,
+    f: &dyn Fn(&str) -> Option<Expr>,
+) -> mos6502::OperandSyntax {
     use mos6502::OperandSyntax as O;
-    let b = |e: &Expr| bake_loop_vars(e, vars);
+    let b = |e: &Expr| map_expr_syms(e, f);
     match o {
         O::None => O::None,
         O::Accumulator => O::Accumulator,
@@ -1291,15 +1304,15 @@ fn bake_operand(o: &mos6502::OperandSyntax, vars: &[(String, i64)]) -> mos6502::
 }
 
 /// The same, over a statement kind.
-fn bake_kind(k: &Kind, vars: &[(String, i64)]) -> Kind {
-    let list = |es: &Vec<Expr>| es.iter().map(|e| bake_loop_vars(e, vars)).collect();
+fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind {
+    let list = |es: &Vec<Expr>| es.iter().map(|e| map_expr_syms(e, f)).collect();
     match k {
         Kind::Bytes(es) => Kind::Bytes(list(es)),
         Kind::Words(es) => Kind::Words(list(es)),
         Kind::DBytes(es) => Kind::DBytes(list(es)),
         Kind::DWords(es) => Kind::DWords(list(es)),
         Kind::Insn { operand, mnemonic } => Kind::Insn {
-            operand: bake_operand(operand, vars),
+            operand: map_operand_syms(operand, f),
             mnemonic: mnemonic.clone(),
         },
         Kind::Empty => Kind::Empty,
@@ -1372,8 +1385,11 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                 let kind = payload
                     .as_any()
                     .downcast_ref::<Kind>()
-                    .expect("ca65 stores a Kind in every native node")
-                    .clone();
+                    .expect("ca65 stores a Kind in every native node");
+                // `.defined` is answered here, in source order, against what
+                // this point in the file has seen — which is the question ca65
+                // asks.
+                let kind = map_kind_syms(kind, &resolve_defined(consts, label_seg));
                 let label = node.label.as_ref().map(|s| s.qualified.clone());
                 if let Some(l) = &label {
                     label_seg.insert(l.clone(), seg.clone());
@@ -2062,7 +2078,7 @@ fn parse_value(
         line,
         parse_number,
         mos6502::ExprOpts {
-            function: Some(ca65_flat::expr_function),
+            function: Some(expr_function_positional),
             bang_is_or: false,
             prec: BytePrec::Tight,
             byte_prefix: true,
@@ -2070,6 +2086,52 @@ fn parse_value(
             at_is_pc: false,
         },
     )
+}
+
+/// Marks a `.defined(NAME)` the projection has yet to answer. `\u{1}` cannot
+/// appear in source, the same property `cheap_key` relies on.
+const DEFINED_MARK: &str = "\u{1}defined\u{1}";
+
+/// ca65's expression functions **plus** `.defined`/`.def`, which the flat
+/// legs cannot have.
+///
+/// `.defined(X)` is *positional* — `0` before the definition and `1` after,
+/// probe-pinned — and nothing is defined yet when the walk parses an
+/// expression. So it cannot fold here; it becomes a marker that the
+/// projection answers in source order, where the constants and labels seen so
+/// far are exactly the set ca65 is asking about.
+///
+/// The 65816 and HuC6280 legs run on the shared engine, which resolves symbols
+/// once at the end and so has no "so far" to consult. They keep refusing
+/// `.defined` rather than answering it wrongly.
+fn expr_function_positional(
+    name: &str,
+    args: Vec<mos6502::ExprArg>,
+    line: usize,
+) -> Result<Expr, AsmError> {
+    if !matches!(name.to_ascii_lowercase().as_str(), ".defined" | ".def") {
+        return ca65_flat::expr_function(name, args, line);
+    }
+    let [arg]: [_; 1] = args
+        .try_into()
+        .map_err(|_| AsmError::new(line, format!("`{name}` takes one argument")))?;
+    match arg.value(name, line)? {
+        Expr::Sym(sym) => Ok(Expr::Sym(format!("{DEFINED_MARK}{sym}"))),
+        _ => Err(AsmError::new(line, format!("`{name}` takes a symbol name"))),
+    }
+}
+
+/// Answer every `.defined` marker in an expression against what is defined so
+/// far. Anything else is left alone.
+fn resolve_defined<'a>(
+    consts: &'a BTreeMap<String, i64>,
+    labels: &'a BTreeMap<String, String>,
+) -> impl Fn(&str) -> Option<Expr> + 'a {
+    move |name| {
+        let sym = name.strip_prefix(DEFINED_MARK)?;
+        let known = consts.contains_key(sym) || labels.contains_key(sym);
+        Some(Expr::Num(i64::from(known)))
+    }
 }
 
 /// A collision-proof symbol key for a cheap local, scoped to its global.
@@ -2162,6 +2224,20 @@ mod tests {
             let e = assemble(src).expect_err(src).to_string();
             assert!(e.contains(want), "expected `{want}`, got `{e}`");
         }
+
+        // `.defined` is positional — the whole reason it is answered in the
+        // projection rather than folded while parsing.
+        let d = rom(
+            ".code\n lda #.defined(L)\nL = 7\n lda #.defined(L)\n lda #.def(L)\n\
+             .if .defined(L)\n lda #$33\n .else\n lda #$44\n .endif\n",
+        );
+        assert_eq!(
+            &d[16..24],
+            &[0xA9, 0x00, 0xA9, 0x01, 0xA9, 0x01, 0xA9, 0x33]
+        );
+        // A label counts as defined, not just an `=` constant.
+        let l = rom(".code\nhere: lda #1\n lda #.defined(here)\n");
+        assert_eq!(&l[18..20], &[0xA9, 0x01]);
 
         // A `.`-word we do not implement — with a plain argument, since a
         // string literal fails earlier, in the tokenizer.

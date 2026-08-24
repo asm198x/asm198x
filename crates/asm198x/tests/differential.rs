@@ -1507,6 +1507,25 @@ const MULTI_PROBES: &[MultiProbe] = &[
     MultiProbe {
         dialect: "ca65-nes",
         binaries: &[],
+        note: "`.defined` is positional: 0 above the definition and 1 below, \
+               in a condition and in an operand alike, and `.def` is the same \
+               function by a shorter name",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .segment \"CODE\"\n\
+             reset: lda #.defined(LATER)\n\
+             .if .defined(LATER)\n lda #$11\n .else\n lda #$22\n .endif\n\
+             LATER = 7\n\
+             lda #.defined(LATER)\n lda #.def(LATER)\n\
+             .if .defined(LATER)\n lda #$33\n .else\n lda #$44\n .endif\n\
+             .if .defined(NEVER)\n lda #$55\n .endif\n\
+             .segment \"VECTORS\"\n .word 0, reset, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
         note: "ca65 segment shorthands and the .pushseg/.popseg stack: \
                `.code`/`.zeropage`/`.bss` place as their spelled-out \
                segments, and a push/pop pair restores the segment the \

@@ -261,10 +261,12 @@ impl ExprArg {
 ///   something other than an `i64`, and those are a text-substitution feature
 ///   rather than an expression one.
 /// - **No parse-position symbol knowledge.** ca65's `.defined(X)` is
-///   *positional* — `0` before the definition and `1` after, probe-pinned —
-///   so it needs the constants known so far, which this signature does not
-///   carry. Folding it against the finished symbol table would answer `1`
-///   both times.
+///   *positional* — `0` before the definition and `1` after — and nothing is
+///   defined yet when a walk parses an expression, so it cannot fold here at
+///   all. A dialect whose pipeline visits statements in source order can
+///   answer it later; ca65 does, by emitting a marker its projection resolves.
+///   One whose symbols resolve once at the end cannot, and should refuse it
+///   rather than answer `1` both times.
 pub(crate) type ExprFn = fn(&str, Vec<ExprArg>, usize) -> Result<Expr, AsmError>;
 
 /// Expression-syntax knobs that vary by dialect. The bitwise/shift operators
