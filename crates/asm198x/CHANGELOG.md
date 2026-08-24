@@ -7,6 +7,51 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.31](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.30...asm198x-v0.0.31) - 2026-08-24
+
+### Added
+
+- declare what the last four references have and we do not ([#224](https://github.com/asm198x/asm198x/pull/224))
+- *(rgbasm)* declare the thirty-three directives rgbasm has and we do not ([#223](https://github.com/asm198x/asm198x/pull/223))
+- *(ca65)* declare the ninety-seven directives ca65 has and we do not ([#222](https://github.com/asm198x/asm198x/pull/222))
+- *(sjasmplus)* take the optional leading dot on every directive ([#221](https://github.com/asm198x/asm198x/pull/221))
+
+### Fixed
+
+- *(lwasm)* stop calling nine 6809 instructions directives ([#226](https://github.com/asm198x/asm198x/pull/226))
+- *(xtask)* stop counting a wider target as a gap ([#219](https://github.com/asm198x/asm198x/pull/219))
+
+### Other
+
+- ca65's visibility words need all three answers, and rgbasm's needs none
+- vasm's visibility words split three ways, and only one of them is a no-op
+- Refusing a word the reference refuses is not a gap: a category for it
+- Say it in ca65 too: the five words its own pipeline needed
+- Print-style directives are notes, not warnings
+- Comparisons for the Z80 family, whose tokens were already there ([#230](https://github.com/asm198x/asm198x/pull/230))
+- Comparison operators, where `<` turned out not to be ambiguous after all
+- Assert where the assembler can still answer: after the symbols resolve
+- Regenerate the surface stamp: 528 to 525
+- Give sjasmplus its device model, and the engine a third way to place a section
+- Answer BANK() from the whole program, because it reaches forward
+- Lay vasm's flat image with the shared placement too
+- Build the NES ROM with the same code that places a Game Boy bank
+- Separate where a section is addressed from where it lands in the image
+- Give the engine sections, and let rgbasm stop calling them origins
+- Answer .defined where the answer exists, and not where it does not
+- Let a function take a string without letting an expression hold one
+- Let each dialect say what an equ may hold ([#228](https://github.com/asm198x/asm198x/pull/228))
+- Teach an expression call to take two arguments, and ca65 .max/.min
+- Write down what the expression-function seam cannot reach yet
+- Add ca65's word extractions, which need no node of their own
+- Give the expression parser a way to read a call, and ca65 its byte extractions
+- Regenerate the surface stamp: 536 to 528
+- Let the source raise its own diagnostic, and align the way cnop does
+- Probe the directives nothing was checking, and fix what that found
+- Align in the two dialects that lay their own bytes out, each on its own terms
+- Pad to a stated boundary, which is not the alignment ACME already had
+- Take the section shorthands the two segment dialects already had the machinery for
+
 ## [0.0.30](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.29...asm198x-v0.0.30) - 2026-08-23
 
 ### Fixed
