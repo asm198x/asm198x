@@ -603,21 +603,29 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What lwasm has here and we do not.
     //
-    // 69 spellings against lwtools 4.25. Its 6309 instructions are absent for
-    // the same reason vasm's 68020 ones are: lwasm refuses them itself in 6809
-    // mode, so they measure a wider target rather than a gap in this one.
+    // 57 spellings against lwtools 4.25.
+    //
+    // **Directives only.** The first cut of this list swept in fifteen 6809
+    // *instructions* — `adca`, `bita`, `cmpd`, `cwai`, `sbca` among them —
+    // because they reach this dialect the same way a directive does and
+    // `lwasm` answers `Bad operand` for both when neither has one. Declaring
+    // an instruction a directive is worse than saying nothing: it is wrong,
+    // and it points the reader at the wrong layer.
+    //
+    // Telling them apart took two passes. Giving each an immediate operand
+    // and keeping the ones that emitted bytes caught the instructions — and
+    // also `dtb`, `dts` and `emod`, which emit bytes because they *are* data:
+    // `dts` assembles to the ASCII of the current date. Reading the bytes
+    // rather than counting them put those three back. The twelve that
+    // remain are tracked as the ISA gap they are (#225).
+    //
+    // lwasm's 6309 instructions are absent for the reason vasm's 68020 ones
+    // are: lwasm refuses them itself in 6809 mode.
     Directive {
         id: "unsupported-lwasm",
         pattern: Pattern::Exact(&[
-            "adca",
-            "adcb",
             "align",
-            "bita",
-            "bitb",
             "bsz",
-            "cmpd",
-            "cmpy",
-            "cwai",
             "dephase",
             "dtb",
             "dts",
@@ -637,7 +645,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "fcz",
             "fdbs",
             "fzb",
-            "hcf",
             "if",
             "ifopt",
             "ifp1",
@@ -660,13 +667,9 @@ pub const DIRECTIVES: &[Directive] = &[
             "phase",
             "pragma",
             "reorg",
-            "reset",
-            "rhf",
             "rmd",
             "rmq",
             "rmw",
-            "sbca",
-            "sbcb",
             "sect",
             "section",
             "set",

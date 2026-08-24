@@ -265,3 +265,29 @@ fn a_real_directive_reads_differently_from_a_typo() {
         );
     }
 }
+
+/// A declaration must not claim an *instruction* is a directive.
+///
+/// The sweep that built these lists did exactly that for lwasm: fifteen 6809
+/// mnemonics reach the dialect the way a directive does, and `lwasm` answers
+/// `Bad operand` for both when neither has one. Calling `adca` a directive is
+/// worse than calling it unknown — it is wrong, and it sends the reader to the
+/// wrong layer.
+///
+/// Pinned on the ones that were actually mis-swept, so the list cannot regain
+/// them quietly. They are a real ISA gap (#225), and that is where they belong.
+#[test]
+fn an_instruction_is_never_declared_a_directive() {
+    for m in [
+        "adca", "adcb", "bita", "bitb", "cmpd", "cmpy", "cwai", "sbca", "sbcb", "reset",
+    ] {
+        let err = assembler("lwasm")(&format!("\t{m} #1\n"))
+            .err()
+            .map(|e| e.message)
+            .unwrap_or_default();
+        assert!(
+            err.contains("unknown instruction"),
+            "`{m}` is a 6809 instruction we lack, not a directive — got: {err}"
+        );
+    }
+}
