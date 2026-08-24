@@ -857,9 +857,17 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["fail", "warn"]),
         category: Category::Operation,
     },
+    // `ASSERT` checks at link time and `STATIC_ASSERT` while assembling; with
+    // assembly and linking fused there is no moment between them, so both are
+    // the same check here.
+    Directive {
+        id: "assert",
+        pattern: Pattern::Exact(&["assert", "static_assert"]),
+        category: Category::Operation,
+    },
     Directive {
         id: "unsupported-assertions",
-        pattern: Pattern::Exact(&["assert", "static_assert", "print", "println"]),
+        pattern: Pattern::Exact(&["print", "println"]),
         category: Category::KnownUnsupported,
     },
     // option and character-map state
@@ -935,6 +943,19 @@ fn parse_op(
                 "bytes" => Operation::Bytes(byte_list(args, line)?),
                 "words" => Operation::Words(value_list(args, line)?),
                 "reserve" => parse_ds(args, consts, line)?,
+                "assert" => {
+                    let parts = mos6502::split_top_level(args, ',');
+                    let cond = value(parts.first().copied().unwrap_or("").trim(), line)?;
+                    let message = parts
+                        .get(1)
+                        .map(|m| format!("Assertion failed: {}", m.trim().trim_matches('"')))
+                        .unwrap_or_else(|| "Assertion failed".to_string());
+                    Operation::Assert {
+                        cond,
+                        fatal: true,
+                        message,
+                    }
+                }
                 "diagnose" => Operation::Diagnose {
                     fatal: word.eq_ignore_ascii_case("fail"),
                     message: args.trim().trim_matches('"').to_string(),
@@ -1525,6 +1546,27 @@ mod tests {
         assert!(err.to_string().contains("no section named"), "got `{err}`");
     }
 
+    /// An assertion fires only when false, and sees labels defined below it —
+    /// which is why it is evaluated with the finished symbol table rather than
+    /// folded while parsing.
+    #[test]
+    fn an_assertion_fires_only_when_false_and_reaches_forward() {
+        assert!(
+            crate::assemble_rgbasm("SECTION \"s\",ROM0[0]\n ASSERT fin-beg\nbeg: db 1,2\nfin:\n")
+                .is_ok()
+        );
+        let err =
+            crate::assemble_rgbasm("SECTION \"s\",ROM0[0]\n STATIC_ASSERT 0, \"boom\"\n db 1\n")
+                .expect_err("false");
+        assert!(err.to_string().contains("boom"), "got `{err}`");
+        // No message given: the reference's own wording, without one.
+        let bare = crate::assemble_rgbasm("SECTION \"s\",ROM0[0]\n ASSERT 0\n").expect_err("false");
+        assert!(
+            bare.to_string().contains("Assertion failed"),
+            "got `{bare}`"
+        );
+    }
+
     /// Two sections claiming the same bytes is refused, not silently merged.
     #[test]
     fn overlapping_sections_are_refused() {
@@ -1863,7 +1905,8 @@ mod tests {
                 .expect_err(body)
                 .to_string()
         };
-        for d in ["ASSERT 1", "PRINT \"x\"", "UNION", "OPT b.X", "PUSHS"] {
+        // `ASSERT` used to head this list; it is implemented now.
+        for d in ["PRINT \"x\"", "UNION", "OPT b.X", "PUSHS"] {
             let e = err(d);
             assert!(
                 e.contains("is a real directive here"),

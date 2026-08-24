@@ -586,6 +586,14 @@ fn assemble_core(
             | Stmt::Align(_)
             | Stmt::Cnop(..) => {}
             Stmt::Fail(message) => return Err(stamp(AsmError::new(s.line, message.clone()))),
+            Stmt::Assert(cond, message) => {
+                if eval(cond, &consts, buf.bytes.len() as i64, s.line).map_err(stamp)? == 0 {
+                    return Err(stamp(AsmError::new(
+                        s.line,
+                        format!("assertion failed: {message}"),
+                    )));
+                }
+            }
             Stmt::Raw(payload) => buf.bytes.extend_from_slice(payload),
             Stmt::Dc(size, items) => {
                 for e in items {
@@ -1397,7 +1405,8 @@ fn stmt_size(
         | Stmt::Section(..)
         | Stmt::Align(_)
         | Stmt::Cnop(..)
-        | Stmt::Fail(_) => 0,
+        | Stmt::Fail(_)
+        | Stmt::Assert(..) => 0,
         Stmt::Raw(payload) => payload.len(),
         Stmt::Dc(size, items) => items.len() * size.bytes(),
         Stmt::Ds(size, count) | Stmt::Dcb(size, count, _) => {
@@ -1596,6 +1605,11 @@ enum Stmt {
     Even,
     /// `section name,attr` — opens a new hunk of the given kind and memory flag.
     Section(HunkKind, MemFlag),
+    /// `assert <expr>[,message]` — stop the assembly when the expression is
+    /// zero. Held as a statement so the condition folds against the finished
+    /// symbol table: an assertion over a label defined later is the point of
+    /// having one.
+    Assert(Expr, String),
     /// `fail "message"` — stop the assembly where the source says to. Held as
     /// a statement rather than raised at parse time because vasm has
     /// conditional assembly, and a `fail` in an untaken branch must stay
@@ -2427,6 +2441,7 @@ fn bake_reptn(kind: &mut Stmt, value: i64) {
         | Stmt::Align(_)
         | Stmt::Cnop(..)
         | Stmt::Fail(_)
+        | Stmt::Assert(..)
         | Stmt::Raw(_) => {}
     }
 }
@@ -2474,6 +2489,7 @@ fn qualify_stmt(kind: &mut Stmt, scope: &str) {
         | Stmt::Align(_)
         | Stmt::Cnop(..)
         | Stmt::Fail(_)
+        | Stmt::Assert(..)
         | Stmt::Raw(_) => {}
     }
 }
@@ -2576,6 +2592,11 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     Directive {
+        id: "assert",
+        pattern: Pattern::Exact(&["assert"]),
+        category: Category::Operation,
+    },
+    Directive {
         id: "section_shorthand",
         pattern: Pattern::Exact(&[
             "code", "code_c", "code_f", "data", "data_c", "data_f", "bss", "bss_c", "bss_f",
@@ -2643,7 +2664,6 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "unsupported-vasm",
         pattern: Pattern::Exact(&[
             "ac68080",
-            "assert",
             "auto",
             "basereg",
             "blk",
@@ -2785,6 +2805,15 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
             "align" => parse_align(args, line),
             "cnop" => parse_cnop(args, line),
             "fail" => Ok(Stmt::Fail(args.trim().trim_matches('"').to_string())),
+            "assert" => {
+                let parts = split_operands(args);
+                let cond = parse_value(parts.first().copied().unwrap_or("").trim(), line)?;
+                let message = parts
+                    .get(1)
+                    .map(|m| m.trim().trim_matches('"').to_string())
+                    .unwrap_or_default();
+                Ok(Stmt::Assert(cond, message))
+            }
             // dcb.x count,value — reserve `count` items of `value`. Stage 1:
             // treat as a constant-sized run (value defaults to 0 if omitted).
             "dcb" => parse_dcb(suffix, args, line),
@@ -3294,6 +3323,15 @@ mod directive_surface {
             bytes("ifeq 0\n        dc.b 1\n        else\n        fail \"never\"\n        endc"),
             vec![1]
         );
+    }
+
+    /// `assert` fires only when its expression is zero, and takes an optional
+    /// message.
+    #[test]
+    fn assert_fires_only_when_false() {
+        assert_eq!(bytes("assert 1\n        dc.b 9"), vec![9]);
+        let err = asm("        section code,code\n        assert 0,\"boom\"\n").expect_err("false");
+        assert!(err.to_string().contains("boom"), "got `{err}`");
     }
 
     /// vasm's `align` names an **exponent**: `align 2` is a four-byte

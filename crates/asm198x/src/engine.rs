@@ -384,6 +384,17 @@ pub(crate) enum Operation {
     /// untaken `!if` must stay silent. Raising it at parse time would fire on
     /// a branch the program never takes.
     Diagnose { fatal: bool, message: String },
+    /// An assertion the source asked for: `ASSERT`/`assert`/`.assert`. The
+    /// diagnostic fires when `cond` evaluates to zero.
+    ///
+    /// Evaluated in the emit pass rather than at parse, because an assertion
+    /// reaches **forward** — `assert end-start = 2` above both labels is the
+    /// point of having one, and both vasm and rgbasm take it.
+    Assert {
+        cond: Expr,
+        fatal: bool,
+        message: String,
+    },
     /// Reserve `count` address units without emitting source-derived data (the
     /// `ds`/`rmb`/`res`/`block` directives). Deliberately **not**
     /// [`Operation::Bytes`] of zeros: what fills reserved space is a property of
@@ -479,8 +490,8 @@ pub(crate) fn next_pc(
         Operation::Encoded(pieces) => pc + pieces.iter().map(Piece::len).sum::<i64>() / addr_unit,
         Operation::Align { andmask, value, .. } => pc + ((value - pc) & andmask),
         Operation::AlignTo { modulus, .. } => pc + align_pad(pc, *modulus),
-        // Emits nothing; it only speaks.
-        Operation::Diagnose { .. } => pc,
+        // Emit nothing; they only speak.
+        Operation::Diagnose { .. } | Operation::Assert { .. } => pc,
         // Moves the counter rather than advancing it; the caller sets it.
         Operation::Section { .. } => pc,
         // Set the counter, bind a name, name an entry point — none of them a
@@ -868,6 +879,26 @@ fn assemble_statements(
                 let pad = align_pad(pc, *modulus);
                 bytes.extend(std::iter::repeat_n(*fill, pad as usize));
             }
+            Some(Operation::Assert {
+                cond,
+                fatal,
+                message,
+            }) if cond
+                .eval(&symbols, pc, s.line)
+                .map_err(|err| s.stamp(err))?
+                == 0 =>
+            {
+                if *fatal {
+                    return Err(s.err(message));
+                }
+                warnings.push(Warning {
+                    line: s.line,
+                    file: s.file,
+                    message: message.clone(),
+                });
+            }
+            // An assertion that holds says nothing.
+            Some(Operation::Assert { .. }) => {}
             Some(Operation::Diagnose { fatal, message }) => {
                 if *fatal {
                     return Err(s.err(message));

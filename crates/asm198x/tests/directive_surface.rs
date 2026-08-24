@@ -240,7 +240,7 @@ fn a_real_directive_reads_differently_from_a_typo() {
         ("sjasmplus", "", ".abyte 1", ".zzqq"),
         ("lwasm", "", "import foo", "zzqq"),
         ("vasm", "", "xdef foo", "zzqq"),
-        ("rgbasm", "SECTION \"s\",ROM0\n", "ASSERT 1", "ZZQQ"),
+        ("rgbasm", "SECTION \"s\",ROM0\n", "PRINT \"x\"", "ZZQQ"),
     ];
     for (dialect, prologue, real, fake) in cases {
         let assemble = assembler(dialect);

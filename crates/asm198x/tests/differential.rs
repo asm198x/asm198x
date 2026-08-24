@@ -467,6 +467,7 @@ const PROBES: &[Probe] = &[
     ok ("vasm", "cnop one short takes 00", "\tdc.b $11,$22,$33\n\tcnop 0,4\n\tdc.b $99\n"),
     ok ("vasm", "cnop offset adds past the boundary", "\tdc.b $11\n\tcnop 2,4\n\tdc.b $99\n"),
     ok ("vasm", "cnop to an eight boundary", "\tdc.b $11\n\tcnop 0,8\n\tdc.b $99\n"),
+    ok ("vasm", "a true assertion is silent",  "\tassert 1\n\tdc.b 1\n"),
     ok ("vasm", "even pads to a word",   "\tdc.b 1\n\teven\n\tdc.b 2\n"),
     ok ("vasm", "even on a word does nothing", "\tdc.b 1,2\n\teven\n\tdc.b 3\n"),
     ok ("vasm", "dcb repeats a value",   "\tdcb 3,$aa\n"),
@@ -622,6 +623,11 @@ const PROBES: &[Probe] = &[
         " DEVICE NONE\n ld a,1\n"),
     ok ("sjasmplus", "the Next has eight slots",
         " DEVICE ZXSPECTRUMNEXT\n SLOT 7\n PAGE 223\n db 1\n"),
+    // `ASSERT` passes silently and reaches forward to labels below it.
+    ok ("sjasmplus", "a true assertion is silent",
+        " ORG 0\n ASSERT 1\n db 1\n"),
+    ok ("sjasmplus", "an assertion sees a later label",
+        " ORG 0\nbeg: db 1,2\nfin:\n ASSERT fin-beg\n"),
     ok ("sjasmplus", "align pads to the boundary",
         " db 1\n align 4\n db 2\n"),
     ok ("sjasmplus", "align defaults to 4",
@@ -821,6 +827,10 @@ const PROBES: &[Probe] = &[
     // Lowering a section to an `org` could only ever move forward, so this
     // failed with `cannot move origin backwards` until the engine grew a
     // section model.
+    ok ("rgbasm", "ASSERT and STATIC_ASSERT pass silently",
+        "SECTION \"s\",ROM0[0]\n ASSERT 1\n STATIC_ASSERT 1, \"fine\"\n db 1\n"),
+    ok ("rgbasm", "an assertion reaches forward",
+        "SECTION \"s\",ROM0[0]\n ASSERT fin-beg\nbeg: db 1,2\nfin:\n"),
     ok ("rgbasm", "sections out of address order",
         "SECTION \"c\",ROM0[$0]\n db $cc\nSECTION \"b\",ROM0[$20]\n db $bb\n\
          SECTION \"a\",ROM0[$10]\n db $aa\n"),

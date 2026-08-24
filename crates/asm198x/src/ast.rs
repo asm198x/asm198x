@@ -211,6 +211,13 @@ pub(crate) enum Item {
         value: i64,
         fill: u8,
     },
+    /// An assertion (`ASSERT`/`.assert`). Like the diagnostics it has no emit
+    /// arm: the formatter re-emits it from [`Node::source`](Node).
+    Assert {
+        cond: crate::engine::Expr,
+        fatal: bool,
+        message: String,
+    },
     /// A section opener (rgbasm `SECTION`). Like the aligns and diagnostics it
     /// has no emit arm: the formatter re-emits it from [`Node::source`](Node),
     /// so each dialect keeps its own spelling and attributes.
@@ -705,6 +712,15 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             fatal: *fatal,
             message: message.clone(),
         },
+        Item::Assert {
+            cond,
+            fatal,
+            message,
+        } => Operation::Assert {
+            cond: cond.clone(),
+            fatal: *fatal,
+            message: message.clone(),
+        },
         Item::Section { name, base, at } => Operation::Section {
             name: name.clone(),
             base: *base,
@@ -773,6 +789,15 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
         },
         Item::AlignTo { modulus, fill } => Operation::AlignTo { modulus, fill },
         Item::Diagnose { fatal, message } => Operation::Diagnose { fatal, message },
+        Item::Assert {
+            cond,
+            fatal,
+            message,
+        } => Operation::Assert {
+            cond,
+            fatal,
+            message,
+        },
         Item::Section { name, base, at } => Operation::Section { name, base, at },
         // No dialect lowers a conditional through the generic path — ACME
         // evaluates the tree in `dialects::acme::evaluate` — so this is
@@ -907,6 +932,15 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
         | Operation::Diagnose { .. }
         | Operation::Section { .. }
         | Operation::Reserve(_)) => other,
+        Operation::Assert {
+            cond,
+            fatal,
+            message,
+        } => Operation::Assert {
+            cond: map_sym_expr(cond, f),
+            fatal,
+            message,
+        },
     }
 }
 
@@ -973,6 +1007,15 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         },
         Operation::AlignTo { modulus, fill } => Item::AlignTo { modulus, fill },
         Operation::Diagnose { fatal, message } => Item::Diagnose { fatal, message },
+        Operation::Assert {
+            cond,
+            fatal,
+            message,
+        } => Item::Assert {
+            cond,
+            fatal,
+            message,
+        },
         Operation::Section { name, base, at } => Item::Section { name, base, at },
     }
 }

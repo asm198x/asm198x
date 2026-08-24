@@ -152,6 +152,15 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     Directive {
+        id: "assert",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["assert"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
+    Directive {
         id: "align",
         pattern: Pattern::Sigilled {
             sigil: '.',
@@ -168,7 +177,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "abyte",
                 "abytec",
                 "abytez",
-                "assert",
                 "binary",
                 "block",
                 "bplist",
@@ -526,6 +534,7 @@ impl Z80Syntax for SjasmplusSyntax {
             || word.eq_ignore_ascii_case("device")
             || word.eq_ignore_ascii_case("slot")
             || word.eq_ignore_ascii_case("page")
+            || word.eq_ignore_ascii_case("assert")
             || self.is_include(word)
             || self.is_incbin(word)
             || z80::is_common_directive(word)
@@ -573,6 +582,16 @@ impl Z80Syntax for SjasmplusSyntax {
         // Validated by `check_device_lines` before any of this ran.
         if word.eq_ignore_ascii_case("device") || word.eq_ignore_ascii_case("slot") {
             return Ok(None);
+        }
+        if word.eq_ignore_ascii_case("assert") {
+            // sjasmplus takes the whole tail as the expression and echoes it
+            // back in the message — `ASSERT 0, "x"` reports `0, "x"` rather
+            // than treating the tail as a message operand (probe-pinned).
+            return Ok(Some(Operation::Assert {
+                cond: z80::parse_value(self, args, line)?,
+                fatal: true,
+                message: format!("[ASSERT] Assertion failed: {}", args.trim()),
+            }));
         }
         if word.eq_ignore_ascii_case("page") {
             return Ok(Some(Operation::Section {

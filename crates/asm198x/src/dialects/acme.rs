@@ -1770,6 +1770,15 @@ fn substitute_anon_refs(
         | Operation::Diagnose { .. }
         | Operation::Section { .. }
         | Operation::Reserve(_)) => other,
+        Operation::Assert {
+            cond,
+            fatal,
+            message,
+        } => Operation::Assert {
+            cond: subst(cond)?,
+            fatal,
+            message,
+        },
     })
 }
 
