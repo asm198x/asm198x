@@ -1,6 +1,6 @@
 # Decision: every ISA spec enumerates its encoding rows, whatever shape it authors them in
 
-**Status:** Proposed. Binding for Asm198x once accepted. Gives
+**Status:** Active. Binding for Asm198x (accepted 2026-08-24). Gives
 [`spec-conformance-and-fuzzing.md`](spec-conformance-and-fuzzing.md) a
 denominator on the six CPUs that have none, and gives
 [#233](https://github.com/asm198x/asm198x/issues/233) somewhere to put a
@@ -88,6 +88,16 @@ Recorded as open rather than guessed, because each one could change the shape:
   product.
 - **Where the enumeration lives.** A trait in `isa`, or a free function per
   module. `isa` is dependency-free and `&'static`, and that must survive.
+
+  Two constraints follow from that, and they are not stylistic. `isa` is
+  consumed by Emu198x over a git dependency, and its promotion to the reserved
+  `isa198x` org is a live question governed by
+  [`rung1-wiring.md`](../../../decisions/rung1-wiring.md). So the seam must not
+  reach for anything in `asm198x` — no `AsmError`, no engine types, no dialect
+  vocabulary — and must not require a consumer to compile the assembler to read
+  a spec. A seam that couples them would make the extraction a rewrite instead
+  of a move, which is the same trap `multi-artifact-output.md` names for
+  container formats and Format198x.
 
 ## What this is worth
 
