@@ -191,6 +191,47 @@ fn ref_assemble(
     ref_outcome(tmp, text, ext, build).bytes()
 }
 
+/// Representative bytes for one 6809 encoding row.
+///
+/// The `Form` specs get this from [`synth`]; the 6809 authors its encodings as
+/// `Kind`, so the same job needs the slot the row names. The operand values are
+/// arbitrary — what matters is that they are *valid* for the mode, so our
+/// disassembler writes source the reference will read back.
+///
+/// `None` for a mode this mnemonic does not populate, which is not an error:
+/// the rows only ever name populated slots, so it means the row and the spec
+/// have parted company.
+fn synth_6809(kind: &isa::mos6809::Kind, mode: &str) -> Option<Vec<u8>> {
+    use isa::mos6809::Kind;
+    let with = |op: &[u8], tail: &[u8]| {
+        (!op.is_empty()).then(|| {
+            let mut b = op.to_vec();
+            b.extend_from_slice(tail);
+            b
+        })
+    };
+    match (kind, mode) {
+        (Kind::Inherent(op), "inherent") => with(op, &[]),
+        // A small forward displacement, so the target stays in range and the
+        // disassembler writes an ordinary label-free offset.
+        (Kind::Branch { short, .. }, "relative") => with(short, &[0x02]),
+        (Kind::Branch { long, .. }, "relative long") => with(long, &[0x00, 0x02]),
+        (Kind::Mem { imm, width, .. }, "immediate") => {
+            with(imm, if *width == 2 { &[0x12, 0x34] } else { &[0x12] })
+        }
+        (Kind::Mem { direct, .. }, "direct") => with(direct, &[0x34]),
+        // `$84` is the postbyte for `,X` — the simplest indexed form, no
+        // offset and no extension bytes.
+        (Kind::Mem { indexed, .. }, "indexed") => with(indexed, &[0x84]),
+        (Kind::Mem { extended, .. }, "extended") => with(extended, &[0x56, 0x78]),
+        // `$01` is D→X: two valid register nibbles.
+        (Kind::Transfer(op), "register pair") => Some(vec![*op, 0x01]),
+        // Bit 1 is A, the smallest non-empty register set.
+        (Kind::Stack { opcode, .. }, "register set") => Some(vec![*opcode, 0x02]),
+        _ => None,
+    }
+}
+
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]
 fn spec_opcodes_match_reference() {
@@ -2295,6 +2336,98 @@ fn ca65_cannot_satisfy_forceimport_for_a_binary() {
         wrong.len(),
         wrong.join("\n  ")
     );
+}
+
+/// The 6809 form audit: every row the spec declares, put to `lwasm`.
+///
+/// The `Form` specs have had this since the beginning; the 6809 could not,
+/// because both the audit and its denominator iterated `Form` and this spec
+/// authors `Kind`. It enumerates rows now
+/// (`decisions/every-spec-enumerates-its-forms.md`), so the audit follows the
+/// same three steps the 6502 one does: synthesise representative bytes for the
+/// row, let **our** disassembler write the source — which is what answers
+/// "how is this operand written" without a second opinion — and hand that to
+/// the real assembler.
+///
+/// What this catches is a declared row whose encoding disagrees with lwasm.
+/// It cannot catch a row nobody declared: that is `xtask surface`'s job, and
+/// the reason it rather than coverage found
+/// [#225](https://github.com/asm198x/asm198x/issues/225).
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn spec_rows_match_reference_6809() {
+    if !have("lwasm") {
+        eprintln!("SKIP: `lwasm` not on PATH (6809 form audit)");
+        return;
+    }
+    let tmp = std::env::temp_dir().join("asm198x-form-6809");
+    let _ = fs::create_dir_all(&tmp);
+    let mut recorder = support::verdicts::Recorder::new();
+    let mut fails: Vec<String> = Vec::new();
+    let mut checked = 0usize;
+    let mut unsynthesised: Vec<String> = Vec::new();
+
+    for insn in isa::mos6809::SET {
+        for row in isa::mos6809::rows().filter(|r| r.mnemonic == insn.mnemonic) {
+            let Some(bytes) = synth_6809(&insn.kind, row.mode) else {
+                unsynthesised.push(format!("{} {}", row.mnemonic, row.mode));
+                continue;
+            };
+            let text = asm198x::listing_6809(&bytes, 0x0000);
+            let source = format!("\torg $0000\n{text}");
+            let reference = ref_assemble(&tmp, &source, "asm", |src, out| {
+                let mut c = Command::new("lwasm");
+                c.args(["--6809", "--raw", "-o"]).arg(out).arg(src);
+                vec![c]
+            });
+            let Some(reference) = reference else {
+                fails.push(format!(
+                    "{} {}: lwasm rejected our own disassembly:\n{source}",
+                    row.mnemonic, row.mode
+                ));
+                continue;
+            };
+            checked += 1;
+            recorder.record_bytes(
+                support::verdicts::CaseRef {
+                    suite: Suite::Form,
+                    cpu: "6809",
+                    tool: "lwasm",
+                    dialect: "lwasm",
+                    case: format!("{} {}", row.mnemonic, row.mode),
+                    source: &source,
+                },
+                &reference,
+            );
+            if reference != bytes {
+                fails.push(format!(
+                    "{} {}: ours {:02X?} vs lwasm {:02X?}",
+                    row.mnemonic, row.mode, bytes, reference
+                ));
+            }
+        }
+    }
+    let added = recorder.flush().expect("write the corpus");
+    if added > 0 {
+        eprintln!("6809 form audit: {added} new verdict(s) recorded");
+    }
+
+    // A row the synthesiser cannot build is a row this audit silently skips,
+    // which is the shape of hole the whole exercise exists to close.
+    assert!(
+        unsynthesised.is_empty(),
+        "{} row(s) have no representative bytes, so nothing arbitrates them:\n  {}",
+        unsynthesised.len(),
+        unsynthesised.join("\n  ")
+    );
+    assert!(
+        fails.is_empty(),
+        "{} of {checked} 6809 rows diverge:\n  {}",
+        fails.len(),
+        fails.join("\n  ")
+    );
+    assert!(checked > 0, "no rows arbitrated");
+    eprintln!("6809 form audit: {checked} rows arbitrated against lwasm");
 }
 
 /// Identify every reference tool this machine has, proving the probe table
