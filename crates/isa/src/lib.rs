@@ -296,6 +296,93 @@ mod row_tests {
         }
     }
 
+    /// A word CPU declares one row per entry: its operands are fields of a
+    /// single opcode word, so the entry *is* the encoding and the class is
+    /// what tells one from another.
+    ///
+    /// Enumerating register numbers or mode bits as separate rows would
+    /// multiply each table by its own operand space — measuring the CPU rather
+    /// than the spec, and giving the audit a denominator nobody could arbitrate
+    /// against a reference in reasonable time.
+    #[test]
+    fn a_word_cpu_declares_one_row_per_entry() {
+        let cases: &[(&str, usize, usize)] = &[
+            (
+                "CP-1610",
+                crate::cp1610::INSTRUCTIONS.len(),
+                crate::cp1610::rows().count(),
+            ),
+            (
+                "PDP-11",
+                crate::pdp11::INSTRUCTIONS.len(),
+                crate::pdp11::rows().count(),
+            ),
+            (
+                "TMS9900",
+                crate::tms9900::INSTRUCTIONS.len(),
+                crate::tms9900::rows().count(),
+            ),
+        ];
+        for (name, entries, rows) in cases {
+            assert_eq!(rows, entries, "{name}");
+            assert!(*entries > 0, "{name} declares no instructions");
+        }
+    }
+
+    /// Within one mnemonic, rows must have **distinct** modes.
+    ///
+    /// This is the property a `(mnemonic, mode)` key needs, and it is weaker
+    /// than "every mode is non-empty" on purpose: the Z80 spec spells "no
+    /// addressing mode" as `""` for its 47 no-operand instructions, where the
+    /// 6502 spells the same thing `"implied"`. Both are fine — `find_form`
+    /// already looks forms up by that label — and normalising one to the other
+    /// here would make a row disagree with the spec it is derived from.
+    ///
+    /// What is *not* fine is two rows of one mnemonic sharing a mode, which
+    /// would collapse two encodings into one for anything keying on the pair,
+    /// and would already be a lookup bug in `find_form`.
+    #[test]
+    fn a_mnemonics_rows_have_distinct_modes() {
+        let sets: &[(&str, Vec<crate::Row>)] = &[
+            ("6809", crate::mos6809::rows().collect()),
+            ("CP-1610", crate::cp1610::rows().collect()),
+            ("PDP-11", crate::pdp11::rows().collect()),
+            ("TMS9900", crate::tms9900::rows().collect()),
+            ("Z80", crate::z80::SET.rows().collect()),
+            ("6502", crate::mos6502::SET.rows().collect()),
+            ("SM83", crate::sm83::SET.rows().collect()),
+        ];
+        for (cpu, rows) in sets {
+            assert!(!rows.is_empty(), "{cpu} yields no rows");
+            let mut seen = std::collections::BTreeSet::new();
+            for row in rows {
+                assert!(!row.mnemonic.is_empty(), "{cpu}: a row has no mnemonic");
+                assert!(
+                    seen.insert((row.mnemonic, row.mode)),
+                    "{cpu}: `{}` declares two rows for mode `{}`",
+                    row.mnemonic,
+                    row.mode
+                );
+            }
+        }
+    }
+
+    /// Every row of a word CPU names its own class, so the mode a consumer
+    /// sees is the one the spec states rather than a name derived from a
+    /// `Debug` derive — which is what the documentation generator used to do,
+    /// by leaking a formatted string per row.
+    #[test]
+    fn a_word_cpu_row_names_its_class() {
+        for (insn, row) in crate::tms9900::INSTRUCTIONS
+            .iter()
+            .zip(crate::tms9900::rows())
+        {
+            assert_eq!(row.mnemonic, insn.mnemonic);
+            assert_eq!(row.mode, insn.class.name());
+            assert!(!row.mode.is_empty());
+        }
+    }
+
     /// A row carries the form's `undocumented` flag rather than inventing one,
     /// so the Z80's eight marked forms stay marked through the seam — which is
     /// where the 6809's undocumented opcodes will hang once they exist.
