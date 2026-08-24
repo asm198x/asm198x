@@ -585,6 +585,12 @@ fn assemble_core(
             | Stmt::Section(..)
             | Stmt::Align(_)
             | Stmt::Cnop(..) => {}
+            Stmt::Echo(text) => warnings.push(crate::engine::Warning {
+                line: s.line,
+                file: s.file,
+                message: text.clone(),
+                kind: crate::engine::WarningKind::Note,
+            }),
             Stmt::Fail(message) => return Err(stamp(AsmError::new(s.line, message.clone()))),
             Stmt::Assert(cond, message) => {
                 if eval(cond, &consts, buf.bytes.len() as i64, s.line).map_err(stamp)? == 0 {
@@ -1406,7 +1412,8 @@ fn stmt_size(
         | Stmt::Align(_)
         | Stmt::Cnop(..)
         | Stmt::Fail(_)
-        | Stmt::Assert(..) => 0,
+        | Stmt::Assert(..)
+        | Stmt::Echo(_) => 0,
         Stmt::Raw(payload) => payload.len(),
         Stmt::Dc(size, items) => items.len() * size.bytes(),
         Stmt::Ds(size, count) | Stmt::Dcb(size, count, _) => {
@@ -1605,6 +1612,9 @@ enum Stmt {
     Even,
     /// `section name,attr` — opens a new hunk of the given kind and memory flag.
     Section(HunkKind, MemFlag),
+    /// `echo "text"[,value]` — print, emit nothing, carry on. Values render in
+    /// decimal here; each reference has its own radix.
+    Echo(String),
     /// `assert <expr>[,message]` — stop the assembly when the expression is
     /// zero. Held as a statement so the condition folds against the finished
     /// symbol table: an assertion over a label defined later is the point of
@@ -2442,6 +2452,7 @@ fn bake_reptn(kind: &mut Stmt, value: i64) {
         | Stmt::Cnop(..)
         | Stmt::Fail(_)
         | Stmt::Assert(..)
+        | Stmt::Echo(_)
         | Stmt::Raw(_) => {}
     }
 }
@@ -2490,6 +2501,7 @@ fn qualify_stmt(kind: &mut Stmt, scope: &str) {
         | Stmt::Cnop(..)
         | Stmt::Fail(_)
         | Stmt::Assert(..)
+        | Stmt::Echo(_)
         | Stmt::Raw(_) => {}
     }
 }
@@ -2597,6 +2609,11 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     Directive {
+        id: "echo",
+        pattern: Pattern::Exact(&["echo"]),
+        category: Category::Operation,
+    },
+    Directive {
         id: "section_shorthand",
         pattern: Pattern::Exact(&[
             "code", "code_c", "code_f", "data", "data_c", "data_f", "bss", "bss_c", "bss_f",
@@ -2682,7 +2699,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "dsource",
             "dw",
             "dx",
-            "echo",
             "einline",
             "elif",
             "elseif",
@@ -2805,6 +2821,7 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
             "align" => parse_align(args, line),
             "cnop" => parse_cnop(args, line),
             "fail" => Ok(Stmt::Fail(args.trim().trim_matches('"').to_string())),
+            "echo" => Ok(Stmt::Echo(render_message(args, line, 10)?)),
             "assert" => {
                 let parts = split_operands(args);
                 let cond = parse_value(parts.first().copied().unwrap_or("").trim(), line)?;
@@ -2855,6 +2872,28 @@ fn parse_section(args: &str, _line: usize) -> Stmt {
 /// function of the program counter alone.
 fn parse_align(args: &str, line: usize) -> Result<Stmt, AsmError> {
     Ok(Stmt::Align(parse_value(args.trim(), line)?))
+}
+
+/// Render a `"text", value, ...` list into one message, values in base
+/// `radix`. Each reference prints numbers its own way — vasm decimal, rgbasm
+/// `$5`, sjasmplus `0x0005` — and nothing compares console output, so the
+/// radix is the dialect's and the rest is its own business.
+fn render_message(args: &str, line: usize, radix: u32) -> Result<String, AsmError> {
+    let mut out = String::new();
+    for part in split_operands(args) {
+        let part = part.trim();
+        if let Some(text) = part.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
+            out.push_str(text);
+        } else if let Ok(Expr::Num(v)) = parse_value(part, line) {
+            match radix {
+                16 => out.push_str(&format!("${v:X}")),
+                _ => out.push_str(&v.to_string()),
+            }
+        } else {
+            out.push_str(part);
+        }
+    }
+    Ok(out)
 }
 
 /// `cnop offset,alignment` — both operands are required, and both may name an
@@ -3332,6 +3371,23 @@ mod directive_surface {
             bytes("ifeq 0\n        dc.b 1\n        else\n        fail \"never\"\n        endc"),
             vec![1]
         );
+    }
+
+    /// `echo` prints and emits nothing, and reaches the caller as a **note**
+    /// rather than a warning: the source asked to say it, the assembler is not
+    /// complaining about anything.
+    #[test]
+    fn echo_is_a_note_and_emits_nothing() {
+        // The warned entry point: `assemble_vasm` returns bytes only.
+        let out = crate::assemble_vasm_warned(
+            "        section code,code\n        echo \"n=\",5\n        dc.b 1,2\n",
+        )
+        .expect("assembles");
+        assert_eq!(out.bytes, vec![1, 2]);
+        let note = out.warnings.first().expect("one note");
+        assert_eq!(note.message, "n=5");
+        assert_eq!(note.kind, crate::engine::WarningKind::Note);
+        assert!(note.to_string().contains("note:"), "got `{note}`");
     }
 
     /// `assert` fires only when its expression is zero, and takes an optional

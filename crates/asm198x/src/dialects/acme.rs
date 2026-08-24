@@ -1451,6 +1451,7 @@ impl AcmeEval<'_> {
                 line: o.line,
                 message: "using oversized addressing mode".to_string(),
                 file: o.file,
+                kind: crate::engine::WarningKind::Advisory,
             })
             .collect()
     }
@@ -2450,7 +2451,11 @@ fn parse_diagnose(
         }
     }
     Operation::Diagnose {
-        fatal: !name.eq_ignore_ascii_case("warn"),
+        severity: if name.eq_ignore_ascii_case("warn") {
+            crate::engine::DiagSeverity::Warning
+        } else {
+            crate::engine::DiagSeverity::Error
+        },
         message,
     }
 }

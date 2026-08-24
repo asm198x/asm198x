@@ -476,6 +476,8 @@ const PROBES: &[Probe] = &[
     ok ("vasm", "a comparison binds looser than arithmetic",
         "\tdc.b 1+1=2,2*2>3\n"),
     ok ("vasm", "assert with a comparison",  "\tassert 2=2\n\tdc.b 9\n"),
+    // Print-style directives emit nothing; the bytes either side are the test.
+    ok ("vasm", "echo emits nothing",    "\techo \"n=\",5\n\tdc.b 1,2\n"),
     ok ("vasm", "a true assertion is silent",  "\tassert 1\n\tdc.b 1\n"),
     ok ("vasm", "even pads to a word",   "\tdc.b 1\n\teven\n\tdc.b 2\n"),
     ok ("vasm", "even on a word does nothing", "\tdc.b 1,2\n\teven\n\tdc.b 3\n"),
@@ -637,6 +639,8 @@ const PROBES: &[Probe] = &[
         " db 2=2,2==2,2!=3,2<3,2>3,2<=3,2>=3\n"),
     ok ("pasmo", "comparisons answer $FF",
         " ld a,2=2\n ld b,2!=3\n ld c,2<3\n ld d,2>3\n ld e,2<=3\n ld h,2>=3\n"),
+    ok ("sjasmplus", "DISPLAY emits nothing",
+        " DISPLAY \"hi \", 5\n db 1,2\n"),
     ok ("sjasmplus", "a true assertion is silent",
         " ORG 0\n ASSERT 1\n db 1\n"),
     ok ("sjasmplus", "an assertion sees a later label",
@@ -849,6 +853,8 @@ const PROBES: &[Probe] = &[
     // section model.
     ok ("rgbasm", "comparisons are == and !=",
         "SECTION \"s\",ROM0[0]\n db 2==2,2==3,2!=3,2<3,2>3,2<=3,2>=3\n"),
+    ok ("rgbasm", "PRINT and PRINTLN emit nothing",
+        "SECTION \"s\",ROM0[0]\n PRINT \"n=\", 5\n PRINTLN \"x\"\n db 1,2\n"),
     ok ("rgbasm", "ASSERT and STATIC_ASSERT pass silently",
         "SECTION \"s\",ROM0[0]\n ASSERT 1\n STATIC_ASSERT 1, \"fine\"\n db 1\n"),
     ok ("rgbasm", "an assertion reaches forward",

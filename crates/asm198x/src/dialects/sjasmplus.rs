@@ -152,6 +152,15 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     Directive {
+        id: "display",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["display"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
+    Directive {
         id: "assert",
         pattern: Pattern::Sigilled {
             sigil: '.',
@@ -193,7 +202,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "dg",
                 "dh",
                 "disp",
-                "display",
                 "dword",
                 "dz",
                 "emptytap",
@@ -549,6 +557,7 @@ impl Z80Syntax for SjasmplusSyntax {
             || word.eq_ignore_ascii_case("slot")
             || word.eq_ignore_ascii_case("page")
             || word.eq_ignore_ascii_case("assert")
+            || word.eq_ignore_ascii_case("display")
             || self.is_include(word)
             || self.is_incbin(word)
             || z80::is_common_directive(word)
@@ -596,6 +605,27 @@ impl Z80Syntax for SjasmplusSyntax {
         // Validated by `check_device_lines` before any of this ran.
         if word.eq_ignore_ascii_case("device") || word.eq_ignore_ascii_case("slot") {
             return Ok(None);
+        }
+        if word.eq_ignore_ascii_case("display") {
+            // sjasmplus prints values as `0x0005`, and prefixes the line with
+            // `> `; the prefix is its own chrome, so only the text is kept.
+            let mut text = String::new();
+            for part in args.split(',') {
+                let part = part.trim();
+                match part.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
+                    Some(lit) => text.push_str(lit),
+                    None => {
+                        match z80::literal(&z80::parse_value(self, part, line)?, consts, line) {
+                            Ok(v) => text.push_str(&format!("0x{v:04X}")),
+                            Err(_) => text.push_str(part),
+                        }
+                    }
+                }
+            }
+            return Ok(Some(Operation::Diagnose {
+                severity: crate::engine::DiagSeverity::Note,
+                message: text,
+            }));
         }
         if word.eq_ignore_ascii_case("assert") {
             // sjasmplus takes the whole tail as the expression and echoes it

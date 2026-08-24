@@ -230,7 +230,7 @@ pub(crate) enum Item {
     /// rgbasm `FAIL`/`WARN`). Like the aligns it has no emit arm: the
     /// formatter re-emits it from [`Node::source`](Node).
     Diagnose {
-        fatal: bool,
+        severity: crate::engine::DiagSeverity,
         message: String,
     },
     /// The boundary-stating `align`/`.align` — a PC-dependent pad to the next
@@ -708,8 +708,8 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             modulus: *modulus,
             fill: *fill,
         },
-        Item::Diagnose { fatal, message } => Operation::Diagnose {
-            fatal: *fatal,
+        Item::Diagnose { severity, message } => Operation::Diagnose {
+            severity: *severity,
             message: message.clone(),
         },
         Item::Assert {
@@ -788,7 +788,7 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             fill,
         },
         Item::AlignTo { modulus, fill } => Operation::AlignTo { modulus, fill },
-        Item::Diagnose { fatal, message } => Operation::Diagnose { fatal, message },
+        Item::Diagnose { severity, message } => Operation::Diagnose { severity, message },
         Item::Assert {
             cond,
             fatal,
@@ -1006,7 +1006,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
             fill,
         },
         Operation::AlignTo { modulus, fill } => Item::AlignTo { modulus, fill },
-        Operation::Diagnose { fatal, message } => Item::Diagnose { fatal, message },
+        Operation::Diagnose { severity, message } => Item::Diagnose { severity, message },
         Operation::Assert {
             cond,
             fatal,

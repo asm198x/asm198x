@@ -143,6 +143,12 @@ impl std::error::Error for AsmError {}
 pub struct Warning {
     pub line: usize,
     pub message: String,
+    /// Whether this is the assembler flagging something, or the source asking
+    /// to say it. Additive with a default, so payloads that predate it load
+    /// and serialize unchanged (`core-contract-freeze.md` names `Warning` in
+    /// the additive set).
+    #[serde(default, skip_serializing_if = "WarningKind::is_advisory")]
+    pub kind: WarningKind,
     /// The file `line` counts within (language-surface U2) — a warning raised
     /// inside an include names that include. Additive per KTD7: absent means
     /// the root, and a root value is not serialized, so pre-multi-file
@@ -151,22 +157,49 @@ pub struct Warning {
     pub file: FileId,
 }
 
+/// What a [`Warning`] is: the assembler's own advisory, or text the source
+/// asked to print.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[non_exhaustive]
+pub enum WarningKind {
+    /// The assembler flagging questionable source — an immediate too wide for
+    /// its operand, a value that will not converge.
+    #[default]
+    Advisory,
+    /// Text the source asked to print: rgbasm's `PRINT`, sjasmplus's
+    /// `DISPLAY`, vasm's `echo`, ca65's `.out`. Not a complaint.
+    Note,
+}
+
+impl WarningKind {
+    pub(crate) fn is_advisory(&self) -> bool {
+        matches!(self, WarningKind::Advisory)
+    }
+}
+
 impl Warning {
     pub(crate) fn new(line: usize, message: impl Into<String>) -> Self {
         Self {
             line,
             message: message.into(),
             file: FileId(0),
+            kind: WarningKind::Advisory,
         }
     }
 }
 
 impl fmt::Display for Warning {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        // A note is the source speaking, not the assembler complaining, so it
+        // does not call itself a warning.
+        let label = match self.kind {
+            WarningKind::Note => "note",
+            _ => "warning",
+        };
         if self.line == 0 {
-            write!(f, "warning: {}", self.message)
+            write!(f, "{label}: {}", self.message)
         } else {
-            write!(f, "line {}: warning: {}", self.line, self.message)
+            write!(f, "line {}: {label}: {}", self.line, self.message)
         }
     }
 }
@@ -399,7 +432,10 @@ pub(crate) enum Operation {
     /// that has one also has conditional assembly, and `!error` inside an
     /// untaken `!if` must stay silent. Raising it at parse time would fire on
     /// a branch the program never takes.
-    Diagnose { fatal: bool, message: String },
+    Diagnose {
+        severity: DiagSeverity,
+        message: String,
+    },
     /// An assertion the source asked for: `ASSERT`/`assert`/`.assert`. The
     /// diagnostic fires when `cond` evaluates to zero.
     ///
@@ -705,6 +741,18 @@ pub(crate) fn lay_out(
     Ok((origin, image))
 }
 
+/// How loud a source-requested diagnostic is.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum DiagSeverity {
+    /// Stops the assembly: `!error`, `!serious`, `FAIL`, lwasm's `error`.
+    Error,
+    /// Notes and carries on: `!warn`, `WARN`.
+    Warning,
+    /// Text the source asked to print, and not a complaint about anything:
+    /// `DISPLAY`, `echo`, `PRINT`, `.out`.
+    Note,
+}
+
 /// One section's placed bytes, closed off when the next section opens.
 ///
 /// The engine's whole section model: a program is a list of these, and a
@@ -911,20 +959,23 @@ fn assemble_statements(
                     line: s.line,
                     file: s.file,
                     message: message.clone(),
+                    kind: crate::engine::WarningKind::Advisory,
                 });
             }
             // An assertion that holds says nothing.
             Some(Operation::Assert { .. }) => {}
-            Some(Operation::Diagnose { fatal, message }) => {
-                if *fatal {
-                    return Err(s.err(message));
-                }
-                warnings.push(Warning {
+            Some(Operation::Diagnose { severity, message }) => match severity {
+                DiagSeverity::Error => return Err(s.err(message)),
+                DiagSeverity::Warning | DiagSeverity::Note => warnings.push(Warning {
                     line: s.line,
                     file: s.file,
                     message: message.clone(),
-                });
-            }
+                    kind: match severity {
+                        DiagSeverity::Note => WarningKind::Note,
+                        _ => WarningKind::Advisory,
+                    },
+                }),
+            },
             Some(Operation::Bytes(items)) => {
                 for e in items {
                     let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
@@ -944,6 +995,7 @@ fn assemble_statements(
                         line: s.line,
                         message: "binary inclusion included no data".to_string(),
                         file: s.file,
+                        kind: crate::engine::WarningKind::Advisory,
                     });
                 }
                 bytes.extend_from_slice(payload);
@@ -1348,6 +1400,7 @@ fn emit_byte(
                     line: s.line,
                     message: format!("value {v} truncated to a byte"),
                     file: s.file,
+                    kind: crate::engine::WarningKind::Advisory,
                 });
             }
         }

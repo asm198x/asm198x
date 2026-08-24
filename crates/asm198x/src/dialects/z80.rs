@@ -607,6 +607,7 @@ impl Forward {
                     line,
                     message: format!("forward reference of symbol `{name}`"),
                     file,
+                    kind: crate::engine::WarningKind::Advisory,
                 });
                 0
             }
@@ -1341,6 +1342,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             line: last.line,
             message: format!("`ENDMODULE` missing for module `{}`", names.join(".")),
             file: last.file,
+            kind: crate::engine::WarningKind::Advisory,
         })
     }
 
@@ -1828,6 +1830,7 @@ fn run_passes<'a, S: Z80Syntax>(
                                  previous value {before} not equal {now}"
                             ),
                             file,
+                            kind: crate::engine::WarningKind::Advisory,
                         });
                     }
                 }

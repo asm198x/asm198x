@@ -234,13 +234,14 @@ fn a_real_directive_reads_differently_from_a_typo() {
     let cases: &[(&str, &str, &str, &str)] = &[
         ("acme", "* = $0000\n", "!to \"x\"", "!zzqq"),
         ("ca65", "", ".export foo", ".zzqq"),
-        // `device` used to sit here; it is implemented now, so this needs a
-        // directive sjasmplus still has and we still do not.
-        ("sjasmplus", "", "display \"x\"", "zzqq"),
+        // `device` sat here, then `display`; both are implemented now. The
+        // save family is deferred by decision rather than by schedule
+        // (`multi-artifact-output.md`), so it will not move under this test.
+        ("sjasmplus", "", "savebin \"x\",0,1", "zzqq"),
         ("sjasmplus", "", ".abyte 1", ".zzqq"),
         ("lwasm", "", "import foo", "zzqq"),
         ("vasm", "", "xdef foo", "zzqq"),
-        ("rgbasm", "SECTION \"s\",ROM0\n", "PRINT \"x\"", "ZZQQ"),
+        ("rgbasm", "SECTION \"s\",ROM0\n", "UNION", "ZZQQ"),
     ];
     for (dialect, prologue, real, fake) in cases {
         let assemble = assembler(dialect);

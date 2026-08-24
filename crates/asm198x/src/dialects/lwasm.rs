@@ -726,7 +726,7 @@ fn parse_op(
             "fill" => parse_fill(operand, env, line),
             "align" => parse_align(operand, env, line),
             "diagnose" => Ok(Some(Operation::Diagnose {
-                fatal: true,
+                severity: crate::engine::DiagSeverity::Error,
                 message: format!("User Specified: {}", operand.trim()),
             })),
             other => Err(AsmError::new(

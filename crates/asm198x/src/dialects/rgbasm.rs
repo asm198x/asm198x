@@ -672,6 +672,24 @@ fn section_bank(code: &str, line: usize) -> Result<Option<i64>, AsmError> {
     }
 }
 
+/// Render a `"text", value, ...` list into one message. rgbasm prints numbers
+/// as `$5`; each reference has its own radix and nothing compares console
+/// output.
+fn render_message(args: &str, line: usize) -> Result<String, AsmError> {
+    let mut out = String::new();
+    for part in mos6502::split_top_level(args, ',') {
+        let part = part.trim();
+        if let Some(text) = part.strip_prefix('"').and_then(|t| t.strip_suffix('"')) {
+            out.push_str(text);
+        } else if let Ok(Expr::Num(v)) = value(part, line) {
+            out.push_str(&format!("${v:X}"));
+        } else {
+            out.push_str(part);
+        }
+    }
+    Ok(out)
+}
+
 /// The quoted name in `SECTION "name", TYPE[...]`, for the debug section table.
 /// Empty when the source did not quote one — rgbasm requires it, so an empty
 /// name means the line is malformed and the reference will say so.
@@ -865,10 +883,12 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["assert", "static_assert"]),
         category: Category::Operation,
     },
+    // `PRINT` and `PRINTLN` differ only by a trailing newline, which a
+    // diagnostic carries no more than a line does.
     Directive {
-        id: "unsupported-assertions",
+        id: "print",
         pattern: Pattern::Exact(&["print", "println"]),
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
     },
     // option and character-map state
     Directive {
@@ -956,8 +976,16 @@ fn parse_op(
                         message,
                     }
                 }
+                "print" => Operation::Diagnose {
+                    severity: crate::engine::DiagSeverity::Note,
+                    message: render_message(args, line)?,
+                },
                 "diagnose" => Operation::Diagnose {
-                    fatal: word.eq_ignore_ascii_case("fail"),
+                    severity: if word.eq_ignore_ascii_case("fail") {
+                        crate::engine::DiagSeverity::Error
+                    } else {
+                        crate::engine::DiagSeverity::Warning
+                    },
                     message: args.trim().trim_matches('"').to_string(),
                 },
                 other => {
@@ -1914,8 +1942,8 @@ mod tests {
                 .expect_err(body)
                 .to_string()
         };
-        // `ASSERT` used to head this list; it is implemented now.
-        for d in ["PRINT \"x\"", "UNION", "OPT b.X", "PUSHS"] {
+        // `ASSERT` and `PRINT` used to be here; both are implemented now.
+        for d in ["UNION", "OPT b.X", "PUSHS"] {
             let e = err(d);
             assert!(
                 e.contains("is a real directive here"),
