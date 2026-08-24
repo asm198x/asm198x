@@ -8,13 +8,17 @@ Z80, sjasmplus syntax.
 
 ## Directives
 
-14 directives, 212 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+19 directives, 212 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
+| `align` | `.align`, `align` |  |
+| `assert` | `.assert`, `assert` |  |
 | `bytes` | `.defb`, `.db`, `.defm`, `.dm`, `.byte`, `defb`, `db`, `defm`, `dm`, `byte` |  |
 | `conditional` | `.if`, `.ifdef`, `.ifndef`, `if`, `ifdef`, `ifndef` |  |
 | `define` | `.define`, `define` |  |
+| `device` | `.device`, `.slot`, `device`, `slot` |  |
+| `display` | `.display`, `display` |  |
 | `end` | `.end`, `end` |  |
 | `equ` | `.equ`, `equ` |  |
 | `incbin` | `.incbin`, `incbin` |  |
@@ -22,9 +26,10 @@ Z80, sjasmplus syntax.
 | `macro` | `.macro`, `macro` |  |
 | `module` | `.module`, `module` |  |
 | `org` | `.org`, `org` |  |
+| `page` | `.page`, `page` |  |
 | `repeat` | `.dup`, `.rept`, `dup`, `rept` |  |
 | `reserve` | `.defs`, `.ds`, `defs`, `ds` |  |
-| `unsupported-sjasmplus` | `.abyte`, `.abytec`, `.abytez`, `.align`, `.assert`, `.binary`, `.block`, `.bplist`, `.cspectmap`, `.d24`, `.dc`, `.dd`, `.defarray`, `.defd`, `.defdevice`, `.defg`, `.defh`, `.dephase`, `.device`, `.dg`, `.dh`, `.disp`, `.display`, `.dword`, `.dz`, `.emptytap`, `.emptytrd`, `.encoding`, `.endlua`, `.endm`, `.ends`, `.endt`, `.endw`, `.ent`, `.exa`, `.exd`, `.export`, `.fpos`, `.hex`, `.ifn`, `.ifnused`, `.ifused`, `.inchob`, `.includelua`, `.inctrd`, `.inf`, `.insert`, `.labelslist`, `.lua`, `.mmu`, `.opt`, `.outend`, `.output`, `.page`, `.phase`, `.relocate_end`, `.relocate_start`, `.relocate_table`, `.save3dos`, `.saveamsdos`, `.savebin`, `.savecdt`, `.savecpcsna`, `.savecpr`, `.savedev`, `.savehob`, `.savenex`, `.savesna`, `.savetap`, `.savetrd`, `.setbp`, `.setbreakpoint`, `.shellexec`, `.size`, `.sldopt`, `.slot`, `.struct`, `.tapend`, `.tapout`, `.textarea`, `.undefine`, `.unphase`, `.while`, `.word`, `abyte`, `abytec`, `abytez`, `align`, `assert`, `binary`, `block`, `bplist`, `cspectmap`, `d24`, `dc`, `dd`, `defarray`, `defd`, `defdevice`, `defg`, `defh`, `dephase`, `device`, `dg`, `dh`, `disp`, `display`, `dword`, `dz`, `emptytap`, `emptytrd`, `encoding`, `endlua`, `endm`, `ends`, `endt`, `endw`, `ent`, `exa`, `exd`, `export`, `fpos`, `hex`, `ifn`, `ifnused`, `ifused`, `inchob`, `includelua`, `inctrd`, `inf`, `insert`, `labelslist`, `lua`, `mmu`, `opt`, `outend`, `output`, `page`, `phase`, `relocate_end`, `relocate_start`, `relocate_table`, `save3dos`, `saveamsdos`, `savebin`, `savecdt`, `savecpcsna`, `savecpr`, `savedev`, `savehob`, `savenex`, `savesna`, `savetap`, `savetrd`, `setbp`, `setbreakpoint`, `shellexec`, `size`, `sldopt`, `slot`, `struct`, `tapend`, `tapout`, `textarea`, `undefine`, `unphase`, `while`, `word` | Recognised, and not implemented |
+| `unsupported-sjasmplus` | `.abyte`, `.abytec`, `.abytez`, `.binary`, `.block`, `.bplist`, `.cspectmap`, `.d24`, `.dc`, `.dd`, `.defarray`, `.defd`, `.defdevice`, `.defg`, `.defh`, `.dephase`, `.dg`, `.dh`, `.disp`, `.dword`, `.dz`, `.emptytap`, `.emptytrd`, `.encoding`, `.endlua`, `.endm`, `.ends`, `.endt`, `.endw`, `.ent`, `.exa`, `.exd`, `.export`, `.fpos`, `.hex`, `.ifn`, `.ifnused`, `.ifused`, `.inchob`, `.includelua`, `.inctrd`, `.inf`, `.insert`, `.labelslist`, `.lua`, `.mmu`, `.opt`, `.outend`, `.output`, `.phase`, `.relocate_end`, `.relocate_start`, `.relocate_table`, `.save3dos`, `.saveamsdos`, `.savebin`, `.savecdt`, `.savecpcsna`, `.savecpr`, `.savedev`, `.savehob`, `.savenex`, `.savesna`, `.savetap`, `.savetrd`, `.setbp`, `.setbreakpoint`, `.shellexec`, `.size`, `.sldopt`, `.struct`, `.tapend`, `.tapout`, `.textarea`, `.undefine`, `.unphase`, `.while`, `.word`, `abyte`, `abytec`, `abytez`, `binary`, `block`, `bplist`, `cspectmap`, `d24`, `dc`, `dd`, `defarray`, `defd`, `defdevice`, `defg`, `defh`, `dephase`, `dg`, `dh`, `disp`, `dword`, `dz`, `emptytap`, `emptytrd`, `encoding`, `endlua`, `endm`, `ends`, `endt`, `endw`, `ent`, `exa`, `exd`, `export`, `fpos`, `hex`, `ifn`, `ifnused`, `ifused`, `inchob`, `includelua`, `inctrd`, `inf`, `insert`, `labelslist`, `lua`, `mmu`, `opt`, `outend`, `output`, `phase`, `relocate_end`, `relocate_start`, `relocate_table`, `save3dos`, `saveamsdos`, `savebin`, `savecdt`, `savecpcsna`, `savecpr`, `savedev`, `savehob`, `savenex`, `savesna`, `savetap`, `savetrd`, `setbp`, `setbreakpoint`, `shellexec`, `size`, `sldopt`, `struct`, `tapend`, `tapout`, `textarea`, `undefine`, `unphase`, `while`, `word` | Recognised, and not implemented |
 | `words` | `.defw`, `.dw`, `defw`, `dw` |  |
 
 Instruction mnemonics are not listed here — they come from the instruction-set spec and have their own reference.

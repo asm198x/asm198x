@@ -8,18 +8,20 @@ Game Boy SM83, RGBDS syntax.
 
 ## Directives
 
-13 directives, 45 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+15 directives, 45 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
+| `assert` | `assert`, `static_assert` |  |
 | `bytes` | `db` |  |
 | `conditional` | `if`, `elif`, `else`, `endc` |  |
+| `diagnose` | `fail`, `warn` |  |
 | `incbin` | `incbin` |  |
 | `include` | `include` |  |
 | `macro` | `macro` |  |
+| `print` | `print`, `println` |  |
 | `repeat` | `rept`, `endr` |  |
 | `reserve` | `ds` |  |
-| `unsupported-assertions` | `assert`, `static_assert`, `fail`, `warn`, `print`, `println` | Recognised, and not implemented |
 | `unsupported-blocks` | `union`, `nextu`, `endu`, `load`, `endl`, `align`, `for`, `break`, `endsection`, `dl` | Recognised, and not implemented |
 | `unsupported-option` | `opt`, `popo`, `pusho`, `popc`, `pushc`, `pops`, `pushs`, `charmap`, `newcharmap`, `setcharmap` | Recognised, and not implemented |
 | `unsupported-symbol` | `export`, `purge`, `redef`, `def`, `shift` | Recognised, and not implemented |

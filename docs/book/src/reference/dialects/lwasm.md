@@ -8,12 +8,14 @@
 
 ## Directives
 
-13 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+16 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
+| `align` | `align` |  |
 | `bytes` | `fcb`, `.byte` |  |
 | `conditional` | `ifne`, `ifeq`, `ifgt`, `ifge`, `iflt`, `ifle`, `ifdef`, `ifndef`, `else`, `endc`, `endif` |  |
+| `diagnose` | `error` |  |
 | `end` | `end` | Accepted and discarded — it changes no bytes |
 | `equ` | `equ` |  |
 | `fcc` | `fcc` |  |
@@ -21,9 +23,10 @@
 | `fqb` | `fqb` |  |
 | `incbin` | `includebin` |  |
 | `include` | `include`, `use` |  |
+| `object-target-only` | `export`, `extdep`, `extern`, `external`, `import` | Refused, as the reference refuses it — only supported for an object target |
 | `org` | `org` |  |
 | `reserve` | `rmb`, `.ds`, `zmb` |  |
-| `unsupported-lwasm` | `align`, `bsz`, `dephase`, `dtb`, `dts`, `emod`, `endm`, `ends`, `endsect`, `endsection`, `endstruct`, `error`, `export`, `extdep`, `extern`, `external`, `fcn`, `fcs`, `fcz`, `fdbs`, `fzb`, `if`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `import`, `incl`, `includestr`, `lib`, `macr`, `macro`, `mod`, `msg`, `nam`, `opt`, `os9`, `pag`, `page`, `phase`, `pragma`, `reorg`, `rmd`, `rmq`, `rmw`, `sect`, `section`, `set`, `setdp`, `setstr`, `spc`, `struct`, `ttl`, `warning`, `zmd`, `zmq` | Recognised, and not implemented |
+| `unsupported-lwasm` | `bsz`, `dephase`, `dtb`, `dts`, `emod`, `endm`, `ends`, `endsect`, `endsection`, `endstruct`, `fcn`, `fcs`, `fcz`, `fdbs`, `fzb`, `if`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `incl`, `includestr`, `lib`, `macr`, `macro`, `mod`, `msg`, `nam`, `opt`, `os9`, `pag`, `page`, `phase`, `pragma`, `reorg`, `rmd`, `rmq`, `rmw`, `sect`, `section`, `set`, `setdp`, `setstr`, `spc`, `struct`, `ttl`, `warning`, `zmd`, `zmq` | Recognised, and not implemented |
 | `words` | `fdb`, `.word` |  |
 
 Instruction mnemonics are not listed here — they come from the instruction-set spec and have their own reference.

@@ -37,6 +37,37 @@ pub enum Category {
     /// This category exists so the diagnostic can say which it is, and so the
     /// gap is countable rather than discoverable by accident.
     KnownUnsupported,
+    /// The reference assembler has it and **refuses it itself**, given the
+    /// output we produce. The payload is its rule, phrased to read in a
+    /// sentence: `"only supported for an object target"`.
+    ///
+    /// This is the opposite of [`KnownUnsupported`](Category::KnownUnsupported)
+    /// and reads almost the same to someone skimming the source, which is why
+    /// it is a category rather than a comment. `KnownUnsupported` says the
+    /// source is valid and we are behind; this says the source is not valid
+    /// for the output asked for, and refusing it *is* matching the reference.
+    ///
+    /// So these words are **covered**, not outstanding: `xtask surface` counts
+    /// them as ours, because assembling them would be the divergence.
+    ///
+    /// Governed by `decisions/symbol-visibility-in-a-fused-assembler.md`.
+    ///
+    /// lwtools 4.25 answers `Only supported for object target (EXPORT)` for
+    /// `export`, `extdep`, `extern`, `external` and `import` under `--raw`,
+    /// with an operand and without (probed 2026-08-24). asm198x emits a
+    /// binary, never an object file, so that is every path we have.
+    RefusedByReference(&'static str),
+}
+
+/// What a [`Category::RefusedByReference`] word owes the reader: the reference's
+/// rule, and that the refusal is the reference's rather than a gap here. Kept
+/// in one place so thirteen dispatch arms cannot drift into thirteen wordings.
+#[must_use]
+pub fn refused_by_reference(tool: &str, spelling: &str, rule: &str) -> String {
+    format!(
+        "`{spelling}` is {rule}, and asm198x emits a binary — {tool} refuses it \
+         there too, so this is not a gap in asm198x"
+    )
 }
 
 /// How a directive is spelled.

@@ -2293,6 +2293,17 @@ fn parse_op<S: Z80Syntax>(
     // an unknown mnemonic would tell the reader their source is invalid, when
     // the reference assembler takes it and the gap is ours.
     if let Some(entry) = crate::directives::lookup(syntax.own_directives(), word)
+        && let crate::directives::Category::RefusedByReference(rule) = entry.category
+    {
+        return Err(AsmError::new(
+            line,
+            // No dialect on this path declares one yet, so the tool is named
+            // generically rather than adding a trait hook for an arm nothing
+            // reaches — name it here when one does.
+            crate::directives::refused_by_reference("the reference assembler", word, rule),
+        ));
+    }
+    if let Some(entry) = crate::directives::lookup(syntax.own_directives(), word)
         && entry.category == crate::directives::Category::KnownUnsupported
     {
         return Err(AsmError::new(

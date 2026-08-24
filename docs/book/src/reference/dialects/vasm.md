@@ -8,22 +8,28 @@ Amiga 68000, vasm Motorola syntax.
 
 ## Directives
 
-12 directives, 147 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+18 directives, 147 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
+| `align` | `align` |  |
+| `assert` | `assert` |  |
+| `cnop` | `cnop` |  |
 | `conditional` | `if`, `ifne`, `ifeq`, `ifgt`, `ifge`, `iflt`, `ifle`, `ifd`, `ifnd`, `else`, `endif`, `endc` |  |
 | `dc` | `dc`, `dc.b`, `dc.w`, `dc.l` |  |
 | `dcb` | `dcb`, `dcb.b`, `dcb.w`, `dcb.l` |  |
 | `ds` | `ds`, `ds.b`, `ds.w`, `ds.l` |  |
+| `echo` | `echo` |  |
 | `equ` | `equ`, `=` |  |
 | `even` | `even` |  |
+| `fail` | `fail` |  |
 | `incbin` | `incbin` |  |
 | `include` | `include` |  |
 | `macro` | `macro` |  |
 | `repeat` | `rept`, `endr` |  |
 | `section` | `section` |  |
-| `unsupported-vasm` | `ac68080`, `align`, `assert`, `auto`, `basereg`, `blk`, `bss`, `bss_c`, `bss_f`, `cargs`, `clrfo`, `clrso`, `cnop`, `code`, `code_c`, `code_f`, `comm`, `comment`, `cpu32`, `cseg`, `data`, `data_c`, `data_f`, `db`, `debug`, `dl`, `dr`, `dseg`, `dsource`, `dw`, `dx`, `echo`, `einline`, `elif`, `elseif`, `end`, `endb`, `endm`, `entry`, `erem`, `export`, `extrn`, `fail`, `far`, `fo`, `fpu`, `global`, `idnt`, `if1`, `if2`, `ifb`, `ifc`, `ifmacrod`, `ifmacrond`, `ifmi`, `ifnb`, `ifnc`, `ifp1`, `ifpl`, `image`, `import`, `incdir`, `initnear`, `inline`, `jumperr`, `jumpptr`, `line_a`, `line_f`, `linea`, `linef`, `list`, `llen`, `load`, `local`, `machine`, `mask2`, `mexit`, `module`, `msource`, `near`, `nolist`, `nopage`, `nref`, `odd`, `offset`, `opt`, `org`, `output`, `page`, `plen`, `popsection`, `printt`, `printv`, `public`, `pushsection`, `rem`, `rorg`, `rs`, `rseven`, `rsreset`, `rsset`, `sdreg`, `setfo`, `setso`, `showoffset`, `so`, `spc`, `symdebug`, `text`, `ttl`, `vdebug`, `weak`, `xdef`, `xref` | Recognised, and not implemented |
+| `section_shorthand` | `code`, `code_c`, `code_f`, `data`, `data_c`, `data_f`, `bss`, `bss_c`, `bss_f` |  |
+| `unsupported-vasm` | `ac68080`, `auto`, `basereg`, `blk`, `cargs`, `clrfo`, `clrso`, `comm`, `comment`, `cpu32`, `cseg`, `db`, `debug`, `dl`, `dr`, `dseg`, `dsource`, `dw`, `dx`, `einline`, `elif`, `elseif`, `end`, `endb`, `endm`, `entry`, `erem`, `export`, `extrn`, `far`, `fo`, `fpu`, `global`, `idnt`, `if1`, `if2`, `ifb`, `ifc`, `ifmacrod`, `ifmacrond`, `ifmi`, `ifnb`, `ifnc`, `ifp1`, `ifpl`, `image`, `import`, `incdir`, `initnear`, `inline`, `jumperr`, `jumpptr`, `line_a`, `line_f`, `linea`, `linef`, `list`, `llen`, `load`, `local`, `machine`, `mask2`, `mexit`, `module`, `msource`, `near`, `nolist`, `nopage`, `nref`, `odd`, `offset`, `opt`, `org`, `output`, `page`, `plen`, `popsection`, `printt`, `printv`, `public`, `pushsection`, `rem`, `rorg`, `rs`, `rseven`, `rsreset`, `rsset`, `sdreg`, `setfo`, `setso`, `showoffset`, `so`, `spc`, `symdebug`, `text`, `ttl`, `vdebug`, `weak`, `xdef`, `xref` | Recognised, and not implemented |
 
 Instruction mnemonics are not listed here — they come from the instruction-set spec and have their own reference.
 

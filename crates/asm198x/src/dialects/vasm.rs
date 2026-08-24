@@ -2799,6 +2799,12 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
         let suffix = lower
             .split_once('.')
             .map_or("", |(_, tail)| &lower[lower.len() - tail.len()..]);
+        if let crate::directives::Category::RefusedByReference(rule) = directive.category {
+            return Err(AsmError::new(
+                line,
+                crate::directives::refused_by_reference("vasm", &lower, rule),
+            ));
+        }
         if directive.category == crate::directives::Category::KnownUnsupported {
             return Err(AsmError::new(
                 line,

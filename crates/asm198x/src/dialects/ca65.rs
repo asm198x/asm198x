@@ -1970,6 +1970,12 @@ fn parse_directive(
             format!("`.{name}` is not a directive ca65 has"),
         ));
     };
+    if let Category::RefusedByReference(rule) = entry.category {
+        return Err(AsmError::new(
+            line,
+            crate::directives::refused_by_reference("ca65", &sigilled, rule),
+        ));
+    }
     if entry.category == Category::KnownUnsupported {
         return Err(AsmError::new(
             line,

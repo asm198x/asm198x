@@ -633,6 +633,16 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["error"]),
         category: Category::Operation,
     },
+    // The five words lwasm has and refuses for the output we produce. Probed
+    // against lwtools 4.25 with `--raw`, with an operand and without: each
+    // answers `Only supported for object target (EXPORT)`. asm198x emits a
+    // binary and never an object file, so that is every path there is — and
+    // refusing them is what matching lwasm means, not a gap.
+    Directive {
+        id: "object-target-only",
+        pattern: Pattern::Exact(&["export", "extdep", "extern", "external", "import"]),
+        category: Category::RefusedByReference("only supported for an object target"),
+    },
     Directive {
         id: "unsupported-lwasm",
         pattern: Pattern::Exact(&[
@@ -646,10 +656,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "endsect",
             "endsection",
             "endstruct",
-            "export",
-            "extdep",
-            "extern",
-            "external",
             "fcn",
             "fcs",
             "fcz",
@@ -661,7 +667,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "ifp2",
             "ifpragma",
             "ifstr",
-            "import",
             "incl",
             "includestr",
             "lib",
@@ -714,6 +719,12 @@ fn parse_op(
         Category::KnownUnsupported => Err(AsmError::new(
             line,
             format!("`{m}` is a real directive here and asm198x does not implement it yet"),
+        )),
+        // Declared for `lwasm` only where lwasm itself refuses the word for the
+        // binary we emit; the refusal is the match, not a gap.
+        Category::RefusedByReference(rule) => Err(AsmError::new(
+            line,
+            crate::directives::refused_by_reference("lwasm", &m, rule),
         )),
         Category::Operation => match directive.id {
             "org" => Ok(Some(Operation::Org(value(operand, line)?))),

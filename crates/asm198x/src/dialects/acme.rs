@@ -2385,6 +2385,12 @@ fn parse_directive(
             format!("`!{name}` is not a pseudo opcode ACME has"),
         ));
     };
+    if let Category::RefusedByReference(rule) = entry.category {
+        return Err(AsmError::new(
+            line,
+            crate::directives::refused_by_reference("acme", &format!("!{name}"), rule),
+        ));
+    }
     if entry.category == Category::KnownUnsupported {
         return Err(AsmError::new(
             line,

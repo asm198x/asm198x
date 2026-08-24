@@ -2108,6 +2108,61 @@ fn the_bytes_view_collapses_every_non_byte_outcome() {
     );
 }
 
+/// lwasm's five object-target words, arbitrated against lwasm rather than
+/// against the manual.
+///
+/// `export`, `extdep`, `extern`, `external` and `import` are declared
+/// [`Category::RefusedByReference`], which is a claim about *lwasm*: that it
+/// refuses them itself when the output is a binary. Everything else in the
+/// declared surface is a claim about us, checkable without a tool. This one is
+/// not, so it is checked with the tool — and it is the claim most likely to be
+/// wrong, because reading the manual would tell you these are ordinary
+/// directives.
+///
+/// If lwtools ever accepts them under `--raw`, they stop being refusals and
+/// become a gap, and this is what says so.
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn lwasm_refuses_its_object_target_words_for_a_binary() {
+    if !have("lwasm") {
+        eprintln!("SKIP: `lwasm` not on PATH");
+        return;
+    }
+    let tmp = std::env::temp_dir().join("asm198x-lwasm-objwords");
+    let _ = fs::create_dir_all(&tmp);
+
+    let mut wrong: Vec<String> = Vec::new();
+    for word in ["export", "extdep", "extern", "external", "import"] {
+        // With an operand and without: the answer is the same either way, so
+        // neither shape can be the one that happened to be probed.
+        for body in [format!(" {word}\n"), format!(" {word} foo\n")] {
+            let source = format!(" org 0\n{body}foo: fcb 1\n");
+            let outcome = ref_outcome(&tmp, &source, "asm", |src, out| {
+                let mut c = Command::new("lwasm");
+                c.arg("--6809").arg("--raw").arg("-o").arg(out).arg(src);
+                vec![c]
+            });
+            match &outcome {
+                RefOutcome::Rejected { diagnostic }
+                    if diagnostic.contains("Only supported for object target") => {}
+                other => wrong.push(format!("`{word}` with `{}`: {other:?}", body.trim())),
+            }
+            // And we refuse it too, naming lwasm's rule rather than a gap here.
+            let err = asm198x::assemble_lwasm(&source).expect_err("we refuse it as well");
+            let message = err.to_string();
+            if !message.contains("object target") || message.contains("does not implement") {
+                wrong.push(format!("`{word}` — ours reads wrong: {message}"));
+            }
+        }
+    }
+    assert!(
+        wrong.is_empty(),
+        "{} object-target probe(s) disagree:\n  {}",
+        wrong.len(),
+        wrong.join("\n  ")
+    );
+}
+
 /// Identify every reference tool this machine has, proving the probe table
 /// against the real binaries rather than against synthetic output.
 ///

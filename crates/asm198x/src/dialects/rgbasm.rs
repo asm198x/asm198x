@@ -959,6 +959,14 @@ fn parse_op(
                     ),
                 ));
             }
+            // Declared for `rgbasm` only where rgbasm itself refuses the word for the
+            // binary we emit; the refusal is the match, not a gap.
+            Category::RefusedByReference(rule) => {
+                return Err(AsmError::new(
+                    line,
+                    crate::directives::refused_by_reference("rgbasm", word, rule),
+                ));
+            }
             Category::Operation => match directive.id {
                 "bytes" => Operation::Bytes(byte_list(args, line)?),
                 "words" => Operation::Words(value_list(args, line)?),

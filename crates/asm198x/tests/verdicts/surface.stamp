@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 512 word(s) outside our surface, across the references installed
+# 507 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -151,17 +151,14 @@ unphase
 
 ## lwasm (lwasm from lwtools 4.25)
 # 2201 candidate(s) harvested; 257 recognised here, 94 more the tool itself
-# refuses on this target; 67 of the 257 outside our surface
+# refuses on this target; 62 of the 257 outside our surface
 dephase
 endm
 endsection
 endstruct
-export
-extdep
 if
 ifp1
 ifp2
-import
 includestr
 macro
 os9
@@ -186,8 +183,6 @@ dts
 emod
 ends
 endsect
-extern
-external
 fcn
 fcs
 fcz
