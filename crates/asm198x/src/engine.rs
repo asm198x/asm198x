@@ -368,16 +368,12 @@ pub(crate) enum Operation {
     /// from the current address, which is what the dialects that have them did
     /// before this existed. `name` carries into the debug section table.
     ///
-    /// `at` is where the section's bytes sit **in the image**, when that is not
-    /// the same thing as where the CPU sees them. A banked Game Boy section is
-    /// addressed at `$4000` whichever bank it is in, and lands at
-    /// `bank * $4000` in the ROM; the NES segments are the same shape, with
-    /// file offsets a linker config fixes. `None` means the two coincide,
-    /// which is every flat dialect.
+    /// `at` says where the section's bytes sit **in the image**, when that is
+    /// not the same thing as where the CPU sees them.
     Section {
         name: String,
         base: Option<i64>,
-        at: Option<i64>,
+        at: Place,
     },
     /// A diagnostic the **source** asked for: ACME's `!error`/`!warn`, lwasm's
     /// `error`, rgbasm's `FAIL`/`WARN`. `fatal` aborts the assembly; otherwise
@@ -597,6 +593,23 @@ pub(crate) fn assemble_multi(
 /// The shared two-pass driver over an already-parsed statement stream — the
 /// single body behind [`assemble`] and [`assemble_multi`], so the single- and
 /// multi-file paths cannot drift.
+/// Where a section's bytes sit in the image.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Place {
+    /// Wherever its address puts it — every flat dialect, and any section whose
+    /// toolchain places it by where the CPU sees it.
+    ByAddress,
+    /// At a fixed offset the container fixes: a Game Boy bank at
+    /// `bank * $4000`, a NES segment at the offset its linker config gives it.
+    /// The section is addressed somewhere the image does not put it.
+    At(i64),
+    /// Immediately after the section before it, whatever either is addressed
+    /// at. sjasmplus's `PAGE` is this: two pages written at the same `ORG`
+    /// concatenate in the output rather than colliding, because they are
+    /// different memory.
+    Next,
+}
+
 /// Lay a program's sections into one image.
 ///
 /// The single placement implementation: the engine's own section path and the
@@ -624,7 +637,22 @@ pub(crate) fn lay_out(
     if runs.is_empty() {
         return Ok((image_base.unwrap_or(0), Vec::new()));
     }
-    let placed = |r: &Run| r.at.unwrap_or(r.base);
+    // A `Next` section belongs immediately after the one before it, whatever
+    // either is addressed at, so fold it in before anything is placed. What is
+    // left all has a place of its own and sorts by it.
+    let mut merged: Vec<Run> = Vec::new();
+    for r in runs {
+        match (r.at, merged.last_mut()) {
+            (Place::Next, Some(prev)) => prev.bytes.extend_from_slice(&r.bytes),
+            _ => merged.push(r),
+        }
+    }
+    let mut runs = merged;
+
+    let placed = |r: &Run| match r.at {
+        Place::At(n) => n,
+        _ => r.base,
+    };
     runs.sort_by_key(placed);
     let origin = image_base.unwrap_or(runs[0].base);
     let first = image_base.unwrap_or_else(|| placed(&runs[0]));
@@ -661,7 +689,7 @@ pub(crate) struct Run {
     /// The address the CPU sees these bytes at — what labels resolve to.
     pub(crate) base: i64,
     /// Where the bytes sit in the image, when that differs from `base`.
-    pub(crate) at: Option<i64>,
+    pub(crate) at: Place,
     pub(crate) bytes: Vec<u8>,
 }
 
@@ -779,7 +807,7 @@ fn assemble_statements(
     // the flat engine unchanged.
     let mut runs: Vec<Run> = Vec::new();
     let mut section_name = String::new();
-    let mut section_at: Option<i64> = None;
+    let mut section_at = Place::ByAddress;
     let mut debug = DebugData::default();
     for s in &statements {
         // The location counter (`$`) is the address of this statement's start,
@@ -804,14 +832,16 @@ fn assemble_statements(
                 // are per-section from here, so the location counter, the
                 // written-range trims and the 64K check all measure within
                 // this section rather than across the image.
-                if let Some(base) = base {
+                if base.is_some() || *at == Place::Next {
                     runs.push(Run {
                         name: std::mem::take(&mut section_name),
                         base: origin,
-                        at: section_at.take(),
+                        at: std::mem::replace(&mut section_at, Place::ByAddress),
                         bytes: std::mem::take(&mut bytes),
                     });
-                    origin = *base;
+                    if let Some(base) = base {
+                        origin = *base;
+                    }
                     written_len = 0;
                     written_start = None;
                 }

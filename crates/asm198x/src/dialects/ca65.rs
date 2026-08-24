@@ -455,7 +455,7 @@ fn link(seg_bytes: &BTreeMap<String, Vec<u8>>) -> Result<Vec<u8>, AsmError> {
             Some(crate::engine::Run {
                 name: (*name).to_string(),
                 base: i64::from(*base),
-                at: Some((*file_at)? as i64),
+                at: crate::engine::Place::At((*file_at)? as i64),
                 bytes: bytes.clone(),
             })
         })

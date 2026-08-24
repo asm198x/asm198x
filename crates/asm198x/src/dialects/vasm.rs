@@ -366,7 +366,7 @@ fn flatten_sections(sections: &[SecOut]) -> Result<Vec<u8>, AsmError> {
             }
             .to_string(),
             base: 0,
-            at: None,
+            at: crate::engine::Place::ByAddress,
             bytes: s.bytes.clone(),
         })
         .collect();

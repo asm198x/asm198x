@@ -411,8 +411,11 @@ impl FlatWalk for Walker {
             // and lands at `bank * $4000` in the ROM. Bank 0 is `ROM0`, which
             // is addressed and placed at the same $0000.
             let (base, at) = match bank {
-                Some(n) if n > 0 => (Some(pinned.unwrap_or(ROMX_BASE)), Some(n * BANK_SIZE)),
-                _ => (pinned, None),
+                Some(n) if n > 0 => (
+                    Some(pinned.unwrap_or(ROMX_BASE)),
+                    crate::engine::Place::At(n * BANK_SIZE),
+                ),
+                _ => (pinned, crate::engine::Place::ByAddress),
             };
             let item = Some(crate::ast::item_from_operation(Operation::Section {
                 name: section_name(code),
@@ -611,9 +614,13 @@ fn expr_function(name: &str, args: Vec<mos6502::ExprArg>, line: usize) -> Result
 fn declared_banks(ops: &[Statement]) -> BTreeMap<String, i64> {
     ops.iter()
         .filter_map(|st| match &st.op {
-            Some(Operation::Section { name, at, .. }) => {
-                Some((name.clone(), at.unwrap_or(0) / BANK_SIZE))
-            }
+            Some(Operation::Section { name, at, .. }) => Some((
+                name.clone(),
+                match at {
+                    crate::engine::Place::At(n) => n / BANK_SIZE,
+                    _ => 0,
+                },
+            )),
             _ => None,
         })
         .collect()

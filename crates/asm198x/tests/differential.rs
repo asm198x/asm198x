@@ -611,6 +611,17 @@ const PROBES: &[Probe] = &[
         " MACRO m\n nop\n ENDM\n DUP 2\n m\n EDUP\n"),
     // `ALIGN` here is power-of-two only, defaults to 4 with no operand, and
     // takes an optional fill byte.
+    // The device model. Two pages written at one address concatenate rather
+    // than colliding, because they are different memory
+    // (`docs/sjasmplus-device-model.md`).
+    ok ("sjasmplus", "two pages at one address concatenate",
+        " DEVICE ZXSPECTRUM128\n SLOT 3\n PAGE 1\n ORG $C000\n db $11\n PAGE 2\n db $22\n"),
+    ok ("sjasmplus", "a device changes no bytes",
+        " DEVICE ZXSPECTRUM48\n ORG $8000\n ld a,1\n ret\n"),
+    ok ("sjasmplus", "DEVICE NONE is no device",
+        " DEVICE NONE\n ld a,1\n"),
+    ok ("sjasmplus", "the Next has eight slots",
+        " DEVICE ZXSPECTRUMNEXT\n SLOT 7\n PAGE 223\n db 1\n"),
     ok ("sjasmplus", "align pads to the boundary",
         " db 1\n align 4\n db 2\n"),
     ok ("sjasmplus", "align defaults to 4",

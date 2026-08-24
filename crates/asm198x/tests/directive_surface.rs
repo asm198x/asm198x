@@ -234,7 +234,9 @@ fn a_real_directive_reads_differently_from_a_typo() {
     let cases: &[(&str, &str, &str, &str)] = &[
         ("acme", "* = $0000\n", "!to \"x\"", "!zzqq"),
         ("ca65", "", ".export foo", ".zzqq"),
-        ("sjasmplus", "", "device ZXSPECTRUM48", "zzqq"),
+        // `device` used to sit here; it is implemented now, so this needs a
+        // directive sjasmplus still has and we still do not.
+        ("sjasmplus", "", "display \"x\"", "zzqq"),
         ("sjasmplus", "", ".abyte 1", ".zzqq"),
         ("lwasm", "", "import foo", "zzqq"),
         ("vasm", "", "xdef foo", "zzqq"),

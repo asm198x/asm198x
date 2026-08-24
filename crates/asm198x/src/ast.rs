@@ -217,7 +217,7 @@ pub(crate) enum Item {
     Section {
         name: String,
         base: Option<i64>,
-        at: Option<i64>,
+        at: crate::engine::Place,
     },
     /// A source-requested diagnostic (ACME `!error`/`!warn`, lwasm `error`,
     /// rgbasm `FAIL`/`WARN`). Like the aligns it has no emit arm: the
