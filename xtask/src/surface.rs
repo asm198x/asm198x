@@ -98,7 +98,7 @@ struct Reference {
 const REFERENCES: &[Reference] = &[
     Reference {
         dialect: "acme",
-        off_target: &[],
+        off_target: &["Chosen CPU does not support"],
         mnemonic: |m| isa::mos6502::SET.has_mnemonic(m),
         bin: "acme",
         ext: "a",

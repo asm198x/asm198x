@@ -8,7 +8,7 @@
 
 ## Directives
 
-12 directives, 27 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+13 directives, 96 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -23,6 +23,7 @@
 | `include` | `include`, `use` |  |
 | `org` | `org` |  |
 | `reserve` | `rmb`, `.ds`, `zmb` |  |
+| `unsupported-lwasm` | `adca`, `adcb`, `align`, `bita`, `bitb`, `bsz`, `cmpd`, `cmpy`, `cwai`, `dephase`, `dtb`, `dts`, `emod`, `endm`, `ends`, `endsect`, `endsection`, `endstruct`, `error`, `export`, `extdep`, `extern`, `external`, `fcn`, `fcs`, `fcz`, `fdbs`, `fzb`, `hcf`, `if`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `import`, `incl`, `includestr`, `lib`, `macr`, `macro`, `mod`, `msg`, `nam`, `opt`, `os9`, `pag`, `page`, `phase`, `pragma`, `reorg`, `reset`, `rhf`, `rmd`, `rmq`, `rmw`, `sbca`, `sbcb`, `sect`, `section`, `set`, `setdp`, `setstr`, `spc`, `struct`, `ttl`, `warning`, `zmd`, `zmq` | Recognised, and not implemented |
 | `words` | `fdb`, `.word` |  |
 
 Instruction mnemonics are not listed here — they come from the instruction-set spec and have their own reference.

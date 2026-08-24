@@ -8,7 +8,7 @@ Z80, sjasmplus syntax.
 
 ## Directives
 
-13 directives, 44 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+14 directives, 212 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -24,7 +24,10 @@ Z80, sjasmplus syntax.
 | `org` | `.org`, `org` |  |
 | `repeat` | `.dup`, `.rept`, `dup`, `rept` |  |
 | `reserve` | `.defs`, `.ds`, `defs`, `ds` |  |
+| `unsupported-sjasmplus` | `.abyte`, `.abytec`, `.abytez`, `.align`, `.assert`, `.binary`, `.block`, `.bplist`, `.cspectmap`, `.d24`, `.dc`, `.dd`, `.defarray`, `.defd`, `.defdevice`, `.defg`, `.defh`, `.dephase`, `.device`, `.dg`, `.dh`, `.disp`, `.display`, `.dword`, `.dz`, `.emptytap`, `.emptytrd`, `.encoding`, `.endlua`, `.endm`, `.ends`, `.endt`, `.endw`, `.ent`, `.exa`, `.exd`, `.export`, `.fpos`, `.hex`, `.ifn`, `.ifnused`, `.ifused`, `.inchob`, `.includelua`, `.inctrd`, `.inf`, `.insert`, `.labelslist`, `.lua`, `.mmu`, `.opt`, `.outend`, `.output`, `.page`, `.phase`, `.relocate_end`, `.relocate_start`, `.relocate_table`, `.save3dos`, `.saveamsdos`, `.savebin`, `.savecdt`, `.savecpcsna`, `.savecpr`, `.savedev`, `.savehob`, `.savenex`, `.savesna`, `.savetap`, `.savetrd`, `.setbp`, `.setbreakpoint`, `.shellexec`, `.size`, `.sldopt`, `.slot`, `.struct`, `.tapend`, `.tapout`, `.textarea`, `.undefine`, `.unphase`, `.while`, `.word`, `abyte`, `abytec`, `abytez`, `align`, `assert`, `binary`, `block`, `bplist`, `cspectmap`, `d24`, `dc`, `dd`, `defarray`, `defd`, `defdevice`, `defg`, `defh`, `dephase`, `device`, `dg`, `dh`, `disp`, `display`, `dword`, `dz`, `emptytap`, `emptytrd`, `encoding`, `endlua`, `endm`, `ends`, `endt`, `endw`, `ent`, `exa`, `exd`, `export`, `fpos`, `hex`, `ifn`, `ifnused`, `ifused`, `inchob`, `includelua`, `inctrd`, `inf`, `insert`, `labelslist`, `lua`, `mmu`, `opt`, `outend`, `output`, `page`, `phase`, `relocate_end`, `relocate_start`, `relocate_table`, `save3dos`, `saveamsdos`, `savebin`, `savecdt`, `savecpcsna`, `savecpr`, `savedev`, `savehob`, `savenex`, `savesna`, `savetap`, `savetrd`, `setbp`, `setbreakpoint`, `shellexec`, `size`, `sldopt`, `slot`, `struct`, `tapend`, `tapout`, `textarea`, `undefine`, `unphase`, `while`, `word` | Recognised, and not implemented |
 | `words` | `.defw`, `.dw`, `defw`, `dw` |  |
+
+Instruction mnemonics are not listed here — they come from the instruction-set spec and have their own reference.
 
 ## Projects in more than one file
 

@@ -222,3 +222,46 @@ fn a_known_unsupported_spelling_says_which_it_is() {
          should be one"
     );
 }
+
+/// Every dialect tells a directive its reference *has* from a word nobody has.
+///
+/// Four of the seven answered the same sentence for both when this was written,
+/// which sends a reader with valid source looking for a typo. It is the one
+/// property of these declarations that a user actually sees, so it is asserted
+/// across the set rather than per dialect.
+#[test]
+fn a_real_directive_reads_differently_from_a_typo() {
+    let cases: &[(&str, &str, &str, &str)] = &[
+        ("acme", "* = $0000\n", "!to \"x\"", "!zzqq"),
+        ("ca65", "", ".export foo", ".zzqq"),
+        ("sjasmplus", "", "device ZXSPECTRUM48", "zzqq"),
+        ("sjasmplus", "", ".abyte 1", ".zzqq"),
+        ("lwasm", "", "import foo", "zzqq"),
+        ("vasm", "", "xdef foo", "zzqq"),
+        ("rgbasm", "SECTION \"s\",ROM0\n", "ASSERT 1", "ZZQQ"),
+    ];
+    for (dialect, prologue, real, fake) in cases {
+        let assemble = assembler(dialect);
+        let real_err = assemble(&format!("{prologue}\t{real}\n"))
+            .err()
+            .map(|e| e.message)
+            .unwrap_or_default();
+        let fake_err = assemble(&format!("{prologue}\t{fake}\n"))
+            .err()
+            .map(|e| e.message)
+            .unwrap_or_default();
+        assert!(
+            !real_err.is_empty() && !fake_err.is_empty(),
+            "{dialect}: both `{real}` and `{fake}` should be refused"
+        );
+        assert_ne!(
+            real_err, fake_err,
+            "{dialect}: `{real}` is a real directive and `{fake}` is not, and they \
+             must not read the same"
+        );
+        assert!(
+            real_err.contains("does not implement") || real_err.contains("dialect has"),
+            "{dialect}: `{real}` should name itself a real directive, got: {real_err}"
+        );
+    }
+}
