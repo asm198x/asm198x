@@ -269,6 +269,18 @@ const PROBES: &[Probe] = &[
     ok ("acme", "prefix and infix < together", " !byte <$1234,2<3\n"),
     ok ("acme", "directive !fill",       " !fill 4\n lda #1\n"),
     ok ("acme", "!fill with a value",    " !fill 3,$ff\n lda #1\n"),
+    // `!fi` is ACME's short spelling of `!fill`, not a conditional terminator.
+    ok ("acme", "!fi is short for !fill", " !fi 3,$ff\n lda #1\n"),
+    // `!raw` bypasses the conversion table where `!text` honours it. Both are
+    // probed so the pair stays tied: today they agree, and when `!ct` lands
+    // only one of them may change.
+    ok ("acme", "directive !raw",        " !raw \"ab\", 3\n"),
+    ok ("acme", "!raw agrees with !text",  " !text \"ab\"\n !raw \"ab\"\n"),
+    ok ("acme", "directive !hex",        " !hex 0f1e2d\n"),
+    ok ("acme", "!hex is case-blind",    " !hex 0F1E2D\n"),
+    // Pairing is per whitespace-separated token: `!hex 0f 1e` is two bytes and
+    // `!hex 0 f` is an error, though both hold two digits.
+    ok ("acme", "!hex pairs per token",  " !hex 0f 1e 2d\n"),
     ok ("acme", "directive !scr",        " !scr \"abc\"\n"),
     ok ("acme", "!scr differs from !pet"," !scr \"@[]\"\n !pet \"@[]\"\n"),
     ok ("acme", "!for counts a block",   " !for i, 1, 3 {\n lda #i\n }\n"),

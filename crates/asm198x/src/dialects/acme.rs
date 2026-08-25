@@ -2187,11 +2187,41 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // `!fi` is not a conditional terminator — ACME has no such word. It is
+    // the short spelling of `!fill`, and takes every form `!fill` does:
+    // `!fi 3` fills with zero, `!fi 2+1, $bb` folds the count.
     Directive {
         id: "fill",
         pattern: Pattern::Sigilled {
             sigil: '!',
-            names: &["fill"],
+            names: &["fill", "fi"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // `!raw` emits its operands **without** the current conversion table,
+    // where `!text` honours it. Today the two produce identical bytes,
+    // because `!ct` is not implemented and ACME's default table converts
+    // nothing — so `!text "ab"` and `!raw "ab"` both give `61 62`. They are
+    // separate ids rather than one entry's aliases precisely because that
+    // coincidence ends the day `!ct` lands: `!text` must start converting and
+    // `!raw` must not.
+    Directive {
+        id: "raw",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["raw"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // `!hex` takes bare hex digit pairs — no `$`, no quotes, no commas, all of
+    // which ACME answers with a syntax error.
+    Directive {
+        id: "hex",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["hex"],
             required: true,
         },
         category: Category::Operation,
@@ -2362,7 +2392,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What ACME has here and we do not.
     //
-    // 27 spellings against 0.97, counted from this list rather than recalled.
+    // 24 spellings against 0.97, counted from this list rather than recalled.
     // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
     // long registers" for them on a 6502, so they belong to a wider target.
     // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
@@ -2384,14 +2414,11 @@ pub const DIRECTIVES: &[Directive] = &[
                 "do",
                 "endoffile",
                 "eof",
-                "fi",
-                "hex",
                 "initmem",
                 "le16",
                 "le24",
                 "le32",
                 "pseudopc",
-                "raw",
                 "rs",
                 "scrxor",
                 "skip",
@@ -2447,6 +2474,9 @@ fn parse_directive(
         "diagnose" => Ok(parse_diagnose(anons, zone, env, name, rest, line)),
         "align" => parse_align(anons, zone, env, rest, line),
         "text" => parse_text(anons, zone, rest, line, |c| c),
+        // Identity today, and identity forever: see the declaration above.
+        "raw" => parse_text(anons, zone, rest, line, |c| c),
+        "hex" => parse_hex(rest, line),
         "scr" => parse_text(anons, zone, rest, line, screen_code),
         "pet" => parse_text(anons, zone, rest, line, petscii),
         // `!zone`/`!zn` never reaches here: it is walk-handled in
@@ -2578,6 +2608,51 @@ fn parse_list(anons: &Anons, zone: &str, rest: &str, line: usize) -> Result<Vec<
 /// Parse a text directive: a comma list mixing `"..."` strings (one byte per
 /// character, passed through `convert`) and bare values (emitted as-is). ACME's
 /// `!text` passes characters through unchanged; `!scr` maps them to screen codes.
+/// `!hex 0f1e2d` — bare hex digit pairs, whitespace-separated.
+///
+/// Every rule here was probed against ACME 0.97 rather than read off its
+/// manual, because two of them are surprising:
+///
+/// - **Pairing is per token, not across the operand.** `!hex 0f 1e` is fine
+///   and `!hex 0 f` is not, even though both hold two digits. Each
+///   whitespace-separated run must itself be even.
+/// - **A non-hex character ends the scan, and which error you get depends on
+///   what came before it.** `!hex 0f1g2d` answers *"Hex digits are not given
+///   in pairs"* (three digits read, an odd count), while `!hex 0fgg1e`
+///   answers *"Syntax error"* (two digits read, then something that is not a
+///   digit). Reporting one message for both would be tidier and would not be
+///   ACME.
+///
+/// An empty operand is accepted and emits nothing — `!hex` on its own is not
+/// an error, unlike the text directives.
+fn parse_hex(rest: &str, line: usize) -> Result<Operation, AsmError> {
+    let mut bytes = Vec::new();
+    for token in rest.split_whitespace() {
+        let digits = token
+            .chars()
+            .take_while(char::is_ascii_hexdigit)
+            .collect::<String>();
+        // Odd first: ACME reports the count before it reports the character
+        // that stopped it, and `!hex 0f1g2d` is the case that tells them apart.
+        if digits.len() % 2 != 0 {
+            return Err(AsmError::new(line, "hex digits are not given in pairs"));
+        }
+        if digits.len() != token.len() {
+            return Err(AsmError::new(
+                line,
+                format!("`{token}` is not hex digits — `!hex` takes no `$`, quotes or commas"),
+            ));
+        }
+        for pair in digits.as_bytes().chunks(2) {
+            let text = std::str::from_utf8(pair).unwrap_or_default();
+            let value = u8::from_str_radix(text, 16)
+                .map_err(|_| AsmError::new(line, format!("`{text}` is not a hex byte")))?;
+            bytes.push(Expr::Num(i64::from(value)));
+        }
+    }
+    Ok(Operation::Bytes(bytes))
+}
+
 fn parse_text(
     anons: &Anons,
     zone: &str,
@@ -2932,6 +3007,74 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// `!fi` is `!fill`, not a conditional terminator. Probed: ACME 0.97
+    /// answers "No value given." for a bare `!fi`, which is what `!fill`
+    /// answers too — it wants a count.
+    #[test]
+    fn fi_is_the_short_spelling_of_fill() {
+        assert_eq!(asm("!fi 3").expect("fi").bytes, vec![0, 0, 0]);
+        assert_eq!(asm("!fi 2+1, $bb").expect("fi value").bytes, vec![0xBB; 3]);
+        assert_eq!(
+            asm("!fi 3,$ff").expect("fi").bytes,
+            asm("!fill 3,$ff").expect("fill").bytes
+        );
+    }
+
+    /// `!raw` emits without the conversion table. It agrees with `!text`
+    /// today only because `!ct` is not implemented and ACME's default table
+    /// converts nothing — so this asserts the bytes, not the equivalence,
+    /// and stays true when `!text` starts converting.
+    #[test]
+    fn raw_emits_its_operands_unconverted() {
+        assert_eq!(
+            asm("!raw \"ab\", 3").expect("raw").bytes,
+            vec![0x61, 0x62, 3]
+        );
+        assert_eq!(asm("!raw 65").expect("num").bytes, vec![0x41]);
+        assert_eq!(asm("!raw 255").expect("max").bytes, vec![0xFF]);
+        assert_eq!(asm("!raw -128").expect("min").bytes, vec![0x80]);
+        asm("!raw -129").expect_err("out of range");
+    }
+
+    /// `!hex` takes bare digit pairs. Every case here was probed against
+    /// ACME 0.97 first — the surprising ones are that pairing is counted per
+    /// whitespace-separated token, and that an empty operand is allowed.
+    #[test]
+    fn hex_takes_bare_digit_pairs() {
+        assert_eq!(
+            asm("!hex 0f1e2d").expect("hex").bytes,
+            vec![0x0F, 0x1E, 0x2D]
+        );
+        assert_eq!(
+            asm("!hex 0F1E2D").expect("upper").bytes,
+            vec![0x0F, 0x1E, 0x2D]
+        );
+        assert_eq!(
+            asm("!hex 0f 1e 2d").expect("spaced").bytes,
+            vec![0x0F, 0x1E, 0x2D]
+        );
+        assert!(asm("!hex").expect("empty is not an error").bytes.is_empty());
+    }
+
+    /// The two refusals ACME distinguishes, which a tidier implementation
+    /// would merge into one. `0f1g2d` stops after three digits — an odd
+    /// count — and `0fgg1e` stops after two, which is even but leaves text
+    /// behind.
+    #[test]
+    fn hex_reports_an_odd_count_before_a_bad_character() {
+        for odd in ["!hex 0f1", "!hex 0 f", "!hex 0f1g2d", "!hex 0f 1"] {
+            let err = asm(odd).expect_err(odd).to_string();
+            assert!(err.contains("pairs"), "{odd}: {err}");
+        }
+        for junk in ["!hex 0fgg1e", "!hex $0f", "!hex 0f,1e"] {
+            let err = asm(junk).expect_err(junk).to_string();
+            assert!(
+                !err.contains("pairs"),
+                "{junk} is even, not unpaired: {err}"
+            );
+        }
+    }
 
     /// The four spellings ACME has **retired**. Refusing them is matching the
     /// reference, not lagging it: 0.97 answers "obsolete" for each however it
