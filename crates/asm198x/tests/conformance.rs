@@ -2634,14 +2634,29 @@ fn spec_rows_match_reference_word_cpus() {
 /// A row no family can yet exemplify is **skipped and reported**, not
 /// arbitrated. Coverage then shows the true fraction: a partial audit that
 /// claimed 100% would be the exact dishonesty this work exists to end.
+/// The non-segmented Z8002.
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]
 fn spec_rows_match_reference_z8000() {
+    z8000_form_audit("Z8000", false);
+}
+
+/// The segmented Z8001, whose rows are the same and whose encodings are not:
+/// an `@Rn` pointer becomes a register pair, and memory operands carry a
+/// segment. Its own audit, because "the same spec" is a claim to check rather
+/// than assume.
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn spec_rows_match_reference_z8001() {
+    z8000_form_audit("Z8001", true);
+}
+
+fn z8000_form_audit(cpu: &str, seg: bool) {
     if !(have("asl") && have("p2bin")) {
-        eprintln!("SKIP: `asl`/`p2bin` not on PATH (Z8000 form audit)");
+        eprintln!("SKIP: `asl`/`p2bin` not on PATH ({cpu} form audit)");
         return;
     }
-    let tmp = std::env::temp_dir().join("asm198x-form-z8000");
+    let tmp = std::env::temp_dir().join(format!("asm198x-form-{cpu}"));
     let _ = fs::create_dir_all(&tmp);
     let mut recorder = support::verdicts::Recorder::new();
     let mut fails: Vec<String> = Vec::new();
@@ -2653,6 +2668,10 @@ fn spec_rows_match_reference_z8000() {
     // that is merely distinct decodes as no byte immediate at all. These rows
     // get operand words that are a legal instance of the form.
     let byte_filler = [0x05u8; 6];
+    // A segmented memory operand carries a long-form segment word: bit 15 set,
+    // the segment in bits 14-8, low byte zero. `asl` writes that form even for
+    // an offset small enough for the short one, so it is what these rows get.
+    let seg_filler = [0x80u8, 0x00, 0x20, 0x00, 0x30, 0x00];
 
     // Rows this method cannot arbitrate, each with the reason and the issue
     // that will retire the entry. Named rather than folded into the anonymous
@@ -2671,10 +2690,11 @@ fn spec_rows_match_reference_z8000() {
         let dyadic = isa::z8000::INSTRUCTIONS.iter().find(|i| i.mnemonic == m);
         let filler = match dyadic {
             Some(i) if i.size == isa::z8000::Size::Byte && row.mode == "immediate" => &byte_filler,
+            _ if seg && matches!(row.mode, "direct address" | "indexed") => &seg_filler,
             _ => &filler,
         };
         let word = dyadic
-            .and_then(|i| i.exemplar(row.mode))
+            .and_then(|i| i.exemplar(row.mode, seg))
             .or_else(|| {
                 isa::z8000::MONO
                     .iter()
@@ -2704,13 +2724,17 @@ fn spec_rows_match_reference_z8000() {
             continue;
         };
         let bytes = exemplar_bytes(word, true, filler);
-        let listing = asm198x::listing_z8000(&bytes, 0x1000);
+        let listing = if seg {
+            asm198x::listing_z8001(&bytes, 0x1000)
+        } else {
+            asm198x::listing_z8000(&bytes, 0x1000)
+        };
         let Some(source) = trim_after_instruction(&listing, m) else {
             // The exemplar is not an instance of this row: the family's rule
             // and the disassembler disagree, which is a real finding rather
             // than a row to skip quietly.
             fails.push(format!(
-                "Z8000 {m} {}: exemplar {word:#06X} disassembles to something else:\n{listing}",
+                "{cpu} {m} {}: exemplar {word:#06X} disassembles to something else:\n{listing}",
                 row.mode
             ));
             continue;
@@ -2725,7 +2749,7 @@ fn spec_rows_match_reference_z8000() {
         });
         let Some(reference) = reference else {
             fails.push(format!(
-                "Z8000 {m} {}: asl rejected our own disassembly:\n{source}",
+                "{cpu} {m} {}: asl rejected our own disassembly:\n{source}",
                 row.mode
             ));
             continue;
@@ -2734,7 +2758,7 @@ fn spec_rows_match_reference_z8000() {
         recorder.record_bytes(
             support::verdicts::CaseRef {
                 suite: Suite::Form,
-                cpu: "Z8000",
+                cpu,
                 tool: "asl",
                 dialect: "asl",
                 case: format!("{m} {}", row.mode),
@@ -2744,7 +2768,7 @@ fn spec_rows_match_reference_z8000() {
         );
         if reference.len() < 2 || reference[..2] != bytes[..2] {
             fails.push(format!(
-                "Z8000 {m} {}: ours {:02X?} vs asl {:02X?}",
+                "{cpu} {m} {}: ours {:02X?} vs asl {:02X?}",
                 row.mode,
                 &bytes[..2],
                 &reference[..reference.len().min(2)]
@@ -2754,8 +2778,8 @@ fn spec_rows_match_reference_z8000() {
 
     let added = recorder.flush().expect("write the corpus");
     eprintln!(
-        "Z8000 form audit: {checked} arbitrated ({added} new), {unplaced} rows have no exemplar \
-         yet, {} excepted",
+        "{cpu} form audit: {checked} arbitrated ({added} new), {unplaced} rows have no \
+         exemplar yet, {} excepted",
         excepted.len()
     );
     for e in &excepted {
@@ -2763,7 +2787,7 @@ fn spec_rows_match_reference_z8000() {
     }
     assert!(
         fails.is_empty(),
-        "{} Z8000 row(s) diverge:\n  {}",
+        "{} {cpu} row(s) diverge:\n  {}",
         fails.len(),
         fails.join("\n  ")
     );

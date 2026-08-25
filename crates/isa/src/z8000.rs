@@ -2307,12 +2307,16 @@ impl Insn {
 
     /// One representative encoding of this dyadic instruction in `mode`.
     ///
+    /// `seg` selects the segmented Z8001, where an `@Rn` pointer is a register
+    /// *pair* and so must be even — the only thing segmentation changes about
+    /// this first word. The extension words differ too, but they are not this.
+    ///
     /// See `decisions/a-row-can-exemplify-itself.md`. `None` for the store
     /// forms and any mode this entry does not allow: their memory operand is
     /// the destination, and which nibble carries what is the assembler's
     /// knowledge rather than the spec's.
     #[must_use]
-    pub fn exemplar(&self, mode: &str) -> Option<u16> {
+    pub fn exemplar(&self, mode: &str, seg: bool) -> Option<u16> {
         if self.store {
             return None;
         }
@@ -2322,12 +2326,22 @@ impl Insn {
             let reg = lowest_register(self.size);
             return Some(((u16::from(top) | reg) << 8) | 0x05);
         }
+        // Segmented `LDA` loads a 32-bit segmented address, so its destination
+        // is a register pair and must be even.
+        let dest_size = if seg && self.size == Size::Address {
+            Size::Long
+        } else {
+            self.size
+        };
         let (mm, field) = mm_of(mode)?;
         // In register mode the source nibble names a register of this
         // instruction's own size; in every other mode it is a word pointer or
         // index register, or zero.
         let source = if mm == 2 {
             lowest_register(self.size)
+        } else if seg && mode == "indirect register" {
+            // Segmented: `@RRn` is a pair, so the field must be even.
+            lowest_register(Size::Long)
         } else {
             field
         };
@@ -2335,7 +2349,7 @@ impl Insn {
             mm,
             self.base6,
             source,
-            lowest_register(self.size),
+            lowest_register(dest_size),
         ))
     }
 }
