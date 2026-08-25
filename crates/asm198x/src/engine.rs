@@ -372,6 +372,15 @@ pub(crate) enum Operation {
         big_endian: bool,
         values: Vec<Expr>,
     },
+    /// Enter (`Some`) or leave (`None`) an ACME `!pseudopc` block: assemble
+    /// here, but let labels and `*` read as if the code were somewhere else.
+    ///
+    /// The offset cannot be computed where the block is written — it is the
+    /// target minus the **real** address the block opens at, and the walk
+    /// that sees the braces has not assigned addresses yet. So the boundary
+    /// is lowered as an operation and the engine, which knows the real
+    /// counter, works the offset out. Emits nothing and occupies nothing.
+    PseudoPc(Option<Expr>),
     /// Set the byte that fills reserved space and `org` gaps, for the **whole
     /// assembly** — ACME's `!initmem`.
     ///
@@ -572,6 +581,9 @@ pub(crate) fn next_pc(
         // Emits nothing and occupies nothing: it chooses what unwritten
         // memory holds, and the driver has already read it.
         Operation::InitMem(_) => pc,
+        // Moves no bytes: it changes what an address *reads as*, not where
+        // one is.
+        Operation::PseudoPc(_) => pc,
         // Moves the counter rather than advancing it; the caller sets it.
         Operation::Section { .. } => pc,
         // Set the counter, bind a name, name an entry point — none of them a
@@ -831,6 +843,11 @@ fn assemble_statements(
     let addr_unit = dialect.addr_unit();
     let mut symbols: BTreeMap<String, i64> = BTreeMap::new();
     let mut pc: i64 = 0;
+    // ACME's `!pseudopc`: what to add to the real counter to get the address
+    // the code claims. Zero outside any such block; a stack, because they
+    // nest and each restores the one it opened inside.
+    let mut pseudo: i64 = 0;
+    let mut pseudo_stack: Vec<i64> = Vec::new();
     let mut origin: Option<i64> = None;
     for s in &statements {
         // `equ` binds the label to a value, not the current address, and emits
@@ -859,7 +876,9 @@ fn assemble_statements(
             if !(0..=0xFF_FFFF).contains(&pc) {
                 return Err(s.err("address out of range"));
             }
-            if symbols.insert(label.clone(), pc).is_some() {
+            // Inside a `!pseudopc` block a label reads as the address the
+            // code will run at, not the one it is being assembled at.
+            if symbols.insert(label.clone(), pc + pseudo).is_some() {
                 return Err(s.err(format!("duplicate label `{label}`")));
             }
         }
@@ -894,6 +913,20 @@ fn assemble_statements(
                     "program counter undefined — set an origin (`*=`) before any code or data",
                 ));
             }
+            Some(Operation::PseudoPc(target)) => match target {
+                Some(e) => {
+                    let at = e
+                        .eval(&symbols, pc + pseudo, s.line)
+                        .map_err(|err| s.stamp(err))?;
+                    pseudo_stack.push(pseudo);
+                    pseudo = at - pc;
+                }
+                None => {
+                    pseudo = pseudo_stack
+                        .pop()
+                        .ok_or_else(|| s.err("internal: `}` closed no `!pseudopc` block"))?;
+                }
+            },
             Some(op) => {
                 pc = next_pc(op, pc, set, ext, addr_unit, s.line).map_err(|err| s.stamp(err))?;
             }
@@ -957,10 +990,16 @@ fn assemble_statements(
     let mut section_name = String::new();
     let mut section_at = Place::ByAddress;
     let mut debug = DebugData::default();
+    // The second counter again, rebuilt for pass 2 — the statements are the
+    // same, so it retraces the same path.
+    let mut pseudo: i64 = 0;
+    let mut pseudo_stack: Vec<i64> = Vec::new();
     for s in &statements {
         // The location counter (`$`) is the address of this statement's start,
-        // in address units (bytes divided by `addr_unit`).
-        let pc = origin + bytes.len() as i64 / addr_unit;
+        // in address units (bytes divided by `addr_unit`). Inside a
+        // `!pseudopc` block it reads as the address the code will run at.
+        let real_pc = origin + bytes.len() as i64 / addr_unit;
+        let pc = real_pc + pseudo;
         let len_before = bytes.len();
         match &s.op {
             None => {}
@@ -1080,6 +1119,18 @@ fn assemble_statements(
             // Read before the passes begin, because it applies to the whole
             // assembly rather than from here on.
             Some(Operation::InitMem(_)) => {}
+            Some(Operation::PseudoPc(target)) => match target {
+                Some(e) => {
+                    let at = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
+                    pseudo_stack.push(pseudo);
+                    pseudo = at - real_pc;
+                }
+                None => {
+                    pseudo = pseudo_stack
+                        .pop()
+                        .ok_or_else(|| s.err("internal: `}` closed no `!pseudopc` block"))?;
+                }
+            },
             Some(Operation::Sized {
                 width,
                 big_endian,
@@ -1145,7 +1196,11 @@ fn assemble_statements(
                         operands.len()
                     )));
                 }
-                let next_addr = origin + bytes.len() as i64 + f.len() as i64;
+                // The address the branch is *measured from*, which inside a
+                // `!pseudopc` block is the claimed one — the label it targets
+                // is claimed too, so measuring one against the other would be
+                // off by the block's offset.
+                let next_addr = origin + pseudo + bytes.len() as i64 + f.len() as i64;
                 bytes.extend_from_slice(f.opcode);
                 for (slot, e) in f.operands.iter().zip(operands.iter()) {
                     let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;

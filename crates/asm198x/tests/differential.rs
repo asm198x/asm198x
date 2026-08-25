@@ -285,6 +285,11 @@ const PROBES: &[Probe] = &[
     ok ("acme", "!be32 / !le32",         " !be32 $12345678\n !le32 $12345678\n"),
     ok ("acme", "sized takes a list",    " !be16 $1234, $5678\n"),
     ok ("acme", "sized spans signed",    " !be16 -32768\n !be16 65535\n"),
+    ok ("acme", "!pseudopc moves labels", " !pseudopc $2000 {\nfoo\n !byte <foo, >foo\n }\n"),
+    ok ("acme", "!pseudopc keeps bytes",  " !byte $11\n !pseudopc $2000 {\n !byte $22\n }\n !byte $33\n"),
+    ok ("acme", "!pseudopc restores",     " !pseudopc $2000 {\n !byte <*, >*\n }\n !byte <*, >*\n"),
+    // Measured from the claimed address, not the real one.
+    ok ("acme", "branch inside !pseudopc", " !pseudopc $2000 {\nl\tnop\n bne l\n }\n"),
     ok ("acme", "!addr binds a value",    " !addr foo = $c000\n lda foo\n"),
     ok ("acme", "!addr keeps zero page",  " !addr bar = $10\n lda bar\n"),
     // Without a value it is a label — the program counter, not a declaration.
