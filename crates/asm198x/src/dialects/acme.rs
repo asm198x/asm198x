@@ -2694,6 +2694,21 @@ pub const DIRECTIVES: &[Directive] = &[
     // `foo = $10` does — so what it really is, is a binding: an assignment
     // with `=`, and a label without. Handled in `parse_statement`, because a
     // directive dispatch cannot bind the name a statement carries.
+    // `!cpu <name>` selects the processor, and ACME's processors are not
+    // spellings of one another: `!cpu 6510` enables the undocumented opcodes
+    // (`lax $10` is `a7 10`) that `!cpu 6502` refuses, and `!cpu 65816` adds
+    // `rtl` and `xba`. So only `6502` names what this dialect assembles; every
+    // other processor ACME knows is a real gap, and every name it does not
+    // know is its own refusal.
+    Directive {
+        id: "cpu",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["cpu"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     // `!to "file"[, format]` names the output, and `!symbollist "file"` a
     // symbol dump. Both are *requests*: ACME takes the first name and warns
     // "already chosen" for any later one — including when the command line
@@ -3021,22 +3036,9 @@ pub const DIRECTIVES: &[Directive] = &[
              use \"!pseudopc {}\" instead`",
         ),
     },
-    // What ACME has here and we do not.
-    //
-    // 1 spelling against 0.97, counted from this list rather than recalled.
-    // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
-    // long registers" for them on a 6502, so they belong to a wider target.
-    // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
-    // reason — ACME refuses them itself, so they are declared above.
-    Directive {
-        id: "unsupported-acme",
-        pattern: Pattern::Sigilled {
-            sigil: '!',
-            names: &["cpu"],
-            required: true,
-        },
-        category: Category::KnownUnsupported,
-    },
+    // Nothing is left here. Every word ACME 0.97 has is now declared above:
+    // taken, refused as ACME refuses it, or — for `!cpu` — taken for the one
+    // processor this dialect assembles and refused by name for the rest.
 ];
 
 fn parse_directive(
@@ -3086,6 +3088,28 @@ fn parse_directive(
         // Identity today, and identity forever: see the declaration above.
         "raw" => parse_text(anons, zone, rest, line, |c| c),
         "hex" => parse_hex(rest, line),
+        "cpu" => {
+            let name = rest.trim().to_ascii_lowercase();
+            match name.as_str() {
+                // The processor this dialect already assembles.
+                "6502" => Ok(Operation::Bytes(Vec::new())),
+                // ACME's other processors. Each is a different opcode set —
+                // not a spelling of 6502 — so accepting one silently would
+                // assemble the wrong instructions or refuse the right ones.
+                "6510" | "65c02" | "65ce02" | "65816" | "4502" | "c64dtv2" | "m65" | "w65c02" => {
+                    Err(AsmError::new(
+                        line,
+                        format!(
+                            "`!cpu {name}` selects a different processor, and asm198x does \
+                             not switch processors mid-assembly yet — the source is valid \
+                             and the gap is ours (asm198x#302)"
+                        ),
+                    ))
+                }
+                "" => Err(AsmError::new(line, "no string given")),
+                other => Err(AsmError::new(line, format!("unknown processor `{other}`"))),
+            }
+        }
         "output-file" => {
             let (path, rest) = quoted_operand(rest, line, "!to")?;
             let mut defaulted_format = false;
@@ -3729,6 +3753,39 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// `!cpu` selects a processor, and ACME's processors are not spellings of
+    /// one another — so only the one this dialect assembles is a no-op.
+    #[test]
+    fn cpu_takes_the_processor_this_dialect_assembles() {
+        assert_eq!(asm("!cpu 6502\nnop").expect("6502").bytes, vec![0xEA]);
+        assert_eq!(asm("!CPU 6502\nnop").expect("case").bytes, vec![0xEA]);
+    }
+
+    /// The seven others ACME knows are a real gap, refused by name rather
+    /// than accepted as a synonym. `!cpu 6510` is the case that shows why:
+    /// it enables the undocumented opcodes `!cpu 6502` refuses, so treating
+    /// it as the same processor would accept `lax` we cannot encode.
+    #[test]
+    fn another_processor_is_refused_as_our_gap() {
+        for cpu in [
+            "6510", "65c02", "65ce02", "65816", "4502", "c64dtv2", "m65", "w65c02",
+        ] {
+            let err = asm(&format!("!cpu {cpu}\nnop")).expect_err(cpu).to_string();
+            assert!(err.contains("the gap is ours"), "{cpu}: {err}");
+            assert!(!err.contains("unknown processor"), "{cpu}: {err}");
+        }
+    }
+
+    /// A name ACME does not know is ACME's own refusal, not ours.
+    #[test]
+    fn an_unknown_processor_is_the_references_refusal() {
+        for cpu in ["6504", "6507", "z80", "8080", "wibble"] {
+            let err = asm(&format!("!cpu {cpu}\nnop")).expect_err(cpu).to_string();
+            assert!(err.contains("unknown processor"), "{cpu}: {err}");
+        }
+        asm("!cpu\nnop").expect_err("no string given");
+    }
 
     /// `!to` names an output file — a *request*, surfaced on the result for
     /// the caller to honour or ignore. The command line still chooses.
