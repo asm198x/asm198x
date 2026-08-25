@@ -2724,6 +2724,21 @@ fn z8000_form_audit(cpu: &str, seg: bool) {
                     .map(isa::z8000::Shift::exemplar)
             })
             .or_else(|| {
+                isa::z8000::BLOCK.iter().find(|i| i.mnemonic == m).map(|i| {
+                    let (a, b) = i.exemplar();
+                    (a, Some(b))
+                })
+            })
+            .or_else(|| {
+                isa::z8000::BLOCK_IO
+                    .iter()
+                    .find(|i| i.mnemonic == m)
+                    .map(|i| {
+                        let (a, b) = i.exemplar();
+                        (a, Some(b))
+                    })
+            })
+            .or_else(|| {
                 isa::z8000::EXTENDS
                     .iter()
                     .find(|i| i.mnemonic == m)
