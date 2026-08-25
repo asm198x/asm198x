@@ -384,14 +384,39 @@ fn run_parity(args: &[String]) -> ExitCode {
             );
             return ExitCode::FAILURE;
         };
+        // The pin describes which curriculum the figures below are about, so
+        // it is checked first: figures that hold against the wrong revision
+        // hold against nothing.
+        let pin_ok = match parity::verify_pin(&repo) {
+            parity::PinVerdict::Matches => {
+                println!("the curriculum checkout is at the recorded pin, on the recorded date");
+                true
+            }
+            parity::PinVerdict::Unverifiable(why) => {
+                // Not a failure — a copied tree has no git to ask. But it is
+                // said out loud, because a check that goes quiet when it
+                // cannot run is indistinguishable from one that passed.
+                println!("cannot verify the pin here: {why}");
+                true
+            }
+            parity::PinVerdict::Wrong(lines) => {
+                eprintln!("the recorded curriculum pin does not describe this checkout:");
+                for line in &lines {
+                    eprintln!("  {line}");
+                }
+                false
+            }
+        };
         let regressions = parity::regressions(&report, &existing);
-        if regressions.is_empty() {
+        if regressions.is_empty() && pin_ok {
             println!("curriculum parity holds against the committed figures");
             return ExitCode::SUCCESS;
         }
-        eprintln!("curriculum parity fell:");
-        for line in &regressions {
-            eprintln!("  {line}");
+        if !regressions.is_empty() {
+            eprintln!("curriculum parity fell:");
+            for line in &regressions {
+                eprintln!("  {line}");
+            }
         }
         return ExitCode::FAILURE;
     }
