@@ -519,6 +519,21 @@ fn dyadic(insn: &Insn, variable: &Operand, reg: u16, line: usize) -> Result<Oper
             format!("`{}` does not allow that addressing mode", insn.mnemonic),
         ));
     }
+    // `LDB Rbd, #data` has two formats and the reference always writes the
+    // short one, on the CPU manual's own instruction — two bytes rather than
+    // four. See `isa::z8000::LDB_SHORT_TOP`.
+    if let (Some(short), Operand::Imm(e)) = (insn.short_immediate_top(), variable) {
+        return Ok(Operation::Encoded(vec![Piece::Packed {
+            expr: e.clone(),
+            bytes: 2,
+            scale: 1,
+            min: -128,
+            max: 255,
+            mask: 0xFF,
+            or_bits: (u32::from(short) | u32::from(reg)) << 8,
+            what: "LDB immediate",
+        }]));
+    }
     let top = (mm(mode) << 6) | u16::from(insn.base6);
     let mut pieces = Vec::from(word_lit((top << 8) | (field << 4) | reg));
     pieces.extend(ext);

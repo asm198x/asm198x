@@ -186,6 +186,53 @@ fn round_trips_z8000_dyadic_through_asl_syntax() {
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
 }
 
+/// `LDB Rbd, #data` has two encodings, and which one we write is the point.
+///
+/// The CPU manual's Note 2 to *Load Immediate Value* says the assembler always
+/// uses the short one-word format, and `asl` does. A plain round trip cannot
+/// see this — the long form round-trips perfectly well — so the bytes are
+/// pinned. See asm198x#252.
+#[test]
+fn z8000_writes_the_short_ldb_immediate_and_reads_both() {
+    let one = assemble_z8000("\torg 0\n\tldb rh1,#5\n").expect("assemble");
+    assert_eq!(
+        one.bytes,
+        vec![0xC1, 0x05],
+        "the short format is the one to emit"
+    );
+
+    // The bounds are the reference's: it takes -128..=255 and refuses either side.
+    for (source, want) in [
+        ("#0FFH", 0xFFu8),
+        ("#-1", 0xFF),
+        ("#-128", 0x80),
+        ("#0", 0x00),
+    ] {
+        let a = assemble_z8000(&format!("\torg 0\n\tldb rh1,{source}\n"))
+            .unwrap_or_else(|e| panic!("`ldb rh1,{source}` should assemble: {e:?}"));
+        assert_eq!(a.bytes, vec![0xC1, want], "for {source}");
+    }
+    for source in ["#0100H", "#-129"] {
+        assert!(
+            assemble_z8000(&format!("\torg 0\n\tldb rh1,{source}\n")).is_err(),
+            "`ldb rh1,{source}` is out of range and should be refused"
+        );
+    }
+
+    // A binary may hold either format, so both must read back as the same
+    // instruction — the long one is still a legal encoding.
+    for bytes in [vec![0xC1u8, 0x05], vec![0x20u8, 0x01, 0x05, 0x05]] {
+        let listing = listing_z8000(&bytes, 0);
+        assert!(
+            listing.lines().any(|l| l.trim() == "ldb rh1,#005H"),
+            "{bytes:02X?} should decode as `ldb rh1,#005H`, listing was:\n{listing}"
+        );
+        // Reassembling either lands on the short format, which is the whole point.
+        let re = assemble_z8000(&listing).expect("reassemble");
+        assert_eq!(re.bytes, vec![0xC1, 0x05], "for {bytes:02X?}");
+    }
+}
+
 #[test]
 fn round_trips_z8000_stack_through_asl_syntax() {
     // Increment 5: PUSH/POP/PUSHL/POPL across the value operand's modes, plus
