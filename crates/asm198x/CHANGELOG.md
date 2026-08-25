@@ -7,6 +7,81 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.33](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.32...asm198x-v0.0.33) - 2026-08-25
+
+Three changes to what asm198x accepts or emits, and a body of work behind them
+proving the rest of it right. If you assemble Z8000 source, **this release
+changes your output** — see the first entry.
+
+### Fixed
+
+- **`LDB Rbd, #data` assembled to four bytes where the reference produces two.**
+  The Z8000 has two encodings for a byte immediate loaded into a register, and
+  the CPU manual settles which to write: "although two formats exist for
+  `LDB R, IM` the assembler always uses the short format". asm198x wrote the
+  long one, and could not read the short one back at all — a binary built by
+  `asl` disassembled to a `word` directive where the instruction should be. It
+  now writes the short form and reads both. Because this is a size change and
+  not only an encoding choice, anything position-dependent after an `LDB #`
+  moves.
+  ([#254](https://github.com/asm198x/asm198x/pull/254),
+  [#252](https://github.com/asm198x/asm198x/issues/252))
+
+- **A replay mismatch on a sweep chunk printed the byte vectors and nothing
+  else.** The largest chunk is 4,096 instructions, so a single failure was
+  around 147,000 characters that never said which instruction moved. It now
+  names the first differing byte, the source line and the instruction there.
+  ([#269](https://github.com/asm198x/asm198x/pull/269),
+  [#268](https://github.com/asm198x/asm198x/issues/268))
+
+### Added
+
+- **The 6809 accepts `reset`, `rhf` and `hcf`.** `lwasm --6809` assembles all
+  three, so source using them is no longer refused; the bytes match, `3E 14 14`.
+  The disassembler never writes them, and that asymmetry is deliberate: `$14`
+  is `SEXW` on the Hitachi 6309, so `fcb $14` is the reading that holds whichever
+  part produced the byte, while `hcf` would assert both the part and that the
+  byte was meant as code. Neither opcode has a defined result, so no working
+  program contains one on purpose.
+  ([#257](https://github.com/asm198x/asm198x/pull/257),
+  [#233](https://github.com/asm198x/asm198x/issues/233))
+
+### Changed
+
+- **vasm's `xref`, `import` and `nref` are accepted when the name is defined.**
+  vasm 2.0b refused them in binary output from both directions at once, so no
+  program satisfied them and asm198x refused them too. 2.0f accepts them, which
+  is the same rule as the seven visibility words beside them. Matching the
+  reference means this changes with the reference.
+  ([#282](https://github.com/asm198x/asm198x/pull/282))
+
+### Assurance
+
+None of this changes what the assembler does. It changes how much of it is
+proven against a real reference assembler rather than asserted.
+
+- **The Z8000 and Z8001 go from nothing to every row.** Both now arbitrate all
+  271 rows of their specification against `asl` — encoding a representative
+  instance of each row, disassembling it, and comparing the reference's bytes.
+  The previous attempt placed 42 and was abandoned. The 6809, PDP-11, TMS9900
+  and CP-1610 gained the same audit; eighteen of twenty CPUs now arbitrate every
+  row they declare, and the two that do not say in the repository why.
+  ([#242](https://github.com/asm198x/asm198x/pull/242) through
+  [#259](https://github.com/asm198x/asm198x/pull/259))
+
+- **A conformance ledger is published with the documentation**, generated from
+  the corpus and held to it on every pull request, so a release cannot carry one
+  that has stopped being true. It names the release, the corpus hash, the pinned
+  curriculum revision, and per CPU the arbiter, its version and what it proved.
+  ([#266](https://github.com/asm198x/asm198x/pull/266))
+
+- **Arbitration coverage is governed rather than reported.** A shortfall states
+  its size and its reason, a CPU that arbitrates nothing cannot merge, and a
+  release will not tag while any shortfall is still owed.
+  ([#261](https://github.com/asm198x/asm198x/pull/261),
+  [#262](https://github.com/asm198x/asm198x/pull/262),
+  [#263](https://github.com/asm198x/asm198x/pull/263))
+
 ## [0.0.32](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.31...asm198x-v0.0.32) - 2026-08-24
 
 Two correctness fixes, both bigger than the issues that reported them. If you
