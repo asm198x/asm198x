@@ -29,6 +29,9 @@ mod tests {
         // `lda #1 / sta $d020 / rts` at $0801. Byte-for-byte against
         // `acme -f cbm`: 01 08 a9 01 8d 20 d0 60.
         let asm: AssemblyResult = crate::engine::Assembly {
+            // A test fixture: nothing here names a file.
+            requested_output: None,
+            requested_symbols: None,
             origin: 0x0801,
             reserved_prefix: 0,
             bytes: vec![0xA9, 0x01, 0x8D, 0x20, 0xD0, 0x60],

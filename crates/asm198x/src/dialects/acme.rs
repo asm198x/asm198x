@@ -69,7 +69,7 @@ use super::mos6502::{
 };
 use crate::dialect::Dialect;
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, Expr, Operation, Statement, Warning};
+use crate::engine::{AsmError, Expr, Operation, OutputFormat, Statement, Warning};
 use crate::source::{MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
 use crate::span::FileId;
 
@@ -2155,6 +2155,16 @@ fn substitute_anon_refs(
         },
         Operation::InitMem(v) => Operation::InitMem(v),
         Operation::PseudoPc(e) => Operation::PseudoPc(e.map(subst).transpose()?),
+        Operation::RequestOutput {
+            path,
+            format,
+            defaulted_format,
+        } => Operation::RequestOutput {
+            path,
+            format,
+            defaulted_format,
+        },
+        Operation::RequestSymbols { path } => Operation::RequestSymbols { path },
         Operation::Instruction {
             mnemonic,
             mode,
@@ -2684,6 +2694,29 @@ pub const DIRECTIVES: &[Directive] = &[
     // `foo = $10` does — so what it really is, is a binding: an assignment
     // with `=`, and a label without. Handled in `parse_statement`, because a
     // directive dispatch cannot bind the name a statement carries.
+    // `!to "file"[, format]` names the output, and `!symbollist "file"` a
+    // symbol dump. Both are *requests*: ACME takes the first name and warns
+    // "already chosen" for any later one — including when the command line
+    // chose first, which is the usual case here. So neither ever overrides a
+    // flag, and a second directive never displaces the first.
+    Directive {
+        id: "output-file",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["to"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "symbol-list",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["symbollist"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     // The condition loops, in all five spellings ACME takes. `!while c { … }`
     // and `!do while|until c { … }` test before the body; `!do { … } while|
     // until c` tests after, so the body always runs once. Walk-handled: the
@@ -2990,7 +3023,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What ACME has here and we do not.
     //
-    // 3 spellings against 0.97, counted from this list rather than recalled.
+    // 1 spelling against 0.97, counted from this list rather than recalled.
     // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
     // long registers" for them on a 6502, so they belong to a wider target.
     // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
@@ -2999,7 +3032,7 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "unsupported-acme",
         pattern: Pattern::Sigilled {
             sigil: '!',
-            names: &["cpu", "symbollist", "to"],
+            names: &["cpu"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -3053,6 +3086,48 @@ fn parse_directive(
         // Identity today, and identity forever: see the declaration above.
         "raw" => parse_text(anons, zone, rest, line, |c| c),
         "hex" => parse_hex(rest, line),
+        "output-file" => {
+            let (path, rest) = quoted_operand(rest, line, "!to")?;
+            let mut defaulted_format = false;
+            let format = match rest.trim().strip_prefix(',') {
+                None if rest.trim().is_empty() => {
+                    defaulted_format = true;
+                    OutputFormat::Cbm
+                }
+                None => {
+                    return Err(AsmError::new(
+                        line,
+                        format!("unexpected `{}` after the file name", rest.trim()),
+                    ));
+                }
+                Some(f) => match f.trim().to_ascii_lowercase().as_str() {
+                    "plain" => OutputFormat::Plain,
+                    "cbm" => OutputFormat::Cbm,
+                    "apple" => OutputFormat::Apple,
+                    other => {
+                        return Err(AsmError::new(
+                            line,
+                            format!("unknown output format `{other}`"),
+                        ));
+                    }
+                },
+            };
+            Ok(Operation::RequestOutput {
+                path,
+                format,
+                defaulted_format,
+            })
+        }
+        "symbol-list" => {
+            let (path, rest) = quoted_operand(rest, line, "!symbollist")?;
+            if !rest.trim().is_empty() {
+                return Err(AsmError::new(
+                    line,
+                    format!("unexpected `{}` after the file name", rest.trim()),
+                ));
+            }
+            Ok(Operation::RequestSymbols { path })
+        }
         "skip" => {
             let n = fold_const(&parse_value(anons, zone, rest.trim(), line)?, env, line)?;
             // ACME's own words for a negative count, because it is the
@@ -3259,6 +3334,19 @@ fn parse_list(anons: &Anons, zone: &str, rest: &str, line: usize) -> Result<Vec<
 ///
 /// An empty operand is accepted and emits nothing — `!hex` on its own is not
 /// an error, unlike the text directives.
+/// A `"…"` file name at the head of a directive's operand, and whatever
+/// follows it.
+fn quoted_operand(rest: &str, line: usize, what: &str) -> Result<(String, String), AsmError> {
+    let rest = rest.trim_start();
+    let body = rest
+        .strip_prefix('"')
+        .ok_or_else(|| AsmError::new(line, format!("`{what}` needs a quoted file name")))?;
+    let end = body
+        .find('"')
+        .ok_or_else(|| AsmError::new(line, format!("`{what}`: unterminated file name")))?;
+    Ok((body[..end].to_string(), body[end + 1..].to_string()))
+}
+
 fn parse_hex(rest: &str, line: usize) -> Result<Operation, AsmError> {
     let mut bytes = Vec::new();
     for token in rest.split_whitespace() {
@@ -3641,6 +3729,75 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// `!to` names an output file — a *request*, surfaced on the result for
+    /// the caller to honour or ignore. The command line still chooses.
+    #[test]
+    fn to_requests_an_output_file_and_a_format() {
+        let r = crate::assemble_acme("*=$1000\n!to \"o.bin\", plain\nlda #1\n").expect("plain");
+        let req = r.requested_output.expect("requested");
+        assert_eq!(req.path, "o.bin");
+        assert_eq!(req.format, crate::OutputFormat::Plain);
+        for (spelling, want) in [
+            ("cbm", crate::OutputFormat::Cbm),
+            ("apple", crate::OutputFormat::Apple),
+        ] {
+            let src = format!("*=$1000\n!to \"o.bin\", {spelling}\nlda #1\n");
+            let r = crate::assemble_acme(&src).expect(spelling);
+            assert_eq!(r.requested_output.expect("requested").format, want);
+        }
+    }
+
+    /// No format is `cbm`, and ACME says so rather than doing it quietly — so
+    /// this warns too.
+    #[test]
+    fn to_without_a_format_defaults_to_cbm_and_says_so() {
+        let r = crate::assemble_acme("*=$1000\n!to \"o.bin\"\nlda #1\n").expect("defaulted");
+        assert_eq!(
+            r.requested_output.expect("requested").format,
+            crate::OutputFormat::Cbm
+        );
+        assert!(
+            r.warnings.iter().any(|w| w.message.contains("defaulting")),
+            "no warning: {:?}",
+            r.warnings
+        );
+    }
+
+    /// The first name stands and a second only warns — ACME's "Output file
+    /// already chosen", and the same rule for the symbol list.
+    #[test]
+    fn a_second_name_warns_and_the_first_stands() {
+        let r =
+            crate::assemble_acme("*=$1000\n!to \"a.bin\", plain\n!to \"b.bin\", plain\nlda #1\n")
+                .expect("twice");
+        assert_eq!(r.requested_output.expect("requested").path, "a.bin");
+        assert!(
+            r.warnings
+                .iter()
+                .any(|w| w.message.contains("already chosen"))
+        );
+
+        let r =
+            crate::assemble_acme("*=$1000\nlda #1\n!symbollist \"a.txt\"\n!symbollist \"b.txt\"\n")
+                .expect("twice");
+        assert_eq!(r.requested_symbols.as_deref(), Some("a.txt"));
+        assert!(
+            r.warnings
+                .iter()
+                .any(|w| w.message.contains("already chosen"))
+        );
+    }
+
+    /// The operand shapes ACME refuses.
+    #[test]
+    fn a_named_file_must_be_quoted_and_its_format_known() {
+        crate::assemble_acme("*=$1000\n!to o.bin, plain\n").expect_err("unquoted");
+        crate::assemble_acme("*=$1000\n!to \"o.bin\", wibble\n").expect_err("unknown format");
+        crate::assemble_acme("*=$1000\n!to \"o.bin\" plain\n").expect_err("missing comma");
+        crate::assemble_acme("*=$1000\n!symbollist s.txt\n").expect_err("unquoted");
+        crate::assemble_acme("*=$1000\n!symbollist \"s.txt\" junk\n").expect_err("trailing");
+    }
 
     /// The five spellings ACME takes, and the one thing that separates them:
     /// whether the condition is tested before the body or after it.

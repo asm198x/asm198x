@@ -213,6 +213,16 @@ pub(crate) enum Item {
     /// The boundary of an ACME `!pseudopc` block: the target address on the
     /// way in, nothing on the way out.
     PseudoPc(Option<Operand>),
+    /// ACME's `!to` — the source naming its own output file.
+    RequestOutput {
+        path: String,
+        format: crate::engine::OutputFormat,
+        defaulted_format: bool,
+    },
+    /// ACME's `!symbollist`.
+    RequestSymbols {
+        path: String,
+    },
     Entry(Operand),
     /// A dialect-computed instruction encoding (a 6809 postbyte + extension,
     /// a field-packed word, …), carried verbatim so a computed-operand CPU
@@ -879,6 +889,16 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
         },
         Item::InitMem(v) => Operation::InitMem(v),
         Item::PseudoPc(o) => Operation::PseudoPc(o.map(Operand::into_value).transpose()?),
+        Item::RequestOutput {
+            path,
+            format,
+            defaulted_format,
+        } => Operation::RequestOutput {
+            path,
+            format,
+            defaulted_format,
+        },
+        Item::RequestSymbols { path } => Operation::RequestSymbols { path },
         Item::Entry(o) => Operation::Entry(o.into_value()?),
         Item::Encoded(pieces) => Operation::Encoded(pieces),
         Item::Reserve(count) => Operation::Reserve(count),
@@ -1037,6 +1057,17 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
         // No expressions to rewrite: the fill byte is folded at parse time.
         Operation::InitMem(v) => Operation::InitMem(v),
         Operation::PseudoPc(e) => Operation::PseudoPc(e.map(|e| map_sym_expr(e, f))),
+        // File names, not expressions: nothing to rewrite.
+        Operation::RequestOutput {
+            path,
+            format,
+            defaulted_format,
+        } => Operation::RequestOutput {
+            path,
+            format,
+            defaulted_format,
+        },
+        Operation::RequestSymbols { path } => Operation::RequestSymbols { path },
         Operation::Instruction {
             mnemonic,
             mode,
@@ -1127,6 +1158,16 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         },
         Operation::InitMem(v) => Item::InitMem(v),
         Operation::PseudoPc(e) => Item::PseudoPc(e.map(Operand::expr)),
+        Operation::RequestOutput {
+            path,
+            format,
+            defaulted_format,
+        } => Item::RequestOutput {
+            path,
+            format,
+            defaulted_format,
+        },
+        Operation::RequestSymbols { path } => Item::RequestSymbols { path },
         Operation::Entry(e) => Item::Entry(Operand::expr(e)),
         Operation::Encoded(pieces) => Item::Encoded(pieces),
         Operation::Binary(payload) => Item::Binary(payload),

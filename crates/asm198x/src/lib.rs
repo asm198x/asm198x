@@ -70,7 +70,7 @@ pub use contract::{
     AssemblyResult, CONTRACT_VERSION, Code, Diagnostic, DiagnosticEnvelope, Fix, Severity,
     resolve_span_path,
 };
-pub use engine::{AsmError, Assembly, DebugData, LineRec, Warning};
+pub use engine::{AsmError, Assembly, DebugData, LineRec, OutputFormat, RequestedOutput, Warning};
 pub use listing::{ListingFile, debug_info, render_listing, render_listing_files, render_sym};
 pub use span::{ExpansionFrame, FileId, Span};
 // Re-exported so consumers of `Assembly.debug` need not depend on debug198x

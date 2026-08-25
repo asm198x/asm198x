@@ -110,6 +110,18 @@ pub struct AssemblyResult {
     /// payload without the field still loads.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub files: Vec<String>,
+    /// The output file the **source** named with ACME's `!to`, if it named
+    /// one, and how it framed it.
+    ///
+    /// A *request*, never an instruction: the command line still chooses. ACME
+    /// takes the first name and warns "Output file already chosen" for any
+    /// later one, and a `-o` counts as the first — so a caller that passed one
+    /// ignores this, and one that did not may use it.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub requested_output: Option<crate::engine::RequestedOutput>,
+    /// The symbol-list file the source named with `!symbollist`. Same rule.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub requested_symbols: Option<String>,
 }
 
 impl AssemblyResult {
@@ -129,6 +141,10 @@ impl AssemblyResult {
             debug: DebugData::default(),
             diagnostics: Vec::new(),
             files: Vec::new(),
+            // A linked image comes from a toolchain with its own output
+            // conventions; nothing in it names a file.
+            requested_output: None,
+            requested_symbols: None,
         }
     }
 
@@ -158,6 +174,8 @@ impl From<Assembly> for AssemblyResult {
             debug: a.debug,
             diagnostics: Vec::new(),
             files: Vec::new(),
+            requested_output: a.requested_output,
+            requested_symbols: a.requested_symbols,
         }
     }
 }
