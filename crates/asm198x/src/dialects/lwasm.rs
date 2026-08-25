@@ -1508,6 +1508,7 @@ impl crate::ast::CondEval for LwasmEval {
             label: node.label.as_ref().map(|s| s.qualified.clone()),
             op,
             operand_span: node.operand_span.clone(),
+            xor_mask: 0,
         });
         Ok(())
     }
