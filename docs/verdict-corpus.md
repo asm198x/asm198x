@@ -72,6 +72,23 @@ in the change that earned it. The check asks for this because a stamp that lags
 is a ratchet that has let go: while it reads the lower number, a regression back
 down to that number passes unnoticed.
 
+## The ledger
+
+`cargo xtask ledger` renders what the corpus proves, per CPU: the arbiter and
+its version, verdict counts by kind, arbitration coverage, tracked divergences,
+the corpus hash, the release it describes, and the curriculum revision with its
+date.
+
+It is not a command anyone has to remember. `docs/book/src/ledger.md` is
+generated from it like every other generated page, so `cargo xtask docs --check`
+fails on any pull request whose corpus no longer matches the published ledger —
+including the release pull request. A release therefore cannot carry a ledger
+that has stopped being true.
+
+Bumping the curriculum pin means updating **both** `code-samples.pin` and
+`code-samples.date`; the date is the pinned commit's, and the ledger reports it
+so staleness is visible.
+
 ## Adding to the corpus
 
 If you have the reference tools:
@@ -105,6 +122,9 @@ verdict counts, coverage, and every tracked divergence.
 |---|---|
 | `crates/asm198x/tests/verdicts/*.ndjson` | the corpus, one file per CPU |
 | `crates/asm198x/tests/verdicts/coverage.stamp` | recorded coverage |
+| `crates/asm198x/tests/verdicts/coverage.accepted` | shortfalls, and why each exists |
 | `crates/asm198x/tests/verdicts/code-samples.pin` | the curriculum revision replayed against |
+| `crates/asm198x/tests/verdicts/code-samples.date` | that revision's commit date, for the ledger |
+| `docs/book/src/ledger.md` | the conformance ledger, generated |
 | `crates/verdict-corpus/` | the record format and its reader |
 | `crates/asm198x/tests/verdict_replay.rs` | the tool-free check |

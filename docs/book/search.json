@@ -280,6 +280,149 @@
       "slug": "introduction"
     },
     {
+      "context": "What the recorded verdict corpus proves, per CPU. Every row is an",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 255/255 (100.0%)",
+      "heading": "1802",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 245/245 (100.0%)",
+      "heading": "2650",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 151/151 (100.0%)",
+      "heading": "6502",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 270/270 (100.0%)",
+      "heading": "65816",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 197/197 (100.0%)",
+      "heading": "6800",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Tracked divergences — differences we know about and check:",
+      "heading": "68000",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 277/280 (98.9%)",
+      "heading": "6809",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 210/214 (98.1%)",
+      "heading": "8039",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 214/214 (100.0%)",
+      "heading": "8048",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 244/244 (100.0%)",
+      "heading": "8080",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 30/30 (100.0%)",
+      "heading": "CP1610",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 253/253 (100.0%)",
+      "heading": "F8",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 96/96 (100.0%)",
+      "heading": "PDP-11",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 121/121 (100.0%)",
+      "heading": "SC/MP",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Tracked divergences — differences we know about and check:",
+      "heading": "SM83",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 203/203 (100.0%)",
+      "heading": "TMS7000",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 69/69 (100.0%)",
+      "heading": "TMS9900",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 704/704 (100.0%)",
+      "heading": "Z80",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 271/271 (100.0%)",
+      "heading": "Z8000",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 271/271 (100.0%)",
+      "heading": "Z8001",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "No tracked divergences.",
+      "heading": "Z80N",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 234/234 (100.0%)",
+      "heading": "huc6280",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
+      "context": "Form coverage: 504/504 (100.0%)",
+      "heading": "sm83",
+      "page": "Conformance ledger",
+      "slug": "ledger"
+    },
+    {
       "context": "You do not port anything. Name the dialect your source is already written in",
       "page": "Moving an existing project across",
       "slug": "migrate"

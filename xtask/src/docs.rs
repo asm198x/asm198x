@@ -112,6 +112,14 @@ fn write_pages(repo: &Path, check: bool, report: &mut Report) -> Result<(), Stri
                 .into_iter()
                 .map(|p| (p.path, p.body)),
         )
+        // The conformance ledger is generated like any other page, which is
+        // what makes it a release artefact without a release step: `--check`
+        // runs on every PR, so a release PR cannot merge carrying a ledger
+        // that no longer describes the corpus.
+        .chain(std::iter::once((
+            "ledger.md".to_string(),
+            crate::ledger::render(repo),
+        )))
         .collect();
     for page in generated
         .iter()
