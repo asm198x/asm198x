@@ -523,17 +523,36 @@ mod row_tests {
         assert_eq!(bytes.len(), form.len());
     }
 
-    /// A row carries the form's `undocumented` flag rather than inventing one,
-    /// so the Z80's eight marked forms stay marked through the seam — which is
-    /// where the 6809's undocumented opcodes will hang once they exist.
+    /// A row carries its form's `undocumented` flag rather than inventing one,
+    /// so a marked form stays marked through the seam.
+    ///
+    /// The two CPUs that declare undocumented rows treat them differently on
+    /// output, and deliberately: the Z80's `SLL` is a working instruction that
+    /// real software uses, so it disassembles; the 6809's three do not, so they
+    /// are input-only (`decisions/undocumented-opcodes-are-input-only.md`).
+    /// The flag is the same either way — what a consumer does with it is the
+    /// consumer's call.
     #[test]
     fn rows_carry_the_undocumented_marker() {
         let marked = crate::z80::SET.rows().filter(|r| r.undocumented).count();
         assert_eq!(marked, 8, "the Z80 declares eight undocumented forms");
+
+        let six = |name| {
+            crate::mos6809::rows()
+                .filter(|r| r.undocumented && r.mnemonic == name)
+                .count()
+        };
         assert_eq!(
             crate::mos6809::rows().filter(|r| r.undocumented).count(),
-            0,
-            "the 6809 declares none yet"
+            3,
+            "the 6809 declares `reset`, `rhf` and `hcf`"
         );
+        for name in ["reset", "rhf", "hcf"] {
+            assert_eq!(six(name), 1, "{name} is one inherent row");
+        }
+        // And nothing documented was swept up by the marker.
+        for name in ["nop", "swi", "sync"] {
+            assert_eq!(six(name), 0, "{name} is documented");
+        }
     }
 }

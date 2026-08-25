@@ -2475,8 +2475,16 @@ fn spec_rows_match_reference_6809() {
     let mut fails: Vec<String> = Vec::new();
     let mut checked = 0usize;
     let mut unsynthesised: Vec<String> = Vec::new();
+    let mut input_only: Vec<&str> = Vec::new();
 
     for insn in isa::mos6809::SET {
+        // An undocumented opcode is input-only, so the disassembler never
+        // writes it and this audit — which goes through the disassembler —
+        // cannot arbitrate it. Reported by name rather than counted as a gap.
+        if insn.undocumented {
+            input_only.push(insn.mnemonic);
+            continue;
+        }
         for row in isa::mos6809::rows().filter(|r| r.mnemonic == insn.mnemonic) {
             let Some((buf, n)) = insn.exemplar(row.mode) else {
                 unsynthesised.push(format!("{} {}", row.mnemonic, row.mode));
@@ -2537,7 +2545,11 @@ fn spec_rows_match_reference_6809() {
         fails.join("\n  ")
     );
     assert!(checked > 0, "no rows arbitrated");
-    eprintln!("6809 form audit: {checked} rows arbitrated against lwasm");
+    eprintln!(
+        "6809 form audit: {checked} rows arbitrated against lwasm, {} input-only ({})",
+        input_only.len(),
+        input_only.join(", ")
+    );
 }
 
 /// The word CPUs' form audits: PDP-11, TMS9900 and the CP-1610, against `asl`.
