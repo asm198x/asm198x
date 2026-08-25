@@ -55,7 +55,7 @@ translation unit, assembly and linking fused.
 | rgbasm 1.0.3 | `EXPORT` | requires nothing by itself — `EXPORT nope` links to a ROM. Only a *reference* fails, at rgblink |
 | lwasm 4.25 | `export extdep extern external import` | refused: `Only supported for object target (EXPORT)` |
 | ca65 | `.forceimport` | **unsatisfiable**: defining the name is `already an import`, not defining it is an unresolved external at ld65 *even unreferenced* |
-| vasm | `xref import nref` | **unsatisfiable**: `error 86: external symbol <foo> must not be defined` when defined, `error 3007` when not |
+| vasm 2.0b | `xref import nref` | **was unsatisfiable**: `error 86: external symbol <foo> must not be defined` when defined, `error 3007` when not. **2.0f accepts them with the name defined** — see below |
 | sjasmplus 1.21.0 | `EXPORT` | writes an export file. Not visibility |
 | acme 0.97 | — | has none |
 
@@ -123,6 +123,27 @@ for a label outside the zero page — but never for a constant.
 `RefusedByReference` gained two more dialects the same day it was introduced,
 which answers the objection to adding it: it was not a category for one word in
 one tool.
+
+## When the reference changes underneath a refusal
+
+`vasm` 2.0f accepts `xref`, `import` and `nref` in binary output when the name
+is defined, and answers `error 3007: undefined symbol` when it is not — the same
+rule as the seven words beside them. So the three moved out of
+`RefusedByReference` and into the ordinary visibility check.
+
+The category was not wrong. It recorded what 2.0b did, and 2.0b refused them from
+both sides at once. What changed is the reference, which this
+project must expect: a refusal is a fact about a *version*, and it carries that
+version's number for exactly this reason.
+
+The category still has users — `lwasm`'s five and `ca65`'s `.forceimport` — so
+nothing here is weakened by one tool moving on.
+
+Found because the arbiter container adopted 2.0f (`ops/arbiter`), the first time
+a reference version moved under this project deliberately rather than because
+somebody upgraded a machine. It will not be the last, and the answer is the same
+each time: probe the new version, match what it does now, and say which version
+the record describes.
 
 ## Consequences
 

@@ -99,10 +99,16 @@ Not free. `vasm_refuses_its_import_side_words_for_a_binary` fails under 2.0f:
 ```
 
 Under 2.0b these were refused when emitting a binary, and the directive surface
-declares them `RefusedByReference` on that basis. 2.0f accepts them. The house
-rule is to match the reference rather than out-converge it, so the declaration
-is now wrong and needs updating with the version — alongside re-arbitrating the
-436 verdicts keyed to 2.0b.
+declared them `RefusedByReference` on that basis. 2.0f accepts them, so the
+three moved into the ordinary visibility rule.
+
+**The corpus needed nothing.** An earlier note here said the 436 verdicts keyed
+to 2.0b would have to be re-arbitrated. They did not: replay compares *our*
+output against recorded reference bytes rather than re-running the tool, and
+2.0b and 2.0f agree on every m68k instruction the corpus holds. No verdict
+records the import-side words at all — that behaviour was declared in code and
+probed by an ignored test, never recorded as a fact. Replay stayed green
+throughout.
 
 ## Running it on macOS
 
@@ -128,5 +134,5 @@ Nothing merges itself. A growth run produces facts for a person to read, and
 the corpus being append-only means a verdict recorded in error costs a
 supersede record rather than an edit.
 
-**The first growth run will fail** until the `vasm` import-side declaration is
-updated for 2.0f — see above. That is known, not a surprise waiting.
+The `vasm` import-side declaration is updated for 2.0f, so a growth run has
+nothing outstanding blocking it.
