@@ -34,6 +34,11 @@ If a drop is deliberate, run `cargo xtask coverage --write` and say in the
 commit which cases went and why. The stamp is the record of that debt, so it
 must not move silently.
 
+A **rise** needs the same command, without the explanation — refresh the stamp
+in the change that earned it. The check asks for this because a stamp that lags
+is a ratchet that has let go: while it reads the lower number, a regression back
+down to that number passes unnoticed.
+
 ## Adding to the corpus
 
 If you have the reference tools:
