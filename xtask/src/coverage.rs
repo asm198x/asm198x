@@ -314,21 +314,62 @@ pub fn accepted_path(repo: &Path) -> PathBuf {
     repo.join(ACCEPTED)
 }
 
-/// The accepted shortfall for each CPU that declares one, in rows.
+/// What a CPU declares about the rows it does not arbitrate.
+#[derive(Debug, PartialEq, Eq)]
+pub struct Accepted {
+    /// How many rows, so the shortfall cannot widen quietly.
+    pub rows: usize,
+    /// Why. Prose for a reader, except for the one word that classifies it.
+    pub reason: String,
+}
+
+impl Accepted {
+    /// Is this a debt rather than a decision?
+    ///
+    /// A shortfall is normally permanent — a form the part forbids, or one a
+    /// decision puts out of the audit's reach. Those are settled, and a release
+    /// carrying them is fine.
+    ///
+    /// A reason opening with `owed` says the opposite: these rows are meant to
+    /// come back, and the entry is a note to self. Work can still land on that
+    /// basis, because the alternative is blocking a merge on a growth run that
+    /// needs the reference tools. What it cannot do is reach a release: the
+    /// pre-tag gate stays red until a growth run clears it. That bounds how
+    /// long a de-arbitrated form can hide.
+    #[must_use]
+    pub fn owed(&self) -> bool {
+        self.reason
+            .trim_start()
+            .to_ascii_lowercase()
+            .starts_with("owed")
+    }
+}
+
+/// What each CPU declares about its shortfall.
 ///
-/// Same shape as the stamp: tab-separated, `#` comments, one CPU per line. The
-/// third column is prose for a reader and is not parsed.
+/// Same shape as the stamp: tab-separated, `#` comments, one CPU per line.
 #[must_use]
-pub fn parse_accepted(text: &str) -> BTreeMap<String, usize> {
+pub fn parse_accepted(text: &str) -> BTreeMap<String, Accepted> {
     text.lines()
         .filter(|l| !l.trim_start().starts_with('#') && !l.trim().is_empty())
         .filter_map(|l| {
             let mut parts = l.split('\t');
             let cpu = parts.next()?.trim().to_string();
             let rows = parts.next()?.trim().parse().ok()?;
-            Some((cpu, rows))
+            let reason = parts.next().unwrap_or_default().trim().to_string();
+            Some((cpu, Accepted { rows, reason }))
         })
         .collect()
+}
+
+/// Every shortfall still owed, in the order the file lists them.
+///
+/// This is the growth-debt residue the release ratchet gates on. A coverage
+/// number cannot express it: acknowledging a drop lowers that number, and
+/// nothing afterwards remembers it was a drop.
+#[must_use]
+pub fn owed(accepted: &BTreeMap<String, Accepted>) -> Vec<(&String, &Accepted)> {
+    accepted.iter().filter(|(_, a)| a.owed()).collect()
 }
 
 /// A shortfall that does not match what the CPU declares it accepts.
@@ -357,13 +398,13 @@ pub enum Unaccepted {
 /// to tell those from a form that quietly stopped arbitrating. So the shortfall
 /// declares its size and its reason, and this checks the size.
 #[must_use]
-pub fn unaccepted(report: &Report, accepted: &BTreeMap<String, usize>) -> Vec<Unaccepted> {
+pub fn unaccepted(report: &Report, accepted: &BTreeMap<String, Accepted>) -> Vec<Unaccepted> {
     report
         .rows
         .iter()
         .filter_map(|row| {
             let rows = row.total.saturating_sub(row.arbitrated);
-            match (rows, accepted.get(&row.cpu).copied()) {
+            match (rows, accepted.get(&row.cpu).map(|a| a.rows)) {
                 (0, None) => None,
                 (0, Some(declared)) => Some(Unaccepted::Stale {
                     cpu: row.cpu.clone(),
@@ -555,6 +596,31 @@ mod tests {
         let accepted = parse_accepted("# comment\n\n6809\t3\tinput-only, by decision\n");
         assert!(unaccepted(&report(&[("6809", 277, 280)]), &accepted).is_empty());
         assert!(unaccepted(&report(&[("Z80", 700, 700)]), &accepted).is_empty());
+    }
+
+    /// `owed` classifies; everything else is a settled decision.
+    #[test]
+    fn a_reason_opening_with_owed_is_debt() {
+        let a = parse_accepted(
+            "6809\t3\tinput-only, by decision\n\
+             8039\t4\tOwed #1: a listing change stranded these\n",
+        );
+        assert!(!a["6809"].owed(), "a decision is not debt");
+        assert!(a["8039"].owed(), "and `owed` is, whatever its case");
+
+        let debt = owed(&a);
+        assert_eq!(debt.len(), 1);
+        assert_eq!(debt[0].0, "8039");
+    }
+
+    /// Debt still counts as declared, so it does not block a merge — only a
+    /// release. Blocking the merge would mean blocking on a growth run, which
+    /// needs the reference tools.
+    #[test]
+    fn debt_is_still_a_declaration() {
+        let a = parse_accepted("6809\t3\towed #1: coming back\n");
+        assert!(unaccepted(&report(&[("6809", 277, 280)]), &a).is_empty());
+        assert_eq!(owed(&a).len(), 1);
     }
 
     /// Coverage that matches the stamp is not drift in either direction.

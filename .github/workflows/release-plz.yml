@@ -52,6 +52,13 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
 
+      # The pre-tag ratchet. This must sit *before* the tagging step: tagging
+      # fires cargo-dist's release.yml, and by then the release exists. A
+      # shortfall that is settled rides along fine; one still owed does not,
+      # because a release is the deadline for recovering it.
+      - name: Refuse to tag while arbitration debt is owed
+        run: cargo xtask coverage --no-debt
+
       - name: Run release-plz (tag merged releases)
         uses: release-plz/action@v0.5
         with:
