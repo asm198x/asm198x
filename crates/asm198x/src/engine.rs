@@ -359,6 +359,19 @@ pub(crate) enum Operation {
     Bytes(Vec<Expr>),
     /// Emit one word per expression, in the instruction set's endianness.
     Words(Vec<Expr>),
+    /// Emit each expression as `width` bytes, in the byte order the
+    /// **directive** names rather than the one the CPU uses — ACME's
+    /// `!be16`/`!le32` family, six spellings of one rule.
+    ///
+    /// Distinct from [`Operation::Words`] for both halves of that: the width
+    /// is 2, 3 or 4 rather than always 2, and the order is a property of the
+    /// word the source wrote. A 6502 is little-endian, and `!be24` on a 6502
+    /// still emits big-endian — that is the whole point of the directive.
+    Sized {
+        width: u8,
+        big_endian: bool,
+        values: Vec<Expr>,
+    },
     /// An instruction whose form the dialect has already chosen by `mode`.
     /// `operands` carries one value per operand byte-slot the form declares, in
     /// order (empty for operand-less forms; two for e.g. Z80 `LD (IX+d),n`).
@@ -536,6 +549,9 @@ pub(crate) fn next_pc(
         // zero-padded in pass 2 — so both passes count the same.
         Operation::Binary(payload) => pc + payload.len().div_ceil(addr_unit as usize) as i64,
         Operation::Words(items) => pc + 2 * items.len() as i64 / addr_unit,
+        Operation::Sized { width, values, .. } => {
+            pc + i64::from(*width) * values.len() as i64 / addr_unit
+        }
         Operation::Instruction { mnemonic, mode, .. } => {
             pc + form(set, ext, mnemonic, mode, line)?.len() as i64 / addr_unit
         }
@@ -1012,6 +1028,44 @@ fn assemble_statements(
                 // and the byte stream stay in step (pass 1 counted whole units).
                 let slack = (addr_unit - payload.len() as i64 % addr_unit) % addr_unit;
                 bytes.extend(std::iter::repeat_n(0u8, slack as usize));
+            }
+            Some(Operation::Sized {
+                width,
+                big_endian,
+                values,
+            }) => {
+                for e in values {
+                    let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
+                    let width = *width;
+                    let max = (1i64 << (u32::from(width) * 8)) - 1;
+                    if !(floor(u32::from(width))..=max).contains(&v) {
+                        match byte_policy {
+                            Oversize::Error => {
+                                return Err(s.operand_err(format!(
+                                    "value {v} does not fit in {width} byte(s)"
+                                )));
+                            }
+                            Oversize::Truncate => {}
+                            Oversize::TruncateWarn => warnings.push(Warning {
+                                line: s.line,
+                                message: format!("value {v} truncated to {width} byte(s)"),
+                                file: s.file,
+                                kind: crate::engine::WarningKind::Advisory,
+                            }),
+                        }
+                    }
+                    // Most significant byte first when the directive says so,
+                    // whatever the CPU's own order is: `!be24` on a 6502 is
+                    // big-endian, which is the reason the directive exists.
+                    for i in 0..width {
+                        let shift = if *big_endian {
+                            (width - 1 - i) * 8
+                        } else {
+                            i * 8
+                        };
+                        bytes.push(((v >> u32::from(shift)) & 0xFF) as u8);
+                    }
+                }
             }
             Some(Operation::Words(items)) => {
                 for e in items {
