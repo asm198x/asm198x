@@ -509,7 +509,7 @@ impl<'a> FmtCx<'a> {
             // so the head and its `}` stay in the tree as verbatim marker
             // nodes (the evaluator switches/restores the zone; the formatter
             // re-renders them) with the body parsed inline between them.
-            if let Some(open) = zone_block_open(trimmed) {
+            if let Some(open) = zone_block_open(trimmed).or_else(|| xor_block_open(trimmed)) {
                 let leading = std::mem::take(&mut self.pending);
                 let head = trimmed[..open].trim();
                 let after = trimmed[open + 1..].trim();
@@ -520,7 +520,7 @@ impl<'a> FmtCx<'a> {
                     if !tail.is_empty() {
                         return Err(AsmError::new(
                             line,
-                            format!("unexpected `{tail}` after the `!zone` block's `}}`"),
+                            format!("unexpected `{tail}` after the block's `}}`"),
                         ));
                     }
                     nodes.push(self.op_node(None, None, format!("{head} {{"), leading, None, line));
@@ -898,6 +898,18 @@ fn for_block_open(trimmed: &str) -> Option<usize> {
     }
 }
 
+/// A `!xor <value> {` head, which opens a marker block exactly as `!zone`
+/// does — the head and its `}` stay in the tree and the evaluator pushes and
+/// pops the mask. The no-block `!xor <value>` is an ordinary line.
+fn xor_block_open(trimmed: &str) -> Option<usize> {
+    let word = split_first_word(trimmed).0.to_ascii_lowercase();
+    if word == "!xor" {
+        find_top(trimmed, b'{')
+    } else {
+        None
+    }
+}
+
 fn zone_block_open(trimmed: &str) -> Option<usize> {
     let word = split_first_word(trimmed).0.to_ascii_lowercase();
     if word == "!zone" || word == "!zn" {
@@ -959,6 +971,14 @@ struct Oversize {
 /// and back out), and anonymous labels register in spliced evaluation order.
 /// Without one (the single-source entry points), those directives are an
 /// error pointing at the multi-file entry points.
+/// What an open `{` block owes its `}`.
+enum OpenBlock {
+    /// The zone name to go back to.
+    Zone(String),
+    /// The `!xor` mask to go back to.
+    Xor(u8),
+}
+
 struct AcmeEval<'a> {
     set: &'static isa::InstructionSet,
     anons: Anons,
@@ -996,7 +1016,14 @@ struct AcmeEval<'a> {
     /// Enclosing-zone saves for the `!zone { … }` block form: `}` restores
     /// (probe z6b); the line form pushes nothing, so it switches for good
     /// even inside a taken conditional (probe ze).
-    zone_stack: Vec<String>,
+    /// What each open marker block has to restore. `!zone` and `!xor` both
+    /// leave their head and `}` in the tree, so one `}` arm serves both and
+    /// the stack is what says which it is closing.
+    block_stack: Vec<OpenBlock>,
+    /// The `!xor` mask in force, which every statement produced from here on
+    /// carries. Masks **combine**: `!xor $f0` then `!xor $0f` gives `$ff`,
+    /// and `!xor $ff` twice cancels back to `$00` (probed 2026-08-25).
+    xor_mask: u8,
 }
 
 impl<'a> AcmeEval<'a> {
@@ -1014,7 +1041,8 @@ impl<'a> AcmeEval<'a> {
             current_file: FileId(0),
             zone: String::new(),
             zone_ord: 0,
-            zone_stack: Vec::new(),
+            block_stack: Vec::new(),
+            xor_mask: 0,
         }
     }
 
@@ -1049,6 +1077,7 @@ impl<'a> AcmeEval<'a> {
                 label: Some(label),
                 op: None,
                 operand_span: None,
+                xor_mask: 0,
             });
         }
         let t = args.trim();
@@ -1065,7 +1094,7 @@ impl<'a> AcmeEval<'a> {
             ));
         }
         if block {
-            self.zone_stack.push(self.zone.clone());
+            self.block_stack.push(OpenBlock::Zone(self.zone.clone()));
         }
         self.zone_ord += 1;
         self.zone = format!("{title}@{}", self.zone_ord);
@@ -1138,6 +1167,7 @@ impl<'a> AcmeEval<'a> {
                 label: Some(label),
                 op: None,
                 operand_span: None,
+                xor_mask: 0,
             });
         }
         let Some(mcx) = self.multi.as_mut() else {
@@ -1229,6 +1259,7 @@ impl<'a> AcmeEval<'a> {
             label,
             op: Some(Operation::Binary(payload)),
             operand_span: node.operand_span.clone(),
+            xor_mask: 0,
         });
         Ok(())
     }
@@ -1341,6 +1372,26 @@ impl crate::ast::CondEval for AcmeEval<'_> {
     }
 
     fn lower(&mut self, node: &crate::ast::Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
+        // Stamp the mask in force onto whatever this node produces, rather
+        // than at each of the half-dozen places a statement is pushed. One
+        // funnel means a new lowering path cannot forget it.
+        let first = out.len();
+        let result = self.lower_inner(node, out);
+        if self.xor_mask != 0 {
+            for s in &mut out[first..] {
+                s.xor_mask = self.xor_mask;
+            }
+        }
+        result
+    }
+}
+
+impl AcmeEval<'_> {
+    fn lower_inner(
+        &mut self,
+        node: &crate::ast::Node,
+        out: &mut Vec<Statement>,
+    ) -> Result<(), AsmError> {
         let line = node.span.line as usize;
         let file = node.span.file;
         // Every live line takes the next evaluation-order position (the anon
@@ -1367,13 +1418,33 @@ impl crate::ast::CondEval for AcmeEval<'_> {
             "!src" | "!source" => return self.lower_include(node, args, out),
             "!bin" | "!binary" => return self.lower_incbin(node, args, out),
             "!zone" | "!zn" => return self.lower_zone(node, args, out),
+            "!xor" if args.trim().ends_with('{') => {
+                let value = args.trim().trim_end_matches('{').trim();
+                let v = self.xor_value(value, line, file)?;
+                self.block_stack.push(OpenBlock::Xor(self.xor_mask));
+                // Combine rather than replace: the probed rule, and the one
+                // that makes a nested `!xor` compose with its parent.
+                self.xor_mask ^= v;
+                return Ok(());
+            }
+            "!xor" => {
+                let v = self.xor_value(args.trim(), line, file)?;
+                // No block, so nothing to restore: it runs to the end of the
+                // enclosing `!xor` block, or of the file. Notably *not* to the
+                // end of an `!if` or `!zone` — those do not scope it.
+                self.xor_mask ^= v;
+                return Ok(());
+            }
             "}" if args.trim().is_empty() => {
-                self.zone = self.zone_stack.pop().ok_or_else(|| {
+                match self.block_stack.pop().ok_or_else(|| {
                     stamp_file(
-                        AsmError::new(line, "internal: `}` closed no `!zone` block"),
+                        AsmError::new(line, "internal: `}` closed no marker block"),
                         file,
                     )
-                })?;
+                })? {
+                    OpenBlock::Zone(zone) => self.zone = zone,
+                    OpenBlock::Xor(mask) => self.xor_mask = mask,
+                }
                 return Ok(());
             }
             _ => {}
@@ -1429,6 +1500,7 @@ impl crate::ast::CondEval for AcmeEval<'_> {
                 label,
                 op,
                 operand_span: node.operand_span.clone(),
+                xor_mask: 0,
             });
         }
         Ok(())
@@ -1436,6 +1508,25 @@ impl crate::ast::CondEval for AcmeEval<'_> {
 }
 
 impl AcmeEval<'_> {
+    /// The operand of an `!xor`, folded and range-checked.
+    ///
+    /// ACME **does** range-check this one, unlike `!scrxor`, which silently
+    /// takes the low byte of whatever it is given. `!xor 256` is "Number out
+    /// of range" while `!scrxor 256, "a"` masks to `$00`. Two directives in
+    /// one family, two answers; both are reproduced rather than reconciled.
+    fn xor_value(&self, text: &str, line: usize, file: FileId) -> Result<u8, AsmError> {
+        let e = parse_value(&self.anons, &self.zone, text, line)
+            .map_err(|err| stamp_file(err, file))?;
+        let v = fold_const(&e, &self.env, line).map_err(|err| stamp_file(err, file))?;
+        if !(-128..=0xFF).contains(&v) {
+            return Err(stamp_file(
+                AsmError::new(line, format!("number out of range: {v}")),
+                file,
+            ));
+        }
+        Ok((v & 0xFF) as u8)
+    }
+
     /// Record an instruction that took an absolute form only because its
     /// operand could not be folded yet.
     ///
@@ -2277,6 +2368,21 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // `!xor` masks every byte its scope *writes* — data, opcodes and an
+    // included binary alike — and leaves reservations and `org` gaps alone.
+    // With a block it restores the previous mask on the way out; without one
+    // it runs to the end of the enclosing `!xor` block or of the file, and is
+    // not scoped by `!if` or `!zone`. Masks combine rather than replace.
+    // Walk-handled, like `!zone`.
+    Directive {
+        id: "xor",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["xor"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     // `!as`/`!rs` select short accumulator/index registers. On a 6502 they
     // are accepted and emit nothing, which is every path this dialect has:
     // the long forms `!al`/`!rl` are refused by ACME itself here ("Chosen CPU
@@ -2518,7 +2624,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What ACME has here and we do not.
     //
-    // 11 spellings against 0.97, counted from this list rather than recalled.
+    // 10 spellings against 0.97, counted from this list rather than recalled.
     // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
     // long registers" for them on a 6502, so they belong to a wider target.
     // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
@@ -2538,7 +2644,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "symbollist",
                 "to",
                 "while",
-                "xor",
             ],
             required: true,
         },
@@ -3178,6 +3283,119 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// `!xor` masks what its scope writes — including the opcode, which is
+    /// why the mask has to reach the engine rather than the lowering.
+    #[test]
+    fn xor_masks_data_and_opcodes_alike() {
+        assert_eq!(
+            asm("!xor $ff {\n!text \"ab\"\n}").expect("text").bytes,
+            vec![0x9E, 0x9D]
+        );
+        assert_eq!(asm("!xor $ff {\nnop\n}").expect("opcode").bytes, vec![0x15]);
+        assert_eq!(
+            asm("!xor $ff { !byte 1 }").expect("one line").bytes,
+            vec![0xFE]
+        );
+    }
+
+    /// A block restores the previous mask; a bare `!xor` does not, and runs
+    /// on. Masks **combine** rather than replace, so two `$ff`s cancel.
+    #[test]
+    fn a_block_restores_the_mask_and_a_bare_xor_does_not() {
+        assert_eq!(
+            asm("!xor $ff {\n!byte 1\n}\n!byte 1")
+                .expect("restore")
+                .bytes,
+            vec![0xFE, 0x01]
+        );
+        assert_eq!(
+            asm("!xor $ff\n!byte 1\n!byte 2").expect("runs on").bytes,
+            vec![0xFE, 0xFD]
+        );
+        assert_eq!(
+            asm("!xor $f0\n!byte 0\n!xor $0f\n!byte 0")
+                .expect("combine")
+                .bytes,
+            vec![0xF0, 0xFF]
+        );
+        assert_eq!(
+            asm("!xor $ff\n!byte 1\n!xor $ff\n!byte 1")
+                .expect("cancel")
+                .bytes,
+            vec![0xFE, 0x01]
+        );
+    }
+
+    /// Only an `!xor` block scopes the mask. `!if` and `!zone` do not — a
+    /// bare `!xor` inside either goes on masking after it closes.
+    #[test]
+    fn only_an_xor_block_scopes_the_mask() {
+        assert_eq!(
+            asm("!if 1 {\n!xor $ff\n!byte 0\n}\n!byte 0")
+                .expect("if")
+                .bytes,
+            vec![0xFF, 0xFF]
+        );
+        assert_eq!(
+            asm("!zone z {\n!xor $ff\n!byte 0\n}\n!byte 0")
+                .expect("zone")
+                .bytes,
+            vec![0xFF, 0xFF]
+        );
+        // A nested block still restores, through the enclosing `!if`.
+        assert_eq!(
+            asm("!if 1 {\n!xor $ff {\n!byte 0\n}\n}\n!byte 0")
+                .expect("nested")
+                .bytes,
+            vec![0xFF, 0x00]
+        );
+        // And a bare `!xor` inside an `!xor` block is undone with the block.
+        assert_eq!(
+            asm("!xor $f0 {\n!xor $0f\n!byte 0\n}\n!byte 0")
+                .expect("bare in block")
+                .bytes,
+            vec![0xFF, 0x00]
+        );
+    }
+
+    /// The mask reaches what the source *wrote*, and nothing else. `!fill`
+    /// writes bytes and takes it; `!skip` and an `org` gap reserve space and
+    /// do not.
+    #[test]
+    fn the_mask_spares_reserved_space() {
+        assert_eq!(
+            asm("!xor $ff {\n!fill 2\n}").expect("fill").bytes,
+            vec![0xFF, 0xFF]
+        );
+        assert_eq!(
+            asm("!xor $ff {\n!skip 2\n}").expect("skip").bytes,
+            vec![0x00, 0x00]
+        );
+        let gap = asm("*=$1000\n!xor $ff {\nnop\n*=$1003\nnop\n}").expect("gap");
+        assert_eq!(gap.bytes, vec![0x15, 0x00, 0x00, 0x15]);
+    }
+
+    /// `!xor` is range-checked where `!scrxor` is truncated. Same family,
+    /// opposite answers, both ACME's.
+    #[test]
+    fn an_xor_value_is_range_checked_unlike_scrxor() {
+        assert_eq!(
+            asm("!xor 255 {\n!byte 0\n}").expect("max").bytes,
+            vec![0xFF]
+        );
+        assert_eq!(
+            asm("!xor -128 {\n!byte 0\n}").expect("min").bytes,
+            vec![0x80]
+        );
+        asm("!xor 256 {\n!byte 0\n}").expect_err("number out of range");
+        asm("!xor -129 {\n!byte 0\n}").expect_err("number out of range");
+        // The contrast, which is the reason both tests exist.
+        assert_eq!(
+            asm("!scrxor 256, \"a\"").expect("truncates").bytes,
+            vec![0x01]
+        );
+    }
 
     /// `!as`/`!rs` are accepted and emit nothing on a 6502. An operand is
     /// refused, as ACME refuses it.

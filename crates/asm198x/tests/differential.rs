@@ -285,6 +285,13 @@ const PROBES: &[Probe] = &[
     ok ("acme", "!be32 / !le32",         " !be32 $12345678\n !le32 $12345678\n"),
     ok ("acme", "sized takes a list",    " !be16 $1234, $5678\n"),
     ok ("acme", "sized spans signed",    " !be16 -32768\n !be16 65535\n"),
+    ok ("acme", "!xor masks a block",    " !xor $ff {\n !text \"ab\"\n }\n"),
+    ok ("acme", "!xor masks the opcode", " !xor $ff {\n nop\n }\n"),
+    ok ("acme", "!xor block restores",   " !xor $ff {\n !byte 1\n }\n !byte 1\n"),
+    ok ("acme", "!xor masks combine",    " !xor $f0\n !byte 0\n !xor $0f\n !byte 0\n"),
+    // The two that say what the mask is *for*: bytes the source wrote.
+    ok ("acme", "!xor masks !fill",      " !xor $ff {\n !fill 2\n }\n"),
+    ok ("acme", "!xor spares !skip",     " !xor $ff {\n !skip 2\n }\n"),
     ok ("acme", "directive !as / !rs",   " !as\n !rs\n lda #1\n"),
     ok ("acme", "directive !eof",        " nop\n !eof\n !!!garbage\n"),
     ok ("acme", "directive !endoffile",  " nop\n !endoffile\n lda\n"),

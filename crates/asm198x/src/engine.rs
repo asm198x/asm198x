@@ -614,6 +614,20 @@ pub(crate) struct Statement {
     /// (contract U3, [`crate::ast::operand_span`]). Pass-2 range errors point
     /// here; `None` keeps them line-granular (contract KTD1).
     pub(crate) operand_span: Option<Span>,
+    /// A byte the statement's **written** output is XOR-ed with — ACME's
+    /// `!xor`, and `0` (no change) for every other dialect.
+    ///
+    /// It has to live here rather than on an `Operation` because it reaches
+    /// what the *engine* chose, not only what the dialect lowered: `!xor $ff
+    /// { nop }` is `15`, so the opcode is masked too. It is set by the walk,
+    /// which is where the lexical scope is known.
+    ///
+    /// **Written** is the operative word. The mask reaches data, opcodes and
+    /// an included binary, and does *not* reach a reservation or an `org`
+    /// gap: `!xor $ff { !fill 2 }` is `ff ff` while `!xor $ff { !skip 2 }` is
+    /// `00 00` (probed 2026-08-25). Reserved space is not something the
+    /// source wrote.
+    pub(crate) xor_mask: u8,
 }
 
 impl Statement {
@@ -1341,6 +1355,19 @@ fn assemble_statements(
                     | Operation::Reserve(_)
             )
         );
+        // ACME's `!xor`, applied to what this statement *wrote*. A
+        // reservation and an `org` gap are both excluded, for the same reason
+        // they are excluded from `written_len` below: nothing wrote those
+        // bytes, so there is nothing to mask. Probed — `!xor $ff` around a
+        // gap gives `15 00 00 15`, the `nop`s masked and the gap not.
+        if s.xor_mask != 0
+            && !matches!(s.op, Some(Operation::Reserve(_)) | Some(Operation::Org(_)))
+            && bytes.len() > len_before
+        {
+            for b in &mut bytes[len_before..] {
+                *b ^= s.xor_mask;
+            }
+        }
         if !matches!(s.op, Some(Operation::Org(_)) | Some(Operation::Reserve(_))) {
             written_len = bytes.len();
             if bytes.len() > len_before {

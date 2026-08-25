@@ -659,6 +659,7 @@ pub(crate) fn lower(program: Program) -> Result<Vec<Statement>, AsmError> {
                 label: node.label.map(|s| s.qualified),
                 op: node.item.map(lower_item).transpose()?,
                 operand_span: node.operand_span,
+                xor_mask: 0,
             })
         })
         .collect()
