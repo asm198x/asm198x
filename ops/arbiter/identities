@@ -1,0 +1,16 @@
+# The behavioural identity each arbiter must report, exactly as the verdict
+# corpus records it. A verdict is keyed on this string, so a container that
+# reports anything else forks the corpus rather than adding to it.
+#
+# Captured from the corpus, not typed from memory:
+#   jq -r '.arbiter | "\(.tool)\t\(.identity)"' verdicts/*.ndjson | sort -u
+#
+# tool	identity
+acme	This is ACME, release 0.97 ("Zem"), 28 June 2020
+asl	Macro Assembler 1.42 Beta [Bld 309]
+ca65	ca65 V2.18 - N/A
+lwasm	lwasm from lwtools 4.25
+pasmo	PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo
+rgbasm	rgbasm v1.0.3
+sjasmplus	SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)
+vasmm68k_mot	vasm 2.0b (c) in 2002-2025 Volker Barthelmann
