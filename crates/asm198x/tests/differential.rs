@@ -285,6 +285,12 @@ const PROBES: &[Probe] = &[
     ok ("acme", "!be32 / !le32",         " !be32 $12345678\n !le32 $12345678\n"),
     ok ("acme", "sized takes a list",    " !be16 $1234, $5678\n"),
     ok ("acme", "sized spans signed",    " !be16 -32768\n !be16 65535\n"),
+    ok ("acme", "directive !skip",       " !skip 4\n lda #1\n"),
+    ok ("acme", "!initmem fills !skip",  " !initmem $ff\n !skip 3\n"),
+    // The one that says `!initmem` is not positional: the reservation is
+    // written first and still takes the value.
+    ok ("acme", "!initmem is not positional", " !skip 3\n !initmem $ff\n"),
+    ok ("acme", "!initmem fills an org gap",  " !initmem $ff\n nop\n *=$0004\n nop\n"),
     ok ("lwasm", "byte truncates up",    " fcb 256\n"),
     ok ("lwasm", "byte truncates down",  " fcb -129\n"),
     ok ("lwasm", "negative word",        " fdb -1\n"),
