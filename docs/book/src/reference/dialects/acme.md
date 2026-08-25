@@ -17,6 +17,7 @@ C64 6502, ACME syntax.
 | `bytes` | `!byte`, `!by`, `!8` |  |
 | `conditional` | `!if`, `!ifdef`, `!ifndef` |  |
 | `convtab` | `!ct`, `!convtab` |  |
+| `cpu` | `!cpu` |  |
 | `diagnose` | `!error`, `!serious`, `!warn` |  |
 | `eof` | `!eof`, `!endoffile` |  |
 | `fill` | `!fill`, `!fi` |  |
@@ -42,7 +43,6 @@ C64 6502, ACME syntax.
 | `skip` | `!skip` |  |
 | `symbol-list` | `!symbollist` |  |
 | `text` | `!text`, `!tx` |  |
-| `unsupported-acme` | `!cpu` | Recognised, and not implemented |
 | `words` | `!word`, `!wo`, `!16` |  |
 | `xor` | `!xor` |  |
 | `zone` | `!zone`, `!zn` |  |
