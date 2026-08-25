@@ -40,6 +40,9 @@ use verdict_corpus::{Corpus, Suite, Verdict};
 /// The stamp file, tracked so a change to it is reviewable.
 const STAMP: &str = "crates/asm198x/tests/verdicts/coverage.stamp";
 
+/// The accepted-shortfalls file, authored rather than generated.
+const ACCEPTED: &str = "crates/asm198x/tests/verdicts/coverage.accepted";
+
 /// A CPU whose spec forms can be counted: the corpus label, and its spec.
 struct Cpu {
     /// The label used in the corpus, and in the stamp.
@@ -245,9 +248,9 @@ pub fn render_stamp(report: &Report) -> String {
     s.push_str("# Regenerate with `cargo xtask coverage --write`.\n");
     s.push_str("# A drop here means a change stopped arbitrating something; say why\n");
     s.push_str("# in the commit, and record the debt if it is not being recovered now.\n");
-    s.push_str("# Below 100% is not automatically wrong: the 8039 forbids the four\n");
-    s.push_str("# BUS-port ops its ROM-less bus is committed to, and the audit skips\n");
-    s.push_str("# them deliberately. What matters is the number not falling.\n");
+    s.push_str("# Below 100% is not automatically wrong, but it is never unexplained:\n");
+    s.push_str("# every shortfall states its reason and its size in coverage.accepted,\n");
+    s.push_str("# and the check holds it to both.\n");
     for row in &report.rows {
         let _ = writeln!(
             s,
@@ -303,6 +306,82 @@ pub fn parse_stamp(text: &str) -> BTreeMap<String, u32> {
 #[must_use]
 pub fn stamp_path(repo: &Path) -> PathBuf {
     repo.join(STAMP)
+}
+
+/// Where the accepted-shortfalls file lives under `repo`.
+#[must_use]
+pub fn accepted_path(repo: &Path) -> PathBuf {
+    repo.join(ACCEPTED)
+}
+
+/// The accepted shortfall for each CPU that declares one, in rows.
+///
+/// Same shape as the stamp: tab-separated, `#` comments, one CPU per line. The
+/// third column is prose for a reader and is not parsed.
+#[must_use]
+pub fn parse_accepted(text: &str) -> BTreeMap<String, usize> {
+    text.lines()
+        .filter(|l| !l.trim_start().starts_with('#') && !l.trim().is_empty())
+        .filter_map(|l| {
+            let mut parts = l.split('\t');
+            let cpu = parts.next()?.trim().to_string();
+            let rows = parts.next()?.trim().parse().ok()?;
+            Some((cpu, rows))
+        })
+        .collect()
+}
+
+/// A shortfall that does not match what the CPU declares it accepts.
+#[derive(Debug, PartialEq, Eq)]
+pub enum Unaccepted {
+    /// Rows go unarbitrated and nothing says why. This is the debt case: until
+    /// it is declared, nobody can tell a decision from an outstanding one.
+    Undeclared { cpu: String, rows: usize },
+    /// More rows go unarbitrated than the CPU declares. The excess is debt even
+    /// though the rest is accepted.
+    Wider {
+        cpu: String,
+        declared: usize,
+        rows: usize,
+    },
+    /// The CPU arbitrates everything, and still declares a shortfall. The entry
+    /// outlived what it described.
+    Stale { cpu: String, declared: usize },
+}
+
+/// Hold every shortfall to what its CPU declares in the accepted file.
+///
+/// A number below 100% is not itself a fault — the 8039 cannot reach the four
+/// BUS-port ops its ROM-less bus commits, and the 6809's three undocumented
+/// opcodes are input-only by decision. What would be a fault is not being able
+/// to tell those from a form that quietly stopped arbitrating. So the shortfall
+/// declares its size and its reason, and this checks the size.
+#[must_use]
+pub fn unaccepted(report: &Report, accepted: &BTreeMap<String, usize>) -> Vec<Unaccepted> {
+    report
+        .rows
+        .iter()
+        .filter_map(|row| {
+            let rows = row.total.saturating_sub(row.arbitrated);
+            match (rows, accepted.get(&row.cpu).copied()) {
+                (0, None) => None,
+                (0, Some(declared)) => Some(Unaccepted::Stale {
+                    cpu: row.cpu.clone(),
+                    declared,
+                }),
+                (rows, None) => Some(Unaccepted::Undeclared {
+                    cpu: row.cpu.clone(),
+                    rows,
+                }),
+                (rows, Some(declared)) if rows > declared => Some(Unaccepted::Wider {
+                    cpu: row.cpu.clone(),
+                    declared,
+                    rows,
+                }),
+                _ => None,
+            }
+        })
+        .collect()
 }
 
 /// A CPU whose coverage differs from the stamp, and in which direction.
@@ -423,6 +502,59 @@ mod tests {
         let moved = drift(&report(&[("6502", 200, 300)]), &stamp);
         assert_eq!(moved.len(), 1, "a rise is reported");
         assert!(!moved[0].fell(), "and it is not a fall");
+    }
+
+    /// A shortfall with no entry is debt until someone says otherwise.
+    ///
+    /// This is the case that motivated the file: the 6809 gained three
+    /// unarbitrable rows and the stamp's prose header, which named only the
+    /// 8039, did not gain a line — because nothing asked it to.
+    #[test]
+    fn an_undeclared_shortfall_is_not_accepted() {
+        let accepted = parse_accepted("6502\t1\twhy\n");
+        assert_eq!(
+            unaccepted(&report(&[("6809", 277, 280)]), &accepted),
+            vec![Unaccepted::Undeclared {
+                cpu: "6809".into(),
+                rows: 3,
+            }]
+        );
+    }
+
+    /// A shortfall may not quietly grow past what it declares.
+    #[test]
+    fn a_shortfall_beyond_its_declaration_is_not_accepted() {
+        let accepted = parse_accepted("6809\t1\twhy\n");
+        assert_eq!(
+            unaccepted(&report(&[("6809", 277, 280)]), &accepted),
+            vec![Unaccepted::Wider {
+                cpu: "6809".into(),
+                declared: 1,
+                rows: 3,
+            }]
+        );
+    }
+
+    /// A declaration outliving its shortfall comes out, so the file cannot
+    /// accumulate permissions nobody needs.
+    #[test]
+    fn a_declaration_for_a_complete_cpu_is_stale() {
+        let accepted = parse_accepted("Z80\t5\twhy\n");
+        assert_eq!(
+            unaccepted(&report(&[("Z80", 700, 700)]), &accepted),
+            vec![Unaccepted::Stale {
+                cpu: "Z80".into(),
+                declared: 5,
+            }]
+        );
+    }
+
+    /// A shortfall matching its declaration passes, and so does a whole CPU.
+    #[test]
+    fn a_declared_shortfall_is_accepted() {
+        let accepted = parse_accepted("# comment\n\n6809\t3\tinput-only, by decision\n");
+        assert!(unaccepted(&report(&[("6809", 277, 280)]), &accepted).is_empty());
+        assert!(unaccepted(&report(&[("Z80", 700, 700)]), &accepted).is_empty());
     }
 
     /// Coverage that matches the stamp is not drift in either direction.

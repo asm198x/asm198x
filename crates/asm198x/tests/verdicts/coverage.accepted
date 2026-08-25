@@ -1,0 +1,16 @@
+# Accepted arbitration shortfalls — a CPU that will not reach every row it
+# declares, and why it never will.
+#
+# Below 100% is not automatically wrong, but it must never be unexplained. A
+# shortfall is one of two things and the number alone cannot tell them apart:
+# a decision we have taken, or a debt we owe. This file is where a shortfall
+# says which, and `cargo xtask coverage --check` holds it to that: a CPU below
+# 100% with no entry here fails, and so does one whose shortfall grew past
+# what it declares.
+#
+# The count is rows, not a percentage, so it does not drift when a spec gains
+# forms. Widening one is a deliberate edit with a reason, like the stamp.
+#
+# CPU	rows	why
+6809	3	`reset`, `rhf` and `hcf` are input-only: the form audit works through the disassembler, which by decision never writes them — decisions/undocumented-opcodes-are-input-only.md
+8039	4	the ROM-less bus commits the four BUS-port ops, so the part forbids them and the audit skips them deliberately
