@@ -285,6 +285,9 @@ const PROBES: &[Probe] = &[
     ok ("acme", "!be32 / !le32",         " !be32 $12345678\n !le32 $12345678\n"),
     ok ("acme", "sized takes a list",    " !be16 $1234, $5678\n"),
     ok ("acme", "sized spans signed",    " !be16 -32768\n !be16 65535\n"),
+    ok ("acme", "directive !as / !rs",   " !as\n !rs\n lda #1\n"),
+    ok ("acme", "directive !eof",        " nop\n !eof\n !!!garbage\n"),
+    ok ("acme", "directive !endoffile",  " nop\n !endoffile\n lda\n"),
     ok ("acme", "directive !scrxor",     " !scrxor $80, \"ab\"\n"),
     // The pair that proves `!scrxor` is not `!xor` around `!scr`: the number
     // is neither converted nor masked.

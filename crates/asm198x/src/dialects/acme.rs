@@ -211,9 +211,15 @@ fn split_comment(line: &str) -> (&str, Option<&str>) {
 // ---------------------------------------------------------------------------
 
 /// How a [`parse_block`](FmtCx::parse_block) ended.
-#[derive(PartialEq, Eq)]
+#[derive(PartialEq, Eq, Clone, Copy)]
 enum Closer {
     Eof,
+    /// End of input reached because `!eof` said so, as distinct from running
+    /// out of lines. The two are the same thing to the *file* and different
+    /// things to an open block: ACME answers `!eof` inside an `!if` with
+    /// "Found end-of-file instead of '}'", so the block parser has to be able
+    /// to tell them apart.
+    EofDirective,
     Brace,
     BraceElse,
 }
@@ -263,7 +269,7 @@ fn parse_program_in(
     let (mut nodes, closer) = cx
         .parse_block()
         .map_err(|e| macros::remap_lines(e, origins))?;
-    if closer != Closer::Eof {
+    if !matches!(closer, Closer::Eof | Closer::EofDirective) {
         return Err(AsmError::new(cx.pos, "unbalanced `}` in conditional block"));
     }
     // Flush a trailing comment block so the formatter keeps it.
@@ -325,6 +331,29 @@ impl<'a> FmtCx<'a> {
                 }
                 self.pos += 1;
                 continue;
+            }
+
+            // `!eof` ends this *file* here — the lines after it are not
+            // parsed at all, so a malformed one is never seen. Stopping the
+            // scan is the whole implementation, and it gives ACME's three
+            // behaviours at once: at the top level the parse ends cleanly; an
+            // included file stops while its parent carries on (each file is
+            // its own parse); and inside an open `!if` the enclosing block
+            // reaches end-of-input where it wanted `}`, which is the error
+            // ACME reports as "Found end-of-file instead of '}'".
+            {
+                let word = split_first_word(trimmed).0.to_ascii_lowercase();
+                if word == "!eof" || word == "!endoffile" {
+                    let rest = split_first_word(trimmed).1.trim();
+                    if !rest.is_empty() {
+                        return Err(AsmError::new(
+                            line,
+                            format!("garbage data at end of statement: `{rest}`"),
+                        ));
+                    }
+                    self.pos = self.lines.len();
+                    return Ok((nodes, Closer::EofDirective));
+                }
             }
 
             // A block close: `}`, `} else {`, `} else` — or, when a `!zone`
@@ -565,8 +594,19 @@ impl<'a> FmtCx<'a> {
         // Multi-line: the body starts on the following line.
         self.pos += 1;
         let (then_body, closer) = self.parse_block()?;
+        // A conditional body must be closed. Running out of input instead —
+        // whether the file simply ended or `!eof` ended it — is ACME's "Found
+        // end-of-file instead of '}'", and was silently accepted here before:
+        // an unclosed `!if 1 {` assembled its body and emitted bytes.
+        let eof_in_block = |c| matches!(c, Closer::Eof | Closer::EofDirective);
+        if eof_in_block(closer) {
+            return Err(AsmError::new(line, "found end-of-file instead of `}`"));
+        }
         let else_body = if closer == Closer::BraceElse {
-            let (eb, _) = self.parse_block()?;
+            let (eb, eb_closer) = self.parse_block()?;
+            if eof_in_block(eb_closer) {
+                return Err(AsmError::new(line, "found end-of-file instead of `}`"));
+            }
             Some(eb)
         } else {
             None
@@ -2237,6 +2277,33 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // `!as`/`!rs` select short accumulator/index registers. On a 6502 they
+    // are accepted and emit nothing, which is every path this dialect has:
+    // the long forms `!al`/`!rl` are refused by ACME itself here ("Chosen CPU
+    // does not support long registers"), and the `!cpu 65816` that would make
+    // any of them matter is not implemented.
+    Directive {
+        id: "register-width",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["as", "rs"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // `!eof` ends **this file**, not the assembly: an include stops there and
+    // its parent carries on. Consumed by the line scanner rather than reaching
+    // `parse_directive`, the way `!zone` is — declared here because the
+    // declaration is what says the word exists.
+    Directive {
+        id: "eof",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["eof", "endoffile"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     // `!scrxor` is **not** `!xor` wrapped around `!scr`, though it looks it.
     // The mask reaches the converted characters of a string and nothing else:
     // `!scrxor $80, 65` is `41`, where `!xor $80 { !scr 65 }` is `c1`. A
@@ -2451,7 +2518,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What ACME has here and we do not.
     //
-    // 15 spellings against 0.97, counted from this list rather than recalled.
+    // 11 spellings against 0.97, counted from this list rather than recalled.
     // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
     // long registers" for them on a 6502, so they belong to a wider target.
     // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
@@ -2463,15 +2530,11 @@ pub const DIRECTIVES: &[Directive] = &[
             names: &[
                 "addr",
                 "address",
-                "as",
                 "convtab",
                 "cpu",
                 "ct",
                 "do",
-                "endoffile",
-                "eof",
                 "pseudopc",
-                "rs",
                 "symbollist",
                 "to",
                 "while",
@@ -2560,6 +2623,19 @@ fn parse_directive(
             })
         }
         "scr" => parse_text(anons, zone, rest, line, screen_code),
+        // Accepted and emits nothing. ACME rejects an operand — "Garbage data
+        // at end of statement" — so this does too rather than ignoring one.
+        "register-width" => {
+            if !rest.trim().is_empty() {
+                return Err(AsmError::new(
+                    line,
+                    format!("garbage data at end of statement: `{}`", rest.trim()),
+                ));
+            }
+            Ok(Operation::Bytes(Vec::new()))
+        }
+        // Consumed by the scanner; reaching here means a path misrouted it.
+        "eof" => Err(AsmError::new(line, "`!eof` is handled by the scanner")),
         "scrxor" => {
             let (mask_src, rest) = rest
                 .split_once(',')
@@ -3102,6 +3178,60 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// `!as`/`!rs` are accepted and emit nothing on a 6502. An operand is
+    /// refused, as ACME refuses it.
+    #[test]
+    fn register_width_directives_emit_nothing() {
+        assert_eq!(asm("!as\nlda #1").expect("as").bytes, vec![0xA9, 0x01]);
+        assert_eq!(asm("!rs\nlda #1").expect("rs").bytes, vec![0xA9, 0x01]);
+        asm("!as 1").expect_err("garbage at end of statement");
+        asm("!rs 1").expect_err("garbage at end of statement");
+    }
+
+    /// `!eof` ends the file where it stands; nothing after it is parsed, so
+    /// text that could not assemble never gets the chance to fail.
+    #[test]
+    fn eof_ends_the_file_without_parsing_the_rest() {
+        assert_eq!(asm("nop\n!eof\n!!!garbage").expect("eof").bytes, vec![0xEA]);
+        assert_eq!(
+            asm("nop\n!endoffile\nlda").expect("endoffile").bytes,
+            vec![0xEA]
+        );
+        assert!(asm("!eof\nnop").expect("at the top").bytes.is_empty());
+        asm("nop\n!eof 1").expect_err("takes no operand");
+    }
+
+    /// Inside an open block it is an error, not an ending: ACME answers
+    /// "Found end-of-file instead of '}'".
+    #[test]
+    fn eof_inside_an_open_block_is_an_error() {
+        asm("nop\n!if 1 {\n!eof\n}\n!byte 2").expect_err("block still open");
+    }
+
+    /// The same check, reached the ordinary way. This was accepted before —
+    /// an unclosed `!if 1 {` assembled its body and emitted bytes, where ACME
+    /// refuses the file. Found while implementing `!eof`, which lands on the
+    /// same path.
+    #[test]
+    fn an_unclosed_conditional_is_refused() {
+        asm("!if 1 {\nnop").expect_err("unclosed `!if`");
+        asm("!if 0 {\nnop\n} else {\n!byte 7").expect_err("unclosed `else`");
+        // The closed forms still work, including nesting.
+        assert_eq!(asm("!if 1 {\nnop\n}").expect("closed").bytes, vec![0xEA]);
+        assert_eq!(
+            asm("!if 0 {\nnop\n} else {\n!byte 7\n}")
+                .expect("else")
+                .bytes,
+            vec![0x07]
+        );
+        assert_eq!(
+            asm("!if 1 {\n!if 1 {\n!byte 3\n}\n}")
+                .expect("nested")
+                .bytes,
+            vec![0x03]
+        );
+    }
 
     /// `!scrxor` converts to screen codes and masks — but only what it
     /// converted.

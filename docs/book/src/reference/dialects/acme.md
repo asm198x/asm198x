@@ -8,7 +8,7 @@ C64 6502, ACME syntax.
 
 ## Directives
 
-25 directives, 58 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+27 directives, 58 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -16,6 +16,7 @@ C64 6502, ACME syntax.
 | `bytes` | `!byte`, `!by`, `!8` |  |
 | `conditional` | `!if`, `!ifdef`, `!ifndef` |  |
 | `diagnose` | `!error`, `!serious`, `!warn` |  |
+| `eof` | `!eof`, `!endoffile` |  |
 | `fill` | `!fill`, `!fi` |  |
 | `hex` | `!hex` |  |
 | `incbin` | `!bin`, `!binary` |  |
@@ -27,6 +28,7 @@ C64 6502, ACME syntax.
 | `obsolete-subzone` | `!subzone`, `!sz` | Refused, as the reference refuses it — retired in ACME 0.97, which answers `"!subzone {}" is obsolete; use "!zone {}" instead` |
 | `pet` | `!pet` |  |
 | `raw` | `!raw` |  |
+| `register-width` | `!as`, `!rs` |  |
 | `repeat` | `!for` |  |
 | `scr` | `!scr` |  |
 | `scrxor` | `!scrxor` |  |
@@ -34,7 +36,7 @@ C64 6502, ACME syntax.
 | `sized` | `!be16`, `!be24`, `!be32`, `!le16`, `!le24`, `!le32` |  |
 | `skip` | `!skip` |  |
 | `text` | `!text`, `!tx` |  |
-| `unsupported-acme` | `!addr`, `!address`, `!as`, `!convtab`, `!cpu`, `!ct`, `!do`, `!endoffile`, `!eof`, `!pseudopc`, `!rs`, `!symbollist`, `!to`, `!while`, `!xor` | Recognised, and not implemented |
+| `unsupported-acme` | `!addr`, `!address`, `!convtab`, `!cpu`, `!ct`, `!do`, `!pseudopc`, `!symbollist`, `!to`, `!while`, `!xor` | Recognised, and not implemented |
 | `words` | `!word`, `!wo`, `!16` |  |
 | `zone` | `!zone`, `!zn` |  |
 
