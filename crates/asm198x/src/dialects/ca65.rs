@@ -771,21 +771,21 @@ fn emit(
         Resolved::Words(exprs) => {
             for e in &exprs {
                 let v = e.eval(env, pc, line_for_errors)?;
-                let w = u16::try_from(v & 0xFFFF).expect("masked");
+                let w = u16::try_from(to_width(v, 0xFFFF, line_for_errors)?).expect("checked");
                 out.extend_from_slice(&w.to_le_bytes());
             }
         }
         Resolved::DBytes(exprs) => {
             for e in &exprs {
                 let v = e.eval(env, pc, line_for_errors)?;
-                let w = u16::try_from(v & 0xFFFF).expect("masked");
+                let w = u16::try_from(to_width(v, 0xFFFF, line_for_errors)?).expect("checked");
                 out.extend_from_slice(&w.to_be_bytes());
             }
         }
         Resolved::DWords(exprs) => {
             for e in &exprs {
                 let v = e.eval(env, pc, line_for_errors)?;
-                let w = u32::try_from(v & 0xFFFF_FFFF).expect("masked");
+                let w = u32::try_from(to_width(v, 0xFFFF_FFFF, line_for_errors)?).expect("checked");
                 out.extend_from_slice(&w.to_le_bytes());
             }
         }
@@ -835,13 +835,26 @@ fn emit(
     Ok(())
 }
 
+/// ca65 takes **no negative literal**, at any width: `.byte -1` is `Range
+/// error (-1 not in [0..255])`, and `.word -1` and `.dword -1` answer the
+/// same way against their own bounds (probed 2026-08-25). It is the only
+/// reference here that refuses — the other six read `-1` as its two's
+/// complement — so this bound is ca65's, not a house preference.
 fn to_byte(v: i64, line: usize) -> Result<u8, AsmError> {
-    if (-128..=0xFF).contains(&v) {
-        Ok((v & 0xFF) as u8)
+    to_width(v, 0xFF, line).map(|v| v as u8)
+}
+
+/// One width's range check, so `.byte`, `.word` and `.dword` cannot drift
+/// apart. Before this the word and dword paths simply masked, which accepted
+/// `.word -1` and `.word 65536` in silence where ca65 refuses both
+/// (asm198x#290).
+fn to_width(v: i64, max: i64, line: usize) -> Result<i64, AsmError> {
+    if (0..=max).contains(&v) {
+        Ok(v)
     } else {
         Err(AsmError::new(
             line,
-            format!("value {v} does not fit in a byte"),
+            format!("range error ({v} not in [0..{max}])"),
         ))
     }
 }

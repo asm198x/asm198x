@@ -59,6 +59,14 @@ use crate::span::FileId;
 pub(crate) struct Rgbasm;
 
 impl Dialect for Rgbasm {
+    /// rgbasm 1.0.3 truncates **and says so**: `db 256` and `ld a,300` both
+    /// give `warning: Expression must be 8-bit; use LOW() to force 8-bit
+    /// [-Wtruncation]` and assemble to `00` / `3e 2c`. It warns for operands
+    /// and data alike (probed 2026-08-25).
+    fn oversized_byte_policy(&self) -> crate::dialect::Oversize {
+        crate::dialect::Oversize::TruncateWarn
+    }
+
     /// A Game Boy ROM starts at file offset 0, whatever the program's lowest
     /// section is: a lone `SECTION "p", ROMX, BANK[2]` still emits the 32K
     /// before it (probe-pinned — `rgblink` writes 49152 bytes for that).
@@ -1527,6 +1535,20 @@ fn expand_rgbasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion
 
 #[cfg(test)]
 mod tests {
+
+    /// rgbasm truncates an oversized value and warns; it does not refuse.
+    /// This is what replaced the `contract.rs` span case that asserted an
+    /// error here — that case was pinning our divergence rather than
+    /// rgbasm's behaviour (asm198x#290).
+    #[test]
+    fn an_oversized_byte_is_a_warning_not_an_error() {
+        let out = crate::assemble_rgbasm("SECTION \"a\", ROM0\n        ld a, 300\n")
+            .expect("rgbasm truncates rather than refusing");
+        assert_eq!(out.bytes, vec![0x3E, 0x2C]);
+        let out = crate::assemble_rgbasm("SECTION \"a\", ROM0\n        db 256\n")
+            .expect("data truncates too");
+        assert_eq!(out.bytes, vec![0x00]);
+    }
 
     /// A section is placed at its own base, whatever order the source wrote
     /// them in — the thing an `org` could never express, since it can only

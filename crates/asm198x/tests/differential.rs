@@ -271,6 +271,30 @@ const PROBES: &[Probe] = &[
     ok ("acme", "!fill with a value",    " !fill 3,$ff\n lda #1\n"),
     // `!fi` is ACME's short spelling of `!fill`, not a conditional terminator.
     ok ("acme", "!fi is short for !fill", " !fi 3,$ff\n lda #1\n"),
+    // Value ranges, at the corners each reference actually draws them
+    // (asm198x#290). Only accepted forms are probed — the harness treats a
+    // reference rejection as out of scope, which is exactly right here: the
+    // refusals are asserted in each dialect's own tests, and what needs a
+    // recorded fact is the *bytes* a reference produces for a value we used
+    // to refuse.
+    ok ("acme", "negative byte",         " !byte -1\n"),
+    ok ("acme", "negative word",         " !word -1\n"),
+    ok ("acme", "most negative word",    " !word -32768\n"),
+    ok ("lwasm", "byte truncates up",    " fcb 256\n"),
+    ok ("lwasm", "byte truncates down",  " fcb -129\n"),
+    ok ("lwasm", "negative word",        " fdb -1\n"),
+    ok ("lwasm", "word truncates",       " fdb 65536\n"),
+    ok ("sjasmplus", "byte truncates",   " db 256\n"),
+    ok ("sjasmplus", "negative word",    " dw -1\n"),
+    ok ("sjasmplus", "operand truncates", " ld a,256\n"),
+    ok ("pasmo", "byte truncates",       " defb 256\n"),
+    ok ("pasmo", "negative word",        " defw -1\n"),
+    ok ("pasmo", "operand truncates",    " ld a,256\n"),
+    ok ("rgbasm", "byte truncates up",   "SECTION \"s\",ROM0[0]\ndb 256\n"),
+    ok ("rgbasm", "byte truncates down", "SECTION \"s\",ROM0[0]\ndb -129\n"),
+    ok ("rgbasm", "negative word",       "SECTION \"s\",ROM0[0]\ndw -1\n"),
+    ok ("rgbasm", "word truncates",      "SECTION \"s\",ROM0[0]\ndw 65536\n"),
+    ok ("rgbasm", "operand truncates",   "SECTION \"s\",ROM0[0]\nld a,300\n"),
     // `!raw` bypasses the conversion table where `!text` honours it. Both are
     // probed so the pair stays tied: today they agree, and when `!ct` lands
     // only one of them may change.

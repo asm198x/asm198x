@@ -34,6 +34,20 @@ use crate::span::FileId;
 pub(crate) struct Lwasm;
 
 impl Dialect for Lwasm {
+    /// lwtools 4.25 truncates a data directive rather than refusing it:
+    /// `fcb 256` is `00` and `fdb 65536` is `00 00`, with no diagnostic
+    /// (probed 2026-08-25).
+    fn oversized_byte_policy(&self) -> crate::dialect::Oversize {
+        crate::dialect::Oversize::Truncate
+    }
+
+    /// An **operand** is the opposite: `ldb #$1ff` is `ERROR : Byte
+    /// overflow`, where `fcb $1ff` beside it is a silent `ff`. lwasm is the
+    /// only reference here that splits the two.
+    fn oversized_operand_policy(&self) -> crate::dialect::Oversize {
+        crate::dialect::Oversize::Error
+    }
+
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         // The engine consults this only for byte order (the 6809 computes its own
         // encoding into `Encoded` pieces); 6809 is big-endian.

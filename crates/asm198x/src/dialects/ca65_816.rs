@@ -44,6 +44,14 @@ use crate::span::FileId;
 pub(crate) struct Ca65_816;
 
 impl Dialect for Ca65_816 {
+    /// ca65 refuses a negative literal at every width — `Range error (-1 not
+    /// in [0..255])` for a byte, and the same for a word and a dword. It is
+    /// the only reference here that does (probed 2026-08-25); refusing this
+    /// source is matching it, not being strict for its own sake.
+    fn accepts_negative_values(&self) -> bool {
+        false
+    }
+
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::mos6502::SET
     }

@@ -115,12 +115,48 @@ pub(crate) trait Dialect {
         false
     }
 
-    /// How to handle a value that overflows a **byte** operand (an 8-bit
-    /// immediate or a `defb`-style byte). Defaults to [`Oversize::Error`]; the
-    /// Z80 dialects override to truncate (pasmo silently, sjasmplus with a
-    /// warning), matching their reference tools.
+    /// Whether a value may be written as a **negative** number, at any width.
+    ///
+    /// The accepted range for `n` bytes is either `-(2^(8n-1))..=2^(8n)-1` —
+    /// signed or unsigned, whichever the source meant — or `0..=2^(8n)-1`,
+    /// with no negatives at all. That is a property of the reference tool,
+    /// not of the width, and the tools genuinely split on it (probed
+    /// 2026-08-25):
+    ///
+    /// | tool | `-1` as a byte or word |
+    /// |---|---|
+    /// | acme, asl, lwasm, vasm, sjasmplus, pasmo, rgbasm | `ff` / `ff ff` |
+    /// | ca65 | `Range error (-1 not in [0..255])` |
+    ///
+    /// ca65 is the only one that refuses, and it refuses everywhere — data
+    /// directives and instruction operands alike, at byte, word and dword.
+    /// So this is one answer per dialect rather than one per directive.
+    ///
+    /// Defaults to `true`, which is six of the seven references. Returning
+    /// `false` is not a stricter setting to be preferred on taste: it makes
+    /// the assembler refuse source, so it must be what the reference does.
+    fn accepts_negative_values(&self) -> bool {
+        true
+    }
+
+    /// How to handle a value outside the accepted range in a **data
+    /// directive** (`!byte`, `defw`, `fcb`), at byte or word width. Defaults
+    /// to [`Oversize::Error`]; the tools that truncate override it (pasmo
+    /// silently, sjasmplus and rgbasm with a warning).
     fn oversized_byte_policy(&self) -> Oversize {
         Oversize::Error
+    }
+
+    /// The same question for an **instruction operand**, which is not always
+    /// the same answer. Defaults to whatever the data directives do, because
+    /// six of the seven references treat them alike.
+    ///
+    /// lwasm is the exception, and only probing found it: `fcb $1ff` truncates
+    /// to `ff` without a word, while `ldb #$1ff` is a hard `Byte overflow`.
+    /// Same tool, same width, same value, opposite answers — so the two
+    /// questions cannot share one method (probed 2026-08-25, asm198x#290).
+    fn oversized_operand_policy(&self) -> Oversize {
+        self.oversized_byte_policy()
     }
 
     /// Whether the formatter keeps a colon on an `equ` label (`name: equ …`).
