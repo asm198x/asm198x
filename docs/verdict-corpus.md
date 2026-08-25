@@ -51,6 +51,14 @@ everything.
 That is the difference between a decision and a debt, which the coverage number
 alone cannot express.
 
+A reason opening with `owed` says these rows are meant to come back. That entry
+still lets work merge — blocking the merge would mean blocking on a growth run,
+which needs the reference tools — but it stops a release:
+`cargo xtask coverage --no-debt` runs before the tag and stays red until a
+growth run recovers the rows, or until the reason is rewritten as the decision
+it turned out to be. A release is the deadline, which is what bounds how long a
+de-arbitrated form can hide.
+
 ### Refreshing the stamp
 
 A **rise** needs the same command, without the explanation — refresh the stamp

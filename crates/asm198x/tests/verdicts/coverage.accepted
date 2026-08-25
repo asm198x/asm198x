@@ -11,6 +11,14 @@
 # The count is rows, not a percentage, so it does not drift when a spec gains
 # forms. Widening one is a deliberate edit with a reason, like the stamp.
 #
+# A reason opening with `owed` means the opposite of settled: these rows are
+# meant to come back. Such an entry still lets work merge — the alternative is
+# blocking a merge on a growth run that needs the reference tools — but it
+# stops a release. `cargo xtask coverage --no-debt` runs before the tag, and
+# stays red until a growth run recovers the rows or the reason is rewritten as
+# the decision it turned out to be. That bounds how long a de-arbitrated form
+# can hide.
+#
 # CPU	rows	why
 6809	3	`reset`, `rhf` and `hcf` are input-only: the form audit works through the disassembler, which by decision never writes them — decisions/undocumented-opcodes-are-input-only.md
 8039	4	the ROM-less bus commits the four BUS-port ops, so the part forbids them and the audit skips them deliberately

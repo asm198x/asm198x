@@ -134,6 +134,7 @@ fn usage() -> String {
      \x20 surface --write     refresh the surface stamp\n\
      \x20 coverage            report arbitration coverage over the verdict corpus\n\
      \x20 coverage --check    fail if any CPU's coverage fell below the stamp\n\
+     \x20 coverage --no-debt  fail if any shortfall is still owed (pre-tag gate)\n\
      \x20 coverage --write    refresh the stamp\n\
      \x20 ledger              print the conformance ledger for this revision\n\
      \x20 grow [filter]       arbitrate what is not yet recorded (needs the tools)\n\
@@ -400,6 +401,37 @@ fn run_parity(args: &[String]) -> ExitCode {
 
 fn run_coverage(args: &[String]) -> ExitCode {
     let repo = repo();
+
+    // The pre-tag release gate. Separate from `--check` because it asks a
+    // different question: not "is every shortfall declared" but "is any of them
+    // still owed". A release carrying a settled shortfall is fine; one carrying
+    // a de-arbitrated form nobody has recovered is what this stops.
+    if args.iter().any(|a| a == "--no-debt") {
+        let accepted_path = coverage::accepted_path(&repo);
+        let accepted = std::fs::read_to_string(&accepted_path).unwrap_or_default();
+        let parsed = coverage::parse_accepted(&accepted);
+        let owed = coverage::owed(&parsed);
+        if owed.is_empty() {
+            println!("no arbitration debt is owed — the release may tag");
+            return ExitCode::SUCCESS;
+        }
+        eprintln!(
+            "{} shortfall(s) are still owed, so this must not tag:",
+            owed.len()
+        );
+        for (cpu, a) in &owed {
+            eprintln!("  {cpu}: {} row(s) — {}", a.rows, a.reason);
+        }
+        eprintln!(
+            "\nThese rows were de-arbitrated and are meant to come back. Recover \
+             them with a growth run and drop the entry, or — if they are not \
+             coming back — say so, by rewriting the reason as the decision it \
+             really is. A release is the deadline for that answer, which is why \
+             the entry was allowed to merge in the first place."
+        );
+        return ExitCode::FAILURE;
+    }
+
     let report = coverage::compute(&repo);
     let rendered = coverage::render_stamp(&report);
     let path = coverage::stamp_path(&repo);
