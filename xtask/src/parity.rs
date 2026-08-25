@@ -63,7 +63,8 @@ pub struct MachineParity {
     comparisons: usize,
     /// Files the shape rule finds in the checkout, when one is present.
     in_checkout: Option<usize>,
-    /// Files present in the checkout with no verdict — the gap that matters.
+    /// Files in the checkout with no verdict for their current contents — the
+    /// gap that matters. A stale verdict under the same path does not count.
     unverified: Vec<String>,
     arbiters: Vec<ArbiterCount>,
 }
@@ -95,10 +96,24 @@ impl Report {
 }
 
 /// Take a curriculum key apart: `<relpath>#<variant>@<digest>`.
-fn parse_key(key: &str) -> Option<(&str, &str)> {
+fn parse_key(key: &str) -> Option<(&str, &str, &str)> {
     let (path, rest) = key.split_once('#')?;
-    let (variant, _digest) = rest.split_once('@')?;
-    Some((path, variant))
+    let (variant, digest) = rest.split_once('@')?;
+    Some((path, variant, digest))
+}
+
+/// The digest a curriculum key would carry for this file's current contents.
+///
+/// The key is built from the file's text (`curriculum_key` hashes the string
+/// the harness read), so hashing the bytes gives the same answer. Returns
+/// `None` for a file that cannot be read, which the caller treats as
+/// unverified rather than silently present.
+fn content_digest(path: &Path) -> Option<String> {
+    use sha2::{Digest, Sha256};
+    let bytes = std::fs::read(path).ok()?;
+    let mut h = Sha256::new();
+    h.update(&bytes);
+    Some(crate::ledger::hex_lower(&h.finalize()))
 }
 
 /// The machine slug in a curriculum relpath: `code-samples/<slug>/assembly/…`.
@@ -140,7 +155,7 @@ pub fn compute(repo: &Path) -> Report {
             if retired.contains(&verdict.id().as_str()) {
                 continue;
             }
-            let Some((relpath, variant)) = parse_key(&verdict.source) else {
+            let Some((relpath, variant, digest)) = parse_key(&verdict.source) else {
                 continue;
             };
             let Some(slug) = machine_of(relpath) else {
@@ -149,6 +164,11 @@ pub fn compute(repo: &Path) -> Report {
             let m = by_machine.entry(slug.to_string()).or_default();
             m.cpu = verdict.cpu.clone();
             m.sources.insert(relpath.to_string());
+            // Keyed on the content, not the path: that is what makes the
+            // receipt say "arbitrated against *this* text" rather than "a file
+            // of this name was arbitrated once".
+            m.arbitrated
+                .insert((relpath.to_string(), digest.to_string()));
             m.comparisons += 1;
             let a = m
                 .arbiters
@@ -170,11 +190,20 @@ pub fn compute(repo: &Path) -> Report {
                 Some(root) => {
                     let dir = root.join(format!("code-samples/{slug}/assembly"));
                     let found = verdict_corpus::curriculum::machine_sources(&dir);
+                    // A file is verified when the corpus holds a verdict for
+                    // *its current contents*. Matching on the path alone would
+                    // let a pin bump that edits a file ride on the old pin's
+                    // verdict — the partial re-arbitration the receipt exists
+                    // to refuse (asm198x#264).
                     let missing: Vec<String> = found
                         .iter()
-                        .filter_map(|p| p.strip_prefix(root).ok())
-                        .map(|p| p.to_string_lossy().replace('\\', "/"))
-                        .filter(|rel| !m.sources.contains(rel))
+                        .filter_map(|p| {
+                            let rel = p.strip_prefix(root).ok()?;
+                            let rel = rel.to_string_lossy().replace('\\', "/");
+                            let fresh = content_digest(p)
+                                .is_some_and(|d| m.arbitrated.contains(&(rel.clone(), d)));
+                            (!fresh).then_some(rel)
+                        })
                         .collect();
                     (Some(found.len()), missing)
                 }
@@ -217,6 +246,8 @@ pub fn compute(repo: &Path) -> Report {
 struct Machine {
     cpu: String,
     sources: BTreeSet<String>,
+    /// Every (path, source digest) the corpus holds a live verdict for.
+    arbitrated: BTreeSet<(String, String)>,
     comparisons: usize,
     arbiters: BTreeMap<(String, String), (usize, BTreeSet<String>)>,
 }
@@ -346,4 +377,35 @@ pub fn regressions(report: &Report, committed: &str) -> Vec<String> {
         ));
     }
     out
+}
+
+#[cfg(test)]
+mod tests {
+    use super::parse_key;
+
+    /// The key carries the source digest, and the receipt needs it.
+    ///
+    /// Dropping it is what let a pin bump that *edits* a file ride on the old
+    /// pin's verdict: the path still matched, so the file read as verified
+    /// (asm198x#264).
+    #[test]
+    fn a_key_yields_its_path_variant_and_digest() {
+        let key = "code-samples/sinclair-zx-spectrum/assembly/gloaming/unit-06/survives.asm\
+                   #pasmonext@2ab0169788193e27060e999b51707a29cc88eb7c226d682a38ab12987349a0d7";
+        let (path, variant, digest) = parse_key(key).expect("parses");
+        assert!(path.ends_with("survives.asm"));
+        assert_eq!(variant, "pasmonext");
+        assert_eq!(
+            digest,
+            "2ab0169788193e27060e999b51707a29cc88eb7c226d682a38ab12987349a0d7"
+        );
+    }
+
+    /// A key without a digest is not a curriculum key, and is skipped rather
+    /// than treated as a file with no content.
+    #[test]
+    fn a_key_without_a_digest_is_not_one() {
+        assert!(parse_key("path.asm#pasmonext").is_none());
+        assert!(parse_key("path.asm").is_none());
+    }
 }

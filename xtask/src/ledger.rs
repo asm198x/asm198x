@@ -192,7 +192,7 @@ fn suite_of(v: &Verdict) -> String {
 /// **upper**-case, for the byte payloads a verdict carries. Swapping the case
 /// of a recorded digest would change every `Verdict::id` and leave the corpus
 /// mixed, so the case is part of the format rather than a detail.
-fn hex_lower(bytes: &[u8]) -> String {
+pub(crate) fn hex_lower(bytes: &[u8]) -> String {
     use std::fmt::Write as _;
     bytes
         .iter()
