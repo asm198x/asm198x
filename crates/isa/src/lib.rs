@@ -140,6 +140,46 @@ pub struct Form {
 }
 
 impl Form {
+    /// One representative encoding of this form: the opcode bytes, a canonical
+    /// value for each operand slot, then any suffix.
+    ///
+    /// The bytes are a valid instance of the form, not a meaningful program.
+    /// What matters is that they are legal for the operand kinds, so a
+    /// disassembler reading them writes source a real assembler will accept —
+    /// which is how the form audit puts every row it declares to a reference
+    /// tool. See `decisions/a-row-can-exemplify-itself.md`.
+    ///
+    /// It answers "show me one of these", not "encode this source": a user's
+    /// operands, expression folding and symbol resolution belong to the
+    /// dialect that reads them.
+    ///
+    /// Allocation-free, because this crate is.
+    pub fn exemplar(&self) -> impl Iterator<Item = u8> + '_ {
+        self.opcode
+            .iter()
+            .copied()
+            .chain(self.operands.iter().flat_map(|op| {
+                let (bytes, len): ([u8; 3], usize) = match op.kind {
+                    // A small forward offset, little-endian over the width, so
+                    // the target stays near and needs no label.
+                    OperandKind::RelativePc => ([0x02, 0x00, 0x00], usize::from(op.bytes)),
+                    OperandKind::Displacement => ([0x05, 0x00, 0x00], 1),
+                    // Big-endian 16-bit immediate: the Z80N `push nn`, whose
+                    // high byte comes first.
+                    OperandKind::ImmediateBe => ([0x12, 0x34, 0x00], 2),
+                    // $12 / $1234 / $123456, little-endian.
+                    OperandKind::Immediate | OperandKind::Address => match op.bytes {
+                        1 => ([0x12, 0x00, 0x00], 1),
+                        2 => ([0x34, 0x12, 0x00], 2),
+                        3 => ([0x56, 0x34, 0x12], 3),
+                        _ => ([0x00, 0x00, 0x00], 0),
+                    },
+                };
+                bytes.into_iter().take(len)
+            }))
+            .chain(self.suffix.iter().copied())
+    }
+
     /// Total encoded length in bytes: opcode bytes, operand bytes, and any
     /// trailing suffix opcode bytes.
     #[must_use]
@@ -429,6 +469,58 @@ mod row_tests {
              than entries ({entries})",
             rows.len()
         );
+    }
+
+    /// An exemplar is exactly as long as the form says it is.
+    ///
+    /// [`Form::len`] is what the assembler advances the program counter by, and
+    /// an exemplar that disagreed with it would be a different instruction from
+    /// the one the row names — which the audit would then arbitrate under the
+    /// wrong name.
+    #[test]
+    fn an_exemplar_is_as_long_as_the_form_claims() {
+        let mut checked = 0usize;
+        for set in [
+            &crate::z80::SET,
+            &crate::mos6502::SET,
+            &crate::sm83::SET,
+            &crate::i8080::SET,
+            &crate::m6800::SET,
+            &crate::mos65816::SET,
+        ] {
+            for insn in set.instructions {
+                for form in insn.forms {
+                    assert_eq!(
+                        form.exemplar().count(),
+                        form.len(),
+                        "{} {}",
+                        insn.mnemonic,
+                        form.mode
+                    );
+                    checked += 1;
+                }
+            }
+        }
+        assert!(checked > 0);
+    }
+
+    /// An exemplar starts with the opcode and ends with the suffix, so the
+    /// operand values sit where the encoding puts them. The Z80's `DD CB`
+    /// group is the case that matters: its final opcode byte comes *after* the
+    /// displacement operand, and an exemplar that appended the suffix in the
+    /// wrong place would encode a different instruction.
+    #[test]
+    fn an_exemplar_keeps_the_suffix_last() {
+        let form = crate::z80::SET
+            .instructions
+            .iter()
+            .flat_map(|i| i.forms)
+            .find(|f| !f.suffix.is_empty())
+            .expect("the Z80 declares suffixed forms");
+        let bytes: Vec<u8> = form.exemplar().collect();
+        assert!(bytes.starts_with(form.opcode), "{bytes:02X?}");
+        assert!(bytes.ends_with(form.suffix), "{bytes:02X?}");
+        assert_eq!(bytes.len(), form.len());
     }
 
     /// A row carries the form's `undocumented` flag rather than inventing one,
