@@ -94,9 +94,10 @@ it reaches the hard part.
 
 ## Outcome
 
-All four steps landed. The Z8000 finished at **124 of 271 rows arbitrated**,
-which is the number the sequencing above predicted would be partial and is
-recorded here rather than rounded up.
+All four steps landed, and both Z8000 CPUs finished at **271 of 271 rows
+arbitrated** — nothing unplaced, nothing excepted, and no row diverging in
+bytes. It took five passes to get there, and every pass but the first raised
+the number by placing a family rather than by fixing an encoding.
 
 Three things came out differently than planned.
 
@@ -125,6 +126,33 @@ one genuine byte divergence in 271 rows — we emit the long dyadic form where
 ([asm198x#252](https://github.com/asm198x/asm198x/issues/252)). It is an
 explicitly named exception in the audit, not part of the anonymous unplaced
 count, and the entry comes out when the row arbitrates.
+
+## Filler is part of the exemplar
+
+The single most common failure was never a wrong opcode word. It was **operand
+words that were not a legal instance of the form**, which stop the row
+disassembling back to itself and so look exactly like an encoding error:
+
+- a byte immediate must be its byte *replicated* into a word;
+- a segmented memory operand must carry a long-form segment word, which `asl`
+  writes even where the short form would fit;
+- a shift's count travels in a following word, and filler is not a count.
+
+Each cost a round of measurement to find and one line to fix. The rule that
+came out of it: **an exemplar is the whole instruction, not its first word.**
+Where a family has operand words, the family states them.
+
+## A sibling row can answer for the wrong one
+
+The store forms are the sharpest lesson here. They share a mnemonic with the
+loads and differ only in a `store` flag, so a lookup by name alone hands a
+store row the *load's* encoding. That still names the right mnemonic, so
+`names_row` passes and the audit records a verdict — for the wrong instruction.
+
+The non-segmented CPU read 271 of 271 while doing exactly that. The Z8001
+caught it, because its segmented encodings differ enough that the wrong entry
+stopped decoding. **An audit that matches on the name alone can be green and
+wrong**, and only a second CPU sharing the spec made the difference visible.
 
 ## Shifts and rotates
 

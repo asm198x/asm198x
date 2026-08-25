@@ -95,6 +95,41 @@ pub struct Ctl {
 
 use CtlKind::{Calr, Djnz, Jr, Jump, Ret};
 
+impl Ctl {
+    /// One representative encoding, or `None` for a mode this entry disallows.
+    ///
+    /// `Jump` is dyadic-shaped and takes its mode from the row, so it reads
+    /// `mm_of` like the dyadic table does — including the segmented rule that
+    /// an `@Rn` pointer is a register pair. The other four kinds are one fixed
+    /// word each, keyed by the top byte in `base`.
+    #[must_use]
+    pub fn exemplar(&self, mode: &str, seg: bool) -> Option<u16> {
+        // `EQ` where the entry carries a condition, else the nibble is zero.
+        let cc = u16::from(self.cc) * 6;
+        Some(match self.kind {
+            CtlKind::Jump => {
+                let (mm, field) = mm_of(mode)?;
+                let field = if seg && mode == "indirect register" {
+                    lowest_register(Size::Long)
+                } else {
+                    field
+                };
+                first_word(mm, self.base as u8, field, cc)
+            }
+            // Displacement zero: the instruction after this one.
+            CtlKind::Jr => (self.base | cc) << 8,
+            CtlKind::Ret => self.base | cc,
+            // `R4`, and a distance of one with the word/byte bit above it.
+            CtlKind::Djnz => {
+                let w = if self.byte { 0 } else { 0x80 };
+                ((self.base | 4) << 8) | w | 1
+            }
+            // `CALR` counts backwards, so its shortest distance is one.
+            CtlKind::Calr => (self.base << 8) | 1,
+        })
+    }
+}
+
 /// The program-control instructions (increment 3).
 pub const CONTROL: &[Ctl] = &[
     Ctl {
@@ -389,6 +424,20 @@ pub struct Stack {
 /// The `base6` of the special `PUSH @Rsp, #imm` form (low nibble 9).
 pub const PUSH_IMM_BASE6: u8 = 0x0D;
 
+impl Stack {
+    /// One representative encoding: a stack pointer and a value register.
+    ///
+    /// Which nibble holds which swaps with the direction — `PUSH` takes the
+    /// pointer first, `POP` the destination — and an exemplar needs both slots
+    /// legal rather than correctly assigned.
+    #[must_use]
+    pub const fn exemplar(&self) -> u16 {
+        // `@R4` with the value in `R6`: both even, so both are legal as a
+        // segmented pointer and as the long pair `PUSHL`/`POPL` want.
+        first_word(2, self.base6, 4, 6)
+    }
+}
+
 /// The stack instructions (increment 5).
 pub const STACK: &[Stack] = &[
     Stack {
@@ -672,6 +721,17 @@ pub struct Bit {
     pub base6: u8,
     pub size: Size,
     pub summary: &'static str,
+}
+
+impl Bit {
+    /// One representative encoding: `BIT R1, #3` and its relatives.
+    ///
+    /// The static form only. A dynamic bit number (`bit r4,r6`) is a different,
+    /// two-word encoding that this entry does not describe.
+    #[must_use]
+    pub const fn exemplar(&self) -> u16 {
+        first_word(2, self.base6, lowest_register(self.size), 3)
+    }
 }
 
 /// The bit-manipulation instructions (increment 7).
@@ -1220,6 +1280,25 @@ pub struct SimpleIo {
     pub summary: &'static str,
 }
 
+impl SimpleIo {
+    /// One representative encoding of the **direct**-port form: the opcode word
+    /// and the port address that follows it.
+    ///
+    /// Direct rather than indirect because every entry has it — special I/O
+    /// (`SIN`/`SOUT`) has no `@Rn` form at all, so the indirect one could not
+    /// exemplify the family.
+    #[must_use]
+    pub fn exemplar(&self) -> (u16, u16) {
+        // A low, even port address: byte ports will not take a wide one, and
+        // this serves both sizes.
+        const PORT: u16 = 0x0034;
+        (
+            first_word(0, io_direct_top(self.size), 1, u16::from(self.direct_sub)),
+            PORT,
+        )
+    }
+}
+
 /// The direct-port top byte for a size (`0x3B` word / `0x3A` byte).
 #[must_use]
 pub fn io_direct_top(size: Size) -> u8 {
@@ -1521,6 +1600,29 @@ pub struct Control {
     pub summary: &'static str,
 }
 
+impl Control {
+    /// One representative encoding. Every kind here is a single word.
+    #[must_use]
+    pub fn exemplar(&self) -> u16 {
+        match self.kind {
+            ControlKind::Fixed(word) => word,
+            ControlKind::Mreq => 0x7B00 | (4 << 4) | 0x0D,
+            // The carry flag, which every one of the three accepts.
+            ControlKind::Flag(subop) => 0x8D00 | (8 << 4) | u16::from(subop),
+            // `VI`, with the enable bit above it.
+            ControlKind::Intr(enable) => 0x7C00 | (u16::from(enable) * 4) | 1,
+            ControlKind::Ldctl(size) => match size {
+                // The byte form reaches `FLAGS` and nothing else.
+                Size::Byte => 0x8C00 | (4 << 4) | 1,
+                _ => 0x7D00 | (4 << 4) | 2,
+            },
+            // The indirect form, which is one word where direct is two.
+            ControlKind::Ldps => 0x3900 | (4 << 4),
+            ControlKind::Sc => 0x7F00 | 5,
+        }
+    }
+}
+
 use ControlKind::{Fixed, Flag, Intr, Ldctl, Ldps, Mreq, Sc};
 
 const fn ctrl(mnemonic: &'static str, kind: ControlKind, summary: &'static str) -> Control {
@@ -1687,6 +1789,24 @@ pub const MISC: &[Misc] = &[
     misc("LDRB", Ldr, Byte, 0x30, "Load relative byte"),
     misc("LDRL", Ldr, Long, 0x35, "Load relative long"),
 ];
+
+impl Misc {
+    /// One representative encoding: the opcode word, and the relative word that
+    /// `LDR` carries after it.
+    #[must_use]
+    pub fn exemplar(&self) -> (u16, Option<u16>) {
+        let top = u16::from(self.top) << 8;
+        match self.kind {
+            // Condition `EQ`.
+            MiscKind::Tcc => (top | (4 << 4) | 6, None),
+            MiscKind::Ldk => (top | (4 << 4) | 5, None),
+            MiscKind::Rotdig => (top | (6 << 4) | 4, None),
+            // The load direction, register in the low nibble, and a distance
+            // that lands back on the instruction itself.
+            MiscKind::Ldr => (top | 4, Some(0xFFFC)),
+        }
+    }
+}
 
 /// Find a miscellaneous instruction by mnemonic (case-insensitive).
 #[must_use]
@@ -2374,15 +2494,18 @@ impl Insn {
     /// *pair* and so must be even — the only thing segmentation changes about
     /// this first word. The extension words differ too, but they are not this.
     ///
-    /// See `decisions/a-row-can-exemplify-itself.md`. `None` for the store
-    /// forms and any mode this entry does not allow: their memory operand is
-    /// the destination, and which nibble carries what is the assembler's
-    /// knowledge rather than the spec's.
+    /// A store form encodes in the same shape as a load — the mode group, the
+    /// base, a field nibble and a register nibble, in those positions. What
+    /// differs is what the nibbles *mean*: the memory operand is the
+    /// destination and the register is the source. An exemplar needs the
+    /// positions, so `store` changes nothing here beyond the row label it
+    /// arrives under.
+    ///
+    /// See `decisions/a-row-can-exemplify-itself.md`. `None` for a mode this
+    /// entry does not allow.
     #[must_use]
     pub fn exemplar(&self, mode: &str, seg: bool) -> Option<u16> {
-        if self.store {
-            return None;
-        }
+        let mode = mode.strip_suffix(", store").unwrap_or(mode);
         // Where a one-word immediate form exists, it is the encoding both this
         // assembler and the reference emit, so it is what the row exemplifies.
         if let (Some(top), "immediate") = (self.short_immediate_top(), mode) {
