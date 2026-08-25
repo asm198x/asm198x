@@ -42,6 +42,12 @@ const DATA: &str = "crates/asm198x/tests/verdicts/parity.json";
 /// The curriculum revision the recorded verdicts describe.
 const PIN: &str = "crates/asm198x/tests/verdicts/code-samples.pin";
 
+/// That revision's commit date, kept beside it rather than in it.
+///
+/// It cannot go *in* the pin file: CI reads that one with `cat` straight into
+/// a checkout ref, so anything but a bare SHA breaks the checkout.
+const DATE: &str = "crates/asm198x/tests/verdicts/code-samples.date";
+
 /// One reference tool's contribution to a machine's parity.
 struct ArbiterCount {
     tool: String,
@@ -379,9 +385,154 @@ pub fn regressions(report: &Report, committed: &str) -> Vec<String> {
     out
 }
 
+/// Whether the recorded pin describes the checkout that is actually here.
+pub enum PinVerdict {
+    /// HEAD and its commit date both match what the sidecars record.
+    Matches,
+    /// The claim cannot be tested here — no checkout, or one with no git
+    /// metadata. Reported rather than passed over: silence is what let three
+    /// separate gaps read as success.
+    Unverifiable(String),
+    /// A concrete disagreement, one line each.
+    Wrong(Vec<String>),
+}
+
+/// Check the recorded pin and date against the curriculum checkout's own git.
+///
+/// The SHA is read by CI straight into a checkout ref, so it is exercised
+/// every run and cannot drift unnoticed. The **date** beside it is
+/// hand-maintained, and nothing has ever checked it — a pin bump that updates
+/// one and not the other publishes a wrong date in the one document whose
+/// purpose is being trustworthy.
+///
+/// Asking git also proves the checkout is *at* the pin, which nothing
+/// currently asserts. A run against some other revision would otherwise
+/// verify curriculum files that the recorded verdicts never described.
+pub fn verify_pin(repo: &Path) -> PinVerdict {
+    let read = |rel: &str| {
+        std::fs::read_to_string(repo.join(rel))
+            .ok()
+            .map(|s| s.trim().to_string())
+    };
+    let (Some(pin), Some(date)) = (read(PIN), read(DATE)) else {
+        return PinVerdict::Wrong(vec![format!(
+            "no `{PIN}` or no `{DATE}` — the ledger names both, so both must exist"
+        )]);
+    };
+    let Some(root) = verdict_corpus::curriculum::root() else {
+        return PinVerdict::Unverifiable(format!(
+            "no curriculum checkout, so `{pin}` ({date}) is unchecked here"
+        ));
+    };
+    let checkout = root.join("code-samples");
+    if !checkout.join(".git").exists() {
+        return PinVerdict::Unverifiable(format!(
+            "{} has no git metadata, so `{pin}` ({date}) is unchecked here",
+            checkout.display()
+        ));
+    }
+    let git = |args: &[&str]| {
+        std::process::Command::new("git")
+            .arg("-C")
+            .arg(&checkout)
+            .args(args)
+            .output()
+            .ok()
+            .filter(|o| o.status.success())
+            .and_then(|o| String::from_utf8(o.stdout).ok())
+            .map(|s| s.trim().to_string())
+    };
+    let (Some(head), Some(head_date)) = (
+        git(&["rev-parse", "HEAD"]),
+        // Committer date, short: the same `YYYY-MM-DD` the sidecar holds.
+        git(&["show", "-s", "--format=%cs", "HEAD"]),
+    ) else {
+        return PinVerdict::Unverifiable(format!(
+            "{} would not answer `git rev-parse`, so `{pin}` ({date}) is unchecked here",
+            checkout.display()
+        ));
+    };
+    match compare_pin(&pin, &date, &head, &head_date) {
+        v if v.is_empty() => PinVerdict::Matches,
+        v => PinVerdict::Wrong(v),
+    }
+}
+
+/// The comparison itself, kept free of IO so it can be tested without a
+/// curriculum checkout — which is exactly the environment that cannot run it.
+fn compare_pin(pin: &str, date: &str, head: &str, head_date: &str) -> Vec<String> {
+    let mut out = Vec::new();
+    if pin != head {
+        out.push(format!(
+            "the checkout is at `{head}`, but `{PIN}` records `{pin}` — \
+             the recorded verdicts describe a revision this run is not reading"
+        ));
+    }
+    if date != head_date {
+        out.push(format!(
+            "`{DATE}` records {date}, but `{head}` was committed {head_date} — \
+             the ledger publishes that date, so it is wrong until this agrees"
+        ));
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
-    use super::parse_key;
+    use super::{PinVerdict, compare_pin, parse_key, verify_pin};
+
+    /// A checkout that agrees with both sidecars produces no complaint.
+    #[test]
+    fn an_agreeing_checkout_says_nothing() {
+        assert!(compare_pin("abc123", "2026-08-14", "abc123", "2026-08-14").is_empty());
+    }
+
+    /// The SHA half. The message names *both* revisions: "the pin is wrong" is
+    /// not actionable, and the reader needs to know which of the two to move.
+    #[test]
+    fn a_checkout_at_another_revision_names_both() {
+        let out = compare_pin("recorded", "2026-08-14", "actual", "2026-08-14");
+        assert_eq!(out.len(), 1);
+        assert!(out[0].contains("recorded"), "{}", out[0]);
+        assert!(out[0].contains("actual"), "{}", out[0]);
+    }
+
+    /// The date half — the one nothing checked before, and the reason this
+    /// exists. The ledger publishes it, so a stale sidecar is a wrong fact in
+    /// a document whose whole purpose is being trustworthy.
+    #[test]
+    fn a_stale_date_is_caught_even_when_the_sha_agrees() {
+        let out = compare_pin("abc123", "2026-01-01", "abc123", "2026-08-14");
+        assert_eq!(out.len(), 1);
+        assert!(out[0].contains("2026-01-01"), "{}", out[0]);
+        assert!(out[0].contains("2026-08-14"), "{}", out[0]);
+    }
+
+    /// Both wrong reports both. A check that stopped at the first would hide
+    /// the second behind a fix for the first.
+    #[test]
+    fn two_disagreements_are_two_lines() {
+        let out = compare_pin("recorded", "2026-01-01", "actual", "2026-08-14");
+        assert_eq!(out.len(), 2, "{out:?}");
+    }
+
+    /// A missing sidecar is a fault, not an excuse. The ledger names both, so
+    /// neither may simply be absent — this is the one input case that must not
+    /// resolve to `Unverifiable`.
+    #[test]
+    fn a_missing_sidecar_is_wrong_rather_than_unverifiable() {
+        let dir = std::env::temp_dir().join("asm198x-parity-pin-test");
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("temp dir");
+        match verify_pin(&dir) {
+            PinVerdict::Wrong(lines) => assert!(!lines.is_empty()),
+            PinVerdict::Matches => panic!("a repo with no pin cannot match"),
+            PinVerdict::Unverifiable(why) => {
+                panic!("a missing sidecar is a fault, not an unverifiable claim: {why}")
+            }
+        }
+        let _ = std::fs::remove_dir_all(&dir);
+    }
 
     /// The key carries the source digest, and the receipt needs it.
     ///
