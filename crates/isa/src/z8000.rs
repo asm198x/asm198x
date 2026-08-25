@@ -882,6 +882,36 @@ impl Block {
     pub fn has_cc(&self) -> bool {
         matches!(self.shape, BlockShape::Compare | BlockShape::CompareString)
     }
+
+    /// One representative encoding: the two words this family always occupies.
+    ///
+    /// Word 1 carries a pointer and the operation nibble; word 2 the count
+    /// register, a second pointer or data register, and the control nibble.
+    /// Which pointer goes where is the shape's business — [`Translate`] puts
+    /// the destination first and the others the source — but an exemplar only
+    /// needs each slot to hold something legal, so it does not have to care.
+    ///
+    /// [`Translate`]: BlockShape::Translate
+    #[must_use]
+    pub fn exemplar(&self) -> (u16, u16) {
+        // `@R4` and `@R6` with the count in `R8`: even, so they are legal
+        // register pairs on the segmented Z8001 as well, and none is `R1`,
+        // which the translate shapes imply and refuse as a pointer.
+        const FIRST: u16 = 4;
+        const SECOND: u16 = 6;
+        const COUNT: u16 = 8;
+        // The condition-carrying shapes read a condition code where the others
+        // read the entry's fixed control nibble; 6 is `EQ`.
+        let ctrl = if self.has_cc() {
+            6
+        } else {
+            u16::from(self.ctrl)
+        };
+        (
+            first_word(2, self.base6, FIRST, u16::from(self.op_nib)),
+            (COUNT << 8) | (SECOND << 4) | ctrl,
+        )
+    }
 }
 
 use BlockShape::{Compare, CompareString, Load, Translate};
@@ -1301,6 +1331,39 @@ pub struct BlockIo {
     /// Word 2's low nibble: 8 single, 0 repeat.
     pub ctrl: u8,
     pub summary: &'static str,
+}
+
+impl BlockIo {
+    /// The top-byte `base6` this entry's size selects.
+    ///
+    /// Shared with the block/string family, which is why the mode bits and not
+    /// the base separate them: `BLOCK` sits at `MM = 10` and this at `MM = 00`.
+    #[must_use]
+    pub const fn base6(&self) -> u8 {
+        match self.size {
+            Size::Byte => 0x3A,
+            _ => 0x3B,
+        }
+    }
+
+    /// One representative encoding: the two words this family always occupies.
+    ///
+    /// Word 1 carries one pointer and the operation nibble, word 2 the count
+    /// register, the other pointer and the control nibble. Which of the two is
+    /// the port and which the memory address swaps between the `IN` and `OUT`
+    /// directions; an exemplar needs both slots legal, not which is which.
+    #[must_use]
+    pub const fn exemplar(&self) -> (u16, u16) {
+        // `@R4` and `@R6`, count in `R8` — even, so they are legal register
+        // pairs on the segmented Z8001 too.
+        const FIRST: u16 = 4;
+        const SECOND: u16 = 6;
+        const COUNT: u16 = 8;
+        (
+            first_word(0, self.base6(), FIRST, self.op_nib as u16),
+            (COUNT << 8) | (SECOND << 4) | self.ctrl as u16,
+        )
+    }
 }
 
 const fn bio(
