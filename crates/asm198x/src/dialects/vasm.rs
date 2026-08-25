@@ -1007,6 +1007,23 @@ fn encode(
         .iter()
         .any(|o| matches!(o, Opnd::Mem { mode: 4, .. }));
 
+    // The register-list mask always follows the opcode word directly, even in
+    // `movem <ea>,reglist` where the list is written second. Emitting it in
+    // operand order puts it after the effective address's extension words —
+    // which is a different instruction, and which also shifts the address the
+    // PC-relative displacement below is measured from.
+    if let Some((slot, op)) = form
+        .operands
+        .iter()
+        .zip(operands)
+        .find(|(slot, _)| matches!(slot, Slot::RegList))
+    {
+        let _ = slot;
+        let mask = reglist_mask(op);
+        let mask = if predec { mask.reverse_bits() } else { mask };
+        ext.extend_from_slice(&mask.to_be_bytes());
+    }
+
     for (slot, op) in form.operands.iter().zip(operands) {
         match (slot, op) {
             (Slot::Dn { shift }, Opnd::DReg(n)) => word |= u16::from(*n) << shift,
@@ -1090,11 +1107,9 @@ fn encode(
                     Size::L => ext.extend_from_slice(&(v as u32).to_be_bytes()),
                 }
             }
-            (Slot::RegList, _) => {
-                let mask = reglist_mask(op);
-                let mask = if predec { mask.reverse_bits() } else { mask };
-                ext.extend_from_slice(&mask.to_be_bytes());
-            }
+            // Already emitted, ahead of the loop, so that it lands
+            // immediately after the opcode word.
+            (Slot::RegList, _) => {}
             (Slot::Ea { shift, dest, modes }, _) => {
                 // PC-relative displacement, when chosen, is measured from this
                 // operand's own extension word (after the opcode and any prior
@@ -1292,7 +1307,11 @@ fn resolve_ea(
             long,
             bit,
         } => {
-            let d = eval(disp, consts, here, line)?;
+            let raw = eval(disp, consts, here, line)?;
+            // `d8(PC,Xn)` names the *target*, exactly as `d16(PC)` does above:
+            // what is stored is `target - pc`. Only the base-register form
+            // takes its displacement literally.
+            let d = if *bit == ea::PCX { raw - pc_ext } else { raw };
             let d8 = i8::try_from(d)
                 .map_err(|_| AsmError::new(line, format!("index displacement {d} out of range")))?;
             // Brief extension word: D/A bit, index register, size, then the

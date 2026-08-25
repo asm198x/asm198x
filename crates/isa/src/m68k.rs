@@ -81,6 +81,30 @@ pub mod ea {
     pub const ALL_SRC: u16 = ALL;
     /// Control modes (no Dn/An, no postinc/predec, no immediate) — e.g. `LEA`.
     pub const CONTROL: u16 = AI | DI | IX | AW | AL | PCD | PCX;
+
+    /// Every single mode bit, with the syntax the assembler writes it in.
+    ///
+    /// Beside the bits rather than in the row builder, for the reason
+    /// [`super::Slot::symbol`] sits beside the slots: a mode the spec can
+    /// allow but nothing can name is a row the audit cannot generate source
+    /// for. `every_mode_bit_is_named` holds the two in step.
+    ///
+    /// Composites (`ALL`, `DATA_ALT`, …) are deliberately absent — they are
+    /// unions of these, and a form allowing one enumerates the members.
+    pub const NAMES: &[(u16, &str)] = &[
+        (DN, "Dn"),
+        (AN, "An"),
+        (AI, "(An)"),
+        (PI, "(An)+"),
+        (PD, "-(An)"),
+        (DI, "d16(An)"),
+        (IX, "d8(An,Xn)"),
+        (AW, "(xxx).W"),
+        (AL, "(xxx).L"),
+        (PCD, "d16(PC)"),
+        (PCX, "d8(PC,Xn)"),
+        (IMM, "#imm"),
+    ];
 }
 
 impl EaModes {
@@ -1725,3 +1749,374 @@ const BRANCH_VS: &[Form] = &[Form {
     size: SizeEnc::Fixed(Size::W),
     operands: &[Slot::BranchW],
 }];
+
+/// Every allowed effective-address mode of a mask, in bit order.
+///
+/// The order is [`ea::NAMES`]' order, which is the mode field's own numbering,
+/// so a form's rows come out in a stable sequence that does not depend on how
+/// the mask was written.
+fn ea_modes(modes: EaModes) -> impl Iterator<Item = (u16, &'static str)> {
+    ea::NAMES
+        .iter()
+        .filter(move |(bit, _)| modes.allows(*bit))
+        .map(|(bit, name)| (*bit, *name))
+}
+
+/// The registers an exemplar names.
+///
+/// Distinct on purpose: a disassembly that read `d1,d1` could not show whether
+/// the two slots were encoded into the fields they claim, and a row whose
+/// operands cannot be told apart arbitrates less than it appears to.
+const EX_DN: u16 = 1;
+const EX_AN: u16 = 2;
+/// The index register of a `d8(An,Xn)` brief extension word: `D3`, word-sized,
+/// displacement `$10`. Scale is 0 — it is a 68020 field.
+const EX_BRIEF: u16 = 0x3010;
+/// A displacement small enough to be uncontroversial and non-zero: vasm
+/// shortens a zero `d16(An)` to `(An)`, which would make the exemplar an
+/// instance of a different row.
+const EX_DISP: u16 = 0x0010;
+
+/// The size an exemplar is written at.
+///
+/// Word wherever the encoding admits a choice. The row does not distinguish
+/// sizes — one uniform field selects them — so a row needs exactly one legal
+/// instance, and word is the size legal in every form that offers a choice.
+/// Byte is not: an address register is not a legal byte operand, so a `.b`
+/// exemplar of `MOVE An,Dn` would be an illegal instruction rather than a
+/// representative one.
+fn exemplar_size(enc: SizeEnc) -> Size {
+    match enc {
+        SizeEnc::Fixed(s) => s,
+        SizeEnc::Std6 | SizeEnc::Move | SizeEnc::WL { .. } => Size::W,
+    }
+}
+
+/// The opcode-word bits a size selects, mirroring the assembler's `size_bits`.
+fn size_bits(enc: SizeEnc, size: Size) -> u16 {
+    match enc {
+        SizeEnc::Fixed(_) => 0,
+        SizeEnc::Std6 => {
+            (match size {
+                Size::B => 0,
+                Size::W => 1,
+                Size::L => 2,
+            }) << 6
+        }
+        SizeEnc::Move => {
+            (match size {
+                Size::B => 1,
+                Size::W => 3,
+                Size::L => 2,
+            }) << 12
+        }
+        SizeEnc::WL { shift } => u16::from(matches!(size, Size::L)) << shift,
+    }
+}
+
+/// One effective address, as an exemplar writes it: the mode and register
+/// numbers that go in the 6-bit field, and the extension words that follow.
+fn ea_instance(bit: u16, size: Size) -> (u16, u16, Vec<u16>) {
+    match bit {
+        DN => (0, EX_DN, vec![]),
+        AN => (1, EX_AN, vec![]),
+        AI => (2, EX_AN, vec![]),
+        PI => (3, EX_AN, vec![]),
+        PD => (4, EX_AN, vec![]),
+        DI => (5, EX_AN, vec![EX_DISP]),
+        IX => (6, EX_AN, vec![EX_BRIEF]),
+        AW => (7, 0, vec![0x0020]),
+        AL => (7, 1, vec![0x0000, 0x3000]),
+        PCD => (7, 2, vec![EX_DISP]),
+        PCX => (7, 3, vec![EX_BRIEF]),
+        IMM => (
+            7,
+            4,
+            // A byte immediate rides zero-extended in one word; a long takes
+            // two. This is the assembler's own rule, not a convenience.
+            // Not 1-8: an immediate in that range is what `ADDQ`/`SUBQ`
+            // encode, and an assembler that picks the quick form for
+            // `add.w #4,a2` is answering a different question than the row
+            // asks. $40 exercises the immediate the row names.
+            match size {
+                Size::B | Size::W => vec![0x0040],
+                Size::L => vec![0x0000, 0x0040],
+            },
+        ),
+        _ => unreachable!("unnamed effective-address mode bit"),
+    }
+}
+
+/// One row of this spec, and one encoding that is an instance of it.
+pub struct Exemplar {
+    /// The row, as [`rows`] yields it.
+    pub row: crate::Row,
+    /// A whole legal instruction: opcode word and every extension word it
+    /// needs, big-endian. Not a first word — the audit disassembles this and
+    /// hands the result to a reference assembler, and a truncated instruction
+    /// would arbitrate the filler behind it.
+    pub bytes: Vec<u8>,
+}
+
+/// Every encoding this spec declares, each with an instance of itself.
+///
+/// Label and bytes are built in **one pass** over the same slots, so a row
+/// cannot name an operand shape its exemplar does not encode. Producing them
+/// separately is the shape of the Z8000's #259: a lookup that agreed on the
+/// mnemonic and disagreed on everything else still read green.
+///
+/// The 68000 authors no mode label. It declares operand *slots* and, for the
+/// effective-address ones, a bitmask of the modes each admits — so the label
+/// that tells one encoding from another has to be built from both. The whole
+/// operand shape is the label, not just the effective address: `ADD` declares
+/// `<ea>,Dn`, `Dn,<ea>` and `<ea>,An`, and their masks overlap, so a label
+/// naming only the address mode would collapse three encodings into one.
+///
+/// `undocumented` is `false` throughout — this spec declares none.
+#[must_use]
+pub fn exemplars() -> Vec<Exemplar> {
+    let mut out = Vec::new();
+    for insn in SET.instructions {
+        for form in insn.forms {
+            let size = exemplar_size(form.size);
+            // Each slot contributes a list of alternatives: one for a fixed
+            // operand, one per allowed mode for an effective address. The
+            // product of those lists is the form's rows.
+            // Two extension lists, because the 68000 does not emit them in
+            // operand order. A register-list mask always follows the opcode
+            // word directly, even in `MOVEM <ea>,reglist` where the list is
+            // written second — and the same is true of the immediates that
+            // `ImmWord` and `ImmSized` carry. Effective-address extensions
+            // come after all of them, in operand order.
+            let mut acc: Vec<(String, u16, Vec<u16>, Vec<u16>)> = vec![(
+                String::new(),
+                form.base | size_bits(form.size, size),
+                vec![],
+                vec![],
+            )];
+            for slot in form.operands {
+                let is_ea = matches!(slot, Slot::Ea { .. });
+                let choices: Vec<(&'static str, u16, Vec<u16>)> = match slot {
+                    Slot::Ea { shift, modes, dest } => ea_modes(*modes)
+                        .map(|(bit, name)| {
+                            let (mode, reg, ext) = ea_instance(bit, size);
+                            let field = if *dest {
+                                (reg << 3) | mode
+                            } else {
+                                (mode << 3) | reg
+                            };
+                            (name, field << shift, ext)
+                        })
+                        .collect(),
+                    other => {
+                        let (bits, ext) = fixed_slot(other, size);
+                        vec![(other.symbol(), bits, ext)]
+                    }
+                };
+                acc = acc
+                    .iter()
+                    .flat_map(|(label, word, head, tail)| {
+                        choices.iter().map(move |(name, bits, more)| {
+                            let label = if label.is_empty() {
+                                (*name).to_string()
+                            } else {
+                                format!("{label},{name}")
+                            };
+                            let (mut head, mut tail) = (head.clone(), tail.clone());
+                            if is_ea {
+                                tail.extend_from_slice(more);
+                            } else {
+                                head.extend_from_slice(more);
+                            }
+                            (label, word | bits, head, tail)
+                        })
+                    })
+                    .collect();
+            }
+            for (label, word, head, tail) in acc {
+                let mut bytes = word.to_be_bytes().to_vec();
+                for w in head.into_iter().chain(tail) {
+                    bytes.extend_from_slice(&w.to_be_bytes());
+                }
+                out.push(Exemplar {
+                    row: crate::Row {
+                        mnemonic: insn.mnemonic,
+                        mode: label.into(),
+                        undocumented: false,
+                    },
+                    bytes,
+                });
+            }
+        }
+    }
+    out
+}
+
+/// The opcode bits and extension words of a slot that is not an effective
+/// address. Every one of these is a single encoding, so it contributes no
+/// rows of its own.
+fn fixed_slot(slot: &Slot, size: Size) -> (u16, Vec<u16>) {
+    match slot {
+        Slot::Ea { .. } => unreachable!("handled by the caller"),
+        Slot::Dn { shift } => (EX_DN << shift, vec![]),
+        Slot::An { shift } => (EX_AN << shift, vec![]),
+        Slot::Quick8 => (0x12, vec![]),
+        // 1-8, with 8 encoded as 000; 1 is in range either way.
+        Slot::Quick3 { shift } => (1 << shift, vec![]),
+        Slot::BranchW | Slot::DispW => (0, vec![EX_DISP]),
+        Slot::ImmWord => (0, vec![0x0003]),
+        Slot::ImmSized => (
+            0,
+            // Outside the quick range, for the reason `ea_instance` gives.
+            match size {
+                Size::B | Size::W => vec![0x0040],
+                Size::L => vec![0x0000, 0x0040],
+            },
+        ),
+        // Palindromic on purpose: `MOVEM` reverses the mask for a predecrement
+        // destination, so a symmetric one is an instance of both directions
+        // and the row does not depend on which way the audit reads it.
+        Slot::RegList => (0, vec![0x8001]),
+        Slot::AddrIndirect { shift, .. } => (EX_AN << shift, vec![]),
+        Slot::Vec4 => (3, vec![]),
+        Slot::Ccr | Slot::Sr | Slot::Usp => (0, vec![]),
+        Slot::MovepDisp => (EX_AN, vec![EX_DISP]),
+    }
+}
+
+/// Every encoding this spec declares, as [`crate::Row`]s.
+///
+/// Derived from [`exemplars`] rather than computed beside it, so a row and its
+/// instance cannot disagree about what the spec declares.
+pub fn rows() -> impl Iterator<Item = crate::Row> {
+    exemplars().into_iter().map(|e| e.row)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    /// A mode the spec can allow but nothing can name would be a row the
+    /// audit cannot write source for — and, because [`shapes_of`] drops
+    /// unnamed bits silently, it would go missing rather than fail loudly.
+    #[test]
+    fn every_mode_bit_is_named() {
+        for bit in 0..16u16 {
+            let mask = 1u16 << bit;
+            if ALL & mask == 0 {
+                continue;
+            }
+            assert!(
+                ea::NAMES.iter().any(|(b, _)| *b == mask),
+                "mode bit {mask:#06x} is in `ALL` but has no name"
+            );
+        }
+        assert_eq!(ea::NAMES.len(), ALL.count_ones() as usize);
+    }
+
+    /// Every mnemonic the spec declares must reach the rows. A form whose
+    /// mask is empty — or whose bits are all unnamed — yields none, which
+    /// reads downstream as a mnemonic the spec never had rather than as a
+    /// mistake.
+    #[test]
+    fn every_mnemonic_reaches_the_rows() {
+        let rows: Vec<crate::Row> = rows().collect();
+        for insn in SET.instructions {
+            assert!(
+                rows.iter().any(|r| r.mnemonic == insn.mnemonic),
+                "`{}` declares forms but yields no rows",
+                insn.mnemonic
+            );
+        }
+    }
+
+    /// Every exemplar is a whole instruction: an opcode word, and a whole
+    /// number of extension words after it.
+    #[test]
+    fn an_exemplar_is_a_whole_number_of_words() {
+        for ex in exemplars() {
+            assert!(
+                ex.bytes.len() >= 2 && ex.bytes.len() % 2 == 0,
+                "`{} {}` exemplifies as {} byte(s)",
+                ex.row.mnemonic,
+                ex.row.mode,
+                ex.bytes.len()
+            );
+        }
+    }
+
+    /// The rows are the spec's own count, not a number anyone typed: every
+    /// form contributes the product of its effective-address slots' allowed
+    /// modes, and nothing else multiplies.
+    #[test]
+    fn the_row_count_is_the_product_the_spec_declares() {
+        let expected: usize = SET
+            .instructions
+            .iter()
+            .flat_map(|i| i.forms)
+            .map(|f| {
+                f.operands
+                    .iter()
+                    .filter_map(|o| match o {
+                        Slot::Ea { modes, .. } => Some(ea_modes(*modes).count()),
+                        _ => None,
+                    })
+                    .product::<usize>()
+            })
+            .sum();
+        assert_eq!(rows().count(), expected);
+    }
+
+    /// Within one mnemonic the rows must have distinct modes, the property a
+    /// `(mnemonic, mode)` key needs. This is the assertion that forced the
+    /// label to carry the whole operand shape rather than the address mode
+    /// alone — `ADD` declares three forms whose masks overlap.
+    #[test]
+    fn a_mnemonics_rows_have_distinct_modes() {
+        let mut seen = std::collections::BTreeSet::new();
+        for row in rows() {
+            assert!(
+                seen.insert((row.mnemonic, row.mode.clone())),
+                "`{}` declares two rows for mode `{}`",
+                row.mnemonic,
+                row.mode
+            );
+        }
+    }
+}
+
+#[cfg(test)]
+mod denominator {
+    use super::*;
+
+    /// The count, checked against the spec by hand once and pinned here.
+    ///
+    /// A derived denominator that is quietly wrong is worse than none: the
+    /// stamp would read a percentage of the wrong whole and nothing would
+    /// say so. So the arithmetic is written out per mnemonic, from the
+    /// masks in `SET`, rather than asserted as a total nobody can check.
+    #[test]
+    fn the_hand_checked_counts_hold() {
+        let rows: Vec<crate::Row> = rows().collect();
+        let n = |m: &str| rows.iter().filter(|r| r.mnemonic == m).count();
+
+        // No operands, so one shape and one row.
+        assert_eq!(n("RTS"), 1);
+        // One `Vec4` slot, which is not an address mode.
+        assert_eq!(n("TRAP"), 1);
+        // `<ea>,Dn` over ALL (12) + `Dn,<ea>` over MEM_ALT (7)
+        //  + ADDA's `<ea>,An` over ALL (12).
+        assert_eq!(n("ADD"), 12 + 7 + 12);
+        // `#imm16,<ea>` over DATA_NOIMM (10) + `Dn,<ea>` over DATA (11).
+        assert_eq!(n("BTST"), 10 + 11);
+        // Store over MEM_ALT (7) + load over CONTROL and postincrement (7).
+        assert_eq!(n("MOVEM"), 7 + 7);
+        // The big one: src ALL (12) x dst DATA_ALT|AN (9) = 108, because the
+        // spec folds MOVEA into MOVE's destination the way vasm does; then
+        // to-CCR and to-SR over DATA (11 each), from-SR over DATA_ALT (8),
+        // and the two USP forms.
+        assert_eq!(n("MOVE"), 108 + 11 + 11 + 8 + 1 + 1);
+
+        assert_eq!(rows.len(), 838);
+    }
+}

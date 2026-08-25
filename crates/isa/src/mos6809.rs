@@ -167,7 +167,7 @@ pub fn rows() -> impl Iterator<Item = crate::Row> {
             .filter(|(_, present)| *present)
             .map(move |(mode, _)| crate::Row {
                 mnemonic: insn.mnemonic,
-                mode,
+                mode: mode.into(),
                 undocumented: insn.undocumented,
             })
     })
@@ -764,7 +764,7 @@ mod row_tests {
     fn every_row_can_exemplify_itself() {
         for insn in SET {
             for row in rows().filter(|r| r.mnemonic == insn.mnemonic) {
-                let (buf, n) = insn.exemplar(row.mode).unwrap_or_else(|| {
+                let (buf, n) = insn.exemplar(&row.mode).unwrap_or_else(|| {
                     panic!("`{} {}` cannot show one of itself", row.mnemonic, row.mode)
                 });
                 assert!(n >= 1, "{} {}: empty exemplar", row.mnemonic, row.mode);

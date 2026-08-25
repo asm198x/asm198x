@@ -461,7 +461,7 @@ pub const INSTRUCTIONS: &[Insn] = &[
 pub fn rows() -> impl Iterator<Item = crate::Row> {
     INSTRUCTIONS.iter().map(|insn| crate::Row {
         mnemonic: insn.mnemonic,
-        mode: insn.class.name(),
+        mode: insn.class.name().into(),
         undocumented: false,
     })
 }

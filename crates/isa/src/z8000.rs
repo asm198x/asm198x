@@ -2363,9 +2363,9 @@ fn modes_of(modes: u8, store: bool) -> impl Iterator<Item = &'static str> {
 ///
 /// `undocumented` is `false` throughout — this spec declares none.
 pub fn rows() -> impl Iterator<Item = crate::Row> {
-    let row = |mnemonic, mode| crate::Row {
+    let row = |mnemonic, mode: &'static str| crate::Row {
         mnemonic,
-        mode,
+        mode: mode.into(),
         undocumented: false,
     };
 

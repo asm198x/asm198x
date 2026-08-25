@@ -152,6 +152,10 @@ fn cpus() -> Vec<Cpu> {
             name: "Z8001",
             forms: isa::z8000::rows().count(),
         },
+        Cpu {
+            name: "68000",
+            forms: isa::m68k::rows().count(),
+        },
     ]
 }
 

@@ -32,7 +32,7 @@ use std::process::Command;
 
 mod support;
 
-use verdict_corpus::Suite;
+use verdict_corpus::{Outcome, Suite, encode_hex};
 
 fn have(bin: &str) -> bool {
     Command::new(bin).output().is_ok()
@@ -2360,7 +2360,7 @@ fn word_cpu_form_audit(
 ) -> usize {
     let mut checked = 0usize;
     for row in rows {
-        let Some((base, base_word)) = base_of(row.mnemonic, row.mode) else {
+        let Some((base, base_word)) = base_of(row.mnemonic, &row.mode) else {
             fails.push(format!(
                 "{cpu} {} {}: no base for the row",
                 row.mnemonic, row.mode
@@ -2480,7 +2480,7 @@ fn spec_rows_match_reference_6809() {
             continue;
         }
         for row in isa::mos6809::rows().filter(|r| r.mnemonic == insn.mnemonic) {
-            let Some((buf, n)) = insn.exemplar(row.mode) else {
+            let Some((buf, n)) = insn.exemplar(&row.mode) else {
                 unsynthesised.push(format!("{} {}", row.mnemonic, row.mode));
                 continue;
             };
@@ -2657,6 +2657,200 @@ fn spec_rows_match_reference_z8001() {
     z8000_form_audit("Z8001", true);
 }
 
+/// The 68000 form audit, against `vasm`.
+///
+/// The last of the seven specs named in `decisions/every-spec-enumerates-its-
+/// forms.md`, and the largest: 838 rows, because an effective-address mask is
+/// an axis the spec distinguishes on and twelve of them multiply.
+///
+/// **The exemplar is the whole instruction.** `isa::m68k::exemplars` returns
+/// the opcode word *and* every extension word the addressing mode needs, so
+/// nothing is appended here. That is deliberate: with no filler behind it, an
+/// exemplar one word short decodes into whatever follows and shows up as a
+/// failure, where filler would have hidden it. Three of the Z8000's four
+/// failure rounds were exactly that mistake.
+///
+/// **The mnemonic check allows a size suffix and an alias.** The disassembler
+/// writes `move.w`, not `MOVE`, and it writes `movea` for the form this spec
+/// folds into `MOVE`'s destination mask — the fold the assembler needs,
+/// because vasm accepts `move.w d0,a0`. Neither is a divergence; both would
+/// be, to a check that compared the first token literally.
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn spec_rows_match_reference_68000() {
+    if !have("vasmm68k_mot") {
+        eprintln!("SKIP: `vasmm68k_mot` not on PATH (68000 form audit)");
+        return;
+    }
+    let tmp = std::env::temp_dir().join("asm198x-form-68000");
+    let _ = fs::create_dir_all(&tmp);
+    let mut recorder = support::verdicts::Recorder::new();
+    let mut fails: Vec<String> = Vec::new();
+    let mut unplaced: Vec<String> = Vec::new();
+    let mut excepted: Vec<String> = Vec::new();
+    let mut checked = 0usize;
+
+    // Rows where **our assembler** — not this spec — is known to differ from
+    // the reference, for a reason already on the record.
+    //
+    // The distinction matters, because this audit does not run our assembler:
+    // it encodes the row, disassembles it, and asks vasm what that source is
+    // worth. The spec side of these two rows is correct and is still checked
+    // below. What differs is what `asm198x` does with the same source, which
+    // only `verdict_replay` sees — so the verdict is recorded as a divergence
+    // here, and that test is what stops the marker outliving the difference.
+    //
+    // Both are issue #110's third row. `add.w #64,a2` assembles to `lea
+    // 64(a2),a2` here, and to `adda.w` under the `-no-opt` this audit pins
+    // vasm to — but to `lea`, byte for byte, under the default invocation a
+    // developer actually uses. The same table's other two rows go the other
+    // way, which is why no single vasm invocation reproduces our output and
+    // why the difference is tracked rather than fixed.
+    const TRACKED: &[(&str, &str, &str)] = &[
+        ("ADD", "#imm,An", "issue-110"),
+        ("SUB", "#imm,An", "issue-110"),
+    ];
+
+    for ex in isa::m68k::exemplars() {
+        let m = ex.row.mnemonic;
+        let mode = ex.row.mode.as_ref();
+        // Origin zero, because that is where vasm assembles the source we
+        // hand back to it. A PC-relative operand disassembles to its *target*,
+        // and the reference recomputes the displacement from wherever it put
+        // the instruction — so an origin the reference does not share turns
+        // every PC-relative row into a false divergence.
+        let listing = asm198x::listing_68000(&ex.bytes, 0);
+        let Some(source) = trim_after_m68k_instruction(&listing, m) else {
+            unplaced.push(format!(
+                "{m} {mode}: exemplar {:02X?} disassembles to something else:\n{listing}",
+                ex.bytes
+            ));
+            continue;
+        };
+        let reference = ref_assemble(&tmp, &source, "s", |src, out| {
+            let mut c = Command::new("vasmm68k_mot");
+            // `-no-opt` for the reason the sweep passes it: the audit compares
+            // opcodes literally, so vasm must not transform or delete them.
+            c.args(["-Fbin", "-no-opt", "-quiet", "-o"])
+                .arg(out)
+                .arg(src);
+            vec![c]
+        });
+        let Some(reference) = reference else {
+            fails.push(format!(
+                "{m} {mode}: vasm rejected our own disassembly:\n{source}"
+            ));
+            continue;
+        };
+        checked += 1;
+        let case = support::verdicts::CaseRef {
+            suite: Suite::Form,
+            cpu: "68000",
+            tool: "vasmm68k_mot",
+            dialect: "vasm",
+            case: format!("{m} {mode}"),
+            source: &source,
+        };
+        // The whole instruction, not just the opcode word: the exemplar
+        // carries its own extension words, so a length or extension-word
+        // disagreement is exactly what this comparison is for. This holds for
+        // a tracked row too — the tag excuses our assembler, never the spec.
+        if reference != ex.bytes {
+            fails.push(format!(
+                "{m} {mode}: ours {:02X?} vs vasm {:02X?}\n{source}",
+                ex.bytes, reference
+            ));
+            continue;
+        }
+        match TRACKED
+            .iter()
+            .find(|(mn, md, _)| *mn == m && *md == mode)
+            .map(|(.., tag)| *tag)
+        {
+            Some(tag) => {
+                excepted.push(format!(
+                    "{m} {mode}: our assembler differs, tracked as `{tag}`"
+                ));
+                recorder.record(
+                    case,
+                    Outcome::Divergence {
+                        divergence: tag.to_string(),
+                        hex: encode_hex(&reference),
+                    },
+                );
+            }
+            None => recorder.record_bytes(case, &reference),
+        }
+    }
+
+    let added = recorder.flush().expect("write the corpus");
+    eprintln!(
+        "68000 form audit: {checked} arbitrated ({added} new), {} rows have no \
+         exemplar yet, {} tracked as a known divergence",
+        unplaced.len(),
+        excepted.len()
+    );
+    for e in &excepted {
+        eprintln!("  tracked: {e}");
+    }
+    for u in unplaced.iter().take(20) {
+        eprintln!("  unplaced: {u}");
+    }
+    assert!(
+        fails.is_empty(),
+        "{} 68000 row(s) diverge:\n  {}",
+        fails.len(),
+        fails.join("\n  ")
+    );
+    assert!(checked > 0, "no rows arbitrated");
+}
+
+/// The 68000's own [`trim_after_instruction`]: the disassembler writes a size
+/// suffix (`move.w`), and writes an alias where the spec folds two mnemonics
+/// into one mask (`movea` for `MOVE`'s address-register destination).
+fn trim_after_m68k_instruction(source: &str, mnemonic: &str) -> Option<String> {
+    /// A mnemonic the disassembler may print in place of the row's own.
+    ///
+    /// Two reasons, both of them the spec being right rather than the
+    /// disassembler being loose. The first four are address-register
+    /// destinations the spec folds into the base mnemonic's mask, because
+    /// vasm accepts `move.w d0,a0` and an assembler that did not would reject
+    /// real source. `DBRA` is the ordinary alias for `DBF`: one encoding,
+    /// two names, and a disassembler can only print one of them.
+    const FOLDED: &[(&str, &str)] = &[
+        ("MOVE", "movea"),
+        ("ADD", "adda"),
+        ("SUB", "suba"),
+        ("CMP", "cmpa"),
+        ("DBRA", "dbf"),
+    ];
+    let names = |head: &str| {
+        let head = head.split('.').next().unwrap_or(head);
+        head.eq_ignore_ascii_case(mnemonic)
+            || FOLDED
+                .iter()
+                .any(|(base, alias)| *base == mnemonic && head.eq_ignore_ascii_case(alias))
+    };
+    let mut out = String::new();
+    for line in source.lines() {
+        let head = line.split_whitespace().next();
+        // A data directive before the instruction means the exemplar did not
+        // decode at all — the row has no instance, rather than the reference
+        // having rejected one.
+        if head.is_some_and(|w| {
+            w.eq_ignore_ascii_case("dc.w") || w.eq_ignore_ascii_case("word") || w == "dc"
+        }) {
+            return None;
+        }
+        out.push_str(line);
+        out.push('\n');
+        if head.is_some_and(names) {
+            return Some(out);
+        }
+    }
+    None
+}
+
 fn z8000_form_audit(cpu: &str, seg: bool) {
     if !(have("asl") && have("p2bin")) {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH ({cpu} form audit)");
@@ -2704,7 +2898,7 @@ fn z8000_form_audit(cpu: &str, seg: bool) {
             Some(i) if i.size == isa::z8000::Size::Byte && row.mode == "immediate" => &byte_filler,
             _ if seg
                 && matches!(
-                    row.mode.strip_suffix(", store").unwrap_or(row.mode),
+                    row.mode.strip_suffix(", store").unwrap_or(&row.mode),
                     "direct address" | "indexed"
                 ) =>
             {
@@ -2716,7 +2910,7 @@ fn z8000_form_audit(cpu: &str, seg: bool) {
         // that family has one; for everything else the operands come from the
         // filler.
         let placed: Option<(u16, Option<u16>)> = dyadic
-            .and_then(|i| i.exemplar(row.mode, seg))
+            .and_then(|i| i.exemplar(&row.mode, seg))
             .map(|w| (w, None))
             .or_else(|| {
                 isa::z8000::MONO
@@ -2749,7 +2943,7 @@ fn z8000_form_audit(cpu: &str, seg: bool) {
                 isa::z8000::CONTROL
                     .iter()
                     .find(|i| i.mnemonic == m)
-                    .and_then(|i| i.exemplar(row.mode, seg))
+                    .and_then(|i| i.exemplar(&row.mode, seg))
                     .map(|w| (w, None))
             })
             .or_else(|| {
