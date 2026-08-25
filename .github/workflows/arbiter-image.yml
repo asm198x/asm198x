@@ -1,0 +1,68 @@
+name: Arbiter image
+
+# The container that holds the eight reference assemblers, pinned to the
+# versions the verdict corpus is keyed on. Published so a growth run — and
+# anyone reproducing a verdict — does not need one particular laptop.
+#
+# `verify-arbiters` runs as part of the build: an image whose tools report
+# anything other than the identities in `ops/arbiter/identities` must not be
+# published, because verdicts recorded with it would key separately from every
+# verdict already held rather than adding to them.
+on:
+  push:
+    branches: [main]
+    paths:
+      - ops/arbiter/**
+      - rust-toolchain.toml
+      - .github/workflows/arbiter-image.yml
+  workflow_dispatch:
+
+concurrency:
+  group: arbiter-image
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  publish:
+    name: Build, verify and publish
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Read pinned toolchain
+        id: toolchain
+        run: |
+          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
+          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
+
+      - name: Build the image
+        run: |
+          docker build \
+            --build-arg RUST_CHANNEL='${{ steps.toolchain.outputs.channel }}' \
+            -t arbiter:candidate ops/arbiter
+
+      # Before publishing, not after. An image that reports different
+      # identities is not a worse arbiter, it is a different one.
+      - name: Verify the arbiter identities
+        run: docker run --rm arbiter:candidate
+
+      # `docker login` directly rather than an action: one command, and one
+      # fewer third-party dependency in the path that publishes an artefact.
+      - name: Log in to the registry
+        run: |
+          echo '${{ secrets.GITHUB_TOKEN }}' \
+            | docker login ghcr.io -u '${{ github.actor }}' --password-stdin
+
+      # Two tags: `latest` for the growth job to follow, and the commit for a
+      # verdict to be traced back to the exact image that recorded it.
+      - name: Push
+        run: |
+          image=ghcr.io/${{ github.repository_owner }}/arbiter
+          docker tag arbiter:candidate "$image:latest"
+          docker tag arbiter:candidate "$image:${GITHUB_SHA}"
+          docker push "$image:latest"
+          docker push "$image:${GITHUB_SHA}"

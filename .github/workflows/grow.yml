@@ -1,0 +1,102 @@
+name: Growth
+
+# Arbitrate whatever the corpus does not yet hold, in the container rather than
+# on one person's machine, and open a pull request with the result.
+#
+# Nothing here merges anything. A growth run produces facts a human reviews:
+# the corpus is append-only, and a verdict recorded in error costs a supersede
+# record to retract rather than an edit.
+on:
+  schedule:
+    # Sunday, early. Growth is not urgent and a weekly cadence keeps the
+    # review small enough to actually read.
+    - cron: '17 5 * * 0'
+  workflow_dispatch:
+
+concurrency:
+  group: growth
+  cancel-in-progress: false
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  grow:
+    name: Arbitrate and open a pull request
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/arbiter:latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      # The gate. If the image's tools no longer report the identities the
+      # corpus is keyed on — an upstream release of vasm, which has no pin —
+      # growth must not run: its verdicts would key separately from every
+      # verdict already held.
+      - name: Verify the arbiter identities
+        run: verify-arbiters
+
+      - name: Read the pinned curriculum revision
+        id: pin
+        run: echo "sha=$(cat crates/asm198x/tests/verdicts/code-samples.pin)" >> "$GITHUB_OUTPUT"
+
+      - name: Check out the curriculum at that revision
+        uses: actions/checkout@v7
+        with:
+          repository: code198x/code-samples
+          ref: ${{ steps.pin.outputs.sha }}
+          path: _code198x/code-samples
+
+      - name: Arbitrate
+        env:
+          ASM198X_CODE_SAMPLES: ${{ github.workspace }}/_code198x
+        run: cargo xtask grow
+
+      - name: Refresh the stamp and the ledger
+        run: |
+          cargo xtask coverage --write
+          cargo xtask docs
+
+      # Hand-rolled rather than a pull-request action: `gh` is already on the
+      # runner, this is a dozen lines, and a scheduled job that writes to the
+      # corpus is the last place to take on a dependency for convenience.
+      - name: Open a pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config user.name  "asm198x growth"
+          git config user.email "growth@asm198x.invalid"
+
+          git add crates/asm198x/tests/verdicts/ docs/book/src/
+          if git diff --cached --quiet; then
+            echo "nothing new was arbitrated — no pull request to open"
+            exit 0
+          fi
+
+          branch=growth/scheduled
+          git checkout -b "$branch"
+          git commit -q -m "chore(corpus): a scheduled growth run
+
+          Recorded by the arbiter container, whose tools reported the same
+          behavioural identities the corpus is keyed on. Verdicts here are facts
+          about what a reference assembler did, not expectations."
+          git push -f origin "$branch"
+
+          if gh pr view "$branch" --json state --jq .state 2>/dev/null | grep -q OPEN; then
+            echo "a growth pull request is already open; pushed to it"
+            exit 0
+          fi
+          gh pr create --head "$branch" --title "chore(corpus): a scheduled growth run" --body \
+          "Arbitrated in \`ghcr.io/${{ github.repository_owner }}/arbiter:latest\`.
+
+          The corpus is append-only, so read this as a set of new facts rather than
+          a diff to approve at a glance. Worth checking before merging:
+
+          - are the new verdicts **new coverage**, or the same cases under a changed
+            identity? The latter means an arbiter moved.
+          - did the coverage stamp move, and does \`coverage.accepted\` still explain
+            every shortfall?
+          - the ledger page is regenerated here, so its counts should match."
