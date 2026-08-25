@@ -2318,11 +2318,55 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // ACME's own retired spellings. It refuses these however they are
+    // invoked — bare, with an operand, with a block — so implementing them
+    // would take source the reference rejects, which is the divergence this
+    // project exists to avoid. Probed against 0.97, 2026-08-25.
+    Directive {
+        id: "obsolete-subzone",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["subzone", "sz"],
+            required: true,
+        },
+        category: Category::RefusedByReference(
+            "retired in ACME 0.97, which answers `\"!subzone {}\" is obsolete; use \
+             \"!zone {}\" instead`",
+        ),
+    },
+    Directive {
+        id: "obsolete-cbm",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["cbm"],
+            required: true,
+        },
+        category: Category::RefusedByReference(
+            "retired in ACME 0.97, which answers `\"!cbm\" is obsolete; use \
+             \"!ct pet\" instead`",
+        ),
+    },
+    // Only the bare `!realpc` is retired; the block form `!pseudopc {}` is
+    // current, and is in the list below as a gap that really is ours.
+    Directive {
+        id: "obsolete-realpc",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["realpc"],
+            required: true,
+        },
+        category: Category::RefusedByReference(
+            "retired in ACME 0.97, which answers `\"!pseudopc/!realpc\" is obsolete; \
+             use \"!pseudopc {}\" instead`",
+        ),
+    },
     // What ACME has here and we do not.
     //
-    // 34 spellings against 0.97. `!al` and `!rl` are absent: ACME answers
-    // "Chosen CPU does not support long registers" for them on a 6502, so they
-    // belong to a wider target.
+    // 27 spellings against 0.97, counted from this list rather than recalled.
+    // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
+    // long registers" for them on a 6502, so they belong to a wider target.
+    // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
+    // reason — ACME refuses them itself, so they are declared above.
     Directive {
         id: "unsupported-acme",
         pattern: Pattern::Sigilled {
@@ -2334,7 +2378,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "be16",
                 "be24",
                 "be32",
-                "cbm",
                 "convtab",
                 "cpu",
                 "ct",
@@ -2349,13 +2392,10 @@ pub const DIRECTIVES: &[Directive] = &[
                 "le32",
                 "pseudopc",
                 "raw",
-                "realpc",
                 "rs",
                 "scrxor",
                 "skip",
-                "subzone",
                 "symbollist",
-                "sz",
                 "to",
                 "while",
                 "xor",
@@ -2892,6 +2932,31 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// The four spellings ACME has **retired**. Refusing them is matching the
+    /// reference, not lagging it: 0.97 answers "obsolete" for each however it
+    /// is invoked, so an assembler that took them would accept source ACME
+    /// rejects.
+    ///
+    /// Named individually rather than left to the generic surface test,
+    /// because that test would still pass if these were moved back to
+    /// `KnownUnsupported` — and the failure that invites is somebody reading
+    /// "the gap is ours" and closing it.
+    #[test]
+    fn acmes_retired_spellings_are_the_references_refusal_not_our_gap() {
+        for spelling in ["!cbm", "!sz", "!subzone", "!realpc"] {
+            let err = asm(&format!("\t{spelling}\n")).expect_err(spelling);
+            let message = err.to_string();
+            assert!(
+                message.contains("obsolete"),
+                "{spelling} does not quote ACME's own answer: {message}"
+            );
+            assert!(
+                !message.contains("the gap is ours"),
+                "{spelling} claims a gap ACME does not leave: {message}"
+            );
+        }
+    }
 
     /// Assemble ACME source, giving it a default origin when it declares none —
     /// so the byte-output tests below needn't each set `*=`. (ACME requires `*=`

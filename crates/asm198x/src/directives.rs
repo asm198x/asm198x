@@ -37,9 +37,16 @@ pub enum Category {
     /// This category exists so the diagnostic can say which it is, and so the
     /// gap is countable rather than discoverable by accident.
     KnownUnsupported,
-    /// The reference assembler has it and **refuses it itself**, given the
-    /// output we produce. The payload is its rule, phrased to read in a
-    /// sentence: `"only supported for an object target"`.
+    /// The reference assembler has it and **refuses it itself**. The payload
+    /// is its rule, phrased to read in a sentence: `"only supported for an
+    /// object target, and asm198x emits a binary"`.
+    ///
+    /// The refusal need not be conditional on our output. It often is — a
+    /// word that needs a linker, given that we emit a binary — and then the
+    /// rule says so. But a reference also refuses words it has **retired**:
+    /// ACME 0.97 answers `"!cbm" is obsolete; use "!ct pet" instead` however
+    /// it is invoked. Both are the same fact for this category's purpose:
+    /// the reference will not take the word, so neither may we.
     ///
     /// This is the opposite of [`KnownUnsupported`](Category::KnownUnsupported)
     /// and reads almost the same to someone skimming the source, which is why
@@ -65,8 +72,8 @@ pub enum Category {
 #[must_use]
 pub fn refused_by_reference(tool: &str, spelling: &str, rule: &str) -> String {
     format!(
-        "`{spelling}` is {rule}, and asm198x emits a binary — {tool} refuses it \
-         there too, so this is not a gap in asm198x"
+        "`{spelling}` is {rule} — {tool} refuses it too, so this is not a gap \
+         in asm198x"
     )
 }
 

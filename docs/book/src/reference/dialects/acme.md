@@ -8,7 +8,7 @@ C64 6502, ACME syntax.
 
 ## Directives
 
-16 directives, 58 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+19 directives, 58 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -20,12 +20,15 @@ C64 6502, ACME syntax.
 | `incbin` | `!bin`, `!binary` |  |
 | `include` | `!src`, `!source` |  |
 | `macro` | `!macro` |  |
+| `obsolete-cbm` | `!cbm` | Refused, as the reference refuses it — retired in ACME 0.97, which answers `"!cbm" is obsolete; use "!ct pet" instead` |
+| `obsolete-realpc` | `!realpc` | Refused, as the reference refuses it — retired in ACME 0.97, which answers `"!pseudopc/!realpc" is obsolete; use "!pseudopc {}" instead` |
+| `obsolete-subzone` | `!subzone`, `!sz` | Refused, as the reference refuses it — retired in ACME 0.97, which answers `"!subzone {}" is obsolete; use "!zone {}" instead` |
 | `pet` | `!pet` |  |
 | `repeat` | `!for` |  |
 | `scr` | `!scr` |  |
 | `set` | `!set` |  |
 | `text` | `!text`, `!tx` |  |
-| `unsupported-acme` | `!addr`, `!address`, `!as`, `!be16`, `!be24`, `!be32`, `!cbm`, `!convtab`, `!cpu`, `!ct`, `!do`, `!endoffile`, `!eof`, `!fi`, `!hex`, `!initmem`, `!le16`, `!le24`, `!le32`, `!pseudopc`, `!raw`, `!realpc`, `!rs`, `!scrxor`, `!skip`, `!subzone`, `!symbollist`, `!sz`, `!to`, `!while`, `!xor` | Recognised, and not implemented |
+| `unsupported-acme` | `!addr`, `!address`, `!as`, `!be16`, `!be24`, `!be32`, `!convtab`, `!cpu`, `!ct`, `!do`, `!endoffile`, `!eof`, `!fi`, `!hex`, `!initmem`, `!le16`, `!le24`, `!le32`, `!pseudopc`, `!raw`, `!rs`, `!scrxor`, `!skip`, `!symbollist`, `!to`, `!while`, `!xor` | Recognised, and not implemented |
 | `words` | `!word`, `!wo`, `!16` |  |
 | `zone` | `!zone`, `!zn` |  |
 
