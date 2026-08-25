@@ -509,7 +509,7 @@ impl<'a> FmtCx<'a> {
             // so the head and its `}` stay in the tree as verbatim marker
             // nodes (the evaluator switches/restores the zone; the formatter
             // re-renders them) with the body parsed inline between them.
-            if let Some(open) = zone_block_open(trimmed).or_else(|| xor_block_open(trimmed)) {
+            if let Some(open) = marker_block_open(trimmed) {
                 let leading = std::mem::take(&mut self.pending);
                 let head = trimmed[..open].trim();
                 let after = trimmed[open + 1..].trim();
@@ -898,21 +898,18 @@ fn for_block_open(trimmed: &str) -> Option<usize> {
     }
 }
 
-/// A `!xor <value> {` head, which opens a marker block exactly as `!zone`
-/// does — the head and its `}` stay in the tree and the evaluator pushes and
-/// pops the mask. The no-block `!xor <value>` is an ordinary line.
-fn xor_block_open(trimmed: &str) -> Option<usize> {
+/// A head that opens a **marker block**: the head and its `}` stay in the
+/// tree, and the evaluator pushes state on the way in and pops it on the way
+/// out. Unlike a conditional there is no branch to prune, so nothing is
+/// removed from the tree and the formatter re-renders both markers.
+///
+/// Three directives share the shape and differ in what they save: `!zone`
+/// the zone name, `!xor` the mask, `!ct` the conversion table. Each also has
+/// a no-block form that mutates without saving, which is why the `{` is what
+/// decides — not the word.
+fn marker_block_open(trimmed: &str) -> Option<usize> {
     let word = split_first_word(trimmed).0.to_ascii_lowercase();
-    if word == "!xor" {
-        find_top(trimmed, b'{')
-    } else {
-        None
-    }
-}
-
-fn zone_block_open(trimmed: &str) -> Option<usize> {
-    let word = split_first_word(trimmed).0.to_ascii_lowercase();
-    if word == "!zone" || word == "!zn" {
+    if matches!(word.as_str(), "!zone" | "!zn" | "!xor" | "!ct" | "!convtab") {
         find_top(trimmed, b'{')
     } else {
         None
@@ -971,12 +968,55 @@ struct Oversize {
 /// and back out), and anonymous labels register in spliced evaluation order.
 /// Without one (the single-source entry points), those directives are an
 /// error pointing at the multi-file entry points.
+/// The character conversion `!text` applies. `!pet` and `!scr` name their own
+/// table and ignore this one; `!raw` bypasses it. The default is `Raw`, which
+/// is why `!text` and `!raw` agreed byte-for-byte before `!ct` existed.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum ConvTable {
+    Raw,
+    Pet,
+    Scr,
+}
+
+impl ConvTable {
+    fn convert(self, c: u8) -> u8 {
+        match self {
+            ConvTable::Raw => c,
+            ConvTable::Pet => petscii(c),
+            ConvTable::Scr => screen_code(c),
+        }
+    }
+
+    /// ACME names them `raw`, `pet` and `scr`; anything else is "Unknown
+    /// encoding". A quoted operand is a 256-byte table read from a file,
+    /// which this does not implement — refused by name rather than silently
+    /// treated as one of the three.
+    fn named(text: &str, line: usize) -> Result<Self, AsmError> {
+        if text.starts_with('"') {
+            return Err(AsmError::new(
+                line,
+                "`!ct` with a table file is not implemented here; the named \
+                 encodings `raw`, `pet` and `scr` are",
+            ));
+        }
+        match text.to_ascii_lowercase().as_str() {
+            "raw" => Ok(ConvTable::Raw),
+            "pet" => Ok(ConvTable::Pet),
+            "scr" => Ok(ConvTable::Scr),
+            "" => Err(AsmError::new(line, "no string given")),
+            other => Err(AsmError::new(line, format!("unknown encoding `{other}`"))),
+        }
+    }
+}
+
 /// What an open `{` block owes its `}`.
 enum OpenBlock {
     /// The zone name to go back to.
     Zone(String),
     /// The `!xor` mask to go back to.
     Xor(u8),
+    /// The conversion table to go back to.
+    Ct(ConvTable),
 }
 
 struct AcmeEval<'a> {
@@ -1020,6 +1060,8 @@ struct AcmeEval<'a> {
     /// leave their head and `}` in the tree, so one `}` arm serves both and
     /// the stack is what says which it is closing.
     block_stack: Vec<OpenBlock>,
+    /// The conversion table `!text` uses from here on.
+    conv: ConvTable,
     /// The `!xor` mask in force, which every statement produced from here on
     /// carries. Masks **combine**: `!xor $f0` then `!xor $0f` gives `$ff`,
     /// and `!xor $ff` twice cancels back to `$00` (probed 2026-08-25).
@@ -1042,6 +1084,7 @@ impl<'a> AcmeEval<'a> {
             zone: String::new(),
             zone_ord: 0,
             block_stack: Vec::new(),
+            conv: ConvTable::Raw,
             xor_mask: 0,
         }
     }
@@ -1418,6 +1461,19 @@ impl AcmeEval<'_> {
             "!src" | "!source" => return self.lower_include(node, args, out),
             "!bin" | "!binary" => return self.lower_incbin(node, args, out),
             "!zone" | "!zn" => return self.lower_zone(node, args, out),
+            "!ct" | "!convtab" if args.trim().ends_with('{') => {
+                let name = args.trim().trim_end_matches('{').trim();
+                let conv = ConvTable::named(name, line).map_err(|e| stamp_file(e, file))?;
+                self.block_stack.push(OpenBlock::Ct(self.conv));
+                self.conv = conv;
+                return Ok(());
+            }
+            "!ct" | "!convtab" => {
+                // Replaces rather than combines — unlike `!xor`, whose masks
+                // compose. Two directives with a block form, two rules.
+                self.conv = ConvTable::named(args.trim(), line).map_err(|e| stamp_file(e, file))?;
+                return Ok(());
+            }
             "!xor" if args.trim().ends_with('{') => {
                 let value = args.trim().trim_end_matches('{').trim();
                 let v = self.xor_value(value, line, file)?;
@@ -1444,6 +1500,7 @@ impl AcmeEval<'_> {
                 })? {
                     OpenBlock::Zone(zone) => self.zone = zone,
                     OpenBlock::Xor(mask) => self.xor_mask = mask,
+                    OpenBlock::Ct(conv) => self.conv = conv,
                 }
                 return Ok(());
             }
@@ -1470,9 +1527,16 @@ impl AcmeEval<'_> {
             return Ok(());
         }
 
-        let (label, op) =
-            parse_statement(self.set, &self.anons, &self.zone, &self.env, &recon, line)
-                .map_err(|e| stamp_file(e, file))?;
+        let (label, op) = parse_statement(
+            self.set,
+            &self.anons,
+            &self.zone,
+            &self.env,
+            self.conv,
+            &recon,
+            line,
+        )
+        .map_err(|e| stamp_file(e, file))?;
         // A `.name` definition qualifies into the current zone (U7); its
         // references were qualified by `parse_value`.
         let label = label.map(|n| self.qualify_name(n));
@@ -2189,6 +2253,7 @@ fn parse_statement(
     anons: &Anons,
     zone: &str,
     env: &BTreeMap<String, i64>,
+    conv: ConvTable,
     code: &str,
     line: usize,
 ) -> Result<(Option<String>, Option<Operation>), AsmError> {
@@ -2220,7 +2285,7 @@ fn parse_statement(
 
     // Otherwise: an optional column-0 label, then a directive or instruction.
     let (label, rest) = split_label(set, anons, code, line)?;
-    let op = parse_op(set, anons, zone, env, rest, line)?;
+    let op = parse_op(set, anons, zone, env, conv, rest, line)?;
     Ok((label, op))
 }
 
@@ -2268,6 +2333,7 @@ fn parse_op(
     anons: &Anons,
     zone: &str,
     env: &BTreeMap<String, i64>,
+    conv: ConvTable,
     rest: &str,
     line: usize,
 ) -> Result<Option<Operation>, AsmError> {
@@ -2275,7 +2341,9 @@ fn parse_op(
         return Ok(None);
     }
     if let Some(directive) = rest.strip_prefix('!') {
-        return Ok(Some(parse_directive(anons, zone, env, directive, line)?));
+        return Ok(Some(parse_directive(
+            anons, zone, env, conv, directive, line,
+        )?));
     }
     let (mnemonic, remainder) = split_first_word(rest);
     let mnemonic = mnemonic.to_ascii_uppercase();
@@ -2364,6 +2432,20 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Sigilled {
             sigil: '!',
             names: &["be16", "be24", "be32", "le16", "le24", "le32"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // `!ct`/`!convtab` choose the table `!text` converts through. `raw`,
+    // `pet` and `scr` are named; a quoted operand is a table read from a file
+    // and is refused by name rather than mistaken for one of the three. Like
+    // `!xor` it has a block form that restores on exit, and unlike `!xor` a
+    // second one **replaces** rather than combining. Walk-handled.
+    Directive {
+        id: "convtab",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["ct", "convtab"],
             required: true,
         },
         category: Category::Operation,
@@ -2624,7 +2706,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What ACME has here and we do not.
     //
-    // 10 spellings against 0.97, counted from this list rather than recalled.
+    // 8 spellings against 0.97, counted from this list rather than recalled.
     // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
     // long registers" for them on a 6502, so they belong to a wider target.
     // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
@@ -2636,9 +2718,7 @@ pub const DIRECTIVES: &[Directive] = &[
             names: &[
                 "addr",
                 "address",
-                "convtab",
                 "cpu",
-                "ct",
                 "do",
                 "pseudopc",
                 "symbollist",
@@ -2655,6 +2735,7 @@ fn parse_directive(
     anons: &Anons,
     zone: &str,
     env: &BTreeMap<String, i64>,
+    conv: ConvTable,
     directive: &str,
     line: usize,
 ) -> Result<Operation, AsmError> {
@@ -2691,7 +2772,9 @@ fn parse_directive(
         "fill" => parse_fill(anons, zone, env, rest, line),
         "diagnose" => Ok(parse_diagnose(anons, zone, env, name, rest, line)),
         "align" => parse_align(anons, zone, env, rest, line),
-        "text" => parse_text(anons, zone, rest, line, |c| c),
+        // The current table, which is `raw` until `!ct` says otherwise —
+        // the reason `!text` and `!raw` agreed byte-for-byte before this.
+        "text" => parse_text(anons, zone, rest, line, move |c| conv.convert(c)),
         // Identity today, and identity forever: see the declaration above.
         "raw" => parse_text(anons, zone, rest, line, |c| c),
         "hex" => parse_hex(rest, line),
@@ -3283,6 +3366,92 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// `!ct` chooses the table `!text` converts through. The default is
+    /// `raw`, which is why `!text` and `!raw` agreed byte-for-byte before
+    /// this existed — and still do, until a table is named.
+    #[test]
+    fn ct_chooses_the_table_text_converts_through() {
+        assert_eq!(
+            asm("!text \"aA[]@\"").expect("default").bytes,
+            vec![0x61, 0x41, 0x5B, 0x5D, 0x40]
+        );
+        assert_eq!(
+            asm("!ct raw\n!text \"aA[]@\"").expect("raw").bytes,
+            asm("!text \"aA[]@\"").expect("default").bytes
+        );
+        assert_eq!(
+            asm("!ct pet\n!text \"aA[]@\"").expect("pet").bytes,
+            asm("!pet \"aA[]@\"").expect("pet directive").bytes
+        );
+        assert_eq!(
+            asm("!ct scr\n!text \"aA[]@\"").expect("scr").bytes,
+            asm("!scr \"aA[]@\"").expect("scr directive").bytes
+        );
+        assert_eq!(
+            asm("!convtab pet\n!text \"a\"").expect("spelling").bytes,
+            vec![0x41]
+        );
+    }
+
+    /// Everything the table does **not** reach: `!raw` bypasses it, `!pet`
+    /// and `!scr` name their own, a number in a list is not a character, and
+    /// `!byte` was never text.
+    #[test]
+    fn the_table_reaches_only_text() {
+        assert_eq!(asm("!ct pet\n!raw \"a\"").expect("raw").bytes, vec![0x61]);
+        assert_eq!(asm("!ct scr\n!pet \"a\"").expect("pet").bytes, vec![0x41]);
+        assert_eq!(asm("!ct pet\n!scr \"a\"").expect("scr").bytes, vec![0x01]);
+        assert_eq!(
+            asm("!ct pet\n!text \"a\", 65").expect("num").bytes,
+            vec![0x41, 0x41]
+        );
+        assert_eq!(asm("!ct pet\n!byte 65").expect("byte").bytes, vec![0x41]);
+    }
+
+    /// A second `!ct` **replaces**; `!xor`'s masks combine. Same block shape,
+    /// different rule, and the block form restores either way.
+    #[test]
+    fn a_second_ct_replaces_where_a_second_xor_combines() {
+        assert_eq!(
+            asm("!ct pet\n!text \"a\"\n!ct raw\n!text \"a\"")
+                .expect("replace")
+                .bytes,
+            vec![0x41, 0x61]
+        );
+        assert_eq!(
+            asm("!ct pet {\n!text \"a\"\n}\n!text \"a\"")
+                .expect("block")
+                .bytes,
+            vec![0x41, 0x61]
+        );
+        assert_eq!(
+            asm("!ct pet {\n!ct scr {\n!text \"a\"\n}\n!text \"a\"\n}\n!text \"a\"")
+                .expect("nested")
+                .bytes,
+            vec![0x01, 0x41, 0x61]
+        );
+        // A bare `!ct` is not scoped by `!if`, exactly as a bare `!xor` is not.
+        assert_eq!(
+            asm("!if 1 {\n!ct pet\n!text \"a\"\n}\n!text \"a\"")
+                .expect("if")
+                .bytes,
+            vec![0x41, 0x41]
+        );
+    }
+
+    /// The named encodings, and the two ACME refuses.
+    #[test]
+    fn only_the_named_encodings_are_taken() {
+        asm("!ct wibble\n!text \"a\"").expect_err("unknown encoding");
+        asm("!ct\n!text \"a\"").expect_err("no string given");
+        // A table read from a file is a real ACME feature and is refused by
+        // name here rather than mistaken for one of the three.
+        let err = asm("!ct \"table.bin\"\n!text \"a\"")
+            .expect_err("table file")
+            .to_string();
+        assert!(err.contains("not implemented"), "{err}");
+    }
 
     /// `!xor` masks what its scope writes — including the opcode, which is
     /// why the mask has to reach the engine rather than the lowering.
