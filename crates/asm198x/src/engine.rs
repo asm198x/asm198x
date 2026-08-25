@@ -372,6 +372,15 @@ pub(crate) enum Operation {
         big_endian: bool,
         values: Vec<Expr>,
     },
+    /// Set the byte that fills reserved space and `org` gaps, for the **whole
+    /// assembly** — ACME's `!initmem`.
+    ///
+    /// Emits nothing, and does not act from where it is written: a `!skip`
+    /// *earlier* in the file still takes the value, because ACME is choosing
+    /// what unwritten memory holds rather than running a statement. The first
+    /// one wins and a second is a warning ("Memory already initialised"),
+    /// which is why the driver scans for it instead of the walk applying it.
+    InitMem(u8),
     /// An instruction whose form the dialect has already chosen by `mode`.
     /// `operands` carries one value per operand byte-slot the form declares, in
     /// order (empty for operand-less forms; two for e.g. Z80 `LD (IX+d),n`).
@@ -560,6 +569,9 @@ pub(crate) fn next_pc(
         Operation::AlignTo { modulus, .. } => pc + align_pad(pc, *modulus),
         // Emit nothing; they only speak.
         Operation::Diagnose { .. } | Operation::Assert { .. } => pc,
+        // Emits nothing and occupies nothing: it chooses what unwritten
+        // memory holds, and the driver has already read it.
+        Operation::InitMem(_) => pc,
         // Moves the counter rather than advancing it; the caller sets it.
         Operation::Section { .. } => pc,
         // Set the counter, bind a name, name an entry point — none of them a
@@ -900,6 +912,28 @@ fn assemble_statements(
     // The parse's advisories come first: they describe the source, and the
     // layout's describe what the source turned into.
     let mut warnings: Vec<Warning> = parse_warnings;
+
+    // `!initmem` is assembly-wide and position-independent: a reservation
+    // *earlier* in the file still takes its value, so it is read here rather
+    // than applied as the walk reaches it. The first one wins; ACME answers a
+    // second with "Memory already initialised" and keeps the first.
+    let mut gap_fill = gap_fill;
+    let mut seen_init = false;
+    for s in &statements {
+        if let Some(Operation::InitMem(v)) = &s.op {
+            if seen_init {
+                warnings.push(Warning {
+                    line: s.line,
+                    message: "memory already initialised; the first value stands".to_string(),
+                    file: s.file,
+                    kind: WarningKind::Advisory,
+                });
+            } else {
+                gap_fill = *v;
+                seen_init = true;
+            }
+        }
+    }
     let mut start: Option<u16> = None;
     let mut bytes: Vec<u8> = Vec::new();
     // Sections closed so far. A dialect with no section concept never opens
@@ -1029,6 +1063,9 @@ fn assemble_statements(
                 let slack = (addr_unit - payload.len() as i64 % addr_unit) % addr_unit;
                 bytes.extend(std::iter::repeat_n(0u8, slack as usize));
             }
+            // Read before the passes begin, because it applies to the whole
+            // assembly rather than from here on.
+            Some(Operation::InitMem(_)) => {}
             Some(Operation::Sized {
                 width,
                 big_endian,

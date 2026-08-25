@@ -1762,6 +1762,7 @@ fn substitute_anon_refs(
             big_endian,
             values: values.into_iter().map(subst).collect::<Result<_, _>>()?,
         },
+        Operation::InitMem(v) => Operation::InitMem(v),
         Operation::Instruction {
             mnemonic,
             mode,
@@ -2236,6 +2237,28 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // `!skip` reserves rather than emitting: what lands there is whatever
+    // `!initmem` chose, so it is a reservation and not a run of zeros.
+    Directive {
+        id: "skip",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["skip"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // `!initmem` names the byte that fills unwritten space, for the whole
+    // assembly and wherever it is written.
+    Directive {
+        id: "initmem",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["initmem"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     // `!hex` takes bare hex digit pairs — no `$`, no quotes, no commas, all of
     // which ACME answers with a syntax error.
     Directive {
@@ -2413,7 +2436,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What ACME has here and we do not.
     //
-    // 18 spellings against 0.97, counted from this list rather than recalled.
+    // 16 spellings against 0.97, counted from this list rather than recalled.
     // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
     // long registers" for them on a 6502, so they belong to a wider target.
     // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
@@ -2432,11 +2455,9 @@ pub const DIRECTIVES: &[Directive] = &[
                 "do",
                 "endoffile",
                 "eof",
-                "initmem",
                 "pseudopc",
                 "rs",
                 "scrxor",
-                "skip",
                 "symbollist",
                 "to",
                 "while",
@@ -2492,6 +2513,23 @@ fn parse_directive(
         // Identity today, and identity forever: see the declaration above.
         "raw" => parse_text(anons, zone, rest, line, |c| c),
         "hex" => parse_hex(rest, line),
+        "skip" => {
+            let n = fold_const(&parse_value(anons, zone, rest.trim(), line)?, env, line)?;
+            // ACME's own words for a negative count, because it is the
+            // reference's rule and not a house one.
+            let n =
+                usize::try_from(n).map_err(|_| AsmError::new(line, "negative size argument"))?;
+            Ok(Operation::Reserve(n))
+        }
+        "initmem" => {
+            let v = fold_const(&parse_value(anons, zone, rest.trim(), line)?, env, line)?;
+            // Signed or unsigned, like every other ACME byte: `!initmem -1`
+            // is `$ff`, and `!initmem 256` is "Number out of range".
+            if !(-128..=0xFF).contains(&v) {
+                return Err(AsmError::new(line, format!("number out of range: {v}")));
+            }
+            Ok(Operation::InitMem((v & 0xFF) as u8))
+        }
         "sized" => {
             // `be`/`le` then the width in bits; the declaration above is what
             // guarantees the shape, so this reads it rather than re-checking.
@@ -3037,6 +3075,61 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// `!skip` reserves; `!initmem` says what lands in reserved space.
+    ///
+    /// The coupling is the point: `!skip` alone is zeros, and the same
+    /// `!skip` after an `!initmem` is that byte instead. They cannot be
+    /// implemented apart.
+    #[test]
+    fn skip_reserves_and_initmem_says_with_what() {
+        assert_eq!(asm("!skip 4").expect("skip").bytes, vec![0, 0, 0, 0]);
+        assert_eq!(
+            asm("!initmem $ff\n!skip 3").expect("filled").bytes,
+            vec![0xFF; 3]
+        );
+        assert_eq!(asm("!skip 2+1").expect("expr").bytes, vec![0, 0, 0]);
+        assert!(asm("!skip 0\nnop").expect("zero is legal").bytes == vec![0xEA]);
+        asm("!skip -1").expect_err("negative size argument");
+        asm("!skip 3,$aa").expect_err("`!skip` takes one operand");
+    }
+
+    /// `!initmem` is not a statement that runs where it is written — it
+    /// chooses what unwritten memory holds for the whole assembly. A `!skip`
+    /// *earlier* in the file takes its value too, which is the behaviour that
+    /// forced it out of the walk and into a pass the driver makes first.
+    #[test]
+    fn initmem_applies_to_the_whole_assembly_not_from_where_it_appears() {
+        assert_eq!(
+            asm("!skip 3\n!initmem $ff").expect("earlier skip").bytes,
+            vec![0xFF; 3]
+        );
+    }
+
+    /// It fills an `org` gap as well as a reservation — the same unwritten
+    /// memory either way.
+    #[test]
+    fn initmem_fills_an_origin_gap() {
+        // The origin is explicit because the helper only supplies one when
+        // the source names none, and `*=$c004` below counts as naming one.
+        let out = asm("*=$c000\n!initmem $ff\nnop\n*=$c004\nnop").expect("gap");
+        assert_eq!(out.bytes, vec![0xEA, 0xFF, 0xFF, 0xFF, 0xEA]);
+    }
+
+    /// A second `!initmem` is ignored, not obeyed and not refused: ACME warns
+    /// "Memory already initialised" and keeps the first value.
+    #[test]
+    fn a_second_initmem_does_not_displace_the_first() {
+        let out = asm("!initmem $ff\n!skip 2\n!initmem $aa\n!skip 2").expect("twice");
+        assert_eq!(out.bytes, vec![0xFF; 4]);
+    }
+
+    /// The fill byte spans signed and unsigned like every other ACME byte.
+    #[test]
+    fn an_initmem_byte_is_signed_or_unsigned() {
+        assert_eq!(asm("!initmem -1\n!skip 1").expect("neg").bytes, vec![0xFF]);
+        asm("!initmem 256\n!skip 1").expect_err("number out of range");
+    }
 
     /// Six spellings of one rule. The byte order is the directive's, not the
     /// CPU's: a 6502 is little-endian and `!be24` still emits big-endian.

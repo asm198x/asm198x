@@ -207,6 +207,9 @@ pub(crate) enum Item {
         big_endian: bool,
         values: Vec<Operand>,
     },
+    /// ACME's `!initmem` — the assembly-wide fill byte. Carries no operand
+    /// once parsed, because the value is folded before it reaches here.
+    InitMem(u8),
     Entry(Operand),
     /// A dialect-computed instruction encoding (a 6809 postbyte + extension,
     /// a field-packed word, …), carried verbatim so a computed-operand CPU
@@ -714,6 +717,7 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
                 .map(Operand::into_value)
                 .collect::<Result<_, _>>()?,
         },
+        Item::InitMem(v) => Operation::InitMem(*v),
         Item::Entry(o) => Operation::Entry(o.clone().into_value()?),
         Item::Reserve(count) => Operation::Reserve(*count),
         Item::Align {
@@ -808,6 +812,7 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
                 .map(Operand::into_value)
                 .collect::<Result<_, _>>()?,
         },
+        Item::InitMem(v) => Operation::InitMem(v),
         Item::Entry(o) => Operation::Entry(o.into_value()?),
         Item::Encoded(pieces) => Operation::Encoded(pieces),
         Item::Reserve(count) => Operation::Reserve(count),
@@ -955,6 +960,8 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
             big_endian,
             values: values.into_iter().map(|e| map_sym_expr(e, f)).collect(),
         },
+        // No expressions to rewrite: the fill byte is folded at parse time.
+        Operation::InitMem(v) => Operation::InitMem(v),
         Operation::Instruction {
             mnemonic,
             mode,
@@ -1043,6 +1050,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
             big_endian,
             values: values.into_iter().map(Operand::expr).collect(),
         },
+        Operation::InitMem(v) => Item::InitMem(v),
         Operation::Entry(e) => Item::Entry(Operand::expr(e)),
         Operation::Encoded(pieces) => Item::Encoded(pieces),
         Operation::Binary(payload) => Item::Binary(payload),
