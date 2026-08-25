@@ -34,6 +34,25 @@ If a drop is deliberate, run `cargo xtask coverage --write` and say in the
 commit which cases went and why. The stamp is the record of that debt, so it
 must not move silently.
 
+### A shortfall says why it exists
+
+Below 100% is not automatically wrong. The 8039 cannot reach the four BUS-port
+ops its ROM-less bus commits; the 6809's three undocumented opcodes are
+input-only by decision, so the form audit — which works through the
+disassembler — can never reach them.
+
+What would be wrong is not being able to tell those from a form that quietly
+stopped arbitrating. So every shortfall is declared in
+`crates/asm198x/tests/verdicts/coverage.accepted`: the CPU, how many rows, and
+why they will never be reached. The check fails on a shortfall with no entry,
+one that grew past what it declares, and an entry whose CPU now arbitrates
+everything.
+
+That is the difference between a decision and a debt, which the coverage number
+alone cannot express.
+
+### Refreshing the stamp
+
 A **rise** needs the same command, without the explanation — refresh the stamp
 in the change that earned it. The check asks for this because a stamp that lags
 is a ratchet that has let go: while it reads the lower number, a regression back

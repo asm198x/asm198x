@@ -421,10 +421,53 @@ fn run_coverage(args: &[String]) -> ExitCode {
             );
             return ExitCode::FAILURE;
         };
+        // Every shortfall must say why it exists and how big it is, or a form
+        // that quietly stopped arbitrating is indistinguishable from one we
+        // decided never to reach.
+        let accepted_path = coverage::accepted_path(&repo);
+        let accepted = std::fs::read_to_string(&accepted_path).unwrap_or_default();
+        let unaccepted = coverage::unaccepted(&report, &coverage::parse_accepted(&accepted));
         let moved = coverage::drift(&report, &coverage::parse_stamp(&existing));
-        if moved.is_empty() {
-            println!("arbitration coverage holds against the stamp");
+        if moved.is_empty() && unaccepted.is_empty() {
+            println!(
+                "arbitration coverage holds against the stamp, and every shortfall is declared"
+            );
             return ExitCode::SUCCESS;
+        }
+        if !unaccepted.is_empty() {
+            eprintln!(
+                "{} shortfall(s) do not match what {} declares:",
+                unaccepted.len(),
+                accepted_path.display()
+            );
+            for u in &unaccepted {
+                match u {
+                    coverage::Unaccepted::Undeclared { cpu, rows } => {
+                        eprintln!("  {cpu}: {rows} row(s) unarbitrated, and nothing says why")
+                    }
+                    coverage::Unaccepted::Wider {
+                        cpu,
+                        declared,
+                        rows,
+                    } => eprintln!(
+                        "  {cpu}: {rows} row(s) unarbitrated, {declared} declared — {} beyond it",
+                        rows - declared
+                    ),
+                    coverage::Unaccepted::Stale { cpu, declared } => eprintln!(
+                        "  {cpu}: arbitrates everything, yet still declares {declared} row(s)"
+                    ),
+                }
+            }
+            eprintln!(
+                "\nA shortfall is either a decision or a debt, and the number cannot \
+                 tell them apart. Declare it — the CPU, the row count, and why it will \
+                 never be reached — or recover the rows with a growth run. An entry \
+                 that outlived its reason comes out."
+            );
+            if moved.is_empty() {
+                return ExitCode::FAILURE;
+            }
+            eprintln!();
         }
         let (fell, rose): (Vec<_>, Vec<_>) = moved.iter().partition(|m| m.fell());
         let list = |moves: &[&coverage::Move]| {
