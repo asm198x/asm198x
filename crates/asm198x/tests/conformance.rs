@@ -38,40 +38,6 @@ fn have(bin: &str) -> bool {
     Command::new(bin).output().is_ok()
 }
 
-/// Synthesise canonical bytes for a form: its opcode, then filler operand bytes
-/// chosen to avoid size-force edge cases (a 2-byte address is `$1234`, ≥ `$100`,
-/// so it stays absolute; a 3-byte one is `$123456`, ≥ `$10000`, so it stays
-/// long), then any trailing suffix bytes.
-fn synth(form: &isa::Form) -> Vec<u8> {
-    let mut b = form.opcode.to_vec();
-    for op in form.operands {
-        match op.kind {
-            isa::OperandKind::RelativePc => {
-                // A small forward offset, little-endian over the operand width.
-                b.push(0x02);
-                b.extend(std::iter::repeat_n(0x00, usize::from(op.bytes) - 1));
-            }
-            isa::OperandKind::Displacement => b.push(0x05),
-            // Big-endian 16-bit immediate (Z80N `push nn`): $1234 high byte
-            // first. Not reached today (this sweep walks the base Z80 set, not
-            // the NEXT extension), but kept correct for when it is.
-            isa::OperandKind::ImmediateBe => b.extend_from_slice(&[0x12, 0x34]),
-            isa::OperandKind::Immediate | isa::OperandKind::Address => {
-                // $12 / $1234 / $123456, little-endian.
-                let bytes: &[u8] = match op.bytes {
-                    1 => &[0x12],
-                    2 => &[0x34, 0x12],
-                    3 => &[0x56, 0x34, 0x12],
-                    _ => &[],
-                };
-                b.extend_from_slice(bytes);
-            }
-        }
-    }
-    b.extend_from_slice(form.suffix);
-    b
-}
-
 /// What a reference assembler did with the source it was handed.
 ///
 /// The distinction matters because a corpus records *facts about source text*
@@ -247,7 +213,7 @@ fn spec_opcodes_match_reference() {
     if have("acme") {
         for insn in isa::mos6502::SET.instructions {
             for form in insn.forms {
-                let bytes = synth(form);
+                let bytes: Vec<u8> = form.exemplar().collect();
                 let text = asm198x::listing_6502(&bytes, 0x0800);
                 let reference = ref_assemble(&tmp, &text, "a", |src, out| {
                     let mut c = Command::new("acme");
@@ -294,7 +260,7 @@ fn spec_opcodes_match_reference() {
     if have("pasmo") {
         for insn in isa::z80::SET.instructions {
             for form in insn.forms {
-                let bytes = synth(form);
+                let bytes: Vec<u8> = form.exemplar().collect();
                 let text = asm198x::listing_z80(&bytes, 0x8000, false);
                 let reference = ref_assemble(&tmp, &text, "z80", |src, out| {
                     let mut c = Command::new("pasmo");
@@ -355,7 +321,7 @@ fn spec_opcodes_match_reference() {
                     } else {
                         Vec::new()
                     };
-                    bytes.extend(synth(form));
+                    bytes.extend(form.exemplar());
                     let text = asm198x::listing_65816(&bytes, 0x0000);
                     let reference = ref_assemble(&tmp, &text, "s", |src, out| {
                         let obj = src.with_extension("o");
@@ -413,7 +379,7 @@ fn spec_opcodes_match_reference() {
         for set in sets {
             for insn in set.instructions {
                 for form in insn.forms {
-                    let mut bytes = synth(form);
+                    let mut bytes: Vec<u8> = form.exemplar().collect();
                     // `tma` reads one MMU register, so ca65 requires a
                     // single-bit operand; the generic `$12` filler (two bits)
                     // is rejected. Use `$02` — the opcode is still verified.
@@ -469,7 +435,7 @@ fn spec_opcodes_match_reference() {
     if have("rgbasm") && have("rgblink") {
         for insn in isa::sm83::SET.instructions {
             for form in insn.forms {
-                let bytes = synth(form);
+                let bytes: Vec<u8> = form.exemplar().collect();
                 let text = asm198x::listing_sm83(&bytes, 0x0000);
                 let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
                     let obj = src.with_extension("o");
@@ -521,7 +487,7 @@ fn spec_opcodes_match_reference() {
     if have("asl") && have("p2bin") {
         for insn in isa::i8080::SET.instructions {
             for form in insn.forms {
-                let bytes = synth(form);
+                let bytes: Vec<u8> = form.exemplar().collect();
                 let text = asm198x::listing_i8080(&bytes, 0x0000);
                 let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
                     let obj = src.with_extension("p");
@@ -569,7 +535,7 @@ fn spec_opcodes_match_reference() {
     if have("asl") && have("p2bin") {
         for insn in isa::m6800::SET.instructions {
             for form in insn.forms {
-                let bytes = synth(form);
+                let bytes: Vec<u8> = form.exemplar().collect();
                 let text = asm198x::listing_m6800(&bytes, 0x0000);
                 let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
                     let obj = src.with_extension("p");
@@ -617,7 +583,7 @@ fn spec_opcodes_match_reference() {
     if have("asl") && have("p2bin") {
         for insn in isa::cdp1802::SET.instructions {
             for form in insn.forms {
-                let bytes = synth(form);
+                let bytes: Vec<u8> = form.exemplar().collect();
                 let text = asm198x::listing_1802(&bytes, 0x0000);
                 let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
                     let obj = src.with_extension("p");
@@ -665,7 +631,7 @@ fn spec_opcodes_match_reference() {
     if have("asl") && have("p2bin") {
         for insn in isa::i8048::SET.instructions {
             for form in insn.forms {
-                let bytes = synth(form);
+                let bytes: Vec<u8> = form.exemplar().collect();
                 let text = asm198x::listing_8048(&bytes, 0x0000);
                 let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
                     let obj = src.with_extension("p");
@@ -726,7 +692,7 @@ fn spec_opcodes_match_reference() {
                 if bus_op(insn.mnemonic, form.mode) {
                     continue;
                 }
-                let bytes = synth(form);
+                let bytes: Vec<u8> = form.exemplar().collect();
                 // Retarget the listing header at the ROM-less part.
                 let text = asm198x::listing_8048(&bytes, 0x0000).replace("cpu 8048", "cpu 8039");
                 let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
@@ -775,7 +741,7 @@ fn spec_opcodes_match_reference() {
     if have("asl") && have("p2bin") {
         for insn in isa::scmp::SET.instructions {
             for form in insn.forms {
-                let bytes = synth(form);
+                let bytes: Vec<u8> = form.exemplar().collect();
                 let text = asm198x::listing_scmp(&bytes, 0x0000);
                 let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
                     let obj = src.with_extension("p");
@@ -823,7 +789,7 @@ fn spec_opcodes_match_reference() {
     if have("asl") && have("p2bin") {
         for insn in isa::f8::SET.instructions {
             for form in insn.forms {
-                let bytes = synth(form);
+                let bytes: Vec<u8> = form.exemplar().collect();
                 let text = asm198x::listing_f8(&bytes, 0x0000);
                 let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
                     let obj = src.with_extension("p");
@@ -871,7 +837,7 @@ fn spec_opcodes_match_reference() {
     if have("asl") && have("p2bin") {
         for insn in isa::s2650::SET.instructions {
             for form in insn.forms {
-                let mut bytes = synth(form);
+                let mut bytes: Vec<u8> = form.exemplar().collect();
                 // The 2650 is big-endian; `synth` fills little-endian, so swap
                 // the 2-byte absolute operand. (Big-endian also keeps the address
                 // in the memory-reference ops' 13-bit direct range.)
@@ -926,7 +892,7 @@ fn spec_opcodes_match_reference() {
     if have("asl") && have("p2bin") {
         for insn in isa::tms7000::SET.instructions {
             for form in insn.forms {
-                let bytes = synth(form);
+                let bytes: Vec<u8> = form.exemplar().collect();
                 let text = asm198x::listing_tms7000(&bytes, 0x0000);
                 let reference = ref_assemble(&tmp, &text, "asm", |src, out| {
                     let obj = src.with_extension("p");
