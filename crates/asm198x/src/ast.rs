@@ -210,6 +210,9 @@ pub(crate) enum Item {
     /// ACME's `!initmem` — the assembly-wide fill byte. Carries no operand
     /// once parsed, because the value is folded before it reaches here.
     InitMem(u8),
+    /// The boundary of an ACME `!pseudopc` block: the target address on the
+    /// way in, nothing on the way out.
+    PseudoPc(Option<Operand>),
     Entry(Operand),
     /// A dialect-computed instruction encoding (a 6809 postbyte + extension,
     /// a field-packed word, …), carried verbatim so a computed-operand CPU
@@ -719,6 +722,7 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
                 .collect::<Result<_, _>>()?,
         },
         Item::InitMem(v) => Operation::InitMem(*v),
+        Item::PseudoPc(o) => Operation::PseudoPc(o.clone().map(Operand::into_value).transpose()?),
         Item::Entry(o) => Operation::Entry(o.clone().into_value()?),
         Item::Reserve(count) => Operation::Reserve(*count),
         Item::Align {
@@ -814,6 +818,7 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
                 .collect::<Result<_, _>>()?,
         },
         Item::InitMem(v) => Operation::InitMem(v),
+        Item::PseudoPc(o) => Operation::PseudoPc(o.map(Operand::into_value).transpose()?),
         Item::Entry(o) => Operation::Entry(o.into_value()?),
         Item::Encoded(pieces) => Operation::Encoded(pieces),
         Item::Reserve(count) => Operation::Reserve(count),
@@ -963,6 +968,7 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
         },
         // No expressions to rewrite: the fill byte is folded at parse time.
         Operation::InitMem(v) => Operation::InitMem(v),
+        Operation::PseudoPc(e) => Operation::PseudoPc(e.map(|e| map_sym_expr(e, f))),
         Operation::Instruction {
             mnemonic,
             mode,
@@ -1052,6 +1058,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
             values: values.into_iter().map(Operand::expr).collect(),
         },
         Operation::InitMem(v) => Item::InitMem(v),
+        Operation::PseudoPc(e) => Item::PseudoPc(e.map(Operand::expr)),
         Operation::Entry(e) => Item::Entry(Operand::expr(e)),
         Operation::Encoded(pieces) => Item::Encoded(pieces),
         Operation::Binary(payload) => Item::Binary(payload),

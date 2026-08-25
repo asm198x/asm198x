@@ -903,13 +903,18 @@ fn for_block_open(trimmed: &str) -> Option<usize> {
 /// out. Unlike a conditional there is no branch to prune, so nothing is
 /// removed from the tree and the formatter re-renders both markers.
 ///
-/// Three directives share the shape and differ in what they save: `!zone`
-/// the zone name, `!xor` the mask, `!ct` the conversion table. Each also has
-/// a no-block form that mutates without saving, which is why the `{` is what
-/// decides — not the word.
+/// Four directives share the shape and differ in what they save: `!zone` the
+/// zone name, `!xor` the mask, `!ct` the conversion table, `!pseudopc` the
+/// address code claims to be at. The first three also have a no-block form
+/// that mutates without saving, which is why the `{` is what decides — not
+/// the word. `!pseudopc` has no such form: ACME retired it, and the bare
+/// spelling is declared as its refusal.
 fn marker_block_open(trimmed: &str) -> Option<usize> {
     let word = split_first_word(trimmed).0.to_ascii_lowercase();
-    if matches!(word.as_str(), "!zone" | "!zn" | "!xor" | "!ct" | "!convtab") {
+    if matches!(
+        word.as_str(),
+        "!zone" | "!zn" | "!xor" | "!ct" | "!convtab" | "!pseudopc"
+    ) {
         find_top(trimmed, b'{')
     } else {
         None
@@ -1017,6 +1022,8 @@ enum OpenBlock {
     Xor(u8),
     /// The conversion table to go back to.
     Ct(ConvTable),
+    /// A `!pseudopc` block, whose restore the engine performs.
+    PseudoPc,
 }
 
 struct AcmeEval<'a> {
@@ -1461,6 +1468,21 @@ impl AcmeEval<'_> {
             "!src" | "!source" => return self.lower_include(node, args, out),
             "!bin" | "!binary" => return self.lower_incbin(node, args, out),
             "!zone" | "!zn" => return self.lower_zone(node, args, out),
+            "!pseudopc" if args.trim().ends_with('{') => {
+                let target = args.trim().trim_end_matches('{').trim();
+                let e = parse_value(&self.anons, &self.zone, target, line)
+                    .map_err(|err| stamp_file(err, file))?;
+                self.block_stack.push(OpenBlock::PseudoPc);
+                out.push(Statement {
+                    line,
+                    file,
+                    label: None,
+                    op: Some(Operation::PseudoPc(Some(e))),
+                    operand_span: None,
+                    xor_mask: 0,
+                });
+                return Ok(());
+            }
             "!ct" | "!convtab" if args.trim().ends_with('{') => {
                 let name = args.trim().trim_end_matches('{').trim();
                 let conv = ConvTable::named(name, line).map_err(|e| stamp_file(e, file))?;
@@ -1501,6 +1523,17 @@ impl AcmeEval<'_> {
                     OpenBlock::Zone(zone) => self.zone = zone,
                     OpenBlock::Xor(mask) => self.xor_mask = mask,
                     OpenBlock::Ct(conv) => self.conv = conv,
+                    // Unlike the others there is nothing to restore here: the
+                    // engine keeps the stack, because only it knows the real
+                    // address the block opened at.
+                    OpenBlock::PseudoPc => out.push(Statement {
+                        line,
+                        file,
+                        label: None,
+                        op: Some(Operation::PseudoPc(None)),
+                        operand_span: None,
+                        xor_mask: 0,
+                    }),
                 }
                 return Ok(());
             }
@@ -1958,6 +1991,7 @@ fn substitute_anon_refs(
             values: values.into_iter().map(subst).collect::<Result<_, _>>()?,
         },
         Operation::InitMem(v) => Operation::InitMem(v),
+        Operation::PseudoPc(e) => Operation::PseudoPc(e.map(subst).transpose()?),
         Operation::Instruction {
             mnemonic,
             mode,
@@ -2487,6 +2521,19 @@ pub const DIRECTIVES: &[Directive] = &[
     // `foo = $10` does — so what it really is, is a binding: an assignment
     // with `=`, and a label without. Handled in `parse_statement`, because a
     // directive dispatch cannot bind the name a statement carries.
+    // `!pseudopc <addr> { … }` assembles here and reports addresses there:
+    // labels and `*` inside read as if the code sat at `<addr>`, while the
+    // bytes stay where they are. The bare `!pseudopc` is ACME's retired
+    // spelling and is declared as its refusal, above.
+    Directive {
+        id: "pseudopc",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["pseudopc"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     Directive {
         id: "addr",
         pattern: Pattern::Sigilled {
@@ -2766,7 +2813,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What ACME has here and we do not.
     //
-    // 6 spellings against 0.97, counted from this list rather than recalled.
+    // 5 spellings against 0.97, counted from this list rather than recalled.
     // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
     // long registers" for them on a 6502, so they belong to a wider target.
     // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
@@ -2775,7 +2822,7 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "unsupported-acme",
         pattern: Pattern::Sigilled {
             sigil: '!',
-            names: &["cpu", "do", "pseudopc", "symbollist", "to", "while"],
+            names: &["cpu", "do", "symbollist", "to", "while"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -3417,6 +3464,69 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// `!pseudopc` assembles here and reports addresses there: labels and
+    /// `*` inside read as if the code sat at the given address, while the
+    /// bytes stay where they are.
+    #[test]
+    fn pseudopc_moves_the_address_and_not_the_bytes() {
+        assert_eq!(
+            asm("*=$1000\n!pseudopc $2000 {\nfoo\n!byte <foo, >foo\n}")
+                .expect("label")
+                .bytes,
+            vec![0x00, 0x20]
+        );
+        assert_eq!(
+            asm("*=$1000\n!pseudopc $2000 {\n!byte <*, >*\n}")
+                .expect("star")
+                .bytes,
+            vec![0x00, 0x20]
+        );
+        // The bytes are contiguous — the real counter never moved.
+        assert_eq!(
+            asm("*=$1000\n!byte $11\n!pseudopc $2000 {\n!byte $22\n}\n!byte $33")
+                .expect("in place")
+                .bytes,
+            vec![0x11, 0x22, 0x33]
+        );
+    }
+
+    /// It restores on the way out, and nests. After a block the counter is
+    /// the real one again, advanced by whatever the block emitted.
+    #[test]
+    fn pseudopc_restores_and_nests() {
+        assert_eq!(
+            asm("*=$1000\n!pseudopc $2000 {\n!byte <*, >*\n}\n!byte <*, >*")
+                .expect("restore")
+                .bytes,
+            vec![0x00, 0x20, 0x02, 0x10]
+        );
+        assert_eq!(
+            asm("*=$1000\n!pseudopc $2000 {\n!pseudopc $3000 {\n!byte <*, >*\n}\n!byte <*, >*\n}")
+                .expect("nested")
+                .bytes,
+            vec![0x00, 0x30, 0x02, 0x20]
+        );
+    }
+
+    /// A branch inside is measured from the **claimed** address, because the
+    /// label it targets is claimed too. Measuring a claimed target from a
+    /// real position is off by the block's offset, which is what the first
+    /// draft did — `bne` to the label one byte back reported 4093.
+    #[test]
+    fn a_branch_inside_is_measured_from_the_claimed_address() {
+        assert_eq!(
+            asm("*=$1000\n!pseudopc $2000 {\nl\tnop\n\tbne l\n}")
+                .expect("in")
+                .bytes,
+            vec![0xEA, 0xD0, 0xFD]
+        );
+        // Unchanged outside a block.
+        assert_eq!(
+            asm("*=$1000\nl\tnop\n\tbne l").expect("out").bytes,
+            vec![0xEA, 0xD0, 0xFD]
+        );
+    }
 
     /// `!addr` names a symbol and marks it an address. The mark never shows
     /// in the bytes, so what is left is the naming — and that is a binding,
