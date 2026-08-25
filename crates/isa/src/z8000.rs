@@ -2366,16 +2366,35 @@ impl Mono {
 }
 
 impl Shift {
-    /// One representative encoding of this shift or rotate, once there is one.
+    /// One representative encoding of this shift or rotate: the opcode word,
+    /// and the count word that follows it where the form has one.
     ///
-    /// `None` throughout for now. The opcode word is the easy half — the count
-    /// travels in a *following* word whose legal range this entry does not
-    /// state, and an exemplar carrying filler as its count is not an instance
-    /// of the row. The audit reports these as unplaced rather than arbitrating
-    /// a guess.
+    /// The two kinds carry their count differently, which is why the pair is
+    /// returned rather than a bare word:
+    ///
+    /// - A [`Shift`](ShiftKind::Shift) puts a *signed* count in a following
+    ///   word — negative for the right-hand variants, and confined to the low
+    ///   byte when the operand is a byte. A count of 1 is legal at every size
+    ///   (see [`shift_max`]), so that is the one shown.
+    /// - A [`Rotate`](ShiftKind::Rotate) has no following word at all: the
+    ///   count is folded into the low nibble, which is why `sel` there is the
+    ///   rotate *type* rather than the nibble itself.
     #[must_use]
-    pub const fn exemplar(&self) -> Option<u16> {
-        None
+    pub const fn exemplar(&self) -> (u16, Option<u16>) {
+        let reg = lowest_register(self.size);
+        match self.kind {
+            ShiftKind::Shift => {
+                let count: u16 = match (self.right, self.size) {
+                    // -1 in the width the count is read at.
+                    (true, Size::Byte) => 0x00FF,
+                    (true, _) => 0xFFFF,
+                    (false, _) => 1,
+                };
+                (first_word(2, self.base6, reg, self.sel as u16), Some(count))
+            }
+            // `type * 4 + (count - 1) * 2`, with the count 1.
+            ShiftKind::Rotate => (first_word(2, self.base6, reg, (self.sel as u16) * 4), None),
+        }
     }
 }
 

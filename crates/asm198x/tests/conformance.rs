@@ -2693,37 +2693,48 @@ fn z8000_form_audit(cpu: &str, seg: bool) {
             _ if seg && matches!(row.mode, "direct address" | "indexed") => &seg_filler,
             _ => &filler,
         };
-        let word = dyadic
+        // The opcode word, and the operand word a shift carries with it. Only
+        // that family has one; for everything else the operands come from the
+        // filler.
+        let placed: Option<(u16, Option<u16>)> = dyadic
             .and_then(|i| i.exemplar(row.mode, seg))
+            .map(|w| (w, None))
             .or_else(|| {
                 isa::z8000::MONO
                     .iter()
                     .find(|i| i.mnemonic == m)
-                    .map(isa::z8000::Mono::exemplar)
+                    .map(|i| (i.exemplar(), None))
             })
             .or_else(|| {
                 isa::z8000::SHIFTS
                     .iter()
                     .find(|i| i.mnemonic == m)
-                    .and_then(isa::z8000::Shift::exemplar)
+                    .map(isa::z8000::Shift::exemplar)
             })
             .or_else(|| {
                 isa::z8000::EXTENDS
                     .iter()
                     .find(|i| i.mnemonic == m)
-                    .map(isa::z8000::Extend::exemplar)
+                    .map(|i| (i.exemplar(), None))
             })
             .or_else(|| {
                 isa::z8000::MULDIV
                     .iter()
                     .find(|i| i.mnemonic == m)
-                    .map(isa::z8000::MulDiv::exemplar)
+                    .map(|i| (i.exemplar(), None))
             });
-        let Some(word) = word else {
+        let Some((word, operand)) = placed else {
             unplaced += 1;
             continue;
         };
-        let bytes = exemplar_bytes(word, true, filler);
+        let bytes = match operand {
+            Some(w) => {
+                let mut b = exemplar_bytes(word, true, &w.to_be_bytes());
+                b.extend_from_slice(filler);
+                b
+            }
+            None => exemplar_bytes(word, true, filler),
+        };
         let listing = if seg {
             asm198x::listing_z8001(&bytes, 0x1000)
         } else {
