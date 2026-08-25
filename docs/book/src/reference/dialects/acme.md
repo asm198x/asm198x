@@ -8,10 +8,11 @@ C64 6502, ACME syntax.
 
 ## Directives
 
-29 directives, 58 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+30 directives, 58 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
+| `addr` | `!addr`, `!address` |  |
 | `align` | `!align` |  |
 | `bytes` | `!byte`, `!by`, `!8` |  |
 | `conditional` | `!if`, `!ifdef`, `!ifndef` |  |
@@ -37,7 +38,7 @@ C64 6502, ACME syntax.
 | `sized` | `!be16`, `!be24`, `!be32`, `!le16`, `!le24`, `!le32` |  |
 | `skip` | `!skip` |  |
 | `text` | `!text`, `!tx` |  |
-| `unsupported-acme` | `!addr`, `!address`, `!cpu`, `!do`, `!pseudopc`, `!symbollist`, `!to`, `!while` | Recognised, and not implemented |
+| `unsupported-acme` | `!cpu`, `!do`, `!pseudopc`, `!symbollist`, `!to`, `!while` | Recognised, and not implemented |
 | `words` | `!word`, `!wo`, `!16` |  |
 | `xor` | `!xor` |  |
 | `zone` | `!zone`, `!zn` |  |

@@ -2248,6 +2248,22 @@ fn top_level_lone_eq(s: &str) -> Option<usize> {
 // ---------------------------------------------------------------------------
 
 /// Reduce one source line to an optional label and an optional operation.
+/// `text` with a leading `word` removed, when it starts with exactly that
+/// word (case-insensitively) followed by whitespace or nothing. Returns
+/// `None` otherwise, so `!address` is not read as `!addr` with a stray `ess`.
+fn strip_word_ci<'a>(text: &'a str, word: &str) -> Option<&'a str> {
+    let head = text.get(..word.len())?;
+    if !head.eq_ignore_ascii_case(word) {
+        return None;
+    }
+    let rest = &text[word.len()..];
+    if rest.is_empty() || rest.starts_with(char::is_whitespace) {
+        Some(rest)
+    } else {
+        None
+    }
+}
+
 fn parse_statement(
     set: &'static isa::InstructionSet,
     anons: &Anons,
@@ -2285,6 +2301,36 @@ fn parse_statement(
 
     // Otherwise: an optional column-0 label, then a directive or instruction.
     let (label, rest) = split_label(set, anons, code, line)?;
+    // `!addr`/`!address` names a symbol and marks it an address. The mark has
+    // no effect on bytes — probed at every shape, `!addr foo = $10` selects
+    // zero page exactly as `foo = $10` does — so what is left is the naming,
+    // and that is a binding rather than an operation.
+    //
+    // With `=` it is the assignment above. Without, it is a **label**: `!addr
+    // foo` binds the program counter, and `!byte <foo, >foo` after three
+    // bytes reads `03 10`, the same as a plain `foo` in that position.
+    if let Some(args) = rest
+        .strip_prefix('!')
+        .map(str::trim_start)
+        .and_then(|r| strip_word_ci(r, "addr").or_else(|| strip_word_ci(r, "address")))
+    {
+        if label.is_some() {
+            return Err(AsmError::new(line, "`!addr` takes no label of its own"));
+        }
+        let args = args.trim();
+        let (name, value) = match args.split_once('=') {
+            Some((n, v)) => (n.trim(), Some(v.trim())),
+            None => (args, None),
+        };
+        if !is_ident(name) {
+            return Err(AsmError::new(line, format!("invalid symbol name `{name}`")));
+        }
+        let op = match value {
+            Some(v) => Some(Operation::Equ(parse_value(anons, zone, v, line)?)),
+            None => None,
+        };
+        return Ok((Some(name.to_string()), op));
+    }
     let op = parse_op(set, anons, zone, env, conv, rest, line)?;
     Ok((label, op))
 }
@@ -2432,6 +2478,20 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Sigilled {
             sigil: '!',
             names: &["be16", "be24", "be32", "le16", "le24", "le32"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // `!addr`/`!address` names a symbol and marks it an address. The mark is
+    // invisible in the bytes — `!addr foo = $10` selects zero page exactly as
+    // `foo = $10` does — so what it really is, is a binding: an assignment
+    // with `=`, and a label without. Handled in `parse_statement`, because a
+    // directive dispatch cannot bind the name a statement carries.
+    Directive {
+        id: "addr",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["addr", "address"],
             required: true,
         },
         category: Category::Operation,
@@ -2706,7 +2766,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What ACME has here and we do not.
     //
-    // 8 spellings against 0.97, counted from this list rather than recalled.
+    // 6 spellings against 0.97, counted from this list rather than recalled.
     // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
     // long registers" for them on a 6502, so they belong to a wider target.
     // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
@@ -2715,16 +2775,7 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "unsupported-acme",
         pattern: Pattern::Sigilled {
             sigil: '!',
-            names: &[
-                "addr",
-                "address",
-                "cpu",
-                "do",
-                "pseudopc",
-                "symbollist",
-                "to",
-                "while",
-            ],
+            names: &["cpu", "do", "pseudopc", "symbollist", "to", "while"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -3366,6 +3417,57 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// `!addr` names a symbol and marks it an address. The mark never shows
+    /// in the bytes, so what is left is the naming — and that is a binding,
+    /// not an operation.
+    #[test]
+    fn addr_binds_a_name_exactly_as_an_assignment_does() {
+        assert_eq!(
+            asm("!addr foo = $c000\nlda foo").expect("addr").bytes,
+            asm("foo = $c000\nlda foo").expect("plain").bytes
+        );
+        // Notably it does *not* force absolute addressing: zero page is
+        // still chosen, exactly as for a plain `=`.
+        assert_eq!(
+            asm("!addr bar = $10\nlda bar").expect("zp").bytes,
+            vec![0xA5, 0x10]
+        );
+        assert_eq!(
+            asm("!address baz = $c000\nlda baz")
+                .expect("spelling")
+                .bytes,
+            vec![0xAD, 0x00, 0xC0]
+        );
+        assert_eq!(
+            asm("!addr foo = $c000+1\nlda foo").expect("expr").bytes,
+            vec![0xAD, 0x01, 0xC0]
+        );
+    }
+
+    /// Without a value it is a **label**: the program counter, bound to the
+    /// name. Probed rather than assumed — it reads the same as a plain label
+    /// in the same position.
+    #[test]
+    fn a_value_less_addr_is_a_label() {
+        assert_eq!(
+            asm("*=$1000\n!byte 1,2,3\n!addr foo\n!byte <foo, >foo")
+                .expect("addr")
+                .bytes,
+            asm("*=$1000\n!byte 1,2,3\nfoo\n!byte <foo, >foo")
+                .expect("label")
+                .bytes
+        );
+    }
+
+    /// The refusals, each ACME's own.
+    #[test]
+    fn addr_refuses_what_acme_refuses() {
+        asm("!addr foo = 1\n!addr foo = 2\n!byte foo").expect_err("already defined");
+        asm("!addr foo = 1\nfoo = 2\n!byte foo").expect_err("already defined");
+        asm("lbl\t!addr foo = 1\n!byte foo").expect_err("takes no label of its own");
+        asm("!addr 9foo = 1").expect_err("invalid symbol name");
+    }
 
     /// `!ct` chooses the table `!text` converts through. The default is
     /// `raw`, which is why `!text` and `!raw` agreed byte-for-byte before

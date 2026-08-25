@@ -285,6 +285,10 @@ const PROBES: &[Probe] = &[
     ok ("acme", "!be32 / !le32",         " !be32 $12345678\n !le32 $12345678\n"),
     ok ("acme", "sized takes a list",    " !be16 $1234, $5678\n"),
     ok ("acme", "sized spans signed",    " !be16 -32768\n !be16 65535\n"),
+    ok ("acme", "!addr binds a value",    " !addr foo = $c000\n lda foo\n"),
+    ok ("acme", "!addr keeps zero page",  " !addr bar = $10\n lda bar\n"),
+    // Without a value it is a label — the program counter, not a declaration.
+    ok ("acme", "!addr with no value",    " !byte 1,2,3\n !addr foo\n !byte <foo, >foo\n"),
     ok ("acme", "!ct pet converts !text", " !ct pet\n !text \"aA[]@\"\n"),
     ok ("acme", "!ct scr converts !text", " !ct scr\n !text \"aA[]@\"\n"),
     // The pair the earlier "!raw agrees with !text" probe anticipated: with a
