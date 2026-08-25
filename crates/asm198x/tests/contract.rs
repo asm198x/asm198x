@@ -224,7 +224,7 @@ type ColumnCase = (
 /// operand-field column on an out-of-range operand, not the line start.
 #[test]
 fn every_span_carrying_dialect_reports_operand_column() {
-    let cases: [ColumnCase; 6] = [
+    let cases: [ColumnCase; 5] = [
         (
             "i8080",
             asm198x::assemble_i8080,
@@ -247,13 +247,14 @@ fn every_span_carrying_dialect_reports_operand_column() {
             13,
         ),
         ("scmp", asm198x::assemble_scmp, "        ldi 0x1ff\n", 1, 13),
-        (
-            "rgbasm",
-            asm198x::assemble_rgbasm,
-            "SECTION \"a\", ROM0\n        ld a, 300\n",
-            2,
-            12,
-        ),
+        // rgbasm is deliberately absent. It was here with `ld a, 300`,
+        // asserting an *error* at the operand column — but rgbasm 1.0.3
+        // answers that with `warning: Expression must be 8-bit` and
+        // assembles `3e 2c`. The case was pinning our own divergence, not
+        // rgbasm's behaviour, and it went when the divergence did
+        // (asm198x#290). rgbasm has no oversize error left to carry a span;
+        // `oversized_byte_is_a_warning_not_an_error` covers what it does
+        // instead.
         (
             "lwasm",
             asm198x::assemble_lwasm,

@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.33`
-- **Corpus hash:** `fdba5957011e7d4a5ddb48ca244b72f7345dad8ff3550602a07baa6dadded4de`
+- **Corpus hash:** `ef4cf0464d9a680792dcdb4da5d57dff3fb8c3fd2c5218960e2d481103784a7a`
 - **Pinned curriculum:** `5435e540cf393c1956362458d5ff0fca3ff705f2` (2026-08-14)
-- **CPUs:** 23, holding 7746 verdict(s)
+- **CPUs:** 23, holding 7770 verdict(s)
 
 ## 1802
 
@@ -35,7 +35,7 @@ Form coverage: **151/151** (100.0%)
 
 | arbiter | version | binaries | verdicts |
 |---|---|---|---|
-| `acme` | This is ACME, release 0.97 ("Zem"), 28 June 2020 | 1 | curriculum 138, form 151, fuzz 100, probe 54 |
+| `acme` | This is ACME, release 0.97 ("Zem"), 28 June 2020 | 1 | curriculum 138, form 151, fuzz 100, probe 63 |
 | `ca65` | ca65 V2.18 - N/A | 1 | curriculum 51 |
 
 Tracked divergences — differences we know about and check:
@@ -88,7 +88,7 @@ Form coverage: **277/280** (98.9%)
 
 | arbiter | version | binaries | verdicts |
 |---|---|---|---|
-| `lwasm` | lwasm from lwtools 4.25 | 1 | form 277, fuzz 100, probe 46, sweep-chunk 98 |
+| `lwasm` | lwasm from lwtools 4.25 | 1 | form 277, fuzz 100, probe 50, sweep-chunk 98 |
 
 Tracked divergences — differences we know about and check:
 
@@ -168,7 +168,7 @@ No tracked divergences.
 
 | arbiter | version | binaries | verdicts |
 |---|---|---|---|
-| `rgbasm` | rgbasm v1.0.3 | 1 | probe 43 |
+| `rgbasm` | rgbasm v1.0.3 | 1 | probe 48 |
 
 Tracked divergences — differences we know about and check:
 
@@ -200,8 +200,8 @@ Form coverage: **704/704** (100.0%)
 
 | arbiter | version | binaries | verdicts |
 |---|---|---|---|
-| `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | 1 | curriculum 161, form 704, fuzz 100, probe 33 |
-| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | 1 | curriculum 161, probe 87 |
+| `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | 1 | curriculum 161, form 704, fuzz 100, probe 36 |
+| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | 1 | curriculum 161, probe 90 |
 
 Tracked divergences — differences we know about and check:
 

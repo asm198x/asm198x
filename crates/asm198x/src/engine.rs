@@ -861,6 +861,15 @@ fn assemble_statements(
 
     // Pass 2 — emit.
     let byte_policy = dialect.oversized_byte_policy();
+    let operand_policy = dialect.oversized_operand_policy();
+    // One answer per dialect, used at every width — see `accepts_negative_values`.
+    let floor = |bytes: u32| -> i64 {
+        if dialect.accepts_negative_values() {
+            -(1i64 << (bytes * 8 - 1))
+        } else {
+            0
+        }
+    };
     let gap_fill = dialect.gap_fill();
     // The image length as of the last operation that actually *wrote* data.
     // Reservations and `org` gaps advance the counter without contributing, so
@@ -979,7 +988,7 @@ fn assemble_statements(
             Some(Operation::Bytes(items)) => {
                 for e in items {
                     let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
-                    emit_byte(&mut bytes, v, byte_policy, &mut warnings, s)?;
+                    emit_byte(&mut bytes, v, floor(1), byte_policy, &mut warnings, s)?;
                 }
             }
             Some(Operation::Reserve(count)) => {
@@ -1007,7 +1016,15 @@ fn assemble_statements(
             Some(Operation::Words(items)) => {
                 for e in items {
                     let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
-                    push_word(&mut bytes, v, s, set.endianness)?;
+                    push_word(
+                        &mut bytes,
+                        v,
+                        s,
+                        set.endianness,
+                        floor(2),
+                        byte_policy,
+                        &mut warnings,
+                    )?;
                 }
             }
             Some(Operation::Instruction {
@@ -1034,8 +1051,23 @@ fn assemble_statements(
                         // byte; a Z80 `LD BC,nn` immediate is two.)
                         isa::OperandKind::Immediate | isa::OperandKind::Address => {
                             match slot.bytes {
-                                1 => emit_byte(&mut bytes, v, byte_policy, &mut warnings, s)?,
-                                2 => push_word(&mut bytes, v, s, set.endianness)?,
+                                1 => emit_byte(
+                                    &mut bytes,
+                                    v,
+                                    floor(1),
+                                    operand_policy,
+                                    &mut warnings,
+                                    s,
+                                )?,
+                                2 => push_word(
+                                    &mut bytes,
+                                    v,
+                                    s,
+                                    set.endianness,
+                                    floor(2),
+                                    operand_policy,
+                                    &mut warnings,
+                                )?,
                                 // 24-bit address (65816 long addressing).
                                 3 => push_addr24(&mut bytes, v, s, set.endianness)?,
                                 other => {
@@ -1046,7 +1078,15 @@ fn assemble_statements(
                         // A big-endian immediate (Z80N `push nn`): high byte
                         // first, regardless of the set's little-endian default.
                         isa::OperandKind::ImmediateBe => {
-                            push_word(&mut bytes, v, s, isa::Endianness::Big)?;
+                            push_word(
+                                &mut bytes,
+                                v,
+                                s,
+                                isa::Endianness::Big,
+                                floor(2),
+                                operand_policy,
+                                &mut warnings,
+                            )?;
                         }
                         // A signed index displacement, e.g. the `d` in (IX+d).
                         isa::OperandKind::Displacement => {
@@ -1075,7 +1115,15 @@ fn assemble_statements(
                                             "long branch target out of range ({offset} bytes; must be -32768..=32767)"
                                         )));
                                     }
-                                    push_word(&mut bytes, offset & 0xFFFF, s, set.endianness)?;
+                                    push_word(
+                                        &mut bytes,
+                                        offset & 0xFFFF,
+                                        s,
+                                        set.endianness,
+                                        floor(2),
+                                        byte_policy,
+                                        &mut warnings,
+                                    )?;
                                 }
                                 other => {
                                     return Err(
@@ -1385,11 +1433,15 @@ fn emit_value(
 fn emit_byte(
     bytes: &mut Vec<u8>,
     v: i64,
+    floor: i64,
     policy: Oversize,
     warnings: &mut Vec<Warning>,
     s: &Statement,
 ) -> Result<(), AsmError> {
-    if !(-128..=0xFF).contains(&v) {
+    // `floor` is 0 for a reference that takes no negative literal at any
+    // width — ca65 — and the signed minimum for the six that do. Hardcoding
+    // -128 here accepted `.byte -1` that ca65 refuses (asm198x#290).
+    if !(floor..=0xFF).contains(&v) {
         match policy {
             Oversize::Error => {
                 return Err(s.operand_err(format!("value {v} does not fit in a byte")));
@@ -1414,9 +1466,30 @@ fn push_word(
     v: i64,
     s: &Statement,
     endianness: isa::Endianness,
+    floor: i64,
+    policy: Oversize,
+    warnings: &mut Vec<Warning>,
 ) -> Result<(), AsmError> {
-    if !(0..=0xFFFF).contains(&v) {
-        return Err(s.operand_err(format!("value {v} does not fit in a word")));
+    // The same shape as `emit_byte`, and for the same reason: what counts as
+    // in range is the dialect's answer, not the width's. Before this, a word
+    // was `0..=0xFFFF` for everyone — which refused `!word -1` that ACME,
+    // asl, lwasm, vasm, sjasmplus, pasmo and rgbasm all accept, and refused
+    // the truncation five of them perform above the range (asm198x#290).
+    if !(floor..=0xFFFF).contains(&v) {
+        match policy {
+            Oversize::Error => {
+                return Err(s.operand_err(format!("value {v} does not fit in a word")));
+            }
+            Oversize::Truncate => {}
+            Oversize::TruncateWarn => {
+                warnings.push(Warning {
+                    line: s.line,
+                    message: format!("value {v} truncated to a word"),
+                    file: s.file,
+                    kind: crate::engine::WarningKind::Advisory,
+                });
+            }
+        }
     }
     let lo = (v & 0xFF) as u8;
     let hi = ((v >> 8) & 0xFF) as u8;
