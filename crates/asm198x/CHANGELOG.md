@@ -7,6 +7,38 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.33](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.32...asm198x-v0.0.33) - 2026-08-25
+
+### Added
+
+- *(docs)* generate the conformance ledger as a published page ([#266](https://github.com/asm198x/asm198x/pull/266))
+- *(xtask)* a CPU that arbitrates nothing cannot merge ([#263](https://github.com/asm198x/asm198x/pull/263))
+- *(release)* refuse to tag while arbitration debt is owed ([#262](https://github.com/asm198x/asm198x/pull/262))
+- *(xtask)* a shortfall declares why it exists, and the check holds it there ([#261](https://github.com/asm198x/asm198x/pull/261))
+- *(Z8000)* the last six families exemplify themselves, both CPUs reach 271/271 ([#259](https://github.com/asm198x/asm198x/pull/259))
+- *(Z8000)* the two block families exemplify themselves, both CPUs reach 209 ([#258](https://github.com/asm198x/asm198x/pull/258))
+- *(6809)* take the three undocumented opcodes on input, never write them ([#257](https://github.com/asm198x/asm198x/pull/257))
+- *(Z8000)* shifts and rotates exemplify themselves, both CPUs reach 145 ([#256](https://github.com/asm198x/asm198x/pull/256))
+- *(Z8001)* the segmented CPU gets its own form audit, and reaches 125 ([#255](https://github.com/asm198x/asm198x/pull/255))
+- *(Z8000)* the thirteen families exemplify themselves, and the audit runs ([#253](https://github.com/asm198x/asm198x/pull/253))
+- *(word CPUs)* the spec states its exemplar field, and the search goes ([#250](https://github.com/asm198x/asm198x/pull/250))
+- *(6809)* Insn exemplifies itself, and the second synthesiser goes ([#249](https://github.com/asm198x/asm198x/pull/249))
+- *(isa)* a Form exemplifies itself, and the first synthesiser goes ([#248](https://github.com/asm198x/asm198x/pull/248))
+- *(word CPUs)* form audits for the PDP-11, TMS9900 and CP-1610 ([#246](https://github.com/asm198x/asm198x/pull/246))
+- *(6809)* a form audit, and the first of the six zeros closes ([#245](https://github.com/asm198x/asm198x/pull/245))
+- *(xtask)* coverage counts rows, so the six unscored CPUs get a number ([#242](https://github.com/asm198x/asm198x/pull/242))
+
+### Fixed
+
+- *(vasm)* the import-side words follow the ordinary rule under 2.0f ([#282](https://github.com/asm198x/asm198x/pull/282))
+- *(replay)* a sweep-chunk mismatch names the instruction that moved ([#269](https://github.com/asm198x/asm198x/pull/269))
+- *(Z8000)* write the short LDB immediate, and read both formats ([#254](https://github.com/asm198x/asm198x/pull/254))
+- remove the abandoned Z8000 audit that shipped by accident ([#251](https://github.com/asm198x/asm198x/pull/251))
+
+### Other
+
+- a spec exemplifies the rows it enumerates ([#247](https://github.com/asm198x/asm198x/pull/247))
+
 ## [0.0.32](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.31...asm198x-v0.0.32) - 2026-08-24
 
 Two correctness fixes, both bigger than the issues that reported them. If you
