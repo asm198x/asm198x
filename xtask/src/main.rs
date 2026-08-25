@@ -135,6 +135,7 @@ fn usage() -> String {
      \x20 coverage            report arbitration coverage over the verdict corpus\n\
      \x20 coverage --check    fail if any CPU's coverage fell below the stamp\n\
      \x20 coverage --no-debt  fail if any shortfall is still owed (pre-tag gate)\n\
+     \x20 coverage --delta <f>  report movement against a base stamp (never fails)\n\
      \x20 coverage --write    refresh the stamp\n\
      \x20 ledger              print the conformance ledger for this revision\n\
      \x20 grow [filter]       arbitrate what is not yet recorded (needs the tools)\n\
@@ -445,6 +446,27 @@ fn run_coverage(args: &[String]) -> ExitCode {
         return ExitCode::SUCCESS;
     }
 
+    // Reporting, never a gate. R12 asks CI to *report* the delta; the gate on a
+    // drop is the acknowledgment in `coverage.accepted` and the release ratchet.
+    // A base that cannot be read is a shallow clone, not a fault, so this says
+    // so and succeeds.
+    if let Some(i) = args.iter().position(|a| a == "--delta") {
+        let Some(base_path) = args.get(i + 1) else {
+            eprintln!("usage: cargo xtask coverage --delta <base coverage.stamp>");
+            return ExitCode::FAILURE;
+        };
+        match std::fs::read_to_string(base_path) {
+            Ok(base) => print!(
+                "{}",
+                coverage::render_delta(&report, &coverage::parse_stamp(&base))
+            ),
+            Err(e) => {
+                println!("arbitration coverage: no base stamp at {base_path} ({e}), so no delta");
+            }
+        }
+        return ExitCode::SUCCESS;
+    }
+
     if args.iter().any(|a| a == "--check") {
         let Ok(existing) = std::fs::read_to_string(&path) else {
             eprintln!(
@@ -458,7 +480,10 @@ fn run_coverage(args: &[String]) -> ExitCode {
         // decided never to reach.
         let accepted_path = coverage::accepted_path(&repo);
         let accepted = std::fs::read_to_string(&accepted_path).unwrap_or_default();
-        let unaccepted = coverage::unaccepted(&report, &coverage::parse_accepted(&accepted));
+        let parsed = coverage::parse_accepted(&accepted);
+        let unaccepted = coverage::unaccepted(&report, &parsed);
+        // The status first, so a passing run still shows what it held to.
+        print!("{}", coverage::render_status(&report, &parsed));
         let moved = coverage::drift(&report, &coverage::parse_stamp(&existing));
         if moved.is_empty() && unaccepted.is_empty() {
             println!(

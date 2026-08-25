@@ -290,6 +290,22 @@ jobs:
       - name: Check arbitration coverage against the stamp
         run: cargo xtask coverage --check
 
+      # What this pull request did to coverage, next to the check that held it
+      # there. Reporting only: the gate on a drop is the acknowledgment in
+      # `coverage.accepted` and the pre-tag ratchet, so a base we cannot read —
+      # a shallow clone, a force-push — says so and passes.
+      - name: Report the arbitration-coverage delta
+        if: github.event_name == 'pull_request'
+        run: |
+          base='${{ github.event.pull_request.base.sha }}'
+          stamp=crates/asm198x/tests/verdicts/coverage.stamp
+          git fetch --depth=1 origin "$base" >/dev/null 2>&1 || true
+          if git show "$base:$stamp" > "${RUNNER_TEMP}/base.stamp" 2>/dev/null; then
+            cargo xtask coverage --delta "${RUNNER_TEMP}/base.stamp"
+          else
+            echo "arbitration coverage: base $base is not readable here, so no delta"
+          fi
+
       # The published parity figures are derived from the corpus, so they go
       # stale silently. This fails when a machine verifies fewer sources than
       # the committed figures record, and — because this job has the curriculum

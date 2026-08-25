@@ -308,6 +308,78 @@ pub fn stamp_path(repo: &Path) -> PathBuf {
     repo.join(STAMP)
 }
 
+/// The per-CPU status, for a human reading a CI log.
+///
+/// R11 asks that a pull request's arbitration status be *visible*, not merely
+/// enforced. A check that prints one line when it passes tells a reader the
+/// gate held; it does not tell them what it held to.
+#[must_use]
+pub fn render_status(report: &Report, accepted: &BTreeMap<String, Accepted>) -> String {
+    let mut out = String::new();
+    let _ = writeln!(out, "arbitration coverage, {} CPU(s):", report.rows.len());
+    for row in &report.rows {
+        let short = row.total.saturating_sub(row.arbitrated);
+        let note = match (short, accepted.get(&row.cpu)) {
+            (0, _) => String::new(),
+            (n, Some(a)) if a.owed() => format!("  {n} owed — {}", a.reason),
+            (n, Some(a)) => format!("  {n} accepted — {}", a.reason),
+            (n, None) => format!("  {n} unarbitrated, undeclared"),
+        };
+        let _ = writeln!(
+            out,
+            "  {:<10} {:>5}/{:<5} {:>5}.{}%{note}",
+            row.cpu,
+            row.arbitrated,
+            row.total,
+            row.permille() / 10,
+            row.permille() % 10
+        );
+    }
+    out
+}
+
+/// The movement between a base stamp and the current corpus, for a pull
+/// request's own delta.
+///
+/// The stamp is the baseline because it is committed and exact: a change that
+/// moves coverage must move the stamp with it, so the difference between the
+/// base's stamp and this one *is* the delta the pull request carries.
+#[must_use]
+pub fn render_delta(report: &Report, base: &BTreeMap<String, u32>) -> String {
+    let moved = drift(report, base);
+    let mut out = String::new();
+    let appeared: Vec<&Row> = report
+        .rows
+        .iter()
+        .filter(|r| !base.contains_key(&r.cpu))
+        .collect();
+    if moved.is_empty() && appeared.is_empty() {
+        out.push_str("arbitration coverage: no change from the base\n");
+        return out;
+    }
+    out.push_str("arbitration coverage, change from the base:\n");
+    for m in &moved {
+        let arrow = if m.fell() { "down" } else { "up" };
+        let _ = writeln!(
+            out,
+            "  {:<10} {}.{}% -> {}.{}%  ({arrow})",
+            m.cpu,
+            m.was / 10,
+            m.was % 10,
+            m.now / 10,
+            m.now % 10
+        );
+    }
+    for row in appeared {
+        let _ = writeln!(
+            out,
+            "  {:<10} new — {}/{} arbitrated",
+            row.cpu, row.arbitrated, row.total
+        );
+    }
+    out
+}
+
 /// Where the accepted-shortfalls file lives under `repo`.
 #[must_use]
 pub fn accepted_path(repo: &Path) -> PathBuf {
@@ -613,6 +685,39 @@ mod tests {
         let accepted = parse_accepted("# comment\n\n6809\t3\tinput-only, by decision\n");
         assert!(unaccepted(&report(&[("6809", 277, 280)]), &accepted).is_empty());
         assert!(unaccepted(&report(&[("Z80", 700, 700)]), &accepted).is_empty());
+    }
+
+    /// The delta names both directions and a CPU the base did not have.
+    #[test]
+    fn a_delta_reports_movement_and_arrivals() {
+        let base = parse_stamp(&render_stamp(&report(&[("Z8000", 145, 271)])));
+        let now = report(&[("Z8000", 271, 271), ("Z8001", 271, 271)]);
+        let out = render_delta(&now, &base);
+        assert!(out.contains("Z8000"), "movement is named: {out}");
+        assert!(out.contains("(up)"), "with its direction: {out}");
+        assert!(
+            out.contains("Z8001") && out.contains("new"),
+            "arrivals too: {out}"
+        );
+    }
+
+    /// An unchanged corpus says so rather than printing an empty table.
+    #[test]
+    fn an_unchanged_corpus_has_no_delta() {
+        let base = parse_stamp(&render_stamp(&report(&[("Z80", 704, 704)])));
+        let out = render_delta(&report(&[("Z80", 704, 704)]), &base);
+        assert!(out.contains("no change"), "{out}");
+    }
+
+    /// The status names a shortfall's reason, and says when it is owed rather
+    /// than settled — that difference is the point of printing it at all.
+    #[test]
+    fn the_status_distinguishes_owed_from_accepted() {
+        let r = report(&[("6809", 277, 280), ("8039", 210, 214)]);
+        let a = parse_accepted("6809\t3\tinput-only\n8039\t4\towed: coming back\n");
+        let out = render_status(&r, &a);
+        assert!(out.contains("3 accepted — input-only"), "{out}");
+        assert!(out.contains("4 owed — owed: coming back"), "{out}");
     }
 
     /// A CPU arbitrating nothing fails, and the accepted file cannot excuse it.

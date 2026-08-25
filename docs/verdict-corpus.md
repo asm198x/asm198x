@@ -65,6 +65,18 @@ growth run recovers the rows, or until the reason is rewritten as the decision
 it turned out to be. A release is the deadline, which is what bounds how long a
 de-arbitrated form can hide.
 
+### Seeing where a change left things
+
+`cargo xtask coverage --check` prints the per-CPU status before its verdict —
+what each CPU arbitrates, and for anything short of everything, how many rows
+and why. A check that says only "held" tells you the gate stood; it does not
+tell you what it stood on.
+
+On a pull request, CI also prints the delta against the base. That is reporting,
+not a gate: the gate on a drop is the acknowledgment above and the pre-tag
+ratchet, so a base CI cannot read — a shallow clone, a force-push — says so and
+passes rather than blocking on plumbing.
+
 ### Refreshing the stamp
 
 A **rise** needs the same command, without the explanation — refresh the stamp
