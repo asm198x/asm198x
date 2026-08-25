@@ -91,3 +91,36 @@ it reaches the hard part.
 - **"The audit can search the opcode space instead"** — it can, and the Z8000
   attempt shows what that costs: a heuristic that reads `cpu` and `org` as
   mnemonics, and no way to tell one addressing mode from another.
+
+## Outcome
+
+All four steps landed. The Z8000 finished at **124 of 271 rows arbitrated**,
+which is the number the sequencing above predicted would be partial and is
+recorded here rather than rounded up.
+
+Three things came out differently than planned.
+
+**The knowledge came from the reference, not from our own encoder.** Step 4
+said the thirteen families would be read from the dialect's `encode_*` and the
+family doc comments. In practice every shape was settled by assembling a
+representative instruction with `asl` and reading the opcode word back — the
+same probing the project uses for directive behaviour. Reading our own encoder
+would have reproduced our own mistakes; the reference cannot.
+
+**Operand legality turned out to be one rule, not thirteen.** A long operand is
+a register pair and needs an even number; a quad needs a multiple of four. Every
+family already carries its `Size`, so `lowest_register` states the rule once and
+each family's exemplar asks for it. That collapsed four families at a stroke.
+
+**The unplaced rows are unplaced for a stated reason.** Shifts and rotates carry
+their count in a *following* word whose legal range no entry states, so
+`Shift::exemplar` returns `None` rather than a guess with filler as its count.
+The segmented Z8001 was not attempted: its memory modes encode addresses
+differently, so it remains at zero and shows as zero.
+
+The audit also did what it was built to do. `LDB` with a byte immediate was the
+one genuine byte divergence in 271 rows — we emit the long dyadic form where
+`asl` emits the short one-word form, which we cannot decode either
+([asm198x#252](https://github.com/asm198x/asm198x/issues/252)). It is an
+explicitly named exception in the audit, not part of the anonymous unplaced
+count, and the entry comes out when the row arbitrates.
