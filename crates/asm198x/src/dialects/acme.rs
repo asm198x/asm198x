@@ -1753,6 +1753,15 @@ fn substitute_anon_refs(
         Operation::Words(v) => {
             Operation::Words(v.into_iter().map(subst).collect::<Result<_, _>>()?)
         }
+        Operation::Sized {
+            width,
+            big_endian,
+            values,
+        } => Operation::Sized {
+            width,
+            big_endian,
+            values: values.into_iter().map(subst).collect::<Result<_, _>>()?,
+        },
         Operation::Instruction {
             mnemonic,
             mode,
@@ -2215,6 +2224,18 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // Six spellings, one rule: emit each value at a stated width in a stated
+    // byte order. The order is the *directive's*, not the CPU's — `!be24` on
+    // a 6502 is big-endian, which is the only reason to write it.
+    Directive {
+        id: "sized",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["be16", "be24", "be32", "le16", "le24", "le32"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     // `!hex` takes bare hex digit pairs — no `$`, no quotes, no commas, all of
     // which ACME answers with a syntax error.
     Directive {
@@ -2392,7 +2413,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What ACME has here and we do not.
     //
-    // 24 spellings against 0.97, counted from this list rather than recalled.
+    // 18 spellings against 0.97, counted from this list rather than recalled.
     // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
     // long registers" for them on a 6502, so they belong to a wider target.
     // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
@@ -2405,9 +2426,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "addr",
                 "address",
                 "as",
-                "be16",
-                "be24",
-                "be32",
                 "convtab",
                 "cpu",
                 "ct",
@@ -2415,9 +2433,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "endoffile",
                 "eof",
                 "initmem",
-                "le16",
-                "le24",
-                "le32",
                 "pseudopc",
                 "rs",
                 "scrxor",
@@ -2477,6 +2492,21 @@ fn parse_directive(
         // Identity today, and identity forever: see the declaration above.
         "raw" => parse_text(anons, zone, rest, line, |c| c),
         "hex" => parse_hex(rest, line),
+        "sized" => {
+            // `be`/`le` then the width in bits; the declaration above is what
+            // guarantees the shape, so this reads it rather than re-checking.
+            let big_endian = name.get(..2).is_some_and(|s| s.eq_ignore_ascii_case("be"));
+            let width = match name.get(2..) {
+                Some("16") => 2,
+                Some("24") => 3,
+                _ => 4,
+            };
+            Ok(Operation::Sized {
+                width,
+                big_endian,
+                values: parse_list(anons, zone, rest, line)?,
+            })
+        }
         "scr" => parse_text(anons, zone, rest, line, screen_code),
         "pet" => parse_text(anons, zone, rest, line, petscii),
         // `!zone`/`!zn` never reaches here: it is walk-handled in
@@ -3007,6 +3037,65 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// Six spellings of one rule. The byte order is the directive's, not the
+    /// CPU's: a 6502 is little-endian and `!be24` still emits big-endian.
+    #[test]
+    fn the_sized_family_takes_its_byte_order_from_the_directive() {
+        assert_eq!(asm("!be16 $1234").expect("be16").bytes, vec![0x12, 0x34]);
+        assert_eq!(asm("!le16 $1234").expect("le16").bytes, vec![0x34, 0x12]);
+        assert_eq!(
+            asm("!be24 $123456").expect("be24").bytes,
+            vec![0x12, 0x34, 0x56]
+        );
+        assert_eq!(
+            asm("!le24 $123456").expect("le24").bytes,
+            vec![0x56, 0x34, 0x12]
+        );
+        assert_eq!(
+            asm("!be32 $12345678").expect("be32").bytes,
+            vec![0x12, 0x34, 0x56, 0x78]
+        );
+        assert_eq!(
+            asm("!le32 $12345678").expect("le32").bytes,
+            vec![0x78, 0x56, 0x34, 0x12]
+        );
+    }
+
+    /// The range is ACME's, per width: signed or unsigned, whichever the
+    /// source meant, and an error either side of that.
+    #[test]
+    fn a_sized_value_spans_signed_and_unsigned() {
+        assert_eq!(asm("!be16 -1").expect("neg").bytes, vec![0xFF, 0xFF]);
+        assert_eq!(asm("!be16 -32768").expect("min").bytes, vec![0x80, 0x00]);
+        assert_eq!(asm("!be16 65535").expect("max").bytes, vec![0xFF, 0xFF]);
+        asm("!be16 -32769").expect_err("below the signed floor");
+        asm("!be16 65536").expect_err("above the unsigned ceiling");
+        assert_eq!(
+            asm("!be24 $ffffff").expect("24-bit max").bytes,
+            vec![0xFF, 0xFF, 0xFF]
+        );
+        asm("!be24 $1000000").expect_err("above the 24-bit ceiling");
+    }
+
+    /// A list, and a value that is not a literal — the directive takes the
+    /// same operand shape the other data directives do.
+    #[test]
+    fn a_sized_directive_takes_a_list_and_an_expression() {
+        assert_eq!(
+            asm("!be16 $1234, $5678").expect("list").bytes,
+            vec![0x12, 0x34, 0x56, 0x78]
+        );
+        assert_eq!(
+            asm("!le32 1+2").expect("expr").bytes,
+            vec![0x03, 0x00, 0x00, 0x00]
+        );
+        // A one-character string is a value to ACME, as it is everywhere else
+        // it wants a number; two characters is "There's more than one
+        // character".
+        assert_eq!(asm("!be16 \"a\"").expect("char").bytes, vec![0x00, 0x61]);
+        asm("!be16 \"ab\"").expect_err("more than one character");
+    }
 
     /// `!fi` is `!fill`, not a conditional terminator. Probed: ACME 0.97
     /// answers "No value given." for a bare `!fi`, which is what `!fill`
