@@ -57,3 +57,57 @@ are superseded and re-arbitrated under 2.0f separately.
 the one the corpus keys on — so an arm64 and an amd64 build are interchangeable
 for keying. `Makefile.def-unknown-linux` is the right generic definition; the
 arch-specific ones do not build under an arm64 container.
+
+## Stage two: does a rebuilt binary corroborate?
+
+Run against a **copy** of the worktree, so a growth run cannot touch the real
+corpus:
+
+```sh
+docker run --rm -v "$copy:/work" -w /work -e CARGO_TARGET_DIR=/tmp/target \
+    asm198x-arbiter:bld309 bash -c 'verify-arbiters && cargo xtask grow'
+```
+
+5,844 records appended, and the split is the answer:
+
+| | records |
+|---|---|
+| sharing an existing key — **corroboration** | **5,508** |
+| new key, `vasm 2.0f` | 251 |
+| new key, `lwasm` | 85 |
+| alarms | **0** |
+
+**The digest-as-provenance design works.** A binary built on Debian/arm64,
+reporting the same behavioural identity as one built by Homebrew on
+macOS/arm64, was recognised as the same fact rather than forking it. That is
+KTD4's first real test and it had never had a second machine to run on.
+
+The 251 `vasm` records are correct: a new identity is a new key, not a conflict.
+The 85 `lwasm` records are 6809 **fuzz** cases — growth the fuzzer produces that
+no ordinary pull request ever commits, because in any given change it looks
+incidental. A dedicated growth run is exactly where they belong.
+
+## What adopting vasm 2.0f costs
+
+Not free. `vasm_refuses_its_import_side_words_for_a_binary` fails under 2.0f:
+
+```
+3 import-side probe(s) disagree:
+  `xref` with the name defined: Bytes([1])
+  `import` with the name defined: Bytes([1])
+  `nref` with the name defined: Bytes([1])
+```
+
+Under 2.0b these were refused when emitting a binary, and the directive surface
+declares them `RefusedByReference` on that basis. 2.0f accepts them. The house
+rule is to match the reference rather than out-converge it, so the declaration
+is now wrong and needs updating with the version — alongside re-arbitrating the
+436 verdicts keyed to 2.0b.
+
+## Running it on macOS
+
+Do not let cargo build into the bind mount. Docker Desktop's shared filesystem
+cannot back rustc's memory mapping and the compile dies with `SIGBUS`, which
+reads like a toolchain fault and is not one. `CARGO_TARGET_DIR=/tmp/target`
+keeps the build on the container's own filesystem. A Linux runner does not hit
+this.

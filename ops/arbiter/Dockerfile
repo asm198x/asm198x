@@ -104,6 +104,18 @@ RUN git clone -q https://github.com/Ckirby101/pasmoNext.git /tmp/pn \
     && install -m 0755 pasmo /usr/local/bin/ \
     && rm -rf /tmp/pn
 
+# --- Rust ---------------------------------------------------------------------
+# Growth runs the ignored test suites, so this image needs the toolchain as well
+# as the assemblers. The channel is read from the repository at build time
+# rather than written twice: a growth run on a different compiler than CI is a
+# difference nobody would think to look for.
+ARG RUST_CHANNEL=1.95.0
+RUN curl -fsSL https://sh.rustup.rs -o /tmp/rustup.sh \
+    && sh /tmp/rustup.sh -y --no-modify-path --profile minimal \
+        --default-toolchain "${RUST_CHANNEL}" \
+    && rm /tmp/rustup.sh
+ENV PATH=/root/.cargo/bin:$PATH
+
 RUN mkdir -p /usr/local/share/asm198x
 COPY identities /usr/local/share/asm198x/identities
 COPY verify.sh /usr/local/bin/verify-arbiters
