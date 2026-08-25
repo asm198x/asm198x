@@ -488,6 +488,10 @@ fn run_coverage(args: &[String]) -> ExitCode {
                     coverage::Unaccepted::Stale { cpu, declared } => eprintln!(
                         "  {cpu}: arbitrates everything, yet still declares {declared} row(s)"
                     ),
+                    coverage::Unaccepted::Unarbitrated { cpu, rows } => eprintln!(
+                        "  {cpu}: arbitrates nothing — {rows} row(s), and no reference \
+                         has checked one of them"
+                    ),
                 }
             }
             eprintln!(
@@ -496,6 +500,18 @@ fn run_coverage(args: &[String]) -> ExitCode {
                  never be reached — or recover the rows with a growth run. An entry \
                  that outlived its reason comes out."
             );
+            if unaccepted
+                .iter()
+                .any(|u| matches!(u, coverage::Unaccepted::Unarbitrated { .. }))
+            {
+                eprintln!(
+                    "\nA CPU arbitrating nothing is the one case the file cannot \
+                     excuse. Run `cargo xtask grow <CPU>` and land its verdicts with \
+                     the spec: a CPU nothing has checked is a compatibility claim \
+                     with no evidence behind it, and this project's whole argument \
+                     is the evidence."
+                );
+            }
             if moved.is_empty() {
                 return ExitCode::FAILURE;
             }

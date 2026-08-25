@@ -388,9 +388,18 @@ pub enum Unaccepted {
     /// The CPU arbitrates everything, and still declares a shortfall. The entry
     /// outlived what it described.
     Stale { cpu: String, declared: usize },
+    /// The CPU arbitrates nothing at all.
+    ///
+    /// A spec can be declared before it is arbitrated — nothing stops the rows
+    /// existing — but it must not *merge* that way. Unlike every other case
+    /// here, this one cannot be declared away: an entry accepting the whole
+    /// spec would be a CPU claiming compatibility that no reference has ever
+    /// checked, which is the one thing this project cannot ship.
+    Unarbitrated { cpu: String, rows: usize },
 }
 
-/// Hold every shortfall to what its CPU declares in the accepted file.
+/// Hold every shortfall to what its CPU declares in the accepted file, and
+/// every CPU to arbitrating something.
 ///
 /// A number below 100% is not itself a fault — the 8039 cannot reach the four
 /// BUS-port ops its ROM-less bus commits, and the 6809's three undocumented
@@ -404,6 +413,14 @@ pub fn unaccepted(report: &Report, accepted: &BTreeMap<String, Accepted>) -> Vec
         .iter()
         .filter_map(|row| {
             let rows = row.total.saturating_sub(row.arbitrated);
+            // Before consulting the file, because this one is not the file's to
+            // excuse. A growth run is the precondition, not a declaration.
+            if row.total > 0 && row.arbitrated == 0 {
+                return Some(Unaccepted::Unarbitrated {
+                    cpu: row.cpu.clone(),
+                    rows,
+                });
+            }
             match (rows, accepted.get(&row.cpu).map(|a| a.rows)) {
                 (0, None) => None,
                 (0, Some(declared)) => Some(Unaccepted::Stale {
@@ -596,6 +613,40 @@ mod tests {
         let accepted = parse_accepted("# comment\n\n6809\t3\tinput-only, by decision\n");
         assert!(unaccepted(&report(&[("6809", 277, 280)]), &accepted).is_empty());
         assert!(unaccepted(&report(&[("Z80", 700, 700)]), &accepted).is_empty());
+    }
+
+    /// A CPU arbitrating nothing fails, and the accepted file cannot excuse it.
+    ///
+    /// This is the new-CPU gate: a spec may land before its verdicts exist, but
+    /// not merge that way. Declaring the whole spec away would be a CPU
+    /// claiming compatibility no reference has checked.
+    #[test]
+    fn a_cpu_arbitrating_nothing_cannot_be_declared_away() {
+        let none = parse_accepted("");
+        assert_eq!(
+            unaccepted(&report(&[("Z8000", 0, 271)]), &none),
+            vec![Unaccepted::Unarbitrated {
+                cpu: "Z8000".into(),
+                rows: 271,
+            }]
+        );
+        // And the file does not help.
+        let excused = parse_accepted("Z8000\t271\tnot arbitrated yet\n");
+        assert_eq!(
+            unaccepted(&report(&[("Z8000", 0, 271)]), &excused),
+            vec![Unaccepted::Unarbitrated {
+                cpu: "Z8000".into(),
+                rows: 271,
+            }]
+        );
+        // One verdict is enough to leave the gate — the ratchet takes over.
+        assert!(
+            unaccepted(
+                &report(&[("Z8000", 1, 271)]),
+                &parse_accepted("Z8000\t270\towed: growth run pending\n")
+            )
+            .is_empty()
+        );
     }
 
     /// `owed` classifies; everything else is a settled decision.

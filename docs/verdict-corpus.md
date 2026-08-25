@@ -51,6 +51,12 @@ everything.
 That is the difference between a decision and a debt, which the coverage number
 alone cannot express.
 
+One case the file cannot excuse: **a CPU that arbitrates nothing**. A spec may
+be written before its verdicts exist, but it must not merge that way, and no
+entry will let it — run `cargo xtask grow <CPU>` and land the verdicts with the
+spec. A CPU no reference has checked is a compatibility claim with no evidence
+behind it, and the evidence is the whole argument.
+
 A reason opening with `owed` says these rows are meant to come back. That entry
 still lets work merge — blocking the merge would mean blocking on a growth run,
 which needs the reference tools — but it stops a release:

@@ -11,6 +11,12 @@
 # The count is rows, not a percentage, so it does not drift when a spec gains
 # forms. Widening one is a deliberate edit with a reason, like the stamp.
 #
+# One case this file cannot excuse: a CPU that arbitrates nothing at all. A
+# spec may be written before its verdicts exist, but it must not merge that
+# way, and no entry here will let it. Run `cargo xtask grow <CPU>` and land the
+# verdicts with the spec — a CPU no reference has checked is a compatibility
+# claim with no evidence behind it.
+#
 # A reason opening with `owed` means the opposite of settled: these rows are
 # meant to come back. Such an entry still lets work merge — the alternative is
 # blocking a merge on a growth run that needs the reference tools — but it
