@@ -1,6 +1,6 @@
 # Decision: a row that can name itself can show itself
 
-**Status:** Proposed. Binding for Asm198x once accepted. Completes
+**Status:** Active. Binding for Asm198x (accepted 2026-08-25). Completes
 [`every-spec-enumerates-its-forms.md`](every-spec-enumerates-its-forms.md),
 whose enumeration this gives a second half.
 
