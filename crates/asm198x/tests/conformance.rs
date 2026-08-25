@@ -2288,6 +2288,34 @@ fn exemplar_bytes(word: u16, big_endian: bool, filler: &[u8]) -> Vec<u8> {
     b
 }
 
+/// The disassembly up to and including the line that names `mnemonic`.
+///
+/// The exemplar carries filler bytes so a multi-word instruction has operands
+/// to consume, and whatever the instruction leaves over disassembles to `word`
+/// data directives. `asl` has no `word` directive for this CPU, so it rejects
+/// the file over the leftovers rather than over the instruction under audit.
+/// Cutting the tail hands the reference exactly the instruction we are asking
+/// it about.
+fn trim_after_instruction(source: &str, mnemonic: &str) -> Option<String> {
+    let mut out = String::new();
+    for line in source.lines() {
+        let head = line.split_whitespace().next();
+        // A data directive before the instruction means the exemplar word did
+        // not decode at all: the mnemonic further down belongs to the filler,
+        // not to this row. That is an unplaced row, not a reference rejection.
+        if head.is_some_and(|w| w.eq_ignore_ascii_case("word")) {
+            return None;
+        }
+        out.push_str(line);
+        out.push('\n');
+        if head.is_some_and(|w| w.eq_ignore_ascii_case(mnemonic)) {
+            out.push_str("\tend\n");
+            return Some(out);
+        }
+    }
+    None
+}
+
 /// Does this disassembly name `mnemonic` as an opcode?
 fn names_row(source: &str, mnemonic: &str) -> bool {
     source.lines().any(|l| {
@@ -2594,6 +2622,157 @@ fn spec_rows_match_reference_word_cpus() {
     );
     assert!(total > 0, "no rows arbitrated");
     eprintln!("word-CPU form audits: {total} rows arbitrated against asl");
+}
+
+/// The Z8000 form audit, against `asl`.
+///
+/// Thirteen tables that share no opcode-word formula, so the exemplar lives
+/// with each family in `isa::z8000` rather than being guessed here — the
+/// lesson of the attempt that failed, which searched and mis-encoded in equal
+/// measure.
+///
+/// A row no family can yet exemplify is **skipped and reported**, not
+/// arbitrated. Coverage then shows the true fraction: a partial audit that
+/// claimed 100% would be the exact dishonesty this work exists to end.
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn spec_rows_match_reference_z8000() {
+    if !(have("asl") && have("p2bin")) {
+        eprintln!("SKIP: `asl`/`p2bin` not on PATH (Z8000 form audit)");
+        return;
+    }
+    let tmp = std::env::temp_dir().join("asm198x-form-z8000");
+    let _ = fs::create_dir_all(&tmp);
+    let mut recorder = support::verdicts::Recorder::new();
+    let mut fails: Vec<String> = Vec::new();
+    let mut unplaced = 0usize;
+    let mut excepted: Vec<String> = Vec::new();
+    let mut checked = 0usize;
+    let filler = [0x10u8, 0x00, 0x20, 0x00, 0x30, 0x00];
+    // A byte immediate travels as its byte *replicated* into a word, so filler
+    // that is merely distinct decodes as no byte immediate at all. These rows
+    // get operand words that are a legal instance of the form.
+    let byte_filler = [0x05u8; 6];
+
+    // Rows this method cannot arbitrate, each with the reason and the issue
+    // that will retire the entry. Named rather than folded into the anonymous
+    // unplaced count: a known exception is a finding, not a gap.
+    const EXCEPTIONS: &[(&str, &str, &str)] = &[(
+        "LDB",
+        "immediate",
+        "we emit the long dyadic form and asl the short one-word form \
+         (0xC0-0xCF), which we also cannot decode - asm198x#252",
+    )];
+
+    for row in isa::z8000::rows() {
+        let m = row.mnemonic;
+        if let Some((.., why)) = EXCEPTIONS
+            .iter()
+            .find(|(mn, mode, _)| *mn == m && *mode == row.mode)
+        {
+            excepted.push(format!("{m} {}: {why}", row.mode));
+            continue;
+        }
+        let dyadic = isa::z8000::INSTRUCTIONS.iter().find(|i| i.mnemonic == m);
+        let filler = match dyadic {
+            Some(i) if i.size == isa::z8000::Size::Byte && row.mode == "immediate" => &byte_filler,
+            _ => &filler,
+        };
+        let word = dyadic
+            .and_then(|i| i.exemplar(row.mode))
+            .or_else(|| {
+                isa::z8000::MONO
+                    .iter()
+                    .find(|i| i.mnemonic == m)
+                    .map(isa::z8000::Mono::exemplar)
+            })
+            .or_else(|| {
+                isa::z8000::SHIFTS
+                    .iter()
+                    .find(|i| i.mnemonic == m)
+                    .and_then(isa::z8000::Shift::exemplar)
+            })
+            .or_else(|| {
+                isa::z8000::EXTENDS
+                    .iter()
+                    .find(|i| i.mnemonic == m)
+                    .map(isa::z8000::Extend::exemplar)
+            })
+            .or_else(|| {
+                isa::z8000::MULDIV
+                    .iter()
+                    .find(|i| i.mnemonic == m)
+                    .map(isa::z8000::MulDiv::exemplar)
+            });
+        let Some(word) = word else {
+            unplaced += 1;
+            continue;
+        };
+        let bytes = exemplar_bytes(word, true, filler);
+        let listing = asm198x::listing_z8000(&bytes, 0x1000);
+        let Some(source) = trim_after_instruction(&listing, m) else {
+            // The exemplar is not an instance of this row: the family's rule
+            // and the disassembler disagree, which is a real finding rather
+            // than a row to skip quietly.
+            fails.push(format!(
+                "Z8000 {m} {}: exemplar {word:#06X} disassembles to something else:\n{listing}",
+                row.mode
+            ));
+            continue;
+        };
+        let reference = ref_assemble(&tmp, &source, "asm", |src, out| {
+            let obj = src.with_extension("p");
+            let mut a = Command::new("asl");
+            a.arg("-q").arg(src).arg("-o").arg(&obj);
+            let mut b = Command::new("p2bin");
+            b.arg(&obj).arg(out);
+            vec![a, b]
+        });
+        let Some(reference) = reference else {
+            fails.push(format!(
+                "Z8000 {m} {}: asl rejected our own disassembly:\n{source}",
+                row.mode
+            ));
+            continue;
+        };
+        checked += 1;
+        recorder.record_bytes(
+            support::verdicts::CaseRef {
+                suite: Suite::Form,
+                cpu: "Z8000",
+                tool: "asl",
+                dialect: "asl",
+                case: format!("{m} {}", row.mode),
+                source: &source,
+            },
+            &reference,
+        );
+        if reference.len() < 2 || reference[..2] != bytes[..2] {
+            fails.push(format!(
+                "Z8000 {m} {}: ours {:02X?} vs asl {:02X?}",
+                row.mode,
+                &bytes[..2],
+                &reference[..reference.len().min(2)]
+            ));
+        }
+    }
+
+    let added = recorder.flush().expect("write the corpus");
+    eprintln!(
+        "Z8000 form audit: {checked} arbitrated ({added} new), {unplaced} rows have no exemplar \
+         yet, {} excepted",
+        excepted.len()
+    );
+    for e in &excepted {
+        eprintln!("  excepted: {e}");
+    }
+    assert!(
+        fails.is_empty(),
+        "{} Z8000 row(s) diverge:\n  {}",
+        fails.len(),
+        fails.join("\n  ")
+    );
+    assert!(checked > 0, "no rows arbitrated");
 }
 
 /// Identify every reference tool this machine has, proving the probe table

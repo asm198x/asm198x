@@ -26,7 +26,7 @@ exactly which build of which assembler produced the bytes we compare with:
 | Reference tool | The version we measured against | Instruction sets | Verdicts |
 |---|---|---|---|
 | `acme` | This is ACME, release 0.97 ("Zem"), 28 June 2020 | 1 | 441 |
-| `asl` | Macro Assembler 1.42 Beta [Bld 309] | 14 | 2513 |
+| `asl` | Macro Assembler 1.42 Beta [Bld 309] | 14 | 2637 |
 | `ca65` | ca65 V2.18 - N/A | 3 | 596 |
 | `lwasm` | lwasm from lwtools 4.25 | 1 | 519 |
 | `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | 1 | 996 |

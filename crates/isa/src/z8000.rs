@@ -2232,6 +2232,126 @@ pub fn rows() -> impl Iterator<Item = crate::Row> {
         .chain(misc)
 }
 
+/// The lowest register number this operand size can legally name.
+///
+/// A long operand is a register *pair*, so its number must be even; a quad is
+/// four consecutive words, so its number must be a multiple of four. Encoding a
+/// row with an illegal register produces a word the disassembler will not read
+/// back as that row, which is why the size — already on every family's entry —
+/// picks the register rather than a constant doing it.
+const fn lowest_register(size: Size) -> u16 {
+    match size {
+        Size::Long => 2,
+        Size::Quad => 0,
+        Size::Byte | Size::Word | Size::Address => 1,
+    }
+}
+
+/// The addressing-mode group bits (`MM`) a mode label selects.
+///
+/// Stated here rather than in a consumer: `MM` is 0 for the immediate and
+/// indirect group, 1 for direct and indexed, 2 for register. Within a group the
+/// source field picks the exact mode, which is why the field matters as much as
+/// the group.
+const fn mm_of(mode: &str) -> Option<(u16, u16)> {
+    // (MM group, source field). Field zero selects immediate over indirect,
+    // and direct over indexed; `R1` is used where a register is wanted,
+    // because `R0` is not a legal `@Rn` pointer.
+    match mode.as_bytes() {
+        b"immediate" => Some((0, 0)),
+        b"indirect register" => Some((0, 1)),
+        b"direct address" => Some((1, 0)),
+        b"indexed" => Some((1, 1)),
+        b"register" => Some((2, 1)),
+        _ => None,
+    }
+}
+
+/// The first word of an instruction in the `MM bbbbbb | ssss dddd` shape,
+/// which most of this CPU's families share.
+const fn first_word(mm: u16, base6: u8, high: u16, low: u16) -> u16 {
+    let top = (mm << 6) | base6 as u16;
+    (top << 8) | (high << 4) | low
+}
+
+impl Insn {
+    /// One representative encoding of this dyadic instruction in `mode`.
+    ///
+    /// See `decisions/a-row-can-exemplify-itself.md`. `None` for the store
+    /// forms and any mode this entry does not allow: their memory operand is
+    /// the destination, and which nibble carries what is the assembler's
+    /// knowledge rather than the spec's.
+    #[must_use]
+    pub fn exemplar(&self, mode: &str) -> Option<u16> {
+        if self.store {
+            return None;
+        }
+        let (mm, field) = mm_of(mode)?;
+        // In register mode the source nibble names a register of this
+        // instruction's own size; in every other mode it is a word pointer or
+        // index register, or zero.
+        let source = if mm == 2 {
+            lowest_register(self.size)
+        } else {
+            field
+        };
+        Some(first_word(
+            mm,
+            self.base6,
+            source,
+            lowest_register(self.size),
+        ))
+    }
+}
+
+impl Mono {
+    /// One representative encoding of this single-operand instruction.
+    #[must_use]
+    pub const fn exemplar(&self) -> u16 {
+        // Register group, with the low nibble carrying the sub-opcode — or a
+        // `count − 1` of zero where the entry says the nibble is a count.
+        let low = if self.count { 0 } else { self.subop as u16 };
+        first_word(2, self.base6, lowest_register(self.size), low)
+    }
+}
+
+impl Shift {
+    /// One representative encoding of this shift or rotate, once there is one.
+    ///
+    /// `None` throughout for now. The opcode word is the easy half — the count
+    /// travels in a *following* word whose legal range this entry does not
+    /// state, and an exemplar carrying filler as its count is not an instance
+    /// of the row. The audit reports these as unplaced rather than arbitrating
+    /// a guess.
+    #[must_use]
+    pub const fn exemplar(&self) -> Option<u16> {
+        None
+    }
+}
+
+impl Extend {
+    /// One representative encoding of this sign-extend.
+    #[must_use]
+    pub const fn exemplar(&self) -> u16 {
+        ((EXTEND_TOP as u16) << 8) | (lowest_register(self.size) << 4) | self.subop as u16
+    }
+}
+
+impl MulDiv {
+    /// One representative encoding of this multiply or divide.
+    #[must_use]
+    pub const fn exemplar(&self) -> u16 {
+        // Dyadic-shaped: the source in the high nibble, the accumulator in the
+        // low one, each the lowest register its own size can name.
+        first_word(
+            2,
+            self.base6,
+            lowest_register(self.src),
+            lowest_register(self.dest),
+        )
+    }
+}
+
 #[cfg(test)]
 mod row_tests {
     /// The mode-bearing families expand and the rest do not, so the row count
