@@ -285,6 +285,12 @@ const PROBES: &[Probe] = &[
     ok ("acme", "!be32 / !le32",         " !be32 $12345678\n !le32 $12345678\n"),
     ok ("acme", "sized takes a list",    " !be16 $1234, $5678\n"),
     ok ("acme", "sized spans signed",    " !be16 -32768\n !be16 65535\n"),
+    ok ("acme", "!ct pet converts !text", " !ct pet\n !text \"aA[]@\"\n"),
+    ok ("acme", "!ct scr converts !text", " !ct scr\n !text \"aA[]@\"\n"),
+    // The pair the earlier "!raw agrees with !text" probe anticipated: with a
+    // table named they no longer agree, and both halves are recorded.
+    ok ("acme", "!raw ignores the table", " !ct pet\n !text \"ab\"\n !raw \"ab\"\n"),
+    ok ("acme", "!ct block restores",     " !ct pet {\n !text \"a\"\n }\n !text \"a\"\n"),
     ok ("acme", "!xor masks a block",    " !xor $ff {\n !text \"ab\"\n }\n"),
     ok ("acme", "!xor masks the opcode", " !xor $ff {\n nop\n }\n"),
     ok ("acme", "!xor block restores",   " !xor $ff {\n !byte 1\n }\n !byte 1\n"),
