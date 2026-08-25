@@ -288,6 +288,22 @@ pub(crate) enum Item {
         inline: bool,
         style: CondStyle,
     },
+    /// A condition loop — ACME's `!while` and `!do`.
+    ///
+    /// Unlike [`Item::Repeat`], whose count is settled before the first
+    /// iteration, the condition is re-read **between** iterations: the body
+    /// is expected to move it (`!set i = i+1`), so evaluating it once would
+    /// loop forever or not at all.
+    ///
+    /// `test_first` separates `!while c { … }` and `!do while c { … }`, which
+    /// may run the body no times, from `!do { … } while c`, which always runs
+    /// it once. `invert` is the `until` spelling.
+    Loop {
+        cond: String,
+        invert: bool,
+        test_first: bool,
+        body: Vec<Node>,
+    },
     /// A repetition block (`DUP n` … `EDUP`, `REPT n` … `ENDR`): the head as
     /// written, and the body to emit `n` times.
     ///
@@ -586,6 +602,49 @@ pub(crate) fn evaluate<D: CondEval>(
             if let Some(else_body) = else_body {
                 evaluate(dialect, else_body, emit && !taken, out)?;
             }
+        } else if let Some(Item::Loop {
+            cond,
+            invert,
+            test_first,
+            body,
+        }) = &node.item
+        {
+            if emit {
+                // The condition is re-read every time round, because the body
+                // is what moves it. A `!do` tests after, so its body always
+                // runs once.
+                //
+                // ACME stops a runaway with "Produced too much code" — a size
+                // limit rather than a count. This bounds the iterations
+                // instead: the point is to fail rather than hang, and a count
+                // says so in terms of the loop the source wrote.
+                const MAX_ITERATIONS: usize = 1_000_000;
+                let holds = |d: &mut D| -> Result<bool, AsmError> {
+                    Ok(d.eval(cond, node.span.line)? != *invert)
+                };
+                let mut ran = 0usize;
+                loop {
+                    if *test_first && !holds(dialect)? {
+                        break;
+                    }
+                    evaluate(dialect, body, true, out)?;
+                    ran += 1;
+                    if ran >= MAX_ITERATIONS {
+                        return Err(AsmError::new(
+                            node.span.line as usize,
+                            format!(
+                                "loop ran {MAX_ITERATIONS} times without its condition \
+                                 changing — nothing in the body moves it"
+                            ),
+                        ));
+                    }
+                    if !*test_first && !holds(dialect)? {
+                        break;
+                    }
+                }
+            } else {
+                evaluate(dialect, body, false, out)?;
+            }
         } else if let Some(Item::Repeat { head, body, .. }) = &node.item {
             // A skipped block still walks its body once with `emit = false`,
             // exactly as an untaken conditional branch does, so nothing inside
@@ -761,6 +820,7 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             let what = match other {
                 Item::Conditional { .. } => "a conditional block",
                 Item::Repeat { .. } => "a repetition block",
+                Item::Loop { .. } => "a condition loop",
                 Item::Native(_) => "a native item",
                 Item::Verbatim => "a verbatim line",
                 Item::Include { .. } => "an unresolved include",
@@ -858,6 +918,14 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             return Err(AsmError::new(
                 0,
                 "internal error: a repetition block is evaluated by the dialect, not lowered",
+            ));
+        }
+        // A condition loop, for the same reason again — and more so: its
+        // condition is re-read between iterations.
+        Item::Loop { .. } => {
+            return Err(AsmError::new(
+                0,
+                "internal error: a condition loop is evaluated by the dialect, not lowered",
             ));
         }
         // A native (multi-pass CISC) item is assembled by its own dialect driver,
@@ -1206,6 +1274,39 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
                     emit_nodes(body, out, equ_label_colon, INDENT);
                     out.push_str(close);
                 }
+            }
+            out.push('\n');
+            continue;
+        }
+        // A condition loop, in whichever of ACME's shapes it was written: the
+        // head carries the condition when it is tested first, and the closer
+        // carries it when it is tested after. Rendering the wrong one would
+        // change the loop's meaning, not just its layout.
+        if let Some(Item::Loop {
+            cond,
+            invert,
+            test_first,
+            body,
+        }) = &node.item
+        {
+            let word = if *invert { "until" } else { "while" };
+            let expr = cond.strip_prefix("!if ").unwrap_or(cond);
+            let _ = expr;
+            if *test_first {
+                // `node.source` is the head as written — `!while c` or
+                // `!do while c`, whichever the source chose.
+                out.push_str(&node.source);
+                out.push_str(" {");
+                trailing(&mut *out);
+                out.push('\n');
+                emit_nodes(body, out, equ_label_colon, INDENT);
+                out.push('}');
+            } else {
+                out.push_str("!do {");
+                trailing(&mut *out);
+                out.push('\n');
+                emit_nodes(body, out, equ_label_colon, INDENT);
+                out.push_str(&format!("}} {word} {expr}"));
             }
             out.push('\n');
             continue;

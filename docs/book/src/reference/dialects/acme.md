@@ -8,7 +8,7 @@ C64 6502, ACME syntax.
 
 ## Directives
 
-31 directives, 58 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+32 directives, 58 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -24,6 +24,7 @@ C64 6502, ACME syntax.
 | `incbin` | `!bin`, `!binary` |  |
 | `include` | `!src`, `!source` |  |
 | `initmem` | `!initmem` |  |
+| `loop` | `!while`, `!do` |  |
 | `macro` | `!macro` |  |
 | `obsolete-cbm` | `!cbm` | Refused, as the reference refuses it — retired in ACME 0.97, which answers `"!cbm" is obsolete; use "!ct pet" instead` |
 | `obsolete-realpc` | `!realpc` | Refused, as the reference refuses it — retired in ACME 0.97, which answers `"!pseudopc/!realpc" is obsolete; use "!pseudopc {}" instead` |
@@ -39,7 +40,7 @@ C64 6502, ACME syntax.
 | `sized` | `!be16`, `!be24`, `!be32`, `!le16`, `!le24`, `!le32` |  |
 | `skip` | `!skip` |  |
 | `text` | `!text`, `!tx` |  |
-| `unsupported-acme` | `!cpu`, `!do`, `!symbollist`, `!to`, `!while` | Recognised, and not implemented |
+| `unsupported-acme` | `!cpu`, `!symbollist`, `!to` | Recognised, and not implemented |
 | `words` | `!word`, `!wo`, `!16` |  |
 | `xor` | `!xor` |  |
 | `zone` | `!zone`, `!zn` |  |

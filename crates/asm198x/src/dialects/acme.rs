@@ -211,7 +211,7 @@ fn split_comment(line: &str) -> (&str, Option<&str>) {
 // ---------------------------------------------------------------------------
 
 /// How a [`parse_block`](FmtCx::parse_block) ended.
-#[derive(PartialEq, Eq, Clone, Copy)]
+#[derive(PartialEq, Eq, Clone)]
 enum Closer {
     Eof,
     /// End of input reached because `!eof` said so, as distinct from running
@@ -222,6 +222,13 @@ enum Closer {
     EofDirective,
     Brace,
     BraceElse,
+    /// `} while <cond>` or `} until <cond>` — the tail of an ACME `!do` loop,
+    /// whose condition lives on the closing line rather than the opening one.
+    /// `invert` is the `until` spelling: run *until* it holds.
+    BraceLoop {
+        cond: String,
+        invert: bool,
+    },
 }
 
 /// The formatter parse cursor.
@@ -393,6 +400,23 @@ impl<'a> FmtCx<'a> {
                 {
                     return Ok((nodes, Closer::BraceElse));
                 }
+                // `} while <cond>` / `} until <cond>`: an ACME `!do` loop
+                // testing after the body, so the body always runs once.
+                for (word, invert) in [("while", false), ("until", true)] {
+                    if let Some(cond) = strip_word_ci(rest, word) {
+                        let cond = cond.trim();
+                        if cond.is_empty() {
+                            return Err(AsmError::new(line, format!("`{word}` needs a condition")));
+                        }
+                        return Ok((
+                            nodes,
+                            Closer::BraceLoop {
+                                cond: cond.to_string(),
+                                invert,
+                            },
+                        ));
+                    }
+                }
                 return Err(AsmError::new(line, format!("unexpected `{trimmed}`")));
             }
 
@@ -504,6 +528,68 @@ impl<'a> FmtCx<'a> {
                 continue;
             }
 
+            // ACME's condition loops, in all five spellings ACME takes:
+            //
+            //   !while c { … }        test first
+            //   !do while c { … }     test first
+            //   !do until c { … }     test first, inverted
+            //   !do { … } while c     test after, so the body always runs
+            //   !do { … } until c     test after, inverted
+            //
+            // The head forms close on a plain `}`; the tail forms carry their
+            // condition on it, which is what `Closer::BraceLoop` is for.
+            if let Some(open) = loop_block_open(trimmed) {
+                let leading = std::mem::take(&mut self.pending);
+                let head = trimmed[..open].trim();
+                let after = trimmed[open + 1..].trim();
+                if !after.is_empty() {
+                    return Err(AsmError::new(
+                        line,
+                        format!("unexpected `{after}` after the loop's `{{`"),
+                    ));
+                }
+                self.pos += 1;
+                let (body, closer) = self.parse_block()?;
+                let (cond, invert, test_first) = match loop_head_condition(head, line)? {
+                    // A head condition: the closer must be a plain `}`.
+                    Some((cond, invert)) => {
+                        if !matches!(closer, Closer::Brace) {
+                            return Err(AsmError::new(
+                                line,
+                                "this loop states its condition twice",
+                            ));
+                        }
+                        (cond, invert, true)
+                    }
+                    // A bare `!do {`: the condition is on the closing line.
+                    None => match closer {
+                        Closer::BraceLoop { cond, invert } => (cond, invert, false),
+                        _ => {
+                            return Err(AsmError::new(
+                                line,
+                                "`!do {` needs a `} while <cond>` or `} until <cond>`",
+                            ));
+                        }
+                    },
+                };
+                // Stored as a conditional *head* in ACME's own spelling, not
+                // as a bare expression: the shared walk asks the dialect to
+                // evaluate it, and every dialect spells its conditions its own
+                // way. `Item::Conditional` carries its head for the same
+                // reason.
+                nodes.push(self.loop_node(
+                    format!("!if {cond}"),
+                    head.to_string(),
+                    invert,
+                    test_first,
+                    body,
+                    leading,
+                    comment,
+                    line,
+                ));
+                continue;
+            }
+
             // A `!zone [title] {` head opens a zone block (U7, probes
             // zh1-zh3/zh8): unlike a conditional there is no branch to prune,
             // so the head and its `}` stay in the tree as verbatim marker
@@ -598,13 +684,13 @@ impl<'a> FmtCx<'a> {
         // whether the file simply ended or `!eof` ended it — is ACME's "Found
         // end-of-file instead of '}'", and was silently accepted here before:
         // an unclosed `!if 1 {` assembled its body and emitted bytes.
-        let eof_in_block = |c| matches!(c, Closer::Eof | Closer::EofDirective);
-        if eof_in_block(closer) {
+        let eof_in_block = |c: &Closer| matches!(c, Closer::Eof | Closer::EofDirective);
+        if eof_in_block(&closer) {
             return Err(AsmError::new(line, "found end-of-file instead of `}`"));
         }
         let else_body = if closer == Closer::BraceElse {
             let (eb, eb_closer) = self.parse_block()?;
-            if eof_in_block(eb_closer) {
+            if eof_in_block(&eb_closer) {
                 return Err(AsmError::new(line, "found end-of-file instead of `}`"));
             }
             Some(eb)
@@ -764,6 +850,42 @@ impl<'a> FmtCx<'a> {
 
     /// A repetition node in acme's brace style. The head is stored without its
     /// `{`, which `emit` puts back — the same shape a brace conditional uses.
+    #[allow(clippy::too_many_arguments)]
+    fn loop_node(
+        &self,
+        cond: String,
+        head: String,
+        invert: bool,
+        test_first: bool,
+        body: Vec<crate::ast::Node>,
+        leading: Vec<crate::ast::Comment>,
+        comment: Option<&str>,
+        line: usize,
+    ) -> crate::ast::Node {
+        // The source text is rebuilt in the spelling that reads back the same
+        // way, so the formatter round-trips a loop it did not see written.
+        // The head exactly as it was written. `!while c` and `!do while c`
+        // are the same loop and ACME takes both, so a formatter that renders
+        // one as the other has changed the word rather than the layout.
+        let source = head;
+        crate::ast::Node {
+            operand_span: None,
+            label: None,
+            item: Some(crate::ast::Item::Loop {
+                cond,
+                invert,
+                test_first,
+                body,
+            }),
+            source,
+            span: self.at(line, 1),
+            trivia: crate::ast::Trivia {
+                leading,
+                trailing: self.trailing(comment, line, 1),
+            },
+        }
+    }
+
     fn repeat_node(
         &self,
         head: String,
@@ -909,6 +1031,47 @@ fn for_block_open(trimmed: &str) -> Option<usize> {
 /// that mutates without saving, which is why the `{` is what decides — not
 /// the word. `!pseudopc` has no such form: ACME retired it, and the bare
 /// spelling is declared as its refusal.
+/// A `!while …  {` or `!do … {` head, and where its `{` is.
+fn loop_block_open(trimmed: &str) -> Option<usize> {
+    let word = split_first_word(trimmed).0.to_ascii_lowercase();
+    if matches!(word.as_str(), "!while" | "!do") {
+        find_top(trimmed, b'{')
+    } else {
+        None
+    }
+}
+
+/// The condition a loop head states, if it states one. `!while c` and
+/// `!do while c` / `!do until c` do; a bare `!do` does not, and puts it on the
+/// closing line instead.
+fn loop_head_condition(head: &str, line: usize) -> Result<Option<(String, bool)>, AsmError> {
+    let (word, rest) = split_first_word(head);
+    let rest = rest.trim();
+    if word.eq_ignore_ascii_case("!while") {
+        if rest.is_empty() {
+            return Err(AsmError::new(line, "`!while` needs a condition"));
+        }
+        return Ok(Some((rest.to_string(), false)));
+    }
+    // `!do`: either bare, or with its own `while`/`until`.
+    for (w, invert) in [("while", false), ("until", true)] {
+        if let Some(cond) = strip_word_ci(rest, w) {
+            let cond = cond.trim();
+            if cond.is_empty() {
+                return Err(AsmError::new(line, format!("`{w}` needs a condition")));
+            }
+            return Ok(Some((cond.to_string(), invert)));
+        }
+    }
+    if rest.is_empty() {
+        return Ok(None);
+    }
+    Err(AsmError::new(
+        line,
+        format!("unexpected `{rest}` after `!do`"),
+    ))
+}
+
 fn marker_block_open(trimmed: &str) -> Option<usize> {
     let word = split_first_word(trimmed).0.to_ascii_lowercase();
     if matches!(
@@ -2521,6 +2684,20 @@ pub const DIRECTIVES: &[Directive] = &[
     // `foo = $10` does — so what it really is, is a binding: an assignment
     // with `=`, and a label without. Handled in `parse_statement`, because a
     // directive dispatch cannot bind the name a statement carries.
+    // The condition loops, in all five spellings ACME takes. `!while c { … }`
+    // and `!do while|until c { … }` test before the body; `!do { … } while|
+    // until c` tests after, so the body always runs once. Walk-handled: the
+    // condition is re-read between iterations, because the body is what moves
+    // it.
+    Directive {
+        id: "loop",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["while", "do"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     // `!pseudopc <addr> { … }` assembles here and reports addresses there:
     // labels and `*` inside read as if the code sat at `<addr>`, while the
     // bytes stay where they are. The bare `!pseudopc` is ACME's retired
@@ -2813,7 +2990,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What ACME has here and we do not.
     //
-    // 5 spellings against 0.97, counted from this list rather than recalled.
+    // 3 spellings against 0.97, counted from this list rather than recalled.
     // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
     // long registers" for them on a 6502, so they belong to a wider target.
     // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
@@ -2822,7 +2999,7 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "unsupported-acme",
         pattern: Pattern::Sigilled {
             sigil: '!',
-            names: &["cpu", "do", "symbollist", "to", "while"],
+            names: &["cpu", "symbollist", "to"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -3464,6 +3641,104 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// The five spellings ACME takes, and the one thing that separates them:
+    /// whether the condition is tested before the body or after it.
+    #[test]
+    fn every_loop_spelling_runs_the_body_the_right_number_of_times() {
+        let counted = "!set i=0\n";
+        assert_eq!(
+            asm(&format!("{counted}!while i<3 {{\n!byte i\n!set i=i+1\n}}"))
+                .expect("while")
+                .bytes,
+            vec![0, 1, 2]
+        );
+        assert_eq!(
+            asm(&format!(
+                "{counted}!do while i<3 {{\n!byte i\n!set i=i+1\n}}"
+            ))
+            .expect("do while head")
+            .bytes,
+            vec![0, 1, 2]
+        );
+        assert_eq!(
+            asm(&format!(
+                "{counted}!do until i=3 {{\n!byte i\n!set i=i+1\n}}"
+            ))
+            .expect("do until head")
+            .bytes,
+            vec![0, 1, 2]
+        );
+        assert_eq!(
+            asm(&format!(
+                "{counted}!do {{\n!byte i\n!set i=i+1\n}} while i<3"
+            ))
+            .expect("do while tail")
+            .bytes,
+            vec![0, 1, 2]
+        );
+        assert_eq!(
+            asm(&format!(
+                "{counted}!do {{\n!byte i\n!set i=i+1\n}} until i=3"
+            ))
+            .expect("do until tail")
+            .bytes,
+            vec![0, 1, 2]
+        );
+    }
+
+    /// Tested first, the body may run no times. Tested after, it always runs
+    /// once — which is the only reason both forms exist.
+    #[test]
+    fn a_tail_tested_loop_always_runs_once() {
+        assert_eq!(
+            asm("!set i=5\n!while i<3 {\n!byte i\n}\n!byte $ff")
+                .expect("head")
+                .bytes,
+            vec![0xFF]
+        );
+        assert_eq!(
+            asm("!set i=5\n!do {\n!byte i\n} while i<3")
+                .expect("tail")
+                .bytes,
+            vec![5]
+        );
+    }
+
+    /// The condition is re-read between iterations — the body is what moves
+    /// it — so a body that does not move it cannot be allowed to run forever.
+    /// ACME stops on output size; this stops on iterations, which names the
+    /// loop rather than the image.
+    #[test]
+    fn a_loop_whose_condition_never_moves_is_refused() {
+        let err = asm("!while 1 {\n!byte 0\n}")
+            .expect_err("endless")
+            .to_string();
+        assert!(err.contains("nothing in the body moves it"), "{err}");
+    }
+
+    /// Loops nest, and interleave with conditionals both ways round.
+    #[test]
+    fn loops_nest_and_mix_with_conditionals() {
+        assert_eq!(
+            asm("!set i=0\n!while i<2 {\n!set j=0\n!while j<2 {\n!byte i*10+j\n!set j=j+1\n}\n!set i=i+1\n}")
+                .expect("nested")
+                .bytes,
+            vec![0x00, 0x01, 0x0A, 0x0B]
+        );
+        assert_eq!(
+            asm("!if 1 {\n!set i=0\n!while i<2 {\n!byte i\n!set i=i+1\n}\n}")
+                .expect("loop in if")
+                .bytes,
+            vec![0, 1]
+        );
+        assert_eq!(
+            asm("!set i=0\n!while i<3 {\n!if i=1 {\n!byte $ee\n}\n!set i=i+1\n}")
+                .expect("if in loop")
+                .bytes,
+            vec![0xEE]
+        );
+    }
 
     /// `!pseudopc` assembles here and reports addresses there: labels and
     /// `*` inside read as if the code sat at the given address, while the
