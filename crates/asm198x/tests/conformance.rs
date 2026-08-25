@@ -2338,6 +2338,180 @@ fn ca65_cannot_satisfy_forceimport_for_a_binary() {
     );
 }
 
+/// Another entry sharing a base means the two mnemonics are the same
+/// encoding, and a disassembler can only print one of them. Derived from the
+/// spec rather than listed here, so it cannot go stale.
+fn shares_base(base: u16, mnemonic: &str) -> Option<&'static str> {
+    isa::pdp11::INSTRUCTIONS
+        .iter()
+        .find(|i| i.base == base && !i.mnemonic.eq_ignore_ascii_case(mnemonic))
+        .map(|i| i.mnemonic)
+}
+
+/// Does this disassembly name `mnemonic` as an opcode?
+fn names_row(source: &str, mnemonic: &str) -> bool {
+    source.lines().any(|l| {
+        l.split_whitespace()
+            .next()
+            .is_some_and(|w| w.eq_ignore_ascii_case(mnemonic))
+    })
+}
+
+/// Another entry sharing this base — the mnemonic is an alias, and the
+/// disassembler can only print one of them.
+fn alias_of(cpu: &str, base: u16, mnemonic: &str) -> Option<&'static str> {
+    match cpu {
+        "PDP-11" => shares_base(base, mnemonic),
+        _ => None,
+    }
+}
+
+/// One word CPU's form audit: every row the spec declares, put to `asl`.
+///
+/// A word CPU packs its operands into fields of a single opcode word, so the
+/// representative bytes for a row are the entry's `base` — the opcode word with
+/// its fields zeroed — followed by the canonical extension-word fillers the
+/// sweep already uses. Zeroed fields are a valid encoding: register zero, a
+/// zero displacement, a branch to itself.
+///
+/// **What this covers that the sweep does not.** The sweep disassembles each
+/// candidate at two origins and keeps only what reads the same at both, so
+/// every PC-relative instruction is dropped from it by construction — 17
+/// branches and `SOB` on the PDP-11, 13 jumps on the TMS9900. Those rows are
+/// in no sweep chunk, and until this they were in no verdict at all.
+///
+/// The disassembly is checked to name the row's own mnemonic before anything
+/// is recorded. A row whose synthesised bytes decode to something else would
+/// otherwise arbitrate a different instruction under this row's name, which is
+/// worse than not arbitrating it.
+#[allow(clippy::too_many_arguments)]
+fn word_cpu_form_audit(
+    cpu: &str,
+    rows: impl Iterator<Item = isa::Row>,
+    base_of: &dyn Fn(&str, &str) -> Option<u16>,
+    big_endian: bool,
+    filler: &[u8],
+    listing: &dyn Fn(&[u8], u32) -> String,
+    tmp: &std::path::Path,
+    recorder: &mut support::verdicts::Recorder,
+    fails: &mut Vec<String>,
+) -> usize {
+    let mut checked = 0usize;
+    for row in rows {
+        let Some(base) = base_of(row.mnemonic, row.mode) else {
+            fails.push(format!(
+                "{cpu} {} {}: no base for the row",
+                row.mnemonic, row.mode
+            ));
+            continue;
+        };
+        // Zeroed fields are usually a valid encoding — register zero, a zero
+        // displacement — but not always: the PDP-11's `JMP` with a register
+        // destination is illegal, because jumping *to* a register is not a
+        // thing, so `base | 0` decodes as data. So the field value is searched
+        // for rather than assumed: the first one whose disassembly names this
+        // row. The field is the low six bits on every one of these CPUs.
+        // The fillers ride along in the search too: a TMS9900 `LI` is two
+        // words, and two bytes of it decode as nothing.
+        let probe_for = |f: u16| {
+            let w = base | f;
+            let mut b = if big_endian {
+                vec![(w >> 8) as u8, w as u8]
+            } else {
+                vec![w as u8, (w >> 8) as u8]
+            };
+            b.extend_from_slice(filler);
+            b
+        };
+        // The row's own spelling first. Failing that, a mnemonic sharing this
+        // base is an alias the disassembler prefers — `BHIS` is `BCC` — and the
+        // encoding is still this row's claim, still arbitrated, under the
+        // spelling the disassembler emits.
+        let find = |want: &str| {
+            (0u16..=0o77)
+                .find(|f| names_row(&listing(&probe_for(*f), 0x1000), want))
+                .map(|f| base | f)
+        };
+        let (word, want) = match find(row.mnemonic) {
+            Some(w) => (Some(w), row.mnemonic),
+            None => match alias_of(cpu, base, row.mnemonic) {
+                Some(other) => (find(other), other),
+                None => (None, row.mnemonic),
+            },
+        };
+        let Some(word) = word else {
+            // No field value produces this row. Either the encoding is one our
+            // disassembler cannot decode — which the sweep cannot notice,
+            // because it *skips* what does not decode — or the mnemonic is an
+            // alias whose base another entry already owns.
+            fails.push(format!(
+                "{cpu} {} {}: base {base:#06X} decodes to no form of `{want}`, so we can \
+                 assemble it and not read it back",
+                row.mnemonic, row.mode
+            ));
+            continue;
+        };
+        let mut bytes = if big_endian {
+            vec![(word >> 8) as u8, word as u8]
+        } else {
+            vec![word as u8, (word >> 8) as u8]
+        };
+        bytes.extend_from_slice(filler);
+
+        // `listing` writes a whole assembler source file — the `cpu` line, the
+        // origin and the instruction — which is what the sweep hands to the
+        // reference, so it is what this hands over too.
+        let source = listing(&bytes, 0x1000);
+        // The disassembly must name this row, or the audit would arbitrate
+        // some other instruction under this row's name.
+        if !names_row(&source, want) {
+            fails.push(format!(
+                "{cpu} {} {}: base {base:#06X} disassembles to something else:\n{source}",
+                row.mnemonic, row.mode
+            ));
+            continue;
+        }
+        let reference = ref_assemble(tmp, &source, "asm", |src, out| {
+            let obj = src.with_extension("p");
+            let mut a = Command::new("asl");
+            a.arg("-q").arg(src).arg("-o").arg(&obj);
+            let mut b = Command::new("p2bin");
+            b.arg(&obj).arg(out);
+            vec![a, b]
+        });
+        let Some(reference) = reference else {
+            fails.push(format!(
+                "{cpu} {} {}: asl rejected our own disassembly:\n{source}",
+                row.mnemonic, row.mode
+            ));
+            continue;
+        };
+        checked += 1;
+        recorder.record_bytes(
+            support::verdicts::CaseRef {
+                suite: Suite::Form,
+                cpu,
+                tool: "asl",
+                dialect: "asl",
+                case: format!("{} {}", row.mnemonic, row.mode),
+                source: &source,
+            },
+            &reference,
+        );
+        // Only the opcode word is this row's claim; the fillers are ours.
+        let ours = &bytes[..2];
+        if reference.len() < 2 || &reference[..2] != ours {
+            fails.push(format!(
+                "{cpu} {} {}: ours {ours:02X?} vs asl {:02X?}",
+                row.mnemonic,
+                row.mode,
+                &reference[..reference.len().min(2)]
+            ));
+        }
+    }
+    checked
+}
+
 /// The 6809 form audit: every row the spec declares, put to `lwasm`.
 ///
 /// The `Form` specs have had this since the beginning; the 6809 could not,
@@ -2428,6 +2602,90 @@ fn spec_rows_match_reference_6809() {
     );
     assert!(checked > 0, "no rows arbitrated");
     eprintln!("6809 form audit: {checked} rows arbitrated against lwasm");
+}
+
+/// The word CPUs' form audits: PDP-11, TMS9900 and the CP-1610, against `asl`.
+///
+/// Their specs are identical in shape — `Insn { mnemonic, base, class }` — so
+/// one implementation serves all three, and the only per-CPU facts are the
+/// byte order, the extension-word filler and asl's name for the chip. All
+/// three are copied from the sweeps rather than restated.
+#[test]
+#[ignore = "needs the reference assemblers; run with --ignored"]
+fn spec_rows_match_reference_word_cpus() {
+    if !(have("asl") && have("p2bin")) {
+        eprintln!("SKIP: `asl`/`p2bin` not on PATH (word-CPU form audits)");
+        return;
+    }
+    let tmp = std::env::temp_dir().join("asm198x-form-word");
+    let _ = fs::create_dir_all(&tmp);
+    let mut recorder = support::verdicts::Recorder::new();
+    let mut fails: Vec<String> = Vec::new();
+    let mut total = 0usize;
+
+    total += word_cpu_form_audit(
+        "PDP-11",
+        isa::pdp11::rows(),
+        &|m, _| {
+            isa::pdp11::INSTRUCTIONS
+                .iter()
+                .find(|i| i.mnemonic == m)
+                .map(|i| i.base)
+        },
+        false,
+        &[0x10, 0x00, 0x20, 0x00, 0x30, 0x00],
+        &|b, o| asm198x::listing_pdp11(b, o as u16),
+        &tmp,
+        &mut recorder,
+        &mut fails,
+    );
+    total += word_cpu_form_audit(
+        "TMS9900",
+        isa::tms9900::rows(),
+        &|m, _| {
+            isa::tms9900::INSTRUCTIONS
+                .iter()
+                .find(|i| i.mnemonic == m)
+                .map(|i| i.base)
+        },
+        true,
+        &[0x10, 0x00, 0x20, 0x00, 0x30, 0x00],
+        &|b, o| asm198x::listing_tms9900(b, o as u16),
+        &tmp,
+        &mut recorder,
+        &mut fails,
+    );
+    total += word_cpu_form_audit(
+        // The corpus label, not asl's chip name — the listing writes its own
+        // `cpu` line, so this is only ever the label a verdict is filed under.
+        "CP1610",
+        isa::cp1610::rows(),
+        &|m, _| {
+            isa::cp1610::INSTRUCTIONS
+                .iter()
+                .find(|i| i.mnemonic == m)
+                .map(|i| i.base)
+        },
+        true,
+        &[0x12, 0x34],
+        &|b, o| asm198x::listing_cp1610(b, o as u16),
+        &tmp,
+        &mut recorder,
+        &mut fails,
+    );
+
+    let added = recorder.flush().expect("write the corpus");
+    if added > 0 {
+        eprintln!("word-CPU form audits: {added} new verdict(s) recorded");
+    }
+    assert!(
+        fails.is_empty(),
+        "{} of {total} word-CPU rows diverge or cannot be arbitrated:\n  {}",
+        fails.len(),
+        fails.join("\n  ")
+    );
+    assert!(total > 0, "no rows arbitrated");
+    eprintln!("word-CPU form audits: {total} rows arbitrated against asl");
 }
 
 /// Identify every reference tool this machine has, proving the probe table
