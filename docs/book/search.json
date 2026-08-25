@@ -1018,7 +1018,7 @@
       "slug": "reference/dialects/vasm"
     },
     {
-      "context": "22 directives, 147 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "21 directives, 147 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "vasm",
       "slug": "reference/dialects/vasm"

@@ -2129,17 +2129,24 @@ fn lwasm_refuses_its_object_target_words_for_a_binary() {
     );
 }
 
-/// vasm's three import-side words, arbitrated against vasm.
+/// vasm's visibility words, arbitrated against vasm.
 ///
-/// `xref`, `import` and `nref` are declared [`Category::RefusedByReference`],
-/// and unlike lwasm's five, vasm never says so: it answers `error 86: external
-/// symbol <foo> must not be defined` when the name is defined here and `error
-/// 3007: undefined symbol` when it is not. The refusal is the *pair* — no
-/// program satisfies both — so the pair is what is checked. A probe of either
-/// shape alone would read as an ordinary undefined-symbol rule.
+/// All ten take a name that must be **defined** in the program: vasm answers
+/// `error 3007: undefined symbol <foo>` otherwise, whether or not anything
+/// references it.
+///
+/// Three of them — `xref`, `import` and `nref` — did not behave this way under
+/// 2.0b, which refused them in binary output from both sides at once (`error
+/// 86: external symbol <foo> must not be defined` when defined, `error 3007`
+/// when not). No program satisfied that pair, so they were declared
+/// [`Category::RefusedByReference`]. 2.0f accepts them with the name defined.
+///
+/// Both shapes are still probed for every word. Checking only the defined case
+/// would pass on a version that had gone back to refusing it, and checking only
+/// the undefined case reads as an ordinary undefined-symbol rule either way.
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]
-fn vasm_refuses_its_import_side_words_for_a_binary() {
+fn vasm_visibility_words_need_a_defined_name() {
     if !have("vasmm68k_mot") {
         eprintln!("SKIP: `vasmm68k_mot` not on PATH");
         return;
@@ -2156,10 +2163,12 @@ fn vasm_refuses_its_import_side_words_for_a_binary() {
     };
 
     let mut wrong: Vec<String> = Vec::new();
-    for word in ["xref", "import", "nref"] {
+    for word in [
+        "xdef", "public", "global", "export", "entry", "weak", "extrn", "xref", "import", "nref",
+    ] {
         let defined = format!("\tsection code,code\n\t{word} foo\nfoo:\tdc.b 1\n");
         match &run(&defined) {
-            RefOutcome::Rejected { diagnostic } if diagnostic.contains("must not be defined") => {}
+            RefOutcome::Bytes(b) if b == &[1] => {}
             other => wrong.push(format!("`{word}` with the name defined: {other:?}")),
         }
         let undefined = format!("\tsection code,code\n\t{word} foo\n\tdc.b 1\n");
@@ -2167,25 +2176,10 @@ fn vasm_refuses_its_import_side_words_for_a_binary() {
             RefOutcome::Rejected { diagnostic } if diagnostic.contains("undefined symbol") => {}
             other => wrong.push(format!("`{word}` with the name undefined: {other:?}")),
         }
-        // And the seven that *can* be satisfied still can, so this is a fact
-        // about these three rather than about visibility words in general.
-        let err = asm198x::assemble_vasm(&undefined).expect_err("we refuse it too");
-        if !err.to_string().contains("object file") {
-            wrong.push(format!("`{word}` — ours reads wrong: {err}"));
-        }
-    }
-    for word in [
-        "xdef", "public", "global", "export", "entry", "weak", "extrn",
-    ] {
-        let defined = format!("\tsection code,code\n\t{word} foo\nfoo:\tdc.b 1\n");
-        match &run(&defined) {
-            RefOutcome::Bytes(b) if b == &[1] => {}
-            other => wrong.push(format!("`{word}` with the name defined: {other:?}")),
-        }
     }
     assert!(
         wrong.is_empty(),
-        "{} import-side probe(s) disagree:\n  {}",
+        "{} visibility probe(s) disagree:\n  {}",
         wrong.len(),
         wrong.join("\n  ")
     );

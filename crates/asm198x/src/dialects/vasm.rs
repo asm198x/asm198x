@@ -2702,19 +2702,25 @@ pub const DIRECTIVES: &[Directive] = &[
     // as state. Its 68020+, FPU and Apollo mnemonics are deliberately absent:
     // vasm refuses those itself under `-m68000`, and
     // `68000-isa-completeness.md` scopes ours to the 68000.
-    // Symbol visibility, probed against vasm 2.0b in binary output — the only
-    // output we produce. Three answers, and the words do not group the way the
-    // manual's headings do; see
+    // Symbol visibility, probed against vasm 2.0f in binary output — the only
+    // output we produce. See
     // `decisions/symbol-visibility-in-a-fused-assembler.md`.
     //
-    // These seven take a name that must be **defined** in the program: vasm
+    // These ten take a name that must be **defined** in the program: vasm
     // answers `error 3007: undefined symbol <nope>` otherwise, whether or not
-    // anything references it. `local` is absent because it requires nothing;
-    // `xref`, `import` and `nref` because they forbid the opposite.
+    // anything references it. `local` is absent because it requires nothing.
+    //
+    // `xref`, `import` and `nref` are here, and were not under 2.0b. That
+    // version refused them in binary output from both sides — `error 86:
+    // external symbol <foo> must not be defined` when the name was defined and
+    // `error 3007` when it was not — so no program satisfied them and they were
+    // declared `RefusedByReference`. 2.0f accepts them with the name defined,
+    // which is the same rule as the other seven.
     Directive {
         id: "visibility",
         pattern: Pattern::Exact(&[
-            "xdef", "public", "global", "export", "entry", "weak", "extrn",
+            "xdef", "public", "global", "export", "entry", "weak", "extrn", "xref", "import",
+            "nref",
         ]),
         category: Category::Operation,
     },
@@ -2726,16 +2732,6 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "common",
         pattern: Pattern::Exact(&["comm"]),
         category: Category::Operation,
-    },
-    // The import side, and it cannot be used at all in binary output: vasm
-    // answers `error 86: external symbol <foo> must not be defined` when the
-    // name is defined here and `error 3007: undefined symbol` when it is not,
-    // so no program satisfies both. That is a refusal, not a gap — the second
-    // dialect to need the category, after lwasm.
-    Directive {
-        id: "external",
-        pattern: Pattern::Exact(&["xref", "import", "nref"]),
-        category: Category::RefusedByReference("only usable when the output is an object file"),
     },
     // `local name` requires nothing of the name and `idnt "mod"` names the
     // object module. Both emit nothing and neither can fail.
@@ -3532,22 +3528,32 @@ mod directive_surface {
         );
     }
 
-    /// `xref`, `import` and `nref` cannot be satisfied in binary output: vasm
-    /// answers `error 86: external symbol <foo> must not be defined` when the
-    /// name is defined and `error 3007: undefined symbol` when it is not. No
-    /// program passes both, so the word is refused rather than counted a gap.
+    /// `xref`, `import` and `nref` follow the same rule as the other seven:
+    /// the name must be defined.
+    ///
+    /// Under vasm 2.0b they followed no rule that could be satisfied — `error
+    /// 86: external symbol <foo> must not be defined` when the name was
+    /// defined, `error 3007: undefined symbol` when it was not — so they were
+    /// declared refused. 2.0f accepts them with the name defined, and this
+    /// checks both halves so a return to the old behaviour cannot pass.
     #[test]
-    fn the_import_side_is_refused_as_the_reference_refuses_it() {
+    fn the_import_side_needs_a_defined_name() {
         for word in ["xref", "import", "nref"] {
-            let err = asm(&format!(
+            assert_eq!(
+                bytes(&format!(
+                    "        section code,code\n        {word} foo\nfoo:    dc.b 1\n"
+                )),
+                vec![1],
+                "{word} with the name defined"
+            );
+            let message = asm(&format!(
                 "        section code,code\n        {word} other\n        dc.b 1\n"
             ))
-            .expect_err(word);
-            let message = err.to_string();
-            assert!(message.contains("object file"), "{word}: got `{message}`");
+            .expect_err(word)
+            .to_string();
             assert!(
-                !message.contains("does not implement"),
-                "{word} claims a gap here, and there is none: {message}"
+                message.contains("undefined symbol"),
+                "{word} with the name undefined: got `{message}`"
             );
         }
     }
