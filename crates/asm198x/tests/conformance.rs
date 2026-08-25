@@ -2657,12 +2657,7 @@ fn spec_rows_match_reference_z8000() {
     // Rows this method cannot arbitrate, each with the reason and the issue
     // that will retire the entry. Named rather than folded into the anonymous
     // unplaced count: a known exception is a finding, not a gap.
-    const EXCEPTIONS: &[(&str, &str, &str)] = &[(
-        "LDB",
-        "immediate",
-        "we emit the long dyadic form and asl the short one-word form \
-         (0xC0-0xCF), which we also cannot decode - asm198x#252",
-    )];
+    const EXCEPTIONS: &[(&str, &str, &str)] = &[];
 
     for row in isa::z8000::rows() {
         let m = row.mnemonic;

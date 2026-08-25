@@ -2267,6 +2267,28 @@ const fn mm_of(mode: &str) -> Option<(u16, u16)> {
     }
 }
 
+/// The top nibble of the one-word `LDB Rbd, #data` form.
+///
+/// Two formats exist for a byte immediate loaded into a register: the regular
+/// dyadic form (`base6` 0x20, the byte replicated into a following word) and
+/// this one-word `1100 dddd | data`. The CPU manual's Note 2 to *Load Immediate
+/// Value* settles which to emit — "although two formats exist for `LDB R, IM`
+/// the assembler always uses the short format" — and it is the cheaper one, two
+/// bytes and five cycles against four and seven.
+///
+/// The decoder still reads the long form, because a binary may hold either.
+pub const LDB_SHORT_TOP: u8 = 0xC0;
+
+/// The destination register of a one-word `LDB Rbd, #data`, if `top` is one.
+#[must_use]
+pub const fn ldb_short_reg(top: u8) -> Option<u16> {
+    if top & 0xF0 == LDB_SHORT_TOP {
+        Some((top & 0x0F) as u16)
+    } else {
+        None
+    }
+}
+
 /// The first word of an instruction in the `MM bbbbbb | ssss dddd` shape,
 /// which most of this CPU's families share.
 const fn first_word(mm: u16, base6: u8, high: u16, low: u16) -> u16 {
@@ -2275,6 +2297,14 @@ const fn first_word(mm: u16, base6: u8, high: u16, low: u16) -> u16 {
 }
 
 impl Insn {
+    /// The top byte of this entry's one-word immediate form, if it has one.
+    ///
+    /// Only the `LDB` load does. See [`LDB_SHORT_TOP`].
+    #[must_use]
+    pub fn short_immediate_top(&self) -> Option<u8> {
+        (self.mnemonic == "LDB" && !self.store).then_some(LDB_SHORT_TOP)
+    }
+
     /// One representative encoding of this dyadic instruction in `mode`.
     ///
     /// See `decisions/a-row-can-exemplify-itself.md`. `None` for the store
@@ -2285,6 +2315,12 @@ impl Insn {
     pub fn exemplar(&self, mode: &str) -> Option<u16> {
         if self.store {
             return None;
+        }
+        // Where a one-word immediate form exists, it is the encoding both this
+        // assembler and the reference emit, so it is what the row exemplifies.
+        if let (Some(top), "immediate") = (self.short_immediate_top(), mode) {
+            let reg = lowest_register(self.size);
+            return Some(((u16::from(top) | reg) << 8) | 0x05);
         }
         let (mm, field) = mm_of(mode)?;
         // In register mode the source nibble names a register of this
@@ -2349,6 +2385,31 @@ impl MulDiv {
             lowest_register(self.src),
             lowest_register(self.dest),
         )
+    }
+}
+
+#[cfg(test)]
+mod short_ldb_tests {
+    use super::{LDB_SHORT_TOP, ldb_short_reg, lookup};
+
+    #[test]
+    fn the_top_nibble_names_the_destination_register() {
+        assert_eq!(ldb_short_reg(LDB_SHORT_TOP), Some(0));
+        assert_eq!(ldb_short_reg(0xC1), Some(1));
+        assert_eq!(ldb_short_reg(0xCF), Some(15));
+        // The neighbours are CALR, JR and DJNZ, which this must not claim.
+        for top in [0xBF, 0xD0, 0xE0, 0xF0] {
+            assert_eq!(ldb_short_reg(top), None, "{top:#04X} is not a short LDB");
+        }
+    }
+
+    #[test]
+    fn only_the_byte_load_has_a_short_immediate_form() {
+        let short = |m| lookup(m).and_then(super::Insn::short_immediate_top);
+        assert_eq!(short("LDB"), Some(LDB_SHORT_TOP));
+        for m in ["LD", "LDL", "ADDB", "CPB"] {
+            assert_eq!(short(m), None, "{m} has no short immediate form");
+        }
     }
 }
 

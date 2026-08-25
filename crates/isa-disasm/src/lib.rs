@@ -2971,6 +2971,7 @@ fn disassemble_z8000_impl(code: &[u8], origin: u16, seg: bool) -> Vec<Line> {
             .or_else(|| decode_io_z8000(code, pos, seg))
             .or_else(|| decode_control_z8000(code, pos, seg))
             .or_else(|| decode_misc_z8000(code, pos, addr))
+            .or_else(|| decode_ldb_short_z8000(code, pos))
             .or_else(|| decode_z8000(code, pos, seg))
         {
             Some((text, len)) => {
@@ -3681,6 +3682,18 @@ fn decode_control_z8000(code: &[u8], pos: usize, seg: bool) -> Option<(String, u
         }
         _ => None,
     }
+}
+
+/// Decode the one-word `LDB Rbd, #data` (`1100 dddd | data`) at `pos`, or
+/// `None`.
+///
+/// The long dyadic form of the same instruction is decoded by
+/// [`decode_z8000`]; a binary may hold either, so both are read. See
+/// [`isa::z8000::LDB_SHORT_TOP`] for which one is written.
+fn decode_ldb_short_z8000(code: &[u8], pos: usize) -> Option<(String, usize)> {
+    let reg = isa::z8000::ldb_short_reg(code[pos])?;
+    let dst = z8000_reg(reg, isa::z8000::Size::Byte);
+    Some((format!("ldb {dst},#0{:02X}H", code[pos + 1]), 2))
 }
 
 /// Decode one Z8000 miscellaneous instruction (`TCC`/`TCCB`, `LDK`, `RLDB`/
