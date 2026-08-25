@@ -828,3 +828,71 @@ pub fn rows() -> impl Iterator<Item = crate::Row> {
         undocumented: false,
     })
 }
+
+impl Insn {
+    /// One representative encoding of this instruction: the opcode word with a
+    /// canonical value in its operand fields.
+    ///
+    /// A word CPU packs its operands into fields of the one word, so an
+    /// exemplar is `base | field` — and zero is almost always a legal field,
+    /// naming register zero, a zero displacement, or a branch to itself.
+    ///
+    /// Where zero is *not* legal the spec says so here, rather than a caller
+    /// searching for a value that works. The difference matters: a search
+    /// hunts until something decodes, so a wrong default is papered over
+    /// silently, where a stated value that is wrong fails the audit loudly.
+    ///
+    /// See `decisions/a-row-can-exemplify-itself.md`.
+    #[must_use]
+    pub fn exemplar(&self) -> u16 {
+        self.base | self.exemplar_field()
+    }
+
+    /// The operand-field value that makes [`exemplar`](Insn::exemplar) a legal
+    /// encoding. Zero unless this instruction cannot take it.
+    fn exemplar_field(&self) -> u16 {
+        match self.mnemonic {
+            // A register destination is illegal for these two — you cannot
+            // jump *to* a register, and `WRTLCK` writes through its operand —
+            // so the exemplar uses register-deferred (`@R0`) instead. Probed:
+            // `base | 0` decodes as data for both.
+            "JMP" | "WRTLCK" => 0o10,
+            _ => 0,
+        }
+    }
+}
+
+#[cfg(test)]
+mod exemplar_tests {
+    /// Almost every instruction exemplifies itself with a zero operand field —
+    /// register zero, a zero displacement, a branch to itself. The two that
+    /// cannot are stated, and this is what notices if a third appears and is
+    /// not.
+    #[test]
+    fn only_the_two_illegal_cases_override_the_field() {
+        let overridden: Vec<&str> = super::INSTRUCTIONS
+            .iter()
+            .filter(|i| i.exemplar() != i.base)
+            .map(|i| i.mnemonic)
+            .collect();
+        assert_eq!(
+            overridden,
+            ["JMP", "WRTLCK"],
+            "a new override wants a reason in the spec, not a search in the audit"
+        );
+    }
+
+    /// The override is register-deferred, not some other mode: `@R0` is the
+    /// simplest destination that is not a bare register, which is the thing
+    /// `JMP` cannot have.
+    #[test]
+    fn the_override_is_register_deferred() {
+        for m in ["JMP", "WRTLCK"] {
+            let insn = super::INSTRUCTIONS
+                .iter()
+                .find(|i| i.mnemonic == m)
+                .expect(m);
+            assert_eq!(insn.exemplar() - insn.base, 0o10, "{m}");
+        }
+    }
+}

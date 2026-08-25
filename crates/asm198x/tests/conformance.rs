@@ -2273,6 +2273,21 @@ fn shares_base(base: u16, mnemonic: &str) -> Option<&'static str> {
         .map(|i| i.mnemonic)
 }
 
+/// Given a mnemonic and a mode, the entry's base and the exemplar word the
+/// spec states for it.
+type BaseLookup<'a> = &'a dyn Fn(&str, &str) -> Option<(u16, u16)>;
+
+/// An exemplar word as bytes, with the extension-word fillers behind it.
+fn exemplar_bytes(word: u16, big_endian: bool, filler: &[u8]) -> Vec<u8> {
+    let mut b = if big_endian {
+        vec![(word >> 8) as u8, word as u8]
+    } else {
+        vec![word as u8, (word >> 8) as u8]
+    };
+    b.extend_from_slice(filler);
+    b
+}
+
 /// Does this disassembly name `mnemonic` as an opcode?
 fn names_row(source: &str, mnemonic: &str) -> bool {
     source.lines().any(|l| {
@@ -2343,7 +2358,7 @@ fn z8000_word(base6: u8, mode: &str) -> Option<u16> {
 fn word_cpu_form_audit(
     cpu: &str,
     rows: impl Iterator<Item = isa::Row>,
-    base_of: &dyn Fn(&str, &str) -> Option<u16>,
+    base_of: BaseLookup<'_>,
     big_endian: bool,
     filler: &[u8],
     listing: &dyn Fn(&[u8], u32) -> String,
@@ -2353,65 +2368,32 @@ fn word_cpu_form_audit(
 ) -> usize {
     let mut checked = 0usize;
     for row in rows {
-        let Some(base) = base_of(row.mnemonic, row.mode) else {
+        let Some((base, base_word)) = base_of(row.mnemonic, row.mode) else {
             fails.push(format!(
                 "{cpu} {} {}: no base for the row",
                 row.mnemonic, row.mode
             ));
             continue;
         };
-        // Zeroed fields are usually a valid encoding — register zero, a zero
-        // displacement — but not always: the PDP-11's `JMP` with a register
-        // destination is illegal, because jumping *to* a register is not a
-        // thing, so `base | 0` decodes as data. So the field value is searched
-        // for rather than assumed: the first one whose disassembly names this
-        // row. The field is the low six bits on every one of these CPUs.
-        // The fillers ride along in the search too: a TMS9900 `LI` is two
-        // words, and two bytes of it decode as nothing.
-        let probe_for = |f: u16| {
-            let w = base | f;
-            let mut b = if big_endian {
-                vec![(w >> 8) as u8, w as u8]
-            } else {
-                vec![w as u8, (w >> 8) as u8]
-            };
-            b.extend_from_slice(filler);
-            b
-        };
-        // The row's own spelling first. Failing that, a mnemonic sharing this
-        // base is an alias the disassembler prefers — `BHIS` is `BCC` — and the
-        // encoding is still this row's claim, still arbitrated, under the
-        // spelling the disassembler emits.
-        let find = |want: &str| {
-            (0u16..=0o77)
-                .find(|f| names_row(&listing(&probe_for(*f), 0x1000), want))
-                .map(|f| base | f)
-        };
-        let (word, want) = match find(row.mnemonic) {
-            Some(w) => (Some(w), row.mnemonic),
-            None => match alias_of(cpu, base, row.mnemonic) {
-                Some(other) => (find(other), other),
-                None => (None, row.mnemonic),
-            },
-        };
-        let Some(word) = word else {
-            // No field value produces this row. Either the encoding is one our
-            // disassembler cannot decode — which the sweep cannot notice,
-            // because it *skips* what does not decode — or the mnemonic is an
-            // alias whose base another entry already owns.
-            fails.push(format!(
-                "{cpu} {} {}: base {base:#06X} decodes to no form of `{want}`, so we can \
-                 assemble it and not read it back",
-                row.mnemonic, row.mode
-            ));
-            continue;
-        };
-        let mut bytes = if big_endian {
-            vec![(word >> 8) as u8, word as u8]
+        // The spec states the field value that makes this a legal encoding —
+        // zero for almost everything, register-deferred for the two PDP-11
+        // instructions that cannot take a register operand. Stated rather than
+        // searched for, so a wrong value fails the `names_row` check below
+        // instead of being hunted around.
+        //
+        // An alias is the exception the spec cannot state, because it is not
+        // about encoding: `BHIS` shares its base with `BCC`, and a
+        // disassembler can only print one of a pair. The encoding is still the
+        // row's claim and is still arbitrated, under the spelling that prints.
+        let want = if names_row(
+            &listing(&exemplar_bytes(base_word, big_endian, filler), 0x1000),
+            row.mnemonic,
+        ) {
+            row.mnemonic
         } else {
-            vec![word as u8, (word >> 8) as u8]
+            alias_of(cpu, base, row.mnemonic).unwrap_or(row.mnemonic)
         };
-        bytes.extend_from_slice(filler);
+        let bytes = exemplar_bytes(base_word, big_endian, filler);
 
         // `listing` writes a whole assembler source file — the `cpu` line, the
         // origin and the instruction — which is what the sweep hands to the
@@ -2586,7 +2568,7 @@ fn spec_rows_match_reference_word_cpus() {
             isa::pdp11::INSTRUCTIONS
                 .iter()
                 .find(|i| i.mnemonic == m)
-                .map(|i| i.base)
+                .map(|i| (i.base, i.exemplar()))
         },
         false,
         &[0x10, 0x00, 0x20, 0x00, 0x30, 0x00],
@@ -2602,7 +2584,7 @@ fn spec_rows_match_reference_word_cpus() {
             isa::tms9900::INSTRUCTIONS
                 .iter()
                 .find(|i| i.mnemonic == m)
-                .map(|i| i.base)
+                .map(|i| (i.base, i.exemplar()))
         },
         true,
         &[0x10, 0x00, 0x20, 0x00, 0x30, 0x00],
@@ -2620,7 +2602,7 @@ fn spec_rows_match_reference_word_cpus() {
             isa::cp1610::INSTRUCTIONS
                 .iter()
                 .find(|i| i.mnemonic == m)
-                .map(|i| i.base)
+                .map(|i| (i.base, i.exemplar()))
         },
         true,
         &[0x12, 0x34],

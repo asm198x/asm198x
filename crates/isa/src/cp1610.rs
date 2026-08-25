@@ -465,3 +465,33 @@ pub fn rows() -> impl Iterator<Item = crate::Row> {
         undocumented: false,
     })
 }
+
+impl Insn {
+    /// One representative encoding of this instruction: the opcode word with a
+    /// canonical value in its operand fields.
+    ///
+    /// A word CPU packs its operands into fields of the one word, so an
+    /// exemplar is `base | field` — and zero is almost always a legal field,
+    /// naming register zero, a zero displacement, or a branch to itself.
+    ///
+    /// Where zero is *not* legal the spec says so here, rather than a caller
+    /// searching for a value that works. The difference matters: a search
+    /// hunts until something decodes, so a wrong default is papered over
+    /// silently, where a stated value that is wrong fails the audit loudly.
+    ///
+    /// See `decisions/a-row-can-exemplify-itself.md`.
+    #[must_use]
+    pub const fn exemplar(&self) -> u16 {
+        self.base | self.exemplar_field()
+    }
+
+    /// The operand-field value that makes [`exemplar`](Insn::exemplar) a legal
+    /// encoding.
+    ///
+    /// Zero throughout on this CPU: every instruction here accepts register
+    /// zero, a zero displacement or a zero count. The PDP-11 is the one that
+    /// needs exceptions, and states them.
+    const fn exemplar_field(&self) -> u16 {
+        0
+    }
+}
