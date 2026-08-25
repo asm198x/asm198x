@@ -280,7 +280,11 @@ fn a_refused_by_reference_spelling_says_whose_rule_it_is() {
 #[test]
 fn a_real_directive_reads_differently_from_a_typo() {
     let cases: &[(&str, &str, &str, &str)] = &[
-        ("acme", "* = $0000\n", "!to \"x\"", "!zzqq"),
+        // `!cpu` — the last ACME word still unimplemented (asm198x#277). This
+        // case was `!to "x"` until that one landed; a word implemented here
+        // stops being a real-but-refused directive, so the example has to
+        // move with the work.
+        ("acme", "* = $0000\n", "!cpu 6502", "!zzqq"),
         // `.condes` rather than `.export`, which became an implemented check
         // once ca65 turned out to enforce one. `.condes` builds an ld65
         // constructor table from linker-config features our fixed NROM layout

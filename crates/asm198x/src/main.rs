@@ -876,16 +876,41 @@ fn run(args: &[String]) -> Result<String, String> {
         );
         (summary, out_path)
     } else {
-        let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("bin"));
-        std::fs::write(&out_path, &assembly.bytes)
+        // The source may name its own output with ACME's `!to`. A `-o` still
+        // wins — that is ACME's rule, which takes the *first* name chosen and
+        // warns that it was "already chosen" for any later one; the flag is
+        // chosen before the source is read. So this only applies when no flag
+        // was given, and it replaces the derived default rather than adding a
+        // second file.
+        let framed;
+        let (out_path, image) = match (&output, &assembly.requested_output) {
+            (None, Some(req)) => {
+                let path = source_named_path(input, &req.path)?;
+                framed = frame_output(&assembly, req.format);
+                (path, framed.as_slice())
+            }
+            _ => (
+                output.unwrap_or_else(|| Path::new(input).with_extension("bin")),
+                assembly.bytes.as_slice(),
+            ),
+        };
+        std::fs::write(&out_path, image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
         let summary = format!(
             "assembled {} byte(s) at ${:04X} -> {}",
-            assembly.bytes.len(),
+            image.len(),
             assembly.origin.unwrap_or(0),
             out_path.display(),
         );
         (summary, out_path)
+    };
+
+    // ACME's `!symbollist` names a symbol dump, on the same terms as `!to`:
+    // a request the flag overrides. `--sym` in any form counts as the name
+    // already chosen, so this only applies when none was given.
+    let sym = match (&sym, &assembly.requested_symbols) {
+        (None, Some(named)) => Some(Some(source_named_path(input, named)?)),
+        _ => sym,
     };
 
     // Debug artifacts (U3) are written only after the image write succeeded, so
@@ -923,6 +948,56 @@ fn run(args: &[String]) -> Result<String, String> {
 /// `sources` is the listing's spliced source set ([`listing_sources`]) — the
 /// linked ca65/vasm paths, where `--listing` is rejected upstream, pass an
 /// empty slice.
+/// Resolve a path the **source** named, against the input's directory.
+///
+/// Source is data, not a command: a `!to "../../elsewhere"` names a file
+/// outside the tree being assembled, and assembling a file someone else wrote
+/// should not write outside it. So the name is taken relative to the input and
+/// refused if it escapes — ACME takes it literally, and this is a deliberate
+/// narrowing, recorded in `decisions/source-named-output-files.md`.
+fn source_named_path(input: &str, named: &str) -> Result<PathBuf, String> {
+    let base = Path::new(input)
+        .parent()
+        .unwrap_or(Path::new("."))
+        .to_path_buf();
+    let candidate = Path::new(named);
+    if candidate.is_absolute() {
+        return Err(format!(
+            "the source names the absolute path `{named}`; a source-named output \
+             stays beside the source it came from"
+        ));
+    }
+    if candidate
+        .components()
+        .any(|c| matches!(c, std::path::Component::ParentDir))
+    {
+        return Err(format!(
+            "the source names `{named}`, which climbs out of its own directory; a \
+             source-named output stays beside the source it came from"
+        ));
+    }
+    Ok(base.join(candidate))
+}
+
+/// Frame the image the way `!to`'s format asks.
+fn frame_output(assembly: &asm198x::AssemblyResult, format: asm198x::OutputFormat) -> Vec<u8> {
+    let origin = assembly.origin.unwrap_or(0);
+    let mut out = Vec::new();
+    match format {
+        asm198x::OutputFormat::Plain => {}
+        // A C64 `.prg`: the load address, little-endian.
+        asm198x::OutputFormat::Cbm => out.extend_from_slice(&origin.to_le_bytes()),
+        // Apple: the load address, then the length.
+        asm198x::OutputFormat::Apple => {
+            out.extend_from_slice(&origin.to_le_bytes());
+            let len = u16::try_from(assembly.bytes.len()).unwrap_or(u16::MAX);
+            out.extend_from_slice(&len.to_le_bytes());
+        }
+    }
+    out.extend_from_slice(&assembly.bytes);
+    out
+}
+
 #[allow(clippy::too_many_arguments)]
 fn write_debug_artifacts(
     input: &str,

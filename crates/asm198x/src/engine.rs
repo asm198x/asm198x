@@ -19,6 +19,27 @@ use crate::dialect::{Dialect, Oversize};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::{FileId, Span};
 
+/// How a source-named output file is framed. ACME's three, and the only ones
+/// `!to` accepts.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum OutputFormat {
+    /// The bytes alone.
+    Plain,
+    /// A two-byte little-endian load address, then the bytes — a C64 `.prg`.
+    /// ACME's default when `!to` names no format, with a warning.
+    Cbm,
+    /// A two-byte load address and a two-byte length, then the bytes.
+    Apple,
+}
+
+/// An output the **source** asked for, rather than the command line.
+#[derive(Clone, Debug, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct RequestedOutput {
+    pub path: String,
+    pub format: OutputFormat,
+}
+
 /// The result of a successful assembly: where it loads and the bytes to load.
 #[derive(Debug, Clone)]
 pub struct Assembly {
@@ -36,6 +57,12 @@ pub struct Assembly {
     pub reserved_prefix: u16,
     /// Assembled machine code, contiguous from `origin`.
     pub bytes: Vec<u8>,
+    /// The output file the source named with `!to`, if it named one. The
+    /// command line still wins — this is what ACME does, and it warns rather
+    /// than obeying the second choice.
+    pub requested_output: Option<RequestedOutput>,
+    /// The symbol-list file the source named with `!symbollist`, same rule.
+    pub requested_symbols: Option<String>,
     /// Resolved labels, for listings and debugging. Values are `i64` to hold
     /// the 65816's 24-bit addresses and bank constants; 8-/16-bit CPUs use the
     /// low bits only.
@@ -372,6 +399,19 @@ pub(crate) enum Operation {
         big_endian: bool,
         values: Vec<Expr>,
     },
+    /// The source naming its own output file — ACME's `!to`. Emits nothing
+    /// and occupies nothing; the driver reads the **first** one and warns on
+    /// any later one, which is what ACME does ("Output file already chosen").
+    RequestOutput {
+        path: String,
+        format: OutputFormat,
+        /// The source named no format and got the default. ACME warns about
+        /// that, so the driver does too.
+        defaulted_format: bool,
+    },
+    /// The source naming a symbol-list file — ACME's `!symbollist`. Same rule
+    /// as `RequestOutput`, and ACME warns in the same words.
+    RequestSymbols { path: String },
     /// Enter (`Some`) or leave (`None`) an ACME `!pseudopc` block: assemble
     /// here, but let labels and `*` read as if the code were somewhere else.
     ///
@@ -584,6 +624,8 @@ pub(crate) fn next_pc(
         // Moves no bytes: it changes what an address *reads as*, not where
         // one is.
         Operation::PseudoPc(_) => pc,
+        // Name a file; emit nothing.
+        Operation::RequestOutput { .. } | Operation::RequestSymbols { .. } => pc,
         // Moves the counter rather than advancing it; the caller sets it.
         Operation::Section { .. } => pc,
         // Set the counter, bind a name, name an entry point — none of them a
@@ -966,6 +1008,11 @@ fn assemble_statements(
     // second with "Memory already initialised" and keeps the first.
     let mut gap_fill = gap_fill;
     let mut seen_init = false;
+    // The source naming its own files. ACME takes the **first** and warns
+    // that the name was "already chosen" for any later one — including when
+    // the command line already chose, which is why these are only a request.
+    let mut requested_output: Option<RequestedOutput> = None;
+    let mut requested_symbols: Option<String> = None;
     for s in &statements {
         if let Some(Operation::InitMem(v)) = &s.op {
             if seen_init {
@@ -979,6 +1026,49 @@ fn assemble_statements(
                 gap_fill = *v;
                 seen_init = true;
             }
+        }
+        match &s.op {
+            Some(Operation::RequestOutput {
+                path,
+                format,
+                defaulted_format,
+            }) => {
+                if *defaulted_format && requested_output.is_none() {
+                    warnings.push(Warning {
+                        line: s.line,
+                        message: "`!to` names no file format; defaulting to `cbm`".to_string(),
+                        file: s.file,
+                        kind: WarningKind::Advisory,
+                    });
+                }
+                if requested_output.is_some() {
+                    warnings.push(Warning {
+                        line: s.line,
+                        message: "output file already chosen; the first name stands".to_string(),
+                        file: s.file,
+                        kind: WarningKind::Advisory,
+                    });
+                } else {
+                    requested_output = Some(RequestedOutput {
+                        path: path.clone(),
+                        format: *format,
+                    });
+                }
+            }
+            Some(Operation::RequestSymbols { path }) => {
+                if requested_symbols.is_some() {
+                    warnings.push(Warning {
+                        line: s.line,
+                        message: "symbol list file name already chosen; the first name stands"
+                            .to_string(),
+                        file: s.file,
+                        kind: WarningKind::Advisory,
+                    });
+                } else {
+                    requested_symbols = Some(path.clone());
+                }
+            }
+            _ => {}
         }
     }
     let mut start: Option<u16> = None;
@@ -1116,9 +1206,11 @@ fn assemble_statements(
                 let slack = (addr_unit - payload.len() as i64 % addr_unit) % addr_unit;
                 bytes.extend(std::iter::repeat_n(0u8, slack as usize));
             }
-            // Read before the passes begin, because it applies to the whole
+            // Read before the passes begin, because they apply to the whole
             // assembly rather than from here on.
-            Some(Operation::InitMem(_)) => {}
+            Some(Operation::InitMem(_))
+            | Some(Operation::RequestOutput { .. })
+            | Some(Operation::RequestSymbols { .. }) => {}
             Some(Operation::PseudoPc(target)) => match target {
                 Some(e) => {
                     let at = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
@@ -1489,6 +1581,8 @@ fn assemble_statements(
                 dialect.image_size(img)
             })?;
         return Ok(Assembly {
+            requested_output,
+            requested_symbols,
             origin: origin_of_image as u16,
             reserved_prefix: 0,
             bytes: image,
@@ -1521,6 +1615,8 @@ fn assemble_statements(
     }
 
     Ok(Assembly {
+        requested_output,
+        requested_symbols,
         origin: origin as u16,
         reserved_prefix,
         bytes,

@@ -93,6 +93,9 @@ mod tests {
 
     fn asm(bytes: Vec<u8>, origin: u16, start: Option<u16>) -> AssemblyResult {
         crate::engine::Assembly {
+            // A test fixture: nothing here names a file.
+            requested_output: None,
+            requested_symbols: None,
             origin,
             reserved_prefix: 0,
             bytes,
