@@ -89,6 +89,60 @@ impl Kind {
     }
 }
 
+impl Insn {
+    /// One representative encoding of this instruction in `mode`: the mode's
+    /// opcode, then a canonical operand. Returns the bytes and how many are
+    /// meaningful.
+    ///
+    /// The operand values are arbitrary and being *valid for the mode* is the
+    /// whole requirement — a disassembler reading these writes source a real
+    /// assembler accepts, which is how the form audit puts a row to `lwasm`.
+    /// See `decisions/a-row-can-exemplify-itself.md`.
+    ///
+    /// A fixed buffer rather than a slice or a `Vec`, because two of the
+    /// operand shapes hold their opcode as a `u8` and this crate does not
+    /// allocate. Four bytes is the longest a 6809 exemplar gets: a `$10`
+    /// prefix, an opcode, and a two-byte operand.
+    ///
+    /// `None` for a mode this instruction does not populate. Rows only ever
+    /// name populated slots, so `None` means the row and the table have parted
+    /// company, and a caller should say so rather than skip it.
+    #[must_use]
+    pub fn exemplar(&self, mode: &str) -> Option<([u8; 4], usize)> {
+        // `$84` is the postbyte for `,X`: the simplest indexed form, no offset
+        // and no extension bytes. `$01` is D→X, two valid register nibbles.
+        // Bit 1 is A, the smallest non-empty register set.
+        let (opcode, tail): (&[u8], &[u8]) = match (&self.kind, mode) {
+            (Kind::Inherent(op), "inherent") => (op, &[]),
+            (Kind::Branch { short, .. }, "relative") => (short, &[0x02]),
+            (Kind::Branch { long, .. }, "relative long") => (long, &[0x00, 0x02]),
+            (Kind::Mem { imm, width, .. }, "immediate") => {
+                (imm, if *width == 2 { &[0x12, 0x34] } else { &[0x12] })
+            }
+            (Kind::Mem { direct, .. }, "direct") => (direct, &[0x34]),
+            (Kind::Mem { indexed, .. }, "indexed") => (indexed, &[0x84]),
+            (Kind::Mem { extended, .. }, "extended") => (extended, &[0x56, 0x78]),
+            (Kind::Transfer(op), "register pair") => {
+                return Some(([*op, 0x01, 0, 0], 2));
+            }
+            (Kind::Stack { opcode, .. }, "register set") => {
+                return Some(([*opcode, 0x02, 0, 0], 2));
+            }
+            _ => return None,
+        };
+        // An empty opcode slice is the table saying this mnemonic has no form
+        // for the mode, which the rows already filter out.
+        if opcode.is_empty() {
+            return None;
+        }
+        let mut out = [0u8; 4];
+        let n = opcode.len() + tail.len();
+        out[..opcode.len()].copy_from_slice(opcode);
+        out[opcode.len()..n].copy_from_slice(tail);
+        Some((out, n))
+    }
+}
+
 /// Every encoding row this spec declares.
 ///
 /// The 6809 authors its encodings as [`Kind`] rather than as
@@ -663,6 +717,49 @@ mod summary_tests {
 #[cfg(test)]
 mod row_tests {
     use super::{Kind, SET, rows};
+
+    /// Every row this spec declares can show one of itself.
+    ///
+    /// The audit puts each row to `lwasm`, and a row it cannot exemplify is a
+    /// row nothing arbitrates while the number reads 100% — the shape of hole
+    /// the enumeration work exists to close, so it is asserted here rather than
+    /// left for the audit to discover on a machine that has the tools.
+    #[test]
+    fn every_row_can_exemplify_itself() {
+        for insn in SET {
+            for row in rows().filter(|r| r.mnemonic == insn.mnemonic) {
+                let (buf, n) = insn.exemplar(row.mode).unwrap_or_else(|| {
+                    panic!("`{} {}` cannot show one of itself", row.mnemonic, row.mode)
+                });
+                assert!(n >= 1, "{} {}: empty exemplar", row.mnemonic, row.mode);
+                assert!(n <= buf.len());
+            }
+        }
+    }
+
+    /// An exemplar starts with the mode's own opcode, so the bytes are an
+    /// instance of *this* row and not of its neighbour. `lda` immediate is
+    /// `$86` and its direct form `$96`; an exemplar that reached for the wrong
+    /// slot would be arbitrated under the wrong name.
+    #[test]
+    fn an_exemplar_uses_the_modes_own_opcode() {
+        let lda = SET.iter().find(|i| i.mnemonic == "lda").expect("lda");
+        // The length follows the mode: one operand byte for an immediate,
+        // direct or indexed `lda`, two for an extended address.
+        for (mode, opcode, len) in [
+            ("immediate", 0x86, 2),
+            ("direct", 0x96, 2),
+            ("indexed", 0xA6, 2),
+            ("extended", 0xB6, 3),
+        ] {
+            let (buf, n) = lda.exemplar(mode).expect(mode);
+            assert_eq!(buf[0], opcode, "lda {mode}");
+            assert_eq!(n, len, "lda {mode}");
+        }
+        // A mode `lda` has no form for yields nothing at all.
+        assert!(lda.exemplar("inherent").is_none());
+        assert!(lda.exemplar("register set").is_none());
+    }
 
     /// A memory operation yields one row per populated mode, and an empty slot
     /// is not a row. `jsr` has no immediate form, so it yields three where

@@ -157,47 +157,6 @@ fn ref_assemble(
     ref_outcome(tmp, text, ext, build).bytes()
 }
 
-/// Representative bytes for one 6809 encoding row.
-///
-/// The `Form` specs get this from [`synth`]; the 6809 authors its encodings as
-/// `Kind`, so the same job needs the slot the row names. The operand values are
-/// arbitrary — what matters is that they are *valid* for the mode, so our
-/// disassembler writes source the reference will read back.
-///
-/// `None` for a mode this mnemonic does not populate, which is not an error:
-/// the rows only ever name populated slots, so it means the row and the spec
-/// have parted company.
-fn synth_6809(kind: &isa::mos6809::Kind, mode: &str) -> Option<Vec<u8>> {
-    use isa::mos6809::Kind;
-    let with = |op: &[u8], tail: &[u8]| {
-        (!op.is_empty()).then(|| {
-            let mut b = op.to_vec();
-            b.extend_from_slice(tail);
-            b
-        })
-    };
-    match (kind, mode) {
-        (Kind::Inherent(op), "inherent") => with(op, &[]),
-        // A small forward displacement, so the target stays in range and the
-        // disassembler writes an ordinary label-free offset.
-        (Kind::Branch { short, .. }, "relative") => with(short, &[0x02]),
-        (Kind::Branch { long, .. }, "relative long") => with(long, &[0x00, 0x02]),
-        (Kind::Mem { imm, width, .. }, "immediate") => {
-            with(imm, if *width == 2 { &[0x12, 0x34] } else { &[0x12] })
-        }
-        (Kind::Mem { direct, .. }, "direct") => with(direct, &[0x34]),
-        // `$84` is the postbyte for `,X` — the simplest indexed form, no
-        // offset and no extension bytes.
-        (Kind::Mem { indexed, .. }, "indexed") => with(indexed, &[0x84]),
-        (Kind::Mem { extended, .. }, "extended") => with(extended, &[0x56, 0x78]),
-        // `$01` is D→X: two valid register nibbles.
-        (Kind::Transfer(op), "register pair") => Some(vec![*op, 0x01]),
-        // Bit 1 is A, the smallest non-empty register set.
-        (Kind::Stack { opcode, .. }, "register set") => Some(vec![*opcode, 0x02]),
-        _ => None,
-    }
-}
-
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]
 fn spec_opcodes_match_reference() {
@@ -2539,11 +2498,12 @@ fn spec_rows_match_reference_6809() {
 
     for insn in isa::mos6809::SET {
         for row in isa::mos6809::rows().filter(|r| r.mnemonic == insn.mnemonic) {
-            let Some(bytes) = synth_6809(&insn.kind, row.mode) else {
+            let Some((buf, n)) = insn.exemplar(row.mode) else {
                 unsynthesised.push(format!("{} {}", row.mnemonic, row.mode));
                 continue;
             };
-            let text = asm198x::listing_6809(&bytes, 0x0000);
+            let bytes = &buf[..n];
+            let text = asm198x::listing_6809(bytes, 0x0000);
             let source = format!("\torg $0000\n{text}");
             let reference = ref_assemble(&tmp, &source, "asm", |src, out| {
                 let mut c = Command::new("lwasm");
