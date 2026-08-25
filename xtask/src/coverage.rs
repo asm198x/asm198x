@@ -305,9 +305,9 @@ pub fn stamp_path(repo: &Path) -> PathBuf {
     repo.join(STAMP)
 }
 
-/// A CPU whose coverage fell, and by how much.
+/// A CPU whose coverage differs from the stamp, and in which direction.
 #[derive(Debug, PartialEq, Eq)]
-pub struct Drop {
+pub struct Move {
     /// Corpus label.
     pub cpu: String,
     /// Recorded coverage, in tenths of a percent.
@@ -316,19 +316,41 @@ pub struct Drop {
     pub now: u32,
 }
 
-/// Compare a computed report against a stamp. Returns every CPU that went down.
+impl Move {
+    /// Coverage fell: something stopped being arbitrated.
+    #[must_use]
+    pub const fn fell(&self) -> bool {
+        self.now < self.was
+    }
+}
+
+/// Compare a computed report against a stamp. Returns every CPU that moved.
 ///
-/// Only downward movement fails. Coverage rising needs no ceremony — the stamp
-/// is refreshed when convenient, and a stale-but-lower stamp never blocks work.
+/// Both directions are reported, for different reasons.
+///
+/// A **fall** is the alarm: something stopped being arbitrated, and the stamp
+/// must not move to cover it without a reason in the commit.
+///
+/// A **rise** used to pass unremarked, on the reasoning that a stale-but-lower
+/// stamp never blocks work. It also never protects it. While the Z8000's stamp
+/// read 0 of 271 and the corpus arbitrated 145, a regression all the way down
+/// to a single row would have passed this check — and it stayed that way across
+/// three merged pull requests, because nothing asks about a rise. The stamp is
+/// the ratchet's entire memory, so a lagging stamp is a ratchet that has quietly
+/// let go.
+///
+/// It also costs the thing this module's own rationale asks for: coverage
+/// showing up in the diff beside the change that caused it. A rise recorded
+/// later, in some unrelated pull request, is not that.
 #[must_use]
-pub fn regressions(report: &Report, stamp: &BTreeMap<String, u32>) -> Vec<Drop> {
+pub fn drift(report: &Report, stamp: &BTreeMap<String, u32>) -> Vec<Move> {
     report
         .rows
         .iter()
         .filter_map(|row| {
             let was = *stamp.get(&row.cpu)?;
             let now = row.permille();
-            (now < was).then_some(Drop {
+            (now != was).then_some(Move {
                 cpu: row.cpu.clone(),
                 was,
                 now,
@@ -377,12 +399,12 @@ mod tests {
     /// Falling coverage is the whole point: it is reported, per CPU, with both
     /// numbers so the size of the loss is legible.
     #[test]
-    fn a_drop_is_reported_with_both_numbers() {
+    fn a_fall_is_reported_with_both_numbers() {
         let stamp = parse_stamp(&render_stamp(&report(&[("6502", 300, 300)])));
         let now = report(&[("6502", 290, 300)]);
         assert_eq!(
-            regressions(&now, &stamp),
-            vec![Drop {
+            drift(&now, &stamp),
+            vec![Move {
                 cpu: "6502".to_string(),
                 was: 1000,
                 now: 966
@@ -390,20 +412,32 @@ mod tests {
         );
     }
 
-    /// Rising coverage passes. Growth should never need a ceremony to land, or
-    /// the ceremony discourages the thing it exists to encourage.
+    /// A rise is drift too, and is not a fall.
+    ///
+    /// It used to pass unremarked. That let the Z8000's stamp sit at 0 of 271
+    /// while the corpus arbitrated 145, across three merged pull requests —
+    /// and a stamp reading 0 protects nothing above 0.
     #[test]
-    fn rising_coverage_needs_no_ceremony() {
+    fn rising_coverage_is_drift_but_not_a_fall() {
         let stamp = parse_stamp(&render_stamp(&report(&[("6502", 100, 300)])));
-        assert!(regressions(&report(&[("6502", 200, 300)]), &stamp).is_empty());
+        let moved = drift(&report(&[("6502", 200, 300)]), &stamp);
+        assert_eq!(moved.len(), 1, "a rise is reported");
+        assert!(!moved[0].fell(), "and it is not a fall");
+    }
+
+    /// Coverage that matches the stamp is not drift in either direction.
+    #[test]
+    fn matching_coverage_is_not_drift() {
+        let stamp = parse_stamp(&render_stamp(&report(&[("6502", 100, 300)])));
+        assert!(drift(&report(&[("6502", 100, 300)]), &stamp).is_empty());
     }
 
     /// A CPU absent from the stamp is new, not regressed — a spec added since
     /// the stamp was written has nothing to fall from.
     #[test]
-    fn a_cpu_absent_from_the_stamp_is_new_not_regressed() {
+    fn a_cpu_absent_from_the_stamp_is_new_not_drift() {
         let stamp = parse_stamp(&render_stamp(&report(&[("6502", 300, 300)])));
-        assert!(regressions(&report(&[("Z80", 0, 700)]), &stamp).is_empty());
+        assert!(drift(&report(&[("Z80", 0, 700)]), &stamp).is_empty());
     }
 
     /// Coverage is integer tenths of a percent, so a stamp comparison can never

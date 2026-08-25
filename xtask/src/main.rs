@@ -421,31 +421,54 @@ fn run_coverage(args: &[String]) -> ExitCode {
             );
             return ExitCode::FAILURE;
         };
-        let regressions = coverage::regressions(&report, &coverage::parse_stamp(&existing));
-        if regressions.is_empty() {
+        let moved = coverage::drift(&report, &coverage::parse_stamp(&existing));
+        if moved.is_empty() {
             println!("arbitration coverage holds against the stamp");
             return ExitCode::SUCCESS;
         }
-        eprintln!(
-            "arbitration coverage fell — {} CPU(s) now arbitrate less than the stamp records:",
-            regressions.len()
-        );
-        for drop in &regressions {
+        let (fell, rose): (Vec<_>, Vec<_>) = moved.iter().partition(|m| m.fell());
+        let list = |moves: &[&coverage::Move]| {
+            for m in moves {
+                eprintln!(
+                    "  {}: {}.{}% -> {}.{}%",
+                    m.cpu,
+                    m.was / 10,
+                    m.was % 10,
+                    m.now / 10,
+                    m.now % 10
+                );
+            }
+        };
+        if !fell.is_empty() {
             eprintln!(
-                "  {}: {}.{}% -> {}.{}%",
-                drop.cpu,
-                drop.was / 10,
-                drop.was % 10,
-                drop.now / 10,
-                drop.now % 10
+                "arbitration coverage fell — {} CPU(s) now arbitrate less than the stamp records:",
+                fell.len()
+            );
+            list(&fell);
+            eprintln!(
+                "\nSomething stopped being arbitrated. Either recover it with a live \
+                 recording run, or accept the loss deliberately: `cargo xtask coverage \
+                 --write`, and say in the commit which cases went and why. The stamp is \
+                 the record of that debt, so it must not move silently."
             );
         }
-        eprintln!(
-            "\nSomething stopped being arbitrated. Either recover it with a live \
-             recording run, or accept the loss deliberately: `cargo xtask coverage \
-             --write`, and say in the commit which cases went and why. The stamp is \
-             the record of that debt, so it must not move silently."
-        );
+        if !rose.is_empty() {
+            if !fell.is_empty() {
+                eprintln!();
+            }
+            eprintln!(
+                "the coverage stamp is behind — {} CPU(s) now arbitrate more than it records:",
+                rose.len()
+            );
+            list(&rose);
+            eprintln!(
+                "\nRefresh it with `cargo xtask coverage --write`, in the change that \
+                 earned the rise. A stamp that lags is a ratchet that has let go: while \
+                 it reads the lower number, a regression back down to that number passes \
+                 unnoticed. The Z8000's stamp sat at 0 of 271 through three merged pull \
+                 requests for exactly this reason."
+            );
+        }
         return ExitCode::FAILURE;
     }
 
