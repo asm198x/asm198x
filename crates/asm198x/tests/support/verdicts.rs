@@ -296,6 +296,79 @@ pub fn curriculum_key(relpath: &str, variant: &str, source: &str) -> String {
     format!("{relpath}#{variant}@{}", sha256_hex(source.as_bytes()))
 }
 
+/// Describe a sweep-chunk mismatch by the instruction that moved.
+///
+/// R6 asks for "chunk + first-differing offset mapped to a case". The chunk is
+/// a generated instruction list — no labels, no forward references — so
+/// assembling a prefix of its source yields a prefix of its bytes, and a
+/// binary search over prefix lengths finds the line the offset lands in.
+///
+/// Falls back to naming the offset alone if a prefix will not assemble: a
+/// worse message is still better than the whole byte vector.
+fn localise_chunk(
+    cpu: &str,
+    dialect: &str,
+    case: &str,
+    source: &str,
+    ours: &[u8],
+    reference: &[u8],
+) -> String {
+    use std::fmt::Write as _;
+    let mut out = format!("{cpu} [{dialect}] {case}: ");
+    let Some(at) = ours.iter().zip(reference).position(|(a, b)| a != b) else {
+        let _ = write!(
+            out,
+            "same bytes for {} of {} — we produced {} byte(s), the reference {}",
+            ours.len().min(reference.len()),
+            ours.len().max(reference.len()),
+            ours.len(),
+            reference.len()
+        );
+        return out;
+    };
+    let _ = write!(out, "first difference at byte {at}");
+    if let Some((line_no, text)) = locate_line(cpu, dialect, source, at) {
+        let _ = write!(out, ", line {line_no}: `{text}`");
+    }
+    let window = |b: &[u8]| {
+        let lo = at.saturating_sub(4);
+        let hi = (at + 4).min(b.len());
+        b[lo..hi]
+            .iter()
+            .map(|x| format!("{x:02X}"))
+            .collect::<Vec<_>>()
+            .join(" ")
+    };
+    let _ = write!(
+        out,
+        "\n  ours      {}\n  reference {}",
+        window(ours),
+        window(reference)
+    );
+    out
+}
+
+/// The 1-based source line whose bytes contain `offset`, and its text.
+fn locate_line(cpu: &str, dialect: &str, source: &str, offset: usize) -> Option<(usize, String)> {
+    let lines: Vec<&str> = source.lines().collect();
+    let len_upto = |n: usize| -> Option<usize> {
+        let text = lines[..n].join("\n");
+        assemble_form(cpu, dialect, &text)?.ok().map(|b| b.len())
+    };
+    // The smallest prefix whose bytes reach past the offset ends on the line
+    // that owns it.
+    let (mut lo, mut hi) = (0usize, lines.len());
+    while lo < hi {
+        let mid = usize::midpoint(lo, hi);
+        if len_upto(mid)? > offset {
+            hi = mid;
+        } else {
+            lo = mid + 1;
+        }
+    }
+    (lo > 0 && lo <= lines.len()).then(|| (lo, lines[lo - 1].trim().to_string()))
+}
+
 /// Take a curriculum key apart again: (path, variant, source digest).
 pub fn parse_curriculum_key(key: &str) -> Option<(&str, &str, &str)> {
     let (path, rest) = key.split_once('#')?;
@@ -413,6 +486,20 @@ pub fn replay_corpus(cpu: &str, corpus: &Corpus, report: &mut ReplayReport) {
 
                 match ours {
                     Ok(bytes) if bytes == reference => {}
+                    // A sweep chunk is thousands of instructions, so the two
+                    // byte vectors are not a finding a reader can act on: the
+                    // largest here would print about 147,000 characters and
+                    // still not say which instruction moved.
+                    Ok(bytes) if verdict.suite == Suite::SweepChunk => {
+                        report.failures.push(localise_chunk(
+                            cpu,
+                            &verdict.dialect,
+                            &verdict.case,
+                            &key.source,
+                            &bytes,
+                            &reference,
+                        ));
+                    }
                     Ok(bytes) => report.failures.push(format!(
                         "{cpu} [{}]: ours {:02X?} vs reference {:02X?} for source:\n{}",
                         verdict.dialect, bytes, reference, key.source
@@ -555,6 +642,52 @@ mod tests {
             report.failures[0].contains("3E, 99"),
             "{:?}",
             report.failures
+        );
+    }
+
+    /// A chunk mismatch names the instruction, not the byte vector.
+    ///
+    /// The largest sweep chunk is 12,288 bytes, so printing both vectors is
+    /// ~147,000 characters that never say which instruction moved (asm198x#268).
+    #[test]
+    fn a_chunk_mismatch_names_the_line_that_moved() {
+        let source = "\tcpu TMS9900\n\torg 01000H\n\ta r0,r0\n\ta r1,r0\n\ta r2,r0\n";
+        let ours = asm198x::assemble_tms9900(source).expect("assemble").bytes;
+        // Move the third instruction's first byte: it starts at byte 4.
+        let mut reference = ours.clone();
+        reference[4] ^= 0xFF;
+
+        let out = localise_chunk(
+            "TMS9900",
+            "asl",
+            "sweep chunk `a`",
+            source,
+            &ours,
+            &reference,
+        );
+        assert!(out.contains("first difference at byte 4"), "{out}");
+        assert!(
+            out.contains("line 5"),
+            "the third instruction is the fifth line: {out}"
+        );
+        assert!(out.contains("`a r2,r0`"), "and it is named: {out}");
+        assert!(
+            out.len() < 400,
+            "the whole point is that it is short, got {} chars",
+            out.len()
+        );
+    }
+
+    /// Identical bytes of different lengths say so rather than pointing nowhere.
+    #[test]
+    fn a_chunk_that_only_differs_in_length_says_so() {
+        let source = "\tcpu TMS9900\n\torg 01000H\n\ta r0,r0\n";
+        let ours = asm198x::assemble_tms9900(source).expect("assemble").bytes;
+        let reference = [ours.clone(), vec![0x00, 0x00]].concat();
+        let out = localise_chunk("TMS9900", "asl", "chunk", source, &ours, &reference);
+        assert!(
+            out.contains("we produced 2 byte(s), the reference 4"),
+            "{out}"
         );
     }
 
