@@ -112,9 +112,12 @@ a register pair and needs an even number; a quad needs a multiple of four. Every
 family already carries its `Size`, so `lowest_register` states the rule once and
 each family's exemplar asks for it. That collapsed four families at a stroke.
 
-**The unplaced rows are unplaced for a stated reason.** Shifts and rotates carry
-their count in a *following* word whose legal range no entry states, so
-`Shift::exemplar` returns `None` rather than a guess with filler as its count.
+**The unplaced rows are unplaced for a stated reason**, and the reason has to be
+true. Shifts and rotates were held back on the grounds that no entry stated the
+count's legal range. That was wrong — `shift_max` had stated it all along, and
+a count of 1 is legal at every size. They are placed now, and the lesson is
+that "the spec does not say" is a claim to check in the spec, not a feeling
+about it.
 
 The audit also did what it was built to do. `LDB` with a byte immediate was the
 one genuine byte divergence in 271 rows — we emit the long dyadic form where
@@ -122,6 +125,23 @@ one genuine byte divergence in 271 rows — we emit the long dyadic form where
 ([asm198x#252](https://github.com/asm198x/asm198x/issues/252)). It is an
 explicitly named exception in the audit, not part of the anonymous unplaced
 count, and the entry comes out when the row arbitrates.
+
+## Shifts and rotates
+
+The two kinds carry their count differently, which is why `Shift::exemplar`
+returns a pair — the opcode word, and the operand word only one of them has:
+
+- A shift puts a *signed* count in a following word, negative for the right-hand
+  variants and confined to the low byte when the operand is a byte
+  (`srlb rh1,#1` is `B211 00FF`, `srll rr2,#1` is `B325 FFFF`).
+- A rotate has no following word. The count folds into the low nibble as
+  `type * 4 + (count - 1) * 2`, which is why `sel` means the rotate *type*
+  there and the nibble itself for a shift. Only counts 1 and 2 exist.
+
+Reading `sel` as one thing for both kinds is what made the rotates look broken
+on the first Z8000 run: `RL` happens to have type 0 and so came out right by
+coincidence, while `RR`, `RLC` and `RRC` did not. A field whose meaning depends
+on a sibling field is worth a doc comment on both.
 
 ## The segmented Z8001
 
