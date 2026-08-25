@@ -2699,10 +2699,23 @@ fn z8000_form_audit(cpu: &str, seg: bool) {
             excepted.push(format!("{m} {}: {why}", row.mode));
             continue;
         }
-        let dyadic = isa::z8000::INSTRUCTIONS.iter().find(|i| i.mnemonic == m);
+        // A store row and a load row share a mnemonic and differ in `store`, so
+        // matching on the name alone hands a store row the load's encoding —
+        // which still names the right mnemonic and so arbitrates a lie.
+        let wants_store = row.mode.ends_with(", store");
+        let dyadic = isa::z8000::INSTRUCTIONS
+            .iter()
+            .find(|i| i.mnemonic == m && i.store == wants_store);
         let filler = match dyadic {
             Some(i) if i.size == isa::z8000::Size::Byte && row.mode == "immediate" => &byte_filler,
-            _ if seg && matches!(row.mode, "direct address" | "indexed") => &seg_filler,
+            _ if seg
+                && matches!(
+                    row.mode.strip_suffix(", store").unwrap_or(row.mode),
+                    "direct address" | "indexed"
+                ) =>
+            {
+                &seg_filler
+            }
             _ => &filler,
         };
         // The opcode word, and the operand word a shift carries with it. Only
@@ -2731,6 +2744,46 @@ fn z8000_form_audit(cpu: &str, seg: bool) {
             })
             .or_else(|| {
                 isa::z8000::BLOCK_IO
+                    .iter()
+                    .find(|i| i.mnemonic == m)
+                    .map(|i| {
+                        let (a, b) = i.exemplar();
+                        (a, Some(b))
+                    })
+            })
+            .or_else(|| {
+                isa::z8000::CONTROL
+                    .iter()
+                    .find(|i| i.mnemonic == m)
+                    .and_then(|i| i.exemplar(row.mode, seg))
+                    .map(|w| (w, None))
+            })
+            .or_else(|| {
+                isa::z8000::CONTROLS
+                    .iter()
+                    .find(|i| i.mnemonic == m)
+                    .map(|i| (i.exemplar(), None))
+            })
+            .or_else(|| {
+                isa::z8000::MISC
+                    .iter()
+                    .find(|i| i.mnemonic == m)
+                    .map(isa::z8000::Misc::exemplar)
+            })
+            .or_else(|| {
+                isa::z8000::BITS
+                    .iter()
+                    .find(|i| i.mnemonic == m)
+                    .map(|i| (i.exemplar(), None))
+            })
+            .or_else(|| {
+                isa::z8000::STACK
+                    .iter()
+                    .find(|i| i.mnemonic == m)
+                    .map(|i| (i.exemplar(), None))
+            })
+            .or_else(|| {
+                isa::z8000::SIMPLE_IO
                     .iter()
                     .find(|i| i.mnemonic == m)
                     .map(|i| {
