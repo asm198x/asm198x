@@ -27,14 +27,24 @@
 /// is true of every encoding regardless of shape, and nothing else — an
 /// opcode-byte field would exclude the field-packed and computed-operand
 /// specs, which is the whole reason this type exists.
-#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+#[derive(Clone, PartialEq, Eq, Debug)]
 pub struct Row {
     /// The mnemonic, as the spec spells it.
     pub mnemonic: &'static str,
     /// What distinguishes this encoding from the mnemonic's others: an
     /// addressing-mode label for the byte-opcode specs, the branch length for
     /// a 6809 branch, the class name for a word CPU.
-    pub mode: &'static str,
+    ///
+    /// Owned-or-borrowed because a label is *derived*, and not every spec
+    /// derives one it already holds. Twelve of them author the label as a
+    /// literal beside the encoding, so the row borrows it. The 68000 authors
+    /// no label at all — it declares a bitmask of allowed effective-address
+    /// modes and an operand slot list, and the thing that tells one of its
+    /// encodings from another (`(An)+,Dn`) exists only once the two are
+    /// combined. A `&'static str` could hold that only by leaking it or by
+    /// authoring a second copy of the spec by hand, and the second copy is
+    /// exactly what this type exists to prevent.
+    pub mode: std::borrow::Cow<'static, str>,
     /// Undocumented / illegal opcode.
     pub undocumented: bool,
 }
@@ -83,7 +93,7 @@ impl InstructionSet {
         self.instructions.iter().flat_map(|i| {
             i.forms.iter().map(|f| Row {
                 mnemonic: i.mnemonic,
-                mode: f.mode,
+                mode: f.mode.into(),
                 undocumented: f.undocumented,
             })
         })
@@ -321,13 +331,11 @@ mod row_tests {
             ("Z80", &crate::z80::SET),
             ("HuC6280", &crate::huc6280::SET),
             ("SM83", &crate::sm83::SET),
-            // The 68000 is absent deliberately. It authors its own `Form`
-            // inside its own `Spec` — `base: u16` plus a size encoding plus
-            // operand slots, with no mode label — so it is neither an
-            // `InstructionSet` nor covered by this agreement. Whether its
-            // field encoding enumerates as rows, or wants representatives
-            // rather than a product, is one of the open questions in
-            // `decisions/every-spec-enumerates-its-forms.md`.
+            // The 68000 is absent because it is not an `InstructionSet` —
+            // it authors its own `Form` inside its own `Spec`, so there is no
+            // `forms.len()` denominator here to agree with. It enumerates as
+            // `m68k::rows()`, and its own denominator is checked against the
+            // spec by hand in `m68k::denominator`.
         ];
         for (name, set) in sets {
             let legacy: usize = set.instructions.iter().map(|i| i.forms.len()).sum();
@@ -389,6 +397,7 @@ mod row_tests {
             ("PDP-11", crate::pdp11::rows().collect()),
             ("TMS9900", crate::tms9900::rows().collect()),
             ("Z8000", crate::z8000::rows().collect()),
+            ("68000", crate::m68k::rows().collect()),
             ("Z80", crate::z80::SET.rows().collect()),
             ("6502", crate::mos6502::SET.rows().collect()),
             ("SM83", crate::sm83::SET.rows().collect()),
@@ -399,7 +408,7 @@ mod row_tests {
             for row in rows {
                 assert!(!row.mnemonic.is_empty(), "{cpu}: a row has no mnemonic");
                 assert!(
-                    seen.insert((row.mnemonic, row.mode)),
+                    seen.insert((row.mnemonic, row.mode.clone())),
                     "{cpu}: `{}` declares two rows for mode `{}`",
                     row.mnemonic,
                     row.mode

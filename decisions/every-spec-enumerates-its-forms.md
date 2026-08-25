@@ -15,7 +15,7 @@ arbitration against a reference tool:
 
 | audited | not audited |
 |---|---|
-| 1802, 2650, 6502, 6800, 65816, 8039, 8048, 8080, F8, SC/MP, TMS7000, Z80, HuC6280, SM83 | **6809, CP-1610, PDP-11, TMS9900, Z8000, Z8001, 68000** |
+| 1802, 2650, 6502, 6800, 65816, 8039, 8048, 8080, F8, SC/MP, TMS7000, Z80, HuC6280, SM83 | **6809, CP-1610, PDP-11, TMS9900, Z8000, Z8001, 68000** — all seven done as of 2026-08-25 |
 
 `xtask coverage` derives its denominator as
 `set.instructions.iter().map(|i| i.forms.len()).sum()`, and the audit iterates
@@ -65,7 +65,7 @@ And the bespoke specs are less bespoke than their count suggests:
 | CP-1610, PDP-11, TMS9900 | `Insn { mnemonic, base: u16, class: Class, summary }` — **structurally identical to each other** | one per entry; the class names the field layout |
 | Z8000 | as above plus `modes: u8`, an explicit **bitmask of addressing modes** | one per set bit |
 | 6809 | `Insn { mnemonic, kind: Kind }`, where `Kind::Mem` holds four mode slots and `Kind::Branch` two | one per non-empty slot |
-| 68000 | `Form`, but field-based | one per `Form`, ~163 today |
+| 68000 | `Form`, but field-based | one per `Form` per allowed address mode — 838 |
 
 Indicative entry counts, for scale rather than precision: 6809 ~121, PDP-11
 ~97, TMS9900 ~70, CP-1610 ~31, Z8000 ~29. These are small tables. The work is
@@ -86,8 +86,45 @@ Recorded as open rather than guessed, because each one could change the shape:
   audit over them is meaningful when the effective-address field multiplies each
   one is a separate question, and it may want representatives rather than a
   product.
+
+  > **Settled 2026-08-25 — both, on different axes.** The effective-address
+  > mask takes the **product**: each mode differs in length, in extension
+  > words, and in what a reference can get wrong, so each is its own row. Size
+  > takes a **representative**: `.b`/`.w`/`.l` ride one uniform two-bit field,
+  > the same way a register number rides a uniform three-bit field, and
+  > expanding it would measure the CPU's operand space rather than the spec's
+  > own distinctions. That is the line
+  > `a_word_cpu_declares_one_row_per_entry` already draws for the word CPUs,
+  > applied to a field-based spec.
+  >
+  > The result is 838 rows, all 838 arbitrated against `vasm`. The audit found
+  > two encoding faults in the assembler that the opcode sweep could not: the
+  > `MOVEM` register-list mask emitted after the effective address's extension
+  > words instead of directly after the opcode word, and a `d8(PC,Xn)`
+  > displacement stored as its target instead of relative to the extension
+  > word. Both are PC-relative or ordering faults, and the sweep drops every
+  > PC-relative instruction by construction — it keeps only what disassembles
+  > identically at two origins. The two mechanisms are complementary here in
+  > exactly the way the table below claims.
 - **Where the enumeration lives.** A trait in `isa`, or a free function per
   module. `isa` is dependency-free and `&'static`, and that must survive.
+
+  > **Amended 2026-08-25 — dependency-free survives; `&'static` does not, for
+  > one field.** `Row::mode` is now `Cow<'static, str>`. Twelve specs author
+  > their mode label as a literal beside the encoding and still borrow it; the
+  > 68000 authors no label at all, only a bitmask of allowed addressing modes
+  > and a slot list, so the thing that tells `(An)+,Dn` from `Dn,(An)` exists
+  > only once the two are combined. A `&'static str` could hold that only by
+  > leaking it or by authoring a second copy of the spec by hand — and the
+  > second copy is what the derived-row rule exists to prevent.
+  >
+  > What the constraint was *for* is intact, and that is the part that was
+  > never stylistic: `Cow` is `std`, so `isa` stays dependency-free; nothing
+  > here reaches into `asm198x`; and a consumer reading a spec still compiles
+  > no assembler and allocates nothing, because a borrowed label allocates
+  > nothing and `Row` is only built when something asks for rows. `Row` loses
+  > `Copy` and keeps `Clone`. The whole change cost twelve mechanical edits
+  > across seven files, none of them outside this crate and its own tests.
 
   Two constraints follow from that, and they are not stylistic. `isa` is
   consumed by Emu198x over a git dependency, and its promotion to the reserved

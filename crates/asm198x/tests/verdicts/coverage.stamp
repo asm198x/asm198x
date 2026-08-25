@@ -25,6 +25,7 @@ PDP-11	96/96	100.0%
 TMS9900	69/69	100.0%
 Z8000	271/271	100.0%
 Z8001	271/271	100.0%
+68000	838/838	100.0%
 #
 # Verdicts held, by CPU and suite (counted, not scored — these
 # suites have no denominator that ought to exist).
@@ -33,7 +34,7 @@ Z8001	271/271	100.0%
 # 6502	curriculum=189 form=151 fuzz=100 probe=54
 # 65816	form=270 probe=44
 # 6800	form=197
-# 68000	curriculum=106 fuzz=100 probe=70 sweep-chunk=160
+# 68000	curriculum=106 form=838 fuzz=100 probe=70 sweep-chunk=160
 # 6809	form=277 fuzz=100 probe=46 sweep-chunk=98
 # 8039	form=210
 # 8048	form=214
