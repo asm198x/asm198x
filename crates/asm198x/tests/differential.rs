@@ -285,6 +285,11 @@ const PROBES: &[Probe] = &[
     ok ("acme", "!be32 / !le32",         " !be32 $12345678\n !le32 $12345678\n"),
     ok ("acme", "sized takes a list",    " !be16 $1234, $5678\n"),
     ok ("acme", "sized spans signed",    " !be16 -32768\n !be16 65535\n"),
+    ok ("acme", "directive !scrxor",     " !scrxor $80, \"ab\"\n"),
+    // The pair that proves `!scrxor` is not `!xor` around `!scr`: the number
+    // is neither converted nor masked.
+    ok ("acme", "!scrxor spares numbers", " !scrxor $80, \"a\", 65, \"b\"\n"),
+    ok ("acme", "!scrxor mask truncates", " !scrxor 511, \"a\"\n"),
     ok ("acme", "directive !skip",       " !skip 4\n lda #1\n"),
     ok ("acme", "!initmem fills !skip",  " !initmem $ff\n !skip 3\n"),
     // The one that says `!initmem` is not positional: the reservation is

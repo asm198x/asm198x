@@ -2237,6 +2237,21 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // `!scrxor` is **not** `!xor` wrapped around `!scr`, though it looks it.
+    // The mask reaches the converted characters of a string and nothing else:
+    // `!scrxor $80, 65` is `41`, where `!xor $80 { !scr 65 }` is `c1`. A
+    // number in the list passes through unconverted and un-masked, exactly as
+    // it does in `!scr` — so this belongs with the text directives, not with
+    // the block that transforms whatever it encloses.
+    Directive {
+        id: "scrxor",
+        pattern: Pattern::Sigilled {
+            sigil: '!',
+            names: &["scrxor"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     // `!skip` reserves rather than emitting: what lands there is whatever
     // `!initmem` chose, so it is a reservation and not a run of zeros.
     Directive {
@@ -2436,7 +2451,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What ACME has here and we do not.
     //
-    // 16 spellings against 0.97, counted from this list rather than recalled.
+    // 15 spellings against 0.97, counted from this list rather than recalled.
     // `!al` and `!rl` are absent: ACME answers "Chosen CPU does not support
     // long registers" for them on a 6502, so they belong to a wider target.
     // `!cbm`, `!realpc`, `!subzone` and `!sz` are absent for the opposite
@@ -2457,7 +2472,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "eof",
                 "pseudopc",
                 "rs",
-                "scrxor",
                 "symbollist",
                 "to",
                 "while",
@@ -2546,6 +2560,19 @@ fn parse_directive(
             })
         }
         "scr" => parse_text(anons, zone, rest, line, screen_code),
+        "scrxor" => {
+            let (mask_src, rest) = rest
+                .split_once(',')
+                .ok_or_else(|| AsmError::new(line, "`!scrxor` needs a value and a list"))?;
+            let mask = fold_const(&parse_value(anons, zone, mask_src.trim(), line)?, env, line)?;
+            // The low byte, whatever the value. ACME range-checks `!initmem`
+            // and does **not** range-check this: `!initmem 256` is "Number
+            // out of range" while `!scrxor 256, "a"` silently masks to `$00`,
+            // `511` to `$ff` and `-129` to `$7f`. Reproducing that
+            // inconsistency is the job; tidying it would be a divergence.
+            let mask = (mask & 0xFF) as u8;
+            parse_text(anons, zone, rest, line, move |c| screen_code(c) ^ mask)
+        }
         "pet" => parse_text(anons, zone, rest, line, petscii),
         // `!zone`/`!zn` never reaches here: it is walk-handled in
         // [`AcmeEval::lower`] (U7 — a zone switch is evaluation state, like
@@ -2726,7 +2753,7 @@ fn parse_text(
     zone: &str,
     rest: &str,
     line: usize,
-    convert: fn(u8) -> u8,
+    convert: impl Fn(u8) -> u8,
 ) -> Result<Operation, AsmError> {
     let rest = rest.trim();
     if rest.is_empty() {
@@ -3075,6 +3102,56 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    /// `!scrxor` converts to screen codes and masks — but only what it
+    /// converted.
+    ///
+    /// It is not `!xor` wrapped around `!scr`, though it reads like it. The
+    /// mask reaches the characters of a string and nothing else: a number in
+    /// the list passes through unconverted *and* unmasked. That is the whole
+    /// difference between the two directives, and it is why they are not one
+    /// rule.
+    #[test]
+    fn scrxor_masks_what_it_converted_and_nothing_else() {
+        assert_eq!(
+            asm("!scrxor $80, \"ab\"").expect("str").bytes,
+            vec![0x81, 0x82]
+        );
+        assert_eq!(asm("!scr \"ab\"").expect("scr").bytes, vec![0x01, 0x02]);
+        // The number is 65 on the way in and $41 on the way out — neither
+        // screen-converted nor masked. `!xor $80 { !scr 65 }` gives $c1.
+        assert_eq!(asm("!scrxor $80, 65").expect("num").bytes, vec![0x41]);
+        assert_eq!(
+            asm("!scrxor $80, \"a\", 65, \"b\"").expect("mixed").bytes,
+            vec![0x81, 0x41, 0x82]
+        );
+        assert_eq!(
+            asm("!scrxor 0, \"ab\"").expect("zero").bytes,
+            vec![0x01, 0x02]
+        );
+        asm("!scrxor $80 \"ab\"").expect_err("needs the comma");
+    }
+
+    /// The mask is the low byte of whatever was written, with no range check.
+    ///
+    /// ACME is inconsistent here and this follows it: `!initmem 256` is
+    /// "Number out of range", while `!scrxor 256` masks silently. Refusing
+    /// the second for symmetry would refuse source ACME accepts.
+    #[test]
+    fn a_scrxor_mask_is_truncated_not_range_checked() {
+        // `!scr "a"` is $01 throughout; only the mask changes.
+        for (written, expect) in [
+            (-1i64, 0xFEu8),
+            (256, 0x01),
+            (257, 0x00),
+            (511, 0xFE),
+            (-129, 0x7E),
+            (65535, 0xFE),
+        ] {
+            let out = asm(&format!("!scrxor {written}, \"a\"")).expect("masked");
+            assert_eq!(out.bytes, vec![expect], "mask {written}");
+        }
+    }
 
     /// `!skip` reserves; `!initmem` says what lands in reserved space.
     ///
