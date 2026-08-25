@@ -1,8 +1,11 @@
 # The arbiter container
 
-Work in progress. Building this surfaced a finding that changes the shape of
-[#279](https://github.com/asm198x/asm198x/issues/279), recorded here so the next
-attempt starts from it rather than rediscovering it.
+Stage one of [#279](https://github.com/asm198x/asm198x/issues/279): a container
+that reproduces every arbiter identity the verdict corpus is keyed on. It does.
+
+Growth does not run here yet — that is the next stage, and the first thing it
+must prove is that a rebuilt binary **corroborates** an existing verdict rather
+than alarming on it.
 
 ## What this has to do
 
@@ -18,30 +21,35 @@ non-zero exit, matched on a marker rather than a line number).
 
 ## Where the pins stand
 
-| tool | share of corpus | pinnable today |
+All eight identities reproduce. `docker run --rm asm198x-arbiter:bld309` says so.
+
+| tool | share | pin |
 |---|---|---|
-| `asl` 1.42 Beta [Bld 309] | 45% | **yes** — upstream publishes a tarball per build number; verified to fetch, build and install |
-| `pasmo` PasmoNext v0.1.3 | 14% | repository reachable, but carries no tags — a commit SHA is the only pin |
-| `ca65` V2.18 (cc65 V2.19) | 9% | **yes** — tag. Note the self-report lags the release |
-| `rgbasm` v1.0.3 | 8% | **yes** — tag |
-| `lwasm` lwtools 4.25 | 8% | **no** — `lwtools.ca` did not respond (40s, twice) |
-| `acme` 0.97 "Zem" | 6% | **no** — the GitHub mirror has no tags; Debian ships `0.97~svn20211115`, a later snapshot |
-| `vasmm68k_mot` vasm 2.0b | 6% | **no** — upstream serves `vasm.tar.gz`, always the current release, with no versioned archive |
-| `sjasmplus` v1.21.0 | 4% | **yes** — tag |
+| `asl` 1.42 Beta [Bld 309] | 45% | `asl-current-142-bld309.tar.gz` — upstream publishes one tarball per build |
+| `pasmo` PasmoNext v0.1.3 | 14% | commit `60957e69` — the fork has no tags |
+| `ca65` V2.18 (cc65 V2.19) | 9% | the release **tarball** for `V2.19`, not a clone — see below |
+| `rgbasm` v1.0.3 | 8% | tag `v1.0.3` |
+| `lwasm` lwtools 4.25 | 8% | `https://www.lwtools.ca/...` — **https**; an `http://` attempt looks like a dead host |
+| `acme` 0.97 "Zem" | 6% | SVN trunk at **revision 266**, from the Homebrew formula that built the local copy |
+| `sjasmplus` v1.21.0 | 4% | tag `v1.21.0` |
+| `vasmm68k_mot` vasm **2.0f** | 6% | none available — adopted, see below |
 
-Four of eight pin cleanly. **Roughly 28% of the corpus has no stable upstream
-URL today**, and `pasmo`'s 14% pins only to a commit.
+## Two things the identity strings taught
 
-## What that means
+**How the source is obtained can change the identity.** `ca65` puts its build
+provenance in its version line: from a git checkout it reports
+`V2.18 - Git 5552824`, and from a release tarball `V2.18 - N/A`, which is what
+the corpus holds. A clone and a tarball of the same tag are not interchangeable
+here.
 
-Fetching from upstream at build time cannot give a reproducible arbiter. A tool
-whose source moves, or whose host is down, either fails the build or — worse —
-succeeds with a different version and reports a different identity.
-
-The container therefore needs the exact source archives held somewhere durable,
-which is a decision about storing artefacts rather than a technical one. Until
-that is settled this image is not reproducible, and growth must not run in it:
-`verify.sh` exists to make that failure loud rather than silent.
+**`vasm` has no pin and was adopted rather than faked.** Upstream serves a
+single `vasm.tar.gz`, always current, with no versioned archives — and it had
+already moved from the 2.0b the corpus first recorded to 2.0f. Pinning to a
+version nobody can fetch would be a pin in name only, unreproducible for the
+next person as well. So the image builds current and `verify-arbiters` decides:
+when upstream releases again the check fails and the image will not build,
+turning a silent drift into a decision. The 436 verdicts recorded under 2.0b
+are superseded and re-arbitrated under 2.0f separately.
 
 ## Also worth knowing
 

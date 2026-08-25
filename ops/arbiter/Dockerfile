@@ -12,7 +12,7 @@
 FROM debian:bookworm-slim
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
-        build-essential ca-certificates curl git \
+        build-essential ca-certificates curl git subversion \
     && rm -rf /var/lib/apt/lists/*
 
 # --- asl / p2bin — 45% of the corpus -----------------------------------------
@@ -34,20 +34,30 @@ RUN curl -fsSL "http://john.ccac.rwth-aachen.de:8000/ftp/as/source/c_version/asl
     && rm -rf /tmp/asl /tmp/asl.tar.gz
 ENV AS_INCLUDE=/usr/local/share/asl/include
 
-# --- acme 0.97 ---------------------------------------------------------------
-RUN git clone --depth 1 --branch r0.97 https://github.com/meonwax/acme.git /tmp/acme \
+# --- acme 0.97 "Zem" ---------------------------------------------------------
+# No release tarball and no tags on the mirror. Revision 266 of the upstream
+# SVN trunk is what the Homebrew formula builds, and that formula built the
+# copy whose identity the corpus records.
+ARG ACME_REV=266
+RUN svn export -q -r "${ACME_REV}" \
+        https://svn.code.sf.net/p/acme-crossass/code-0/trunk /tmp/acme \
     && make -C /tmp/acme/src -j"$(nproc)" \
     && install -m 0755 /tmp/acme/src/acme /usr/local/bin/ \
     && rm -rf /tmp/acme
 
 # --- cc65 2.19 — its ca65 reports V2.18, which is what the corpus holds -------
-RUN git clone --depth 1 --branch V2.19 https://github.com/cc65/cc65.git /tmp/cc65 \
+# The release *tarball*, not a git clone. ca65 puts its build provenance in the
+# identity string: from a checkout it reports `- Git <sha>`, and from a tarball
+# `- N/A`, which is what the corpus records. How the source is obtained is part
+# of the identity here.
+RUN curl -fsSL https://github.com/cc65/cc65/archive/refs/tags/V2.19.tar.gz -o /tmp/cc65.tar.gz \
+    && mkdir -p /tmp/cc65 && tar -xzf /tmp/cc65.tar.gz -C /tmp/cc65 --strip-components=1 \
     && make -C /tmp/cc65 -j"$(nproc)" \
     && install -m 0755 /tmp/cc65/bin/ca65 /tmp/cc65/bin/ld65 /usr/local/bin/ \
-    && rm -rf /tmp/cc65
+    && rm -rf /tmp/cc65 /tmp/cc65.tar.gz
 
 # --- lwtools 4.25 ------------------------------------------------------------
-RUN curl -fsSL http://www.lwtools.ca/releases/lwtools/lwtools-4.25.tar.gz -o /tmp/lw.tar.gz \
+RUN curl -fsSL https://www.lwtools.ca/releases/lwtools/lwtools-4.25.tar.gz -o /tmp/lw.tar.gz \
     && mkdir -p /tmp/lw && tar -xzf /tmp/lw.tar.gz -C /tmp/lw --strip-components=1 \
     && make -C /tmp/lw -j"$(nproc)" \
     && install -m 0755 /tmp/lw/lwasm/lwasm /usr/local/bin/ \
@@ -69,7 +79,15 @@ RUN git clone --depth 1 --recursive --branch v1.21.0 \
     && install -m 0755 /tmp/sj/sjasmplus /usr/local/bin/ \
     && rm -rf /tmp/sj
 
-# --- vasm 2.0b (Motorola syntax, m68k) ---------------------------------------
+# --- vasm (current release) --------------------------------------------------
+# The one tool here with no pin available. Upstream serves a single
+# `vasm.tar.gz` that is always the current release, keeps no versioned
+# archives, and has already moved past the 2.0b the corpus first recorded.
+#
+# So this fetches current and lets `verify-arbiters` decide. When upstream
+# releases again the identity check fails and the image will not build — which
+# is the point: a version change becomes a decision to take rather than a drift
+# to discover later in a corpus that has quietly forked.
 RUN curl -fsSL http://sun.hasenbraten.de/vasm/release/vasm.tar.gz -o /tmp/vasm.tar.gz \
     && mkdir -p /tmp/vasm && tar -xzf /tmp/vasm.tar.gz -C /tmp/vasm --strip-components=1 \
     && make -C /tmp/vasm CPU=m68k SYNTAX=mot -j"$(nproc)" \
@@ -77,8 +95,11 @@ RUN curl -fsSL http://sun.hasenbraten.de/vasm/release/vasm.tar.gz -o /tmp/vasm.t
     && rm -rf /tmp/vasm /tmp/vasm.tar.gz
 
 # --- PasmoNext ---------------------------------------------------------------
-# A fork, so it pins to its own repository rather than a release.
-RUN git clone --depth 1 https://github.com/Ckirby101/pasmoNext.git /tmp/pn \
+# A fork with no tags, so a commit is the pin. This one builds and reports the
+# identity the corpus records.
+ARG PASMO_REV=60957e69ed97eadf0f1546a8bfcd2c10a987f64a
+RUN git clone -q https://github.com/Ckirby101/pasmoNext.git /tmp/pn \
+    && git -C /tmp/pn checkout -q "${PASMO_REV}" \
     && cd /tmp/pn/pasmo && g++ -O2 -o pasmo *.cpp \
     && install -m 0755 pasmo /usr/local/bin/ \
     && rm -rf /tmp/pn
