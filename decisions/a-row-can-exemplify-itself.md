@@ -115,8 +115,6 @@ each family's exemplar asks for it. That collapsed four families at a stroke.
 **The unplaced rows are unplaced for a stated reason.** Shifts and rotates carry
 their count in a *following* word whose legal range no entry states, so
 `Shift::exemplar` returns `None` rather than a guess with filler as its count.
-The segmented Z8001 was not attempted: its memory modes encode addresses
-differently, so it remains at zero and shows as zero.
 
 The audit also did what it was built to do. `LDB` with a byte immediate was the
 one genuine byte divergence in 271 rows — we emit the long dyadic form where
@@ -124,3 +122,26 @@ one genuine byte divergence in 271 rows — we emit the long dyadic form where
 ([asm198x#252](https://github.com/asm198x/asm198x/issues/252)). It is an
 explicitly named exception in the audit, not part of the anonymous unplaced
 count, and the entry comes out when the row arbitrates.
+
+## The segmented Z8001
+
+The Z8001 runs the same audit over the same rows, and reaches the same 125. It
+gets its own test rather than sharing the Z8002's, because "the same spec" is a
+claim worth checking: the two CPUs differ in how they encode memory, and an
+audit that assumed they agreed could not have told us they do.
+
+Three things differ, and all three were already known somewhere in the tree —
+the exemplar was the last place to learn them:
+
+- An `@Rn` pointer is a register **pair**, so its field must be even.
+- `LDA` loads a 32-bit segmented address, so its destination is a pair too.
+  The encoder and decoder both already promoted `Size::Address` to
+  `Size::Long` here; the exemplar now does the same.
+- A memory operand carries a long-form segment word — bit 15 set, segment in
+  bits 14-8, low byte zero. `asl` writes that form even for an offset small
+  enough for the short one, so the audit's filler does too.
+
+The last of those is the same lesson as the byte immediate: **filler must be a
+legal instance of the form, not just a distinguishable one**, and a row whose
+operand words are illegal does not disassemble back to itself. Every failure the Z8001
+audit reported on its first run was filler, not spec.
