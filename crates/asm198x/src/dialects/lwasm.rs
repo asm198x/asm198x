@@ -641,7 +641,9 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "object-target-only",
         pattern: Pattern::Exact(&["export", "extdep", "extern", "external", "import"]),
-        category: Category::RefusedByReference("only supported for an object target"),
+        category: Category::RefusedByReference(
+            "only supported for an object target, and asm198x emits a binary",
+        ),
     },
     Directive {
         id: "unsupported-lwasm",

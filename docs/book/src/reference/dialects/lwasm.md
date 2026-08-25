@@ -23,7 +23,7 @@
 | `fqb` | `fqb` |  |
 | `incbin` | `includebin` |  |
 | `include` | `include`, `use` |  |
-| `object-target-only` | `export`, `extdep`, `extern`, `external`, `import` | Refused, as the reference refuses it — only supported for an object target |
+| `object-target-only` | `export`, `extdep`, `extern`, `external`, `import` | Refused, as the reference refuses it — only supported for an object target, and asm198x emits a binary |
 | `org` | `org` |  |
 | `reserve` | `rmb`, `.ds`, `zmb` |  |
 | `unsupported-lwasm` | `bsz`, `dephase`, `dtb`, `dts`, `emod`, `endm`, `ends`, `endsect`, `endsection`, `endstruct`, `fcn`, `fcs`, `fcz`, `fdbs`, `fzb`, `if`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `incl`, `includestr`, `lib`, `macr`, `macro`, `mod`, `msg`, `nam`, `opt`, `os9`, `pag`, `page`, `phase`, `pragma`, `reorg`, `rmd`, `rmq`, `rmw`, `sect`, `section`, `set`, `setdp`, `setstr`, `spc`, `struct`, `ttl`, `warning`, `zmd`, `zmq` | Recognised, and not implemented |

@@ -2030,7 +2030,8 @@ pub const DIRECTIVES: &[Directive] = &[
             required: true,
         },
         category: Category::RefusedByReference(
-            "only usable when a linker resolves it from another module",
+            "only usable when a linker resolves it from another module, and asm198x \
+             emits a binary",
         ),
     },
     // `.autoimport +`/`-` switches ca65's automatic import of runtime symbols.
