@@ -111,3 +111,22 @@ cannot back rustc's memory mapping and the compile dies with `SIGBUS`, which
 reads like a toolchain fault and is not one. `CARGO_TARGET_DIR=/tmp/target`
 keeps the build on the container's own filesystem. A Linux runner does not hit
 this.
+
+## Stage three: published and scheduled
+
+- `.github/workflows/arbiter-image.yml` builds this image on any change to
+  `ops/arbiter/**`, **verifies the identities before publishing**, and pushes
+  to `ghcr.io/asm198x/arbiter` under `latest` and the commit SHA. An image whose
+  tools report different identities is not a worse arbiter — it is a different
+  one, so it must not be published.
+- `.github/workflows/grow.yml` runs `cargo xtask grow` in it weekly, refreshes
+  the stamp and the ledger, and opens a pull request. It verifies identities
+  first and stops if they have moved, which is how an unpinned `vasm` release
+  surfaces as a decision rather than a fork.
+
+Nothing merges itself. A growth run produces facts for a person to read, and
+the corpus being append-only means a verdict recorded in error costs a
+supersede record rather than an edit.
+
+**The first growth run will fail** until the `vasm` import-side declaration is
+updated for 2.0f — see above. That is known, not a surprise waiting.
