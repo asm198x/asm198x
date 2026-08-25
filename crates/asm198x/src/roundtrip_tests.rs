@@ -8,12 +8,12 @@
 
 use crate::{
     assemble_1802, assemble_2650, assemble_8039, assemble_8048, assemble_acme, assemble_cp1610,
-    assemble_f8, assemble_i8080, assemble_m6800, assemble_pasmonext, assemble_pdp11,
-    assemble_rgbasm, assemble_scmp, assemble_tms7000, assemble_tms9900, assemble_vasm,
-    assemble_z8000, assemble_z8001, listing_1802, listing_2650, listing_6502, listing_8048,
-    listing_68000, listing_cp1610, listing_f8, listing_i8080, listing_m6800, listing_pdp11,
-    listing_scmp, listing_sm83, listing_tms7000, listing_tms9900, listing_z80, listing_z8000,
-    listing_z8001,
+    assemble_f8, assemble_i8080, assemble_lwasm, assemble_m6800, assemble_pasmonext,
+    assemble_pdp11, assemble_rgbasm, assemble_scmp, assemble_tms7000, assemble_tms9900,
+    assemble_vasm, assemble_z8000, assemble_z8001, listing_1802, listing_2650, listing_6502,
+    listing_6809, listing_8048, listing_68000, listing_cp1610, listing_f8, listing_i8080,
+    listing_m6800, listing_pdp11, listing_scmp, listing_sm83, listing_tms7000, listing_tms9900,
+    listing_z80, listing_z8000, listing_z8001,
 };
 
 #[test]
@@ -184,6 +184,40 @@ fn round_trips_z8000_dyadic_through_asl_syntax() {
     let listing = listing_z8000(&original.bytes, original.origin.unwrap_or(0));
     let re = assemble_z8000(&listing).expect("reassemble");
     assert_eq!(re.bytes, original.bytes, "listing was:\n{listing}");
+}
+
+/// The 6809's three undocumented opcodes are accepted on input and never
+/// written on output.
+///
+/// `lwasm --6809` assembles all three (and its default 6309 mode refuses them,
+/// calling them 6809 instructions). We match that on input. We do not match it
+/// on output, because there is nothing to match: `$14` is `SEXW` on the Hitachi
+/// 6309, so `fcb $14` is the reading that holds whichever part produced the
+/// byte. See `decisions/undocumented-opcodes-are-input-only.md` and asm198x#233.
+#[test]
+fn the_6809_accepts_undocumented_opcodes_and_never_writes_them() {
+    let a = assemble_lwasm("\torg $1000\n\treset\n\trhf\n\thcf\n\tnop\n").expect("assemble");
+    assert_eq!(
+        a.bytes,
+        vec![0x3E, 0x14, 0x14, 0x12],
+        "the bytes lwasm --6809 produces"
+    );
+
+    // Neither byte comes back as a mnemonic, and the surrounding code still
+    // decodes — an undocumented opcode must not derail the stream.
+    let listing = listing_6809(&[0x14, 0x3E, 0x12], 0x1000);
+    for absent in ["hcf", "rhf", "reset"] {
+        assert!(
+            !listing.contains(absent),
+            "`{absent}` should never be written, listing was:\n{listing}"
+        );
+    }
+    for present in ["fcb $14", "fcb $3E", "nop"] {
+        assert!(
+            listing.contains(present),
+            "expected `{present}`, listing was:\n{listing}"
+        );
+    }
 }
 
 /// `LDB Rbd, #data` has two encodings, and which one we write is the point.

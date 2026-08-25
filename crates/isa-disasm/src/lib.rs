@@ -825,6 +825,14 @@ fn decode_6809(code: &[u8], pos: usize, addr: u16) -> Option<(String, usize)> {
         !op.is_empty() && code.len() - pos >= op.len() && code[pos..pos + op.len()] == *op
     };
     for insn in mos6809::SET {
+        // Undocumented opcodes are accepted on input and never written on
+        // output. `$14` is `SEXW` on the Hitachi 6309, so `fcb $14` is the
+        // reading that holds whichever part produced the byte, while `hcf`
+        // would assert both the part and that the byte was meant as code.
+        // See `decisions/undocumented-opcodes-are-input-only.md`.
+        if insn.undocumented {
+            continue;
+        }
         let m = insn.mnemonic;
         match &insn.kind {
             Kind::Inherent(op) if matches(op) => return Some((m.to_string(), op.len())),

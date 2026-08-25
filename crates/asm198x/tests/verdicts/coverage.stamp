@@ -19,12 +19,12 @@ TMS7000	203/203	100.0%
 Z80	704/704	100.0%
 huc6280	234/234	100.0%
 sm83	504/504	100.0%
-6809	277/277	100.0%
+6809	277/280	98.9%
 CP1610	30/30	100.0%
 PDP-11	96/96	100.0%
 TMS9900	69/69	100.0%
-Z8000	0/271	0.0%
-Z8001	0/271	0.0%
+Z8000	145/271	53.5%
+Z8001	145/271	53.5%
 #
 # Verdicts held, by CPU and suite (counted, not scored — these
 # suites have no denominator that ought to exist).
@@ -46,8 +46,8 @@ Z8001	0/271	0.0%
 # TMS7000	form=203
 # TMS9900	form=69 sweep-chunk=56
 # Z80	curriculum=322 form=704 fuzz=100 probe=120
-# Z8000	sweep-chunk=96
-# Z8001	sweep-chunk=96
+# Z8000	form=145 sweep-chunk=97
+# Z8001	form=145 sweep-chunk=97
 # Z80N	probe=9
 # huc6280	form=234
 # sm83	form=504

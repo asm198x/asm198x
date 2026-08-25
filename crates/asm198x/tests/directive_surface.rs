@@ -350,17 +350,14 @@ fn an_instruction_is_never_declared_a_directive() {
         assembler("lwasm")(&format!("\t{m} #1\n"))
             .unwrap_or_else(|e| panic!("`{m}` is a 6809 instruction and must assemble: {e}"));
     }
-    // Still not implemented, and still not directives: lwasm's undocumented
-    // opcodes. `reset` and `hcf`/`rhf` take no operand, so a wrong answer here
-    // reads as a directive complaint rather than an unknown mnemonic.
-    for m in ["reset", "hcf", "rhf"] {
-        let err = assembler("lwasm")(&format!("\t{m}\n"))
-            .err()
-            .map(|e| e.message)
-            .unwrap_or_default();
-        assert!(
-            err.contains("unknown instruction"),
-            "`{m}` is an undocumented 6809 instruction we lack, not a directive — got: {err}"
-        );
+    // The three undocumented opcodes (#233), which take no operand — so a wrong
+    // answer here would read as a directive complaint rather than an unknown
+    // mnemonic. They are input-only by
+    // `decisions/undocumented-opcodes-are-input-only.md`: accepted here, and
+    // never written by the disassembler.
+    for (m, want) in [("reset", 0x3Eu8), ("hcf", 0x14), ("rhf", 0x14)] {
+        let a = assembler("lwasm")(&format!("\t{m}\n"))
+            .unwrap_or_else(|e| panic!("`{m}` is accepted on input and must assemble: {e}"));
+        assert_eq!(a.bytes, vec![want], "`{m}` encodes as lwasm --6809 does");
     }
 }

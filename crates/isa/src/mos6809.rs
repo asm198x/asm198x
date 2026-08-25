@@ -15,6 +15,11 @@
 pub struct Insn {
     pub mnemonic: &'static str,
     pub kind: Kind,
+    /// Not in any Motorola document: attested only by `lwasm --6809`, which
+    /// assembles it. See `decisions/undocumented-opcodes-are-input-only.md`.
+    /// The disassembler never writes these, so a byte keeps the reading that is
+    /// true whichever 6809-family part produced it.
+    pub undocumented: bool,
 }
 
 /// The operand shape of an instruction — which addressing modes it supports.
@@ -163,7 +168,7 @@ pub fn rows() -> impl Iterator<Item = crate::Row> {
             .map(move |(mode, _)| crate::Row {
                 mnemonic: insn.mnemonic,
                 mode,
-                undocumented: false,
+                undocumented: insn.undocumented,
             })
     })
 }
@@ -186,30 +191,45 @@ impl Insn {
                 extended,
                 width,
             },
+            undocumented: false,
         }
     }
     const fn inh(mnemonic: &'static str, opcode: &'static [u8]) -> Self {
         Insn {
             mnemonic,
             kind: Kind::Inherent(opcode),
+            undocumented: false,
+        }
+    }
+
+    /// An inherent instruction no Motorola document lists, which `lwasm --6809`
+    /// nonetheless assembles.
+    const fn inh_undocumented(mnemonic: &'static str, opcode: &'static [u8]) -> Self {
+        Insn {
+            mnemonic,
+            kind: Kind::Inherent(opcode),
+            undocumented: true,
         }
     }
     const fn branch(mnemonic: &'static str, short: &'static [u8], long: &'static [u8]) -> Self {
         Insn {
             mnemonic,
             kind: Kind::Branch { short, long },
+            undocumented: false,
         }
     }
     const fn transfer(mnemonic: &'static str, opcode: u8) -> Self {
         Insn {
             mnemonic,
             kind: Kind::Transfer(opcode),
+            undocumented: false,
         }
     }
     const fn stack(mnemonic: &'static str, opcode: u8, u_stack: bool) -> Self {
         Insn {
             mnemonic,
             kind: Kind::Stack { opcode, u_stack },
+            undocumented: false,
         }
     }
 }
@@ -478,6 +498,9 @@ const SUMMARIES: &[(&str, &str)] = &[
     ("bgt", "Branch if greater than"),
     ("ble", "Branch if less or equal"),
     ("bsr", "Branch to subroutine"),
+    ("reset", "Reset (undocumented, input only)"),
+    ("rhf", "Halt and catch fire (undocumented, input only)"),
+    ("hcf", "Halt and catch fire (undocumented, input only)"),
 ];
 
 /// The one-line description for a mnemonic, or `""` if it has none.
@@ -679,6 +702,19 @@ pub static SET: &[Insn] = &[
     Insn::branch("bgt", op![0x2E], op![0x10, 0x2E]),
     Insn::branch("ble", op![0x2F], op![0x10, 0x2F]),
     Insn::branch("bsr", op![0x8D], op![0x17]),
+    // --- undocumented -------------------------------------------------------
+    // Not in Motorola's 1981 programming manual or the 1984 MC6809E datasheet,
+    // and so cited to the reference rather than the manufacturer: `lwasm` from
+    // lwtools 4.25 assembles all three under `--6809`, and refuses them in its
+    // default 6309 mode as "Illegal use of 6809 instruction in 6309 mode".
+    //
+    // `$14` is the reason the disassembler never writes these: on the Hitachi
+    // 6309 that byte is `SEXW`, a documented instruction. `fcb $14` is true
+    // whichever part produced the byte; `hcf` would assert both the part and
+    // the intent. See `decisions/undocumented-opcodes-are-input-only.md`.
+    Insn::inh_undocumented("reset", op![0x3E]),
+    Insn::inh_undocumented("rhf", op![0x14]),
+    Insn::inh_undocumented("hcf", op![0x14]),
 ];
 
 #[cfg(test)]
