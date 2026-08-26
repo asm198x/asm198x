@@ -64,6 +64,7 @@ impl Dialect for Lwasm {
         let program = parse_program(source, macros::Expand::Yes)?;
         let mut eval = LwasmEval {
             env: BTreeMap::new(),
+            dp: 0,
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
@@ -88,6 +89,7 @@ impl Dialect for Lwasm {
         let program = parse_program_multi(map, loader)?;
         let mut eval = LwasmEval {
             env: BTreeMap::new(),
+            dp: 0,
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
@@ -249,6 +251,9 @@ struct Walker {
     in_macro: bool,
     /// The macros defined so far, so an invocation is recognised too.
     macro_names: BTreeSet<String>,
+    /// The direct page `setdp` last named, zero until one does. Parse-time
+    /// state, because the direct-vs-extended choice is made at parse time.
+    dp: u8,
     nodes: Vec<Node>,
 }
 
@@ -259,6 +264,7 @@ impl Walker {
             pending_leading: Vec::new(),
             in_macro: false,
             macro_names: BTreeSet::new(),
+            dp: 0,
             nodes: Vec::new(),
         }
     }
@@ -487,7 +493,7 @@ impl FlatWalk for Walker {
         let op = if rest.is_empty() {
             None
         } else {
-            parse_op(rest, &self.env, line)?
+            parse_op(rest, &self.env, &mut self.dp, line)?
         };
         // Bind an `equ` value into the parse-time env so a later direct/extended
         // choice can fold it (mirrors the engine's pass-1 `equ`).
@@ -716,7 +722,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What lwasm has here and we do not.
     //
-    // 28 spellings against lwtools 4.25.
+    // 27 spellings against lwtools 4.25.
     //
     // **Directives only.** The first cut of this list swept in fifteen 6809
     // *instructions* — `adca`, `bita`, `cmpd`, `cwai`, `sbca` among them —
@@ -737,6 +743,22 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "align",
         pattern: Pattern::Exact(&["align"]),
+        category: Category::Operation,
+    },
+    // `setdp page` says which 256-byte page the 6809's DP register will hold
+    // when this code runs, so the assembler can reach an address on it in two
+    // bytes instead of three. It emits nothing and promises something: get it
+    // wrong and the code reads the wrong address at run time, which is why
+    // lwasm makes it explicit rather than guessing.
+    //
+    // The operand is a page number, taken modulo 256 — `setdp $2000` is page
+    // `$00`, not page `$20` — and it must fold on pass one ("SETDP must be
+    // constant on pass 1"), so a forward symbol is refused. The last one above
+    // a line is the one that line uses, and one inside a branch that is not
+    // taken never happens at all.
+    Directive {
+        id: "setdp",
+        pattern: Pattern::Exact(&["setdp"]),
         category: Category::Operation,
     },
     // `phase addr` moves the *address* without moving the output: the bytes
@@ -820,7 +842,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "reorg",
             "sect",
             "section",
-            "setdp",
             "setstr",
             "struct",
         ]),
@@ -831,6 +852,7 @@ pub const DIRECTIVES: &[Directive] = &[
 fn parse_op(
     rest: &str,
     env: &BTreeMap<String, i64>,
+    dp: &mut u8,
     line: usize,
 ) -> Result<Option<Operation>, AsmError> {
     let (mnem, operand) = split_first_word(rest);
@@ -838,7 +860,7 @@ fn parse_op(
     // Dispatch through the declared surface: a spelling the declaration does
     // not carry cannot be accepted here. See `crate::directives`.
     let Some(directive) = lookup(DIRECTIVES, &m) else {
-        return Ok(Some(parse_instruction(&m, operand, env, line)?));
+        return Ok(Some(parse_instruction(&m, operand, env, *dp, line)?));
     };
     match directive.category {
         // `end` marks the end of source; it emits nothing.
@@ -869,6 +891,15 @@ fn parse_op(
             "reserve-quad" => parse_rmb(&m, operand, env, line, 4),
             "fill" => parse_fill(operand, env, line),
             "align" => parse_align(operand, env, line),
+            "setdp" => {
+                if operand.trim().is_empty() {
+                    return Err(AsmError::new(line, "`setdp` needs a page"));
+                }
+                let page = fold_const(&value(operand, line)?, env, line)
+                    .map_err(|_| AsmError::new(line, "`setdp` must be constant on pass 1"))?;
+                *dp = (page & 0xFF) as u8;
+                Ok(Some(Operation::Bytes(Vec::new())))
+            }
             "pseudo-pc" => {
                 if m == "dephase" {
                     return Ok(Some(Operation::PseudoPc(None)));
@@ -995,6 +1026,7 @@ fn parse_instruction(
     m: &str,
     operand: &str,
     env: &BTreeMap<String, i64>,
+    dp: u8,
     line: usize,
 ) -> Result<Operation, AsmError> {
     if let Some(insn) = mos6809::lookup(m) {
@@ -1008,7 +1040,7 @@ fn parse_instruction(
                 extended,
                 width,
             } => encode_mem(
-                m, imm, direct, indexed, extended, *width, operand, env, line,
+                m, imm, direct, indexed, extended, *width, operand, env, dp, line,
             ),
             Kind::Transfer(opcode) => encode_transfer(m, *opcode, operand, line),
             Kind::Stack { opcode, u_stack } => encode_stack(*opcode, *u_stack, operand, line),
@@ -1071,6 +1103,7 @@ fn encode_mem(
     width: u8,
     operand: &str,
     env: &BTreeMap<String, i64>,
+    dp: u8,
     line: usize,
 ) -> Result<Operation, AsmError> {
     let t = operand.trim();
@@ -1096,7 +1129,11 @@ fn encode_mem(
         if direct.is_empty() {
             return Err(AsmError::new(line, format!("`{m}` has no direct mode")));
         }
-        return Ok(encoded(direct, value(rest, line)?, 1));
+        // Direct mode carries the offset *within* the page, so it is the low
+        // byte of the address that is emitted — `lda <$2010` is `96 10`, not a
+        // one-byte operand asked to hold $2010. The force also fixes the size,
+        // so a forward symbol is fine here where a bare one would not be.
+        return Ok(encoded(direct, Expr::Lo(Box::new(value(rest, line)?)), 1));
     }
     if let Some(rest) = t.strip_prefix('>') {
         if extended.is_empty() {
@@ -1104,14 +1141,19 @@ fn encode_mem(
         }
         return Ok(encoded(extended, value(rest, line)?, 2));
     }
-    // Bare address: direct when it folds to a constant that fits in a byte and a
-    // direct mode exists; otherwise extended. A forward symbol stays extended,
-    // keeping the size stable across passes — lwasm's default.
+    // Bare address: direct when it folds to a constant **on the direct page**
+    // and a direct mode exists; otherwise extended. A forward symbol stays
+    // extended, keeping the size stable across passes — lwasm's default.
+    //
+    // The page is `setdp`'s, zero until one says otherwise: an address is on
+    // it when its high byte is the page number, so with `setdp $20` it is
+    // `$2010` that reaches direct mode and `$0010` that no longer does.
     let e = value(t, line)?;
-    let fits_direct =
-        !direct.is_empty() && fold_const(&e, env, line).is_ok_and(|v| (0..=0xFF).contains(&v));
+    let fits_direct = !direct.is_empty()
+        && fold_const(&e, env, line)
+            .is_ok_and(|v| (0..=0xFFFF).contains(&v) && ((v >> 8) & 0xFF) == i64::from(dp));
     if fits_direct {
-        Ok(encoded(direct, e, 1))
+        Ok(encoded(direct, Expr::Lo(Box::new(e)), 1))
     } else if !extended.is_empty() {
         Ok(encoded(extended, e, 2))
     } else {
@@ -1610,6 +1652,11 @@ fn expand_lwasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion,
 /// walk so a later direct/extended choice sees only what a taken branch bound.
 struct LwasmEval {
     env: BTreeMap<String, i64>,
+    /// The direct page `setdp` last named. This is the copy that decides the
+    /// emitted bytes: the walk parses every line, live or not, where this
+    /// lowering sees only the live ones — so a `setdp` inside a branch that is
+    /// not taken never reaches it, which is what lwasm does with one.
+    dp: u8,
 }
 
 impl crate::ast::CondEval for LwasmEval {
@@ -1686,7 +1733,7 @@ impl crate::ast::CondEval for LwasmEval {
                 ));
             }
             _ if node.source.is_empty() => None,
-            _ => parse_op(&node.source, &self.env, line)?,
+            _ => parse_op(&node.source, &self.env, &mut self.dp, line)?,
         };
         if let (Some(sym), Some(Operation::Equ(e) | Operation::Set(e))) = (node.label.as_ref(), &op)
             && let Ok(v) = fold_const(e, &self.env, line)
@@ -1937,6 +1984,87 @@ mod tests {
         assert!(
             asm(" org $1000\n if\n fcb 1\n endc\n").is_err(),
             "bare `if`"
+        );
+    }
+
+    /// The `<` force means direct mode, and direct mode carries the offset
+    /// within the page — so what is emitted is the *low byte* of the address.
+    /// It also fixes the size, which is why a forward symbol is allowed here
+    /// where a bare one would stay extended.
+    #[test]
+    fn the_direct_force_emits_the_offset_within_the_page() {
+        assert_eq!(
+            asm(" lda <$2010\n").expect("high page").bytes,
+            vec![0x96, 0x10]
+        );
+        assert_eq!(
+            asm(" lda <$10\n").expect("page zero").bytes,
+            vec![0x96, 0x10]
+        );
+        assert_eq!(
+            asm(" lda <l\nl equ $2010\n").expect("forward").bytes,
+            vec![0x96, 0x10]
+        );
+    }
+
+    /// `setdp` says which page the DP register will hold at run time, so an
+    /// address *on that page* reaches direct mode and one off it no longer
+    /// does — including page zero, which stops being special the moment a
+    /// `setdp` names another.
+    #[test]
+    fn setdp_moves_which_page_is_direct() {
+        assert_eq!(
+            asm(" setdp $20\n lda $2010\n lda $2110\n lda $10\n")
+                .expect("setdp")
+                .bytes,
+            vec![0x96, 0x10, 0xB6, 0x21, 0x10, 0xB6, 0x00, 0x10]
+        );
+        // The last one above the line wins, and it reaches every addressing
+        // mode that has a direct form — not just the accumulator loads.
+        assert_eq!(
+            asm(" setdp $20\n setdp $30\n lda $3010\n lda $2010\n")
+                .expect("twice")
+                .bytes,
+            vec![0x96, 0x10, 0xB6, 0x20, 0x10]
+        );
+        assert_eq!(
+            asm(" setdp $20\n jmp $2010\n cmpx $2010\n")
+                .expect("others")
+                .bytes,
+            vec![0x0E, 0x10, 0x9C, 0x10]
+        );
+        // Indexed and immediate operands never had a page to be on.
+        assert_eq!(
+            asm(" setdp $20\n lda $2010,x\n").expect("indexed").bytes,
+            vec![0xA6, 0x89, 0x20, 0x10]
+        );
+    }
+
+    /// The operand is a page number taken modulo 256 — `setdp $2000` is page
+    /// zero, not page $20 — it must fold on pass one, and one inside a branch
+    /// that is not taken never happens.
+    #[test]
+    fn setdp_takes_a_constant_page_number() {
+        assert_eq!(
+            asm(" setdp $2000\n lda $0010\n lda $2010\n")
+                .expect("masked")
+                .bytes,
+            vec![0x96, 0x10, 0xB6, 0x20, 0x10]
+        );
+        assert_eq!(
+            asm(" setdp -1\n lda $ff10\n").expect("negative").bytes,
+            vec![0x96, 0x10]
+        );
+        assert!(
+            asm(" setdp later\nlater equ $20\n lda $2010\n").is_err(),
+            "a forward `setdp` cannot fold on pass one"
+        );
+        assert!(asm(" setdp\n fcb 1\n").is_err(), "bare `setdp`");
+        assert_eq!(
+            asm(" ifne 0\n setdp $20\n endc\n lda $2010\n")
+                .expect("untaken")
+                .bytes,
+            vec![0xB6, 0x20, 0x10]
         );
     }
 

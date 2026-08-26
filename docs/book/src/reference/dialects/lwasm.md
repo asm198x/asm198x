@@ -8,7 +8,7 @@
 
 ## Directives
 
-25 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+26 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -34,7 +34,8 @@
 | `reserve-double` | `rmd`, `zmd`, `rmw` |  |
 | `reserve-quad` | `rmq`, `zmq` |  |
 | `set` | `set` |  |
-| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `endm`, `ends`, `endsect`, `endsection`, `endstruct`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `incl`, `includestr`, `lib`, `macr`, `macro`, `mod`, `opt`, `os9`, `pragma`, `reorg`, `sect`, `section`, `setdp`, `setstr`, `struct` | Recognised, and not implemented |
+| `setdp` | `setdp` |  |
+| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `endm`, `ends`, `endsect`, `endsection`, `endstruct`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `incl`, `includestr`, `lib`, `macr`, `macro`, `mod`, `opt`, `os9`, `pragma`, `reorg`, `sect`, `section`, `setstr`, `struct` | Recognised, and not implemented |
 | `words` | `fdb`, `.word` |  |
 | `words-swapped` | `fdbs` |  |
 
