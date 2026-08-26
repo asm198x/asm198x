@@ -7,6 +7,54 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.34](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.33...asm198x-v0.0.34) - 2026-08-26
+
+### Added
+
+- *(ca65)* fold the nine conditional heads beyond .if ([#330](https://github.com/asm198x/asm198x/pull/330))
+- *(ca65)* take the plural extractors, and refuse the word ca65 never takes ([#326](https://github.com/asm198x/asm198x/pull/326))
+- *(ca65)* take the operator vocabulary, both spellings ([#324](https://github.com/asm198x/asm198x/pull/324))
+- *(ca65)* declare the expression words, so the ledger can see them ([#323](https://github.com/asm198x/asm198x/pull/323))
+- *(vasm)* take `output`, the file a source names for itself ([#321](https://github.com/asm198x/asm198x/pull/321))
+- *(sjasmplus)* take `SAVETAP`, on the tape crate graduated from emu198x ([#320](https://github.com/asm198x/asm198x/pull/320))
+- describe the files a source asks for besides the machine code ([#319](https://github.com/asm198x/asm198x/pull/319))
+- *(lwasm)* take `pragma`, `opt`, `ifpragma` and `ifopt` ([#312](https://github.com/asm198x/asm198x/pull/312))
+- *(lwasm)* take `struct`, `endstruct` and `ends` ([#311](https://github.com/asm198x/asm198x/pull/311))
+- *(lwasm)* declare the section and macro words, and refuse on reach ([#310](https://github.com/asm198x/asm198x/pull/310))
+- *(lwasm)* take `incl`, `lib` and `reorg`, and stop a second `org` padding ([#309](https://github.com/asm198x/asm198x/pull/309))
+- *(lwasm)* take `setdp`, and emit the offset within the page ([#308](https://github.com/asm198x/asm198x/pull/308))
+- *(lwasm)* take `set` and plain `if` (on a new redefinable-symbol seam) ([#307](https://github.com/asm198x/asm198x/pull/307))
+- *(lwasm)* take `phase` and `dephase` (and fix a computed branch inside a relocated block) ([#306](https://github.com/asm198x/asm198x/pull/306))
+- *(lwasm)* take the listing words, and `warning`/`msg` ([#305](https://github.com/asm198x/asm198x/pull/305))
+- *(lwasm)* take the block and string data forms ([#304](https://github.com/asm198x/asm198x/pull/304))
+- *(acme)* take `!cpu 6502`, and name the other processors as our gap ([#303](https://github.com/asm198x/asm198x/pull/303))
+- *(acme)* take `!to` and `!symbollist`, which name files rather than bytes ([#301](https://github.com/asm198x/asm198x/pull/301))
+- *(acme)* take `!while` and `!do`, the condition loops ([#300](https://github.com/asm198x/asm198x/pull/300))
+- *(acme)* take `!pseudopc`, a second location counter ([#299](https://github.com/asm198x/asm198x/pull/299))
+- *(acme)* take `!addr`/`!address`, which bind rather than emit ([#298](https://github.com/asm198x/asm198x/pull/298))
+- *(acme)* take `!ct`/`!convtab`, the table `!text` converts through ([#297](https://github.com/asm198x/asm198x/pull/297))
+- *(acme)* take `!xor`, which masks what the scope writes ([#296](https://github.com/asm198x/asm198x/pull/296))
+- *(acme)* take `!as`, `!rs` and `!eof` — and refuse an unclosed block ([#295](https://github.com/asm198x/asm198x/pull/295))
+- *(acme)* take `!scrxor`, which is not `!xor` around `!scr` ([#294](https://github.com/asm198x/asm198x/pull/294))
+- *(acme)* take `!skip` and `!initmem` ([#293](https://github.com/asm198x/asm198x/pull/293))
+- *(acme)* take the `!be16`/`!le32` family ([#292](https://github.com/asm198x/asm198x/pull/292))
+- *(acme)* take `!fi`, `!raw` and `!hex` ([#289](https://github.com/asm198x/asm198x/pull/289))
+- *(isa)* arbitrate every 68000 form against vasm ([#284](https://github.com/asm198x/asm198x/pull/284))
+
+### Fixed
+
+- *(xtask)* count forms, not verdicts, as form coverage ([#331](https://github.com/asm198x/asm198x/pull/331))
+- a data list must not split inside a function call ([#322](https://github.com/asm198x/asm198x/pull/322))
+- ask the dialect what a value's range is, not the width ([#291](https://github.com/asm198x/asm198x/pull/291))
+- *(acme)* declare ACME's retired spellings as its refusal, not our gap ([#288](https://github.com/asm198x/asm198x/pull/288))
+
+### Other
+
+- *(ca65)* use the bank-byte node the engine already had ([#327](https://github.com/asm198x/asm198x/pull/327))
+- follow the TAP crate to its org-prefixed name ([#325](https://github.com/asm198x/asm198x/pull/325))
+- check every reference-version claim against what we recorded ([#317](https://github.com/asm198x/asm198x/pull/317))
+- record the reference-parity goal the parity issues already cite ([#313](https://github.com/asm198x/asm198x/pull/313))
+
 ## [0.0.33](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.32...asm198x-v0.0.33) - 2026-08-25
 
 Three changes to what asm198x accepts or emits, and a body of work behind them
