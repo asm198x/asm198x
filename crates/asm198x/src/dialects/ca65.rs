@@ -3026,9 +3026,16 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::KnownUnsupported,
     },
-    // CPU selection
+    // CPU selection. `.setcpu "6502"` and `.p02` name the processor this leg
+    // already assembles, so they change nothing; every other name selects a
+    // different opcode set and is refused by name, the way ACME's `!cpu` is
+    // (`decisions/reference-parity-goal.md`, asm198x#302).
+    //
+    // `.pushcpu`/`.popcpu` save and restore a selection that cannot change
+    // here, and `.smart` decides how ca65 tracks the 65816's register widths
+    // across `jsr`/`rts` — probed inert on a 6502.
     Directive {
-        id: "unsupported-cpu",
+        id: "cpu",
         pattern: Pattern::Sigilled {
             sigil: '.',
             names: &[
@@ -3036,7 +3043,21 @@ pub const DIRECTIVES: &[Directive] = &[
             ],
             required: true,
         },
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
+    },
+    // `.asize`/`.isize` answer the current register widths, which only the
+    // 65816 has: ca65 on this target says `Command is only valid in 65816
+    // mode`, so refusing them is matching it.
+    Directive {
+        id: "register-widths",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["asize", "isize"],
+            required: true,
+        },
+        category: Category::RefusedByReference(
+            "only valid in 65816 mode, and this leg assembles a 6502",
+        ),
     },
     // The option words that change what the parse does, and so cannot be
     // accepted and discarded: `.linecont +` turns on backslash continuation,
@@ -3178,6 +3199,51 @@ fn parse_directive(
             rest,
             line,
         )?)),
+        // The processor words. `.setcpu` takes a quoted name; the `.pNN`
+        // shorthands are the name themselves.
+        "cpu" => {
+            let (word, _) = split_first_word(directive);
+            let selected = match word.to_ascii_lowercase().as_str() {
+                ".setcpu" | "setcpu" => {
+                    let text = rest.trim();
+                    let Some(name) = string_literal(text) else {
+                        return Err(AsmError::new(
+                            line,
+                            format!("`.setcpu` takes a quoted processor name, not `{text}`"),
+                        ));
+                    };
+                    Some(name.to_ascii_lowercase())
+                }
+                ".p02" | "p02" => Some("6502".to_string()),
+                ".pc02" | "pc02" => Some("65c02".to_string()),
+                ".psc02" | "psc02" => Some("65sc02".to_string()),
+                ".p816" | "p816" => Some("65816".to_string()),
+                ".p4510" | "p4510" => Some("4510".to_string()),
+                // `.pushcpu`/`.popcpu` save and restore a selection that
+                // cannot change here, and `.smart` is inert on a 6502.
+                _ => None,
+            };
+            // The processors ca65 V2.18 knows, probed by asking it for each:
+            // anything else is its own `CPU not supported`, which is a fault in
+            // the source rather than a gap here.
+            const KNOWN: &[&str] = &[
+                "6502", "6502x", "65sc02", "65c02", "65816", "huc6280", "4510", "sweet16", "none",
+            ];
+            match selected.as_deref() {
+                None | Some("6502") => Ok(Kind::Empty),
+                Some(name) if KNOWN.contains(&name) => Err(AsmError::new(
+                    line,
+                    format!(
+                        "`{name}` is a different opcode set, and asm198x assembles a 6502 \
+                         here — the source is valid and the gap is ours (asm198x#302)"
+                    ),
+                )),
+                Some(name) => Err(AsmError::new(
+                    line,
+                    format!("`{name}` is not a processor ca65 knows"),
+                )),
+            }
+        }
         "res" => parse_res(anons, current_global, consts, rest, line),
         "align" => parse_align(anons, current_global, consts, rest, line),
         // `.out` is the strict one: ca65 answers a value list with
@@ -4541,6 +4607,38 @@ two:\n\
         assert!(
             err(".struct S\nsa .byte\n.endstruct\nq: .tag S 2\n").contains("takes nothing after")
         );
+    }
+
+    /// Naming the processor this leg assembles changes nothing; naming another
+    /// is our gap, and naming a word ca65 does not know is a fault in the
+    /// source. Three different answers, and the third is ca65's own.
+    #[test]
+    fn the_processor_words_accept_the_processor_we_assemble() {
+        let plain = rom(".segment \"CODE\"\n lda #1\n");
+        let named = rom(".segment \"CODE\"\n.setcpu \"6502\"\n.p02\n.smart on\n\
+             .pushcpu\n.popcpu\n lda #1\n");
+        assert_eq!(plain, named, "naming a 6502 changes no byte");
+
+        let err = |src: &str| {
+            super::assemble(&format!(".segment \"CODE\"\n{src}\n nop\n"))
+                .expect_err(src)
+                .to_string()
+        };
+        // ca65's other processors: each a different opcode set, so taking one
+        // silently would assemble the wrong instructions.
+        for src in [".setcpu \"65C02\"", ".pc02", ".p816", ".p4510", ".psc02"] {
+            assert!(
+                err(src).contains("the gap is ours"),
+                "`{src}` should read as our gap: {}",
+                err(src)
+            );
+        }
+        // A name ca65 does not know is its `CPU not supported`, not our gap.
+        let e = err(".setcpu \"zz\"");
+        assert!(e.contains("not a processor ca65 knows"), "got: {e}");
+        // `.asize`/`.isize` are 65816-only, and ca65 refuses them here too.
+        let e = err(".asize");
+        assert!(e.contains("only valid in 65816 mode"), "got: {e}");
     }
 
     /// A pseudo-function is declared as what it is.

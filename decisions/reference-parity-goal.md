@@ -75,7 +75,7 @@ not deferred — nobody has examined it yet, which is a different thing.
 | `.ifref`, `.ifnref` | ca65 | they ask whether a symbol has been *referenced* above the line, and the projection keeps no use record |
 | `\#`, `_NARG`, `\@` | rgbasm | macro-expansion surface, unbuilt |
 | eight pragma spellings | lwasm | rule 3 — refused by name; see the `PRAGMAS` table |
-| every processor but `6502` | ACME `!cpu` | rule 3 — [#302](https://github.com/asm198x/asm198x/issues/302) |
+| every processor but `6502` | ACME `!cpu`, ca65 `.setcpu`/`.pNN` | rule 3 — [#302](https://github.com/asm198x/asm198x/issues/302) |
 
 Two open questions are **not** deferrals, because nothing has decided them:
 
