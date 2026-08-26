@@ -36,7 +36,7 @@ use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
 use crate::dialects::macros;
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, BinOp, Expr, Operation, Piece, Statement};
+use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
 
@@ -708,17 +708,10 @@ fn parse_directive(
         ))),
         // `.asciiz` — a `.byte` string list with one terminating $00.
         // Byte 0, 1 and 2 of each value, and all three for `.faraddr`. Byte 2
-        // is spelled out of `Lo` over a shift, the engine having no node for
-        // it; wrapping the expression rather than folding it keeps a forward
-        // label resolving in pass two.
+        // is `Expr::Bank`, the engine's 65816 `^` node. Wrapping the expression
+        // rather than folding it keeps a forward label resolving in pass two.
         "lobytes" | "hibytes" | "bankbytes" | "faraddr" => {
-            let bank = |e: Expr| {
-                Expr::Lo(Box::new(Expr::Bin(
-                    BinOp::Shr,
-                    Box::new(e),
-                    Box::new(Expr::Num(16)),
-                )))
-            };
+            let bank = |e: Expr| Expr::Bank(Box::new(e));
             let mut out = Vec::new();
             for value in value_list(rest, line)? {
                 match entry.id {

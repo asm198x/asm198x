@@ -33,7 +33,7 @@ use super::mos6502::{
     split_first_word, split_top_level, string_literal,
 };
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, BinOp, DiagSeverity, Expr, Operation, Warning, WarningKind};
+use crate::engine::{AsmError, DiagSeverity, Expr, Operation, Warning, WarningKind};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
 
@@ -2319,6 +2319,8 @@ fn parse_directive(
         // round every one, so a forward label still resolves at layout time and
         // the size is the item count (times three for `.faraddr`). ca65 answers
         // a string with a syntax error, which `parse_value_list` does too.
+        // `Expr::Bank` is the engine's 65816 `^` node — bits 16-23 — which is
+        // byte 2 exactly.
         "lobytes" | "hibytes" | "bankbytes" | "faraddr" => {
             let values = parse_value_list(anons, current_global, rest, line)?;
             let mut out = Vec::with_capacity(values.len());
@@ -2326,11 +2328,11 @@ fn parse_directive(
                 match entry.id {
                     "lobytes" => out.push(Expr::Lo(Box::new(value))),
                     "hibytes" => out.push(Expr::Hi(Box::new(value))),
-                    "bankbytes" => out.push(bank_byte(value)),
+                    "bankbytes" => out.push(Expr::Bank(Box::new(value))),
                     _ => {
                         out.push(Expr::Lo(Box::new(value.clone())));
                         out.push(Expr::Hi(Box::new(value.clone())));
-                        out.push(bank_byte(value));
+                        out.push(Expr::Bank(Box::new(value)));
                     }
                 }
             }
@@ -2586,17 +2588,6 @@ fn parse_asciiz(
     let mut out = parse_data_list(anons, current_global, rest, line)?;
     out.push(Expr::Num(0));
     Ok(out)
-}
-
-/// Byte 2 of a value — the bank byte of a 65816 address. `.bankbytes` and the
-/// third byte of `.faraddr` both want it, and the engine has no dedicated node
-/// for it, so it is spelled out of the ones it does have.
-fn bank_byte(value: Expr) -> Expr {
-    Expr::Lo(Box::new(Expr::Bin(
-        BinOp::Shr,
-        Box::new(value),
-        Box::new(Expr::Num(16)),
-    )))
 }
 
 fn parse_value_list(
