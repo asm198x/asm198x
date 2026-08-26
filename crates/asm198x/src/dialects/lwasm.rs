@@ -387,7 +387,7 @@ impl FlatWalk for Walker {
         use ca65_flat::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_lowercase();
         Some(match word.as_str() {
-            "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifdef" | "ifndef" => {
+            "if" | "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifdef" | "ifndef" => {
                 BlockKw::CondOpen
             }
             "else" => BlockKw::Else,
@@ -491,7 +491,7 @@ impl FlatWalk for Walker {
         };
         // Bind an `equ` value into the parse-time env so a later direct/extended
         // choice can fold it (mirrors the engine's pass-1 `equ`).
-        if let (Some(name), Some(Operation::Equ(e))) = (&label, &op)
+        if let (Some(name), Some(Operation::Equ(e) | Operation::Set(e))) = (&label, &op)
             && let Ok(v) = fold_const(e, &self.env, line)
         {
             self.env.insert(name.clone(), v);
@@ -576,16 +576,23 @@ pub const DIRECTIVES: &[Directive] = &[
     // before `parse_op` sees a line.
     //
     // Every numeric form compares against **zero** rather than taking a
-    // boolean, which is why there are six of them and not one. Both `endc` and
-    // `endif` close — the only dialect measured here with two closers.
+    // boolean, which is why there are six of them and not one — plus plain
+    // `if`, which is `ifne` under a shorter name. Both `endc` and `endif`
+    // close — the only dialect measured here with two closers.
+    //
+    // `ifp1` and `ifp2` ask which pass is running, and lwtools 4.25 answers
+    // neither: it warns "Not supported IFP1" and takes the true branch. The
+    // branch is easy here; the warning has nowhere to go, because `CondEval`
+    // folds a head from `&self` and cannot report one. They stay outstanding
+    // until it can.
     //
     // `ifpragma` and `ifstr` are real lwasm and deliberately absent: pragma
     // strings and string conditions are their own surfaces, demand-gated.
     Directive {
         id: "conditional",
         pattern: Pattern::Exact(&[
-            "ifne", "ifeq", "ifgt", "ifge", "iflt", "ifle", "ifdef", "ifndef", "else", "endc",
-            "endif",
+            "if", "ifne", "ifeq", "ifgt", "ifge", "iflt", "ifle", "ifdef", "ifndef", "else",
+            "endc", "endif",
         ]),
         category: Category::Operation,
     },
@@ -597,6 +604,19 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "equ",
         pattern: Pattern::Exact(&["equ"]),
+        category: Category::Operation,
+    },
+    // `set` is `equ` for a name that moves. It binds the label again as often
+    // as it likes, and a use above the statement reads the value the name is
+    // left with at the end of the file where a use below reads the one bound
+    // here — which is what lwtools 4.25 does, and what a two-pass assembler
+    // has to do with a name that has more than one value.
+    //
+    // A name is one or the other: `set` over an `equ`, or an `equ` over a
+    // `set`, is "Multiply defined symbol" whichever came first.
+    Directive {
+        id: "set",
+        pattern: Pattern::Exact(&["set"]),
         category: Category::Operation,
     },
     Directive {
@@ -696,7 +716,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What lwasm has here and we do not.
     //
-    // 30 spellings against lwtools 4.25.
+    // 28 spellings against lwtools 4.25.
     //
     // **Directives only.** The first cut of this list swept in fifteen 6809
     // *instructions* — `adca`, `bita`, `cmpd`, `cwai`, `sbca` among them —
@@ -783,7 +803,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "endsect",
             "endsection",
             "endstruct",
-            "if",
             "ifopt",
             "ifp1",
             "ifp2",
@@ -801,7 +820,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "reorg",
             "sect",
             "section",
-            "set",
             "setdp",
             "setstr",
             "struct",
@@ -838,6 +856,7 @@ fn parse_op(
         Category::Operation => match directive.id {
             "org" => Ok(Some(Operation::Org(value(operand, line)?))),
             "equ" => Ok(Some(Operation::Equ(value(operand, line)?))),
+            "set" => Ok(Some(Operation::Set(value(operand, line)?))),
             "bytes" => Ok(Some(Operation::Bytes(list(operand, line)?))),
             "words" => Ok(Some(Operation::Words(list(operand, line)?))),
             "fcc" => Ok(Some(parse_fcc(operand, line, StringEnd::Bare)?)),
@@ -1622,7 +1641,7 @@ impl crate::ast::CondEval for LwasmEval {
             )
         })?;
         Ok(match word.as_str() {
-            "ifne" => value != 0,
+            "if" | "ifne" => value != 0,
             "ifeq" => value == 0,
             "ifgt" => value > 0,
             "ifge" => value >= 0,
@@ -1669,7 +1688,7 @@ impl crate::ast::CondEval for LwasmEval {
             _ if node.source.is_empty() => None,
             _ => parse_op(&node.source, &self.env, line)?,
         };
-        if let (Some(sym), Some(Operation::Equ(e))) = (node.label.as_ref(), &op)
+        if let (Some(sym), Some(Operation::Equ(e) | Operation::Set(e))) = (node.label.as_ref(), &op)
             && let Ok(v) = fold_const(e, &self.env, line)
         {
             self.env.insert(sym.qualified.clone(), v);
@@ -1814,6 +1833,110 @@ mod tests {
         assert!(
             asm(" org $1000\n phase $2000\n dephase\n phase $3000\n dephase\n").is_ok(),
             "sequential phases"
+        );
+    }
+
+    /// `set` is `equ` for a name that moves — and the direction of a
+    /// reference decides which value it reads. A use *below* the binding gets
+    /// the one bound there; a use *above* it gets the value the name is left
+    /// with at the end of the file, because that is what pass one leaves for
+    /// pass two to start from. lwtools 4.25 was measured doing both.
+    #[test]
+    fn set_binds_a_name_that_moves() {
+        assert_eq!(
+            asm(" org $1000\nn set 1\n fcb n\nn set 2\n fcb n\nn set n+5\n fcb n\n")
+                .expect("set")
+                .bytes,
+            vec![1, 2, 7]
+        );
+        // The leading `fcb n` reads 2 — the last binding — and the two after
+        // each read the binding above them.
+        assert_eq!(
+            asm(" org $1000\n fcb n\nn set 1\n fcb n\nn set 2\n fcb n\n")
+                .expect("forward")
+                .bytes,
+            vec![2, 1, 2]
+        );
+    }
+
+    /// A name is redefinable or it is fixed, never both — lwasm answers
+    /// "Multiply defined symbol" whichever kind came first.
+    #[test]
+    fn a_name_is_redefinable_or_fixed_but_not_both() {
+        assert!(
+            asm(" org $1000\nn set 1\nn equ 2\n fcb n\n").is_err(),
+            "set then equ"
+        );
+        assert!(
+            asm(" org $1000\nn equ 1\nn set 2\n fcb n\n").is_err(),
+            "equ then set"
+        );
+        assert!(
+            asm(" org $1000\nn set 1\nn fcb 2\n").is_err(),
+            "set then label"
+        );
+        assert!(
+            asm(" org $1000\nn fcb 2\nn set 1\n").is_err(),
+            "label then set"
+        );
+        assert!(asm(" org $1000\n set 1\n").is_err(), "`set` with no label");
+        assert!(
+            asm(" org $1000\nn set\n fcb 1\n").is_err(),
+            "`set` with no value"
+        );
+    }
+
+    /// A `set` value reaches the parse-time direct/extended choice the same
+    /// way an `equ` does, and the last binding above the use is the one that
+    /// decides it.
+    #[test]
+    fn a_set_value_chooses_direct_or_extended() {
+        assert_eq!(
+            asm(" org $1000\nn set $50\n lda n\n")
+                .expect("direct")
+                .bytes,
+            vec![0x96, 0x50]
+        );
+        assert_eq!(
+            asm(" org $1000\nn set $50\nn set $2050\n lda n\n")
+                .expect("extended")
+                .bytes,
+            vec![0xB6, 0x20, 0x50]
+        );
+    }
+
+    /// Plain `if` is `ifne` under a shorter name: true when the condition is
+    /// anything but zero, negatives included.
+    #[test]
+    fn plain_if_tests_against_zero() {
+        assert_eq!(
+            asm(" org $1000\n if 1\n fcb 1\n else\n fcb 2\n endc\n")
+                .expect("true")
+                .bytes,
+            vec![1]
+        );
+        assert_eq!(
+            asm(" org $1000\n if 0\n fcb 1\n else\n fcb 2\n endc\n")
+                .expect("false")
+                .bytes,
+            vec![2]
+        );
+        assert_eq!(
+            asm(" org $1000\n if -1\n fcb 1\n endc\n")
+                .expect("neg")
+                .bytes,
+            vec![1]
+        );
+        // It nests, and closes with either closer.
+        assert_eq!(
+            asm(" org $1000\n if 1\n if 0\n fcb 1\n endc\n fcb 2\n endif\n")
+                .expect("nested")
+                .bytes,
+            vec![2]
+        );
+        assert!(
+            asm(" org $1000\n if\n fcb 1\n endc\n").is_err(),
+            "bare `if`"
         );
     }
 
