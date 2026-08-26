@@ -1120,9 +1120,9 @@ impl FlatWalk for Walker {
     /// `.endif`, and `.repeat` / `.endrepeat`.
     ///
     /// `.ifblank`, `.ifconst`, `.ifp02`, `.ifref` and kin are real ca65 and
-    /// deliberately absent — fringe spellings stay demand-gated, and declaring
-    /// one here without folding it would group a block the projection cannot
-    /// evaluate.
+    /// deliberately absent: declaring one here without folding it would group a
+    /// block the projection cannot evaluate. Registered in
+    /// `decisions/reference-parity-goal.md`.
     fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
         use ca65_flat::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_lowercase();
@@ -1885,8 +1885,9 @@ pub const DIRECTIVES: &[Directive] = &[
     // `Item::Repeat` before `parse_directive` sees a line.
     //
     // `.ifblank`, `.ifconst`, `.ifp02` and `.ifref` are real ca65 and
-    // deliberately absent — fringe spellings stay demand-gated, and declaring
-    // one without folding it would group a block the projection cannot read.
+    // deliberately absent: declaring one without folding it would group a block
+    // the projection cannot read. Registered in
+    // `decisions/reference-parity-goal.md`.
     Directive {
         id: "conditional",
         pattern: Pattern::Exact(&[".if", ".ifdef", ".ifndef", ".elseif", ".else", ".endif"]),
@@ -3209,7 +3210,8 @@ two:\n\
         // `.condes` rather than `.export`, which became an implemented check
         // once ca65 turned out to enforce one. `.condes` builds an ld65
         // constructor table from linker-config features our fixed layout does
-        // not declare, so it stays a gap by decision rather than by schedule.
+        // not declare, so it stays a gap by decision rather than by schedule
+        // (`decisions/reference-parity-goal.md`).
         for d in [".condes foo, 1", ".proc x", ".org $200", ".macpack cpu"] {
             let e = err(&format!("\t{d}\n"));
             assert!(

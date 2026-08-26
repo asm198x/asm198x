@@ -1460,8 +1460,9 @@ impl crate::ast::CondEval for RgbasmEval {
 //     anything the definition declared.
 //   * a call is the macro's bare name, and an unknown one is `Undefined macro`.
 //
-// Not adopted, and demand-gated: `\#` (all arguments verbatim), `_NARG` (the
-// argument count) and `\@` (a per-expansion unique suffix).
+// Not adopted, and registered in `decisions/reference-parity-goal.md`: `\#`
+// (all arguments verbatim), `_NARG` (the argument count) and `\@` (a
+// per-expansion unique suffix).
 // ---------------------------------------------------------------------------
 
 /// rgbasm's macro grammar.
