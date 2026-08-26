@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 360 word(s) outside our surface, across the references installed
+# 352 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -340,7 +340,7 @@ __utc_year__
 
 ## ca65 (ca65 V2.18 - N/A)
 # 2906 candidate(s) harvested; 225 recognised here, 4 more the tool itself
-# refuses on this target; 74 of the 225 outside our surface
+# refuses on this target; 66 of the 225 outside our surface
 .asize
 .bank
 .blank
@@ -351,8 +351,6 @@ __utc_year__
 .const
 .constructor
 .cpu
-.dbg
-.debuginfo
 .define
 .definedmacro
 .delmac
@@ -367,8 +365,6 @@ __utc_year__
 .exitmac
 .exitmacro
 .feature
-.fileopt
-.fopt
 .ident
 .ifnref
 .ifref
@@ -378,8 +374,6 @@ __utc_year__
 .ismnemonic
 .left
 .linecont
-.list
-.listbytes
 .localchar
 .macpack
 .match
@@ -389,8 +383,6 @@ __utc_year__
 .p02
 .p4510
 .p816
-.pagelen
-.pagelength
 .paramcount
 .pc02
 .popcpu

@@ -2091,6 +2091,24 @@ const MULTI_PROBES: &[MultiProbe] = &[
              .segment \"VECTORS\"\n .word 0, one, 0\n",
         )],
     },
+    // The words that address the listing and the object file rather than the
+    // program: present or absent, the bytes are the same.
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "listing and object-metadata words emit nothing: .list, \
+               .listbytes, .pagelen(gth), .debuginfo, .dbg, .fileopt/.fopt",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .code\n\
+             .debuginfo on\n .fileopt comment, \"probe\"\n .fopt author, \"probe\"\n\
+             .list on\n .byte $11\n .list off\n .byte $22\n\
+             .listbytes 4\n .pagelen 60\n .pagelength 60\n .dbg line\n\
+             .byte $33\n\
+             .segment \"VECTORS\"\n .word 0, 0, 0\n",
+        )],
+    },
     MultiProbe {
         dialect: "ca65-nes",
         binaries: &[],
