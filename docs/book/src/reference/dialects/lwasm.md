@@ -8,13 +8,13 @@
 
 ## Directives
 
-30 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+31 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
 | `align` | `align` |  |
 | `bytes` | `fcb`, `.byte` |  |
-| `conditional` | `if`, `ifne`, `ifeq`, `ifgt`, `ifge`, `iflt`, `ifle`, `ifdef`, `ifndef`, `else`, `endc`, `endif` |  |
+| `conditional` | `if`, `ifne`, `ifeq`, `ifgt`, `ifge`, `iflt`, `ifle`, `ifdef`, `ifndef`, `ifpragma`, `ifopt`, `else`, `endc`, `endif` |  |
 | `diagnose` | `error` |  |
 | `diagnose-warning` | `warning`, `msg` |  |
 | `end` | `end` | Accepted and discarded — it changes no bytes |
@@ -30,6 +30,7 @@
 | `macro` | `macro`, `macr`, `endm` |  |
 | `object-target-only` | `export`, `extdep`, `extern`, `external`, `import` | Refused, as the reference refuses it — only supported for an object target, and asm198x emits a binary |
 | `org` | `org` |  |
+| `pragma` | `pragma`, `opt` |  |
 | `pseudo-pc` | `phase`, `dephase` |  |
 | `reorg` | `reorg` |  |
 | `reserve` | `rmb`, `.ds`, `zmb`, `bsz`, `fzb` |  |
@@ -39,7 +40,7 @@
 | `set` | `set` |  |
 | `setdp` | `setdp` |  |
 | `struct` | `struct`, `endstruct`, `ends` |  |
-| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `includestr`, `mod`, `opt`, `os9`, `pragma`, `setstr` | Recognised, and not implemented |
+| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `ifp1`, `ifp2`, `ifstr`, `includestr`, `mod`, `os9`, `setstr` | Recognised, and not implemented |
 | `words` | `fdb`, `.word` |  |
 | `words-swapped` | `fdbs` |  |
 
