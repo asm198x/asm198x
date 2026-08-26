@@ -8,7 +8,7 @@
 
 ## Directives
 
-16 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+21 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -19,15 +19,20 @@
 | `end` | `end` | Accepted and discarded — it changes no bytes |
 | `equ` | `equ` |  |
 | `fcc` | `fcc` |  |
+| `fcn` | `fcn`, `fcz` |  |
+| `fcs` | `fcs` |  |
 | `fill` | `fill` |  |
 | `fqb` | `fqb` |  |
 | `incbin` | `includebin` |  |
 | `include` | `include`, `use` |  |
 | `object-target-only` | `export`, `extdep`, `extern`, `external`, `import` | Refused, as the reference refuses it — only supported for an object target, and asm198x emits a binary |
 | `org` | `org` |  |
-| `reserve` | `rmb`, `.ds`, `zmb` |  |
-| `unsupported-lwasm` | `bsz`, `dephase`, `dtb`, `dts`, `emod`, `endm`, `ends`, `endsect`, `endsection`, `endstruct`, `fcn`, `fcs`, `fcz`, `fdbs`, `fzb`, `if`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `incl`, `includestr`, `lib`, `macr`, `macro`, `mod`, `msg`, `nam`, `opt`, `os9`, `pag`, `page`, `phase`, `pragma`, `reorg`, `rmd`, `rmq`, `rmw`, `sect`, `section`, `set`, `setdp`, `setstr`, `spc`, `struct`, `ttl`, `warning`, `zmd`, `zmq` | Recognised, and not implemented |
+| `reserve` | `rmb`, `.ds`, `zmb`, `bsz`, `fzb` |  |
+| `reserve-double` | `rmd`, `zmd`, `rmw` |  |
+| `reserve-quad` | `rmq`, `zmq` |  |
+| `unsupported-lwasm` | `dephase`, `dtb`, `dts`, `emod`, `endm`, `ends`, `endsect`, `endsection`, `endstruct`, `if`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `incl`, `includestr`, `lib`, `macr`, `macro`, `mod`, `msg`, `nam`, `opt`, `os9`, `pag`, `page`, `phase`, `pragma`, `reorg`, `sect`, `section`, `set`, `setdp`, `setstr`, `spc`, `struct`, `ttl`, `warning` | Recognised, and not implemented |
 | `words` | `fdb`, `.word` |  |
+| `words-swapped` | `fdbs` |  |
 
 Instruction mnemonics are not listed here — they come from the instruction-set spec and have their own reference.
 
