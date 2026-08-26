@@ -35,7 +35,7 @@ serde_json = "1"
 # than here because Emu198x reads what this writes, and a format with two
 # consumers graduates — see ../decisions/multi-artifact-output.md, and
 # format198x's own crate for the layout facts and their citations.
-format-sinclair-zx-spectrum-tap = "0.1"
+format198x-sinclair-zx-spectrum-tap = "0.1"
 
 [workspace.package]
 edition = "2024"

@@ -110,7 +110,7 @@ projects as they earn a standalone consumer."*
 So the sequence is settled, not open. Write the serialiser here, citing the
 primary library; when a second consumer appears — Emu198x's loader reading a
 layout Asm198x writes is the obvious one — the format graduates to a
-`format-sinclair-zx-spectrum-tap` crate and this workspace depends on it.
+`format198x-sinclair-zx-spectrum-tap` crate and this workspace depends on it.
 
 That has a consequence for how the first one is written, and it binds:
 **write it graduation-ready.** Format198x's conventions are

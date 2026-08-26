@@ -78,7 +78,7 @@ pub enum ArtifactFormat {
     #[default]
     Raw,
     /// A ZX Spectrum tape image: a ROM header block naming the span, then the
-    /// span itself. Written by `format-sinclair-zx-spectrum-tap`, which holds
+    /// span itself. Written by `format198x-sinclair-zx-spectrum-tap`, which holds
     /// the layout and the citations for it.
     Tap,
 }
@@ -1924,7 +1924,7 @@ struct Save {
 /// means "no auto-start line", whatever start the directive was given — and
 /// the second is the length again.
 fn tape_image(kind: TapeKind, name: &str, at: i64, span: Vec<u8>) -> Vec<u8> {
-    use format_sinclair_zx_spectrum_tap as tap;
+    use format198x_sinclair_zx_spectrum_tap as tap;
     let len = span.len() as u16;
     let start = at as u16;
     let header = match kind {

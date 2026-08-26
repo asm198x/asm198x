@@ -154,7 +154,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // `SAVETAP "file",CODE|BASIC,"name",start,length` wraps the same span in a
     // Spectrum tape: a ROM header block naming it, then the block itself. The
-    // layout is `format-sinclair-zx-spectrum-tap`'s, which graduated to
+    // layout is `format198x-sinclair-zx-spectrum-tap`'s, which graduated to
     // Format198x when this became its second consumer.
     //
     // The forms that name no kind save the *device's* memory rather than a
