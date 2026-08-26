@@ -2536,6 +2536,35 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Ignored,
     },
+    // The words that address the listing and the object file's own metadata
+    // rather than the program. Probed against V2.18 and ld65: each assembles to
+    // the same bytes with the directive present or absent, so accepting and
+    // discarding one is what matching the reference means here.
+    //
+    // `.list off` does not suppress bytes, only listing lines; `.dbg` and
+    // `.debuginfo` add records to the object file, which the binary output
+    // never carries; `.fileopt`/`.fopt` write an object-file comment. The two
+    // option words that are *not* here are the two that change what the parse
+    // does: `.linecont +` turns on backslash continuation, and `.case off`
+    // makes identifiers case-blind.
+    Directive {
+        id: "listing",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &[
+                "list",
+                "listbytes",
+                "pagelen",
+                "pagelength",
+                "debuginfo",
+                "dbg",
+                "fileopt",
+                "fopt",
+            ],
+            required: true,
+        },
+        category: Category::Ignored,
+    },
     Directive {
         id: "unsupported-symbol",
         pattern: Pattern::Sigilled {
@@ -2601,21 +2630,17 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::KnownUnsupported,
     },
-    // diagnostics and listing
+    // The option words that change what the parse does, and so cannot be
+    // accepted and discarded: `.linecont +` turns on backslash continuation,
+    // `.case off` makes identifiers case-blind, `.charmap`/`.localchar`
+    // translate characters on the way out, and `.feature` switches syntax
+    // rules on one by one.
     Directive {
-        id: "unsupported-diagnostics",
+        id: "unsupported-parse-options",
         pattern: Pattern::Sigilled {
             sigil: '.',
             names: &[
-                "list",
-                "listbytes",
-                "pagelen",
-                "pagelength",
                 "linecont",
-                "fileopt",
-                "fopt",
-                "dbg",
-                "debuginfo",
                 "case",
                 "charmap",
                 "localchar",
@@ -4013,6 +4038,29 @@ two:\n\
              .proc two\n@l: nop\n bne @l\n.endproc\n");
         // Each branch reaches its own `@l`: nop, bne -3, twice over.
         assert_eq!(&image[16..22], &[0xEA, 0xD0, 0xFD, 0xEA, 0xD0, 0xFD]);
+    }
+
+    /// The listing words are accepted and change nothing; the option words that
+    /// change the parse are still refused, and say so.
+    #[test]
+    fn a_listing_word_is_accepted_and_a_parse_option_is_not() {
+        let plain = rom(".segment \"CODE\"\n .byte $AA\n");
+        let noisy = rom(".segment \"CODE\"\n\
+             .debuginfo on\n .fileopt comment, \"x\"\n .fopt author, \"y\"\n\
+             .list off\n .listbytes 4\n .pagelen 60\n .pagelength 60\n .dbg line\n\
+             .byte $AA\n");
+        assert_eq!(plain, noisy, "the listing words change no byte");
+        // `.linecont +` and `.case off` change what the parse does, so they are
+        // a gap rather than something to discard.
+        for word in [".linecont +", ".case off", ".feature labels_without_colons"] {
+            let e = super::assemble(&format!(".segment \"CODE\"\n {word}\n"))
+                .expect_err(word)
+                .to_string();
+            assert!(
+                e.contains("is a real directive here"),
+                "`{word}` should read as our gap, got: {e}"
+            );
+        }
     }
 
     /// A pseudo-function is declared as what it is.
