@@ -1116,18 +1116,25 @@ impl Walker {
 
 impl FlatWalk for Walker {
     /// ca65's block vocabulary, measured against ca65 V2.18 and
-    /// case-insensitive: `.if` / `.ifdef` / `.ifndef`, `.elseif`, `.else`,
+    /// case-insensitive: `.if` and its nine sibling heads, `.elseif`, `.else`,
     /// `.endif`, and `.repeat` / `.endrepeat`.
     ///
-    /// `.ifblank`, `.ifconst`, `.ifp02`, `.ifref` and kin are real ca65 and
-    /// deliberately absent: declaring one here without folding it would group a
-    /// block the projection cannot evaluate. Registered in
+    /// `.ifref` and `.ifnref` are the two still absent. They ask whether a
+    /// symbol has been *referenced* above this line, which needs a use record
+    /// the projection does not keep. Registered in
     /// `decisions/reference-parity-goal.md`.
     fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
         use ca65_flat::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_lowercase();
         Some(match word.as_str() {
-            ".if" | ".ifdef" | ".ifndef" => BlockKw::CondOpen,
+            ".if" | ".ifdef" | ".ifndef" | ".ifblank" | ".ifnblank" | ".ifconst" | ".ifnconst" => {
+                BlockKw::CondOpen
+            }
+            // The CPU tests. This leg assembles for one CPU and refuses
+            // `.setcpu`, so which of them is true is fixed before the file is
+            // read — but they still open a block, and the dead branch still
+            // has to be skipped rather than parsed.
+            ".ifp02" | ".ifp4510" | ".ifp816" | ".ifpc02" | ".ifpsc02" => BlockKw::CondOpen,
             ".elseif" => BlockKw::ElseIf,
             ".else" => BlockKw::Else,
             ".endif" => BlockKw::CondClose,
@@ -1407,6 +1414,34 @@ fn fold_condition(head: &str, st: &Projection, line: usize) -> Result<bool, AsmE
             let defined = env.contains_key(name) || st.label_seg.contains_key(name);
             Ok(if word == ".ifdef" { defined } else { !defined })
         }
+        // `.ifblank` asks whether anything follows it on the line — which is
+        // how a macro tests an argument it may not have been given, the
+        // expansion being textual. ca65 counts tokens, not characters, so
+        // whitespace alone is still blank.
+        ".ifblank" | ".ifnblank" => Ok((word == ".ifblank") == args.is_empty()),
+        // The CPU tests. This leg is a 6502 and refuses `.setcpu`, so no
+        // reachable source can make one of the others true.
+        ".ifp02" => Ok(true),
+        ".ifp4510" | ".ifp816" | ".ifpc02" | ".ifpsc02" => Ok(false),
+        // `.ifconst` is not `.if`: it asks whether the expression *is* a
+        // constant, not what it comes to, and answers rather than failing when
+        // it is not. ca65's rule is the linker's — probed against V2.18:
+        //
+        //   `.const(LA - LB)` in one segment is 1, across two is 0;
+        //   `.const(LA + LA)` and `.const(LA * 2)` are 0;
+        //   `.const(LB - LA)` with `LB` *below* the line is 0.
+        //
+        // So a label is not constant, a difference of two labels above the line
+        // in one segment is, and anything that is not linear in the labels is
+        // not. See [`segment_weights`].
+        ".ifconst" | ".ifnconst" => {
+            if args.is_empty() {
+                return Err(AsmError::new(line, format!("`{word}` needs an expression")));
+            }
+            let expr = parse_value(&AnonCtx::default(), "", args, line)?;
+            let expr = map_expr_syms(&expr, &resolve_defined(&st.consts, &st.label_seg));
+            Ok((word == ".ifconst") == weighs_nothing(&expr, st))
+        }
         ".if" | ".elseif" => {
             if args.is_empty() {
                 return Err(AsmError::new(line, format!("`{word}` needs a condition")));
@@ -1431,6 +1466,74 @@ fn fold_condition(head: &str, st: &Projection, line: usize) -> Result<bool, AsmE
             line,
             format!("internal error: `{head}` is not a conditional head"),
         )),
+    }
+}
+
+/// How much of each segment an expression carries — ca65's constancy rule,
+/// which is the linker's.
+///
+/// `Some(weights)` for an expression that is *linear* in the labels: every
+/// label above this line counts +1 in its own segment, `*` counts +1 in the
+/// active one, and addition and subtraction combine them. All-zero weights
+/// mean the expression is a constant. `None` means it is not linear at all — a
+/// label multiplied, shifted, masked or fed to a byte extractor — which ca65
+/// answers as not constant too, so the caller need not tell the two apart.
+///
+/// A name this line has not seen yet counts as a label of *no* segment, which
+/// cannot cancel against a real one: `.const(LB - LA)` with `LB` below the line
+/// is `0` in ca65, and a name defined nowhere is `0` here where ca65
+/// additionally reports the undefined symbol.
+fn segment_weights(expr: &Expr, st: &Projection) -> Option<BTreeMap<String, i64>> {
+    let mut weights = BTreeMap::new();
+    walk_weights(expr, 1, st, &mut weights)?;
+    Some(weights)
+}
+
+/// Whether an expression stands for a value on its own — all weights present
+/// and cancelling.
+fn weighs_nothing(expr: &Expr, st: &Projection) -> bool {
+    segment_weights(expr, st).is_some_and(|w| w.values().all(|&n| n == 0))
+}
+
+fn walk_weights(
+    expr: &Expr,
+    sign: i64,
+    st: &Projection,
+    weights: &mut BTreeMap<String, i64>,
+) -> Option<()> {
+    use crate::engine::BinOp as Op;
+    let mut carry = |seg: String| *weights.entry(seg).or_insert(0) += sign;
+    match expr {
+        Expr::Num(_) => Some(()),
+        Expr::Pc => {
+            carry(st.seg.clone());
+            Some(())
+        }
+        Expr::Sym(name) => {
+            if st.consts.contains_key(name) {
+                return Some(());
+            }
+            carry(st.label_seg.get(name).cloned().unwrap_or_default());
+            Some(())
+        }
+        Expr::Bin(Op::Add, a, b) => {
+            walk_weights(a, sign, st, weights)?;
+            walk_weights(b, sign, st, weights)
+        }
+        Expr::Bin(Op::Sub, a, b) => {
+            walk_weights(a, sign, st, weights)?;
+            walk_weights(b, -sign, st, weights)
+        }
+        // Every other operator is linear only over operands that already stand
+        // for values, so each side is weighed on its own and a label anywhere
+        // inside ends it.
+        Expr::Bin(_, a, b) => (weighs_nothing(a, st) && weighs_nothing(b, st)).then_some(()),
+        Expr::Lo(e)
+        | Expr::Hi(e)
+        | Expr::Bank(e)
+        | Expr::Neg(e)
+        | Expr::BitNot(e)
+        | Expr::LogNot(e) => weighs_nothing(e, st).then_some(()),
     }
 }
 
@@ -1966,13 +2069,28 @@ pub const DIRECTIVES: &[Directive] = &[
     // Walk-handled: the shared cursor reads these into `Item::Conditional` /
     // `Item::Repeat` before `parse_directive` sees a line.
     //
-    // `.ifblank`, `.ifconst`, `.ifp02` and `.ifref` are real ca65 and
-    // deliberately absent: declaring one without folding it would group a block
-    // the projection cannot read. Registered in
+    // `.ifref` and `.ifnref` are the two still absent: declaring one without
+    // folding it would group a block the projection cannot read. Registered in
     // `decisions/reference-parity-goal.md`.
     Directive {
         id: "conditional",
-        pattern: Pattern::Exact(&[".if", ".ifdef", ".ifndef", ".elseif", ".else", ".endif"]),
+        pattern: Pattern::Exact(&[
+            ".if",
+            ".ifdef",
+            ".ifndef",
+            ".ifblank",
+            ".ifnblank",
+            ".ifconst",
+            ".ifnconst",
+            ".ifp02",
+            ".ifp4510",
+            ".ifp816",
+            ".ifpc02",
+            ".ifpsc02",
+            ".elseif",
+            ".else",
+            ".endif",
+        ]),
         category: Category::Operation,
     },
     Directive {
@@ -2180,10 +2298,7 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "unsupported-conditionals",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &[
-                "ifblank", "ifconst", "ifnblank", "ifnconst", "ifnref", "ifp02", "ifp4510",
-                "ifp816", "ifpc02", "ifpsc02", "ifref",
-            ],
+            names: &["ifnref", "ifref"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -3435,6 +3550,56 @@ two:\n\
             !text.contains("the gap is ours"),
             "and must not read as an unimplemented directive: {text}"
         );
+    }
+
+    /// The nine conditional heads beyond `.if`/`.ifdef`/`.ifndef`, each folded
+    /// the way ca65 V2.18 folds it.
+    #[test]
+    fn the_conditional_heads_fold_as_ca65_folds_them() {
+        // Each case is a head, then the byte the taken branch emits.
+        let taken = |head: &str| {
+            let src = format!(
+                ".segment \"CODE\"\nV = 5\nLA:\nLB:\n{head}\n .byte $11\n .else\n .byte $22\n .endif\nLC: .byte 0\n"
+            );
+            let image = super::assemble(&src)
+                .unwrap_or_else(|e| panic!("{head}: {e}"))
+                .0;
+            let at = image
+                .iter()
+                .position(|&b| b == 0x11 || b == 0x22)
+                .unwrap_or_else(|| panic!("{head}: neither branch emitted"));
+            image[at]
+        };
+        // `.ifblank` asks whether anything follows it on the line.
+        assert_eq!(taken(".ifblank"), 0x11);
+        assert_eq!(taken(".ifblank x"), 0x22);
+        assert_eq!(taken(".ifnblank"), 0x22);
+        assert_eq!(taken(".ifnblank x"), 0x11);
+        // `.ifconst` asks whether the expression *is* constant, and answers
+        // rather than failing when it is not.
+        assert_eq!(taken(".ifconst 1+1"), 0x11);
+        assert_eq!(taken(".ifconst V*2"), 0x11);
+        assert_eq!(taken(".ifnconst 1"), 0x22);
+        // A label is not constant; a difference of two labels above the line in
+        // one segment is; a forward one is not, and neither is a label that has
+        // been multiplied.
+        assert_eq!(taken(".ifconst LB-LA"), 0x11);
+        assert_eq!(taken(".ifconst LA"), 0x22);
+        // `LC` stands below the line, and a name this line has not seen yet is
+        // not constant however it is used.
+        assert_eq!(taken(".ifconst LC-LA"), 0x22);
+        assert_eq!(taken(".ifconst LA*2"), 0x22);
+        assert_eq!(taken(".ifconst .lobyte(LA)"), 0x22);
+        // `*` is a label of the active segment, so it cancels against itself
+        // and against nothing else.
+        assert_eq!(taken(".ifconst *-*"), 0x11);
+        assert_eq!(taken(".ifconst *"), 0x22);
+        // The CPU tests: this leg is a 6502 and refuses `.setcpu`, so the
+        // answer cannot change while a file is read.
+        assert_eq!(taken(".ifp02"), 0x11);
+        for head in [".ifp816", ".ifpc02", ".ifpsc02", ".ifp4510"] {
+            assert_eq!(taken(head), 0x22, "{head}");
+        }
     }
 
     /// A pseudo-function is declared as what it is.
