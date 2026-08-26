@@ -67,6 +67,7 @@ impl Dialect for Lwasm {
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        check_phases(&out)?;
         Ok(out)
     }
 
@@ -90,8 +91,39 @@ impl Dialect for Lwasm {
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        check_phases(&out)?;
         Ok(out)
     }
+}
+
+/// lwasm's two rules for `phase`/`dephase`, checked over the finished
+/// statement stream because neither is visible from one line: a `phase` inside
+/// an open one is "Nested PHASE not supported", and a `dephase` that closes
+/// nothing is "DEPHASE without PHASE". The engine's own counter stack would
+/// take both, so the refusal has to be made here or not at all.
+fn check_phases(statements: &[Statement]) -> Result<(), AsmError> {
+    let mut open = false;
+    for s in statements {
+        match &s.op {
+            Some(Operation::PseudoPc(Some(_))) => {
+                if open {
+                    return Err(AsmError::new(
+                        s.line,
+                        "`phase` inside a `phase` — lwasm does not nest them",
+                    ));
+                }
+                open = true;
+            }
+            Some(Operation::PseudoPc(None)) => {
+                if !open {
+                    return Err(AsmError::new(s.line, "`dephase` without a `phase`"));
+                }
+                open = false;
+            }
+            _ => {}
+        }
+    }
+    Ok(())
 }
 
 /// Parse 6809 source into the semantic [`Program`](crate::ast::Program). Each line
@@ -664,7 +696,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What lwasm has here and we do not.
     //
-    // 32 spellings against lwtools 4.25.
+    // 30 spellings against lwtools 4.25.
     //
     // **Directives only.** The first cut of this list swept in fifteen 6809
     // *instructions* — `adca`, `bita`, `cmpd`, `cwai`, `sbca` among them —
@@ -685,6 +717,31 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "align",
         pattern: Pattern::Exact(&["align"]),
+        category: Category::Operation,
+    },
+    // `phase addr` moves the *address* without moving the output: the bytes
+    // keep landing where they were going, and labels between here and
+    // `dephase` read as if the code sat at `addr`. It is what a routine copied
+    // to another address before it runs needs, and it is the same machinery as
+    // ACME's `!pseudopc`.
+    //
+    // lwtools 4.25 refuses to nest one inside another ("Nested PHASE not
+    // supported") and refuses a `dephase` that closes nothing ("DEPHASE
+    // without PHASE"). Both are checked after the parse, over the statement
+    // stream, because the parse of a line cannot see the lines around it.
+    // A `phase` still open at the end of the source is fine, and stays fine.
+    //
+    // `reorg` is the third word of this family and stays outstanding. It is
+    // understood, not unread: it sets the counter back to the value of the
+    // `org` *before* the current one, needs two of them to have something to
+    // go back to ("Previous ORG not found"), and takes no operand. What it
+    // needs here is the previous `org`'s expression, which one line's parse
+    // cannot see either — and inside an open `phase` lwasm keeps the phased
+    // address counting from where it was, where this engine derives it from
+    // the real counter, so the two would part. Both want their own change.
+    Directive {
+        id: "pseudo-pc",
+        pattern: Pattern::Exact(&["phase", "dephase"]),
         category: Category::Operation,
     },
     // `error <text>` takes the rest of the line verbatim — no quotes, no
@@ -718,7 +775,6 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "unsupported-lwasm",
         pattern: Pattern::Exact(&[
-            "dephase",
             "dtb",
             "dts",
             "emod",
@@ -741,7 +797,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "mod",
             "opt",
             "os9",
-            "phase",
             "pragma",
             "reorg",
             "sect",
@@ -795,6 +850,15 @@ fn parse_op(
             "reserve-quad" => parse_rmb(&m, operand, env, line, 4),
             "fill" => parse_fill(operand, env, line),
             "align" => parse_align(operand, env, line),
+            "pseudo-pc" => {
+                if m == "dephase" {
+                    return Ok(Some(Operation::PseudoPc(None)));
+                }
+                if operand.trim().is_empty() {
+                    return Err(AsmError::new(line, "`phase` needs an address"));
+                }
+                Ok(Some(Operation::PseudoPc(Some(value(operand, line)?))))
+            }
             "diagnose" => Ok(Some(Operation::Diagnose {
                 severity: crate::engine::DiagSeverity::Error,
                 message: format!("User Specified: {}", operand.trim()),
@@ -1686,6 +1750,71 @@ mod tests {
                 assert_eq!(out.bytes, vec![1, 2], "{spelling}{operand}");
             }
         }
+    }
+
+    /// `phase` moves the address without moving the output, and `dephase`
+    /// puts it back. A label between the two reads as the claimed address; the
+    /// bytes land where they were always going to.
+    #[test]
+    fn phase_claims_an_address_without_moving_the_output() {
+        assert_eq!(
+            asm(" org $1000\n phase $2000\nl fcb 1\n fdb l\n dephase\n fdb *\n")
+                .expect("phase")
+                .bytes,
+            vec![0x01, 0x20, 0x00, 0x10, 0x03]
+        );
+        // The claimed address counts on with the output, and a `phase` left
+        // open at the end of the source is lwasm's business, not an error.
+        assert_eq!(
+            asm(" org $1000\n phase $5000\n fcb 1\n fdb *\n")
+                .expect("open")
+                .bytes,
+            vec![0x01, 0x50, 0x01]
+        );
+    }
+
+    /// A branch inside a relocated block measures claimed-against-claimed. The
+    /// 6809 computes its own operands, and the computed path took the *real*
+    /// address as the branch base while the target label was already claimed —
+    /// so `bra` over one byte read as a jump four kilobytes away.
+    #[test]
+    fn a_branch_inside_a_phase_measures_from_the_claimed_address() {
+        assert_eq!(
+            asm(" org $1000\n phase $2000\n bra t\nt fcb 9\n dephase\n")
+                .expect("bra")
+                .bytes,
+            vec![0x20, 0x00, 9]
+        );
+        assert_eq!(
+            asm(" org $1000\n phase $2000\n lbra t\nt fcb 9\n dephase\n")
+                .expect("lbra")
+                .bytes,
+            vec![0x16, 0x00, 0x00, 9]
+        );
+        // …and `,pcr` indexing, which is the same measurement by another name.
+        assert_eq!(
+            asm(" org $1000\n phase $2000\n leax t,pcr\nt fcb 9\n dephase\n")
+                .expect("pcr")
+                .bytes,
+            vec![0x30, 0x8D, 0x00, 0x00, 9]
+        );
+    }
+
+    /// lwasm's two refusals, which the engine's own counter stack would
+    /// otherwise take: it does not nest `phase`, and `dephase` must close one.
+    #[test]
+    fn lwasm_does_not_nest_a_phase() {
+        assert!(
+            asm(" org $1000\n phase $2000\n phase $3000\n dephase\n dephase\n").is_err(),
+            "nested `phase`"
+        );
+        assert!(asm(" org $1000\n dephase\n").is_err(), "`dephase` alone");
+        assert!(asm(" org $1000\n phase\n").is_err(), "bare `phase`");
+        // Two in sequence are not nested, and are fine.
+        assert!(
+            asm(" org $1000\n phase $2000\n dephase\n phase $3000\n dephase\n").is_ok(),
+            "sequential phases"
+        );
     }
 
     #[test]
