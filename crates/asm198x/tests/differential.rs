@@ -807,6 +807,21 @@ const PROBES: &[Probe] = &[
     // `Missing macro name`.
     // The listing and debug knobs, and the two that say something: probed
     // inert, so the same source assembles to the same bytes either way.
+    // The conditional heads beyond the comparisons: blank-argument, text
+    // comparison, sign, and the two else-legs — one of which is not what its
+    // name suggests.
+    ok ("vasm", "ifb/ifnb, ifc/ifnc, ifmi/ifpl and the else legs",
+        "\tsection code,code\n\
+         \tifb\n\tdc.b $11\n\telse\n\tdc.b $22\n\tendif\n\
+         \tifb x\n\tdc.b $33\n\telse\n\tdc.b $44\n\tendif\n\
+         \tifc \"a\",\"a\"\n\tdc.b $55\n\tendif\n\
+         \tifnc \"a\",\"b\"\n\tdc.b $66\n\tendif\n\
+         \tifmi -1\n\tdc.b $77\n\tendif\n\
+         \tifpl 0\n\tdc.b $88\n\tendif\n\
+         \tifeq 1\n\tdc.b $CC\n\telseif 0\n\tdc.b $DD\n\tendif\n"),
+    ok ("vasm", "ifb answers a macro argument that was not given",
+        "m\tmacro\n\tifb \\1\n\tdc.b $11\n\telse\n\tdc.b $22\n\tendif\n\tendm\n\
+         \tsection code,code\n\tm\n\tm 5\n"),
     ok ("vasm", "the listing and debug words emit nothing",
         "\tsection code,code\n\tlist\n\tnolist\n\tllen 80\n\tplen 60\n\tpage\n\
          \tnopage\n\tspc 2\n\tttl \"t\"\n\tsymdebug\n\tdsource \"x.s\"\n\tmsource\n\

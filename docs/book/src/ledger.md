@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.34`
-- **Corpus hash:** `2327e72f2dff8fb86c99f1451eedae8e62a7bff1c1bf1305a90a218a972fe0d6`
+- **Corpus hash:** `f8d25a55c631a1f3d904298a191f5a4b305c60688b6cac8b63ebfa1e3270a10a`
 - **Pinned curriculum:** `5435e540cf393c1956362458d5ff0fca3ff705f2` (2026-08-14)
-- **CPUs:** 23, holding 7910 verdict(s)
+- **CPUs:** 23, holding 7920 verdict(s)
 
 ## 1802
 
@@ -71,7 +71,7 @@ Form coverage: **838/838** (100.0%)
 
 | arbiter | version | binaries | verdicts |
 |---|---|---|---|
-| `vasmm68k_mot` | vasm 2.0b (c) in 2002-2025 Volker Barthelmann | 1 | curriculum 106, fuzz 100, probe 70, sweep-chunk 160 |
+| `vasmm68k_mot` | vasm 2.0b (c) in 2002-2025 Volker Barthelmann | 1 | curriculum 106, fuzz 100, probe 74, sweep-chunk 160 |
 | `vasmm68k_mot` | vasm 2.0f (c) in 2002-2026 Volker Barthelmann | 1 | form 838 |
 
 Tracked divergences — differences we know about and check:
@@ -168,7 +168,7 @@ No tracked divergences.
 
 | arbiter | version | binaries | verdicts |
 |---|---|---|---|
-| `rgbasm` | rgbasm v1.0.3 | 1 | probe 48 |
+| `rgbasm` | rgbasm v1.0.3 | 1 | probe 54 |
 
 Tracked divergences — differences we know about and check:
 
