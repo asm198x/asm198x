@@ -79,10 +79,18 @@ Two open questions are **not** deferrals, because nothing has decided them:
 
 - **`dtb`/`dts`** (lwasm) assemble the current date and time. Implementing them
   makes a build's output depend on the clock, which cuts against reproducibility
-  everywhere else here. Undecided.
+  everywhere else here. Undecided —
+  [#314](https://github.com/asm198x/asm198x/issues/314).
 - **`ifp1`/`ifp2`** (lwasm) warn "Not supported IFP1" and take the true branch.
   The branch is a line; the warning has nowhere to go, because `CondEval::eval`
-  folds a head from `&self`. Plumbing, not a decision.
+  folds a head from `&self`. Plumbing, not a decision —
+  [#315](https://github.com/asm198x/asm198x/issues/315).
+
+The first entry of the register is a third kind again: `multi-artifact-output.md`
+is accepted and **unimplemented**, so five words across three dialects are
+deferred on a decision nobody has built yet. That is legitimate under rule 1 and
+should not be a standing state —
+[#316](https://github.com/asm198x/asm198x/issues/316) tracks it.
 
 ## Where the count stands
 
