@@ -2135,15 +2135,19 @@ fn lwasm_refuses_its_object_target_words_for_a_binary() {
 /// `error 3007: undefined symbol <foo>` otherwise, whether or not anything
 /// references it.
 ///
-/// Three of them — `xref`, `import` and `nref` — did not behave this way under
-/// 2.0b, which refused them in binary output from both sides at once (`error
+/// Three of them — `xref`, `import` and `nref` — do not behave this way under
+/// 2.0b, which refuses them in binary output from both sides at once (`error
 /// 86: external symbol <foo> must not be defined` when defined, `error 3007`
-/// when not). No program satisfied that pair, so they were declared
+/// when not). No program satisfies that pair, so they are declared
 /// [`Category::RefusedByReference`]. 2.0f accepts them with the name defined.
 ///
-/// Both shapes are still probed for every word. Checking only the defined case
-/// would pass on a version that had gone back to refusing it, and checking only
-/// the undefined case reads as an ordinary undefined-symbol rule either way.
+/// So the expectation is read off the *installed* tool's own version line
+/// rather than pinned to one build: asserting 2.0f's answer everywhere failed
+/// on a machine holding 2.0b, which is a difference between two references and
+/// not a defect in either. Both shapes are probed for every word — checking
+/// only the defined case would pass on a version that had gone back to
+/// refusing it, and checking only the undefined case reads as an ordinary
+/// undefined-symbol rule either way.
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]
 fn vasm_visibility_words_need_a_defined_name() {
@@ -2162,14 +2166,22 @@ fn vasm_visibility_words_need_a_defined_name() {
         })
     };
 
+    // The three refusers behave differently before 2.0f, so what the defined
+    // case must answer depends on which vasm is installed here.
+    let two_oh_b = support::tool_identity::identify("vasmm68k_mot")
+        .is_some_and(|id| id.identity.contains("vasm 2.0b"));
+
     let mut wrong: Vec<String> = Vec::new();
     for word in [
         "xdef", "public", "global", "export", "entry", "weak", "extrn", "xref", "import", "nref",
     ] {
+        let refuses_defined = two_oh_b && matches!(word, "xref" | "import" | "nref");
         let defined = format!("\tsection code,code\n\t{word} foo\nfoo:\tdc.b 1\n");
-        match &run(&defined) {
-            RefOutcome::Bytes(b) if b == &[1] => {}
-            other => wrong.push(format!("`{word}` with the name defined: {other:?}")),
+        match (&run(&defined), refuses_defined) {
+            (RefOutcome::Bytes(b), false) if b == &[1] => {}
+            (RefOutcome::Rejected { diagnostic }, true)
+                if diagnostic.contains("must not be defined") => {}
+            (other, _) => wrong.push(format!("`{word}` with the name defined: {other:?}")),
         }
         let undefined = format!("\tsection code,code\n\t{word} foo\n\tdc.b 1\n");
         match &run(&undefined) {

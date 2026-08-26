@@ -31,7 +31,7 @@
 //! de-arbitrated CPUs named in the file. That is the grep-able residue a
 //! reviewer needs, rather than a number buried in a log.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Write as _;
 use std::path::{Path, PathBuf};
 
@@ -182,9 +182,32 @@ impl Row {
     }
 }
 
-/// Count verdicts per CPU, by suite, from the committed corpus.
-fn counts(root: &Path) -> BTreeMap<String, BTreeMap<String, usize>> {
-    let mut out: BTreeMap<String, BTreeMap<String, usize>> = BTreeMap::new();
+/// What one read of the corpus yields: verdicts counted per CPU per suite, and
+/// the **distinct forms** arbitrated per CPU.
+///
+/// The two are different questions and were once the same number. A verdict is
+/// one observation, so a form arbitrated by two tools — or by two versions of
+/// one tool, which the corpus records separately by design — is two verdicts of
+/// the same form. Counting verdicts as coverage reads the second arbiter as
+/// twice the work: sweeping the 68000 under both vasm 2.0b and 2.0f scores
+/// `1676/838`, which the ledger publishes as 200.0%.
+///
+/// The form's identity is its **case** label, not its source text. Two forms
+/// can share source: `move.w d1,a2` and `movea.w d1,a2` are one line to the
+/// assembler, which canonicalises the first, and the 68000 corpus has fourteen
+/// such pairs. Keying on source would score them 824/838 and call a complete
+/// audit incomplete.
+struct Tally {
+    per_suite: BTreeMap<String, BTreeMap<String, usize>>,
+    forms: BTreeMap<String, BTreeSet<String>>,
+}
+
+/// Read the committed corpus once, tallying both.
+fn tally(root: &Path) -> Tally {
+    let mut out = Tally {
+        per_suite: BTreeMap::new(),
+        forms: BTreeMap::new(),
+    };
     let Ok(entries) = std::fs::read_dir(root) else {
         return out;
     };
@@ -197,10 +220,17 @@ fn counts(root: &Path) -> BTreeMap<String, BTreeMap<String, usize>> {
             continue;
         };
         for verdict in corpus.verdicts() {
-            *out.entry(verdict.cpu.clone())
+            *out.per_suite
+                .entry(verdict.cpu.clone())
                 .or_default()
                 .entry(suite_name(verdict).to_string())
                 .or_default() += 1;
+            if verdict.suite == Suite::Form {
+                out.forms
+                    .entry(verdict.cpu.clone())
+                    .or_default()
+                    .insert(verdict.case.clone());
+            }
         }
     }
     out
@@ -227,20 +257,19 @@ pub struct Report {
 /// Compute coverage against the corpus under `repo`.
 #[must_use]
 pub fn compute(repo: &Path) -> Report {
-    let counts = counts(&repo.join("crates/asm198x/tests/verdicts"));
+    let tally = tally(&repo.join("crates/asm198x/tests/verdicts"));
     let rows = cpus()
         .into_iter()
         .map(|cpu| Row {
-            arbitrated: counts
-                .get(cpu.name)
-                .and_then(|s| s.get("form"))
-                .copied()
-                .unwrap_or(0),
+            arbitrated: tally.forms.get(cpu.name).map_or(0, BTreeSet::len),
             total: cpu.forms,
             cpu: cpu.name.to_string(),
         })
         .collect();
-    Report { rows, counts }
+    Report {
+        rows,
+        counts: tally.per_suite,
+    }
 }
 
 /// Render the stamp: one line per CPU, sorted, plus the unscored counts as
@@ -588,6 +617,49 @@ mod tests {
                 .collect(),
             counts: BTreeMap::new(),
         }
+    }
+
+    /// A second arbiter over the same forms is corroboration, not coverage.
+    ///
+    /// The regression this guards: `arbitrated` counted verdict *lines*, so
+    /// sweeping the 68000 under both installed vasm versions scored 1676 of
+    /// 838 forms and the ledger published "200.0%". The two identities here
+    /// are the two the 68000 corpus actually holds — an invented version would
+    /// be a version claim, and `versions --check` refuses those.
+    #[test]
+    fn a_second_arbiter_does_not_inflate_coverage() {
+        let dir = std::env::temp_dir().join("asm198x-coverage-tally");
+        let _ = std::fs::remove_dir_all(&dir);
+        std::fs::create_dir_all(&dir).expect("temp dir");
+        let line = |case: &str, identity: &str, source: &str| {
+            format!(
+                "{{\"t\":\"verdict\",\"suite\":\"form\",\"cpu\":\"68000\",\
+                 \"dialect\":\"vasm\",\"case\":\"{case}\",\"source\":\"{source}\",\
+                 \"arbiter\":{{\"tool\":\"vasmm68k_mot\",\"identity\":\"{identity}\",\
+                 \"digest\":\"00\"}},\"outcome\":\"bytes\",\"hex\":\"4E71\"}}\n"
+            )
+        };
+        let older = "vasm 2.0b (c) in 2002-2025 Volker Barthelmann";
+        let newer = "vasm 2.0f (c) in 2002-2026 Volker Barthelmann";
+        let corpus = format!(
+            "{}{}{}",
+            line("NOP", older, "\\tnop\\n"),
+            // The same form, seen again by the other installed version.
+            line("NOP", newer, "\\tnop\\n"),
+            line("RTS", older, "\\trts\\n"),
+        );
+        std::fs::write(dir.join("68000.ndjson"), corpus).expect("write corpus");
+
+        let tally = tally(&dir);
+        assert_eq!(
+            tally.forms.get("68000").map(BTreeSet::len),
+            Some(2),
+            "two forms were arbitrated, one of them twice"
+        );
+        // The per-suite count is the other question, and still counts every
+        // observation: three verdicts were recorded.
+        assert_eq!(tally.per_suite["68000"]["form"], 3);
+        let _ = std::fs::remove_dir_all(&dir);
     }
 
     /// A stamp round-trips its scored rows, so what CI compares is what the
