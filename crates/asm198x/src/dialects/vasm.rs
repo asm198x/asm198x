@@ -1997,10 +1997,15 @@ impl FlatWalk for Walker {
         use ca65_flat::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_lowercase();
         Some(match word.as_str() {
-            "if" | "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifd" | "ifnd" => {
-                BlockKw::CondOpen
-            }
-            "else" => BlockKw::Else,
+            "if" | "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifd" | "ifnd" | "ifb"
+            | "ifnb" | "ifc" | "ifnc" | "ifmi" | "ifpl" => BlockKw::CondOpen,
+            // `elseif` is `else`: vasm takes whatever follows it and pays no
+            // attention — `elseif 0` and `elseif 1` both take the branch.
+            // `elif`, the real else-if, is not here: the shared walk stores an
+            // else-if leg as a conditional nested in the else branch, and the
+            // formatter re-emits that nesting as source this dialect cannot
+            // read back (asm198x#346).
+            "else" | "elseif" => BlockKw::Else,
             "endif" | "endc" => BlockKw::CondClose,
             "rept" => BlockKw::RepeatOpen,
             "endr" => BlockKw::RepeatClose,
@@ -2353,6 +2358,32 @@ fn fold_vasm_condition(
         let defined = env.contains_key(name);
         return Ok(if word == "ifd" { defined } else { !defined });
     }
+    // `ifb`/`ifnb` ask whether anything follows, which is how a macro tests an
+    // argument it may not have been given — the expansion is textual, so an
+    // omitted one leaves nothing behind.
+    if word == "ifb" || word == "ifnb" {
+        return Ok((word == "ifb") == args.is_empty());
+    }
+    // `ifc`/`ifnc` compare two pieces of *text*, quoted or not. vasm takes
+    // `ifc "a","a"` and `ifc a,a` alike, and compares what is between the
+    // quotes when they are there.
+    if word == "ifc" || word == "ifnc" {
+        let parts = split_operands(args);
+        let [a, b] = parts.as_slice() else {
+            return Err(AsmError::new(
+                line,
+                format!("`{word}` compares two pieces of text, separated by a comma"),
+            ));
+        };
+        let unquote = |t: &str| {
+            let t = t.trim();
+            t.strip_prefix('"')
+                .and_then(|t| t.strip_suffix('"'))
+                .unwrap_or(t)
+                .to_string()
+        };
+        return Ok((word == "ifc") == (unquote(a) == unquote(b)));
+    }
     if args.is_empty() {
         return Err(AsmError::new(line, format!("`{word}` needs a condition")));
     }
@@ -2381,6 +2412,9 @@ fn fold_vasm_condition(
     Ok(match word.as_str() {
         "if" | "ifne" => value != 0,
         "ifeq" => value == 0,
+        // `ifmi`/`ifpl` read the value's sign — minus, or plus-or-zero.
+        "ifmi" => value < 0,
+        "ifpl" => value >= 0,
         "ifgt" => value > 0,
         "ifge" => value >= 0,
         "iflt" => value < 0,
@@ -2646,8 +2680,8 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "conditional",
         pattern: Pattern::Exact(&[
-            "if", "ifne", "ifeq", "ifgt", "ifge", "iflt", "ifle", "ifd", "ifnd", "else", "endif",
-            "endc",
+            "if", "ifne", "ifeq", "ifgt", "ifge", "iflt", "ifle", "ifd", "ifnd", "ifb", "ifnb",
+            "ifc", "ifnc", "ifmi", "ifpl", "elseif", "else", "endif", "endc",
         ]),
         category: Category::Operation,
     },
@@ -2870,7 +2904,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "dx",
             "einline",
             "elif",
-            "elseif",
             "end",
             "endb",
             "endm",
@@ -2880,15 +2913,9 @@ pub const DIRECTIVES: &[Directive] = &[
             "fpu",
             "if1",
             "if2",
-            "ifb",
-            "ifc",
             "ifmacrod",
             "ifmacrond",
-            "ifmi",
-            "ifnb",
-            "ifnc",
             "ifp1",
-            "ifpl",
             "image",
             "incdir",
             "initnear",
@@ -3526,8 +3553,13 @@ impl macros::MacroSyntax for VasmMacros {
     }
 
     /// `\1`, `\2`, … for as many arguments as the call site passed.
+    /// `\1` through `\9`, whether or not that many arguments were given: vasm
+    /// substitutes a missing one with **nothing**, so the names have to cover
+    /// the range the body might use rather than the range the caller supplied.
+    /// Naming only what was passed left `\1` standing in the expansion, which
+    /// is what `ifb \1` — the whole point of `ifb` — asks about.
     fn argument_names(&self, _declared: &[String], count: usize) -> Vec<String> {
-        (1..=count).map(|n| format!("\\{n}")).collect()
+        (1..=count.max(9)).map(|n| format!("\\{n}")).collect()
     }
 
     /// A backslash opens a positional parameter, so it must be inside the token
