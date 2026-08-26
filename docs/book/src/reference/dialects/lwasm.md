@@ -8,7 +8,7 @@
 
 ## Directives
 
-29 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+30 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -38,7 +38,8 @@
 | `sections` | `section`, `sect`, `endsection`, `endsect` | Refused, as the reference refuses it — only usable with an object target, and asm198x emits a binary |
 | `set` | `set` |  |
 | `setdp` | `setdp` |  |
-| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `ends`, `endstruct`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `includestr`, `mod`, `opt`, `os9`, `pragma`, `setstr`, `struct` | Recognised, and not implemented |
+| `struct` | `struct`, `endstruct`, `ends` |  |
+| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `includestr`, `mod`, `opt`, `os9`, `pragma`, `setstr` | Recognised, and not implemented |
 | `words` | `fdb`, `.word` |  |
 | `words-swapped` | `fdbs` |  |
 
