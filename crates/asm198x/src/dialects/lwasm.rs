@@ -262,6 +262,26 @@ struct ParseState {
     cur_org: Option<Expr>,
     /// Whether a `phase` is open here.
     in_phase: bool,
+    /// The struct types defined so far, by name.
+    structs: BTreeMap<String, StructDef>,
+    /// The type being defined here, if `struct` opened one and no `endstruct`
+    /// has closed it yet.
+    open_struct: Option<OpenStruct>,
+}
+
+/// A struct type: what its members are called, how far into it each one sits,
+/// and how big the whole thing is.
+#[derive(Clone, Default)]
+struct StructDef {
+    members: Vec<(String, i64)>,
+    size: i64,
+}
+
+/// A type part-way through being defined.
+#[derive(Clone)]
+struct OpenStruct {
+    name: String,
+    def: StructDef,
 }
 
 /// The per-line parse walk shared by [`parse_program`] (single source) and
@@ -520,6 +540,37 @@ impl FlatWalk for Walker {
                 },
             }));
         }
+        // A struct definition describes a layout rather than stating one, and
+        // an instance names a type where an opcode would go — neither reads as
+        // an ordinary operation. The node is kept so the lowering walk sees the
+        // line (and so `--fmt` renders it), but nothing here is parsed.
+        // An error here is deferred, not raised: this walk reads every line,
+        // live or not, and lwasm does not parse a branch it is not taking. The
+        // lowering walk runs the same reading over the live lines only, and
+        // says the same thing there — where it counts.
+        let is_struct_line =
+            match struct_line(label.as_deref(), rest, &mut self.state, &self.env, line) {
+                Ok(effect) => effect.is_some(),
+                Err(_) => true,
+            };
+        if is_struct_line {
+            self.nodes.push(Node {
+                operand_span: None,
+                label: label.map(|name| Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }),
+                item: Some(crate::ast::Item::Native(Box::new(StructLine))),
+                source: rest.trim().to_string(),
+                span: Span::in_file(file, line as u32, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing,
+                },
+            });
+            return Ok(None);
+        }
         let op = if rest.is_empty() {
             None
         } else {
@@ -765,7 +816,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What lwasm has here and we do not.
     //
-    // 17 spellings against lwtools 4.25.
+    // 14 spellings against lwtools 4.25.
     //
     // **Directives only.** The first cut of this list swept in fifteen 6809
     // *instructions* — `adca`, `bita`, `cmpd`, `cwai`, `sbca` among them —
@@ -866,6 +917,22 @@ pub const DIRECTIVES: &[Directive] = &[
             "only usable with an object target, and asm198x emits a binary",
         ),
     },
+    // `name struct` … `endstruct` describes a layout without laying anything
+    // out. The members name offsets into the type — `pt.x` is a constant, the
+    // type name itself is not a symbol at all — and `v pt` then reserves one
+    // of them, binding `v` to where it sits and `v.x` to the member's address.
+    //
+    // Measured against lwtools 4.25: only reserving directives may sit inside
+    // one (`fcb` is "Bad operand"), a member may be another struct, defining
+    // the same name twice is "Duplicate structure definition", an unnamed
+    // `struct` is "Structure definition with no effect - no symbol", and an
+    // instance without a label is not one ("Bad opcode"). `ends` is the second
+    // spelling of `endstruct`.
+    Directive {
+        id: "struct",
+        pattern: Pattern::Exact(&["struct", "endstruct", "ends"]),
+        category: Category::Operation,
+    },
     // Macro definition. The walk reads a `name macro` header and its `endm`
     // before `parse_op` sees either, so these are declared for what they are
     // rather than dispatched: reaching the dispatch means the line was not
@@ -881,8 +948,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "dtb",
             "dts",
             "emod",
-            "ends",
-            "endstruct",
             "ifopt",
             "ifp1",
             "ifp2",
@@ -894,11 +959,134 @@ pub const DIRECTIVES: &[Directive] = &[
             "os9",
             "pragma",
             "setstr",
-            "struct",
         ]),
         category: Category::KnownUnsupported,
     },
 ];
+
+/// A struct line's label belongs *on* the line: lwasm reads the type name, the
+/// member name and the instance name from label position, so a formatter that
+/// lifted one onto its own line above would break what it reformatted.
+struct StructLine;
+
+impl crate::ast::NativeItem for StructLine {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn inline_label(&self) -> bool {
+        true
+    }
+}
+
+/// What a line meant to the struct machinery.
+enum StructEffect {
+    /// Part of a definition: it describes the layout and emits nothing.
+    Nothing,
+    /// `endstruct` just closed a type — bind each `<type>.<member>` to its
+    /// offset, so `pt.x` reads as a constant with no instance in sight. The
+    /// type name itself is deliberately not bound: lwasm answers "Undefined
+    /// symbol pt" for one.
+    Closed { name: String, def: StructDef },
+    /// `label <type>` — reserve one here, and name where each member landed.
+    Instance { def: StructDef },
+}
+
+/// Read one line as the struct machinery sees it, updating `state`. `None`
+/// means the line is nothing to do with structs and belongs to the ordinary
+/// parse.
+///
+/// Both walks call this, each against its own state: the reading walk to keep
+/// from choking on a type name where an opcode would go, the lowering walk to
+/// decide the bytes.
+fn struct_line(
+    label: Option<&str>,
+    rest: &str,
+    state: &mut ParseState,
+    env: &BTreeMap<String, i64>,
+    line: usize,
+) -> Result<Option<StructEffect>, AsmError> {
+    let (word, operand) = split_first_word(rest.trim());
+    let w = word.to_ascii_lowercase();
+    if w == "struct" {
+        if state.open_struct.is_some() {
+            return Err(AsmError::new(line, "`struct` inside a `struct`"));
+        }
+        let name = label.ok_or_else(|| {
+            AsmError::new(line, "structure definition with no effect - no symbol")
+        })?;
+        if state.structs.contains_key(name) {
+            return Err(AsmError::new(line, "duplicate structure definition"));
+        }
+        state.open_struct = Some(OpenStruct {
+            name: name.to_string(),
+            def: StructDef::default(),
+        });
+        return Ok(Some(StructEffect::Nothing));
+    }
+    if w == "endstruct" || w == "ends" {
+        let open = state
+            .open_struct
+            .take()
+            .ok_or_else(|| AsmError::new(line, "`endstruct` without a `struct`"))?;
+        state.structs.insert(open.name.clone(), open.def.clone());
+        return Ok(Some(StructEffect::Closed {
+            name: open.name,
+            def: open.def,
+        }));
+    }
+    // Inside a definition every line describes a member: how much room it
+    // takes, and — if it is labelled — what that room is called. lwasm allows
+    // only the reserving directives and other struct types there; `fcb 9` is
+    // "Bad operand", because a struct is a shape and not data.
+    if let Some(open) = &state.open_struct {
+        let width = member_width(&w, operand, &state.structs, env, line)?;
+        let at = open.def.size;
+        let open = state.open_struct.as_mut().expect("still open");
+        if let Some(name) = label {
+            open.def.members.push((name.to_string(), at));
+        }
+        open.def.size += width;
+        return Ok(Some(StructEffect::Nothing));
+    }
+    // Outside one, a type name where an opcode would go reserves an instance —
+    // but only with a label to bind it to. lwasm answers "Bad opcode" for a
+    // bare one, which is what the ordinary parse says too, so it is left to it.
+    if let (Some(_), Some(def)) = (label, state.structs.get(&w)) {
+        return Ok(Some(StructEffect::Instance { def: def.clone() }));
+    }
+    Ok(None)
+}
+
+/// How much room one member of a struct takes: a reserving directive's count
+/// times its unit, or the whole size of another struct type.
+fn member_width(
+    word: &str,
+    operand: &str,
+    structs: &BTreeMap<String, StructDef>,
+    env: &BTreeMap<String, i64>,
+    line: usize,
+) -> Result<i64, AsmError> {
+    if let Some(def) = structs.get(word) {
+        return Ok(def.size);
+    }
+    let unit = match word {
+        "rmb" | "zmb" | "bsz" | "fzb" | ".ds" => 1,
+        "rmd" | "zmd" | "rmw" => 2,
+        "rmq" | "zmq" => 4,
+        _ => {
+            return Err(AsmError::new(
+                line,
+                format!("`{word}` cannot be a struct member — a struct reserves room"),
+            ));
+        }
+    };
+    let count = fold_const(&value(operand, line)?, env, line)?;
+    if count < 0 {
+        return Err(AsmError::new(line, "negative block sizes make no sense"));
+    }
+    Ok(count * unit)
+}
 
 fn parse_op(
     rest: &str,
@@ -1818,6 +2006,56 @@ impl crate::ast::CondEval for LwasmEval {
     /// environment so the direct/extended choice sees the live bindings.
     fn lower(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
         let line = node.span.line as usize;
+        let label = node.label.as_ref().map(|s| s.qualified.clone());
+        if let Some(effect) = struct_line(
+            label.as_deref(),
+            &node.source,
+            &mut self.state,
+            &self.env,
+            line,
+        )? {
+            let at = |op, label| Statement {
+                line,
+                file: node.span.file,
+                label,
+                op: Some(op),
+                operand_span: None,
+                xor_mask: 0,
+            };
+            match effect {
+                StructEffect::Nothing => {}
+                // The offsets are constants, so they are bound as constants —
+                // `pt.x` reads as one with no instance anywhere.
+                StructEffect::Closed { name, def } => {
+                    for (member, offset) in &def.members {
+                        let sym = format!("{name}.{member}");
+                        self.env.insert(sym.clone(), *offset);
+                        out.push(at(Operation::Equ(Expr::Num(*offset)), Some(sym)));
+                    }
+                }
+                // An instance is room with names on it: the label lands where
+                // the room starts, and each member's name lands at its offset
+                // into it.
+                StructEffect::Instance { def } => {
+                    let base = label.clone().expect("an instance has a label");
+                    out.push(at(
+                        Operation::Bytes(vec![Expr::Num(0); def.size as usize]),
+                        Some(base.clone()),
+                    ));
+                    for (member, offset) in &def.members {
+                        out.push(at(
+                            Operation::Equ(Expr::Bin(
+                                crate::engine::BinOp::Add,
+                                Box::new(Expr::Sym(base.clone())),
+                                Box::new(Expr::Num(*offset)),
+                            )),
+                            Some(format!("{base}.{member}")),
+                        ));
+                    }
+                }
+            }
+            return Ok(());
+        }
         // A walk-resolved payload keeps what the walk built: an `includebin`'s
         // bytes cannot be rebuilt here, because resolving one needs the loader
         // the walk had and this does not. Everything else re-parses.
@@ -2313,6 +2551,118 @@ mod tests {
         }
         let err = asm(" endm\n fcb 1\n").expect_err("stray endm").to_string();
         assert!(err.contains("without a `macro`"), "{err}");
+    }
+
+    /// A struct describes a layout without laying anything out: the
+    /// definition emits nothing, the members name offsets into the type, and
+    /// `pt.x` reads as a constant with no instance in sight. The type name
+    /// itself is not a symbol — lwasm answers "Undefined symbol pt" for one.
+    #[test]
+    fn a_struct_names_offsets_and_emits_nothing() {
+        assert_eq!(
+            asm(" org $1000\npt struct\nx rmb 1\ny rmb 2\n endstruct\n fdb pt.x\n fdb pt.y\n")
+                .expect("offsets")
+                .bytes,
+            vec![0, 0, 0, 1]
+        );
+        assert!(
+            asm(" org $1000\npt struct\nx rmb 1\n endstruct\n fcb pt\n").is_err(),
+            "the type name is not a symbol"
+        );
+        assert!(
+            asm(" org $1000\npt struct\nx rmb 1\n endstruct\n fdb pt.zz\n").is_err(),
+            "an unknown member"
+        );
+    }
+
+    /// An instance is room with names on it. The label lands where the room
+    /// starts and each member's name at its offset into it, so two instances
+    /// sit one after the other and read their own addresses.
+    #[test]
+    fn an_instance_reserves_the_room_and_names_it() {
+        assert_eq!(
+            asm(
+                " org $1000\npt struct\nx rmb 1\ny rmb 2\n endstruct\nv pt\nw pt\n \
+                 fdb v.y\n fdb w.x\n"
+            )
+            .expect("two")
+            .bytes,
+            vec![0, 0, 0, 0, 0, 0, 0x10, 0x01, 0x10, 0x03]
+        );
+        // A member may be another struct, and the sizes add up through it.
+        assert_eq!(
+            asm(
+                " org $1000\npt struct\nx rmb 1\n endstruct\nq struct\na pt\nb rmb 1\n \
+                 endstruct\nv q\n fdb v.a\n fdb v.b\n"
+            )
+            .expect("nested")
+            .bytes,
+            vec![0, 0, 0x10, 0x00, 0x10, 0x01]
+        );
+        // `ends` is the second spelling of the close, and an empty struct
+        // reserves nothing at all.
+        assert_eq!(
+            asm(" org $1000\npt struct\nx rmb 1\n ends\n fdb pt.x\n")
+                .expect("ends")
+                .bytes,
+            vec![0, 0]
+        );
+        assert_eq!(
+            asm(" org $1000\npt struct\n endstruct\nv pt\n fdb *\n")
+                .expect("empty")
+                .bytes,
+            vec![0x10, 0x00]
+        );
+    }
+
+    /// A struct behind a branch that is not taken is never read, the way
+    /// every other refused word is not — and one in a branch that *is* taken
+    /// works as it would anywhere.
+    #[test]
+    fn a_struct_inside_a_dead_branch_is_never_read() {
+        for word in ["struct", "endstruct", "ends"] {
+            assert_eq!(
+                asm(&format!(" ifne 0\n {word}\n endc\n fcb 1\n"))
+                    .unwrap_or_else(|e| panic!("{word} behind `if 0`: {e}"))
+                    .bytes,
+                vec![1],
+                "{word}"
+            );
+        }
+        assert_eq!(
+            asm(
+                " ifne 1\npt struct\nx rmb 1\n endstruct\n endc\n org $1000\nv pt\n \
+                 fdb v.x\n"
+            )
+            .expect("taken")
+            .bytes,
+            vec![0, 0x10, 0x00]
+        );
+    }
+
+    /// The four ways to get one wrong, each of which lwasm names.
+    #[test]
+    fn a_struct_that_is_not_one_says_so() {
+        assert!(
+            asm(" org $1000\n struct\nx rmb 1\n endstruct\n").is_err(),
+            "a definition with no name has no effect"
+        );
+        assert!(
+            asm(" org $1000\n endstruct\n fcb 1\n").is_err(),
+            "a close with nothing open"
+        );
+        assert!(
+            asm(
+                " org $1000\npt struct\nx rmb 1\n endstruct\npt struct\ny rmb 1\n \
+                 endstruct\n"
+            )
+            .is_err(),
+            "the same name twice"
+        );
+        assert!(
+            asm(" org $1000\npt struct\nx fcb 9\n endstruct\n").is_err(),
+            "a struct reserves room; it does not hold data"
+        );
     }
 
     #[test]
