@@ -2156,6 +2156,28 @@ const MULTI_PROBES: &[MultiProbe] = &[
              .segment \"VECTORS\"\n .word 0, 0, 0\n",
         )],
     },
+    // `.ref`/`.referenced` and the two conditional heads over them: has this
+    // name been *used* above the line, which is a different question from
+    // `.defined` and answered from a different record.
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: ".ref/.referenced answer whether a name was used above the line, \
+               .ifref/.ifnref branch on it, and a use inside a dead branch \
+               does not count",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .code\n\
+             L: nop\n .byte .ref(L)\n .word L\n .byte .ref(L), .referenced(L)\n\
+             .ifref L\n .byte $11\n .else\n .byte $22\n .endif\n\
+             .ifnref ZZ\n .byte $33\n .else\n .byte $44\n .endif\n\
+             .if 0\n .word M\n .endif\n\
+             M: nop\n .byte .ref(M)\n\
+             .word M\n .byte .ref(M)\n\
+             .segment \"VECTORS\"\n .word 0, 0, 0\n",
+        )],
+    },
     MultiProbe {
         dialect: "ca65-nes",
         binaries: &[],

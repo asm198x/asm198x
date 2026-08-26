@@ -72,7 +72,6 @@ not deferred — nobody has examined it yet, which is a different thing.
 | the `save*` family | sjasmplus | the same |
 | `setstr`, `ifstr`, `includestr` | lwasm | string symbols are their own surface, unbuilt |
 | `.condes` | ca65 | builds an ld65 constructor table from linker-config features our fixed NROM layout does not declare |
-| `.ifref`, `.ifnref` | ca65 | they ask whether a symbol has been *referenced* above the line, and the projection keeps no use record |
 | `\#`, `_NARG`, `\@` | rgbasm | macro-expansion surface, unbuilt |
 | eight pragma spellings | lwasm | rule 3 — refused by name; see the `PRAGMAS` table |
 | every processor but `6502` | ACME `!cpu`, ca65 `.setcpu`/`.pNN` | rule 3 — [#302](https://github.com/asm198x/asm198x/issues/302) |

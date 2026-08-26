@@ -1679,17 +1679,15 @@ impl FlatWalk for Walker {
     /// case-insensitive: `.if` and its nine sibling heads, `.elseif`, `.else`,
     /// `.endif`, and `.repeat` / `.endrepeat`.
     ///
-    /// `.ifref` and `.ifnref` are the two still absent. They ask whether a
-    /// symbol has been *referenced* above this line, which needs a use record
-    /// the projection does not keep. Registered in
-    /// `decisions/reference-parity-goal.md`.
+    /// Every head ca65 has is here. The last two to arrive, `.ifref` and
+    /// `.ifnref`, ask whether a symbol has been *used* above the line, which
+    /// the projection now records as it goes.
     fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
         use ca65_flat::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_lowercase();
         Some(match word.as_str() {
-            ".if" | ".ifdef" | ".ifndef" | ".ifblank" | ".ifnblank" | ".ifconst" | ".ifnconst" => {
-                BlockKw::CondOpen
-            }
+            ".if" | ".ifdef" | ".ifndef" | ".ifblank" | ".ifnblank" | ".ifconst" | ".ifnconst"
+            | ".ifref" | ".ifnref" => BlockKw::CondOpen,
             // The CPU tests. This leg assembles for one CPU and refuses
             // `.setcpu`, so which of them is true is fixed before the file is
             // read — but they still open a block, and the dead branch still
@@ -1952,6 +1950,7 @@ fn parsed_from_program(program: &crate::ast::Program) -> Result<Parsed, AsmError
         stmts: Vec::new(),
         label_seg: BTreeMap::new(),
         consts: BTreeMap::new(),
+        referenced: BTreeSet::new(),
         loop_vars: Vec::new(),
     };
     project_nodes(&program.nodes, &mut st)?;
@@ -1970,6 +1969,11 @@ struct Projection {
     stmts: Vec<Stmt>,
     label_seg: BTreeMap<String, String>,
     consts: BTreeMap<String, i64>,
+    /// Every name the statements *above this point* have mentioned, which is
+    /// what `.ref`/`.referenced` and `.ifref`/`.ifnref` ask about. Dead
+    /// branches never reach here, so a use inside one does not count — probed
+    /// against V2.18, where `.if 0 / .word L / .endif` leaves `.ref(L)` at 0.
+    referenced: BTreeSet<String>,
     /// Loop variables bound by enclosing `.repeat`s, innermost last. Kept apart
     /// from `consts` because ca65 **scopes one to its loop** — `lda #i` after
     /// `.endrepeat` is `Symbol 'i' is undefined`, where acme's `!for` variable
@@ -2063,6 +2067,14 @@ fn fold_condition(head: &str, st: &Projection, line: usize) -> Result<bool, AsmE
         ".ifblank" | ".ifnblank" => Ok((word == ".ifblank") == args.is_empty()),
         // The CPU tests. This leg is a 6502 and refuses `.setcpu`, so no
         // reachable source can make one of the others true.
+        // `.ifref` asks the same question `.ref` does, from the same set.
+        ".ifref" | ".ifnref" => {
+            let name = args
+                .split_whitespace()
+                .next()
+                .ok_or_else(|| AsmError::new(line, format!("`{word}` needs a name")))?;
+            Ok((word == ".ifref") == st.referenced.contains(name))
+        }
         ".ifp02" => Ok(true),
         ".ifp4510" | ".ifp816" | ".ifpc02" | ".ifpsc02" => Ok(false),
         // `.ifconst` is not `.if`: it asks whether the expression *is* a
@@ -2312,6 +2324,7 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
     let stmts = &mut st.stmts;
     let label_seg = &mut st.label_seg;
     let consts = &mut st.consts;
+    let referenced = &mut st.referenced;
     {
         let line = node.span.line as usize;
         let file = node.span.file;
@@ -2372,6 +2385,13 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                 // this point in the file has seen — which is the question ca65
                 // asks.
                 let kind = map_kind_syms(kind, &resolve_defined(consts, label_seg));
+                // `.ref` is the same question about uses rather than
+                // definitions, so it is answered from the same place.
+                let kind = map_kind_syms(&kind, &resolve_ref(referenced));
+                // Then record what *this* statement mentions, so the next one
+                // sees it. Answering first keeps a statement's own names out of
+                // its own `.ref`.
+                collect_syms(&kind, referenced);
                 // A record's constants, folded here so they land in the same
                 // map, in the same order, as every `=` in the file.
                 if let Kind::Constant(name, value) = &kind {
@@ -2729,9 +2749,8 @@ pub const DIRECTIVES: &[Directive] = &[
     // Walk-handled: the shared cursor reads these into `Item::Conditional` /
     // `Item::Repeat` before `parse_directive` sees a line.
     //
-    // `.ifref` and `.ifnref` are the two still absent: declaring one without
-    // folding it would group a block the projection cannot read. Registered in
-    // `decisions/reference-parity-goal.md`.
+    // Every head ca65 has, `.ifref`/`.ifnref` included: each one folds, so
+    // none of them groups a block the projection cannot read.
     Directive {
         id: "conditional",
         pattern: Pattern::Exact(&[
@@ -2747,6 +2766,8 @@ pub const DIRECTIVES: &[Directive] = &[
             ".ifp816",
             ".ifpc02",
             ".ifpsc02",
+            ".ifref",
+            ".ifnref",
             ".elseif",
             ".else",
             ".endif",
@@ -3021,10 +3042,10 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "unsupported-conditionals",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["ifnref", "ifref"],
+            names: &["ref", "referenced"],
             required: true,
         },
-        category: Category::KnownUnsupported,
+        category: Category::ExpressionWord,
     },
     // CPU selection. `.setcpu "6502"` and `.p02` name the processor this leg
     // already assembles, so they change nothing; every other name selects a
@@ -3558,6 +3579,11 @@ fn parse_value(
 /// appear in source, the same property `cheap_key` relies on.
 const DEFINED_MARK: &str = "\u{1}defined\u{1}";
 
+/// The same for `.ref(NAME)`/`.referenced(NAME)`, which asks a different
+/// question about the same thing: not whether the name is *defined* above this
+/// line but whether it has been *used* above it.
+const REF_MARK: &str = "\u{1}ref\u{1}";
+
 /// ca65's expression functions **plus** `.defined`/`.def`, which the flat
 /// legs cannot have.
 ///
@@ -3587,6 +3613,15 @@ fn expr_function_positional(
         return match arg.value(name, line)? {
             Expr::Sym(sym) => Ok(Expr::Sym(Walker::record_size_key(&sym))),
             _ => Err(AsmError::new(line, format!("`{name}` takes a name"))),
+        };
+    }
+    if matches!(name.to_ascii_lowercase().as_str(), ".ref" | ".referenced") {
+        let [arg]: [_; 1] = args
+            .try_into()
+            .map_err(|_| AsmError::new(line, format!("`{name}` takes one argument")))?;
+        return match arg.value(name, line)? {
+            Expr::Sym(sym) => Ok(Expr::Sym(format!("{REF_MARK}{sym}"))),
+            _ => Err(AsmError::new(line, format!("`{name}` takes a symbol name"))),
         };
     }
     if !matches!(name.to_ascii_lowercase().as_str(), ".defined" | ".def") {
@@ -3678,6 +3713,17 @@ fn scope_targets(
         out.insert(key.clone(), target);
     }
     out
+}
+
+/// Answer every `.ref` marker against what has been *used* so far. The set is
+/// the projection's, and it is updated after each statement is answered, so a
+/// name a statement mentions is not yet referenced for that statement's own
+/// `.ref` — which is what asking "above this line" means.
+fn resolve_ref(used: &BTreeSet<String>) -> impl Fn(&str) -> Option<Expr> + '_ {
+    move |name| {
+        let sym = name.strip_prefix(REF_MARK)?;
+        Some(Expr::Num(i64::from(used.contains(sym))))
+    }
 }
 
 /// A collision-proof symbol key for a cheap local, scoped to its global.
@@ -4639,6 +4685,45 @@ two:\n\
         // `.asize`/`.isize` are 65816-only, and ca65 refuses them here too.
         let e = err(".asize");
         assert!(e.contains("only valid in 65816 mode"), "got: {e}");
+    }
+
+    /// `.ref` asks whether a name has been *used* above the line — a different
+    /// question from `.defined`, answered from a different record.
+    #[test]
+    fn a_reference_is_counted_from_above_the_line() {
+        let image = rom(".segment \"CODE\"\n\
+             L: nop\n .byte .ref(L)\n .word L\n .byte .ref(L), .referenced(L)\n");
+        assert_eq!(&image[16..21], &[0xEA, 0x00, 0x00, 0x80, 0x01]);
+        assert_eq!(image[21], 0x01, "`.referenced` is the long spelling");
+
+        // A use inside a branch that is never taken is not a use: the dead leg
+        // never reaches the projection, which is where the record is kept.
+        let image = rom(".segment \"CODE\"\nM: nop\n.if 0\n .word M\n.endif\n .byte .ref(M)\n");
+        assert_eq!(&image[16..18], &[0xEA, 0x00]);
+
+        // A name nothing has mentioned, and one that is never defined at all.
+        let image = rom(".segment \"CODE\"\n .byte .ref(ZZ)\n");
+        assert_eq!(image[16], 0x00);
+    }
+
+    /// `.ifref`/`.ifnref` branch on the same record.
+    #[test]
+    fn the_reference_conditionals_read_the_same_record() {
+        let taken = |src: &str| {
+            let image = rom(&format!(
+                ".segment \"CODE\"\nL: nop\n{src}\n .byte $11\n .else\n .byte $22\n .endif\n"
+            ));
+            // The branch byte is found rather than indexed: a `.word L` before
+            // the head moves it along.
+            *image[16..]
+                .iter()
+                .find(|&&b| b == 0x11 || b == 0x22)
+                .unwrap_or_else(|| panic!("{src}: neither branch emitted"))
+        };
+        assert_eq!(taken(".ifref L"), 0x22, "nothing has used `L` yet");
+        assert_eq!(taken(" .word L\n.ifref L"), 0x11);
+        assert_eq!(taken(".ifnref L"), 0x11);
+        assert_eq!(taken(" .word L\n.ifnref L"), 0x22);
     }
 
     /// A pseudo-function is declared as what it is.

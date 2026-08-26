@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 333 word(s) outside our surface, across the references installed
+# 329 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -340,7 +340,7 @@ __utc_year__
 
 ## ca65 (ca65 V2.18 - N/A)
 # 2906 candidate(s) harvested; 225 recognised here, 4 more the tool itself
-# refuses on this target; 47 of the 225 outside our surface
+# refuses on this target; 43 of the 225 outside our surface
 .bank
 .blank
 .case
@@ -361,8 +361,6 @@ __utc_year__
 .exitmacro
 .feature
 .ident
-.ifnref
-.ifref
 .interruptor
 .ismnem
 .ismnemonic
@@ -375,8 +373,6 @@ __utc_year__
 .null
 .org
 .paramcount
-.ref
-.referenced
 .reloc
 .right
 .set
