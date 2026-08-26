@@ -31,7 +31,7 @@ use crate::span::{ExpansionFrame, Span};
 
 /// How deep expansion may nest before we call it runaway.
 ///
-/// Both references measured — sjasmplus 1.21.0 and pasmo 0.5.5 — **segfault**
+/// Both references measured — sjasmplus 1.21.0 and PasmoNext v0.1.3 — **segfault**
 /// on a self-recursive macro (exit 139). We decline to reproduce that: a crash
 /// is not a verdict about anyone's source, and an assembler that dies is worse
 /// than one that explains itself. Byte-identical output is the goal;

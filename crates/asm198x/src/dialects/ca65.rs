@@ -1115,7 +1115,7 @@ impl Walker {
 }
 
 impl FlatWalk for Walker {
-    /// ca65's block vocabulary, measured against ca65 2.19 and
+    /// ca65's block vocabulary, measured against ca65 V2.18 and
     /// case-insensitive: `.if` / `.ifdef` / `.ifndef`, `.elseif`, `.else`,
     /// `.endif`, and `.repeat` / `.endrepeat`.
     ///
@@ -2862,7 +2862,7 @@ two:\n\
     }
 
     // -----------------------------------------------------------------------
-    // Conditionals and repetition. Measured against ca65 2.19; folded once, in
+    // Conditionals and repetition. Measured against ca65 V2.18; folded once, in
     // source order, before layout — `decisions/conditionals-in-multipass-dialects.md`.
     // -----------------------------------------------------------------------
 

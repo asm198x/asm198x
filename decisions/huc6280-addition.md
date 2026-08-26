@@ -58,7 +58,7 @@ reference.
 The spec is authored from the primary library like the other CPUs: the
 manufacturer's **HuC6280 CMOS 8-bit Microprocessor Software Manual** (Hudson Soft
 / NEC, 110pp) was sourced and added to
-[`reference/by-topic/cpu-huc6280/`](../../reference/by-topic/cpu-huc6280/)
+[`reference/by-topic/cpu-huc6280/`](../../../reference/by-topic/cpu-huc6280/)
 (commit `af886a2b` in the reference repo). The spec cites it, and encodings are
 cross-checked byte-for-byte against `ca65 --cpu huc6280` — so the manual and the
 reference tool agree. (The extract is OCR-fair, so the conformance sweep, not the

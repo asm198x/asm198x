@@ -25,7 +25,7 @@ relaxation fixpoint.
 
 ## The finding: it is not a multi-pass problem
 
-Measured against ca65 2.19 and vasm 1.9 (m68k mot), 2026-08-22. **Neither
+Measured against ca65 V2.18 and vasm 1.9 (m68k mot), 2026-08-22. **Neither
 reference lets a condition depend on anything that is not already known where
 the condition sits.**
 

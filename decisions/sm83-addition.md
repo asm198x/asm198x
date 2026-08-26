@@ -48,7 +48,7 @@ serves as a byte-identical reference.
 
 Authored from Nintendo's **Game Boy Programming Manual v1.1** (304pp), sourced
 into the primary library at
-[`reference/by-topic/cpu-sm83/`](../../reference/by-topic/cpu-sm83/) alongside a
+[`reference/by-topic/cpu-sm83/`](../../../reference/by-topic/cpu-sm83/) alongside a
 pre-existing distilled `cpu-sm83-reference.md`. Encodings are cross-checked
 byte-for-byte against `rgbasm`.
 

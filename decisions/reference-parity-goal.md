@@ -28,7 +28,9 @@ without anyone deciding to change it.
 ## How it is measured
 
 `cargo xtask surface` harvests each installed reference's vocabulary and reports
-what it accepts and we do not.
+what it accepts and we do not. Which version of each is being measured is
+[`reference-versions.md`](reference-versions.md)'s, and `cargo xtask versions
+--check` keeps the prose honest about it.
 
 Two things the number is not. It is **surface, not effort**: a family of dotted
 spellings is often one rule, and one line can be a week's work or an afternoon's.

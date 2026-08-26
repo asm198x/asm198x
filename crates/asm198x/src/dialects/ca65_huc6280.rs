@@ -370,7 +370,7 @@ fn split_label(code: &str) -> (Option<String>, &str) {
     // No column rule: in ca65 the **colon** makes a label, not the column. A
     // label may be indented (`        start: dex` assembles), and a first word
     // without a colon is not a label wherever it sits — `start dex` at column 0
-    // is `':' expected`, not a definition. Both measured against ca65 2.19.
+    // is `':' expected`, not a definition. Both measured against ca65 V2.18.
     //
     // The column test that used to be here made the formatter unsafe rather
     // than merely strict: indenting a macro body is correct ca65 layout, so

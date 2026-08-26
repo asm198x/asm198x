@@ -43,7 +43,7 @@ spelling.
 
 ### What the references actually do
 
-Measured 2026-08-22 against the installed references — pasmo, ca65 2.19,
+Measured 2026-08-22 against the installed references — pasmo, ca65 V2.18,
 rgbds 1.0.3, vasm (m68k mot), acme 0.97, lwasm — not read from manuals.
 
 | dialect | opens | closes | loop variable | count `0` |
@@ -67,7 +67,7 @@ manual-reading implementation would have assumed:
 2. **pasmo is case-insensitive here** (`rept`, `Rept`, `REPT` all assemble),
    unlike sjasmplus, whose strict all-lower-or-all-upper rule is already
    implemented and is a genuine difference between the two.
-3. **ca65 2.19 has no `.rep`/`.endrep` alias** — `'.REP' is not a recognized
+3. **ca65 V2.18 has no `.rep`/`.endrep` alias** — `'.REP' is not a recognized
    control command`. The alias exists in later cc65; declaring it here would be
    declaring a spelling this reference refuses.
 4. **The three loop-variable dialects disagree on every axis.** ca65's variable
@@ -244,7 +244,7 @@ formatter that deletes a line refuses nothing. It now assembles the formatted
 text and compares bytes, which promptly found a second defect in ca65 ([#186],
 ledgered).
 
-**Verified:** twenty-seven probes arbitrated against pasmo 0.5.5 across
+**Verified:** twenty-seven probes arbitrated against PasmoNext v0.1.3 across
 conditionals and repetition, byte-identical where it assembles and refused
 where it refuses; formatter round trip and idempotence for both constructs.
 

@@ -454,7 +454,7 @@ fn split_label(code: &str) -> (Option<String>, &str) {
     // No column rule: in ca65 the **colon** makes a label, not the column. A
     // label may be indented (`        start: dex` assembles), and a first word
     // without a colon is not a label wherever it sits — `start dex` at column 0
-    // is `':' expected`, not a definition. Both measured against ca65 2.19.
+    // is `':' expected`, not a definition. Both measured against ca65 V2.18.
     //
     // The column test that used to be here made the formatter unsafe rather
     // than merely strict: indenting a macro body is correct ca65 layout, so
@@ -1155,7 +1155,7 @@ mod tests {
     //
     // The grammar is the ca65 family's, in `ca65_flat`, so these cover
     // ca65-huc6280 and the NES ca65 too — cc65 ships one assembler and the CPU
-    // is a flag. Every expectation is a byte string ca65 V2.19 produced for the
+    // is a flag. Every expectation is a byte string ca65 V2.18 produced for the
     // same source.
 
     /// The definition, the invocation, a parameter, and the `.mac` spelling.
