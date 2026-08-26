@@ -35,9 +35,9 @@ match the parameter list.
 Because the dialects do not disagree about spelling. They disagree about
 meaning.
 
-| | sjasmplus 1.21.0 | pasmo 0.5.5 | ca65 V2.19 | lwasm 4.19 | vasm 2.0b | acme 0.97 |
+| | sjasmplus 1.21.0 | PasmoNext v0.1.3 | ca65 V2.18 | lwasm 4.25 | vasm 2.0b | acme 0.97 |
 |---|---|---|---|---|---|---|
-| header | `MACRO name p1 p2` | `MACRO name, p1` *or* `name MACRO p1` | `.macro name p1, p2` | `name macro` only | `name macro` *or* ` macro name` | `!macro name .p1 {` |
+| header | `MACRO name p1 p2` | `MACRO name, p1` *or* `name MACRO p1` | `.macro name p1, p2` | `name macro` *or* `name macr`, never indented | `name macro` *or* ` macro name` | `!macro name .p1 {` |
 | body ends at | `ENDM` | `ENDM` | `.endmacro` | `endm` | `endm` | the matching **`}`** |
 | call | `name args` | `name args` | `name args` | `name args` | `name args` | `+name args` |
 | parameters | named | named | named | positional `\1` | positional `\1` | named `.p` |
@@ -143,7 +143,7 @@ fails rather than passes.
   ca65, ca65-816 and ca65-huc6280, because cc65 ships one assembler and the CPU
   is a flag. `.macro`/`.endmacro` with the `.mac` short spellings, `.local`
   declarations, and the reject-too-many/tolerate-too-few posture. Fifteen facts
-  recorded against ca65 V2.19; the two `issue-93` markers it closed retired with
+  recorded against ca65 V2.18; the two `issue-93` markers it closed retired with
   a supersede record.
 
   The plumbing moved into `dialects/macros.rs` with this adoption — `Expand`,

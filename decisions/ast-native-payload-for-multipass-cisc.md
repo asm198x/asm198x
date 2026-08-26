@@ -4,7 +4,7 @@
 now; x86 and the 68020+/68080 line later) route through the semantic AST.
 Extends [`roadmap-sequencing.md`](roadmap-sequencing.md) (the AST layer) and is
 constrained by the *seam-first* stance in
-[`../../decisions/asm198x-cpu-coverage-roadmap.md`](../../../decisions/asm198x-cpu-coverage-roadmap.md).
+[`asm198x-cpu-coverage-roadmap.md`](../../../decisions/asm198x-cpu-coverage-roadmap.md).
 
 **Date:** 2026-07-06.
 

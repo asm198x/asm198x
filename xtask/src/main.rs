@@ -23,6 +23,7 @@ mod parity;
 mod search;
 mod supersede;
 mod surface;
+mod versions;
 
 use std::path::PathBuf;
 use std::process::ExitCode;
@@ -116,6 +117,37 @@ fn main() -> ExitCode {
             print!("{}", ledger::render(&repo()));
             ExitCode::SUCCESS
         }
+        Some("versions") => {
+            let checking = args.iter().any(|a| a == "--check");
+            if !checking {
+                print!("{}", versions::report(&repo()));
+                return ExitCode::SUCCESS;
+            }
+            match versions::check(&repo()) {
+                Ok(unbacked) if unbacked.is_empty() => {
+                    println!("every reference-version claim names a version the corpus recorded");
+                    ExitCode::SUCCESS
+                }
+                Ok(unbacked) => {
+                    eprintln!(
+                        "{} version claim(s) name a version this project never recorded:\n",
+                        unbacked.len()
+                    );
+                    for u in &unbacked {
+                        eprintln!("  {u}");
+                    }
+                    eprintln!(
+                        "\nCorrect the claim, or — if the tool has moved on since it was true \
+                         — record it in decisions/reference-versions.md with the reason it stands."
+                    );
+                    ExitCode::FAILURE
+                }
+                Err(e) => {
+                    eprintln!("xtask versions: {e}");
+                    ExitCode::FAILURE
+                }
+            }
+        }
         Some(other) => {
             eprintln!("xtask: unknown command `{other}`\n\n{}", usage());
             ExitCode::FAILURE
@@ -138,6 +170,8 @@ fn usage() -> String {
      \x20 coverage --delta <f>  report movement against a base stamp (never fails)\n\
      \x20 coverage --write    refresh the stamp\n\
      \x20 ledger              print the conformance ledger for this revision\n\
+     \x20 versions            print the reference versions the corpus recorded\n\
+     \x20 versions --check    refuse a version claim nothing ever recorded\n\
      \x20 grow [filter]       arbitrate what is not yet recorded (needs the tools)\n\
      \x20 supersede <tag> <why>  retire the verdicts carrying a divergence tag\n\
      \x20 changelog           fail if the newest release entry still reads like a draft\n\

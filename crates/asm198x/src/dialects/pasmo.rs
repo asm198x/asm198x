@@ -96,7 +96,7 @@ pub(crate) struct Pasmo {
 impl Dialect for Pasmo {
     /// pasmo is the one reference in the set that bounds a constant, and it
     /// bounds only the top: `V equ $FFFF` assembles, `$10000` does not, and
-    /// `-65536` is accepted. Probed against pasmo 0.5.
+    /// `-65536` is accepted. Probed against PasmoNext v0.1.3.
     fn equ_range(&self) -> Option<std::ops::RangeInclusive<i64>> {
         Some(i64::MIN..=0xFFFF)
     }
@@ -232,7 +232,7 @@ impl Z80Syntax for PasmoSyntax {
 
     /// `IF` / `ELSE` / `ENDIF`, case-insensitively, and **nothing else**.
     ///
-    /// Measured against pasmo 0.5.5, not read from its manual. Every spelling
+    /// Measured against PasmoNext v0.1.3, not read from its manual. Every spelling
     /// sjasmplus has and pasmo does not is a spelling we must refuse:
     ///
     /// | form | pasmo |
@@ -291,7 +291,7 @@ impl Z80Syntax for PasmoSyntax {
 // Macros (#93)
 //
 // The mechanics live in [`crate::dialects::macros`]; this is pasmo's grammar,
-// measured against pasmo 0.5.5. It agrees with sjasmplus on the parts a user
+// measured against PasmoNext v0.1.3. It agrees with sjasmplus on the parts a user
 // would expect to be universal — the keyword is case-insensitive, a macro name
 // is case-sensitive, substitution is textual, word-bounded, string-safe, and
 // happens before expressions are evaluated — and differs on the two parts that
@@ -679,7 +679,7 @@ mod tests {
 
     // ----- Macros (#93) -------------------------------------------------
     //
-    // Every expectation below is a byte string pasmo 0.5.5 actually produced
+    // Every expectation below is a byte string PasmoNext v0.1.3 actually produced
     // for the same source, not a reading of its manual.
 
     /// Both spellings of a definition work, and substitution happens before the
@@ -860,7 +860,7 @@ mod tests {
     // (`decisions/conditional-assembly-framework.md`, 2026-08-22), and the
     // point of adopting it is that its surface is the *narrowest* of the
     // candidates: what it refuses matters as much as what it takes. Every
-    // expectation below was measured against pasmo 0.5.5.
+    // expectation below was measured against PasmoNext v0.1.3.
     // -----------------------------------------------------------------------
 
     /// The taken branch assembles and the other one does not exist.
@@ -981,7 +981,7 @@ mod tests {
     }
 
     // -----------------------------------------------------------------------
-    // Repetition. Measured against pasmo 0.5.5.
+    // Repetition. Measured against PasmoNext v0.1.3.
     // -----------------------------------------------------------------------
 
     /// The body assembles once per iteration, and the count folds against the

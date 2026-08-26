@@ -13,7 +13,7 @@ outstanding work.
 The Debug198x cross-CPU debug-info format — the `.debug198x` NDJSON sidecar
 written by asm198x (`--debug`) and read by consumers, first the Emu198x
 importer. The format itself is specified in the org docs repo
-([`docs/debug198x.md`](https://github.com/asm198x/docs/blob/main/debug198x.md)),
+([`../docs/debug198x.md`](https://github.com/asm198x/docs/blob/main/debug198x.md)),
 written for external implementers against the conformance fixture corpus
 (`crates/asm198x/tests/fixtures/debug198x/`, enforced always-on by
 `tests/debug198x_fixtures.rs`). That page describes the format; this record

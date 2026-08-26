@@ -1015,7 +1015,7 @@ pub(crate) fn directive_operand_span(
 // Macros (#93)
 //
 // The mechanics live in [`crate::dialects::macros`]; this is the ca65 family's
-// grammar, measured against ca65 V2.19. One grammar serves ca65, ca65-816 and
+// grammar, measured against ca65 V2.18. One grammar serves ca65, ca65-816 and
 // ca65-huc6280, because cc65 ships one assembler and the CPU is a flag.
 //
 // ca65 agrees with sjasmplus on the header shape — the name is followed by

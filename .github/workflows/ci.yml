@@ -209,6 +209,15 @@ jobs:
       - name: Check the docs, their generated blocks and their nav
         run: cargo xtask docs --check
 
+      # A comment saying "measured against ca65 2.19" reads as evidence to every
+      # future reader, and nothing else in the build reads prose — so the claim
+      # rotted unnoticed until an audit found forty of them, two families of
+      # which named a version this project has never run. This measures every
+      # version claim against the `identity` the verdict corpus recorded when
+      # the tool actually answered. See `decisions/reference-versions.md`.
+      - name: Check every reference-version claim against what was recorded
+        run: cargo xtask versions --check
+
       # `/releases` publishes CHANGELOG.md, so its newest entry is reader-facing
       # prose. release-plz drafts it from commit subjects, files anything with no
       # conventional-commit prefix under `Other` as its raw subject, and cannot
