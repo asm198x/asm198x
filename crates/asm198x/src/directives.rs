@@ -29,6 +29,17 @@ pub enum Category {
     /// The reference assembler accepts it, it changes no bytes, and we accept
     /// and discard it so source carrying it still assembles.
     Ignored,
+    /// It is part of an **expression**, not a statement — ca65's `.lobyte(x)`,
+    /// `.max(a,b)`, `.strlen("s")`.
+    ///
+    /// Declared here because it is vocabulary the reference has and we
+    /// implement, and the ledger counts what is declared: leaving it out made
+    /// nine working ca65 words read as gaps. But it never begins a line, so
+    /// the directive dispatch never sees one and the declared-vs-dispatched
+    /// invariant does not apply to it. Its own invariant does: every one of
+    /// these parses *inside an expression*, which
+    /// `an_expression_word_parses_where_it_belongs` checks.
+    ExpressionWord,
     /// The reference assembler accepts it and we do not implement it.
     ///
     /// Refusing is the only honest answer — the alternative is assembling
@@ -64,6 +75,14 @@ pub enum Category {
     /// with an operand and without (probed 2026-08-24). asm198x emits a
     /// binary, never an object file, so that is every path we have.
     RefusedByReference(&'static str),
+}
+
+/// What to say when a word that belongs *inside an expression* is written
+/// where a statement goes. Never reachable from a dialect that declares none,
+/// but every line-start dispatch matches on the category, so each needs an
+/// answer and they may as well give the same one.
+pub(crate) fn not_a_statement(word: &str) -> String {
+    format!("`{word}` belongs inside an expression here, not at the start of a line")
 }
 
 /// What a [`Category::RefusedByReference`] word owes the reader: the reference's

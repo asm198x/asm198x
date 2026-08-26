@@ -1798,6 +1798,31 @@ fn parse_op(
 /// is read where segments are assigned; the macro spellings are expanded before
 /// parsing.
 pub const DIRECTIVES: &[Directive] = &[
+    // ca65's expression vocabulary: words that appear *inside* an expression
+    // and never begin a line. Declared because the ledger counts what is
+    // declared, and leaving these out made eleven working words read as gaps
+    // — see `Category::ExpressionWord`.
+    //
+    // `.max`, `.min` and `.strat` were unreachable until the data-list
+    // splitter stopped cutting a call in half at its argument comma; the code
+    // behind them was always right.
+    Directive {
+        id: "expression-word",
+        pattern: Pattern::Exact(&[
+            ".bankbyte",
+            ".def",
+            ".defined",
+            ".hibyte",
+            ".hiword",
+            ".lobyte",
+            ".loword",
+            ".max",
+            ".min",
+            ".strat",
+            ".strlen",
+        ]),
+        category: Category::ExpressionWord,
+    },
     Directive {
         id: "bytes",
         pattern: Pattern::Sigilled {
@@ -2198,6 +2223,12 @@ fn parse_directive(
             // Named as the pair, because it is the pair that refuses: ca65
             // rejects the definition and ld65 rejects its absence.
             crate::directives::refused_by_reference("the ca65+ld65 pipeline", &sigilled, rule),
+        ));
+    }
+    if entry.category == Category::ExpressionWord {
+        return Err(AsmError::new(
+            line,
+            crate::directives::not_a_statement(&sigilled),
         ));
     }
     if entry.category == Category::KnownUnsupported {
@@ -3225,26 +3256,46 @@ two:\n\
         );
     }
 
-    /// The declaration covers what ca65 accepts **in statement position**, and
-    /// not its pseudo-functions. `.lobyte` and `.strlen` live inside
-    /// expressions; naming them here would describe them in a place they never
-    /// appear, so they are deliberately absent.
+    /// A pseudo-function is declared as what it is.
+    ///
+    /// This test used to assert the opposite — that `.lobyte` and `.strlen`
+    /// were deliberately absent, because "naming them here would describe them
+    /// in a place they never appear". That objection was right about the
+    /// model as it stood: every category described a *statement*, so declaring
+    /// an expression function claimed it began a line.
+    ///
+    /// `Category::ExpressionWord` names the place instead, so the objection no
+    /// longer holds and the eleven that work stop reading as gaps. What has
+    /// not changed is the other half: a function we do **not** implement stays
+    /// undeclared, because declaring it would claim we do.
     #[test]
-    fn the_pseudo_functions_are_not_declared_as_directives() {
-        let declared: Vec<String> = crate::directives::surfaces()
+    fn a_pseudo_function_is_declared_as_an_expression_word() {
+        let ca65: Vec<crate::directives::Directive> = crate::directives::surfaces()
             .into_iter()
             .filter(|s| s.dialect == "ca65")
             .flat_map(|s| s.directives)
-            .flat_map(|d| d.spellings())
             .collect();
-        for f in [".lobyte", ".strlen", ".max", ".sizeof", ".paramcount"] {
-            assert!(
-                !declared.iter().any(|s| s == f),
-                "`{f}` is an expression function, not a directive"
+        let kind = |word: &str| {
+            ca65.iter()
+                .find(|d| d.spellings().iter().any(|s| s == word))
+                .map(|d| d.category)
+        };
+        for f in [".lobyte", ".strlen", ".max", ".defined"] {
+            assert_eq!(
+                kind(f),
+                Some(crate::directives::Category::ExpressionWord),
+                "`{f}` is implemented, so it is declared as what it is"
+            );
+        }
+        for f in [".sizeof", ".paramcount"] {
+            assert_eq!(
+                kind(f),
+                None,
+                "`{f}` is not implemented, so nothing claims it"
             );
         }
         for d in [".export", ".proc", ".segment", ".byte"] {
-            assert!(declared.iter().any(|s| s == d), "`{d}` should be declared");
+            assert!(kind(d).is_some(), "`{d}` should be declared");
         }
     }
 }
