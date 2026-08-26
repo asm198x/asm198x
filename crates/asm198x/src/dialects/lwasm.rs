@@ -582,14 +582,48 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["fcc"]),
         category: Category::Operation,
     },
+    // `fcc`'s two terminated cousins. `fcn` and `fcz` are the same directive
+    // under two names — both append a NUL — and `fcs` instead sets the high
+    // bit of the last byte, the 6809 convention for marking a string's end
+    // without spending a byte on it. All three take one delimited string, as
+    // `fcc` does; a comma list is `Bad operand` for every one of them.
+    Directive {
+        id: "fcn",
+        pattern: Pattern::Exact(&["fcn", "fcz"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "fcs",
+        pattern: Pattern::Exact(&["fcs"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "words-swapped",
+        pattern: Pattern::Exact(&["fdbs"]),
+        category: Category::Operation,
+    },
     Directive {
         id: "fqb",
         pattern: Pattern::Exact(&["fqb"]),
         category: Category::Operation,
     },
+    // The reserve family is three entries because lwasm's spellings carry a
+    // *width*, not just a count: `rmd 3` is six bytes, `rmq 3` twelve. Probed
+    // against lwtools 4.25 with `--raw`, where every one of them zero-fills —
+    // `rmb` and `zmb` differ only for an object target, which we never emit.
     Directive {
         id: "reserve",
-        pattern: Pattern::Exact(&["rmb", ".ds", "zmb"]),
+        pattern: Pattern::Exact(&["rmb", ".ds", "zmb", "bsz", "fzb"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "reserve-double",
+        pattern: Pattern::Exact(&["rmd", "zmd", "rmw"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "reserve-quad",
+        pattern: Pattern::Exact(&["rmq", "zmq"]),
         category: Category::Operation,
     },
     Directive {
@@ -617,7 +651,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What lwasm has here and we do not.
     //
-    // 57 spellings against lwtools 4.25.
+    // 39 spellings against lwtools 4.25.
     //
     // **Directives only.** The first cut of this list swept in fifteen 6809
     // *instructions* — `adca`, `bita`, `cmpd`, `cwai`, `sbca` among them —
@@ -662,7 +696,6 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "unsupported-lwasm",
         pattern: Pattern::Exact(&[
-            "bsz",
             "dephase",
             "dtb",
             "dts",
@@ -672,11 +705,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "endsect",
             "endsection",
             "endstruct",
-            "fcn",
-            "fcs",
-            "fcz",
-            "fdbs",
-            "fzb",
             "if",
             "ifopt",
             "ifp1",
@@ -698,9 +726,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "phase",
             "pragma",
             "reorg",
-            "rmd",
-            "rmq",
-            "rmw",
             "sect",
             "section",
             "set",
@@ -710,8 +735,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "struct",
             "ttl",
             "warning",
-            "zmd",
-            "zmq",
         ]),
         category: Category::KnownUnsupported,
     },
@@ -747,9 +770,14 @@ fn parse_op(
             "equ" => Ok(Some(Operation::Equ(value(operand, line)?))),
             "bytes" => Ok(Some(Operation::Bytes(list(operand, line)?))),
             "words" => Ok(Some(Operation::Words(list(operand, line)?))),
-            "fcc" => Ok(Some(parse_fcc(operand, line)?)),
+            "fcc" => Ok(Some(parse_fcc(operand, line, StringEnd::Bare)?)),
+            "fcn" => Ok(Some(parse_fcc(operand, line, StringEnd::Nul)?)),
+            "fcs" => Ok(Some(parse_fcc(operand, line, StringEnd::HighBit)?)),
+            "words-swapped" => Ok(Some(parse_fdbs(operand, line)?)),
             "fqb" => Ok(Some(parse_fqb(operand, line)?)),
-            "reserve" => parse_rmb(operand, env, line),
+            "reserve" => parse_rmb(&m, operand, env, line, 1),
+            "reserve-double" => parse_rmb(&m, operand, env, line, 2),
+            "reserve-quad" => parse_rmb(&m, operand, env, line, 4),
             "fill" => parse_fill(operand, env, line),
             "align" => parse_align(operand, env, line),
             "diagnose" => Ok(Some(Operation::Diagnose {
@@ -764,18 +792,29 @@ fn parse_op(
     }
 }
 
-/// `rmb count` / `zmb count` — reserve/zero `count` bytes, zero-filled (the
+/// The reserve family — `rmb`/`zmb`/`bsz`/`fzb` (`width` 1), `rmd`/`zmd`/`rmw`
+/// (2) and `rmq`/`zmq` (4): `count` units of `width` bytes, zero-filled (the
 /// flat-output behaviour). `count` folds against the parse-time env so the size
 /// is known in pass one.
+///
+/// lwasm refuses a negative count in its own words — "Negative block sizes make
+/// no sense!" — rather than reading it as a huge unsigned one, so the count is
+/// range-checked here and not masked.
 fn parse_rmb(
+    mnemonic: &str,
     operand: &str,
     env: &BTreeMap<String, i64>,
     line: usize,
+    width: usize,
 ) -> Result<Option<Operation>, AsmError> {
     let n = fold_const(&value(operand, line)?, env, line)?;
-    let n = usize::try_from(n)
-        .map_err(|_| AsmError::new(line, "`rmb` count must be a non-negative constant"))?;
-    Ok(Some(Operation::Bytes(vec![Expr::Num(0); n])))
+    let n = usize::try_from(n).map_err(|_| {
+        AsmError::new(
+            line,
+            format!("`{mnemonic}` count must be a non-negative constant"),
+        )
+    })?;
+    Ok(Some(Operation::Bytes(vec![Expr::Num(0); n * width])))
 }
 
 /// `align boundary[,fill]` — pad to the next multiple of `boundary`. lwasm
@@ -1223,24 +1262,68 @@ fn encode_stack(
     ]))
 }
 
-/// `fcc` — a string with a self-chosen delimiter (`"text"`, `/text/`, …): one
-/// byte per character, up to the closing delimiter.
-fn parse_fcc(operand: &str, line: usize) -> Result<Operation, AsmError> {
+/// How a string directive marks its end.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum StringEnd {
+    /// `fcc` — the characters and nothing more.
+    Bare,
+    /// `fcn`/`fcz` — a trailing NUL.
+    Nul,
+    /// `fcs` — the high bit of the last byte set. An empty string has no last
+    /// byte and so emits nothing at all, where `fcn ""` still emits its NUL.
+    HighBit,
+}
+
+/// `fcc`/`fcn`/`fcz`/`fcs` — a string with a self-chosen delimiter (`"text"`,
+/// `/text/`, …): one byte per character, up to the closing delimiter, then
+/// whatever `end` marks the end with.
+fn parse_fcc(operand: &str, line: usize, end: StringEnd) -> Result<Operation, AsmError> {
     let t = operand.trim();
     let delim = t
         .chars()
         .next()
         .ok_or_else(|| AsmError::new(line, "`fcc` needs a string"))?;
     let rest = &t[delim.len_utf8()..];
-    let end = rest
+    let close = rest
         .find(delim)
         .ok_or_else(|| AsmError::new(line, "unterminated `fcc` string"))?;
+    let mut bytes: Vec<u8> = rest[..close].bytes().collect();
+    match end {
+        StringEnd::Bare => {}
+        StringEnd::Nul => bytes.push(0),
+        StringEnd::HighBit => {
+            if let Some(last) = bytes.last_mut() {
+                *last |= 0x80;
+            }
+        }
+    }
     Ok(Operation::Bytes(
-        rest[..end]
-            .bytes()
-            .map(|b| Expr::Num(i64::from(b)))
-            .collect(),
+        bytes.into_iter().map(|b| Expr::Num(i64::from(b))).collect(),
     ))
+}
+
+/// `fdbs value[,value…]` — "form double byte, swapped": each value as a 16-bit
+/// word with the bytes the other way round from `fdb`.
+///
+/// It is not a byte-swap of `fdb`, and the difference is lwasm's, not a
+/// simplification here. `fdb` takes the two halves of the two's-complement
+/// value, so `fdb -255` is `ff 01`; `fdbs` takes the low byte the same way but
+/// derives the high byte by *dividing* by 256, and C division truncates toward
+/// zero, so `fdbs -255` is `01 00` rather than the `01 ff` a swap would give.
+/// The two agree everywhere the quotient is exact — `fdbs -256` is `00 ff` —
+/// which is why the gap only shows on negatives that are not whole pages.
+/// `Expr::Hi` shifts, so it cannot be used for the high byte here.
+fn parse_fdbs(operand: &str, line: usize) -> Result<Operation, AsmError> {
+    let mut bytes = Vec::new();
+    for expr in list(operand, line)? {
+        bytes.push(Expr::Lo(Box::new(expr.clone())));
+        bytes.push(Expr::Bin(
+            crate::engine::BinOp::Div,
+            Box::new(expr),
+            Box::new(Expr::Num(256)),
+        ));
+    }
+    Ok(Operation::Bytes(bytes))
 }
 
 /// Parse a comma-separated list of value expressions (for `fcb`/`fdb`).
@@ -1751,6 +1834,113 @@ mod tests {
             asm("        pshu a,b,s\n").expect("pshu").bytes,
             vec![0x36, 0x46]
         );
+    }
+
+    /// `fcn` and `fcz` are the same directive under two names, and `fcs`
+    /// marks the end in the byte it already has rather than spending another.
+    /// An empty string is where the two conventions part: `fcn ""` still has
+    /// a NUL to emit, `fcs ""` has no last byte to set a bit in.
+    #[test]
+    fn a_terminated_string_marks_its_own_end() {
+        assert_eq!(
+            asm("        fcn \"AB\"\n").expect("fcn").bytes,
+            vec![0x41, 0x42, 0]
+        );
+        assert_eq!(
+            asm("        fcz \"AB\"\n").expect("fcz").bytes,
+            vec![0x41, 0x42, 0]
+        );
+        assert_eq!(
+            asm("        fcs \"AB\"\n").expect("fcs").bytes,
+            vec![0x41, 0xC2]
+        );
+        // The delimiter is whatever the string opens with, as for `fcc`.
+        assert_eq!(
+            asm("        fcs /Hi/\n").expect("slash").bytes,
+            vec![0x48, 0xE9]
+        );
+        assert_eq!(asm("        fcn \"\"\n").expect("empty fcn").bytes, vec![0]);
+        assert!(
+            asm("        fcs \"\"\n")
+                .expect("empty fcs")
+                .bytes
+                .is_empty(),
+            "an empty `fcs` has no byte to mark"
+        );
+    }
+
+    /// `fdbs` is not a byte-swapped `fdb`, and the gap is lwasm's: its high
+    /// byte comes from a truncating division, so a negative that is not a
+    /// whole page loses the sign extension `fdb` keeps.
+    #[test]
+    fn fdbs_swaps_the_bytes_the_way_lwasm_does() {
+        assert_eq!(
+            asm("        fdbs $1234\n").expect("swap").bytes,
+            vec![0x34, 0x12]
+        );
+        assert_eq!(
+            asm("        fdbs 1,2,3\n").expect("list").bytes,
+            vec![1, 0, 2, 0, 3, 0]
+        );
+        // `fdb -255` is `ff 01`; a swap of it would be `01 ff`.
+        assert_eq!(
+            asm("        fdb -255\n").expect("fdb").bytes,
+            vec![0xFF, 0x01]
+        );
+        assert_eq!(
+            asm("        fdbs -255\n").expect("fdbs").bytes,
+            vec![0x01, 0x00]
+        );
+        // Where the quotient is exact the two really are a swap.
+        assert_eq!(
+            asm("        fdbs -256\n").expect("page").bytes,
+            vec![0x00, 0xFF]
+        );
+        assert_eq!(
+            asm("        fdbs -32768\n").expect("min").bytes,
+            vec![0x00, 0x80]
+        );
+        // Symbols resolve in pass two, forward references included.
+        assert_eq!(
+            asm("        org $1000\n        fdbs later\nlater   fcb 9\n")
+                .expect("forward")
+                .bytes,
+            vec![0x02, 0x10, 9]
+        );
+    }
+
+    /// The reserve spellings carry a width, so the count is units and not
+    /// bytes. A negative count is lwasm's own refusal ("Negative block sizes
+    /// make no sense!"), not a huge unsigned one.
+    #[test]
+    fn the_reserve_family_reserves_in_units_of_its_width() {
+        for byte_wide in ["rmb", "zmb", "bsz", "fzb"] {
+            let bytes = asm(&format!("        {byte_wide} 3\n"))
+                .expect(byte_wide)
+                .bytes;
+            assert_eq!(bytes, vec![0; 3], "{byte_wide}");
+        }
+        for two_wide in ["rmd", "zmd", "rmw"] {
+            let bytes = asm(&format!("        {two_wide} 3\n"))
+                .expect(two_wide)
+                .bytes;
+            assert_eq!(bytes, vec![0; 6], "{two_wide}");
+        }
+        for four_wide in ["rmq", "zmq"] {
+            let bytes = asm(&format!("        {four_wide} 3\n"))
+                .expect(four_wide)
+                .bytes;
+            assert_eq!(bytes, vec![0; 12], "{four_wide}");
+        }
+        for any in ["rmb", "rmd", "rmq"] {
+            assert!(
+                asm(&format!("        {any} 0\n"))
+                    .expect("zero")
+                    .bytes
+                    .is_empty()
+            );
+            assert!(asm(&format!("        {any} -1\n")).is_err(), "{any} -1");
+        }
     }
 
     #[test]
