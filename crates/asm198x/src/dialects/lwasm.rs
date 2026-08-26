@@ -636,6 +636,19 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["end"]),
         category: Category::Ignored,
     },
+    // The five words that only ever reach the listing: a title (`nam`, `ttl`),
+    // a page break (`pag`, `page`) and vertical space (`spc`). asm198x writes
+    // no listing of lwasm's kind, so there is nothing for them to do here.
+    //
+    // Ignoring them is what lwtools 4.25 does to the *bytes*, which is the
+    // claim that matters: each was probed bare, with an operand and with junk
+    // for an operand, and emitted nothing every time. `opt` is not among them
+    // however much it looks like one — see `unsupported-lwasm`.
+    Directive {
+        id: "listing",
+        pattern: Pattern::Exact(&["nam", "ttl", "pag", "page", "spc"]),
+        category: Category::Ignored,
+    },
     // Walk-handled. `use` is lwasm's own second spelling of `include`, so it
     // is an alternative spelling of one entry rather than a directive of its
     // own — the same call `fcb`/`.byte` already get here.
@@ -651,7 +664,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What lwasm has here and we do not.
     //
-    // 39 spellings against lwtools 4.25.
+    // 32 spellings against lwtools 4.25.
     //
     // **Directives only.** The first cut of this list swept in fifteen 6809
     // *instructions* — `adca`, `bita`, `cmpd`, `cwai`, `sbca` among them —
@@ -676,9 +689,18 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // `error <text>` takes the rest of the line verbatim — no quotes, no
     // expression list. lwasm reports it as "User Specified: <text>".
+    //
+    // `warning` and `msg` are the same directive at warning severity: lwtools
+    // 4.25 answers both identically, assembly continues, and the exit status
+    // stays zero. Neither says anything from inside an untaken conditional.
     Directive {
         id: "diagnose",
         pattern: Pattern::Exact(&["error"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "diagnose-warning",
+        pattern: Pattern::Exact(&["warning", "msg"]),
         category: Category::Operation,
     },
     // The five words lwasm has and refuses for the output we produce. Probed
@@ -717,12 +739,8 @@ pub const DIRECTIVES: &[Directive] = &[
             "macr",
             "macro",
             "mod",
-            "msg",
-            "nam",
             "opt",
             "os9",
-            "pag",
-            "page",
             "phase",
             "pragma",
             "reorg",
@@ -731,10 +749,7 @@ pub const DIRECTIVES: &[Directive] = &[
             "set",
             "setdp",
             "setstr",
-            "spc",
             "struct",
-            "ttl",
-            "warning",
         ]),
         category: Category::KnownUnsupported,
     },
@@ -783,6 +798,16 @@ fn parse_op(
             "diagnose" => Ok(Some(Operation::Diagnose {
                 severity: crate::engine::DiagSeverity::Error,
                 message: format!("User Specified: {}", operand.trim()),
+            })),
+            // The text passes through as written. lwasm prefixes its own
+            // warning line with the word "Error" — it reuses the error
+            // reporter's label — and that is a slip in its display rather
+            // than part of what the source said, so repeating it inside our
+            // own "warning:" frame would only mislead. The bytes, which are
+            // what source compatibility is a claim about, are unaffected.
+            "diagnose-warning" => Ok(Some(Operation::Diagnose {
+                severity: crate::engine::DiagSeverity::Warning,
+                message: operand.trim().to_string(),
             })),
             other => Err(AsmError::new(
                 line,
@@ -1630,6 +1655,37 @@ mod tests {
                 .bytes,
             vec![1]
         );
+    }
+
+    /// `warning` and `msg` are the same directive at warning severity:
+    /// assembly continues, the bytes are unaffected, and an untaken branch
+    /// says nothing at all.
+    #[test]
+    fn warning_and_msg_say_something_and_carry_on() {
+        for spelling in ["warning", "msg"] {
+            let out = asm(&format!(" {spelling} careful\n fcb 1\n")).expect(spelling);
+            assert_eq!(out.bytes, vec![1], "{spelling}");
+            assert_eq!(out.warnings.len(), 1, "{spelling}");
+            assert!(out.warnings[0].message.contains("careful"), "{spelling}");
+            let quiet =
+                asm(&format!(" ifne 0\n {spelling} never\n endc\n fcb 1\n")).expect("untaken");
+            assert_eq!(quiet.bytes, vec![1], "{spelling}");
+            assert!(quiet.warnings.is_empty(), "{spelling} inside a dead branch");
+        }
+    }
+
+    /// The listing words reach the listing and nothing else. lwasm takes any
+    /// operand for them, or none, and emits nothing either way — so a source
+    /// that titles and paginates itself assembles to the same bytes here.
+    #[test]
+    fn the_listing_words_emit_nothing_whatever_they_are_given() {
+        for spelling in ["nam", "ttl", "pag", "page", "spc"] {
+            for operand in ["", " a title here", " 3,4 $x"] {
+                let out = asm(&format!(" fcb 1\n {spelling}{operand}\n fcb 2\n"))
+                    .unwrap_or_else(|e| panic!("{spelling}{operand}: {e}"));
+                assert_eq!(out.bytes, vec![1, 2], "{spelling}{operand}");
+            }
+        }
     }
 
     #[test]
