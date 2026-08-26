@@ -8,7 +8,7 @@
 
 ## Directives
 
-21 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+23 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -16,6 +16,7 @@
 | `bytes` | `fcb`, `.byte` |  |
 | `conditional` | `ifne`, `ifeq`, `ifgt`, `ifge`, `iflt`, `ifle`, `ifdef`, `ifndef`, `else`, `endc`, `endif` |  |
 | `diagnose` | `error` |  |
+| `diagnose-warning` | `warning`, `msg` |  |
 | `end` | `end` | Accepted and discarded — it changes no bytes |
 | `equ` | `equ` |  |
 | `fcc` | `fcc` |  |
@@ -25,12 +26,13 @@
 | `fqb` | `fqb` |  |
 | `incbin` | `includebin` |  |
 | `include` | `include`, `use` |  |
+| `listing` | `nam`, `ttl`, `pag`, `page`, `spc` | Accepted and discarded — it changes no bytes |
 | `object-target-only` | `export`, `extdep`, `extern`, `external`, `import` | Refused, as the reference refuses it — only supported for an object target, and asm198x emits a binary |
 | `org` | `org` |  |
 | `reserve` | `rmb`, `.ds`, `zmb`, `bsz`, `fzb` |  |
 | `reserve-double` | `rmd`, `zmd`, `rmw` |  |
 | `reserve-quad` | `rmq`, `zmq` |  |
-| `unsupported-lwasm` | `dephase`, `dtb`, `dts`, `emod`, `endm`, `ends`, `endsect`, `endsection`, `endstruct`, `if`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `incl`, `includestr`, `lib`, `macr`, `macro`, `mod`, `msg`, `nam`, `opt`, `os9`, `pag`, `page`, `phase`, `pragma`, `reorg`, `sect`, `section`, `set`, `setdp`, `setstr`, `spc`, `struct`, `ttl`, `warning` | Recognised, and not implemented |
+| `unsupported-lwasm` | `dephase`, `dtb`, `dts`, `emod`, `endm`, `ends`, `endsect`, `endsection`, `endstruct`, `if`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `incl`, `includestr`, `lib`, `macr`, `macro`, `mod`, `opt`, `os9`, `phase`, `pragma`, `reorg`, `sect`, `section`, `set`, `setdp`, `setstr`, `struct` | Recognised, and not implemented |
 | `words` | `fdb`, `.word` |  |
 | `words-swapped` | `fdbs` |  |
 
