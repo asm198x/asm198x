@@ -40,6 +40,35 @@ pub struct RequestedOutput {
     pub format: OutputFormat,
 }
 
+/// A file a source asked for **besides** the machine code — sjasmplus's
+/// `SAVEBIN` and the container-writing directives after it.
+///
+/// The library describes one; it never writes it. A library call that touched
+/// the filesystem because of a string in its input would make "assemble this
+/// and see whether it parses" a filesystem operation, which no consumer can
+/// defend against. See `decisions/multi-artifact-output.md`.
+#[derive(Debug, Clone, PartialEq, Eq, serde::Serialize, serde::Deserialize)]
+pub struct Artifact {
+    /// The name exactly as the source wrote it. Resolving it against an output
+    /// directory, a prefix or anything else is the host's business.
+    pub name: String,
+    /// What the bytes are.
+    pub format: ArtifactFormat,
+    /// The bytes to write.
+    pub bytes: Vec<u8>,
+}
+
+/// What an [`Artifact`] holds. One variant for now; a container format joins it
+/// with its serialiser behind this seam, kept free of this crate's types so it
+/// can graduate to Format198x by moving rather than by being rewritten.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, serde::Serialize, serde::Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum ArtifactFormat {
+    /// A span of the address space, as bytes, with nothing wrapped round it.
+    #[default]
+    Raw,
+}
+
 /// The result of a successful assembly: where it loads and the bytes to load.
 #[derive(Debug, Clone)]
 pub struct Assembly {
@@ -63,6 +92,9 @@ pub struct Assembly {
     pub requested_output: Option<RequestedOutput>,
     /// The symbol-list file the source named with `!symbollist`, same rule.
     pub requested_symbols: Option<String>,
+    /// Files the source asked for besides the machine code, in the order it
+    /// asked. Empty for a source that asked for none, which is most of them.
+    pub artifacts: Vec<Artifact>,
     /// Resolved labels, for listings and debugging. Values are `i64` to hold
     /// the 65816's 24-bit addresses and bank constants; 8-/16-bit CPUs use the
     /// low bits only.
@@ -381,6 +413,19 @@ pub(crate) enum Operation {
     Org(Expr),
     /// Define the statement's label as a constant value rather than the PC
     /// (the `equ`/`=` directive). The statement must carry a label.
+    /// Write a span of the address space to a named file — sjasmplus's
+    /// `SAVEBIN`. The span is resolved against the finished image, so this is
+    /// collected in pass two and answered once the image exists: an address
+    /// the source never wrote reads as zero, which is what a device's memory
+    /// does and what the reference was measured doing.
+    ///
+    /// `length` of `None` — or zero, which the reference treats the same way —
+    /// means "to the end of the address space".
+    SaveRaw {
+        name: String,
+        start: Expr,
+        length: Option<Expr>,
+    },
     /// A **redefinable** symbol binding — lwasm's `set`, and the same idea
     /// under ca65's `.set`, sjasmplus's `defl` and rgbasm's `=`. Unlike
     /// [`Operation::Equ`] it may bind the same name again, and it rebinds in
@@ -648,7 +693,11 @@ pub(crate) fn next_pc(
         Operation::Section { .. } => pc,
         // Set the counter, bind a name, name an entry point — none of them a
         // width. A caller that can reach these handles them itself.
-        Operation::Org(_) | Operation::Equ(_) | Operation::Set(_) | Operation::Entry(_) => pc,
+        Operation::Org(_)
+        | Operation::Equ(_)
+        | Operation::Set(_)
+        | Operation::SaveRaw { .. }
+        | Operation::Entry(_) => pc,
     })
 }
 
@@ -1058,6 +1107,8 @@ fn assemble_statements(
     // the command line already chose, which is why these are only a request.
     let mut requested_output: Option<RequestedOutput> = None;
     let mut requested_symbols: Option<String> = None;
+    // `SAVEBIN` and its kind, in source order, waiting for the image.
+    let mut saves: Vec<(String, i64, Option<i64>)> = Vec::new();
     for s in &statements {
         if let Some(Operation::InitMem(v)) = &s.op {
             if seen_init {
@@ -1176,6 +1227,22 @@ fn assemble_statements(
                 section_at = *at;
             }
             Some(Operation::Equ(_)) => {} // defines a symbol; emits nothing
+            // Noted here and answered below: the span it names is against the
+            // finished image, which does not exist yet.
+            Some(Operation::SaveRaw {
+                name,
+                start,
+                length,
+            }) => {
+                let at = start
+                    .eval(&symbols, pc, s.line)
+                    .map_err(|err| s.stamp(err))?;
+                let len = match length {
+                    Some(e) => Some(e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?),
+                    None => None,
+                };
+                saves.push((name.clone(), at, len));
+            }
             // Rebinds where it stands, so a use below reads this value and a
             // use above kept the one pass one left. Emits nothing either way.
             Some(Operation::Set(e)) => {
@@ -1642,9 +1709,11 @@ fn assemble_statements(
             lay_out(runs, gap_fill, addr_unit, dialect.image_base(), |img| {
                 dialect.image_size(img)
             })?;
+        let artifacts = raw_artifacts(&saves, origin_of_image, &image)?;
         return Ok(Assembly {
             requested_output,
             requested_symbols,
+            artifacts,
             origin: origin_of_image as u16,
             reserved_prefix: 0,
             bytes: image,
@@ -1676,9 +1745,11 @@ fn assemble_statements(
         }
     }
 
+    let artifacts = raw_artifacts(&saves, origin, &bytes)?;
     Ok(Assembly {
         requested_output,
         requested_symbols,
+        artifacts,
         origin: origin as u16,
         reserved_prefix,
         bytes,
@@ -1687,6 +1758,63 @@ fn assemble_statements(
         warnings,
         debug,
     })
+}
+
+/// Cut each requested span out of the finished image.
+///
+/// **The span has to lie inside what the source assembled.** A `SAVEBIN` reads
+/// a *device's memory*, and a device's memory is not empty: SjASMPlus 1.21.0's
+/// `DEVICE ZXSPECTRUM48` starts as a booted Spectrum's RAM — the attribute file
+/// at `$5800`, the system variables from `$5C00`, the user-defined graphics
+/// under `$FFFF` — so an address the source never wrote reads as whatever the
+/// machine left there, not as zero.
+///
+/// Reproducing that means writing a machine's post-boot RAM down as the
+/// hardware fact it is, in the primary library, and citing it. Transcribing it
+/// out of another assembler's output is the move
+/// `decisions/multi-artifact-output.md` forbids in as many words (asm198x#318).
+/// So a span
+/// that reaches outside the assembled image is refused by name until the fact
+/// exists, rather than answered with zeros that are right in most of the
+/// address space and wrong in three parts of it.
+///
+/// A length of `None` or zero means "to the end of the address space", which is
+/// the reference's reading of both.
+fn raw_artifacts(
+    saves: &[(String, i64, Option<i64>)],
+    origin: i64,
+    image: &[u8],
+) -> Result<Vec<Artifact>, AsmError> {
+    const SPACE: i64 = 0x1_0000;
+    let end = origin + image.len() as i64;
+    saves
+        .iter()
+        .map(|(name, at, len)| {
+            let len = match len {
+                Some(n) if *n > 0 => *n,
+                _ => (SPACE - at).max(0),
+            };
+            if *at < origin || at + len > end {
+                return Err(AsmError::new(
+                    0,
+                    format!(
+                        "`{name}` saves ${at:04X}..${:04X}, which reaches outside the \
+                         ${origin:04X}..${end:04X} this source assembled — a device's \
+                         memory starts as a booted machine's rather than as zeros, and \
+                         asm198x has no record of that yet, so the source is valid and \
+                         the gap is ours",
+                        at + len - 1
+                    ),
+                ));
+            }
+            let from = (at - origin) as usize;
+            Ok(Artifact {
+                name: name.clone(),
+                format: ArtifactFormat::Raw,
+                bytes: image[from..from + len as usize].to_vec(),
+            })
+        })
+        .collect()
 }
 
 /// Look up a resolved instruction form in the spec, erroring with the source

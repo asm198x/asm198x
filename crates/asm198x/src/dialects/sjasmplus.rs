@@ -133,6 +133,25 @@ pub const DIRECTIVES: &[Directive] = &[
     // The device model (`docs/sjasmplus-device-model.md`). `DEVICE` and `SLOT`
     // emit nothing; `PAGE` opens a section, because two pages written at one
     // address concatenate in the output rather than colliding.
+    // `SAVEBIN "file",start[,length]` writes a span of the address space to a
+    // file of its own. It needs a `DEVICE` — without one SjASMPlus 1.21.0
+    // answers "SAVEBIN only allowed in real device emulation mode" — and the
+    // span is against a 64K space that starts zero-filled, so an address the
+    // source never wrote saves as zero rather than as an error.
+    //
+    // A length of zero, or none at all, means to the end of the space. The rest
+    // of the `save*` family writes a *container*, and each waits on its format
+    // (`decisions/multi-artifact-output.md`); this one writes the bytes as they
+    // stand, so it needs no format at all.
+    Directive {
+        id: "savebin",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["savebin"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
     Directive {
         id: "device",
         pattern: Pattern::Sigilled {
@@ -238,7 +257,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "relocate_table",
                 "save3dos",
                 "saveamsdos",
-                "savebin",
                 "savecdt",
                 "savecpcsna",
                 "savecpr",
@@ -399,6 +417,16 @@ fn check_device_lines(source: &str) -> Result<(), AsmError> {
                         })?);
                 }
             }
+            // `SAVEBIN` writes out of a device's memory, so without one there
+            // is nothing to write out of. `DEVICE NONE` counts as none —
+            // measured both ways, including a `NONE` that closes a real device
+            // opened above it.
+            "SAVEBIN" if device.is_none() => {
+                return Err(AsmError::new(
+                    line,
+                    "SAVEBIN only allowed in real device emulation mode (See DEVICE)",
+                ));
+            }
             "PAGE" | "SLOT" => {
                 let Some((name, pages, slots)) = device else {
                     continue;
@@ -435,6 +463,45 @@ impl SjasmplusSyntax {
     /// (`align 3` is `Illegal align: 3`), defaults the boundary to 4 when the
     /// operand is omitted, and fills with zero unless told otherwise. All three
     /// are probe-pinned against 1.21.0.
+    /// `SAVEBIN "file",start[,length]`.
+    ///
+    /// The name is quoted, the start is required — SjASMPlus 1.21.0 answers
+    /// "[SAVEBIN] Syntax error. No parameters" without it — and the length is
+    /// optional. The span is resolved against the finished image rather than
+    /// here, so both expressions travel as they were written.
+    fn parse_savebin(
+        &self,
+        args: &str,
+        line: usize,
+        consts: &BTreeMap<String, i64>,
+    ) -> Result<Operation, AsmError> {
+        let _ = consts;
+        let mut parts = crate::dialects::mos6502::split_top_level(args.trim(), ',');
+        if parts.is_empty() {
+            return Err(AsmError::new(line, "[SAVEBIN] Syntax error. No parameters"));
+        }
+        let name = parts.remove(0);
+        let name = name
+            .trim()
+            .strip_prefix('"')
+            .and_then(|t| t.strip_suffix('"'))
+            .ok_or_else(|| AsmError::new(line, "`SAVEBIN` needs a quoted file name"))?
+            .to_string();
+        let Some(start) = parts.first() else {
+            return Err(AsmError::new(line, "[SAVEBIN] Syntax error. No parameters"));
+        };
+        let start = z80::parse_value(self, start.trim(), line)?;
+        let length = match parts.get(1) {
+            Some(e) => Some(z80::parse_value(self, e.trim(), line)?),
+            None => None,
+        };
+        Ok(Operation::SaveRaw {
+            name,
+            start,
+            length,
+        })
+    }
+
     fn parse_align(
         &self,
         args: &str,
@@ -558,6 +625,7 @@ impl Z80Syntax for SjasmplusSyntax {
             || word.eq_ignore_ascii_case("page")
             || word.eq_ignore_ascii_case("assert")
             || word.eq_ignore_ascii_case("display")
+            || word.eq_ignore_ascii_case("savebin")
             || self.is_include(word)
             || self.is_incbin(word)
             || z80::is_common_directive(word)
@@ -626,6 +694,9 @@ impl Z80Syntax for SjasmplusSyntax {
                 severity: crate::engine::DiagSeverity::Note,
                 message: text,
             }));
+        }
+        if word.eq_ignore_ascii_case("savebin") {
+            return self.parse_savebin(args, line, consts).map(Some);
         }
         if word.eq_ignore_ascii_case("assert") {
             // sjasmplus takes the whole tail as the expression and echoes it
@@ -869,6 +940,72 @@ mod tests {
     /// sjasmplus's remaining vocabulary gap was.
     /// The device model: pages are separate memory, so two written at one
     /// address concatenate; the bounds come from the device.
+    /// `SAVEBIN` describes a file besides the machine code: the library says
+    /// what it holds and the caller writes it. `bytes` still holds the code.
+    #[test]
+    fn savebin_describes_a_file_beside_the_machine_code() {
+        let out = asm(" DEVICE ZXSPECTRUM48\n ORG $8000\n DB 1,2,3,4\n \
+                       SAVEBIN \"x.bin\",$8000,4\n")
+        .expect("savebin");
+        assert_eq!(out.bytes, vec![1, 2, 3, 4], "the code is unchanged");
+        assert_eq!(out.artifacts.len(), 1);
+        assert_eq!(out.artifacts[0].name, "x.bin");
+        assert_eq!(out.artifacts[0].bytes, vec![1, 2, 3, 4]);
+        // A span inside the image, and two of them in source order.
+        let two = asm(" DEVICE ZXSPECTRUM48\n ORG $8000\n DB 1,2,3,4\n \
+                       SAVEBIN \"x.bin\",$8000,4\n SAVEBIN \"y.bin\",$8002,2\n")
+        .expect("two");
+        assert_eq!(two.artifacts.len(), 2);
+        assert_eq!(two.artifacts[1].name, "y.bin");
+        assert_eq!(two.artifacts[1].bytes, vec![3, 4]);
+    }
+
+    /// It needs a device to read memory out of — SjASMPlus answers "SAVEBIN
+    /// only allowed in real device emulation mode" without one, and `DEVICE
+    /// NONE` counts as none however far above it a real device was opened.
+    #[test]
+    fn savebin_needs_a_device() {
+        for src in [
+            " ORG $8000\n DB 1\n SAVEBIN \"x.bin\",$8000,1\n",
+            " DEVICE NONE\n ORG $8000\n DB 1\n SAVEBIN \"x.bin\",$8000,1\n",
+            " DEVICE ZXSPECTRUM48\n ORG $8000\n DB 1\n DEVICE NONE\n \
+              SAVEBIN \"x.bin\",$8000,1\n",
+        ] {
+            let err = asm(src).expect_err(src).to_string();
+            assert!(err.contains("real device emulation mode"), "{err}");
+        }
+        // The start is required; the name alone is a syntax error there.
+        assert!(
+            asm(" DEVICE ZXSPECTRUM48\n ORG $8000\n DB 1\n SAVEBIN \"x.bin\"\n").is_err(),
+            "no start"
+        );
+    }
+
+    /// A span reaching outside what the source assembled is refused by name.
+    /// A device's memory starts as a booted machine's — the Spectrum's
+    /// attribute file, system variables and UDGs are all non-zero before a
+    /// line is assembled — so answering with zeros would be right across most
+    /// of the address space and wrong in three parts of it.
+    #[test]
+    fn a_span_outside_the_image_is_refused_as_our_gap() {
+        for (src, what) in [
+            (" SAVEBIN \"x.bin\",$0000,4\n", "before the image"),
+            (" SAVEBIN \"x.bin\",$8000,10\n", "past the end"),
+            (" SAVEBIN \"x.bin\",$8000\n", "to the end of the space"),
+            (
+                " SAVEBIN \"x.bin\",$8000,0\n",
+                "zero length reads as the same",
+            ),
+        ] {
+            let err = asm(&format!(
+                " DEVICE ZXSPECTRUM48\n ORG $8000\n DB 1,2,3,4\n{src}"
+            ))
+            .expect_err(what)
+            .to_string();
+            assert!(err.contains("the gap is ours"), "{what}: {err}");
+        }
+    }
+
     #[test]
     fn pages_are_separate_memory_bounded_by_the_device() {
         let out =

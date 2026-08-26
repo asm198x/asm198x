@@ -469,6 +469,10 @@ fn run(args: &[String]) -> Result<String, String> {
     // the order is the search order (language-surface U1/KTD8). The
     // include-capable entry points (U2) feed them to the filesystem loader.
     let mut include_dirs: Vec<PathBuf> = Vec::new();
+    // sjasmplus's own flag: "Prefix for save/output/.. filenames in
+    // directives". It is the reference conceding the host gets a say over
+    // source-named writes without changing the language.
+    let mut outprefix: Option<PathBuf> = None;
     let mut i = 0;
     while i < args.len() {
         match args[i].as_str() {
@@ -479,6 +483,14 @@ fn run(args: &[String]) -> Result<String, String> {
             "--sym" => sym = Some(None),
             f if f.starts_with("--sym=") => {
                 sym = Some(Some(PathBuf::from(&f["--sym=".len()..])));
+            }
+            "--outprefix" => {
+                i += 1;
+                let path = args.get(i).ok_or("`--outprefix` needs a path")?;
+                outprefix = Some(PathBuf::from(path));
+            }
+            f if f.starts_with("--outprefix=") => {
+                outprefix = Some(PathBuf::from(&f["--outprefix=".len()..]));
             }
             "--listing" => listing = Some(None),
             f if f.starts_with("--listing=") => {
@@ -741,6 +753,7 @@ fn run(args: &[String]) -> Result<String, String> {
             output.unwrap_or_else(|| Path::new(input).with_extension(if exe { "" } else { "bin" }));
         std::fs::write(&out_path, &result.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+        let artifact_notes = write_artifacts(&result.artifacts, &out_path, outprefix.as_deref())?;
         let debug_notes = match &info {
             Some(info) => write_debug_artifacts(
                 input,
@@ -756,7 +769,7 @@ fn run(args: &[String]) -> Result<String, String> {
             None => String::new(),
         };
         return Ok(format!(
-            "assembled {} byte(s) -> {}{debug_notes}",
+            "assembled {} byte(s) -> {}{artifact_notes}{debug_notes}",
             result.bytes.len(),
             out_path.display()
         ));
@@ -896,8 +909,9 @@ fn run(args: &[String]) -> Result<String, String> {
         };
         std::fs::write(&out_path, image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+        let artifact_notes = write_artifacts(&assembly.artifacts, &out_path, outprefix.as_deref())?;
         let summary = format!(
-            "assembled {} byte(s) at ${:04X} -> {}",
+            "assembled {} byte(s) at ${:04X} -> {}{artifact_notes}",
             image.len(),
             assembly.origin.unwrap_or(0),
             out_path.display(),
@@ -977,6 +991,43 @@ fn source_named_path(input: &str, named: &str) -> Result<PathBuf, String> {
         ));
     }
     Ok(base.join(candidate))
+}
+
+/// Write the files a source asked for besides the machine code, and say so.
+///
+/// The rules are `decisions/multi-artifact-output.md`'s, and two of them are
+/// deliberate rather than incidental. A name resolves against the **output
+/// directory**, so a source's `SAVEBIN "x.bin"` lands beside the binary rather
+/// than wherever the process happens to be standing. And an absolute path or
+/// one climbing out with `..` is **written and reported**, not refused —
+/// refusing would fail source the reference accepts, which is the
+/// out-converging the house rule warns against. `--outprefix` is the control
+/// for a caller that wants one, mirroring sjasmplus's flag of the same name.
+///
+/// Every write is reported, so a caller sees the full set of side effects
+/// without scraping for them.
+fn write_artifacts(
+    artifacts: &[asm198x::Artifact],
+    out_path: &Path,
+    outprefix: Option<&Path>,
+) -> Result<String, String> {
+    let mut notes = String::new();
+    for artifact in artifacts {
+        let named = Path::new(&artifact.name);
+        let path = match (outprefix, named.is_absolute()) {
+            (Some(prefix), _) => prefix.join(named),
+            (None, true) => named.to_path_buf(),
+            (None, false) => out_path.parent().unwrap_or(Path::new(".")).join(named),
+        };
+        std::fs::write(&path, &artifact.bytes)
+            .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
+        notes.push_str(&format!(
+            "\nwrote {} byte(s) -> {}",
+            artifact.bytes.len(),
+            path.display()
+        ));
+    }
+    Ok(notes)
 }
 
 /// Frame the image the way `!to`'s format asks.

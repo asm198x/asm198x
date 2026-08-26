@@ -122,6 +122,16 @@ pub struct AssemblyResult {
     /// The symbol-list file the source named with `!symbollist`. Same rule.
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub requested_symbols: Option<String>,
+    /// Files the source asked for **besides** the machine code — sjasmplus's
+    /// `SAVEBIN` and the container directives after it — in the order it asked.
+    ///
+    /// Described, never written: nothing in a library call touches the
+    /// filesystem because of a string in its input. `bytes` is still the
+    /// assembled machine code, and an artifact joins it rather than replacing
+    /// it, so a consumer that ignores this field keeps getting what it did.
+    /// See `decisions/multi-artifact-output.md`.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub artifacts: Vec<crate::engine::Artifact>,
 }
 
 impl AssemblyResult {
@@ -145,6 +155,7 @@ impl AssemblyResult {
             // conventions; nothing in it names a file.
             requested_output: None,
             requested_symbols: None,
+            artifacts: Vec::new(),
         }
     }
 
@@ -176,6 +187,7 @@ impl From<Assembly> for AssemblyResult {
             files: Vec::new(),
             requested_output: a.requested_output,
             requested_symbols: a.requested_symbols,
+            artifacts: a.artifacts,
         }
     }
 }

@@ -32,6 +32,7 @@ mod tests {
             // A test fixture: nothing here names a file.
             requested_output: None,
             requested_symbols: None,
+            artifacts: Vec::new(),
             origin: 0x0801,
             reserved_prefix: 0,
             bytes: vec![0xA9, 0x01, 0x8D, 0x20, 0xD0, 0x60],
