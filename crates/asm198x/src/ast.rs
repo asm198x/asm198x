@@ -199,6 +199,13 @@ pub(crate) enum Item {
     Equ(Operand),
     /// A redefinable binding — see [`Operation::Set`](crate::engine::Operation::Set).
     Set(Operand),
+    /// A file the source asked for besides the machine code — see
+    /// [`Operation::SaveRaw`](crate::engine::Operation::SaveRaw).
+    SaveRaw {
+        name: String,
+        start: Operand,
+        length: Option<Operand>,
+    },
     Bytes(Vec<Operand>),
     Words(Vec<Operand>),
     /// Values at a width and byte order the **directive** named, not the CPU
@@ -768,6 +775,15 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
         Item::Org(o) => Operation::Org(o.clone().into_value()?),
         Item::Equ(o) => Operation::Equ(o.clone().into_value()?),
         Item::Set(o) => Operation::Set(o.clone().into_value()?),
+        Item::SaveRaw {
+            name,
+            start,
+            length,
+        } => Operation::SaveRaw {
+            name: name.clone(),
+            start: start.clone().into_value()?,
+            length: length.clone().map(Operand::into_value).transpose()?,
+        },
         Item::Bytes(v) => Operation::Bytes(
             v.iter()
                 .cloned()
@@ -869,6 +885,15 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
         Item::Org(o) => Operation::Org(o.into_value()?),
         Item::Equ(o) => Operation::Equ(o.into_value()?),
         Item::Set(o) => Operation::Set(o.into_value()?),
+        Item::SaveRaw {
+            name,
+            start,
+            length,
+        } => Operation::SaveRaw {
+            name: name.clone(),
+            start: start.into_value()?,
+            length: length.map(Operand::into_value).transpose()?,
+        },
         Item::Bytes(v) => Operation::Bytes(
             v.into_iter()
                 .map(Operand::into_value)
@@ -1044,6 +1069,15 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
         Operation::Org(e) => Operation::Org(map_sym_expr(e, f)),
         Operation::Equ(e) => Operation::Equ(map_sym_expr(e, f)),
         Operation::Set(e) => Operation::Set(map_sym_expr(e, f)),
+        Operation::SaveRaw {
+            name,
+            start,
+            length,
+        } => Operation::SaveRaw {
+            name,
+            start: map_sym_expr(start, f),
+            length: length.map(|e| map_sym_expr(e, f)),
+        },
         Operation::Bytes(v) => {
             Operation::Bytes(v.into_iter().map(|e| map_sym_expr(e, f)).collect())
         }
@@ -1151,6 +1185,15 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         Operation::Org(e) => Item::Org(Operand::expr(e)),
         Operation::Equ(e) => Item::Equ(Operand::expr(e)),
         Operation::Set(e) => Item::Set(Operand::expr(e)),
+        Operation::SaveRaw {
+            name,
+            start,
+            length,
+        } => Item::SaveRaw {
+            name,
+            start: Operand::expr(start),
+            length: length.map(Operand::expr),
+        },
         Operation::Bytes(v) => Item::Bytes(v.into_iter().map(Operand::expr).collect()),
         Operation::Words(v) => Item::Words(v.into_iter().map(Operand::expr).collect()),
         Operation::Sized {

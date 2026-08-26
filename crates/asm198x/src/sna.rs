@@ -96,6 +96,7 @@ mod tests {
             // A test fixture: nothing here names a file.
             requested_output: None,
             requested_symbols: None,
+            artifacts: Vec::new(),
             origin,
             reserved_prefix: 0,
             bytes,

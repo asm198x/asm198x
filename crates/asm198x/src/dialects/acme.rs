@@ -2138,6 +2138,15 @@ fn substitute_anon_refs(
         Operation::Org(e) => Operation::Org(subst(e)?),
         Operation::Equ(e) => Operation::Equ(subst(e)?),
         Operation::Set(e) => Operation::Set(subst(e)?),
+        Operation::SaveRaw {
+            name,
+            start,
+            length,
+        } => Operation::SaveRaw {
+            name,
+            start: subst(start)?,
+            length: length.map(subst).transpose()?,
+        },
         Operation::Entry(e) => Operation::Entry(subst(e)?),
         Operation::Bytes(v) => {
             Operation::Bytes(v.into_iter().map(subst).collect::<Result<_, _>>()?)
