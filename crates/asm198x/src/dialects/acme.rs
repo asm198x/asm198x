@@ -3090,6 +3090,12 @@ fn parse_directive(
             crate::directives::refused_by_reference("acme", &format!("!{name}"), rule),
         ));
     }
+    if entry.category == Category::ExpressionWord {
+        return Err(AsmError::new(
+            line,
+            crate::directives::not_a_statement(&format!("!{name}")),
+        ));
+    }
     if entry.category == Category::KnownUnsupported {
         return Err(AsmError::new(
             line,

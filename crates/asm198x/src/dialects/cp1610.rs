@@ -255,6 +255,12 @@ fn parse_op(rest: &str, line: usize, after_sdbd: bool) -> Result<Option<Operatio
     {
         Some(directive) => match directive.category {
             Category::Ignored => return Ok(None),
+            Category::ExpressionWord => {
+                return Err(AsmError::new(
+                    line,
+                    crate::directives::not_a_statement(word),
+                ));
+            }
             Category::KnownUnsupported => {
                 return Err(AsmError::new(
                     line,

@@ -92,6 +92,48 @@ fn every_declared_spelling_is_recognised() {
     }
 }
 
+/// Every declared expression word parses **inside an expression**.
+///
+/// The declared-vs-dispatched invariant above cannot speak for these: they
+/// never begin a line, so the directive dispatch never sees one and the only
+/// thing it can say is that writing one there is a mistake. This is their half
+/// — the claim the declaration actually makes, which is that the expression
+/// parser knows the word.
+#[test]
+fn an_expression_word_parses_where_it_belongs() {
+    // One call shape per arity, since the declaration does not record it.
+    let shapes = |spelling: &str| {
+        [
+            format!("{spelling}($1234)"),
+            format!("{spelling}(2,9)"),
+            format!("{spelling}(\"abc\")"),
+            format!("{spelling}(\"abc\",1)"),
+        ]
+    };
+    for surface in directives::surfaces() {
+        let assemble = assembler(surface.dialect);
+        for directive in &surface.directives {
+            if directive.category != directives::Category::ExpressionWord {
+                continue;
+            }
+            for spelling in &directive.spellings() {
+                let taken = shapes(spelling).into_iter().any(|call| {
+                    let source = format!(".segment \"CODE\"\n.byte {call}\n");
+                    assemble(&source)
+                        .err()
+                        .is_none_or(|e| !refused_by_name(&e, spelling))
+                });
+                assert!(
+                    taken,
+                    "{}: `{spelling}` is declared an expression word and no call shape \
+                     of it parses",
+                    surface.dialect
+                );
+            }
+        }
+    }
+}
+
 /// A word no dialect declares is refused as an unknown instruction, everywhere.
 ///
 /// This is the other half of R3: the declaration is the only route in, so

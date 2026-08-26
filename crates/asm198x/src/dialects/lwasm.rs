@@ -1383,6 +1383,9 @@ fn parse_op(
     match directive.category {
         // `end` marks the end of source; it emits nothing.
         Category::Ignored => Ok(None),
+        Category::ExpressionWord => {
+            Err(AsmError::new(line, crate::directives::not_a_statement(&m)))
+        }
         // A refused word is refused when it is *reached*, not when it is read.
         // lwasm does not parse a branch it is not taking at all — anything at
         // all may sit inside `if 0`, an unknown opcode and an unterminated
