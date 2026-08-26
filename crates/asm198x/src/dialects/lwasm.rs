@@ -441,7 +441,8 @@ impl FlatWalk for Walker {
     /// one closer more than any other dialect measured here.
     ///
     /// `ifpragma` and `ifstr` are real lwasm and deliberately absent: pragma
-    /// strings and string conditions are their own surfaces, demand-gated.
+    /// strings and string conditions are their own surfaces, unbuilt and
+    /// registered in `decisions/reference-parity-goal.md`.
     fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
         use ca65_flat::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_lowercase();
@@ -676,7 +677,8 @@ pub const DIRECTIVES: &[Directive] = &[
     // until it can.
     //
     // `ifpragma` and `ifstr` are real lwasm and deliberately absent: pragma
-    // strings and string conditions are their own surfaces, demand-gated.
+    // strings and string conditions are their own surfaces, unbuilt and
+    // registered in `decisions/reference-parity-goal.md`.
     Directive {
         id: "conditional",
         pattern: Pattern::Exact(&[
