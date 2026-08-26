@@ -1021,11 +1021,17 @@ pub(crate) fn assignment_split(trimmed: &str) -> Option<usize> {
 pub(crate) fn split_data_items(s: &str) -> Vec<&str> {
     let mut out = Vec::new();
     let mut in_string = false;
+    let mut depth: i32 = 0;
     let mut start = 0;
     for (i, c) in s.char_indices() {
         match c {
             '"' => in_string = !in_string,
-            ',' if !in_string => {
+            // A comma inside parentheses separates a *function's* arguments,
+            // not the list's items: `.byte .max(2,9)` is one value, and
+            // splitting it here left the parser half a call to read.
+            '(' if !in_string => depth += 1,
+            ')' if !in_string => depth -= 1,
+            ',' if !in_string && depth == 0 => {
                 out.push(s[start..i].trim());
                 start = i + 1;
             }
@@ -1076,6 +1082,32 @@ mod tests {
             bang_is_or: false,
         };
         fold_const(&parse_expr(raw, 1, num, opts).expect("parse"), &env, 1).expect("fold")
+    }
+
+    /// A data list splits on the commas *between its items*, not on the ones
+    /// inside a function call. `.byte .max(2,9)` is one value, and splitting
+    /// it left the expression parser half a call to read — which made every
+    /// two-argument function unreachable, `.max`, `.min` and `.strat`
+    /// included, though all three were written and correct.
+    #[test]
+    fn a_data_list_does_not_split_inside_a_call() {
+        assert_eq!(split_data_items(".max(2,9)"), vec![".max(2,9)"]);
+        assert_eq!(
+            split_data_items("1, .max(2,9), 3"),
+            vec!["1", ".max(2,9)", "3"]
+        );
+        assert_eq!(
+            split_data_items(".max(.min(1,5), 3)"),
+            vec![".max(.min(1,5), 3)"],
+            "nested calls keep their own commas"
+        );
+        // The rules it already had still hold.
+        assert_eq!(split_data_items("1,2,3"), vec!["1", "2", "3"]);
+        assert_eq!(split_data_items("\"a,b\""), vec!["\"a,b\""]);
+        assert_eq!(
+            split_data_items("\"a,b\", .max(1,2)"),
+            vec!["\"a,b\"", ".max(1,2)"]
+        );
     }
 
     #[test]
