@@ -298,6 +298,7 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         parse_number,
         ExprOpts {
             logical: false,
+            scoped_names: false,
             compare: crate::dialects::mos6502::Compare::default(),
             function: None,
             bang_is_or: false,

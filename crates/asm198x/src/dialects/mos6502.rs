@@ -332,6 +332,10 @@ pub(crate) struct ExprOpts {
     /// bare `.and` is an ordinary symbol in a dialect that does not know the
     /// word.
     pub logical: bool,
+    /// `::` inside a name (ca65's `scope::name`, and `::name` for the top
+    /// level). Off everywhere else, where a `:` ends a name — a lone `:` is an
+    /// anonymous label in several dialects, so only the doubled form is taken.
+    pub scoped_names: bool,
     /// Comparison support. `Default` is none, which is what a dialect whose
     /// reference has no comparison operators wants.
     pub compare: Compare,
@@ -628,12 +632,23 @@ fn tokenize(
                     line,
                 )?));
             }
-            l if l.is_ascii_alphabetic() || l == '_' || l == '.' => {
+            l if l.is_ascii_alphabetic()
+                || l == '_'
+                || l == '.'
+                || (l == ':' && opts.scoped_names) =>
+            {
                 let start = i;
                 while i < chars.len()
-                    && (chars[i].is_ascii_alphanumeric() || chars[i] == '_' || chars[i] == '.')
+                    && (chars[i].is_ascii_alphanumeric()
+                        || chars[i] == '_'
+                        || chars[i] == '.'
+                        // `::` binds into the name; a single `:` does not, so a
+                        // trailing one is left for whatever else reads it.
+                        || (opts.scoped_names
+                            && chars[i] == ':'
+                            && chars.get(i + 1) == Some(&':')))
                 {
-                    i += 1;
+                    i += if chars[i] == ':' { 2 } else { 1 };
                 }
                 let word: String = chars[start..i].iter().collect();
                 // ACME spells bitwise XOR as the keyword `XOR` (alias `EOR`);
@@ -1193,6 +1208,7 @@ mod tests {
         let env = BTreeMap::new();
         let opts = ExprOpts {
             logical: false,
+            scoped_names: false,
             compare: Compare::default(),
             function: None,
             prec,

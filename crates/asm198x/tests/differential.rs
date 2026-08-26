@@ -2048,6 +2048,49 @@ const MULTI_PROBES: &[MultiProbe] = &[
              .segment \"VECTORS\"\n .word 0, LA, 0\n",
         )],
     },
+    // `.proc`/`.scope`: what NES source is actually written in. The rules here
+    // are ca65 V2.18's own, probed: `.proc name` defines `name` and opens a
+    // scope, `.scope` opens one and defines nothing, a name inside is reached
+    // from outside as `scope::name`, lookup walks outward, `::name` is the top
+    // level from anywhere, and cheap locals belong to the scope they are in.
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "scopes: .proc defines its name and opens one, .scope only opens \
+               one, names inside are reached as scope::name, lookup walks \
+               outward, :: is the top level, and @cheap locals do not collide",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .code\n\
+             v = $11\n\
+             .proc one\n\
+             v = $22\n\
+             inner: nop\n\
+             @l: nop\n\
+             bne @l\n\
+             .byte v, ::v\n\
+             .endproc\n\
+             .proc two\n\
+             inner: nop\n\
+             @l: nop\n\
+             bne @l\n\
+             .byte one::v\n\
+             .endproc\n\
+             .scope outer\n\
+             w = $33\n\
+             .scope nested\n\
+             .byte w\n\
+             deep: nop\n\
+             .endscope\n\
+             .word nested::deep\n\
+             .endscope\n\
+             after: nop\n\
+             .word one, two, one::inner, two::inner, outer::nested::deep, after\n\
+             .byte outer::w\n\
+             .segment \"VECTORS\"\n .word 0, one, 0\n",
+        )],
+    },
     MultiProbe {
         dialect: "ca65-nes",
         binaries: &[],
