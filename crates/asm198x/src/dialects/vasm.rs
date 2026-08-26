@@ -3353,6 +3353,7 @@ fn parse_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         mos6502::parse_number,
         mos6502::ExprOpts {
             logical: false,
+            scoped_names: false,
             compare: mos6502::Compare {
                 eq: true,
                 eq_eq: false,

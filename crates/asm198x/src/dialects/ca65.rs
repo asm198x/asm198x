@@ -326,6 +326,32 @@ fn assemble_program(
     // `decisions/ast-native-payload-for-multipass-cisc.md`.
     let parsed = parsed_from_program(program)?;
 
+    // Scoped label references, answered now that every definition is known:
+    // `v` written inside `a::b` is `a::b::v` if that exists, else `a::v`, else
+    // `v`. Constants were answered at parse time, positionally, which is what
+    // ca65 requires of them; a label may stand anywhere, so it waits for this.
+    let mut parsed = parsed;
+    if !parsed.stmts.is_empty() {
+        let mut refs: BTreeSet<String> = BTreeSet::new();
+        for stmt in &parsed.stmts {
+            collect_syms(&stmt.kind, &mut refs);
+        }
+        refs.retain(|k| k.starts_with(SCOPE_MARK));
+        if !refs.is_empty() {
+            let known: BTreeSet<&String> = parsed
+                .label_seg
+                .keys()
+                .chain(parsed.consts.keys())
+                .collect();
+            let targets = scope_targets(&refs, &|name| known.contains(&name.to_string()));
+            for stmt in &mut parsed.stmts {
+                stmt.kind = map_kind_syms(&stmt.kind, &|name| {
+                    targets.get(name).map(|t| Expr::Sym(t.clone()))
+                });
+            }
+        }
+    }
+
     // The address-size environment: constants by value, plus zero-page labels
     // pinned below $100 so the shared mode picker selects the short form.
     let mut size_env = parsed.consts.clone();
@@ -1049,6 +1075,31 @@ struct Walker {
     consts: BTreeMap<String, i64>,
     pending_leading: Vec<crate::ast::Comment>,
     nodes: Vec<crate::ast::Node>,
+    /// The scopes open at this line, outermost first — what `.proc`/`.scope`
+    /// push and their closers pop. Names defined here are qualified with it.
+    scopes: Vec<OpenScope>,
+    /// Every scope path opened so far, whether or not it is still open. Two
+    /// uses: ca65 refuses a second scope of the same name in one parent
+    /// (`Duplicate scope 'sa'`), and a `sa::v` reference may only name a scope
+    /// already opened above it (`No such scope: 'sa'`) — both positional.
+    opened: BTreeSet<String>,
+    /// Counts the unnamed `.proc`s, so each gets a path segment of its own.
+    unnamed: usize,
+}
+
+/// One open scope.
+struct OpenScope {
+    /// Its path segment. An unnamed `.proc` gets a synthetic one, which cannot
+    /// collide because [`LABEL_SEP`] is not valid in source.
+    segment: String,
+    /// `.proc` (true) or `.scope` (false). ca65 pairs them by kind: `.endscope`
+    /// on an open `.proc` is `No open .SCOPE`, and the reverse is `No open
+    /// .PROC`.
+    is_proc: bool,
+    /// Where it was opened, so an unclosed one can say where to look.
+    line: usize,
+    /// The cheap-local scope in force outside it, restored when it closes.
+    outer_global: String,
 }
 
 impl Walker {
@@ -1060,6 +1111,9 @@ impl Walker {
             consts: BTreeMap::new(),
             pending_leading: Vec::new(),
             nodes: Vec::new(),
+            scopes: Vec::new(),
+            opened: BTreeSet::new(),
+            unnamed: 0,
         }
     }
 
@@ -1081,8 +1135,171 @@ impl Walker {
                 },
             });
         }
+        // ca65: `Local scope was not closed`, reported at the end of the file.
+        if let Some(open) = self.scopes.last() {
+            let word = if open.is_proc { ".proc" } else { ".scope" };
+            return Err(AsmError::new(
+                open.line,
+                format!("`{word}` is never closed"),
+            ));
+        }
         self.anons.check()?;
         Ok(Program { nodes: self.nodes })
+    }
+
+    /// The path of the scopes open here.
+    fn path(&self) -> Vec<String> {
+        self.scopes.iter().map(|s| s.segment.clone()).collect()
+    }
+
+    /// Recognise `.proc`/`.scope` and their closers, and act on them.
+    ///
+    /// `Some(label)` is what the line defines: `.proc name` defines `name` as a
+    /// label at this address, in the *enclosing* scope, and opens a scope of
+    /// that name; `.scope name` opens one and defines nothing. Both closers
+    /// define nothing, and are matched by kind.
+    fn scope_directive(
+        &mut self,
+        code: &str,
+        line: usize,
+    ) -> Result<Option<Option<String>>, AsmError> {
+        let (word, rest) = split_first_word(code.trim());
+        let rest = rest.trim();
+        let word = word.to_ascii_lowercase();
+        let closing = match word.as_str() {
+            ".endproc" => Some(true),
+            ".endscope" => Some(false),
+            _ => None,
+        };
+        if let Some(is_proc) = closing {
+            match self.scopes.last() {
+                Some(open) if open.is_proc == is_proc => {
+                    let open = self.scopes.pop().expect("just matched");
+                    self.current_global = open.outer_global;
+                    return Ok(Some(None));
+                }
+                // ca65 pairs the closers by kind, so `.endscope` over an open
+                // `.proc` is not a mismatch report but `No open .SCOPE`.
+                _ => {
+                    let opener = if is_proc { ".proc" } else { ".scope" };
+                    return Err(AsmError::new(
+                        line,
+                        format!("`{word}` with no open `{opener}`"),
+                    ));
+                }
+            }
+        }
+        let is_proc = match word.as_str() {
+            ".proc" => true,
+            ".scope" => false,
+            _ => return Ok(None),
+        };
+        // An unnamed `.proc` is real ca65 — deprecated, and it still opens a
+        // scope. The synthetic segment cannot be named from source, which is
+        // exactly what an unnamed scope means. (ca65 also warns; a parse-time
+        // warning has nowhere to go here, and the bytes are what this claims.)
+        let name = if rest.is_empty() {
+            if !is_proc {
+                return Err(AsmError::new(line, "`.scope` needs a name"));
+            }
+            self.unnamed += 1;
+            format!("{LABEL_SEP}proc#{}", self.unnamed)
+        } else {
+            if !is_ident(rest) {
+                return Err(AsmError::new(line, format!("invalid scope name `{rest}`")));
+            }
+            rest.to_string()
+        };
+        let path = qualify(&self.path(), &name);
+        // ca65: `Duplicate scope 'sa'` — a name may be opened once per parent.
+        if !self.opened.insert(path.clone()) {
+            return Err(AsmError::new(line, format!("duplicate scope `{name}`")));
+        }
+        let label = (is_proc && !rest.is_empty()).then(|| qualify(&self.path(), &name));
+        let outer_global = std::mem::replace(
+            &mut self.current_global,
+            label.clone().unwrap_or_else(|| path.clone()),
+        );
+        self.scopes.push(OpenScope {
+            segment: name,
+            is_proc,
+            line,
+            outer_global,
+        });
+        Ok(Some(label))
+    }
+
+    /// A name written here, as the key it is stored or looked up under.
+    ///
+    /// A constant is answered now: ca65 requires an `=` above the line that
+    /// uses it, so the innermost enclosing scope holding one is already known,
+    /// and answering here keeps `.if`, `.res` and every other parse-time fold
+    /// working inside a scope. A label cannot be, so it becomes a
+    /// [`scope_ref`] for [`scope_targets`] to answer once the file is read.
+    fn scoped_name(&self, name: &str) -> String {
+        let mut segments = self.path();
+        loop {
+            let candidate = qualify(&segments, name);
+            if self.consts.contains_key(&candidate) {
+                return candidate;
+            }
+            if segments.pop().is_none() {
+                break;
+            }
+        }
+        scope_ref(&self.path(), name)
+    }
+
+    /// `sa::v` — the scope named must already be open or closed above this
+    /// line, searched outward from here, which is ca65's `No such scope`.
+    fn resolve_qualified(&self, text: &str, line: usize) -> Result<String, AsmError> {
+        let (head, rest) = text.split_once("::").expect("caller checked");
+        let mut segments = self.path();
+        loop {
+            let candidate = qualify(&segments, head);
+            if self.opened.contains(&candidate) {
+                return Ok(format!("{candidate}::{rest}"));
+            }
+            if segments.pop().is_none() {
+                break;
+            }
+        }
+        Err(AsmError::new(line, format!("no such scope `{head}`")))
+    }
+
+    /// Rewrite every name in a statement to the key it resolves under. A no-op
+    /// outside a scope, except for the `::name` spelling, which means the top
+    /// level from anywhere.
+    fn scope_syms(&self, kind: &Kind, line: usize) -> Result<Kind, AsmError> {
+        let failure: std::cell::RefCell<Option<AsmError>> = std::cell::RefCell::new(None);
+        let out = map_kind_syms(kind, &|name: &str| {
+            // Anonymous labels, cheap locals and the `.defined` marker are
+            // already keys rather than source names.
+            if name.starts_with(LABEL_SEP) {
+                return None;
+            }
+            if let Some(global) = name.strip_prefix("::") {
+                return Some(Expr::Sym(global.to_string()));
+            }
+            if name.contains("::") {
+                return match self.resolve_qualified(name, line) {
+                    Ok(key) => Some(Expr::Sym(key)),
+                    Err(e) => {
+                        *failure.borrow_mut() = Some(e);
+                        None
+                    }
+                };
+            }
+            if self.scopes.is_empty() {
+                None
+            } else {
+                Some(Expr::Sym(self.scoped_name(name)))
+            }
+        });
+        match failure.into_inner() {
+            Some(e) => Err(e),
+            None => Ok(out),
+        }
     }
 
     /// Recognise a walk-handled `.include`/`.incbin` operation, parsing the
@@ -1201,6 +1418,29 @@ impl FlatWalk for Walker {
             return Ok(None);
         }
 
+        // `.proc`/`.scope` and their closers. Kept as source-only nodes like the
+        // segment directives, so the formatter reproduces them; `.proc name`
+        // carries the label it defines, which the projection places at this
+        // address like any label-only line.
+        if let Some(label) = self.scope_directive(trimmed, line)? {
+            self.nodes.push(Node {
+                operand_span: None,
+                label: label.map(|qualified| Symbol {
+                    name: qualified.rsplit("::").next().unwrap_or("").to_string(),
+                    scope: Scope::Global,
+                    qualified,
+                }),
+                item: None,
+                source: trimmed.to_string(),
+                span,
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing,
+                },
+            });
+            return Ok(None);
+        }
+
         // `NAME = expr` defines a constant — the shared `Item::Equ`, folded in
         // source order (later statements' size decisions see it).
         if let Some(eq) = assignment_split(trimmed) {
@@ -1212,6 +1452,14 @@ impl FlatWalk for Walker {
                 ));
             }
             let expr = parse_value(&self.anons, &self.current_global, &trimmed[eq + 1..], line)?;
+            let expr = match self.scope_syms(&Kind::Bytes(vec![expr]), line)? {
+                Kind::Bytes(mut es) => es.pop().expect("one expression in, one out"),
+                _ => unreachable!("Bytes maps to Bytes"),
+            };
+            // A constant inside a scope belongs to it: `v` in `.proc pa` is
+            // `pa::v`, and `::v` outside is a different symbol.
+            let name = qualify(&self.path(), name);
+            let name = name.as_str();
             if let Ok(v) = fold_const(&expr, &self.consts, line) {
                 self.consts.insert(name.to_string(), v);
             }
@@ -1261,6 +1509,23 @@ impl FlatWalk for Walker {
             rest,
             line,
         )?;
+        // Every name the statement mentions, as the key it resolves under.
+        let kind = self.scope_syms(&kind, line)?;
+        // A label inside a scope is defined in it, and takes the cheap-local
+        // scope with it so `@l` in two procs is two labels.
+        let symbol = symbol.map(|mut s| {
+            // Only a plain label: a cheap local is already keyed on its global
+            // (which is itself qualified, so two procs' `@l` stay apart), and an
+            // anonymous one is positional rather than named.
+            if !self.scopes.is_empty()
+                && matches!(s.scope, crate::ast::Scope::Global)
+                && !s.qualified.starts_with(LABEL_SEP)
+            {
+                s.qualified = qualify(&self.path(), &s.qualified);
+                self.current_global = s.qualified.clone();
+            }
+            s
+        });
         let trivia = Trivia {
             leading: std::mem::take(&mut self.pending_leading),
             trailing,
@@ -1615,6 +1880,18 @@ fn map_operand_syms(
         O::Indexed(e, i) => O::Indexed(b(e), *i),
         O::Direct(e) => O::Direct(b(e)),
     }
+}
+
+/// Every name a statement mentions. Written as a map that answers nothing,
+/// because [`map_kind_syms`] already knows where the names in a `Kind` are and
+/// a second walk would be a second thing to keep in step with it.
+fn collect_syms(kind: &Kind, out: &mut BTreeSet<String>) {
+    let seen = std::cell::RefCell::new(Vec::new());
+    let _ = map_kind_syms(kind, &|name: &str| {
+        seen.borrow_mut().push(name.to_string());
+        None
+    });
+    out.extend(seen.into_inner());
 }
 
 /// The same, over a statement kind.
@@ -2268,14 +2545,23 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::KnownUnsupported,
     },
-    // scopes and blocks
+    // Walk-handled, like the segment directives: the scope stack is parse
+    // state, so these are read before `parse_directive` sees a line.
     Directive {
-        id: "unsupported-scopes",
+        id: "scopes",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &[
-                "proc", "endproc", "scope", "endscope", "struct", "union", "enum", "tag", "end",
-            ],
+            names: &["proc", "endproc", "scope", "endscope"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // The record types, which declare a layout rather than open a scope.
+    Directive {
+        id: "unsupported-records",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["struct", "union", "enum", "tag", "end"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -2749,6 +3035,7 @@ fn parse_value(
         parse_number,
         mos6502::ExprOpts {
             logical: true,
+            scoped_names: true,
             compare: mos6502::Compare {
                 eq: true,
                 eq_eq: false,
@@ -2812,6 +3099,72 @@ fn resolve_defined<'a>(
         let known = consts.contains_key(sym) || labels.contains_key(sym);
         Some(Expr::Num(i64::from(known)))
     }
+}
+
+/// Marks an unqualified reference written inside a scope. ca65 resolves such a
+/// name against the innermost enclosing scope that holds it, and only the
+/// *whole file* knows which that is, so the parse records the path the
+/// reference was written in and [`scope_targets`] answers it once every
+/// definition is known. Built from [`LABEL_SEP`], so it cannot collide with a
+/// name from source.
+const SCOPE_MARK: &str = "\u{1}scope\u{1}";
+
+/// `a::b::name`, or `name` at the top level — the key a definition inside a
+/// scope is stored under, and what a reference finally resolves to.
+fn qualify(path: &[String], name: &str) -> String {
+    if path.is_empty() {
+        return name.to_string();
+    }
+    format!("{}::{name}", path.join("::"))
+}
+
+/// The reference key for `name` written inside `path`: the path, then the name.
+fn scope_ref(path: &[String], name: &str) -> String {
+    format!("{SCOPE_MARK}{}{LABEL_SEP}{name}", path.join("::"))
+}
+
+/// Split a reference key back into the path it was written in and the name.
+fn split_scope_ref(key: &str) -> Option<(&str, &str)> {
+    key.strip_prefix(SCOPE_MARK)?.split_once(LABEL_SEP)
+}
+
+/// What each scoped reference resolves to, given everything the file defines.
+///
+/// ca65 looks a name up in the scope it was written in, then in that scope's
+/// parent, and outward to the top — so `v` inside `a::b` is `a::b::v` if that
+/// exists, else `a::v`, else `v`. A name that resolves nowhere keeps its bare
+/// spelling, so the diagnostic names what the source wrote rather than an
+/// internal key.
+fn scope_targets(
+    refs: &BTreeSet<String>,
+    defined: &dyn Fn(&str) -> bool,
+) -> BTreeMap<String, String> {
+    let mut out = BTreeMap::new();
+    for key in refs {
+        let Some((path, name)) = split_scope_ref(key) else {
+            continue;
+        };
+        let mut segments: Vec<&str> = if path.is_empty() {
+            Vec::new()
+        } else {
+            path.split("::").collect()
+        };
+        let target = loop {
+            let candidate = if segments.is_empty() {
+                name.to_string()
+            } else {
+                format!("{}::{name}", segments.join("::"))
+            };
+            if defined(&candidate) {
+                break candidate;
+            }
+            if segments.pop().is_none() {
+                break name.to_string();
+            }
+        };
+        out.insert(key.clone(), target);
+    }
+    out
 }
 
 /// A collision-proof symbol key for a cheap local, scoped to its global.
@@ -3432,7 +3785,7 @@ two:\n\
         // constructor table from linker-config features our fixed layout does
         // not declare, so it stays a gap by decision rather than by schedule
         // (`decisions/reference-parity-goal.md`).
-        for d in [".condes foo, 1", ".proc x", ".org $200", ".macpack cpu"] {
+        for d in [".condes foo, 1", ".struct s", ".org $200", ".macpack cpu"] {
             let e = err(&format!("\t{d}\n"));
             assert!(
                 e.contains("is a real directive here"),
@@ -3600,6 +3953,66 @@ two:\n\
         for head in [".ifp816", ".ifpc02", ".ifpsc02", ".ifp4510"] {
             assert_eq!(taken(head), 0x22, "{head}");
         }
+    }
+
+    /// What a scope does to a name, measured against ca65 V2.18. The
+    /// byte-for-byte agreement is the differential fixture's job; these are the
+    /// rules that fixture would not show if it broke.
+    #[test]
+    fn a_scope_qualifies_the_names_inside_it() {
+        // A name in two procs is two symbols, and each `.word` reads its own.
+        let image = rom(".segment \"CODE\"\n\
+             .proc one\ninner: nop\n.endproc\n\
+             .proc two\ninner: nop\n.endproc\n\
+             .word one::inner, two::inner, one, two\n");
+        assert_eq!(&image[16..20], &[0xEA, 0xEA, 0x00, 0x80]);
+        assert_eq!(&image[20..24], &[0x01, 0x80, 0x00, 0x80]);
+
+        // `.scope` opens one and defines nothing, so its name is not a symbol.
+        super::assemble(".segment \"CODE\"\n.scope s\n nop\n.endscope\n .word s\n")
+            .expect_err("ca65: Symbol 's' is undefined");
+
+        // Lookup walks outward, and `::` is the top level from anywhere.
+        let image = rom(".segment \"CODE\"\nv = $11\n.proc p\nv = $22\n .byte v, ::v\n.endproc\n");
+        assert_eq!(&image[16..18], &[0x22, 0x11]);
+
+        // A name defined inside is invisible outside it.
+        super::assemble(".segment \"CODE\"\n.proc p\ninner: nop\n.endproc\n .word inner\n")
+            .expect_err("ca65: Symbol 'inner' is undefined");
+    }
+
+    /// The ways a scope can be written wrongly, each answered the way ca65
+    /// answers it.
+    #[test]
+    fn a_scope_has_to_be_opened_and_closed() {
+        let err = |src: &str| {
+            super::assemble(&format!(".segment \"CODE\"\n{src}"))
+                .expect_err(src)
+                .to_string()
+        };
+        // The closers are paired by kind: ca65 answers `.endscope` over an open
+        // `.proc` with `No open .SCOPE`, not with a mismatch report.
+        assert!(err(".proc p\n nop\n.endscope\n").contains("no open `.scope`"));
+        assert!(err(".scope s\n nop\n.endproc\n").contains("no open `.proc`"));
+        assert!(err(".endproc\n").contains("no open `.proc`"));
+        // ca65: `Local scope was not closed`.
+        assert!(err(".proc p\n nop\n").contains("never closed"));
+        // ca65: `Duplicate scope 'sa'` — one name per parent.
+        assert!(err(".scope sa\n.endscope\n.scope sa\n.endscope\n").contains("duplicate scope"));
+        // A scope reference may only name one opened above it: ca65 answers
+        // `No such scope: 'p'` rather than waiting to see whether one arrives.
+        assert!(err(" .word p::inner\n.proc p\ninner: nop\n.endproc\n").contains("no such scope"));
+    }
+
+    /// Cheap locals belong to the scope they are written in, so the same `@l`
+    /// in two procs is two labels rather than a duplicate-symbol error.
+    #[test]
+    fn a_cheap_local_belongs_to_its_scope() {
+        let image = rom(".segment \"CODE\"\n\
+             .proc one\n@l: nop\n bne @l\n.endproc\n\
+             .proc two\n@l: nop\n bne @l\n.endproc\n");
+        // Each branch reaches its own `@l`: nop, bne -3, twice over.
+        assert_eq!(&image[16..22], &[0xEA, 0xD0, 0xFD, 0xEA, 0xD0, 0xFD]);
     }
 
     /// A pseudo-function is declared as what it is.
