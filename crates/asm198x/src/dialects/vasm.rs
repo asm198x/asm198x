@@ -2711,6 +2711,41 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["echo"]),
         category: Category::Operation,
     },
+    // `printt` says a string and `printv` says a value four ways — both at
+    // assembly time, like `echo`, and neither emits a byte.
+    Directive {
+        id: "print_text",
+        pattern: Pattern::Exact(&["printt"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "print_value",
+        pattern: Pattern::Exact(&["printv"]),
+        category: Category::Operation,
+    },
+    // The listing and debug knobs. Each was probed against vasm 2.0b: the same
+    // source assembles to the same bytes with the directive present or absent,
+    // because every one addresses the *listing file* or the debug output
+    // rather than the program.
+    Directive {
+        id: "listing",
+        pattern: Pattern::Exact(&[
+            "list",
+            "nolist",
+            "llen",
+            "plen",
+            "page",
+            "nopage",
+            "spc",
+            "ttl",
+            "symdebug",
+            "dsource",
+            "msource",
+            "vdebug",
+            "showoffset",
+        ]),
+        category: Category::Ignored,
+    },
     Directive {
         id: "section_shorthand",
         pattern: Pattern::Exact(&[
@@ -2831,7 +2866,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "dl",
             "dr",
             "dseg",
-            "dsource",
             "dw",
             "dx",
             "einline",
@@ -2865,26 +2899,17 @@ pub const DIRECTIVES: &[Directive] = &[
             "line_f",
             "linea",
             "linef",
-            "list",
-            "llen",
             "load",
             "machine",
             "mask2",
             "mexit",
             "module",
-            "msource",
             "near",
-            "nolist",
-            "nopage",
             "odd",
             "offset",
             "opt",
             "org",
-            "page",
-            "plen",
             "popsection",
-            "printt",
-            "printv",
             "pushsection",
             "rem",
             "rorg",
@@ -2895,13 +2920,8 @@ pub const DIRECTIVES: &[Directive] = &[
             "sdreg",
             "setfo",
             "setso",
-            "showoffset",
             "so",
-            "spc",
-            "symdebug",
             "text",
-            "ttl",
-            "vdebug",
         ]),
         category: Category::KnownUnsupported,
     },
@@ -2963,7 +2983,21 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
                     Stmt::Output(name.to_string())
                 })
             }
-            "echo" => Ok(Stmt::Echo(render_message(args, line, 10)?)),
+            "echo" | "print_text" => Ok(Stmt::Echo(render_message(args, line, 10)?)),
+            // `printv 42` prints `$2A 42 "...*" %0000...101010` — the value as
+            // hex, as decimal, as its four bytes rendered printable, and as 32
+            // bits. Read off vasm 2.0b rather than guessed at.
+            "print_value" => {
+                // Read on pass one, like `echo`'s own numeric parts: a value
+                // that needs the symbol table has nothing to print yet.
+                let Ok(Expr::Num(value)) = parse_value(args.trim(), line) else {
+                    return Err(AsmError::new(
+                        line,
+                        "`printv` needs a value it can work out where it stands",
+                    ));
+                };
+                Ok(Stmt::Echo(print_value(value)))
+            }
             "visibility" => Ok(Stmt::Visible(
                 split_operands(args)
                     .iter()
@@ -3036,6 +3070,27 @@ fn parse_align(args: &str, line: usize) -> Result<Stmt, AsmError> {
 /// `radix`. Each reference prints numbers its own way — vasm decimal, rgbasm
 /// `$5`, sjasmplus `0x0005` — and nothing compares console output, so the
 /// radix is the dialect's and the rest is its own business.
+/// vasm's `printv` rendering: hex, decimal, the value's four bytes as
+/// characters, and its 32 bits. A byte outside the printable range shows as
+/// `.`, which is how the reference writes an unprintable one.
+fn print_value(value: i64) -> String {
+    let text: String = (value as u32)
+        .to_be_bytes()
+        .iter()
+        .map(|&b| {
+            if (0x20..0x7F).contains(&b) {
+                b as char
+            } else {
+                '.'
+            }
+        })
+        .collect();
+    format!(
+        "${:X} {} \"{}\" %{:032b}",
+        value as u32, value, text, value as u32
+    )
+}
+
 fn render_message(args: &str, line: usize, radix: u32) -> Result<String, AsmError> {
     let mut out = String::new();
     for part in split_operands(args) {
@@ -3503,6 +3558,49 @@ fn expand_vasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
     macros::expansion(mode, source, |s| {
         macros::expand(&VasmMacros, s).map(|e| Some((e.text, e.origins)))
     })
+}
+
+#[cfg(test)]
+mod listing_words {
+    //! The words that address the listing rather than the program, and the two
+    //! that say something on the way past.
+
+    /// `printv` renders a value four ways, and the shape is the reference's:
+    /// hex, decimal, the four bytes as characters with unprintables shown as
+    /// `.`, then 32 bits. Read off vasm 2.0b.
+    #[test]
+    fn printv_renders_the_way_vasm_renders() {
+        assert_eq!(
+            super::print_value(42),
+            "$2A 42 \"...*\" %00000000000000000000000000101010"
+        );
+        // Four printable bytes read straight out.
+        assert_eq!(
+            super::print_value(0x4142_4344),
+            "$41424344 1094861636 \"ABCD\" %01000001010000100100001101000100"
+        );
+    }
+
+    /// The thirteen listing knobs change no byte, and the two printing ones
+    /// emit nothing either — they arrive as notes.
+    #[test]
+    fn the_listing_words_change_no_byte() {
+        let plain = crate::assemble_vasm("\tsection code,code\n\tdc.b $11\n").expect("plain");
+        let noisy = crate::assemble_vasm_warned(
+            "\tsection code,code\n\tlist\n\tnolist\n\tllen 80\n\tplen 60\n\tpage\n\
+             \tnopage\n\tspc 2\n\tttl \"t\"\n\tsymdebug\n\tdsource \"x.s\"\n\tmsource\n\
+             \tvdebug\n\tshowoffset\n\tprintt \"hello\"\n\tprintv 42\n\tdc.b $11\n",
+        )
+        .expect("noisy");
+        assert_eq!(plain.bytes, noisy.bytes);
+        // What `printt`/`printv` say arrives as a note rather than vanishing.
+        let notes: Vec<&str> = noisy.warnings.iter().map(|w| w.message.as_str()).collect();
+        assert!(notes.contains(&"hello"), "got {notes:?}");
+        assert!(
+            notes.iter().any(|n| n.starts_with("$2A 42 \"...*\"")),
+            "got {notes:?}"
+        );
+    }
 }
 
 #[cfg(test)]

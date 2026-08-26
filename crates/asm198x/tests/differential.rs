@@ -805,6 +805,14 @@ const PROBES: &[Probe] = &[
         "ldav\tmacro\n move.l #\\1,d0\n move.l #\\2,d1\n endm\n ldav 5,7\n"),
     // vasm also takes the definition keyword-first, which lwasm rejects with
     // `Missing macro name`.
+    // The listing and debug knobs, and the two that say something: probed
+    // inert, so the same source assembles to the same bytes either way.
+    ok ("vasm", "the listing and debug words emit nothing",
+        "\tsection code,code\n\tlist\n\tnolist\n\tllen 80\n\tplen 60\n\tpage\n\
+         \tnopage\n\tspc 2\n\tttl \"t\"\n\tsymdebug\n\tdsource \"x.s\"\n\tmsource\n\
+         \tvdebug\n\tshowoffset\n\tdc.b $11\n\tdc.w $2233\n"),
+    ok ("vasm", "printt and printv say something and emit nothing",
+        "\tsection code,code\n\tprintt \"hello\"\n\tprintv 42\n\tdc.b $11\n"),
     ok ("vasm", "macro defined keyword-first",
         " macro nop2\n nop\n endm\n nop2\n"),
     // `\@` numbers the expansion, so `spin\@` is a fresh label each time. The
