@@ -630,6 +630,7 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         parse_number,
         mos6502::ExprOpts {
+            logical: true,
             compare: mos6502::Compare {
                 eq: true,
                 eq_eq: false,

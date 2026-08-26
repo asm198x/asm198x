@@ -295,6 +295,16 @@ pub(crate) enum BinOp {
     Xor,
     Shl,
     Shr,
+    /// Remainder — ca65's `.mod`. C's sign rule, which is the reference's:
+    /// `7 .mod (0-4)` is `3`, and a negative left operand is refused there
+    /// rather than defined.
+    Mod,
+    /// The **logical** operators — ca65's `&&`/`.and`, `||`/`.or` and `.xor`.
+    /// Each takes its operands as true-or-false and answers `1` or `0`, so
+    /// `2 .and 3` is `1` where `2 & 3` is `2`.
+    LogAnd,
+    LogOr,
+    LogXor,
     /// Exponentiation (ACME's `^`): `a` raised to the power `b`.
     Pow,
     /// The larger of the two (ca65 `.max`).
@@ -333,6 +343,14 @@ pub(crate) enum Expr {
     Bank(Box<Expr>),
     /// Negation of the inner value.
     Neg(Box<Expr>),
+    /// Bitwise complement — ca65's `~` and `.bitnot`. Every bit, so the value
+    /// is negative unless something masks it: `~0` is `-1` and `~0 & $FF` is
+    /// `$FF`.
+    BitNot(Box<Expr>),
+    /// Logical negation — ca65's `!` and `.not`. Answers `1` or `0`, and binds
+    /// *looser* than everything else in that dialect: `.not 1 .or 1` is `0`,
+    /// because the `.or` happens first.
+    LogNot(Box<Expr>),
     /// A binary operation on two sub-expressions.
     Bin(BinOp, Box<Expr>, Box<Expr>),
 }
@@ -375,6 +393,8 @@ impl Expr {
                 .eval_with(resolve, pc, line)?
                 .checked_neg()
                 .ok_or_else(|| AsmError::new(line, "arithmetic overflow in expression"))?,
+            Expr::BitNot(e) => !e.eval_with(resolve, pc, line)?,
+            Expr::LogNot(e) => i64::from(e.eval_with(resolve, pc, line)? == 0),
             Expr::Bin(op, l, r) => {
                 let a = l.eval_with(resolve, pc, line)?;
                 let b = r.eval_with(resolve, pc, line)?;
@@ -397,6 +417,16 @@ pub(crate) fn eval_binop(op: BinOp, a: i64, b: i64, line: usize) -> Result<i64, 
         BinOp::And => a & b,
         BinOp::Or => a | b,
         BinOp::Xor => a ^ b,
+        // ca65 refuses a negative left operand rather than defining one, so it
+        // never reaches here; the sign rule for the rest is C's, which is
+        // Rust's — `7 .mod (0-4)` is `3`.
+        BinOp::Mod if b == 0 => return Err(AsmError::new(line, "modulo by zero in expression")),
+        BinOp::Mod => a.checked_rem(b).ok_or_else(overflow)?,
+        // Logical, not bitwise: the operands are read as true-or-false and the
+        // answer is 1 or 0. `2 .and 3` is 1 where `2 & 3` is 2.
+        BinOp::LogAnd => i64::from(a != 0 && b != 0),
+        BinOp::LogOr => i64::from(a != 0 || b != 0),
+        BinOp::LogXor => i64::from((a != 0) ^ (b != 0)),
         BinOp::Shl => a.wrapping_shl(b as u32),
         BinOp::Shr => a.wrapping_shr(b as u32),
         // ca65's `.max`/`.min`. Binary operations rather than a dedicated node:

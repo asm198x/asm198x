@@ -2398,7 +2398,12 @@ fn fold_vasm_condition(
 fn mentions_pc(e: &Expr) -> bool {
     match e {
         Expr::Pc => true,
-        Expr::Lo(i) | Expr::Hi(i) | Expr::Bank(i) | Expr::Neg(i) => mentions_pc(i),
+        Expr::Lo(i)
+        | Expr::Hi(i)
+        | Expr::Bank(i)
+        | Expr::Neg(i)
+        | Expr::BitNot(i)
+        | Expr::LogNot(i) => mentions_pc(i),
         Expr::Bin(_, l, r) => mentions_pc(l) || mentions_pc(r),
         Expr::Num(_) | Expr::Sym(_) => false,
     }
@@ -3347,6 +3352,7 @@ fn parse_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         mos6502::parse_number,
         mos6502::ExprOpts {
+            logical: false,
             compare: mos6502::Compare {
                 eq: true,
                 eq_eq: false,

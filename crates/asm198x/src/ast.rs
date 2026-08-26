@@ -1196,6 +1196,8 @@ pub(crate) fn map_sym_expr(e: Expr, f: &mut impl FnMut(String) -> Expr) -> Expr 
         Expr::Hi(b) => Expr::Hi(Box::new(map_sym_expr(*b, f))),
         Expr::Bank(b) => Expr::Bank(Box::new(map_sym_expr(*b, f))),
         Expr::Neg(b) => Expr::Neg(Box::new(map_sym_expr(*b, f))),
+        Expr::BitNot(b) => Expr::BitNot(Box::new(map_sym_expr(*b, f))),
+        Expr::LogNot(b) => Expr::LogNot(Box::new(map_sym_expr(*b, f))),
         Expr::Bin(op, l, r) => Expr::Bin(
             op,
             Box::new(map_sym_expr(*l, f)),

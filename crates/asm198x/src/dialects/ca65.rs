@@ -1473,6 +1473,8 @@ fn map_expr_syms(e: &Expr, f: &dyn Fn(&str) -> Option<Expr>) -> Expr {
         Expr::Hi(i) => Expr::Hi(Box::new(map_expr_syms(i, f))),
         Expr::Bank(i) => Expr::Bank(Box::new(map_expr_syms(i, f))),
         Expr::Neg(i) => Expr::Neg(Box::new(map_expr_syms(i, f))),
+        Expr::BitNot(i) => Expr::BitNot(Box::new(map_expr_syms(i, f))),
+        Expr::LogNot(i) => Expr::LogNot(Box::new(map_expr_syms(i, f))),
         Expr::Bin(op, l, r) => Expr::Bin(
             *op,
             Box::new(map_expr_syms(l, f)),
@@ -1806,6 +1808,21 @@ pub const DIRECTIVES: &[Directive] = &[
     // `.max`, `.min` and `.strat` were unreachable until the data-list
     // splitter stopped cutting a call in half at its argument comma; the code
     // behind them was always right.
+    // The operator spellings. ca65 writes every operator twice — `&` and
+    // `.bitand` are one operator — so the keyword lands on the same token as
+    // its symbol twin and inherits its precedence. `.mod` is the exception
+    // with no twin: `%` is a binary literal there.
+    //
+    // `.not` is the one whose place is not the obvious one: it binds looser
+    // than everything, so `.not 1 .or 1` is `0`.
+    Directive {
+        id: "operator",
+        pattern: Pattern::Exact(&[
+            ".and", ".bitand", ".bitnot", ".bitor", ".bitxor", ".mod", ".not", ".or", ".shl",
+            ".shr", ".xor",
+        ]),
+        category: Category::ExpressionWord,
+    },
     Directive {
         id: "expression-word",
         pattern: Pattern::Exact(&[
@@ -2173,22 +2190,7 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "unsupported-everything",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &[
-                "bankbytes",
-                "bitand",
-                "bitnot",
-                "bitor",
-                "bitxor",
-                "faraddr",
-                "hibytes",
-                "lobytes",
-                "mod",
-                "not",
-                "or",
-                "shl",
-                "shr",
-                "xor",
-            ],
+            names: &["bankbytes", "faraddr", "hibytes", "lobytes"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -2560,6 +2562,7 @@ fn parse_value(
         line,
         parse_number,
         mos6502::ExprOpts {
+            logical: true,
             compare: mos6502::Compare {
                 eq: true,
                 eq_eq: false,
@@ -3254,6 +3257,59 @@ two:\n\
             err("\t.zzqq\n").contains("is not a directive ca65 has"),
             "and a word ca65 does not have should say so"
         );
+    }
+
+    /// ca65 spells every operator twice, and both spellings are one operator:
+    /// the keyword lands on its symbol twin's token, so it inherits the same
+    /// precedence rather than getting a second, nearly-right one.
+    #[test]
+    fn a_keyword_operator_is_its_symbol_twin() {
+        let byte = |src: &str| {
+            super::assemble(&format!(".segment \"CODE\"\n.byte {src}\n"))
+                .unwrap_or_else(|e| panic!("{src}: {e}"))
+                .0
+        };
+        for (keyword, symbol) in [
+            ("4 + 1 .bitand 1", "4 + 1 & 1"),
+            ("4 + 2 .bitor 1", "4 + 2 | 1"),
+            ("6 .bitxor 3 + 1", "6 ^ 3 + 1"),
+            ("1 .shl 2 + 1", "1 << 2 + 1"),
+            ("$80 .shr 3", "$80 >> 3"),
+            (".bitnot 0 .bitand $FF", "~0 & $FF"),
+            ("1 .and 0 .or 1", "1 && 0 || 1"),
+            ("0 .or 1 .and 0", "0 || 1 && 0"),
+            (".not 1 .or 1", "! 1 || 1"),
+        ] {
+            assert_eq!(byte(keyword), byte(symbol), "`{keyword}` vs `{symbol}`");
+        }
+    }
+
+    /// The two things about this layer that are not the obvious reading, both
+    /// measured against ca65 V2.18.
+    #[test]
+    fn the_logical_layer_reads_as_ca65_reads_it() {
+        // The value is fenced, because the linked image is padded and a `0`
+        // answer would otherwise be indistinguishable from the padding.
+        let byte = |src: &str| {
+            let image = super::assemble(&format!(".segment \"CODE\"\n.byte $AA,{src},$AA\n"))
+                .unwrap_or_else(|e| panic!("{src}: {e}"))
+                .0;
+            let at = image
+                .windows(3)
+                .position(|w| w[0] == 0xAA && w[2] == 0xAA)
+                .unwrap_or_else(|| panic!("{src}: no fenced value in the image"));
+            vec![image[at + 1]]
+        };
+        // `.not` binds looser than everything, so the `.or` happens first and
+        // the `.not` negates the lot. Read as an ordinary prefix this is 1.
+        assert_eq!(byte(".not 1 .or 1"), vec![0]);
+        // The logical operators answer 1 or 0 whatever they are given, where
+        // the bitwise ones answer the bits.
+        assert_eq!(byte("2 .and 3"), vec![1]);
+        assert_eq!(byte("2 .bitand 3"), vec![2]);
+        // `.mod` sits with `*` and `/`, and takes C's sign rule.
+        assert_eq!(byte("7 .mod 4 + 1"), vec![4]);
+        assert_eq!(byte("7 .mod (0 - 4)"), vec![3]);
     }
 
     /// A pseudo-function is declared as what it is.
