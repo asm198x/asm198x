@@ -307,6 +307,11 @@ pub(crate) enum BinOp {
     LogXor,
     /// Exponentiation (ACME's `^`): `a` raised to the power `b`.
     Pow,
+    /// Fixed-point multiply and divide in rgbasm's Q16.16: `MUL(1.5, 1.5)` is
+    /// `2.25`, so the product is shifted back down by the fraction's width and
+    /// the quotient shifted up before dividing.
+    FixMul,
+    FixDiv,
     /// The larger of the two (ca65 `.max`).
     Max,
     /// The smaller of the two (ca65 `.min`).
@@ -327,6 +332,9 @@ pub(crate) enum BinOp {
 /// syntax into this tree; the engine evaluates it. The tree stays dialect-
 /// agnostic: a `<`/`>` operator and a `low()`/`high()` function both lower to
 /// [`Expr::Lo`]/[`Expr::Hi`], and any dialect's `+`/`-`/`*`/`/` lower to
+/// The fraction's width in rgbasm's fixed-point numbers: `1.0` is `$10000`.
+pub(crate) const FIX_BITS: i64 = 16;
+
 /// [`Expr::Bin`].
 #[derive(Debug, Clone)]
 pub(crate) enum Expr {
@@ -347,6 +355,13 @@ pub(crate) enum Expr {
     /// is negative unless something masks it: `~0` is `-1` and `~0 & $FF` is
     /// `$FF`.
     BitNot(Box<Expr>),
+    /// rgbasm's `ROUND` over a Q16.16 value: to the nearest whole number, with
+    /// a half going *away from zero* — `ROUND(-3.5)` is `-4.0`, which is why
+    /// this is a node rather than an add-and-mask.
+    FixRound(Box<Expr>),
+    /// rgbasm's `TZCOUNT`: how many low bits of the value are zero. Zero itself
+    /// has none by definition here rather than all of them.
+    TrailingZeros(Box<Expr>),
     /// Logical negation — ca65's `!` and `.not`. Answers `1` or `0`, and binds
     /// *looser* than everything else in that dialect: `.not 1 .or 1` is `0`,
     /// because the `.or` happens first.
@@ -395,6 +410,15 @@ impl Expr {
                 .ok_or_else(|| AsmError::new(line, "arithmetic overflow in expression"))?,
             Expr::BitNot(e) => !e.eval_with(resolve, pc, line)?,
             Expr::LogNot(e) => i64::from(e.eval_with(resolve, pc, line)? == 0),
+            // Half goes away from zero, which is what rgbasm does: `ROUND(3.5)`
+            // is `4.0` and `ROUND(-3.5)` is `-4.0`.
+            Expr::FixRound(e) => {
+                let v = e.eval_with(resolve, pc, line)?;
+                let half = 1 << (FIX_BITS - 1);
+                let away = if v < 0 { v - half } else { v + half };
+                away & !((1 << FIX_BITS) - 1)
+            }
+            Expr::TrailingZeros(e) => i64::from(e.eval_with(resolve, pc, line)?.trailing_zeros()),
             Expr::Bin(op, l, r) => {
                 let a = l.eval_with(resolve, pc, line)?;
                 let b = r.eval_with(resolve, pc, line)?;
@@ -443,6 +467,15 @@ pub(crate) fn eval_binop(op: BinOp, a: i64, b: i64, line: usize) -> Result<i64, 
             let exp = u32::try_from(b)
                 .map_err(|_| AsmError::new(line, "negative exponent in expression"))?;
             a.checked_pow(exp).ok_or_else(overflow)?
+        }
+        // Q16.16: the product of two scaled values is scaled twice, so it comes
+        // back down; the quotient is scaled away entirely, so it goes up first.
+        BinOp::FixMul => a.checked_mul(b).ok_or_else(overflow)? >> FIX_BITS,
+        BinOp::FixDiv => {
+            if b == 0 {
+                return Err(AsmError::new(line, "division by zero in expression"));
+            }
+            a.checked_shl(FIX_BITS as u32).ok_or_else(overflow)? / b
         }
     })
 }

@@ -2403,7 +2403,9 @@ fn mentions_pc(e: &Expr) -> bool {
         | Expr::Bank(i)
         | Expr::Neg(i)
         | Expr::BitNot(i)
-        | Expr::LogNot(i) => mentions_pc(i),
+        | Expr::LogNot(i)
+        | Expr::FixRound(i)
+        | Expr::TrailingZeros(i) => mentions_pc(i),
         Expr::Bin(_, l, r) => mentions_pc(l) || mentions_pc(r),
         Expr::Num(_) | Expr::Sym(_) => false,
     }
@@ -3354,6 +3356,7 @@ fn parse_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         mos6502::ExprOpts {
             logical: false,
             scoped_names: false,
+            fixed_point: false,
             compare: mos6502::Compare {
                 eq: true,
                 eq_eq: false,

@@ -2238,6 +2238,10 @@ fn subst_anon_expr(e: Expr, anons: &Anons, file: FileId, line: usize) -> Result<
         Expr::Bank(b) => Expr::Bank(Box::new(subst_anon_expr(*b, anons, file, line)?)),
         Expr::Neg(b) => Expr::Neg(Box::new(subst_anon_expr(*b, anons, file, line)?)),
         Expr::BitNot(b) => Expr::BitNot(Box::new(subst_anon_expr(*b, anons, file, line)?)),
+        Expr::FixRound(b) => Expr::FixRound(Box::new(subst_anon_expr(*b, anons, file, line)?)),
+        Expr::TrailingZeros(b) => {
+            Expr::TrailingZeros(Box::new(subst_anon_expr(*b, anons, file, line)?))
+        }
         Expr::LogNot(b) => Expr::LogNot(Box::new(subst_anon_expr(*b, anons, file, line)?)),
         Expr::Bin(op, l, r) => Expr::Bin(
             op,
@@ -3545,6 +3549,7 @@ fn parse_value(anons: &Anons, zone: &str, raw: &str, line: usize) -> Result<Expr
         mos6502::ExprOpts {
             logical: false,
             scoped_names: false,
+            fixed_point: false,
             compare: mos6502::Compare {
                 eq: true,
                 eq_eq: false,

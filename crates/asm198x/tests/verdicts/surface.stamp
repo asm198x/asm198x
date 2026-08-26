@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 326 word(s) outside our surface, across the references installed
+# 316 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -222,7 +222,7 @@ vdebug
 
 ## rgbasm (rgbasm v1.0.3)
 # 3045 candidate(s) harvested; 306 recognised here, 0 more the tool itself
-# refuses on this target; 114 of the 306 outside our surface
+# refuses on this target; 104 of the 306 outside our surface
 acos
 af
 align
@@ -234,7 +234,6 @@ bc
 bitwidth
 break
 bytelen
-ceil
 charcmp
 charlen
 charmap
@@ -244,8 +243,6 @@ charval
 cos
 de
 def
-div
-dl
 endl
 endm
 endsection
@@ -253,11 +250,8 @@ endu
 equ
 equs
 fatal
-floor
-fmod
 for
 fragment
-high
 hl
 hld
 hli
@@ -266,8 +260,6 @@ incharmap
 isconst
 load
 log
-low
-mul
 nc
 newcharmap
 nextu
@@ -288,7 +280,6 @@ redef
 revchar
 rom0
 romx
-round
 rsreset
 rsset
 rw
@@ -315,7 +306,6 @@ strslice
 strsub
 strupr
 tan
-tzcount
 union
 vram
 wram0

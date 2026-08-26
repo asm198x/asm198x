@@ -336,6 +336,10 @@ pub(crate) struct ExprOpts {
     /// level). Off everywhere else, where a `:` ends a name — a lone `:` is an
     /// anonymous label in several dialects, so only the doubled form is taken.
     pub scoped_names: bool,
+    /// A `.` inside a number, and an optional `qN` precision suffix after it —
+    /// rgbasm's fixed-point literals, where `1.0` is `$10000`. Off elsewhere,
+    /// where a `.` after a digit is not part of the number.
+    pub fixed_point: bool,
     /// Comparison support. `Default` is none, which is what a dialect whose
     /// reference has no comparison operators wants.
     pub compare: Compare,
@@ -626,6 +630,18 @@ fn tokenize(
                 let start = i;
                 while i < chars.len() && chars[i].is_ascii_alphanumeric() {
                     i += 1;
+                }
+                // `3.7`, and `3.7q8` for a precision other than the default.
+                // Only a digit may follow the point: `3.foo` is a number and a
+                // label, which is how a dialect without this reads every case.
+                if opts.fixed_point
+                    && chars.get(i) == Some(&'.')
+                    && chars.get(i + 1).is_some_and(char::is_ascii_digit)
+                {
+                    i += 1;
+                    while i < chars.len() && chars[i].is_ascii_alphanumeric() {
+                        i += 1;
+                    }
                 }
                 tokens.push(Tok::Num(parse_number(
                     &chars[start..i].iter().collect::<String>(),
@@ -1209,6 +1225,7 @@ mod tests {
         let opts = ExprOpts {
             logical: false,
             scoped_names: false,
+            fixed_point: false,
             compare: Compare::default(),
             function: None,
             prec,

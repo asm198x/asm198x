@@ -335,6 +335,24 @@ const PROBES: &[Probe] = &[
     ok ("pasmo", "byte truncates",       " defb 256\n"),
     ok ("pasmo", "negative word",        " defw -1\n"),
     ok ("pasmo", "operand truncates",    " ld a,256\n"),
+    // Fixed-point literals and the exactly-defined half of rgbasm's maths.
+    // `1.0` is `$10000`, and the fraction truncates toward zero rather than
+    // rounding, so `3.7` is `$3B333`.
+    ok ("rgbasm", "fixed-point literals",
+        "SECTION \"s\",ROM0[0]\ndl 3.7\ndl 1.0\ndl -1.5\ndl 0.5\n"),
+    ok ("rgbasm", "a q suffix names another precision",
+        "SECTION \"s\",ROM0[0]\ndl 3.7q8\ndl 1.0q4\n"),
+    ok ("rgbasm", "fixed multiply and divide",
+        "SECTION \"s\",ROM0[0]\ndl DIV(1.0, 3.0)\ndl MUL(1.5, 1.5)\ndl FMOD(7.5, 2.0)\n"),
+    // The three roundings, each over a negative as well: FLOOR goes toward
+    // minus infinity, CEIL away from it, and ROUND sends a half away from zero.
+    ok ("rgbasm", "fixed rounding, both signs",
+        "SECTION \"s\",ROM0[0]\ndl FLOOR(3.7)\ndl FLOOR(-3.2)\ndl CEIL(3.2)\n\
+         dl CEIL(-3.2)\ndl ROUND(3.5)\ndl ROUND(-3.5)\n"),
+    ok ("rgbasm", "byte extraction and trailing zeros",
+        "SECTION \"s\",ROM0[0]\ndb HIGH($1234), LOW($1234)\ndl TZCOUNT(8)\ndl TZCOUNT(1)\n"),
+    ok ("rgbasm", "dl is 32-bit little-endian",
+        "SECTION \"s\",ROM0[0]\ndl $12345678, -1\n"),
     ok ("rgbasm", "byte truncates up",   "SECTION \"s\",ROM0[0]\ndb 256\n"),
     ok ("rgbasm", "byte truncates down", "SECTION \"s\",ROM0[0]\ndb -129\n"),
     ok ("rgbasm", "negative word",       "SECTION \"s\",ROM0[0]\ndw -1\n"),
