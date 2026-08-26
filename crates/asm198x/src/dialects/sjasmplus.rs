@@ -48,7 +48,7 @@ use crate::dialect::{Dialect, Oversize};
 use crate::dialects::macros::{self, Expand};
 use crate::dialects::z80::{self, Z80Syntax};
 use crate::directives::{Category, Directive, Pattern};
-use crate::engine::{AsmError, Operation, Statement};
+use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
 use crate::source::{SourceLoader, SourceMap};
 
 /// The sjasmplus Z80 dialect. `z80n` selects the target instruction set
@@ -61,10 +61,24 @@ use crate::source::{SourceLoader, SourceMap};
 ///
 /// `include` is here and is not in pasmo's list, which is the difference this
 /// declaration exists to make visible.
+/// The data directives sjasmplus has beyond the shared Z80 set. Named once, so
+/// the declaration and the dispatch cannot drift apart.
+const SJASMPLUS_DATA: &[&str] = &[
+    "word", "dword", "dd", "defd", "d24", "dz", "dc", "dh", "hex", "defh", "dg", "defg", "abyte",
+    "abytec", "abytez", "block",
+];
+
 pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "bytes",
         pattern: Pattern::Exact(&["defb", "db", "defm", "dm", "byte"]),
+        category: Category::Operation,
+    },
+    // The data directives sjasmplus has beyond the shared Z80 set. Widths,
+    // terminators, hex and bit-graphics — each shape probed against v1.21.0.
+    Directive {
+        id: "sjasmplus-data",
+        pattern: Pattern::Exact(SJASMPLUS_DATA),
         category: Category::Operation,
     },
     Directive {
@@ -218,27 +232,13 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Sigilled {
             sigil: '.',
             names: &[
-                "abyte",
-                "abytec",
-                "abytez",
                 "binary",
-                "block",
                 "bplist",
                 "cspectmap",
-                "d24",
-                "dc",
-                "dd",
                 "defarray",
-                "defd",
                 "defdevice",
-                "defg",
-                "defh",
                 "dephase",
-                "dg",
-                "dh",
                 "disp",
-                "dword",
-                "dz",
                 "emptytap",
                 "emptytrd",
                 "encoding",
@@ -252,7 +252,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "exd",
                 "export",
                 "fpos",
-                "hex",
                 "ifn",
                 "ifnused",
                 "ifused",
@@ -293,7 +292,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "undefine",
                 "unphase",
                 "while",
-                "word",
             ],
             required: false,
         },
@@ -687,6 +685,9 @@ impl Z80Syntax for SjasmplusSyntax {
             || word.eq_ignore_ascii_case("display")
             || word.eq_ignore_ascii_case("savebin")
             || word.eq_ignore_ascii_case("savetap")
+            // The data directives beyond the shared set — see the
+            // `sjasmplus-data` declaration.
+            || SJASMPLUS_DATA.iter().any(|d| word.eq_ignore_ascii_case(d))
             || self.is_include(word)
             || self.is_incbin(word)
             || z80::is_common_directive(word)
@@ -779,6 +780,74 @@ impl Z80Syntax for SjasmplusSyntax {
                 at: crate::engine::Place::Next,
             }));
         }
+        // The data directives sjasmplus has and the shared Z80 set does not.
+        // Every shape here was read off v1.21.0 rather than assumed.
+        let lower = word.to_ascii_lowercase();
+        match lower.as_str() {
+            "word" => return Ok(Some(Operation::Words(flat(data_items(args, line)?)))),
+            "dword" | "dd" | "defd" => {
+                return Ok(Some(wide(flat(data_items(args, line)?), 4)));
+            }
+            "d24" => return Ok(Some(wide(flat(data_items(args, line)?), 3))),
+            // `dz` terminates with a zero; `dc` sets bit 7 on the last
+            // character of each string and leaves numbers alone.
+            "dz" => {
+                let mut bytes = flat(data_items(args, line)?);
+                bytes.push(Expr::Num(0));
+                return Ok(Some(Operation::Bytes(bytes)));
+            }
+            "dc" => return Ok(Some(Operation::Bytes(marked(data_items(args, line)?)))),
+            // `block n[,fill]` is `ds` with a fill byte: the count sets the
+            // statement's size, so it has to be known where it stands.
+            "block" => {
+                let parts: Vec<&str> = args.splitn(2, ',').collect();
+                let count = z80::literal(
+                    &z80::parse_value(self, parts.first().copied().unwrap_or("").trim(), line)?,
+                    consts,
+                    line,
+                )?;
+                let count = usize::try_from(count).map_err(|_| {
+                    AsmError::new(line, "`block` needs a non-negative constant count")
+                })?;
+                let fill = match parts.get(1) {
+                    Some(text) => z80::parse_value(self, text.trim(), line)?,
+                    None => Expr::Num(0),
+                };
+                return Ok(Some(Operation::Bytes(vec![fill; count])));
+            }
+            "dh" | "hex" | "defh" => {
+                return Ok(Some(Operation::Bytes(hex_bytes(args, line)?)));
+            }
+            "dg" | "defg" => return Ok(Some(Operation::Bytes(graphic_bytes(args, line)?))),
+            // `abyte n list` adds `n` to every byte; `abytec` marks the last
+            // character of each string as `dc` does, and `abytez` appends a
+            // zero as `dz` does.
+            "abyte" | "abytec" | "abytez" => {
+                let (offset, rest) = crate::dialects::mos6502::split_first_word(args.trim());
+                let offset = z80::parse_value(self, offset, line)?;
+                let items = data_items(rest, line)?;
+                let mut bytes = if lower == "abytec" {
+                    marked(items)
+                } else {
+                    flat(items)
+                };
+                bytes = bytes
+                    .into_iter()
+                    .map(|b| {
+                        Expr::Bin(
+                            crate::engine::BinOp::Add,
+                            Box::new(b),
+                            Box::new(offset.clone()),
+                        )
+                    })
+                    .collect();
+                if lower == "abytez" {
+                    bytes.push(Expr::Num(0));
+                }
+                return Ok(Some(Operation::Bytes(bytes)));
+            }
+            _ => {}
+        }
         let word = if word.eq_ignore_ascii_case("byte") {
             "db"
         } else {
@@ -844,6 +913,140 @@ impl Z80Syntax for SjasmplusSyntax {
         }
         t.parse::<i64>().map_err(|_| bad())
     }
+}
+
+/// One item of a data list, and whether the source wrote it as a string.
+///
+/// `dc` and `abytec` set bit 7 on the **last character of each string** and
+/// leave a number alone (`dc "ab",3,"cd"` is `61 E2 03 63 E4`), so the item
+/// boundaries have to survive the parse rather than being flattened away.
+struct DataItem {
+    from_string: bool,
+    bytes: Vec<Expr>,
+}
+
+fn data_items(rest: &str, line: usize) -> Result<Vec<DataItem>, AsmError> {
+    let rest = rest.trim();
+    if rest.is_empty() {
+        return Err(AsmError::new(line, "directive needs at least one value"));
+    }
+    let mut out = Vec::new();
+    for piece in z80::split_data_items(rest) {
+        if let Some(text) = z80::string_literal(piece) {
+            out.push(DataItem {
+                from_string: true,
+                bytes: text.chars().map(|c| Expr::Num(c as i64)).collect(),
+            });
+        } else {
+            out.push(DataItem {
+                from_string: false,
+                bytes: vec![z80::parse_value(&SjasmplusSyntax, piece, line)?],
+            });
+        }
+    }
+    Ok(out)
+}
+
+/// `dh`/`hex`/`defh` — hex digit pairs, with or without commas between them:
+/// `dh 11,22` and `hex 3344` are both `11 22` / `33 44`.
+fn hex_bytes(rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
+    let digits: String = rest
+        .chars()
+        .filter(|c| !c.is_whitespace() && *c != ',')
+        .collect();
+    if digits.is_empty()
+        || !digits.len().is_multiple_of(2)
+        || !digits.chars().all(|c| c.is_ascii_hexdigit())
+    {
+        return Err(AsmError::new(
+            line,
+            "hex data takes pairs of hex digits, optionally separated by commas",
+        ));
+    }
+    digits
+        .as_bytes()
+        .chunks(2)
+        .map(|pair| {
+            let text = std::str::from_utf8(pair).expect("ascii");
+            u8::from_str_radix(text, 16)
+                .map(|b| Expr::Num(i64::from(b)))
+                .map_err(|_| AsmError::new(line, format!("`{text}` is not a pair of hex digits")))
+        })
+        .collect()
+}
+
+/// `dg`/`defg` — one bit per character, eight to a byte. `#` is a one; `-`,
+/// `.` and `_` are zeros, which is how sjasmplus spells a blank pixel.
+fn graphic_bytes(rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
+    let bits: String = rest.chars().filter(|c| !c.is_whitespace()).collect();
+    if bits.is_empty() || !bits.len().is_multiple_of(8) {
+        return Err(AsmError::new(
+            line,
+            "graphic data takes a multiple of eight characters, one per bit",
+        ));
+    }
+    bits.as_bytes()
+        .chunks(8)
+        .map(|byte| {
+            let mut value = 0i64;
+            for &c in byte {
+                let bit = match c {
+                    b'#' | b'1' | b'x' | b'X' | b'*' => 1,
+                    b'-' | b'.' | b'_' | b'0' => 0,
+                    other => {
+                        return Err(AsmError::new(
+                            line,
+                            format!("`{}` is not a graphic character", other as char),
+                        ));
+                    }
+                };
+                value = (value << 1) | bit;
+            }
+            Ok(Expr::Num(value))
+        })
+        .collect()
+}
+
+/// Every item's bytes, in order, with the item boundaries dropped.
+fn flat(items: Vec<DataItem>) -> Vec<Expr> {
+    items.into_iter().flat_map(|i| i.bytes).collect()
+}
+
+/// The same, with bit 7 set on the last byte of every item that came from a
+/// string — `dc` and `abytec`'s terminator convention.
+fn marked(items: Vec<DataItem>) -> Vec<Expr> {
+    let mut out = Vec::new();
+    for item in items {
+        let last = item.bytes.len().saturating_sub(1);
+        for (i, byte) in item.bytes.into_iter().enumerate() {
+            if item.from_string && i == last {
+                out.push(Expr::Bin(
+                    crate::engine::BinOp::Or,
+                    Box::new(byte),
+                    Box::new(Expr::Num(0x80)),
+                ));
+            } else {
+                out.push(byte);
+            }
+        }
+    }
+    out
+}
+
+/// Lay a value down over `width` bytes, little-endian, as computed pieces so a
+/// symbol still resolves in pass two.
+fn wide(values: Vec<Expr>, width: u8) -> Operation {
+    Operation::Encoded(
+        values
+            .into_iter()
+            .map(|expr| Piece::Val {
+                expr,
+                bytes: width,
+                rel: false,
+                signed: false,
+            })
+            .collect(),
+    )
 }
 
 // ---------------------------------------------------------------------------
@@ -993,6 +1196,56 @@ impl macros::MacroSyntax for SjasmplusSyntax {
 #[cfg(test)]
 mod tests {
     use crate::assemble_sjasmplus as asm;
+
+    /// The data directives beyond the shared Z80 set. Every expectation was
+    /// read off sjasmplus v1.21.0 before it was written here.
+    #[test]
+    fn the_wider_data_directives_match_sjasmplus() {
+        let b = |src: &str| asm(src).unwrap_or_else(|e| panic!("{src}: {e}")).bytes;
+        // Widths, all little-endian.
+        assert_eq!(b("\tword $1234\n"), vec![0x34, 0x12]);
+        assert_eq!(b("\tdword $12345678\n"), vec![0x78, 0x56, 0x34, 0x12]);
+        assert_eq!(b("\tdd $12345678\n"), b("\tdefd $12345678\n"));
+        assert_eq!(b("\td24 $123456\n"), vec![0x56, 0x34, 0x12]);
+
+        // `dz` appends a zero. `dc` sets bit 7 on the last character of each
+        // *string* and leaves a number alone — `dc "ab",3,"cd"` is the case
+        // that says which of those two rules is the real one.
+        assert_eq!(b("\tdz \"ab\"\n"), vec![0x61, 0x62, 0x00]);
+        assert_eq!(
+            b("\tdc \"ab\",3,\"cd\"\n"),
+            vec![0x61, 0xE2, 0x03, 0x63, 0xE4]
+        );
+
+        // Hex pairs, comma-separated or not.
+        assert_eq!(b("\tdh 11,22\n"), vec![0x11, 0x22]);
+        assert_eq!(b("\thex 3344\n"), vec![0x33, 0x44]);
+        assert_eq!(b("\tdefh 1122\n"), vec![0x11, 0x22]);
+
+        // Bit graphics: eight characters to a byte, `#` a one.
+        assert_eq!(b("\tdg #-#-#-#-\n"), vec![0xAA]);
+        assert_eq!(b("\tdefg ..##..##\n"), vec![0x33]);
+        assert_eq!(b("\tdg #-------#------#\n"), vec![0x80, 0x81]);
+
+        // `abyte` adds its offset to every byte; the suffixed forms add the
+        // `dc` and `dz` conventions on top.
+        assert_eq!(b("\tabyte 4 1,2\n"), vec![0x05, 0x06]);
+        assert_eq!(b("\tabytec 0 \"ab\"\n"), vec![0x61, 0xE2]);
+        assert_eq!(b("\tabytez 4 1,2\n"), vec![0x05, 0x06, 0x00]);
+
+        // `block` is `ds` with a fill.
+        assert_eq!(b("\tblock 3,$AA\n"), vec![0xAA; 3]);
+        assert_eq!(b("\tblock 2\n"), vec![0x00; 2]);
+    }
+
+    /// A graphic run has to be a multiple of eight, and hex data pairs of
+    /// digits — sjasmplus refuses either otherwise, and so does this.
+    #[test]
+    fn malformed_graphic_and_hex_data_are_refused() {
+        assert!(asm("\tdg #-#\n").is_err(), "three bits is not a byte");
+        assert!(asm("\thex 123\n").is_err(), "an odd digit count");
+        assert!(asm("\tdh zz\n").is_err(), "not hex digits");
+    }
 
     // -----------------------------------------------------------------------
     // The optional leading dot. Probed against SjASMPlus 1.21.0, 2026-08-23:

@@ -2014,6 +2014,10 @@ fn emit_value(
         1 => (-128, 0xFF),
         2 if signed => (-32768, 32767),
         2 => (-32768, 0xFFFF),
+        // Three bytes: sjasmplus's `d24`, and the width a 65816 long address
+        // wants. Ranged like the others — either sign across the full width.
+        3 if signed => (-0x80_0000, 0x7F_FFFF),
+        3 => (-0x80_0000, 0xFF_FFFF),
         4 if signed => (i64::from(i32::MIN), i64::from(i32::MAX)),
         4 => (i64::from(i32::MIN), i64::from(u32::MAX)),
         other => {
@@ -2028,6 +2032,8 @@ fn emit_value(
         (1, _) => bytes.push(b[0]),
         (2, isa::Endianness::Little) => bytes.extend_from_slice(&b[..2]),
         (2, isa::Endianness::Big) => bytes.extend_from_slice(&[b[1], b[0]]),
+        (3, isa::Endianness::Little) => bytes.extend_from_slice(&b[..3]),
+        (3, isa::Endianness::Big) => bytes.extend_from_slice(&[b[2], b[1], b[0]]),
         (4, isa::Endianness::Little) => bytes.extend_from_slice(&b[..4]),
         (4, isa::Endianness::Big) => bytes.extend_from_slice(&[b[3], b[2], b[1], b[0]]),
         _ => unreachable!("width validated above"),

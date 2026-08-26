@@ -338,6 +338,20 @@ const PROBES: &[Probe] = &[
     // Fixed-point literals and the exactly-defined half of rgbasm's maths.
     // `1.0` is `$10000`, and the fraction truncates toward zero rather than
     // rounding, so `3.7` is `$3B333`.
+    // sjasmplus's data directives beyond the shared Z80 set: widths, the two
+    // terminator conventions, hex digit pairs and bit graphics.
+    ok ("sjasmplus", "the wider data directives",
+        "\tword $1234\n\tdword $12345678\n\tdd $12345678\n\tdefd $12345678\n\td24 $123456\n"),
+    ok ("sjasmplus", "dz terminates and dc marks each string's last character",
+        "\tdz \"ab\"\n\tdc \"ab\",3,\"cd\"\n\tdz 1,2\n"),
+    ok ("sjasmplus", "hex digit pairs, with commas and without",
+        "\tdh 11,22\n\thex 3344\n\tdefh 1122\n"),
+    ok ("sjasmplus", "bit graphics, eight characters to a byte",
+        "\tdg #-#-#-#-\n\tdefg ..##..##\n\tdg #-------#------#\n"),
+    ok ("sjasmplus", "abyte adds an offset, and its two suffixed forms",
+        "\tabyte 4 1,2\n\tabytec 0 \"ab\"\n\tabytez 4 1,2\n"),
+    ok ("sjasmplus", "block fills, with a byte and without",
+        "\tblock 3,$AA\n\tblock 2\n"),
     ok ("rgbasm", "fixed-point literals",
         "SECTION \"s\",ROM0[0]\ndl 3.7\ndl 1.0\ndl -1.5\ndl 0.5\n"),
     ok ("rgbasm", "a q suffix names another precision",
