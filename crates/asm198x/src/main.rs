@@ -748,9 +748,15 @@ fn run(args: &[String]) -> Result<String, String> {
                 .map_or(input, String::as_str);
             eprintln!("asm198x: {file}: {w}");
         }
-        // vasm's convention: the executable drops the source extension.
-        let out_path =
-            output.unwrap_or_else(|| Path::new(input).with_extension(if exe { "" } else { "bin" }));
+        // vasm's convention: the executable drops the source extension. A
+        // source may name the file itself with `output`, and the flag still
+        // wins — `decisions/source-named-output-files.md`, the same three
+        // rules ACME's `!to` follows.
+        let out_path = match (&output, &result.requested_output) {
+            (None, Some(req)) => source_named_path(input, &req.path)?,
+            _ => output
+                .unwrap_or_else(|| Path::new(input).with_extension(if exe { "" } else { "bin" })),
+        };
         std::fs::write(&out_path, &result.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
         let artifact_notes = write_artifacts(&result.artifacts, &out_path, outprefix.as_deref())?;

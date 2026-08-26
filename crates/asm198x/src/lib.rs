@@ -368,9 +368,13 @@ pub fn assemble_vasm_warned_files(
 ) -> Result<AssemblyResult, MultiFileError> {
     let mut map = new_source_map(input_path, source);
     match dialects::vasm::assemble_warned_multi(&mut map, loader) {
-        Ok((bytes, warnings, _)) => {
+        Ok((bytes, warnings, _, named)) => {
             let mut result = AssemblyResult::image_warned(bytes, warnings);
             result.files = map.file_table();
+            result.requested_output = named.map(|path| crate::engine::RequestedOutput {
+                path,
+                format: crate::engine::OutputFormat::Plain,
+            });
             Ok(result)
         }
         Err(error) => Err(MultiFileError {
@@ -426,11 +430,15 @@ pub fn assemble_vasm_warned_files_debug(
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
     let mut map = new_source_map(input_path, source);
     match dialects::vasm::assemble_warned_multi(&mut map, loader) {
-        Ok((bytes, warnings, capture)) => {
+        Ok((bytes, warnings, capture, named)) => {
             let files = map.file_table();
             let info = listing::capture_debug_info_multi(capture, "68000", "vasm", files.clone());
             let mut result = AssemblyResult::image_warned(bytes, warnings);
             result.files = files;
+            result.requested_output = named.map(|path| crate::engine::RequestedOutput {
+                path,
+                format: crate::engine::OutputFormat::Plain,
+            });
             Ok((result, info))
         }
         Err(error) => Err(MultiFileError {
