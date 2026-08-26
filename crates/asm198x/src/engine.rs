@@ -40,6 +40,16 @@ pub struct RequestedOutput {
     pub format: OutputFormat,
 }
 
+/// What a tape's header says the block after it holds — the two kinds an
+/// assembler has any use for, of the four the format has.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum TapeKind {
+    /// A BASIC program.
+    Program,
+    /// Machine code.
+    Code,
+}
+
 /// A file a source asked for **besides** the machine code — sjasmplus's
 /// `SAVEBIN` and the container-writing directives after it.
 ///
@@ -67,6 +77,10 @@ pub enum ArtifactFormat {
     /// A span of the address space, as bytes, with nothing wrapped round it.
     #[default]
     Raw,
+    /// A ZX Spectrum tape image: a ROM header block naming the span, then the
+    /// span itself. Written by `format-sinclair-zx-spectrum-tap`, which holds
+    /// the layout and the citations for it.
+    Tap,
 }
 
 /// The result of a successful assembly: where it loads and the bytes to load.
@@ -426,6 +440,16 @@ pub(crate) enum Operation {
         start: Expr,
         length: Option<Expr>,
     },
+    /// Write a span of the address space as a tape image — sjasmplus's
+    /// `SAVETAP`. Resolved with [`Operation::SaveRaw`] and under the same
+    /// rule: the span has to be one this source assembled.
+    SaveTape {
+        file: String,
+        kind: TapeKind,
+        name: String,
+        start: Expr,
+        length: Expr,
+    },
     /// A **redefinable** symbol binding — lwasm's `set`, and the same idea
     /// under ca65's `.set`, sjasmplus's `defl` and rgbasm's `=`. Unlike
     /// [`Operation::Equ`] it may bind the same name again, and it rebinds in
@@ -697,6 +721,7 @@ pub(crate) fn next_pc(
         | Operation::Equ(_)
         | Operation::Set(_)
         | Operation::SaveRaw { .. }
+        | Operation::SaveTape { .. }
         | Operation::Entry(_) => pc,
     })
 }
@@ -1108,7 +1133,7 @@ fn assemble_statements(
     let mut requested_output: Option<RequestedOutput> = None;
     let mut requested_symbols: Option<String> = None;
     // `SAVEBIN` and its kind, in source order, waiting for the image.
-    let mut saves: Vec<(String, i64, Option<i64>)> = Vec::new();
+    let mut saves: Vec<Save> = Vec::new();
     for s in &statements {
         if let Some(Operation::InitMem(v)) = &s.op {
             if seen_init {
@@ -1241,7 +1266,32 @@ fn assemble_statements(
                     Some(e) => Some(e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?),
                     None => None,
                 };
-                saves.push((name.clone(), at, len));
+                saves.push(Save {
+                    file: name.clone(),
+                    at,
+                    len,
+                    tape: None,
+                });
+            }
+            Some(Operation::SaveTape {
+                file,
+                kind,
+                name,
+                start,
+                length,
+            }) => {
+                let at = start
+                    .eval(&symbols, pc, s.line)
+                    .map_err(|err| s.stamp(err))?;
+                let len = length
+                    .eval(&symbols, pc, s.line)
+                    .map_err(|err| s.stamp(err))?;
+                saves.push(Save {
+                    file: file.clone(),
+                    at,
+                    len: Some(len),
+                    tape: Some((*kind, name.clone())),
+                });
             }
             // Rebinds where it stands, so a use below reads this value and a
             // use above kept the one pass one left. Emits nothing either way.
@@ -1780,41 +1830,78 @@ fn assemble_statements(
 ///
 /// A length of `None` or zero means "to the end of the address space", which is
 /// the reference's reading of both.
-fn raw_artifacts(
-    saves: &[(String, i64, Option<i64>)],
-    origin: i64,
-    image: &[u8],
-) -> Result<Vec<Artifact>, AsmError> {
+fn raw_artifacts(saves: &[Save], origin: i64, image: &[u8]) -> Result<Vec<Artifact>, AsmError> {
     const SPACE: i64 = 0x1_0000;
     let end = origin + image.len() as i64;
     saves
         .iter()
-        .map(|(name, at, len)| {
-            let len = match len {
-                Some(n) if *n > 0 => *n,
-                _ => (SPACE - at).max(0),
-            };
-            if *at < origin || at + len > end {
-                return Err(AsmError::new(
-                    0,
-                    format!(
-                        "`{name}` saves ${at:04X}..${:04X}, which reaches outside the \
+        .map(
+            |Save {
+                 file: name,
+                 at,
+                 len,
+                 tape,
+             }| {
+                let len = match len {
+                    Some(n) if *n > 0 => *n,
+                    _ => (SPACE - at).max(0),
+                };
+                if *at < origin || at + len > end {
+                    return Err(AsmError::new(
+                        0,
+                        format!(
+                            "`{name}` saves ${at:04X}..${:04X}, which reaches outside the \
                          ${origin:04X}..${end:04X} this source assembled — a device's \
                          memory starts as a booted machine's rather than as zeros, and \
                          asm198x has no record of that yet, so the source is valid and \
                          the gap is ours",
-                        at + len - 1
-                    ),
-                ));
-            }
-            let from = (at - origin) as usize;
-            Ok(Artifact {
-                name: name.clone(),
-                format: ArtifactFormat::Raw,
-                bytes: image[from..from + len as usize].to_vec(),
-            })
-        })
+                            at + len - 1
+                        ),
+                    ));
+                }
+                let from = (at - origin) as usize;
+                let span = image[from..from + len as usize].to_vec();
+                let (format, bytes) = match tape {
+                    None => (ArtifactFormat::Raw, span),
+                    Some((kind, tape_name)) => {
+                        (ArtifactFormat::Tap, tape_image(*kind, tape_name, *at, span))
+                    }
+                };
+                Ok(Artifact {
+                    name: name.clone(),
+                    format,
+                    bytes,
+                })
+            },
+        )
         .collect()
+}
+
+/// One file the source asked for, waiting for the image to exist.
+struct Save {
+    file: String,
+    at: i64,
+    len: Option<i64>,
+    /// The header a tape image needs, or `None` for a raw span.
+    tape: Option<(TapeKind, String)>,
+}
+
+/// Wrap a span as a Spectrum tape: a ROM header block naming it, then the span.
+///
+/// The two parameter words are the tape's, not ours, and SjASMPlus 1.21.0 was
+/// measured setting them: for `Code` the first is the start address and the
+/// second is `$8000`; for a `Program` the first is `$8000` — the value that
+/// means "no auto-start line", whatever start the directive was given — and
+/// the second is the length again.
+fn tape_image(kind: TapeKind, name: &str, at: i64, span: Vec<u8>) -> Vec<u8> {
+    use format_sinclair_zx_spectrum_tap as tap;
+    let len = span.len() as u16;
+    let start = at as u16;
+    let header = match kind {
+        TapeKind::Code => tap::Header::new(tap::HeaderKind::Code, name, len, start, 0x8000),
+        TapeKind::Program => tap::Header::new(tap::HeaderKind::Program, name, len, 0x8000, len),
+    };
+    tap::encode(&[header.block(), tap::TapBlock::data(span)])
 }
 
 /// Look up a resolved instruction form in the spec, erroring with the source

@@ -7,6 +7,7 @@ name = "asm198x"
 version = "0.0.33"
 dependencies = [
  "debug198x",
+ "format-sinclair-zx-spectrum-tap",
  "isa",
  "isa-disasm",
  "serde",
@@ -72,6 +73,12 @@ dependencies = [
  "const-oid",
  "crypto-common",
 ]
+
+[[package]]
+name = "format-sinclair-zx-spectrum-tap"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1cfd44caf004510be6e7c17a585ca8d19a45cc3cbe221c35cda9968db45c2169"
 
 [[package]]
 name = "hybrid-array"

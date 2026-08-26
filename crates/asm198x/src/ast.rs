@@ -206,6 +206,15 @@ pub(crate) enum Item {
         start: Operand,
         length: Option<Operand>,
     },
+    /// A tape image the source asked for — see
+    /// [`Operation::SaveTape`](crate::engine::Operation::SaveTape).
+    SaveTape {
+        file: String,
+        kind: crate::engine::TapeKind,
+        name: String,
+        start: Operand,
+        length: Operand,
+    },
     Bytes(Vec<Operand>),
     Words(Vec<Operand>),
     /// Values at a width and byte order the **directive** named, not the CPU
@@ -784,6 +793,19 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             start: start.clone().into_value()?,
             length: length.clone().map(Operand::into_value).transpose()?,
         },
+        Item::SaveTape {
+            file,
+            kind,
+            name,
+            start,
+            length,
+        } => Operation::SaveTape {
+            file: file.clone(),
+            kind: *kind,
+            name: name.clone(),
+            start: start.clone().into_value()?,
+            length: length.clone().into_value()?,
+        },
         Item::Bytes(v) => Operation::Bytes(
             v.iter()
                 .cloned()
@@ -893,6 +915,19 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             name: name.clone(),
             start: start.into_value()?,
             length: length.map(Operand::into_value).transpose()?,
+        },
+        Item::SaveTape {
+            file,
+            kind,
+            name,
+            start,
+            length,
+        } => Operation::SaveTape {
+            file: file.clone(),
+            kind,
+            name: name.clone(),
+            start: start.into_value()?,
+            length: length.into_value()?,
         },
         Item::Bytes(v) => Operation::Bytes(
             v.into_iter()
@@ -1078,6 +1113,19 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
             start: map_sym_expr(start, f),
             length: length.map(|e| map_sym_expr(e, f)),
         },
+        Operation::SaveTape {
+            file,
+            kind,
+            name,
+            start,
+            length,
+        } => Operation::SaveTape {
+            file,
+            kind,
+            name,
+            start: map_sym_expr(start, f),
+            length: map_sym_expr(length, f),
+        },
         Operation::Bytes(v) => {
             Operation::Bytes(v.into_iter().map(|e| map_sym_expr(e, f)).collect())
         }
@@ -1193,6 +1241,19 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
             name,
             start: Operand::expr(start),
             length: length.map(Operand::expr),
+        },
+        Operation::SaveTape {
+            file,
+            kind,
+            name,
+            start,
+            length,
+        } => Item::SaveTape {
+            file,
+            kind,
+            name,
+            start: Operand::expr(start),
+            length: Operand::expr(length),
         },
         Operation::Bytes(v) => Item::Bytes(v.into_iter().map(Operand::expr).collect()),
         Operation::Words(v) => Item::Words(v.into_iter().map(Operand::expr).collect()),
