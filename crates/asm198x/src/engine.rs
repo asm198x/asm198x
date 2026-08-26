@@ -1403,8 +1403,12 @@ fn assemble_statements(
                                 .eval(&symbols, pc, s.line)
                                 .map_err(|err| s.stamp(err))?;
                             // A branch offset is relative to the address that
-                            // follows this value (the next instruction).
-                            let next = origin + bytes.len() as i64 + i64::from(*width);
+                            // follows this value (the next instruction) — the
+                            // claimed address inside a relocated block, for the
+                            // reason `next_addr` is above: the target label is
+                            // claimed too, so measuring one against the other
+                            // would be off by the block's offset.
+                            let next = origin + pseudo + bytes.len() as i64 + i64::from(*width);
                             let v = if *rel { raw - next } else { raw };
                             emit_value(&mut bytes, v, *width, *rel || *signed, set.endianness, s)?;
                         }
