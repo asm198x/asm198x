@@ -9,51 +9,107 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.34](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.33...asm198x-v0.0.34) - 2026-08-26
 
+The release where source compatibility stopped being a claim about a few
+dialects and started being measured against all six references. 476 words the
+installed reference assemblers accept and asm198x did not are now 364; ACME
+reaches **zero**. And an assembler can now write the files a source asks for
+besides the machine code — including a Spectrum tape image.
+
 ### Added
 
-- *(ca65)* fold the nine conditional heads beyond .if ([#330](https://github.com/asm198x/asm198x/pull/330))
-- *(ca65)* take the plural extractors, and refuse the word ca65 never takes ([#326](https://github.com/asm198x/asm198x/pull/326))
-- *(ca65)* take the operator vocabulary, both spellings ([#324](https://github.com/asm198x/asm198x/pull/324))
-- *(ca65)* declare the expression words, so the ledger can see them ([#323](https://github.com/asm198x/asm198x/pull/323))
-- *(vasm)* take `output`, the file a source names for itself ([#321](https://github.com/asm198x/asm198x/pull/321))
-- *(sjasmplus)* take `SAVETAP`, on the tape crate graduated from emu198x ([#320](https://github.com/asm198x/asm198x/pull/320))
-- describe the files a source asks for besides the machine code ([#319](https://github.com/asm198x/asm198x/pull/319))
-- *(lwasm)* take `pragma`, `opt`, `ifpragma` and `ifopt` ([#312](https://github.com/asm198x/asm198x/pull/312))
-- *(lwasm)* take `struct`, `endstruct` and `ends` ([#311](https://github.com/asm198x/asm198x/pull/311))
-- *(lwasm)* declare the section and macro words, and refuse on reach ([#310](https://github.com/asm198x/asm198x/pull/310))
-- *(lwasm)* take `incl`, `lib` and `reorg`, and stop a second `org` padding ([#309](https://github.com/asm198x/asm198x/pull/309))
-- *(lwasm)* take `setdp`, and emit the offset within the page ([#308](https://github.com/asm198x/asm198x/pull/308))
-- *(lwasm)* take `set` and plain `if` (on a new redefinable-symbol seam) ([#307](https://github.com/asm198x/asm198x/pull/307))
-- *(lwasm)* take `phase` and `dephase` (and fix a computed branch inside a relocated block) ([#306](https://github.com/asm198x/asm198x/pull/306))
-- *(lwasm)* take the listing words, and `warning`/`msg` ([#305](https://github.com/asm198x/asm198x/pull/305))
-- *(lwasm)* take the block and string data forms ([#304](https://github.com/asm198x/asm198x/pull/304))
-- *(acme)* take `!cpu 6502`, and name the other processors as our gap ([#303](https://github.com/asm198x/asm198x/pull/303))
-- *(acme)* take `!to` and `!symbollist`, which name files rather than bytes ([#301](https://github.com/asm198x/asm198x/pull/301))
-- *(acme)* take `!while` and `!do`, the condition loops ([#300](https://github.com/asm198x/asm198x/pull/300))
-- *(acme)* take `!pseudopc`, a second location counter ([#299](https://github.com/asm198x/asm198x/pull/299))
-- *(acme)* take `!addr`/`!address`, which bind rather than emit ([#298](https://github.com/asm198x/asm198x/pull/298))
-- *(acme)* take `!ct`/`!convtab`, the table `!text` converts through ([#297](https://github.com/asm198x/asm198x/pull/297))
-- *(acme)* take `!xor`, which masks what the scope writes ([#296](https://github.com/asm198x/asm198x/pull/296))
-- *(acme)* take `!as`, `!rs` and `!eof` — and refuse an unclosed block ([#295](https://github.com/asm198x/asm198x/pull/295))
-- *(acme)* take `!scrxor`, which is not `!xor` around `!scr` ([#294](https://github.com/asm198x/asm198x/pull/294))
-- *(acme)* take `!skip` and `!initmem` ([#293](https://github.com/asm198x/asm198x/pull/293))
-- *(acme)* take the `!be16`/`!le32` family ([#292](https://github.com/asm198x/asm198x/pull/292))
-- *(acme)* take `!fi`, `!raw` and `!hex` ([#289](https://github.com/asm198x/asm198x/pull/289))
-- *(isa)* arbitrate every 68000 form against vasm ([#284](https://github.com/asm198x/asm198x/pull/284))
+- **A source can name the files it wants written.** ACME's `!to`, vasm's
+  `output`, sjasmplus's `SAVEBIN` and `SAVETAP` all state an output file in the
+  source rather than on the command line, and each is now honoured. `SAVETAP`
+  writes a real `.tap`: the tape image the Spectrum's ROM loader reads, built on
+  `format198x-sinclair-zx-spectrum-tap`, a crate graduated out of the emulator
+  into Format198x and published so anything can read one.
+  ([#319](https://github.com/asm198x/asm198x/pull/319),
+  [#320](https://github.com/asm198x/asm198x/pull/320),
+  [#321](https://github.com/asm198x/asm198x/pull/321))
+
+- **ACME assembles what ACME assembles.** Every word ACME 0.97 accepts is
+  accepted here: the conversion tables `!ct`/`!convtab`, the endian data family
+  `!be16` through `!le32`, the condition loops `!while`/`!do`, the second
+  location counter `!pseudopc`, `!xor` and `!scrxor`, `!addr`, `!skip`,
+  `!initmem`, `!as`, `!rs`, `!eof`, `!fi`, `!raw`, `!hex`, `!symbollist` and
+  `!cpu 6502`. 31 outstanding words to none.
+  ([#289](https://github.com/asm198x/asm198x/pull/289) through
+  [#303](https://github.com/asm198x/asm198x/pull/303))
+
+- **lwasm goes from 53 outstanding words to 10.** The block and string data
+  forms, the listing controls, `warning`/`msg`, `setdp` (which emits the offset
+  within the page), `phase`/`dephase`, `set` and plain `if` on a redefinable
+  symbol, `incl`/`lib`/`reorg`, `struct`/`endstruct`/`ends`, and the
+  `pragma`/`opt`/`ifpragma`/`ifopt` family across 22 switches. The words it
+  still refuses, it refuses by name and says why.
+  ([#304](https://github.com/asm198x/asm198x/pull/304) through
+  [#312](https://github.com/asm198x/asm198x/pull/312))
+
+- **ca65 goes from 113 to 78.** Its operator vocabulary in both spellings —
+  `&&` and `.and` are one operator, and the keyword now lands on its symbol
+  twin's token rather than getting a second, nearly-right precedence. The
+  plural byte extractors `.lobytes`/`.hibytes`/`.bankbytes`/`.faraddr`. Nine
+  conditional heads beyond `.if`: `.ifblank`, `.ifconst` and the `.ifpNN` CPU
+  tests, where `.ifconst` follows ca65's own rule that a difference of two
+  labels in one segment is constant and a label alone is not.
+  ([#323](https://github.com/asm198x/asm198x/pull/323),
+  [#324](https://github.com/asm198x/asm198x/pull/324),
+  [#326](https://github.com/asm198x/asm198x/pull/326),
+  [#330](https://github.com/asm198x/asm198x/pull/330))
 
 ### Fixed
 
-- *(xtask)* count forms, not verdicts, as form coverage ([#331](https://github.com/asm198x/asm198x/pull/331))
-- a data list must not split inside a function call ([#322](https://github.com/asm198x/asm198x/pull/322))
-- ask the dialect what a value's range is, not the width ([#291](https://github.com/asm198x/asm198x/pull/291))
-- *(acme)* declare ACME's retired spellings as its refusal, not our gap ([#288](https://github.com/asm198x/asm198x/pull/288))
+- **A data list split inside a function call.** `.word .max($100, $200), $3`
+  was read as three items rather than two, because the operand splitter counted
+  commas without counting parentheses. Anything passing a two-argument function
+  in a data list assembled wrongly or was refused.
+  ([#322](https://github.com/asm198x/asm198x/pull/322))
 
-### Other
+- **A value's range came from its width rather than its dialect.** The engine
+  held one hardcoded answer — `-128..=0xFF` for a byte, `0..=0xFFFF` for a word
+  — where the references disagree on two counts: ca65 refuses a negative value
+  a byte directive would take elsewhere, and lwasm, vasm, rgbasm, pasmo and
+  sjasmplus truncate a value out of range where acme and the asl-backed
+  dialects call it an error. Probed at the corners across all seven.
+  ([#291](https://github.com/asm198x/asm198x/pull/291))
 
-- *(ca65)* use the bank-byte node the engine already had ([#327](https://github.com/asm198x/asm198x/pull/327))
-- follow the TAP crate to its org-prefixed name ([#325](https://github.com/asm198x/asm198x/pull/325))
-- check every reference-version claim against what we recorded ([#317](https://github.com/asm198x/asm198x/pull/317))
-- record the reference-parity goal the parity issues already cite ([#313](https://github.com/asm198x/asm198x/pull/313))
+- **ACME's retired spellings read as our gap.** Words ACME itself removed were
+  declared unimplemented, which put them on the wrong side of the ledger: they
+  are the reference's refusal, not ours.
+  ([#288](https://github.com/asm198x/asm198x/pull/288))
+
+### Assurance
+
+None of this changes what the assembler does. It changes what is proven, and
+what a wrong claim costs.
+
+- **Every 68000 form is arbitrated against vasm.** All 838 rows of the
+  specification, encoded and compared against the reference's own bytes.
+  ([#284](https://github.com/asm198x/asm198x/pull/284))
+
+- **Form coverage counted verdicts, not forms.** A form arbitrated by two
+  versions of one tool counted twice, so a 68000 sweep under both installed
+  vasm builds published "Form coverage: 1676/838 (200.0%)". It counts distinct
+  forms now, keyed on the form's label rather than its source text — two forms
+  can share source, since an assembler that canonicalises `move.w d1,a2` to
+  `movea.w d1,a2` writes one line for both.
+  ([#331](https://github.com/asm198x/asm198x/pull/331))
+
+- **A version claim in the source has to name a version that was recorded.**
+  Prose here cites reference-tool behaviour by version constantly, and nothing
+  checked those citations against the corpus that observed them.
+  ([#317](https://github.com/asm198x/asm198x/pull/317))
+
+- **The ledger's pinned curriculum date is checked against the commit it
+  names.** The revision itself is a CI checkout ref and cannot drift unseen;
+  the date beside it was hand-maintained and checked by nothing.
+  ([#286](https://github.com/asm198x/asm198x/pull/286))
+
+- **The parity goal is written down, with a register of deferrals.** Every word
+  a reference accepts and asm198x does not is either outstanding or deferred
+  with a stated reason, and a deferral with no record is treated as a backlog
+  item wearing a decision's clothes.
+  ([#313](https://github.com/asm198x/asm198x/pull/313))
 
 ## [0.0.33](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.32...asm198x-v0.0.33) - 2026-08-25
 
