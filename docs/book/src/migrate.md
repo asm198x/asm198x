@@ -48,7 +48,7 @@ it:
 | `65816` | `.include` | `.incbin` |
 | `huc6280` | `.include` | `.incbin` |
 | `vasm` | `include` | `incbin` |
-| `lwasm` | `include`, `use` | `includebin` |
+| `lwasm` | `include`, `use`, `incl`, `lib` | `includebin` |
 | `rgbasm` | `include` | `incbin` |
 | `pasmo` | `include` — **not implemented** | `incbin` |
 | `sjasmplus` | `.include`, `include` | `.incbin`, `incbin` |
