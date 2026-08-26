@@ -381,6 +381,15 @@ pub(crate) enum Operation {
     Org(Expr),
     /// Define the statement's label as a constant value rather than the PC
     /// (the `equ`/`=` directive). The statement must carry a label.
+    /// A **redefinable** symbol binding — lwasm's `set`, and the same idea
+    /// under ca65's `.set`, sjasmplus's `defl` and rgbasm's `=`. Unlike
+    /// [`Operation::Equ`] it may bind the same name again, and it rebinds in
+    /// pass two as well as pass one: a use *before* the statement reads the
+    /// value the name was left with at the end of pass one (the last binding
+    /// in the file), and a use after it reads the value bound here. That is
+    /// what a two-pass assembler does with a name that moves, and it is what
+    /// lwtools 4.25 was measured doing.
+    Set(Expr),
     Equ(Expr),
     /// Emit one byte per expression.
     Bytes(Vec<Expr>),
@@ -411,7 +420,9 @@ pub(crate) enum Operation {
     },
     /// The source naming a symbol-list file — ACME's `!symbollist`. Same rule
     /// as `RequestOutput`, and ACME warns in the same words.
-    RequestSymbols { path: String },
+    RequestSymbols {
+        path: String,
+    },
     /// Enter (`Some`) or leave (`None`) an ACME `!pseudopc` block: assemble
     /// here, but let labels and `*` read as if the code were somewhere else.
     ///
@@ -463,7 +474,11 @@ pub(crate) enum Operation {
     /// [, fill]`). The pad count is PC-dependent, so it is resolved in the
     /// engine passes; `andmask`/`value`/`fill` are folded to constants by the
     /// dialect. The pad is `(value - pc) & andmask`.
-    Align { andmask: i64, value: i64, fill: u8 },
+    Align {
+        andmask: i64,
+        value: i64,
+        fill: u8,
+    },
     /// Advance the program counter to the next multiple of `modulus`, filling
     /// the gap with `fill` — the `align`/`.align` of every dialect that states
     /// a boundary rather than ACME's mask/value pair. A `modulus` of 1 or less
@@ -474,7 +489,10 @@ pub(crate) enum Operation {
     /// non-power-of-two one (`.align 3` after a byte lands the next item at
     /// offset 3). Approximating either with the other would diverge silently
     /// on exactly the source that distinguishes them.
-    AlignTo { modulus: i64, fill: u8 },
+    AlignTo {
+        modulus: i64,
+        fill: u8,
+    },
     /// Open a section: subsequent bytes are placed at `base` rather than
     /// continuing from the current address, and the section's own bytes are
     /// laid out independently of what came before.
@@ -630,7 +648,7 @@ pub(crate) fn next_pc(
         Operation::Section { .. } => pc,
         // Set the counter, bind a name, name an entry point — none of them a
         // width. A caller that can reach these handles them itself.
-        Operation::Org(_) | Operation::Equ(_) | Operation::Entry(_) => pc,
+        Operation::Org(_) | Operation::Equ(_) | Operation::Set(_) | Operation::Entry(_) => pc,
     })
 }
 
@@ -884,6 +902,9 @@ fn assemble_statements(
     // in address units, so a byte length is divided by this.
     let addr_unit = dialect.addr_unit();
     let mut symbols: BTreeMap<String, i64> = BTreeMap::new();
+    // The names a redefinable binding owns, so a second one is allowed and a
+    // label or `equ` over the top of one is not.
+    let mut redefinable: std::collections::BTreeSet<String> = std::collections::BTreeSet::new();
     let mut pc: i64 = 0;
     // ACME's `!pseudopc`: what to add to the real counter to get the address
     // the code claims. Zero outside any such block; a stack, because they
@@ -909,9 +930,25 @@ fn assemble_statements(
                     range.end()
                 )));
             }
-            if symbols.insert(label.clone(), v).is_some() {
+            if symbols.insert(label.clone(), v).is_some() || redefinable.contains(label) {
                 return Err(s.err(format!("duplicate label `{label}`")));
             }
+            continue;
+        }
+        // A redefinable binding (`set`). It may bind the same name again, so
+        // long as the name is one this directive owns — a name already fixed
+        // by a label or an `equ` is not, and lwasm calls that "Multiply
+        // defined symbol" whichever of the two came first.
+        if let Some(Operation::Set(e)) = &s.op {
+            let label = s
+                .label
+                .as_ref()
+                .ok_or_else(|| s.err("`set` needs a label"))?;
+            let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
+            if symbols.insert(label.clone(), v).is_some() && !redefinable.contains(label) {
+                return Err(s.err(format!("duplicate label `{label}`")));
+            }
+            redefinable.insert(label.clone());
             continue;
         }
         if let Some(label) = &s.label {
@@ -920,7 +957,7 @@ fn assemble_statements(
             }
             // Inside a `!pseudopc` block a label reads as the address the
             // code will run at, not the one it is being assembled at.
-            if symbols.insert(label.clone(), pc + pseudo).is_some() {
+            if symbols.insert(label.clone(), pc + pseudo).is_some() || redefinable.contains(label) {
                 return Err(s.err(format!("duplicate label `{label}`")));
             }
         }
@@ -1126,6 +1163,14 @@ fn assemble_statements(
                 section_at = *at;
             }
             Some(Operation::Equ(_)) => {} // defines a symbol; emits nothing
+            // Rebinds where it stands, so a use below reads this value and a
+            // use above kept the one pass one left. Emits nothing either way.
+            Some(Operation::Set(e)) => {
+                let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
+                if let Some(label) = &s.label {
+                    symbols.insert(label.clone(), v);
+                }
+            }
             Some(Operation::Entry(e)) => {
                 let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
                 if !(0..=0xFFFF).contains(&v) {
