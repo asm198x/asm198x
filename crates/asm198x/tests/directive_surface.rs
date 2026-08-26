@@ -302,11 +302,12 @@ fn a_real_directive_reads_differently_from_a_typo() {
         // binary target. `os9` is deferred by decision — it writes a different
         // artifact — so it will not move under this test either.
         ("lwasm", "", "os9 foo", "zzqq"),
-        // `output "x"` (it names the output file) rather than `xdef`, which
-        // became an implemented check once vasm turned out to enforce one in
-        // binary output. `output` is deferred by decision — it writes a
-        // different artifact — so it will not move under this test either.
-        ("vasm", "", "output \"x\"", "zzqq"),
+        // `xdef` sat here, then `output` — each implemented in turn, `output`
+        // once the source-named-output rules covered a second dialect. `incdir`
+        // adds a directory to the include search path, which is the *host's*
+        // to decide here (`-I`), so it stays a gap by decision rather than by
+        // schedule (`decisions/reference-parity-goal.md`).
+        ("vasm", "", "incdir \"x\"", "zzqq"),
         ("rgbasm", "SECTION \"s\",ROM0\n", "UNION", "ZZQQ"),
     ];
     for (dialect, prologue, real, fake) in cases {

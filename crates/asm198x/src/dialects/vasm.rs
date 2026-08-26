@@ -285,13 +285,16 @@ pub(crate) fn assemble_warned(source: &str) -> Result<(Vec<u8>, Vec<Warning>), A
 pub(crate) fn assemble_warned_multi(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
-) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
+) -> Result<FlatMulti, AsmError> {
     let mut warnings = Vec::new();
-    let (sections, mut capture) =
-        assemble_core(&parse_program_multi(map, loader)?, true, &mut warnings)?;
+    let program = parse_program_multi(map, loader)?;
+    // Read before assembling: it is a request about where the bytes go, not a
+    // fact about what they are.
+    let named = requested_output(&program);
+    let (sections, mut capture) = assemble_core(&program, true, &mut warnings)?;
     let bytes = flatten_sections(&sections)?;
     rebase_flat_capture(&sections, &mut capture);
-    Ok((bytes, warnings, capture))
+    Ok((bytes, warnings, capture, named))
 }
 
 /// Assemble a **multi-file** 68000 program to an Amiga hunk executable
@@ -460,6 +463,27 @@ struct Ctx {
 /// addresses). The capture is strictly passive: it observes emission and never
 /// branches on it. Errors and warnings are stamped with the owning statement's
 /// file, so a failure inside an included file names that file.
+/// What a multi-file flat assemble yields: the bytes, any advisories, the
+/// debug capture, and the file the source named for itself with `output`.
+type FlatMulti = (Vec<u8>, Vec<Warning>, DebugCaptureMulti, Option<String>);
+
+/// The file the source named with `output`, if it named one.
+///
+/// Read off the parsed program rather than threaded out of the assembler,
+/// because it is not a fact about the bytes: it is a request the *caller*
+/// resolves, and `decisions/source-named-output-files.md` gives the rule —
+/// the first name stands and the command line beats it. vasm 2.0b keeps the
+/// first in silence, where ACME warns about the second.
+pub(crate) fn requested_output(program: &crate::ast::Program) -> Option<String> {
+    program.nodes.iter().find_map(|node| match &node.item {
+        Some(crate::ast::Item::Native(n)) => match n.as_any().downcast_ref::<Stmt>() {
+            Some(Stmt::Output(name)) => Some(name.clone()),
+            _ => None,
+        },
+        _ => None,
+    })
+}
+
 fn assemble_core(
     program: &crate::ast::Program,
     optimize: bool,
@@ -592,6 +616,9 @@ fn assemble_core(
                 kind: crate::engine::WarningKind::Note,
             }),
             Stmt::Fail(message) => return Err(stamp(AsmError::new(s.line, message.clone()))),
+            // Emits nothing. The name is read off the parsed program by
+            // `requested_output`, before any of this runs.
+            Stmt::Output(_) => {}
             Stmt::Visible(names) => {
                 for name in names {
                     // vasm answers `error 3007: undefined symbol <nope>`, after
@@ -1446,6 +1473,7 @@ fn stmt_size(
         | Stmt::Align(_)
         | Stmt::Cnop(..)
         | Stmt::Fail(_)
+        | Stmt::Output(_)
         | Stmt::Assert(..)
         | Stmt::Echo(_)
         | Stmt::Visible(_) => 0,
@@ -1662,6 +1690,12 @@ enum Stmt {
     /// the program. Held as a statement so the check runs against the finished
     /// symbol table, the way `assert` does — vasm takes a name defined below.
     Visible(Vec<String>),
+    /// `output "file"` — the name vasm writes to when the command line gave
+    /// none. A request rather than an instruction, resolved by
+    /// `decisions/source-named-output-files.md`: the **first** one stands, and
+    /// `-o` beats them all. vasm says nothing about a second, where ACME warns
+    /// (measured against vasm 2.0b).
+    Output(String),
     /// `fail "message"` — stop the assembly where the source says to. Held as
     /// a statement rather than raised at parse time because vasm has
     /// conditional assembly, and a `fail` in an untaken branch must stay
@@ -2479,6 +2513,8 @@ fn split_comment(line: &str) -> (&str, Option<&str>) {
 /// undefined — `dc.b REPTN` at the top level emits `$FF`.
 fn bake_reptn(kind: &mut Stmt, value: i64) {
     match kind {
+        // A file name is not an expression.
+        Stmt::Output(_) => {}
         Stmt::Equ(_, e) => bake_reptn_expr(e, value),
         Stmt::Dc(_, items) => items.iter_mut().for_each(|e| bake_reptn_expr(e, value)),
         Stmt::Ds(_, count) => bake_reptn_expr(count, value),
@@ -2524,6 +2560,8 @@ fn bake_reptn_expr(e: &mut Expr, value: i64) {
 
 fn qualify_stmt(kind: &mut Stmt, scope: &str) {
     match kind {
+        // A file name is not a symbol.
+        Stmt::Output(_) => {}
         Stmt::Equ(name, e) => {
             if name.starts_with('.') {
                 *name = format!("{scope}{name}");
@@ -2635,6 +2673,15 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "align",
         pattern: Pattern::Exact(&["align"]),
+        category: Category::Operation,
+    },
+    // `output "file"` names the file vasm writes, exactly as ACME's `!to`
+    // does: quoted or bare, the **first** one stands, and a command-line `-o`
+    // beats both. Unlike ACME, vasm says nothing about a second — measured
+    // against vasm 2.0b, which silently keeps the first.
+    Directive {
+        id: "output-file",
+        pattern: Pattern::Exact(&["output"]),
         category: Category::Operation,
     },
     Directive {
@@ -2826,7 +2873,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "offset",
             "opt",
             "org",
-            "output",
             "page",
             "plen",
             "popsection",
@@ -2900,6 +2946,16 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
             "align" => parse_align(args, line),
             "cnop" => parse_cnop(args, line),
             "fail" => Ok(Stmt::Fail(args.trim().trim_matches('"').to_string())),
+            // Quoted or bare, both measured. A bare `output` names nothing and
+            // vasm ignores it rather than refusing, so it lowers to nothing.
+            "output-file" => {
+                let name = args.trim().trim_matches('"').trim();
+                Ok(if name.is_empty() {
+                    Stmt::Empty
+                } else {
+                    Stmt::Output(name.to_string())
+                })
+            }
             "echo" => Ok(Stmt::Echo(render_message(args, line, 10)?)),
             "visibility" => Ok(Stmt::Visible(
                 split_operands(args)
@@ -3437,6 +3493,52 @@ fn expand_vasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
     macros::expansion(mode, source, |s| {
         macros::expand(&VasmMacros, s).map(|e| Some((e.text, e.origins)))
     })
+}
+
+#[cfg(test)]
+mod output_directive {
+    //! `output "file"` — the file a vasm source names for itself.
+
+    /// A request, not an instruction: the **first** one stands, a bare one
+    /// names nothing and is ignored, and its position in the source does not
+    /// matter — all measured against vasm 2.0b. The command line still beats
+    /// it, which the CLI resolves rather than this.
+    #[test]
+    fn output_names_the_file_and_the_first_one_stands() {
+        let named = |src: &str| {
+            super::requested_output(
+                &super::parse_program(src, crate::dialects::macros::Expand::Yes).expect("parses"),
+            )
+        };
+        assert_eq!(
+            named(" output \"x.bin\"\n dc.b 1,2\n").as_deref(),
+            Some("x.bin")
+        );
+        assert_eq!(
+            named(" output x.bin\n dc.b 1,2\n").as_deref(),
+            Some("x.bin")
+        );
+        assert_eq!(
+            named(" dc.b 1,2\n output \"x.bin\"\n").as_deref(),
+            Some("x.bin")
+        );
+        assert_eq!(
+            named(" output \"x.bin\"\n dc.b 1\n output \"y.bin\"\n").as_deref(),
+            Some("x.bin"),
+            "the first name stands"
+        );
+        assert_eq!(
+            named(" output\n dc.b 1,2\n"),
+            None,
+            "a bare `output` names nothing"
+        );
+        assert_eq!(named(" dc.b 1,2\n"), None);
+        // It emits nothing either way.
+        assert_eq!(
+            super::assemble(" output \"x.bin\"\n dc.b 1,2\n").expect("bytes"),
+            vec![1, 2]
+        );
+    }
 }
 
 #[cfg(test)]

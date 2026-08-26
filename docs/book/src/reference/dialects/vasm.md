@@ -8,7 +8,7 @@ Amiga 68000, vasm Motorola syntax.
 
 ## Directives
 
-21 directives, 147 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+22 directives, 147 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -28,10 +28,11 @@ Amiga 68000, vasm Motorola syntax.
 | `incbin` | `incbin` |  |
 | `include` | `include` |  |
 | `macro` | `macro` |  |
+| `output-file` | `output` |  |
 | `repeat` | `rept`, `endr` |  |
 | `section` | `section` |  |
 | `section_shorthand` | `code`, `code_c`, `code_f`, `data`, `data_c`, `data_f`, `bss`, `bss_c`, `bss_f` |  |
-| `unsupported-vasm` | `ac68080`, `auto`, `basereg`, `blk`, `cargs`, `clrfo`, `clrso`, `comment`, `cpu32`, `cseg`, `db`, `debug`, `dl`, `dr`, `dseg`, `dsource`, `dw`, `dx`, `einline`, `elif`, `elseif`, `end`, `endb`, `endm`, `erem`, `far`, `fo`, `fpu`, `if1`, `if2`, `ifb`, `ifc`, `ifmacrod`, `ifmacrond`, `ifmi`, `ifnb`, `ifnc`, `ifp1`, `ifpl`, `image`, `incdir`, `initnear`, `inline`, `jumperr`, `jumpptr`, `line_a`, `line_f`, `linea`, `linef`, `list`, `llen`, `load`, `machine`, `mask2`, `mexit`, `module`, `msource`, `near`, `nolist`, `nopage`, `odd`, `offset`, `opt`, `org`, `output`, `page`, `plen`, `popsection`, `printt`, `printv`, `pushsection`, `rem`, `rorg`, `rs`, `rseven`, `rsreset`, `rsset`, `sdreg`, `setfo`, `setso`, `showoffset`, `so`, `spc`, `symdebug`, `text`, `ttl`, `vdebug` | Recognised, and not implemented |
+| `unsupported-vasm` | `ac68080`, `auto`, `basereg`, `blk`, `cargs`, `clrfo`, `clrso`, `comment`, `cpu32`, `cseg`, `db`, `debug`, `dl`, `dr`, `dseg`, `dsource`, `dw`, `dx`, `einline`, `elif`, `elseif`, `end`, `endb`, `endm`, `erem`, `far`, `fo`, `fpu`, `if1`, `if2`, `ifb`, `ifc`, `ifmacrod`, `ifmacrond`, `ifmi`, `ifnb`, `ifnc`, `ifp1`, `ifpl`, `image`, `incdir`, `initnear`, `inline`, `jumperr`, `jumpptr`, `line_a`, `line_f`, `linea`, `linef`, `list`, `llen`, `load`, `machine`, `mask2`, `mexit`, `module`, `msource`, `near`, `nolist`, `nopage`, `odd`, `offset`, `opt`, `org`, `page`, `plen`, `popsection`, `printt`, `printv`, `pushsection`, `rem`, `rorg`, `rs`, `rseven`, `rsreset`, `rsset`, `sdreg`, `setfo`, `setso`, `showoffset`, `so`, `spc`, `symdebug`, `text`, `ttl`, `vdebug` | Recognised, and not implemented |
 | `visibility` | `xdef`, `public`, `global`, `export`, `entry`, `weak`, `extrn`, `xref`, `import`, `nref` |  |
 
 Instruction mnemonics are not listed here — they come from the instruction-set spec and have their own reference.
