@@ -338,7 +338,7 @@ fn a_real_directive_reads_differently_from_a_typo() {
         // `savesna` writes a 48K snapshot, so it waits on a device's memory
         // as well (#318).
         ("sjasmplus", "", "savesna \"x\"", "zzqq"),
-        ("sjasmplus", "", ".abyte 1", ".zzqq"),
+        ("sjasmplus", "", ".defarray x, 1", ".zzqq"),
         // `os9` (an OS-9 module header) rather than `import`: `import` moved
         // to `RefusedByReference` when lwasm turned out to refuse it for a
         // binary target. `os9` is deferred by decision — it writes a different

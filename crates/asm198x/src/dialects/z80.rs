@@ -2753,7 +2753,7 @@ fn parse_list<S: Z80Syntax>(syntax: &S, rest: &str, line: usize) -> Result<Vec<E
 }
 
 /// Split a data list on commas not inside a `"..."` string.
-fn split_data_items(s: &str) -> Vec<&str> {
+pub(crate) fn split_data_items(s: &str) -> Vec<&str> {
     let mut out = Vec::new();
     let mut in_string = false;
     let mut start = 0;
@@ -2771,7 +2771,7 @@ fn split_data_items(s: &str) -> Vec<&str> {
     out
 }
 
-fn string_literal(piece: &str) -> Option<&str> {
+pub(crate) fn string_literal(piece: &str) -> Option<&str> {
     let p = piece.trim();
     (p.len() >= 2 && p.starts_with('"') && p.ends_with('"')).then(|| &p[1..p.len() - 1])
 }
