@@ -2109,6 +2109,37 @@ const MULTI_PROBES: &[MultiProbe] = &[
              .segment \"VECTORS\"\n .word 0, 0, 0\n",
         )],
     },
+    // The record types: a compile-time layout, its names scoped under the
+    // record, and `.tag` allocating one instance's worth of space.
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: "records: .struct field offsets and .sizeof, .res and counted \
+               fields, .union laying every member at zero, .enum counting on \
+               from an explicit value, a record nested in a record allocating \
+               its size, and .tag reserving an instance",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .code\n\
+             .struct Point\npx .byte\npy .byte\npw .word\n.endstruct\n\
+             .struct Buf\nblen .byte 3\nbdata .res 8\nbw .word 2\n.endstruct\n\
+             .union U\nua .byte\nub .word\n.endunion\n\
+             .enum Colours\nred\ngreen\nblue = 10\nwhite\n.endenum\n\
+             .struct Outer\noa .byte\n.struct Inner\nia .word\n.endstruct\n\
+             ob .byte\noi .tag Point\n.endstruct\n\
+             .byte Point::px, Point::py, Point::pw, .sizeof(Point)\n\
+             .byte Buf::blen, Buf::bdata, Buf::bw, .sizeof(Buf)\n\
+             .byte U::ua, U::ub, .sizeof(U)\n\
+             .byte Colours::red, Colours::green, Colours::blue, Colours::white\n\
+             .byte Outer::oa, Outer::ob, Outer::oi, .sizeof(Outer)\n\
+             .byte .sizeof(Outer::Inner), .sizeof(Outer::oi)\n\
+             p: .tag Point\n\
+             q: .tag Point\n\
+             .word p, q, p + Point::pw\n\
+             .segment \"VECTORS\"\n .word 0, 0, 0\n",
+        )],
+    },
     MultiProbe {
         dialect: "ca65-nes",
         binaries: &[],

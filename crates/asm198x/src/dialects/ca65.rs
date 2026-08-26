@@ -171,6 +171,12 @@ enum Kind {
     DWords(Vec<Expr>),
     /// `.res count [, fill]` — `count` bytes of `fill`.
     Res(usize, u8),
+    /// A constant a record declaration defines: a field's offset, a member's
+    /// value, or a record's own size. It emits nothing and is carried as a
+    /// statement so the projection folds it **in source order**, which is where
+    /// every other constant here is folded and what makes `.if` and `.res` see
+    /// the same file the reference does.
+    Constant(String, i64),
     /// `.out`, `.warning`, `.error` and `.fatal` — say something and emit
     /// nothing. The severity decides what happens next: a note or a warning
     /// carries on, an error stops. ca65 reports every `.error` and only the
@@ -331,23 +337,45 @@ fn assemble_program(
     // `v`. Constants were answered at parse time, positionally, which is what
     // ca65 requires of them; a label may stand anywhere, so it waits for this.
     let mut parsed = parsed;
-    if !parsed.stmts.is_empty() {
+    {
         let mut refs: BTreeSet<String> = BTreeSet::new();
         for stmt in &parsed.stmts {
             collect_syms(&stmt.kind, &mut refs);
         }
-        refs.retain(|k| k.starts_with(SCOPE_MARK));
-        if !refs.is_empty() {
-            let known: BTreeSet<&String> = parsed
-                .label_seg
-                .keys()
-                .chain(parsed.consts.keys())
-                .collect();
-            let targets = scope_targets(&refs, &|name| known.contains(&name.to_string()));
-            for stmt in &mut parsed.stmts {
-                stmt.kind = map_kind_syms(&stmt.kind, &|name| {
-                    targets.get(name).map(|t| Expr::Sym(t.clone()))
-                });
+        let known: BTreeSet<&String> = parsed
+            .label_seg
+            .keys()
+            .chain(parsed.consts.keys())
+            .collect();
+        let scoped: BTreeSet<String> = refs
+            .iter()
+            .filter(|k| k.starts_with(SCOPE_MARK))
+            .cloned()
+            .collect();
+        let targets = scope_targets(&scoped, &|name| known.contains(&name.to_string()));
+        for stmt in &mut parsed.stmts {
+            stmt.kind = map_kind_syms(&stmt.kind, &|name| {
+                targets.get(name).map(|t| Expr::Sym(t.clone()))
+            });
+            // `.sizeof` reads a size the declaration stored. A name that
+            // declared none has no size to give, which is ca65's `Size of 'V'
+            // is unknown` — answered here, where the message can still name
+            // what the source wrote rather than the key it became.
+            let mut named = BTreeSet::new();
+            collect_syms(&stmt.kind, &mut named);
+            for key in &named {
+                let Some(name) = key.strip_suffix(&format!("{LABEL_SEP}size")) else {
+                    continue;
+                };
+                if !parsed.consts.contains_key(key) {
+                    return Err(ca65_flat::stamp_file(
+                        AsmError::new(
+                            stmt.line,
+                            format!("size of `{}` is unknown", display_label(name)),
+                        ),
+                        stmt.file,
+                    ));
+                }
             }
         }
     }
@@ -668,6 +696,7 @@ fn resolve(
             (Resolved::DWords(v), n)
         }
         Kind::Res(count, fill) => (Resolved::Fill(count, fill), count),
+        Kind::Constant(..) => (Resolved::Nothing, 0),
         Kind::Message(severity, text) => (Resolved::Message(severity, text), 0),
         Kind::Visible {
             rule,
@@ -1085,6 +1114,53 @@ struct Walker {
     opened: BTreeSet<String>,
     /// Counts the unnamed `.proc`s, so each gets a path segment of its own.
     unnamed: usize,
+    /// The record definitions open here, outermost first. A `.struct` may hold
+    /// another, and the inner one allocates its size in the outer.
+    records: Vec<RecordBuild>,
+}
+
+/// A `.struct`, `.union` or `.enum` being read.
+struct RecordBuild {
+    kind: RecordKind,
+    /// The scope its names are defined in — the path opened by the header.
+    path: String,
+    /// A struct's next offset, an enum's next value. A union lays every field
+    /// at zero, so this stays there and the size is the widest member.
+    cursor: i64,
+    /// The widest field, for a union.
+    widest: i64,
+    line: usize,
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum RecordKind {
+    Struct,
+    Union,
+    Enum,
+}
+
+impl RecordKind {
+    /// The word that opens it, and the word that closes it. ca65 pairs them
+    /// strictly: `.endstruct` inside an `.enum` is read as a member name, and
+    /// answered `Identifier expected`.
+    fn words(self) -> (&'static str, &'static str) {
+        match self {
+            RecordKind::Struct => (".struct", ".endstruct"),
+            RecordKind::Union => (".union", ".endunion"),
+            RecordKind::Enum => (".enum", ".endenum"),
+        }
+    }
+}
+
+impl RecordBuild {
+    /// What `.sizeof` answers for it: how far a struct got, the widest member
+    /// of a union.
+    fn size(&self) -> i64 {
+        match self.kind {
+            RecordKind::Union => self.widest,
+            _ => self.cursor,
+        }
+    }
 }
 
 /// One open scope.
@@ -1114,6 +1190,7 @@ impl Walker {
             scopes: Vec::new(),
             opened: BTreeSet::new(),
             unnamed: 0,
+            records: Vec::new(),
         }
     }
 
@@ -1134,6 +1211,13 @@ impl Walker {
                     trailing: None,
                 },
             });
+        }
+        if let Some(open) = self.records.last() {
+            let (opener, closer) = open.kind.words();
+            return Err(AsmError::new(
+                open.line,
+                format!("`{opener}` is never closed — `{closer}` is missing"),
+            ));
         }
         // ca65: `Local scope was not closed`, reported at the end of the file.
         if let Some(open) = self.scopes.last() {
@@ -1227,6 +1311,265 @@ impl Walker {
             outer_global,
         });
         Ok(Some(label))
+    }
+
+    /// Open a scope that is not a `.proc`/`.scope` — a record's name is one
+    /// too, which is how `Point::px` is spelled.
+    fn push_scope(&mut self, name: &str, line: usize) -> Result<String, AsmError> {
+        let path = qualify(&self.path(), name);
+        if !self.opened.insert(path.clone()) {
+            return Err(AsmError::new(line, format!("duplicate scope `{name}`")));
+        }
+        let outer_global = std::mem::replace(&mut self.current_global, path.clone());
+        self.scopes.push(OpenScope {
+            segment: name.to_string(),
+            is_proc: false,
+            line,
+            outer_global,
+        });
+        Ok(path)
+    }
+
+    /// The size a record declares, which `.sizeof` reads back. Stored as an
+    /// ordinary constant under a key source cannot spell, so it resolves
+    /// through the same scope lookup every other name uses.
+    fn record_size_key(path: &str) -> String {
+        format!("{path}{LABEL_SEP}size")
+    }
+
+    /// The size of the record `name` stands for here, looked up outward
+    /// through the open scopes. The *size key* is what is searched for, not the
+    /// name: a record declares no constant under its own name, so searching for
+    /// that would walk past the scope holding it.
+    fn record_size(&self, name: &str) -> Option<i64> {
+        let mut segments = self.path();
+        loop {
+            let key = Self::record_size_key(&qualify(&segments, name));
+            if let Some(&size) = self.consts.get(&key) {
+                return Some(size);
+            }
+            segments.pop()?;
+        }
+    }
+
+    /// `.struct`/`.union`/`.enum` and their closers, and — while one is open —
+    /// every line inside it, which declares a field rather than a statement.
+    ///
+    /// `Some(kind)` is what the line assembles to: nothing at all for a
+    /// declaration (they emit no bytes and define constants), which the caller
+    /// keeps as a source-only node so the formatter reproduces it.
+    fn record_line(&mut self, code: &str, line: usize) -> Result<Option<Vec<Kind>>, AsmError> {
+        let (first, rest) = split_first_word(code.trim());
+        let word = first.to_ascii_lowercase();
+        // A closer, matched by kind.
+        for kind in [RecordKind::Struct, RecordKind::Union, RecordKind::Enum] {
+            let (_, closer) = kind.words();
+            if word != closer {
+                continue;
+            }
+            let Some(open) = self.records.last() else {
+                return Err(AsmError::new(line, format!("`{word}` with no open record")));
+            };
+            if open.kind != kind {
+                let (opener, _) = open.kind.words();
+                return Err(AsmError::new(
+                    line,
+                    format!("`{word}` closes a `{opener}` opened at line {}", open.line),
+                ));
+            }
+            let done = self.records.pop().expect("just matched");
+            let key = Self::record_size_key(&done.path);
+            self.consts.insert(key.clone(), done.size());
+            if let Some(open) = self.scopes.pop() {
+                self.current_global = open.outer_global;
+            }
+            // A record declared inside another allocates its size there, the
+            // way an unnamed field of that type would.
+            if done.kind != RecordKind::Enum {
+                self.allocate(done.size());
+            }
+            return Ok(Some(vec![Kind::Constant(key, done.size())]));
+        }
+        // An opener, whether or not one is already open.
+        let kind = match word.as_str() {
+            ".struct" => Some(RecordKind::Struct),
+            ".union" => Some(RecordKind::Union),
+            ".enum" => Some(RecordKind::Enum),
+            _ => None,
+        };
+        if let Some(kind) = kind {
+            let name = rest.trim();
+            let name = if name.is_empty() {
+                self.unnamed += 1;
+                format!("{LABEL_SEP}rec#{}", self.unnamed)
+            } else {
+                if !is_ident(name) {
+                    return Err(AsmError::new(line, format!("invalid record name `{name}`")));
+                }
+                name.to_string()
+            };
+            let path = self.push_scope(&name, line)?;
+            self.records.push(RecordBuild {
+                kind,
+                path,
+                cursor: 0,
+                widest: 0,
+                line,
+            });
+            return Ok(Some(Vec::new()));
+        }
+        // Not a record word. Inside a record, every other line is a member.
+        if self.records.is_empty() {
+            return Ok(None);
+        }
+        let defined = if self.records.last().expect("open").kind == RecordKind::Enum {
+            self.enum_member(code.trim(), line)?
+        } else {
+            self.record_field(code.trim(), line)?
+        };
+        Ok(Some(defined))
+    }
+
+    /// Advance the open record by `size` bytes: a struct moves on, a union
+    /// keeps the widest member seen.
+    fn allocate(&mut self, size: i64) {
+        if let Some(open) = self.records.last_mut() {
+            match open.kind {
+                RecordKind::Union => open.widest = open.widest.max(size),
+                _ => open.cursor += size,
+            }
+        }
+    }
+
+    /// `name .byte`, `name .res 8`, `name .tag Other 3`, or any of those with
+    /// the name left out. The name binds to the field's offset — zero for every
+    /// member of a union — and the record moves on by the field's size.
+    fn record_field(&mut self, text: &str, line: usize) -> Result<Vec<Kind>, AsmError> {
+        let (head, tail) = split_first_word(text);
+        let (name, allocator, args) = if head.starts_with('.') {
+            ("", head, tail.trim())
+        } else {
+            let (word, rest) = split_first_word(tail.trim());
+            (head, word, rest.trim())
+        };
+        if !allocator.starts_with('.') {
+            return Err(AsmError::new(
+                line,
+                format!("`{allocator}` is not a storage allocator ca65 has"),
+            ));
+        }
+        let count = |text: &str, default: i64| -> Result<i64, AsmError> {
+            if text.is_empty() {
+                return Ok(default);
+            }
+            let expr = parse_value(&self.anons, &self.current_global, text, line)?;
+            fold_const(&expr, &self.consts, line)
+        };
+        // `.tag` names another record, whose size this field takes. It is
+        // resolved here rather than later because ca65 requires the record to
+        // be declared above the field that uses it.
+        let (unit, count) = match allocator.to_ascii_lowercase().as_str() {
+            ".byte" | ".res" => (1, count(args, 1)?),
+            ".word" | ".addr" | ".dbyt" => (2, count(args, 1)?),
+            ".faraddr" => (3, count(args, 1)?),
+            ".dword" => (4, count(args, 1)?),
+            ".tag" => {
+                let (record, rest) = split_first_word(args);
+                let Some(size) = self.record_size(record) else {
+                    return Err(AsmError::new(
+                        line,
+                        format!("`.tag` names `{record}`, which is not a record declared above it"),
+                    ));
+                };
+                (size, count(rest.trim(), 1)?)
+            }
+            _ => {
+                return Err(AsmError::new(
+                    line,
+                    format!("`{allocator}` is not a storage allocator ca65 has"),
+                ));
+            }
+        };
+        let open = self.records.last().expect("a record is open");
+        let offset = match open.kind {
+            RecordKind::Union => 0,
+            _ => open.cursor,
+        };
+        let size = unit * count;
+        let mut defined = Vec::new();
+        if !name.is_empty() {
+            if !is_ident(name) {
+                return Err(AsmError::new(line, format!("invalid field name `{name}`")));
+            }
+            let key = qualify(&self.path(), name);
+            // The field's own size, so `.sizeof(Outer::field)` answers.
+            let size_key = Self::record_size_key(&key);
+            self.consts.insert(size_key.clone(), size);
+            self.consts.insert(key.clone(), offset);
+            defined.push(Kind::Constant(size_key, size));
+            defined.push(Kind::Constant(key, offset));
+        }
+        self.allocate(size);
+        Ok(defined)
+    }
+
+    /// `name` or `name = expr`. The counter carries on from the last member, so
+    /// `a = 5` followed by a bare `b` is 5 then 6.
+    fn enum_member(&mut self, text: &str, line: usize) -> Result<Vec<Kind>, AsmError> {
+        let (name, value) = match text.split_once('=') {
+            Some((name, expr)) => {
+                let expr = parse_value(&self.anons, &self.current_global, expr.trim(), line)?;
+                (name.trim(), Some(fold_const(&expr, &self.consts, line)?))
+            }
+            None => (text, None),
+        };
+        if !is_ident(name) {
+            return Err(AsmError::new(line, format!("invalid enum member `{name}`")));
+        }
+        let open = self.records.last_mut().expect("a record is open");
+        let value = value.unwrap_or(open.cursor);
+        open.cursor = value + 1;
+        let key = qualify(&self.path(), name);
+        self.consts.insert(key.clone(), value);
+        Ok(vec![Kind::Constant(key, value)])
+    }
+
+    /// `.tag Record [count]` outside a record declaration: reserve one
+    /// instance's worth of space, the way `.res` does. The label on the line
+    /// binds at its start, like any other, so the caller keeps handling that.
+    ///
+    /// Read here rather than in `parse_directive` because the record's size is
+    /// a name, and only the walker knows the scopes it must be looked up
+    /// through.
+    fn tag_statement(&self, rest: &str, line: usize) -> Result<Option<Kind>, AsmError> {
+        let (word, args) = split_first_word(rest.trim());
+        if !word.eq_ignore_ascii_case(".tag") {
+            return Ok(None);
+        }
+        let (record, trailing) = split_first_word(args.trim());
+        if record.is_empty() {
+            return Err(AsmError::new(line, "`.tag` needs a record name"));
+        }
+        // A *field* may be `.tag Inner 3`; a statement may not. ca65 answers
+        // the count here with `Unexpected trailing garbage characters`.
+        if !trailing.trim().is_empty() {
+            return Err(AsmError::new(
+                line,
+                format!(
+                    "`.tag {record}` takes nothing after the record name here — \
+                         a repeat count is only a struct field's to give"
+                ),
+            ));
+        }
+        let Some(size) = self.record_size(record) else {
+            return Err(AsmError::new(
+                line,
+                format!("`.tag` names `{record}`, which is not a record declared above it"),
+            ));
+        };
+        let bytes = usize::try_from(size)
+            .map_err(|_| AsmError::new(line, "`.tag` reserves a negative amount of space"))?;
+        Ok(Some(Kind::Res(bytes, 0)))
     }
 
     /// A name written here, as the key it is stored or looked up under.
@@ -1418,6 +1761,37 @@ impl FlatWalk for Walker {
             return Ok(None);
         }
 
+        // `.struct`/`.union`/`.enum`, their closers, and — while one is open —
+        // every line inside, which declares a field rather than a statement.
+        // Source-only nodes: a record emits no bytes, it defines constants.
+        if let Some(defined) = self.record_line(trimmed, line)? {
+            // The line itself, so the formatter reproduces the declaration, and
+            // then one node per constant it defined — carried as items so the
+            // projection folds them where the source put them.
+            self.nodes.push(Node {
+                operand_span: None,
+                label: None,
+                item: None,
+                source: trimmed.to_string(),
+                span: span.clone(),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing,
+                },
+            });
+            for kind in defined {
+                self.nodes.push(Node {
+                    operand_span: None,
+                    label: None,
+                    item: Some(Item::Native(Box::new(kind))),
+                    source: String::new(),
+                    span: span.clone(),
+                    trivia: Trivia::default(),
+                });
+            }
+            return Ok(None);
+        }
+
         // `.proc`/`.scope` and their closers. Kept as source-only nodes like the
         // segment directives, so the formatter reproduces them; `.proc name`
         // carries the label it defines, which the projection places at this
@@ -1501,14 +1875,17 @@ impl FlatWalk for Walker {
                 },
             }));
         }
-        let kind = parse_op(
-            self.set,
-            &self.anons,
-            &self.current_global,
-            &self.consts,
-            rest,
-            line,
-        )?;
+        let kind = match self.tag_statement(rest, line)? {
+            Some(kind) => kind,
+            None => parse_op(
+                self.set,
+                &self.anons,
+                &self.current_global,
+                &self.consts,
+                rest,
+                line,
+            )?,
+        };
         // Every name the statement mentions, as the key it resolves under.
         let kind = self.scope_syms(&kind, line)?;
         // A label inside a scope is defined in it, and takes the cheap-local
@@ -1908,6 +2285,7 @@ fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind {
         },
         Kind::Empty => Kind::Empty,
         Kind::Res(n, f) => Kind::Res(*n, *f),
+        Kind::Constant(name, value) => Kind::Constant(name.clone(), *value),
         Kind::Align(m, f) => Kind::Align(*m, *f),
         Kind::Message(sev, t) => Kind::Message(*sev, t.clone()),
         Kind::Visible {
@@ -1994,6 +2372,11 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
                 // this point in the file has seen — which is the question ca65
                 // asks.
                 let kind = map_kind_syms(kind, &resolve_defined(consts, label_seg));
+                // A record's constants, folded here so they land in the same
+                // map, in the same order, as every `=` in the file.
+                if let Kind::Constant(name, value) = &kind {
+                    consts.insert(name.clone(), *value);
+                }
                 // `.export foo := 7` defines `foo` as well as exporting it, so
                 // it is collected here with the `=` constants rather than left
                 // to the visibility check, which would then find it undefined.
@@ -2585,12 +2968,37 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
-    // The record types, which declare a layout rather than open a scope.
+    // Walk-handled, like the scopes: a record declares constants rather than
+    // statements, and the walker is what reads its lines.
     Directive {
-        id: "unsupported-records",
+        id: "records",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["struct", "union", "enum", "tag", "end"],
+            names: &[
+                "struct",
+                "endstruct",
+                "union",
+                "endunion",
+                "enum",
+                "endenum",
+                "tag",
+            ],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // `.sizeof` is a name rather than a computation here: a record stores its
+    // size as a constant when its declaration closes.
+    Directive {
+        id: "sizeof",
+        pattern: Pattern::Exact(&[".sizeof"]),
+        category: Category::ExpressionWord,
+    },
+    Directive {
+        id: "unsupported-end",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["end"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -3101,6 +3509,20 @@ fn expr_function_positional(
     args: Vec<mos6502::ExprArg>,
     line: usize,
 ) -> Result<Expr, AsmError> {
+    // `.sizeof(X)` is a name, not a computation: a record's size is stored as a
+    // constant when its declaration closes, so this rewrites to that constant
+    // and every scope rule applies to it unchanged. (ca65 also answers
+    // `.sizeof` for a plain label — the size of what it points at — which needs
+    // a size record per label that nothing here keeps.)
+    if name.eq_ignore_ascii_case(".sizeof") {
+        let [arg]: [_; 1] = args
+            .try_into()
+            .map_err(|_| AsmError::new(line, format!("`{name}` takes one argument")))?;
+        return match arg.value(name, line)? {
+            Expr::Sym(sym) => Ok(Expr::Sym(Walker::record_size_key(&sym))),
+            _ => Err(AsmError::new(line, format!("`{name}` takes a name"))),
+        };
+    }
     if !matches!(name.to_ascii_lowercase().as_str(), ".defined" | ".def") {
         return ca65_flat::expr_function(name, args, line);
     }
@@ -3299,9 +3721,16 @@ mod tests {
 
         // A `.`-word we do not implement — with a plain argument, since a
         // string literal fails earlier, in the tokenizer.
-        let err = assemble(".code\nV = 1\n lda #.sizeof(V)\n").expect_err("not implemented");
+        let err = assemble(".code\nV = 1\n lda #.tcount(V)\n").expect_err("not implemented");
         assert!(
             err.to_string().contains("not an expression function"),
+            "got `{err}`"
+        );
+        // `.sizeof` *is* implemented, and refuses a name that declared no size
+        // — ca65's `Size of 'V' is unknown`.
+        let err = assemble(".code\nV = 1\n lda #.sizeof(V)\n").expect_err("no size");
+        assert!(
+            err.to_string().contains("size of `V` is unknown"),
             "got `{err}`"
         );
     }
@@ -3810,7 +4239,12 @@ two:\n\
         // constructor table from linker-config features our fixed layout does
         // not declare, so it stays a gap by decision rather than by schedule
         // (`decisions/reference-parity-goal.md`).
-        for d in [".condes foo, 1", ".struct s", ".org $200", ".macpack cpu"] {
+        for d in [
+            ".condes foo, 1",
+            ".charmap $41, $42",
+            ".org $200",
+            ".macpack cpu",
+        ] {
             let e = err(&format!("\t{d}\n"));
             assert!(
                 e.contains("is a real directive here"),
@@ -4063,6 +4497,52 @@ two:\n\
         }
     }
 
+    /// A record declares constants and emits nothing; `.tag` is what emits.
+    #[test]
+    fn a_record_declares_a_layout() {
+        let image = rom(".segment \"CODE\"\n\
+             .struct Point\npx .byte\npy .byte\npw .word\n.endstruct\n\
+             .union U\nua .byte\nub .word\n.endunion\n\
+             .enum E\nea\neb = 10\nec\n.endenum\n\
+             .byte Point::px, Point::py, Point::pw, .sizeof(Point)\n\
+             .byte U::ua, U::ub, .sizeof(U)\n\
+             .byte E::ea, E::eb, E::ec\n");
+        // Struct fields run on; a union lays every member at zero and is as
+        // wide as its widest; an enum counts on from an explicit value.
+        assert_eq!(&image[16..20], &[0, 1, 2, 4]);
+        assert_eq!(&image[20..23], &[0, 0, 2]);
+        assert_eq!(&image[23..26], &[0, 10, 11]);
+
+        // `.tag` reserves one instance, and the label binds at its start.
+        let image = rom(".segment \"CODE\"\n\
+             .struct Point\npx .byte\npy .byte\n.endstruct\n\
+             .byte $AA\np: .tag Point\n .word p\n");
+        assert_eq!(&image[16..21], &[0xAA, 0, 0, 0x01, 0x80]);
+    }
+
+    /// The ways a record can be written wrongly.
+    #[test]
+    fn a_record_has_to_be_closed_by_its_own_word() {
+        let err = |src: &str| {
+            super::assemble(&format!(".segment \"CODE\"\n{src}"))
+                .expect_err(src)
+                .to_string()
+        };
+        // ca65 pairs them strictly: inside an `.enum`, `.endstruct` is read as
+        // a member name and answered `Identifier expected`.
+        assert!(err(".union U\nua .byte\n.endstruct\n").contains("closes a `.union`"));
+        assert!(err(".struct S\nsa .byte\n").contains("never closed"));
+        assert!(err(".endstruct\n").contains("no open record"));
+        // A storage allocator ca65 does not have, and a `.tag` naming nothing.
+        assert!(err(".struct S\nsa .zzz\n.endstruct\n").contains("not a storage allocator"));
+        assert!(err(".struct S\nsa .tag Nope\n.endstruct\n").contains("not a record declared"));
+        // A *field* may repeat (`.tag Inner 3`); a statement may not, which is
+        // ca65's `Unexpected trailing garbage characters`.
+        assert!(
+            err(".struct S\nsa .byte\n.endstruct\nq: .tag S 2\n").contains("takes nothing after")
+        );
+    }
+
     /// A pseudo-function is declared as what it is.
     ///
     /// This test used to assert the opposite — that `.lobyte` and `.strlen`
@@ -4087,14 +4567,14 @@ two:\n\
                 .find(|d| d.spellings().iter().any(|s| s == word))
                 .map(|d| d.category)
         };
-        for f in [".lobyte", ".strlen", ".max", ".defined"] {
+        for f in [".lobyte", ".strlen", ".max", ".defined", ".sizeof"] {
             assert_eq!(
                 kind(f),
                 Some(crate::directives::Category::ExpressionWord),
                 "`{f}` is implemented, so it is declared as what it is"
             );
         }
-        for f in [".sizeof", ".paramcount"] {
+        for f in [".paramcount", ".tcount"] {
             assert_eq!(
                 kind(f),
                 None,
