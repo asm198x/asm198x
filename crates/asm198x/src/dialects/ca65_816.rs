@@ -36,7 +36,7 @@ use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
 use crate::dialects::macros;
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
+use crate::engine::{AsmError, BinOp, Expr, Operation, Piece, Statement};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
 
@@ -571,6 +571,44 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // `.lobytes`/`.hibytes`/`.bankbytes` take byte 0, 1 and 2 of each value in
+    // the list; `.faraddr` emits all three, little-endian — a 65816 far address.
+    Directive {
+        id: "lobytes",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["lobytes"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "hibytes",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["hibytes"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "bankbytes",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["bankbytes"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "faraddr",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["faraddr"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     Directive {
         id: "asciiz",
         pattern: Pattern::Sigilled {
@@ -669,6 +707,33 @@ fn parse_directive(
                 .collect(),
         ))),
         // `.asciiz` — a `.byte` string list with one terminating $00.
+        // Byte 0, 1 and 2 of each value, and all three for `.faraddr`. Byte 2
+        // is spelled out of `Lo` over a shift, the engine having no node for
+        // it; wrapping the expression rather than folding it keeps a forward
+        // label resolving in pass two.
+        "lobytes" | "hibytes" | "bankbytes" | "faraddr" => {
+            let bank = |e: Expr| {
+                Expr::Lo(Box::new(Expr::Bin(
+                    BinOp::Shr,
+                    Box::new(e),
+                    Box::new(Expr::Num(16)),
+                )))
+            };
+            let mut out = Vec::new();
+            for value in value_list(rest, line)? {
+                match entry.id {
+                    "lobytes" => out.push(Expr::Lo(Box::new(value))),
+                    "hibytes" => out.push(Expr::Hi(Box::new(value))),
+                    "bankbytes" => out.push(bank(value)),
+                    _ => {
+                        out.push(Expr::Lo(Box::new(value.clone())));
+                        out.push(Expr::Hi(Box::new(value.clone())));
+                        out.push(bank(value));
+                    }
+                }
+            }
+            Ok(Some(Operation::Bytes(out)))
+        }
         "asciiz" => {
             let mut out = byte_list(rest, line)?;
             out.push(Expr::Num(0));

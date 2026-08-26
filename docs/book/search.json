@@ -627,7 +627,7 @@
       "slug": "reference/dialects/65816"
     },
     {
-      "context": "11 directives, 21 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "15 directives, 25 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "65816",
       "slug": "reference/dialects/65816"
@@ -742,7 +742,7 @@
       "slug": "reference/dialects/ca65"
     },
     {
-      "context": "34 directives, 133 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "38 directives, 134 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "ca65",
       "slug": "reference/dialects/ca65"
@@ -811,7 +811,7 @@
       "slug": "reference/dialects/huc6280"
     },
     {
-      "context": "11 directives, 16 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "15 directives, 20 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "huc6280",
       "slug": "reference/dialects/huc6280"

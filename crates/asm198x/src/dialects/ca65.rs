@@ -33,7 +33,7 @@ use super::mos6502::{
     split_first_word, split_top_level, string_literal,
 };
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, DiagSeverity, Expr, Operation, Warning, WarningKind};
+use crate::engine::{AsmError, BinOp, DiagSeverity, Expr, Operation, Warning, WarningKind};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
 
@@ -1876,6 +1876,46 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // `.lobytes`/`.hibytes`/`.bankbytes` take byte 0, 1 and 2 of each value in
+    // the list; `.faraddr` emits all three, little-endian. Byte 2 is the bank
+    // byte of a 65816 address, which is why the third has that name and the
+    // fourth is a `far` address rather than a 24-bit word.
+    Directive {
+        id: "lobytes",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["lobytes"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "hibytes",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["hibytes"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "bankbytes",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["bankbytes"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    Directive {
+        id: "faraddr",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["faraddr"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
     Directive {
         id: "asciiz",
         pattern: Pattern::Sigilled {
@@ -2185,15 +2225,23 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::KnownUnsupported,
     },
-    // everything else ca65 has here
+    // A word ca65's tokenizer knows and its parser accepts nowhere. Probed
+    // against V2.18 at statement position, after a label, as a struct storage
+    // allocator, as an `.import`/`.export` address-size specifier and inside an
+    // expanded macro body: every one answers `Unexpected '.FORCEWORD'` (the
+    // address-size specifiers there are `zeropage`, `absolute`, `direct` and
+    // `near`, plus `far`/`dword` on a CPU wide enough for them). Reachable
+    // source cannot contain it, so refusing it is matching the reference.
     Directive {
-        id: "unsupported-everything",
+        id: "forceword",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["bankbytes", "faraddr", "hibytes", "lobytes"],
+            names: &["forceword"],
             required: true,
         },
-        category: Category::KnownUnsupported,
+        category: Category::RefusedByReference(
+            "a word its tokenizer knows and its parser accepts in no position",
+        ),
     },
 ];
 
@@ -2267,6 +2315,27 @@ fn parse_directive(
             rest,
             line,
         )?)),
+        // Each extractor is its list of values with a byte selector wrapped
+        // round every one, so a forward label still resolves at layout time and
+        // the size is the item count (times three for `.faraddr`). ca65 answers
+        // a string with a syntax error, which `parse_value_list` does too.
+        "lobytes" | "hibytes" | "bankbytes" | "faraddr" => {
+            let values = parse_value_list(anons, current_global, rest, line)?;
+            let mut out = Vec::with_capacity(values.len());
+            for value in values {
+                match entry.id {
+                    "lobytes" => out.push(Expr::Lo(Box::new(value))),
+                    "hibytes" => out.push(Expr::Hi(Box::new(value))),
+                    "bankbytes" => out.push(bank_byte(value)),
+                    _ => {
+                        out.push(Expr::Lo(Box::new(value.clone())));
+                        out.push(Expr::Hi(Box::new(value.clone())));
+                        out.push(bank_byte(value));
+                    }
+                }
+            }
+            Ok(Kind::Bytes(out))
+        }
         "asciiz" => Ok(Kind::Bytes(parse_asciiz(
             anons,
             current_global,
@@ -2517,6 +2586,17 @@ fn parse_asciiz(
     let mut out = parse_data_list(anons, current_global, rest, line)?;
     out.push(Expr::Num(0));
     Ok(out)
+}
+
+/// Byte 2 of a value — the bank byte of a 65816 address. `.bankbytes` and the
+/// third byte of `.faraddr` both want it, and the engine has no dedicated node
+/// for it, so it is spelled out of the ones it does have.
+fn bank_byte(value: Expr) -> Expr {
+    Expr::Lo(Box::new(Expr::Bin(
+        BinOp::Shr,
+        Box::new(value),
+        Box::new(Expr::Num(16)),
+    )))
 }
 
 fn parse_value_list(
@@ -3310,6 +3390,60 @@ two:\n\
         // `.mod` sits with `*` and `/`, and takes C's sign rule.
         assert_eq!(byte("7 .mod 4 + 1"), vec![4]);
         assert_eq!(byte("7 .mod (0 - 4)"), vec![3]);
+    }
+
+    /// The plural extractors, over the NES path — the differential covers the
+    /// flat 65816 dialect, and this dialect has its own directive table.
+    #[test]
+    fn the_extractors_take_a_byte_from_each_value() {
+        // The image is a linked NES ROM — header, then padded segments — so the
+        // values are found behind a `$AA,$55` fence rather than at a fixed
+        // offset.
+        let bytes = |src: &str| {
+            let image = super::assemble(&format!(".segment \"CODE\"\n .byte $AA,$55\n{src}\n"))
+                .unwrap_or_else(|e| panic!("{src}: {e}"))
+                .0;
+            let at = image
+                .windows(2)
+                .position(|w| w == [0xAA, 0x55])
+                .unwrap_or_else(|| panic!("{src}: no fence in the image"));
+            image[at + 2..].to_vec()
+        };
+        assert_eq!(&bytes(" .lobytes $1234, $5678")[..2], &[0x34, 0x78]);
+        assert_eq!(&bytes(" .hibytes $1234, $5678")[..2], &[0x12, 0x56]);
+        // Byte 2 of the value, above 24 bits as well as within them.
+        assert_eq!(&bytes(" .bankbytes $123456, $12345678")[..2], &[0x12, 0x34]);
+        // Three bytes, little-endian, per value.
+        assert_eq!(
+            &bytes(" .faraddr $112233, $445566")[..6],
+            &[0x33, 0x22, 0x11, 0x66, 0x55, 0x44]
+        );
+        // Masked, not refused: ca65 answers `.hibytes 0-1` with $FF.
+        assert_eq!(
+            &bytes(" .lobytes 0-1\n .hibytes 0-1\n .bankbytes 0-1")[..3],
+            &[0xFF; 3]
+        );
+    }
+
+    /// `.forceword` is a word ca65's tokenizer knows and its parser takes
+    /// nowhere — statement position, after a label, as a struct storage
+    /// allocator, as an address-size specifier, inside an expanded macro: every
+    /// one answers `Unexpected '.FORCEWORD'`. Refusing it is matching V2.18,
+    /// not a gap, so it reads as a refusal rather than as an unimplemented
+    /// directive.
+    #[test]
+    fn a_word_the_reference_never_accepts_is_refused_as_one() {
+        let e = super::assemble(".segment \"CODE\"\n .forceword $12\n")
+            .expect_err("ca65 refuses it, so we must");
+        let text = e.to_string();
+        assert!(
+            text.contains("accepts in no position"),
+            "should name the reference's own refusal, got: {text}"
+        );
+        assert!(
+            !text.contains("the gap is ours"),
+            "and must not read as an unimplemented directive: {text}"
+        );
     }
 
     /// A pseudo-function is declared as what it is.
