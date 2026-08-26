@@ -267,6 +267,9 @@ struct ParseState {
     /// The type being defined here, if `struct` opened one and no `endstruct`
     /// has closed it yet.
     open_struct: Option<OpenStruct>,
+    /// The pragmas a `pragma` or `opt` has changed, by index into [`PRAGMAS`].
+    /// Anything absent stands where lwasm starts it.
+    pragmas: BTreeMap<usize, bool>,
 }
 
 /// A struct type: what its members are called, how far into it each one sits,
@@ -443,9 +446,8 @@ impl FlatWalk for Walker {
         use ca65_flat::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_lowercase();
         Some(match word.as_str() {
-            "if" | "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifdef" | "ifndef" => {
-                BlockKw::CondOpen
-            }
+            "if" | "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifdef" | "ifndef"
+            | "ifpragma" | "ifopt" => BlockKw::CondOpen,
             "else" => BlockKw::Else,
             "endc" | "endif" => BlockKw::CondClose,
             _ => return None,
@@ -678,8 +680,8 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "conditional",
         pattern: Pattern::Exact(&[
-            "if", "ifne", "ifeq", "ifgt", "ifge", "iflt", "ifle", "ifdef", "ifndef", "else",
-            "endc", "endif",
+            "if", "ifne", "ifeq", "ifgt", "ifge", "iflt", "ifle", "ifdef", "ifndef", "ifpragma",
+            "ifopt", "else", "endc", "endif",
         ]),
         category: Category::Operation,
     },
@@ -816,7 +818,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What lwasm has here and we do not.
     //
-    // 14 spellings against lwtools 4.25.
+    // 10 spellings against lwtools 4.25.
     //
     // **Directives only.** The first cut of this list swept in fifteen 6809
     // *instructions* — `adca`, `bita`, `cmpd`, `cwai`, `sbca` among them —
@@ -917,6 +919,21 @@ pub const DIRECTIVES: &[Directive] = &[
             "only usable with an object target, and asm198x emits a binary",
         ),
     },
+    // `pragma` and `opt` reach the same switches — `opt 6809` really does turn
+    // away a 6309 instruction — and `ifpragma`/`ifopt` ask whether one is set.
+    // The difference between the two spellings is what they do with a name
+    // they do not know: `pragma zzz` is "Unrecognized pragma string" and `opt
+    // zzz` assembles, in silence.
+    //
+    // Eight of the forty-nine spellings ask for something asm198x does not do,
+    // and each is refused by name where it is set rather than accepted and
+    // ignored. See [`PRAGMAS`] for which, and for what the rest were measured
+    // against.
+    Directive {
+        id: "pragma",
+        pattern: Pattern::Exact(&["pragma", "opt"]),
+        category: Category::Operation,
+    },
     // `name struct` … `endstruct` describes a layout without laying anything
     // out. The members name offsets into the type — `pt.x` is a constant, the
     // type name itself is not a symbol at all — and `v pt` then reserves one
@@ -948,21 +965,281 @@ pub const DIRECTIVES: &[Directive] = &[
             "dtb",
             "dts",
             "emod",
-            "ifopt",
             "ifp1",
             "ifp2",
-            "ifpragma",
             "ifstr",
             "includestr",
             "mod",
-            "opt",
             "os9",
-            "pragma",
             "setstr",
         ]),
         category: Category::KnownUnsupported,
     },
 ];
+
+/// An operation that objects where it stands rather than where it was read —
+/// see [`Category::KnownUnsupported`]'s arm in [`parse_op`] for why every
+/// refusal in this dialect takes this shape.
+fn refused(message: impl Into<String>) -> Operation {
+    Operation::Diagnose {
+        severity: crate::engine::DiagSeverity::Error,
+        message: message.into(),
+    }
+}
+
+/// One of lwasm's pragmas: the spellings that turn it on, the spellings that
+/// turn it off, whether it starts on, and — where asm198x cannot follow — what
+/// changes in the direction it cannot follow.
+///
+/// The vocabulary and the starting state were read out of lwtools 4.25 rather
+/// than guessed: every name below answers `pragma`, and `ifpragma <name>` was
+/// asked for each one before anything set it. A name outside the table is
+/// "Unrecognized pragma string" there and here.
+struct Pragma {
+    on: &'static [&'static str],
+    off: &'static [&'static str],
+    starts_on: bool,
+    /// What turning it **on** would change, when this dialect cannot do it.
+    gap_on: Option<&'static str>,
+    /// The same for turning it **off**.
+    gap_off: Option<&'static str>,
+}
+
+/// lwasm's pragmas, each with the spellings that reach it.
+///
+/// The eight refusals below are the ones measured to change something across a
+/// corpus of fourteen probe programs — plain and indexed addressing, `,pc`
+/// indexing, short and long branches, forward references, strings, `$` in a
+/// symbol, colliding symbol case, an undefined symbol in a condition, an
+/// oversized operand, a macro, a struct and a conditional. Every other pragma
+/// left all fourteen byte-identical, which is evidence rather than proof: the
+/// corpus is the warrant, and a construct it does not reach could still hide
+/// one.
+const PRAGMAS: &[Pragma] = &[
+    Pragma {
+        on: &["6309"],
+        off: &["6809"],
+        starts_on: true,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["c"],
+        off: &[],
+        starts_on: false,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["6800compat"],
+        off: &["no6800compat"],
+        starts_on: false,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["autobranchlength"],
+        off: &["noautobranchlength"],
+        starts_on: false,
+        gap_on: Some("choosing a branch's length for the source"),
+        gap_off: None,
+    },
+    Pragma {
+        on: &["cescapes"],
+        off: &["nocescapes"],
+        starts_on: false,
+        gap_on: Some("C escapes inside a string"),
+        gap_off: None,
+    },
+    Pragma {
+        on: &["cd"],
+        off: &["nocd"],
+        starts_on: false,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["condundefzero"],
+        off: &["nocondundefzero"],
+        starts_on: false,
+        gap_on: Some("reading an undefined symbol as zero in a condition"),
+        gap_off: None,
+    },
+    Pragma {
+        on: &["dollarlocal", "nodollarnotlocal"],
+        off: &["nodollarlocal", "dollarnotlocal"],
+        starts_on: true,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["expandcond"],
+        off: &["noexpandcond"],
+        starts_on: true,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["export"],
+        off: &["noexport"],
+        starts_on: false,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["forwardrefmax"],
+        off: &["noforwardrefmax"],
+        starts_on: true,
+        gap_on: None,
+        gap_off: Some("sizing a forward reference by its value rather than at maximum"),
+    },
+    Pragma {
+        on: &["importundefexport"],
+        off: &["noimportundefexport"],
+        starts_on: false,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["index0tonone"],
+        off: &["noindex0tonone"],
+        starts_on: true,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["list"],
+        off: &["nolist"],
+        starts_on: true,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["listcode"],
+        off: &["nolistcode"],
+        starts_on: true,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["m80ext"],
+        off: &["nom80ext"],
+        starts_on: false,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["oldsource", "nonewsource"],
+        off: &["nooldsource", "newsource"],
+        starts_on: true,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["operandsizewarning"],
+        off: &["nooperandsizewarning"],
+        starts_on: false,
+        gap_on: Some("warning that an operand is wider than it needs to be"),
+        gap_off: None,
+    },
+    Pragma {
+        on: &["pcaspcr"],
+        off: &["nopcaspcr"],
+        starts_on: false,
+        gap_on: Some("reading `,pc` as `,pcr`"),
+        gap_off: None,
+    },
+    Pragma {
+        on: &["shadow"],
+        off: &["noshadow"],
+        starts_on: false,
+        gap_on: None,
+        gap_off: None,
+    },
+    Pragma {
+        on: &["symbolcase", "nosymbolnocase"],
+        off: &["nosymbolcase", "symbolnocase"],
+        starts_on: true,
+        gap_on: None,
+        gap_off: Some("matching symbol names without regard to case"),
+    },
+    Pragma {
+        on: &["undefextern"],
+        off: &["noundefextern"],
+        starts_on: false,
+        gap_on: None,
+        gap_off: None,
+    },
+];
+
+/// Find the pragma one spelling reaches, and which way that spelling points.
+fn pragma_named(name: &str) -> Option<(usize, bool)> {
+    PRAGMAS.iter().enumerate().find_map(|(i, p)| {
+        if p.on.contains(&name) {
+            Some((i, true))
+        } else if p.off.contains(&name) {
+            Some((i, false))
+        } else {
+            None
+        }
+    })
+}
+
+/// Whether a pragma is on as the source stands. `set` holds only what a
+/// `pragma` or `opt` has changed, so anything untouched answers with what
+/// lwasm starts it at.
+fn pragma_is_on(set: &BTreeMap<usize, bool>, index: usize) -> bool {
+    set.get(&index).copied().unwrap_or(PRAGMAS[index].starts_on)
+}
+
+/// Apply one `pragma`/`opt` name. `strict` is `pragma`'s: it refuses a name it
+/// does not know, where `opt` passes over one in silence (measured — `opt zzz`
+/// assembles, `pragma zzz` is "Unrecognized pragma string").
+fn set_pragma(
+    name: &str,
+    strict: bool,
+    set: &mut BTreeMap<usize, bool>,
+    line: usize,
+) -> Result<(), AsmError> {
+    let Some((index, want_on)) = pragma_named(name) else {
+        if strict {
+            return Err(AsmError::new(
+                line,
+                format!("unrecognized pragma string `{name}`"),
+            ));
+        }
+        return Ok(());
+    };
+    let p = &PRAGMAS[index];
+    let gap = if want_on { p.gap_on } else { p.gap_off };
+    if let Some(what) = gap
+        && pragma_is_on(set, index) != want_on
+    {
+        return Err(AsmError::new(
+            line,
+            format!(
+                "`{name}` asks for {what}, which asm198x does not do — the source is \
+                 valid and the gap is ours"
+            ),
+        ));
+    }
+    set.insert(index, want_on);
+    Ok(())
+}
+
+/// Split a `pragma`/`opt` operand into its names: commas separate them, and
+/// the first space ends them — everything after it is the Motorola comment
+/// field, as it is elsewhere in this dialect.
+///
+/// That pair of rules is what makes `pragma list nolist` set only `list`,
+/// while `pragma list,nolist` sets both and `pragma list, nolist` is
+/// "Unrecognized pragma string": the comment field starts after the comma,
+/// leaving an empty name behind it. All three were measured.
+fn pragma_names(operand: &str) -> Vec<String> {
+    let field = operand.trim_start();
+    let field = &field[..field.find(char::is_whitespace).unwrap_or(field.len())];
+    field.split(',').map(|n| n.to_ascii_lowercase()).collect()
+}
 
 /// A struct line's label belongs *on* the line: lwasm reads the type name, the
 /// member name and the instance name from label position, so a formatter that
@@ -1166,6 +1443,28 @@ fn parse_op(
             }
             "equ" => Ok(Some(Operation::Equ(value(operand, line)?))),
             "set" => Ok(Some(Operation::Set(value(operand, line)?))),
+            // A bare `opt` is nothing to do and assembles; a bare `pragma` is a
+            // name it does not know, and does not.
+            "pragma" => {
+                let strict = m == "pragma";
+                if operand.trim().is_empty() {
+                    if strict {
+                        return Ok(Some(refused("unrecognized pragma string")));
+                    }
+                    return Ok(Some(Operation::Bytes(Vec::new())));
+                }
+                // A refusal here is raised where the statement stands rather
+                // than where it is read, for the reason every other refusal in
+                // this dialect is: lwasm does not parse a branch it is not
+                // taking, so a pragma it would turn away has to reach the
+                // engine before it objects.
+                for name in pragma_names(operand) {
+                    if let Err(e) = set_pragma(&name, strict, &mut state.pragmas, line) {
+                        return Ok(Some(refused(e.message)));
+                    }
+                }
+                Ok(Some(Operation::Bytes(Vec::new())))
+            }
             // Reaching here means the walk did not take this line as part of a
             // definition — a `macro` with no name in label position, or an
             // `endm` closing nothing. lwasm names both.
@@ -1966,6 +2265,20 @@ impl crate::ast::CondEval for LwasmEval {
         let (word, args) = split_first_word(head.trim());
         let word = word.to_ascii_lowercase();
         let args = args.trim();
+        if word == "ifpragma" || word == "ifopt" {
+            let name = args
+                .split_whitespace()
+                .next()
+                .unwrap_or("")
+                .to_ascii_lowercase();
+            // Both spellings refuse a name they do not know, where `opt`
+            // itself passes over one — measured: `opt zzz` assembles and
+            // `ifopt zzz` does not.
+            let (index, want_on) = pragma_named(&name).ok_or_else(|| {
+                AsmError::new(line, format!("unrecognized pragma string `{name}`"))
+            })?;
+            return Ok(pragma_is_on(&self.state.pragmas, index) == want_on);
+        }
         if word == "ifdef" || word == "ifndef" {
             let name = args
                 .split_whitespace()
@@ -2663,6 +2976,141 @@ mod tests {
             asm(" org $1000\npt struct\nx fcb 9\n endstruct\n").is_err(),
             "a struct reserves room; it does not hold data"
         );
+    }
+
+    /// `pragma` and `opt` reach the same switches, and `ifpragma`/`ifopt` ask
+    /// whether one is set. A pragma untouched by the source answers with what
+    /// lwasm starts it at, which is not "off" for all of them.
+    #[test]
+    fn a_pragma_is_set_and_asked_after() {
+        // `6309` starts on, `cd` starts off — both measured against lwtools.
+        assert_eq!(
+            asm(" ifpragma 6309\n fcb 1\n else\n fcb 2\n endc\n")
+                .expect("6309")
+                .bytes,
+            vec![1]
+        );
+        assert_eq!(
+            asm(" ifopt cd\n fcb 1\n else\n fcb 2\n endc\n")
+                .expect("cd")
+                .bytes,
+            vec![2]
+        );
+        // Setting one shows through either spelling of the question.
+        for ask in ["ifpragma", "ifopt"] {
+            assert_eq!(
+                asm(&format!(
+                    " opt cd\n {ask} cd\n fcb 1\n else\n fcb 2\n endc\n"
+                ))
+                .expect(ask)
+                .bytes,
+                vec![1],
+                "{ask}"
+            );
+        }
+        // The off-spelling is the same switch seen the other way round, and
+        // `6809` is `6309`'s.
+        assert_eq!(
+            asm(" pragma cd\n ifpragma nocd\n fcb 1\n else\n fcb 2\n endc\n")
+                .expect("negative")
+                .bytes,
+            vec![2]
+        );
+        assert_eq!(
+            asm(" pragma 6809\n ifpragma 6309\n fcb 1\n else\n fcb 2\n endc\n")
+                .expect("6809")
+                .bytes,
+            vec![2]
+        );
+    }
+
+    /// Commas separate the names and the first space ends them — everything
+    /// after it is the comment field. So `list nolist` sets only `list`, where
+    /// `list,nolist` sets both and `list, nolist` leaves an empty name behind
+    /// the comma and is refused.
+    #[test]
+    fn a_pragma_takes_a_comma_list_and_then_a_comment() {
+        assert_eq!(
+            asm(" pragma list nolist\n ifpragma list\n fcb 1\n else\n fcb 2\n endc\n")
+                .expect("space")
+                .bytes,
+            vec![1]
+        );
+        assert_eq!(
+            asm(" pragma list,nolist\n ifpragma list\n fcb 1\n else\n fcb 2\n endc\n")
+                .expect("comma")
+                .bytes,
+            vec![2]
+        );
+        assert!(
+            asm(" pragma list, nolist\n fcb 1\n").is_err(),
+            "comma then space"
+        );
+    }
+
+    /// The two spellings part company over a name neither knows: `pragma`
+    /// refuses it, `opt` passes over it in silence. A bare `opt` is nothing to
+    /// do; a bare `pragma` is a name it does not know.
+    #[test]
+    fn opt_forgives_a_name_pragma_refuses() {
+        assert_eq!(asm(" opt zzz\n fcb 1\n").expect("opt").bytes, vec![1]);
+        assert!(
+            asm(" pragma zzz\n fcb 1\n").is_err(),
+            "`pragma` with an unknown name"
+        );
+        assert_eq!(asm(" opt\n fcb 1\n").expect("bare opt").bytes, vec![1]);
+        assert!(asm(" pragma\n fcb 1\n").is_err(), "bare `pragma`");
+        // Both refuse a name they do not know when *asking* about it.
+        assert!(
+            asm(" ifopt zzz\n fcb 1\n endc\n").is_err(),
+            "`ifopt` with an unknown name"
+        );
+    }
+
+    /// Eight of the forty-nine spellings ask for something this dialect does
+    /// not do. Each is refused where it is set, by name, rather than accepted
+    /// and quietly ignored — and, like every refusal here, only when the line
+    /// is reached.
+    #[test]
+    fn a_pragma_asking_for_what_we_cannot_do_says_so() {
+        for spelling in [
+            "autobranchlength",
+            "cescapes",
+            "condundefzero",
+            "noforwardrefmax",
+            "operandsizewarning",
+            "pcaspcr",
+            "nosymbolcase",
+            "symbolnocase",
+        ] {
+            let err = asm(&format!(" pragma {spelling}\n fcb 1\n"))
+                .expect_err(spelling)
+                .to_string();
+            assert!(err.contains("the gap is ours"), "{spelling}: {err}");
+            assert_eq!(
+                asm(&format!(" ifne 0\n pragma {spelling}\n endc\n fcb 1\n"))
+                    .unwrap_or_else(|e| panic!("{spelling} behind `if 0`: {e}"))
+                    .bytes,
+                vec![1],
+                "{spelling}"
+            );
+        }
+        // Asking for the direction it already stands in is not asking for
+        // anything, and is taken.
+        for spelling in [
+            "noautobranchlength",
+            "nopcaspcr",
+            "symbolcase",
+            "forwardrefmax",
+        ] {
+            assert_eq!(
+                asm(&format!(" pragma {spelling}\n fcb 1\n"))
+                    .unwrap_or_else(|e| panic!("{spelling}: {e}"))
+                    .bytes,
+                vec![1],
+                "{spelling}"
+            );
+        }
     }
 
     #[test]
