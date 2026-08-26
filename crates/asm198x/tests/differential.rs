@@ -2021,6 +2021,36 @@ const MULTI_PROBES: &[MultiProbe] = &[
     MultiProbe {
         dialect: "ca65-nes",
         binaries: &[],
+        note: "the nine conditional heads beyond .if/.ifdef/.ifndef: \
+               .ifblank asks whether anything follows it, .ifconst whether \
+               the expression is a constant (a label is not, a same-segment \
+               difference above the line is, a forward one is not), and the \
+               .ifpNN family which CPU this is",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .code\nV = 5\n\
+             .ifblank\n .byte $11\n .else\n .byte $22\n .endif\n\
+             .ifblank x\n .byte $11\n .else\n .byte $22\n .endif\n\
+             .ifnblank\n .byte $11\n .else\n .byte $22\n .endif\n\
+             .ifconst 1+1\n .byte $33\n .endif\n\
+             .ifconst V*2\n .byte $34\n .endif\n\
+             .ifnconst 1\n .byte $ee\n .else\n .byte $35\n .endif\n\
+             LA:\nLB:\n .ifconst LB-LA\n .byte $36\n .else\n .byte $ee\n .endif\n\
+             .ifconst LA\n .byte $ee\n .else\n .byte $37\n .endif\n\
+             .ifconst LA*2\n .byte $ee\n .else\n .byte $38\n .endif\n\
+             .ifconst LC-LA\n .byte $ee\n .else\n .byte $39\n .endif\n\
+             LC:\n .ifp02\n .byte $44\n .endif\n\
+             .ifp816\n .byte $ee\n .else\n .byte $45\n .endif\n\
+             .ifpc02\n .byte $ee\n .else\n .byte $46\n .endif\n\
+             .ifpsc02\n .byte $ee\n .else\n .byte $47\n .endif\n\
+             .ifp4510\n .byte $ee\n .else\n .byte $48\n .endif\n\
+             .segment \"VECTORS\"\n .word 0, LA, 0\n",
+        )],
+    },
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
         note: "ca65 `.align` pads within the segment, not to an absolute \
                address — `.align 3` in CODE (based at $8000, not a multiple \
                of 3) lands at segment offset 3. The boundary need not be a \
