@@ -2237,6 +2237,8 @@ fn subst_anon_expr(e: Expr, anons: &Anons, file: FileId, line: usize) -> Result<
         Expr::Hi(b) => Expr::Hi(Box::new(subst_anon_expr(*b, anons, file, line)?)),
         Expr::Bank(b) => Expr::Bank(Box::new(subst_anon_expr(*b, anons, file, line)?)),
         Expr::Neg(b) => Expr::Neg(Box::new(subst_anon_expr(*b, anons, file, line)?)),
+        Expr::BitNot(b) => Expr::BitNot(Box::new(subst_anon_expr(*b, anons, file, line)?)),
+        Expr::LogNot(b) => Expr::LogNot(Box::new(subst_anon_expr(*b, anons, file, line)?)),
         Expr::Bin(op, l, r) => Expr::Bin(
             op,
             Box::new(subst_anon_expr(*l, anons, file, line)?),
@@ -2326,6 +2328,8 @@ fn bake_expr(e: Expr, env: &BTreeMap<String, i64>, set_names: &BTreeSet<String>)
         Expr::Hi(inner) => Expr::Hi(Box::new(bake_expr(*inner, env, set_names))),
         Expr::Bank(inner) => Expr::Bank(Box::new(bake_expr(*inner, env, set_names))),
         Expr::Neg(inner) => Expr::Neg(Box::new(bake_expr(*inner, env, set_names))),
+        Expr::BitNot(inner) => Expr::BitNot(Box::new(bake_expr(*inner, env, set_names))),
+        Expr::LogNot(inner) => Expr::LogNot(Box::new(bake_expr(*inner, env, set_names))),
         Expr::Bin(op, l, r) => Expr::Bin(
             op,
             Box::new(bake_expr(*l, env, set_names)),
@@ -3539,6 +3543,7 @@ fn parse_value(anons: &Anons, zone: &str, raw: &str, line: usize) -> Result<Expr
         line,
         parse_number,
         mos6502::ExprOpts {
+            logical: false,
             compare: mos6502::Compare {
                 eq: true,
                 eq_eq: false,

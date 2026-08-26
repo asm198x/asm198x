@@ -324,6 +324,14 @@ pub(crate) struct ExprOpts {
     /// function whose argument is a *name* rather than a value (ca65's
     /// `.sizeof(Point)`) reads it back as an `Expr::Sym`.
     pub function: Option<ExprFn>,
+    /// Whether this dialect has ca65's logical layer: `&&`/`.and`, `||`/`.or`,
+    /// `.xor`, `!`/`.not` and `~`/`.bitnot`, plus the keyword spellings of the
+    /// bitwise operators it already has.
+    ///
+    /// Off everywhere else, and it has to be: `!` is bitwise OR in vasm, and a
+    /// bare `.and` is an ordinary symbol in a dialect that does not know the
+    /// word.
+    pub logical: bool,
     /// Comparison support. `Default` is none, which is what a dialect whose
     /// reference has no comparison operators wants.
     pub compare: Compare,
@@ -349,6 +357,7 @@ pub(crate) fn parse_expr(
         caret: opts.caret,
         function: opts.function,
         compare_opts: opts.compare,
+        logical: opts.logical,
     };
     let expr = parser.expr()?;
     if parser.pos != parser.tokens.len() {
@@ -387,11 +396,45 @@ enum Tok {
     /// An expression still evaluates to an `i64`, so a string never becomes a
     /// value; `.strlen("abc")` consumes it at parse time and yields a number.
     Str(String),
+    /// ca65's logical operators and its bitwise complement — `&&`/`.and`,
+    /// `||`/`.or`, `.xor`, `!`/`.not`, `~`/`.bitnot`. Only ca65 produces
+    /// these: `!` is bitwise OR in vasm and `~` is nothing anywhere else.
+    LogAnd,
+    LogOr,
+    LogXor,
+    LogNot,
+    BitNot,
+    /// ca65's `.mod`. It has no symbol spelling there — `%` is a binary
+    /// literal — so the keyword is the only way in.
+    Mod,
     /// Argument separator inside a function call. Nothing else in an
     /// expression takes one — every caller splits its operand list on commas
     /// before an expression reaches here, and does so paren-aware, so a
     /// comma survives only inside `f(a,b)`.
     Comma,
+}
+
+/// ca65's keyword spelling of an operator, if that is what the word is.
+///
+/// Every one of these has a symbol twin except `.mod`, which has none — `%`
+/// is a binary literal there. Mapping the keyword to the twin's token is what
+/// makes `4 + 1 .bitand 1` and `4 + 1 & 1` the same expression, precedence
+/// included.
+fn keyword_operator(word: &str) -> Option<Tok> {
+    Some(match word.to_ascii_lowercase().as_str() {
+        ".bitand" => Tok::And,
+        ".bitor" => Tok::Or,
+        ".bitxor" => Tok::Xor,
+        ".bitnot" => Tok::BitNot,
+        ".shl" => Tok::Shl,
+        ".shr" => Tok::Shr,
+        ".mod" => Tok::Mod,
+        ".and" => Tok::LogAnd,
+        ".or" => Tok::LogOr,
+        ".xor" => Tok::LogXor,
+        ".not" => Tok::LogNot,
+        _ => return None,
+    })
 }
 
 fn tokenize(
@@ -492,12 +535,28 @@ fn tokenize(
                 tokens.push(Tok::Cmp(BinOp::Ne));
                 i += 2;
             }
+            '&' if opts.logical && chars.get(i + 1) == Some(&'&') => {
+                tokens.push(Tok::LogAnd);
+                i += 2;
+            }
             '&' => {
                 tokens.push(Tok::And);
                 i += 1;
             }
+            '|' if opts.logical && chars.get(i + 1) == Some(&'|') => {
+                tokens.push(Tok::LogOr);
+                i += 2;
+            }
             '|' => {
                 tokens.push(Tok::Or);
+                i += 1;
+            }
+            '~' if opts.logical => {
+                tokens.push(Tok::BitNot);
+                i += 1;
+            }
+            '!' if opts.logical => {
+                tokens.push(Tok::LogNot);
                 i += 1;
             }
             // vasm accepts `!` as a second spelling of bitwise OR, at the same
@@ -585,6 +644,11 @@ fn tokenize(
                     && (word.eq_ignore_ascii_case("xor") || word.eq_ignore_ascii_case("eor"))
                 {
                     tokens.push(Tok::Xor);
+                } else if let Some(op) = opts.logical.then(|| keyword_operator(&word)).flatten() {
+                    // ca65 spells every operator twice: `&` and `.bitand` are
+                    // one operator, and the keyword must land on the same
+                    // token so it inherits the same precedence.
+                    tokens.push(op);
                 } else {
                     tokens.push(Tok::Sym(word));
                 }
@@ -608,11 +672,58 @@ struct ExprParser {
     caret: Caret,
     function: Option<ExprFn>,
     compare_opts: Compare,
+    /// ca65's logical layer — see [`ExprOpts::logical`].
+    logical: bool,
 }
 
 impl ExprParser {
     fn expr(&mut self) -> Result<Expr, AsmError> {
-        self.compare()
+        self.logical_not()
+    }
+
+    // ---- ca65's logical layer, above the comparisons and loosest-first.
+    //
+    // Measured against ca65 V2.18, and the ordering is the reference's rather
+    // than the obvious one: `.not` binds **looser than everything**, so
+    // `.not 1 .or 1` is `0` — the `.or` happens first and the `.not` negates
+    // the lot. A parser that treated it as an ordinary prefix would answer
+    // `1`. Below it, `.or` is looser than `.and`/`.xor`, which are looser
+    // than the comparisons.
+    //
+    // Off in every other dialect: `!` is bitwise OR in vasm, and `.and` is an
+    // ordinary symbol in a dialect that has never heard of it.
+
+    fn logical_not(&mut self) -> Result<Expr, AsmError> {
+        if self.logical && matches!(self.tokens.get(self.pos), Some(Tok::LogNot)) {
+            self.pos += 1;
+            return Ok(Expr::LogNot(Box::new(self.logical_not()?)));
+        }
+        self.logical_or()
+    }
+
+    fn logical_or(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.logical_and()?;
+        while self.logical && matches!(self.tokens.get(self.pos), Some(Tok::LogOr)) {
+            self.pos += 1;
+            let right = self.logical_and()?;
+            left = Expr::Bin(BinOp::LogOr, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn logical_and(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.compare()?;
+        while self.logical {
+            let op = match self.tokens.get(self.pos) {
+                Some(Tok::LogAnd) => BinOp::LogAnd,
+                Some(Tok::LogXor) => BinOp::LogXor,
+                _ => break,
+            };
+            self.pos += 1;
+            let right = self.compare()?;
+            left = Expr::Bin(op, Box::new(left), Box::new(right));
+        }
+        Ok(left)
     }
 
     /// The dialect's arithmetic ladder, below any comparison.
@@ -776,6 +887,10 @@ impl ExprParser {
             let op = match self.tokens.get(self.pos) {
                 Some(Tok::Star) => BinOp::Mul,
                 Some(Tok::Slash) => BinOp::Div,
+                // ca65's `.mod` sits with `*` and `/`: `7 .mod 4 + 1` is 4.
+                // The token only exists where `logical` is on, so this arm is
+                // ca65's alone.
+                Some(Tok::Mod) => BinOp::Mod,
                 _ => break,
             };
             self.pos += 1;
@@ -857,6 +972,10 @@ impl ExprParser {
                 }
                 _ => {}
             }
+        }
+        if self.logical && matches!(self.tokens.get(self.pos), Some(Tok::BitNot)) {
+            self.pos += 1;
+            return Ok(Expr::BitNot(Box::new(self.unary()?)));
         }
         self.atom()
     }
@@ -1073,6 +1192,7 @@ mod tests {
     fn eval(raw: &str, prec: BytePrec) -> i64 {
         let env = BTreeMap::new();
         let opts = ExprOpts {
+            logical: false,
             compare: Compare::default(),
             function: None,
             prec,
