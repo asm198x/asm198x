@@ -765,7 +765,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What lwasm has here and we do not.
     //
-    // 23 spellings against lwtools 4.25.
+    // 17 spellings against lwtools 4.25.
     //
     // **Directives only.** The first cut of this list swept in fifteen 6809
     // *instructions* — `adca`, `bita`, `cmpd`, `cwai`, `sbca` among them —
@@ -854,16 +854,34 @@ pub const DIRECTIVES: &[Directive] = &[
             "only supported for an object target, and asm198x emits a binary",
         ),
     },
+    // The section words go the same way, and say so in lwasm's own words:
+    // "Cannot use sections unless using the object target". Probed against
+    // lwtools 4.25 with `--raw`, bare and with arguments — all four answer it
+    // every time, and only when the line is live: one inside a branch that is
+    // not taken is never reached, here as there.
+    Directive {
+        id: "sections",
+        pattern: Pattern::Exact(&["section", "sect", "endsection", "endsect"]),
+        category: Category::RefusedByReference(
+            "only usable with an object target, and asm198x emits a binary",
+        ),
+    },
+    // Macro definition. The walk reads a `name macro` header and its `endm`
+    // before `parse_op` sees either, so these are declared for what they are
+    // rather than dispatched: reaching the dispatch means the line was not
+    // part of a definition, and lwasm has an answer for each of those too.
+    Directive {
+        id: "macro",
+        pattern: Pattern::Exact(&["macro", "macr", "endm"]),
+        category: Category::Operation,
+    },
     Directive {
         id: "unsupported-lwasm",
         pattern: Pattern::Exact(&[
             "dtb",
             "dts",
             "emod",
-            "endm",
             "ends",
-            "endsect",
-            "endsection",
             "endstruct",
             "ifopt",
             "ifp1",
@@ -871,14 +889,10 @@ pub const DIRECTIVES: &[Directive] = &[
             "ifpragma",
             "ifstr",
             "includestr",
-            "macr",
-            "macro",
             "mod",
             "opt",
             "os9",
             "pragma",
-            "sect",
-            "section",
             "setstr",
             "struct",
         ]),
@@ -902,16 +916,25 @@ fn parse_op(
     match directive.category {
         // `end` marks the end of source; it emits nothing.
         Category::Ignored => Ok(None),
-        Category::KnownUnsupported => Err(AsmError::new(
-            line,
-            format!("`{m}` is a real directive here and asm198x does not implement it yet"),
-        )),
+        // A refused word is refused when it is *reached*, not when it is read.
+        // lwasm does not parse a branch it is not taking at all — anything at
+        // all may sit inside `if 0`, an unknown opcode and an unterminated
+        // string included — so a word we would turn away has to survive the
+        // parse and object at assembly time. `Operation::Diagnose` is that:
+        // the engine raises it where the statement stands, and a statement
+        // inside a dead branch never becomes one.
+        Category::KnownUnsupported => Ok(Some(Operation::Diagnose {
+            severity: crate::engine::DiagSeverity::Error,
+            message: format!(
+                "`{m}` is a real directive here and asm198x does not implement it yet"
+            ),
+        })),
         // Declared for `lwasm` only where lwasm itself refuses the word for the
         // binary we emit; the refusal is the match, not a gap.
-        Category::RefusedByReference(rule) => Err(AsmError::new(
-            line,
-            crate::directives::refused_by_reference("lwasm", &m, rule),
-        )),
+        Category::RefusedByReference(rule) => Ok(Some(Operation::Diagnose {
+            severity: crate::engine::DiagSeverity::Error,
+            message: crate::directives::refused_by_reference("lwasm", &m, rule),
+        })),
         Category::Operation => match directive.id {
             "org" => {
                 if state.in_phase {
@@ -955,6 +978,17 @@ fn parse_op(
             }
             "equ" => Ok(Some(Operation::Equ(value(operand, line)?))),
             "set" => Ok(Some(Operation::Set(value(operand, line)?))),
+            // Reaching here means the walk did not take this line as part of a
+            // definition — a `macro` with no name in label position, or an
+            // `endm` closing nothing. lwasm names both.
+            "macro" => Ok(Some(Operation::Diagnose {
+                severity: crate::engine::DiagSeverity::Error,
+                message: if m == "endm" {
+                    "`endm` without a `macro`".to_string()
+                } else {
+                    "missing macro name".to_string()
+                },
+            })),
             "bytes" => Ok(Some(Operation::Bytes(list(operand, line)?))),
             "words" => Ok(Some(Operation::Words(list(operand, line)?))),
             "fcc" => Ok(Some(parse_fcc(operand, line, StringEnd::Bare)?)),
@@ -1619,7 +1653,8 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
 struct LwasmMacros;
 
 impl macros::MacroSyntax for LwasmMacros {
-    /// `name macro` — name first, and only name first.
+    /// `name macro` — name first, and only name first. `macr` is lwasm's
+    /// second spelling of the same word.
     fn header(&self, line: &str) -> Option<(String, Vec<String>)> {
         let text = macros::without_comment(line);
         // A definition names its macro in label position, so an indented
@@ -1628,8 +1663,8 @@ impl macros::MacroSyntax for LwasmMacros {
             return None;
         }
         let (name, rest) = text.trim_end().split_once(char::is_whitespace)?;
-        rest.trim()
-            .eq_ignore_ascii_case("macro")
+        let word = rest.trim();
+        (word.eq_ignore_ascii_case("macro") || word.eq_ignore_ascii_case("macr"))
             .then(|| (name.trim_end_matches(':').to_string(), Vec::new()))
     }
 
@@ -2215,6 +2250,69 @@ mod tests {
             .to_string();
             assert!(err.contains("the gap is ours"), "{word}: {err}");
         }
+    }
+
+    /// lwasm's section words are lwasm's own refusal for the output we make,
+    /// not a gap here: "Cannot use sections unless using the object target",
+    /// bare or with arguments, every time.
+    #[test]
+    fn the_section_words_are_the_references_refusal() {
+        for spelling in ["section", "sect", "endsection", "endsect"] {
+            for operand in ["", " name,bss"] {
+                let err = asm(&format!(" {spelling}{operand}\n fcb 1\n"))
+                    .expect_err(spelling)
+                    .to_string();
+                assert!(err.contains("object target"), "{spelling}: {err}");
+                assert!(!err.contains("does not implement"), "{spelling}: {err}");
+            }
+        }
+    }
+
+    /// A word we turn away is turned away when it is *reached*, not when it is
+    /// read. lwasm does not parse a branch it is not taking at all, so a
+    /// `section` or an `export` guarded behind `if 0` has to assemble here —
+    /// and the same word on a live line still has to be refused.
+    #[test]
+    fn a_refused_word_inside_a_dead_branch_is_never_reached() {
+        for spelling in ["section", "export", "import", "os9", "struct", "endm"] {
+            assert_eq!(
+                asm(&format!(" ifne 0\n {spelling}\n endc\n fcb 1\n"))
+                    .unwrap_or_else(|e| panic!("{spelling} behind `if 0`: {e}"))
+                    .bytes,
+                vec![1],
+                "{spelling}"
+            );
+            assert!(
+                asm(&format!(" {spelling}\n fcb 1\n")).is_err(),
+                "{spelling} live"
+            );
+        }
+    }
+
+    /// `macr` is lwasm's second spelling of `macro`, and both are read by the
+    /// walk before the directive table sees them — so reaching the table means
+    /// the line was not part of a definition, and each of those has an answer
+    /// too.
+    #[test]
+    fn macr_defines_a_macro_and_a_stray_one_says_why_not() {
+        for spelling in ["macro", "macr", "MACRO"] {
+            assert_eq!(
+                asm(&format!(
+                    "twice {spelling}\n fcb \\1\n endm\n org $1000\n twice 7\n"
+                ))
+                .unwrap_or_else(|e| panic!("{spelling}: {e}"))
+                .bytes,
+                vec![7],
+                "{spelling}"
+            );
+            // Indented, it names nothing, and lwasm says so.
+            let err = asm(&format!(" {spelling}\n fcb 1\n"))
+                .expect_err(spelling)
+                .to_string();
+            assert!(err.contains("macro name"), "{spelling}: {err}");
+        }
+        let err = asm(" endm\n fcb 1\n").expect_err("stray endm").to_string();
+        assert!(err.contains("without a `macro`"), "{err}");
     }
 
     #[test]

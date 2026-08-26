@@ -8,7 +8,7 @@
 
 ## Directives
 
-27 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+29 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -27,6 +27,7 @@
 | `incbin` | `includebin` |  |
 | `include` | `include`, `use`, `incl`, `lib` |  |
 | `listing` | `nam`, `ttl`, `pag`, `page`, `spc` | Accepted and discarded — it changes no bytes |
+| `macro` | `macro`, `macr`, `endm` |  |
 | `object-target-only` | `export`, `extdep`, `extern`, `external`, `import` | Refused, as the reference refuses it — only supported for an object target, and asm198x emits a binary |
 | `org` | `org` |  |
 | `pseudo-pc` | `phase`, `dephase` |  |
@@ -34,9 +35,10 @@
 | `reserve` | `rmb`, `.ds`, `zmb`, `bsz`, `fzb` |  |
 | `reserve-double` | `rmd`, `zmd`, `rmw` |  |
 | `reserve-quad` | `rmq`, `zmq` |  |
+| `sections` | `section`, `sect`, `endsection`, `endsect` | Refused, as the reference refuses it — only usable with an object target, and asm198x emits a binary |
 | `set` | `set` |  |
 | `setdp` | `setdp` |  |
-| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `endm`, `ends`, `endsect`, `endsection`, `endstruct`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `includestr`, `macr`, `macro`, `mod`, `opt`, `os9`, `pragma`, `sect`, `section`, `setstr`, `struct` | Recognised, and not implemented |
+| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `ends`, `endstruct`, `ifopt`, `ifp1`, `ifp2`, `ifpragma`, `ifstr`, `includestr`, `mod`, `opt`, `os9`, `pragma`, `setstr`, `struct` | Recognised, and not implemented |
 | `words` | `fdb`, `.word` |  |
 | `words-swapped` | `fdbs` |  |
 
