@@ -171,6 +171,10 @@ enum Kind {
     DWords(Vec<Expr>),
     /// `.res count [, fill]` — `count` bytes of `fill`.
     Res(usize, u8),
+    /// `.org expr` — the address a following label reads, without moving where
+    /// its bytes land. `.reloc` ends it.
+    Org(Expr),
+    Reloc,
     /// A constant a record declaration defines: a field's offset, a member's
     /// value, or a record's own size. It emits nothing and is carried as a
     /// statement so the projection folds it **in source order**, which is where
@@ -398,6 +402,14 @@ fn assemble_program(
     for (name, value) in &parsed.consts {
         addr_env.insert(name.clone(), *value);
     }
+    // What `.org` adds to the address a statement reports. ca65's `.org` moves
+    // the address and leaves the bytes where they were going: `.byte $11 /
+    // .org $2000 / L: .byte $22 / .word L` is `11 22 00 20`, so the `$22`
+    // still lands next to the `$11` and `L` reads `$2000`. `.reloc` ends it.
+    // The offset is computed here rather than in the projection because it is
+    // measured from where the bytes are actually going, which only the layout
+    // knows.
+    let mut pseudo: i64 = 0;
     let mut placed: Vec<(String, u32, usize, FileId, Resolved)> = Vec::new(); // (segment, addr, line, file, item)
     // The debug read-out (U4): symbols and line spans fall out of the layout
     // values already in hand — `(section, offset)` is `(seg, addr - base)`.
@@ -448,6 +460,18 @@ fn assemble_program(
         })?;
         let off = *offsets.entry(stmt.seg.clone()).or_insert(0);
         let addr = info.base + off;
+        match &stmt.kind {
+            // A label on the `.org` line binds at the new address, so the
+            // offset moves before the label is recorded.
+            Kind::Org(e) => {
+                let target = e
+                    .eval(&addr_env, i64::from(addr) + pseudo, stmt.line)
+                    .map_err(|e| ca65_flat::stamp_file(e, stmt.file))?;
+                pseudo = target - i64::from(addr);
+            }
+            Kind::Reloc => pseudo = 0,
+            _ => {}
+        }
         if let Some(label) = &stmt.label {
             // Real ca65 rejects a duplicate symbol; accepting one would also
             // make the debug record lie (the record keeps every definition,
@@ -463,7 +487,10 @@ fn assemble_program(
                     stmt.file,
                 ));
             }
-            if addr_env.insert(label.clone(), i64::from(addr)).is_some() {
+            if addr_env
+                .insert(label.clone(), i64::from(addr) + pseudo)
+                .is_some()
+            {
                 return Err(ca65_flat::stamp_file(
                     AsmError::new(
                         stmt.line,
@@ -504,7 +531,19 @@ fn assemble_program(
             ));
         }
         if !matches!(resolved, Resolved::Nothing) {
-            placed.push((stmt.seg, addr, stmt.line, stmt.file, resolved));
+            // The address the statement *reports* — what `*` reads and what a
+            // relative branch measures from. Where its bytes go is the
+            // segment buffer's business, and that has not moved.
+            let reported = u32::try_from(i64::from(addr) + pseudo).map_err(|_| {
+                ca65_flat::stamp_file(
+                    AsmError::new(
+                        stmt.line,
+                        "`.org` puts this statement outside the address space",
+                    ),
+                    stmt.file,
+                )
+            })?;
+            placed.push((stmt.seg, reported, stmt.line, stmt.file, resolved));
         }
     }
 
@@ -696,7 +735,7 @@ fn resolve(
             (Resolved::DWords(v), n)
         }
         Kind::Res(count, fill) => (Resolved::Fill(count, fill), count),
-        Kind::Constant(..) => (Resolved::Nothing, 0),
+        Kind::Constant(..) | Kind::Org(_) | Kind::Reloc => (Resolved::Nothing, 0),
         Kind::Message(severity, text) => (Resolved::Message(severity, text), 0),
         Kind::Visible {
             rule,
@@ -1114,6 +1153,9 @@ struct Walker {
     opened: BTreeSet<String>,
     /// Counts the unnamed `.proc`s, so each gets a path segment of its own.
     unnamed: usize,
+    /// Set by `.end`, which stops the assembler reading: every line after it
+    /// is ignored, including one that would not parse.
+    ended: bool,
     /// The record definitions open here, outermost first. A `.struct` may hold
     /// another, and the inner one allocates its size in the outer.
     records: Vec<RecordBuild>,
@@ -1190,6 +1232,7 @@ impl Walker {
             scopes: Vec::new(),
             opened: BTreeSet::new(),
             unnamed: 0,
+            ended: false,
             records: Vec::new(),
         }
     }
@@ -1722,6 +1765,12 @@ impl FlatWalk for Walker {
         // Deferred anonymous-reference records need the current file; the
         // parse helpers below only know their line.
         self.anons.file.set(file);
+        // `.end` stops the assembler reading. Nothing below it is parsed, so a
+        // line that would be an error is not one — probed: ca65 takes
+        // `.end zz`, trailing garbage and all, because it never looks.
+        if self.ended {
+            return Ok(None);
+        }
         let (code, comment) = split_comment(raw);
         let trimmed = code.trim();
         if trimmed.is_empty() {
@@ -1756,6 +1805,15 @@ impl FlatWalk for Walker {
                     trailing,
                 },
             });
+            return Ok(None);
+        }
+
+        if trimmed
+            .split_whitespace()
+            .next()
+            .is_some_and(|w| w.eq_ignore_ascii_case(".end"))
+        {
+            self.ended = true;
             return Ok(None);
         }
 
@@ -2298,6 +2356,8 @@ fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind {
         Kind::Empty => Kind::Empty,
         Kind::Res(n, f) => Kind::Res(*n, *f),
         Kind::Constant(name, value) => Kind::Constant(name.clone(), *value),
+        Kind::Org(e) => Kind::Org(map_expr_syms(e, f)),
+        Kind::Reloc => Kind::Reloc,
         Kind::Align(m, f) => Kind::Align(*m, *f),
         Kind::Message(sev, t) => Kind::Message(*sev, t.clone()),
         Kind::Visible {
@@ -2874,14 +2934,16 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // `.org` names an address without moving the output; `.reloc` gives it
+    // back to the segment.
     Directive {
-        id: "unsupported-segments",
+        id: "placement",
         pattern: Pattern::Sigilled {
             sigil: '.',
             names: &["org", "reloc"],
             required: true,
         },
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
     },
     // Symbol visibility, probed against ca65 2.18 + ld65 in the fused
     // assemble+link this dialect performs. See
@@ -3015,14 +3077,15 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&[".sizeof"]),
         category: Category::ExpressionWord,
     },
+    // `.end` stops the assembler reading the file.
     Directive {
-        id: "unsupported-end",
+        id: "end",
         pattern: Pattern::Sigilled {
             sigil: '.',
             names: &["end"],
             required: true,
         },
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
     },
     // macros
     Directive {
@@ -3264,6 +3327,17 @@ fn parse_directive(
                     format!("`{name}` is not a processor ca65 knows"),
                 )),
             }
+        }
+        // `.org` names an address without moving the output, and `.reloc`
+        // gives the address back to the segment. Probed against V2.18 + ld65:
+        // `.byte $11 / .org $2000 / L: .byte $22 / .word L` is `11 22 00 20` —
+        // the `$22` still lands next to the `$11`, and `L` reads `$2000`.
+        "placement" => {
+            let (word, _) = split_first_word(directive);
+            if word.eq_ignore_ascii_case("reloc") {
+                return Ok(Kind::Reloc);
+            }
+            Ok(Kind::Org(parse_value(anons, current_global, rest, line)?))
         }
         "res" => parse_res(anons, current_global, consts, rest, line),
         "align" => parse_align(anons, current_global, consts, rest, line),
@@ -4354,7 +4428,7 @@ two:\n\
         for d in [
             ".condes foo, 1",
             ".charmap $41, $42",
-            ".org $200",
+            ".define X 1",
             ".macpack cpu",
         ] {
             let e = err(&format!("\t{d}\n"));
@@ -4724,6 +4798,34 @@ two:\n\
         assert_eq!(taken(" .word L\n.ifref L"), 0x11);
         assert_eq!(taken(".ifnref L"), 0x11);
         assert_eq!(taken(" .word L\n.ifnref L"), 0x22);
+    }
+
+    /// `.org` moves the address a statement reports and leaves its bytes where
+    /// they were going; `.reloc` gives the address back to the segment.
+    #[test]
+    fn org_moves_the_address_and_not_the_bytes() {
+        let image = rom(".segment \"CODE\"\n .byte $11\n\
+             .org $2000\nL: .byte $22\n .word L, *\n\
+             .reloc\nM: .byte $33\n .word M\n");
+        // The `$22` still lands next to the `$11` — only the address moved.
+        assert_eq!(&image[16..18], &[0x11, 0x22]);
+        // `L` and `*` both read from the new origin. `*` is the address of the
+        // statement it stands in — the `.word` itself, one byte along.
+        assert_eq!(&image[18..22], &[0x00, 0x20, 0x01, 0x20]);
+        // After `.reloc` the segment's own addressing is back: `M` is the
+        // seventh byte of CODE, which is based at $8000.
+        assert_eq!(image[22], 0x33);
+        assert_eq!(&image[23..25], &[0x06, 0x80]);
+    }
+
+    /// `.end` stops the assembler reading, so what follows is not parsed at
+    /// all — not even far enough to be an error.
+    #[test]
+    fn end_stops_the_read() {
+        let image = rom(".segment \"CODE\"\n .byte $11\n.end\n .byte $22\n\
+             .zzqq this is not a directive and never becomes one\n");
+        assert_eq!(image[16], 0x11);
+        assert_eq!(image[17], 0x00, "nothing below `.end` was assembled");
     }
 
     /// A pseudo-function is declared as what it is.

@@ -2178,6 +2178,27 @@ const MULTI_PROBES: &[MultiProbe] = &[
              .segment \"VECTORS\"\n .word 0, 0, 0\n",
         )],
     },
+    // `.org` names an address without moving the output, `.reloc` gives it
+    // back, and `.end` stops the assembler reading.
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: ".org moves the address and not the bytes, .reloc returns to the \
+               segment's own addressing, and .end stops the read",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .code\n .byte $11\n\
+             .org $2000\n\
+             L: .byte $22\n .word L\n .word *\n\
+             .org $3000\n N: .byte $44\n .word N\n\
+             .reloc\n\
+             M: .byte $33\n .word M\n\
+             .segment \"VECTORS\"\n .word 0, 0, 0\n\
+             .end\n\
+             this line is never read and would not parse\n",
+        )],
+    },
     MultiProbe {
         dialect: "ca65-nes",
         binaries: &[],
