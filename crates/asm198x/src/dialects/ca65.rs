@@ -2245,7 +2245,9 @@ fn walk_weights(
         | Expr::Bank(e)
         | Expr::Neg(e)
         | Expr::BitNot(e)
-        | Expr::LogNot(e) => weighs_nothing(e, st).then_some(()),
+        | Expr::LogNot(e)
+        | Expr::FixRound(e)
+        | Expr::TrailingZeros(e) => weighs_nothing(e, st).then_some(()),
     }
 }
 
@@ -2290,6 +2292,8 @@ fn map_expr_syms(e: &Expr, f: &dyn Fn(&str) -> Option<Expr>) -> Expr {
         Expr::Neg(i) => Expr::Neg(Box::new(map_expr_syms(i, f))),
         Expr::BitNot(i) => Expr::BitNot(Box::new(map_expr_syms(i, f))),
         Expr::LogNot(i) => Expr::LogNot(Box::new(map_expr_syms(i, f))),
+        Expr::FixRound(i) => Expr::FixRound(Box::new(map_expr_syms(i, f))),
+        Expr::TrailingZeros(i) => Expr::TrailingZeros(Box::new(map_expr_syms(i, f))),
         Expr::Bin(op, l, r) => Expr::Bin(
             *op,
             Box::new(map_expr_syms(l, f)),
@@ -3630,6 +3634,7 @@ fn parse_value(
         mos6502::ExprOpts {
             logical: true,
             scoped_names: true,
+            fixed_point: false,
             compare: mos6502::Compare {
                 eq: true,
                 eq_eq: false,

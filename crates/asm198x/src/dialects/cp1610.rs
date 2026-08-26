@@ -412,6 +412,7 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         ExprOpts {
             logical: false,
             scoped_names: false,
+            fixed_point: false,
             compare: crate::dialects::mos6502::Compare::default(),
             function: None,
             bang_is_or: false,

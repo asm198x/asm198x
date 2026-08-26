@@ -45,13 +45,13 @@ use std::collections::BTreeMap;
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
 use super::macros;
 use super::mos6502::{
-    self, BytePrec, Caret, ExprOpts, fold_const, is_ident, parse_number, split_data_items,
-    split_first_word, split_top_level, string_literal,
+    self, BytePrec, Caret, ExprOpts, fold_const, is_ident, split_data_items, split_first_word,
+    split_top_level, string_literal,
 };
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
 use crate::directives::{Category, Directive, Pattern, lookup};
-use crate::engine::{AsmError, Expr, Operation, Statement};
+use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
 use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
 
@@ -601,7 +601,114 @@ const BANK_MARK: &str = "\u{1}bank\u{1}";
 /// given, and it reaches **forward** — `db BANK("paged")` above the section it
 /// names assembles — so it cannot fold while walking. It becomes a marker that
 /// [`resolve_banks`] answers once every `SECTION` in the program is known.
+/// rgbasm's numbers, which include fixed-point literals.
+///
+/// `1.0` is `$10000`: the value is scaled by `1 << 16` and the fraction
+/// truncated toward zero, so `3.7` is `$3B333` rather than a rounded
+/// `$3B334`. A `qN` suffix names another precision — `3.7q8` is `$3B3` —
+/// which is how a program that has changed the default writes a literal.
+/// Anything without a point is an ordinary integer.
+fn number(text: &str, line: usize) -> Result<i64, AsmError> {
+    let (digits, precision) = match text.split_once(['q', 'Q']) {
+        Some((head, bits)) if head.contains('.') => {
+            let bits: u32 = bits.parse().map_err(|_| {
+                AsmError::new(line, format!("`{text}`: `q` needs a bit count after it"))
+            })?;
+            if bits == 0 || bits > 31 {
+                return Err(AsmError::new(
+                    line,
+                    format!("`{text}`: a fixed-point precision runs from 1 to 31 bits"),
+                ));
+            }
+            (head, bits)
+        }
+        _ => (text, crate::engine::FIX_BITS as u32),
+    };
+    let Some((whole, fraction)) = digits.split_once('.') else {
+        return mos6502::parse_number(text, line);
+    };
+    let whole: i64 = if whole.is_empty() {
+        0
+    } else {
+        whole
+            .parse()
+            .map_err(|_| AsmError::new(line, format!("`{text}` is not a number")))?
+    };
+    if !fraction.chars().all(|c| c.is_ascii_digit()) {
+        return Err(AsmError::new(line, format!("`{text}` is not a number")));
+    }
+    // The fraction as a rational, scaled and truncated: `.7` at 16 bits is
+    // `7 * 65536 / 10`, which is `45875.2` and lands on `45875`.
+    let scale = 1i64 << precision;
+    let denominator = 10i64
+        .checked_pow(fraction.len() as u32)
+        .ok_or_else(|| AsmError::new(line, format!("`{text}` has too many decimal places")))?;
+    let numerator: i64 = fraction
+        .parse()
+        .map_err(|_| AsmError::new(line, format!("`{text}` is not a number")))?;
+    Ok(whole * scale + numerator * scale / denominator)
+}
+
 fn expr_function(name: &str, args: Vec<mos6502::ExprArg>, line: usize) -> Result<Expr, AsmError> {
+    use crate::engine::BinOp as Op;
+    let lower = name.to_ascii_lowercase();
+
+    // The byte extractions, and the one bit-counting function whose answer is a
+    // plain integer rather than a fixed-point value.
+    let unary: Option<fn(Box<Expr>) -> Expr> = match lower.as_str() {
+        "high" => Some(Expr::Hi),
+        "low" => Some(Expr::Lo),
+        "round" => Some(Expr::FixRound),
+        "tzcount" => Some(Expr::TrailingZeros),
+        _ => None,
+    };
+    if let Some(build) = unary {
+        let [arg]: [_; 1] = args
+            .try_into()
+            .map_err(|_| AsmError::new(line, format!("`{name}` takes one argument")))?;
+        return Ok(build(Box::new(arg.value(name, line)?)));
+    }
+
+    // `FLOOR` and `CEIL` need no node of their own: masking the fraction away
+    // rounds toward minus infinity on a two's-complement value, which is what
+    // flooring is, and ceiling is flooring one step up.
+    let fraction = (1i64 << crate::engine::FIX_BITS) - 1;
+    if matches!(lower.as_str(), "floor" | "ceil") {
+        let [arg]: [_; 1] = args
+            .try_into()
+            .map_err(|_| AsmError::new(line, format!("`{name}` takes one argument")))?;
+        let value = arg.value(name, line)?;
+        let value = if lower == "ceil" {
+            Expr::Bin(Op::Add, Box::new(value), Box::new(Expr::Num(fraction)))
+        } else {
+            value
+        };
+        return Ok(Expr::Bin(
+            Op::And,
+            Box::new(value),
+            Box::new(Expr::Num(!fraction)),
+        ));
+    }
+
+    // The two-argument fixed-point arithmetic. `FMOD` is the ordinary
+    // remainder: both operands carry the same scale, so it survives it.
+    let pair = match lower.as_str() {
+        "mul" => Some(Op::FixMul),
+        "div" => Some(Op::FixDiv),
+        "fmod" => Some(Op::Mod),
+        _ => None,
+    };
+    if let Some(op) = pair {
+        let [a, b]: [_; 2] = args
+            .try_into()
+            .map_err(|_| AsmError::new(line, format!("`{name}` takes two arguments")))?;
+        return Ok(Expr::Bin(
+            op,
+            Box::new(a.value(name, line)?),
+            Box::new(b.value(name, line)?),
+        ));
+    }
+
     if !name.eq_ignore_ascii_case("bank") {
         return Err(AsmError::new(
             line,
@@ -836,6 +943,13 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["dw"]),
         category: Category::Operation,
     },
+    // `dl` is 32-bit, little-endian like the rest — the width a fixed-point
+    // value needs to survive being written down.
+    Directive {
+        id: "longs",
+        pattern: Pattern::Exact(&["dl"]),
+        category: Category::Operation,
+    },
     Directive {
         id: "reserve",
         pattern: Pattern::Exact(&["ds"]),
@@ -939,6 +1053,16 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::KnownUnsupported,
     },
     // blocks and layout
+    // The expression functions this dialect implements. Declared as what they
+    // are: they never begin a statement, so naming them as operations would
+    // claim a line they cannot start (`Category::ExpressionWord`).
+    Directive {
+        id: "fixed-point-functions",
+        pattern: Pattern::Exact(&[
+            "high", "low", "mul", "div", "fmod", "floor", "ceil", "round", "tzcount",
+        ]),
+        category: Category::ExpressionWord,
+    },
     Directive {
         id: "unsupported-blocks",
         pattern: Pattern::Exact(&[
@@ -951,7 +1075,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "for",
             "break",
             "endsection",
-            "dl",
         ]),
         category: Category::KnownUnsupported,
     },
@@ -995,6 +1118,17 @@ fn parse_op(
             Category::Operation => match directive.id {
                 "bytes" => Operation::Bytes(byte_list(args, line)?),
                 "words" => Operation::Words(value_list(args, line)?),
+                "longs" => Operation::Encoded(
+                    value_list(args, line)?
+                        .into_iter()
+                        .map(|expr| Piece::Val {
+                            expr,
+                            bytes: 4,
+                            rel: false,
+                            signed: false,
+                        })
+                        .collect(),
+                ),
                 "reserve" => parse_ds(args, consts, line)?,
                 "assert" => {
                     let parts = mos6502::split_top_level(args, ',');
@@ -1091,10 +1225,11 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
     mos6502::parse_expr(
         raw,
         line,
-        parse_number,
+        number,
         ExprOpts {
             logical: false,
             scoped_names: false,
+            fixed_point: true,
             compare: mos6502::Compare {
                 eq: false,
                 eq_eq: true,
@@ -1545,6 +1680,55 @@ fn expand_rgbasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion
 
 #[cfg(test)]
 mod tests {
+
+    /// Fixed-point literals, and the arithmetic that is exact enough to
+    /// reproduce. Every value here was read off rgbasm v1.0.3 first.
+    #[test]
+    fn fixed_point_reads_as_rgbasm_reads_it() {
+        let longs = |src: &str| {
+            let out = crate::assemble_rgbasm(&format!("SECTION \"a\", ROM0[0]\n{src}\n"))
+                .unwrap_or_else(|e| panic!("{src}: {e}"));
+            out.bytes
+                .chunks_exact(4)
+                .map(|c| i64::from(i32::from_le_bytes([c[0], c[1], c[2], c[3]])))
+                .collect::<Vec<_>>()
+        };
+        // `1.0` is `$10000`, and the fraction truncates toward zero: `3.7` is
+        // `$3B333`, not a rounded `$3B334`.
+        assert_eq!(longs("dl 1.0"), vec![0x1_0000]);
+        assert_eq!(longs("dl 3.7"), vec![0x3_B333]);
+        assert_eq!(longs("dl -1.5"), vec![-0x1_8000]);
+        // A `q` suffix names another precision.
+        assert_eq!(longs("dl 3.7q8"), vec![0x3B3]);
+
+        assert_eq!(longs("dl DIV(1.0, 3.0)"), vec![0x5555]);
+        assert_eq!(longs("dl MUL(1.5, 1.5)"), vec![0x2_4000]);
+        assert_eq!(longs("dl FMOD(7.5, 2.0)"), vec![0x1_8000]);
+
+        // FLOOR goes toward minus infinity and CEIL away from it, so both move
+        // a negative the opposite way from a positive.
+        assert_eq!(
+            longs("dl FLOOR(3.7)\ndl FLOOR(-3.2)"),
+            vec![0x3_0000, -0x4_0000]
+        );
+        assert_eq!(
+            longs("dl CEIL(3.2)\ndl CEIL(-3.2)"),
+            vec![0x4_0000, -0x3_0000]
+        );
+        // A half goes *away from zero*, which is why ROUND is its own node
+        // rather than an add-and-mask.
+        assert_eq!(
+            longs("dl ROUND(3.5)\ndl ROUND(-3.5)"),
+            vec![0x4_0000, -0x4_0000]
+        );
+
+        // `TZCOUNT` answers a plain integer, not a fixed-point value.
+        assert_eq!(longs("dl TZCOUNT(8)\ndl TZCOUNT(1)"), vec![3, 0]);
+
+        let out = crate::assemble_rgbasm("SECTION \"a\", ROM0[0]\ndb HIGH($1234), LOW($1234)\n")
+            .expect("byte extraction");
+        assert_eq!(out.bytes, vec![0x12, 0x34]);
+    }
 
     /// rgbasm truncates an oversized value and warns; it does not refuse.
     /// This is what replaced the `contract.rs` span case that asserted an

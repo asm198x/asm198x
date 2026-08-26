@@ -1198,6 +1198,8 @@ pub(crate) fn map_sym_expr(e: Expr, f: &mut impl FnMut(String) -> Expr) -> Expr 
         Expr::Neg(b) => Expr::Neg(Box::new(map_sym_expr(*b, f))),
         Expr::BitNot(b) => Expr::BitNot(Box::new(map_sym_expr(*b, f))),
         Expr::LogNot(b) => Expr::LogNot(Box::new(map_sym_expr(*b, f))),
+        Expr::FixRound(b) => Expr::FixRound(Box::new(map_sym_expr(*b, f))),
+        Expr::TrailingZeros(b) => Expr::TrailingZeros(Box::new(map_sym_expr(*b, f))),
         Expr::Bin(op, l, r) => Expr::Bin(
             op,
             Box::new(map_sym_expr(*l, f)),

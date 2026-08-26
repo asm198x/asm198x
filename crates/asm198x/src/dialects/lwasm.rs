@@ -2103,6 +2103,7 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         mos6502::ExprOpts {
             logical: false,
             scoped_names: false,
+            fixed_point: false,
             compare: mos6502::Compare {
                 eq: false,
                 eq_eq: false,
