@@ -152,6 +152,22 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // `SAVETAP "file",CODE|BASIC,"name",start,length` wraps the same span in a
+    // Spectrum tape: a ROM header block naming it, then the block itself. The
+    // layout is `format-sinclair-zx-spectrum-tap`'s, which graduated to
+    // Format198x when this became its second consumer.
+    //
+    // The forms that name no kind save the *device's* memory rather than a
+    // span, so they wait on the same fact `SAVEBIN` does (asm198x#318).
+    Directive {
+        id: "savetap",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["savetap"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
     Directive {
         id: "device",
         pattern: Pattern::Sigilled {
@@ -264,7 +280,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "savehob",
                 "savenex",
                 "savesna",
-                "savetap",
                 "savetrd",
                 "setbp",
                 "setbreakpoint",
@@ -421,10 +436,10 @@ fn check_device_lines(source: &str) -> Result<(), AsmError> {
             // is nothing to write out of. `DEVICE NONE` counts as none —
             // measured both ways, including a `NONE` that closes a real device
             // opened above it.
-            "SAVEBIN" if device.is_none() => {
+            "SAVEBIN" | "SAVETAP" if device.is_none() => {
                 return Err(AsmError::new(
                     line,
-                    "SAVEBIN only allowed in real device emulation mode (See DEVICE)",
+                    format!("{word} only allowed in real device emulation mode (See DEVICE)"),
                 ));
             }
             "PAGE" | "SLOT" => {
@@ -499,6 +514,51 @@ impl SjasmplusSyntax {
             name,
             start,
             length,
+        })
+    }
+
+    /// `SAVETAP "file",CODE|BASIC,"name",start,length`.
+    ///
+    /// The kind and the name are what a tape's header carries beyond the
+    /// bytes. SjASMPlus also takes forms that name neither and save the whole
+    /// of a device's memory; those are refused here for the reason `SAVEBIN`
+    /// refuses a span outside the image (asm198x#318).
+    fn parse_savetap(&self, args: &str, line: usize) -> Result<Operation, AsmError> {
+        let parts = crate::dialects::mos6502::split_top_level(args.trim(), ',');
+        let quoted = |p: &str| {
+            p.trim()
+                .strip_prefix('"')
+                .and_then(|t| t.strip_suffix('"'))
+                .map(str::to_string)
+        };
+        let [file, kind, name, start, length] = parts.as_slice() else {
+            return Err(AsmError::new(
+                line,
+                "`SAVETAP` needs `\"file\",CODE|BASIC,\"name\",start,length` here — the \
+                 forms that name no kind save a whole device's memory, which asm198x \
+                 has no record of yet, so the source is valid and the gap is ours",
+            ));
+        };
+        let file = quoted(file)
+            .ok_or_else(|| AsmError::new(line, "`SAVETAP` needs a quoted file name"))?;
+        let kind = match kind.trim().to_ascii_uppercase().as_str() {
+            "CODE" => crate::engine::TapeKind::Code,
+            "BASIC" => crate::engine::TapeKind::Program,
+            other => {
+                return Err(AsmError::new(
+                    line,
+                    format!("`{other}` is not a tape block kind asm198x writes (CODE, BASIC)"),
+                ));
+            }
+        };
+        let name = quoted(name)
+            .ok_or_else(|| AsmError::new(line, "`SAVETAP` needs a quoted block name"))?;
+        Ok(Operation::SaveTape {
+            file,
+            kind,
+            name,
+            start: z80::parse_value(self, start.trim(), line)?,
+            length: z80::parse_value(self, length.trim(), line)?,
         })
     }
 
@@ -626,6 +686,7 @@ impl Z80Syntax for SjasmplusSyntax {
             || word.eq_ignore_ascii_case("assert")
             || word.eq_ignore_ascii_case("display")
             || word.eq_ignore_ascii_case("savebin")
+            || word.eq_ignore_ascii_case("savetap")
             || self.is_include(word)
             || self.is_incbin(word)
             || z80::is_common_directive(word)
@@ -697,6 +758,9 @@ impl Z80Syntax for SjasmplusSyntax {
         }
         if word.eq_ignore_ascii_case("savebin") {
             return self.parse_savebin(args, line, consts).map(Some);
+        }
+        if word.eq_ignore_ascii_case("savetap") {
+            return self.parse_savetap(args, line).map(Some);
         }
         if word.eq_ignore_ascii_case("assert") {
             // sjasmplus takes the whole tail as the expression and echoes it
@@ -958,6 +1022,55 @@ mod tests {
         assert_eq!(two.artifacts.len(), 2);
         assert_eq!(two.artifacts[1].name, "y.bin");
         assert_eq!(two.artifacts[1].bytes, vec![3, 4]);
+    }
+
+    /// `SAVETAP` wraps the same span in a tape: a ROM header block naming it,
+    /// then the block. The header's two parameter words are the tape's own —
+    /// for `CODE` the start address and `$8000`, for a `BASIC` program
+    /// `$8000` (no auto-start line) and the length again — and both were
+    /// measured rather than reasoned about.
+    #[test]
+    fn savetap_wraps_a_span_in_a_tape() {
+        let out = asm(" DEVICE ZXSPECTRUM48\n ORG $8000\n DB 1,2,3,4\n \
+                       SAVETAP \"x.tap\",CODE,\"name\",$8000,4\n")
+        .expect("savetap");
+        assert_eq!(out.bytes, vec![1, 2, 3, 4], "the code is unchanged");
+        let tape = &out.artifacts[0];
+        assert_eq!(tape.name, "x.tap");
+        // 19-byte header: kind 3, `name` padded to ten, length 4, $8000, $8000.
+        assert_eq!(&tape.bytes[..4], &[0x13, 0x00, 0x00, 3]);
+        assert_eq!(&tape.bytes[4..14], b"name      ");
+        assert_eq!(&tape.bytes[14..20], &[4, 0, 0x00, 0x80, 0x00, 0x80]);
+        // then the data block: its own length, flag $FF, the span, the parity.
+        assert_eq!(
+            &tape.bytes[21..],
+            &[6, 0, 0xFF, 1, 2, 3, 4, 0xFF ^ 1 ^ 2 ^ 3 ^ 4]
+        );
+
+        // A `BASIC` header parks $8000 in the first parameter whatever start
+        // it was given, and repeats the length in the second.
+        let basic = asm(" DEVICE ZXSPECTRUM48\n ORG $8000\n DB 1,2,3,4\n \
+                         SAVETAP \"x.tap\",BASIC,\"n\",$8000,4\n")
+        .expect("basic");
+        assert_eq!(&basic.artifacts[0].bytes[3..4], &[0]);
+        assert_eq!(&basic.artifacts[0].bytes[14..20], &[4, 0, 0x00, 0x80, 4, 0]);
+    }
+
+    /// The forms that name no kind save a whole device's memory rather than a
+    /// span, so they wait on the same fact a wide `SAVEBIN` does.
+    #[test]
+    fn a_tape_of_the_whole_device_is_refused_as_our_gap() {
+        let err = asm(" DEVICE ZXSPECTRUM48\n ORG $8000\n DB 1,2,3,4\n \
+                       SAVETAP \"x.tap\",$8000,4\n")
+        .expect_err("whole memory")
+        .to_string();
+        assert!(err.contains("the gap is ours"), "{err}");
+        // A kind this dialect does not write says which it does.
+        let err = asm(" DEVICE ZXSPECTRUM48\n ORG $8000\n DB 1,2,3,4\n \
+                       SAVETAP \"x.tap\",SCREEN$,\"n\",$8000,4\n")
+        .expect_err("kind")
+        .to_string();
+        assert!(err.contains("CODE, BASIC"), "{err}");
     }
 
     /// It needs a device to read memory out of — SjASMPlus answers "SAVEBIN

@@ -2147,6 +2147,19 @@ fn substitute_anon_refs(
             start: subst(start)?,
             length: length.map(subst).transpose()?,
         },
+        Operation::SaveTape {
+            file,
+            kind,
+            name,
+            start,
+            length,
+        } => Operation::SaveTape {
+            file,
+            kind,
+            name,
+            start: subst(start)?,
+            length: subst(length)?,
+        },
         Operation::Entry(e) => Operation::Entry(subst(e)?),
         Operation::Bytes(v) => {
             Operation::Bytes(v.into_iter().map(subst).collect::<Result<_, _>>()?)

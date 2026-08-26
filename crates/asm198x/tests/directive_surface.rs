@@ -290,12 +290,12 @@ fn a_real_directive_reads_differently_from_a_typo() {
         // constructor table from linker-config features our fixed NROM layout
         // does not declare — a gap by decision, so it will not move here.
         ("ca65", "", ".condes foo, 1", ".zzqq"),
-        // `device` sat here, then `display`, then `savebin` — each implemented
-        // in turn. `savebin` writes the bytes as they stand and needed no
-        // format; the rest of the save family writes a *container*, and each
-        // waits on its own (`multi-artifact-output.md`), so `savetap` will not
-        // move under this test until a TAP serialiser exists.
-        ("sjasmplus", "", "savetap \"x\"", "zzqq"),
+        // `device` sat here, then `display`, `savebin` and `savetap` — each
+        // implemented in turn. Every remaining `save*` writes a container of
+        // its own and waits on that format (`multi-artifact-output.md`);
+        // `savesna` writes a 48K snapshot, so it waits on a device's memory
+        // as well (#318).
+        ("sjasmplus", "", "savesna \"x\"", "zzqq"),
         ("sjasmplus", "", ".abyte 1", ".zzqq"),
         // `os9` (an OS-9 module header) rather than `import`: `import` moved
         // to `RefusedByReference` when lwasm turned out to refuse it for a
