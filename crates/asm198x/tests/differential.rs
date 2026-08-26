@@ -2140,6 +2140,22 @@ const MULTI_PROBES: &[MultiProbe] = &[
              .segment \"VECTORS\"\n .word 0, 0, 0\n",
         )],
     },
+    // The processor words a NES header opens with. Naming the processor this
+    // leg already assembles changes nothing at all.
+    MultiProbe {
+        dialect: "ca65-nes",
+        binaries: &[],
+        note: ".setcpu \"6502\", .p02, .smart and the .pushcpu/.popcpu pair \
+               emit nothing when the processor named is the one being assembled",
+        files: &[(
+            "main.s",
+            ".segment \"HEADER\"\n .byte \"NES\", $1A, 2, 1\n\
+             .setcpu \"6502\"\n .smart on\n\
+             .code\n .p02\n lda #1\n .pushcpu\n .setcpu \"6502\"\n ldx #2\n\
+             .popcpu\n ldy #3\n .smart off\n rts\n\
+             .segment \"VECTORS\"\n .word 0, 0, 0\n",
+        )],
+    },
     MultiProbe {
         dialect: "ca65-nes",
         binaries: &[],
