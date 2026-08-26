@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 476 word(s) outside our surface, across the references installed
+# 373 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -34,42 +34,11 @@
 
 ## acme (This is ACME, release 0.97 ("Zem"), 28 June 2020)
 # 1177 candidate(s) harvested; 74 recognised here, 2 more the tool itself
-# refuses on this target; 31 of the 74 outside our surface
-!cpu
-!hex
-!rs
-!subzone
-!to
-!xor
-!addr
-!address
-!as
-!be16
-!be24
-!be32
-!cbm
-!convtab
-!ct
-!do
-!endoffile
-!eof
-!fi
-!initmem
-!le16
-!le24
-!le32
-!pseudopc
-!raw
-!realpc
-!scrxor
-!skip
-!symbollist
-!sz
-!while
+# refuses on this target; 0 of the 74 outside our surface
 
 ## sjasmplus (SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus))
 # 4231 candidate(s) harvested; 264 recognised here, 24 more the tool itself
-# refuses on this target; 78 of the 264 outside our surface
+# refuses on this target; 76 of the 264 outside our surface
 abyte
 abytec
 abytez
@@ -111,7 +80,6 @@ output
 relocate_table
 save3dos
 saveamsdos
-savebin
 savecdt
 savecpcsna
 savecpr
@@ -119,7 +87,6 @@ savedev
 savehob
 savenex
 savesna
-savetap
 savetrd
 setbreakpoint
 shellexec
@@ -151,64 +118,21 @@ unphase
 
 ## lwasm (lwasm from lwtools 4.25)
 # 2201 candidate(s) harvested; 257 recognised here, 94 more the tool itself
-# refuses on this target; 53 of the 257 outside our surface
-dephase
-endm
-endsection
-endstruct
-if
+# refuses on this target; 10 of the 257 outside our surface
 ifp1
 ifp2
 includestr
-macro
 os9
-phase
-pragma
-rhf
-section
-set
-setdp
-struct
-warning
-bsz
 dtb
 dts
 emod
-ends
-endsect
-fcn
-fcs
-fcz
-fdbs
-fzb
-hcf
-ifopt
-ifpragma
 ifstr
-incl
-lib
-macr
 mod
-msg
-nam
-opt
-pag
-page
-reorg
-reset
-rmd
-rmq
-rmw
-sect
 setstr
-spc
-ttl
-zmd
-zmq
 
 ## vasm (vasm 2.0b (c) in 2002-2025 Volker Barthelmann)
 # 4215 candidate(s) harvested; 183 recognised here, 527 more the tool itself
-# refuses on this target; 87 of the 183 outside our surface
+# refuses on this target; 86 of the 183 outside our surface
 cpu32
 dr
 dw
@@ -274,7 +198,6 @@ nopage
 odd
 opt
 org
-output
 page
 plen
 popsection
@@ -417,15 +340,9 @@ __utc_year__
 
 ## ca65 (ca65 V2.18 - N/A)
 # 2906 candidate(s) harvested; 225 recognised here, 4 more the tool itself
-# refuses on this target; 113 of the 225 outside our surface
+# refuses on this target; 87 of the 225 outside our surface
 .asize
 .bank
-.bankbyte
-.bankbytes
-.bitand
-.bitnot
-.bitor
-.bitxor
 .blank
 .case
 .charmap
@@ -436,9 +353,7 @@ __utc_year__
 .cpu
 .dbg
 .debuginfo
-.def
 .define
-.defined
 .definedmacro
 .delmac
 .delmacro
@@ -453,14 +368,9 @@ __utc_year__
 .enum
 .exitmac
 .exitmacro
-.faraddr
 .feature
 .fileopt
 .fopt
-.forceword
-.hibyte
-.hibytes
-.hiword
 .ident
 .ifblank
 .ifconst
@@ -481,19 +391,11 @@ __utc_year__
 .linecont
 .list
 .listbytes
-.lobyte
-.lobytes
 .localchar
-.loword
 .macpack
 .match
-.max
 .mid
-.min
-.mod
-.not
 .null
-.or
 .org
 .p02
 .p4510
@@ -513,14 +415,10 @@ __utc_year__
 .scope
 .set
 .setcpu
-.shl
-.shr
 .sizeof
 .smart
 .sprintf
-.strat
 .string
-.strlen
 .struct
 .tag
 .tcount
@@ -530,4 +428,3 @@ __utc_year__
 .union
 .version
 .xmatch
-.xor
