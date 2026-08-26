@@ -48,6 +48,15 @@ impl Dialect for Lwasm {
         crate::dialect::Oversize::Error
     }
 
+    /// lwasm's flat output is contiguous: `org` names the address the code
+    /// claims and the bytes keep landing where they were. `org $1000 / fcb 1 /
+    /// org $2000 / fcb 2` is `01 02` with `*` then reading `$2001`, and an
+    /// `org` below the current address is ordinary rather than refused
+    /// (probed against lwtools 4.25 with `--raw`).
+    fn org_moves_output(&self) -> bool {
+        false
+    }
+
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         // The engine consults this only for byte order (the 6809 computes its own
         // encoding into `Encoded` pieces); 6809 is big-endian.
@@ -64,7 +73,7 @@ impl Dialect for Lwasm {
         let program = parse_program(source, macros::Expand::Yes)?;
         let mut eval = LwasmEval {
             env: BTreeMap::new(),
-            dp: 0,
+            state: ParseState::default(),
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
@@ -89,7 +98,7 @@ impl Dialect for Lwasm {
         let program = parse_program_multi(map, loader)?;
         let mut eval = LwasmEval {
             env: BTreeMap::new(),
-            dp: 0,
+            state: ParseState::default(),
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
@@ -233,6 +242,28 @@ fn slice_includebin(
     Ok(data[off as usize..(off + take) as usize].to_vec())
 }
 
+/// What one line's parse leaves for the lines after it. Three directives set
+/// something a later line reads, and none of them is visible from the line that
+/// reads it — so the state is carried rather than looked up.
+///
+/// Both walks keep one. The reading walk parses every line, live or not; the
+/// lowering walk sees only the live ones, and is the copy that decides the
+/// emitted bytes — which is why a `setdp` or an `org` inside a branch that is
+/// not taken never counts, as it does not in lwasm.
+#[derive(Default)]
+struct ParseState {
+    /// The direct page `setdp` last named, zero until one does.
+    dp: u8,
+    /// The `org` before the current one, which is where `reorg` goes back to,
+    /// and the current one. `reorg` moves the current one back without moving
+    /// this — so a second `reorg` repeats rather than stepping further, which
+    /// is what lwtools 4.25 does.
+    prev_org: Option<Expr>,
+    cur_org: Option<Expr>,
+    /// Whether a `phase` is open here.
+    in_phase: bool,
+}
+
 /// The per-line parse walk shared by [`parse_program`] (single source) and
 /// [`parse_program_multi`] (the include-capable walk). The environment — the
 /// `equ` constants driving direct-vs-extended selection, and pending comment
@@ -251,9 +282,8 @@ struct Walker {
     in_macro: bool,
     /// The macros defined so far, so an invocation is recognised too.
     macro_names: BTreeSet<String>,
-    /// The direct page `setdp` last named, zero until one does. Parse-time
-    /// state, because the direct-vs-extended choice is made at parse time.
-    dp: u8,
+    /// What the directives so far left for the lines after them.
+    state: ParseState,
     nodes: Vec<Node>,
 }
 
@@ -264,7 +294,7 @@ impl Walker {
             pending_leading: Vec::new(),
             in_macro: false,
             macro_names: BTreeSet::new(),
-            dp: 0,
+            state: ParseState::default(),
             nodes: Vec::new(),
         }
     }
@@ -299,7 +329,7 @@ impl Walker {
         let (word, args) = split_first_word(rest);
         let m = word.to_ascii_lowercase();
         match m.as_str() {
-            "include" | "use" => {
+            "include" | "use" | "incl" | "lib" => {
                 let (request, _) = file_name(args, line, &m)?;
                 Ok(Some(WalkDirective::Include { request }))
             }
@@ -493,7 +523,7 @@ impl FlatWalk for Walker {
         let op = if rest.is_empty() {
             None
         } else {
-            parse_op(rest, &self.env, &mut self.dp, line)?
+            parse_op(rest, &self.env, &mut self.state, line)?
         };
         // Bind an `equ` value into the parse-time env so a later direct/extended
         // choice can fold it (mirrors the engine's pass-1 `equ`).
@@ -607,6 +637,17 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["org"]),
         category: Category::Operation,
     },
+    // `reorg` sets the counter back to the value of the `org` *before* the
+    // current one. Measured against lwtools 4.25: it needs two to have
+    // somewhere to go ("Previous ORG not found"), takes no operand, and moves
+    // the current `org` back without moving the previous one — so a second
+    // `reorg` in a row repeats rather than stepping further back. It changes
+    // the address only; the output stays where it was going.
+    Directive {
+        id: "reorg",
+        pattern: Pattern::Exact(&["reorg"]),
+        category: Category::Operation,
+    },
     Directive {
         id: "equ",
         pattern: Pattern::Exact(&["equ"]),
@@ -707,12 +748,14 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["nam", "ttl", "pag", "page", "spc"]),
         category: Category::Ignored,
     },
-    // Walk-handled. `use` is lwasm's own second spelling of `include`, so it
-    // is an alternative spelling of one entry rather than a directive of its
-    // own — the same call `fcb`/`.byte` already get here.
+    // Walk-handled. lwasm has four spellings of one directive, so they are
+    // alternative spellings of one entry rather than four directives — the
+    // same call `fcb`/`.byte` already get here. `incl` and `lib` were probed
+    // against lwtools 4.25 quoted and bare, beside `include` and `use`, and
+    // all four answered identically, missing-file message included.
     Directive {
         id: "include",
-        pattern: Pattern::Exact(&["include", "use"]),
+        pattern: Pattern::Exact(&["include", "use", "incl", "lib"]),
         category: Category::Operation,
     },
     Directive {
@@ -722,7 +765,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What lwasm has here and we do not.
     //
-    // 27 spellings against lwtools 4.25.
+    // 23 spellings against lwtools 4.25.
     //
     // **Directives only.** The first cut of this list swept in fifteen 6809
     // *instructions* — `adca`, `bita`, `cmpd`, `cwai`, `sbca` among them —
@@ -773,14 +816,11 @@ pub const DIRECTIVES: &[Directive] = &[
     // stream, because the parse of a line cannot see the lines around it.
     // A `phase` still open at the end of the source is fine, and stays fine.
     //
-    // `reorg` is the third word of this family and stays outstanding. It is
-    // understood, not unread: it sets the counter back to the value of the
-    // `org` *before* the current one, needs two of them to have something to
-    // go back to ("Previous ORG not found"), and takes no operand. What it
-    // needs here is the previous `org`'s expression, which one line's parse
-    // cannot see either — and inside an open `phase` lwasm keeps the phased
-    // address counting from where it was, where this engine derives it from
-    // the real counter, so the two would part. Both want their own change.
+    // `reorg` is the third word of this family, declared beside `org`. The one
+    // corner the two do not share is a `reorg` *inside* an open `phase`: lwasm
+    // keeps the phased address counting from where it was, where this engine
+    // derives it from the real counter, so the two would part. That corner is
+    // refused by name rather than answered wrongly.
     Directive {
         id: "pseudo-pc",
         pattern: Pattern::Exact(&["phase", "dephase"]),
@@ -830,16 +870,13 @@ pub const DIRECTIVES: &[Directive] = &[
             "ifp2",
             "ifpragma",
             "ifstr",
-            "incl",
             "includestr",
-            "lib",
             "macr",
             "macro",
             "mod",
             "opt",
             "os9",
             "pragma",
-            "reorg",
             "sect",
             "section",
             "setstr",
@@ -852,7 +889,7 @@ pub const DIRECTIVES: &[Directive] = &[
 fn parse_op(
     rest: &str,
     env: &BTreeMap<String, i64>,
-    dp: &mut u8,
+    state: &mut ParseState,
     line: usize,
 ) -> Result<Option<Operation>, AsmError> {
     let (mnem, operand) = split_first_word(rest);
@@ -860,7 +897,7 @@ fn parse_op(
     // Dispatch through the declared surface: a spelling the declaration does
     // not carry cannot be accepted here. See `crate::directives`.
     let Some(directive) = lookup(DIRECTIVES, &m) else {
-        return Ok(Some(parse_instruction(&m, operand, env, *dp, line)?));
+        return Ok(Some(parse_instruction(&m, operand, env, state.dp, line)?));
     };
     match directive.category {
         // `end` marks the end of source; it emits nothing.
@@ -876,7 +913,46 @@ fn parse_op(
             crate::directives::refused_by_reference("lwasm", &m, rule),
         )),
         Category::Operation => match directive.id {
-            "org" => Ok(Some(Operation::Org(value(operand, line)?))),
+            "org" => {
+                if state.in_phase {
+                    return Err(AsmError::new(
+                        line,
+                        "`org` inside a `phase` — lwasm keeps the phased address counting \
+                         from where it was, and asm198x derives it from the real counter, so \
+                         the two would part here; the source is valid and the gap is ours",
+                    ));
+                }
+                let e = value(operand, line)?;
+                state.prev_org = state.cur_org.replace(e.clone());
+                Ok(Some(Operation::Org(e)))
+            }
+            // `reorg` goes back to the `org` before the current one, so it
+            // needs two to have somewhere to go — one is "Previous ORG not
+            // found". It takes no operand, and it moves the current `org`
+            // back without moving the previous one, so a second `reorg` in a
+            // row repeats rather than stepping further.
+            "reorg" => {
+                if !operand.trim().is_empty() {
+                    return Err(AsmError::new(
+                        line,
+                        format!("`reorg` takes no operand (got `{}`)", operand.trim()),
+                    ));
+                }
+                if state.in_phase {
+                    return Err(AsmError::new(
+                        line,
+                        "`reorg` inside a `phase` — lwasm keeps the phased address counting \
+                         from where it was, and asm198x derives it from the real counter, so \
+                         the two would part here; the source is valid and the gap is ours",
+                    ));
+                }
+                let back = state
+                    .prev_org
+                    .clone()
+                    .ok_or_else(|| AsmError::new(line, "previous `org` not found"))?;
+                state.cur_org = Some(back.clone());
+                Ok(Some(Operation::Org(back)))
+            }
             "equ" => Ok(Some(Operation::Equ(value(operand, line)?))),
             "set" => Ok(Some(Operation::Set(value(operand, line)?))),
             "bytes" => Ok(Some(Operation::Bytes(list(operand, line)?))),
@@ -897,13 +973,15 @@ fn parse_op(
                 }
                 let page = fold_const(&value(operand, line)?, env, line)
                     .map_err(|_| AsmError::new(line, "`setdp` must be constant on pass 1"))?;
-                *dp = (page & 0xFF) as u8;
+                state.dp = (page & 0xFF) as u8;
                 Ok(Some(Operation::Bytes(Vec::new())))
             }
             "pseudo-pc" => {
                 if m == "dephase" {
+                    state.in_phase = false;
                     return Ok(Some(Operation::PseudoPc(None)));
                 }
+                state.in_phase = true;
                 if operand.trim().is_empty() {
                     return Err(AsmError::new(line, "`phase` needs an address"));
                 }
@@ -1652,11 +1730,9 @@ fn expand_lwasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion,
 /// walk so a later direct/extended choice sees only what a taken branch bound.
 struct LwasmEval {
     env: BTreeMap<String, i64>,
-    /// The direct page `setdp` last named. This is the copy that decides the
-    /// emitted bytes: the walk parses every line, live or not, where this
-    /// lowering sees only the live ones — so a `setdp` inside a branch that is
-    /// not taken never reaches it, which is what lwasm does with one.
-    dp: u8,
+    /// What the live directives so far left for the lines after them. This is
+    /// the copy that decides the emitted bytes.
+    state: ParseState,
 }
 
 impl crate::ast::CondEval for LwasmEval {
@@ -1733,7 +1809,7 @@ impl crate::ast::CondEval for LwasmEval {
                 ));
             }
             _ if node.source.is_empty() => None,
-            _ => parse_op(&node.source, &self.env, &mut self.dp, line)?,
+            _ => parse_op(&node.source, &self.env, &mut self.state, line)?,
         };
         if let (Some(sym), Some(Operation::Equ(e) | Operation::Set(e))) = (node.label.as_ref(), &op)
             && let Ok(v) = fold_const(e, &self.env, line)
@@ -2066,6 +2142,79 @@ mod tests {
                 .bytes,
             vec![0xB6, 0x20, 0x10]
         );
+    }
+
+    /// lwasm's flat output is contiguous, so a second `org` names an address
+    /// and leaves the bytes where they were: `org $1000 / fcb 1 / org $2000 /
+    /// fcb 2` is two bytes and `*` then reads $2001. An `org` below the
+    /// current address is ordinary here, where a padding dialect refuses it.
+    #[test]
+    fn a_second_org_moves_the_address_and_not_the_output() {
+        assert_eq!(
+            asm(" org $1000\n fcb 1\n org $2000\n fcb 2\n fdb *\n")
+                .expect("forward")
+                .bytes,
+            vec![1, 2, 0x20, 0x01]
+        );
+        assert_eq!(
+            asm(" org $2000\n fcb 1\n org $1000\n fcb 2\n fdb *\n")
+                .expect("backwards")
+                .bytes,
+            vec![1, 2, 0x10, 0x01]
+        );
+        // Labels either side read their own address, and a branch across the
+        // move measures between them.
+        assert_eq!(
+            asm(" org $1000\nl fcb 1\n org $2000\nm fcb 2\n fdb l\n fdb m\n")
+                .expect("labels")
+                .bytes,
+            vec![1, 2, 0x10, 0x00, 0x20, 0x00]
+        );
+    }
+
+    /// `reorg` goes back to the `org` before the current one — not one step
+    /// further each time. A second in a row repeats, because it moves the
+    /// current `org` back without moving the previous one.
+    #[test]
+    fn reorg_goes_back_to_the_org_before_this_one() {
+        assert_eq!(
+            asm(
+                " org $1000\n org $2000\n org $3000\n fdb *\n reorg\n fdb *\n \
+                 reorg\n fdb *\n"
+            )
+            .expect("three")
+            .bytes,
+            vec![0x30, 0x00, 0x20, 0x00, 0x20, 0x00]
+        );
+        assert_eq!(
+            asm(" org $1000\n fcb 1\n org $2000\n fcb 2\n reorg\n fdb *\n fcb 3\n")
+                .expect("then more")
+                .bytes,
+            vec![1, 2, 0x10, 0x00, 3]
+        );
+        // One `org` leaves nothing to go back to, and it takes no operand.
+        assert!(asm(" org $1000\n reorg\n").is_err(), "one `org` only");
+        assert!(asm(" reorg\n").is_err(), "no `org` at all");
+        assert!(
+            asm(" org $1000\n org $2000\n reorg $3000\n").is_err(),
+            "an operand"
+        );
+    }
+
+    /// The one corner `org` and `reorg` do not share with lwasm: inside an
+    /// open `phase` it keeps the phased address counting from where it was,
+    /// where this engine derives it from the real counter. Refused by name
+    /// rather than answered wrongly.
+    #[test]
+    fn moving_the_counter_inside_a_phase_is_refused_as_our_gap() {
+        for word in ["org $2000", "reorg"] {
+            let err = asm(&format!(
+                " org $1000\n org $2000\n phase $5000\n {word}\n dephase\n"
+            ))
+            .expect_err(word)
+            .to_string();
+            assert!(err.contains("the gap is ours"), "{word}: {err}");
+        }
     }
 
     #[test]

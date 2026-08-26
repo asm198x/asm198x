@@ -897,6 +897,7 @@ fn assemble_statements(
 
     // Pass 1 — assign addresses to labels.
     let require_origin = dialect.requires_explicit_origin();
+    let org_moves_output = dialect.org_moves_output();
     // Emitted bytes per address unit — 1 for the byte-addressed CPUs, 2 for the
     // word-addressed CP1610 (a decle is two bytes). The location counter advances
     // in address units, so a byte length is divided by this.
@@ -968,8 +969,15 @@ fn assemble_statements(
                 if !(0..=0xFFFF).contains(&v) {
                     return Err(s.err("origin address out of range"));
                 }
-                pc = v;
-                origin.get_or_insert(v);
+                if origin.is_some() && !org_moves_output {
+                    // The address moves and the output does not, so the move
+                    // is an offset from the real counter — the same thing a
+                    // relocated block holds, and it outlives the statement.
+                    pseudo = v - pc;
+                } else {
+                    pc = v;
+                    origin.get_or_insert(v);
+                }
             }
             Some(Operation::Section {
                 base: Some(base), ..
@@ -1133,13 +1141,18 @@ fn assemble_statements(
             Some(Operation::Org(e)) => {
                 let target = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
                 let cur = origin + bytes.len() as i64 / addr_unit;
-                if target < cur {
-                    return Err(s.err("cannot move origin backwards"));
+                if !org_moves_output {
+                    // See pass one: the address moves, the output does not.
+                    pseudo = target - cur;
+                } else {
+                    if target < cur {
+                        return Err(s.err("cannot move origin backwards"));
+                    }
+                    bytes.resize(
+                        bytes.len() + ((target - cur) * addr_unit) as usize,
+                        gap_fill,
+                    );
                 }
-                bytes.resize(
-                    bytes.len() + ((target - cur) * addr_unit) as usize,
-                    gap_fill,
-                );
             }
             Some(Operation::Section { name, base, at }) => {
                 // Close the run so far and start one at the new base. Bytes

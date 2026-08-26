@@ -115,6 +115,22 @@ pub(crate) trait Dialect {
         false
     }
 
+    /// Whether a second `org` moves the *output* as well as the address.
+    ///
+    /// Most references here mean "put the next byte at this address", so an
+    /// `org` above the current position pads the gap and one below it is an
+    /// error. lwasm's flat output means the other thing: `org` sets the
+    /// address the code claims and the bytes keep landing where they were,
+    /// contiguous — `org $1000 / fcb 1 / org $2000 / fcb 2` is two bytes, not
+    /// four thousand and one, and an `org` below the current address is
+    /// ordinary rather than refused (probed against lwtools 4.25 with
+    /// `--raw`).
+    ///
+    /// On by default, which is the padding meaning.
+    fn org_moves_output(&self) -> bool {
+        true
+    }
+
     /// Whether a value may be written as a **negative** number, at any width.
     ///
     /// The accepted range for `n` bytes is either `-(2^(8n-1))..=2^(8n)-1` —
