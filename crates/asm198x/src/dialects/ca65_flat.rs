@@ -1120,7 +1120,20 @@ fn unfolded_text(arg: &super::mos6502::ExprArg) -> bool {
 /// The text layer's function names, lower-cased. One list, read by the pass
 /// that folds them and by the stand-in the formatter parses.
 fn is_text_function(lower: &str) -> bool {
-    matches!(lower, ".concat" | ".string" | ".ident" | ".sprintf")
+    matches!(
+        lower,
+        ".concat"
+            | ".string"
+            | ".ident"
+            | ".sprintf"
+            | ".tcount"
+            | ".blank"
+            | ".match"
+            | ".xmatch"
+            | ".left"
+            | ".mid"
+            | ".right"
+    )
 }
 
 /// The prefix on the stand-in a text-layer call parses to when the text pass
@@ -1147,12 +1160,40 @@ fn name_list(text: &str) -> Vec<String> {
 pub(crate) fn expand_ca65(
     source: &str,
     mode: macros::Expand,
+    registers: Registers,
 ) -> Result<macros::Expansion, AsmError> {
     macros::expansion(mode, source, |s| {
         let expanded = macros::expand(&Ca65Macros, s)?;
-        let resolved = text::expand(&Ca65Text::default(), &expanded.text)?;
+        let text = Ca65Text {
+            registers,
+            ..Ca65Text::default()
+        };
+        let resolved = text::expand(&text, &expanded.text)?;
         Ok(Some((resolved, expanded.origins)))
     })
+}
+
+/// Which identifiers a token list reads as **registers** rather than as names.
+///
+/// ca65 takes this from the CPU, and it is observable: `.match({s},{q})` is 1
+/// assembling for a 6502, where `s` is an ordinary identifier, and 0 for a
+/// 65816, where it is the stack register its stack-relative modes need.
+#[derive(Clone, Copy, Default)]
+pub(crate) enum Registers {
+    /// `a`, `x`, `y`.
+    #[default]
+    Mos6502,
+    /// `a`, `x`, `y`, `s`.
+    Wdc65816,
+}
+
+impl Registers {
+    fn holds(self, name: &str) -> bool {
+        matches!(
+            (self, name),
+            (_, "a" | "x" | "y") | (Registers::Wdc65816, "s")
+        )
+    }
 }
 
 /// ca65's string grammar. It has no string *symbol* — `.define` is a macro
@@ -1171,6 +1212,8 @@ struct Ca65Text {
     /// two different symbols. Refusing to fold is a gap; folding the wrong
     /// symbol is a wrong answer.
     depth: std::cell::Cell<usize>,
+    /// The CPU's register names, which change what a token list holds.
+    registers: Registers,
 }
 
 impl text::TextSyntax for Ca65Text {
@@ -1247,16 +1290,7 @@ impl text::TextSyntax for Ca65Text {
         if args.is_empty() {
             return Ok(Some(Folded::Text(String::new())));
         }
-        let one = |args: &[text::Arg]| -> Result<(), AsmError> {
-            if args.len() == 1 {
-                Ok(())
-            } else {
-                Err(AsmError::new(
-                    line,
-                    format!("`{name}` takes one argument, and was given {}", args.len()),
-                ))
-            }
-        };
+        let one = |args: &[text::Arg]| arity(args, 1, name, line);
         Ok(Some(match lower.as_str() {
             ".concat" => {
                 let mut out = String::new();
@@ -1292,6 +1326,62 @@ impl text::TextSyntax for Ca65Text {
             ".sprintf" => {
                 Folded::Text(sprintf(args[0].text(name, line)?, &args[1..], scope, line)?)
             }
+            // The token-list half. A token list is unevaluated source, so these
+            // answer over what is *written* rather than what it is worth — and
+            // the sub-list ones splice the author's own text back, rather than
+            // re-rendering tokens that would have to be spaced back together.
+            ".tcount" => {
+                one(args)?;
+                Folded::Number(
+                    tokens(token_list(&args[0], name, line)?, self.registers).len() as i64,
+                )
+            }
+            ".blank" => {
+                one(args)?;
+                Folded::Number(i64::from(
+                    tokens(token_list(&args[0], name, line)?, self.registers).is_empty(),
+                ))
+            }
+            // `.match` compares what each token *is*; `.xmatch` compares what it
+            // says as well. So `.match({1},{2})` is 1 and `.xmatch({1},{2})` is
+            // 0, while `.match({a},{b})` is 0 — `a` is the accumulator and `b`
+            // is an identifier.
+            ".match" | ".xmatch" => {
+                arity(args, 2, name, line)?;
+                let exact = lower == ".xmatch";
+                let (a, b) = (
+                    token_list(&args[0], name, line)?,
+                    token_list(&args[1], name, line)?,
+                );
+                let (a, b) = (tokens(a, self.registers), tokens(b, self.registers));
+                let same = a.len() == b.len()
+                    && a.iter().zip(&b).all(|(x, y)| {
+                        x.kind == y.kind && (!exact || token_value(x) == token_value(y))
+                    });
+                Folded::Number(i64::from(same))
+            }
+            ".left" | ".right" => {
+                arity(args, 2, name, line)?;
+                let count = scope.number(&args[0], name, line)?.max(0) as usize;
+                let list = token_list(&args[1], name, line)?;
+                let all = tokens(list, self.registers);
+                let (from, to) = if lower == ".left" {
+                    (0, count)
+                } else {
+                    (all.len().saturating_sub(count), all.len())
+                };
+                Folded::Bare(token_slice(list, &all, from, to).to_string())
+            }
+            ".mid" => {
+                arity(args, 3, name, line)?;
+                let start = scope.number(&args[0], name, line)?.max(0) as usize;
+                let count = scope.number(&args[1], name, line)?.max(0) as usize;
+                let list = token_list(&args[2], name, line)?;
+                let all = tokens(list, self.registers);
+                Folded::Bare(
+                    token_slice(list, &all, start, start.saturating_add(count)).to_string(),
+                )
+            }
             // A name built from text, spliced back in unquoted for the parse to
             // resolve — forward references included, as in ca65.
             ".ident" => {
@@ -1301,6 +1391,221 @@ impl text::TextSyntax for Ca65Text {
             other => unreachable!("`{other}` was matched as known and then not folded"),
         }))
     }
+}
+
+/// Whether a line holds a `{…}` token list, and so is the formatter's to hand
+/// back rather than lay out.
+///
+/// A token list is unevaluated source — that is the whole point of one — so
+/// there is no expression to render it from. The text pass folds every line
+/// that reaches assembly, which is why this only ever answers `true` on the
+/// formatter's parse. Braces mean nothing else in ca65.
+pub(crate) fn holds_a_token_list(code: &str) -> bool {
+    let mut quote = None;
+    for c in code.chars() {
+        match (quote, c) {
+            (Some(q), _) if c == q => quote = None,
+            (Some(_), _) => {}
+            (None, '"' | '\'') => quote = Some(c),
+            (None, ';') => return false,
+            (None, '{') => return true,
+            _ => {}
+        }
+    }
+    false
+}
+
+/// Exactly `want` arguments, or a diagnostic naming the function.
+fn arity(args: &[text::Arg], want: usize, name: &str, line: usize) -> Result<(), AsmError> {
+    if args.len() == want {
+        Ok(())
+    } else {
+        Err(AsmError::new(
+            line,
+            format!(
+                "`{name}` takes {want} argument(s), and was given {}",
+                args.len()
+            ),
+        ))
+    }
+}
+
+/// What a token in a ca65 token list *is*, which is what `.match` compares.
+///
+/// Probed against ca65 V2.18, and the surprises are all here: `a`, `x` and `y`
+/// are register tokens and nothing else is (`s` is an ordinary identifier), a
+/// character literal is not a number, and each dot-keyword and each punctuation
+/// mark is its own kind — `.match({.byte},{.word})` is 0 where
+/// `.match({abc},{abd})` is 1.
+#[derive(PartialEq, Eq, Debug)]
+enum TokenKind {
+    Number,
+    Char,
+    Str,
+    Ident,
+    /// `a`, `x` or `y`, lower-cased.
+    Register(char),
+    /// `.byte`, `.word`, … lower-cased, since each is its own kind.
+    DotKeyword(String),
+    /// `+`, `<<`, `::`, … verbatim, since each is its own kind.
+    Punct(String),
+}
+
+/// One token, with the slice of source it came from so a sub-list can be
+/// spliced back as the author wrote it rather than re-rendered.
+struct Token<'a> {
+    kind: TokenKind,
+    text: &'a str,
+    start: usize,
+    end: usize,
+}
+
+/// ca65's two-character operators, longest-match-first.
+const OPERATORS: &[&str] = &["::", "<<", ">>", "<=", ">=", "<>", "&&", "||"];
+
+/// Split a token list into tokens. Whitespace separates and is not a token, so
+/// `{+ +}` and `{++}` are the same two tokens.
+fn tokens(text: &str, registers: Registers) -> Vec<Token<'_>> {
+    let bytes = text.as_bytes();
+    let mut out = Vec::new();
+    let mut i = 0usize;
+    let word = |c: u8| c.is_ascii_alphanumeric() || c == b'_';
+    while i < bytes.len() {
+        let c = bytes[i];
+        if c.is_ascii_whitespace() {
+            i += 1;
+            continue;
+        }
+        let start = i;
+        let kind = match c {
+            b'"' => {
+                i += 1;
+                while i < bytes.len() && bytes[i] != b'"' {
+                    i += 1;
+                }
+                i = (i + 1).min(bytes.len());
+                TokenKind::Str
+            }
+            b'\'' => {
+                i += 1;
+                while i < bytes.len() && bytes[i] != b'\'' {
+                    i += 1;
+                }
+                i = (i + 1).min(bytes.len());
+                TokenKind::Char
+            }
+            // `$ff` and `%1010` are numbers; a lone `$` is the location counter
+            // and a lone `%` is the modulo operator.
+            b'$' | b'%' if bytes.get(i + 1).is_some_and(|d| d.is_ascii_alphanumeric()) => {
+                i += 1;
+                while i < bytes.len() && bytes[i].is_ascii_alphanumeric() {
+                    i += 1;
+                }
+                TokenKind::Number
+            }
+            _ if c.is_ascii_digit() => {
+                while i < bytes.len() && bytes[i].is_ascii_alphanumeric() {
+                    i += 1;
+                }
+                TokenKind::Number
+            }
+            // A dot-keyword, and not an identifier that happens to start with a
+            // dot: ca65 has no such identifier.
+            b'.' if bytes.get(i + 1).is_some_and(|d| d.is_ascii_alphabetic()) => {
+                i += 1;
+                while i < bytes.len() && word(bytes[i]) {
+                    i += 1;
+                }
+                TokenKind::DotKeyword(text[start..i].to_ascii_lowercase())
+            }
+            _ if c.is_ascii_alphabetic() || c == b'_' || c == b'@' => {
+                i += 1;
+                while i < bytes.len() && word(bytes[i]) {
+                    i += 1;
+                }
+                let name = text[start..i].to_ascii_lowercase();
+                if registers.holds(&name) {
+                    TokenKind::Register(name.chars().next().unwrap_or('a'))
+                } else {
+                    TokenKind::Ident
+                }
+            }
+            // `:+` and `:---` are one anonymous-label reference, not a colon
+            // followed by operators.
+            b':' if matches!(bytes.get(i + 1), Some(b'+' | b'-')) => {
+                let sign = bytes[i + 1];
+                i += 1;
+                while bytes.get(i) == Some(&sign) {
+                    i += 1;
+                }
+                TokenKind::Punct(text[start..i].to_string())
+            }
+            _ => {
+                let rest = &text[i..];
+                let op = OPERATORS.iter().find(|o| rest.starts_with(**o));
+                i += op.map_or_else(
+                    || text[i..].chars().next().map_or(1, char::len_utf8),
+                    |o| o.len(),
+                );
+                TokenKind::Punct(text[start..i].to_string())
+            }
+        };
+        out.push(Token {
+            kind,
+            text: &text[start..i],
+            start,
+            end: i,
+        });
+    }
+    out
+}
+
+/// The value `.xmatch` compares once the kinds agree: a number by what it is
+/// worth (`1` and `$1` are the same token), a string or character by its
+/// contents, an identifier by its name **case-sensitively**, and everything
+/// else by nothing, because its kind already said everything.
+fn token_value(token: &Token) -> String {
+    match token.kind {
+        TokenKind::Number => match super::mos6502::parse_number(token.text, 0) {
+            Ok(n) => n.to_string(),
+            Err(_) => token.text.to_string(),
+        },
+        TokenKind::Str | TokenKind::Char => token
+            .text
+            .trim_matches(|c| c == '"' || c == '\'')
+            .to_string(),
+        TokenKind::Ident => token.text.to_string(),
+        _ => String::new(),
+    }
+}
+
+/// The contents of a `{…}` token list, or a refusal naming what was wanted.
+fn token_list<'a>(arg: &'a text::Arg, name: &str, line: usize) -> Result<&'a str, AsmError> {
+    let text::Arg::Bare(raw) = arg else {
+        return Err(AsmError::new(
+            line,
+            format!("`{name}` takes a token list in braces, and was given a string"),
+        ));
+    };
+    raw.trim()
+        .strip_prefix('{')
+        .and_then(|t| t.strip_suffix('}'))
+        .ok_or_else(|| {
+            AsmError::new(
+                line,
+                format!("`{name}` takes a token list in braces, and `{raw}` has none"),
+            )
+        })
+}
+
+/// The source slice covering `tokens[from..to]`, clamped to what is there —
+/// ca65 stops at the end of the list rather than refusing.
+fn token_slice<'a>(list: &'a str, tokens: &[Token<'a>], from: usize, to: usize) -> &'a str {
+    let to = to.min(tokens.len());
+    if from >= to {
+        return "";
+    }
+    &list[tokens[from].start..tokens[to - 1].end]
 }
 
 /// One `%` conversion in a ca65 format string.

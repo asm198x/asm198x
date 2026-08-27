@@ -474,7 +474,9 @@ fn matching_paren(line: &str, open: usize) -> Option<usize> {
     None
 }
 
-/// Split an argument list on commas outside strings and nested parentheses.
+/// Split an argument list on commas outside strings, nested parentheses and
+/// **braces** — ca65's token lists are written `{a, b}`, and a comma inside one
+/// separates tokens rather than arguments.
 fn split_args(text: &str) -> Vec<Arg> {
     if text.trim().is_empty() {
         return Vec::new();
@@ -493,8 +495,8 @@ fn split_args(text: &str) -> Vec<Arg> {
         }
         match c {
             b'"' => quote = Some(c),
-            b'(' => depth += 1,
-            b')' => depth = depth.saturating_sub(1),
+            b'(' | b'{' => depth += 1,
+            b')' | b'}' => depth = depth.saturating_sub(1),
             b',' if depth == 0 => {
                 out.push(one_arg(&text[start..i]));
                 start = i + 1;
