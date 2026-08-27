@@ -57,7 +57,9 @@ dependencies = [
 
 [[package]]
 name = "debug198x"
-version = "0.0.35"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b7b758cddf8ce93adf9cb21eebdf1b0f33fb1304fe56620134d2131332d32b14"
 dependencies = [
  "serde",
  "serde_json",

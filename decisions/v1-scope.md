@@ -59,7 +59,7 @@ them, which is what those records were protecting in the first place.
 
 **Only Debug198x must freeze for 1.0**, because it is a wire format read across a
 repo boundary by another project — a real external promise with a real consumer.
-Its own checklist governs, per [`debug198x-format.md`](debug198x-format.md).
+Its own checklist governs, per [`debug198x-format.md`](https://github.com/debug198x/debug198x/blob/main/decisions/debug198x-format.md).
 
 ## The v1.0 bar
 
@@ -172,7 +172,7 @@ written as outstanding work and had stopped describing the repository.
 |---|---|---|
 | 1 | Macros | **Met.** #93 closed 2026-08-23 — macros, repetition, modules. |
 | 2 | Verdict corpus v1a | **Met.** 5,747 verdicts over 22 CPUs, replayed by a tools-free CI status of its own. |
-| 3 | Debug198x freeze | **Met.** Frozen at v1, 2026-08-18 ([`debug198x-format.md`](debug198x-format.md)). |
+| 3 | Debug198x freeze | **Met.** Frozen at v1, 2026-08-18 ([`debug198x-format.md`](https://github.com/debug198x/debug198x/blob/main/decisions/debug198x-format.md)). |
 | 4 | The gap class | **Met.** Empty as of 2026-08-23; see below. |
 | 5 | CLI subcommands | **Met.** `asm198x [asm\|disasm\|fmt]`. |
 | 6 | Docs and distribution | **Met.** Shell, PowerShell and Homebrew installers with a tap; a hand-written CLI reference; 21 generated dialect pages. |

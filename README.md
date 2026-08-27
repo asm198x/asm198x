@@ -69,7 +69,6 @@ Four crates, split only where a boundary is real:
 |-------|------|
 | [`isa`](crates/isa) | Dependency-free declarative instruction-set specs: the single source of truth for encoding. |
 | [`isa-disasm`](crates/isa-disasm) | Spec-driven disassemblers that decode against `isa` without pulling in the assembler. |
-| [`debug198x`](crates/debug198x) | Cross-CPU debug-info sidecar format for line/address maps, typed symbols, and sections. |
 | [`asm198x`](crates/asm198x) | Assembler library, dialect front-ends, shared engine, formatter, diagnostics contract, bounded linked-output paths, and the `asm198x` CLI. |
 
 The **engine ↔ dialect ↔ spec** seam is what lets one binary span many CPUs and
