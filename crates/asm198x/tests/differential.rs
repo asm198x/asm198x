@@ -941,6 +941,16 @@ const PROBES: &[Probe] = &[
         "N = 7\n .byte .string(N)\n .byte .string(42)\nlbl: .byte .string(lbl)\n"),
     ok ("ca65-816", ".ident builds a name, forward references included",
         "foo = 5\n .byte .ident(\"foo\")\n .byte .ident(.concat(\"b\",\"ar\"))\nbar = 9\n"),
+    // `.const` asks whether an expression is constant *here*, so a constant
+    // defined below the line is not one — which is what a pass walking in
+    // source order sees anyway. `.ismnem` follows the CPU: `bra` and `phb` are
+    // 65816 additions a plain 6502 does not know.
+    ok ("ca65-816", ".const answers over what is known here",
+        "N = 5\nL: .byte .const(5), .const(N), .const(N*2)\n\
+         .byte .const(L), .const(*)\n .byte .const(M)\nM = 5\n"),
+    ok ("ca65-816", ".ismnem follows the CPU",
+        " .byte .ismnem(lda), .ismnemonic(lda), .ismnem(zzz), .ismnem(LDA)\n\
+         .byte .ismnem(phb), .ismnem(bra), .ismnem(nop)\n"),
     // The token-list half. A token list is unevaluated source, so these answer
     // over what is *written*: `.match` asks what each token is and `.xmatch`
     // asks what it says. `a`, `x` and `y` are register tokens and `s` is not,

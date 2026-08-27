@@ -1079,7 +1079,7 @@ pub(crate) fn parse_program(
     // Macros expand before parsing (#93), but only for assembly: the formatter
     // asks with `Expand::No`, because laying source out must not replace a
     // definition with its expansions.
-    let expanded = ca65_flat::expand_ca65(source, mode, ca65_flat::Registers::Mos6502)?;
+    let expanded = ca65_flat::expand_ca65(source, mode, ca65_flat::Target::Mos6502)?;
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
     let mut w = Walker::new(set);
@@ -1752,7 +1752,7 @@ impl FlatWalk for Walker {
     /// The multi-file walk expands too, or macros would work when a file is
     /// assembled alone and vanish the moment it is included from another.
     fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
-        ca65_flat::expand_ca65(source, macros::Expand::Yes, ca65_flat::Registers::Mos6502)
+        ca65_flat::expand_ca65(source, macros::Expand::Yes, ca65_flat::Target::Mos6502)
     }
 
     fn walk_line(
@@ -2694,11 +2694,14 @@ pub const DIRECTIVES: &[Directive] = &[
             ".bankbyte",
             ".blank",
             ".concat",
+            ".const",
             ".def",
             ".defined",
             ".hibyte",
             ".hiword",
             ".ident",
+            ".ismnem",
+            ".ismnemonic",
             ".left",
             ".match",
             ".mid",
@@ -3898,6 +3901,64 @@ mod tests {
         assert_eq!(&code(".byte .strlen(.concat(\"ab\",\"cd\"))")[..1], &[4]);
     }
 
+    /// `.const` and `.ismnem`, read off ca65 V2.18 first.
+    #[test]
+    fn const_and_ismnem_answer_the_way_ca65_answers() {
+        let code = |src: &str| {
+            let r = rom(&format!(".segment \"CODE\"\n{src}\n"));
+            r[16..16 + 4].to_vec()
+        };
+
+        // A literal and a constant above the line are constant; a label and the
+        // location counter are not, and neither is a constant defined *below*
+        // — which is exactly what a pass walking in source order can see.
+        assert_eq!(
+            &code("N = 5\nL: .byte .const(5), .const(N), .const(N*2)")[..3],
+            &[1, 1, 1]
+        );
+        assert_eq!(&code("L: .byte .const(L), .const(*)")[..2], &[0, 0]);
+        assert_eq!(&code(".byte .const(N)\nN = 5")[..1], &[0]);
+        // A label declared but never given a value still counts as defined.
+        assert_eq!(&code(".import ext\n.byte .const(ext)")[..1], &[0]);
+
+        // `.ismnem` follows the CPU. `bra` and `stz` are 65C02 additions that
+        // plain 6502 ca65 does not know, and `nop` is in every one of them.
+        assert_eq!(
+            &code(".byte .ismnem(lda), .ismnemonic(lda), .ismnem(zzz)")[..3],
+            &[1, 1, 0]
+        );
+        assert_eq!(
+            &code(".byte .ismnem(bra), .ismnem(stz), .ismnem(nop)")[..3],
+            &[0, 0, 1]
+        );
+        // The name is read case-insensitively.
+        assert_eq!(&code(".byte .ismnem(LDA)")[..1], &[1]);
+    }
+
+    /// What `.const` and `.ismnem` refuse.
+    #[test]
+    fn const_and_ismnem_refuse_what_they_cannot_answer() {
+        let refused = |src: &str| {
+            assemble(&format!(".segment \"CODE\"\n{src}\n"))
+                .expect_err(&format!("should refuse `{src}`"))
+        };
+        // ca65 answers a name it has never seen with "Symbol is undefined"
+        // rather than with 0, so a 0 here would be an invention.
+        let e = refused(".byte .const(zzz)");
+        assert!(e.to_string().contains("not defined anywhere"), "{e}");
+
+        // The pass keeps no scope stack, so it says so rather than answering 0
+        // where ca65 answers 1.
+        let e = refused(".scope pa\nv = 1\n.byte .const(v)\n.endscope");
+        assert!(e.to_string().contains("no scope stack"), "{e}");
+        let e = refused("N = 1\n.byte .const(pa::N)");
+        assert!(e.to_string().contains("no scope stack"), "{e}");
+
+        // ca65 takes a bare name for `.ismnem` and nothing else.
+        refused(".byte .ismnem(\"lda\")");
+        refused(".byte .ismnem(1+1)");
+    }
+
     /// The token-list half, read off ca65 V2.18 first.
     ///
     /// A token list is unevaluated source, so these answer over what is
@@ -4309,7 +4370,7 @@ mod tests {
 
         // A `.`-word we do not implement — with a plain argument, since a
         // string literal fails earlier, in the tokenizer.
-        let err = assemble(".code\nV = 1\n lda #.const(V)\n").expect_err("not implemented");
+        let err = assemble(".code\nV = 1\n lda #.definedmacro(V)\n").expect_err("not implemented");
         assert!(
             err.to_string().contains("not an expression function"),
             "got `{err}`"
@@ -5263,7 +5324,7 @@ two:\n\
                 "`{f}` is implemented, so it is declared as what it is"
             );
         }
-        for f in [".paramcount", ".const"] {
+        for f in [".paramcount", ".definedmacro"] {
             assert_eq!(
                 kind(f),
                 None,

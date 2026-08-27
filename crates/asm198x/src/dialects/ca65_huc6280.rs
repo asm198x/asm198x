@@ -107,7 +107,7 @@ pub(crate) fn parse_program(source: &str, mode: macros::Expand) -> Result<Progra
     // Macros expand before parsing (#93), but only for assembly: the formatter
     // asks with `Expand::No`, because laying source out must not replace a
     // definition with its expansions.
-    let expanded = ca65_flat::expand_ca65(source, mode, ca65_flat::Registers::Mos6502)?;
+    let expanded = ca65_flat::expand_ca65(source, mode, ca65_flat::Target::HuC6280)?;
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
     let mut w = Walker::new();
@@ -229,7 +229,7 @@ impl FlatWalk for Walker {
     /// The multi-file walk expands too, or macros would work when a file is
     /// assembled alone and vanish the moment it is included from another.
     fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
-        ca65_flat::expand_ca65(source, macros::Expand::Yes, ca65_flat::Registers::Mos6502)
+        ca65_flat::expand_ca65(source, macros::Expand::Yes, ca65_flat::Target::HuC6280)
     }
 
     fn walk_line(

@@ -742,7 +742,7 @@
       "slug": "reference/dialects/ca65"
     },
     {
-      "context": "43 directives, 146 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "43 directives, 149 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "ca65",
       "slug": "reference/dialects/ca65"
