@@ -932,6 +932,17 @@ const PROBES: &[Probe] = &[
     // expression still evaluates to an integer.
     ok ("ca65-816", ".strlen",           " lda #.strlen(\"hello\")\n .byte .strlen(\"\")\n"),
     ok ("ca65-816", ".strat picks a character", " lda #.strat(\"abc\", 1)\n"),
+    // The text layer: string functions folded before the parse. `.string`
+    // stringifies its argument's *token* rather than its value, and `.ident`
+    // builds a name that resolves like any other — a forward reference too.
+    ok ("ca65-816", ".concat joins, and one argument is a whole call",
+        " .byte .concat(\"ab\",\"cd\")\n .byte .concat(\"a\")\n"),
+    ok ("ca65-816", ".string takes the token, not the value",
+        "N = 7\n .byte .string(N)\n .byte .string(42)\nlbl: .byte .string(lbl)\n"),
+    ok ("ca65-816", ".ident builds a name, forward references included",
+        "foo = 5\n .byte .ident(\"foo\")\n .byte .ident(.concat(\"b\",\"ar\"))\nbar = 9\n"),
+    ok ("ca65-816", "a text fold feeds a numeric function",
+        " .byte .strlen(.concat(\"ab\",\"cd\"))\n"),
     ok ("ca65-816", ".max / .min",
         " lda #.max(3, 7)\n lda #.min(3, 7)\n"),
     ok ("ca65-816", "two-argument functions take expressions",
