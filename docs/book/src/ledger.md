@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.34`
-- **Corpus hash:** `8b2e811ed60548b8a7e48cadfe0eb8aebef0d233dfcf359557a8cf7bc3b5cb2a`
+- **Corpus hash:** `60203d0746f9270de8debef01a697938f2dabbc535903b4655257dd022a76f33`
 - **Pinned curriculum:** `5435e540cf393c1956362458d5ff0fca3ff705f2` (2026-08-14)
-- **CPUs:** 23, holding 7945 verdict(s)
+- **CPUs:** 23, holding 7950 verdict(s)
 
 ## 1802
 
@@ -48,7 +48,7 @@ Form coverage: **270/270** (100.0%)
 
 | arbiter | version | binaries | verdicts |
 |---|---|---|---|
-| `ca65` | ca65 V2.18 - N/A | 1 | form 270, probe 54 |
+| `ca65` | ca65 V2.18 - N/A | 1 | form 270, probe 59 |
 
 Tracked divergences — differences we know about and check:
 
