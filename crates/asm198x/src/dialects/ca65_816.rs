@@ -105,7 +105,7 @@ pub(crate) fn parse_program(source: &str, mode: macros::Expand) -> Result<Progra
     // Macros expand before parsing (#93), but only for assembly: the formatter
     // asks with `Expand::No`, because laying source out must not replace a
     // definition with its expansions.
-    let expanded = ca65_flat::expand_ca65(source, mode)?;
+    let expanded = ca65_flat::expand_ca65(source, mode, ca65_flat::Registers::Wdc65816)?;
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
     let mut w = Walker::new();
@@ -223,7 +223,7 @@ impl FlatWalk for Walker {
     /// The multi-file walk expands too, or macros would work when a file is
     /// assembled alone and vanish the moment it is included from another.
     fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
-        ca65_flat::expand_ca65(source, macros::Expand::Yes)
+        ca65_flat::expand_ca65(source, macros::Expand::Yes, ca65_flat::Registers::Wdc65816)
     }
 
     fn walk_line(
@@ -235,6 +235,24 @@ impl FlatWalk for Walker {
         let prim = &isa::mos6502::SET;
         let ext = &isa::mos65816::SET;
         let (code, comment) = split_comment(raw);
+        // A `{…}` token list is unevaluated source with no expression to
+        // render it from, so the formatter hands the line back as written.
+        // The text pass folded every one that reaches assembly.
+        if ca65_flat::holds_a_token_list(code) {
+            let leading = std::mem::take(&mut self.pending_leading);
+            self.push_node(Node {
+                operand_span: None,
+                label: None,
+                item: Some(crate::ast::Item::Verbatim),
+                source: raw.trim_end().to_string(),
+                span: Span::in_file(file, line as u32, 1),
+                trivia: Trivia {
+                    leading,
+                    trailing: None,
+                },
+            });
+            return Ok(None);
+        }
         if code.trim().is_empty() {
             if let Some(text) = comment {
                 self.pending_leading.push(Comment {

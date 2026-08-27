@@ -1079,7 +1079,7 @@ pub(crate) fn parse_program(
     // Macros expand before parsing (#93), but only for assembly: the formatter
     // asks with `Expand::No`, because laying source out must not replace a
     // definition with its expansions.
-    let expanded = ca65_flat::expand_ca65(source, mode)?;
+    let expanded = ca65_flat::expand_ca65(source, mode, ca65_flat::Registers::Mos6502)?;
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
     let mut w = Walker::new(set);
@@ -1752,7 +1752,7 @@ impl FlatWalk for Walker {
     /// The multi-file walk expands too, or macros would work when a file is
     /// assembled alone and vanish the moment it is included from another.
     fn expand_source(&self, source: &str) -> Result<macros::Expansion, AsmError> {
-        ca65_flat::expand_ca65(source, macros::Expand::Yes)
+        ca65_flat::expand_ca65(source, macros::Expand::Yes, ca65_flat::Registers::Mos6502)
     }
 
     fn walk_line(
@@ -1772,6 +1772,24 @@ impl FlatWalk for Walker {
             return Ok(None);
         }
         let (code, comment) = split_comment(raw);
+        // A `{…}` token list is unevaluated source with no expression to
+        // render it from, so the formatter hands the line back as written.
+        // The text pass folded every one that reaches assembly.
+        if ca65_flat::holds_a_token_list(code) {
+            let leading = std::mem::take(&mut self.pending_leading);
+            self.push_node(Node {
+                operand_span: None,
+                label: None,
+                item: Some(crate::ast::Item::Verbatim),
+                source: raw.trim_end().to_string(),
+                span: Span::in_file(file, line as u32, 1),
+                trivia: Trivia {
+                    leading,
+                    trailing: None,
+                },
+            });
+            return Ok(None);
+        }
         let trimmed = code.trim();
         if trimmed.is_empty() {
             if let Some(text) = comment {
@@ -2674,12 +2692,17 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "expression-word",
         pattern: Pattern::Exact(&[
             ".bankbyte",
+            ".blank",
             ".concat",
             ".def",
             ".defined",
             ".hibyte",
             ".hiword",
             ".ident",
+            ".left",
+            ".match",
+            ".mid",
+            ".right",
             ".sprintf",
             ".lobyte",
             ".loword",
@@ -2688,6 +2711,8 @@ pub const DIRECTIVES: &[Directive] = &[
             ".strat",
             ".string",
             ".strlen",
+            ".tcount",
+            ".xmatch",
         ]),
         category: Category::ExpressionWord,
     },
@@ -3101,8 +3126,7 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Sigilled {
             sigil: '.',
             names: &[
-                "define", "delmac", "delmacro", "macpack", "undef", "undefine", "left", "mid",
-                "right",
+                "define", "delmac", "delmacro", "macpack", "undef", "undefine",
             ],
             required: true,
         },
@@ -3874,6 +3898,100 @@ mod tests {
         assert_eq!(&code(".byte .strlen(.concat(\"ab\",\"cd\"))")[..1], &[4]);
     }
 
+    /// The token-list half, read off ca65 V2.18 first.
+    ///
+    /// A token list is unevaluated source, so these answer over what is
+    /// *written*. The comparison rules are the part worth pinning: `.match`
+    /// asks what each token **is** and `.xmatch` asks what it **says**.
+    #[test]
+    fn the_token_functions_fold_the_way_ca65_folds_them() {
+        let code = |src: &str| {
+            let r = rom(&format!(".segment \"CODE\"\n{src}\n"));
+            r[16..16 + 6].to_vec()
+        };
+
+        // A comma is a token, and a string is one however much is inside it.
+        assert_eq!(&code(".byte .tcount({1, 2, 3})")[..1], &[5]);
+        assert_eq!(
+            &code(".byte .tcount({}), .tcount({abc}), .tcount({\"a,b\"})")[..3],
+            &[0, 1, 1]
+        );
+        assert_eq!(
+            &code(".byte .tcount({#$12}), .tcount({pa::v}), .tcount({.byte 1})")[..3],
+            &[2, 3, 2]
+        );
+        // Whitespace separates and is not a token, and `<<` is one where `+ +`
+        // is two.
+        assert_eq!(
+            &code(".byte .tcount({++}), .tcount({<<}), .tcount({:+})")[..3],
+            &[2, 1, 1]
+        );
+        assert_eq!(&code(".byte .blank({}), .blank({x})")[..2], &[1, 0]);
+
+        // `.match` compares kinds. Two numbers match whatever they are worth,
+        // and so do two strings — but `a` is the accumulator and `b` is an
+        // identifier, so those do not.
+        assert_eq!(
+            &code(".byte .match({1},{2}), .match({\"a\"},{\"b\"}), .match({abc},{abd})")[..3],
+            &[1, 1, 1]
+        );
+        assert_eq!(
+            &code(".byte .match({a},{b}), .match({x},{y}), .match({a},{A})")[..3],
+            &[0, 0, 1]
+        );
+        // `s` is a register on a 65816 and an ordinary identifier here, so
+        // this same line answers 0 through the `ca65-816` dialect. ca65 takes
+        // the register names from the CPU.
+        assert_eq!(&code(".byte .match({s},{q})")[..1], &[1]);
+        // Each dot-keyword and each punctuation mark is its own kind, and a
+        // character literal is not a number.
+        assert_eq!(
+            &code(".byte .match({.byte},{.word}), .match({+},{-}), .match({'a'},{1})")[..3],
+            &[0, 0, 0]
+        );
+        assert_eq!(
+            &code(".byte .match({a},{a b}), .match({},{})")[..2],
+            &[0, 1]
+        );
+
+        // `.xmatch` adds the value: numbers by what they are worth, so `1` and
+        // `$1` agree, and identifiers case-sensitively, so `lda` and `LDA` do
+        // not.
+        assert_eq!(
+            &code(".byte .xmatch({1},{2}), .xmatch({1},{$1})")[..2],
+            &[0, 1]
+        );
+        assert_eq!(
+            &code(".byte .xmatch({abc},{abd}), .xmatch({lda},{LDA})")[..2],
+            &[0, 0]
+        );
+        assert_eq!(
+            &code(".byte .xmatch({\"a\"},{\"b\"}), .xmatch({.byte},{.byte})")[..2],
+            &[0, 1]
+        );
+
+        // The sub-list functions splice tokens back as source: `.left(3, …)`
+        // takes `1`, `,` and `2`, which is a two-item byte list.
+        assert_eq!(&code(".byte .left(1, {1, 2, 3})")[..1], &[1]);
+        assert_eq!(&code(".byte .left(3, {1, 2, 3})")[..2], &[1, 2]);
+        assert_eq!(
+            &code(".byte .right(1, {1, 2, 3}), .mid(2, 1, {1, 2, 3})")[..2],
+            &[3, 2]
+        );
+        // Past the end stops at the end rather than refusing.
+        assert_eq!(
+            &code(".byte .left(9, {1}), .right(9, {1}), .mid(0, 9, {1})")[..3],
+            &[1, 1, 1]
+        );
+
+        // A string-valued function inside a list folds first and is then one
+        // token, exactly as ca65 counts it — while a numeric one stays four.
+        assert_eq!(
+            &code(".byte .tcount({.concat(\"a\",\"b\")}), .tcount({.strlen(\"ab\")})")[..2],
+            &[1, 4]
+        );
+    }
+
     /// `.sprintf` against ca65 V2.18, one row per measured case.
     ///
     /// The whole matrix is here rather than a sample because the rules are not
@@ -4191,7 +4309,7 @@ mod tests {
 
         // A `.`-word we do not implement — with a plain argument, since a
         // string literal fails earlier, in the tokenizer.
-        let err = assemble(".code\nV = 1\n lda #.tcount(V)\n").expect_err("not implemented");
+        let err = assemble(".code\nV = 1\n lda #.const(V)\n").expect_err("not implemented");
         assert!(
             err.to_string().contains("not an expression function"),
             "got `{err}`"
@@ -5136,14 +5254,16 @@ two:\n\
                 .find(|d| d.spellings().iter().any(|s| s == word))
                 .map(|d| d.category)
         };
-        for f in [".lobyte", ".strlen", ".max", ".defined", ".sizeof"] {
+        for f in [
+            ".lobyte", ".strlen", ".max", ".defined", ".sizeof", ".tcount",
+        ] {
             assert_eq!(
                 kind(f),
                 Some(crate::directives::Category::ExpressionWord),
                 "`{f}` is implemented, so it is declared as what it is"
             );
         }
-        for f in [".paramcount", ".tcount"] {
+        for f in [".paramcount", ".const"] {
             assert_eq!(
                 kind(f),
                 None,

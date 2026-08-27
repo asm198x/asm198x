@@ -941,6 +941,31 @@ const PROBES: &[Probe] = &[
         "N = 7\n .byte .string(N)\n .byte .string(42)\nlbl: .byte .string(lbl)\n"),
     ok ("ca65-816", ".ident builds a name, forward references included",
         "foo = 5\n .byte .ident(\"foo\")\n .byte .ident(.concat(\"b\",\"ar\"))\nbar = 9\n"),
+    // The token-list half. A token list is unevaluated source, so these answer
+    // over what is *written*: `.match` asks what each token is and `.xmatch`
+    // asks what it says. `a`, `x` and `y` are register tokens and `s` is not,
+    // each dot-keyword and punctuation mark is its own kind, and a character
+    // literal is not a number.
+    ok ("ca65-816", ".tcount and .blank count what is written",
+        " .byte .tcount({1, 2, 3}), .tcount({}), .tcount({abc}), .tcount({\"a,b\"})\n\
+         .byte .tcount({#$12}), .tcount({pa::v}), .tcount({.byte 1})\n\
+         .byte .tcount({++}), .tcount({<<}), .tcount({:+})\n\
+         .byte .blank({}), .blank({x})\n"),
+    ok ("ca65-816", ".match compares what a token is",
+        " .byte .match({1},{2}), .match({\"a\"},{\"b\"}), .match({abc},{abd})\n\
+         .byte .match({a},{b}), .match({x},{y}), .match({a},{A})\n\
+         .byte .match({s},{q})\n\
+         .byte .match({.byte},{.word}), .match({+},{-}), .match({'a'},{1})\n\
+         .byte .match({a},{a b}), .match({},{})\n"),
+    ok ("ca65-816", ".xmatch compares what a token says as well",
+        " .byte .xmatch({1},{2}), .xmatch({1},{$1}), .xmatch({abc},{abd})\n\
+         .byte .xmatch({lda},{LDA}), .xmatch({\"a\"},{\"b\"}), .xmatch({.byte},{.byte})\n"),
+    ok ("ca65-816", ".left, .mid and .right splice tokens back as source",
+        " .byte .left(1, {1, 2, 3})\n .byte .left(3, {1, 2, 3})\n\
+         .byte .right(1, {1, 2, 3}), .mid(2, 1, {1, 2, 3})\n\
+         .byte .left(9, {1}), .right(9, {1}), .mid(0, 9, {1})\n"),
+    ok ("ca65-816", "a string function inside a list is one token by the time it counts",
+        " .byte .tcount({.concat(\"a\",\"b\")}), .tcount({.strlen(\"ab\")})\n"),
     // `.sprintf` is C's shape and not all of C's rules. `%x` is signed and
     // `%X` is not, so the two disagree about a negative value; `%s` and `%c`
     // pad on the right by default and on the left with `-`, the reverse of
