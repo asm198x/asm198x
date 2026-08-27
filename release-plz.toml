@@ -32,40 +32,45 @@ changelog_update = true
 # (Must precede the [[package]] table below: it is a [workspace] key.)
 git_only = true
 
-# The `isa` crate is not dist-able (no binary) and never ships independently —
-# it exists only as a dependency of `asm198x`. cargo-dist's release.yml fires on
-# any version-like tag and errors on a non-dist-able package, so an `isa-vX.Y.Z`
-# tag would produce a failed release run. Keep isa version-bumped (lockstep) but
-# untagged; only `asm198x-vX.Y.Z` drives a release.
+# The library and tooling crates ride the lockstep version and are not tagged.
+# Each exists only as a part of `asm198x`: none is published, and none has a
+# consumer that could act on a release of its own.
+#
+# That is now a preference. Until tag-namespace = "asm198x" was set in
+# Cargo.toml it was load-bearing safety. cargo-dist fired on any version-shaped
+# tag and errored on a package with no binary, so a tag here produced a junk
+# release — `isa-disasm` did exactly that once, cutting a GitHub Release that
+# contained only a dist-manifest.json and then took the "Latest" badge. Any
+# crate added without a block below would have repeated it. A tag that does not
+# start with `asm198x` now reaches cargo-dist not at all, so these blocks
+# express intent rather than prevent a failure.
+#
+# `debug198x` is the one worth revisiting: Emu198x reads the debug-info format
+# asm198x writes, and a cross-repo consumer is exactly the case a tagged release
+# with notes serves. Flipping it needs git_release_enable = true here too, since
+# the workspace disables releases so cargo-dist can own asm198x's own.
+
+# Dependency of asm198x; no binary.
 [[package]]
 name = "isa"
 git_tag_enable = false
 
-# isa-disasm is the same case: no binary, dependency-only. Without this it takes
-# the workspace default (git_tag_enable = true), so release-plz tags it and
-# cargo-dist's release.yml fires on `isa-disasm-vX.Y.Z` and, finding no binary,
-# produces a junk GitHub Release — it already did once (only a dist-manifest.json,
-# and it grabbed the "Latest" badge). Keep it version-bumped in lockstep but
-# untagged; only `asm198x-vX.Y.Z` drives a release.
+# Dependency of asm198x; no binary.
 [[package]]
 name = "isa-disasm"
 git_tag_enable = false
 
-# debug198x is the same case again: the debug-info format crate has no binary and
-# ships only as a dependency (asm198x writes it, Emu198x reads it). Keep it
-# version-bumped in lockstep but untagged, so a version tag never fires
-# cargo-dist and mints a junk GitHub Release.
+# The debug-info format: asm198x writes it, Emu198x reads it. See above.
 [[package]]
 name = "debug198x"
 git_tag_enable = false
 
-# verdict-corpus is test infrastructure — no binary, no consumers outside this
-# workspace's tests. It rides the lockstep version but earns no tag of its own.
+# Test infrastructure; no consumers outside this workspace's tests.
 [[package]]
 name = "verdict-corpus"
 git_tag_enable = false
 
-# xtask is repository automation — no binary anyone installs, no consumers.
+# Repository automation; nothing anyone installs.
 [[package]]
 name = "xtask"
 git_tag_enable = false
