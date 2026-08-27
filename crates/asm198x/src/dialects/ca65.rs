@@ -2697,6 +2697,7 @@ pub const DIRECTIVES: &[Directive] = &[
             ".const",
             ".def",
             ".defined",
+            ".definedmacro",
             ".hibyte",
             ".hiword",
             ".ident",
@@ -2711,6 +2712,7 @@ pub const DIRECTIVES: &[Directive] = &[
             ".loword",
             ".max",
             ".min",
+            ".paramcount",
             ".strat",
             ".string",
             ".strlen",
@@ -3901,6 +3903,60 @@ mod tests {
         assert_eq!(&code(".byte .strlen(.concat(\"ab\",\"cd\"))")[..1], &[4]);
     }
 
+    /// `.paramcount` and `.definedmacro`, read off ca65 V2.18 first. Both are
+    /// answered during macro expansion, which is the only place either has a
+    /// meaning.
+    #[test]
+    fn the_macro_predicates_answer_the_way_ca65_answers() {
+        let code = |src: &str| {
+            let r = rom(&format!(".segment \"CODE\"\n{src}\n"));
+            r[16..16 + 4].to_vec()
+        };
+        let m = ".macro m p1, p2\n.byte .paramcount\n.endmacro\n";
+
+        // The **call site's** count, not the declared one: two parameters
+        // called with one answers 1, and a blank argument still counts.
+        assert_eq!(&code(&format!("{m}m 1, 2"))[..1], &[2]);
+        assert_eq!(&code(&format!("{m}m 1"))[..1], &[1]);
+        assert_eq!(&code(&format!("{m}m"))[..1], &[0]);
+        assert_eq!(
+            &code(".macro m p1, p2, p3\n.byte .paramcount\n.endmacro\nm 1, , 3")[..1],
+            &[3]
+        );
+        // A nested invocation answers for itself, not for the macro around it.
+        assert_eq!(
+            &code(".macro i\n.byte .paramcount\n.endmacro\n.macro o p1\ni\n.endmacro\no 1")[..1],
+            &[0]
+        );
+        // It reads as a number, so a conditional can branch on it.
+        assert_eq!(
+            &code(
+                ".macro m p1, p2\n.if .paramcount > 1\n.byte 9\n.else\n.byte 8\n.endif\n\
+                 .endmacro\nm 1\nm 1,2"
+            )[..2],
+            &[8, 9]
+        );
+
+        // `.definedmacro` is answered where it is *written*: a definition below
+        // the line does not count, and the name is case-sensitive.
+        assert_eq!(
+            &code(
+                ".macro d\n.endmacro\n.byte .definedmacro(d), .definedmacro(n), .definedmacro(D)"
+            )[..3],
+            &[1, 0, 0]
+        );
+        assert_eq!(
+            &code(".byte .definedmacro(d)\n.macro d\n.endmacro")[..1],
+            &[0]
+        );
+        // Inside a body it is answered at the line the macro was *invoked* on,
+        // which is where ca65 answers it too.
+        assert_eq!(
+            &code(".macro d\n.endmacro\n.macro n\n.byte .definedmacro(d)\n.endmacro\nn")[..1],
+            &[1]
+        );
+    }
+
     /// `.const` and `.ismnem`, read off ca65 V2.18 first.
     #[test]
     fn const_and_ismnem_answer_the_way_ca65_answers() {
@@ -4370,7 +4426,7 @@ mod tests {
 
         // A `.`-word we do not implement — with a plain argument, since a
         // string literal fails earlier, in the tokenizer.
-        let err = assemble(".code\nV = 1\n lda #.definedmacro(V)\n").expect_err("not implemented");
+        let err = assemble(".code\nV = 1\n lda #.bank(V)\n").expect_err("not implemented");
         assert!(
             err.to_string().contains("not an expression function"),
             "got `{err}`"
@@ -5324,7 +5380,7 @@ two:\n\
                 "`{f}` is implemented, so it is declared as what it is"
             );
         }
-        for f in [".paramcount", ".definedmacro"] {
+        for f in [".time", ".version"] {
             assert_eq!(
                 kind(f),
                 None,
