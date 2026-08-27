@@ -445,6 +445,33 @@ impl FlatWalk for Walker {
             return Ok(None);
         }
 
+        // `[DEF] NAME EQUS "text"` — a string symbol. What it holds is text
+        // spliced into the source rather than a value bound to a name, so
+        // there is nothing here for the engine to lower, and the text pass has
+        // already taken the line by the time assembly walks. This is the
+        // formatter's path, and a line it must hand back exactly as written:
+        // the value may hold quotes, escapes and calls that any re-rendering
+        // would have to reproduce byte for byte. See `Item::Verbatim`.
+        // A `{name}` interpolation is the same kind of line: text spliced into
+        // the middle of a token, which the pass resolved before assembly and
+        // which cannot be laid out as an expression because it is not one yet.
+        // An unresolved interpolation is refused by the pass, so reaching here
+        // with one means the formatter's parse.
+        if string_symbol(code.trim()).is_some() || code.contains('{') {
+            self.nodes.push(Node {
+                operand_span: None,
+                label: None,
+                item: Some(crate::ast::Item::Verbatim),
+                source: code.trim_end().to_string(),
+                span: Span::in_file(file, line as u32, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing,
+                },
+            });
+            return Ok(None);
+        }
+
         // `[DEF] NAME EQU expr` / `[DEF] NAME = expr` — a (global) constant.
         if let Some(c) = constant(code.trim(), line)? {
             if let Ok(v) = fold_const(&c.expr, &self.consts, line) {
@@ -598,6 +625,31 @@ fn section_origin(code: &str, line: usize) -> Result<Option<Expr>, AsmError> {
 /// cannot appear in source.
 const BANK_MARK: &str = "\u{1}bank\u{1}";
 
+/// The prefix on the stand-in a text-layer call parses to when the text pass
+/// has not run — the formatter's path. `\u{1}` cannot appear in rgbasm source,
+/// so the name can never collide with a real symbol.
+const TEXT_MARK: &str = "\u{1}text\u{1}";
+
+/// The text layer's function names, lower-cased. One list, read by the pass
+/// that folds them and by the stand-in the formatter parses.
+fn is_text_function(lower: &str) -> bool {
+    matches!(
+        lower,
+        "strcat"
+            | "strfmt"
+            | "strupr"
+            | "strlwr"
+            | "strsub"
+            | "strslice"
+            | "strlen"
+            | "strcmp"
+            | "strfind"
+            | "strin"
+            | "strrin"
+            | "strrpl"
+    )
+}
+
 /// rgbasm's expression functions. `BANK("name")` is the bank its section was
 /// given, and it reaches **forward** — `db BANK("paged")` above the section it
 /// names assembles — so it cannot fold while walking. It becomes a marker that
@@ -656,6 +708,17 @@ fn number(text: &str, line: usize) -> Result<i64, AsmError> {
 fn expr_function(name: &str, args: Vec<mos6502::ExprArg>, line: usize) -> Result<Expr, AsmError> {
     use crate::engine::BinOp as Op;
     let lower = name.to_ascii_lowercase();
+
+    // The text layer's functions (`decisions/string-and-text-layer.md`).
+    // Assembly never arrives here: the pass folds them to text before the parse
+    // runs. This arm is the **formatter's**, which parses without expanding and
+    // then re-emits the call from its source — so all it needs is a value that
+    // parses. The mark cannot be an rgbasm identifier, so a fold that somehow
+    // did not happen fails as an unresolved symbol rather than answering a
+    // number.
+    if is_text_function(&lower) {
+        return Ok(Expr::Sym(format!("{TEXT_MARK}{lower}")));
+    }
 
     // The byte extractions, and the one bit-counting function whose answer is a
     // plain integer rather than a fixed-point value.
@@ -829,6 +892,28 @@ struct Constant {
     render_name: String,
     expr: Expr,
     op_source: String,
+}
+
+/// `[DEF] NAME EQUS "text"` — a string symbol: the name the text pass binds,
+/// and the text it holds.
+///
+/// Two readers, one grammar. The text pass stores the value and leaves the line
+/// blank, so assembly never parses one; the formatter runs with the pass
+/// switched off, so it does.
+fn string_symbol(code: &str) -> Option<(String, String)> {
+    let code = macros::without_comment(code);
+    let mut words = code.split_whitespace();
+    let first = words.next()?;
+    let (name, keyword) = if first.eq_ignore_ascii_case("def") {
+        (words.next()?, words.next()?)
+    } else {
+        (first, words.next()?)
+    };
+    if !keyword.eq_ignore_ascii_case("equs") {
+        return None;
+    }
+    let value = code.split_once(keyword)?.1.trim();
+    Some((name.trim_end_matches(':').to_string(), value.to_string()))
 }
 
 /// `[DEF] NAME EQU expr` or `[DEF] NAME = expr` (redefinable). rgbasm v1.0
@@ -1722,19 +1807,7 @@ struct RgbasmText;
 impl text::TextSyntax for RgbasmText {
     /// `DEF name EQUS "text"`, and the bare `name EQUS "text"` older form.
     fn definition(&self, line: &str) -> Option<(String, String)> {
-        let code = macros::without_comment(line);
-        let mut words = code.split_whitespace();
-        let first = words.next()?;
-        let (name, keyword) = if first.eq_ignore_ascii_case("def") {
-            (words.next()?, words.next()?)
-        } else {
-            (first, words.next()?)
-        };
-        if !keyword.eq_ignore_ascii_case("equs") {
-            return None;
-        }
-        let value = code.split_once(keyword)?.1.trim();
-        Some((name.trim_end_matches(':').to_string(), value.to_string()))
+        string_symbol(line)
     }
 
     fn interpolates(&self) -> bool {
@@ -1768,22 +1841,7 @@ impl text::TextSyntax for RgbasmText {
     ) -> Result<Option<text::Folded>, AsmError> {
         use text::Folded;
         let lower = name.to_ascii_lowercase();
-        let known = matches!(
-            lower.as_str(),
-            "strcat"
-                | "strfmt"
-                | "strupr"
-                | "strlwr"
-                | "strsub"
-                | "strslice"
-                | "strlen"
-                | "strcmp"
-                | "strfind"
-                | "strin"
-                | "strrin"
-                | "strrpl"
-        );
-        if !known {
+        if !is_text_function(&lower) {
             return Ok(None);
         }
         // An empty argument list is how the pass asks "is this a call?", so it
@@ -2783,6 +2841,46 @@ mod tests {
     }
 
     /// The formatter lays source out; it does not expand.
+    /// The text layer's lines are the formatter's to hand back, not to lay
+    /// out: an `EQUS` holds text spliced into the source, and a `{name}`
+    /// splices into the middle of a token. Neither is an expression yet, and
+    /// re-rendering either would have to reproduce its quotes and escapes byte
+    /// for byte.
+    #[test]
+    fn the_text_layer_formats_back_as_written() {
+        let src = "SECTION \"s\",ROM0[0]\n\
+                   DEF q EQUS \"\\\"ab\\\"\"\n\
+                   DEF n EQUS \"4\"\n\
+                   db $1{n}\n\
+                   db STRLEN(q)\n\
+                   db STRCAT(\"ab\",\"cd\")\n";
+        let formatted = crate::format_rgbasm(src).expect("formats");
+        for kept in [
+            "DEF q EQUS \"\\\"ab\\\"\"",
+            "$1{n}",
+            "STRCAT(\"ab\",\"cd\")",
+        ] {
+            assert!(formatted.contains(kept), "lost `{kept}`:\n{formatted}");
+        }
+        assert_eq!(
+            out(src),
+            crate::assemble_rgbasm(&formatted)
+                .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+                .bytes,
+            "formatting changed the program:\n{formatted}"
+        );
+    }
+
+    /// rgbasm answers an interpolation of a name it does not hold with
+    /// "Interpolated symbol `n` does not exist", so the pass refuses it too
+    /// rather than leaving the braces for the expression parser to trip over.
+    #[test]
+    fn an_unresolved_interpolation_is_refused() {
+        let e = crate::assemble_rgbasm("SECTION \"s\",ROM0[0]\n db $1{n}\n")
+            .expect_err("rgbasm refuses an interpolation of an undefined symbol");
+        assert!(e.to_string().contains("{n}"), "{e}");
+    }
+
     /// An `ELIF` leg is stored as a conditional nested in the else branch, and
     /// it has to come back out flat: `ELSE` before `ELIF` is source rgbasm will
     /// not read, and the one closer the author wrote belongs to the whole

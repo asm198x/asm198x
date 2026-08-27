@@ -178,12 +178,13 @@ pub(crate) fn expand<S: TextSyntax>(syntax: &S, source: &str) -> Result<String, 
                 numbers: &numbers,
                 evaluate: &evaluate,
             };
-            let value = fold_line(syntax, &scope, &substitute(&value, &symbols, syntax), line)?;
+            let substituted = substitute(&value, &symbols, syntax, line)?;
+            let value = fold_line(syntax, &scope, &substituted, line)?;
             symbols.insert(name, unquote(value.trim()));
             out.push('\n');
             continue;
         }
-        let substituted = substitute(raw, &symbols, syntax);
+        let substituted = substitute(raw, &symbols, syntax, line)?;
         let folded = {
             let scope = Scope {
                 numbers: &numbers,
@@ -245,9 +246,16 @@ fn escape(text: &str) -> String {
 /// Replace every string symbol in a line: a bare name at a word boundary, and
 /// — where the dialect has it — a `{name}` interpolation, which reaches into
 /// the middle of a token and into string literals.
-fn substitute<S: TextSyntax>(line: &str, symbols: &BTreeMap<String, String>, syntax: &S) -> String {
-    if symbols.is_empty() {
-        return line.to_string();
+fn substitute<S: TextSyntax>(
+    line: &str,
+    symbols: &BTreeMap<String, String>,
+    syntax: &S,
+    at: usize,
+) -> Result<String, AsmError> {
+    // An interpolation still has to be *checked* when nothing is defined: an
+    // unresolved `{name}` is an error, not a line to pass through.
+    if symbols.is_empty() && !(syntax.interpolates() && line.contains('{')) {
+        return Ok(line.to_string());
     }
     let mut out = String::with_capacity(line.len());
     let bytes = line.as_bytes();
@@ -263,11 +271,15 @@ fn substitute<S: TextSyntax>(line: &str, symbols: &BTreeMap<String, String>, syn
             && let Some(end) = line[i + 1..].find('}')
         {
             let name = &line[i + 1..i + 1 + end];
-            if let Some(value) = symbols.get(name) {
-                out.push_str(value);
-                i += end + 2;
-                continue;
-            }
+            let Some(value) = symbols.get(name) else {
+                return Err(AsmError::new(
+                    at,
+                    format!("`{{{name}}}` names no string symbol defined above this line"),
+                ));
+            };
+            out.push_str(value);
+            i += end + 2;
+            continue;
         }
         if let Some(q) = quote {
             out.push(c as char);
@@ -303,7 +315,7 @@ fn substitute<S: TextSyntax>(line: &str, symbols: &BTreeMap<String, String>, syn
         out.push(c as char);
         i += 1;
     }
-    out
+    Ok(out)
 }
 
 /// Fold every string-function call in one line, innermost first.
