@@ -2674,15 +2674,18 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "expression-word",
         pattern: Pattern::Exact(&[
             ".bankbyte",
+            ".concat",
             ".def",
             ".defined",
             ".hibyte",
             ".hiword",
+            ".ident",
             ".lobyte",
             ".loword",
             ".max",
             ".min",
             ".strat",
+            ".string",
             ".strlen",
         ]),
         category: Category::ExpressionWord,
@@ -3097,8 +3100,8 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Sigilled {
             sigil: '.',
             names: &[
-                "define", "delmac", "delmacro", "macpack", "undef", "undefine", "ident", "concat",
-                "sprintf", "string", "left", "mid", "right",
+                "define", "delmac", "delmacro", "macpack", "undef", "undefine", "sprintf", "left",
+                "mid", "right",
             ],
             required: true,
         },
@@ -3828,6 +3831,57 @@ mod tests {
 
     fn rom(src: &str) -> Vec<u8> {
         assemble(src).expect("assembles").0
+    }
+
+    /// ca65's text layer, folded before the parse. Every value here was read
+    /// off ca65 V2.18 first.
+    #[test]
+    fn the_string_functions_fold_the_way_ca65_folds_them() {
+        // The ROM's payload starts after the 16-byte iNES header.
+        let code = |src: &str| {
+            let r = rom(&format!(".segment \"CODE\"\n{src}\n"));
+            r[16..16 + 8].to_vec()
+        };
+        assert_eq!(&code(".byte .concat(\"ab\",\"cd\")")[..4], b"abcd");
+        // One argument is a whole call; ca65 does not require two.
+        assert_eq!(&code(".byte .concat(\"a\")")[..1], b"a");
+
+        // `.string` stringifies the *token*, not the value: with `N = 7`,
+        // `.string(N)` is `"N"` and not `"7"`. A literal keeps its digits.
+        assert_eq!(&code("N = 7\n.byte .string(N)")[..1], b"N");
+        assert_eq!(&code(".byte .string(42)")[..2], b"42");
+        assert_eq!(&code("lbl:\n.byte .string(lbl)")[..3], b"lbl");
+
+        // `.ident` builds a *name* from text, so it resolves like any other —
+        // a forward reference included.
+        assert_eq!(&code("foo = 5\n.byte .ident(\"foo\")")[..1], &[5]);
+        assert_eq!(
+            &code(".byte .ident(.concat(\"f\",\"oo\"))\nfoo = 9")[..1],
+            &[9]
+        );
+
+        // The folds nest, innermost first, so a numeric function reads a
+        // literal by the time it runs.
+        assert_eq!(&code(".byte .strlen(.concat(\"ab\",\"cd\"))")[..1], &[4]);
+    }
+
+    /// What the three refuse. ca65 refuses each of these itself.
+    #[test]
+    fn the_string_functions_refuse_what_ca65_refuses() {
+        for src in [
+            // `.concat` joins strings, and a number is not one.
+            ".byte .concat(\"a\", 5)",
+            // `.string` takes one name or number — not a string, and not an
+            // expression over them.
+            ".byte .string(\"hi\")",
+            "N = 7\n.byte .string(N*2)",
+            ".byte .string(1, 2)",
+            // `.ident` needs the text a name is built from.
+            ".byte .ident(foo)",
+        ] {
+            assemble(&format!(".segment \"CODE\"\n{src}\n"))
+                .expect_err(&format!("ca65 refuses `{src}`"));
+        }
     }
 
     #[test]

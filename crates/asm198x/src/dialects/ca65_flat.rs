@@ -42,6 +42,7 @@
 
 use crate::ast::{Node, Span, Symbol, Trivia};
 use crate::dialects::macros;
+use crate::dialects::text;
 use crate::engine::AsmError;
 use crate::source::{LoadError, MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
 use crate::span::FileId;
@@ -1109,6 +1110,18 @@ fn local_declaration(line: &str) -> Option<Vec<String>> {
         .filter(|names| !names.is_empty())
 }
 
+/// Whether the argument is an unfolded text-layer call — which happens only on
+/// the formatter's path, where a function over a string sees the stand-in
+/// rather than the text it would have folded to.
+fn unfolded_text(arg: &super::mos6502::ExprArg) -> bool {
+    matches!(arg, super::mos6502::ExprArg::Value(crate::engine::Expr::Sym(s)) if s.starts_with(TEXT_MARK))
+}
+
+/// The prefix on the stand-in a text-layer call parses to when the text pass
+/// has not run — the formatter's path. `\u{1}` cannot appear in ca65 source, so
+/// the name can never collide with a real symbol.
+const TEXT_MARK: &str = "\u{1}text\u{1}";
+
 /// A comma-separated name list, empties dropped — shared by macro parameters
 /// and `.local` declarations, which ca65 spells the same way.
 fn name_list(text: &str) -> Vec<String> {
@@ -1118,14 +1131,114 @@ fn name_list(text: &str) -> Vec<String> {
         .collect()
 }
 
-/// Expand the ca65 family's macros, unless this parse is the formatter's.
+/// Expand the ca65 family's macros and resolve its text layer, unless this
+/// parse is the formatter's.
+///
+/// The text pass runs **after** macro expansion — ca65's string functions are
+/// written for macro bodies, so most of what they fold only exists once the
+/// macro has been placed — and it emits one line per line, so the origins the
+/// expansion recorded still line up.
 pub(crate) fn expand_ca65(
     source: &str,
     mode: macros::Expand,
 ) -> Result<macros::Expansion, AsmError> {
     macros::expansion(mode, source, |s| {
-        macros::expand(&Ca65Macros, s).map(|e| Some((e.text, e.origins)))
+        let expanded = macros::expand(&Ca65Macros, s)?;
+        let resolved = text::expand(&Ca65Text, &expanded.text)?;
+        Ok(Some((resolved, expanded.origins)))
     })
+}
+
+/// ca65's string grammar. It has no string *symbol* — `.define` is a macro
+/// there — so this is the function half only.
+///
+/// Each rule was read off ca65 V2.18 before it was written. The one a reader
+/// would most likely guess wrong is `.string`, which stringifies its argument's
+/// **token** rather than its value: with `N = 7`, `.string(N)` is `"N"`.
+struct Ca65Text;
+
+impl text::TextSyntax for Ca65Text {
+    fn definition(&self, _line: &str) -> Option<(String, String)> {
+        None
+    }
+
+    fn function(
+        &self,
+        name: &str,
+        args: &[text::Arg],
+        _scope: &text::Scope,
+        line: usize,
+    ) -> Result<Option<text::Folded>, AsmError> {
+        use text::Folded;
+        let lower = name.to_ascii_lowercase();
+        if !matches!(lower.as_str(), ".concat" | ".string" | ".ident") {
+            return Ok(None);
+        }
+        // An empty argument list is how the pass asks "is this a call?", so it
+        // is answered without complaint.
+        if args.is_empty() {
+            return Ok(Some(Folded::Text(String::new())));
+        }
+        let one = |args: &[text::Arg]| -> Result<(), AsmError> {
+            if args.len() == 1 {
+                Ok(())
+            } else {
+                Err(AsmError::new(
+                    line,
+                    format!("`{name}` takes one argument, and was given {}", args.len()),
+                ))
+            }
+        };
+        Ok(Some(match lower.as_str() {
+            ".concat" => {
+                let mut out = String::new();
+                for a in args {
+                    out.push_str(a.text(name, line)?);
+                }
+                Folded::Text(out)
+            }
+            // The *token*, not its value: ca65 takes one identifier or one
+            // number here and refuses an expression or a string.
+            ".string" => {
+                one(args)?;
+                let token = match &args[0] {
+                    text::Arg::Bare(b) => b.trim(),
+                    text::Arg::Text(t) => {
+                        return Err(AsmError::new(
+                            line,
+                            format!("`{name}` takes a name or a number, and `\"{t}\"` is a string"),
+                        ));
+                    }
+                };
+                if !is_one_token(token) {
+                    return Err(AsmError::new(
+                        line,
+                        format!(
+                            "`{name}` takes a single name or number, and `{token}` is an \
+                             expression"
+                        ),
+                    ));
+                }
+                Folded::Text(token.to_string())
+            }
+            // A name built from text, spliced back in unquoted for the parse to
+            // resolve — forward references included, as in ca65.
+            ".ident" => {
+                one(args)?;
+                Folded::Bare(args[0].text(name, line)?.to_string())
+            }
+            other => unreachable!("`{other}` was matched as known and then not folded"),
+        }))
+    }
+}
+
+/// Whether the text is one identifier or one number literal — what `.string`
+/// accepts.
+fn is_one_token(text: &str) -> bool {
+    !text.is_empty()
+        && text.chars().all(|c| {
+            c.is_ascii_alphanumeric() || c == '_' || c == '@' || c == '$' || c == '%' || c == '.'
+        })
 }
 
 /// ca65's expression functions. Only the three byte extractions so far — they
@@ -1144,15 +1257,31 @@ pub(crate) fn expr_function(
     use crate::engine::Expr;
     let lower = name.to_ascii_lowercase();
 
+    // The text layer's functions (`decisions/string-and-text-layer.md`).
+    // Assembly never arrives here: the pass folds them to text before the parse
+    // runs. This arm is the **formatter's**, which parses without expanding and
+    // then re-emits the call from its source — so all it needs is a value that
+    // parses. The mark cannot be a ca65 identifier, so a fold that somehow did
+    // not happen fails as an unresolved symbol rather than answering a number.
+    if matches!(lower.as_str(), ".concat" | ".string" | ".ident") {
+        return Ok(Expr::Sym(format!("{TEXT_MARK}{lower}")));
+    }
+
     // The string functions. A string is consumed here and yields a number, so
     // an expression still evaluates to an `i64` — see `ExprArg`.
     match lower.as_str() {
         ".strlen" => {
             let [t]: [_; 1] = take(name, args, 1, line)?;
+            if unfolded_text(&t) {
+                return Ok(Expr::Sym(format!("{TEXT_MARK}{lower}")));
+            }
             return Ok(Expr::Num(t.text(name, line)?.chars().count() as i64));
         }
         ".strat" => {
             let [t, i]: [_; 2] = take(name, args, 2, line)?;
+            if unfolded_text(&t) {
+                return Ok(Expr::Sym(format!("{TEXT_MARK}{lower}")));
+            }
             let text = t.text(name, line)?;
             let Expr::Num(idx) = i.value(name, line)? else {
                 return Err(AsmError::new(line, "`.strat` index must be a constant"));

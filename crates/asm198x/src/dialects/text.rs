@@ -112,6 +112,9 @@ pub(crate) enum Folded {
     Text(String),
     /// A number, spliced back in as digits.
     Number(i64),
+    /// Text spliced back in **unquoted** — what ca65's `.ident` makes, where
+    /// the answer is a name for the parse to resolve and not a string.
+    Bare(String),
 }
 
 /// A dialect's string grammar.
@@ -373,6 +376,7 @@ fn fold_once<S: TextSyntax>(
                         let text = match folded {
                             Folded::Text(t) => format!("\"{}\"", escape(&t)),
                             Folded::Number(n) => n.to_string(),
+                            Folded::Bare(t) => t,
                         };
                         return Ok(Some(format!("{}{text}{}", &line[..i], &line[close + 1..])));
                     }
