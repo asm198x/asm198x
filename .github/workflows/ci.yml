@@ -227,6 +227,17 @@ jobs:
       - name: Check the newest changelog entry is written for a reader
         run: cargo xtask changelog
 
+      # The crate documentation is published to docs.rs, and until now it was
+      # the one output here with no gate on it — 27 warnings had accumulated,
+      # including four dead links in `asm198x`'s own crate-level architecture
+      # paragraph, which is the first page a reader lands on. A broken or
+      # private intra-doc link renders as plain text, so a reader cannot tell
+      # they were meant to be able to follow it. See asm198x#365.
+      - name: Check the crate documentation builds without warnings
+        env:
+          RUSTDOCFLAGS: -D warnings
+        run: cargo doc --workspace --no-deps
+
       - name: Install Vale
         uses: errata-ai/vale-action@reviewdog
         with:

@@ -4,7 +4,7 @@
 //!
 //! Unlike the fixed-opcode-byte specs ([`crate::mos6502`], [`crate::z80`]),
 //! the PDP-11 packs its operands as **fields inside the opcode word** — a
-//! 3-bit mode + 3-bit register per operand — so enumerating one [`Form`] per
+//! 3-bit mode + 3-bit register per operand — so enumerating one `Form` per
 //! addressing-mode combination is impractical (8 modes × 8 registers, squared
 //! for two-operand instructions). This module is therefore a **bespoke table**:
 //! one [`Insn`] per mnemonic carrying its base opcode and its [`Class`] (which
@@ -213,7 +213,7 @@ pub fn decode(word: u16) -> Option<&'static Insn> {
 
 /// Minimal set for the [`Dialect`](../../asm198x/dialect/trait.Dialect.html)
 /// trait — the PDP-11 dialect encodes through the computed-operand seam, not
-/// [`Form`]s, so only the endianness is load-bearing here.
+/// `Form`s, so only the endianness is load-bearing here.
 pub const SET: InstructionSet = InstructionSet {
     cpu: "DEC PDP-11",
     endianness: Endianness::Little,

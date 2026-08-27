@@ -200,7 +200,7 @@ pub fn decode(word: u16) -> Option<&'static Insn> {
 }
 
 /// Minimal set for the `Dialect` trait — the TMS9900 dialect encodes through the
-/// computed-operand seam, not [`Form`]s, so only the endianness is load-bearing.
+/// computed-operand seam, not `Form`s, so only the endianness is load-bearing.
 pub const SET: InstructionSet = InstructionSet {
     cpu: "TI TMS9900",
     endianness: Endianness::Big,

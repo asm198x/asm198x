@@ -15,7 +15,7 @@
 //! could check must be generated, never typed.
 //!
 //! **Derived where it can be, tested where it cannot.** Most dialects hand a
-//! [`WalkSemantics`](crate::dialects::ca65_flat::WalkSemantics) const to the
+//! `WalkSemantics` const to the
 //! shared walk, and those rows are read straight off it, so the table and the
 //! behaviour are one fact. acme and the Z80 pair resolve inside their own
 //! walks against the requesting file, with no const to read; their rows are

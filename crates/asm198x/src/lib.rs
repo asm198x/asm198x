@@ -1,16 +1,16 @@
 //! Asm198x — a family of modern assemblers for retro CPUs.
 //!
 //! The crate is built around one **dialect-agnostic engine** and a set of
-//! **dialect front-ends**. The engine ([`engine`]) owns the two-pass driver,
+//! **dialect front-ends**. The engine (`engine`) owns the two-pass driver,
 //! symbol table, expression evaluation, directive semantics, and byte
-//! emission — none of it CPU- or syntax-specific. A [`Dialect`](dialect::Dialect)
-//! ([`dialects`]) tokenises one source syntax and resolves each instruction's
+//! emission — none of it CPU- or syntax-specific. A `Dialect`
+//! (`dialects`) tokenises one source syntax and resolves each instruction's
 //! addressing mode against an [`isa`] spec, producing the engine's statement
 //! stream. Instruction *encoding* comes entirely from the shared [`isa`] spec.
 //!
 //! This three-way seam — **engine ↔ dialect ↔ spec** — is what lets one binary
 //! span many CPUs and many source dialects: a new dialect is a new module in
-//! [`dialects`], a new CPU is a new spec in [`isa`], and the engine is reused
+//! `dialects`, a new CPU is a new spec in [`isa`], and the engine is reused
 //! unchanged. See `decisions/syntax-stance.md` and the umbrella decision
 //! `asm198x-and-shared-isa-spec.md`.
 //!

@@ -29,7 +29,7 @@
 //! ## Cycles
 //!
 //! `base` is the T-state count. Conditional control flow uses
-//! [`cond`]: `base` is the not-taken cost and `branch_taken` the extra T-states
+//! `cond`: `base` is the not-taken cost and `branch_taken` the extra T-states
 //! when the condition holds (the Z80 has no 6502-style page-cross term).
 //!
 //! ## Coverage
@@ -1036,7 +1036,7 @@ const TWO_N: &[Operand] = &[IMM8, IMM8]; // NEXTREG reg,val
 /// assembly does not see them. One surprise the reference tools and the Next
 /// documentation agree on: `PUSH nn`'s immediate is stored **big-endian** (high
 /// byte first) — the only big-endian operand in the whole Z80/Z80N set — so it
-/// uses [`IMM16_BE`], not the usual little-endian `IMM16`.
+/// uses `IMM16_BE`, not the usual little-endian `IMM16`.
 pub const NEXT: InstructionSet = InstructionSet {
     cpu: "Zilog Z80N",
     endianness: Endianness::Little,

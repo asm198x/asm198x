@@ -2,7 +2,7 @@
 //!
 //! The 65816 keeps every documented 6502 opcode encoding unchanged and adds new
 //! opcodes (in the 6502's undefined slots) plus new addressing modes on existing
-//! mnemonics. So this is an *extension* [`InstructionSet`](crate::InstructionSet)
+//! mnemonics. So this is an *extension* [`InstructionSet`]
 //! layered on [`crate::mos6502`] exactly as [`crate::z80::NEXT`] layers on the
 //! Z80: the engine consults the 6502 set first, then this. It carries only what
 //! the 6502 set lacks — never a duplicate of a 6502 form.
