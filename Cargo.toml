@@ -83,6 +83,20 @@ tap = "asm198x/homebrew-tap"
 publish-jobs = ["homebrew"]
 targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
 pr-run-mode = "plan"
+# Restrict dist to tags that start with this. Without it, dist fires on *any*
+# version-shaped tag — `**[0-9]+.[0-9]+.[0-9]+*` — so tagging one of the
+# library crates hands it a package it cannot build. That is not hypothetical
+# here: `isa-disasm` cut a GitHub Release containing only a dist-manifest.json,
+# and it took the "Latest" badge.
+#
+# The family's `{org}198x-` crate naming makes this free: the existing
+# `asm198x-vX.Y.Z` tags already carry the prefix, so no tag was rewritten and
+# no history moved. The per-crate `git_tag_enable = false` blocks in
+# release-plz.toml stop being load-bearing safety and become a preference —
+# forgetting one for a new crate can no longer break a release.
+#
+# Note this renames the generated workflow to asm198x-release.yml.
+tag-namespace = "asm198x"
 # Announce each release in Discord. A custom job rather than an `on: release`
 # workflow: the release is cut by `gh release create` with GITHUB_TOKEN, and a
 # release created with that token fires no `release: published` event for
