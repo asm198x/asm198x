@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 278 word(s) outside our surface, across the references installed
+# 268 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -116,21 +116,18 @@ setstr
 
 ## vasm (vasm 2.0b (c) in 2002-2025 Volker Barthelmann)
 # 4215 candidate(s) harvested; 183 recognised here, 527 more the tool itself
-# refuses on this target; 64 of the 183 outside our surface
+# refuses on this target; 54 of the 183 outside our surface
 cpu32
 dr
 dw
 dx
 fpu
 offset
-rs
 ac68080
 auto
 basereg
 blk
 cargs
-clrfo
-clrso
 comment
 cseg
 db
@@ -144,7 +141,6 @@ endb
 endm
 erem
 far
-fo
 if1
 if2
 ifmacrod
@@ -173,13 +169,7 @@ popsection
 pushsection
 rem
 rorg
-rseven
-rsreset
-rsset
 sdreg
-setfo
-setso
-so
 text
 
 ## rgbasm (rgbasm v1.0.3)
