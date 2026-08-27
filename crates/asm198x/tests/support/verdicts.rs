@@ -220,6 +220,11 @@ pub fn assemble_probe(dialect: &str, body: &str) -> Option<Result<Vec<u8>, Strin
 /// different sources: acme's probes are assembled with a `* = $0000` prepended,
 /// and a formatter handed the bare body would fail for want of an origin rather
 /// than for the reason under test.
+///
+/// **A dialect missing from this list is not checked at all.** `rgbasm` was
+/// absent while its text layer landed, so eight probes assembled and would not
+/// format and nothing said so. Adding a dialect's formatter here is part of
+/// building it, not a later tidy.
 pub fn format_probe(dialect: &str, body: &str) -> Option<Result<String, String>> {
     let result = match dialect {
         "acme" => asm198x::format_acme(&format!("* = $0000\n{body}")),
@@ -229,6 +234,7 @@ pub fn format_probe(dialect: &str, body: &str) -> Option<Result<String, String>>
         "lwasm" => asm198x::format_lwasm(body),
         "vasm" => asm198x::format_vasm(body),
         "ca65-816" => asm198x::format_ca65_816(body),
+        "rgbasm" => asm198x::format_rgbasm(body),
         _ => return None,
     };
     Some(result.map_err(|e| e.to_string()))
