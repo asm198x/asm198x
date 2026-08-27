@@ -2360,8 +2360,10 @@ mod tests {
             let out = crate::assemble_rgbasm(&format!("SECTION \"a\", ROM0[0]\n{src}\n"))
                 .unwrap_or_else(|e| panic!("{src}: {e}"));
             out.bytes
-                .chunks_exact(4)
-                .map(|c| i64::from(i32::from_le_bytes([c[0], c[1], c[2], c[3]])))
+                .as_chunks::<4>()
+                .0
+                .iter()
+                .map(|c| i64::from(i32::from_le_bytes(*c)))
                 .collect::<Vec<_>>()
         };
         // `1.0` is `$10000`, and the fraction rounds to nearest: `3.7` is
