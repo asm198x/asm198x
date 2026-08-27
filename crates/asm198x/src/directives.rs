@@ -24,7 +24,7 @@
 /// What the assembler does with a directive it accepts.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Category {
-    /// It produces an [`crate::contract::Operation`].
+    /// It produces an `Operation`.
     Operation,
     /// The reference assembler accepts it, it changes no bytes, and we accept
     /// and discard it so source carrying it still assembles.

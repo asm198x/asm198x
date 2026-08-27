@@ -84,7 +84,7 @@ pub struct Ctl {
     /// The base opcode (top byte for `Jr`/`Djnz`/`Calr`, full word for `Ret`,
     /// the `MM`-independent `base6` for `Jump`).
     pub base: u16,
-    /// Allowed addressing modes ([`Jump`](CtlKind::Jump) only).
+    /// Allowed addressing modes ([`Jump`] only).
     pub modes: u8,
     /// Carries a condition code in its low nibble (`JP`, `JR`, `RET`).
     pub cc: bool,
@@ -531,7 +531,7 @@ pub struct Shift {
     pub kind: ShiftKind,
     /// [`Shift`](ShiftKind::Shift): the low-nibble sub-opcode (word logical 1 /
     /// arithmetic 9, long logical 5 / arithmetic 0xD).
-    /// [`Rotate`](ShiftKind::Rotate): the rotate type (0–3), laid down as
+    /// [`Rotate`]: the rotate type (0–3), laid down as
     /// `type·4 + (count − 1)·2`.
     pub sel: u8,
     /// [`Shift`](ShiftKind::Shift) only: a right variant (`SRx`), so the encoder
@@ -810,11 +810,11 @@ pub fn bit_decode(top: u8) -> Option<&'static Bit> {
 pub struct MulDiv {
     pub mnemonic: &'static str,
     pub base6: u8,
-    /// The destination accumulator's size: [`Long`](Size::Long) (`rr`) or
+    /// The destination accumulator's size: [`Long`] (`rr`) or
     /// [`Quad`](Size::Quad) (`rq`).
     pub dest: Size,
     /// The source operand's size (and immediate width):
-    /// [`Word`](Size::Word) or [`Long`](Size::Long).
+    /// [`Word`] or [`Long`].
     pub src: Size,
     pub summary: &'static str,
 }
@@ -895,7 +895,7 @@ pub enum BlockShape {
     /// `CPx  Rr, @Rs, Rc, cc` — source pointer in word 1, a data **register** in
     /// word 2, the condition code in the control nibble.
     Compare,
-    /// `CPSx @Rd, @Rs, Rc, cc` — like [`Load`](BlockShape::Load) but the control
+    /// `CPSx @Rd, @Rs, Rc, cc` — like [`Load`] but the control
     /// nibble is a condition code.
     CompareString,
     /// `TRxB / TRTxB @Rd, @Rs, Rc` — dest pointer in word 1, source pointer in
@@ -924,12 +924,12 @@ pub struct Block {
     /// Word 1's low nibble — identifies the operation, direction, and (for
     /// `CPx`/`CPSx`) the repeat bit.
     pub op_nib: u8,
-    /// Word 2's low nibble for the fixed-control shapes ([`Load`](BlockShape::Load)
-    /// single/repeat, [`Translate`](BlockShape::Translate)); the condition-carrying
+    /// Word 2's low nibble for the fixed-control shapes ([`Load`]
+    /// single/repeat, [`Translate`]); the condition-carrying
     /// shapes read a condition code here instead.
     pub ctrl: u8,
     pub shape: BlockShape,
-    /// The data register's size for [`Compare`](BlockShape::Compare); word / byte
+    /// The data register's size for [`Compare`]; word / byte
     /// otherwise selects only the top byte.
     pub size: Size,
     pub summary: &'static str,
@@ -2562,7 +2562,7 @@ impl Shift {
     ///   word — negative for the right-hand variants, and confined to the low
     ///   byte when the operand is a byte. A count of 1 is legal at every size
     ///   (see [`shift_max`]), so that is the one shown.
-    /// - A [`Rotate`](ShiftKind::Rotate) has no following word at all: the
+    /// - A [`Rotate`] has no following word at all: the
     ///   count is folded into the low nibble, which is why `sel` there is the
     ///   rotate *type* rather than the nibble itself.
     #[must_use]

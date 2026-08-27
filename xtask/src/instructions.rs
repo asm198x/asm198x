@@ -21,7 +21,7 @@
 //! **empty** — a placeholder beside the real, bespoke table. That is a trap
 //! worth naming: reading the exports alone suggests they are on the standard
 //! model, and generating from them produces a page confidently reporting zero
-//! instructions. [`every_listed_cpu_has_instructions`] exists so that cannot
+//! instructions. `every_listed_cpu_has_instructions` exists so that cannot
 //! happen quietly again.
 
 use std::fmt::Write as _;

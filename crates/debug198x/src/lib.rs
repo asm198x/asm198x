@@ -9,7 +9,7 @@
 //!
 //! ## Serialization — NDJSON
 //!
-//! One JSON object per line, discriminated by a `t` field ([`Record`]). Every
+//! One JSON object per line, discriminated by a `t` field (`Record`). Every
 //! consumer already has a JSON parser, records grep and diff line-stably, and a
 //! reader **skips record types it does not recognize** — so the format grows
 //! additively without breaking older readers (the guarantee that freezes at v1).

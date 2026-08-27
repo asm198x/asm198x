@@ -6,7 +6,7 @@
 //! can render running code without pulling in the toolchain — see
 //! `../../decisions/disassembler-crate.md`.
 //!
-//! For the byte-opcode CPUs (6502/Z80), [`decode_one`] matches opcode bytes
+//! For the byte-opcode CPUs (6502/Z80), `decode_one` matches opcode bytes
 //! against the instruction set and reads the operand bytes, with no hand-written
 //! decode tables; the 68000 is field-based (the inverse of its encoder). The
 //! round-trip the authored-spec architecture was justified by — assemble →

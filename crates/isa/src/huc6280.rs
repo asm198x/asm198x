@@ -2,7 +2,7 @@
 //!
 //! The HuC6280 (PC Engine / TurboGrafx-16 CPU) is a 65C02 superset. Like
 //! [`crate::mos65816`] and [`crate::z80::NEXT`], this is an *extension*
-//! [`InstructionSet`](crate::InstructionSet) layered on [`crate::mos6502`]: the
+//! [`InstructionSet`] layered on [`crate::mos6502`]: the
 //! engine consults the 6502 set first, then this. It carries only what the NMOS
 //! 6502 lacks — the 65C02 additions the HuC6280 inherits, the Rockwell bit
 //! instructions (`rmb`/`smb`/`bbr`/`bbs`), and the HuC6280-specific instructions.

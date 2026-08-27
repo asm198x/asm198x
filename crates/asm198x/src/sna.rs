@@ -24,7 +24,7 @@ const ATTR_LEN: usize = 0x300;
 /// The Spectrum's default attribute byte: black ink (0) on white paper (7).
 const DEFAULT_ATTR: u8 = 0x38;
 
-/// Serialize an [`Assembly`] into a 48K `.sna` snapshot (49179 bytes).
+/// Serialize an [`AssemblyResult`](crate::AssemblyResult) into a 48K `.sna` snapshot (49179 bytes).
 ///
 /// The program's code is laid into a zero-filled RAM image at its origin, the
 /// entry point (`end <addr>`) is pushed onto the stack at `$FFFC`, and the
