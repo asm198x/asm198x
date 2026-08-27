@@ -15,7 +15,7 @@ Every repository within the 198x family should inherit these principles and add 
 
 Programming, emulation, tooling, preservation and education are all expressions of that single goal.
 
-The project does not merely teach *how* to build software.
+The project teaches more than *how* to build software.
 
 It continually asks:
 
@@ -51,7 +51,7 @@ Software, documentation and tooling exist to deepen understanding.
 
 ## Reality over mythology
 
-Document the world as it actually is.
+Document the world as it is.
 
 Not as people remember it.
 
@@ -176,7 +176,7 @@ Critique:
 - evidence
 - assumptions
 
-Do not dismiss ideas simply because they are ambitious.
+Do not dismiss ideas because they are ambitious.
 
 ---
 
