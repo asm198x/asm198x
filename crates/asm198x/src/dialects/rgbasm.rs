@@ -638,8 +638,11 @@ fn number(text: &str, line: usize) -> Result<i64, AsmError> {
     if !fraction.chars().all(|c| c.is_ascii_digit()) {
         return Err(AsmError::new(line, format!("`{text}` is not a number")));
     }
-    // The fraction as a rational, scaled and truncated: `.7` at 16 bits is
-    // `7 * 65536 / 10`, which is `45875.2` and lands on `45875`.
+    // The fraction as a rational, scaled and rounded to nearest with a half
+    // going away from zero (the sign is a separate unary minus, so the value
+    // here is never negative). `.1` at 16 bits is `65536 / 10`, which is
+    // `6553.6` and lands on `6554` — truncation would answer `6553`, and
+    // rgbasm v1.0.3 emits `$199A`.
     let scale = 1i64 << precision;
     let denominator = 10i64
         .checked_pow(fraction.len() as u32)
@@ -647,7 +650,7 @@ fn number(text: &str, line: usize) -> Result<i64, AsmError> {
     let numerator: i64 = fraction
         .parse()
         .map_err(|_| AsmError::new(line, format!("`{text}` is not a number")))?;
-    Ok(whole * scale + numerator * scale / denominator)
+    Ok(whole * scale + (numerator * scale + denominator / 2) / denominator)
 }
 
 fn expr_function(name: &str, args: Vec<mos6502::ExprArg>, line: usize) -> Result<Expr, AsmError> {
@@ -1940,10 +1943,16 @@ mod tests {
                 .map(|c| i64::from(i32::from_le_bytes([c[0], c[1], c[2], c[3]])))
                 .collect::<Vec<_>>()
         };
-        // `1.0` is `$10000`, and the fraction truncates toward zero: `3.7` is
-        // `$3B333`, not a rounded `$3B334`.
+        // `1.0` is `$10000`, and the fraction rounds to nearest: `3.7` is
+        // `$3B333` because `242483.2` rounds down, and `0.1` is `$199A`
+        // because `6553.6` rounds up. Truncation agrees with the first and
+        // not the second, which is why both are here.
         assert_eq!(longs("dl 1.0"), vec![0x1_0000]);
         assert_eq!(longs("dl 3.7"), vec![0x3_B333]);
+        assert_eq!(longs("dl 0.1, 0.3"), vec![0x199A, 0x4CCD]);
+        // A half goes away from zero, which `q1` and `q2` can show and 16 bits
+        // of precision cannot reach with a short literal.
+        assert_eq!(longs("dl 0.25q1, 1.25q1, 0.125q2"), vec![1, 3, 1]);
         assert_eq!(longs("dl -1.5"), vec![-0x1_8000]);
         // A `q` suffix names another precision.
         assert_eq!(longs("dl 3.7q8"), vec![0x3B3]);
