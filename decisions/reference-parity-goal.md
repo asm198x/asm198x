@@ -95,16 +95,16 @@ should not be a standing state —
 
 ## Where the count stands
 
-Measured 2026-08-26 against the installed references:
+Measured 2026-08-27 against the installed references:
 
 | Reference | Outstanding | Of |
 |---|---|---|
 | acme 0.97 | 0 | 74 |
 | lwasm 4.25 | 10 | 257 |
-| sjasmplus 1.21.0 | 78 | 264 |
-| vasm 2.0b | 87 | 183 |
-| ca65 V2.18 | 113 | 225 |
-| rgbasm 1.0.3 | 114 | 306 |
+| ca65 V2.18 | 40 | 225 |
+| vasm 2.0b | 54 | 183 |
+| sjasmplus 1.21.0 | 60 | 264 |
+| rgbasm 1.0.3 | 91 | 306 |
 
 ACME is complete. lwasm's remaining ten are the deferrals and open questions
 above and nothing else.

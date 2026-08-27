@@ -8,7 +8,7 @@ Game Boy SM83, RGBDS syntax.
 
 ## Directives
 
-20 directives, 66 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+20 directives, 67 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -25,7 +25,7 @@ Game Boy SM83, RGBDS syntax.
 | `print` | `print`, `println` |  |
 | `repeat` | `rept`, `endr` |  |
 | `reserve` | `ds` |  |
-| `string-functions` | `strcat`, `strupr`, `strlwr`, `strsub`, `strslice`, `strlen`, `strcmp`, `strfind`, `strin`, `strrin`, `strrpl` | Used inside an expression, not as a statement |
+| `string-functions` | `strcat`, `strfmt`, `strupr`, `strlwr`, `strsub`, `strslice`, `strlen`, `strcmp`, `strfind`, `strin`, `strrin`, `strrpl` | Used inside an expression, not as a statement |
 | `string-symbol` | `equs` |  |
 | `unsupported-blocks` | `union`, `nextu`, `endu`, `load`, `endl`, `align`, `for`, `break`, `endsection` | Recognised, and not implemented |
 | `unsupported-option` | `opt`, `popo`, `pusho`, `popc`, `pushc`, `pops`, `pushs`, `charmap`, `newcharmap`, `setcharmap` | Recognised, and not implemented |

@@ -43,19 +43,47 @@ impl Arg {
         }
     }
 
-    /// A whole-number argument, which the pass folds itself: an index or a
-    /// length is known where it stands or the function cannot be folded.
-    pub(crate) fn number(&self, name: &str, line: usize) -> Result<i64, AsmError> {
-        let text = match self {
+    /// The argument's text, whichever kind it is — what a number is read from.
+    fn raw(&self) -> &str {
+        match self {
             Arg::Bare(b) => b.trim(),
             Arg::Text(t) => t,
-        };
-        parse_int(text).ok_or_else(|| {
+        }
+    }
+}
+
+/// What a folded call may consult: the numeric constants defined **above** it,
+/// read through the dialect's own expression grammar.
+///
+/// The pass walks in source order and folds the environment as it goes, so a
+/// constant is in scope exactly where the reference has it in scope.
+pub(crate) struct Scope<'a> {
+    numbers: &'a BTreeMap<String, i64>,
+    evaluate: &'a Evaluate<'a>,
+}
+
+/// Reading a number in a dialect's own expression grammar, against the
+/// constants above the line.
+type Evaluate<'a> = dyn Fn(&str, &BTreeMap<String, i64>, usize) -> Option<i64> + 'a;
+
+impl Scope<'_> {
+    /// A whole-number argument, which the pass works out where it stands: an
+    /// index, a length, or a value to format.
+    ///
+    /// # Errors
+    ///
+    /// Anything the pass cannot reduce to a number here — including the one
+    /// case `decisions/string-and-text-layer.md` names, a label's address,
+    /// which is not assigned until long after this pass has run.
+    pub(crate) fn number(&self, arg: &Arg, name: &str, line: usize) -> Result<i64, AsmError> {
+        let text = arg.raw();
+        (self.evaluate)(text, self.numbers, line).ok_or_else(|| {
             AsmError::new(
                 line,
                 format!(
-                    "`{name}` needs a number it can work out where it stands, and `{text}` \
-                     is not one"
+                    "`{name}` needs a number it can work out where it stands, and `{text}` is \
+                     not one: this pass runs before the layout, so a label's address cannot be \
+                     reached from here"
                 ),
             )
         })
@@ -92,9 +120,33 @@ pub(crate) trait TextSyntax {
     /// of its value (the value is folded by the pass before it is stored).
     fn definition(&self, line: &str) -> Option<(String, String)>;
 
+    /// Recognise a **numeric** constant definition and work its value out
+    /// against the constants above it. The line itself is kept as it stands —
+    /// unlike a string symbol, a constant is a statement the ordinary parse
+    /// still reads — and its value joins the environment the lines below it
+    /// fold against.
+    fn constant(&self, line: &str, numbers: &BTreeMap<String, i64>) -> Option<(String, i64)> {
+        let _ = (line, numbers);
+        None
+    }
+
+    /// Read a number in this dialect's expression grammar, against the
+    /// constants collected above the line. The default reads a literal, which
+    /// is all a dialect with no constants environment needs.
+    fn evaluate(&self, text: &str, numbers: &BTreeMap<String, i64>, line: usize) -> Option<i64> {
+        let _ = (numbers, line);
+        parse_int(text)
+    }
+
     /// Fold one call. `None` means the name is not a string function here, and
     /// the call is left alone for the ordinary parse to deal with.
-    fn function(&self, name: &str, args: &[Arg], line: usize) -> Result<Option<Folded>, AsmError>;
+    fn function(
+        &self,
+        name: &str,
+        args: &[Arg],
+        scope: &Scope,
+        line: usize,
+    ) -> Result<Option<Folded>, AsmError>;
 
     /// Whether `{name}` splices a string symbol into the middle of a token.
     fn interpolates(&self) -> bool {
@@ -110,20 +162,38 @@ pub(crate) trait TextSyntax {
 /// pass cannot work out, or a function given the wrong number of arguments.
 pub(crate) fn expand<S: TextSyntax>(syntax: &S, source: &str) -> Result<String, AsmError> {
     let mut symbols: BTreeMap<String, String> = BTreeMap::new();
+    let mut numbers: BTreeMap<String, i64> = BTreeMap::new();
     let mut out = String::with_capacity(source.len());
+    let evaluate = |t: &str, n: &BTreeMap<String, i64>, l: usize| syntax.evaluate(t, n, l);
     for (index, raw) in source.lines().enumerate() {
         let line = index + 1;
         if let Some((name, value)) = syntax.definition(raw) {
             // The value is folded now, against the symbols above it, and the
             // definition line is kept as a blank so every later span still
             // names the line its author wrote.
-            let value = fold_line(syntax, &substitute(&value, &symbols, syntax), line)?;
+            let scope = Scope {
+                numbers: &numbers,
+                evaluate: &evaluate,
+            };
+            let value = fold_line(syntax, &scope, &substitute(&value, &symbols, syntax), line)?;
             symbols.insert(name, unquote(value.trim()));
             out.push('\n');
             continue;
         }
         let substituted = substitute(raw, &symbols, syntax);
-        out.push_str(&fold_line(syntax, &substituted, line)?);
+        let folded = {
+            let scope = Scope {
+                numbers: &numbers,
+                evaluate: &evaluate,
+            };
+            fold_line(syntax, &scope, &substituted, line)?
+        };
+        // A constant is read off the folded line, so `N EQU STRLEN("abc")`
+        // joins the environment as the number it became.
+        if let Some((name, value)) = syntax.constant(&folded, &numbers) {
+            numbers.insert(name, value);
+        }
+        out.push_str(&folded);
         out.push('\n');
     }
     Ok(out)
@@ -234,13 +304,18 @@ fn substitute<S: TextSyntax>(line: &str, symbols: &BTreeMap<String, String>, syn
 }
 
 /// Fold every string-function call in one line, innermost first.
-fn fold_line<S: TextSyntax>(syntax: &S, line: &str, at: usize) -> Result<String, AsmError> {
+fn fold_line<S: TextSyntax>(
+    syntax: &S,
+    scope: &Scope,
+    line: &str,
+    at: usize,
+) -> Result<String, AsmError> {
     let mut current = line.to_string();
     // A fold can expose another (`STRLEN(STRCAT(...))`), so the line is walked
     // again until it stops changing. The bound is the line's own length, which
     // no sequence of folds can exceed in count.
     for _ in 0..=line.len() {
-        match fold_once(syntax, &current, at)? {
+        match fold_once(syntax, scope, &current, at)? {
             Some(next) => current = next,
             None => return Ok(current),
         }
@@ -252,7 +327,12 @@ fn fold_line<S: TextSyntax>(syntax: &S, line: &str, at: usize) -> Result<String,
 }
 
 /// Fold the **innermost, leftmost** call, or `None` when there is none left.
-fn fold_once<S: TextSyntax>(syntax: &S, line: &str, at: usize) -> Result<Option<String>, AsmError> {
+fn fold_once<S: TextSyntax>(
+    syntax: &S,
+    scope: &Scope,
+    line: &str,
+    at: usize,
+) -> Result<Option<String>, AsmError> {
     let bytes = line.as_bytes();
     let word = |c: u8| c.is_ascii_alphanumeric() || c == b'_' || c == b'.';
     let mut quote: Option<u8> = None;
@@ -284,12 +364,12 @@ fn fold_once<S: TextSyntax>(syntax: &S, line: &str, at: usize) -> Result<Option<
                     let inner = &line[j + 1..close];
                     // Innermost first: a call inside the arguments is folded
                     // before this one, so every argument is already a literal.
-                    if has_call(syntax, inner) {
+                    if has_call(syntax, scope, inner) {
                         i = j + 1;
                         continue;
                     }
                     let args = split_args(inner);
-                    if let Some(folded) = syntax.function(name, &args, at)? {
+                    if let Some(folded) = syntax.function(name, &args, scope, at)? {
                         let text = match folded {
                             Folded::Text(t) => format!("\"{}\"", escape(&t)),
                             Folded::Number(n) => n.to_string(),
@@ -307,7 +387,7 @@ fn fold_once<S: TextSyntax>(syntax: &S, line: &str, at: usize) -> Result<Option<
 
 /// Whether the text holds a call this dialect would fold — used to find the
 /// innermost one rather than folding an outer call over unfolded arguments.
-fn has_call<S: TextSyntax>(syntax: &S, text: &str) -> bool {
+fn has_call<S: TextSyntax>(syntax: &S, scope: &Scope, text: &str) -> bool {
     let bytes = text.as_bytes();
     let word = |c: u8| c.is_ascii_alphanumeric() || c == b'_' || c == b'.';
     let mut quote: Option<u8> = None;
@@ -333,14 +413,14 @@ fn has_call<S: TextSyntax>(syntax: &S, text: &str) -> bool {
             }
             if bytes.get(j) == Some(&b'(')
                 && syntax
-                    .function(&text[i..j], &[], 0)
+                    .function(&text[i..j], &[], scope, 0)
                     .is_ok_and(|f| f.is_some())
             {
                 return true;
             }
             // A name the dialect knows but which refused an empty argument
             // list is still a call.
-            if bytes.get(j) == Some(&b'(') && syntax.function(&text[i..j], &[], 0).is_err() {
+            if bytes.get(j) == Some(&b'(') && syntax.function(&text[i..j], &[], scope, 0).is_err() {
                 return true;
             }
             i = j;

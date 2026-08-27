@@ -1071,8 +1071,8 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "string-functions",
         pattern: Pattern::Exact(&[
-            "strcat", "strupr", "strlwr", "strsub", "strslice", "strlen", "strcmp", "strfind",
-            "strin", "strrin", "strrpl",
+            "strcat", "strfmt", "strupr", "strlwr", "strsub", "strslice", "strlen", "strcmp",
+            "strfind", "strin", "strrin", "strrpl",
         ]),
         category: Category::ExpressionWord,
     },
@@ -1741,10 +1741,29 @@ impl text::TextSyntax for RgbasmText {
         true
     }
 
+    /// `[DEF] NAME EQU expr` and `[DEF] NAME = expr`, read through the same
+    /// parser the statement itself uses, so the environment the text pass
+    /// folds against and the one the engine binds cannot drift apart.
+    fn constant(&self, line: &str, numbers: &BTreeMap<String, i64>) -> Option<(String, i64)> {
+        let found = constant(macros::without_comment(line).trim(), 0)
+            .ok()
+            .flatten()?;
+        let value = fold_const(&found.expr, numbers, 0).ok()?;
+        Some((found.name, value))
+    }
+
+    /// An rgbasm expression over the constants above the line. A label's
+    /// address is deliberately unreachable here: the layout has not run.
+    fn evaluate(&self, text: &str, numbers: &BTreeMap<String, i64>, line: usize) -> Option<i64> {
+        let expr = value(text, line).ok()?;
+        fold_const(&expr, numbers, line).ok()
+    }
+
     fn function(
         &self,
         name: &str,
         args: &[text::Arg],
+        scope: &text::Scope,
         line: usize,
     ) -> Result<Option<text::Folded>, AsmError> {
         use text::Folded;
@@ -1752,6 +1771,7 @@ impl text::TextSyntax for RgbasmText {
         let known = matches!(
             lower.as_str(),
             "strcat"
+                | "strfmt"
                 | "strupr"
                 | "strlwr"
                 | "strsub"
@@ -1808,16 +1828,16 @@ impl text::TextSyntax for RgbasmText {
             "strsub" => {
                 arity(3)?;
                 let text = chars(&args[0])?;
-                let start = args[1].number(name, line)?.max(1) as usize - 1;
-                let len = args[2].number(name, line)?.max(0) as usize;
+                let start = scope.number(&args[1], name, line)?.max(1) as usize - 1;
+                let len = scope.number(&args[2], name, line)?.max(0) as usize;
                 Folded::Text(text.into_iter().skip(start).take(len).collect())
             }
             // 0-based, and an end: `STRSLICE("abcd", 1, 3)` is `bc`.
             "strslice" => {
                 arity(3)?;
                 let text = chars(&args[0])?;
-                let start = args[1].number(name, line)?.max(0) as usize;
-                let end = args[2].number(name, line)?.max(0) as usize;
+                let start = scope.number(&args[1], name, line)?.max(0) as usize;
+                let end = scope.number(&args[2], name, line)?.max(0) as usize;
                 Folded::Text(text.into_iter().take(end).skip(start).collect())
             }
             "strlen" => {
@@ -1851,6 +1871,15 @@ impl text::TextSyntax for RgbasmText {
                 let (h, n) = (args[0].text(name, line)?, args[1].text(name, line)?);
                 Folded::Number(h.rfind(n).map_or(0, |i| h[..i].chars().count() as i64 + 1))
             }
+            // printf's shape, with rgbasm's own rules: the flags come in a
+            // fixed order, `#` is a base prefix rather than C's alternate
+            // form, and `%f` reads its argument as Q16.16.
+            "strfmt" => {
+                if args.is_empty() {
+                    return Err(AsmError::new(line, "`STRFMT` needs a format string"));
+                }
+                Folded::Text(strfmt(args[0].text(name, line)?, &args[1..], scope, line)?)
+            }
             "strrpl" => {
                 arity(3)?;
                 let (h, from, to) = (
@@ -1863,6 +1892,224 @@ impl text::TextSyntax for RgbasmText {
             other => unreachable!("`{other}` was matched as known and then not folded"),
         }))
     }
+}
+
+/// One `%` conversion in an rgbasm format string.
+///
+/// The flags are parsed in a **fixed order** — sign, then `#`, then `-`, then
+/// `0` — because that is what v1.0.3 accepts: `%+#x` assembles and `%#+x` is
+/// "Invalid format spec". Anything a C programmer would expect to be
+/// order-free is therefore not.
+#[derive(Default)]
+struct FormatSpec {
+    /// `+` or a space: what stands in for the sign of a value that has none.
+    sign: Option<char>,
+    /// `#`: `$`/`%`/`&` before a hex/binary/octal body, and rgbasm's `q16`
+    /// suffix after a fixed-point one.
+    prefix: bool,
+    left: bool,
+    zero: bool,
+    width: usize,
+    /// Digits after the point, which only `%f` takes.
+    precision: Option<usize>,
+    kind: char,
+}
+
+/// Parse one spec, starting just after the `%`, and answer it with the index of
+/// the first byte past it.
+fn format_spec(fmt: &[u8], mut i: usize) -> Option<(FormatSpec, usize)> {
+    let mut spec = FormatSpec::default();
+    if matches!(fmt.get(i), Some(b'+' | b' ')) {
+        spec.sign = Some(fmt[i] as char);
+        i += 1;
+    }
+    if fmt.get(i) == Some(&b'#') {
+        spec.prefix = true;
+        i += 1;
+    }
+    if fmt.get(i) == Some(&b'-') {
+        spec.left = true;
+        i += 1;
+    }
+    if fmt.get(i) == Some(&b'0') {
+        spec.zero = true;
+        i += 1;
+    }
+    while let Some(d) = fmt.get(i).filter(|c| c.is_ascii_digit()) {
+        spec.width = spec.width * 10 + usize::from(d - b'0');
+        i += 1;
+    }
+    if fmt.get(i) == Some(&b'.') {
+        i += 1;
+        let mut precision = 0usize;
+        while let Some(d) = fmt.get(i).filter(|c| c.is_ascii_digit()) {
+            precision = precision * 10 + usize::from(d - b'0');
+            i += 1;
+        }
+        spec.precision = Some(precision);
+    }
+    spec.kind = *fmt.get(i)? as char;
+    if !matches!(spec.kind, 'd' | 'u' | 'x' | 'X' | 'b' | 'o' | 'f' | 's') {
+        return None;
+    }
+    Some((spec, i + 1))
+}
+
+/// Fold one `STRFMT` call.
+fn strfmt(
+    fmt: &str,
+    args: &[text::Arg],
+    scope: &text::Scope,
+    line: usize,
+) -> Result<String, AsmError> {
+    let bytes = fmt.as_bytes();
+    let mut out = String::with_capacity(fmt.len());
+    let mut used = 0usize;
+    let mut i = 0usize;
+    while i < bytes.len() {
+        if bytes[i] != b'%' {
+            let start = i;
+            while i < bytes.len() && bytes[i] != b'%' {
+                i += 1;
+            }
+            out.push_str(&fmt[start..i]);
+            continue;
+        }
+        // `%%` is a literal per cent and takes no argument.
+        if bytes.get(i + 1) == Some(&b'%') {
+            out.push('%');
+            i += 2;
+            continue;
+        }
+        if i + 1 >= bytes.len() {
+            return Err(AsmError::new(
+                line,
+                "`STRFMT` was given a format string ending in a lone `%`",
+            ));
+        }
+        let (spec, next) = format_spec(bytes, i + 1).ok_or_else(|| {
+            AsmError::new(
+                line,
+                format!(
+                    "`STRFMT` cannot read the format spec for argument {}: rgbasm takes the \
+                     flags in the order `+`/space, `#`, `-`, `0`, and only `%f` takes a \
+                     precision",
+                    used + 1
+                ),
+            )
+        })?;
+        let arg = args.get(used).ok_or_else(|| {
+            AsmError::new(
+                line,
+                format!(
+                    "`STRFMT` has {} format spec(s) and was given {} argument(s) to fill them",
+                    used + 1,
+                    args.len()
+                ),
+            )
+        })?;
+        out.push_str(&format_one(&spec, arg, scope, line)?);
+        used += 1;
+        i = next;
+    }
+    if used < args.len() {
+        return Err(AsmError::new(
+            line,
+            format!(
+                "`STRFMT` was given {} argument(s) and has {used} format spec(s) to put them in",
+                args.len()
+            ),
+        ));
+    }
+    Ok(out)
+}
+
+/// Render one argument through one spec.
+fn format_one(
+    spec: &FormatSpec,
+    arg: &text::Arg,
+    scope: &text::Scope,
+    line: usize,
+) -> Result<String, AsmError> {
+    let refuse = |what: &str| AsmError::new(line, format!("`STRFMT` cannot format {what}"));
+    let kind = spec.kind;
+    if spec.precision.is_some() && kind != 'f' {
+        return Err(refuse(&format!(
+            "`%{kind}` with a precision: only `%f` takes one"
+        )));
+    }
+    if spec.prefix && matches!(kind, 'd' | 'u') {
+        return Err(refuse(&format!(
+            "`%{kind}` with `#`: it has no base to mark"
+        )));
+    }
+    // The sign of a number stands in front of its zero padding; a prefix stands
+    // between the two. `%+#08x` of 5 is `+$000005`.
+    let (sign, prefix, body) = if kind == 's' {
+        if let Some(flag) = spec.sign {
+            return Err(refuse(&format!("a string with the sign flag `{flag}`")));
+        }
+        if spec.zero {
+            return Err(refuse("a string with the padding flag `0`"));
+        }
+        let text::Arg::Text(text) = arg else {
+            return Err(refuse("a number as `%s`"));
+        };
+        (String::new(), String::new(), text.clone())
+    } else {
+        if let text::Arg::Text(text) = arg {
+            return Err(refuse(&format!("the string \"{text}\" as `%{kind}`")));
+        }
+        // rgbasm's values are 32-bit, and every type but `%d` and `%f` reads
+        // them unsigned: `%x` of -1 is `ffffffff`.
+        let value = scope.number(arg, "STRFMT", line)? as i32;
+        let (negative, body) = match kind {
+            'd' => (value < 0, value.unsigned_abs().to_string()),
+            'u' => (false, (value as u32).to_string()),
+            'x' => (false, format!("{:x}", value as u32)),
+            'X' => (false, format!("{:X}", value as u32)),
+            'b' => (false, format!("{:b}", value as u32)),
+            'o' => (false, format!("{:o}", value as u32)),
+            _ => (value < 0, fixed_point(value, spec.precision.unwrap_or(5))),
+        };
+        let sign = if negative {
+            "-".to_string()
+        } else {
+            spec.sign.map(String::from).unwrap_or_default()
+        };
+        let prefix = match (spec.prefix, kind) {
+            (true, 'x' | 'X') => "$",
+            (true, 'b') => "%",
+            (true, 'o') => "&",
+            _ => "",
+        };
+        // `%#f` marks the fixed-point precision after the digits rather than
+        // the base before them.
+        let body = if spec.prefix && kind == 'f' {
+            format!("{body}q{}", crate::engine::FIX_BITS)
+        } else {
+            body
+        };
+        (sign, prefix.to_string(), body)
+    };
+    let width = sign.len() + prefix.len() + body.chars().count();
+    let pad = spec.width.saturating_sub(width);
+    Ok(match () {
+        // Left alignment wins over zero padding, as it does in C.
+        _ if spec.left => format!("{sign}{prefix}{body}{:pad$}", "", pad = pad),
+        _ if spec.zero => format!("{sign}{prefix}{:0>pad$}{body}", "", pad = pad),
+        _ => format!("{:pad$}{sign}{prefix}{body}", "", pad = pad),
+    })
+}
+
+/// The digits of a Q16.16 value's magnitude, to `precision` decimal places.
+///
+/// The value is a dyadic rational, so its decimal expansion terminates and a
+/// `f64` holds it exactly; the rounding at the cut is to nearest, ties to even,
+/// which is what v1.0.3 does — `%.0f` of `0.5` is `0` and of `1.5` is `2`.
+fn fixed_point(value: i32, precision: usize) -> String {
+    let magnitude = f64::from(value.unsigned_abs()) / f64::from(1u32 << crate::engine::FIX_BITS);
+    format!("{magnitude:.precision$}")
 }
 
 #[cfg(test)]
@@ -1905,6 +2152,122 @@ mod tests {
         // literal.
         assert_eq!(b("db STRLEN(STRCAT(\"ab\",\"cd\"))"), vec![4]);
         assert_eq!(b("db STRUPR(STRSUB(\"abcd\", 2, 2))"), b"BC");
+    }
+
+    /// `STRFMT` is printf's shape with rgbasm's rules. Every value here was
+    /// read off rgbasm v1.0.3 first, and several are not what a C programmer
+    /// would predict.
+    #[test]
+    fn strfmt_formats_the_way_rgbasm_formats() {
+        let b = |src: &str| {
+            asm(&format!("SECTION \"a\", ROM0[0]\n{src}\n"))
+                .unwrap_or_else(|e| panic!("{src}: {e}"))
+                .bytes
+        };
+        assert_eq!(b("db STRFMT(\"%d\", 42)"), b"42");
+        assert_eq!(b("db STRFMT(\"%X|%x\", 255, 255)"), b"FF|ff");
+        assert_eq!(b("db STRFMT(\"%b|%o\", 5, 9)"), b"101|11");
+        assert_eq!(b("db STRFMT(\"[%s]\", \"hi\")"), b"[hi]");
+        assert_eq!(b("db STRFMT(\"100%%\")"), b"100%");
+
+        // Width, then the padding rules: zero padding stands *inside* the sign
+        // and the base prefix, and left alignment overrides it.
+        assert_eq!(b("db STRFMT(\"%5d|%05d\", 42, 42)"), b"   42|00042");
+        assert_eq!(b("db STRFMT(\"%-5d|\", 42)"), b"42   |");
+        assert_eq!(b("db STRFMT(\"%-06d|\", 42)"), b"42    |");
+        assert_eq!(b("db STRFMT(\"%+06d|%06d\", 42, -42)"), b"+00042|-00042");
+        assert_eq!(b("db STRFMT(\"%+#08x\", 5)"), b"+$000005");
+        assert_eq!(b("db STRFMT(\"% -6d|\", 42)"), b" 42   |");
+
+        // `#` marks the base rather than C's alternate form, and the spellings
+        // are rgbasm's own.
+        assert_eq!(b("db STRFMT(\"%#x|%#b|%#o\", 255, 5, 9)"), b"$ff|%101|&11");
+
+        // A value is 32 bits wide, and every type but `%d` reads it unsigned.
+        assert_eq!(b("db STRFMT(\"%x\", -1)"), b"ffffffff");
+        assert_eq!(b("db STRFMT(\"%u\", -1)"), b"4294967295");
+        assert_eq!(b("db STRFMT(\"%d\", $FFFFFFFF)"), b"-1");
+        // The sign flag stands in only where the value supplies none.
+        assert_eq!(b("db STRFMT(\"%+d|%+u\", -1, -1)"), b"-1|+4294967295");
+
+        // `%f` reads its argument as Q16.16 — so a plain `1` is a very small
+        // fraction — and `#` marks the precision after the digits.
+        assert_eq!(b("db STRFMT(\"%f\", 1.5)"), b"1.50000");
+        assert_eq!(b("db STRFMT(\"%f\", 1)"), b"0.00002");
+        assert_eq!(b("db STRFMT(\"%.2f|%f\", 1.5, -1.5)"), b"1.50|-1.50000");
+        assert_eq!(b("db STRFMT(\"%#f\", 1.5)"), b"1.50000q16");
+        assert_eq!(b("db STRFMT(\"%#014f\", 1.5)"), b"00001.50000q16");
+        // The cut rounds to nearest with ties to *even*, and the sign survives
+        // a magnitude that rounds away.
+        assert_eq!(b("db STRFMT(\"%.0f %.0f %.0f\", 0.5, 1.5, 2.5)"), b"0 2 2");
+        assert_eq!(b("db STRFMT(\"%.0f|%.0f\", -1.5, -0.5)"), b"-2|-0");
+        // The value is a dyadic rational, so the expansion is exact and
+        // terminates rather than drifting.
+        assert_eq!(b("db STRFMT(\"%.17f\", 0.1)"), b"0.10000610351562500");
+    }
+
+    /// What `STRFMT` refuses, and why each one is a rule rather than an
+    /// oversight: rgbasm v1.0.3 refuses every line here.
+    #[test]
+    fn strfmt_refuses_what_rgbasm_refuses() {
+        let refused = |src: &str| {
+            asm(&format!("SECTION \"a\", ROM0[0]\n{src}\n"))
+                .expect_err(&format!("rgbasm refuses `{src}`"));
+        };
+        // The flags come in a fixed order — sign, `#`, `-`, `0` — so every
+        // other arrangement is a spec the reference will not read.
+        refused("db STRFMT(\"%#+x\", 5)");
+        refused("db STRFMT(\"%0-6d\", 5)");
+        refused("db STRFMT(\"%+ d\", 5)");
+        refused("db STRFMT(\"%6-d\", 5)");
+        // A flag may appear once.
+        refused("db STRFMT(\"%--6d\", 5)");
+        refused("db STRFMT(\"%q\", 5)");
+        refused("db STRFMT(\"abc%\")");
+
+        // Only `%f` has a fraction to cut, and only a based type has a base to
+        // mark.
+        refused("db STRFMT(\"%.2d\", 5)");
+        refused("db STRFMT(\"%.2x\", 5)");
+        refused("db STRFMT(\"%#d\", 5)");
+        // A string takes neither a sign nor zero padding.
+        refused("db STRFMT(\"%+s\", \"ab\")");
+        refused("db STRFMT(\"%06s\", \"ab\")");
+
+        // The two halves cannot be swapped.
+        refused("db STRFMT(\"%s\", 5)");
+        refused("db STRFMT(\"%d\", \"hi\")");
+
+        // The argument count is exact in both directions.
+        refused("db STRFMT(\"%d %d\", 1)");
+        refused("db STRFMT(\"%d\", 1, 2)");
+    }
+
+    /// The pass folds a constants environment as it walks, so a number
+    /// argument may be a constant defined above the line or an expression over
+    /// one — and a label's address, which the layout has not assigned yet, is
+    /// refused by name.
+    #[test]
+    fn a_number_argument_reads_the_constants_above_it() {
+        let b = |src: &str| {
+            asm(&format!("SECTION \"a\", ROM0[0]\n{src}\n"))
+                .unwrap_or_else(|e| panic!("{src}: {e}"))
+                .bytes
+        };
+        assert_eq!(b("DEF N EQU 7\ndb STRFMT(\"n=%d\", N)"), b"n=7");
+        assert_eq!(b("DEF N EQU 7\ndb STRFMT(\"%d\", N*2+1)"), b"15");
+        // The same environment answers an index, which was a literal before.
+        assert_eq!(b("DEF N EQU 2\ndb STRSUB(\"abcd\", N, 2)"), b"bc");
+        // A constant is in scope from the line below its definition, exactly as
+        // the pass walks.
+        assert_eq!(b("DEF N EQU 3\nDEF M EQU N+1\ndb STRFMT(\"%d\", M)"), b"4");
+
+        let refused = asm("SECTION \"a\", ROM0[0]\nlbl:\ndb STRFMT(\"%d\", lbl)\n")
+            .expect_err("a label's address is not reachable from the text pass");
+        assert!(
+            refused.to_string().contains("label's address"),
+            "the refusal should name the case: {refused}"
+        );
     }
 
     /// `EQUS` is a *text* symbol: what it holds is spliced into the source and
