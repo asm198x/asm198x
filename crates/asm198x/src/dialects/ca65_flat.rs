@@ -1117,6 +1117,12 @@ fn unfolded_text(arg: &super::mos6502::ExprArg) -> bool {
     matches!(arg, super::mos6502::ExprArg::Value(crate::engine::Expr::Sym(s)) if s.starts_with(TEXT_MARK))
 }
 
+/// The text layer's function names, lower-cased. One list, read by the pass
+/// that folds them and by the stand-in the formatter parses.
+fn is_text_function(lower: &str) -> bool {
+    matches!(lower, ".concat" | ".string" | ".ident" | ".sprintf")
+}
+
 /// The prefix on the stand-in a text-layer call parses to when the text pass
 /// has not run — the formatter's path. `\u{1}` cannot appear in ca65 source, so
 /// the name can never collide with a real symbol.
@@ -1144,7 +1150,7 @@ pub(crate) fn expand_ca65(
 ) -> Result<macros::Expansion, AsmError> {
     macros::expansion(mode, source, |s| {
         let expanded = macros::expand(&Ca65Macros, s)?;
-        let resolved = text::expand(&Ca65Text, &expanded.text)?;
+        let resolved = text::expand(&Ca65Text::default(), &expanded.text)?;
         Ok(Some((resolved, expanded.origins)))
     })
 }
@@ -1155,23 +1161,85 @@ pub(crate) fn expand_ca65(
 /// Each rule was read off ca65 V2.18 before it was written. The one a reader
 /// would most likely guess wrong is `.string`, which stringifies its argument's
 /// **token** rather than its value: with `N = 7`, `.string(N)` is `"N"`.
-struct Ca65Text;
+#[derive(Default)]
+struct Ca65Text {
+    /// How many `.proc`/`.scope` blocks are open around the line being read.
+    ///
+    /// The pass has no scope stack, so a constant defined inside one is not
+    /// recorded at all. That is deliberate: recording it flat would let an
+    /// inner `v` answer a `v` written outside the scope, where ca65 resolves
+    /// two different symbols. Refusing to fold is a gap; folding the wrong
+    /// symbol is a wrong answer.
+    depth: std::cell::Cell<usize>,
+}
 
 impl text::TextSyntax for Ca65Text {
     fn definition(&self, _line: &str) -> Option<(String, String)> {
         None
     }
 
+    /// `NAME = expr` at the top level, read through the same expression parser
+    /// the statement itself uses.
+    fn constant(
+        &self,
+        line: &str,
+        numbers: &std::collections::BTreeMap<String, i64>,
+    ) -> Option<(String, i64)> {
+        let code = macros::without_comment(line);
+        let code = code.trim();
+        match code
+            .split_whitespace()
+            .next()
+            .unwrap_or_default()
+            .to_ascii_lowercase()
+            .as_str()
+        {
+            ".proc" | ".scope" => {
+                self.depth.set(self.depth.get() + 1);
+                return None;
+            }
+            ".endproc" | ".endscope" => {
+                self.depth.set(self.depth.get().saturating_sub(1));
+                return None;
+            }
+            _ => {}
+        }
+        if self.depth.get() > 0 {
+            return None;
+        }
+        let eq = super::mos6502::assignment_split(code)?;
+        let name = code[..eq].trim();
+        if !super::mos6502::is_ident(name) {
+            return None;
+        }
+        let expr = super::ca65::constant_value(&code[eq + 1..], 0).ok()?;
+        let value = super::mos6502::fold_const(&expr, numbers, 0).ok()?;
+        Some((name.to_string(), value))
+    }
+
+    /// A ca65 expression over the constants above the line. A label's address
+    /// is unreachable here, and ca65 refuses that case itself — `.sprintf("%d",
+    /// L)` on a label is "Constant expression expected" there too.
+    fn evaluate(
+        &self,
+        text: &str,
+        numbers: &std::collections::BTreeMap<String, i64>,
+        line: usize,
+    ) -> Option<i64> {
+        let expr = super::ca65::constant_value(text, line).ok()?;
+        super::mos6502::fold_const(&expr, numbers, line).ok()
+    }
+
     fn function(
         &self,
         name: &str,
         args: &[text::Arg],
-        _scope: &text::Scope,
+        scope: &text::Scope,
         line: usize,
     ) -> Result<Option<text::Folded>, AsmError> {
         use text::Folded;
         let lower = name.to_ascii_lowercase();
-        if !matches!(lower.as_str(), ".concat" | ".string" | ".ident") {
+        if !is_text_function(&lower) {
             return Ok(None);
         }
         // An empty argument list is how the pass asks "is this a call?", so it
@@ -1221,6 +1289,9 @@ impl text::TextSyntax for Ca65Text {
                 }
                 Folded::Text(token.to_string())
             }
+            ".sprintf" => {
+                Folded::Text(sprintf(args[0].text(name, line)?, &args[1..], scope, line)?)
+            }
             // A name built from text, spliced back in unquoted for the parse to
             // resolve — forward references included, as in ca65.
             ".ident" => {
@@ -1230,6 +1301,227 @@ impl text::TextSyntax for Ca65Text {
             other => unreachable!("`{other}` was matched as known and then not folded"),
         }))
     }
+}
+
+/// One `%` conversion in a ca65 format string.
+///
+/// C's shape, and mostly C's rules — but not all of them, and the differences
+/// were read off ca65 V2.18 rather than assumed:
+///
+/// - **`%x` is signed and `%X` is not.** `%x` of `-255` is `-ff`; `%X` of the
+///   same value is `FFFFFFFFFFFFFF01`, the 64-bit pattern.
+/// - **`%s` and `%c` align the other way round.** `%6s` pads on the *right*
+///   and `%-6s` on the left, which is the reverse of every other type here.
+/// - **`#` on `%x` shows even for zero.** `%#x` of `0` is `0x0`, where C
+///   suppresses the prefix.
+/// - Every flag is accepted on every type, repeats included, and ignored where
+///   it means nothing. Only an unknown *type* is "Invalid format string".
+#[derive(Default)]
+struct FormatSpec {
+    sign: Option<char>,
+    prefix: bool,
+    left: bool,
+    zero: bool,
+    width: usize,
+    precision: Option<usize>,
+    kind: char,
+}
+
+/// Parse one spec, starting just after the `%`, and answer it with the index of
+/// the first byte past it.
+fn format_spec(fmt: &[u8], mut i: usize) -> Option<(FormatSpec, usize)> {
+    let mut spec = FormatSpec::default();
+    // Flags in any order, and a repeat is not an error.
+    while let Some(c) = fmt.get(i) {
+        match c {
+            b'-' => spec.left = true,
+            b'+' => spec.sign = Some('+'),
+            b' ' => {
+                if spec.sign.is_none() {
+                    spec.sign = Some(' ');
+                }
+            }
+            b'#' => spec.prefix = true,
+            b'0' => spec.zero = true,
+            _ => break,
+        }
+        i += 1;
+    }
+    while let Some(d) = fmt.get(i).filter(|c| c.is_ascii_digit()) {
+        spec.width = spec.width * 10 + usize::from(d - b'0');
+        i += 1;
+    }
+    if fmt.get(i) == Some(&b'.') {
+        i += 1;
+        let mut precision = 0usize;
+        while let Some(d) = fmt.get(i).filter(|c| c.is_ascii_digit()) {
+            precision = precision * 10 + usize::from(d - b'0');
+            i += 1;
+        }
+        spec.precision = Some(precision);
+    }
+    spec.kind = *fmt.get(i)? as char;
+    if !matches!(spec.kind, 'd' | 'i' | 'u' | 'x' | 'X' | 'o' | 'c' | 's') {
+        return None;
+    }
+    Some((spec, i + 1))
+}
+
+/// Fold one `.sprintf` call.
+fn sprintf(
+    fmt: &str,
+    args: &[text::Arg],
+    scope: &text::Scope,
+    line: usize,
+) -> Result<String, AsmError> {
+    let bytes = fmt.as_bytes();
+    let mut out = String::with_capacity(fmt.len());
+    let mut used = 0usize;
+    let mut i = 0usize;
+    while i < bytes.len() {
+        if bytes[i] != b'%' {
+            let start = i;
+            while i < bytes.len() && bytes[i] != b'%' {
+                i += 1;
+            }
+            out.push_str(&fmt[start..i]);
+            continue;
+        }
+        if bytes.get(i + 1) == Some(&b'%') {
+            out.push('%');
+            i += 2;
+            continue;
+        }
+        let (spec, next) = format_spec(bytes, i + 1).ok_or_else(|| {
+            AsmError::new(
+                line,
+                format!(
+                    "`.sprintf` cannot read the format spec for argument {}: ca65 takes \
+                     `d`, `i`, `u`, `x`, `X`, `o`, `c` and `s`, and no others",
+                    used + 1
+                ),
+            )
+        })?;
+        let arg = args.get(used).ok_or_else(|| {
+            AsmError::new(
+                line,
+                format!(
+                    "`.sprintf` has {} format spec(s) and was given {} argument(s) to fill them",
+                    used + 1,
+                    args.len()
+                ),
+            )
+        })?;
+        out.push_str(&format_one(&spec, arg, scope, line)?);
+        used += 1;
+        i = next;
+    }
+    if used < args.len() {
+        return Err(AsmError::new(
+            line,
+            format!(
+                "`.sprintf` was given {} argument(s) and has {used} format spec(s) to put \
+                 them in",
+                args.len()
+            ),
+        ));
+    }
+    Ok(out)
+}
+
+/// Render one argument through one spec.
+fn format_one(
+    spec: &FormatSpec,
+    arg: &text::Arg,
+    scope: &text::Scope,
+    line: usize,
+) -> Result<String, AsmError> {
+    let kind = spec.kind;
+    let refuse = |what: &str| AsmError::new(line, format!("`.sprintf` cannot format {what}"));
+
+    // `%s` and `%c` share a padding rule that is the reverse of the numeric
+    // types': no flag pads on the right, and `-` pads on the left.
+    if matches!(kind, 's' | 'c') {
+        let body = match (kind, arg) {
+            ('s', text::Arg::Text(t)) => match spec.precision {
+                Some(n) => t.chars().take(n).collect(),
+                None => t.clone(),
+            },
+            ('s', text::Arg::Bare(b)) => {
+                return Err(refuse(&format!("`{b}` as `%s`: it is not a string")));
+            }
+            (_, text::Arg::Text(t)) => {
+                return Err(refuse(&format!("the string \"{t}\" as `%c`")));
+            }
+            _ => {
+                // ca65 answers 0 and anything past a byte with "Char argument
+                // out of range", so `%c` takes 1..=255 and nothing else.
+                let value = scope.number(arg, ".sprintf", line)?;
+                let byte = u8::try_from(value)
+                    .ok()
+                    .filter(|b| *b != 0)
+                    .ok_or_else(|| {
+                        refuse(&format!("{value} as `%c`: a character runs from 1 to 255"))
+                    })?;
+                (byte as char).to_string()
+            }
+        };
+        let pad = spec.width.saturating_sub(body.chars().count());
+        return Ok(if spec.left {
+            format!("{:pad$}{body}", "", pad = pad)
+        } else {
+            format!("{body}{:pad$}", "", pad = pad)
+        });
+    }
+
+    if let text::Arg::Text(t) = arg {
+        return Err(refuse(&format!("the string \"{t}\" as `%{kind}`")));
+    }
+    let value = scope.number(arg, ".sprintf", line)?;
+    // `%d`, `%i` and `%x` read the value signed; `%u`, `%X` and `%o` read the
+    // same bits as a 64-bit unsigned, which is why `%x` and `%X` disagree about
+    // a negative one.
+    let (negative, magnitude) = match kind {
+        'd' | 'i' | 'x' => (value < 0, value.unsigned_abs()),
+        _ => (false, value as u64),
+    };
+    let digits = match kind {
+        'x' => format!("{magnitude:x}"),
+        'X' => format!("{magnitude:X}"),
+        'o' => format!("{magnitude:o}"),
+        _ => magnitude.to_string(),
+    };
+    // A precision is a minimum digit count, and a precision of zero renders a
+    // zero value as nothing at all.
+    let digits = match spec.precision {
+        Some(0) if magnitude == 0 => String::new(),
+        Some(n) => format!("{:0>n$}", digits, n = n),
+        None => digits,
+    };
+    let sign = if negative {
+        "-".to_string()
+    } else {
+        spec.sign.map(String::from).unwrap_or_default()
+    };
+    let prefix = match (spec.prefix, kind) {
+        (true, 'x') => "0x",
+        (true, 'X') => "0X",
+        // The octal prefix is a leading zero, so it is not written twice when
+        // the digits already start with one — `%#.4o` of 9 is `0011`.
+        (true, 'o') if !digits.starts_with('0') => "0",
+        _ => "",
+    };
+    let width = sign.len() + prefix.len() + digits.chars().count();
+    let pad = spec.width.saturating_sub(width);
+    Ok(match () {
+        _ if spec.left => format!("{sign}{prefix}{digits}{:pad$}", "", pad = pad),
+        // A precision has already said how many digits there are, so the zero
+        // flag has nothing left to say.
+        _ if spec.zero && spec.precision.is_none() => {
+            format!("{sign}{prefix}{:0>pad$}{digits}", "", pad = pad)
+        }
+        _ => format!("{:pad$}{sign}{prefix}{digits}", "", pad = pad),
+    })
 }
 
 /// Whether the text is one identifier or one number literal — what `.string`
@@ -1263,7 +1555,7 @@ pub(crate) fn expr_function(
     // then re-emits the call from its source — so all it needs is a value that
     // parses. The mark cannot be a ca65 identifier, so a fold that somehow did
     // not happen fails as an unresolved symbol rather than answering a number.
-    if matches!(lower.as_str(), ".concat" | ".string" | ".ident") {
+    if is_text_function(&lower) {
         return Ok(Expr::Sym(format!("{TEXT_MARK}{lower}")));
     }
 

@@ -941,6 +941,26 @@ const PROBES: &[Probe] = &[
         "N = 7\n .byte .string(N)\n .byte .string(42)\nlbl: .byte .string(lbl)\n"),
     ok ("ca65-816", ".ident builds a name, forward references included",
         "foo = 5\n .byte .ident(\"foo\")\n .byte .ident(.concat(\"b\",\"ar\"))\nbar = 9\n"),
+    // `.sprintf` is C's shape and not all of C's rules. `%x` is signed and
+    // `%X` is not, so the two disagree about a negative value; `%s` and `%c`
+    // pad on the right by default and on the left with `-`, the reverse of
+    // every other type; and `#` on `%x` shows its prefix even for zero.
+    ok ("ca65-816", ".sprintf's eight conversions",
+        " .byte .sprintf(\"%d|%i|%u|%c|%s\", 5, -5, -5, 65, \"ab\")\n\
+         .byte .sprintf(\"%x|%X|%o|100%%\", -255, -255, -9)\n"),
+    ok ("ca65-816", ".sprintf's flags and widths",
+        " .byte .sprintf(\"%+d|% d|%6d|%-6d|%06d|%+06d\", 5, 5, -5, -5, -5, 0)\n\
+         .byte .sprintf(\"%#x|%#X|%#o|%#x|%#o\", 255, 255, 9, 0, 0)\n\
+         .byte .sprintf(\"%#08x|%+#08x|%#08X|%+#08X\", -255, 255, -255, 255)\n"),
+    ok ("ca65-816", ".sprintf pads a string and a char the other way round",
+        " .byte .sprintf(\"[%6s][%-6s][%06s][%.2s]\", \"ab\", \"ab\", \"ab\", \"abcd\")\n\
+         .byte .sprintf(\"[%6c][%-6c]\", 65, 65)\n"),
+    ok ("ca65-816", ".sprintf's precision is a minimum digit count",
+        " .byte .sprintf(\"%.3d|%.4x|%.4X|%.4o|%.4u\", -5, -255, -255, -9, 5)\n\
+         .byte .sprintf(\"[%.0d][%.0x][%08.3d][%#.4o]\", 0, 0, 5, 9)\n"),
+    ok ("ca65-816", ".sprintf reads a constant defined above it",
+        "N = 5\n .byte .sprintf(\"n=%d|%d\", N, N*2+1)\n\
+         .byte .sprintf(\"%s\", .sprintf(\"%d\", 7))\n"),
     ok ("ca65-816", "a text fold feeds a numeric function",
         " .byte .strlen(.concat(\"ab\",\"cd\"))\n"),
     ok ("ca65-816", ".max / .min",

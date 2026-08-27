@@ -2680,6 +2680,7 @@ pub const DIRECTIVES: &[Directive] = &[
             ".hibyte",
             ".hiword",
             ".ident",
+            ".sprintf",
             ".lobyte",
             ".loword",
             ".max",
@@ -3100,8 +3101,8 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Sigilled {
             sigil: '.',
             names: &[
-                "define", "delmac", "delmacro", "macpack", "undef", "undefine", "sprintf", "left",
-                "mid", "right",
+                "define", "delmac", "delmacro", "macpack", "undef", "undefine", "left", "mid",
+                "right",
             ],
             required: true,
         },
@@ -3615,6 +3616,14 @@ fn parse_value_list(
 /// Parse a ca65 value. A bare `:-`/`:+` run is an anonymous-label reference; a
 /// bare `@cheap` operand is a cheap-local reference scoped to the current global;
 /// otherwise it is an expression with `<`/`>` binding tight ([`BytePrec::Tight`]).
+/// An expression with no label context — the text pass's reader, which walks
+/// source order with no anonymous labels and no current global to resolve a
+/// cheap local against. Both of those are label references, and a label's
+/// address is not something that pass can reach anyway.
+pub(crate) fn constant_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
+    parse_value(&AnonCtx::default(), "", raw, line)
+}
+
 fn parse_value(
     anons: &AnonCtx,
     current_global: &str,
@@ -3863,6 +3872,222 @@ mod tests {
         // The folds nest, innermost first, so a numeric function reads a
         // literal by the time it runs.
         assert_eq!(&code(".byte .strlen(.concat(\"ab\",\"cd\"))")[..1], &[4]);
+    }
+
+    /// `.sprintf` against ca65 V2.18, one row per measured case.
+    ///
+    /// The whole matrix is here rather than a sample because the rules are not
+    /// C's and not guessable: `%x` is signed where `%X` is not, `%s` and `%c`
+    /// align the opposite way to everything else, and `#` on `%x` shows a
+    /// prefix even for zero. Every row was read off the tool before it was
+    /// written down.
+    #[test]
+    fn sprintf_formats_the_way_ca65_formats() {
+        let text = |src: &str| {
+            let r = rom(&format!(".segment \"CODE\"\n{src}\n"));
+            let body = &r[16..];
+            let end = body.iter().position(|b| *b == 0).unwrap_or(0);
+            String::from_utf8_lossy(&body[..end]).into_owned()
+        };
+        #[rustfmt::skip]
+        let cases: &[(&str, &str, &str)] = &[
+            ("%d", "5", "5"),
+            ("%d", "-5", "-5"),
+            ("%d", "0", "0"),
+            ("%i", "5", "5"),
+            ("%i", "-5", "-5"),
+            ("%u", "5", "5"),
+            ("%u", "-5", "18446744073709551611"),
+            ("%x", "255", "ff"),
+            ("%x", "-255", "-ff"),
+            ("%x", "-1", "-1"),
+            ("%X", "255", "FF"),
+            ("%X", "-255", "FFFFFFFFFFFFFF01"),
+            ("%X", "-1", "FFFFFFFFFFFFFFFF"),
+            ("%o", "9", "11"),
+            ("%o", "-9", "1777777777777777777767"),
+            ("%c", "65", "A"),
+            ("%s", "\"ab\"", "ab"),
+            ("%+d", "5", "+5"),
+            ("%+d", "-5", "-5"),
+            ("%+d", "0", "+0"),
+            ("% d", "5", " 5"),
+            ("% d", "-5", "-5"),
+            ("% d", "0", " 0"),
+            ("%#x", "255", "0xff"),
+            ("%#x", "-255", "-0xff"),
+            ("%#x", "-1", "-0x1"),
+            ("%#X", "255", "0XFF"),
+            ("%#X", "-255", "0XFFFFFFFFFFFFFF01"),
+            ("%#X", "-1", "0XFFFFFFFFFFFFFFFF"),
+            ("%#o", "9", "011"),
+            ("%#o", "-9", "01777777777777777777767"),
+            ("%#d", "5", "5"),
+            ("%#d", "-5", "-5"),
+            ("%#d", "0", "0"),
+            ("%#s", "\"ab\"", "ab"),
+            ("%#c", "65", "A"),
+            ("%+u", "5", "+5"),
+            ("%+u", "-5", "+18446744073709551611"),
+            ("%+x", "255", "+ff"),
+            ("%+x", "-255", "-ff"),
+            ("%+x", "-1", "-1"),
+            ("%+X", "255", "+FF"),
+            ("%+X", "-255", "+FFFFFFFFFFFFFF01"),
+            ("%+X", "-1", "+FFFFFFFFFFFFFFFF"),
+            ("%+o", "9", "+11"),
+            ("%+o", "-9", "+1777777777777777777767"),
+            ("%+c", "65", "A"),
+            ("%+s", "\"ab\"", "ab"),
+            ("% u", "5", " 5"),
+            ("% u", "-5", " 18446744073709551611"),
+            ("% x", "255", " ff"),
+            ("% x", "-255", "-ff"),
+            ("% x", "-1", "-1"),
+            ("% X", "255", " FF"),
+            ("% X", "-255", " FFFFFFFFFFFFFF01"),
+            ("% X", "-1", " FFFFFFFFFFFFFFFF"),
+            ("% o", "9", " 11"),
+            ("% o", "-9", " 1777777777777777777767"),
+            ("% s", "\"ab\"", "ab"),
+            ("% c", "65", "A"),
+            ("%6d", "5", "     5"),
+            ("%6d", "-5", "    -5"),
+            ("%6d", "0", "     0"),
+            ("%-6d", "5", "5     "),
+            ("%-6d", "-5", "-5    "),
+            ("%-6d", "0", "0     "),
+            ("%06d", "5", "000005"),
+            ("%06d", "-5", "-00005"),
+            ("%06d", "0", "000000"),
+            ("%-06d", "5", "5     "),
+            ("%-06d", "-5", "-5    "),
+            ("%-06d", "0", "0     "),
+            ("%+06d", "5", "+00005"),
+            ("%+06d", "-5", "-00005"),
+            ("%+06d", "0", "+00000"),
+            ("%6x", "255", "    ff"),
+            ("%6x", "-255", "   -ff"),
+            ("%6x", "-1", "    -1"),
+            ("%-6x", "255", "ff    "),
+            ("%-6x", "-255", "-ff   "),
+            ("%-6x", "-1", "-1    "),
+            ("%06x", "255", "0000ff"),
+            ("%06x", "-255", "-000ff"),
+            ("%06x", "-1", "-00001"),
+            ("%#08x", "255", "0x0000ff"),
+            ("%#08x", "-255", "-0x000ff"),
+            ("%#08x", "-1", "-0x00001"),
+            ("%+#08x", "255", "+0x000ff"),
+            ("%+#08x", "-255", "-0x000ff"),
+            ("%+#08x", "-1", "-0x00001"),
+            ("%#08X", "255", "0X0000FF"),
+            ("%#08X", "-255", "0XFFFFFFFFFFFFFF01"),
+            ("%#08X", "-1", "0XFFFFFFFFFFFFFFFF"),
+            ("%+#08X", "255", "+0X000FF"),
+            ("%+#08X", "-255", "+0XFFFFFFFFFFFFFF01"),
+            ("%+#08X", "-1", "+0XFFFFFFFFFFFFFFFF"),
+            ("%6X", "255", "    FF"),
+            ("%6X", "-255", "FFFFFFFFFFFFFF01"),
+            ("%6X", "-1", "FFFFFFFFFFFFFFFF"),
+            ("%06X", "255", "0000FF"),
+            ("%06X", "-255", "FFFFFFFFFFFFFF01"),
+            ("%06X", "-1", "FFFFFFFFFFFFFFFF"),
+            ("%6o", "9", "    11"),
+            ("%6o", "-9", "1777777777777777777767"),
+            ("%06o", "9", "000011"),
+            ("%06o", "-9", "1777777777777777777767"),
+            ("%6u", "5", "     5"),
+            ("%6u", "-5", "18446744073709551611"),
+            ("%06u", "5", "000005"),
+            ("%06u", "-5", "18446744073709551611"),
+            ("%6s", "\"ab\"", "ab    "),
+            ("%-6s", "\"ab\"", "    ab"),
+            ("%06s", "\"ab\"", "ab    "),
+            ("%.2s", "\"ab\"", "ab"),
+            ("%.6s", "\"ab\"", "ab"),
+            ("%6c", "65", "A     "),
+            ("%-6c", "65", "     A"),
+            ("%06c", "65", "A     "),
+            ("%.1c", "65", "A"),
+            ("%.3d", "5", "005"),
+            ("%.3d", "-5", "-005"),
+            ("%.3d", "0", "000"),
+            ("%.4x", "255", "00ff"),
+            ("%.4x", "-255", "-00ff"),
+            ("%.4x", "-1", "-0001"),
+            ("%.4X", "255", "00FF"),
+            ("%.4X", "-255", "FFFFFFFFFFFFFF01"),
+            ("%.4X", "-1", "FFFFFFFFFFFFFFFF"),
+            ("%.4o", "9", "0011"),
+            ("%.4o", "-9", "1777777777777777777767"),
+            ("%.4u", "5", "0005"),
+            ("%.4u", "-5", "18446744073709551611"),
+            ("%.0d", "5", "5"),
+            ("%.0d", "-5", "-5"),
+            ("%.0d", "0", ""),
+        ];
+        for (spec, value, want) in cases {
+            let src = format!(".byte .sprintf(\"{spec}\", {value}), 0");
+            assert_eq!(&text(&src), want, "`{spec}` of `{value}`");
+        }
+    }
+
+    /// The pass folds a constants environment as it walks, so `%d` may be
+    /// given a constant defined above the line — and the cases ca65 refuses
+    /// itself are refused here for the same reason.
+    #[test]
+    fn sprintf_reads_the_constants_above_it() {
+        let code = |src: &str| {
+            let r = rom(&format!(".segment \"CODE\"\n{src}\n"));
+            r[16..16 + 4].to_vec()
+        };
+        assert_eq!(&code("N = 5\n.byte .sprintf(\"n=%d\", N)")[..3], b"n=5");
+        assert_eq!(&code("N = 5\n.byte .sprintf(\"%d\", N*2+1)")[..2], b"11");
+
+        // A label's address and a constant defined *below* are both out of
+        // reach of a pass that walks in source order — and ca65 answers both
+        // with "Constant expression expected", so nothing is lost.
+        for src in [
+            "L: .byte .sprintf(\"%d\", L)",
+            ".byte .sprintf(\"%d\", N)\nN = 5",
+        ] {
+            assemble(&format!(".segment \"CODE\"\n{src}\n"))
+                .expect_err(&format!("ca65 refuses `{src}`"));
+        }
+
+        // A constant defined inside a scope is not recorded: folding it flat
+        // would let an inner `v` answer a `v` written outside, where ca65
+        // resolves two different symbols.
+        assemble(".segment \"CODE\"\n.scope pa\nv = 1\n.endscope\n.byte .sprintf(\"%d\", v)\n")
+            .expect_err("an inner scope's constant is not in scope outside it");
+    }
+
+    /// What `.sprintf` refuses. ca65 refuses each of these itself.
+    #[test]
+    fn sprintf_refuses_what_ca65_refuses() {
+        for src in [
+            // Only eight conversions, and `%b`, `%f`, `%ld` and `%*d` are not
+            // among them however ordinary they look in C.
+            ".byte .sprintf(\"%q\", 1)",
+            ".byte .sprintf(\"%b\", 1)",
+            ".byte .sprintf(\"%f\", 1)",
+            ".byte .sprintf(\"%ld\", 1)",
+            ".byte .sprintf(\"%*d\", 5, 1)",
+            // The two halves cannot be swapped.
+            ".byte .sprintf(\"%d\", \"hi\")",
+            ".byte .sprintf(\"%s\", 5)",
+            // A character runs from 1 to 255.
+            ".byte .sprintf(\"%c\", 0)",
+            ".byte .sprintf(\"%c\", 256)",
+            ".byte .sprintf(\"%c\", -1)",
+            // The argument count is exact in both directions.
+            ".byte .sprintf(\"%d %d\", 1)",
+            ".byte .sprintf(\"%d\", 1, 2)",
+        ] {
+            assemble(&format!(".segment \"CODE\"\n{src}\n"))
+                .expect_err(&format!("ca65 refuses `{src}`"));
+        }
     }
 
     /// What the three refuse. ca65 refuses each of these itself.
