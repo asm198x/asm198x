@@ -11,10 +11,11 @@
 //! reuses the engine only for the two-pass driver, the symbol table, `org`, and
 //! `equ`. Encoding facts come from [`isa::mos6809`]. The 6809 is big-endian.
 //!
-//! Covered so far: inherent, immediate, direct, extended, and relative
-//! (short + long) addressing, plus `org`/`equ`/`fcb`/`fdb`/`rmb`. Indexed
-//! addressing (the postbyte) and the register-list ops (`tfr`/`exg`/`pshs`/
-//! `puls`) are the next increment.
+//! Every addressing mode is covered, indexed included, and so are the
+//! register-list ops (`tfr`/`exg`/`pshs`/`puls`). What is outstanding is
+//! vocabulary rather than encoding: `cargo xtask surface` names the words
+//! lwasm takes and this does not, and each is refused by name rather than
+//! silently accepted.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -1696,7 +1697,8 @@ fn encode_branch(
 }
 
 /// Encode a register/memory instruction, choosing the addressing mode from the
-/// operand syntax. Indexed addressing is a later increment.
+/// operand syntax — including indexed, which dispatches to [`encode_indexed`]
+/// for its computed postbyte.
 #[allow(clippy::too_many_arguments)]
 fn encode_mem(
     m: &str,
