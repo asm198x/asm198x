@@ -609,6 +609,7 @@ fn assemble_core(
             | Stmt::Section(..)
             | Stmt::Align(_)
             | Stmt::Cnop(..) => {}
+            Stmt::Nothing => {}
             Stmt::Echo(text) => warnings.push(crate::engine::Warning {
                 line: s.line,
                 file: s.file,
@@ -1476,6 +1477,7 @@ fn stmt_size(
         | Stmt::Output(_)
         | Stmt::Assert(..)
         | Stmt::Echo(_)
+        | Stmt::Nothing
         | Stmt::Visible(_) => 0,
         Stmt::Raw(payload) => payload.len(),
         Stmt::Dc(size, items) => items.len() * size.bytes(),
@@ -1671,6 +1673,11 @@ impl MemFlag {
 #[derive(Clone)]
 enum Stmt {
     Empty,
+    /// Emits nothing and keeps its line. `Empty` drops the node, source and
+    /// all, which is right for a blank line and wrong for a directive that
+    /// *did* something the formatter must still reproduce — an offset counter
+    /// being set, for instance.
+    Nothing,
     Equ(String, Expr),
     Even,
     /// `section name,attr` — opens a new hunk of the given kind and memory flag.
@@ -1939,7 +1946,28 @@ struct Walker {
     /// The macros defined so far, so an **invocation** is recognised too. A
     /// call is not an instruction, and nothing else tells `two` from a typo.
     macro_names: BTreeSet<String>,
+    /// vasm's three offset counters, which allocate *names* rather than bytes:
+    /// `rs` for a structure, `so` for a second one, and `fo` which runs the
+    /// other way. Each is ordinary parse-time state, read and moved in source
+    /// order, and each is also readable as a symbol (`__RS`, `__SO`, `__FO`).
+    counters: Counters,
     nodes: Vec<crate::ast::Node>,
+}
+
+/// The offset counters, and which way each one runs.
+///
+/// There are **two**, not three. `rs` and `so` are one counter under two
+/// spellings — `setso 9` leaves `__RS` reading 9, `clrso` clears `rs`, and
+/// `rseven` rounds the same value either name reads. Only `fo` is its own, and
+/// it runs the other way. All probed against 2.0b, because the names suggest
+/// three and nothing else says otherwise.
+#[derive(Default)]
+struct Counters {
+    /// The `rs`/`so` counter, which counts up.
+    rs: i64,
+    /// `fo` **subtracts** before it binds: `setfo 8` then `a fo.b 1` leaves `a`
+    /// at 7, not 8.
+    fo: i64,
 }
 
 impl Walker {
@@ -2133,7 +2161,10 @@ impl FlatWalk for Walker {
         // now-current scope, then store it in the node as the family-owned native
         // payload (the assembler reads it back). An `equ`/`=` reports
         // `inline_label`, so emit keeps its label on the operation's line.
-        let mut stmt = parse_op(&label, rest, line)?;
+        let mut stmt = parse_op(&label, rest, line, &mut self.counters)?;
+        // The counter symbols read the value in force *here*, so they are
+        // answered against the state this line has just left behind.
+        stmt = resolve_counter_symbols(stmt, &self.counters);
         qualify_stmt(&mut stmt, &self.scope);
         // Fold an `equ` constant for later `incbin` argument folding (the
         // qualified name, so a local `equ` resolves like any other reference).
@@ -2555,7 +2586,7 @@ fn split_comment(line: &str) -> (&str, Option<&str>) {
 fn bake_reptn(kind: &mut Stmt, value: i64) {
     match kind {
         // A file name is not an expression.
-        Stmt::Output(_) => {}
+        Stmt::Output(_) | Stmt::Nothing => {}
         Stmt::Equ(_, e) => bake_reptn_expr(e, value),
         Stmt::Dc(_, items) => items.iter_mut().for_each(|e| bake_reptn_expr(e, value)),
         Stmt::Ds(_, count) => bake_reptn_expr(count, value),
@@ -2602,7 +2633,7 @@ fn bake_reptn_expr(e: &mut Expr, value: i64) {
 fn qualify_stmt(kind: &mut Stmt, scope: &str) {
     match kind {
         // A file name is not a symbol.
-        Stmt::Output(_) => {}
+        Stmt::Output(_) | Stmt::Nothing => {}
         Stmt::Equ(name, e) => {
             if name.starts_with('.') {
                 *name = format!("{scope}{name}");
@@ -2695,6 +2726,23 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "equ",
         pattern: Pattern::Exact(&["equ", "="]),
+        category: Category::Operation,
+    },
+    // The offset counters: `rs`/`so` count up, `fo` counts down, and each
+    // takes an optional size suffix. `__RS`, `__SO` and `__FO` read them.
+    Directive {
+        id: "offset-counter",
+        pattern: Pattern::Exact(&[
+            "rs", "rs.b", "rs.w", "rs.l", "so", "so.b", "so.w", "so.l", "fo", "fo.b", "fo.w",
+            "fo.l",
+        ]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "offset-control",
+        pattern: Pattern::Exact(&[
+            "rsset", "rsreset", "rseven", "setso", "clrso", "setfo", "clrfo",
+        ]),
         category: Category::Operation,
     },
     Directive {
@@ -2890,8 +2938,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "basereg",
             "blk",
             "cargs",
-            "clrfo",
-            "clrso",
             "comment",
             "cpu32",
             "cseg",
@@ -2909,7 +2955,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "endm",
             "erem",
             "far",
-            "fo",
             "fpu",
             "if1",
             "if2",
@@ -2940,21 +2985,50 @@ pub const DIRECTIVES: &[Directive] = &[
             "pushsection",
             "rem",
             "rorg",
-            "rs",
-            "rseven",
-            "rsreset",
-            "rsset",
             "sdreg",
-            "setfo",
-            "setso",
-            "so",
             "text",
         ]),
         category: Category::KnownUnsupported,
     },
 ];
 
-fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, AsmError> {
+/// Read the three counter symbols where they stand.
+///
+/// `__RS`, `__SO` and `__FO` are vasm's names for the counters' current
+/// values, and "current" is the point in the source the reference reads them
+/// at — so they are answered during the parse, like the counters themselves,
+/// rather than left for a symbol table that only knows their final values.
+fn resolve_counter_symbols(stmt: Stmt, counters: &Counters) -> Stmt {
+    let swap = |e: Expr| {
+        crate::ast::map_sym_expr(
+            e,
+            &mut |name: String| match name.to_ascii_uppercase().as_str() {
+                "__RS" => Expr::Num(counters.rs),
+                // `__SO` reads the `rs` counter: they are one value.
+                "__SO" => Expr::Num(counters.rs),
+                "__FO" => Expr::Num(counters.fo),
+                _ => Expr::Sym(name),
+            },
+        )
+    };
+    match stmt {
+        Stmt::Equ(name, e) => Stmt::Equ(name, swap(e)),
+        Stmt::Dc(size, items) => Stmt::Dc(size, items.into_iter().map(swap).collect()),
+        Stmt::Ds(size, e) => Stmt::Ds(size, swap(e)),
+        Stmt::Dcb(size, count, fill) => Stmt::Dcb(size, swap(count), swap(fill)),
+        Stmt::Align(e) => Stmt::Align(swap(e)),
+        Stmt::Cnop(a, b) => Stmt::Cnop(swap(a), swap(b)),
+        Stmt::Assert(e, message) => Stmt::Assert(swap(e), message),
+        other => other,
+    }
+}
+
+fn parse_op(
+    label: &Option<String>,
+    rest: &str,
+    line: usize,
+    counters: &mut Counters,
+) -> Result<Stmt, AsmError> {
     if rest.is_empty() {
         return Ok(Stmt::Empty);
     }
@@ -2995,6 +3069,76 @@ fn parse_op(label: &Option<String>, rest: &str, line: usize) -> Result<Stmt, Asm
                 Ok(Stmt::Equ(name, parse_value(args, line)?))
             }
             "even" => Ok(Stmt::Even),
+            // The offset counters. Each allocates a *name*, not a byte: the
+            // label takes the counter's value and the counter moves on by the
+            // size times the count. Probed against 2.0b, including the default
+            // size (a word, not a byte) and `fo`'s direction.
+            "offset-counter" => {
+                let (word, size) = split_size(&lower, line)?;
+                let step = match size {
+                    Some(Size::B) => 1,
+                    Some(Size::L) => 4,
+                    // No suffix is a *word*: `a rs 1` then `b rs 1` leaves `b`
+                    // at 2.
+                    Some(Size::W) | None => 2,
+                };
+                let count = if args.trim().is_empty() {
+                    1
+                } else {
+                    match parse_value(args.trim(), line)? {
+                        Expr::Num(n) => n,
+                        _ => {
+                            return Err(AsmError::new(
+                                line,
+                                format!("`{lower}` needs a count it can work out where it stands"),
+                            ));
+                        }
+                    }
+                };
+                let bytes = step * count;
+                let value = match word.to_ascii_lowercase().as_str() {
+                    // `rs` and `so` are the same counter.
+                    "rs" | "so" => {
+                        let at = counters.rs;
+                        counters.rs += bytes;
+                        at
+                    }
+                    // `fo` runs the other way and binds the value it lands on.
+                    _ => {
+                        counters.fo -= bytes;
+                        counters.fo
+                    }
+                };
+                Ok(match label.clone() {
+                    Some(name) => Stmt::Equ(name, Expr::Num(value)),
+                    None => Stmt::Nothing,
+                })
+            }
+            // Setting and clearing them, and `rseven`, which rounds `rs` up to
+            // the next even offset.
+            "offset-control" => {
+                let value = if args.trim().is_empty() {
+                    0
+                } else {
+                    match parse_value(args.trim(), line)? {
+                        Expr::Num(n) => n,
+                        _ => {
+                            return Err(AsmError::new(
+                                line,
+                                format!("`{lower}` needs a value it can work out where it stands"),
+                            ));
+                        }
+                    }
+                };
+                match lower.as_str() {
+                    "rsset" | "setso" => counters.rs = value,
+                    "rsreset" | "clrso" => counters.rs = 0,
+                    "rseven" => counters.rs = (counters.rs + 1) & !1,
+                    "setfo" => counters.fo = value,
+                    _ => counters.fo = 0,
+                }
+                Ok(Stmt::Nothing)
+            }
             "section" => Ok(parse_section(args, line)),
             "section_shorthand" => Ok(section_from_attr(&lower)),
             "align" => parse_align(args, line),
@@ -3590,6 +3734,64 @@ fn expand_vasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
     macros::expansion(mode, source, |s| {
         macros::expand(&VasmMacros, s).map(|e| Some((e.text, e.origins)))
     })
+}
+
+#[cfg(test)]
+mod offset_counters {
+    //! `rs`/`so`/`fo` allocate names rather than bytes.
+
+    use crate::assemble_vasm as asm;
+
+    fn bytes(src: &str) -> Vec<u8> {
+        asm(&format!("\tsection code,code\n{src}"))
+            .unwrap_or_else(|e| panic!("{src}: {e}"))
+            .bytes
+    }
+
+    /// The counter allocates a name and moves on by the size times the count.
+    /// No suffix is a **word**, which is the part a reader would guess wrong.
+    #[test]
+    fn rs_allocates_names_not_bytes() {
+        assert_eq!(
+            bytes("a\trs.b 1\nb\trs.w 1\nc\trs.l 1\n\tdc.b a,b,c,__RS\n"),
+            vec![0, 1, 3, 7]
+        );
+        assert_eq!(bytes("k\trs 1\nl\trs 1\n\tdc.b k,l\n"), vec![0, 2]);
+        assert_eq!(bytes("\trsset 8\nd\trs.b 1\n\tdc.b d\n"), vec![8]);
+        // `rseven` rounds up to the next even offset.
+        assert_eq!(
+            bytes("e\trs.b 1\n\trseven\nf\trs.b 1\n\tdc.b e,f\n"),
+            vec![0, 2]
+        );
+    }
+
+    /// `so` is not a second counter. It is `rs` under another name — probed,
+    /// because three names imply three counters and only two exist.
+    #[test]
+    fn so_is_rs_under_another_name() {
+        assert_eq!(bytes("\tsetso 9\n\tdc.b __RS,__SO\n"), vec![9, 9]);
+        assert_eq!(bytes("\trsset 6\n\tdc.b __SO\n"), vec![6]);
+        assert_eq!(bytes("\trsset 6\n\tclrso\na\trs.b 1\n\tdc.b a\n"), vec![0]);
+        // Allocating through one name moves what the other reads.
+        assert_eq!(
+            bytes("a\trs.b 1\nb\tso.b 2\nc\trs.b 1\n\tdc.b a,b,c\n"),
+            vec![0, 1, 3]
+        );
+    }
+
+    /// `fo` *is* its own counter, and it counts **down**: it subtracts first
+    /// and binds the value it lands on.
+    #[test]
+    fn fo_is_separate_and_counts_down() {
+        assert_eq!(
+            bytes("\tsetfo 8\nh\tfo.b 1\ni\tfo.w 1\n\tdc.b h,i,__FO\n"),
+            vec![7, 5, 5]
+        );
+        // Untouched by `fo`, the other counter stays where it was.
+        assert_eq!(bytes("\tsetfo 9\n\tdc.b __RS\n"), vec![0]);
+        // From zero it goes negative, which a byte shows as $FF.
+        assert_eq!(bytes("\tclrfo\nj\tfo.b 1\n\tdc.b j\n"), vec![0xFF]);
+    }
 }
 
 #[cfg(test)]

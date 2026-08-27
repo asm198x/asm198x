@@ -836,6 +836,19 @@ const PROBES: &[Probe] = &[
     ok ("vasm", "ifb answers a macro argument that was not given",
         "m\tmacro\n\tifb \\1\n\tdc.b $11\n\telse\n\tdc.b $22\n\tendif\n\tendm\n\
          \tsection code,code\n\tm\n\tm 5\n"),
+    // The offset counters. `rs` and `so` turn out to be one counter under two
+    // spellings, and only `fo` is separate — which the names do not suggest.
+    ok ("vasm", "rs allocates names, and the counter symbols read it",
+        "\tsection code,code\na\trs.b 1\nb\trs.w 1\nc\trs.l 1\n\tdc.b a,b,c,__RS\n\
+         \trsset 8\nd\trs.b 1\n\tdc.b d\n\trsreset\ne\trs.b 1\n\trseven\n\
+         f\trs.b 1\n\tdc.b e,f\n\tk\trs 1\nl\trs 1\n\tdc.b k,l\n"),
+    ok ("vasm", "so is the same counter as rs, under another name",
+        "\tsection code,code\n\tsetso 9\n\tdc.b __RS,__SO\n\
+         \trsset 6\n\tdc.b __SO\n\tclrso\na\trs.b 1\n\tdc.b a\n\
+         b\tso.b 2\nc\trs.b 1\n\tdc.b b,c\n"),
+    ok ("vasm", "fo is its own counter and runs the other way",
+        "\tsection code,code\n\tsetfo 8\nh\tfo.b 1\ni\tfo.w 1\n\tdc.b h,i,__FO\n\
+         \tdc.b __RS\n\tclrfo\nj\tfo.b 1\n\tdc.b j\n"),
     ok ("vasm", "the listing and debug words emit nothing",
         "\tsection code,code\n\tlist\n\tnolist\n\tllen 80\n\tplen 60\n\tpage\n\
          \tnopage\n\tspc 2\n\tttl \"t\"\n\tsymdebug\n\tdsource \"x.s\"\n\tmsource\n\
