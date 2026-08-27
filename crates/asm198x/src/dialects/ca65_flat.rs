@@ -1133,6 +1133,9 @@ fn is_text_function(lower: &str) -> bool {
             | ".left"
             | ".mid"
             | ".right"
+            | ".const"
+            | ".ismnem"
+            | ".ismnemonic"
     )
 }
 
@@ -1160,12 +1163,13 @@ fn name_list(text: &str) -> Vec<String> {
 pub(crate) fn expand_ca65(
     source: &str,
     mode: macros::Expand,
-    registers: Registers,
+    target: Target,
 ) -> Result<macros::Expansion, AsmError> {
     macros::expansion(mode, source, |s| {
         let expanded = macros::expand(&Ca65Macros, s)?;
         let text = Ca65Text {
-            registers,
+            target,
+            defined: defined_names(&expanded.text),
             ..Ca65Text::default()
         };
         let resolved = text::expand(&text, &expanded.text)?;
@@ -1173,26 +1177,40 @@ pub(crate) fn expand_ca65(
     })
 }
 
-/// Which identifiers a token list reads as **registers** rather than as names.
+/// Which CPU a ca65 parse is for.
 ///
-/// ca65 takes this from the CPU, and it is observable: `.match({s},{q})` is 1
-/// assembling for a 6502, where `s` is an ordinary identifier, and 0 for a
-/// 65816, where it is the stack register its stack-relative modes need.
+/// The text layer reads two things off it, and both are observable rather than
+/// cosmetic:
+///
+/// - **the register names a token list holds.** `.match({s},{q})` is 1 for a
+///   6502, where `s` is an ordinary identifier, and 0 for a 65816, where it is
+///   the stack register its stack-relative modes need.
+/// - **which mnemonics exist.** `.ismnem(bra)` is 0 for a 6502 and 1 for a
+///   65816.
 #[derive(Clone, Copy, Default)]
-pub(crate) enum Registers {
-    /// `a`, `x`, `y`.
+pub(crate) enum Target {
     #[default]
     Mos6502,
-    /// `a`, `x`, `y`, `s`.
     Wdc65816,
+    HuC6280,
 }
 
-impl Registers {
-    fn holds(self, name: &str) -> bool {
-        matches!(
-            (self, name),
-            (_, "a" | "x" | "y") | (Registers::Wdc65816, "s")
-        )
+impl Target {
+    fn holds_register(self, name: &str) -> bool {
+        matches!((self, name), (_, "a" | "x" | "y") | (Target::Wdc65816, "s"))
+    }
+
+    /// Whether the CPU has this mnemonic. ca65 reads the name
+    /// case-insensitively — `.ismnem(LDA)` is 1 — and the spec stores it
+    /// upper-case; every one of these targets is a 6502 with additions.
+    fn has_mnemonic(self, name: &str) -> bool {
+        let upper = name.to_ascii_uppercase();
+        isa::mos6502::SET.has_mnemonic(&upper)
+            || match self {
+                Target::Mos6502 => false,
+                Target::Wdc65816 => isa::mos65816::SET.has_mnemonic(&upper),
+                Target::HuC6280 => isa::huc6280::SET.has_mnemonic(&upper),
+            }
     }
 }
 
@@ -1212,8 +1230,128 @@ struct Ca65Text {
     /// two different symbols. Refusing to fold is a gap; folding the wrong
     /// symbol is a wrong answer.
     depth: std::cell::Cell<usize>,
-    /// The CPU's register names, which change what a token list holds.
-    registers: Registers,
+    /// The CPU, which decides both the register names a token list holds and
+    /// which mnemonics `.ismnem` knows.
+    target: Target,
+    /// Every name defined anywhere in the source.
+    ///
+    /// `.const` needs it: ca65 answers 0 for a symbol that is defined but not
+    /// constant *here* — a label, or a constant defined below the line — and
+    /// **errors** for one that is not defined at all. Telling those apart needs
+    /// the whole file, which is why this is collected before the walk rather
+    /// than accumulated during it.
+    defined: std::collections::BTreeSet<String>,
+}
+
+/// Every name the source defines, wherever it defines it.
+///
+/// Deliberately generous about what counts and deliberately blind to scope: a
+/// name it misses makes `.const` refuse rather than answer, which is the safe
+/// direction.
+fn defined_names(source: &str) -> std::collections::BTreeSet<String> {
+    let mut out = std::collections::BTreeSet::new();
+    for raw in source.lines() {
+        let code = macros::without_comment(raw);
+        let code = code.trim();
+        if code.is_empty() {
+            continue;
+        }
+        // `name:` and `@cheap:` labels, which may be followed by a statement.
+        if let Some(colon) = code.find(':')
+            && !code[..colon].contains(char::is_whitespace)
+        {
+            let name = code[..colon].trim_start_matches('@');
+            if super::mos6502::is_ident(name) {
+                out.insert(name.to_string());
+            }
+        }
+        let (word, rest) = super::mos6502::split_first_word(code);
+        match word.to_ascii_lowercase().as_str() {
+            // A declaration names a symbol without defining a value.
+            ".import" | ".importzp" | ".global" | ".globalzp" | ".export" | ".exportzp"
+            | ".forceimport" => {
+                for name in rest.split(',') {
+                    let name = name.split('=').next().unwrap_or_default().trim();
+                    if super::mos6502::is_ident(name) {
+                        out.insert(name.to_string());
+                    }
+                }
+                continue;
+            }
+            ".proc" | ".scope" | ".enum" | ".struct" | ".union" => {
+                let name = super::mos6502::split_first_word(rest).0;
+                if super::mos6502::is_ident(name) {
+                    out.insert(name.to_string());
+                }
+                continue;
+            }
+            _ => {}
+        }
+        // `NAME = expr` and `NAME .set expr`.
+        if let Some(eq) = super::mos6502::assignment_split(code) {
+            let name = code[..eq].trim();
+            if super::mos6502::is_ident(name) {
+                out.insert(name.to_string());
+            }
+        }
+    }
+    out
+}
+
+impl Ca65Text {
+    /// Answer `.const`: 1 if the expression folds here, 0 if every name in it
+    /// is defined somewhere but not to a value this pass can reach.
+    ///
+    /// # Errors
+    ///
+    /// A name defined nowhere — which ca65 answers with "Symbol is undefined"
+    /// rather than with 0 — and the two cases this pass cannot see: a scoped
+    /// name, and any expression inside an open `.proc`/`.scope`, where a
+    /// constant is in scope for ca65 and invisible here.
+    fn constancy(
+        &self,
+        arg: &text::Arg,
+        scope: &text::Scope,
+        name: &str,
+        line: usize,
+    ) -> Result<i64, AsmError> {
+        let text::Arg::Bare(raw) = arg else {
+            return Err(AsmError::new(
+                line,
+                format!("`{name}` takes an expression, not a string"),
+            ));
+        };
+        let raw = raw.trim();
+        if self.depth.get() > 0 || raw.contains("::") {
+            return Err(AsmError::new(
+                line,
+                format!(
+                    "`{name}` cannot answer for `{raw}`: this pass keeps no scope stack, so a \
+                     constant inside a `.proc` or `.scope` is invisible to it"
+                ),
+            ));
+        }
+        if scope.number(arg, name, line).is_ok() {
+            return Ok(1);
+        }
+        let expr = super::ca65::constant_value(raw, line)?;
+        // Not constant — but ca65 tells "defined and not constant" from "not
+        // defined", and so must this.
+        let mut unknown = None;
+        crate::ast::map_sym_expr(expr, &mut |sym| {
+            if !self.defined.contains(&sym) {
+                unknown.get_or_insert_with(|| sym.clone());
+            }
+            crate::engine::Expr::Sym(sym)
+        });
+        match unknown {
+            Some(sym) => Err(AsmError::new(
+                line,
+                format!("`{sym}` is not defined anywhere in this source"),
+            )),
+            None => Ok(0),
+        }
+    }
 }
 
 impl text::TextSyntax for Ca65Text {
@@ -1332,14 +1470,12 @@ impl text::TextSyntax for Ca65Text {
             // re-rendering tokens that would have to be spaced back together.
             ".tcount" => {
                 one(args)?;
-                Folded::Number(
-                    tokens(token_list(&args[0], name, line)?, self.registers).len() as i64,
-                )
+                Folded::Number(tokens(token_list(&args[0], name, line)?, self.target).len() as i64)
             }
             ".blank" => {
                 one(args)?;
                 Folded::Number(i64::from(
-                    tokens(token_list(&args[0], name, line)?, self.registers).is_empty(),
+                    tokens(token_list(&args[0], name, line)?, self.target).is_empty(),
                 ))
             }
             // `.match` compares what each token *is*; `.xmatch` compares what it
@@ -1353,7 +1489,7 @@ impl text::TextSyntax for Ca65Text {
                     token_list(&args[0], name, line)?,
                     token_list(&args[1], name, line)?,
                 );
-                let (a, b) = (tokens(a, self.registers), tokens(b, self.registers));
+                let (a, b) = (tokens(a, self.target), tokens(b, self.target));
                 let same = a.len() == b.len()
                     && a.iter().zip(&b).all(|(x, y)| {
                         x.kind == y.kind && (!exact || token_value(x) == token_value(y))
@@ -1364,7 +1500,7 @@ impl text::TextSyntax for Ca65Text {
                 arity(args, 2, name, line)?;
                 let count = scope.number(&args[0], name, line)?.max(0) as usize;
                 let list = token_list(&args[1], name, line)?;
-                let all = tokens(list, self.registers);
+                let all = tokens(list, self.target);
                 let (from, to) = if lower == ".left" {
                     (0, count)
                 } else {
@@ -1372,12 +1508,39 @@ impl text::TextSyntax for Ca65Text {
                 };
                 Folded::Bare(token_slice(list, &all, from, to).to_string())
             }
+            // Whether the CPU has this mnemonic. ca65 takes a bare name here
+            // and nothing else — `.ismnem("lda")` is "Identifier expected" —
+            // and reads it case-insensitively.
+            ".ismnem" | ".ismnemonic" => {
+                one(args)?;
+                let text::Arg::Bare(word) = &args[0] else {
+                    return Err(AsmError::new(
+                        line,
+                        format!("`{name}` takes a bare name, not a string"),
+                    ));
+                };
+                let word = word.trim();
+                if !super::mos6502::is_ident(word) {
+                    return Err(AsmError::new(
+                        line,
+                        format!("`{name}` takes a name, and `{word}` is not one"),
+                    ));
+                }
+                Folded::Number(i64::from(self.target.has_mnemonic(word)))
+            }
+            // Whether the expression is constant *here*. A symbol defined below
+            // the line is not, and neither is a label or the location counter;
+            // a symbol defined nowhere is an error in ca65, so it is one here.
+            ".const" => {
+                one(args)?;
+                Folded::Number(self.constancy(&args[0], scope, name, line)?)
+            }
             ".mid" => {
                 arity(args, 3, name, line)?;
                 let start = scope.number(&args[0], name, line)?.max(0) as usize;
                 let count = scope.number(&args[1], name, line)?.max(0) as usize;
                 let list = token_list(&args[2], name, line)?;
-                let all = tokens(list, self.registers);
+                let all = tokens(list, self.target);
                 Folded::Bare(
                     token_slice(list, &all, start, start.saturating_add(count)).to_string(),
                 )
@@ -1465,7 +1628,7 @@ const OPERATORS: &[&str] = &["::", "<<", ">>", "<=", ">=", "<>", "&&", "||"];
 
 /// Split a token list into tokens. Whitespace separates and is not a token, so
 /// `{+ +}` and `{++}` are the same two tokens.
-fn tokens(text: &str, registers: Registers) -> Vec<Token<'_>> {
+fn tokens(text: &str, target: Target) -> Vec<Token<'_>> {
     let bytes = text.as_bytes();
     let mut out = Vec::new();
     let mut i = 0usize;
@@ -1524,7 +1687,7 @@ fn tokens(text: &str, registers: Registers) -> Vec<Token<'_>> {
                     i += 1;
                 }
                 let name = text[start..i].to_ascii_lowercase();
-                if registers.holds(&name) {
+                if target.holds_register(&name) {
                     TokenKind::Register(name.chars().next().unwrap_or('a'))
                 } else {
                     TokenKind::Ident
