@@ -7,6 +7,39 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.35](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.34...asm198x-v0.0.35) - 2026-08-27
+
+### Added
+
+- *(ca65)* answer .paramcount and .definedmacro during expansion ([#361](https://github.com/asm198x/asm198x/pull/361))
+- *(ca65)* answer .const, .ismnem and .ismnemonic ([#360](https://github.com/asm198x/asm198x/pull/360))
+- *(ca65)* take the token-list half — .match, .tcount, .left and their kin ([#359](https://github.com/asm198x/asm198x/pull/359))
+- *(ca65)* fold .sprintf, over a constants environment ([#357](https://github.com/asm198x/asm198x/pull/357))
+- *(ca65)* take .concat, .string and .ident into the text layer ([#354](https://github.com/asm198x/asm198x/pull/354))
+- *(rgbasm)* fold STRFMT, over a constants environment ([#353](https://github.com/asm198x/asm198x/pull/353))
+- *(rgbasm)* build the text layer, and take twelve of its words ([#351](https://github.com/asm198x/asm198x/pull/351))
+- *(vasm)* take the offset counters, and find there are two of them ([#349](https://github.com/asm198x/asm198x/pull/349))
+- *(sjasmplus)* take the sixteen data directives beyond the shared set ([#348](https://github.com/asm198x/asm198x/pull/348))
+- *(vasm)* take seven more conditional heads, and stop dropping \1 ([#347](https://github.com/asm198x/asm198x/pull/347))
+- *(vasm)* take the listing words, and the two that say something ([#345](https://github.com/asm198x/asm198x/pull/345))
+- *(rgbasm)* take fixed-point literals and the maths that is exact ([#343](https://github.com/asm198x/asm198x/pull/343))
+- *(ca65)* take .org, .reloc and .end ([#342](https://github.com/asm198x/asm198x/pull/342))
+- *(ca65)* take .ref, .referenced and the two conditionals over them ([#341](https://github.com/asm198x/asm198x/pull/341))
+- *(ca65)* take the processor words, and name the other processors as the gap ([#340](https://github.com/asm198x/asm198x/pull/340))
+- *(ca65)* take the record types — .struct, .union, .enum, .tag, .sizeof ([#339](https://github.com/asm198x/asm198x/pull/339))
+- *(ca65)* accept the eight words that address the listing, not the bytes ([#338](https://github.com/asm198x/asm198x/pull/338))
+- *(ca65)* take .proc and .scope, and qualify the names inside them ([#334](https://github.com/asm198x/asm198x/pull/334))
+
+### Fixed
+
+- *(rgbasm)* format the text layer, and check that the formatter can ([#356](https://github.com/asm198x/asm198x/pull/356))
+- *(fmt)* read an else-if leg back flat, and take vasm's elif ([#355](https://github.com/asm198x/asm198x/pull/355))
+- *(rgbasm)* round a fixed-point literal instead of truncating it ([#352](https://github.com/asm198x/asm198x/pull/352))
+
+### Other
+
+- *(6809)* record 85 fuzz programs the corpus had never held ([#344](https://github.com/asm198x/asm198x/pull/344))
+
 ## [0.0.34](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.33...asm198x-v0.0.34) - 2026-08-26
 
 The release where source compatibility stopped being a claim about a few
