@@ -376,9 +376,9 @@ const PROBES: &[Probe] = &[
         "SECTION \"s\",ROM0[0]\nDEF q EQUS \"\\\"ab\\\"\"\ndb STRLEN(q)\n\
          DEF j EQUS \"STRCAT(\\\"xy\\\",\\\"z\\\")\"\ndb j\n"),
     ok ("rgbasm", "fixed-point literals",
-        "SECTION \"s\",ROM0[0]\ndl 3.7\ndl 1.0\ndl -1.5\ndl 0.5\n"),
+        "SECTION \"s\",ROM0[0]\ndl 3.7\ndl 1.0\ndl -1.5\ndl 0.5\ndl 0.1\ndl 0.3\n"),
     ok ("rgbasm", "a q suffix names another precision",
-        "SECTION \"s\",ROM0[0]\ndl 3.7q8\ndl 1.0q4\n"),
+        "SECTION \"s\",ROM0[0]\ndl 3.7q8\ndl 1.0q4\ndl 0.25q1\ndl 1.25q1\ndl 0.125q2\n"),
     ok ("rgbasm", "fixed multiply and divide",
         "SECTION \"s\",ROM0[0]\ndl DIV(1.0, 3.0)\ndl MUL(1.5, 1.5)\ndl FMOD(7.5, 2.0)\n"),
     // The three roundings, each over a negative as well: FLOOR goes toward
