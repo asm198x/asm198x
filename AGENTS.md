@@ -47,7 +47,7 @@ When adding or changing a CPU, prefer the existing encoding models before introd
 - computed operands via the existing operand seam;
 - field-packed bespoke tables for word-oriented or CISC-like encodings.
 
-The engine ↔ dialect ↔ spec seam is documented in `crates/asm198x/src/lib.rs`. The encoding-model taxonomy and CPU roadmap live in [`../../decisions/packaging-and-cpu-roadmap.md`](../../decisions/packaging-and-cpu-roadmap.md) and [`../../decisions/asm198x-cpu-coverage-roadmap.md`](../../decisions/asm198x-cpu-coverage-roadmap.md).
+The engine ↔ dialect ↔ spec seam is documented in `crates/asm198x/src/lib.rs`. The encoding-model taxonomy and CPU roadmap live in [`decisions/packaging-and-cpu-roadmap.md`](decisions/packaging-and-cpu-roadmap.md) and [`../../decisions/asm198x-cpu-coverage-roadmap.md`](../../decisions/asm198x-cpu-coverage-roadmap.md).
 
 ## Layers above the encoder
 

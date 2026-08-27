@@ -1073,8 +1073,9 @@ pub fn assemble_z8001_files(
 }
 
 /// Assemble lwasm-syntax 6809 source into a flat big-endian binary — matching
-/// `lwasm --6809 --raw`. Covers inherent, immediate, direct, extended, and
-/// relative (short + long) addressing; indexed addressing is not yet supported.
+/// `lwasm --6809 --raw`. Covers every addressing mode the 6809 has — inherent,
+/// immediate, direct, extended, relative (short and long), and indexed in all
+/// its forms with the indirect ones — and the register-list operations.
 /// Single-source: an `include`/`use`/`includebin` directive is an error here —
 /// use [`assemble_lwasm_files`] for a multi-file program.
 ///
