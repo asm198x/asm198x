@@ -7,6 +7,140 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.35](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.34...asm198x-v0.0.35) - 2026-08-27
+
+The release where the references' string features stopped being a gap. ca65 and
+rgbasm both express whole idioms through text the assembler builds *before* it
+parses — `STRFMT`, `.sprintf`, `.concat`, `.ident`, `.match` — and none of it
+existed here. It does now, and as a source pre-pass rather than a second type in
+the expression language, which is a decision with a record behind it. 364
+outstanding reference words to **238**: ca65 alone goes from 78 to 24.
+
+### Added
+
+- **Strings are a source pre-pass, not a second type in the expression
+  language.** An expression evaluates to an `i64`, and continues to. The
+  references' string features are resolved before the parse, in the shape macro
+  expansion already used: symbols are collected, functions are folded to the
+  text they produce, and the ordinary parse reads a string literal or a number
+  as it always would. The alternative — a string type in the expression tree —
+  would make every dialect's evaluation two-typed and still could not answer
+  ca65's token-list functions, which compare things that are neither number nor
+  string. The one case a pre-pass cannot reach is a string function applied to a
+  label's address; ca65 refuses that itself, and rgbasm's version of it is
+  refused here by name rather than answered wrongly.
+  ([#350](https://github.com/asm198x/asm198x/pull/350))
+
+- **rgbasm's string vocabulary — thirteen words.** `EQUS`, `STRCAT`, `STRUPR`,
+  `STRLWR`, `STRSUB`, `STRSLICE`, `STRLEN`, `STRCMP`, `STRFIND`, `STRIN`,
+  `STRRIN`, `STRRPL` and `STRFMT`. The index conventions are the part worth
+  knowing: `STRSUB` is 1-based and takes a *length*, `STRSLICE` is 0-based and
+  takes an *end*, `STRFIND` answers a 0-based index or `-1`, and `STRIN`
+  answers a 1-based one or `0`. `STRFMT` is printf's shape and not printf's
+  rules — `%#x` writes `$ff`, `%#f` appends `q16` as a suffix, `%f` reads its
+  argument as a raw Q16.16 value, and the flags come in a fixed order, so `%+#x`
+  assembles where `%#+x` does not.
+  ([#351](https://github.com/asm198x/asm198x/pull/351),
+  [#353](https://github.com/asm198x/asm198x/pull/353))
+
+- **ca65's string vocabulary — `.concat`, `.string`, `.ident`, `.sprintf`.**
+  `.string` stringifies its argument's *token* rather than its value: with
+  `N = 7`, `.string(N)` is `"N"`. `.ident` builds a name from text and resolves
+  it like any other, forward references included. `.sprintf` is C's shape with
+  ca65's own departures — `%x` is signed where `%X` is not, so the two disagree
+  about a negative value; `%s` and `%c` pad on the right by default and on the
+  left with `-`, the reverse of every other conversion; and `#` on `%x` shows
+  its prefix even for zero. All 135 measured cases are in the test.
+  ([#354](https://github.com/asm198x/asm198x/pull/354),
+  [#357](https://github.com/asm198x/asm198x/pull/357))
+
+- **ca65's token lists — `.match`, `.xmatch`, `.tcount`, `.blank`, `.left`,
+  `.mid`, `.right`.** A token list is unevaluated source, so these answer over
+  what is *written*. `.match` asks what each token **is** and `.xmatch` asks
+  what it **says**: `.match({1},{2})` is 1 and `.xmatch({1},{2})` is 0, while
+  `.match({a},{b})` is 0 because `a` is the accumulator and `b` is a name. The
+  register set follows the CPU, which is observable — `.match({s},{q})` is 1 for
+  a 6502 and 0 for a 65816, where `s` is the stack register.
+  ([#359](https://github.com/asm198x/asm198x/pull/359))
+
+- **ca65's four remaining predicates — `.const`, `.ismnem`, `.paramcount`,
+  `.definedmacro`.** `.const` answers 0 for a constant defined *below* the line,
+  which is what a pass walking in source order sees anyway, and errors for a
+  name defined nowhere, which is what ca65 does rather than answering 0.
+  `.ismnem` follows the CPU. `.paramcount` counts the **call site** and not the
+  declared parameters, so a macro with two of them called with one answers 1.
+  `.definedmacro` is answered above the line that asks — for a line inside a
+  body, the line the macro was invoked on.
+  ([#360](https://github.com/asm198x/asm198x/pull/360),
+  [#361](https://github.com/asm198x/asm198x/pull/361))
+
+- **rgbasm's fixed-point arithmetic.** Q16.16 literals with an optional `q`
+  precision suffix, `MUL`, `DIV`, `FMOD`, `FLOOR`, `CEIL`, `ROUND`, `TZCOUNT`,
+  `HIGH`, `LOW` and `dl`. Only the operations whose answers are exactly defined;
+  the transcendental ones remain a named gap rather than an approximation.
+  ([#343](https://github.com/asm198x/asm198x/pull/343))
+
+- **vasm goes from 87 outstanding words to 53.** The listing controls, and the
+  two that say something — `printt` and `printv`. Seven more conditional heads
+  (`ifb`, `ifnb`, `ifc`, `ifnc`, `ifmi`, `ifpl`, `elseif`), where `elseif` reads
+  its argument and ignores it. The offset counters, which turn out to be two
+  rather than one: `rs` and `so` share a counter and `fo` counts down.
+  ([#345](https://github.com/asm198x/asm198x/pull/345),
+  [#347](https://github.com/asm198x/asm198x/pull/347),
+  [#349](https://github.com/asm198x/asm198x/pull/349))
+
+- **sjasmplus's sixteen data directives beyond the shared set.** The `dc`/`dz`
+  string forms, the wide and graphic byte spellings, and the marked variants —
+  where `dc` marks the last character of each *string*, not of the whole list.
+  ([#348](https://github.com/asm198x/asm198x/pull/348))
+
+- **ca65's structure, reference and listing vocabulary.** `.proc` and `.scope`,
+  with names inside them qualified as ca65 qualifies them. The record types
+  `.struct`, `.union`, `.enum`, `.tag` and `.sizeof`. `.ref`/`.referenced` and
+  the two conditionals over them, where a use in a branch the assembler never
+  took does not count. `.org`, `.reloc` and `.end` — `.org` moves the *address*
+  and not the bytes. The processor words, with the processors we do not assemble
+  named as the gap rather than silently accepted. And the eight words that
+  address the listing rather than the bytes.
+  ([#334](https://github.com/asm198x/asm198x/pull/334),
+  [#338](https://github.com/asm198x/asm198x/pull/338),
+  [#339](https://github.com/asm198x/asm198x/pull/339),
+  [#340](https://github.com/asm198x/asm198x/pull/340),
+  [#341](https://github.com/asm198x/asm198x/pull/341),
+  [#342](https://github.com/asm198x/asm198x/pull/342))
+
+### Fixed
+
+- **A fixed-point literal truncated where rgbasm rounds.** `0.1` assembled to
+  `$1999` against rgbasm's `$199A`, and `0.3` to `$4CCC` against `$4CCD`. The
+  test that should have caught it pinned `3.7` as `$3B333` and read that as
+  evidence of truncation — but `242483.2` rounds *down*, so both rules agree
+  there, and the one probe that would have told them apart was never asked.
+  ([#352](https://github.com/asm198x/asm198x/pull/352))
+
+- **The formatter turned an else-if chain into source the assembler refused.**
+  A leg is stored as a conditional nested in the else branch, and it came back
+  out flat only for `.elseif`; rgbasm spells it `ELIF`, so its chains were
+  re-emitted as `ELSE` followed by `ELIF`. The closer was the same bug's other
+  half: the author writes one, the walk gives it to the innermost leg, and the
+  outer block then derived `ENDIF` — which rgbasm refuses outright. With that
+  honest, vasm's `elif` was no longer blocked and landed alongside it.
+  ([#355](https://github.com/asm198x/asm198x/pull/355))
+
+- **rgbasm's formatter was never checked, and could not format the text
+  layer.** The invariant that says `fmt` must read what `asm` reads walks a list
+  of dialects, and rgbasm was missing from it — so eight probes assembled and
+  would not format with nothing to say so. All eight now do, and the ledger of
+  known formatter gaps stays empty over one more dialect.
+  ([#356](https://github.com/asm198x/asm198x/pull/356))
+
+### Assurance
+
+- **85 fuzz programs the 6809 corpus had never held.** Seeded differential
+  programs recorded against lwasm, so the fuzzer's findings are replayable on a
+  machine with no reference tools installed rather than re-derived each run.
+  ([#344](https://github.com/asm198x/asm198x/pull/344))
+
 ## [0.0.34](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.33...asm198x-v0.0.34) - 2026-08-26
 
 The release where source compatibility stopped being a claim about a few

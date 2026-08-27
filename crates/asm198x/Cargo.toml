@@ -17,9 +17,9 @@ format198x-sinclair-zx-spectrum-tap = { workspace = true }
 # verify the manifest — release-plz runs it to compute the release diff, and
 # path deps without a version fail packaging. release-plz keeps it in sync on
 # each bump. Local builds use the path; the version is only for packaging.
-isa = { path = "../isa", version = "0.0.34" }
-isa-disasm = { path = "../isa-disasm", version = "0.0.34" }
-debug198x = { path = "../debug198x", version = "0.0.34" }
+isa = { path = "../isa", version = "0.0.35" }
+isa-disasm = { path = "../isa-disasm", version = "0.0.35" }
+debug198x = { path = "../debug198x", version = "0.0.35" }
 # serde derive for the public `AssemblyResult` contract (U1). Already on the CLI
 # path transitively via debug198x; this makes the derive macro available directly.
 serde = { workspace = true }
