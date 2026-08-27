@@ -1037,6 +1037,14 @@ pub(crate) fn directive_operand_span(
 pub(crate) struct Ca65Macros;
 
 impl macros::MacroSyntax for Ca65Macros {
+    fn argument_count_word(&self) -> Option<&'static str> {
+        Some(".paramcount")
+    }
+
+    fn defined_macro_word(&self) -> Option<&'static str> {
+        Some(".definedmacro")
+    }
+
     /// `.macro name [p1[, p2]...]`, or the `.mac` short spelling. The leading
     /// dot is required; the keyword is matched case-insensitively and the name
     /// is kept as written, since ca65 rejects a mis-cased call.
@@ -1119,6 +1127,10 @@ fn unfolded_text(arg: &super::mos6502::ExprArg) -> bool {
 
 /// The text layer's function names, lower-cased. One list, read by the pass
 /// that folds them and by the stand-in the formatter parses.
+///
+/// `.definedmacro` is not here — it is answered a layer earlier, during macro
+/// expansion — but it needs the same stand-in for the same reason, so the
+/// caller adds it.
 fn is_text_function(lower: &str) -> bool {
     matches!(
         lower,
@@ -2023,7 +2035,7 @@ pub(crate) fn expr_function(
     // then re-emits the call from its source — so all it needs is a value that
     // parses. The mark cannot be a ca65 identifier, so a fold that somehow did
     // not happen fails as an unresolved symbol rather than answering a number.
-    if is_text_function(&lower) {
+    if is_text_function(&lower) || lower == ".definedmacro" {
         return Ok(Expr::Sym(format!("{TEXT_MARK}{lower}")));
     }
 

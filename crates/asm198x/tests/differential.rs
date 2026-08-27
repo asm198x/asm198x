@@ -941,6 +941,18 @@ const PROBES: &[Probe] = &[
         "N = 7\n .byte .string(N)\n .byte .string(42)\nlbl: .byte .string(lbl)\n"),
     ok ("ca65-816", ".ident builds a name, forward references included",
         "foo = 5\n .byte .ident(\"foo\")\n .byte .ident(.concat(\"b\",\"ar\"))\nbar = 9\n"),
+    // `.paramcount` counts the **call site**, not the declared parameters, and
+    // `.definedmacro` is answered where it is written — a definition below the
+    // line does not count, and the name is case-sensitive.
+    ok ("ca65-816", ".paramcount counts the call site",
+        ".macro m p1, p2\n .byte .paramcount\n.endmacro\n m 1, 2\n m 1\n m\n\
+         .macro n p1, p2, p3\n .byte .paramcount\n.endmacro\n n 1, , 3\n\
+         .macro i\n .byte .paramcount\n.endmacro\n\
+         .macro o p1\n i\n.endmacro\n o 1\n"),
+    ok ("ca65-816", ".definedmacro is answered where it is written",
+        ".byte .definedmacro(d)\n.macro d\n.endmacro\n\
+         .byte .definedmacro(d), .definedmacro(n), .definedmacro(D)\n\
+         .macro n\n .byte .definedmacro(d)\n.endmacro\n n\n"),
     // `.const` asks whether an expression is constant *here*, so a constant
     // defined below the line is not one — which is what a pass walking in
     // source order sees anyway. `.ismnem` follows the CPU: `bra` and `phb` are

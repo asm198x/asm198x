@@ -95,6 +95,28 @@ pub(crate) trait MacroSyntax {
         None
     }
 
+    /// A word the body may use for **how many arguments this invocation was
+    /// given** — ca65's `.paramcount`, which counts the call site and not the
+    /// declared parameters, so a macro with two parameters called with one
+    /// answers 1.
+    ///
+    /// A plain textual swap, like [`expansion_token`](Self::expansion_token),
+    /// and for the same reason: the word is not a symbol.
+    fn argument_count_word(&self) -> Option<&'static str> {
+        None
+    }
+
+    /// A call the dialect answers with **whether a macro of that name is
+    /// defined** — ca65's `.definedmacro(name)`.
+    ///
+    /// Answered against the macros defined above the line that asks, which for
+    /// a line inside a body is the line the macro was *invoked* on: that is
+    /// where ca65 evaluates it, and it is the origin every expanded line
+    /// already carries.
+    fn defined_macro_word(&self) -> Option<&'static str> {
+        None
+    }
+
     /// Whether `c` can appear inside a symbol, for word-boundary-aware
     /// substitution.
     ///
@@ -341,6 +363,40 @@ pub(crate) fn split_args(text: &str) -> Vec<String> {
 ///
 /// Two passes, because a macro may invoke one defined **later** in the file —
 /// the references resolve a name when they expand, not when they read.
+/// Answer every `word(name)` on one line with 1 or 0, against the macros
+/// defined above source line `at`.
+///
+/// A definition *below* the line does not count — ca65 answers 0 there — which
+/// is why this reads the source line the expansion recorded rather than the
+/// position in the output.
+fn fold_defined_macro(
+    word: &str,
+    line: &str,
+    defined_at: &std::collections::HashMap<String, usize>,
+    at: usize,
+) -> String {
+    let mut out = String::with_capacity(line.len());
+    let mut rest = line;
+    while let Some(start) = rest.find(word) {
+        let after = &rest[start + word.len()..];
+        let Some(open) = after.find('(').filter(|i| after[..*i].trim().is_empty()) else {
+            out.push_str(&rest[..start + word.len()]);
+            rest = after;
+            continue;
+        };
+        let Some(close) = after[open..].find(')').map(|i| open + i) else {
+            break;
+        };
+        let name = after[open + 1..close].trim();
+        let known = defined_at.get(name).is_some_and(|line| *line < at);
+        out.push_str(&rest[..start]);
+        out.push(if known { '1' } else { '0' });
+        rest = &after[close + 1..];
+    }
+    out.push_str(rest);
+    out
+}
+
 pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expanded, AsmError> {
     let lines: Vec<&str> = source.lines().collect();
     // Definitions are grouped by name rather than replaced, because one dialect
@@ -348,6 +404,9 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
     // take. Where a dialect has only ever one, the group holds one.
     let mut macros: std::collections::HashMap<String, Vec<MacroDef>> =
         std::collections::HashMap::new();
+    // The source line each name became defined on, for `.definedmacro`: a
+    // definition below the line that asks does not count.
+    let mut defined_at: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
 
     // Pass 1 — take the definitions out, keep everything else with its origin.
     let mut body: Vec<(LineOrigin, String)> = Vec::with_capacity(lines.len());
@@ -361,6 +420,7 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
                 def,
                 last_line,
             } = collected.map_err(|msg| AsmError::new(line_no, msg))?;
+            defined_at.entry(name.clone()).or_insert(last_line + 1);
             macros.entry(name).or_default().push(def);
             i = last_line + 1;
             continue;
@@ -399,6 +459,7 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
                     ),
                 ));
             };
+            let given = args.len();
             let args = syntax
                 .fit_arguments(&name, &def.params, args)
                 .map_err(|msg| AsmError::new(origin.line, msg))?;
@@ -438,6 +499,11 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
                     continue;
                 }
                 let mut text = substitute(syntax, body_line, &params, &args);
+                if let Some(word) = syntax.argument_count_word() {
+                    // The call site's count, not the fitted one: a macro with
+                    // two parameters called with one answers 1.
+                    text = text.replace(word, &given.to_string());
+                }
                 if let Some(token) = syntax.expansion_token() {
                     // A plain textual swap: the token is not a symbol, so the
                     // word-boundary rules above would never see it.
@@ -461,6 +527,10 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
     let mut text = String::with_capacity(source.len());
     let mut origins = Vec::with_capacity(body.len());
     for (origin, line) in body {
+        let line = match syntax.defined_macro_word() {
+            Some(word) => fold_defined_macro(word, &line, &defined_at, origin.line),
+            None => line,
+        };
         text.push_str(&line);
         text.push('\n');
         origins.push(origin);
