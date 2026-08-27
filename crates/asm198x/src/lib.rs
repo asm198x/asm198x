@@ -51,6 +51,7 @@ mod prg;
 #[cfg(test)]
 mod roundtrip_tests;
 mod sna;
+mod tape;
 // The multi-file source model (language-surface U1): the loader seam
 // (filesystem + in-memory), the FileId-allocating source map, and the include
 // graph. Public as a module (not flattened into the crate root): consumers
@@ -91,6 +92,7 @@ pub use isa_disasm::{
 };
 pub use prg::prg;
 pub use sna::sna_48k;
+pub use tape::{TapeFormat, tape};
 
 /// Assemble ACME-syntax 6502 source into a flat binary — the C64 curriculum's
 /// dialect (`*=` to set the PC, `!byte`/`!word`/`!fill`, `name = value`).

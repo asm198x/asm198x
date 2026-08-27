@@ -458,6 +458,9 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut exe = false;
     let mut sna = false;
     let mut prg = false;
+    // `--tap`/`--tzx` frame the program for tape; the `bas` spellings put
+    // pasmo's auto-run BASIC loader in front of it.
+    let mut tape: Option<(asm198x::TapeFormat, bool)> = None;
     let mut origin: u16 = 0;
     let mut message_format = MessageFormat::Human;
     // Debug198x artifacts (U3): `None` = flag absent; `Some(None)` = default
@@ -531,6 +534,10 @@ fn run(args: &[String]) -> Result<String, String> {
             "--exe" | "--hunkexe" => exe = true,
             "--sna" => sna = true,
             "--prg" => prg = true,
+            "--tap" => tape = Some((asm198x::TapeFormat::Tap, false)),
+            "--tapbas" => tape = Some((asm198x::TapeFormat::Tap, true)),
+            "--tzx" => tape = Some((asm198x::TapeFormat::Tzx, false)),
+            "--tzxbas" => tape = Some((asm198x::TapeFormat::Tzx, true)),
             "--org" => {
                 i += 1;
                 let value = args.get(i).ok_or("`--org` needs an address")?;
@@ -840,6 +847,17 @@ fn run(args: &[String]) -> Result<String, String> {
     if prg && !matches!(assembler, Assembler::Acme) {
         return Err("`--prg` is only for the C64 dialect (acme)".into());
     }
+    if tape.is_some()
+        && !matches!(
+            assembler,
+            Assembler::Pasmo { .. } | Assembler::Sjasmplus { .. }
+        )
+    {
+        return Err(
+            "`--tap`/`--tzx` are only for the Spectrum Z80 dialects (pasmo/pasmonext/sjasmplus)"
+                .into(),
+        );
+    }
 
     // Every flat dialect assembles through its multi-file entry (U2–U4 — the
     // z80 family, acme, the ca65-flat family, rgbasm, lwasm, and the twelve
@@ -869,7 +887,28 @@ fn run(args: &[String]) -> Result<String, String> {
 
     // `--sna`: wrap the assembled Spectrum program in a 48K snapshot; `--prg`:
     // prefix the C64 load address; else a flat binary.
-    let (summary, image_path) = if sna {
+    let (summary, image_path) = if let Some((format, autorun)) = tape {
+        // The block name is the output path as pasmo would have been given it,
+        // so the default extension has to be settled before the image is built
+        // rather than after.
+        let extension = match format {
+            asm198x::TapeFormat::Tap => "tap",
+            asm198x::TapeFormat::Tzx => "tzx",
+        };
+        let out_path = output.unwrap_or_else(|| Path::new(input).with_extension(extension));
+        let image = asm198x::tape(&assembly, format, &out_path.to_string_lossy(), autorun)
+            .map_err(|e| render_error(input, &files, &e))?;
+        std::fs::write(&out_path, &image)
+            .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+        let summary = format!(
+            "assembled {} byte(s) -> {} ({} tape{})",
+            image.len(),
+            out_path.display(),
+            extension,
+            if autorun { ", auto-run" } else { "" },
+        );
+        (summary, out_path)
+    } else if sna {
         // Only the Z80/Spectrum dialects carry an entry point; a missing
         // `end <addr>` fails here, before any file is written.
         let image = asm198x::sna_48k(&assembly).map_err(|e| render_error(input, &files, &e))?;
@@ -1209,6 +1248,10 @@ fn usage() -> String {
      \x20             -I adds an include-search directory, repeatable, in order)\n\
      snapshot:    asm198x --dialect pasmonext --sna <input> [-o <out.sna>]\n\
      \x20            (Spectrum Z80 only; needs `end <addr>` for the entry point)\n\
+     tape:        asm198x --dialect pasmonext --tap|--tzx <input> [-o <out.tap>]\n\
+     \x20            (Spectrum Z80 only; the `bas` spellings — --tapbas/--tzxbas —\n\
+     \x20             put an auto-run BASIC loader in front, which needs `end <addr>`\n\
+     \x20             for its RANDOMIZE USR line)\n\
      C64 program: asm198x --dialect acme --prg <input> [-o <out.prg>]\n\
      \x20            (prepends the 2-byte load address)\n\
      debug info:  asm198x [--debug[=path]] [--sym[=path]] [--listing[=path]] <input>\n\
