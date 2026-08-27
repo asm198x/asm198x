@@ -102,7 +102,7 @@ Measured 2026-08-27 against the installed references:
 | acme 0.97 | 0 | 74 |
 | lwasm 4.25 | 10 | 257 |
 | ca65 V2.18 | 37 | 225 |
-| vasm 2.0b | 54 | 183 |
+| vasm 2.0b | 53 | 183 |
 | sjasmplus 1.21.0 | 60 | 264 |
 | rgbasm 1.0.3 | 91 | 306 |
 

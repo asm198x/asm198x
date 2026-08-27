@@ -1675,12 +1675,18 @@ fn emit_keyword_conditional(
     // flat chain and must render back that way — otherwise the formatter emits
     // `ELSE` before `ELSEIF`, which does not reassemble.
     let mut rest = else_body;
+    // The chain was written with one closer, and the walk gave it to the
+    // *innermost* leg — so flattening the chain has to bring it back out. Left
+    // behind, the outer block derives `ENDIF` from its head, which rgbasm
+    // refuses.
+    let mut close = close;
     while let Some(body) = rest {
         if let [only] = body
             && let Some(Item::Conditional {
                 head: leg_head,
                 then_body: leg_then,
                 else_body: leg_else,
+                close: leg_close,
                 style: CondStyle::Keyword,
                 ..
             }) = &only.item
@@ -1690,6 +1696,9 @@ fn emit_keyword_conditional(
             out.push_str(leg_head);
             out.push('\n');
             emit_nodes(leg_then, out, equ_label_colon, INDENT);
+            if close.is_empty() {
+                close = leg_close;
+            }
             rest = leg_else.as_deref();
             continue;
         }
@@ -1720,7 +1729,10 @@ fn emit_keyword_conditional(
 /// an optional dot; the head is stored verbatim, so it carries its own marker.
 fn is_elseif_head(head: &str) -> bool {
     let word = head.split_whitespace().next().unwrap_or_default();
-    matches!(word.strip_prefix('.').unwrap_or(word), "elseif" | "ELSEIF")
+    matches!(
+        word.strip_prefix('.').unwrap_or(word),
+        "elseif" | "ELSEIF" | "elif" | "ELIF"
+    )
 }
 
 /// Render a single node inline (`X = 0`, `nop`) for the one-line guard idiom.
