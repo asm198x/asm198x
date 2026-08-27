@@ -1,8 +1,10 @@
 # Asm198x
 
+> Read [`PRINCIPLES.md`](PRINCIPLES.md) first.
+
 Asm198x is the 198x family’s assembler/disassembler workspace: modern, single-binary, cross-platform tooling for the project’s target CPUs. It is a sibling of Code198x and Emu198x, not a child of either.
 
-For umbrella context and cross-project rules, read [`../../CLAUDE.md`](../../CLAUDE.md). For the sibling/project boundary, read [`../../decisions/sibling-project-coordination.md`](../../decisions/sibling-project-coordination.md). For the Asm198x/ISA architecture, read [`../../decisions/asm198x-and-shared-isa-spec.md`](../../decisions/asm198x-and-shared-isa-spec.md).
+For umbrella context and cross-project rules, read [`../../AGENTS.md`](../../AGENTS.md). For the sibling/project boundary, read [`../../decisions/sibling-project-coordination.md`](../../decisions/sibling-project-coordination.md). For the Asm198x/ISA architecture, read [`../../decisions/asm198x-and-shared-isa-spec.md`](../../decisions/asm198x-and-shared-isa-spec.md).
 
 ## Current role
 
