@@ -352,6 +352,29 @@ const PROBES: &[Probe] = &[
         "\tabyte 4 1,2\n\tabytec 0 \"ab\"\n\tabytez 4 1,2\n"),
     ok ("sjasmplus", "block fills, with a byte and without",
         "\tblock 3,$AA\n\tblock 2\n"),
+    // The text layer: string symbols and string functions, resolved before the
+    // parse. The index conventions are the part worth pinning — `STRSUB` is
+    // 1-based with a length and `STRSLICE` 0-based with an end, and the two
+    // searches differ in both base and miss value.
+    ok ("rgbasm", "the string functions fold to text and numbers",
+        "SECTION \"s\",ROM0[0]\ndb STRCAT(\"ab\",\"cd\")\n\
+         db STRUPR(\"ab\"), STRLWR(\"CD\")\ndb STRSUB(\"abcd\", 2, 2)\n\
+         db STRSLICE(\"abcd\", 1, 3)\ndb STRLEN(\"abc\")\n\
+         db STRRPL(\"abab\",\"b\",\"X\")\n"),
+    ok ("rgbasm", "the searches differ in base and in what a miss answers",
+        "SECTION \"s\",ROM0[0]\n\
+         db STRFIND(\"abc\",\"b\"), STRIN(\"abc\",\"b\"), STRRIN(\"abab\",\"b\")\n\
+         db STRFIND(\"abc\",\"z\"), STRIN(\"abc\",\"z\")\n\
+         db STRCMP(\"a\",\"b\"), STRCMP(\"b\",\"a\"), STRCMP(\"a\",\"a\")\n"),
+    ok ("rgbasm", "string functions nest",
+        "SECTION \"s\",ROM0[0]\ndb STRLEN(STRCAT(\"ab\",\"cd\"))\n\
+         db STRUPR(STRSUB(\"abcd\", 2, 2))\n"),
+    ok ("rgbasm", "EQUS substitutes text, and {} reaches inside a token",
+        "SECTION \"s\",ROM0[0]\nDEF s EQUS \"$41\"\ndb s\n\
+         DEF n EQUS \"4\"\ndb $1{n}\ndb \"s in a string\"\n"),
+    ok ("rgbasm", "an EQUS may hold a quoted string, or a call",
+        "SECTION \"s\",ROM0[0]\nDEF q EQUS \"\\\"ab\\\"\"\ndb STRLEN(q)\n\
+         DEF j EQUS \"STRCAT(\\\"xy\\\",\\\"z\\\")\"\ndb j\n"),
     ok ("rgbasm", "fixed-point literals",
         "SECTION \"s\",ROM0[0]\ndl 3.7\ndl 1.0\ndl -1.5\ndl 0.5\n"),
     ok ("rgbasm", "a q suffix names another precision",
