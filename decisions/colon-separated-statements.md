@@ -37,7 +37,7 @@ on. A debugger stepping through a colon line stops twice and shows the same
 line twice — coarse, and correct.
 
 A column field would sharpen that, and
-[`debug198x-format.md`](debug198x-format.md) permits it: the format froze on
+[`debug198x-format.md`](https://github.com/debug198x/debug198x/blob/main/decisions/debug198x-format.md) permits it: the format froze on
 2026-08-18 with additive changes still free. So this is a decision to wait, not
 a wall. **Waiting is right because the sharpening has a consumer cost and no
 consumer.** The field would mean nothing until the Emu198x importer read it,

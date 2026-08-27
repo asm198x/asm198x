@@ -15,7 +15,6 @@ resolver = "2"
 members = [
     "crates/isa",
     "crates/isa-disasm",
-    "crates/debug198x",
     "crates/asm198x",
     # Test infrastructure: the recorded reference-assembler verdicts CI replays
     # with no tools installed. Never a dependency of the shipped binary.
@@ -25,9 +24,9 @@ members = [
 ]
 default-members = ["crates/asm198x"]
 
-# External dependencies (the workspace's first — the debug-info crate warrants
-# the ecosystem serializer; see crates/debug198x and the plan's KTD1). Kept here
-# so versions are managed in one place.
+# External dependencies. serde arrived for the debug-info crate, which has since
+# graduated to its own repo; asm198x still needs it directly for the public
+# `AssemblyResult` contract. Kept here so versions are managed in one place.
 [workspace.dependencies]
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

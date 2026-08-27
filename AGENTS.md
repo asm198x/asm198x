@@ -23,7 +23,6 @@ Hardware facts come from the umbrella primary library at [`../../reference/`](..
 |---|---|
 | [`crates/isa`](crates/isa) | Dependency-free declarative instruction-set specs. This is the single source of truth for instruction encoding. |
 | [`crates/isa-disasm`](crates/isa-disasm) | Spec-driven disassemblers that depend only on `isa` + std, so Emu198x can consume disassembly without the assembler. |
-| [`crates/debug198x`](crates/debug198x) | Debug198x sidecar format: line/address maps, typed symbols, and sections. Governed by [`decisions/debug198x-format.md`](decisions/debug198x-format.md). |
 | [`crates/asm198x`](crates/asm198x) | Assembler library, dialect front-ends, shared engine, formatter, diagnostics contract, and `asm198x` CLI. |
 
 Split crates further only when the per-CPU ISA boundary or Emu198x consumption makes the split real.

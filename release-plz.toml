@@ -60,11 +60,6 @@ git_tag_enable = false
 name = "isa-disasm"
 git_tag_enable = false
 
-# The debug-info format: asm198x writes it, Emu198x reads it. See above.
-[[package]]
-name = "debug198x"
-git_tag_enable = false
-
 # Test infrastructure; no consumers outside this workspace's tests.
 [[package]]
 name = "verdict-corpus"

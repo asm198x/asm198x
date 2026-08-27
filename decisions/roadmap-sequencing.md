@@ -72,7 +72,7 @@ freeze fires at MCP (`decisions/core-contract-freeze.md`).
   crate, engine/ca65/vasm emission, CLI artifacts, fixture corpus, spec page +
   freeze record). Was paused, correctly, pending the contract's designed R1
   shape (contract-first). The format's v1 freeze waits on Emu198x consumption
-  per `decisions/debug198x-format.md`.
+  per [`debug198x-format.md`](https://github.com/debug198x/debug198x/blob/main/decisions/debug198x-format.md).
 - **Verdict pipeline (`…-002`, idea 2)** — genuinely **independent**, gated on
   nothing; reuses only the thin diagnostic envelope opportunistically. Run its
   harness prerequisite (outcome-typed `ref_assemble`, its U2) whenever capacity
