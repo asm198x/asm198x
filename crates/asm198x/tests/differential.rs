@@ -375,6 +375,25 @@ const PROBES: &[Probe] = &[
     ok ("rgbasm", "an EQUS may hold a quoted string, or a call",
         "SECTION \"s\",ROM0[0]\nDEF q EQUS \"\\\"ab\\\"\"\ndb STRLEN(q)\n\
          DEF j EQUS \"STRCAT(\\\"xy\\\",\\\"z\\\")\"\ndb j\n"),
+    // `STRFMT` is printf's shape and not printf's rules: the flags come in a
+    // fixed order, `#` marks the base rather than C's alternate form, and `%f`
+    // reads a Q16.16 value — so a plain `1` is a very small fraction.
+    ok ("rgbasm", "STRFMT's types, flags and widths",
+        "SECTION \"s\",ROM0[0]\ndb STRFMT(\"%d|%u|%X|%x|%b|%o\", 42, -1, 255, 255, 5, 9)\n\
+         db STRFMT(\"[%s]|100%%\", \"hi\")\n\
+         db STRFMT(\"%5d|%05d|%-5d|%+d|%+06d|%06d\", 42, 42, 42, 42, 42, -42)\n\
+         db STRFMT(\"%#x|%#b|%#o|%+#08x|% -6d|\", 255, 5, 9, 5, 42)\n"),
+    ok ("rgbasm", "STRFMT reads %f as a fixed-point value",
+        "SECTION \"s\",ROM0[0]\ndb STRFMT(\"%f|%f|%f\", 1.5, -1.5, 1)\n\
+         db STRFMT(\"%.2f|%#f|%#014f\", 1.5, 1.5, 1.5)\n\
+         db STRFMT(\"%.0f %.0f %.0f %.0f\", 0.5, 1.5, 2.5, -0.5)\n\
+         db STRFMT(\"%.17f\", 0.1)\n"),
+    // The pass folds a constants environment as it walks, so a number
+    // argument may be a constant defined above the line, or an expression
+    // over one.
+    ok ("rgbasm", "a folded number may come from a constant above it",
+        "SECTION \"s\",ROM0[0]\nDEF N EQU 7\ndb STRFMT(\"n=%d|%d\", N, N*2+1)\n\
+         DEF M EQU N-5\ndb STRSUB(\"abcd\", M, 2)\n"),
     ok ("rgbasm", "fixed-point literals",
         "SECTION \"s\",ROM0[0]\ndl 3.7\ndl 1.0\ndl -1.5\ndl 0.5\ndl 0.1\ndl 0.3\n"),
     ok ("rgbasm", "a q suffix names another precision",

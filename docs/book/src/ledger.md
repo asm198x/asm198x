@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.34`
-- **Corpus hash:** `be86bbcc7b13143eebcfc6acfe7a8bbcdc6090b89d01dbdc79a6c803d61f0cf2`
+- **Corpus hash:** `c2bada0f472839228beb6827a856c711fcc9ad254257ba07faf9e8618b99f1f2`
 - **Pinned curriculum:** `5435e540cf393c1956362458d5ff0fca3ff705f2` (2026-08-14)
-- **CPUs:** 23, holding 7935 verdict(s)
+- **CPUs:** 23, holding 7938 verdict(s)
 
 ## 1802
 
@@ -168,7 +168,7 @@ No tracked divergences.
 
 | arbiter | version | binaries | verdicts |
 |---|---|---|---|
-| `rgbasm` | rgbasm v1.0.3 | 1 | probe 61 |
+| `rgbasm` | rgbasm v1.0.3 | 1 | probe 64 |
 
 Tracked divergences — differences we know about and check:
 
