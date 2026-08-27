@@ -25,6 +25,7 @@ pub(crate) mod rgbasm;
 pub(crate) mod s2650;
 pub(crate) mod scmp;
 pub(crate) mod sjasmplus;
+pub(crate) mod text;
 pub(crate) mod tms7000;
 pub(crate) mod tms9900;
 pub(crate) mod vasm;

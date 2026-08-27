@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 268 word(s) outside our surface, across the references installed
+# 256 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -174,7 +174,7 @@ text
 
 ## rgbasm (rgbasm v1.0.3)
 # 3045 candidate(s) harvested; 306 recognised here, 0 more the tool itself
-# refuses on this target; 104 of the 306 outside our surface
+# refuses on this target; 92 of the 306 outside our surface
 acos
 af
 align
@@ -200,7 +200,6 @@ endm
 endsection
 endu
 equ
-equs
 fatal
 for
 fragment
@@ -243,20 +242,9 @@ sp
 sram
 startof
 strbyte
-strcat
 strchar
-strcmp
-strfind
 strfmt
-strin
-strlen
-strlwr
 strrfind
-strrin
-strrpl
-strslice
-strsub
-strupr
 tan
 union
 vram

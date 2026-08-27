@@ -48,6 +48,7 @@ use super::mos6502::{
     self, BytePrec, Caret, ExprOpts, fold_const, is_ident, split_data_items, split_first_word,
     split_top_level, string_literal,
 };
+use super::text;
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
 use crate::directives::{Category, Directive, Pattern, lookup};
@@ -1056,6 +1057,22 @@ pub const DIRECTIVES: &[Directive] = &[
     // The expression functions this dialect implements. Declared as what they
     // are: they never begin a statement, so naming them as operations would
     // claim a line they cannot start (`Category::ExpressionWord`).
+    // The text layer's vocabulary (`decisions/string-and-text-layer.md`).
+    // `EQUS` defines a string symbol and the rest are string functions, all
+    // resolved by a source pre-pass before the parse sees them.
+    Directive {
+        id: "string-symbol",
+        pattern: Pattern::Exact(&["equs"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "string-functions",
+        pattern: Pattern::Exact(&[
+            "strcat", "strupr", "strlwr", "strsub", "strslice", "strlen", "strcmp", "strfind",
+            "strin", "strrin", "strrpl",
+        ]),
+        category: Category::ExpressionWord,
+    },
     Directive {
         id: "fixed-point-functions",
         pattern: Pattern::Exact(&[
@@ -1671,15 +1688,245 @@ impl macros::MacroSyntax for RgbasmMacros {
     }
 }
 
-/// Expand rgbasm's macros, unless this parse is the formatter's.
+/// Expand rgbasm's macros and resolve its text layer, unless this parse is the
+/// formatter's.
+///
+/// The text pass runs **after** macro expansion, so a string function a macro
+/// produced is folded like any other, and it emits one line per line, so the
+/// origins the expansion recorded still line up.
 fn expand_rgbasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion, AsmError> {
     macros::expansion(mode, source, |s| {
-        macros::expand(&RgbasmMacros, s).map(|e| Some((e.text, e.origins)))
+        let expanded = macros::expand(&RgbasmMacros, s)?;
+        let resolved = text::expand(&RgbasmText, &expanded.text)?;
+        Ok(Some((resolved, expanded.origins)))
     })
+}
+
+// ---------------------------------------------------------------------------
+// The text layer (`decisions/string-and-text-layer.md`)
+// ---------------------------------------------------------------------------
+
+/// rgbasm's string grammar: `EQUS` symbols, `{name}` interpolation, and the
+/// string functions whose answers do not need the layout.
+///
+/// Every rule here was read off v1.0.3 before it was written, and the two that
+/// a reader would most likely guess wrong are the index conventions:
+/// `STRSUB` is **1-based with a length**, `STRSLICE` is **0-based with an end**,
+/// `STRFIND` answers a 0-based index or `-1`, and `STRIN` answers a 1-based one
+/// or `0`.
+struct RgbasmText;
+
+impl text::TextSyntax for RgbasmText {
+    /// `DEF name EQUS "text"`, and the bare `name EQUS "text"` older form.
+    fn definition(&self, line: &str) -> Option<(String, String)> {
+        let code = macros::without_comment(line);
+        let mut words = code.split_whitespace();
+        let first = words.next()?;
+        let (name, keyword) = if first.eq_ignore_ascii_case("def") {
+            (words.next()?, words.next()?)
+        } else {
+            (first, words.next()?)
+        };
+        if !keyword.eq_ignore_ascii_case("equs") {
+            return None;
+        }
+        let value = code.split_once(keyword)?.1.trim();
+        Some((name.trim_end_matches(':').to_string(), value.to_string()))
+    }
+
+    fn interpolates(&self) -> bool {
+        true
+    }
+
+    fn function(
+        &self,
+        name: &str,
+        args: &[text::Arg],
+        line: usize,
+    ) -> Result<Option<text::Folded>, AsmError> {
+        use text::Folded;
+        let lower = name.to_ascii_lowercase();
+        let known = matches!(
+            lower.as_str(),
+            "strcat"
+                | "strupr"
+                | "strlwr"
+                | "strsub"
+                | "strslice"
+                | "strlen"
+                | "strcmp"
+                | "strfind"
+                | "strin"
+                | "strrin"
+                | "strrpl"
+        );
+        if !known {
+            return Ok(None);
+        }
+        // An empty argument list is how the pass asks "is this a call?", so it
+        // is answered without complaint.
+        if args.is_empty() {
+            return Ok(Some(Folded::Text(String::new())));
+        }
+        let arity = |want: usize| -> Result<(), AsmError> {
+            if args.len() == want {
+                Ok(())
+            } else {
+                Err(AsmError::new(
+                    line,
+                    format!(
+                        "`{name}` takes {want} argument(s), and was given {}",
+                        args.len()
+                    ),
+                ))
+            }
+        };
+        let chars = |a: &text::Arg| -> Result<Vec<char>, AsmError> {
+            Ok(a.text(name, line)?.chars().collect())
+        };
+        Ok(Some(match lower.as_str() {
+            "strcat" => {
+                let mut out = String::new();
+                for a in args {
+                    out.push_str(a.text(name, line)?);
+                }
+                Folded::Text(out)
+            }
+            "strupr" => {
+                arity(1)?;
+                Folded::Text(args[0].text(name, line)?.to_ascii_uppercase())
+            }
+            "strlwr" => {
+                arity(1)?;
+                Folded::Text(args[0].text(name, line)?.to_ascii_lowercase())
+            }
+            // 1-based, and a length: `STRSUB("abcd", 2, 2)` is `bc`. Past the
+            // end it stops at the end rather than refusing.
+            "strsub" => {
+                arity(3)?;
+                let text = chars(&args[0])?;
+                let start = args[1].number(name, line)?.max(1) as usize - 1;
+                let len = args[2].number(name, line)?.max(0) as usize;
+                Folded::Text(text.into_iter().skip(start).take(len).collect())
+            }
+            // 0-based, and an end: `STRSLICE("abcd", 1, 3)` is `bc`.
+            "strslice" => {
+                arity(3)?;
+                let text = chars(&args[0])?;
+                let start = args[1].number(name, line)?.max(0) as usize;
+                let end = args[2].number(name, line)?.max(0) as usize;
+                Folded::Text(text.into_iter().take(end).skip(start).collect())
+            }
+            "strlen" => {
+                arity(1)?;
+                Folded::Number(args[0].text(name, line)?.chars().count() as i64)
+            }
+            // `-1`, `0` or `1`, the way C's `strcmp` reports it.
+            "strcmp" => {
+                arity(2)?;
+                let (a, b) = (args[0].text(name, line)?, args[1].text(name, line)?);
+                Folded::Number(match a.cmp(b) {
+                    std::cmp::Ordering::Less => -1,
+                    std::cmp::Ordering::Equal => 0,
+                    std::cmp::Ordering::Greater => 1,
+                })
+            }
+            // The two searches differ in *both* base and miss value, which is
+            // the pair most likely to be implemented as one function.
+            "strfind" => {
+                arity(2)?;
+                let (h, n) = (args[0].text(name, line)?, args[1].text(name, line)?);
+                Folded::Number(h.find(n).map_or(-1, |i| h[..i].chars().count() as i64))
+            }
+            "strin" => {
+                arity(2)?;
+                let (h, n) = (args[0].text(name, line)?, args[1].text(name, line)?);
+                Folded::Number(h.find(n).map_or(0, |i| h[..i].chars().count() as i64 + 1))
+            }
+            "strrin" => {
+                arity(2)?;
+                let (h, n) = (args[0].text(name, line)?, args[1].text(name, line)?);
+                Folded::Number(h.rfind(n).map_or(0, |i| h[..i].chars().count() as i64 + 1))
+            }
+            "strrpl" => {
+                arity(3)?;
+                let (h, from, to) = (
+                    args[0].text(name, line)?,
+                    args[1].text(name, line)?,
+                    args[2].text(name, line)?,
+                );
+                Folded::Text(h.replace(from, to))
+            }
+            other => unreachable!("`{other}` was matched as known and then not folded"),
+        }))
+    }
 }
 
 #[cfg(test)]
 mod tests {
+
+    /// The text layer: string symbols and string functions, folded before the
+    /// parse. Every value here was read off rgbasm v1.0.3 first.
+    #[test]
+    fn the_string_functions_fold_the_way_rgbasm_folds_them() {
+        let b = |src: &str| {
+            asm(&format!("SECTION \"a\", ROM0[0]\n{src}\n"))
+                .unwrap_or_else(|e| panic!("{src}: {e}"))
+                .bytes
+        };
+        assert_eq!(b("db STRCAT(\"ab\",\"cd\")"), b"abcd");
+        assert_eq!(b("db STRUPR(\"ab\"), STRLWR(\"CD\")"), b"ABcd");
+        assert_eq!(b("db STRRPL(\"abab\",\"b\",\"X\")"), b"aXaX");
+
+        // The two slicing functions disagree about both ends: `STRSUB` is
+        // 1-based and takes a *length*, `STRSLICE` is 0-based and takes an
+        // *end*. They pick out the same two characters here by different routes.
+        assert_eq!(b("db STRSUB(\"abcd\", 2, 2)"), b"bc");
+        assert_eq!(b("db STRSLICE(\"abcd\", 1, 3)"), b"bc");
+        // Past the end, `STRSUB` stops rather than refusing.
+        assert_eq!(b("db STRSUB(\"ab\", 2, 9)"), b"b");
+
+        assert_eq!(b("db STRLEN(\"abc\")"), vec![3]);
+        // The searches differ in base *and* in what a miss answers.
+        assert_eq!(b("db STRFIND(\"abc\",\"b\")"), vec![1]);
+        assert_eq!(b("db STRIN(\"abc\",\"b\")"), vec![2]);
+        assert_eq!(b("db STRRIN(\"abab\",\"b\")"), vec![4]);
+        assert_eq!(b("db STRFIND(\"abc\",\"z\")"), vec![0xFF]);
+        assert_eq!(b("db STRIN(\"abc\",\"z\")"), vec![0]);
+        assert_eq!(
+            b("db STRCMP(\"a\",\"b\"), STRCMP(\"b\",\"a\"), STRCMP(\"a\",\"a\")"),
+            vec![0xFF, 1, 0]
+        );
+
+        // Nesting: the innermost call folds first, so the outer one sees a
+        // literal.
+        assert_eq!(b("db STRLEN(STRCAT(\"ab\",\"cd\"))"), vec![4]);
+        assert_eq!(b("db STRUPR(STRSUB(\"abcd\", 2, 2))"), b"BC");
+    }
+
+    /// `EQUS` is a *text* symbol: what it holds is spliced into the source and
+    /// then read as source, which is why it can hold a number, a quoted string,
+    /// or a call.
+    #[test]
+    fn equs_substitutes_text_and_braces_reach_inside_a_token() {
+        let b = |src: &str| {
+            asm(&format!("SECTION \"a\", ROM0[0]\n{src}\n"))
+                .unwrap_or_else(|e| panic!("{src}: {e}"))
+                .bytes
+        };
+        assert_eq!(b("DEF s EQUS \"$41\"\ndb s"), vec![0x41]);
+        // `{name}` splices into the middle of a token, which a bare name
+        // cannot: `$1{n}` with `n` as `4` is `$14`.
+        assert_eq!(b("DEF n EQUS \"4\"\ndb $1{n}"), vec![0x14]);
+        // A bare name inside a string literal is left alone.
+        assert_eq!(b("DEF s EQUS \"$41\"\ndb \"s\""), b"s");
+        // What it holds may be a quoted string, or a call that then folds.
+        assert_eq!(b("DEF q EQUS \"\\\"ab\\\"\"\ndb STRLEN(q)"), vec![2]);
+        assert_eq!(
+            b("DEF j EQUS \"STRCAT(\\\"xy\\\",\\\"z\\\")\"\ndb j"),
+            b"xyz"
+        );
+    }
 
     /// Fixed-point literals, and the arithmetic that is exact enough to
     /// reproduce. Every value here was read off rgbasm v1.0.3 first.
@@ -2203,10 +2450,16 @@ mod tests {
         assert!(err("ZZQQ").contains("unknown instruction"));
     }
 
-    /// Only *statement* vocabulary is declared. rgbasm's registers, built-in
-    /// functions, predefined symbols and section attributes are all words it
-    /// knows and we may or may not have, in positions that are not this one —
-    /// naming them here would describe them where they never appear.
+    /// Only *statement* vocabulary is declared as an operation. rgbasm's
+    /// registers, predefined symbols and section attributes are words it knows
+    /// in positions that are not this one, and naming them here would describe
+    /// them where they never appear.
+    ///
+    /// A built-in **function** is the one exception, and it is not really one:
+    /// `Category::ExpressionWord` names the position rather than claiming the
+    /// word begins a line, so a function we implement is declared as what it
+    /// is and one we do not stays undeclared. `strlen` is implemented (the
+    /// text layer); `cos` is not.
     #[test]
     fn only_statement_vocabulary_is_declared() {
         let declared: Vec<String> = crate::directives::surfaces()
@@ -2216,12 +2469,27 @@ mod tests {
             .flat_map(|d| d.spellings())
             .map(|s| s.to_ascii_lowercase())
             .collect();
-        for absent in [
-            "af", "hli", "strlen", "sizeof", "cos", "__date__", "_narg", "rom0",
-        ] {
+        for absent in ["af", "hli", "sizeof", "cos", "__date__", "_narg", "rom0"] {
             assert!(
                 !declared.iter().any(|s| s == absent),
                 "`{absent}` is not statement vocabulary"
+            );
+        }
+        // An implemented function is declared as an expression word, never as
+        // an operation.
+        let kind = |word: &str| {
+            crate::directives::surfaces()
+                .into_iter()
+                .filter(|s| s.dialect == "rgbasm")
+                .flat_map(|s| s.directives)
+                .find(|d| d.spellings().iter().any(|s| s.eq_ignore_ascii_case(word)))
+                .map(|d| d.category)
+        };
+        for function in ["strlen", "strcat", "high", "mul"] {
+            assert_eq!(
+                kind(function),
+                Some(crate::directives::Category::ExpressionWord),
+                "`{function}` is implemented, so it is declared as what it is"
             );
         }
         for present in ["assert", "print", "union", "align", "db"] {
