@@ -1156,6 +1156,15 @@ const PROBES: &[Probe] = &[
     ok ("vasm", "ifd",             "sym\tequ 1\n\tifd sym\n\tnop\n\tendif\n\trts\n"),
     ok ("vasm", "ifnd",            "\tifnd nosuch\n\tnop\n\tendif\n\trts\n"),
     ok ("vasm", "else",            "\tifne 0\n\tnop\n\telse\n\trts\n\tendif\n"),
+    // `elif` is the real else-if, and it tests its argument for **truth** the
+    // way `if` does — not against zero the way `ifeq` does. `elseif` is the
+    // false friend beside it: vasm reads whatever follows and ignores it.
+    ok ("vasm", "elif takes the first true leg",
+        "\tifeq 1\n\tnop\n\telif 1\n\trts\n\telse\n\tillegal\n\tendif\n"),
+    ok ("vasm", "elif chains, and falls through to else",
+        "\tifeq 1\n\tnop\n\telif 0\n\tillegal\n\telif 0\n\tnop\n\telse\n\trts\n\tendif\n"),
+    ok ("vasm", "elif with no else",
+        "\tifeq 1\n\tnop\n\telif 1\n\trts\n\tendif\n"),
     ok ("vasm", "endc closes too", "\tifne 1\n\tnop\n\tendc\n\trts\n"),
     ok ("vasm", "uppercase",       "\tIFNE 1\n\tNOP\n\tENDIF\n"),
     ok ("vasm", "nested",          "\tifne 1\n\tifne 1\n\tnop\n\tendif\n\trts\n\tendif\n"),

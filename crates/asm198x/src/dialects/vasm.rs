@@ -2028,12 +2028,11 @@ impl FlatWalk for Walker {
             "if" | "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifd" | "ifnd" | "ifb"
             | "ifnb" | "ifc" | "ifnc" | "ifmi" | "ifpl" => BlockKw::CondOpen,
             // `elseif` is `else`: vasm takes whatever follows it and pays no
-            // attention — `elseif 0` and `elseif 1` both take the branch.
-            // `elif`, the real else-if, is not here: the shared walk stores an
-            // else-if leg as a conditional nested in the else branch, and the
-            // formatter re-emits that nesting as source this dialect cannot
-            // read back (asm198x#346).
+            // attention — `elseif 0` and `elseif 1` both take the branch. The
+            // real else-if is `elif`, which tests its argument for truth the
+            // way `if` does and not for zero the way `ifeq` does.
             "else" | "elseif" => BlockKw::Else,
+            "elif" => BlockKw::ElseIf,
             "endif" | "endc" => BlockKw::CondClose,
             "rept" => BlockKw::RepeatOpen,
             "endr" => BlockKw::RepeatClose,
@@ -2441,7 +2440,7 @@ fn fold_vasm_condition(
         )
     })?;
     Ok(match word.as_str() {
-        "if" | "ifne" => value != 0,
+        "if" | "ifne" | "elif" => value != 0,
         "ifeq" => value == 0,
         // `ifmi`/`ifpl` read the value's sign — minus, or plus-or-zero.
         "ifmi" => value < 0,
@@ -2712,7 +2711,7 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "conditional",
         pattern: Pattern::Exact(&[
             "if", "ifne", "ifeq", "ifgt", "ifge", "iflt", "ifle", "ifd", "ifnd", "ifb", "ifnb",
-            "ifc", "ifnc", "ifmi", "ifpl", "elseif", "else", "endif", "endc",
+            "ifc", "ifnc", "ifmi", "ifpl", "elif", "elseif", "else", "endif", "endc",
         ]),
         category: Category::Operation,
     },
@@ -2949,7 +2948,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "dw",
             "dx",
             "einline",
-            "elif",
             "end",
             "endb",
             "endm",

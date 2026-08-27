@@ -2783,6 +2783,28 @@ mod tests {
     }
 
     /// The formatter lays source out; it does not expand.
+    /// An `ELIF` leg is stored as a conditional nested in the else branch, and
+    /// it has to come back out flat: `ELSE` before `ELIF` is source rgbasm will
+    /// not read, and the one closer the author wrote belongs to the whole
+    /// chain — rgbasm takes `ENDC` and refuses `ENDIF`, so a derived closer is
+    /// a broken file rather than a cosmetic difference (#346).
+    #[test]
+    fn an_elif_chain_formats_back_flat() {
+        let src =
+            "SECTION \"s\",ROM0[0]\n if 0\n db $99\n elif 1\n db $AA\n else\n db $BB\n endc\n";
+        let formatted = crate::format_rgbasm(src).expect("formats");
+        assert!(formatted.contains("elif 1"), "{formatted}");
+        assert!(!formatted.contains("endif"), "derived closer:\n{formatted}");
+        assert_eq!(formatted.matches("endc").count(), 1, "{formatted}");
+        assert_eq!(
+            out(src),
+            crate::assemble_rgbasm(&formatted)
+                .unwrap_or_else(|e| panic!("the formatted source assembles: {e:?}\n{formatted}"))
+                .bytes,
+            "formatting changed the program:\n{formatted}"
+        );
+    }
+
     #[test]
     fn formatting_does_not_expand() {
         let src = "SECTION \"s\",ROM0[0]\nMACRO ldav\n ld a,\\1\nENDM\n ldav 5\n";
