@@ -356,6 +356,34 @@ fn curriculum_is_byte_identical() {
                 }
                 None => fails.push(format!("pasmo reference failed: {}", label(file))),
             }
+            // Tape parity, in both containers and with and without the
+            // auto-run stub. The block header carries the **output path**, so
+            // pasmo and this have to be handed the same one for the bytes to
+            // be comparable at all.
+            for (flag, format, autorun) in [
+                ("--tap", asm198x::TapeFormat::Tap, false),
+                ("--tapbas", asm198x::TapeFormat::Tap, true),
+                ("--tzx", asm198x::TapeFormat::Tzx, false),
+                ("--tzxbas", asm198x::TapeFormat::Tzx, true),
+            ] {
+                let out = tmp.join("ref.tape");
+                let mut cmd = Command::new("pasmo");
+                cmd.arg(flag).arg(file).arg(&out);
+                match ref_bytes(&tmp, &out, cmd) {
+                    Some(reference) => {
+                        checked += 1;
+                        let tape = asm198x::tape(&ours, format, &out.to_string_lossy(), autorun)
+                            .expect("tape image");
+                        if tape != reference {
+                            fails.push(format!("pasmo {flag}: {}", label(file)));
+                        }
+                    }
+                    None => {
+                        fails.push(format!("pasmo {flag} reference failed: {}", label(file)));
+                    }
+                }
+            }
+
             // Z80 disassembler round-trip.
             let listing = asm198x::listing_z80(&ours.bytes, ours.origin.unwrap_or(0), true);
             let round = asm198x::assemble_pasmonext(&listing)
