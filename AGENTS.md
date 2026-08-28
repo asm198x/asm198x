@@ -1,6 +1,6 @@
 # Asm198x
 
-> Read [`PRINCIPLES.md`](PRINCIPLES.md) first.
+> Read [`PRINCIPLES.md`](PRINCIPLES.md) first. [`MANIFESTO.md`](MANIFESTO.md) is why the project exists.
 
 Asm198x is the 198x family’s assembler/disassembler workspace: modern, single-binary, cross-platform tooling for the project’s target CPUs. It is a sibling of Code198x and Emu198x, not a child of either.
 

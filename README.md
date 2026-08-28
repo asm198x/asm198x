@@ -80,7 +80,7 @@ See the top of [`crates/asm198x/src/lib.rs`](crates/asm198x/src/lib.rs) and
 [`decisions/syntax-stance.md`](decisions/syntax-stance.md).
 
 Asm198x owns the assembler/disassembler and executable ISA-spec layer for the 198x family, built on the same shared hardware reference as the curriculum, emulator, build-tools, catalogue, and future workbench projects. The binding architecture decision lives in the umbrella record:
-[`../../decisions/asm198x-and-shared-isa-spec.md`](../../decisions/asm198x-and-shared-isa-spec.md).
+`198x/decisions/asm198x-and-shared-isa-spec.md`.
 
 ## Build and test
 
