@@ -63,12 +63,30 @@ git_only = true
 # with notes serves. Flipping it needs git_release_enable = true here too, since
 # the workspace disables releases so cargo-dist can own asm198x's own.
 
+# changelog_update = false on the two crates below: a changelog is release
+# notes, and neither crate has a release to write notes for. Both are
+# git_tag_enable = false, so nothing tags them and the `compare/` links
+# release-plz writes into their entries point at tags that do not exist.
+#
+# Left on, the entries also drift, because release-plz derives "what is new"
+# from the last tag and there is none: xtask's v0.0.35 entry listed one pull
+# request, and its v0.0.36 entry listed that same one plus six older ones that
+# had already shipped. Nobody reads either file — `/releases` publishes
+# crates/asm198x/CHANGELOG.md and nothing else — so the drift was invisible
+# and the files are noise the release commit rewrites every time.
+#
+# This does not stop the release commit touching package paths altogether;
+# crates/asm198x/CHANGELOG.md is still written, and should be. It is tagged in
+# the same commit, so it leaves nothing behind for the next run to release.
+
 # Test infrastructure; no consumers outside this workspace's tests.
 [[package]]
 name = "verdict-corpus"
 git_tag_enable = false
+changelog_update = false
 
 # Repository automation; nothing anyone installs.
 [[package]]
 name = "xtask"
 git_tag_enable = false
+changelog_update = false
