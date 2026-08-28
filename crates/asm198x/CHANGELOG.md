@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.37](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.36...asm198x-v0.0.37) - 2026-08-28
+
+### Changed
+
+- Publish the `asm198x` crate to crates.io for the first time. The executable
+  ISA specs and shared disassemblers have graduated with their history to the
+  neutral Isa198x project as `isa198x` and `isa198x-disasm` 0.1.0. Asm198x now
+  consumes those registry releases instead of owning their source, and Emu198x
+  can version the same shared layer without raw commit pins.
+
 ## [0.0.36](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.35...asm198x-v0.0.36) - 2026-08-28
 
 Two Spectrum tape targets, and one crate leaves the workspace. `--tap` and
