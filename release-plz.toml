@@ -67,6 +67,7 @@ git_only = true
 # notes, and neither crate has a release to write notes for. Both are
 # git_tag_enable = false, so nothing tags them and the `compare/` links
 # release-plz writes into their entries point at tags that do not exist.
+# Their files are deleted; with generation off, nothing recreates them.
 #
 # Left on, the entries also drift, because release-plz derives "what is new"
 # from the last tag and there is none: xtask's v0.0.35 entry listed one pull
