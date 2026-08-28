@@ -9,16 +9,66 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.36](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.35...asm198x-v0.0.36) - 2026-08-28
 
+Two Spectrum tape targets, and one crate leaves the workspace. `--tap` and
+`--tzx` complete the tier-one Spectrum outputs alongside `.sna`, and
+`debug198x` — the debug-info format Asm198x writes and Emu198x reads — now
+comes from crates.io rather than from this repository.
+
 ### Added
 
-- consume debug198x from crates.io instead of owning it ([#372](https://github.com/asm198x/asm198x/pull/372))
-- *(spectrum)* emit .tap and .tzx, with pasmo's auto-run stub ([#369](https://github.com/asm198x/asm198x/pull/369))
+- **Spectrum `.tap` and `.tzx`, with pasmo's auto-run BASIC loader.** `--tap`,
+  `--tapbas`, `--tzx` and `--tzxbas` produce output byte-identical to PasmoNext
+  v0.1.3. Two behaviours are worth knowing before scripting them: the tape
+  block name is **the output path as given**, clipped to ten characters and
+  space-padded — `sub/o.tap` names the block `sub/o.tap`, slash and extension
+  included — and the loader's `RANDOMIZE USR` line is written only when the
+  source has an `end` directive, so a source without one loads and stops. The
+  `.tzx` files are version 1.13, which is pasmo's.
+  ([#369](https://github.com/asm198x/asm198x/pull/369))
 
-### Other
+### Changed
 
-- clear 27 rustdoc warnings, and gate the crate docs in CI ([#366](https://github.com/asm198x/asm198x/pull/366))
-- *(6809)* stop saying indexed addressing is unsupported — it works ([#364](https://github.com/asm198x/asm198x/pull/364))
-- track Rust 1.98.0 ([#362](https://github.com/asm198x/asm198x/pull/362))
+- **`debug198x` is a published crate rather than a workspace member.** The
+  debug-info format is the contract between Asm198x and Emu198x, and it now
+  lives at [debug198x/debug198x](https://github.com/debug198x/debug198x) and on
+  [crates.io](https://crates.io/crates/debug198x). Emu198x had been pinning
+  three crates out of this repository at two raw revisions; `debug198x = "0.1"`
+  replaces that arrangement for one of them. Its released versions restart at
+  **0.1.0**, because the old 0.0.x numbers were this workspace's lockstep
+  version and said nothing about the format. Nothing about the emitted sidecar
+  changes — the full suite passes unchanged against the published crate — and
+  the spec moved with the code, so `decisions/debug198x-format.md` is now in
+  the new repository.
+  ([#372](https://github.com/asm198x/asm198x/pull/372))
+
+- **The toolchain tracks Rust 1.98.0**, up from a 1.95.0 pin that had been
+  inherited by copying a sibling repository rather than chosen. One new lint
+  had a single site in the workspace. Both compilers give the same 1223
+  passing tests.
+  ([#362](https://github.com/asm198x/asm198x/pull/362))
+
+### Fixed
+
+- **The 6809 dialect said indexed addressing was unsupported. It works.** Three
+  comments claimed it, one of them on a public entry point that ships to
+  docs.rs — so someone evaluating the crate for 6809 work read that it could
+  not assemble most real 6809 code, indexed being the 6809's characteristic
+  mode. The same header called the register-list operations `tfr`, `exg`,
+  `pshs` and `puls` "the next increment", and those work too. All of it is
+  byte-identical against `lwasm --6809 --raw`. What is genuinely outstanding on
+  lwasm is ten directives, and the replacement comments point at
+  `cargo xtask surface` for that rather than restating a list that can go stale
+  the way these three did.
+  ([#364](https://github.com/asm198x/asm198x/pull/364))
+
+- **27 rustdoc warnings, four of them broken links on the first page a reader
+  lands on.** `asm198x`'s crate-level architecture paragraph links to `engine`,
+  `Dialect` and `dialects` to explain the engine ↔ dialect ↔ spec seam; all
+  three are private, so docs.rs rendered them as plain text with no sign a link
+  was intended. `sna_48k` named a type that has never existed. CI now builds
+  the crate documentation with `-D warnings`, which is the part that stops the
+  count growing unseen again.
+  ([#366](https://github.com/asm198x/asm198x/pull/366))
 
 ## [0.0.35](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.34...asm198x-v0.0.35) - 2026-08-27
 
