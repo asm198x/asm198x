@@ -20,6 +20,7 @@
 //!   loads and stops, and the BASIC program is 18 bytes shorter.
 
 use format198x_sinclair_zx_spectrum_tap as tap;
+use format198x_tzx as tzx;
 
 use crate::contract::AssemblyResult;
 use crate::engine::AsmError;
@@ -35,14 +36,9 @@ pub enum TapeFormat {
 
 /// TZX's signature and terminator (`syntheses/zx-spectrum/tape-loading-format.md`
 /// §5, citing fuse's `tzx_read.c`).
-const TZX_SIGNATURE: &[u8] = b"ZXTape!\x1a";
-
 /// The version pasmo writes. **1.13, not the format's current 1.20** — every
 /// byte here is diffed against pasmo, so this follows it rather than the spec.
-const TZX_VERSION: [u8; 2] = [1, 13];
-
-/// TZX block `$10`: standard speed data, the one a ROM loader reads.
-const TZX_STANDARD_SPEED: u8 = 0x10;
+const TZX_VERSION: tzx::Version = tzx::Version::new(1, 13);
 
 /// The pause after each block, in milliseconds, as pasmo writes it.
 const TZX_PAUSE_MS: u16 = 1000;
@@ -104,23 +100,22 @@ pub fn tape(
     Ok(match format {
         Tap => tap::encode(&blocks),
         Tzx => {
-            let mut out = Vec::with_capacity(TZX_SIGNATURE.len() + 2);
-            out.extend_from_slice(TZX_SIGNATURE);
-            out.extend_from_slice(&TZX_VERSION);
             // A TZX is the same block stream with each block introduced: the
             // type byte, the pause that follows it, and its length. The block's
             // own bytes — flag, payload, checksum — are the `.tap` ones.
+            let mut framed = Vec::with_capacity(blocks.len());
             for block in &blocks {
                 let bytes = tap::encode(std::slice::from_ref(block));
                 // `encode` writes each block behind its own 16-bit length,
                 // which TZX carries in its own header instead.
                 let payload = &bytes[2..];
-                out.push(TZX_STANDARD_SPEED);
-                out.extend_from_slice(&TZX_PAUSE_MS.to_le_bytes());
-                out.extend_from_slice(&(payload.len() as u16).to_le_bytes());
-                out.extend_from_slice(payload);
+                framed.push(tzx::Block::standard_speed(TZX_PAUSE_MS, payload).map_err(
+                    |reason| {
+                        AsmError::new(0, format!("program does not fit a TZX block: {reason}"))
+                    },
+                )?);
             }
-            out
+            tzx::encode(&tzx::Tzx::new(TZX_VERSION, framed))
         }
     })
 }
