@@ -131,6 +131,13 @@ pub(crate) trait Dialect {
         true
     }
 
+    /// Whether a backward `org` discards an initial region containing only
+    /// reservations. lwasm raw output starts at the first region that writes
+    /// bytes; other dialects retain their normal gap semantics.
+    fn org_drops_unwritten_prefix(&self) -> bool {
+        false
+    }
+
     /// Whether a value may be written as a **negative** number, at any width.
     ///
     /// The accepted range for `n` bytes is either `-(2^(8n-1))..=2^(8n)-1` —
