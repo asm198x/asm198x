@@ -58,6 +58,10 @@ impl Dialect for Lwasm {
         false
     }
 
+    fn org_drops_unwritten_prefix(&self) -> bool {
+        true
+    }
+
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         // The engine consults this only for byte order (the 6809 computes its own
         // encoding into `Encoded` pieces); 6809 is big-endian.
@@ -1537,9 +1541,10 @@ fn parse_op(
 }
 
 /// The reserve family — `rmb`/`zmb`/`bsz`/`fzb` (`width` 1), `rmd`/`zmd`/`rmw`
-/// (2) and `rmq`/`zmq` (4): `count` units of `width` bytes, zero-filled (the
-/// flat-output behaviour). `count` folds against the parse-time env so the size
-/// is known in pass one.
+/// (2) and `rmq`/`zmq` (4): `count` units of `width` bytes, represented as a
+/// reservation so the layout engine can distinguish them from authored zero
+/// data. They are still zero-filled in ordinary flat output. `count` folds
+/// against the parse-time env so the size is known in pass one.
 ///
 /// lwasm refuses a negative count in its own words — "Negative block sizes make
 /// no sense!" — rather than reading it as a huge unsigned one, so the count is
@@ -1558,7 +1563,7 @@ fn parse_rmb(
             format!("`{mnemonic}` count must be a non-negative constant"),
         )
     })?;
-    Ok(Some(Operation::Bytes(vec![Expr::Num(0); n * width])))
+    Ok(Some(Operation::Reserve(n * width)))
 }
 
 /// `align boundary[,fill]` — pad to the next multiple of `boundary`. lwasm
@@ -1760,6 +1765,13 @@ fn encode_mem(
             .is_ok_and(|v| (0..=0xFFFF).contains(&v) && ((v >> 8) & 0xFF) == i64::from(dp));
     if fits_direct {
         Ok(encoded(direct, Expr::Lo(Box::new(e)), 1))
+    } else if !direct.is_empty() && fold_const(&e, env, line).is_err() {
+        Ok(Operation::DirectPage {
+            direct: direct.to_vec(),
+            extended: extended.to_vec(),
+            expr: e,
+            dp,
+        })
     } else if !extended.is_empty() {
         Ok(encoded(extended, e, 2))
     } else {
@@ -1773,14 +1785,7 @@ fn encode_mem(
 /// Build an `Encoded` operation: the opcode literal bytes, then one unsigned
 /// value of `width` bytes (an immediate, direct offset, or extended address).
 fn encoded(opcode: &[u8], expr: Expr, width: u8) -> Operation {
-    let mut pieces: Vec<Piece> = opcode.iter().map(|b| Piece::Lit(*b)).collect();
-    pieces.push(Piece::Val {
-        expr,
-        bytes: width,
-        rel: false,
-        signed: false,
-    });
-    Operation::Encoded(pieces)
+    Operation::Encoded(crate::engine::encoded_pieces(opcode, expr, width))
 }
 
 // ---------------------------------------------------------------------------
@@ -2709,6 +2714,43 @@ mod tests {
         assert_eq!(
             asm(" setdp $20\n lda $2010,x\n").expect("indexed").bytes,
             vec![0xA6, 0x89, 0x20, 0x10]
+        );
+    }
+
+    #[test]
+    fn setdp_applies_to_an_already_placed_label() {
+        assert_eq!(
+            asm(" setdp $c8\n org $c881\nBACK rmb 1\n org $0000\n lda BACK\n")
+                .expect("backward label")
+                .bytes,
+            [0x96, 0x81]
+        );
+        assert_eq!(
+            asm(" setdp $c8\n org $0000\n lda LATER\n org $c881\nLATER rmb 1\n")
+                .expect("forward label")
+                .bytes[..3],
+            [0xb6, 0xc8, 0x81]
+        );
+    }
+
+    #[test]
+    fn backward_org_discards_an_initial_reservation_only_region() {
+        let assembly =
+            asm(" org $c881\nBACK rmb 1\n org $0000\n lda BACK\n").expect("vectrex layout");
+        assert_eq!(assembly.origin, Some(0));
+        assert_eq!(assembly.bytes, [0xb6, 0xc8, 0x81]);
+
+        assert_eq!(
+            asm(" org $c881\n fcb $11\n org $0000\n fcb $22\n")
+                .expect("written first region")
+                .bytes,
+            [0x11, 0x22]
+        );
+        assert_eq!(
+            asm(" org 0\n fcb $11\nBUF rmb 2\n fcb $22\n")
+                .expect("interior reservation")
+                .bytes,
+            [0x11, 0, 0, 0x22]
         );
     }
 

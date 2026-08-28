@@ -587,6 +587,15 @@ pub(crate) enum Operation {
     /// seam for CPUs whose operands are computed, not fixed-width slots; the
     /// dialect still reuses this engine's two-pass driver, symbols, and `org`.
     Encoded(Vec<Piece>),
+    /// A 6809 bare address whose direct/extended width depends on whether its
+    /// expression is already known at this point in pass one. Backward labels
+    /// may select direct page; forward labels deliberately stay extended.
+    DirectPage {
+        direct: Vec<u8>,
+        extended: Vec<u8>,
+        expr: Expr,
+        dp: u8,
+    },
     /// Record the program's entry point (the `end <addr>` directive). Emits no
     /// bytes; surfaced on [`Assembly::start`] for containers that carry a start
     /// address (e.g. a Spectrum `.sna` snapshot). A flat binary ignores it.
@@ -730,6 +739,17 @@ pub(crate) enum Piece {
     },
 }
 
+pub(crate) fn encoded_pieces(opcode: &[u8], expr: Expr, width: u8) -> Vec<Piece> {
+    let mut pieces: Vec<Piece> = opcode.iter().copied().map(Piece::Lit).collect();
+    pieces.push(Piece::Val {
+        expr,
+        bytes: width,
+        rel: false,
+        signed: false,
+    });
+    pieces
+}
+
 /// Where the location counter stands after `op`, given that it stood at `pc`
 /// before it. The one place an operation's width is decided.
 ///
@@ -764,6 +784,12 @@ pub(crate) fn next_pc(
             pc + form(set, ext, mnemonic, mode, line)?.len() as i64 / addr_unit
         }
         Operation::Encoded(pieces) => pc + pieces.iter().map(Piece::len).sum::<i64>() / addr_unit,
+        Operation::DirectPage { .. } => {
+            return Err(AsmError::new(
+                line,
+                "internal: unresolved direct-page operand",
+            ));
+        }
         Operation::Align { andmask, value, .. } => pc + ((value - pc) & andmask),
         Operation::AlignTo { modulus, .. } => pc + align_pad(pc, *modulus),
         // Emit nothing; they only speak.
@@ -1025,7 +1051,7 @@ pub(crate) struct Run {
 // section, and this is where it would go.
 
 fn assemble_statements(
-    statements: Vec<Statement>,
+    mut statements: Vec<Statement>,
     parse_warnings: Vec<Warning>,
     dialect: &dyn Dialect,
 ) -> Result<Assembly, AsmError> {
@@ -1035,6 +1061,7 @@ fn assemble_statements(
     // Pass 1 — assign addresses to labels.
     let require_origin = dialect.requires_explicit_origin();
     let org_moves_output = dialect.org_moves_output();
+    let org_drops_unwritten_prefix = dialect.org_drops_unwritten_prefix();
     // Emitted bytes per address unit — 1 for the byte-addressed CPUs, 2 for the
     // word-addressed CP1610 (a decle is two bytes). The location counter advances
     // in address units, so a byte length is divided by this.
@@ -1050,7 +1077,7 @@ fn assemble_statements(
     let mut pseudo: i64 = 0;
     let mut pseudo_stack: Vec<i64> = Vec::new();
     let mut origin: Option<i64> = None;
-    for s in &statements {
+    for s in &mut statements {
         // `equ` binds the label to a value, not the current address, and emits
         // nothing — so it is handled before the address-label assignment below.
         if let Some(Operation::Equ(e)) = &s.op {
@@ -1099,6 +1126,25 @@ fn assemble_statements(
                 return Err(s.err(format!("duplicate label `{label}`")));
             }
         }
+        if let Some(Operation::DirectPage {
+            direct,
+            extended,
+            expr,
+            dp,
+        }) = &s.op
+        {
+            let is_direct = expr.eval(&symbols, pc + pseudo, s.line).is_ok_and(|value| {
+                (0..=0xFFFF).contains(&value) && ((value >> 8) & 0xFF) == i64::from(*dp)
+            });
+            let opcode = if is_direct { direct } else { extended };
+            let width = if is_direct { 1 } else { 2 };
+            let value = if is_direct {
+                Expr::Lo(Box::new(expr.clone()))
+            } else {
+                expr.clone()
+            };
+            s.op = Some(Operation::Encoded(encoded_pieces(opcode, value, width)));
+        }
         match &s.op {
             None => {}
             Some(Operation::Org(e)) => {
@@ -1129,6 +1175,7 @@ fn assemble_statements(
                 | Operation::Words(_)
                 | Operation::Instruction { .. }
                 | Operation::Encoded(_)
+                | Operation::DirectPage { .. }
                 | Operation::Binary(_)
                 | Operation::Align { .. }
                 | Operation::AlignTo { .. },
@@ -1180,6 +1227,7 @@ fn assemble_statements(
     // the file at the lowest *written* address, so a leading gap shifts the
     // load address instead of padding it.
     let mut written_start: Option<usize> = None;
+    let mut wrote_any = false;
     // The parse's advisories come first: they describe the source, and the
     // layout's describe what the source turned into.
     let mut warnings: Vec<Warning> = parse_warnings;
@@ -1282,7 +1330,14 @@ fn assemble_statements(
                 let cur = origin + bytes.len() as i64 / addr_unit;
                 if !org_moves_output {
                     // See pass one: the address moves, the output does not.
-                    pseudo = target - cur;
+                    if org_drops_unwritten_prefix && !wrote_any && target < cur {
+                        bytes.clear();
+                        origin = target;
+                        pseudo = 0;
+                        written_len = 0;
+                    } else {
+                        pseudo = target - cur;
+                    }
                 } else {
                     if target < cur {
                         return Err(s.err("cannot move origin backwards"));
@@ -1310,6 +1365,7 @@ fn assemble_statements(
                     }
                     written_len = 0;
                     written_start = None;
+                    wrote_any = false;
                 }
                 section_name = name.clone();
                 section_at = *at;
@@ -1706,6 +1762,9 @@ fn assemble_statements(
                     }
                 }
             }
+            Some(Operation::DirectPage { .. }) => {
+                return Err(s.err("internal: unresolved direct-page operand"));
+            }
         }
 
         // --- Debug capture (U2). Reads only `pc`/`bytes.len()`/`symbols`; it
@@ -1740,6 +1799,7 @@ fn assemble_statements(
                     | Operation::Words(_)
                     | Operation::Instruction { .. }
                     | Operation::Encoded(_)
+                    | Operation::DirectPage { .. }
                     | Operation::Binary(_)
                     | Operation::Reserve(_)
             )
@@ -1761,6 +1821,7 @@ fn assemble_statements(
             written_len = bytes.len();
             if bytes.len() > len_before {
                 written_start.get_or_insert(len_before);
+                wrote_any = true;
             }
         }
         if source_bearing && bytes.len() > len_before {

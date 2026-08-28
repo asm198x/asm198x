@@ -2197,6 +2197,17 @@ fn substitute_anon_refs(
             mode,
             operands: operands.into_iter().map(subst).collect::<Result<_, _>>()?,
         },
+        Operation::DirectPage {
+            direct,
+            extended,
+            expr,
+            dp,
+        } => Operation::DirectPage {
+            direct,
+            extended,
+            expr: subst(expr)?,
+            dp,
+        },
         // No expressions to rewrite: pre-encoded pieces, binary payloads, and
         // the constant-argument align.
         other @ (Operation::Encoded(_)
