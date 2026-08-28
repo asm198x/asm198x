@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.36](https://github.com/asm198x/asm198x/compare/isa-disasm-v0.0.35...isa-disasm-v0.0.36) - 2026-08-28
+
+### Other
+
+- release v0.0.36 ([#363](https://github.com/asm198x/asm198x/pull/363))
+
 ## [0.0.35](https://github.com/asm198x/asm198x/compare/isa-disasm-v0.0.34...isa-disasm-v0.0.35) - 2026-08-27
 
 ### Added
