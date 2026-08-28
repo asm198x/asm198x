@@ -32,9 +32,22 @@ changelog_update = true
 # (Must precede the [[package]] table below: it is a [workspace] key.)
 git_only = true
 
-# The library and tooling crates ride the lockstep version and are not tagged.
-# Each exists only as a part of `asm198x`: none is published, and none has a
-# consumer that could act on a release of its own.
+# `isa` and `isa-disasm` are tagged; the rest are not.
+#
+# Emu198x consumes both — a runtime dependency in `emu198x-shell` and
+# dev-dependencies in `motorola-68000` and `emu198x-zilog-z80` for the ISA
+# conformance cross-checks — and pins them by raw commit SHA because it has
+# nothing else to pin to. All three of its manifests say so in as many words:
+# "isa-disasm is untagged". A tag is a reproducible rev that also carries a
+# version, which is what those pins wanted and could not have.
+#
+# This is safe now and was not before. Until tag-namespace = "asm198x" was set
+# in Cargo.toml, cargo-dist fired on any version-shaped tag and errored on a
+# package with no binary — tagging `isa-disasm` is precisely what once cut a
+# GitHub Release containing only a dist-manifest.json.
+#
+# `xtask` and `verdict-corpus` stay untagged: repository automation and test
+# infrastructure, with no consumer inside or outside this workspace.
 #
 # That is now a preference. Until tag-namespace = "asm198x" was set in
 # Cargo.toml it was load-bearing safety. cargo-dist fired on any version-shaped
@@ -49,16 +62,6 @@ git_only = true
 # asm198x writes, and a cross-repo consumer is exactly the case a tagged release
 # with notes serves. Flipping it needs git_release_enable = true here too, since
 # the workspace disables releases so cargo-dist can own asm198x's own.
-
-# Dependency of asm198x; no binary.
-[[package]]
-name = "isa"
-git_tag_enable = false
-
-# Dependency of asm198x; no binary.
-[[package]]
-name = "isa-disasm"
-git_tag_enable = false
 
 # Test infrastructure; no consumers outside this workspace's tests.
 [[package]]
