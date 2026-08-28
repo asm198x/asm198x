@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.38](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.37...asm198x-v0.0.38) - 2026-08-28
+
+### Fixed
+
+- *(lwasm)* match direct-page and reserved-region layout
+
 ## [0.0.37](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.36...asm198x-v0.0.37) - 2026-08-28
 
 ### Changed
