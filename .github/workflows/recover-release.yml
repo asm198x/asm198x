@@ -1,0 +1,52 @@
+name: Recover cargo-dist release
+
+on:
+  workflow_dispatch:
+    inputs:
+      run_id:
+        description: "Failed cargo-dist run containing completed build artifacts"
+        required: true
+        type: string
+      tag:
+        description: "Existing release tag"
+        required: true
+        type: string
+
+permissions:
+  actions: read
+  contents: write
+
+jobs:
+  recover:
+    runs-on: ubuntu-latest
+    env:
+      GH_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+      - name: Refuse an unknown tag or existing release
+        run: |
+          git rev-parse --verify "refs/tags/${{ inputs.tag }}"
+          if gh release view "${{ inputs.tag }}" >/dev/null 2>&1; then
+            echo "::error::release ${{ inputs.tag }} already exists"
+            exit 1
+          fi
+      - name: Download completed cargo-dist artifacts
+        run: |
+          mkdir artifacts
+          gh run download "${{ inputs.run_id }}" \
+            --name artifacts-build-global \
+            --name artifacts-build-local-aarch64-apple-darwin \
+            --name artifacts-build-local-x86_64-apple-darwin \
+            --name artifacts-build-local-x86_64-pc-windows-msvc \
+            --name artifacts-build-local-x86_64-unknown-linux-gnu \
+            --dir artifacts
+          find artifacts -name '*-dist-manifest.json' -delete
+      - name: Create the missing GitHub release
+        run: |
+          gh release create "${{ inputs.tag }}" \
+            --verify-tag \
+            --title "${{ inputs.tag }}" \
+            --generate-notes \
+            artifacts/*/*
