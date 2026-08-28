@@ -231,3 +231,19 @@ Composing *multiple* artifacts onto a tape — an authored BASIC loader, a
 SCREEN$ loading screen, multiload — is mastering, owned by Build198x, exactly
 parallel to the bootblock-vs-bootable-ADF split above. The Spectrum
 `.tap`/`.tzx` first-wave targets in this record are unchanged.
+
+### 2026-08-28 — TZX output declares version 1.13
+
+The TZX serialiser graduated to `format198x-tzx`, but Pasmo-compatible output
+continues to declare version **1.13**, rather than the specification's current
+1.20. The declaration says what the writer requires, not which specification
+edition its author has read: Asm198x emits only the `$10` standard-speed block,
+which predates 1.13, and a 1.13 declaration is readable by both 1.13 and 1.20
+readers. Declaring 1.20 would exclude older readers without describing any byte
+in the file more truthfully, and would deliberately break the byte-identical
+PasmoNext reference tests.
+
+The version must be revisited if output gains a block introduced after 1.13,
+or if a separate native TZX mode explicitly stops promising Pasmo parity. It
+does not track the latest published specification merely because that number
+changes.

@@ -13,6 +13,7 @@ homepage.workspace = true
 
 [dependencies]
 format198x-sinclair-zx-spectrum-tap = { workspace = true }
+format198x-tzx = { workspace = true }
 # version (lockstep with the workspace) is required so `cargo package` can
 # verify the manifest — release-plz runs it to compute the release diff, and
 # path deps without a version fail packaging. release-plz keeps it in sync on
