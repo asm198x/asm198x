@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.36](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.35...asm198x-v0.0.36) - 2026-08-28
+
+### Added
+
+- consume debug198x from crates.io instead of owning it ([#372](https://github.com/asm198x/asm198x/pull/372))
+- *(spectrum)* emit .tap and .tzx, with pasmo's auto-run stub ([#369](https://github.com/asm198x/asm198x/pull/369))
+
+### Other
+
+- clear 27 rustdoc warnings, and gate the crate docs in CI ([#366](https://github.com/asm198x/asm198x/pull/366))
+- *(6809)* stop saying indexed addressing is unsupported — it works ([#364](https://github.com/asm198x/asm198x/pull/364))
+- track Rust 1.98.0 ([#362](https://github.com/asm198x/asm198x/pull/362))
+
 ## [0.0.35](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.34...asm198x-v0.0.35) - 2026-08-27
 
 The release where the references' string features stopped being a gap. ca65 and
