@@ -8,6 +8,11 @@ stability promise the version number makes.
 *Where the bar stands* below. What remains is the decision to cut 1.0, which is
 not a bar item.
 
+**Amended 2026-08-28:** `asm198x` now publishes to crates.io. The ISA libraries
+have graduated to Isa198x as independently versioned `isa198x` and
+`isa198x-disasm`; their API remains outside the Asm198x 1.0 promise. Historical
+arguments below about `publish = false` describe the earlier delivery model.
+
 ## The decision
 
 **v1.0 promises the `asm198x` CLI's behaviour and the Debug198x format. It does

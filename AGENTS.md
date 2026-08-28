@@ -11,7 +11,7 @@ For umbrella context and cross-project rules, read [`../../AGENTS.md`](../../AGE
 Asm198x owns:
 
 - assembler and disassembler front-ends for retro CPU dialects;
-- the shared declarative ISA specification used for instruction encoding;
+- the assembler's use of the neutral Isa198x instruction specifications;
 - the `debug198x` debug-info format emitted by the assembler and consumed by Emu198x;
 - the command-line contract for diagnostics, JSON output, formatting, listings, symbols, and debug sidecars.
 
@@ -21,11 +21,11 @@ Hardware facts come from the umbrella primary library at [`../../reference/`](..
 
 | Crate | Role |
 |---|---|
-| [`crates/isa`](crates/isa) | Dependency-free declarative instruction-set specs. This is the single source of truth for instruction encoding. |
-| [`crates/isa-disasm`](crates/isa-disasm) | Spec-driven disassemblers that depend only on `isa` + std, so Emu198x can consume disassembly without the assembler. |
+| [`isa198x`](https://github.com/isa198x/isa198x) | Neutral dependency supplying the executable instruction-set specs and spec-driven disassemblers used by Asm198x and Emu198x. |
 | [`crates/asm198x`](crates/asm198x) | Assembler library, dialect front-ends, shared engine, formatter, diagnostics contract, and `asm198x` CLI. |
 
-Split crates further only when the per-CPU ISA boundary or Emu198x consumption makes the split real.
+Isa198x keeps CPU families as modules until an isolated consumer or measured
+build cost makes per-CPU crates worthwhile.
 
 ## Supported CPU and dialect surface
 

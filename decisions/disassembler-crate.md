@@ -4,6 +4,11 @@
 
 **Date:** 2026-06-03.
 
+**Amended 2026-08-28:** this boundary now lives in the neutral Isa198x
+repository and publishes as `isa198x-disasm`, depending only on `isa198x` plus
+the standard library. The dependency shape below remains binding; old local
+paths describe its original Asm198x home.
+
 ## The decision
 
 The spec-driven disassemblers (6502, Z80, 68000, 6809, 65816) live in a separate crate,

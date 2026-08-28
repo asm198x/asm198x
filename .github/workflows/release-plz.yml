@@ -5,17 +5,13 @@ on:
     branches:
       - main
 
-concurrency:
-  group: release-plz-${{ github.ref }}
-  cancel-in-progress: false
-
 permissions:
   pull-requests: write
   contents: write
 
 jobs:
-  release-plz:
-    name: Release-plz
+  release:
+    name: Release merged versions
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
@@ -41,17 +37,6 @@ jobs:
         with:
           toolchain: ${{ steps.toolchain.outputs.channel }}
 
-      # Two steps, the release-plz two-command model: release-pr opens/updates
-      # the "chore: release" PR for new commits; release tags any version in
-      # Cargo.toml that isn't yet tagged (i.e. once that PR is merged) and the
-      # tag push fires cargo-dist's release.yml.
-      - name: Run release-plz (open/update release PR)
-        uses: release-plz/action@v0.5
-        with:
-          command: release-pr
-        env:
-          GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
-
       # The pre-tag ratchet. This must sit *before* the tagging step: tagging
       # fires cargo-dist's release.yml, and by then the release exists. A
       # shortfall that is settled rides along fine; one still owed does not,
@@ -63,5 +48,28 @@ jobs:
         uses: release-plz/action@v0.5
         with:
           command: release
+        env:
+          GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
+
+  release-pr:
+    name: Prepare the next release
+    needs: release
+    runs-on: ubuntu-latest
+    concurrency:
+      group: release-plz-pr-${{ github.ref }}
+      cancel-in-progress: false
+    steps:
+      - uses: actions/checkout@v7
+        with:
+          fetch-depth: 0
+          token: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}
+      - id: toolchain
+        run: echo "channel=$(awk -F'\"' '/^channel/{print $2}' rust-toolchain.toml)" >> "$GITHUB_OUTPUT"
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.toolchain.outputs.channel }}
+      - uses: release-plz/action@v0.5
+        with:
+          command: release-pr
         env:
           GITHUB_TOKEN: ${{ secrets.RELEASE_PLZ_TOKEN || secrets.GITHUB_TOKEN }}

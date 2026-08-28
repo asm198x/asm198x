@@ -8,7 +8,7 @@ repository.workspace = true
 publish = false
 
 [dependencies]
-isa = { path = "../crates/isa", version = "0.0.36" }
+isa = { package = "isa198x", version = "0.1" }
 # The docs task generates from the same dialect table `--dialect` resolves
 # against, so the book cannot describe a surface the binary does not have.
 asm198x = { path = "../crates/asm198x", version = "0.0.36" }

@@ -14,54 +14,36 @@
 # roughly one CPU and its changelog stays focused — not after several pile up
 # (which is how v0.0.4 became a wall). See decisions/release-cadence.md.
 #
-# publish = false: we do NOT publish to crates.io (the binary ships via the
-# GitHub Release instead, and the generic `isa` crate name shouldn't be
-# claimed there). git_release_enable = false: cargo-dist owns the GitHub
-# Release, not release-plz — release-plz only bumps, changelogs, and tags.
+# The flagship package publishes to crates.io. cargo-dist still owns its
+# binary archives and GitHub Release; the ISA libraries release from Isa198x.
 [workspace]
-publish = false
+publish = true
 git_release_enable = false
 git_tag_enable = true
 changelog_update = true
 
-# git_only = true: take the previous version from the git tag, not the
-# crates.io registry. Required whenever publish = false — with no registry
-# baseline, release-plz can't see the last release and never bumps the version
-# (it reports "already up-to-date" and opens no release PR). See the umbrella
-# project-skeleton-standard decision for the full story.
-# (Must precede the [[package]] table below: it is a [workspace] key.)
-git_only = true
+[changelog]
+protect_breaking_commits = true
+commit_parsers = [
+  { message = '^chore(\([^)]*\))?: release\b', skip = true },
+  { message = '^(feat|fix|perf|revert)\((ci|release)\)', skip = true },
+  { message = "^feat", group = "Added" },
+  { message = "^fix", group = "Fixed" },
+  { message = "^perf", group = "Performance" },
+  { message = "^revert", group = "Reverted" },
+  { message = '^(chore|build)\(deps\)', group = "Dependencies" },
+  { message = "^(docs|test|chore|ci|build|refactor|style)", skip = true },
+  { message = "^Merge", skip = true },
+  { message = ".*", group = "Other" },
+]
 
-# `isa` and `isa-disasm` are tagged; the rest are not.
-#
-# Emu198x consumes both — a runtime dependency in `emu198x-shell` and
-# dev-dependencies in `motorola-68000` and `emu198x-zilog-z80` for the ISA
-# conformance cross-checks — and pins them by raw commit SHA because it has
-# nothing else to pin to. All three of its manifests say so in as many words:
-# "isa-disasm is untagged". A tag is a reproducible rev that also carries a
-# version, which is what those pins wanted and could not have.
-#
-# This is safe now and was not before. Until tag-namespace = "asm198x" was set
-# in Cargo.toml, cargo-dist fired on any version-shaped tag and errored on a
-# package with no binary — tagging `isa-disasm` is precisely what once cut a
-# GitHub Release containing only a dist-manifest.json.
-#
+# `asm198x` publishes and tags; the repository-only crates do neither.
 # `xtask` and `verdict-corpus` stay untagged: repository automation and test
 # infrastructure, with no consumer inside or outside this workspace.
-#
-# That is now a preference. Until tag-namespace = "asm198x" was set in
-# Cargo.toml it was load-bearing safety. cargo-dist fired on any version-shaped
-# tag and errored on a package with no binary, so a tag here produced a junk
-# release — `isa-disasm` did exactly that once, cutting a GitHub Release that
-# contained only a dist-manifest.json and then took the "Latest" badge. Any
-# crate added without a block below would have repeated it. A tag that does not
-# start with `asm198x` now reaches cargo-dist not at all, so these blocks
-# express intent rather than prevent a failure.
-#
-# `debug198x` is the one worth revisiting: Emu198x reads the debug-info format
-# asm198x writes, and a cross-repo consumer is exactly the case a tagged release
-# with notes serves. Flipping it needs git_release_enable = true here too, since
-# the workspace disables releases so cargo-dist can own asm198x's own.
+[[package]]
+name = "asm198x"
+publish = true
+git_release_enable = false
 
 # changelog_update = false on the two crates below: a changelog is release
 # notes, and neither crate has a release to write notes for. Both are
@@ -83,11 +65,13 @@ git_only = true
 # Test infrastructure; no consumers outside this workspace's tests.
 [[package]]
 name = "verdict-corpus"
+publish = false
 git_tag_enable = false
 changelog_update = false
 
 # Repository automation; nothing anyone installs.
 [[package]]
 name = "xtask"
+publish = false
 git_tag_enable = false
 changelog_update = false

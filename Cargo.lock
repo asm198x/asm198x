@@ -8,8 +8,8 @@ version = "0.0.36"
 dependencies = [
  "debug198x",
  "format198x-sinclair-zx-spectrum-tap",
- "isa",
- "isa-disasm",
+ "isa198x",
+ "isa198x-disasm",
  "serde",
  "serde_json",
  "sha2",
@@ -92,14 +92,18 @@ dependencies = [
 ]
 
 [[package]]
-name = "isa"
-version = "0.0.36"
+name = "isa198x"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "b82bc0bf85e1e4d080a687259533265bafc2e16f679064a90e2d0f492f7ad005"
 
 [[package]]
-name = "isa-disasm"
-version = "0.0.36"
+name = "isa198x-disasm"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "bf7c236e49615d4cd41339b60880e4dde1039484f1a8f4cc61f3716a367f509a"
 dependencies = [
- "isa",
+ "isa198x",
 ]
 
 [[package]]
@@ -219,8 +223,8 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 name = "verdict-corpus"
 version = "0.0.36"
 dependencies = [
- "isa",
- "isa-disasm",
+ "isa198x",
+ "isa198x-disasm",
  "serde",
  "serde_json",
 ]
@@ -230,7 +234,7 @@ name = "xtask"
 version = "0.0.36"
 dependencies = [
  "asm198x",
- "isa",
+ "isa198x",
  "serde_json",
  "sha2",
  "verdict-corpus",
