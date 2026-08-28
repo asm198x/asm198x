@@ -17,8 +17,8 @@ format198x-sinclair-zx-spectrum-tap = { workspace = true }
 # verify the manifest — release-plz runs it to compute the release diff, and
 # path deps without a version fail packaging. release-plz keeps it in sync on
 # each bump. Local builds use the path; the version is only for packaging.
-isa = { path = "../isa", version = "0.0.35" }
-isa-disasm = { path = "../isa-disasm", version = "0.0.35" }
+isa = { path = "../isa", version = "0.0.36" }
+isa-disasm = { path = "../isa-disasm", version = "0.0.36" }
 # debug198x graduated to its own repo on 2026-08-27 and comes from crates.io
 # now, not from this workspace. It is the contract between this assembler and
 # Emu198x, and a contract that lives inside one of its two parties is not one —
