@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.51](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.50...asm198x-v0.0.51) - 2026-08-29
+
+### Added
+
+- *(cli)* add Pasmo command-line constants ([#418](https://github.com/asm198x/asm198x/pull/418))
+
 ### Added
 
 - **Pasmo command-line constants.** Repeatable `--equ NAME=VALUE` definitions
