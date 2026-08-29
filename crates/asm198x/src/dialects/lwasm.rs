@@ -24,6 +24,7 @@ use isa::mos6809::{self, Kind};
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
 use super::macros;
 use super::mos6502::{self, BytePrec, fold_const, split_first_word};
+use super::text;
 use crate::ast::{Comment, Node, Program, Scope, Span, Symbol, Trivia};
 use crate::dialect::Dialect;
 use crate::directives::{Category, Directive, Pattern, lookup};
@@ -445,15 +446,12 @@ impl FlatWalk for Walker {
     /// rather than a boolean test. Both `endc` **and** `endif` close, which is
     /// one closer more than any other dialect measured here.
     ///
-    /// `ifstr` is real lwasm and deliberately absent: string conditions are
-    /// their own surface, unbuilt and registered in
-    /// `decisions/reference-parity-goal.md`.
     fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
         use ca65_flat::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_lowercase();
         Some(match word.as_str() {
             "if" | "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifdef" | "ifndef"
-            | "ifp1" | "ifp2" | "ifpragma" | "ifopt" => BlockKw::CondOpen,
+            | "ifp1" | "ifp2" | "ifpragma" | "ifopt" | "ifstr" => BlockKw::CondOpen,
             "else" => BlockKw::Else,
             "endc" | "endif" => BlockKw::CondClose,
             _ => return None,
@@ -526,6 +524,26 @@ impl FlatWalk for Walker {
         }
 
         let (label, rest) = split_label(code);
+        let (word, operand) = split_first_word(rest);
+        if word.eq_ignore_ascii_case("includestr") {
+            let source = parse_general_string(operand, line)?;
+            self.nodes.push(Node {
+                operand_span: crate::ast::operand_span(raw, rest, line as u32),
+                label: label.map(|name| Symbol {
+                    qualified: name.clone(),
+                    scope: Scope::Global,
+                    name,
+                }),
+                item: Some(crate::ast::Item::Native(Box::new(InlineSource(source)))),
+                source: rest.trim().to_string(),
+                span: Span::in_file(file, line as u32, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing,
+                },
+            });
+            return Ok(None);
+        }
         // `include`/`use`/`includebin` are walk-handled, not directives: the
         // target must not be opened here (KTD1 — `--fmt` succeeds with a
         // missing target), so hand them back for the driver to resolve (or
@@ -675,15 +693,17 @@ pub const DIRECTIVES: &[Directive] = &[
     // `if`, which is `ifne` under a shorter name. Both `endc` and `endif`
     // close — the only dialect measured here with two closers.
     //
-    // `ifstr` is real lwasm and deliberately absent: string conditions are
-    // their own surface, unbuilt and registered in
-    // `decisions/reference-parity-goal.md`.
     Directive {
         id: "conditional",
         pattern: Pattern::Exact(&[
             "if", "ifne", "ifeq", "ifgt", "ifge", "iflt", "ifle", "ifdef", "ifndef", "ifpragma",
-            "ifopt", "ifp1", "ifp2", "else", "endc", "endif",
+            "ifopt", "ifp1", "ifp2", "ifstr", "else", "endc", "endif",
         ]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "string-symbol",
+        pattern: Pattern::Exact(&["setstr", "includestr"]),
         category: Category::Operation,
     },
     Directive {
@@ -965,14 +985,7 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&[
             // Intentionally clockless: see
             // `decisions/clock-dependent-directives.md`.
-            "dtb",
-            "dts",
-            "emod",
-            "ifstr",
-            "includestr",
-            "mod",
-            "os9",
-            "setstr",
+            "dtb", "dts", "emod", "mod", "os9",
         ]),
         category: Category::KnownUnsupported,
     },
@@ -1257,6 +1270,16 @@ impl crate::ast::NativeItem for StructLine {
     }
 }
 
+/// Source constructed by `includestr`, kept until the conditional evaluator
+/// reaches the line so an untaken branch never parses it.
+struct InlineSource(String);
+
+impl crate::ast::NativeItem for InlineSource {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
 /// What a line meant to the struct machinery.
 enum StructEffect {
     /// Part of a definition: it describes the layout and emits nothing.
@@ -1480,6 +1503,7 @@ fn parse_op(
                     "missing macro name".to_string()
                 },
             })),
+            "string-symbol" => Ok(Some(refused(format!("bad operand for `{m}`")))),
             "bytes" => Ok(Some(Operation::Bytes(list(operand, line)?))),
             "words" => Ok(Some(Operation::Words(list(operand, line)?))),
             "fcc" => Ok(Some(parse_fcc(operand, line, StringEnd::Bare)?)),
@@ -2029,6 +2053,52 @@ enum StringEnd {
     HighBit,
 }
 
+/// Decode lwtools' general-string grammar, used by `setstr` and `includestr`.
+fn parse_general_string(raw: &str, line: usize) -> Result<String, AsmError> {
+    let text = raw.trim_start();
+    if text.is_empty() {
+        return Ok(String::new());
+    }
+    let Some(inner) = text.strip_prefix('"') else {
+        return Err(AsmError::new(line, "a general string must begin with `\"`"));
+    };
+    let mut out = String::new();
+    let mut chars = inner.chars().peekable();
+    while let Some(c) = chars.next() {
+        match c {
+            '"' => return Ok(out),
+            '\\' => match chars.next() {
+                Some('n') => out.push('\n'),
+                Some('r') => out.push('\r'),
+                Some('t') => out.push('\t'),
+                Some('f') => out.push('\u{000c}'),
+                Some('e') => out.push('\u{001b}'),
+                Some('x') => {
+                    let mut look = chars.clone();
+                    let a = look.next();
+                    let b = look.next();
+                    match (
+                        a.and_then(|v| v.to_digit(16)),
+                        b.and_then(|v| v.to_digit(16)),
+                    ) {
+                        (Some(a), Some(b)) => {
+                            chars.next();
+                            chars.next();
+                            out.push(char::from((a * 16 + b) as u8));
+                        }
+                        _ => out.push('x'),
+                    }
+                }
+                Some(other) => out.push(other),
+                None => break,
+            },
+            other => out.push(other),
+        }
+    }
+    // lwtools accepts an unterminated general string through end of line.
+    Ok(out)
+}
+
 /// `fcc`/`fcn`/`fcz`/`fcs` — a string with a self-chosen delimiter (`"text"`,
 /// `/text/`, …): one byte per character, up to the closing delimiter, then
 /// whatever `end` marks the end with.
@@ -2239,8 +2309,87 @@ impl macros::MacroSyntax for LwasmMacros {
 /// Expand lwasm's macros, unless this parse is the formatter's.
 fn expand_lwasm(source: &str, mode: macros::Expand) -> Result<macros::Expansion, AsmError> {
     macros::expansion(mode, source, |s| {
-        macros::expand(&LwasmMacros, s).map(|e| Some((e.text, e.origins)))
+        let expanded = macros::expand(&LwasmMacros, s)?;
+        let resolved = text::expand(&LwasmText, &expanded.text)?;
+        Ok(Some((resolved, expanded.origins)))
     })
+}
+
+/// lwasm's string-symbol grammar. A definition is `SETSTR name="value"`;
+/// later general strings interpolate it as `%(name)`.
+struct LwasmText;
+
+impl text::TextSyntax for LwasmText {
+    fn definition(&self, line: &str) -> Option<(String, String)> {
+        let code = strip_comment(line).trim();
+        let (word, operand) = split_first_word(code);
+        if !word.eq_ignore_ascii_case("setstr") {
+            return None;
+        }
+        let (name, value) = operand.split_once('=')?;
+        Some((name.trim().to_string(), value.trim().to_string()))
+    }
+
+    fn undefinition(&self, line: &str) -> Option<String> {
+        let code = strip_comment(line).trim();
+        let (word, operand) = split_first_word(code);
+        (word.eq_ignore_ascii_case("setstr")
+            && !operand.contains('=')
+            && !operand.trim().is_empty())
+        .then(|| operand.trim().to_string())
+    }
+
+    fn function(
+        &self,
+        _name: &str,
+        _args: &[text::Arg],
+        _scope: &text::Scope,
+        _line: usize,
+    ) -> Result<Option<text::Folded>, AsmError> {
+        Ok(None)
+    }
+
+    fn interpolation(&self) -> Option<(&'static str, char)> {
+        Some(("%(", ')'))
+    }
+
+    fn interpolation_in_strings_only(&self) -> bool {
+        true
+    }
+
+    fn interpolates_line(&self, line: &str) -> bool {
+        let (word, _) = split_first_word(strip_comment(line).trim());
+        word.eq_ignore_ascii_case("setstr") || word.eq_ignore_ascii_case("includestr")
+    }
+
+    fn backslash_escapes_interpolation(&self) -> bool {
+        true
+    }
+
+    fn unknown_interpolation(&self) -> Option<&'static str> {
+        Some("")
+    }
+
+    fn render_interpolation(&self, value: &str) -> String {
+        let mut out = String::new();
+        for c in value.chars() {
+            match c {
+                '\n' => out.push_str("\\n"),
+                '\r' => out.push_str("\\r"),
+                '\t' => out.push_str("\\t"),
+                '\u{000c}' => out.push_str("\\f"),
+                '\u{001b}' => out.push_str("\\e"),
+                '"' => out.push_str("\\\""),
+                '\\' => out.push_str("\\\\"),
+                other => out.push(other),
+            }
+        }
+        out
+    }
+
+    fn decode_definition(&self, value: &str, line: usize) -> Result<String, AsmError> {
+        parse_general_string(value, line)
+    }
 }
 
 // ---------------------------------------------------------------------------
@@ -2283,6 +2432,9 @@ impl crate::ast::CondEval for LwasmEval {
         let (word, args) = split_first_word(head.trim());
         let word = word.to_ascii_lowercase();
         let args = args.trim();
+        if word == "ifstr" {
+            return eval_ifstr(args, line);
+        }
         if word == "ifp1" || word == "ifp2" {
             return Ok(true);
         }
@@ -2340,6 +2492,29 @@ impl crate::ast::CondEval for LwasmEval {
     /// environment so the direct/extended choice sees the live bindings.
     fn lower(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
         let line = node.span.line as usize;
+        if let Some(crate::ast::Item::Native(native)) = &node.item
+            && let Some(inline) = native.as_any().downcast_ref::<InlineSource>()
+        {
+            if let Some(label) = &node.label {
+                out.push(Statement {
+                    line,
+                    file: node.span.file,
+                    label: Some(label.qualified.clone()),
+                    op: None,
+                    operand_span: None,
+                    xor_mask: 0,
+                });
+            }
+            let program = parse_program(&inline.0, macros::Expand::Yes)?;
+            let start = out.len();
+            crate::ast::evaluate(self, &program.nodes, true, out)?;
+            for statement in &mut out[start..] {
+                statement.line = line;
+                statement.file = node.span.file;
+                statement.operand_span = Some(node.span.clone());
+            }
+            return Ok(());
+        }
         let label = node.label.as_ref().map(|s| s.qualified.clone());
         if let Some(effect) = struct_line(
             label.as_deref(),
@@ -2432,6 +2607,81 @@ impl crate::ast::CondEval for LwasmEval {
             xor_mask: 0,
         });
         Ok(())
+    }
+}
+
+/// Evaluate lwasm's twelve `ifstr` operators. `p` compares prefixes, `s`
+/// suffixes, and an initial `i` makes the comparison ASCII-insensitive.
+fn eval_ifstr(operand: &str, line: usize) -> Result<bool, AsmError> {
+    let parts = mos6502::split_top_level(operand, ',');
+    let op = parts
+        .first()
+        .map(|p| p.trim().to_ascii_lowercase())
+        .unwrap_or_default();
+    let insensitive = op.starts_with('i');
+    let base = op.strip_prefix('i').unwrap_or(&op);
+    let (left, right) = match base {
+        "eq" | "ne" => {
+            if parts.len() != 3 {
+                return Err(AsmError::new(line, "`ifstr` comparison needs two strings"));
+            }
+            (ifstr_arg(parts[1]), ifstr_arg(parts[2]))
+        }
+        "peq" | "pne" | "seq" | "sne" => {
+            if parts.len() != 4 {
+                return Err(AsmError::new(
+                    line,
+                    "`ifstr` prefix/suffix comparison needs a length and two strings",
+                ));
+            }
+            let n = ifstr_arg(parts[1]).parse::<usize>().unwrap_or(0);
+            let a = ifstr_arg(parts[2]);
+            let b = ifstr_arg(parts[3]);
+            if base.starts_with('p') {
+                (a.chars().take(n).collect(), b.chars().take(n).collect())
+            } else {
+                (
+                    a.chars()
+                        .rev()
+                        .take(n)
+                        .collect::<String>()
+                        .chars()
+                        .rev()
+                        .collect(),
+                    b.chars()
+                        .rev()
+                        .take(n)
+                        .collect::<String>()
+                        .chars()
+                        .rev()
+                        .collect(),
+                )
+            }
+        }
+        _ => {
+            return Err(AsmError::new(
+                line,
+                format!("unknown `ifstr` operator `{op}`"),
+            ));
+        }
+    };
+    let equal = if insensitive {
+        left.eq_ignore_ascii_case(&right)
+    } else {
+        left == right
+    };
+    Ok(if base.ends_with("ne") { !equal } else { equal })
+}
+
+fn ifstr_arg(raw: &str) -> String {
+    let text = raw.trim();
+    if text.len() >= 2
+        && ((text.starts_with('"') && text.ends_with('"'))
+            || (text.starts_with('\'') && text.ends_with('\'')))
+    {
+        text[1..text.len() - 1].to_string()
+    } else {
+        text.to_string()
     }
 }
 
@@ -3742,6 +3992,69 @@ mod tests {
                 .bytes,
             vec![0x12, 0x39]
         );
+    }
+
+    #[test]
+    fn setstr_interpolates_into_includestr() {
+        let src = " setstr BODY=\" fcb $2a\\n fcb $2b\"\n includestr \"%(BODY)\"\n";
+        assert_eq!(
+            asm(src).expect("assembled injected source").bytes,
+            vec![0x2A, 0x2B]
+        );
+
+        // lwtools defines an unknown string variable as the empty string.
+        assert!(
+            asm(" includestr \"%(MISSING)\"\n")
+                .expect("empty injection")
+                .bytes
+                .is_empty()
+        );
+    }
+
+    #[test]
+    fn ifstr_covers_exact_prefix_suffix_and_case_rules() {
+        let src = concat!(
+            " ifstr ieq,\"AbcXYZ\",\"abcxyz\"\n fcb 1\n endc\n",
+            " ifstr peq,3,\"AbcXYZ\",\"Abc123\"\n fcb 2\n endc\n",
+            " ifstr iseq,3,\"AbcXYZ\",\"000xyz\"\n fcb 3\n endc\n",
+            " ifstr ne,\"AbcXYZ\",\"other\"\n fcb 4\n endc\n",
+        );
+        assert_eq!(asm(src).expect("string conditions").bytes, vec![1, 2, 3, 4]);
+
+        let true_cases = [
+            "eq,abc,abc",
+            "ieq,AbC,aBc",
+            "ne,abc,abd",
+            "ine,AbC,aBd",
+            "peq,2,abc,abz",
+            "ipeq,2,Abc,aBZ",
+            "pne,2,abc,acz",
+            "ipne,2,Abc,aCZ",
+            "seq,2,zbc,abc",
+            "iseq,2,zBc,aBC",
+            "sne,2,zbc,zbd",
+            "isne,2,zBc,zBD",
+        ];
+        for (n, condition) in true_cases.into_iter().enumerate() {
+            let source = format!(" ifstr {condition}\n fcb {}\n endc\n", n + 1);
+            assert_eq!(asm(&source).expect(condition).bytes, vec![(n + 1) as u8]);
+        }
+    }
+
+    #[test]
+    fn setstr_redefines_and_unsets_a_string_symbol() {
+        let src = concat!(
+            " setstr V=\" fcb 1\"\n includestr \"%(V)\"\n",
+            " setstr V=\" fcb 2\"\n includestr \"%(V)\"\n",
+            " setstr V\n includestr \"%(V)\"\n",
+        );
+        assert_eq!(asm(src).expect("set, reset, unset").bytes, vec![1, 2]);
+    }
+
+    #[test]
+    fn includestr_inside_an_untaken_branch_is_not_parsed() {
+        let src = " ifne 0\n includestr \" this_is_not_an_opcode\"\n endc\n fcb 1\n";
+        assert_eq!(asm(src).expect("dead injection stays dead").bytes, vec![1]);
     }
 
     /// Formatting a conditional changes the layout and not the program.

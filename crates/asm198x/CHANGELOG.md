@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- **lwasm string symbols and generated source.** `setstr` now defines and
+  redefines general-string values, `%(name)` interpolates them where lwtools
+  does, `includestr` assembles the constructed source lazily, and all twelve
+  `ifstr` comparison forms are available. Generated source in an untaken
+  conditional is never parsed.
+
 - **Pasmo projects can include source files.** `include "file"` now uses the
   same loader-backed, requester-relative project model as the other multi-file
   dialects. Nested includes share constants and labels with their includer,

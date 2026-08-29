@@ -123,6 +123,12 @@ pub(crate) trait TextSyntax {
     /// of its value (the value is folded by the pass before it is stored).
     fn definition(&self, line: &str) -> Option<(String, String)>;
 
+    /// Recognise a string-symbol removal. Most dialects spell removal through
+    /// a separate directive; lwasm uses `setstr name` without `=`.
+    fn undefinition(&self, _line: &str) -> Option<String> {
+        None
+    }
+
     /// Recognise a **numeric** constant definition and work its value out
     /// against the constants above it. The line itself is kept as it stands —
     /// unlike a string symbol, a constant is a statement the ordinary parse
@@ -151,9 +157,49 @@ pub(crate) trait TextSyntax {
         line: usize,
     ) -> Result<Option<Folded>, AsmError>;
 
-    /// Whether `{name}` splices a string symbol into the middle of a token.
-    fn interpolates(&self) -> bool {
+    /// The delimiters around an interpolated string-symbol name. rgbasm uses
+    /// `{name}`; lwasm uses `%(name)`.
+    fn interpolation(&self) -> Option<(&'static str, char)> {
+        None
+    }
+
+    /// Whether interpolation is recognised only while scanning a string
+    /// literal. lwasm's `%(name)` is part of its general-string grammar;
+    /// rgbasm's `{name}` also reaches identifiers.
+    fn interpolation_in_strings_only(&self) -> bool {
         false
+    }
+
+    /// Whether this source line uses the dialect's interpolation grammar.
+    /// lwasm has "general strings" only on `setstr` and `includestr`; an
+    /// `ifstr` quoted argument is deliberately an ordinary string.
+    fn interpolates_line(&self, _line: &str) -> bool {
+        true
+    }
+
+    /// Whether an odd run of backslashes immediately before the opener makes
+    /// it literal. This is part of lwasm's general-string grammar.
+    fn backslash_escapes_interpolation(&self) -> bool {
+        false
+    }
+
+    /// What an unknown interpolated name becomes. Most dialects diagnose it;
+    /// lwasm deliberately substitutes an empty string.
+    fn unknown_interpolation(&self) -> Option<&'static str> {
+        None
+    }
+
+    /// Render a stored value back into the source surrounding the
+    /// interpolation. lwasm re-escapes control characters because the value
+    /// is still inside a general string at this stage.
+    fn render_interpolation(&self, value: &str) -> String {
+        value.to_string()
+    }
+
+    /// Decode a string-symbol definition before storing it. The default is
+    /// the quote/backslash grammar shared by ca65 and rgbasm.
+    fn decode_definition(&self, text: &str, _line: usize) -> Result<String, AsmError> {
+        Ok(unquote(text))
     }
 }
 
@@ -170,6 +216,11 @@ pub(crate) fn expand<S: TextSyntax>(syntax: &S, source: &str) -> Result<String, 
     let evaluate = |t: &str, n: &BTreeMap<String, i64>, l: usize| syntax.evaluate(t, n, l);
     for (index, raw) in source.lines().enumerate() {
         let line = index + 1;
+        if let Some(name) = syntax.undefinition(raw) {
+            symbols.remove(&name);
+            out.push('\n');
+            continue;
+        }
         if let Some((name, value)) = syntax.definition(raw) {
             // The value is folded now, against the symbols above it, and the
             // definition line is kept as a blank so every later span still
@@ -180,7 +231,7 @@ pub(crate) fn expand<S: TextSyntax>(syntax: &S, source: &str) -> Result<String, 
             };
             let substituted = substitute(&value, &symbols, syntax, line)?;
             let value = fold_line(syntax, &scope, &substituted, line)?;
-            symbols.insert(name, unquote(value.trim()));
+            symbols.insert(name, syntax.decode_definition(value.trim(), line)?);
             out.push('\n');
             continue;
         }
@@ -254,7 +305,11 @@ fn substitute<S: TextSyntax>(
 ) -> Result<String, AsmError> {
     // An interpolation still has to be *checked* when nothing is defined: an
     // unresolved `{name}` is an error, not a line to pass through.
-    if symbols.is_empty() && !(syntax.interpolates() && line.contains('{')) {
+    let interpolation = syntax
+        .interpolates_line(line)
+        .then(|| syntax.interpolation())
+        .flatten();
+    if symbols.is_empty() && !interpolation.is_some_and(|(open, _)| line.contains(open)) {
         return Ok(line.to_string());
     }
     let mut out = String::with_capacity(line.len());
@@ -265,20 +320,31 @@ fn substitute<S: TextSyntax>(
     let mut i = 0;
     while i < bytes.len() {
         let c = bytes[i];
-        // `{name}` is spliced even inside a string, which is what it is for.
-        if syntax.interpolates()
-            && c == b'{'
-            && let Some(end) = line[i + 1..].find('}')
+        // Interpolation is dialect grammar: rgbasm reaches identifiers and
+        // strings, while lwasm recognises it only inside a general string.
+        if let Some((open, close)) = interpolation
+            && (!syntax.interpolation_in_strings_only() || quote.is_some())
+            && !(syntax.backslash_escapes_interpolation()
+                && line[..i].bytes().rev().take_while(|b| *b == b'\\').count() % 2 == 1)
+            && line[i..].starts_with(open)
+            && let Some(end) = line[i + open.len()..].find(close)
         {
-            let name = &line[i + 1..i + 1 + end];
-            let Some(value) = symbols.get(name) else {
-                return Err(AsmError::new(
-                    at,
-                    format!("`{{{name}}}` names no string symbol defined above this line"),
-                ));
-            };
-            out.push_str(value);
-            i += end + 2;
+            let name = &line[i + open.len()..i + open.len() + end];
+            match symbols.get(name) {
+                Some(value) => out.push_str(&syntax.render_interpolation(value)),
+                None if syntax.unknown_interpolation().is_some() => {
+                    out.push_str(syntax.unknown_interpolation().unwrap_or_default());
+                }
+                None => {
+                    return Err(AsmError::new(
+                        at,
+                        format!(
+                            "`{open}{name}{close}` names no string symbol defined above this line"
+                        ),
+                    ));
+                }
+            }
+            i += open.len() + end + close.len_utf8();
             continue;
         }
         if let Some(q) = quote {

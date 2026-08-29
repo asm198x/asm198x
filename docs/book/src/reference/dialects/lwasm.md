@@ -8,13 +8,13 @@
 
 ## Directives
 
-31 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+32 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
 | `align` | `align` |  |
 | `bytes` | `fcb`, `.byte` |  |
-| `conditional` | `if`, `ifne`, `ifeq`, `ifgt`, `ifge`, `iflt`, `ifle`, `ifdef`, `ifndef`, `ifpragma`, `ifopt`, `ifp1`, `ifp2`, `else`, `endc`, `endif` |  |
+| `conditional` | `if`, `ifne`, `ifeq`, `ifgt`, `ifge`, `iflt`, `ifle`, `ifdef`, `ifndef`, `ifpragma`, `ifopt`, `ifp1`, `ifp2`, `ifstr`, `else`, `endc`, `endif` |  |
 | `diagnose` | `error` |  |
 | `diagnose-warning` | `warning`, `msg` |  |
 | `end` | `end` | Accepted and discarded — it changes no bytes |
@@ -39,8 +39,9 @@
 | `sections` | `section`, `sect`, `endsection`, `endsect` | Refused, as the reference refuses it — only usable with an object target, and asm198x emits a binary |
 | `set` | `set` |  |
 | `setdp` | `setdp` |  |
+| `string-symbol` | `setstr`, `includestr` |  |
 | `struct` | `struct`, `endstruct`, `ends` |  |
-| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `ifstr`, `includestr`, `mod`, `os9`, `setstr` | Recognised, and not implemented |
+| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `mod`, `os9` | Recognised, and not implemented |
 | `words` | `fdb`, `.word` |  |
 | `words-swapped` | `fdbs` |  |
 

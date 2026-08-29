@@ -1137,6 +1137,12 @@ const PROBES: &[Probe] = &[
         " fcb 1\n align 4,$ff\n fcb 2\n"),
     ok ("lwasm", "align on the boundary pads nothing",
         " fcb 1,2,3,4\n align 4\n fcb 9\n"),
+    ok ("lwasm", "setstr feeds generated source",
+        " setstr BODY=\" fcb $2a\\n fcb $2b\"\n includestr \"%(BODY)\"\n"),
+    ok ("lwasm", "ifstr exact prefix suffix and case forms",
+        " ifstr ieq,\"AbcXYZ\",\"abcxyz\"\n fcb 1\n endc\n\
+         ifstr peq,3,\"AbcXYZ\",\"Abc123\"\n fcb 2\n endc\n\
+         ifstr iseq,3,\"AbcXYZ\",\"000xyz\"\n fcb 3\n endc\n"),
 
     // ---- rgbasm / SM83 ------------------------------------------------------
     // Conditionals: `ELIF` rather than `ELSEIF`, and `ENDC` is the **only**
