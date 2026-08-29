@@ -221,6 +221,21 @@ pub(crate) trait FlatWalk {
         None
     }
 
+    /// Split an optional label from a block-opening line after
+    /// [`block_keyword`](Self::block_keyword) has recognised it.
+    ///
+    /// Most keyword-block dialects do not permit a label here. ca65 does, so
+    /// its walker returns the symbol to attach to the block node and the head
+    /// text that begins with the directive itself.
+    fn block_open<'a>(
+        &mut self,
+        code: &'a str,
+        line: usize,
+    ) -> Result<(Option<Symbol>, &'a str), AsmError> {
+        let _ = line;
+        Ok((None, code.trim()))
+    }
+
     /// Rewrite source before parsing — macro expansion (#93).
     ///
     /// `None`, the default, means the dialect rewrites nothing and its source
@@ -348,14 +363,16 @@ fn walk_block<W: FlatWalk>(
 
         // Structure first, so a block keyword never reaches the line parser —
         // which would refuse it as an unknown directive.
-        if let Some(kw) = w.block_keyword(strip_block_comment(raw)) {
-            let head = strip_block_comment(raw).trim().to_string();
+        let code = strip_block_comment(raw);
+        if let Some(kw) = w.block_keyword(code) {
+            let head = code.trim().to_string();
             match kw {
                 BlockKw::CondClose if in_block => return Ok(BlockClose::CondClose(head)),
                 BlockKw::RepeatClose if in_block => return Ok(BlockClose::RepeatClose(head)),
                 BlockKw::Else if in_block => return Ok(BlockClose::Else),
                 BlockKw::ElseIf if in_block => return Ok(BlockClose::ElseIf(head, line)),
                 BlockKw::CondOpen => {
+                    let (label, head) = w.block_open(code, line)?;
                     parse_conditional(
                         Cursor {
                             lines,
@@ -365,12 +382,14 @@ fn walk_block<W: FlatWalk>(
                         },
                         w,
                         res,
-                        head,
+                        head.to_string(),
+                        label,
                         line,
                     )?;
                     continue;
                 }
                 BlockKw::RepeatOpen => {
+                    let (label, head) = w.block_open(code, line)?;
                     parse_repeat(
                         Cursor {
                             lines,
@@ -380,7 +399,8 @@ fn walk_block<W: FlatWalk>(
                         },
                         w,
                         res,
-                        head,
+                        head.to_string(),
+                        label,
                         line,
                     )?;
                     continue;
@@ -404,6 +424,7 @@ fn parse_conditional<W: FlatWalk>(
     w: &mut W,
     res: &mut Resolve<'_>,
     head: String,
+    label: Option<Symbol>,
     line: usize,
 ) -> Result<(), AsmError> {
     let Cursor {
@@ -470,6 +491,7 @@ fn parse_conditional<W: FlatWalk>(
                 w,
                 res,
                 leg_head,
+                None,
                 leg_line,
             )?;
             Some(w.nodes_mut().split_off(start))
@@ -489,7 +511,7 @@ fn parse_conditional<W: FlatWalk>(
     };
     w.push_node(Node {
         operand_span: None,
-        label: None,
+        label,
         item: Some(crate::ast::Item::Conditional {
             close: closer,
             head: head.clone(),
@@ -512,6 +534,7 @@ fn parse_repeat<W: FlatWalk>(
     w: &mut W,
     res: &mut Resolve<'_>,
     head: String,
+    label: Option<Symbol>,
     line: usize,
 ) -> Result<(), AsmError> {
     let Cursor {
@@ -541,7 +564,7 @@ fn parse_repeat<W: FlatWalk>(
     let body: Vec<Node> = w.nodes_mut().split_off(start);
     w.push_node(Node {
         operand_span: None,
-        label: None,
+        label,
         item: Some(crate::ast::Item::Repeat {
             head: head.clone(),
             body,
