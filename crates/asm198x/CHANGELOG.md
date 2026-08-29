@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.45](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.44...asm198x-v0.0.45) - 2026-08-29
+
+### Added
+
+- *(asl)* share enumeration constants ([#400](https://github.com/asm198x/asm198x/pull/400))
+
 ### Added
 
 - **Shared ASL enumerations.** All twelve ASL-syntax CPU front ends now accept
