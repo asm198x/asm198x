@@ -11,10 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- *(cli)* add Pasmo command-line constants ([#418](https://github.com/asm198x/asm198x/pull/418))
-
-### Added
-
 - **Pasmo command-line constants.** Repeatable `--equ NAME=VALUE` definitions
   are available before conditional assembly, so one source tree can build
   multiple Pasmo and PasmoNext targets without wrapper source files.
