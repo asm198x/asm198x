@@ -1977,14 +1977,21 @@ impl FlatWalk for Walker {
         }
         let kind = match self.tag_statement(rest, line)? {
             Some(kind) => kind,
-            None => parse_op(
+            None => match parse_op(
                 self.set,
                 &self.anons,
                 &self.current_global,
                 &self.consts,
                 rest,
                 line,
-            )?,
+            ) {
+                Ok(kind) => kind,
+                // ca65 skips an untaken conditional branch lexically. Keep a
+                // parse failure as a fatal statement until projection chooses
+                // the live branch: reached source still reports the original
+                // diagnostic, while dead source is never required to parse.
+                Err(error) => Kind::Message(DiagSeverity::Error, error.message),
+            },
         };
         // Every name the statement mentions, as the key it resolves under.
         let kind = self.scope_syms(&kind, line)?;
@@ -4920,6 +4927,23 @@ two:\n\
             ".segment \"CODE\"\nLB: .if 1\n .byte $11\n.endif\nLR: .repeat 1\n .byte $22\n.endrepeat\n .word LB, LR\n",
         );
         assert_eq!(&image[16..22], &[0x11, 0x22, 0x00, 0x80, 0x01, 0x80]);
+    }
+
+    #[test]
+    fn a_dead_conditional_branch_need_not_parse() {
+        assert_eq!(bytes(".if 0\n .byte\n.endif\n .byte 1\n")[..1], [1]);
+        crate::assemble_ca65(".if 1\n .byte\n.endif\n")
+            .expect_err("the same malformed line is an error when reached");
+    }
+
+    #[test]
+    fn a_blank_macro_argument_may_leave_invalid_source_in_the_dead_branch() {
+        assert_eq!(
+            bytes(
+                ".macro fill v\n .ifblank v\n .byte $ff\n .else\n .byte v\n .endif\n.endmacro\n fill\n"
+            )[..1],
+            [0xFF]
+        );
     }
 
     /// `.ifdef` tests what is defined **above** it. A definition inside an
