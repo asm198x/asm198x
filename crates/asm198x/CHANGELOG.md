@@ -11,10 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- *(vasm)* coalesce repeated named sections ([#420](https://github.com/asm198x/asm198x/pull/420))
-
-### Fixed
-
 - **Repeated vasm sections.** Reopening a named section now resumes its
   existing hunk, matching vasm's layout and relocation semantics for modular
   Amiga programs instead of emitting one hunk per declaration.
