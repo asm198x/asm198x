@@ -217,6 +217,9 @@ pub(crate) enum Item {
     },
     Bytes(Vec<Operand>),
     Words(Vec<Operand>),
+    /// An OS-9 module header (`mod`) and trailer (`emod`).
+    Os9Module(Vec<Operand>),
+    Os9EndModule,
     /// Values at a width and byte order the **directive** named, not the CPU
     /// — ACME's `!be16`/`!le32` family. [`Item::Words`] cannot carry it: that
     /// one is always two bytes in the instruction set's order.
@@ -846,6 +849,14 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
                 .map(Operand::into_value)
                 .collect::<Result<_, _>>()?,
         ),
+        Item::Os9Module(v) => Operation::Os9Module {
+            fields: v
+                .iter()
+                .cloned()
+                .map(Operand::into_value)
+                .collect::<Result<_, _>>()?,
+        },
+        Item::Os9EndModule => Operation::Os9EndModule,
         Item::Sized {
             width,
             big_endian,
@@ -967,6 +978,13 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
                 .map(Operand::into_value)
                 .collect::<Result<_, _>>()?,
         ),
+        Item::Os9Module(v) => Operation::Os9Module {
+            fields: v
+                .into_iter()
+                .map(Operand::into_value)
+                .collect::<Result<_, _>>()?,
+        },
+        Item::Os9EndModule => Operation::Os9EndModule,
         Item::Sized {
             width,
             big_endian,
@@ -1171,6 +1189,9 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
         Operation::Words(v) => {
             Operation::Words(v.into_iter().map(|e| map_sym_expr(e, f)).collect())
         }
+        Operation::Os9Module { fields } => Operation::Os9Module {
+            fields: fields.into_iter().map(|e| map_sym_expr(e, f)).collect(),
+        },
         Operation::Sized {
             width,
             big_endian,
@@ -1224,6 +1245,7 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
         | Operation::Diagnose { .. }
         | Operation::Section { .. }
         | Operation::Reserve(_)) => other,
+        Operation::Os9EndModule => Operation::Os9EndModule,
         Operation::Assert {
             cond,
             fatal,
@@ -1311,6 +1333,10 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         },
         Operation::Bytes(v) => Item::Bytes(v.into_iter().map(Operand::expr).collect()),
         Operation::Words(v) => Item::Words(v.into_iter().map(Operand::expr).collect()),
+        Operation::Os9Module { fields } => {
+            Item::Os9Module(fields.into_iter().map(Operand::expr).collect())
+        }
+        Operation::Os9EndModule => Item::Os9EndModule,
         Operation::Sized {
             width,
             big_endian,

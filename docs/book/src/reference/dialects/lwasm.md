@@ -8,7 +8,7 @@
 
 ## Directives
 
-32 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+33 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -30,6 +30,7 @@
 | `macro` | `macro`, `macr`, `endm` |  |
 | `object-target-only` | `export`, `extdep`, `extern`, `external`, `import` | Refused, as the reference refuses it — only supported for an object target, and asm198x emits a binary |
 | `org` | `org` |  |
+| `os9-module` | `mod`, `emod`, `os9` |  |
 | `pragma` | `pragma`, `opt` |  |
 | `pseudo-pc` | `phase`, `dephase` |  |
 | `reorg` | `reorg` |  |
@@ -41,7 +42,7 @@
 | `setdp` | `setdp` |  |
 | `string-symbol` | `setstr`, `includestr` |  |
 | `struct` | `struct`, `endstruct`, `ends` |  |
-| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `mod`, `os9` | Recognised, and not implemented |
+| `unsupported-lwasm` | `dtb`, `dts` | Recognised, and not implemented |
 | `words` | `fdb`, `.word` |  |
 | `words-swapped` | `fdbs` |  |
 

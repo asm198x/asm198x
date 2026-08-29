@@ -84,6 +84,7 @@ impl Dialect for Lwasm {
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
         check_phases(&out)?;
+        check_modules(&out)?;
         Ok(out)
     }
 
@@ -109,6 +110,7 @@ impl Dialect for Lwasm {
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
         check_phases(&out)?;
+        check_modules(&out)?;
         Ok(out)
     }
 }
@@ -137,6 +139,24 @@ fn check_phases(statements: &[Statement]) -> Result<(), AsmError> {
                 }
                 open = false;
             }
+            _ => {}
+        }
+    }
+    Ok(())
+}
+
+fn check_modules(statements: &[Statement]) -> Result<(), AsmError> {
+    let mut open = false;
+    for s in statements {
+        match &s.op {
+            Some(Operation::Os9Module { .. }) if open => {
+                return Err(AsmError::new(s.line, "`mod` inside an open OS-9 module"));
+            }
+            Some(Operation::Os9Module { .. }) => open = true,
+            Some(Operation::Os9EndModule) if !open => {
+                return Err(AsmError::new(s.line, "`emod` outside an OS-9 module"));
+            }
+            Some(Operation::Os9EndModule) => open = false,
             _ => {}
         }
     }
@@ -839,7 +859,7 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What lwasm has here and we do not.
     //
-    // 10 spellings against lwtools 4.25.
+    // Harvested against lwtools 4.25.
     //
     // **Directives only.** The first cut of this list swept in fifteen 6809
     // *instructions* — `adca`, `bita`, `cmpd`, `cwai`, `sbca` among them —
@@ -852,8 +872,9 @@ pub const DIRECTIVES: &[Directive] = &[
     // and keeping the ones that emitted bytes caught the instructions — and
     // also `dtb`, `dts` and `emod`, which emit bytes because they *are* data:
     // `dts` assembles to the ASCII of the current date. Reading the bytes
-    // rather than counting them put those three back. The twelve that
-    // remain are tracked as the ISA gap they are (#225).
+    // rather than counting them put those three back. `emod` is now the OS-9
+    // module CRC trailer below; `dtb` and `dts` remain deliberately clockless
+    // under `decisions/clock-dependent-directives.md`.
     //
     // lwasm's 6309 instructions are absent for the reason vasm's 68020 ones
     // are: lwasm refuses them itself in 6809 mode.
@@ -981,11 +1002,16 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     Directive {
+        id: "os9-module",
+        pattern: Pattern::Exact(&["mod", "emod", "os9"]),
+        category: Category::Operation,
+    },
+    Directive {
         id: "unsupported-lwasm",
         pattern: Pattern::Exact(&[
             // Intentionally clockless: see
             // `decisions/clock-dependent-directives.md`.
-            "dtb", "dts", "emod", "mod", "os9",
+            "dtb", "dts",
         ]),
         category: Category::KnownUnsupported,
     },
@@ -1506,6 +1532,23 @@ fn parse_op(
             "string-symbol" => Ok(Some(refused(format!("bad operand for `{m}`")))),
             "bytes" => Ok(Some(Operation::Bytes(list(operand, line)?))),
             "words" => Ok(Some(Operation::Words(list(operand, line)?))),
+            "os9-module" => match m.as_str() {
+                "mod" => {
+                    let fields = list(operand, line)?;
+                    if !matches!(fields.len(), 4 | 6) {
+                        return Err(AsmError::new(line, "`mod` needs four or six fields"));
+                    }
+                    Ok(Some(Operation::Os9Module { fields }))
+                }
+                "emod" => {
+                    if !operand.trim().is_empty() {
+                        return Err(AsmError::new(line, "`emod` takes no operand"));
+                    }
+                    Ok(Some(Operation::Os9EndModule))
+                }
+                "os9" => Ok(Some(encoded(&[0x10, 0x3F], value(operand, line)?, 1))),
+                _ => unreachable!(),
+            },
             "fcc" => Ok(Some(parse_fcc(operand, line, StringEnd::Bare)?)),
             "fcn" => Ok(Some(parse_fcc(operand, line, StringEnd::Nul)?)),
             "fcs" => Ok(Some(parse_fcc(operand, line, StringEnd::HighBit)?)),
@@ -2690,6 +2733,32 @@ mod tests {
     use crate::assemble_lwasm as asm;
 
     #[test]
+    fn os9_module_header_syscall_and_crc_match_lwtools() {
+        let source = concat!(
+            "        mod endmod,name,$11,$81,start,1\n",
+            "name    fcs /TEST/\n",
+            "start   os9 $2a\n",
+            "        rts\n",
+            "endmod  equ *+3\n",
+            "        emod\n",
+        );
+        assert_eq!(
+            asm(source).expect("OS-9 module assembles").bytes,
+            vec![
+                0x87, 0xcd, 0x00, 0x18, 0x00, 0x0d, 0x11, 0x81, 0x30, 0x00, 0x11, 0x00, 0x01, 0x54,
+                0x45, 0x53, 0xd4, 0x10, 0x3f, 0x2a, 0x39, 0x71, 0x28, 0xc2,
+            ]
+        );
+    }
+
+    #[test]
+    fn os9_module_boundaries_are_checked() {
+        assert!(asm(" emod\n").is_err());
+        assert!(asm(" mod 9,9,1,1\n mod 9,9,1,1\n").is_err());
+        assert!(asm(" mod 1,2,3\n").is_err());
+    }
+
+    #[test]
     fn inherent_and_immediate() {
         assert_eq!(asm("        nop\n").expect("nop").bytes, vec![0x12]);
         assert_eq!(asm("        rts\n").expect("rts").bytes, vec![0x39]);
@@ -3133,7 +3202,7 @@ mod tests {
     /// and the same word on a live line still has to be refused.
     #[test]
     fn a_refused_word_inside_a_dead_branch_is_never_reached() {
-        for spelling in ["section", "export", "import", "os9", "struct", "endm"] {
+        for spelling in ["section", "export", "import", "dtb", "struct", "endm"] {
             assert_eq!(
                 asm(&format!(" ifne 0\n {spelling}\n endc\n fcb 1\n"))
                     .unwrap_or_else(|e| panic!("{spelling} behind `if 0`: {e}"))
