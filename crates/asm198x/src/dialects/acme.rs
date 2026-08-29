@@ -197,6 +197,32 @@ fn split_comment(line: &str) -> (&str, Option<&str>) {
     (code, comment)
 }
 
+/// Split ACME's `:`-separated statements without mistaking a column-zero
+/// label suffix or a colon inside a quoted literal for a separator.
+fn split_statements(line: &str) -> Vec<&str> {
+    let bytes = line.as_bytes();
+    let (mut in_char, mut in_str) = (false, false);
+    let mut start = 0usize;
+    let mut parts = Vec::new();
+    for (i, &b) in bytes.iter().enumerate() {
+        match b {
+            b'\'' if !in_str => in_char = !in_char,
+            b'"' if !in_char => in_str = !in_str,
+            b':' if !in_char && !in_str => {
+                let label_suffix =
+                    start == 0 && !line.starts_with([' ', '\t']) && is_ident(line[..i].trim());
+                if !label_suffix {
+                    parts.push(&line[start..i]);
+                    start = i + 1;
+                }
+            }
+            _ => {}
+        }
+    }
+    parts.push(&line[start..]);
+    parts
+}
+
 // ---------------------------------------------------------------------------
 // Source-preserving parse — the single ACME front-end (U6 / idea 4).
 //
@@ -611,7 +637,7 @@ impl<'a> FmtCx<'a> {
                     }
                     nodes.push(self.op_node(None, None, format!("{head} {{"), leading, None, line));
                     if !body_text.is_empty() {
-                        nodes.push(self.parse_line(body_text, None, line, Vec::new())?);
+                        nodes.extend(self.parse_statements(body_text, None, line, Vec::new())?);
                     }
                     nodes.push(self.op_node(
                         None,
@@ -627,7 +653,7 @@ impl<'a> FmtCx<'a> {
                 // Multi-line: the head node, then the body until its `}`.
                 nodes.push(self.op_node(None, None, format!("{head} {{"), leading, comment, line));
                 if !after.is_empty() {
-                    nodes.push(self.parse_line(after, None, line, Vec::new())?);
+                    nodes.extend(self.parse_statements(after, None, line, Vec::new())?);
                 }
                 zone_depth += 1;
                 self.pos += 1;
@@ -636,8 +662,7 @@ impl<'a> FmtCx<'a> {
 
             // An ordinary line.
             let leading = std::mem::take(&mut self.pending);
-            let node = self.parse_line(code, comment, line, leading)?;
-            nodes.push(node);
+            nodes.extend(self.parse_statements(code, comment, line, leading)?);
             self.pos += 1;
         }
         if zone_depth > 0 {
@@ -671,7 +696,7 @@ impl<'a> FmtCx<'a> {
             let then_body = if body_text.is_empty() {
                 Vec::new()
             } else {
-                vec![self.parse_line(body_text, None, line, Vec::new())?]
+                self.parse_statements(body_text, None, line, Vec::new())?
             };
             self.pos += 1;
             return Ok(self.conditional_node(head, then_body, None, true, leading, comment, line));
@@ -700,7 +725,41 @@ impl<'a> FmtCx<'a> {
         Ok(self.conditional_node(head, then_body, else_body, false, leading, comment, line))
     }
 
-    /// Build one flat node from an ordinary line: its optional (column-0) label,
+    /// Build the flat nodes from one physical line. ACME treats a top-level
+    /// colon as a statement separator; leading trivia belongs to the first
+    /// statement and the line comment to the last.
+    fn parse_statements(
+        &self,
+        code: &str,
+        comment: Option<&str>,
+        line: usize,
+        leading: Vec<crate::ast::Comment>,
+    ) -> Result<Vec<crate::ast::Node>, AsmError> {
+        let parts: Vec<&str> = split_statements(code)
+            .into_iter()
+            .filter(|part| !part.trim().is_empty())
+            .collect();
+        let last = parts.len().saturating_sub(1);
+        let mut leading = Some(leading);
+        parts
+            .into_iter()
+            .enumerate()
+            .map(|(i, part)| {
+                // A separator begins a fresh statement column. ACME accepts a
+                // label here (with its usual non-leftmost warning), so leading
+                // spacing after `:` must not hide it from label recognition.
+                let part = if i == 0 { part } else { part.trim_start() };
+                self.parse_line(
+                    part,
+                    (i == last).then_some(comment).flatten(),
+                    line,
+                    leading.take().unwrap_or_default(),
+                )
+            })
+            .collect()
+    }
+
+    /// Build one flat node from an ordinary statement: its optional (column-0) label,
     /// its verbatim operation source, and trivia. Mirrors `parse_statement`'s
     /// label rules but keeps source rather than lowering.
     fn parse_line(
@@ -4646,6 +4705,37 @@ mod tests {
         } else {
             assemble_acme(&format!("*= $c000\n{src}"))
         }
+    }
+
+    #[test]
+    fn colon_separates_statements_after_a_label() {
+        let src = "txt_hearts: !text \"HEARTS\" : !byte 0\n";
+        let out = asm(src).expect("colon-separated Rachel source");
+        assert_eq!(out.bytes, b"HEARTS\0");
+        assert!(out.symbols.contains_key("txt_hearts"));
+    }
+
+    #[test]
+    fn colon_in_a_literal_is_not_a_statement_separator() {
+        assert_eq!(
+            asm("!text \"a:b\" : !byte 0\n").expect("literal").bytes,
+            b"a:b\0"
+        );
+    }
+
+    #[test]
+    fn a_label_after_a_separator_binds_at_that_point() {
+        let out =
+            asm("!byte 1 : second: !byte 2\n!byte <second, >second\n").expect("mid-line label");
+        assert_eq!(out.bytes, vec![1, 2, 1, 0xc0]);
+    }
+
+    #[test]
+    fn formatting_colon_separated_statements_preserves_bytes() {
+        let src = "*= $c000\nstart: lda #1 : sta $d020 : rts\n";
+        let before = assemble_acme(src).expect("assembles").bytes;
+        let formatted = crate::format_acme(src).expect("formats");
+        assert_eq!(assemble_acme(&formatted).expect("formatted").bytes, before);
     }
 
     #[test]
