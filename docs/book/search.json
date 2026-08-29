@@ -834,7 +834,7 @@
       "slug": "reference/dialects/lwasm"
     },
     {
-      "context": "31 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "32 directives, 84 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "lwasm",
       "slug": "reference/dialects/lwasm"

@@ -1810,8 +1810,8 @@ impl text::TextSyntax for RgbasmText {
         string_symbol(line)
     }
 
-    fn interpolates(&self) -> bool {
-        true
+    fn interpolation(&self) -> Option<(&'static str, char)> {
+        Some(("{", '}'))
     }
 
     /// `[DEF] NAME EQU expr` and `[DEF] NAME = expr`, read through the same

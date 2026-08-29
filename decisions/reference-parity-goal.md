@@ -71,7 +71,6 @@ not deferred — nobody has examined it yet, which is a different thing.
 | `os9`, `mod`, `emod` | lwasm | [`multi-artifact-output.md`](multi-artifact-output.md) — accepted, **not yet implemented** |
 | `output` | vasm | the same |
 | the `save*` family | sjasmplus | the same |
-| `setstr`, `ifstr`, `includestr` | lwasm | string symbols are their own surface, unbuilt |
 | `.condes` | ca65 | builds an ld65 constructor table from linker-config features our fixed NROM layout does not declare |
 | `\#`, `_NARG`, `\@` | rgbasm | macro-expansion surface, unbuilt |
 | eight pragma spellings | lwasm | rule 3 — refused by name; see the `PRAGMAS` table |
