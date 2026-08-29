@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **vasm semicolon character literals.** A semicolon inside a quoted character
+  or string literal no longer begins a comment, so operands such as
+  `move.b #';',(a0)+` assemble as vasm does.
+
 ## [0.0.46](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.45...asm198x-v0.0.46) - 2026-08-29
 
 ### Added

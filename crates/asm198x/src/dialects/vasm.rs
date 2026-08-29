@@ -2555,15 +2555,66 @@ fn stamp(e: AsmError, s: &Line) -> AsmError {
 
 /// Split a line into its code and its comment for carrying comments as AST
 /// trivia — a `*`-column-0 line is a whole-line comment, otherwise the text from
-/// the first `;` (a naive scan, no string awareness — exactly what vasm's parser
-/// treats as a comment), so the code half is precisely what assembly sees.
+/// the first `;` outside a single- or double-quoted literal. In particular,
+/// `#';'` is an immediate character value, not the start of a comment (#404).
 fn split_comment(line: &str) -> (&str, Option<&str>) {
     if line.starts_with('*') {
         return ("", Some(line.trim_end()));
     }
-    match line.find(';') {
-        Some(i) => (&line[..i], Some(line[i..].trim_end())),
-        None => (line, None),
+    let mut quote = None;
+    let mut escaped = false;
+    for (i, ch) in line.char_indices() {
+        if escaped {
+            escaped = false;
+            continue;
+        }
+        if quote.is_some() && ch == '\\' {
+            escaped = true;
+            continue;
+        }
+        if matches!(ch, '\'' | '"') {
+            if quote == Some(ch) {
+                quote = None;
+            } else if quote.is_none() {
+                quote = Some(ch);
+            }
+            continue;
+        }
+        if ch == ';' && quote.is_none() {
+            return (&line[..i], Some(line[i..].trim_end()));
+        }
+    }
+    (line, None)
+}
+
+#[cfg(test)]
+mod comment_scanning {
+    use super::*;
+
+    #[test]
+    fn semicolons_inside_literals_are_not_comments() {
+        assert_eq!(
+            split_comment(" move.b #';',(a0)+"),
+            (" move.b #';',(a0)+", None)
+        );
+        assert_eq!(
+            split_comment(" dc.b \"a;b\" ; real comment"),
+            (" dc.b \"a;b\" ", Some("; real comment"))
+        );
+        assert_eq!(
+            split_comment(" move.b #';',(a0)+ ; copy delimiter"),
+            (" move.b #';',(a0)+ ", Some("; copy delimiter"))
+        );
+    }
+
+    #[test]
+    fn a_semicolon_character_literal_encodes_like_vasm() {
+        assert_eq!(
+            crate::assemble_vasm(" section code,code\n move.b #';',(a0)+\n")
+                .expect("semicolon literal")
+                .bytes,
+            vec![0x10, 0xFC, 0x00, 0x3B]
+        );
     }
 }
 
