@@ -393,6 +393,38 @@ fn main() -> ExitCode {
     }
 }
 
+/// Apply the cartridge framing performed by `rgbfix -v -p 0xff`: pad to the
+/// next valid power-of-two ROM size (32 KiB minimum), record that size in the
+/// header, then write the header and global checksums.
+fn game_boy_rom(bytes: &[u8]) -> Result<Vec<u8>, String> {
+    if bytes.len() < 0x150 {
+        return Err("a Game Boy ROM must contain the complete $0100-$014f header".into());
+    }
+    let linked_size = bytes.len().div_ceil(0x4000) * 0x4000;
+    let size = linked_size.max(0x8000).next_power_of_two();
+    if size > 0x80_0000 {
+        return Err("Game Boy ROM exceeds the 8 MiB header limit".into());
+    }
+    let mut rom = bytes.to_vec();
+    // RGBLINK materialises the rest of the highest used bank with its zero
+    // fill; rgbfix's requested $ff padding begins only after that linked ROM.
+    rom.resize(linked_size, 0x00);
+    rom.resize(size, 0xFF);
+    rom[0x148] = (size / 0x8000).ilog2() as u8;
+
+    let header = rom[0x134..=0x14C]
+        .iter()
+        .fold(0u8, |sum, &byte| sum.wrapping_sub(byte).wrapping_sub(1));
+    rom[0x14D] = header;
+    rom[0x14E] = 0;
+    rom[0x14F] = 0;
+    let global = rom
+        .iter()
+        .fold(0u16, |sum, &byte| sum.wrapping_add(u16::from(byte)));
+    rom[0x14E..=0x14F].copy_from_slice(&global.to_be_bytes());
+    Ok(rom)
+}
+
 /// Which operation the invocation asks for. Named as a subcommand
 /// (`asm198x disasm …`), git/cargo style, per
 /// `decisions/packaging-and-cpu-roadmap.md`.
@@ -458,6 +490,7 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut exe = false;
     let mut sna = false;
     let mut prg = false;
+    let mut gb_rom = false;
     // `--tap`/`--tzx` frame the program for tape; the `bas` spellings put
     // pasmo's auto-run BASIC loader in front of it.
     let mut tape: Option<(asm198x::TapeFormat, bool)> = None;
@@ -545,6 +578,7 @@ fn run(args: &[String]) -> Result<String, String> {
             "--exe" | "--hunkexe" => exe = true,
             "--sna" => sna = true,
             "--prg" => prg = true,
+            "--gb-rom" => gb_rom = true,
             "--tap" => tape = Some((asm198x::TapeFormat::Tap, false)),
             "--tapbas" => tape = Some((asm198x::TapeFormat::Tap, true)),
             "--tzx" => tape = Some((asm198x::TapeFormat::Tzx, false)),
@@ -660,6 +694,12 @@ fn run(args: &[String]) -> Result<String, String> {
         return Err("`--equ` is an assembly option for the pasmo/pasmonext dialects".into());
     }
     let source = apply_equ_definitions(&source, &equ_definitions)?;
+    if gb_rom && !matches!(assembler, Assembler::Rgbasm) {
+        return Err("`--gb-rom` is only for the Game Boy dialect (rgbasm)".into());
+    }
+    if gb_rom && matches!(message_format, MessageFormat::Json) {
+        return Err("`--gb-rom` is not yet available with `--message-format=json`".into());
+    }
 
     // Debug198x artifacts: every path emits them (flat U3, ca65 U4, vasm U5).
     // The ca65/vasm listings wait on a per-section byte map, so only the
@@ -948,6 +988,17 @@ fn run(args: &[String]) -> Result<String, String> {
             image.len(),
             out_path.display(),
             assembly.origin.unwrap_or(0),
+        );
+        (summary, out_path)
+    } else if gb_rom {
+        let image = game_boy_rom(&assembly.bytes)?;
+        let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("gb"));
+        std::fs::write(&out_path, &image)
+            .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+        let summary = format!(
+            "assembled + finalised {} byte(s) -> {} (Game Boy ROM)",
+            image.len(),
+            out_path.display(),
         );
         (summary, out_path)
     } else {
@@ -1301,6 +1352,8 @@ fn usage() -> String {
      \x20             for its RANDOMIZE USR line)\n\
      C64 program: asm198x --dialect acme --prg <input> [-o <out.prg>]\n\
      \x20            (prepends the 2-byte load address)\n\
+     Game Boy ROM: asm198x --dialect rgbasm --gb-rom <input> [-o <out.gb>]\n\
+     \x20            (RGBLINK-compatible layout, padding and header checksums)\n\
      debug info:  asm198x [--debug[=path]] [--sym[=path]] [--listing[=path]] <input>\n\
      \x20            (--debug writes the .debug198x NDJSON sidecar; --sym a sorted\n\
      \x20             `name = $hex` table; --listing address/bytes/source rows —\n\
@@ -1554,6 +1607,30 @@ mod tests {
                 "`{bad}` must be rejected"
             );
         }
+    }
+
+    #[test]
+    fn game_boy_rom_matches_rgbfix_padding_and_checksums() {
+        let mut image = vec![0u8; 0x150];
+        image[0x134..0x13A].copy_from_slice(b"RACHEL");
+        let rom = game_boy_rom(&image).expect("complete header");
+        assert_eq!(rom.len(), 0x8000);
+        assert_eq!(rom[0x148], 0);
+        assert!(rom[0x150..0x4000].iter().all(|&byte| byte == 0x00));
+        assert!(rom[0x4000..].iter().all(|&byte| byte == 0xFF));
+        let header = rom[0x134..=0x14C]
+            .iter()
+            .fold(0u8, |sum, &byte| sum.wrapping_sub(byte).wrapping_sub(1));
+        assert_eq!(rom[0x14D], header);
+        let expected_global = rom
+            .iter()
+            .enumerate()
+            .filter(|(i, _)| !matches!(i, 0x14E | 0x14F))
+            .fold(0u16, |sum, (_, &byte)| sum.wrapping_add(u16::from(byte)));
+        assert_eq!(
+            u16::from_be_bytes([rom[0x14E], rom[0x14F]]),
+            expected_global
+        );
     }
 
     /// A span in a non-root file renders that file's name from the table —

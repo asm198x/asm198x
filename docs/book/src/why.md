@@ -23,7 +23,7 @@ lists all 24, and what each one is the syntax of.
 | One binary, 20 CPUs | One install for every machine you target, rather than a toolchain per machine |
 | `fmt` — canonical layout, idempotent | Every dialect |
 | `disasm` | Every dialect |
-| `--prg`, `--sna`, `--exe` | The loader format comes out of the assembler, not a later packaging step |
+| `--prg`, `--sna`, `--gb-rom`, `--exe` | The loader format comes out of the assembler, not a later packaging step |
 | `--message-format=json` | Structured results and diagnostics, for editors and build scripts |
 | `--debug` | A Debug198x sidecar for source-level debugging; flat dialects, plus the ca65 and vasm linked paths |
 | `--sym`, `--listing` | A symbol table and an address/bytes/source listing |

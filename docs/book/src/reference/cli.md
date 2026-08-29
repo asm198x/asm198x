@@ -162,6 +162,7 @@ By default `asm` writes a flat binary. These wrap it for a machine's loader:
 |---|---|---|
 | `--sna` | Spectrum 48K snapshot | Z80 dialect; `end <addr>` for the entry point; code at or above `$4000`, since below that is ROM |
 | `--prg` | C64 program (2-byte load address prepended) | acme |
+| `--gb-rom` | Game Boy cartridge ROM (RGBLINK layout, padding and checksums) | rgbasm |
 | `--exe`, `--hunkexe` | Amiga hunk executable | vasm |
 
 ### Debug artifacts

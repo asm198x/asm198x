@@ -105,6 +105,7 @@ impl Dialect for Rgbasm {
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
         let banks = declared_banks(&out);
         resolve_banks(&mut out, &banks)?;
+        place_floating_rom0_sections(&mut out)?;
         Ok(out)
     }
 
@@ -130,6 +131,7 @@ impl Dialect for Rgbasm {
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
         let banks = declared_banks(&out);
         resolve_banks(&mut out, &banks)?;
+        place_floating_rom0_sections(&mut out)?;
         Ok(out)
     }
 
@@ -419,12 +421,21 @@ impl FlatWalk for Walker {
             // A banked section is addressed at $4000 whichever bank holds it,
             // and lands at `bank * $4000` in the ROM. Bank 0 is `ROM0`, which
             // is addressed and placed at the same $0000.
+            let kind = section_kind(code);
             let (base, at) = match bank {
                 Some(n) if n > 0 => (
                     Some(pinned.unwrap_or(ROMX_BASE)),
                     crate::engine::Place::At(n * BANK_SIZE),
                 ),
-                _ => (pinned, crate::engine::Place::ByAddress),
+                _ if kind == "ROM0" => (pinned, crate::engine::Place::ByAddress),
+                _ if kind == "ROMX" => (
+                    Some(pinned.unwrap_or(ROMX_BASE)),
+                    crate::engine::Place::At(BANK_SIZE),
+                ),
+                _ => (
+                    Some(pinned.unwrap_or_else(|| section_default_base(&kind))),
+                    crate::engine::Place::Discard,
+                ),
             };
             let item = Some(crate::ast::item_from_operation(Operation::Section {
                 name: section_name(code),
@@ -837,6 +848,121 @@ fn resolve_banks(ops: &mut [Statement], banks: &BTreeMap<String, i64>) -> Result
 /// A Game Boy ROM bank, and where the CPU sees a banked one.
 const BANK_SIZE: i64 = 0x4000;
 const ROMX_BASE: i64 = 0x4000;
+
+/// The section type following the quoted name.
+fn section_kind(code: &str) -> String {
+    code.split_once('"')
+        .and_then(|(_, tail)| tail.split_once('"'))
+        .and_then(|(_, tail)| tail.split_once(','))
+        .map(|(_, kind)| kind.trim().split(['[', ',']).next().unwrap_or(""))
+        .unwrap_or("")
+        .to_ascii_uppercase()
+}
+
+/// First address in each non-ROM RGBDS region. These sections are BSS in a
+/// linked ROM, but their labels still need the addresses the CPU observes.
+fn section_default_base(kind: &str) -> i64 {
+    match kind {
+        "VRAM" => 0x8000,
+        "SRAM" => 0xA000,
+        "WRAM0" => 0xC000,
+        "WRAMX" => 0xD000,
+        "OAM" => 0xFE00,
+        "HRAM" => 0xFF80,
+        _ => 0,
+    }
+}
+
+/// Give floating ROM0 sections RGBLINK's largest-first, first-fit layout.
+/// Pinned sections reserve their ranges first; floating sections are ordered
+/// by decreasing size (declaration order breaks ties), then each takes the
+/// lowest gap that can contain it.
+fn place_floating_rom0_sections(ops: &mut [Statement]) -> Result<(), AsmError> {
+    #[derive(Clone, Copy)]
+    struct Section {
+        statement: usize,
+        end: usize,
+        base: Option<i64>,
+        at: crate::engine::Place,
+    }
+
+    let starts: Vec<usize> = ops
+        .iter()
+        .enumerate()
+        .filter_map(|(i, st)| matches!(st.op, Some(Operation::Section { .. })).then_some(i))
+        .collect();
+    let sections: Vec<Section> = starts
+        .iter()
+        .enumerate()
+        .map(|(n, &statement)| {
+            let end = starts.get(n + 1).copied().unwrap_or(ops.len());
+            let (base, at) = match &ops[statement].op {
+                Some(Operation::Section { base, at, .. }) => (*base, *at),
+                _ => unreachable!("collected only section statements"),
+            };
+            Section {
+                statement,
+                end,
+                base,
+                at,
+            }
+        })
+        .collect();
+
+    fn extent(ops: &[Statement], section: Section, base: i64) -> Result<i64, AsmError> {
+        let mut pc = base;
+        for st in &ops[section.statement + 1..section.end] {
+            if let Some(op) = &st.op {
+                pc = crate::engine::next_pc(op, pc, &isa::sm83::SET, None, 1, st.line)
+                    .map_err(|err| st.stamp(err))?;
+            }
+        }
+        Ok(pc)
+    }
+
+    let mut occupied: Vec<(i64, i64)> = Vec::new();
+    for section in sections
+        .iter()
+        .copied()
+        .filter(|s| s.at == crate::engine::Place::ByAddress && s.base.is_some())
+    {
+        let base = section.base.expect("filtered to pinned sections");
+        occupied.push((base, extent(ops, section, base)?));
+    }
+    occupied.sort_unstable();
+
+    let mut floating: Vec<(Section, i64)> = sections
+        .iter()
+        .copied()
+        .filter(|s| s.at == crate::engine::Place::ByAddress && s.base.is_none())
+        .map(|section| Ok((section, extent(ops, section, 0)?)))
+        .collect::<Result<_, AsmError>>()?;
+    floating.sort_by_key(|(section, end)| (std::cmp::Reverse(*end), section.statement));
+
+    for (section, _) in floating {
+        let mut base = 0;
+        loop {
+            let end = extent(ops, section, base)?;
+            if let Some((_, used_end)) = occupied
+                .iter()
+                .find(|(used_start, used_end)| base < *used_end && end > *used_start)
+            {
+                base = *used_end;
+                continue;
+            }
+            if end > BANK_SIZE {
+                return Err(ops[section.statement].err("ROM0 sections exceed the 16 KiB bank"));
+            }
+            if let Some(Operation::Section { base: slot, .. }) = &mut ops[section.statement].op {
+                *slot = Some(base);
+            }
+            occupied.push((base, end));
+            occupied.sort_unstable();
+            break;
+        }
+    }
+    Ok(())
+}
 
 /// The bank in `SECTION "n", ROMX, BANK[k]`, if the source named one.
 fn section_bank(code: &str, line: usize) -> Result<Option<i64>, AsmError> {
@@ -2437,6 +2563,37 @@ mod tests {
         assert_eq!(out.bytes[0x00], 0xCC);
         assert_eq!(out.bytes[0x10], 0xAA);
         assert_eq!(out.bytes[0x20], 0xBB);
+    }
+
+    /// RGBLINK sorts floating sections largest first, then gives each the
+    /// lowest available range. Declaration order alone would put `small` at
+    /// zero and force `large` past the pinned header.
+    #[test]
+    fn floating_sections_use_rgblink_largest_first_first_fit() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"header\",ROM0[$100]\n ds $50,$aa\n\
+             SECTION \"main\",ROM0[$150]\n db $33\n\
+             SECTION \"small\",ROM0\n ds $20,$11\n\
+             SECTION \"large\",ROM0\n ds $80,$22\n",
+        )
+        .expect("assembles");
+        assert!(out.bytes[..0x80].iter().all(|&b| b == 0x22));
+        assert!(out.bytes[0x80..0xA0].iter().all(|&b| b == 0x11));
+        assert!(out.bytes[0x100..0x150].iter().all(|&b| b == 0xAA));
+        assert_eq!(out.bytes[0x150], 0x33);
+    }
+
+    /// RAM sections bind addresses but are BSS: `rgblink` does not append
+    /// their reservation bytes to a cartridge image.
+    #[test]
+    fn ram_sections_have_addresses_without_rom_bytes() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"rom\",ROM0[0]\n dw work\n\
+             SECTION \"ram\",WRAM0\nwork: ds 2\n",
+        )
+        .expect("assembles");
+        assert_eq!(out.bytes, [0x00, 0xC0]);
+        assert_eq!(out.symbols.get("work"), Some(&0xC000));
     }
 
     /// A label belongs to its own section, so it resolves against that
