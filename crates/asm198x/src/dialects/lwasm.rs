@@ -445,15 +445,15 @@ impl FlatWalk for Walker {
     /// rather than a boolean test. Both `endc` **and** `endif` close, which is
     /// one closer more than any other dialect measured here.
     ///
-    /// `ifpragma` and `ifstr` are real lwasm and deliberately absent: pragma
-    /// strings and string conditions are their own surfaces, unbuilt and
-    /// registered in `decisions/reference-parity-goal.md`.
+    /// `ifstr` is real lwasm and deliberately absent: string conditions are
+    /// their own surface, unbuilt and registered in
+    /// `decisions/reference-parity-goal.md`.
     fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
         use ca65_flat::BlockKw;
         let word = code.split_whitespace().next()?.to_ascii_lowercase();
         Some(match word.as_str() {
             "if" | "ifne" | "ifeq" | "ifgt" | "ifge" | "iflt" | "ifle" | "ifdef" | "ifndef"
-            | "ifpragma" | "ifopt" => BlockKw::CondOpen,
+            | "ifp1" | "ifp2" | "ifpragma" | "ifopt" => BlockKw::CondOpen,
             "else" => BlockKw::Else,
             "endc" | "endif" => BlockKw::CondClose,
             _ => return None,
@@ -675,20 +675,14 @@ pub const DIRECTIVES: &[Directive] = &[
     // `if`, which is `ifne` under a shorter name. Both `endc` and `endif`
     // close — the only dialect measured here with two closers.
     //
-    // `ifp1` and `ifp2` ask which pass is running, and lwtools 4.25 answers
-    // neither: it warns "Not supported IFP1" and takes the true branch. The
-    // branch is easy here; the warning has nowhere to go, because `CondEval`
-    // folds a head from `&self` and cannot report one. They stay outstanding
-    // until it can.
-    //
-    // `ifpragma` and `ifstr` are real lwasm and deliberately absent: pragma
-    // strings and string conditions are their own surfaces, unbuilt and
-    // registered in `decisions/reference-parity-goal.md`.
+    // `ifstr` is real lwasm and deliberately absent: string conditions are
+    // their own surface, unbuilt and registered in
+    // `decisions/reference-parity-goal.md`.
     Directive {
         id: "conditional",
         pattern: Pattern::Exact(&[
             "if", "ifne", "ifeq", "ifgt", "ifge", "iflt", "ifle", "ifdef", "ifndef", "ifpragma",
-            "ifopt", "else", "endc", "endif",
+            "ifopt", "ifp1", "ifp2", "else", "endc", "endif",
         ]),
         category: Category::Operation,
     },
@@ -972,8 +966,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "dtb",
             "dts",
             "emod",
-            "ifp1",
-            "ifp2",
             "ifstr",
             "includestr",
             "mod",
@@ -2273,6 +2265,15 @@ struct LwasmEval {
 }
 
 impl crate::ast::CondEval for LwasmEval {
+    fn condition_diagnostic(&self, head: &str) -> Option<Operation> {
+        let (word, _) = split_first_word(head.trim());
+        let word = word.to_ascii_lowercase();
+        matches!(word.as_str(), "ifp1" | "ifp2").then(|| Operation::Diagnose {
+            severity: crate::engine::DiagSeverity::Warning,
+            message: format!("Not supported {}", word.to_ascii_uppercase()),
+        })
+    }
+
     /// Fold one conditional head. Every numeric form compares against zero;
     /// `ifdef`/`ifndef` test the environment for a name.
     fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError> {
@@ -2280,6 +2281,9 @@ impl crate::ast::CondEval for LwasmEval {
         let (word, args) = split_first_word(head.trim());
         let word = word.to_ascii_lowercase();
         let args = args.trim();
+        if word == "ifp1" || word == "ifp2" {
+            return Ok(true);
+        }
         if word == "ifpragma" || word == "ifopt" {
             let name = args
                 .split_whitespace()
@@ -3658,6 +3662,26 @@ mod tests {
         ] {
             assert_eq!(crate::assemble_lwasm(src).expect(src).bytes, want, "{src}");
         }
+    }
+
+    #[test]
+    fn pass_conditionals_warn_and_take_the_true_branch() {
+        for word in ["ifp1", "ifp2"] {
+            let src = format!(" {word}\n nop\n else\n clra\n endc\n rts\n");
+            let assembled = crate::assemble_lwasm(&src).expect("assembles with a warning");
+            assert_eq!(assembled.bytes, vec![0x12, 0x39]);
+            assert_eq!(assembled.warnings.len(), 1);
+            assert_eq!(assembled.warnings[0].line, 1);
+            assert_eq!(
+                assembled.warnings[0].message,
+                format!("Not supported {}", word.to_ascii_uppercase())
+            );
+        }
+
+        let skipped = crate::assemble_lwasm(" ifne 0\n ifp1\n nop\n endc\n endc\n rts\n")
+            .expect("an unreachable pass test is silent");
+        assert_eq!(skipped.bytes, vec![0x39]);
+        assert!(skipped.warnings.is_empty());
     }
 
     /// `endc` **and** `endif` both close — lwasm is the only dialect measured

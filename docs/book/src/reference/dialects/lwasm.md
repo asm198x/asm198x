@@ -14,7 +14,7 @@
 |---|---|---|
 | `align` | `align` |  |
 | `bytes` | `fcb`, `.byte` |  |
-| `conditional` | `if`, `ifne`, `ifeq`, `ifgt`, `ifge`, `iflt`, `ifle`, `ifdef`, `ifndef`, `ifpragma`, `ifopt`, `else`, `endc`, `endif` |  |
+| `conditional` | `if`, `ifne`, `ifeq`, `ifgt`, `ifge`, `iflt`, `ifle`, `ifdef`, `ifndef`, `ifpragma`, `ifopt`, `ifp1`, `ifp2`, `else`, `endc`, `endif` |  |
 | `diagnose` | `error` |  |
 | `diagnose-warning` | `warning`, `msg` |  |
 | `end` | `end` | Accepted and discarded — it changes no bytes |
@@ -40,7 +40,7 @@
 | `set` | `set` |  |
 | `setdp` | `setdp` |  |
 | `struct` | `struct`, `endstruct`, `ends` |  |
-| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `ifp1`, `ifp2`, `ifstr`, `includestr`, `mod`, `os9`, `setstr` | Recognised, and not implemented |
+| `unsupported-lwasm` | `dtb`, `dts`, `emod`, `ifstr`, `includestr`, `mod`, `os9`, `setstr` | Recognised, and not implemented |
 | `words` | `fdb`, `.word` |  |
 | `words-swapped` | `fdbs` |  |
 
