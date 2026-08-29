@@ -418,6 +418,21 @@ mod tests {
         let err = crate::assemble_pasmo("V equ $10000\n ld a,1\n").expect_err("refused");
         assert!(err.to_string().contains("out of range"), "got `{err}`");
     }
+
+    #[test]
+    fn index_register_halves_encode_through_the_shared_isa() {
+        let src = " ld ixl,a\n ld a,ixh\n ld iyh,$12\n inc iyl\n add a,ixh\n cp iyl\n";
+        let expected = vec![
+            0xDD, 0x6F, 0xDD, 0x7C, 0xFD, 0x26, 0x12, 0xFD, 0x2C, 0xDD, 0x84, 0xFD, 0xBD,
+        ];
+        assert_eq!(crate::assemble_pasmo(src).expect("pasmo").bytes, expected);
+        assert_eq!(
+            crate::assemble_pasmonext(src).expect("pasmonext").bytes,
+            expected
+        );
+        assert!(crate::assemble_pasmo(" ld ixh,iyl\n").is_err());
+    }
+
     use crate::assemble_pasmonext as asm;
     use crate::dialects::macros::Expand;
 
