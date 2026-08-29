@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.42](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.41...asm198x-v0.0.42) - 2026-08-29
+
+### Added
+
+- *(asl)* share alignment across targets ([#394](https://github.com/asm198x/asm198x/pull/394))
+
 ### Added
 
 - **Shared ASL alignment.** All twelve ASL-syntax CPU front ends now accept
