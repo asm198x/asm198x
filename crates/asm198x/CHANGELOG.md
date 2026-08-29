@@ -11,10 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- *(asl)* share character translation ([#402](https://github.com/asm198x/asm198x/pull/402))
-
-### Added
-
 - **Shared ASL character translation.** All twelve ASL-syntax CPU front ends
   now accept `charset source,replacement`; mappings apply to strings and
   character literals, accumulate across included source, and reset to the
