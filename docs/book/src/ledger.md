@@ -196,7 +196,7 @@ No tracked divergences.
 
 ## Z80
 
-Form coverage: **704/704** (100.0%)
+Form coverage: **704/796** (88.4%)
 
 | arbiter | version | binaries | verdicts |
 |---|---|---|---|

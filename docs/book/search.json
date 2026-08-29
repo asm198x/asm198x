@@ -387,7 +387,7 @@
       "slug": "ledger"
     },
     {
-      "context": "Form coverage: 704/704 (100.0%)",
+      "context": "Form coverage: 704/796 (88.4%)",
       "heading": "Z80",
       "page": "Conformance ledger",
       "slug": "ledger"
@@ -6729,7 +6729,7 @@
       "slug": "reference/instructions/tms9900"
     },
     {
-      "context": "118 mnemonics, 704 encoded forms, operands little-endian. Generated from `crates/isa/src/z80.rs`.",
+      "context": "140 mnemonics, 796 encoded forms, operands little-endian. Generated from `crates/isa/src/z80.rs`.",
       "page": "Zilog Z80",
       "slug": "reference/instructions/z80"
     },
@@ -7138,6 +7138,138 @@
     {
       "context": "Set bit",
       "heading": "SET",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Load IX byte halves",
+      "heading": "LD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Increment IX byte halves",
+      "heading": "INC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Decrement IX byte halves",
+      "heading": "DEC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "ADD IX byte halves",
+      "heading": "ADD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "ADC IX byte halves",
+      "heading": "ADC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "SUB IX byte halves",
+      "heading": "SUB",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "SBC IX byte halves",
+      "heading": "SBC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "AND IX byte halves",
+      "heading": "AND",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "XOR IX byte halves",
+      "heading": "XOR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "OR IX byte halves",
+      "heading": "OR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "CP IX byte halves",
+      "heading": "CP",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Load IY byte halves",
+      "heading": "LD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Increment IY byte halves",
+      "heading": "INC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "Decrement IY byte halves",
+      "heading": "DEC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "ADD IY byte halves",
+      "heading": "ADD",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "ADC IY byte halves",
+      "heading": "ADC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "SUB IY byte halves",
+      "heading": "SUB",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "SBC IY byte halves",
+      "heading": "SBC",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "AND IY byte halves",
+      "heading": "AND",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "XOR IY byte halves",
+      "heading": "XOR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "OR IY byte halves",
+      "heading": "OR",
+      "page": "Zilog Z80",
+      "slug": "reference/instructions/z80"
+    },
+    {
+      "context": "CP IY byte halves",
+      "heading": "CP",
       "page": "Zilog Z80",
       "slug": "reference/instructions/z80"
     },
