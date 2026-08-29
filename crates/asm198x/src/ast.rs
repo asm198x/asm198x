@@ -1450,7 +1450,12 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
             match style {
                 // `DUP 3` … `EDUP`: head and closer are indented directives.
                 CondStyle::Keyword => {
-                    out.push_str(INDENT);
+                    if let Some(label) = &node.label {
+                        out.push_str(&label.name);
+                        out.push_str(": ");
+                    } else {
+                        out.push_str(INDENT);
+                    }
                     out.push_str(head);
                     trailing(&mut *out);
                     out.push('\n');
@@ -1701,7 +1706,12 @@ fn emit_keyword_conditional(
     let bare = head.strip_prefix('.').unwrap_or(head);
     let upper = bare.chars().next().is_some_and(|c| c.is_ascii_uppercase());
     let dot = if head.starts_with('.') { "." } else { "" };
-    out.push_str(INDENT);
+    if let Some(label) = &node.label {
+        out.push_str(&label.name);
+        out.push_str(": ");
+    } else {
+        out.push_str(INDENT);
+    }
     out.push_str(head);
     if let Some(c) = &node.trivia.trailing {
         out.push_str("   ");

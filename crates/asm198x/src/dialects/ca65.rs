@@ -1727,7 +1727,13 @@ impl FlatWalk for Walker {
     /// the projection now records as it goes.
     fn block_keyword(&self, code: &str) -> Option<ca65_flat::BlockKw> {
         use ca65_flat::BlockKw;
-        let word = code.split_whitespace().next()?.to_ascii_lowercase();
+        let (first, rest) = split_first_word(code.trim());
+        let word = if first.ends_with(':') {
+            split_first_word(rest).0
+        } else {
+            first
+        }
+        .to_ascii_lowercase();
         Some(match word.as_str() {
             ".if" | ".ifdef" | ".ifndef" | ".ifblank" | ".ifnblank" | ".ifconst" | ".ifnconst"
             | ".ifref" | ".ifnref" => BlockKw::CondOpen,
@@ -1743,6 +1749,26 @@ impl FlatWalk for Walker {
             ".endrepeat" => BlockKw::RepeatClose,
             _ => return None,
         })
+    }
+
+    fn block_open<'a>(
+        &mut self,
+        code: &'a str,
+        line: usize,
+    ) -> Result<(Option<crate::ast::Symbol>, &'a str), AsmError> {
+        let (symbol, rest) =
+            split_label_symbol(&self.anons, line, &mut self.current_global, code.trim())?;
+        let symbol = symbol.map(|mut symbol| {
+            if !self.scopes.is_empty()
+                && matches!(symbol.scope, crate::ast::Scope::Global)
+                && !symbol.qualified.starts_with(LABEL_SEP)
+            {
+                symbol.qualified = qualify(&self.path(), &symbol.qualified);
+                self.current_global = symbol.qualified.clone();
+            }
+            symbol
+        });
+        Ok((symbol, rest.trim()))
     }
 
     fn nodes_mut(&mut self) -> &mut Vec<crate::ast::Node> {
@@ -2085,6 +2111,7 @@ fn project_nodes(nodes: &[crate::ast::Node], st: &mut Projection) -> Result<(), 
                 else_body,
                 ..
             }) => {
+                project_block_label(node, st);
                 if fold_condition(head, st, node.span.line as usize)? {
                     project_nodes(then_body, st)?;
                 } else if let Some(body) = else_body {
@@ -2093,6 +2120,7 @@ fn project_nodes(nodes: &[crate::ast::Node], st: &mut Projection) -> Result<(), 
                 continue;
             }
             Some(Item::Repeat { head, body, .. }) => {
+                project_block_label(node, st);
                 let (count, var) = fold_repeat(head, st, node.span.line as usize)?;
                 for i in 0..count {
                     if let Some(name) = &var {
@@ -2119,6 +2147,24 @@ fn project_nodes(nodes: &[crate::ast::Node], st: &mut Projection) -> Result<(), 
         project_one(node, st)?;
     }
     Ok(())
+}
+
+/// Bind a label carried by a conditional or repetition head before evaluating
+/// the block. ca65 places it at the head line's address, just as if it occupied
+/// its own label-only line.
+fn project_block_label(node: &crate::ast::Node, st: &mut Projection) {
+    let Some(symbol) = node.label.as_ref() else {
+        return;
+    };
+    st.label_seg
+        .insert(symbol.qualified.clone(), st.seg.clone());
+    st.stmts.push(Stmt {
+        line: node.span.line as usize,
+        file: node.span.file,
+        seg: st.seg.clone(),
+        label: Some(symbol.qualified.clone()),
+        kind: Kind::Empty,
+    });
 }
 
 /// Fold a `.if` / `.ifdef` / `.ifndef` / `.elseif` head.
@@ -4866,6 +4912,14 @@ two:\n\
             )[..2],
             [0xA9, 0x03]
         );
+    }
+
+    #[test]
+    fn a_label_may_share_a_conditional_or_repetition_head() {
+        let image = rom(
+            ".segment \"CODE\"\nLB: .if 1\n .byte $11\n.endif\nLR: .repeat 1\n .byte $22\n.endrepeat\n .word LB, LR\n",
+        );
+        assert_eq!(&image[16..22], &[0x11, 0x22, 0x00, 0x80, 0x01, 0x80]);
     }
 
     /// `.ifdef` tests what is defined **above** it. A definition inside an
