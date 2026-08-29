@@ -11,10 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- *(asl)* share alignment across targets ([#394](https://github.com/asm198x/asm198x/pull/394))
-
-### Added
-
 - **Shared ASL alignment.** All twelve ASL-syntax CPU front ends now accept
   `align boundary[,fill]`, including non-power-of-two boundaries. The default
   `$FF` holes match `asl` plus `p2bin`; custom fill values occupy one target
