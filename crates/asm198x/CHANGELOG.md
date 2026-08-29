@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.39](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.38...asm198x-v0.0.39) - 2026-08-29
+
+### Fixed
+
+- *(ca65)* discard errors in dead branches ([#385](https://github.com/asm198x/asm198x/pull/385))
+- *(ca65)* accept labels on block heads ([#384](https://github.com/asm198x/asm198x/pull/384))
+
 ## [0.0.38](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.37...asm198x-v0.0.38) - 2026-08-28
 
 ### Fixed
