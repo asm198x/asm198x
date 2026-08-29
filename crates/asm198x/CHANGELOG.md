@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Z80 index-register halves.** Pasmo and PasmoNext now accept the IXH, IXL,
+  IYH, and IYL forms supplied by Isa198x, including Rachel's `ld ixl,a`.
+
 ## [0.0.49](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.48...asm198x-v0.0.49) - 2026-08-29
 
 ### Fixed

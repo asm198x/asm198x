@@ -12,7 +12,7 @@ datasheets its specification was written from.
 | [MOS 6502](instructions/mos6502.md) | 56 | 151 | little-endian |
 | [WDC 65C816 (extension)](instructions/mos65816.md) | 53 | 119 | little-endian |
 | [Hudson HuC6280 (extension)](instructions/huc6280.md) | 73 | 83 | little-endian |
-| [Zilog Z80](instructions/z80.md) | 118 | 704 | little-endian |
+| [Zilog Z80](instructions/z80.md) | 140 | 796 | little-endian |
 | [Zilog Z80N](instructions/z80n.md) | 22 | 30 | little-endian |
 | [Sharp SM83 (Game Boy)](instructions/sm83.md) | 46 | 504 | little-endian |
 | [Intel 8080](instructions/i8080.md) | 78 | 244 | little-endian |

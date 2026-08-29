@@ -100,15 +100,15 @@ dependencies = [
 
 [[package]]
 name = "isa198x"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b82bc0bf85e1e4d080a687259533265bafc2e16f679064a90e2d0f492f7ad005"
+checksum = "725b235be273633e54465647a03062f17cd1ba78b890b31f01d6e3d8c1b3d4c7"
 
 [[package]]
 name = "isa198x-disasm"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bf7c236e49615d4cd41339b60880e4dde1039484f1a8f4cc61f3716a367f509a"
+checksum = "c44afedb2bd0553c4d76c3fd1caaf3da5e66cbb3131c58edc2d0eca76fe1aeb0"
 dependencies = [
  "isa198x",
 ]
