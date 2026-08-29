@@ -351,6 +351,10 @@ thread_local! {
     /// token. Outside that walk, each dialect's existing callback retains
     /// complete control of its number syntax.
     static IMPLICIT_RADIX: Cell<Option<u32>> = const { Cell::new(None) };
+    /// The ASL-family character translation table. Like `RADIX`, `CHARSET`
+    /// belongs to one source walk; other dialects must continue to read
+    /// character and string literals verbatim.
+    static ASL_CHARSET: Cell<Option<[u8; 256]>> = const { Cell::new(None) };
 }
 
 /// Run an expression-parsing operation with `radix` as the base for an
@@ -381,6 +385,43 @@ pub(crate) fn with_implicit_radix<T>(radix: u32, f: impl FnOnce() -> T) -> T {
         drop(reset);
         result
     })
+}
+
+/// Run an ASL operation with its current character translation table.
+///
+/// The guard restores an outer walk even if parsing returns early or panics,
+/// matching the isolation guarantees of [`with_implicit_radix`].
+pub(crate) fn with_asl_charset<T>(charset: [u8; 256], f: impl FnOnce() -> T) -> T {
+    ASL_CHARSET.with(|current| {
+        struct Reset<'a> {
+            current: &'a Cell<Option<[u8; 256]>>,
+            previous: Option<[u8; 256]>,
+        }
+
+        impl Drop for Reset<'_> {
+            fn drop(&mut self) {
+                self.current.set(self.previous);
+            }
+        }
+
+        let reset = Reset {
+            current,
+            previous: current.replace(Some(charset)),
+        };
+        let result = f();
+        drop(reset);
+        result
+    })
+}
+
+fn asl_character(byte: u8) -> u8 {
+    ASL_CHARSET.with(|current| current.get().map_or(byte, |table| table[usize::from(byte)]))
+}
+
+/// Translate an ASL string literal through the walk's current `CHARSET`.
+/// Outside an ASL walk this is deliberately the identity mapping.
+pub(crate) fn asl_string_bytes(text: &str) -> impl Iterator<Item = u8> + '_ {
+    text.bytes().map(asl_character)
 }
 
 fn implicit_number(token: &str) -> Option<i64> {
@@ -658,7 +699,12 @@ fn tokenize(
             '\'' => {
                 if i + 2 < chars.len() && chars[i + 2] == '\'' {
                     let s: String = chars[i..=i + 2].iter().collect();
-                    tokens.push(Tok::Num(parse_number(&s, line)?));
+                    let value = parse_number(&s, line)?;
+                    let value = u8::try_from(value)
+                        .map(asl_character)
+                        .map(i64::from)
+                        .unwrap_or(value);
+                    tokens.push(Tok::Num(value));
                     i += 3;
                 } else {
                     return Err(AsmError::new(line, "malformed character literal"));
