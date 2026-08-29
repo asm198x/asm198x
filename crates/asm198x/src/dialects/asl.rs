@@ -149,10 +149,12 @@ pub const SEMANTIC_DIRECTIVES: &[Directive] = &[
         category: Category::KnownUnsupported,
     },
     Directive {
-        // Labels take addresses the output pointer never reaches.
+        // Labels take addresses the output pointer never reaches. The shared
+        // walk lowers nested `phase`/`dephase` pairs to the engine's pseudo-PC
+        // stack; asl accepts a stray `dephase` as an inert directive.
         id: "phase",
         pattern: Pattern::Exact(&["phase", "dephase"]),
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
     },
     Directive {
         // Pads to the next multiple of *n*, for any `n` — `align 3` from $01
@@ -295,6 +297,9 @@ pub(crate) struct Walker<C> {
     /// to the next one. Comments never reach the encoder, so bytes are
     /// unchanged.
     pending_leading: Vec<Comment>,
+    /// Number of open `PHASE` regions. asl nests them, permits one to remain
+    /// open at EOF, and treats a `DEPHASE` at depth zero as a no-op.
+    phase_depth: usize,
     nodes: Vec<Node>,
 }
 
@@ -349,6 +354,7 @@ impl<C: AslChip> Walker<C> {
             chip,
             consts: BTreeMap::new(),
             pending_leading: Vec::new(),
+            phase_depth: 0,
             nodes: Vec::new(),
         }
     }
@@ -439,27 +445,46 @@ impl<C: AslChip> Walker<C> {
     /// Chip-independent operations whose meaning is uniform across asl's
     /// targets. Keeping them here makes one implementation serve all twelve
     /// front ends, like `INCLUDE`/`BINCLUDE` above.
-    fn shared_operation(&self, rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
+    fn shared_operation(&mut self, rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
         let (word, args) = split_first_word(rest);
-        if !word.eq_ignore_ascii_case("align") {
-            return Ok(None);
+        if word.eq_ignore_ascii_case("phase") {
+            if args.trim().is_empty() {
+                return Err(AsmError::new(line, "`phase` needs an address"));
+            }
+            self.phase_depth += 1;
+            return Ok(Some(Operation::PseudoPc(Some(
+                self.chip.value(args.trim(), line)?,
+            ))));
         }
-        let parts = split_top_level(args, ',');
-        if args.trim().is_empty() || !(1..=2).contains(&parts.len()) {
-            return Err(AsmError::new(line, "`align` needs `boundary[,fill]`"));
+        if word.eq_ignore_ascii_case("dephase") {
+            if !args.trim().is_empty() {
+                return Err(AsmError::new(line, "`dephase` takes no operands"));
+            }
+            if self.phase_depth == 0 {
+                return Ok(Some(Operation::Bytes(Vec::new())));
+            }
+            self.phase_depth -= 1;
+            return Ok(Some(Operation::PseudoPc(None)));
         }
-        let modulus = fold_const(&self.chip.value(parts[0].trim(), line)?, &self.consts, line)?;
-        if modulus < 1 {
-            return Err(AsmError::new(line, "`align` boundary must be positive"));
+        if word.eq_ignore_ascii_case("align") {
+            let parts = split_top_level(args, ',');
+            if args.trim().is_empty() || !(1..=2).contains(&parts.len()) {
+                return Err(AsmError::new(line, "`align` needs `boundary[,fill]`"));
+            }
+            let modulus = fold_const(&self.chip.value(parts[0].trim(), line)?, &self.consts, line)?;
+            if modulus < 1 {
+                return Err(AsmError::new(line, "`align` boundary must be positive"));
+            }
+            let value = match parts.get(1) {
+                Some(raw) => fold_const(&self.chip.value(raw.trim(), line)?, &self.consts, line)?,
+                None => -1,
+            };
+            return Ok(Some(Operation::AlignTo {
+                modulus,
+                fill: self.chip.alignment_fill(value),
+            }));
         }
-        let value = match parts.get(1) {
-            Some(raw) => fold_const(&self.chip.value(raw.trim(), line)?, &self.consts, line)?,
-            None => -1,
-        };
-        Ok(Some(Operation::AlignTo {
-            modulus,
-            fill: self.chip.alignment_fill(value),
-        }))
+        Ok(None)
     }
 }
 
@@ -748,8 +773,6 @@ mod semantic_tests {
         for d in [
             "relaxed on",
             "radix 16",
-            "phase 100h",
-            "dephase",
             "enum a,b",
             "charset 97,65",
             "segment code",
@@ -890,5 +913,32 @@ mod semantic_tests {
                 "`{chip}` must refuse a directive that changes what a literal means"
             );
         }
+    }
+
+    #[test]
+    fn phase_is_shared_and_matches_asls_stack_rules() {
+        assert_eq!(
+            asm(" org 100h\n phase 200h\na: dw a\n phase 300h\nb: dw b\n dephase\nc: dw c\n dephase\nd: dw d\n")
+                .expect("nested phases")
+                .bytes,
+            vec![0x00, 0x02, 0x00, 0x03, 0x04, 0x02, 0x06, 0x01]
+        );
+        assert_eq!(
+            asm(" org 100h\n dephase\n db 1\n")
+                .expect("stray dephase is inert")
+                .bytes,
+            vec![1]
+        );
+        assert_eq!(
+            crate::assemble_cp1610(
+                " org x'0100'\n phase x'0200'\na: word a\n dephase\nb: word b\n",
+            )
+            .expect("word-addressed phase")
+            .bytes,
+            vec![0x02, 0x00, 0x01, 0x01]
+        );
+        assert!(asm(" org 100h\n phase\n").is_err());
+        assert!(asm(" org 100h\n dephase 1\n").is_err());
+        assert!(asm(" org 100h\n phase 200h\n db 1\n").is_ok());
     }
 }

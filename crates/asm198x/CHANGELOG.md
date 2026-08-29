@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Shared ASL phased addresses.** All twelve ASL-syntax CPU front ends now
+  accept nested `phase`/`dephase` regions, so labels and PC-relative operands
+  use the claimed address while emitted bytes remain at their real location.
+  Edge cases match asl 1.42: an unmatched `dephase` is inert, and a phase may
+  remain open at end of source.
+
 ## [0.0.42](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.41...asm198x-v0.0.42) - 2026-08-29
 
 ### Added
