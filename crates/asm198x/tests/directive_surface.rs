@@ -335,11 +335,11 @@ fn a_real_directive_reads_differently_from_a_typo() {
         // as well (#318).
         ("sjasmplus", "", "savesna \"x\"", "zzqq"),
         ("sjasmplus", "", ".defarray x, 1", ".zzqq"),
-        // `os9` (an OS-9 module header) rather than `import`: `import` moved
-        // to `RefusedByReference` when lwasm turned out to refuse it for a
-        // binary target. `os9` is deferred by decision — it writes a different
-        // artifact — so it will not move under this test either.
-        ("lwasm", "", "os9 foo", "zzqq"),
+        // `dtb` rather than `import`: `import` moved to
+        // `RefusedByReference` when lwasm turned out to refuse it for a binary
+        // target. `dtb` is deliberately absent under the clock-dependent
+        // directive decision; the OS-9 module family is implemented.
+        ("lwasm", "", "dtb", "zzqq"),
         // `xdef` sat here, then `output` — each implemented in turn, `output`
         // once the source-named-output rules covered a second dialect. `incdir`
         // adds a directory to the include search path, which is the *host's*

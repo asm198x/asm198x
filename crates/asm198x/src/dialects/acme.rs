@@ -2167,6 +2167,10 @@ fn substitute_anon_refs(
         Operation::Words(v) => {
             Operation::Words(v.into_iter().map(subst).collect::<Result<_, _>>()?)
         }
+        Operation::Os9Module { fields } => Operation::Os9Module {
+            fields: fields.into_iter().map(subst).collect::<Result<_, _>>()?,
+        },
+        Operation::Os9EndModule => Operation::Os9EndModule,
         Operation::Sized {
             width,
             big_endian,

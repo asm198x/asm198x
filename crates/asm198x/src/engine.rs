@@ -527,6 +527,15 @@ pub(crate) enum Operation {
     Bytes(Vec<Expr>),
     /// Emit one word per expression, in the instruction set's endianness.
     Words(Vec<Expr>),
+    /// Begin an OS-9 module. The four mandatory fields are module length,
+    /// name offset, type/language, and attributes/revision; executable and
+    /// data-size offsets are present together for the six-field header.
+    /// `mod` also establishes module-relative address zero.
+    Os9Module {
+        fields: Vec<Expr>,
+    },
+    /// Finish an OS-9 module with its three-byte CRC-24.
+    Os9EndModule,
     /// Emit each expression as `width` bytes, in the byte order the
     /// **directive** names rather than the one the CPU uses — ACME's
     /// `!be16`/`!le32` family, six spellings of one rule.
@@ -750,6 +759,29 @@ pub(crate) fn encoded_pieces(opcode: &[u8], expr: Expr, width: u8) -> Vec<Piece>
     pieces
 }
 
+/// CRC-24 used by OS-9 module trailers, transliterated from the NitrOS-9
+/// routine used by lwtools. The stored value is the complemented accumulator.
+fn os9_crc24(image: &[u8]) -> [u8; 3] {
+    let mut crc = [0xFFu8; 3];
+    for &input in image {
+        let mut byte = input ^ crc[0];
+        crc[0] = crc[1];
+        crc[1] = crc[2];
+        crc[1] ^= byte >> 7;
+        crc[2] = byte << 1;
+        crc[1] ^= byte >> 2;
+        crc[2] ^= byte << 6;
+        byte ^= byte << 1;
+        byte ^= byte << 2;
+        byte ^= byte << 4;
+        if byte & 0x80 != 0 {
+            crc[0] ^= 0x80;
+            crc[2] ^= 0x21;
+        }
+    }
+    [crc[0] ^ 0xFF, crc[1] ^ 0xFF, crc[2] ^ 0xFF]
+}
+
 /// Where the location counter stands after `op`, given that it stood at `pc`
 /// before it. The one place an operation's width is decided.
 ///
@@ -777,6 +809,8 @@ pub(crate) fn next_pc(
         // zero-padded in pass 2 — so both passes count the same.
         Operation::Binary(payload) => pc + payload.len().div_ceil(addr_unit as usize) as i64,
         Operation::Words(items) => pc + 2 * items.len() as i64 / addr_unit,
+        Operation::Os9Module { fields } => pc + if fields.len() == 6 { 13 } else { 9 },
+        Operation::Os9EndModule => pc + 3,
         Operation::Sized { width, values, .. } => {
             pc + i64::from(*width) * values.len() as i64 / addr_unit
         }
@@ -1076,6 +1110,9 @@ fn assemble_statements(
     // nest and each restores the one it opened inside.
     let mut pseudo: i64 = 0;
     let mut pseudo_stack: Vec<i64> = Vec::new();
+    // Byte offset of the current OS-9 module. A file may contain successive
+    // modules; each trailer covers its own module, not everything before it.
+    let mut os9_module_start: Option<usize> = None;
     let mut origin: Option<i64> = None;
     for s in &mut statements {
         // `equ` binds the label to a value, not the current address, and emits
@@ -1147,6 +1184,21 @@ fn assemble_statements(
         }
         match &s.op {
             None => {}
+            Some(Operation::Os9Module { .. }) => {
+                // `mod` carries the implicit `org 0` which makes every header
+                // field and label module-relative.
+                pc = 0;
+                pseudo = 0;
+                origin = Some(0);
+                pc = next_pc(
+                    s.op.as_ref().expect("matched operation"),
+                    pc,
+                    set,
+                    ext,
+                    addr_unit,
+                    s.line,
+                )?;
+            }
             Some(Operation::Org(e)) => {
                 let v = e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?;
                 if !(0..=0xFFFF).contains(&v) {
@@ -1569,6 +1621,32 @@ fn assemble_statements(
                     )?;
                 }
             }
+            Some(Operation::Os9Module { fields }) => {
+                debug_assert!(matches!(fields.len(), 4 | 6));
+                os9_module_start = Some(len_before);
+                let values = fields
+                    .iter()
+                    .map(|e| e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err)))
+                    .collect::<Result<Vec<_>, _>>()?;
+                bytes.extend_from_slice(&[0x87, 0xCD]);
+                emit_value(&mut bytes, values[0], 2, false, isa::Endianness::Big, s)?;
+                emit_value(&mut bytes, values[1], 2, false, isa::Endianness::Big, s)?;
+                emit_value(&mut bytes, values[2], 1, false, isa::Endianness::Big, s)?;
+                emit_value(&mut bytes, values[3], 1, false, isa::Endianness::Big, s)?;
+                let check = !bytes[len_before..].iter().fold(0u8, |acc, b| acc ^ b);
+                bytes.push(check);
+                if values.len() == 6 {
+                    emit_value(&mut bytes, values[4], 2, false, isa::Endianness::Big, s)?;
+                    emit_value(&mut bytes, values[5], 2, false, isa::Endianness::Big, s)?;
+                }
+            }
+            Some(Operation::Os9EndModule) => {
+                let start = os9_module_start
+                    .take()
+                    .ok_or_else(|| s.err("internal: `emod` has no open OS-9 module"))?;
+                let crc = os9_crc24(&bytes[start..]);
+                bytes.extend_from_slice(&crc);
+            }
             Some(Operation::Instruction {
                 mnemonic,
                 mode,
@@ -1797,6 +1875,8 @@ fn assemble_statements(
             Some(
                 Operation::Bytes(_)
                     | Operation::Words(_)
+                    | Operation::Os9Module { .. }
+                    | Operation::Os9EndModule
                     | Operation::Instruction { .. }
                     | Operation::Encoded(_)
                     | Operation::DirectPage { .. }
