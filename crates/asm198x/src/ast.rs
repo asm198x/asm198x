@@ -291,7 +291,7 @@ pub(crate) enum Item {
     /// (`align 4`, `.align 4`, and vasm's exponent `align 2`).
     AlignTo {
         modulus: i64,
-        fill: u8,
+        fill: Vec<u8>,
     },
     /// A conditional-assembly block (ACME `!if`/`!ifdef`/`!ifndef` … `{ … }` …
     /// `else { … }`, or a keyword dialect's `IF`/`IFDEF`/`IFNDEF` … `ELSE` …
@@ -885,7 +885,7 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
         },
         Item::AlignTo { modulus, fill } => Operation::AlignTo {
             modulus: *modulus,
-            fill: *fill,
+            fill: fill.clone(),
         },
         Item::Diagnose { severity, message } => Operation::Diagnose {
             severity: *severity,

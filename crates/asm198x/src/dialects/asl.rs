@@ -156,12 +156,12 @@ pub const SEMANTIC_DIRECTIVES: &[Directive] = &[
     },
     Directive {
         // Pads to the next multiple of *n*, for any `n` — `align 3` from $01
-        // reaches $03. Our `Operation::Align` is mask-based (ACME's
-        // `!align`), so this is a different operation and not another
-        // spelling of one we have.
+        // reaches $03. The shared walk lowers it to the boundary-based
+        // `Operation::AlignTo`; an optional second value supplies one address
+        // unit of fill (a byte on most chips, a decle on CP-1600).
         id: "align-modulo",
         pattern: Pattern::Exact(&["align"]),
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
     },
     Directive {
         // Defines symbols: `enum red,green` then `db green` emits 1.
@@ -273,6 +273,12 @@ pub(crate) trait AslChip {
     /// 6800, 1802, SC/MP); everything else stays line-granular.
     fn operand_span(&self, _raw: &str, _rest: &str, _line: usize) -> Option<Span> {
         None
+    }
+
+    /// Render one `ALIGN` fill value as one address unit. Most asl targets are
+    /// byte-addressed; CP-1600 overrides this for its big-endian decle.
+    fn alignment_fill(&self, value: i64) -> Vec<u8> {
+        vec![value as u8]
     }
 }
 
@@ -429,6 +435,32 @@ impl<C: AslChip> Walker<C> {
             _ => Ok(None),
         }
     }
+
+    /// Chip-independent operations whose meaning is uniform across asl's
+    /// targets. Keeping them here makes one implementation serve all twelve
+    /// front ends, like `INCLUDE`/`BINCLUDE` above.
+    fn shared_operation(&self, rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
+        let (word, args) = split_first_word(rest);
+        if !word.eq_ignore_ascii_case("align") {
+            return Ok(None);
+        }
+        let parts = split_top_level(args, ',');
+        if args.trim().is_empty() || !(1..=2).contains(&parts.len()) {
+            return Err(AsmError::new(line, "`align` needs `boundary[,fill]`"));
+        }
+        let modulus = fold_const(&self.chip.value(parts[0].trim(), line)?, &self.consts, line)?;
+        if modulus < 1 {
+            return Err(AsmError::new(line, "`align` boundary must be positive"));
+        }
+        let value = match parts.get(1) {
+            Some(raw) => fold_const(&self.chip.value(raw.trim(), line)?, &self.consts, line)?,
+            None => -1,
+        };
+        Ok(Some(Operation::AlignTo {
+            modulus,
+            fill: self.chip.alignment_fill(value),
+        }))
+    }
 }
 
 impl<C: AslChip> FlatWalk for Walker<C> {
@@ -499,6 +531,8 @@ impl<C: AslChip> FlatWalk for Walker<C> {
         }
         let op = if rest.is_empty() {
             None
+        } else if let Some(op) = self.shared_operation(rest, line)? {
+            Some(op)
         } else {
             self.chip.parse_op(rest, &self.consts, line)?
         };
@@ -716,7 +750,6 @@ mod semantic_tests {
             "radix 16",
             "phase 100h",
             "dephase",
-            "align 4",
             "enum a,b",
             "charset 97,65",
             "segment code",
@@ -733,6 +766,34 @@ mod semantic_tests {
                 "`{d}` should be refused as a real directive, got: {e}"
             );
         }
+    }
+
+    #[test]
+    fn align_is_shared_across_byte_and_word_addressed_asl_chips() {
+        assert_eq!(
+            asm(" org 0\n db 1\n align 3\n db 2\n")
+                .expect("8080 alignment")
+                .bytes,
+            vec![0x01, 0xFF, 0xFF, 0x02]
+        );
+        assert_eq!(
+            asm(" org 0\n db 1\n align 3,0\n db 2\n")
+                .expect("custom 8080 fill")
+                .bytes,
+            vec![0x01, 0x00, 0x00, 0x02]
+        );
+        assert_eq!(
+            crate::assemble_cp1610(" org 0\n word 1\n align 3\n word 2\n")
+                .expect("CP-1600 alignment")
+                .bytes,
+            vec![0x00, 0x01, 0xFF, 0xFF, 0xFF, 0xFF, 0x00, 0x02]
+        );
+        assert_eq!(
+            crate::assemble_cp1610(" org 0\n word 1\n align 3,x'1234'\n word 2\n")
+                .expect("custom CP-1600 fill")
+                .bytes,
+            vec![0x00, 0x01, 0x12, 0x34, 0x12, 0x34, 0x00, 0x02]
+        );
     }
 
     /// The inert ones, each probed byte-for-byte against asl before being

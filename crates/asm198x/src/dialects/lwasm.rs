@@ -1650,7 +1650,10 @@ fn parse_align(
         }
         None => 0,
     };
-    Ok(Some(Operation::AlignTo { modulus, fill }))
+    Ok(Some(Operation::AlignTo {
+        modulus,
+        fill: vec![fill],
+    }))
 }
 
 /// `fill value,count` — `count` copies of `value` (lwasm's order is value first,

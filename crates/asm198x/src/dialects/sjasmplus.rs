@@ -581,7 +581,10 @@ impl SjasmplusSyntax {
             }
             None => 0,
         };
-        Ok(Some(Operation::AlignTo { modulus, fill }))
+        Ok(Some(Operation::AlignTo {
+            modulus,
+            fill: vec![fill],
+        }))
     }
 }
 

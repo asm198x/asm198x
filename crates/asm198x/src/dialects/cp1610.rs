@@ -119,6 +119,10 @@ struct Chip {
 }
 
 impl AslChip for Chip {
+    fn alignment_fill(&self, value: i64) -> Vec<u8> {
+        (value as u16).to_be_bytes().to_vec()
+    }
+
     fn split_comment<'a>(&self, line: &'a str) -> (&'a str, Option<&'a str>) {
         split_comment(line)
     }

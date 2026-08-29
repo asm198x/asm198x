@@ -641,7 +641,9 @@ pub(crate) enum Operation {
     /// on exactly the source that distinguishes them.
     AlignTo {
         modulus: i64,
-        fill: u8,
+        /// One address unit of fill, in output byte order. Byte-addressed
+        /// dialects carry one byte; the word-addressed CP1610 carries two.
+        fill: Vec<u8>,
     },
     /// Open a section: subsequent bytes are placed at `base` rather than
     /// continuing from the current address, and the section's own bytes are
@@ -1489,7 +1491,9 @@ fn assemble_statements(
             }
             Some(Operation::AlignTo { modulus, fill }) => {
                 let pad = align_pad(pc, *modulus);
-                bytes.extend(std::iter::repeat_n(*fill, pad as usize));
+                for _ in 0..pad {
+                    bytes.extend_from_slice(fill);
+                }
             }
             Some(Operation::Assert {
                 cond,

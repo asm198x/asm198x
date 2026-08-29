@@ -12,7 +12,7 @@ National SC/MP (INS8060).
 
 | Directive | Spellings | Notes |
 |---|---|---|
-| `align-modulo` | `align` | Recognised, and not implemented |
+| `align-modulo` | `align` |  |
 | `assume` | `assume` | Recognised, and not implemented |
 | `bytes` | `db`, `dc`, `byte` |  |
 | `charset` | `charset` | Recognised, and not implemented |
