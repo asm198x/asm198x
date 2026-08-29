@@ -17,7 +17,7 @@ DEC PDP-11.
 | `bytes` | `byte`, `db`, `dc.b` |  |
 | `charset` | `charset` | Recognised, and not implemented |
 | `diagnostic` | `message`, `warning` | Accepted and discarded — it changes no bytes |
-| `enum` | `enum` | Recognised, and not implemented |
+| `enum` | `enum` |  |
 | `expect` | `expect`, `endexpect` | Recognised, and not implemented |
 | `function` | `function` | Recognised, and not implemented |
 | `ignored` | `cpu`, `end`, `title`, `page`, `aseg`, `listing` | Accepted and discarded — it changes no bytes |

@@ -197,6 +197,8 @@ pub(crate) enum Item {
     },
     Org(Operand),
     Equ(Operand),
+    /// Several immutable constants defined by one source directive.
+    DefineSymbols(Vec<(String, i64)>),
     /// A redefinable binding — see [`Operation::Set`](crate::engine::Operation::Set).
     Set(Operand),
     /// A file the source asked for besides the machine code — see
@@ -814,6 +816,7 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
         },
         Item::Org(o) => Operation::Org(o.clone().into_value()?),
         Item::Equ(o) => Operation::Equ(o.clone().into_value()?),
+        Item::DefineSymbols(definitions) => Operation::DefineSymbols(definitions.clone()),
         Item::Set(o) => Operation::Set(o.clone().into_value()?),
         Item::SaveRaw {
             name,
@@ -945,6 +948,7 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
         },
         Item::Org(o) => Operation::Org(o.into_value()?),
         Item::Equ(o) => Operation::Equ(o.into_value()?),
+        Item::DefineSymbols(definitions) => Operation::DefineSymbols(definitions),
         Item::Set(o) => Operation::Set(o.into_value()?),
         Item::SaveRaw {
             name,
@@ -1160,6 +1164,7 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
     match op {
         Operation::Org(e) => Operation::Org(map_sym_expr(e, f)),
         Operation::Equ(e) => Operation::Equ(map_sym_expr(e, f)),
+        Operation::DefineSymbols(definitions) => Operation::DefineSymbols(definitions),
         Operation::Set(e) => Operation::Set(map_sym_expr(e, f)),
         Operation::SaveRaw {
             name,
@@ -1308,6 +1313,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         },
         Operation::Org(e) => Item::Org(Operand::expr(e)),
         Operation::Equ(e) => Item::Equ(Operand::expr(e)),
+        Operation::DefineSymbols(definitions) => Item::DefineSymbols(definitions),
         Operation::Set(e) => Item::Set(Operand::expr(e)),
         Operation::SaveRaw {
             name,

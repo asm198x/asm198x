@@ -523,6 +523,10 @@ pub(crate) enum Operation {
     /// lwtools 4.25 was measured doing.
     Set(Expr),
     Equ(Expr),
+    /// Define several immutable constants on one source line — ASL's `ENUM`.
+    /// Values are folded by the source walk because each implicit member
+    /// depends on the preceding member's concrete value.
+    DefineSymbols(Vec<(String, i64)>),
     /// Emit one byte per expression.
     Bytes(Vec<Expr>),
     /// Emit one word per expression, in the instruction set's endianness.
@@ -845,6 +849,7 @@ pub(crate) fn next_pc(
         Operation::Org(_)
         | Operation::Equ(_)
         | Operation::Set(_)
+        | Operation::DefineSymbols(_)
         | Operation::SaveRaw { .. }
         | Operation::SaveTape { .. }
         | Operation::Entry(_) => pc,
@@ -1155,6 +1160,22 @@ fn assemble_statements(
             redefinable.insert(label.clone());
             continue;
         }
+        if let Some(Operation::DefineSymbols(definitions)) = &s.op {
+            for (name, value) in definitions {
+                if let Some(range) = dialect.equ_range()
+                    && !range.contains(value)
+                {
+                    return Err(s.err(format!(
+                        "enum value {value} out of range {}..={}",
+                        range.start(),
+                        range.end()
+                    )));
+                }
+                if symbols.insert(name.clone(), *value).is_some() || redefinable.contains(name) {
+                    return Err(s.err(format!("duplicate label `{name}`")));
+                }
+            }
+        }
         if let Some(label) = &s.label {
             if !(0..=0xFF_FFFF).contains(&pc) {
                 return Err(s.err("address out of range"));
@@ -1424,7 +1445,9 @@ fn assemble_statements(
                 section_name = name.clone();
                 section_at = *at;
             }
-            Some(Operation::Equ(_)) => {} // defines a symbol; emits nothing
+            Some(Operation::Equ(_) | Operation::DefineSymbols(_)) => {
+                // Define symbols; emit nothing.
+            }
             // Noted here and answered below: the span it names is against the
             // finished image, which does not exist yet.
             Some(Operation::SaveRaw {
@@ -1852,6 +1875,16 @@ fn assemble_statements(
         // --- Debug capture (U2). Reads only `pc`/`bytes.len()`/`symbols`; it
         // never influences an emitted byte (AE2). Addresses are section-relative
         // offsets in address units, section 0 based at `origin`. ---
+        if let Some(Operation::DefineSymbols(definitions)) = &s.op {
+            debug
+                .symbols
+                .extend(definitions.iter().map(|(name, value)| debug198x::Symbol {
+                    name: name.clone(),
+                    kind: debug198x::SymbolKind::Const {
+                        value: *value as u64,
+                    },
+                }));
+        }
         if let Some(label) = &s.label {
             let kind = if matches!(&s.op, Some(Operation::Equ(_))) {
                 // An `equ`/`=` constant: its value, not an address, and no space.
