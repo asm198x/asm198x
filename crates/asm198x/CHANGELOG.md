@@ -11,10 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- *(lwasm)* support OS-9 modules ([#392](https://github.com/asm198x/asm198x/pull/392))
-
-### Added
-
 - **lwasm OS-9 modules.** `mod` emits and checksums the four- or six-field
   module header, establishes module-relative address zero, `os9` emits the
   system-call sequence, and `emod` closes the module with OS-9's CRC-24. The
