@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.49](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.48...asm198x-v0.0.49) - 2026-08-29
+
+### Fixed
+
+- *(acme)* accept colon-separated statements ([#414](https://github.com/asm198x/asm198x/pull/414))
+
 ### Fixed
 
 - **ACME colon-separated statements.** ACME source may now place multiple
