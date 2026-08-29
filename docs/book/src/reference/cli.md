@@ -149,6 +149,7 @@ Added after v0.0.12. Earlier binaries answer none of the three spellings, so if
 | `-d`, `--dialect <name>` | all | Source syntax — see *Dialects* |
 | `--cpu`, `--target <name>` | all | CPU target where a dialect serves more than one (`z80`, `z80n`); with no `--dialect`, names a chip directly — see *Targets* |
 | `-I <dir>` | asm | Add an include-search directory. Repeatable; **order is search order** |
+| `--equ NAME=VALUE` | asm (pasmo/pasmonext) | Define a command-line constant before conditional assembly. Repeatable; matches Pasmo's spelling |
 | `--org <addr>` | disasm | Address of the first byte |
 | `--message-format <human\|json>` | asm | `human` (default) or a machine-readable result plus diagnostics on stdout |
 | `-h`, `--help` | — | This surface, in one screen |
