@@ -12,7 +12,7 @@ DEC PDP-11.
 
 | Directive | Spellings | Notes |
 |---|---|---|
-| `align-modulo` | `align` | Recognised, and not implemented |
+| `align-modulo` | `align` |  |
 | `assume` | `assume` | Recognised, and not implemented |
 | `bytes` | `byte`, `db`, `dc.b` |  |
 | `charset` | `charset` | Recognised, and not implemented |

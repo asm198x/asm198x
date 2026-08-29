@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Shared ASL alignment.** All twelve ASL-syntax CPU front ends now accept
+  `align boundary[,fill]`, including non-power-of-two boundaries. The default
+  `$FF` holes match `asl` plus `p2bin`; custom fill values occupy one target
+  address unit, including full 16-bit decles on the word-addressed CP-1600.
+
 ## [0.0.41](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.40...asm198x-v0.0.41) - 2026-08-29
 
 ### Added
