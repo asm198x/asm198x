@@ -9,6 +9,7 @@
 //! byte-extraction operators sit in precedence ([`BytePrec`]). This mirrors the
 //! `Z80Syntax` split for the Z80 dialects.
 
+use std::cell::Cell;
 use std::collections::BTreeMap;
 
 use crate::engine::{AsmError, BinOp, Expr};
@@ -345,6 +346,54 @@ pub(crate) struct ExprOpts {
     pub compare: Compare,
 }
 
+thread_local! {
+    /// The ASL-family base for an otherwise unadorned alphanumeric number
+    /// token. Outside that walk, each dialect's existing callback retains
+    /// complete control of its number syntax.
+    static IMPLICIT_RADIX: Cell<Option<u32>> = const { Cell::new(None) };
+}
+
+/// Run an expression-parsing operation with `radix` as the base for an
+/// unadorned alphanumeric number token, restoring the caller's base afterward.
+///
+/// This is dynamically scoped because the expression tokenizer is shared by
+/// every dialect while ASL's `RADIX` is parser state owned by one source walk.
+/// The thread-local boundary keeps concurrent assemblies independent, and the
+/// restore guard makes nested parsing retain the outer walk's state.
+pub(crate) fn with_implicit_radix<T>(radix: u32, f: impl FnOnce() -> T) -> T {
+    IMPLICIT_RADIX.with(|current| {
+        struct Reset<'a> {
+            current: &'a Cell<Option<u32>>,
+            previous: Option<u32>,
+        }
+
+        impl Drop for Reset<'_> {
+            fn drop(&mut self) {
+                self.current.set(self.previous);
+            }
+        }
+
+        let reset = Reset {
+            current,
+            previous: current.replace(Some(radix)),
+        };
+        let result = f();
+        drop(reset);
+        result
+    })
+}
+
+fn implicit_number(token: &str) -> Option<i64> {
+    IMPLICIT_RADIX.with(|current| {
+        let radix = current.get()?;
+        token
+            .chars()
+            .all(|c| c.is_ascii_alphanumeric() && c.is_digit(radix))
+            .then(|| i64::from_str_radix(token, radix).ok())
+            .flatten()
+    })
+}
+
 /// Parse a value expression. `parse_number` lexes the dialect's numeric literal
 /// forms; `opts` selects the dialect's operator syntax.
 pub(crate) fn parse_expr(
@@ -643,10 +692,11 @@ fn tokenize(
                         i += 1;
                     }
                 }
-                tokens.push(Tok::Num(parse_number(
-                    &chars[start..i].iter().collect::<String>(),
-                    line,
-                )?));
+                let token = chars[start..i].iter().collect::<String>();
+                tokens.push(Tok::Num(match implicit_number(&token) {
+                    Some(value) => value,
+                    None => parse_number(&token, line)?,
+                }));
             }
             l if l.is_ascii_alphabetic()
                 || l == '_'
@@ -667,6 +717,10 @@ fn tokenize(
                     i += if chars[i] == ':' { 2 } else { 1 };
                 }
                 let word: String = chars[start..i].iter().collect();
+                if let Some(value) = implicit_number(&word) {
+                    tokens.push(Tok::Num(value));
+                    continue;
+                }
                 // ACME spells bitwise XOR as the keyword `XOR` (alias `EOR`);
                 // `^` is exponentiation there. Elsewhere these are ordinary
                 // symbols. (`EOR` the mnemonic never reaches here — the operand
