@@ -472,6 +472,10 @@ fn run(args: &[String]) -> Result<String, String> {
     // the order is the search order (language-surface U1/KTD8). The
     // include-capable entry points (U2) feed them to the filesystem loader.
     let mut include_dirs: Vec<PathBuf> = Vec::new();
+    // Pasmo-compatible command-line constants. They are written as an
+    // assembly prelude before parsing, so conditional assembly sees them just
+    // as it sees an `equ` at the top of the source.
+    let mut equ_definitions: Vec<&str> = Vec::new();
     // sjasmplus's own flag: "Prefix for save/output/.. filenames in
     // directives". It is the reference conceding the host gets a say over
     // source-named writes without changing the language.
@@ -524,6 +528,13 @@ fn run(args: &[String]) -> Result<String, String> {
                 i += 1;
                 let dir = args.get(i).ok_or("`-I` needs a directory")?;
                 include_dirs.push(PathBuf::from(dir));
+            }
+            "--equ" => {
+                i += 1;
+                equ_definitions.push(args.get(i).ok_or("`--equ` needs NAME=VALUE")?);
+            }
+            f if f.starts_with("--equ=") => {
+                equ_definitions.push(&f["--equ=".len()..]);
             }
             "--disasm" | "--disassemble" => {
                 return Err("`--disasm` is now a subcommand: `asm198x disasm <input.bin>`".into());
@@ -643,6 +654,12 @@ fn run(args: &[String]) -> Result<String, String> {
 
     let assembler = Assembler::resolve(dialect, target)?;
     let source = std::fs::read_to_string(input).map_err(|e| format!("cannot read {input}: {e}"))?;
+    if !equ_definitions.is_empty()
+        && (!matches!(mode, Mode::Assemble) || !matches!(assembler, Assembler::Pasmo { .. }))
+    {
+        return Err("`--equ` is an assembly option for the pasmo/pasmonext dialects".into());
+    }
+    let source = apply_equ_definitions(&source, &equ_definitions)?;
 
     // Debug198x artifacts: every path emits them (flat U3, ca65 U4, vasm U5).
     // The ca65/vasm listings wait on a per-section byte map, so only the
@@ -1238,6 +1255,34 @@ fn parse_u16(value: &str) -> Result<u16, String> {
     parsed.map_err(|_| format!("invalid address `{value}`"))
 }
 
+/// Turn Pasmo's repeatable `--equ NAME=VALUE` arguments into a source prelude.
+/// Keeping the value as source text deliberately gives it Pasmo's own numeric
+/// and expression grammar rather than inventing a second CLI-only parser.
+fn apply_equ_definitions(source: &str, definitions: &[&str]) -> Result<String, String> {
+    let mut prelude = String::new();
+    for definition in definitions {
+        let (name, value) = definition.split_once('=').ok_or_else(|| {
+            format!("invalid `--equ` definition `{definition}`; expected NAME=VALUE")
+        })?;
+        if name.is_empty()
+            || !name.chars().enumerate().all(|(i, c)| {
+                c == '_' || c.is_ascii_alphanumeric() && (i > 0 || !c.is_ascii_digit())
+            })
+            || value.trim().is_empty()
+        {
+            return Err(format!(
+                "invalid `--equ` definition `{definition}`; expected NAME=VALUE"
+            ));
+        }
+        prelude.push_str(name);
+        prelude.push_str(" equ ");
+        prelude.push_str(value);
+        prelude.push('\n');
+    }
+    prelude.push_str(source);
+    Ok(prelude)
+}
+
 fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
      usage: asm198x [asm|disasm|fmt] [options] <input>\n\
@@ -1246,6 +1291,8 @@ fn usage() -> String {
      \x20            (add --message-format=json for a machine-readable result +\n\
      \x20             diagnostics on stdout; --message-format=human is the default;\n\
      \x20             -I adds an include-search directory, repeatable, in order)\n\
+     \x20            (--equ NAME=VALUE defines a repeatable pasmo/pasmonext constant\n\
+     \x20             before conditional assembly, matching Pasmo's spelling)\n\
      snapshot:    asm198x --dialect pasmonext --sna <input> [-o <out.sna>]\n\
      \x20            (Spectrum Z80 only; needs `end <addr>` for the entry point)\n\
      tape:        asm198x --dialect pasmonext --tap|--tzx <input> [-o <out.tap>]\n\
@@ -1475,6 +1522,37 @@ mod tests {
         for spelling in ["--version", "-V", "version"] {
             let args = vec![spelling.to_string()];
             assert_eq!(run(&args).as_deref(), Ok(expected.as_str()), "{spelling}");
+        }
+    }
+
+    #[test]
+    fn pasmo_equ_definitions_are_visible_to_conditionals() {
+        let source =
+            "        if NEXT\n        defb 1\n        else\n        defb 2\n        endif\n";
+        let next =
+            apply_equ_definitions(source, &["NEXT=1", "SPECTRANET=0"]).expect("valid definitions");
+        let spectranet =
+            apply_equ_definitions(source, &["NEXT=0", "SPECTRANET=1"]).expect("valid definitions");
+
+        assert_eq!(
+            asm198x::assemble_pasmo(&next).expect("NEXT build").bytes,
+            [1]
+        );
+        assert_eq!(
+            asm198x::assemble_pasmo(&spectranet)
+                .expect("Spectranet build")
+                .bytes,
+            [2]
+        );
+    }
+
+    #[test]
+    fn equ_definitions_require_a_symbol_and_value() {
+        for bad in ["NEXT", "=1", "1NEXT=1", "NEXT="] {
+            assert!(
+                apply_equ_definitions("", &[bad]).is_err(),
+                "`{bad}` must be rejected"
+            );
         }
     }
 
