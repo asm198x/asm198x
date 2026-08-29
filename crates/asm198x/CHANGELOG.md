@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.50](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.49...asm198x-v0.0.50) - 2026-08-29
+
 ### Fixed
 
 - **Z80 index-register halves.** Pasmo and PasmoNext now accept the IXH, IXL,
