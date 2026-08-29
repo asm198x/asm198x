@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.47](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.46...asm198x-v0.0.47) - 2026-08-29
+
+### Fixed
+
+- *(vasm)* preserve semicolon character literals ([#410](https://github.com/asm198x/asm198x/pull/410))
+
 ### Fixed
 
 - **vasm semicolon character literals.** A semicolon inside a quoted character
