@@ -11,10 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- *(vasm)* preserve semicolon character literals ([#410](https://github.com/asm198x/asm198x/pull/410))
-
-### Fixed
-
 - **vasm semicolon character literals.** A semicolon inside a quoted character
   or string literal no longer begins a comment, so operands such as
   `move.b #';',(a0)+` assemble as vasm does.
