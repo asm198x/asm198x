@@ -67,6 +67,7 @@ not deferred — nobody has examined it yet, which is a different thing.
 
 | Words | Dialect | Basis |
 |---|---|---|
+| `dtb`, `dts` | lwasm | [`clock-dependent-directives.md`](clock-dependent-directives.md) — rule 3; refused by name so assembly has no implicit wall-clock input |
 | `os9`, `mod`, `emod` | lwasm | [`multi-artifact-output.md`](multi-artifact-output.md) — accepted, **not yet implemented** |
 | `output` | vasm | the same |
 | the `save*` family | sjasmplus | the same |
@@ -76,14 +77,8 @@ not deferred — nobody has examined it yet, which is a different thing.
 | eight pragma spellings | lwasm | rule 3 — refused by name; see the `PRAGMAS` table |
 | every processor but `6502` | ACME `!cpu`, ca65 `.setcpu`/`.pNN` | rule 3 — [#302](https://github.com/asm198x/asm198x/issues/302) |
 
-One open question is **not** a deferral, because nothing has decided it:
-
-- **`dtb`/`dts`** (lwasm) assemble the current date and time. Implementing them
-  makes a build's output depend on the clock, which cuts against reproducibility
-  everywhere else here. Undecided —
-  [#314](https://github.com/asm198x/asm198x/issues/314).
-The first entry of the register is a third kind again: `multi-artifact-output.md`
-is accepted and **unimplemented**, so five words across three dialects are
+The multi-artifact entry is a third kind again: `multi-artifact-output.md` is
+accepted and **unimplemented**, so five words across three dialects are
 deferred on a decision nobody has built yet. That is legitimate under rule 1 and
 should not be a standing state —
 [#316](https://github.com/asm198x/asm198x/issues/316) tracks it.

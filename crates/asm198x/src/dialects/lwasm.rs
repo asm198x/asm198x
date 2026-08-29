@@ -963,6 +963,8 @@ pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "unsupported-lwasm",
         pattern: Pattern::Exact(&[
+            // Intentionally clockless: see
+            // `decisions/clock-dependent-directives.md`.
             "dtb",
             "dts",
             "emod",
