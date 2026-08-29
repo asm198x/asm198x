@@ -3413,6 +3413,16 @@ fn vasm_include_matches_the_flattened_source() {
     assert_eq!(r.files, vec!["main.s", "body.inc"]);
 }
 
+/// `end` terminates the whole textual source stream when reached inside an
+/// include: neither the include's tail nor the includer's tail is assembled.
+#[test]
+fn vasm_end_inside_include_terminates_the_root_source() {
+    let loader = MemoryLoader::new().text("body.inc", "\tdc.b 2\n\tend\n\tdc.b 3\n");
+    let src = "\tdc.b 1\n\tinclude \"body.inc\"\n\tdc.b 4\n";
+    let r = assemble_vasm_warned_files(src, "main.s", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![1, 2]);
+}
+
 /// Three-deep nesting, code at every level, spliced in walk order.
 #[test]
 fn vasm_include_three_deep_nests() {

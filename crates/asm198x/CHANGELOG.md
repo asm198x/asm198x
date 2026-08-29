@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **vasm source termination.** The Motorola-syntax assembler now accepts
+  `end`, including its optional ignored operand, and stops the whole source
+  stream when the directive is reached—even from inside an included file.
+
 ## [0.0.47](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.46...asm198x-v0.0.47) - 2026-08-29
 
 ### Fixed

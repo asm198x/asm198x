@@ -604,6 +604,7 @@ fn assemble_core(
         let span_start = buf.bytes.len();
         match &s.kind {
             Stmt::Empty
+            | Stmt::End
             | Stmt::Equ(..)
             | Stmt::Even
             | Stmt::Section(..)
@@ -1468,6 +1469,7 @@ fn stmt_size(
 ) -> Result<usize, AsmError> {
     Ok(match kind {
         Stmt::Empty
+        | Stmt::End
         | Stmt::Equ(..)
         | Stmt::Even
         | Stmt::Section(..)
@@ -1673,6 +1675,9 @@ impl MemFlag {
 #[derive(Clone)]
 enum Stmt {
     Empty,
+    /// `end [ignored]` — terminate the active source stream. Kept in the AST
+    /// so conditional projection decides whether the directive is reached.
+    End,
     /// Emits nothing and keeps its line. `Empty` drops the node, source and
     /// all, which is right for a blank line and wrong for a directive that
     /// *did* something the formatter must still reproduce — an offset counter
@@ -2318,7 +2323,7 @@ fn project_lines(
     out: &mut Vec<Line>,
     env: &mut BTreeMap<String, i64>,
     reptn: &mut Vec<i64>,
-) -> Result<(), AsmError> {
+) -> Result<bool, AsmError> {
     use crate::ast::Item;
     for node in nodes {
         match &node.item {
@@ -2329,9 +2334,13 @@ fn project_lines(
                 ..
             }) => {
                 if fold_vasm_condition(head, env, reptn, node.span.line as usize)? {
-                    project_lines(then_body, out, env, reptn)?;
-                } else if let Some(body) = else_body {
-                    project_lines(body, out, env, reptn)?;
+                    if project_lines(then_body, out, env, reptn)? {
+                        return Ok(true);
+                    }
+                } else if let Some(body) = else_body
+                    && project_lines(body, out, env, reptn)?
+                {
+                    return Ok(true);
                 }
                 continue;
             }
@@ -2350,15 +2359,23 @@ fn project_lines(
                     reptn.push(i);
                     let done = project_lines(body, out, env, reptn);
                     reptn.pop();
-                    done?;
+                    if done? {
+                        return Ok(true);
+                    }
                 }
                 continue;
             }
             _ => {}
         }
+        if matches!(
+            node.item.as_ref(),
+            Some(Item::Native(n)) if matches!(n.as_any().downcast_ref::<Stmt>(), Some(Stmt::End))
+        ) {
+            return Ok(true);
+        }
         project_one_line(node, out, env, reptn)?;
     }
-    Ok(())
+    Ok(false)
 }
 
 /// The environment a fold sees: the `equ` constants plus `REPTN`, which is the
@@ -2618,6 +2635,30 @@ mod comment_scanning {
     }
 }
 
+#[cfg(test)]
+mod end_directive {
+    #[test]
+    fn bare_end_and_its_ignored_operand_stop_output() {
+        for end in ["end", "end 123"] {
+            let src = format!(" dc.b 1\n {end}\n dc.b 2\n");
+            assert_eq!(
+                crate::assemble_vasm(&src).expect(end).bytes,
+                vec![1],
+                "{end}"
+            );
+        }
+    }
+
+    #[test]
+    fn end_only_stops_when_its_conditional_branch_is_taken() {
+        let src = " if 0\n end\n endif\n dc.b 1\n if 1\n end\n endif\n dc.b 2\n";
+        assert_eq!(
+            crate::assemble_vasm(src).expect("conditional end").bytes,
+            vec![1]
+        );
+    }
+}
+
 /// Resolve vasm local labels (names starting with `.`) to their enclosing global
 /// label, so the same `.loop` can recur under different routines: each local
 /// definition and reference is rewritten to `<global>.<local>`, a key no ordinary
@@ -2636,7 +2677,7 @@ mod comment_scanning {
 fn bake_reptn(kind: &mut Stmt, value: i64) {
     match kind {
         // A file name is not an expression.
-        Stmt::Output(_) | Stmt::Nothing => {}
+        Stmt::Output(_) | Stmt::Nothing | Stmt::End => {}
         Stmt::Equ(_, e) => bake_reptn_expr(e, value),
         Stmt::Dc(_, items) => items.iter_mut().for_each(|e| bake_reptn_expr(e, value)),
         Stmt::Ds(_, count) => bake_reptn_expr(count, value),
@@ -2683,7 +2724,7 @@ fn bake_reptn_expr(e: &mut Expr, value: i64) {
 fn qualify_stmt(kind: &mut Stmt, scope: &str) {
     match kind {
         // A file name is not a symbol.
-        Stmt::Output(_) | Stmt::Nothing => {}
+        Stmt::Output(_) | Stmt::Nothing | Stmt::End => {}
         Stmt::Equ(name, e) => {
             if name.starts_with('.') {
                 *name = format!("{scope}{name}");
@@ -2980,6 +3021,13 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["local", "idnt"]),
         category: Category::Ignored,
     },
+    // Source terminator. vasm ignores any operand and stops the whole textual
+    // stream, including an includer's remainder when reached from an include.
+    Directive {
+        id: "end",
+        pattern: Pattern::Exact(&["end"]),
+        category: Category::Operation,
+    },
     Directive {
         id: "unsupported-vasm",
         pattern: Pattern::Exact(&[
@@ -2999,7 +3047,6 @@ pub const DIRECTIVES: &[Directive] = &[
             "dw",
             "dx",
             "einline",
-            "end",
             "endb",
             "endm",
             "erem",
@@ -3111,6 +3158,7 @@ fn parse_op(
             ));
         }
         return match directive.id {
+            "end" => Ok(Stmt::End),
             "equ" => {
                 let name = label
                     .clone()
