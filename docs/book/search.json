@@ -387,7 +387,7 @@
       "slug": "ledger"
     },
     {
-      "context": "Form coverage: 704/796 (88.4%)",
+      "context": "Form coverage: 796/796 (100.0%)",
       "heading": "Z80",
       "page": "Conformance ledger",
       "slug": "ledger"
