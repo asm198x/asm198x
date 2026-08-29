@@ -310,7 +310,7 @@ fn byte_list(args: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
     let mut out = Vec::new();
     for piece in split_data_items(args) {
         if let Some(text) = string_literal(piece) {
-            out.extend(text.bytes().map(|b| Expr::Num(i64::from(b))));
+            out.extend(super::mos6502::asl_string_bytes(text).map(|b| Expr::Num(i64::from(b))));
         } else {
             out.push(value(piece, line)?);
         }

@@ -15,7 +15,7 @@ National SC/MP (INS8060).
 | `align-modulo` | `align` |  |
 | `assume` | `assume` | Recognised, and not implemented |
 | `bytes` | `db`, `dc`, `byte` |  |
-| `charset` | `charset` | Recognised, and not implemented |
+| `charset` | `charset` |  |
 | `diagnostic` | `message`, `warning` | Accepted and discarded — it changes no bytes |
 | `enum` | `enum` |  |
 | `expect` | `expect`, `endexpect` | Recognised, and not implemented |

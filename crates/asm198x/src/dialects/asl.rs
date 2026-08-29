@@ -134,8 +134,8 @@ pub const SEMANTIC_DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["shared"]),
         category: Category::Ignored,
     },
-    // Semantic. Each changes what the source means, so each is refused until
-    // it is implemented, with the probe that settled it named.
+    // Semantic. Unsupported entries change what the source means, so they are
+    // refused until implemented, with the probe that settled each one named.
     Directive {
         // `db 012` is 12 without it and 10 with it.
         id: "relaxed-literals",
@@ -175,7 +175,7 @@ pub const SEMANTIC_DIRECTIVES: &[Directive] = &[
         // `charset 97,65` makes `db "a"` emit $41 instead of $61.
         id: "charset",
         pattern: Pattern::Exact(&["charset"]),
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
     },
     Directive {
         id: "segment",
@@ -303,6 +303,9 @@ pub(crate) struct Walker<C> {
     /// Base for unadorned alphanumeric number tokens. `RADIX`'s own operand
     /// is always decimal; the selected base then applies through includes.
     radix: u32,
+    /// ASL's byte-for-byte character translation table. `CHARSET from,to`
+    /// replaces one entry; bare `CHARSET` restores the identity table.
+    charset: [u8; 256],
     nodes: Vec<Node>,
 }
 
@@ -359,6 +362,7 @@ impl<C: AslChip> Walker<C> {
             pending_leading: Vec::new(),
             phase_depth: 0,
             radix: 10,
+            charset: std::array::from_fn(|i| i as u8),
             nodes: Vec::new(),
         }
     }
@@ -501,6 +505,29 @@ impl<C: AslChip> Walker<C> {
             }
             return Ok(Some(Operation::DefineSymbols(definitions)));
         }
+        if word.eq_ignore_ascii_case("charset") {
+            if args.trim().is_empty() {
+                self.charset = std::array::from_fn(|i| i as u8);
+                return Ok(Some(Operation::Bytes(Vec::new())));
+            }
+            let parts = split_top_level(args, ',');
+            if parts.len() != 2 || parts.iter().any(|part| part.trim().is_empty()) {
+                return Err(AsmError::new(
+                    line,
+                    "`charset` needs `source,replacement` or no operands",
+                ));
+            }
+            let source = fold_const(&self.chip.value(parts[0].trim(), line)?, &self.consts, line)?;
+            let replacement =
+                fold_const(&self.chip.value(parts[1].trim(), line)?, &self.consts, line)?;
+            let source = u8::try_from(source)
+                .map_err(|_| AsmError::new(line, "`charset` source must be between 0 and 255"))?;
+            let replacement = u8::try_from(replacement).map_err(|_| {
+                AsmError::new(line, "`charset` replacement must be between 0 and 255")
+            })?;
+            self.charset[usize::from(source)] = replacement;
+            return Ok(Some(Operation::Bytes(Vec::new())));
+        }
         if word.eq_ignore_ascii_case("dephase") {
             if !args.trim().is_empty() {
                 return Err(AsmError::new(line, "`dephase` takes no operands"));
@@ -545,7 +572,10 @@ impl<C: AslChip> FlatWalk for Walker<C> {
         file: FileId,
     ) -> Result<Option<DirectiveLine>, AsmError> {
         let radix = self.radix;
-        super::mos6502::with_implicit_radix(radix, || self.walk_line_inner(raw, line, file))
+        let charset = self.charset;
+        super::mos6502::with_implicit_radix(radix, || {
+            super::mos6502::with_asl_charset(charset, || self.walk_line_inner(raw, line, file))
+        })
     }
 
     fn push_node(&mut self, node: Node) {
@@ -829,7 +859,6 @@ mod semantic_tests {
     fn a_semantic_directive_is_refused_as_a_known_directive() {
         for d in [
             "relaxed on",
-            "charset 97,65",
             "segment code",
             "save",
             "restore",
@@ -1014,6 +1043,61 @@ mod semantic_tests {
         for invalid in ["radix", "radix one", "radix 1", "radix 37"] {
             assert!(asm(&format!(" org 0\n {invalid}\n db 1\n")).is_err());
         }
+    }
+
+    #[test]
+    fn charset_translates_strings_and_characters_but_not_numbers() {
+        assert_eq!(
+            asm(" org 0\n charset 97,65\n db \"abz\",'a',97\n charset 98,66\n charset 122,90\n db \"abz\"\n charset\n db \"abz\"\n")
+                .expect("charset changes and reset")
+                .bytes,
+            // Probe-pinned against ASL 1.42: mappings accumulate, character
+            // literals use the table, numeric 97 does not, and bare CHARSET
+            // restores the identity mapping.
+            vec![0x41, 0x62, 0x7A, 0x41, 0x61, 0x41, 0x42, 0x5A, 0x61, 0x62, 0x7A]
+        );
+        for invalid in [
+            "charset 1",
+            "charset 1,2,3",
+            "charset -1,2",
+            "charset 1,256",
+        ] {
+            assert!(asm(&format!(" org 0\n {invalid}\n db 1\n")).is_err());
+        }
+    }
+
+    #[test]
+    fn charset_is_shared_by_every_asl_front_end() {
+        macro_rules! byte_chip {
+            ($assemble:path) => {
+                assert_eq!(
+                    $assemble(" org 0\n charset 97,65\n db \"a\",'a',97\n")
+                        .expect("charset")
+                        .bytes,
+                    vec![0x41, 0x41, 0x61]
+                );
+            };
+        }
+        byte_chip!(crate::assemble_i8080);
+        byte_chip!(crate::assemble_m6800);
+        byte_chip!(crate::assemble_1802);
+        byte_chip!(crate::assemble_8048);
+        byte_chip!(crate::assemble_scmp);
+        byte_chip!(crate::assemble_f8);
+        byte_chip!(crate::assemble_2650);
+        byte_chip!(crate::assemble_tms7000);
+        byte_chip!(crate::assemble_pdp11);
+        byte_chip!(crate::assemble_tms9900);
+        byte_chip!(crate::assemble_z8000);
+
+        // CP-1600 strings in BYTE/WORD are reference-defined no-ops, but its
+        // character expression still uses CHARSET and occupies one decle.
+        assert_eq!(
+            crate::assemble_cp1610(" org 0\n charset 97,65\n word 'a',97\n")
+                .expect("CP-1600 charset")
+                .bytes,
+            vec![0x00, 0x41, 0x00, 0x61]
+        );
     }
 
     #[test]

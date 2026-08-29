@@ -2645,6 +2645,19 @@ fn i8080_radix_state_threads_through_an_include() {
     assert_eq!(r.bytes, vec![0x10, 0x08]);
 }
 
+/// `CHARSET` is ordinary parser state too: mappings flow into an include,
+/// changes made there remain live afterward, and a bare reset flows out.
+#[test]
+fn i8080_charset_state_threads_through_an_include() {
+    let loader = MemoryLoader::new().text(
+        "values.inc",
+        "        db \"ab\"\n        charset 98,66\n        db \"ab\"\n",
+    );
+    let src = "        charset 97,65\n        include values.inc\n        db \"ab\"\n        charset\n        db \"ab\"\n";
+    let r = assemble_i8080_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(r.bytes, b"AbABABab");
+}
+
 /// asl's probe-pinned extension default: an extensionless `include` request
 /// tries `name.inc` first and the exact spelling second.
 #[test]
