@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.44](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.43...asm198x-v0.0.44) - 2026-08-29
+
+### Added
+
+- *(asl)* share input radix state ([#398](https://github.com/asm198x/asm198x/pull/398))
+
 ### Added
 
 - **Shared ASL input radix.** All twelve ASL-syntax CPU front ends now accept
