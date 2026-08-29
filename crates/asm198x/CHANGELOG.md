@@ -11,10 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- *(acme)* accept colon-separated statements ([#414](https://github.com/asm198x/asm198x/pull/414))
-
-### Fixed
-
 - **ACME colon-separated statements.** ACME source may now place multiple
   statements on one physical line, including a label before or after a `:`;
   colons inside quoted literals remain literal data.
