@@ -6,10 +6,9 @@
 //! could not be documented without hand-maintaining a second copy — the drift
 //! this project keeps paying for.
 //!
-//! It also made a gap invisible. `include` is unimplemented for pasmo, and the
-//! only way anyone found out was assembling a multi-file project and reading
-//! `unknown instruction INCLUDE`. A declared surface makes that a row you can
-//! count rather than a hole you fall into.
+//! It also made gaps invisible. Pasmo's once-unimplemented `include` was found
+//! only by assembling a multi-file project and reading `unknown instruction
+//! INCLUDE`. A declared surface makes such gaps rows we can count and close.
 //!
 //! # The shape
 //!
@@ -469,20 +468,8 @@ mod surface_invariants {
         }
     }
 
-    /// The difference this whole surface exists to make visible.
-    ///
-    /// sjasmplus takes `include`. pasmo has one and asm198x does not implement
-    /// it, so a multi-file pasmo project does not assemble — and the two facts
-    /// are now told apart by **category** rather than by one dialect having a
-    /// row and the other having nothing.
-    ///
-    /// That distinction is the point. An absent row says "this dialect has no
-    /// such directive"; a `KnownUnsupported` row says "it has one and we do not
-    /// implement it", which is what is true here and what a reader can act on.
-    /// Implementing it means changing this category, and this test is what
-    /// makes someone do that.
     #[test]
-    fn the_two_z80_dialects_differ_where_they_actually_differ() {
+    fn both_z80_dialects_declare_their_file_directives() {
         let of = |name: &str| {
             surfaces()
                 .into_iter()
@@ -492,21 +479,13 @@ mod surface_invariants {
         let pasmo = of("pasmo");
         let sjasmplus = of("sjasmplus");
 
-        assert_eq!(
-            super::lookup(&sjasmplus.directives, "include").map(|d| d.category),
-            Some(Category::Operation),
-            "sjasmplus implements `include`"
-        );
-        assert_eq!(
-            super::lookup(&pasmo.directives, "include").map(|d| d.category),
-            Some(Category::KnownUnsupported),
-            "pasmo has `include` and we do not implement it — if this now says \
-             Operation, the row and the code have parted company"
-        );
-
-        // Both take incbin, and both implement it, so the difference is the
-        // include and not file inclusion in general.
         for surface in [&pasmo, &sjasmplus] {
+            assert_eq!(
+                super::lookup(&surface.directives, "include").map(|d| d.category),
+                Some(Category::Operation),
+                "{} implements `include`",
+                surface.dialect
+            );
             assert_eq!(
                 super::lookup(&surface.directives, "incbin").map(|d| d.category),
                 Some(Category::Operation),

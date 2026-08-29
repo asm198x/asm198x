@@ -59,8 +59,8 @@ use crate::source::{SourceLoader, SourceMap};
 /// sjasmplus spells `db` four ways and adds `byte`, and two entries claiming
 /// one concept would show as two rows in a matrix.
 ///
-/// `include` is here and is not in pasmo's list, which is the difference this
-/// declaration exists to make visible.
+/// `include` is declared here because the shared Z80 base describes neither
+/// dialect's complete file-inclusion vocabulary.
 /// The data directives sjasmplus has beyond the shared Z80 set. Named once, so
 /// the declaration and the dispatch cannot drift apart.
 const SJASMPLUS_DATA: &[&str] = &[

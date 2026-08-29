@@ -23,12 +23,8 @@ use crate::source::{SourceLoader, SourceMap};
 /// Z80 (vanilla pasmo), `true` for the Spectrum Next's Z80N (pasmonext).
 /// What pasmo accepts beyond the shared Z80 base.
 ///
-/// `incbin` and **no include**. That is not an oversight in this list: pasmo's
-/// include is unimplemented, so a multi-file pasmo project does not assemble.
-/// Declaring the absence is the point — a generated matrix shows sjasmplus with
-/// an `include` row and pasmo without one, where before the difference could
-/// only be found by assembling a project and reading `unknown instruction
-/// INCLUDE`.
+/// File inclusion, macros, repetition and conditional assembly beyond the
+/// shared Z80 base.
 pub const DIRECTIVES: &[Directive] = &[
     Directive {
         id: "incbin",
@@ -73,19 +69,10 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["rept"]),
         category: Category::Operation,
     },
-    // Declared, and declared **unsupported**. Real pasmo assembles `include`;
-    // asm198x does not implement it, so a multi-file pasmo project does not
-    // build here.
-    //
-    // Refusing it as an unknown mnemonic — which is what happened until this
-    // row existed — tells the reader their source is invalid when it is not,
-    // and sends them to check their own file. The category exists to keep
-    // "not supported yet" apart from "not a thing", because only one of those
-    // is a decision the reader can act on.
     Directive {
         id: "include",
         pattern: Pattern::Exact(&["include"]),
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
     },
 ];
 
@@ -127,10 +114,8 @@ impl Dialect for Pasmo {
             Expand::No,
         )?))
     }
-    /// The incbin-capable parse (language-surface U3): the same
-    /// environment-threaded walk as sjasmplus's, resolving `incbin` lazily
-    /// through the loader. pasmo's `include` is *not* recognised yet (U4), so
-    /// includes still error exactly as on the single-file path.
+    /// The multi-file parse: the same environment-threaded walk as
+    /// sjasmplus's, resolving `include` and `incbin` lazily through the loader.
     fn parse_multi(
         &self,
         map: &mut SourceMap,
@@ -183,10 +168,14 @@ impl Z80Syntax for PasmoSyntax {
         line.find(';').map_or(line, |idx| &line[..idx])
     }
 
-    /// pasmo's `incbin` (language-surface U3), listed so a column-0 spelling
-    /// reads as an operation, not a label. `include` waits for U4.
+    /// File directives are listed so a column-0 spelling reads as an
+    /// operation, not a label.
     fn is_directive(&self, word: &str) -> bool {
-        self.is_incbin(word) || z80::is_common_directive(word)
+        self.is_include(word) || self.is_incbin(word) || z80::is_common_directive(word)
+    }
+
+    fn is_include(&self, word: &str) -> bool {
+        word.eq_ignore_ascii_case("include")
     }
 
     /// pasmo's binary-inclusion directive (language-surface U3),

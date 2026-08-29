@@ -863,7 +863,7 @@
       "slug": "reference/dialects/pasmo"
     },
     {
-      "context": "This dialect has no include directive yet, so a project in more than one file does not assemble. It is the one front door where that is true — see Projects in more than one file.",
+      "context": "A relative request is looked for in the including file's own directory, then in the -I search directories in the order they were given.",
       "heading": "Projects in more than one file",
       "page": "pasmo",
       "slug": "reference/dialects/pasmo"

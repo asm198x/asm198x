@@ -15,18 +15,18 @@ Z80, pasmo syntax.
 | `end` | `end` |  |
 | `equ` | `equ` |  |
 | `incbin` | `incbin` |  |
-| `include` | `include` | Recognised, and not implemented |
+| `include` | `include` |  |
 | `macro` | `macro` |  |
 | `org` | `org` |  |
 | `repeat` | `rept` |  |
 | `reserve` | `defs`, `ds` |  |
 | `words` | `defw`, `dw` |  |
 
-Instruction mnemonics are not listed here — they come from the instruction-set spec and have their own reference.
-
 ## Projects in more than one file
 
-This dialect has no include directive yet, so a project in more than one file does not assemble. It is the one front door where that is true — see [Projects in more than one file](../../guide/multi-file.md).
+A relative request is looked for in **the including file's own directory**, then in the `-I` search directories in the order they were given.
+
+The anchor is pinned against this dialect's own reference assembler, and the dialects genuinely disagree — [Projects in more than one file](../../guide/multi-file.md) has the comparison.
 
 ## Elsewhere
 
