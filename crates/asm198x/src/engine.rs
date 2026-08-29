@@ -910,7 +910,7 @@ impl Statement {
     /// A line-granular error at this statement, carrying its `(file, line)`
     /// as a real span — so a failure inside an included file renders with
     /// that file's name, not a bare line number.
-    fn err(&self, message: impl Into<String>) -> AsmError {
+    pub(crate) fn err(&self, message: impl Into<String>) -> AsmError {
         AsmError::at(Span::in_file(self.file, self.line as u32, 0), message)
     }
 
@@ -918,7 +918,7 @@ impl Statement {
     /// (expression evaluation, form lookup): a span-less error gains a
     /// line-granular span in this statement's file; an error that already
     /// carries a span (an operand-accurate one) is left alone.
-    fn stamp(&self, mut e: AsmError) -> AsmError {
+    pub(crate) fn stamp(&self, mut e: AsmError) -> AsmError {
         if e.span.is_none() && e.line != 0 {
             e.span = Some(Span::in_file(self.file, e.line as u32, 0));
         }
@@ -989,6 +989,10 @@ pub(crate) enum Place {
     /// concatenate in the output rather than colliding, because they are
     /// different memory.
     Next,
+    /// The section has an address and symbols, but contributes no bytes to the
+    /// output image. RGBDS RAM sections are BSS: they reserve machine memory,
+    /// not cartridge space.
+    Discard,
 }
 
 /// Lay a program's sections into one image.
@@ -1014,7 +1018,7 @@ pub(crate) fn lay_out(
     image_base: Option<i64>,
     image_size: impl Fn(&[u8]) -> Option<usize>,
 ) -> Result<(i64, Vec<u8>), AsmError> {
-    runs.retain(|r| !r.bytes.is_empty());
+    runs.retain(|r| !r.bytes.is_empty() && r.at != Place::Discard);
     if runs.is_empty() {
         return Ok((image_base.unwrap_or(0), Vec::new()));
     }
@@ -1032,6 +1036,7 @@ pub(crate) fn lay_out(
 
     let placed = |r: &Run| match r.at {
         Place::At(n) => n,
+        Place::Discard => unreachable!("discarded runs were removed above"),
         _ => r.base,
     };
     runs.sort_by_key(placed);

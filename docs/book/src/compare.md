@@ -50,7 +50,7 @@ Stated as what this tool does, because that is what we can vouch for:
 | One binary | Every dialect above, one install, the same interface on macOS, Linux and Windows |
 | `fmt` | Canonical layout for every dialect, idempotent, and the bytes do not change |
 | `disasm` | Every dialect, in that dialect's own syntax, and it reassembles |
-| `--prg`, `--sna`, `--exe` | The loadable file comes out of the assembler |
+| `--prg`, `--sna`, `--gb-rom`, `--exe` | The loadable file comes out of the assembler |
 | `--message-format=json` | Structured results and diagnostics for editors and build scripts |
 | `--debug`, `--sym`, `--listing` | A Debug198x sidecar, a symbol table, an address/bytes/source listing |
 | Multi-file | `-I` search paths, with each dialect's own resolution rules — see [Projects in more than one file](guide/multi-file.md) |

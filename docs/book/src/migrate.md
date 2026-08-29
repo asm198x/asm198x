@@ -81,6 +81,7 @@ may not be needed:
 |---|---|
 | `--prg` | A C64 program with its two-byte load address |
 | `--sna` | A 48K Spectrum snapshot — needs `end <addr>` for the entry point |
+| `--gb-rom` | A padded Game Boy cartridge ROM with finalised header checksums |
 | `--exe` | An Amiga hunk executable |
 
 Without one of these you get the flat binary, which is what your existing
