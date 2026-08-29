@@ -793,7 +793,43 @@ fn single_source_entry_rejects_incbin_with_a_clear_error() {
     }
 }
 
-// --- pasmo (U3): the plain form only, probe-pinned ---
+// --- pasmo include and incbin ---
+
+/// Pasmo includes share the live environment with their includer: constants
+/// flow out, nested files emit in place, and every source receives a FileId.
+#[test]
+fn pasmo_include_nests_and_shares_state() {
+    let loader = MemoryLoader::new()
+        .text("defs.inc", "VALUE equ $2b\n        include \"body.inc\"\n")
+        .text("body.inc", "        ld b,2\n");
+    let src = "        org $8000\n        include \"defs.inc\"\n        ld a,VALUE\n";
+    let r = assemble_pasmo_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0x06, 0x02, 0x3E, 0x2B]);
+    assert_eq!(r.files, vec!["main.asm", "defs.inc", "body.inc"]);
+}
+
+/// Includes are resolved only when their branch is taken, as Pasmo's other
+/// conditional contents are.
+#[test]
+fn pasmo_untaken_include_is_not_loaded() {
+    let loader = MemoryLoader::new();
+    let src = "        org $8000\n        if 0\n        include \"missing.inc\"\n        endif\n        nop\n";
+    let r = assemble_pasmo_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0x00]);
+    assert_eq!(r.files, vec!["main.asm"]);
+}
+
+/// The single-source entry keeps its one-file contract and points callers to
+/// the loader-backed entry point.
+#[test]
+fn pasmo_single_source_include_has_a_clear_error() {
+    let e = assemble_pasmo("        include \"defs.inc\"\n").expect_err("no loader here");
+    assert!(
+        e.message.contains("include") && e.message.contains("multi-file"),
+        "points at the multi-file entry: {}",
+        e.message
+    );
+}
 
 /// pasmo's plain `incbin "file"` inserts the whole asset (probe p1); the
 /// quoted and bare spellings both resolve (probe p5).

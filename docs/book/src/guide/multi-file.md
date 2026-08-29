@@ -28,7 +28,7 @@ either.
 | `vasm` | The root input's directory, however deep the request | taken as spelled |
 | `lwasm` | The including file's own directory | taken as spelled |
 | `rgbasm` | The root input's directory, however deep the request | taken as spelled |
-| `pasmo` | No include | — |
+| `pasmo` | The including file's own directory | taken as spelled |
 | `sjasmplus` | The including file's own directory | taken as spelled |
 | `8080` | The including file's own directory | `defs` tries `defs.inc` first |
 | `6800` | The including file's own directory | `defs` tries `defs.inc` first |

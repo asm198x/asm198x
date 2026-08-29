@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Pasmo projects can include source files.** `include "file"` now uses the
+  same loader-backed, requester-relative project model as the other multi-file
+  dialects. Nested includes share constants and labels with their includer,
+  preserve per-file diagnostics, and are loaded only in taken conditional
+  branches.
+
 ## [0.0.39](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.38...asm198x-v0.0.39) - 2026-08-29
 
 ### Fixed

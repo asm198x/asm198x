@@ -50,7 +50,7 @@ it:
 | `vasm` | `include` | `incbin` |
 | `lwasm` | `include`, `use`, `incl`, `lib` | `includebin` |
 | `rgbasm` | `include` | `incbin` |
-| `pasmo` | `include` — **not implemented** | `incbin` |
+| `pasmo` | `include` | `incbin` |
 | `sjasmplus` | `.include`, `include` | `.incbin`, `incbin` |
 | `8080` | `include` | `binclude` |
 | `6800` | `include` | `binclude` |

@@ -23,10 +23,10 @@ use asm198x::includes::{self, Anchor};
 ///
 /// Three outcomes, and the middle one is why this is not a one-liner. A dialect
 /// with no such entry gets a dash. One that declares it
-/// [`Category::KnownUnsupported`] gets the spelling **and** a note, because
-/// "pasmo spells it `include` and we do not implement it" is a different fact
-/// from "pasmo has no include", and a table that showed both as a dash would
-/// lose the distinction the category was added to make.
+/// [`Category::KnownUnsupported`] gets the spelling **and** a note, because a
+/// declared-but-unimplemented directive is different from a dialect having no
+/// such directive, and a table that showed both as a dash would lose that
+/// distinction.
 fn spellings(directives: &[Directive], id: &str) -> String {
     let Some(entry) = directives.iter().find(|d| d.id == id) else {
         return "—".to_string();

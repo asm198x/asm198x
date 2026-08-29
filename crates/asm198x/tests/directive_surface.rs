@@ -223,9 +223,8 @@ fn every_selectable_dialect_is_accounted_for() {
 
 /// Every `KnownUnsupported` spelling is refused as one, and says so.
 ///
-/// The category spent two plans with no members and a test asserting the count
-/// was zero. It has one now — pasmo's `include` — and the useful invariant is
-/// not how many there are but that each one draws a diagnostic saying the
+/// The useful invariant is not how many there are but that each one draws a
+/// diagnostic saying the
 /// directive is real and unimplemented, rather than the unknown-mnemonic
 /// refusal that sends a reader to check their own source.
 #[test]
@@ -256,12 +255,9 @@ fn a_known_unsupported_spelling_says_which_it_is() {
             }
         }
     }
-    // A category nothing declares is a category nothing checks. It was empty
-    // for two plans; this is what notices if it empties again.
     assert!(
         checked > 0,
-        "no dialect declares a `KnownUnsupported` spelling — pasmo's `include` \
-         should be one"
+        "no dialect declares a `KnownUnsupported` spelling"
     );
 }
 

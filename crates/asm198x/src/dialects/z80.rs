@@ -127,13 +127,6 @@ pub(crate) trait Z80Syntax {
     /// U2).
     ///
     /// Off by default. sjasmplus overrides it for `INCLUDE`; pasmo does not
-    /// implement one, so a multi-file pasmo project does not assemble.
-    ///
-    /// That gap was in no unit's scope until 2026-08-21: this comment used to
-    /// say it landed in U4, and U4's roster did not name pasmo. The plan is
-    /// corrected; the underlying problem is that the units batch dialects when
-    /// the unit of work is (dialect × directive).
-    ///
     /// An include is walk-handled — a verbatim item in the single-source parse,
     /// a lazy load in the multi-file walk — never an [`Operation`].
     fn is_include(&self, word: &str) -> bool {
@@ -2338,11 +2331,8 @@ fn parse_op<S: Z80Syntax>(
 
 /// The directives pasmo and sjasmplus share.
 ///
-/// A **base**, not either dialect's full surface. sjasmplus adds `INCLUDE` and
-/// the conditionals; pasmo adds nothing here and notably has no include, which
-/// is why a multi-file pasmo project does not assemble. Composing each
-/// dialect's own entries on top of this base is what would let `surfaces()`
-/// state that difference rather than leave it to be discovered.
+/// A **base**, not either dialect's full surface. Each dialect composes its
+/// own file-inclusion and conditional vocabulary on top of it.
 pub(crate) const COMMON_DIRECTIVES: &[Directive] = &[
     Directive {
         id: "org",

@@ -271,17 +271,16 @@ mod tests {
         }
     }
 
-    /// pasmo's missing include is stated on its page rather than left as an
-    /// absence, which is the whole reason the declaration carries it.
+    /// Pasmo's page now describes its requester-relative project model.
     #[test]
-    fn pasmo_says_it_cannot_include() {
+    fn pasmo_says_how_it_resolves_includes() {
         let page = pages()
             .into_iter()
             .find(|p| p.path.ends_with("pasmo.md"))
             .expect("pasmo has a page");
         assert!(
-            page.body.contains("no include directive yet"),
-            "pasmo's page should say so"
+            page.body.contains("including file's own directory"),
+            "pasmo's page should describe its include resolution"
         );
     }
 

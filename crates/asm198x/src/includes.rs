@@ -113,13 +113,7 @@ pub fn resolution() -> Vec<DialectIncludes> {
         DialectIncludes::from("vasm", &vasm::VASM_SEMANTICS),
         DialectIncludes::from("lwasm", &lwasm::SEMANTICS),
         DialectIncludes::from("rgbasm", &rgbasm::SEMANTICS),
-        // pasmo's include is unimplemented, which the declared directive
-        // surface also states — see `crate::directives`.
-        DialectIncludes {
-            dialect: "pasmo",
-            anchor: Anchor::None,
-            default_extension: None,
-        },
+        DialectIncludes::requester("pasmo"),
         DialectIncludes::requester("sjasmplus"),
         DialectIncludes::from("8080", &asl::SEMANTICS),
         DialectIncludes::from("6800", &asl::SEMANTICS),
@@ -190,9 +184,9 @@ mod tests {
         assert_eq!(anchor("rgbasm"), Anchor::Root);
         assert_eq!(anchor("lwasm"), Anchor::Requester);
         assert_eq!(anchor("acme"), Anchor::Requester);
+        assert_eq!(anchor("pasmo"), Anchor::Requester);
         assert_eq!(anchor("sjasmplus"), Anchor::Requester);
         assert_eq!(anchor("8080"), Anchor::Requester);
-        assert_eq!(anchor("pasmo"), Anchor::None);
     }
 
     /// asl is the only family with extension defaulting, and a table that
