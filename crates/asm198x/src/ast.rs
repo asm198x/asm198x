@@ -533,6 +533,18 @@ pub enum Iteration {
 /// its environment, then calling [`evaluate`]; the ACME (brace) and — when a
 /// keyword dialect adopts them — `IF … ENDIF` styles share this one walk.
 pub(crate) trait CondEval {
+    /// Return a diagnostic the conditional head itself must emit.
+    ///
+    /// Most heads are silent. This hook exists for reference-compatible cases
+    /// such as lwasm's `ifp1`/`ifp2`: the branch is taken, but the assembler
+    /// must also warn that pass-dependent behaviour is unsupported. Returning
+    /// an [`Operation`] keeps that warning on the engine's normal diagnostic
+    /// path, including source-file attribution.
+    fn condition_diagnostic(&self, head: &str) -> Option<Operation> {
+        let _ = head;
+        None
+    }
+
     /// Evaluate a conditional head (`!if DEBUG = 1`, `IF DEBUG`, `IFDEF FOO`)
     /// against the current environment: `true` if the then-branch is taken.
     /// `line` is the head's source line, for diagnostics.
@@ -628,6 +640,16 @@ pub(crate) fn evaluate<D: CondEval>(
         }) = &node.item
         {
             let taken = if emit {
+                if let Some(op) = dialect.condition_diagnostic(head) {
+                    out.push(Statement {
+                        line: node.span.line as usize,
+                        file: node.span.file,
+                        label: None,
+                        op: Some(op),
+                        operand_span: None,
+                        xor_mask: 0,
+                    });
+                }
                 dialect.eval(head, node.span.line)?
             } else {
                 false

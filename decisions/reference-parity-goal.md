@@ -76,17 +76,12 @@ not deferred — nobody has examined it yet, which is a different thing.
 | eight pragma spellings | lwasm | rule 3 — refused by name; see the `PRAGMAS` table |
 | every processor but `6502` | ACME `!cpu`, ca65 `.setcpu`/`.pNN` | rule 3 — [#302](https://github.com/asm198x/asm198x/issues/302) |
 
-Two open questions are **not** deferrals, because nothing has decided them:
+One open question is **not** a deferral, because nothing has decided it:
 
 - **`dtb`/`dts`** (lwasm) assemble the current date and time. Implementing them
   makes a build's output depend on the clock, which cuts against reproducibility
   everywhere else here. Undecided —
   [#314](https://github.com/asm198x/asm198x/issues/314).
-- **`ifp1`/`ifp2`** (lwasm) warn "Not supported IFP1" and take the true branch.
-  The branch is a line; the warning has nowhere to go, because `CondEval::eval`
-  folds a head from `&self`. Plumbing, not a decision —
-  [#315](https://github.com/asm198x/asm198x/issues/315).
-
 The first entry of the register is a third kind again: `multi-artifact-output.md`
 is accepted and **unimplemented**, so five words across three dialects are
 deferred on a decision nobody has built yet. That is legitimate under rule 1 and
@@ -100,13 +95,13 @@ Measured 2026-08-27 against the installed references:
 | Reference | Outstanding | Of |
 |---|---|---|
 | acme 0.97 | 0 | 74 |
-| lwasm 4.25 | 10 | 257 |
+| lwasm 4.25 | 8 | 257 |
 | ca65 V2.18 | 24 | 225 |
 | vasm 2.0b | 53 | 183 |
 | sjasmplus 1.21.0 | 60 | 264 |
 | rgbasm 1.0.3 | 91 | 306 |
 
-ACME is complete. lwasm's remaining ten are the deferrals and open questions
+ACME is complete. lwasm's remaining eight are the deferrals and open question
 above and nothing else.
 
 ## Drift triggers
