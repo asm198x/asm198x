@@ -11,10 +11,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- *(asl)* share enumeration constants ([#400](https://github.com/asm198x/asm198x/pull/400))
-
-### Added
-
 - **Shared ASL enumerations.** All twelve ASL-syntax CPU front ends now accept
   `enum` lists. Members start at zero, explicit assignments reset the running
   value, later assignments may use earlier members, and each new directive
