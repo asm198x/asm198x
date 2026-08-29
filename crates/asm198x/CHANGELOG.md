@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Repeated vasm sections.** Reopening a named section now resumes its
+  existing hunk, matching vasm's layout and relocation semantics for modular
+  Amiga programs instead of emitting one hunk per declaration.
+
 ## [0.0.51](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.50...asm198x-v0.0.51) - 2026-08-29
 
 ### Added

@@ -497,21 +497,27 @@ fn assemble_core(
 
     // Assign every statement to a section. A `section` directive opens one;
     // bytes emitted before any directive fall into an implicit code section.
-    let mut sec_meta: Vec<(HunkKind, MemFlag)> = Vec::new();
+    let mut sec_meta: Vec<(String, HunkKind, MemFlag)> = Vec::new();
+    let mut named_sections: BTreeMap<String, usize> = BTreeMap::new();
     let mut sec_idx: Vec<usize> = Vec::with_capacity(stmts.len());
     let mut cur: Option<usize> = None;
     for s in &stmts {
-        if let Stmt::Section(kind, flag) = &s.kind {
-            sec_meta.push((*kind, *flag));
-            cur = Some(sec_meta.len() - 1);
+        if let Stmt::Section(name, kind, flag) = &s.kind {
+            let key = name.to_ascii_lowercase();
+            cur = named_sections.get(&key).copied().or_else(|| {
+                let index = sec_meta.len();
+                sec_meta.push((name.clone(), *kind, *flag));
+                named_sections.insert(key, index);
+                Some(index)
+            });
         } else if cur.is_none() && stmt_emits(&s.kind) {
-            sec_meta.push((HunkKind::Code, MemFlag::Any));
+            sec_meta.push(("code".to_string(), HunkKind::Code, MemFlag::Any));
             cur = Some(0);
         }
         sec_idx.push(cur.unwrap_or(0));
     }
     if sec_meta.is_empty() {
-        sec_meta.push((HunkKind::Code, MemFlag::Any));
+        sec_meta.push(("code".to_string(), HunkKind::Code, MemFlag::Any));
     }
     let nsec = sec_meta.len();
 
@@ -578,9 +584,9 @@ fn assemble_core(
     let (consts, _) = layout(&stmts, &sec_idx, nsec, &ctx, &word_branch)?;
     let mut out: Vec<SecOut> = sec_meta
         .iter()
-        .map(|&(kind, flag)| SecOut {
-            kind,
-            flag,
+        .map(|(_, kind, flag)| SecOut {
+            kind: *kind,
+            flag: *flag,
             bytes: Vec::new(),
             relocs: Vec::new(),
         })
@@ -732,19 +738,15 @@ fn assemble_core(
             kind,
         });
     }
-    // The section table: hunk kind as the name, `base: None` throughout —
+    // The section table: source section name, `base: None` throughout —
     // hunks are relocatable, so offsets stay section-relative and a consumer
     // (the Emu198x importer) supplies actual load addresses via a `BaseMap`.
     let dbg_sections: Vec<debug198x::Section> = sec_meta
         .iter()
         .enumerate()
-        .map(|(id, (kind, _))| debug198x::Section {
+        .map(|(id, (name, _, _))| debug198x::Section {
             id: id as debug198x::SectionId,
-            name: match kind {
-                HunkKind::Code => "code".to_string(),
-                HunkKind::Data => "data".to_string(),
-                HunkKind::Bss => "bss".to_string(),
-            },
+            name: name.clone(),
             base: None,
             space: None,
         })
@@ -1685,8 +1687,8 @@ enum Stmt {
     Nothing,
     Equ(String, Expr),
     Even,
-    /// `section name,attr` — opens a new hunk of the given kind and memory flag.
-    Section(HunkKind, MemFlag),
+    /// `section name,attr` — selects the named hunk, creating it on first use.
+    Section(String, HunkKind, MemFlag),
     /// `echo "text"[,value]` — print, emit nothing, carry on. Values render in
     /// decimal here; each reference has its own radix.
     Echo(String),
@@ -3237,7 +3239,7 @@ fn parse_op(
                 Ok(Stmt::Nothing)
             }
             "section" => Ok(parse_section(args, line)),
-            "section_shorthand" => Ok(section_from_attr(&lower)),
+            "section_shorthand" => Ok(section_from_attr(&lower, &lower)),
             "align" => parse_align(args, line),
             "cnop" => parse_cnop(args, line),
             "fail" => Ok(Stmt::Fail(args.trim().trim_matches('"').to_string())),
@@ -3319,12 +3321,10 @@ fn parse_op(
 /// `data`, `bss`) and, via a `_c`/`_f` suffix, the memory placement (chip/fast).
 /// vasm also accepts the standalone words `chip`/`fast`.
 fn parse_section(args: &str, _line: usize) -> Stmt {
-    let attr = split_operands(args)
-        .get(1)
-        .copied()
-        .unwrap_or("")
-        .to_ascii_lowercase();
-    section_from_attr(&attr)
+    let operands = split_operands(args);
+    let name = operands.first().copied().unwrap_or("").trim().to_string();
+    let attr = operands.get(1).copied().unwrap_or("").to_ascii_lowercase();
+    section_from_attr(&name, &attr)
 }
 
 /// `align n` — pad to a `2^n` boundary. The operand is an exponent, so
@@ -3393,7 +3393,7 @@ fn parse_cnop(args: &str, line: usize) -> Result<Stmt, AsmError> {
 /// The content kind and memory placement a section attribute names. Shared by
 /// `section name,attr` and by the shorthands, where the directive word is the
 /// attribute: `bss_c` is `section BSS,bss_c`.
-fn section_from_attr(attr: &str) -> Stmt {
+fn section_from_attr(name: &str, attr: &str) -> Stmt {
     let kind = if attr.contains("bss") {
         HunkKind::Bss
     } else if attr.contains("data") {
@@ -3408,7 +3408,7 @@ fn section_from_attr(attr: &str) -> Stmt {
     } else {
         MemFlag::Any
     };
-    Stmt::Section(kind, flag)
+    Stmt::Section(name.to_string(), kind, flag)
 }
 
 fn parse_dcb(sz: &str, args: &str, line: usize) -> Result<Stmt, AsmError> {
@@ -4176,6 +4176,30 @@ mod directive_surface {
                 "`{short}` should be `{long}`"
             );
         }
+    }
+
+    /// Reopening a named section resumes the existing hunk. Real programs do
+    /// this from each included module; vasm emits one hunk per name, not one
+    /// per directive occurrence.
+    #[test]
+    fn repeated_named_sections_coalesce() {
+        let source = "\
+\tsection code,code\n\
+\tdc.b 1\n\
+\tsection data,data\n\
+\tdc.b 2\n\
+\tsection code,code\n\
+\tdc.b 3\n\
+\tsection data,data\n\
+\tdc.b 4\n";
+        let exe = super::assemble_exe(source).expect("hunk executable");
+
+        assert_eq!(
+            u32::from_be_bytes(exe[8..12].try_into().expect("header hunk count")),
+            2
+        );
+        assert!(exe.windows(4).any(|bytes| bytes == [1, 3, 0x4e, 0x71]));
+        assert!(exe.windows(4).any(|bytes| bytes == [2, 4, 0, 0]));
     }
 
     /// R6: one entry per family, not an enumerated cross-product.
