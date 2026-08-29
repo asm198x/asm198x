@@ -9,11 +9,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [0.0.40](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.39...asm198x-v0.0.40) - 2026-08-29
 
-### Added
-
-- *(lwasm)* support string symbols ([#391](https://github.com/asm198x/asm198x/pull/391))
-- *(pasmo)* support source includes ([#389](https://github.com/asm198x/asm198x/pull/389))
-
 ### Fixed
 
 - *(lwasm)* warn for pass conditionals
