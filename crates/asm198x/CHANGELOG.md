@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Shared ASL enumerations.** All twelve ASL-syntax CPU front ends now accept
+  `enum` lists. Members start at zero, explicit assignments reset the running
+  value, later assignments may use earlier members, and each new directive
+  starts a fresh sequence; the resulting constants are included in symbol and
+  Debug198x output.
+
 ## [0.0.44](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.43...asm198x-v0.0.44) - 2026-08-29
 
 ### Added

@@ -169,7 +169,7 @@ pub const SEMANTIC_DIRECTIVES: &[Directive] = &[
         // Defines symbols: `enum red,green` then `db green` emits 1.
         id: "enum",
         pattern: Pattern::Exact(&["enum"]),
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
     },
     Directive {
         // `charset 97,65` makes `db "a"` emit $41 instead of $61.
@@ -470,6 +470,36 @@ impl<C: AslChip> Walker<C> {
             }
             self.radix = radix;
             return Ok(Some(Operation::Bytes(Vec::new())));
+        }
+        if word.eq_ignore_ascii_case("enum") {
+            let parts = split_top_level(args, ',');
+            if args.trim().is_empty() || parts.iter().any(|part| part.trim().is_empty()) {
+                return Err(AsmError::new(line, "`enum` needs one or more names"));
+            }
+            let mut next = 0i64;
+            let mut definitions = Vec::with_capacity(parts.len());
+            for part in parts {
+                let assignment = split_top_level(part, '=');
+                if assignment.len() > 2 {
+                    return Err(AsmError::new(line, format!("invalid enum member `{part}`")));
+                }
+                let name = assignment[0].trim();
+                if !super::mos6502::is_ident(name) {
+                    return Err(AsmError::new(line, format!("invalid enum name `{name}`")));
+                }
+                if self.consts.contains_key(name) {
+                    return Err(AsmError::new(line, format!("duplicate label `{name}`")));
+                }
+                if let Some(value) = assignment.get(1) {
+                    next = fold_const(&self.chip.value(value.trim(), line)?, &self.consts, line)?;
+                }
+                definitions.push((name.to_string(), next));
+                self.consts.insert(name.to_string(), next);
+                next = next
+                    .checked_add(1)
+                    .ok_or_else(|| AsmError::new(line, "enum value overflow"))?;
+            }
+            return Ok(Some(Operation::DefineSymbols(definitions)));
         }
         if word.eq_ignore_ascii_case("dephase") {
             if !args.trim().is_empty() {
@@ -799,7 +829,6 @@ mod semantic_tests {
     fn a_semantic_directive_is_refused_as_a_known_directive() {
         for d in [
             "relaxed on",
-            "enum a,b",
             "charset 97,65",
             "segment code",
             "save",
@@ -985,5 +1014,18 @@ mod semantic_tests {
         for invalid in ["radix", "radix one", "radix 1", "radix 37"] {
             assert!(asm(&format!(" org 0\n {invalid}\n db 1\n")).is_err());
         }
+    }
+
+    #[test]
+    fn enum_defines_a_fresh_sequence_of_constants() {
+        let result =
+            asm(" org 0\n enum red=5,green,blue=red+10,white\n enum black,grey\n db red,green,blue,white,black,grey\n")
+                .expect("enum constants");
+        assert_eq!(result.bytes, vec![5, 6, 15, 16, 0, 1]);
+        assert_eq!(result.symbols.get("white"), Some(&16));
+        assert_eq!(result.symbols.get("grey"), Some(&1));
+        assert!(asm(" org 0\n enum\n").is_err());
+        assert!(asm(" org 0\n enum a,,b\n").is_err());
+        assert!(asm(" org 0\n enum a,a\n").is_err());
     }
 }

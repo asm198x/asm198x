@@ -2216,6 +2216,7 @@ fn substitute_anon_refs(
         // the constant-argument align.
         other @ (Operation::Encoded(_)
         | Operation::Binary(_)
+        | Operation::DefineSymbols(_)
         | Operation::Align { .. }
         | Operation::AlignTo { .. }
         | Operation::Diagnose { .. }
