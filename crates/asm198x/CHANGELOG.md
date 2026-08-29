@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.53](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.52...asm198x-v0.0.53) - 2026-08-29
+
+### Fixed
+
+- *(rgbasm)* match RGBLINK cartridge layout ([#423](https://github.com/asm198x/asm198x/pull/423))
+
 ## [0.0.52](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.51...asm198x-v0.0.52) - 2026-08-29
 
 ### Fixed
