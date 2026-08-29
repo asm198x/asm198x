@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.41](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.40...asm198x-v0.0.41) - 2026-08-29
+
+### Added
+
+- *(lwasm)* support OS-9 modules ([#392](https://github.com/asm198x/asm198x/pull/392))
+
 ### Added
 
 - **lwasm OS-9 modules.** `mod` emits and checksums the four- or six-field
