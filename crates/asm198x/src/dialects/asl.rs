@@ -146,7 +146,7 @@ pub const SEMANTIC_DIRECTIVES: &[Directive] = &[
         // `radix 16` makes `db 10` emit $10.
         id: "radix",
         pattern: Pattern::Exact(&["radix"]),
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
     },
     Directive {
         // Labels take addresses the output pointer never reaches. The shared
@@ -300,6 +300,9 @@ pub(crate) struct Walker<C> {
     /// Number of open `PHASE` regions. asl nests them, permits one to remain
     /// open at EOF, and treats a `DEPHASE` at depth zero as a no-op.
     phase_depth: usize,
+    /// Base for unadorned alphanumeric number tokens. `RADIX`'s own operand
+    /// is always decimal; the selected base then applies through includes.
+    radix: u32,
     nodes: Vec<Node>,
 }
 
@@ -355,6 +358,7 @@ impl<C: AslChip> Walker<C> {
             consts: BTreeMap::new(),
             pending_leading: Vec::new(),
             phase_depth: 0,
+            radix: 10,
             nodes: Vec::new(),
         }
     }
@@ -456,6 +460,17 @@ impl<C: AslChip> Walker<C> {
                 self.chip.value(args.trim(), line)?,
             ))));
         }
+        if word.eq_ignore_ascii_case("radix") {
+            let radix = args
+                .trim()
+                .parse::<u32>()
+                .map_err(|_| AsmError::new(line, "`radix` needs a decimal base from 2 to 36"))?;
+            if !(2..=36).contains(&radix) {
+                return Err(AsmError::new(line, "`radix` base must be between 2 and 36"));
+            }
+            self.radix = radix;
+            return Ok(Some(Operation::Bytes(Vec::new())));
+        }
         if word.eq_ignore_ascii_case("dephase") {
             if !args.trim().is_empty() {
                 return Err(AsmError::new(line, "`dephase` takes no operands"));
@@ -494,6 +509,22 @@ impl<C: AslChip> FlatWalk for Walker<C> {
     }
 
     fn walk_line(
+        &mut self,
+        raw: &str,
+        line: usize,
+        file: FileId,
+    ) -> Result<Option<DirectiveLine>, AsmError> {
+        let radix = self.radix;
+        super::mos6502::with_implicit_radix(radix, || self.walk_line_inner(raw, line, file))
+    }
+
+    fn push_node(&mut self, node: Node) {
+        self.nodes.push(node);
+    }
+}
+
+impl<C: AslChip> Walker<C> {
+    fn walk_line_inner(
         &mut self,
         raw: &str,
         line: usize,
@@ -579,10 +610,6 @@ impl<C: AslChip> FlatWalk for Walker<C> {
             },
         });
         Ok(None)
-    }
-
-    fn push_node(&mut self, node: Node) {
-        self.nodes.push(node);
     }
 }
 
@@ -772,7 +799,6 @@ mod semantic_tests {
     fn a_semantic_directive_is_refused_as_a_known_directive() {
         for d in [
             "relaxed on",
-            "radix 16",
             "enum a,b",
             "charset 97,65",
             "segment code",
@@ -940,5 +966,24 @@ mod semantic_tests {
         assert!(asm(" org 100h\n phase\n").is_err());
         assert!(asm(" org 100h\n dephase 1\n").is_err());
         assert!(asm(" org 100h\n phase 200h\n db 1\n").is_ok());
+    }
+
+    #[test]
+    fn radix_is_shared_parser_state() {
+        assert_eq!(
+            asm(" org 0\n db 10\n radix 16\n db 10,ff\n mvi a,10\n radix 2\n db 10\n radix 10\n db 10\n")
+                .expect("radix changes")
+                .bytes,
+            vec![10, 0x10, 0xFF, 0x3E, 0x10, 2, 10]
+        );
+        assert_eq!(
+            asm(" org 0\n radix 16\nn equ 10\n db n\n radix 36\n dw 10h\n")
+                .expect("radix constants")
+                .bytes,
+            vec![0x10, 0x21, 0x05]
+        );
+        for invalid in ["radix", "radix one", "radix 1", "radix 37"] {
+            assert!(asm(&format!(" org 0\n {invalid}\n db 1\n")).is_err());
+        }
     }
 }

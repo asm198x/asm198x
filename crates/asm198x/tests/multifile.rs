@@ -2635,6 +2635,16 @@ fn i8080_include_defined_equ_feeds_later_includer_lines() {
     );
 }
 
+/// `RADIX` is ordinary parser state in asl: the includer passes its current
+/// base into the included source, and a change there remains live afterward.
+#[test]
+fn i8080_radix_state_threads_through_an_include() {
+    let loader = MemoryLoader::new().text("values.inc", "        db 10\n        radix 8\n");
+    let src = "        radix 16\n        include values.inc\n        db 10\n";
+    let r = assemble_i8080_files(src, "main.asm", &loader).expect("assembles");
+    assert_eq!(r.bytes, vec![0x10, 0x08]);
+}
+
 /// asl's probe-pinned extension default: an extensionless `include` request
 /// tries `name.inc` first and the exact spelling second.
 #[test]

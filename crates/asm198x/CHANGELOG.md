@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **Shared ASL input radix.** All twelve ASL-syntax CPU front ends now accept
+  `radix 2` through `radix 36`. The selected base applies to unadorned numeric
+  tokens, constants, instruction operands, and included source; changes made
+  inside an include remain live when assembly returns to its caller.
+
 ## [0.0.43](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.42...asm198x-v0.0.43) - 2026-08-29
 
 ### Added

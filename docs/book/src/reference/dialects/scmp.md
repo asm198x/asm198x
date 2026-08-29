@@ -27,7 +27,7 @@ National SC/MP (INS8060).
 | `org` | `org` |  |
 | `phase` | `phase`, `dephase` |  |
 | `printer-init` | `prtinit` | Accepted and discarded — it changes no bytes |
-| `radix` | `radix` | Recognised, and not implemented |
+| `radix` | `radix` |  |
 | `relaxed-literals` | `relaxed` | Recognised, and not implemented |
 | `reserve` | `ds`, `rmb` |  |
 | `save-state` | `save`, `restore` | Recognised, and not implemented |
