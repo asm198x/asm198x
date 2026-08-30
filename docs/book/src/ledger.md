@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.53`
-- **Corpus hash:** `d8172fe1463743c4df31f1a19e8e4a19496b700eaf61bcf0db17ce1534ad8122`
+- **Corpus hash:** `2bd9540fd84542ca6e74ea77b2c502da33dafc18c14037f7cb5a108a8d64215f`
 - **Pinned curriculum:** `5435e540cf393c1956362458d5ff0fca3ff705f2` (2026-08-14)
-- **CPUs:** 23, holding 8062 verdict(s)
+- **CPUs:** 23, holding 8063 verdict(s)
 
 ## 1802
 
@@ -71,7 +71,7 @@ Form coverage: **838/838** (100.0%)
 
 | arbiter | version | binaries | verdicts |
 |---|---|---|---|
-| `vasmm68k_mot` | vasm 2.0b (c) in 2002-2025 Volker Barthelmann | 1 | curriculum 106, fuzz 100, probe 79, sweep-chunk 160 |
+| `vasmm68k_mot` | vasm 2.0b (c) in 2002-2025 Volker Barthelmann | 1 | curriculum 106, fuzz 100, probe 80, sweep-chunk 160 |
 | `vasmm68k_mot` | vasm 2.0f (c) in 2002-2026 Volker Barthelmann | 1 | form 838 |
 
 Tracked divergences — differences we know about and check:
