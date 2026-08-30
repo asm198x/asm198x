@@ -3727,6 +3727,7 @@ fn parse_value(
         parse_number,
         mos6502::ExprOpts {
             logical: true,
+            logical_not_tight: false,
             scoped_names: true,
             fixed_point: false,
             compare: mos6502::Compare {
