@@ -1,13 +1,43 @@
-# ARM (ARM2 / ARMv2) — a staged build (scoped, not yet started)
+# ARM (ARMv1 + ARM2 / ARMv2) — a staged build (scoped, not yet started)
 
-**Status:** 📋 **Planned (scoped 2026-07-03).** The first 32-bit RISC and the
-highest-value 32-bit door (Archimedes + later, via extension, GBA/DS). Scoping is
-done, the arbiter is built and installed, the engine widening is understood.
-Build not yet started. It is also the first deliberate proving ground for the
-shared legacy-toolchain direction in
+**Status:** 📋 **Planned (ARM2 scoped 2026-07-03; ARMv1 admitted
+2026-08-30).** The first 32-bit RISC lineage and the highest-value 32-bit door
+(ARM1 and Archimedes, plus later extension to GBA/DS).
+ARM2 scoping is done, its arbiter is built and installed, and the engine
+widening is understood. ARMv1 is in scope but gated on its own primary reference
+and byte arbiter. Build not yet started. ARM2 is also the first deliberate
+proving ground for the shared legacy-toolchain direction in
 [`llvm-alike-legacy-assembly-infrastructure.md`](llvm-alike-legacy-assembly-infrastructure.md):
 the 32-bit widening must be reusable by the rest of Wave D, while ARM's operand
 semantics remain ARM-owned.
+
+## ARMv1 is a real target, not an ARM2 alias
+
+Asm198x will support **ARMv1 / ARM1** as the first member of the lineage. It is
+historically valuable in its own right and tests the architecture's promise
+that one CPU family can expose several explicit instruction-set revisions
+without duplicating its frontend, engine, or artifact paths.
+
+It does **not** inherit ARM2's present evidence:
+
+- the umbrella primary reference is the VTI/VLSI 1990 databook and explicitly
+  documents ARM2/VL86C010, not ARM1;
+- the installed `vasmarm_std` accepts `-m2` and later targets but rejects both
+  `-m1` and `-marm1` as unknown options;
+- therefore an ARM2 encoding accepted by vasm is not, by itself, evidence that
+  ARMv1 contains that instruction or behaves identically.
+
+Before implementation, source an ARM1 primary manual, datasheet, or equivalent
+contemporaneous instruction-set description and a reference assembler that can
+select ARMv1. If no surviving assembler can arbitrate it, record a specific
+exception to the normal arbiter rule with an independent executable oracle; do
+not silently treat `vasmarm_std -m2` as ARMv1.
+
+**Sequence:** build the shared 32-bit seam and the fully arbitrated ARM2 target
+first. Then add ARMv1 as a target revision over the same ARM family model,
+differentially proving its accepted and rejected instruction surface. This
+ordering follows the available evidence, not a claim that ARMv1 is less
+important.
 
 ## Scope: ARM2 (ARMv2, 26-bit) — the Archimedes
 
@@ -90,6 +120,10 @@ handled from increment 1.
 7. **Multiply** — `MUL`/`MLA`.
 8. **`SWI` + coprocessor** — `CDP`/`MRC`/`MCR`/`LDC`/`STC` (the FPA door; may be
    deferred).
+9. **ARMv1 target revision** — after its reference gate is satisfied, share the
+   ARM frontend and machine model while explicitly gating every instruction or
+   semantic difference from ARM2. Add accepted-form, rejected-form, and
+   opcode-space arbitration under the ARMv1 target name.
 
 ## Reference
 
