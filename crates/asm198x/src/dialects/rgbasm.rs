@@ -1651,7 +1651,10 @@ fn parse_ds(
 
 fn byte_list(args: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
     if args.trim().is_empty() {
-        return Err(AsmError::new(line, "`db` needs a value"));
+        // RGBDS treats an operandless data directive as one uninitialised
+        // element. In ROM that links as zero; in RAM the section is discarded
+        // from the image while its location counter still advances.
+        return Ok(vec![Expr::Num(0)]);
     }
     let mut out = Vec::new();
     for piece in split_data_items(args) {
@@ -1666,7 +1669,7 @@ fn byte_list(args: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
 
 fn value_list(args: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
     if args.trim().is_empty() {
-        return Err(AsmError::new(line, "`dw` needs a value"));
+        return Ok(vec![Expr::Num(0)]);
     }
     split_top_level(args, ',')
         .iter()
@@ -3110,6 +3113,30 @@ mod tests {
         .expect("assembles");
         assert_eq!(out.bytes, [0x00, 0xC0]);
         assert_eq!(out.symbols.get("work"), Some(&0xC000));
+    }
+
+    /// RGBASM 1.0.3 uses an operandless data directive as an uninitialised
+    /// element of that width. ROM links those elements as zero-filled bytes;
+    /// discarded RAM sections retain only their counter advancement.
+    #[test]
+    fn operandless_data_reserves_one_element() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"rom\",ROM0[0]\n\
+             RomStart: db\nRomByte: dw\nRomWord: dl\nRomLong: db $aa\n\
+             SECTION \"vars\",WRAM0\n\
+             RamStart: db\nRamByte: dw\nRamWord: dl\nRamLong:\n\
+             SECTION \"addresses\",ROM0[$10]\n\
+             dw RamStart,RamByte,RamWord,RamLong\n\
+             db RamByte-RamStart,RamWord-RamByte,RamLong-RamWord\n",
+        )
+        .expect("operandless data declarations");
+        assert_eq!(&out.bytes[..8], &[0, 0, 0, 0, 0, 0, 0, 0xAA]);
+        assert_eq!(
+            &out.bytes[0x10..0x1B],
+            &[0x00, 0xC0, 0x01, 0xC0, 0x03, 0xC0, 0x07, 0xC0, 1, 2, 4]
+        );
+        assert_eq!(out.symbols.get("RomLong"), Some(&7));
+        assert_eq!(out.symbols.get("RamLong"), Some(&0xC007));
     }
 
     /// A label belongs to its own section, so it resolves against that
