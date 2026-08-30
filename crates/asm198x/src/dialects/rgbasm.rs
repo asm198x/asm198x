@@ -689,15 +689,16 @@ fn number(text: &str, line: usize) -> Result<i64, AsmError> {
         _ => (text, crate::engine::FIX_BITS as u32),
     };
     let Some((whole, fraction)) = digits.split_once('.') else {
-        return mos6502::parse_number(text, line);
+        return integer(text, line);
     };
     let whole: i64 = if whole.is_empty() {
         0
     } else {
-        whole
+        separators(whole, false, text, line)?
             .parse()
             .map_err(|_| AsmError::new(line, format!("`{text}` is not a number")))?
     };
+    let fraction = separators(fraction, false, text, line)?;
     if !fraction.chars().all(|c| c.is_ascii_digit()) {
         return Err(AsmError::new(line, format!("`{text}` is not a number")));
     }
@@ -714,6 +715,53 @@ fn number(text: &str, line: usize) -> Result<i64, AsmError> {
         .parse()
         .map_err(|_| AsmError::new(line, format!("`{text}` is not a number")))?;
     Ok(whole * scale + (numerator * scale + denominator / 2) / denominator)
+}
+
+/// RGBDS permits one `_` between digits, and also immediately after an
+/// explicit `$`/`%`/`&` radix prefix. It refuses adjacent or trailing
+/// separators and separators touching a fixed-point `.`. Keeping that rule
+/// here, rather than stripping every underscore in the shared lexer, prevents
+/// RGBDS syntax leaking into the other dialects.
+fn separators(
+    digits: &str,
+    leading: bool,
+    original: &str,
+    line: usize,
+) -> Result<String, AsmError> {
+    if digits.is_empty() {
+        return Err(AsmError::new(line, format!("`{original}` is not a number")));
+    }
+    let chars: Vec<char> = digits.chars().collect();
+    for (i, c) in chars.iter().enumerate() {
+        if *c == '_'
+            && ((!leading && i == 0)
+                || i + 1 == chars.len()
+                || chars.get(i.wrapping_sub(1)) == Some(&'_'))
+        {
+            return Err(AsmError::new(
+                line,
+                format!("invalid digit separator in `{original}`"),
+            ));
+        }
+    }
+    Ok(chars.into_iter().filter(|c| *c != '_').collect())
+}
+
+fn integer(text: &str, line: usize) -> Result<i64, AsmError> {
+    let trimmed = text.trim();
+    let bad = || AsmError::new(line, format!("`{text}` is not a number"));
+    for (prefix, radix) in [('$', 16), ('%', 2), ('&', 8)] {
+        if let Some(body) = trimmed.strip_prefix(prefix) {
+            let body = separators(body, true, text, line)?;
+            return i64::from_str_radix(&body, radix).map_err(|_| bad());
+        }
+    }
+    if trimmed.starts_with('\'') && trimmed.ends_with('\'') && trimmed.chars().count() == 3 {
+        return trimmed.chars().nth(1).map(|c| c as i64).ok_or_else(bad);
+    }
+    separators(trimmed, false, text, line)?
+        .parse::<i64>()
+        .map_err(|_| bad())
 }
 
 fn expr_function(name: &str, args: Vec<mos6502::ExprArg>, line: usize) -> Result<Expr, AsmError> {
@@ -2533,6 +2581,38 @@ mod tests {
         let out = crate::assemble_rgbasm("SECTION \"a\", ROM0[0]\ndb HIGH($1234), LOW($1234)\n")
             .expect("byte extraction");
         assert_eq!(out.bytes, vec![0x12, 0x34]);
+    }
+
+    /// RGBASM 1.0.3 accepts separators across every radix and in each
+    /// fixed-point component. It permits one immediately after an explicit
+    /// radix prefix, but nowhere else without a digit on both sides.
+    #[test]
+    fn digit_separators_follow_rgbasm_rules() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"a\", ROM0[0]\n\
+             db %1111_0000, %_10, $A_B, $_C, &1_7, &_7, 2_5_5\n\
+             dl 1_2.2_5, 1.2_5q8\n",
+        )
+        .expect("separated numbers");
+        assert_eq!(
+            out.bytes,
+            vec![
+                0xF0, 2, 0xAB, 0x0C, 15, 7, 255, 0x00, 0x40, 0x0C, 0x00, 0x40, 0x01, 0x00, 0x00,
+            ]
+        );
+
+        for invalid in ["%10_", "%1__0", "1__0", "1_.5", "1._5", "1.5_", "1.5q1_6"] {
+            let directive = if invalid.contains('.') { "dl" } else { "db" };
+            let error =
+                crate::assemble_rgbasm(&format!("SECTION \"a\", ROM0[0]\n{directive} {invalid}\n"))
+                    .expect_err(invalid);
+            assert!(
+                error.to_string().contains("separator")
+                    || error.to_string().contains("bit count")
+                    || error.to_string().contains("trailing tokens"),
+                "{invalid}: {error}"
+            );
+        }
     }
 
     /// rgbasm truncates an oversized value and warns; it does not refuse.

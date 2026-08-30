@@ -396,6 +396,9 @@ const PROBES: &[Probe] = &[
          DEF M EQU N-5\ndb STRSUB(\"abcd\", M, 2)\n"),
     ok ("rgbasm", "fixed-point literals",
         "SECTION \"s\",ROM0[0]\ndl 3.7\ndl 1.0\ndl -1.5\ndl 0.5\ndl 0.1\ndl 0.3\n"),
+    ok ("rgbasm", "digit separators in every radix and fixed-point component",
+        "SECTION \"s\",ROM0[0]\ndb %1111_0000,%_10,$A_B,$_C,&1_7,&_7,2_5_5\n\
+         dl 1_2.2_5,1.2_5q8\n"),
     ok ("rgbasm", "a q suffix names another precision",
         "SECTION \"s\",ROM0[0]\ndl 3.7q8\ndl 1.0q4\ndl 0.25q1\ndl 1.25q1\ndl 0.125q2\n"),
     ok ("rgbasm", "fixed multiply and divide",
