@@ -408,6 +408,10 @@ const PROBES: &[Probe] = &[
     ok ("rgbasm", "STARTOF memory regions and forward placed sections",
         "SECTION \"probe\",ROM0[0]\ndw STARTOF(OAM),STARTOF(\"later\"),STARTOF(\"pinned\")\n\
          SECTION \"later\",ROM0\ndb 1,2,3\nSECTION \"pinned\",ROM0[$200]\ndb 4\n"),
+    ok ("rgbasm", "graphics literals pack two-bit pixels into tile bitplanes",
+        "SECTION \"s\",ROM0[0]\ndw `0,`1,`2,`3,`01,`10,`0123,`3210\n\
+         dw `00000000,`11111111,`22222222,`33333333,`01230123,`32103210\n\
+         dw `0_1,`_01,`333333333,`0123+1,(`3210<<1)\n"),
     ok ("rgbasm", "a q suffix names another precision",
         "SECTION \"s\",ROM0[0]\ndl 3.7q8\ndl 1.0q4\ndl 0.25q1\ndl 1.25q1\ndl 0.125q2\n"),
     ok ("rgbasm", "fixed multiply and divide",
