@@ -6,7 +6,7 @@
 
 ## The decision
 
-Correctness now rests on **four layers**, not one, each testing a different thing
+Correctness now rests on **five layers**, not one, each testing a different thing
 against the real reference assemblers:
 
 1. **Curated byte-identity** (`tests/curriculum`) — real curriculum programs
@@ -21,6 +21,11 @@ against the real reference assemblers:
    multi-instruction programs, reassembled by *both* our assembler and the
    reference, must reproduce the bytes. Proves *operand-value and sequence
    coverage* the curated corpus misses.
+5. **Ecosystem source corpus** (`ecosystem/corpus.json`) — complete, pinned,
+   independently authored build targets are assembled unchanged. Proves the
+   real-world compatibility claim across includes, macros, directives, linker
+   configuration, and combinations selected by authors outside this family.
+   See [`ecosystem-source-corpus.md`](ecosystem-source-corpus.md).
 
 ### The disassembler-reuse trick
 

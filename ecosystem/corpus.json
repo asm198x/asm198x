@@ -1,0 +1,109 @@
+{
+  "schema": 1,
+  "projects": [
+    {
+      "id": "kindjie-6502assembly",
+      "name": "6502Assembly",
+      "cpu": "mos6502",
+      "dialect": "acme",
+      "upstream": "https://github.com/kindjie/6502Assembly.git",
+      "commit": "35b4968be3bdd26804a5d195557d1225497a0358",
+      "license": { "spdx": "MIT", "path": "LICENSE" },
+      "targets": [
+        {
+          "id": "hello-world",
+          "cwd": ".",
+          "sources": ["helloworld.asm"],
+          "reference": ["acme", "--cpu", "6510", "--format", "cbm", "--outfile", "helloworld.prg", "helloworld.asm"],
+          "outputs": ["helloworld.prg"]
+        },
+        {
+          "id": "interrupts",
+          "cwd": ".",
+          "sources": ["ex_interrupts.asm", "libs/interrupt.asm"],
+          "reference": ["acme", "--cpu", "6510", "--format", "cbm", "--outfile", "ex_interrupts.prg", "ex_interrupts.asm"],
+          "outputs": ["ex_interrupts.prg"]
+        },
+        {
+          "id": "charset",
+          "cwd": ".",
+          "sources": ["ex_charset.asm", "libs/loader.asm", "libs/screen.asm", "charsets/chars.raw", "charsets/attribs.raw", "charsets/map.raw", "charsets/tiles.raw"],
+          "reference": ["acme", "--cpu", "6510", "--format", "cbm", "--outfile", "ex_charset.prg", "ex_charset.asm"],
+          "outputs": ["ex_charset.prg"]
+        }
+      ]
+    },
+    {
+      "id": "bradsmith-nes-ca65-example",
+      "name": "NES-ca65-example",
+      "cpu": "mos6502",
+      "dialect": "ca65",
+      "upstream": "https://github.com/bbbradsmith/NES-ca65-example.git",
+      "commit": "1bb961dcdf317f39460c0c28a13f33a82feb29c4",
+      "license": { "spdx": "LicenseRef-BradSmith-Permissive", "path": "readme.md" },
+      "targets": [
+        {
+          "id": "example",
+          "cwd": ".",
+          "sources": ["example.s", "example.cfg", "background.chr", "sprite.chr"],
+          "reference": ["ca65", "example.s", "-g", "-o", "example.o"],
+          "outputs": ["example.o", "example.nes"]
+        }
+      ]
+    },
+    {
+      "id": "gbdev-gb-asm-tutorial",
+      "name": "GB ASM Tutorial — Unbricked",
+      "cpu": "sm83",
+      "dialect": "rgbasm",
+      "upstream": "https://github.com/gbdev/gb-asm-tutorial.git",
+      "commit": "d127fc21a136eb3a081d358f3bd0d322bd399a29",
+      "license": { "spdx": "MIT", "path": "LICENSE" },
+      "targets": [
+        {
+          "id": "unbricked",
+          "cwd": "unbricked/bricks",
+          "sources": ["unbricked/bricks/main.asm", "unbricked/bricks/hardware.inc"],
+          "reference": ["rgbasm", "-o", "main.o", "main.asm"],
+          "outputs": ["unbricked/bricks/main.o", "unbricked/bricks/unbricked.gb"]
+        }
+      ]
+    },
+    {
+      "id": "howprice-specnext-invaders",
+      "name": "SpecNext Invaders",
+      "cpu": "z80n",
+      "dialect": "sjasmplus",
+      "upstream": "https://github.com/howprice/specnext-invaders.git",
+      "commit": "e3211ea8ad2e83aca4d07d70bd8e09b7b51a9a1d",
+      "license": { "spdx": "MIT", "path": "LICENSE" },
+      "targets": [
+        {
+          "id": "game",
+          "cwd": ".",
+          "sources": ["src/main.asm", "src/macros.asm", "src/game_state.asm", "src/sprite_data.asm", "data"],
+          "reference": ["sjasmplus", "--fullpath", "--sld=bin/invaders.sld", "--lst=bin/invaders.lst", "--lstlab", "--sym=bin/invaders.labels", "--msg=war", "src/main.asm"],
+          "outputs": ["bin/invaders.nex"]
+        }
+      ]
+    },
+    {
+      "id": "nicodex-helloami",
+      "name": "HelloAmi",
+      "cpu": "m68000",
+      "dialect": "vasm",
+      "upstream": "https://github.com/nicodex/HelloAmi.git",
+      "commit": "6dae73b6968cc2caaea356b7a35b0ae1dd78fe09",
+      "license": { "spdx": "MIT", "path": "LICENSE" },
+      "targets": [
+        {
+          "id": "hello-ami",
+          "cwd": ".",
+          "sources": ["HelloAmi.asm"],
+          "reference": ["vasmm68k_mot", "-quiet", "-Fhunkexe", "-nosym", "-pic", "-m68000", "-no-fpu", "-showopt", "-o", "HelloAmi", "HelloAmi.asm"],
+          "outputs": ["HelloAmi"]
+        }
+      ]
+    }
+  ]
+}
