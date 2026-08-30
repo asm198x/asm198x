@@ -17,6 +17,7 @@ verdict-corpus = { path = "../crates/verdict-corpus", version = "0.0.53" }
 # quotes and parentheses. Hand-rolled JSON escaping is a bug waiting; this is
 # the same workspace dependency four other crates already use.
 serde_json = { workspace = true }
+serde = { workspace = true }
 # Hashes the corpus so a ledger names exactly which corpus it describes.
 # xtask is never shipped, so this stays clear of the assembler's tree.
 sha2 = "0.11"

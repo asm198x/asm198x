@@ -218,6 +218,12 @@ jobs:
       - name: Check every reference-version claim against what was recorded
         run: cargo xtask versions --check
 
+      # Whole upstream projects are the evidence for the source-compatibility
+      # claim. CI does not fetch or execute them; it checks that every admitted
+      # target remains pinned, licensed, and structurally valid.
+      - name: Check the ecosystem source corpus manifest
+        run: cargo xtask ecosystem check
+
       # `/releases` publishes CHANGELOG.md, so its newest entry is reader-facing
       # prose. release-plz drafts it from commit subjects, files anything with no
       # conventional-commit prefix under `Other` as its raw subject, and cannot

@@ -12,6 +12,7 @@ mod coverage;
 mod dialect_pages;
 mod divergences;
 mod docs;
+mod ecosystem;
 mod evidence;
 mod grow;
 mod includes;
@@ -34,6 +35,7 @@ fn main() -> ExitCode {
         Some("coverage") => run_coverage(&args[1..]),
         Some("parity") => run_parity(&args[1..]),
         Some("grow") => grow::run(&repo(), args.get(1).map(String::as_str)),
+        Some("ecosystem") => ecosystem::run(&repo(), &args[1..]),
         // The scope form: `--cpu <CPU> --suite <suite>... <reason>`. A listing
         // change strands every verdict keyed on the text it used to emit, and
         // those carry no divergence tag to select on (#214).
@@ -173,6 +175,10 @@ fn usage() -> String {
      \x20 versions            print the reference versions the corpus recorded\n\
      \x20 versions --check    refuse a version claim nothing ever recorded\n\
      \x20 grow [filter]       arbitrate what is not yet recorded (needs the tools)\n\
+     \x20 ecosystem check     validate the real-world source manifest\n\
+     \x20 ecosystem list      list admitted projects and build targets\n\
+     \x20 ecosystem fetch <dir> [id]  fetch and verify pinned source trees\n\
+     \x20 ecosystem verify <dir> [id] verify existing pinned source trees\n\
      \x20 supersede <tag> <why>  retire the verdicts carrying a divergence tag\n\
      \x20 changelog           fail if the newest release entry still reads like a draft\n\
      \x20 docs                regenerate the book's generated blocks\n\
