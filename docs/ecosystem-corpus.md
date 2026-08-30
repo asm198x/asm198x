@@ -53,7 +53,7 @@ Their native controls pass with the installed verdict-corpus arbiters: ACME
 |---|---:|---:|---|---|
 | 6502Assembly | ACME | 3 | passes | macro defined by preceding `!source` is not visible at `+start_at` |
 | NES-ca65-example | ca65 | 1 | passes | project-specific `TILES` segment/linker config |
-| GB ASM Tutorial — Unbricked | RGBDS | 1 | passes | operandless `db` storage declarations in WRAM at `wFrameCounter: db` after graphics literals were fixed in #439 |
+| GB ASM Tutorial — Unbricked | RGBDS | 1 | passes | logical `!`, `||`, and `DEF(...)` in `hardware.inc` include guards after operandless storage declarations were fixed in #441 |
 | SpecNext Invaders | SjASMPlus | 1 | passes | `OPT` directive |
 | HelloAmi | vasm | 1 | passes | `BLO` condition-code spelling |
 

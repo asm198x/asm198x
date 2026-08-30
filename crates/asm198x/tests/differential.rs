@@ -412,6 +412,11 @@ const PROBES: &[Probe] = &[
         "SECTION \"s\",ROM0[0]\ndw `0,`1,`2,`3,`01,`10,`0123,`3210\n\
          dw `00000000,`11111111,`22222222,`33333333,`01230123,`32103210\n\
          dw `0_1,`_01,`333333333,`0123+1,(`3210<<1)\n"),
+    ok ("rgbasm", "operandless data reserves one element in ROM and RAM",
+        "SECTION \"rom\",ROM0[0]\nStart: db\nAfterByte: dw\nAfterWord: dl\nAfterLong: db $aa\n\
+         SECTION \"vars\",WRAM0\nRamStart: db\nRamByte: dw\nRamWord: dl\nRamLong:\n\
+         SECTION \"addresses\",ROM0[$10]\ndw RamStart,RamByte,RamWord,RamLong\n\
+         db RamByte-RamStart,RamWord-RamByte,RamLong-RamWord\n"),
     ok ("rgbasm", "a q suffix names another precision",
         "SECTION \"s\",ROM0[0]\ndl 3.7q8\ndl 1.0q4\ndl 0.25q1\ndl 1.25q1\ndl 0.125q2\n"),
     ok ("rgbasm", "fixed multiply and divide",
