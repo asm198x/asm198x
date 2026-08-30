@@ -34,6 +34,13 @@ This record is the map. It does not restate each plan — it says what order the
 go in and why, and where the freeze-gates are. Read it before scheduling work
 that touches more than one plan.
 
+The longer architectural direction is
+[`llvm-alike-legacy-assembly-infrastructure.md`](llvm-alike-legacy-assembly-infrastructure.md):
+these seams are the beginnings of shared compiler infrastructure for legacy
+assembly, rather than only conveniences shared by today's assemblers. That
+direction does not change this record's evidence-first extraction and freeze
+gates.
+
 ## The four shared seams (where rework concentrates)
 
 | Seam | Owner (defines it) | Consumers (build on it) | Freeze-gate |
