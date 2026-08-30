@@ -98,8 +98,9 @@ impl Dialect for Rgbasm {
         let program = parse_program(source, macros::Expand::Yes)?;
         let mut eval = RgbasmEval {
             set: self.instruction_set(),
-            consts: BTreeMap::new(),
+            consts: BTreeMap::from([("_RS".to_string(), 0)]),
             global: String::new(),
+            rs: 0,
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
@@ -124,8 +125,9 @@ impl Dialect for Rgbasm {
         let program = parse_program_multi(map, loader)?;
         let mut eval = RgbasmEval {
             set: self.instruction_set(),
-            consts: BTreeMap::new(),
+            consts: BTreeMap::from([("_RS".to_string(), 0)]),
             global: String::new(),
+            rs: 0,
         };
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
@@ -402,6 +404,26 @@ impl FlatWalk for Walker {
             text: text.to_string(),
             span: Span::in_file(file, line as u32, (code.len() + 1) as u32),
         });
+
+        // The RS family is evaluator state, not layout state: `RSSET` and
+        // `RSRESET` move a private offset counter, while `DEF name RB/RW/RL`
+        // binds its current value and advances it. Preserve these lines for
+        // the live conditional/repetition walk below; interpreting them here
+        // would let an untaken branch move the counter.
+        if rs_line(code.trim()) {
+            self.nodes.push(Node {
+                operand_span: None,
+                label: None,
+                item: Some(crate::ast::Item::Verbatim),
+                source: code.trim().to_string(),
+                span: Span::in_file(file, line as u32, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut self.pending_leading),
+                    trailing,
+                },
+            });
+            return Ok(None);
+        }
 
         // `SECTION "name", TYPE[$addr]` — a directive preserved verbatim, and
         // an actual section rather than an origin in disguise. Lowering it to
@@ -1134,6 +1156,38 @@ fn constant(code: &str, line: usize) -> Result<Option<Constant>, AsmError> {
     Ok(None)
 }
 
+/// Whether a source line belongs to RGBASM's old-style RS offset-counter
+/// syntax. Full validation stays in `RgbasmEval`, where only live lines run.
+fn rs_line(code: &str) -> bool {
+    let (word, _) = split_first_word(code);
+    word.eq_ignore_ascii_case("rsset")
+        || word.eq_ignore_ascii_case("rsreset")
+        || rs_definition(code).is_some()
+}
+
+/// `DEF name RB/RW/RL [count]`: return the name, byte width, and count text.
+fn rs_definition(code: &str) -> Option<(&str, i64, &str)> {
+    let (def, rest) = split_first_word(code);
+    if !def.eq_ignore_ascii_case("def") {
+        return None;
+    }
+    let (name, rest) = split_first_word(rest);
+    if !is_ident(name) {
+        return None;
+    }
+    let (kind, count) = split_first_word(rest);
+    let width = if kind.eq_ignore_ascii_case("rb") {
+        1
+    } else if kind.eq_ignore_ascii_case("rw") {
+        2
+    } else if kind.eq_ignore_ascii_case("rl") {
+        4
+    } else {
+        return None;
+    };
+    Some((name, width, count.trim()))
+}
+
 /// Split a leading label from the line. rgbasm labels are `name:`/`name::` or a
 /// leading-`.` local; a bare column-0 word with no colon is the mnemonic.
 fn split_label(code: &str, line: usize) -> Result<(Option<String>, &str), AsmError> {
@@ -1305,15 +1359,20 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // symbol management
     Directive {
+        id: "define",
+        pattern: Pattern::Exact(&["def"]),
+        category: Category::Operation,
+    },
+    Directive {
         id: "unsupported-symbol",
-        pattern: Pattern::Exact(&["purge", "redef", "def", "shift"]),
+        pattern: Pattern::Exact(&["purge", "redef", "shift"]),
         category: Category::KnownUnsupported,
     },
     // the RS counter
     Directive {
-        id: "unsupported-the",
+        id: "rs-counter",
         pattern: Pattern::Exact(&["rsset", "rsreset"]),
-        category: Category::KnownUnsupported,
+        category: Category::Operation,
     },
     // blocks and layout
     // The expression functions this dialect implements. Declared as what they
@@ -1780,7 +1839,10 @@ struct RgbasmEval {
     set: &'static isa::InstructionSet,
     consts: BTreeMap<String, i64>,
     global: String,
+    rs: i64,
 }
+
+type LoweredRs = Option<(Option<String>, Option<Operation>)>;
 
 impl crate::ast::CondEval for RgbasmEval {
     fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError> {
@@ -1812,6 +1874,17 @@ impl crate::ast::CondEval for RgbasmEval {
 
     fn lower(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
         let line = node.span.line as usize;
+        if let Some((label, op)) = self.lower_rs(&node.source, line)? {
+            out.push(Statement {
+                line,
+                file: node.span.file,
+                label,
+                op,
+                operand_span: node.operand_span.clone(),
+                xor_mask: 0,
+            });
+            return Ok(());
+        }
         if let Some(sym) = node.label.as_ref()
             && !sym.name.starts_with('.')
         {
@@ -1846,7 +1919,13 @@ impl crate::ast::CondEval for RgbasmEval {
             // a bare `SECTION "a", ROM0` is the case, and re-parsing it would
             // answer `unknown instruction` for a line the reference accepts.
             None => None,
-            Some(it) => match parse_op(self.set, &node.source, &self.consts, &self.global, line) {
+            Some(it) => match parse_op(
+                self.set,
+                &expand_rs_symbol(&node.source, self.rs),
+                &self.consts,
+                &self.global,
+                line,
+            ) {
                 Ok(op) => op,
                 // A directive the walk handled and the line parser cannot
                 // rebuild — `SECTION "a", ROM0[0]`, which carries an origin.
@@ -1868,6 +1947,97 @@ impl crate::ast::CondEval for RgbasmEval {
         });
         Ok(())
     }
+}
+
+impl RgbasmEval {
+    fn lower_rs(&mut self, source: &str, line: usize) -> Result<LoweredRs, AsmError> {
+        let (word, args) = split_first_word(source.trim());
+        if word.eq_ignore_ascii_case("rsreset") {
+            if !args.trim().is_empty() {
+                return Err(AsmError::new(line, "`RSRESET` takes no arguments"));
+            }
+            self.set_rs(0);
+            return Ok(Some((None, None)));
+        }
+        if word.eq_ignore_ascii_case("rsset") {
+            let value = fold_const(&value(args.trim(), line)?, &self.consts, line)?;
+            if value < 0 {
+                return Err(AsmError::new(line, "RS counter must not be negative"));
+            }
+            self.set_rs(value);
+            return Ok(Some((None, None)));
+        }
+        let Some((name, width, count)) = rs_definition(source) else {
+            return Ok(None);
+        };
+        let count = if count.is_empty() {
+            1
+        } else {
+            fold_const(&value(count, line)?, &self.consts, line)?
+        };
+        if count < 0 {
+            return Err(AsmError::new(
+                line,
+                "an RS allocation count must not be negative",
+            ));
+        }
+        let bound = self.rs;
+        let advance = count
+            .checked_mul(width)
+            .and_then(|n| bound.checked_add(n))
+            .ok_or_else(|| AsmError::new(line, "RS counter overflow"))?;
+        self.consts.insert(name.to_string(), bound);
+        self.set_rs(advance);
+        Ok(Some((
+            Some(name.to_string()),
+            Some(Operation::Equ(Expr::Num(bound))),
+        )))
+    }
+
+    fn set_rs(&mut self, value: i64) {
+        self.rs = value;
+        self.consts.insert("_RS".to_string(), value);
+    }
+}
+
+/// `_RS` is a predefined value read at the point an expression is parsed, not
+/// an ordinary final symbol. Substitute that exact token on live source lines;
+/// quoted text and longer identifiers remain untouched.
+fn expand_rs_symbol(source: &str, rs: i64) -> String {
+    let bytes = source.as_bytes();
+    let ident = |b: u8| b.is_ascii_alphanumeric() || matches!(b, b'_' | b'.');
+    let mut out = String::with_capacity(source.len());
+    let mut i = 0;
+    let mut quoted = false;
+    let mut escaped = false;
+    while i < bytes.len() {
+        if bytes[i] == b'"' && !escaped {
+            quoted = !quoted;
+            out.push('"');
+            i += 1;
+            continue;
+        }
+        let before_symbol = i == 0 || !ident(bytes[i - 1]);
+        let after = i + 3;
+        let after_symbol = after >= bytes.len() || !ident(bytes[after]);
+        if !quoted
+            && before_symbol
+            && after <= bytes.len()
+            && &bytes[i..after] == b"_RS"
+            && after_symbol
+        {
+            out.push_str(&rs.to_string());
+            i = after;
+        } else {
+            out.push(bytes[i] as char);
+            escaped = bytes[i] == b'\\' && !escaped;
+            if bytes[i] != b'\\' {
+                escaped = false;
+            }
+            i += 1;
+        }
+    }
+    out
 }
 
 // ---------------------------------------------------------------------------
@@ -2611,6 +2781,66 @@ mod tests {
                     || error.to_string().contains("bit count")
                     || error.to_string().contains("trailing tokens"),
                 "{invalid}: {error}"
+            );
+        }
+    }
+
+    /// RGBASM 1.0.3's old-style structure counter starts at zero. `RB`, `RW`,
+    /// and `RL` bind the current value and advance by 1, 2, or 4 times their
+    /// optional count; `RSSET` and `RSRESET` move that same `_RS` value.
+    #[test]
+    fn rs_definitions_follow_the_live_offset_counter() {
+        let source = "SECTION \"a\", ROM0[0]\n\
+                      db _RS\n\
+                      RSRESET\n\
+                      DEF Foo RB\n\
+                      DEF Bar RB 2\n\
+                      DEF Cat RW\n\
+                      DEF Dog RW 2\n\
+                      DEF Elk RL\n\
+                      DEF Fox RL 2\n\
+                      db Foo, Bar, Cat, Dog, Elk, Fox, _RS\n\
+                      RSSET 3 + 4\n\
+                      DEF Gap RB 0\n\
+                      DEF Hat RB\n\
+                      db Gap, Hat, _RS\n";
+        let out = crate::assemble_rgbasm(source).expect("RS counter source");
+        assert_eq!(out.bytes, vec![0, 0, 1, 3, 5, 9, 13, 21, 7, 7, 8]);
+        for (name, value) in [
+            ("Foo", 0),
+            ("Bar", 1),
+            ("Cat", 3),
+            ("Dog", 5),
+            ("Elk", 9),
+            ("Fox", 13),
+            ("Gap", 7),
+            ("Hat", 7),
+        ] {
+            assert_eq!(out.symbols.get(name), Some(&value), "{name}");
+        }
+
+        // Counter mutations in untaken branches do not happen, while a
+        // repeated allocation advances once per live iteration.
+        let flow =
+            crate::assemble_rgbasm("IF 0\nRSSET 99\nENDC\nREPT 2\nRSSET _RS + 1\nENDR\ndb _RS\n")
+                .expect("conditional and repeated RS state");
+        assert_eq!(flow.bytes, vec![2]);
+
+        let formatted = crate::format_rgbasm(source).expect("formats");
+        assert_eq!(
+            crate::assemble_rgbasm(&formatted)
+                .expect("formatted source")
+                .bytes,
+            out.bytes
+        );
+
+        for source in ["RSSET -1", "DEF Bad RB -1"] {
+            assert!(
+                crate::assemble_rgbasm(source)
+                    .expect_err(source)
+                    .to_string()
+                    .contains("negative"),
+                "{source}"
             );
         }
     }

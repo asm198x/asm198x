@@ -8,13 +8,14 @@ Game Boy SM83, RGBDS syntax.
 
 ## Directives
 
-20 directives, 67 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+21 directives, 67 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
 | `assert` | `assert`, `static_assert` |  |
 | `bytes` | `db` |  |
 | `conditional` | `if`, `elif`, `else`, `endc` |  |
+| `define` | `def` |  |
 | `diagnose` | `fail`, `warn` |  |
 | `export` | `export` | Accepted and discarded — it changes no bytes |
 | `fixed-point-functions` | `high`, `low`, `mul`, `div`, `fmod`, `floor`, `ceil`, `round`, `tzcount` | Used inside an expression, not as a statement |
@@ -25,12 +26,12 @@ Game Boy SM83, RGBDS syntax.
 | `print` | `print`, `println` |  |
 | `repeat` | `rept`, `endr` |  |
 | `reserve` | `ds` |  |
+| `rs-counter` | `rsset`, `rsreset` |  |
 | `string-functions` | `strcat`, `strfmt`, `strupr`, `strlwr`, `strsub`, `strslice`, `strlen`, `strcmp`, `strfind`, `strin`, `strrin`, `strrpl` | Used inside an expression, not as a statement |
 | `string-symbol` | `equs` |  |
 | `unsupported-blocks` | `union`, `nextu`, `endu`, `load`, `endl`, `align`, `for`, `break`, `endsection` | Recognised, and not implemented |
 | `unsupported-option` | `opt`, `popo`, `pusho`, `popc`, `pushc`, `pops`, `pushs`, `charmap`, `newcharmap`, `setcharmap` | Recognised, and not implemented |
-| `unsupported-symbol` | `purge`, `redef`, `def`, `shift` | Recognised, and not implemented |
-| `unsupported-the` | `rsset`, `rsreset` | Recognised, and not implemented |
+| `unsupported-symbol` | `purge`, `redef`, `shift` | Recognised, and not implemented |
 | `words` | `dw` |  |
 
 Instruction mnemonics are not listed here — they come from the instruction-set spec and have their own reference.
