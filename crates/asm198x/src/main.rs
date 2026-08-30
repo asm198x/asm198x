@@ -393,10 +393,18 @@ fn main() -> ExitCode {
     }
 }
 
-/// Apply the cartridge framing performed by `rgbfix -v -p 0xff`: pad to the
-/// next valid power-of-two ROM size (32 KiB minimum), record that size in the
-/// header, then write the header and global checksums.
-fn game_boy_rom(bytes: &[u8]) -> Result<Vec<u8>, String> {
+const NINTENDO_LOGO: [u8; 48] = [
+    0xCE, 0xED, 0x66, 0x66, 0xCC, 0x0D, 0x00, 0x0B, 0x03, 0x73, 0x00, 0x83, 0x00, 0x0C, 0x00, 0x0D,
+    0x00, 0x08, 0x11, 0x1F, 0x88, 0x89, 0x00, 0x0E, 0xDC, 0xCC, 0x6E, 0xE6, 0xDD, 0xDD, 0xD9, 0x99,
+    0xBB, 0xBB, 0x67, 0x63, 0x6E, 0x0E, 0xEC, 0xCC, 0xDD, 0xDC, 0x99, 0x9F, 0xBB, 0xB9, 0x33, 0x3E,
+];
+
+/// Apply the cartridge framing performed by `rgbfix -v -p 0xff`: install the
+/// Nintendo logo, pad to the next valid power-of-two ROM size (32 KiB minimum),
+/// record that size in the header, then write the header and global checksums.
+/// The flag reports RGBFIX's `-Woverwrite` condition for a replaced non-zero
+/// logo byte.
+fn game_boy_rom(bytes: &[u8]) -> Result<(Vec<u8>, bool), String> {
     if bytes.len() < 0x150 {
         return Err("a Game Boy ROM must contain the complete $0100-$014f header".into());
     }
@@ -410,6 +418,11 @@ fn game_boy_rom(bytes: &[u8]) -> Result<Vec<u8>, String> {
     // fill; rgbfix's requested $ff padding begins only after that linked ROM.
     rom.resize(linked_size, 0x00);
     rom.resize(size, 0xFF);
+    let overwrote_logo = rom[0x104..0x134]
+        .iter()
+        .zip(NINTENDO_LOGO)
+        .any(|(&old, new)| old != 0 && old != new);
+    rom[0x104..0x134].copy_from_slice(&NINTENDO_LOGO);
     rom[0x148] = (size / 0x8000).ilog2() as u8;
 
     let header = rom[0x134..=0x14C]
@@ -422,7 +435,7 @@ fn game_boy_rom(bytes: &[u8]) -> Result<Vec<u8>, String> {
         .iter()
         .fold(0u16, |sum, &byte| sum.wrapping_add(u16::from(byte)));
     rom[0x14E..=0x14F].copy_from_slice(&global.to_be_bytes());
-    Ok(rom)
+    Ok((rom, overwrote_logo))
 }
 
 /// Materialise the complete highest ROM bank, matching RGBLINK without `-x`.
@@ -1001,7 +1014,10 @@ fn run(args: &[String]) -> Result<String, String> {
         );
         (summary, out_path)
     } else if gb_rom {
-        let image = game_boy_rom(&assembly.bytes)?;
+        let (image, overwrote_logo) = game_boy_rom(&assembly.bytes)?;
+        if overwrote_logo {
+            eprintln!("asm198x: warning: overwrote a non-zero byte in the Nintendo logo");
+        }
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("gb"));
         std::fs::write(&out_path, &image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
@@ -1625,11 +1641,14 @@ mod tests {
     }
 
     #[test]
-    fn game_boy_rom_matches_rgbfix_padding_and_checksums() {
+    fn game_boy_rom_matches_rgbfix_header_padding_and_checksums() {
         let mut image = vec![0u8; 0x150];
         image[0x134..0x13A].copy_from_slice(b"RACHEL");
-        let rom = game_boy_rom(&image).expect("complete header");
+        let (rom, overwrote_logo) = game_boy_rom(&image).expect("complete header");
+        assert!(!overwrote_logo);
         assert_eq!(rom.len(), 0x8000);
+        assert_eq!(rom[0x104..0x134], NINTENDO_LOGO);
+        assert_eq!(&rom[0x134..0x13A], b"RACHEL");
         assert_eq!(rom[0x148], 0);
         assert!(rom[0x150..0x4000].iter().all(|&byte| byte == 0x00));
         assert!(rom[0x4000..].iter().all(|&byte| byte == 0xFF));
@@ -1646,6 +1665,47 @@ mod tests {
             u16::from_be_bytes([rom[0x14E], rom[0x14F]]),
             expected_global
         );
+    }
+
+    #[test]
+    fn game_boy_rom_reports_only_overwritten_nonzero_logo_bytes() {
+        let mut image = vec![0u8; 0x150];
+        image[0x104] = NINTENDO_LOGO[0];
+        assert!(!game_boy_rom(&image).expect("matching logo byte").1);
+
+        image[0x104] ^= 0xFF;
+        let (rom, overwrote_logo) = game_boy_rom(&image).expect("custom logo byte");
+        assert!(overwrote_logo);
+        assert_eq!(rom[0x104..0x134], NINTENDO_LOGO);
+    }
+
+    #[test]
+    #[ignore = "needs rgbfix 1.0.3; run with --ignored"]
+    fn game_boy_rom_is_byte_identical_to_rgbfix() {
+        let mut image = vec![0u8; 0x4000];
+        image[0x100..0x104].copy_from_slice(&[0xC3, 0x50, 0x01, 0x00]);
+        image[0x104] = 0xAA;
+        image[0x134..0x143].copy_from_slice(b"CUSTOM-TITLE-12");
+        image[0x148..0x14C].copy_from_slice(&[7, 0x11, 0x22, 0x33]);
+
+        let path = std::env::temp_dir().join(format!(
+            "asm198x-rgbfix-{}-{}.gb",
+            std::process::id(),
+            line!()
+        ));
+        std::fs::write(&path, &image).expect("write RGBFIX input");
+        let status = std::process::Command::new("rgbfix")
+            .args(["-v", "-p", "0xFF"])
+            .arg(&path)
+            .status()
+            .expect("run rgbfix");
+        assert!(status.success(), "rgbfix must accept the probe ROM");
+        let reference = std::fs::read(&path).expect("read RGBFIX output");
+        std::fs::remove_file(&path).expect("remove RGBFIX probe");
+
+        let (ours, overwrote_logo) = game_boy_rom(&image).expect("finalise probe ROM");
+        assert!(overwrote_logo);
+        assert_eq!(ours, reference);
     }
 
     #[test]

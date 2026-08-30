@@ -53,14 +53,14 @@ Their native controls pass with the installed verdict-corpus arbiters: ACME
 |---|---:|---:|---|---|
 | 6502Assembly | ACME | 3 | passes | macro defined by preceding `!source` is not visible at `+start_at` |
 | NES-ca65-example | ca65 | 1 | passes | project-specific `TILES` segment/linker config |
-| GB ASM Tutorial — Unbricked | RGBDS | 1 | passes | raw 16 KiB artifact matches RGBLINK exactly; `--gb-rom` omits the Nintendo logo written by `rgbfix -v`, so final checksums differ after bank extent was fixed in #447 |
+| GB ASM Tutorial — Unbricked | RGBDS | 1 | passes | raw 16 KiB artifact matches RGBLINK exactly; `--gb-rom` also matches the 32 KiB artifact finalised by `rgbfix -v -p 0xFF` exactly |
 | SpecNext Invaders | SjASMPlus | 1 | passes | `OPT` directive |
 | HelloAmi | vasm | 1 | passes | `BLO` condition-code spelling |
 
-This is already useful evidence: none of the first seven independent targets
-passes Asm198x unchanged, and the five earliest failures exercise five different
-parts of the compatibility surface. The corpus is therefore a backlog
-generator as well as a regression suite.
+This is already useful evidence: Unbricked now passes Asm198x unchanged at both
+the linked-bank and final-ROM boundaries, while the remaining earliest failures
+exercise four different parts of the compatibility surface. The corpus is
+therefore a backlog generator as well as a regression suite.
 
 The table records the first boundary, not the only one. Once a boundary is
 implemented, rerun the unchanged source and let the next one surface. A target
