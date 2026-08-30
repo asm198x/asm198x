@@ -8,7 +8,7 @@ Game Boy SM83, RGBDS syntax.
 
 ## Directives
 
-21 directives, 67 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+22 directives, 69 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -27,6 +27,7 @@ Game Boy SM83, RGBDS syntax.
 | `repeat` | `rept`, `endr` |  |
 | `reserve` | `ds` |  |
 | `rs-counter` | `rsset`, `rsreset` |  |
+| `section-functions` | `bank`, `startof` | Used inside an expression, not as a statement |
 | `string-functions` | `strcat`, `strfmt`, `strupr`, `strlwr`, `strsub`, `strslice`, `strlen`, `strcmp`, `strfind`, `strin`, `strrin`, `strrpl` | Used inside an expression, not as a statement |
 | `string-symbol` | `equs` |  |
 | `unsupported-blocks` | `union`, `nextu`, `endu`, `load`, `endl`, `align`, `for`, `break`, `endsection` | Recognised, and not implemented |
