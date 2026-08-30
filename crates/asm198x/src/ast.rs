@@ -1250,6 +1250,10 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
         | Operation::Diagnose { .. }
         | Operation::Section { .. }
         | Operation::Reserve(_)) => other,
+        Operation::Fill { count, value } => Operation::Fill {
+            count: map_sym_expr(count, f),
+            value,
+        },
         Operation::Os9EndModule => Operation::Os9EndModule,
         Operation::Assert {
             cond,
@@ -1379,6 +1383,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         },
         Operation::Binary(payload) => Item::Binary(payload),
         Operation::Reserve(count) => Item::Reserve(count),
+        Operation::Fill { .. } => Item::Verbatim,
         Operation::Align {
             andmask,
             value,

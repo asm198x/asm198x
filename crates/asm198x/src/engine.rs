@@ -700,6 +700,13 @@ pub(crate) enum Operation {
     /// here is what made the asl-family output diverge from asl + p2bin, which
     /// leaves a gap and fills it with `$FF`.
     Reserve(usize),
+    /// Emit `value` for a count resolved at the statement's live location.
+    /// RGBASM's `DS $150 - @, 0` needs this: the count is constant only once
+    /// the section has been placed and `@` has a value.
+    Fill {
+        count: Expr,
+        value: u8,
+    },
 }
 
 /// One piece of a dialect-computed instruction encoding.
@@ -811,6 +818,14 @@ pub(crate) fn next_pc(
     Ok(match op {
         Operation::Bytes(items) => pc + items.len() as i64 / addr_unit,
         Operation::Reserve(count) => pc + *count as i64,
+        Operation::Fill { count, .. } => {
+            let count = count.eval(&BTreeMap::new(), pc, line)?;
+            if count < 0 {
+                return Err(AsmError::new(line, "fill count must not be negative"));
+            }
+            pc.checked_add(count)
+                .ok_or_else(|| AsmError::new(line, "location counter overflow"))?
+        }
         // A binary payload occupies whole address units, the final partial unit
         // zero-padded in pass 2 — so both passes count the same.
         Operation::Binary(payload) => pc + payload.len().div_ceil(addr_unit as usize) as i64,
@@ -1257,6 +1272,7 @@ fn assemble_statements(
                 | Operation::Encoded(_)
                 | Operation::DirectPage { .. }
                 | Operation::Binary(_)
+                | Operation::Fill { .. }
                 | Operation::Align { .. }
                 | Operation::AlignTo { .. },
             ) if require_origin && origin.is_none() => {
@@ -1564,6 +1580,14 @@ fn assemble_statements(
             }
             Some(Operation::Reserve(count)) => {
                 bytes.extend(std::iter::repeat_n(gap_fill, count * addr_unit as usize));
+            }
+            Some(Operation::Fill { count, value }) => {
+                let count = count
+                    .eval(&symbols, pc, s.line)
+                    .map_err(|err| s.stamp(err))?;
+                let count =
+                    usize::try_from(count).map_err(|_| s.err("fill count must not be negative"))?;
+                bytes.extend(std::iter::repeat_n(*value, count * addr_unit as usize));
             }
             Some(Operation::Binary(payload)) => {
                 // Asset data, laid down verbatim — never through the per-byte

@@ -2281,6 +2281,10 @@ fn substitute_anon_refs(
         | Operation::Diagnose { .. }
         | Operation::Section { .. }
         | Operation::Reserve(_)) => other,
+        Operation::Fill { count, value } => Operation::Fill {
+            count: subst(count)?,
+            value,
+        },
         Operation::Assert {
             cond,
             fatal,
