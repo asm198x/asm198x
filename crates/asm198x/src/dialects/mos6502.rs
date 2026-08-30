@@ -730,6 +730,21 @@ fn tokenize(
                     return Err(AsmError::new(line, "malformed character literal"));
                 }
             }
+            // RGBDS graphics constants pack pixels written with the alphabet
+            // 0..3 into the two bitplanes of a Game Boy tile row. The shared
+            // callback retains the dialect-specific packing and validation;
+            // `fixed_point` is already the RGBASM-only number grammar switch.
+            '`' if opts.fixed_point => {
+                let start = i;
+                i += 1;
+                while i < chars.len() && (chars[i].is_ascii_alphanumeric() || chars[i] == '_') {
+                    i += 1;
+                }
+                tokens.push(Tok::Num(parse_number(
+                    &chars[start..i].iter().collect::<String>(),
+                    line,
+                )?));
+            }
             '$' | '%' => {
                 let start = i;
                 i += 1;

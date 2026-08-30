@@ -777,6 +777,23 @@ fn separators(
 fn integer(text: &str, line: usize) -> Result<i64, AsmError> {
     let trimmed = text.trim();
     let bad = || AsmError::new(line, format!("`{text}` is not a number"));
+    if let Some(body) = trimmed.strip_prefix('`') {
+        let digits = separators(body, true, text, line)?;
+        if !digits.chars().all(|c| matches!(c, '0'..='3')) {
+            return Err(bad());
+        }
+        // Each source digit is one pixel: its low bit enters plane 0 and its
+        // high bit enters plane 1. Short rows remain right-aligned; RGBASM
+        // warns on longer rows and considers only the first eight pixels.
+        let mut low = 0i64;
+        let mut high = 0i64;
+        for digit in digits.bytes().take(8) {
+            let pixel = digit - b'0';
+            low = (low << 1) | i64::from(pixel & 1);
+            high = (high << 1) | i64::from(pixel >> 1);
+        }
+        return Ok(low | (high << 8));
+    }
     for (prefix, radix) in [('$', 16), ('%', 2), ('&', 8)] {
         if let Some(body) = trimmed.strip_prefix(prefix) {
             let body = separators(body, true, text, line)?;
@@ -2938,6 +2955,37 @@ mod tests {
                 error.to_string().contains("separator")
                     || error.to_string().contains("bit count")
                     || error.to_string().contains("trailing tokens"),
+                "{invalid}: {error}"
+            );
+        }
+    }
+
+    /// A backtick graphics constant describes up to eight two-bit Game Boy
+    /// pixels. RGBASM 1.0.3 puts each digit's low bit in the low byte and its
+    /// high bit in the high byte, retaining source order within both planes.
+    #[test]
+    fn graphics_literals_pack_two_bit_tile_rows() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"a\", ROM0[0]\n\
+             dw `0, `1, `2, `3, `01, `10, `0123, `3210\n\
+             dw `00000000, `11111111, `22222222, `33333333\n\
+             dw `01230123, `32103210, `0_1, `_01, `333333333\n\
+             dw `0123 + 1, (`3210 << 1)\n",
+        )
+        .expect("graphics literals");
+        assert_eq!(
+            out.bytes,
+            vec![
+                0, 0, 1, 0, 0, 1, 1, 1, 1, 0, 2, 0, 5, 3, 10, 12, 0, 0, 255, 0, 0, 255, 255, 255,
+                85, 51, 170, 204, 1, 0, 1, 0, 255, 255, 6, 3, 20, 24,
+            ]
+        );
+
+        for invalid in ["`", "`01_", "`0__1", "`0124", "`01a2"] {
+            let error = crate::assemble_rgbasm(&format!("SECTION \"a\", ROM0[0]\ndw {invalid}\n"))
+                .expect_err(invalid);
+            assert!(
+                error.to_string().contains("number") || error.to_string().contains("separator"),
                 "{invalid}: {error}"
             );
         }
