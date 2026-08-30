@@ -410,7 +410,7 @@ impl FlatWalk for Walker {
         // binds its current value and advances it. Preserve these lines for
         // the live conditional/repetition walk below; interpreting them here
         // would let an untaken branch move the counter.
-        if rs_line(code.trim()) {
+        if rs_line(code.trim()) || pc_dependent_ds(code.trim()) {
             self.nodes.push(Node {
                 operand_span: None,
                 label: None,
@@ -1165,6 +1165,24 @@ fn rs_line(code: &str) -> bool {
         || rs_definition(code).is_some()
 }
 
+fn pc_dependent_ds(code: &str) -> bool {
+    pc_ds_parts(code).is_some()
+}
+
+fn pc_ds_parts(code: &str) -> Option<(Option<&str>, &str)> {
+    let (first, rest) = split_first_word(code);
+    let (label, operation) = if let Some(label) = first.strip_suffix(':') {
+        (Some(label), rest)
+    } else {
+        (None, code)
+    };
+    let (word, args) = split_first_word(operation);
+    if !word.eq_ignore_ascii_case("ds") || !args.contains('@') {
+        return None;
+    }
+    Some((label, args))
+}
+
 /// `DEF name RB/RW/RL [count]`: return the name, byte width, and count text.
 fn rs_definition(code: &str) -> Option<(&str, i64, &str)> {
     let (def, rest) = split_first_word(code);
@@ -1874,6 +1892,26 @@ impl crate::ast::CondEval for RgbasmEval {
 
     fn lower(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
         let line = node.span.line as usize;
+        if let Some((label, args)) = pc_ds_parts(&node.source) {
+            let op = parse_live_ds(args, &self.consts, line)?;
+            let label = label.map(|name| {
+                if name.starts_with('.') && !self.global.is_empty() {
+                    format!("{}{name}", self.global)
+                } else {
+                    self.global = name.to_string();
+                    name.to_string()
+                }
+            });
+            out.push(Statement {
+                line,
+                file: node.span.file,
+                label,
+                op: Some(op),
+                operand_span: node.operand_span.clone(),
+                xor_mask: 0,
+            });
+            return Ok(());
+        }
         if let Some((label, op)) = self.lower_rs(&node.source, line)? {
             out.push(Statement {
                 line,
@@ -1946,6 +1984,46 @@ impl crate::ast::CondEval for RgbasmEval {
             xor_mask: 0,
         });
         Ok(())
+    }
+}
+
+fn parse_live_ds(
+    args: &str,
+    consts: &BTreeMap<String, i64>,
+    line: usize,
+) -> Result<Operation, AsmError> {
+    let parts = split_top_level(args, ',');
+    if parts.is_empty() || parts.len() > 2 {
+        return Err(AsmError::new(line, "`ds` needs a count and optional fill"));
+    }
+    let count = bind_known(value(parts[0], line)?, consts);
+    let fill = match parts.get(1) {
+        None => 0,
+        Some(v) => {
+            let n = fold_const(&value(v, line)?, consts, line)?;
+            u8::try_from(n & 0xFF).unwrap_or(0)
+        }
+    };
+    Ok(Operation::Fill { count, value: fill })
+}
+
+fn bind_known(expr: Expr, consts: &BTreeMap<String, i64>) -> Expr {
+    let one = |e: Box<Expr>| Box::new(bind_known(*e, consts));
+    match expr {
+        Expr::Sym(name) => consts
+            .get(&name)
+            .copied()
+            .map_or(Expr::Sym(name), Expr::Num),
+        Expr::Lo(e) => Expr::Lo(one(e)),
+        Expr::Hi(e) => Expr::Hi(one(e)),
+        Expr::Bank(e) => Expr::Bank(one(e)),
+        Expr::Neg(e) => Expr::Neg(one(e)),
+        Expr::BitNot(e) => Expr::BitNot(one(e)),
+        Expr::FixRound(e) => Expr::FixRound(one(e)),
+        Expr::TrailingZeros(e) => Expr::TrailingZeros(one(e)),
+        Expr::LogNot(e) => Expr::LogNot(one(e)),
+        Expr::Bin(op, left, right) => Expr::Bin(op, one(left), one(right)),
+        Expr::Num(_) | Expr::Pc => expr,
     }
 }
 
@@ -3103,6 +3181,31 @@ mod tests {
         assert_eq!(bytes(" ld hl, @\n"), vec![0x21, 0x00, 0x00]);
         // `@+4` from the jr at 0 (len 2) → offset +2.
         assert_eq!(bytes(" jr @+4\n nop\n nop\n"), vec![0x18, 0x02, 0x00, 0x00]);
+    }
+
+    #[test]
+    fn ds_count_can_end_at_an_address_relative_to_the_current_location() {
+        let source = "SECTION \"s\", ROM0[$100]\n\
+                      db $11\n\
+                      Here: ds $105 - @, $aa\n\
+                      Empty: ds @ - @, $bb\n\
+                      db $55\n";
+        let out = crate::assemble_rgbasm(source).expect("PC-relative DS");
+        assert_eq!(&out.bytes[0x100..], &[0x11, 0xaa, 0xaa, 0xaa, 0xaa, 0x55]);
+        assert_eq!(out.symbols.get("Here"), Some(&0x101));
+        assert_eq!(out.symbols.get("Empty"), Some(&0x105));
+
+        let formatted = crate::format_rgbasm(source).expect("formats");
+        assert_eq!(
+            crate::assemble_rgbasm(&formatted)
+                .expect("formatted source")
+                .bytes,
+            out.bytes
+        );
+
+        let error = crate::assemble_rgbasm("SECTION \"s\", ROM0[$100]\ndb 0\nds $100 - @\n")
+            .expect_err("negative reserve count");
+        assert!(error.to_string().contains("negative"), "{error}");
     }
 
     #[test]

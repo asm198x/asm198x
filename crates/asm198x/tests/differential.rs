@@ -403,6 +403,8 @@ const PROBES: &[Probe] = &[
         "SECTION \"s\",ROM0[0]\ndb _RS\nrsreset\nDEF Foo RB\nDEF Bar RB 2\nDEF Cat RW\n\
          DEF Dog RW 2\nDEF Elk RL\nDEF Fox RL 2\ndb Foo,Bar,Cat,Dog,Elk,Fox,_RS\n\
          rsset 7\nDEF Gap RB 0\nDEF Hat RB\ndb Gap,Hat,_RS\n"),
+    ok ("rgbasm", "DS count relative to the live location counter",
+        "SECTION \"s\",ROM0[$100]\ndb $11\nHere: ds $105-@,$aa\nEmpty: ds @-@,$bb\ndb $55\n"),
     ok ("rgbasm", "a q suffix names another precision",
         "SECTION \"s\",ROM0[0]\ndl 3.7q8\ndl 1.0q4\ndl 0.25q1\ndl 1.25q1\ndl 0.125q2\n"),
     ok ("rgbasm", "fixed multiply and divide",
