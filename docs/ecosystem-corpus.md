@@ -55,7 +55,7 @@ Their native controls pass with the installed verdict-corpus arbiters: ACME
 | NES-ca65-example | ca65 | 1 | passes | project-specific `TILES` segment/linker config |
 | GB ASM Tutorial — Unbricked | RGBDS | 1 | passes | raw 16 KiB artifact matches RGBLINK exactly; `--gb-rom` also matches the 32 KiB artifact finalised by `rgbfix -v -p 0xFF` exactly |
 | SpecNext Invaders | SjASMPlus | 1 | passes | `OPT` directive |
-| HelloAmi | vasm | 1 | passes | `BLO` condition-code spelling |
+| HelloAmi | vasm | 1 | passes | re-audit after the unsigned condition-code alias family; no known source rejection remains |
 
 This is already useful evidence: Unbricked now passes Asm198x unchanged at both
 the linked-bank and final-ROM boundaries, while the remaining earliest failures

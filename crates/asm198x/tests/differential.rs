@@ -1299,6 +1299,8 @@ const PROBES: &[Probe] = &[
     ok ("vasm", "old-style d(An)",       " move.w 4(a0),d0\n move.w 4(a0,d0.w),d1\n"),
     ok ("vasm", "predec / postinc",      " move.l -(a7),d0\n move.l (a0)+,d1\n"),
     ok ("vasm", "movem / dbra / trap",   " movem.l d0-d7/a0-a6,-(a7)\n dbra d0,*\n trap #0\n"),
+    ok ("vasm", "unsigned condition aliases",
+        " bhs.b next\n nop\nnext: blo.w done\n dbhs d0,next\n dblo.w d1,done\n shs d2\n slo.b d3\ndone: nop\n"),
     ok ("vasm", "sub/cmp An (base)",     " sub.l a0,a1\n cmp.l a0,a1\n"),
     ok ("vasm", "new-style (d,An)",      " lea (4,a0),a1\n"),
     ok ("vasm", "new-style (d,An,Xn)",   " lea (4,a0,d0.w),a1\n"),

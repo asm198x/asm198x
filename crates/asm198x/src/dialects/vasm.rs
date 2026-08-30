@@ -96,6 +96,22 @@ fn eval(e: &Expr, consts: &BTreeMap<String, i64>, here: i64, line: usize) -> Res
 /// `Category::KnownUnsupported` exists to avoid one level up.
 const ADDRESS_ALIASES: &[&str] = &["ADDA", "SUBA", "CMPA"];
 
+/// Motorola's unsigned condition-code aliases. Vasm accepts the `HS`/`LO`
+/// pair everywhere the underlying `CC`/`CS` condition appears: branches,
+/// decrement-and-branches, and condition setters. Keep this at the dialect
+/// seam so the ISA and disassembler retain one canonical spelling per opcode.
+fn canonical_condition_alias(mnemonic: &str) -> &str {
+    match mnemonic {
+        "BHS" => "BCC",
+        "BLO" => "BCS",
+        "DBHS" => "DBCC",
+        "DBLO" => "DBCS",
+        "SHS" => "SCC",
+        "SLO" => "SCS",
+        _ => mnemonic,
+    }
+}
+
 /// The right refusal for a mnemonic the spec has no entry for: an alias that
 /// survived lowering is a *known* mnemonic used with operands it has no form
 /// for, and saying otherwise tells the reader their source is invalid when it
@@ -125,6 +141,7 @@ fn lower<'a>(
     ctx: &Ctx,
     consts: &BTreeMap<String, i64>,
 ) -> (&'a str, Cow<'a, [Opnd]>, Option<Size>) {
+    let mnemonic = canonical_condition_alias(mnemonic);
     // adda/suba/cmpa are the address-register-destination spellings of add/sub/
     // cmp; the spec encodes those forms under the base mnemonic (form selection
     // picks the An-destination form). Alias them when the destination is an An,
@@ -988,7 +1005,7 @@ fn relaxable_branch_target(kind: &Stmt) -> Option<&Expr> {
     if matches!(size, Some(Size::W | Size::L)) {
         return None; // explicitly forced to word/long
     }
-    let insn = m68k::SET.instruction(mnemonic)?;
+    let insn = m68k::SET.instruction(canonical_condition_alias(mnemonic))?;
     let form = match_form(insn, operands)?;
     if !form.operands.iter().any(|s| matches!(s, Slot::BranchW)) {
         return None;
@@ -3309,6 +3326,18 @@ fn parse_op(
     }
 
     let (mnemonic, size) = split_size(word, line)?;
+    let alias_size_ok = match mnemonic.as_str() {
+        "BHS" | "BLO" => !matches!(size, Some(Size::L)),
+        "DBHS" | "DBLO" => matches!(size, None | Some(Size::W)),
+        "SHS" | "SLO" => matches!(size, None | Some(Size::B)),
+        _ => true,
+    };
+    if !alias_size_ok {
+        return Err(AsmError::new(
+            line,
+            format!("`{mnemonic}` does not support that size"),
+        ));
+    }
     let operands = parse_operands(args, line)?;
     Ok(Stmt::Insn {
         mnemonic,
@@ -4464,6 +4493,57 @@ mod directive_surface {
                 .bytes,
             vec![0x58, 0x88],
             "the form that does exist is unaffected"
+        );
+    }
+
+    #[test]
+    fn unsigned_condition_aliases_cover_branch_decrement_and_set_families() {
+        for (alias, canonical, operands) in [
+            ("bhs", "bcc", "target"),
+            ("blo", "bcs", "target"),
+            ("dbhs", "dbcc", "d0,target"),
+            ("dblo", "dbcs", "d0,target"),
+            ("shs", "scc", "d0"),
+            ("slo", "scs", "d0"),
+        ] {
+            for suffix in match alias.as_bytes()[0] {
+                b'b' => ["", ".b", ".w"].as_slice(),
+                b'd' => ["", ".w"].as_slice(),
+                _ => ["", ".b"].as_slice(),
+            } {
+                let source = format!("\t{alias}{suffix} {operands}\n\tnop\ntarget:\tnop\n");
+                let reference = format!("\t{canonical}{suffix} {operands}\n\tnop\ntarget:\tnop\n");
+                assert_eq!(
+                    crate::assemble_vasm(&source).expect(&source).bytes,
+                    crate::assemble_vasm(&reference).expect(&reference).bytes,
+                    "{alias}{suffix} must encode as {canonical}{suffix}"
+                );
+            }
+        }
+    }
+
+    #[test]
+    fn unsigned_condition_aliases_reject_near_misses_and_disassemble_canonically() {
+        for near_miss in ["bhis", "blos", "dbhis", "dblos", "shis", "slos"] {
+            let source = format!("\t{near_miss} d0\n");
+            crate::assemble_vasm(&source).expect_err("vasm rejects this near-miss");
+        }
+        for bad_size in ["bhs.l target", "dblo.b d0,target", "shs.w d0"] {
+            let source = format!("\t{bad_size}\ntarget:\tnop\n");
+            crate::assemble_vasm(&source).expect_err("vasm rejects this size");
+        }
+
+        let bytes = crate::assemble_vasm("\tblo.b target\ntarget:\tnop\n")
+            .expect("alias")
+            .bytes;
+        let listing = crate::listing_68000(&bytes, 0);
+        assert!(listing.contains("bcs."), "canonical listing:\n{listing}");
+        assert!(!listing.contains("blo"), "canonical listing:\n{listing}");
+        assert_eq!(
+            crate::assemble_vasm(&listing)
+                .expect("canonical listing")
+                .bytes,
+            bytes
         );
     }
 }
