@@ -96,6 +96,7 @@ impl Dialect for Rgbasm {
         // then lower to the engine's statement stream — byte-identical to the old
         // direct parse (AE1). Other CPUs stay on direct lowering (KTD6).
         let program = parse_program(source, macros::Expand::Yes)?;
+        let nonrom = nonrom_section_meta(&program.nodes);
         let (consts, defined) = initial_symbols();
         let mut eval = RgbasmEval {
             set: self.instruction_set(),
@@ -109,6 +110,7 @@ impl Dialect for Rgbasm {
         let banks = declared_banks(&out);
         resolve_banks(&mut out, &banks)?;
         place_floating_rom0_sections(&mut out)?;
+        place_floating_nonrom_sections(&mut out, &nonrom)?;
         let starts = declared_section_starts(&out);
         resolve_starts(&mut out, &starts)?;
         Ok(out)
@@ -127,6 +129,7 @@ impl Dialect for Rgbasm {
         loader: &dyn SourceLoader,
     ) -> Result<Vec<Statement>, AsmError> {
         let program = parse_program_multi(map, loader)?;
+        let nonrom = nonrom_section_meta(&program.nodes);
         let (consts, defined) = initial_symbols();
         let mut eval = RgbasmEval {
             set: self.instruction_set(),
@@ -140,6 +143,7 @@ impl Dialect for Rgbasm {
         let banks = declared_banks(&out);
         resolve_banks(&mut out, &banks)?;
         place_floating_rom0_sections(&mut out)?;
+        place_floating_nonrom_sections(&mut out, &nonrom)?;
         let starts = declared_section_starts(&out);
         resolve_starts(&mut out, &starts)?;
         Ok(out)
@@ -1048,6 +1052,153 @@ fn section_region_start(kind: &str) -> Option<i64> {
             section_default_base(&upper)
         }
     })
+}
+
+#[derive(Clone)]
+struct NonromMeta {
+    kind: String,
+    pinned: bool,
+    declaration: usize,
+}
+
+fn nonrom_section_meta(nodes: &[Node]) -> BTreeMap<String, NonromMeta> {
+    nodes
+        .iter()
+        .enumerate()
+        .filter_map(|(declaration, node)| {
+            let code = node.source.trim();
+            code.to_ascii_uppercase()
+                .starts_with("SECTION")
+                .then(|| {
+                    let kind = section_kind(code);
+                    (!matches!(kind.as_str(), "ROM0" | "ROMX")).then(|| {
+                        (
+                            section_name(code),
+                            NonromMeta {
+                                kind,
+                                pinned: section_origin(code, node.span.line as usize)
+                                    .ok()
+                                    .flatten()
+                                    .is_some(),
+                                declaration,
+                            },
+                        )
+                    })
+                })
+                .flatten()
+        })
+        .collect()
+}
+
+fn section_region_end(kind: &str) -> Option<i64> {
+    Some(match kind {
+        "VRAM" => 0xA000,
+        "SRAM" => 0xC000,
+        "WRAM0" => 0xD000,
+        "WRAMX" => 0xE000,
+        "OAM" => 0xFEA0,
+        "HRAM" => 0xFFFF,
+        _ => return None,
+    })
+}
+
+/// Place floating BSS sections with RGBLINK's largest-first, reverse-source
+/// tie break, then first-fit around pinned ranges. They remain `Discard`
+/// sections, so only their resolved addresses enter the cartridge image.
+fn place_floating_nonrom_sections(
+    ops: &mut [Statement],
+    meta: &BTreeMap<String, NonromMeta>,
+) -> Result<(), AsmError> {
+    #[derive(Clone, Copy)]
+    struct Section {
+        statement: usize,
+        end: usize,
+        base: i64,
+        declaration: usize,
+        pinned: bool,
+    }
+
+    fn extent(ops: &[Statement], section: Section, base: i64) -> Result<i64, AsmError> {
+        let mut pc = base;
+        for st in &ops[section.statement + 1..section.end] {
+            if let Some(op) = &st.op {
+                pc = crate::engine::next_pc(op, pc, &isa::sm83::SET, None, 1, st.line)
+                    .map_err(|err| st.stamp(err))?;
+            }
+        }
+        Ok(pc)
+    }
+
+    let starts: Vec<usize> = ops
+        .iter()
+        .enumerate()
+        .filter_map(|(i, st)| matches!(st.op, Some(Operation::Section { .. })).then_some(i))
+        .collect();
+    for kind in ["VRAM", "SRAM", "WRAM0", "WRAMX", "OAM", "HRAM"] {
+        let region_start = section_default_base(kind);
+        let region_end = section_region_end(kind).expect("known region");
+        let mut sections = Vec::new();
+        for (n, &statement) in starts.iter().enumerate() {
+            let end = starts.get(n + 1).copied().unwrap_or(ops.len());
+            let Some(Operation::Section {
+                name,
+                base: Some(base),
+                at: crate::engine::Place::Discard,
+            }) = &ops[statement].op
+            else {
+                continue;
+            };
+            let Some(info) = meta.get(name).filter(|m| m.kind == kind) else {
+                continue;
+            };
+            sections.push(Section {
+                statement,
+                end,
+                base: *base,
+                declaration: info.declaration,
+                pinned: info.pinned,
+            });
+        }
+        let mut occupied = Vec::new();
+        for section in sections.iter().copied().filter(|s| s.pinned) {
+            occupied.push((section.base, extent(ops, section, section.base)?));
+        }
+        occupied.sort_unstable();
+        let mut floating = sections
+            .iter()
+            .copied()
+            .filter(|s| !s.pinned)
+            .map(|s| Ok((s, extent(ops, s, region_start)? - region_start)))
+            .collect::<Result<Vec<_>, AsmError>>()?;
+        floating
+            .sort_by_key(|(s, size)| (std::cmp::Reverse(*size), std::cmp::Reverse(s.declaration)));
+        for (section, size) in floating {
+            let mut base = region_start;
+            loop {
+                let end = base + size;
+                if let Some((_, used_end)) = occupied
+                    .iter()
+                    .find(|(used_start, used_end)| base < *used_end && end > *used_start)
+                {
+                    base = *used_end;
+                    continue;
+                }
+                if end > region_end {
+                    return Err(
+                        ops[section.statement].err(format!("{kind} sections exceed their region"))
+                    );
+                }
+                if let Some(Operation::Section { base: slot, .. }) = &mut ops[section.statement].op
+                {
+                    *slot = Some(base);
+                }
+                occupied.push((base, end));
+                occupied.sort_unstable();
+                break;
+            }
+        }
+    }
+    Ok(())
 }
 
 /// Give floating ROM0 sections RGBLINK's largest-first, first-fit layout.
@@ -3204,6 +3355,26 @@ mod tests {
         );
         assert_eq!(out.symbols.get("RomLong"), Some(&7));
         assert_eq!(out.symbols.get("RamLong"), Some(&0xC007));
+    }
+
+    /// RGBLINK places floating RAM sections largest-first. Equal sizes use
+    /// reverse declaration order, and pinned sections reserve their ranges
+    /// before first-fit placement begins.
+    #[test]
+    fn floating_wram_sections_follow_rgblink_placement() {
+        let out = crate::assemble_rgbasm(
+            "SECTION \"Zed\",WRAM0\nZed: ds 2\n\
+             SECTION \"Alpha\",WRAM0\nAlpha: ds 2\n\
+             SECTION \"Middle\",WRAM0\nMiddle: ds 2\n\
+             SECTION \"Pinned\",WRAM0[$c008]\nPinned: ds 2\n\
+             SECTION \"Small\",WRAM0\nSmall: ds 1\n\
+             SECTION \"rom\",ROM0[0]\ndw Zed,Alpha,Middle,Pinned,Small\n",
+        )
+        .expect("floating WRAM placement");
+        assert_eq!(
+            out.bytes,
+            [0x04, 0xC0, 0x02, 0xC0, 0x00, 0xC0, 0x08, 0xC0, 0x06, 0xC0]
+        );
     }
 
     /// A label belongs to its own section, so it resolves against that
