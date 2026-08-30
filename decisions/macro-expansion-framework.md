@@ -202,6 +202,20 @@ fails rather than passes.
   That makes five of six dialects whose formatter refuses what it cannot lay
   out; only sjasmplus round-trips a macro. Closing that is its own piece of work.
 
+- **2026-08-30 — acme macros across `!source`** (#429). ACME 0.97 was probed
+  in both directions: a definition in an included file is visible afterward
+  in its includer, a definition in the includer is visible inside the included
+  file, and a nested include's definition flows all the way back out. Macro
+  state is therefore part of ACME's live include environment, alongside
+  symbols and zones. A definition later in the includer is not visible inside
+  an earlier include, so multi-file ACME registers definitions and expands
+  calls in the evaluation walk's exact textual order. The shared expander
+  gained a reusable namespace; other dialects keep the short-lived one-file
+  default. Expansion frames now retain both the included definition span and
+  the invocation span, so textual inclusion does not cost source provenance.
+  The pinned 6502Assembly corpus advances to the independent `%` expression
+  gap (#455).
+
 ## Drift triggers
 
 Stop and re-consult if a change would:
@@ -225,9 +239,9 @@ Stop and re-consult if a change would:
 - **Reproduce a reference's crash for fidelity.** Both assemblers measured
   segfault on self-recursion (exit 139). Byte-identical output is the goal;
   byte-identical crashing is not.
-- **Expand macros across an include boundary** without probing what the
-  reference does. Each file expands on its own today, which is a deliberate
-  hold, not a considered answer, and a multi-file test pins it.
+- **Expand another dialect's macros across an include boundary** without
+  probing what its reference does. ACME's namespace is now deliberately live
+  across `!source`; no conclusion was inferred for the other dialects.
 - **Add a dialect's macros to its single-source parse only.** The CLI assembles
   through the multi-file entry point, so a hook in the wrong place passes every
   library test and does nothing in the tool. It has happened once.

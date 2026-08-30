@@ -27,6 +27,7 @@
 
 use crate::ast::Node;
 use crate::engine::AsmError;
+use crate::span::FileId;
 use crate::span::{ExpansionFrame, Span};
 
 /// How deep expansion may nest before we call it runaway.
@@ -155,7 +156,11 @@ pub(crate) trait MacroSyntax {
             if self.is_end(line) {
                 return Some(Ok(Definition {
                     name,
-                    def: MacroDef { params, body },
+                    def: MacroDef {
+                        params,
+                        body,
+                        defined_at: None,
+                    },
                     last_line: offset,
                 }));
             }
@@ -227,12 +232,24 @@ pub(crate) struct Expanded {
 }
 
 /// A macro as collected by the pre-pass.
+#[derive(Clone)]
 pub(crate) struct MacroDef {
     /// Parameter names, in order. Empty for a dialect whose parameters are
     /// positional, where [`MacroSyntax::argument_names`] supplies them instead.
     pub(crate) params: Vec<String>,
     /// Body lines, verbatim, before substitution.
     pub(crate) body: Vec<String>,
+    /// The definition header, when expansion is shared across source files.
+    pub(crate) defined_at: Option<Span>,
+}
+
+/// A live macro namespace. Most dialects expand one source string and use the
+/// short-lived default; ACME threads one namespace through its live include
+/// walk because `!source` is textual for macro visibility.
+#[derive(Default)]
+pub(crate) struct MacroState {
+    macros: std::collections::HashMap<String, Vec<MacroDef>>,
+    expansions: usize,
 }
 
 /// A definition the pre-pass lifted out of the source.
@@ -398,12 +415,34 @@ fn fold_defined_macro(
 }
 
 pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expanded, AsmError> {
+    expand_in(syntax, source, FileId(0), &mut MacroState::default())
+}
+
+/// Expand one file against a namespace shared with earlier files in an include
+/// walk. Definitions collected here remain visible to subsequent calls.
+pub(crate) fn expand_in<S: MacroSyntax>(
+    syntax: &S,
+    source: &str,
+    file: FileId,
+    state: &mut MacroState,
+) -> Result<Expanded, AsmError> {
+    expand_at(syntax, source, file, 1, state)
+}
+
+/// As [`expand_in`], with the source fragment's first line in its real file.
+/// ACME uses this when a live include walk reaches a definition or invocation
+/// node that was deliberately left unexpanded by the file parser.
+pub(crate) fn expand_at<S: MacroSyntax>(
+    syntax: &S,
+    source: &str,
+    file: FileId,
+    first_line: usize,
+    state: &mut MacroState,
+) -> Result<Expanded, AsmError> {
     let lines: Vec<&str> = source.lines().collect();
     // Definitions are grouped by name rather than replaced, because one dialect
     // — acme — lets a name carry several, told apart by how many arguments they
     // take. Where a dialect has only ever one, the group holds one.
-    let mut macros: std::collections::HashMap<String, Vec<MacroDef>> =
-        std::collections::HashMap::new();
     // The source line each name became defined on, for `.definedmacro`: a
     // definition below the line that asks does not count.
     let mut defined_at: std::collections::HashMap<String, usize> = std::collections::HashMap::new();
@@ -413,7 +452,7 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
     let mut i = 0;
     while i < lines.len() {
         let raw = lines[i];
-        let line_no = i + 1;
+        let line_no = first_line + i;
         if let Some(collected) = syntax.collect(&lines, i) {
             let Definition {
                 name,
@@ -421,7 +460,9 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
                 last_line,
             } = collected.map_err(|msg| AsmError::new(line_no, msg))?;
             defined_at.entry(name.clone()).or_insert(last_line + 1);
-            macros.entry(name).or_default().push(def);
+            let mut def = def;
+            def.defined_at = Some(Span::in_file(file, line_no as u32, 1));
+            state.macros.entry(name).or_default().push(def);
             i = last_line + 1;
             continue;
         }
@@ -437,18 +478,17 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
 
     // Pass 2 — expand until nothing is left to expand, since a body may invoke
     // another macro.
-    let mut expansions = 0usize;
     for depth in 0..=MAX_EXPANSION_DEPTH {
         let mut next: Vec<(LineOrigin, String)> = Vec::with_capacity(body.len());
         let mut expanded_any = false;
         for (origin, text) in &body {
             let Some((label, name, args)) =
-                invocation(syntax, text, &|w: &str| macros.contains_key(w))
+                invocation(syntax, text, &|w: &str| state.macros.contains_key(w))
             else {
                 next.push((origin.clone(), text.clone()));
                 continue;
             };
-            let Some(def) = syntax.select(&macros[&name], args.len()) else {
+            let Some(def) = syntax.select(&state.macros[&name], args.len()) else {
                 // Only reachable where arity picks the definition: the name is
                 // known, but no definition takes this many arguments.
                 return Err(AsmError::new(
@@ -473,18 +513,19 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
                 ));
             }
             expanded_any = true;
-            expansions += 1;
+            state.expansions += 1;
             let locals = syntax.locals(&def.body);
             let renamed: Vec<String> = locals
                 .iter()
-                .map(|local| syntax.rename_local(local, expansions))
+                .map(|local| syntax.rename_local(local, state.expansions))
                 .collect();
             // The new frame goes in front, so the innermost expansion is named
             // first — the order the `included from` notes already use.
             let mut frames = Vec::with_capacity(origin.frames.len() + 1);
             frames.push(ExpansionFrame {
                 macro_name: name.clone(),
-                invoked_at: Box::new(Span::at(origin.line as u32, 0)),
+                defined_at: def.defined_at.clone().map(Box::new),
+                invoked_at: Box::new(Span::in_file(file, origin.line as u32, 0)),
             });
             frames.extend(origin.frames.iter().cloned());
             // A label in front of the invocation is the author's own text, so
@@ -507,7 +548,7 @@ pub(crate) fn expand<S: MacroSyntax>(syntax: &S, source: &str) -> Result<Expande
                 if let Some(token) = syntax.expansion_token() {
                     // A plain textual swap: the token is not a symbol, so the
                     // word-boundary rules above would never see it.
-                    text = text.replace(token, &expansions.to_string());
+                    text = text.replace(token, &state.expansions.to_string());
                 }
                 next.push((
                     LineOrigin {

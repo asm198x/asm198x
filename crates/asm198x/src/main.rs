@@ -1285,10 +1285,26 @@ fn render_expansion_notes(span: &asm198x::Span) -> String {
     span.expansion_frames
         .iter()
         .map(|frame| {
-            format!(
-                "\nin expansion of macro `{}` invoked at line {}",
-                frame.macro_name, frame.invoked_at.line
-            )
+            let invoked = frame.invoked_at.path.as_deref().map_or_else(
+                || format!("line {}", frame.invoked_at.line),
+                |path| format!("{path}:{}", frame.invoked_at.line),
+            );
+            let defined = frame.defined_at.as_deref().map(|span| {
+                span.path.as_deref().map_or_else(
+                    || format!("line {}", span.line),
+                    |path| format!("{path}:{}", span.line),
+                )
+            });
+            match defined {
+                Some(defined) => format!(
+                    "\nin expansion of macro `{}` defined at {defined}, invoked at {invoked}",
+                    frame.macro_name
+                ),
+                None => format!(
+                    "\nin expansion of macro `{}` invoked at {invoked}",
+                    frame.macro_name
+                ),
+            }
         })
         .collect()
 }

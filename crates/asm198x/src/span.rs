@@ -47,6 +47,11 @@ impl FileId {
 #[non_exhaustive]
 pub struct ExpansionFrame {
     pub macro_name: String,
+    /// Where the selected definition begins. Older serialized diagnostics did
+    /// not carry this field, so readers may omit it and writers omit it when a
+    /// legacy expansion path has no definition location.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub defined_at: Option<Box<Span>>,
     pub invoked_at: Box<Span>,
 }
 
