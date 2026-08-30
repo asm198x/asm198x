@@ -417,6 +417,11 @@ const PROBES: &[Probe] = &[
          SECTION \"vars\",WRAM0\nRamStart: db\nRamByte: dw\nRamWord: dl\nRamLong:\n\
          SECTION \"addresses\",ROM0[$10]\ndw RamStart,RamByte,RamWord,RamLong\n\
          db RamByte-RamStart,RamWord-RamByte,RamLong-RamWord\n"),
+    ok ("rgbasm", "floating WRAM sections use RGBLINK placement order",
+        "SECTION \"Zed\",WRAM0\nZed: ds 2\nSECTION \"Alpha\",WRAM0\nAlpha: ds 2\n\
+         SECTION \"Middle\",WRAM0\nMiddle: ds 2\nSECTION \"Pinned\",WRAM0[$c008]\nPinned: ds 2\n\
+         SECTION \"Small\",WRAM0\nSmall: ds 1\nSECTION \"rom\",ROM0[0]\n\
+         dw Zed,Alpha,Middle,Pinned,Small\n"),
     ok ("rgbasm", "DEF predicates and short-circuit logical operators",
         "SECTION \"s\",ROM0[0]\nDEF Foo EQU 7\nDEF foo EQU 9\n\
          db DEF(Foo),DEF(foo),DEF(FOO),!DEF(Missing)\n\
