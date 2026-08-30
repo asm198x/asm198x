@@ -3,7 +3,11 @@
 **Status:** 📋 **Planned (scoped 2026-07-03).** The first 32-bit RISC and the
 highest-value 32-bit door (Archimedes + later, via extension, GBA/DS). Scoping is
 done, the arbiter is built and installed, the engine widening is understood.
-Build not yet started.
+Build not yet started. It is also the first deliberate proving ground for the
+shared legacy-toolchain direction in
+[`llvm-alike-legacy-assembly-infrastructure.md`](llvm-alike-legacy-assembly-infrastructure.md):
+the 32-bit widening must be reusable by the rest of Wave D, while ARM's operand
+semantics remain ARM-owned.
 
 ## Scope: ARM2 (ARMv2, 26-bit) — the Archimedes
 
@@ -58,6 +62,12 @@ are already `i64`, so the widening is mostly public types and range checks:
   `Piece::Packed` — which handles the `B`/`BL` branch directly: `expr =
   target - (pc + 8)` (the ARM pipeline offset), `scale 4`, `mask 0xFFFFFF`,
   `or_bits = cond << 28 | 0xA << 24`.
+
+The widening is shared infrastructure, not an ARM backend hidden inside the
+engine. MIPS, SH, PowerPC, V810, and SPARC must be able to reuse it without
+depending on ARM condition codes, barrel-shifter operands, or R15 semantics.
+Conversely, those ARM-specific concepts stay in the ARM machine model rather
+than forcing a speculative universal operand type.
 
 ## Proposed increments (sweep-verified, like the Z8000)
 
