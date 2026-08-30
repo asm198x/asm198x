@@ -425,6 +425,16 @@ fn game_boy_rom(bytes: &[u8]) -> Result<Vec<u8>, String> {
     Ok(rom)
 }
 
+/// Materialise the complete highest ROM bank, matching RGBLINK without `-x`.
+/// The library keeps its compact `rgblink -x` byte view for expression and
+/// differential tests; the CLI's raw linked artifact has bank extent.
+fn rgbasm_raw_image(bytes: &[u8]) -> Vec<u8> {
+    let size = bytes.len().div_ceil(0x4000).max(1) * 0x4000;
+    let mut image = bytes.to_vec();
+    image.resize(size, 0);
+    image
+}
+
 /// Which operation the invocation asks for. Named as a subcommand
 /// (`asm198x disasm …`), git/cargo style, per
 /// `decisions/packaging-and-cpu-roadmap.md`.
@@ -1009,16 +1019,21 @@ fn run(args: &[String]) -> Result<String, String> {
         // was given, and it replaces the derived default rather than adding a
         // second file.
         let framed;
+        let linked =
+            matches!(assembler, Assembler::Rgbasm).then(|| rgbasm_raw_image(&assembly.bytes));
         let (out_path, image) = match (&output, &assembly.requested_output) {
             (None, Some(req)) => {
                 let path = source_named_path(input, &req.path)?;
                 framed = frame_output(&assembly, req.format);
                 (path, framed.as_slice())
             }
-            _ => (
-                output.unwrap_or_else(|| Path::new(input).with_extension("bin")),
-                assembly.bytes.as_slice(),
-            ),
+            _ => {
+                let image = linked.as_deref().unwrap_or(assembly.bytes.as_slice());
+                (
+                    output.unwrap_or_else(|| Path::new(input).with_extension("bin")),
+                    image,
+                )
+            }
         };
         std::fs::write(&out_path, image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
@@ -1631,6 +1646,16 @@ mod tests {
             u16::from_be_bytes([rom[0x14E], rom[0x14F]]),
             expected_global
         );
+    }
+
+    #[test]
+    fn rgbasm_raw_images_end_at_a_full_bank() {
+        assert_eq!(rgbasm_raw_image(&[]).len(), 0x4000);
+        let image = rgbasm_raw_image(&[0xAA; 0x101]);
+        assert_eq!(image.len(), 0x4000);
+        assert_eq!(image[0x100], 0xAA);
+        assert!(image[0x101..].iter().all(|&byte| byte == 0));
+        assert_eq!(rgbasm_raw_image(&vec![0; 0x8001]).len(), 0xC000);
     }
 
     /// A span in a non-root file renders that file's name from the table —

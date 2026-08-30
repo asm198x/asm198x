@@ -79,9 +79,9 @@ impl Dialect for Rgbasm {
     /// `(highest bank + 1) * $4000` bytes, with no rounding to a power of two
     /// (three banks give 49152, six give 98304 — both probe-pinned).
     ///
-    /// Only when a bank was actually used. A ROM0-only program keeps the exact
-    /// length it was written to, which is what `rgblink -x` emits and what
-    /// every existing probe compares.
+    /// Only when a bank beyond ROM0 was actually used. The library keeps the
+    /// compact `rgblink -x` view used by expression probes; the CLI materialises
+    /// at least one complete bank for its raw linked artifact.
     fn image_size(&self, image: &[u8]) -> Option<usize> {
         let banks = image.len().div_ceil(0x4000);
         (banks > 1).then(|| banks * 0x4000)
