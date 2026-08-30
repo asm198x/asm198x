@@ -107,6 +107,8 @@ impl Dialect for Rgbasm {
         let banks = declared_banks(&out);
         resolve_banks(&mut out, &banks)?;
         place_floating_rom0_sections(&mut out)?;
+        let starts = declared_section_starts(&out);
+        resolve_starts(&mut out, &starts)?;
         Ok(out)
     }
 
@@ -134,6 +136,8 @@ impl Dialect for Rgbasm {
         let banks = declared_banks(&out);
         resolve_banks(&mut out, &banks)?;
         place_floating_rom0_sections(&mut out)?;
+        let starts = declared_section_starts(&out);
+        resolve_starts(&mut out, &starts)?;
         Ok(out)
     }
 
@@ -657,6 +661,7 @@ fn section_origin(code: &str, line: usize) -> Result<Option<Expr>, AsmError> {
 /// Marks a `BANK("name")` whose section may not have been seen yet. `\u{1}`
 /// cannot appear in source.
 const BANK_MARK: &str = "\u{1}bank\u{1}";
+const START_MARK: &str = "\u{1}start\u{1}";
 
 /// The prefix on the stand-in a text-layer call parses to when the text pass
 /// has not run — the formatter's path. `\u{1}` cannot appear in rgbasm source,
@@ -857,6 +862,23 @@ fn expr_function(name: &str, args: Vec<mos6502::ExprArg>, line: usize) -> Result
         ));
     }
 
+    if name.eq_ignore_ascii_case("startof") {
+        let [arg]: [_; 1] = args
+            .try_into()
+            .map_err(|_| AsmError::new(line, "`STARTOF` takes one argument"))?;
+        return Ok(match arg {
+            mos6502::ExprArg::Text(section) => Expr::Sym(format!("{START_MARK}{section}")),
+            mos6502::ExprArg::Value(Expr::Sym(kind)) if section_region_start(&kind).is_some() => {
+                Expr::Num(section_region_start(&kind).expect("checked"))
+            }
+            _ => {
+                return Err(AsmError::new(
+                    line,
+                    "`STARTOF` takes a section name string or memory-region name",
+                ));
+            }
+        });
+    }
     if !name.eq_ignore_ascii_case("bank") {
         return Err(AsmError::new(
             line,
@@ -870,6 +892,44 @@ fn expr_function(name: &str, args: Vec<mos6502::ExprArg>, line: usize) -> Result
         .try_into()
         .map_err(|_| AsmError::new(line, "`BANK` takes one argument"))?;
     Ok(Expr::Sym(format!("{BANK_MARK}{}", arg.text(name, line)?)))
+}
+
+fn declared_section_starts(ops: &[Statement]) -> BTreeMap<String, i64> {
+    ops.iter()
+        .filter_map(|st| match &st.op {
+            Some(Operation::Section {
+                name,
+                base: Some(base),
+                ..
+            }) => Some((name.clone(), *base)),
+            _ => None,
+        })
+        .collect()
+}
+
+fn resolve_starts(ops: &mut [Statement], starts: &BTreeMap<String, i64>) -> Result<(), AsmError> {
+    let mut missing = None;
+    for st in ops.iter_mut() {
+        if let Some(op) = st.op.take() {
+            st.op = Some(crate::ast::map_syms(
+                op,
+                &mut |sym| match sym.strip_prefix(START_MARK) {
+                    Some(name) => match starts.get(name) {
+                        Some(start) => Expr::Num(*start),
+                        None => {
+                            missing.get_or_insert_with(|| name.to_string());
+                            Expr::Num(0)
+                        }
+                    },
+                    None => Expr::Sym(sym),
+                },
+            ));
+        }
+    }
+    match missing {
+        Some(name) => Err(AsmError::new(0, format!("no section named `{name}`"))),
+        None => Ok(()),
+    }
 }
 
 /// Every section the program declared, and the bank it went in. A section with
@@ -941,6 +1001,21 @@ fn section_default_base(kind: &str) -> i64 {
         "HRAM" => 0xFF80,
         _ => 0,
     }
+}
+
+fn section_region_start(kind: &str) -> Option<i64> {
+    let upper = kind.to_ascii_uppercase();
+    matches!(
+        upper.as_str(),
+        "ROM0" | "ROMX" | "VRAM" | "SRAM" | "WRAM0" | "WRAMX" | "OAM" | "HRAM"
+    )
+    .then(|| {
+        if upper == "ROMX" {
+            ROMX_BASE
+        } else {
+            section_default_base(&upper)
+        }
+    })
 }
 
 /// Give floating ROM0 sections RGBLINK's largest-first, first-fit layout.
@@ -1417,6 +1492,11 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&[
             "high", "low", "mul", "div", "fmod", "floor", "ceil", "round", "tzcount",
         ]),
+        category: Category::ExpressionWord,
+    },
+    Directive {
+        id: "section-functions",
+        pattern: Pattern::Exact(&["bank", "startof"]),
         category: Category::ExpressionWord,
     },
     Directive {
@@ -3040,6 +3120,38 @@ mod tests {
         let err = crate::assemble_rgbasm("SECTION \"f\",ROM0[$0]\n db BANK(\"nope\")\n")
             .expect_err("no such section");
         assert!(err.to_string().contains("no section named"), "got `{err}`");
+    }
+
+    /// `STARTOF` accepts a memory-region word directly, or a quoted section
+    /// name. Named sections reach forward and observe RGBLINK-style placement,
+    /// including a floating ROM0 section placed after the referencing one.
+    #[test]
+    fn startof_reads_regions_and_placed_sections() {
+        let source = "SECTION \"probe\",ROM0[0]\n\
+                      dw STARTOF(OAM)\n\
+                      dw STARTOF(\"later\")\n\
+                      dw STARTOF(\"pinned\")\n\
+                      SECTION \"later\",ROM0\n\
+                      db 1,2,3\n\
+                      SECTION \"pinned\",ROM0[$200]\n\
+                      db 4\n";
+        let out = crate::assemble_rgbasm(source).expect("section starts");
+        assert_eq!(
+            &out.bytes[..9],
+            &[0x00, 0xFE, 0x06, 0x00, 0x00, 0x02, 1, 2, 3]
+        );
+
+        let formatted = crate::format_rgbasm(source).expect("formats");
+        assert_eq!(
+            crate::assemble_rgbasm(&formatted)
+                .expect("formatted source")
+                .bytes,
+            out.bytes
+        );
+
+        let err = crate::assemble_rgbasm("SECTION \"probe\",ROM0[0]\ndw STARTOF(\"missing\")\n")
+            .expect_err("unknown section");
+        assert!(err.to_string().contains("no section named"), "{err}");
     }
 
     /// An assertion fires only when false, and sees labels defined below it —

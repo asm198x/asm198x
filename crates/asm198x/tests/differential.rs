@@ -405,6 +405,9 @@ const PROBES: &[Probe] = &[
          rsset 7\nDEF Gap RB 0\nDEF Hat RB\ndb Gap,Hat,_RS\n"),
     ok ("rgbasm", "DS count relative to the live location counter",
         "SECTION \"s\",ROM0[$100]\ndb $11\nHere: ds $105-@,$aa\nEmpty: ds @-@,$bb\ndb $55\n"),
+    ok ("rgbasm", "STARTOF memory regions and forward placed sections",
+        "SECTION \"probe\",ROM0[0]\ndw STARTOF(OAM),STARTOF(\"later\"),STARTOF(\"pinned\")\n\
+         SECTION \"later\",ROM0\ndb 1,2,3\nSECTION \"pinned\",ROM0[$200]\ndb 4\n"),
     ok ("rgbasm", "a q suffix names another precision",
         "SECTION \"s\",ROM0[0]\ndl 3.7q8\ndl 1.0q4\ndl 0.25q1\ndl 1.25q1\ndl 0.125q2\n"),
     ok ("rgbasm", "fixed multiply and divide",
