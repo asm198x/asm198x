@@ -399,6 +399,10 @@ const PROBES: &[Probe] = &[
     ok ("rgbasm", "digit separators in every radix and fixed-point component",
         "SECTION \"s\",ROM0[0]\ndb %1111_0000,%_10,$A_B,$_C,&1_7,&_7,2_5_5\n\
          dl 1_2.2_5,1.2_5q8\n"),
+    ok ("rgbasm", "the RS offset counter and byte word long definitions",
+        "SECTION \"s\",ROM0[0]\ndb _RS\nrsreset\nDEF Foo RB\nDEF Bar RB 2\nDEF Cat RW\n\
+         DEF Dog RW 2\nDEF Elk RL\nDEF Fox RL 2\ndb Foo,Bar,Cat,Dog,Elk,Fox,_RS\n\
+         rsset 7\nDEF Gap RB 0\nDEF Hat RB\ndb Gap,Hat,_RS\n"),
     ok ("rgbasm", "a q suffix names another precision",
         "SECTION \"s\",ROM0[0]\ndl 3.7q8\ndl 1.0q4\ndl 0.25q1\ndl 1.25q1\ndl 0.125q2\n"),
     ok ("rgbasm", "fixed multiply and divide",

@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 256 word(s) outside our surface, across the references installed
+# 226 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -102,21 +102,13 @@ unphase
 
 ## lwasm (lwasm from lwtools 4.25)
 # 2201 candidate(s) harvested; 257 recognised here, 94 more the tool itself
-# refuses on this target; 10 of the 257 outside our surface
-ifp1
-ifp2
-includestr
-os9
+# refuses on this target; 2 of the 257 outside our surface
 dtb
 dts
-emod
-ifstr
-mod
-setstr
 
 ## vasm (vasm 2.0b (c) in 2002-2025 Volker Barthelmann)
 # 4215 candidate(s) harvested; 183 recognised here, 527 more the tool itself
-# refuses on this target; 54 of the 183 outside our surface
+# refuses on this target; 52 of the 183 outside our surface
 cpu32
 dr
 dw
@@ -135,8 +127,6 @@ debug
 dl
 dseg
 einline
-elif
-end
 endb
 endm
 erem
@@ -174,7 +164,7 @@ text
 
 ## rgbasm (rgbasm v1.0.3)
 # 3045 candidate(s) harvested; 306 recognised here, 0 more the tool itself
-# refuses on this target; 92 of the 306 outside our surface
+# refuses on this target; 88 of the 306 outside our surface
 acos
 af
 align
@@ -194,7 +184,6 @@ charsub
 charval
 cos
 de
-def
 endl
 endm
 endsection
@@ -231,8 +220,6 @@ redef
 revchar
 rom0
 romx
-rsreset
-rsset
 rw
 setcharmap
 shift
@@ -243,7 +230,6 @@ sram
 startof
 strbyte
 strchar
-strfmt
 strrfind
 tan
 union
@@ -270,18 +256,14 @@ __utc_year__
 
 ## ca65 (ca65 V2.18 - N/A)
 # 2906 candidate(s) harvested; 225 recognised here, 4 more the tool itself
-# refuses on this target; 40 of the 225 outside our surface
+# refuses on this target; 24 of the 225 outside our surface
 .bank
-.blank
 .case
 .charmap
-.concat
 .condes
-.const
 .constructor
 .cpu
 .define
-.definedmacro
 .delmac
 .delmacro
 .destructor
@@ -289,25 +271,13 @@ __utc_year__
 .exitmac
 .exitmacro
 .feature
-.ident
 .interruptor
-.ismnem
-.ismnemonic
-.left
 .linecont
 .localchar
 .macpack
-.match
-.mid
 .null
-.paramcount
-.right
 .set
-.sprintf
-.string
-.tcount
 .time
 .undef
 .undefine
 .version
-.xmatch
