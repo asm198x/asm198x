@@ -4901,6 +4901,23 @@ mod tests {
         assert_eq!(asm("lda #(1+2)*3").expect("parens").bytes, vec![0xA9, 0x09]);
     }
 
+    /// ACME 0.97 gives `%` two position-dependent meanings: binary prefix and
+    /// infix modulo. Modulo shares `*`/`/` precedence (probe bytes 0a 02 05 02),
+    /// and the engine's safer divide-by-zero diagnostic replaces ACME's wording.
+    #[test]
+    fn percent_is_binary_prefix_or_modulo_by_position() {
+        let a = asm("!byte %1010\n!byte 17 % 5\n!byte 2 + 9 % 4 * 3\n!byte 17%5")
+            .expect("ACME percent forms");
+        assert_eq!(a.bytes, vec![0x0A, 0x02, 0x05, 0x02]);
+
+        let macro_use = asm("!macro rem .a, .b { !byte .a % .b }\n+rem 17, 5")
+            .expect("modulo survives macro substitution");
+        assert_eq!(macro_use.bytes, vec![2]);
+
+        let e = asm("!byte 7 % 0").expect_err("zero divisor");
+        assert!(e.to_string().contains("modulo by zero"));
+    }
+
     #[test]
     fn star_is_the_program_counter() {
         let a = asm("*= $0801\n        ldx #<*\n        lda #2*3\n").expect("pc");
