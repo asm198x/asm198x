@@ -637,6 +637,26 @@ fn tokenize(
                 tokens.push(Tok::LogAnd);
                 i += 2;
             }
+            // RGBDS gives `&` two jobs: bitwise AND between values and an
+            // octal prefix before one. The prefix may be followed by its one
+            // permitted leading digit separator, so look through `_` here;
+            // `a & _name` remains an operator followed by a symbol because a
+            // name cannot begin with an octal digit.
+            '&' if opts.fixed_point
+                && (chars.get(i + 1).is_some_and(|c| matches!(c, '0'..='7'))
+                    || (chars.get(i + 1) == Some(&'_')
+                        && chars.get(i + 2).is_some_and(|c| matches!(c, '0'..='7')))) =>
+            {
+                let start = i;
+                i += 1;
+                while i < chars.len() && (chars[i].is_ascii_alphanumeric() || chars[i] == '_') {
+                    i += 1;
+                }
+                tokens.push(Tok::Num(parse_number(
+                    &chars[start..i].iter().collect::<String>(),
+                    line,
+                )?));
+            }
             '&' => {
                 tokens.push(Tok::And);
                 i += 1;
@@ -713,7 +733,9 @@ fn tokenize(
             '$' | '%' => {
                 let start = i;
                 i += 1;
-                while i < chars.len() && chars[i].is_ascii_alphanumeric() {
+                while i < chars.len()
+                    && (chars[i].is_ascii_alphanumeric() || (opts.fixed_point && chars[i] == '_'))
+                {
                     i += 1;
                 }
                 tokens.push(Tok::Num(parse_number(
@@ -723,7 +745,9 @@ fn tokenize(
             }
             d if d.is_ascii_digit() => {
                 let start = i;
-                while i < chars.len() && chars[i].is_ascii_alphanumeric() {
+                while i < chars.len()
+                    && (chars[i].is_ascii_alphanumeric() || (opts.fixed_point && chars[i] == '_'))
+                {
                     i += 1;
                 }
                 // `3.7`, and `3.7q8` for a precision other than the default.
@@ -734,7 +758,10 @@ fn tokenize(
                     && chars.get(i + 1).is_some_and(char::is_ascii_digit)
                 {
                     i += 1;
-                    while i < chars.len() && chars[i].is_ascii_alphanumeric() {
+                    while i < chars.len()
+                        && (chars[i].is_ascii_alphanumeric()
+                            || (opts.fixed_point && chars[i] == '_'))
+                    {
                         i += 1;
                     }
                 }
