@@ -507,8 +507,8 @@ enum Tok {
     LogXor,
     LogNot,
     BitNot,
-    /// ca65's `.mod`. It has no symbol spelling there — `%` is a binary
-    /// literal — so the keyword is the only way in.
+    /// Modulo: ca65's `.mod`, and ACME's infix `%`. A leading `%` remains a
+    /// binary literal in both dialects.
     Mod,
     /// Argument separator inside a function call. Nothing else in an
     /// expression takes one — every caller splits its operand list on commas
@@ -580,6 +580,14 @@ fn tokenize(
             }
             '/' => {
                 tokens.push(Tok::Slash);
+                i += 1;
+            }
+            // ACME gives `%` two jobs: a binary-literal prefix where a value
+            // may begin, and modulo after a value. `Caret::Power` identifies
+            // ACME's expression grammar; ca65 keeps `%` prefix-only and uses
+            // `.mod`, while no other shared dialect uses ACME's power ladder.
+            '%' if after_value && opts.caret == Caret::Power => {
+                tokens.push(Tok::Mod);
                 i += 1;
             }
             // `<<`/`>>` are shifts everywhere. A lone `<`/`>` is a
@@ -958,7 +966,7 @@ impl ExprParser {
     }
 
     // ---- ACME precedence ladder (loosest first): `|`, keyword `XOR`/`EOR`,
-    // `&`, `<< >>`, `+ -`, `* /`, `^` (power). Verified against the acme binary.
+    // `&`, `<< >>`, `+ -`, `* / %`, `^` (power). Verified against the acme binary.
 
     fn acme_or(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.acme_xor()?;
@@ -1026,6 +1034,7 @@ impl ExprParser {
             let op = match self.tokens.get(self.pos) {
                 Some(Tok::Star) => BinOp::Mul,
                 Some(Tok::Slash) => BinOp::Div,
+                Some(Tok::Mod) => BinOp::Mod,
                 _ => break,
             };
             self.pos += 1;
@@ -1069,9 +1078,7 @@ impl ExprParser {
             let op = match self.tokens.get(self.pos) {
                 Some(Tok::Star) => BinOp::Mul,
                 Some(Tok::Slash) => BinOp::Div,
-                // ca65's `.mod` sits with `*` and `/`: `7 .mod 4 + 1` is 4.
-                // The token only exists where `logical` is on, so this arm is
-                // ca65's alone.
+                // ca65's `.mod` and ACME's `%` sit with `*` and `/`.
                 Some(Tok::Mod) => BinOp::Mod,
                 _ => break,
             };

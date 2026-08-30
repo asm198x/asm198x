@@ -43,7 +43,7 @@ assemble the same source with the reference tool and compare bytes. 8 tools
 across 23 instruction sets: ACME, ca65, lwasm, pasmo, RGBDS, sjasmplus, vasm and
 Macro Assembler AS, which covers the 14 less-travelled ones.
 
-**What they produced is recorded, not remembered.** 7,983 verdicts, each keyed
+**What they produced is recorded, not remembered.** 7,986 verdicts, each keyed
 on the reference tool's own version string, committed to this repository. CI
 replays every one of them on machines with none of those tools installed, so a
 change that alters our output fails against what the real assembler did — not
