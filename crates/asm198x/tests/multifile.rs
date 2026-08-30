@@ -1010,6 +1010,96 @@ fn acme_include_defined_symbols_feed_later_zp_abs_selection() {
     );
 }
 
+/// ACME treats `!source` as textual for its macro namespace: definitions flow
+/// out to later lines in the includer, and definitions already seen in the
+/// includer flow into the included file. These are the two directions measured
+/// against ACME 0.97 for #429.
+#[test]
+fn acme_macros_flow_both_ways_across_source() {
+    let loader = MemoryLoader::new()
+        .text("defs.a", "!macro from_include .v {\n        !byte .v\n}\n")
+        .text("call.a", "+from_root 2\n");
+    let src = "* = $1000\n\
+               !macro from_root .v {\n        !byte .v\n}\n\
+                       !source \"defs.a\"\n\
+                       +from_include 1\n\
+                       !source \"call.a\"\n";
+    let r = assemble_acme_files(src, "main.a", &loader).expect("cross-file macros assemble");
+    assert_eq!(r.bytes, vec![1, 2], "ACME 0.97 reference bytes");
+    assert_eq!(r.files, vec!["main.a", "defs.a", "call.a"]);
+}
+
+/// Textual means ordered: a definition later in the includer does not leak
+/// backward into an earlier included file (ACME 0.97 rejects it as undefined).
+#[test]
+fn acme_macro_after_source_is_not_visible_inside_that_source() {
+    let loader = MemoryLoader::new().text("call.a", "+later 4\n");
+    let src = "* = $1000\n\
+                       !source \"call.a\"\n\
+               !macro later .v {\n        !byte .v\n}\n";
+    let e = assemble_acme_files(src, "main.a", &loader).expect_err("not defined yet");
+    assert!(
+        e.error.message.contains("cannot parse") || e.error.message.contains("unknown"),
+        "ACME's undefined-macro posture: {}",
+        e.error.message
+    );
+    let span = e.error.span.as_ref().expect("included call span");
+    assert_eq!(span.file, FileId(1));
+    assert_eq!(span.line, 1);
+}
+
+/// An error expanded from an included definition points at the root invocation
+/// while retaining the included definition location in its expansion frame.
+#[test]
+fn acme_include_macro_error_preserves_definition_and_invocation() {
+    let loader = MemoryLoader::new().text("defs.a", "!macro broken {\n        !frobnicate\n}\n");
+    let src = "* = $1000\n        !source \"defs.a\"\n        +broken\n";
+    let e = assemble_acme_files(src, "main.a", &loader).expect_err("bad expanded body");
+    let span = e.error.span.as_ref().expect("expanded error has a span");
+    assert_eq!(span.file, FileId(0));
+    assert_eq!(span.line, 3, "primary location is the invocation");
+    let frame = span
+        .expansion_frames
+        .first()
+        .expect("macro expansion frame");
+    assert_eq!(frame.macro_name, "broken");
+    assert_eq!(frame.invoked_at.file, FileId(0));
+    assert_eq!(frame.invoked_at.line, 3);
+    let defined = frame.defined_at.as_ref().expect("definition location");
+    assert_eq!(defined.file, FileId(1));
+    assert_eq!(defined.line, 1);
+}
+
+/// Live differential control for #429. Kept ignored with the other external
+/// reference tests; the hermetic test above runs on every machine.
+#[test]
+#[ignore = "needs ACME 0.97; run with --ignored"]
+fn acme_include_macro_matches_reference_bytes() {
+    let dir = temp_tree("acme-include-macro-reference");
+    std::fs::write(
+        dir.join("defs.a"),
+        "!macro from_include .v {\n        !byte .v\n}\n",
+    )
+    .expect("write definition");
+    let source = "* = $1000\n!source \"defs.a\"\n+from_include $2a\n";
+    std::fs::write(dir.join("main.a"), source).expect("write root");
+    let native = Command::new("acme")
+        .current_dir(&dir)
+        .args(["-f", "plain", "-o", "native.bin", "main.a"])
+        .output()
+        .expect("run ACME 0.97");
+    assert!(
+        native.status.success(),
+        "ACME failed: {}",
+        String::from_utf8_lossy(&native.stderr)
+    );
+    let native = std::fs::read(dir.join("native.bin")).expect("read native bytes");
+    let loader =
+        MemoryLoader::new().text("defs.a", "!macro from_include .v {\n        !byte .v\n}\n");
+    let ours = assemble_acme_files(source, "main.a", &loader).expect("Asm198x assembles");
+    assert_eq!(ours.bytes, native);
+}
+
 /// The environment flows *out* of the include: a constant defined inside it
 /// drives the includer's later conditional (probe-pinned: a9 ff).
 #[test]

@@ -201,6 +201,12 @@ impl From<Assembly> for AssemblyResult {
 #[must_use]
 pub fn resolve_span_path(mut span: Span, files: &[String]) -> Span {
     span.path = files.get(span.file.0 as usize).cloned();
+    for frame in &mut span.expansion_frames {
+        if let Some(defined) = frame.defined_at.take() {
+            frame.defined_at = Some(Box::new(resolve_span_path(*defined, files)));
+        }
+        *frame.invoked_at = resolve_span_path((*frame.invoked_at).clone(), files);
+    }
     span
 }
 

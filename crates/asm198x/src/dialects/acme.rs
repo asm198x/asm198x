@@ -58,7 +58,7 @@
 //! surface, and `@` is not producible in an acme identifier, so keys cannot
 //! collide with user globals.
 //!
-//! Not yet covered (no curriculum use): macros, `!for`, and `@cheap` locals.
+//! Not yet covered (no curriculum use): `@cheap` locals.
 
 use std::collections::{BTreeMap, BTreeSet};
 
@@ -131,7 +131,7 @@ impl Dialect for Acme {
             .contents(FileId(0))
             .map(str::to_owned)
             .unwrap_or_default();
-        let program = parse_program_in(FileId(0), &root, macros::Expand::Yes)?;
+        let program = parse_program_in(FileId(0), &root, macros::Expand::No)?;
         let mut eval = AcmeEval::new(
             self.instruction_set(),
             Some(MultiCx {
@@ -156,7 +156,7 @@ impl Dialect for Acme {
             .contents(FileId(0))
             .map(str::to_owned)
             .unwrap_or_default();
-        let program = parse_program_in(FileId(0), &root, macros::Expand::Yes)?;
+        let program = parse_program_in(FileId(0), &root, macros::Expand::No)?;
         let mut eval = AcmeEval::new(
             self.instruction_set(),
             Some(MultiCx {
@@ -453,8 +453,9 @@ impl<'a> FmtCx<'a> {
             // way the expander does instead of looking for a keyword. See
             // `Item::Verbatim`.
             //
-            // Only the formatter's parse reaches here with a definition intact:
-            // the assembling path expands it away first.
+            // The formatter and the multi-file assembly parse reach here with
+            // a definition intact. The latter registers these copied nodes in
+            // the live evaluation walk, preserving textual `!source` order.
             if is_macro_head(trimmed) {
                 let mut leading = std::mem::take(&mut self.pending);
                 let mut depth = 0usize;
@@ -1248,6 +1249,13 @@ enum OpenBlock {
     PseudoPc,
 }
 
+struct MacroCapture {
+    source: String,
+    depth: usize,
+    file: FileId,
+    line: usize,
+}
+
 struct AcmeEval<'a> {
     set: &'static isa::InstructionSet,
     anons: Anons,
@@ -1269,6 +1277,14 @@ struct AcmeEval<'a> {
     /// — see [`AcmeEval::oversized_warnings`].
     oversize: Vec<Oversize>,
     multi: Option<MultiCx<'a>>,
+    /// ACME's macro namespace follows textual `!source` order in both
+    /// directions. It therefore lives beside the include stack, rather than
+    /// being recreated for each parsed file.
+    macro_state: macros::MacroState,
+    /// A definition is copied as verbatim AST nodes. The live multi-file walk
+    /// gathers those nodes here and registers the definition only when it is
+    /// reached, which gives ACME its textual ordering across `!source`.
+    macro_capture: Option<MacroCapture>,
     /// The file the walk is currently inside — stamps condition-evaluation
     /// errors, which the shared walk raises without node context.
     current_file: FileId,
@@ -1309,6 +1325,8 @@ impl<'a> AcmeEval<'a> {
             pc: None,
             oversize: Vec::new(),
             multi,
+            macro_state: macros::MacroState::default(),
+            macro_capture: None,
             current_file: FileId(0),
             zone: String::new(),
             zone_ord: 0,
@@ -1475,7 +1493,7 @@ impl<'a> AcmeEval<'a> {
         let contents = mcx.map.contents(id).unwrap_or_default().to_owned();
         mcx.stack.push(id);
         let program =
-            parse_program_in(id, &contents, macros::Expand::Yes).map_err(|e| stamp_file(e, id))?;
+            parse_program_in(id, &contents, macros::Expand::No).map_err(|e| stamp_file(e, id))?;
         let saved = self.current_file;
         self.current_file = id;
         let walked = crate::ast::evaluate(self, &program.nodes, true, out);
@@ -1666,6 +1684,75 @@ impl AcmeEval<'_> {
     ) -> Result<(), AsmError> {
         let line = node.span.line as usize;
         let file = node.span.file;
+
+        // Multi-file assembly leaves definitions verbatim so they enter the
+        // namespace in evaluation order. Gather the formatter AST's copied
+        // lines until the definition's matching brace, then let the ordinary
+        // ACME collector register it with its real file and header line.
+        if let Some(mut capture) = self.macro_capture.take() {
+            capture.source.push_str(&node.source);
+            capture.source.push('\n');
+            if close_brace(&node.source, &mut capture.depth).is_some() {
+                macros::expand_at(
+                    &AcmeMacros,
+                    &capture.source,
+                    capture.file,
+                    capture.line,
+                    &mut self.macro_state,
+                )?;
+            } else {
+                self.macro_capture = Some(capture);
+            }
+            return Ok(());
+        }
+        if is_macro_head(node.source.trim()) {
+            let mut capture = MacroCapture {
+                source: format!("{}\n", node.source),
+                depth: 0,
+                file,
+                line,
+            };
+            if close_brace(&node.source, &mut capture.depth).is_some() {
+                macros::expand_at(
+                    &AcmeMacros,
+                    &capture.source,
+                    file,
+                    line,
+                    &mut self.macro_state,
+                )?;
+            } else {
+                self.macro_capture = Some(capture);
+            }
+            return Ok(());
+        }
+
+        // Expand calls against the namespace at this exact point in the live
+        // include walk. Unknown calls remain ordinary source and reach the
+        // usual diagnostic path.
+        if node.source.trim_start().starts_with('+') {
+            let expanded =
+                macros::expand_at(&AcmeMacros, &node.source, file, line, &mut self.macro_state)?;
+            if expanded.text.trim_end() != node.source.trim_end() {
+                let expansion = Some((expanded.text, expanded.origins));
+                let text = macros::expanded_text(&expansion, &node.source);
+                let origins = macros::line_origins(&expansion);
+                let mut cx = FmtCx {
+                    set: &isa::mos6502::SET,
+                    file,
+                    lines: text.lines().collect(),
+                    pos: 0,
+                    pending: Vec::new(),
+                };
+                let (mut nodes, closer) = cx
+                    .parse_block()
+                    .map_err(|e| macros::remap_lines(e, origins))?;
+                if !matches!(closer, Closer::Eof | Closer::EofDirective) {
+                    return Err(AsmError::new(line, "unbalanced `}` in macro expansion"));
+                }
+                macros::place_nodes(&mut nodes, origins);
+                return crate::ast::evaluate(self, &nodes, true, out);
+            }
+        }
         // Every live line takes the next evaluation-order position (the anon
         // "virtual line"): included files splice their lines here, so `-`/`+`
         // resolution follows the spliced order, never any single file's line
@@ -3813,7 +3900,11 @@ fn definition(
 ) -> macros::Definition {
     macros::Definition {
         name: name.to_string(),
-        def: macros::MacroDef { params, body },
+        def: macros::MacroDef {
+            params,
+            body,
+            defined_at: None,
+        },
         last_line,
     }
 }
