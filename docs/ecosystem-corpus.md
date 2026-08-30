@@ -53,7 +53,7 @@ Their native controls pass with the installed verdict-corpus arbiters: ACME
 |---|---:|---:|---|---|
 | 6502Assembly | ACME | 3 | passes | macro defined by preceding `!source` is not visible at `+start_at` |
 | NES-ca65-example | ca65 | 1 | passes | project-specific `TILES` segment/linker config |
-| GB ASM Tutorial — Unbricked | RGBDS | 1 | passes | assembly content matches RGBLINK byte-for-byte; raw output stops at 1,856 bytes instead of extending ROM0 to 16 KiB after floating WRAM placement was fixed in #445 |
+| GB ASM Tutorial — Unbricked | RGBDS | 1 | passes | raw 16 KiB artifact matches RGBLINK exactly; `--gb-rom` omits the Nintendo logo written by `rgbfix -v`, so final checksums differ after bank extent was fixed in #447 |
 | SpecNext Invaders | SjASMPlus | 1 | passes | `OPT` directive |
 | HelloAmi | vasm | 1 | passes | `BLO` condition-code spelling |
 

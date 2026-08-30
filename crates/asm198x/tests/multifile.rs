@@ -2223,11 +2223,14 @@ fn cli_assembles_an_rgbasm_include_via_a_search_dir() {
         "stderr: {}",
         String::from_utf8_lossy(&run.stderr)
     );
+    let image = std::fs::read(&out).expect("read output");
+    assert_eq!(image.len(), 0x4000, "RGBLINK materialises one ROM bank");
     assert_eq!(
-        std::fs::read(&out).expect("read output"),
-        vec![0x3E, 0x01, 0x0E, 0x03, 0xAD, 0xBE],
+        &image[..6],
+        &[0x3E, 0x01, 0x0E, 0x03, 0xAD, 0xBE],
         "include and incbin both resolve through the -I dir"
     );
+    assert!(image[6..].iter().all(|&byte| byte == 0));
 }
 
 // ===========================================================================
