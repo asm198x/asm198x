@@ -40,7 +40,7 @@
 //! than length"); a length past the remaining bytes is an error ("out of
 //! bounds"); length 0 is empty.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 
 use super::ca65_flat::{self, DirectiveLine, FlatWalk, WalkDirective};
 use super::macros;
@@ -96,9 +96,11 @@ impl Dialect for Rgbasm {
         // then lower to the engine's statement stream — byte-identical to the old
         // direct parse (AE1). Other CPUs stay on direct lowering (KTD6).
         let program = parse_program(source, macros::Expand::Yes)?;
+        let (consts, defined) = initial_symbols();
         let mut eval = RgbasmEval {
             set: self.instruction_set(),
-            consts: BTreeMap::from([("_RS".to_string(), 0)]),
+            consts,
+            defined,
             global: String::new(),
             rs: 0,
         };
@@ -125,9 +127,11 @@ impl Dialect for Rgbasm {
         loader: &dyn SourceLoader,
     ) -> Result<Vec<Statement>, AsmError> {
         let program = parse_program_multi(map, loader)?;
+        let (consts, defined) = initial_symbols();
         let mut eval = RgbasmEval {
             set: self.instruction_set(),
-            consts: BTreeMap::from([("_RS".to_string(), 0)]),
+            consts,
+            defined,
             global: String::new(),
             rs: 0,
         };
@@ -662,6 +666,7 @@ fn section_origin(code: &str, line: usize) -> Result<Option<Expr>, AsmError> {
 /// cannot appear in source.
 const BANK_MARK: &str = "\u{1}bank\u{1}";
 const START_MARK: &str = "\u{1}start\u{1}";
+const DEF_MARK: &str = "\u{1}def\u{1}";
 
 /// The prefix on the stand-in a text-layer call parses to when the text pass
 /// has not run — the formatter's path. `\u{1}` cannot appear in rgbasm source,
@@ -811,6 +816,16 @@ fn integer(text: &str, line: usize) -> Result<i64, AsmError> {
 fn expr_function(name: &str, args: Vec<mos6502::ExprArg>, line: usize) -> Result<Expr, AsmError> {
     use crate::engine::BinOp as Op;
     let lower = name.to_ascii_lowercase();
+
+    if lower == "def" {
+        let [arg]: [_; 1] = args
+            .try_into()
+            .map_err(|_| AsmError::new(line, "`DEF` takes one symbol"))?;
+        return match arg {
+            mos6502::ExprArg::Value(Expr::Sym(name)) => Ok(Expr::Sym(format!("{DEF_MARK}{name}"))),
+            _ => Err(AsmError::new(line, "`DEF` takes one symbol")),
+        };
+    }
 
     // The text layer's functions (`decisions/string-and-text-layer.md`).
     // Assembly never arrives here: the pass folds them to text before the parse
@@ -1683,7 +1698,8 @@ fn value(raw: &str, line: usize) -> Result<Expr, AsmError> {
         line,
         number,
         ExprOpts {
-            logical: false,
+            logical: true,
+            logical_not_tight: true,
             scoped_names: false,
             fixed_point: true,
             compare: mos6502::Compare {
@@ -1956,8 +1972,24 @@ fn product(lists: &[Vec<Alternative>]) -> Vec<Vec<Alternative>> {
 struct RgbasmEval {
     set: &'static isa::InstructionSet,
     consts: BTreeMap<String, i64>,
+    defined: BTreeSet<String>,
     global: String,
     rs: i64,
+}
+
+/// Symbols RGBASM itself defines before reading the first source line. The
+/// compatibility surface is measured against RGBDS 1.0.3, the reference tool
+/// recorded by the verdict corpus, so its version tuple is observable source
+/// input just as `_RS`'s initial zero is.
+fn initial_symbols() -> (BTreeMap<String, i64>, BTreeSet<String>) {
+    let consts = BTreeMap::from([
+        ("_RS".to_string(), 0),
+        ("__RGBDS_MAJOR__".to_string(), 1),
+        ("__RGBDS_MINOR__".to_string(), 0),
+        ("__RGBDS_PATCH__".to_string(), 3),
+    ]);
+    let defined = consts.keys().cloned().collect();
+    (consts, defined)
 }
 
 type LoweredRs = Option<(Option<String>, Option<Operation>)>;
@@ -1970,7 +2002,8 @@ impl crate::ast::CondEval for RgbasmEval {
         if args.is_empty() {
             return Err(AsmError::new(line, format!("`{word}` needs a condition")));
         }
-        let v = fold_const(&value(args, line)?, &self.consts, line).map_err(|_| {
+        let expr = bind_defined(value(args, line)?, &self.defined);
+        let v = fold_const(&expr, &self.consts, line).map_err(|_| {
             AsmError::new(
                 line,
                 format!(
@@ -2028,6 +2061,9 @@ impl crate::ast::CondEval for RgbasmEval {
         {
             self.global = sym.qualified.clone();
         }
+        if let Some(sym) = node.label.as_ref() {
+            self.defined.insert(sym.qualified.clone());
+        }
         let op = match &node.item {
             // Walk-handled: keep what it built rather than rebuilding it.
             Some(crate::ast::Item::Binary(_)) => Some(crate::ast::lower_item_ref(
@@ -2070,6 +2106,16 @@ impl crate::ast::CondEval for RgbasmEval {
                 Err(e) => Some(crate::ast::lower_item_ref(it).map_err(|_| e)?),
             },
         };
+        let op = op.map(|op| {
+            crate::ast::map_syms(op, &mut |name| match name.strip_prefix(DEF_MARK) {
+                Some(symbol) => Expr::Num(i64::from(self.defined.contains(symbol))),
+                None => self
+                    .consts
+                    .get(&name)
+                    .copied()
+                    .map_or(Expr::Sym(name), Expr::Num),
+            })
+        });
         if let (Some(sym), Some(Operation::Equ(e))) = (node.label.as_ref(), &op)
             && let Ok(v) = fold_const(e, &self.consts, line)
         {
@@ -2127,6 +2173,26 @@ fn bind_known(expr: Expr, consts: &BTreeMap<String, i64>) -> Expr {
     }
 }
 
+fn bind_defined(expr: Expr, defined: &BTreeSet<String>) -> Expr {
+    let one = |e: Box<Expr>| Box::new(bind_defined(*e, defined));
+    match expr {
+        Expr::Sym(name) => match name.strip_prefix(DEF_MARK) {
+            Some(symbol) => Expr::Num(i64::from(defined.contains(symbol))),
+            None => Expr::Sym(name),
+        },
+        Expr::Lo(e) => Expr::Lo(one(e)),
+        Expr::Hi(e) => Expr::Hi(one(e)),
+        Expr::Bank(e) => Expr::Bank(one(e)),
+        Expr::Neg(e) => Expr::Neg(one(e)),
+        Expr::BitNot(e) => Expr::BitNot(one(e)),
+        Expr::FixRound(e) => Expr::FixRound(one(e)),
+        Expr::TrailingZeros(e) => Expr::TrailingZeros(one(e)),
+        Expr::LogNot(e) => Expr::LogNot(one(e)),
+        Expr::Bin(op, left, right) => Expr::Bin(op, one(left), one(right)),
+        Expr::Num(_) | Expr::Pc => expr,
+    }
+}
+
 impl RgbasmEval {
     fn lower_rs(&mut self, source: &str, line: usize) -> Result<LoweredRs, AsmError> {
         let (word, args) = split_first_word(source.trim());
@@ -2165,6 +2231,7 @@ impl RgbasmEval {
             .and_then(|n| bound.checked_add(n))
             .ok_or_else(|| AsmError::new(line, "RS counter overflow"))?;
         self.consts.insert(name.to_string(), bound);
+        self.defined.insert(name.to_string());
         self.set_rs(advance);
         Ok(Some((
             Some(name.to_string()),
@@ -3508,6 +3575,35 @@ mod tests {
         assert_eq!(
             out("SECTION \"s\",ROM0[0]\nDEF N EQU 3\nREPT N\n nop\nENDR\n"),
             vec![0x00, 0x00, 0x00]
+        );
+    }
+
+    /// RGBASM's `DEF(name)` asks whether the name exists at that point in the
+    /// source; it does not reach forward. Logical negation is a tight unary
+    /// operator, `&&` binds tighter than `||`, and both short-circuit.
+    #[test]
+    fn definedness_and_logical_operators_follow_rgbasm() {
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\n\
+                 DEF Foo EQU 7\nDEF foo EQU 9\n\
+                 db DEF(Foo),DEF(foo),DEF(FOO),!DEF(Missing)\n\
+                 db 0||0&&1,1||0&&0,!0,!7,!!7\n\
+                 db DEF(Foo)&&Foo==7,DEF(Missing)||5\n\
+                 Before: db 0\ndb DEF(Before),DEF(After)\nAfter: db 0\n\
+                 db 1||Unknown,0&&Unknown\n"),
+            vec![1, 1, 0, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 0, 0, 1, 0]
+        );
+
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\n\
+                 IF !DEF(Guard)\nDEF Guard EQU 1\ndb $aa\nENDC\n\
+                 IF DEF(Guard)&&!DEF(Missing)\ndb $bb\nENDC\n"),
+            vec![0xAA, 0xBB]
+        );
+        assert_eq!(
+            out("SECTION \"s\",ROM0[0]\n\
+                 db DEF(__RGBDS_MAJOR__),__RGBDS_MAJOR__,__RGBDS_MINOR__,__RGBDS_PATCH__\n"),
+            vec![1, 1, 0, 3]
         );
     }
 

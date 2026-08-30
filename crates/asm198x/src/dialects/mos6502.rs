@@ -333,6 +333,10 @@ pub(crate) struct ExprOpts {
     /// bare `.and` is an ordinary symbol in a dialect that does not know the
     /// word.
     pub logical: bool,
+    /// Whether logical `!` is an ordinary tight unary operator (RGBDS).
+    /// ca65 deliberately leaves this false because its `.not`/`!` layer binds
+    /// looser than the whole logical expression.
+    pub logical_not_tight: bool,
     /// `::` inside a name (ca65's `scope::name`, and `::name` for the top
     /// level). Off everywhere else, where a `:` ends a name — a lone `:` is an
     /// anonymous label in several dialects, so only the doubled form is taken.
@@ -456,6 +460,7 @@ pub(crate) fn parse_expr(
         function: opts.function,
         compare_opts: opts.compare,
         logical: opts.logical,
+        logical_not_tight: opts.logical_not_tight,
     };
     let expr = parser.expr()?;
     if parser.pos != parser.tokens.len() {
@@ -847,6 +852,7 @@ struct ExprParser {
     compare_opts: Compare,
     /// ca65's logical layer — see [`ExprOpts::logical`].
     logical: bool,
+    logical_not_tight: bool,
 }
 
 impl ExprParser {
@@ -867,7 +873,10 @@ impl ExprParser {
     // ordinary symbol in a dialect that has never heard of it.
 
     fn logical_not(&mut self) -> Result<Expr, AsmError> {
-        if self.logical && matches!(self.tokens.get(self.pos), Some(Tok::LogNot)) {
+        if self.logical
+            && !self.logical_not_tight
+            && matches!(self.tokens.get(self.pos), Some(Tok::LogNot))
+        {
             self.pos += 1;
             return Ok(Expr::LogNot(Box::new(self.logical_not()?)));
         }
@@ -1122,6 +1131,10 @@ impl ExprParser {
     }
 
     fn unary(&mut self) -> Result<Expr, AsmError> {
+        if self.logical_not_tight && matches!(self.tokens.get(self.pos), Some(Tok::LogNot)) {
+            self.pos += 1;
+            return Ok(Expr::LogNot(Box::new(self.unary()?)));
+        }
         if matches!(self.tokens.get(self.pos), Some(Tok::Minus)) {
             self.pos += 1;
             return Ok(Expr::Neg(Box::new(self.unary()?)));
@@ -1366,6 +1379,7 @@ mod tests {
         let env = BTreeMap::new();
         let opts = ExprOpts {
             logical: false,
+            logical_not_tight: false,
             scoped_names: false,
             fixed_point: false,
             compare: Compare::default(),

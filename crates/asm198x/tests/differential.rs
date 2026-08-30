@@ -417,6 +417,15 @@ const PROBES: &[Probe] = &[
          SECTION \"vars\",WRAM0\nRamStart: db\nRamByte: dw\nRamWord: dl\nRamLong:\n\
          SECTION \"addresses\",ROM0[$10]\ndw RamStart,RamByte,RamWord,RamLong\n\
          db RamByte-RamStart,RamWord-RamByte,RamLong-RamWord\n"),
+    ok ("rgbasm", "DEF predicates and short-circuit logical operators",
+        "SECTION \"s\",ROM0[0]\nDEF Foo EQU 7\nDEF foo EQU 9\n\
+         db DEF(Foo),DEF(foo),DEF(FOO),!DEF(Missing)\n\
+         db 0||0&&1,1||0&&0,!0,!7,!!7,DEF(Foo)&&Foo==7,DEF(Missing)||5\n\
+         Before: db 0\ndb DEF(Before),DEF(After)\nAfter: db 0\n\
+         db 1||Unknown,0&&Unknown\n\
+         db DEF(__RGBDS_MAJOR__),__RGBDS_MAJOR__,__RGBDS_MINOR__,__RGBDS_PATCH__\n\
+         IF !DEF(Guard)\nDEF Guard EQU 1\ndb $aa\nENDC\n\
+         IF DEF(Guard)&&!DEF(Missing)\ndb $bb\nENDC\n"),
     ok ("rgbasm", "a q suffix names another precision",
         "SECTION \"s\",ROM0[0]\ndl 3.7q8\ndl 1.0q4\ndl 0.25q1\ndl 1.25q1\ndl 0.125q2\n"),
     ok ("rgbasm", "fixed multiply and divide",

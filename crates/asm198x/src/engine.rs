@@ -421,6 +421,15 @@ impl Expr {
             Expr::TrailingZeros(e) => i64::from(e.eval_with(resolve, pc, line)?.trailing_zeros()),
             Expr::Bin(op, l, r) => {
                 let a = l.eval_with(resolve, pc, line)?;
+                // Logical operators short-circuit in the source languages
+                // that expose them. Besides matching their observable error
+                // behavior, this lets a definedness guard protect a symbol.
+                if matches!(op, BinOp::LogAnd) && a == 0 {
+                    return Ok(0);
+                }
+                if matches!(op, BinOp::LogOr) && a != 0 {
+                    return Ok(1);
+                }
                 let b = r.eval_with(resolve, pc, line)?;
                 eval_binop(*op, a, b, line)?
             }
