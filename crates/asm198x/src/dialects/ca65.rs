@@ -2399,6 +2399,8 @@ fn map_operand_syms(
         O::Indirect(e) => O::Indirect(b(e)),
         O::IndexedIndirect(e) => O::IndexedIndirect(b(e)),
         O::IndirectIndexed(e) => O::IndirectIndexed(b(e)),
+        O::IndirectIndexedZ(e) => O::IndirectIndexedZ(b(e)),
+        O::StackIndirectIndexedY(e) => O::StackIndirectIndexedY(b(e)),
         O::Indexed(e, i) => O::Indexed(b(e), *i),
         O::Direct(e) => O::Direct(b(e)),
     }

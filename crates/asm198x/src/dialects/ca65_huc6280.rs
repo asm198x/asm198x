@@ -818,6 +818,8 @@ fn resolve(
             (mode, Some(e))
         }
         OperandSyntax::IndirectIndexed(e) => ("(indirect),y", Some(e)),
+        OperandSyntax::IndirectIndexedZ(e) => ("(indirect),z", Some(e)),
+        OperandSyntax::StackIndirectIndexedY(e) => ("(stack-indirect),y", Some(e)),
         // `(expr)` is `jmp` indirect where the mnemonic has that form, else the
         // HuC6280/65C02 `(dp)` zero-page indirect.
         OperandSyntax::Indirect(e) => {
