@@ -1750,6 +1750,23 @@ impl AcmeEval<'_> {
                     return Err(AsmError::new(line, "unbalanced `}` in macro expansion"));
                 }
                 macros::place_nodes(&mut nodes, origins);
+                // The shared pre-pass emits a label in front of an invocation
+                // as its own line. A call learned only after `!source` reaches
+                // this live path instead, so reproduce that same node before
+                // evaluating the generated body. Otherwise `irq +handler`
+                // emits the handler but silently loses `irq`, breaking later
+                // pass-two references such as `#<irq` / `#>irq` (#457).
+                if node.label.is_some() {
+                    let label = crate::ast::Node {
+                        operand_span: None,
+                        label: node.label.clone(),
+                        item: None,
+                        source: String::new(),
+                        span: node.span.clone(),
+                        trivia: crate::ast::Trivia::default(),
+                    };
+                    crate::ast::evaluate(self, &[label], true, out)?;
+                }
                 return crate::ast::evaluate(self, &nodes, true, out);
             }
         }
