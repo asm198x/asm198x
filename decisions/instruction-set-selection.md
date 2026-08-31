@@ -36,8 +36,9 @@ dialect does not require a second assembler engine.
 
 ## Current coverage
 
-ACME can switch among the documented 6502 set, the CMOS 65C02 extension, the
-NMOS undocumented extension selected by `6510`/`nmos6502`, and the shared 65816 extension. The other ACME
+ACME can switch among the documented 6502 set; the CMOS 65C02, Rockwell
+R65C02, and WDC W65C02 extensions; the NMOS undocumented extension selected by
+`6510`/`nmos6502`; and the shared 65816 extension. The other ACME
 processor names remain explicit capability gaps until their executable ISA
 sets exist; they are not aliases for 6502.
 
