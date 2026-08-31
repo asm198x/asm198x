@@ -217,6 +217,8 @@ fn is_known_acme_mnemonic(base: &'static isa::InstructionSet, word: &str) -> boo
             &isa::mos65c02::ROCKWELL_SET,
             &isa::mos65c02::WDC_SET,
             &isa::c64dtv2::SET,
+            &isa::csg65ce02::SET,
+            &isa::csg65ce02::CSG4502_SET,
             &isa::mos65816::SET,
         ]
         .iter()
@@ -1965,6 +1967,8 @@ impl AcmeEval<'_> {
                 "r65c02" => Some(&isa::mos65c02::ROCKWELL_SET),
                 "w65c02" => Some(&isa::mos65c02::WDC_SET),
                 "c64dtv2" => Some(&isa::c64dtv2::SET),
+                "65ce02" => Some(&isa::csg65ce02::SET),
+                "4502" => Some(&isa::csg65ce02::CSG4502_SET),
                 "65816" => Some(&isa::mos65816::SET),
                 _ => self.target.ext,
             };
@@ -2931,9 +2935,23 @@ fn parse_op(
     }
     let operand = mos6502::parse_operand(remainder, line, &|s, l| parse_value(anons, zone, s, l))?;
     let force_abs = address_forces_absolute(remainder);
-    let (mode, operand) = mos6502::resolve_mode_in_sets(
+    let (mode, mut operand) = mos6502::resolve_mode_in_sets(
         target.set, target.ext, &mnemonic, operand, env, force_abs, line,
     )?;
+    // Unlike the 65816's 16-bit relative forms, 65CE02 long branches measure
+    // from opcode+2 rather than from the end of the three-byte instruction.
+    // The shared encoder measures from the end, so carry that one-byte bias in
+    // the lowered target expression. This is ACME/65CE02 semantics, not a
+    // general property of the `relative16` ISA mode.
+    if mode == "relative16" && target.ext.is_some_and(|set| set.has_mnemonic("LDZ")) {
+        operand = operand.map(|e| {
+            Expr::Bin(
+                crate::engine::BinOp::Add,
+                Box::new(e),
+                Box::new(Expr::Num(1)),
+            )
+        });
+    }
     Ok(Some(Operation::Instruction {
         mnemonic,
         mode,
@@ -3443,11 +3461,11 @@ fn parse_directive(
             match name.as_str() {
                 // The processor this dialect already assembles.
                 "6502" | "6510" | "nmos6502" | "65c02" | "r65c02" | "w65c02" | "c64dtv2"
-                | "65816" => Ok(Operation::Bytes(Vec::new())),
+                | "65ce02" | "4502" | "65816" => Ok(Operation::Bytes(Vec::new())),
                 // ACME's other processors. Each is a different opcode set —
                 // not a spelling of 6502 — so accepting one silently would
                 // assemble the wrong instructions or refuse the right ones.
-                "65ce02" | "4502" | "m65" => Err(AsmError::new(
+                "m65" => Err(AsmError::new(
                     line,
                     format!(
                         "`!cpu {name}` selects a different processor, and asm198x does \
@@ -4194,17 +4212,30 @@ mod tests {
             .expect_err("C64DTV2 switched back")
             .to_string();
         assert!(err.contains("unknown instruction `SAC`"), "{err}");
+
+        assert_eq!(
+            asm("!cpu 65ce02\ncle\nldz #$12\nlda ($34),z\nsta ($56,sp),y\nphw #$1234\nlbne far\nasr $78,x\nfar:\naug\n!cpu 4502\nmap\neom")
+                .expect("65CE02 and 4502 profiles")
+                .bytes,
+            vec![
+                0x02, 0xA3, 0x12, 0xB2, 0x34, 0x82, 0x56, 0xF4, 0x34, 0x12, 0xD3, 0x03,
+                0x00, 0x54, 0x78, 0x5C, 0x5C, 0xEA
+            ]
+        );
+        let err = asm("!cpu 65ce02\n lda ($12)")
+            .expect_err("65CE02 replaces plain indirect with Z-indexed indirect")
+            .to_string();
+        assert!(err.contains("no `LDA` form"), "{err}");
     }
 
     /// The processor families whose executable sets do not exist yet remain
     /// named gaps rather than aliases for the nearest implemented CPU.
     #[test]
     fn another_processor_is_refused_as_our_gap() {
-        for cpu in ["65ce02", "4502", "m65"] {
-            let err = asm(&format!("!cpu {cpu}\nnop")).expect_err(cpu).to_string();
-            assert!(err.contains("the gap is ours"), "{cpu}: {err}");
-            assert!(!err.contains("unknown processor"), "{cpu}: {err}");
-        }
+        let cpu = "m65";
+        let err = asm(&format!("!cpu {cpu}\nnop")).expect_err(cpu).to_string();
+        assert!(err.contains("the gap is ours"), "{cpu}: {err}");
+        assert!(!err.contains("unknown processor"), "{cpu}: {err}");
     }
 
     /// A name ACME does not know is ACME's own refusal, not ours.

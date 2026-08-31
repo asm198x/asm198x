@@ -35,6 +35,8 @@ pub(crate) enum OperandSyntax {
     Indirect(Expr),
     IndexedIndirect(Expr),
     IndirectIndexed(Expr),
+    IndirectIndexedZ(Expr),
+    StackIndirectIndexedY(Expr),
     Indexed(Expr, Index),
     Direct(Expr),
 }
@@ -67,6 +69,8 @@ pub(crate) fn resolve_mode(
         OperandSyntax::Indirect(e) => ("indirect", Some(e)),
         OperandSyntax::IndexedIndirect(e) => ("(indirect,x)", Some(e)),
         OperandSyntax::IndirectIndexed(e) => ("(indirect),y", Some(e)),
+        OperandSyntax::IndirectIndexedZ(e) => ("(indirect),z", Some(e)),
+        OperandSyntax::StackIndirectIndexedY(e) => ("(stack-indirect),y", Some(e)),
         OperandSyntax::Indexed(e, Index::X) => (
             pick_zp_abs(insn, &e, env, force_abs, "zeropage,x", "absolute,x"),
             Some(e),
@@ -120,7 +124,14 @@ pub(crate) fn resolve_mode_in_sets(
             }
         }
         OperandSyntax::Accumulator => ("accumulator", None),
-        OperandSyntax::Immediate(e) => ("immediate", Some(e)),
+        OperandSyntax::Immediate(e) => {
+            let mode = if has("immediate") {
+                "immediate"
+            } else {
+                "immediate16"
+            };
+            (mode, Some(e))
+        }
         OperandSyntax::Indirect(e) => {
             let mode = if has("indirect") {
                 "indirect"
@@ -138,6 +149,8 @@ pub(crate) fn resolve_mode_in_sets(
             (mode, Some(e))
         }
         OperandSyntax::IndirectIndexed(e) => ("(indirect),y", Some(e)),
+        OperandSyntax::IndirectIndexedZ(e) => ("(indirect),z", Some(e)),
+        OperandSyntax::StackIndirectIndexedY(e) => ("(stack-indirect),y", Some(e)),
         OperandSyntax::Indexed(e, Index::X) => (
             pick_zp_abs_in_sets(&has, &e, env, force_abs, "zeropage,x", "absolute,x"),
             Some(e),
@@ -149,6 +162,8 @@ pub(crate) fn resolve_mode_in_sets(
         OperandSyntax::Direct(e) => {
             if has("relative") {
                 ("relative", Some(e))
+            } else if has("relative16") {
+                ("relative16", Some(e))
             } else {
                 (
                     pick_zp_abs_in_sets(&has, &e, env, force_abs, "zeropage", "absolute"),
@@ -248,7 +263,22 @@ pub(crate) fn parse_operand(
         let after = t[close + 1..].trim();
         let idx = after.strip_prefix(',').map(str::trim);
         if idx.is_some_and(|i| i.eq_ignore_ascii_case("y")) {
-            return Ok(OperandSyntax::IndirectIndexed(value(&t[1..close], line)?));
+            let inner = &t[1..close];
+            if let Some(comma) = top_level_rfind(inner, ',')
+                && matches!(
+                    inner[comma + 1..].trim().to_ascii_lowercase().as_str(),
+                    "s" | "sp"
+                )
+            {
+                return Ok(OperandSyntax::StackIndirectIndexedY(value(
+                    &inner[..comma],
+                    line,
+                )?));
+            }
+            return Ok(OperandSyntax::IndirectIndexed(value(inner, line)?));
+        }
+        if idx.is_some_and(|i| i.eq_ignore_ascii_case("z")) {
+            return Ok(OperandSyntax::IndirectIndexedZ(value(&t[1..close], line)?));
         }
         return Err(malformed());
     }
