@@ -52,6 +52,24 @@
       ]
     },
     {
+      "id": "cc65-6502dtv-opcodes",
+      "name": "cc65 6502DTV opcode test",
+      "cpu": "c64dtv2",
+      "dialect": "ca65",
+      "upstream": "https://github.com/cc65/cc65.git",
+      "commit": "e11fb5c39371046ebe25485f984f644c5a0d65d3",
+      "license": { "spdx": "Zlib", "path": "LICENSE" },
+      "targets": [
+        {
+          "id": "opcode-space",
+          "cwd": "test/asm/opcodes",
+          "sources": ["test/asm/opcodes/6502dtv-opcodes.s", "test/asm/opcodes/6502dtv-opcodes.ref"],
+          "reference": ["ca65", "6502dtv-opcodes.s", "-o", "6502dtv-opcodes.o"],
+          "outputs": ["test/asm/opcodes/6502dtv-opcodes.o"]
+        }
+      ]
+    },
+    {
       "id": "gbdev-gb-asm-tutorial",
       "name": "GB ASM Tutorial — Unbricked",
       "cpu": "sm83",
