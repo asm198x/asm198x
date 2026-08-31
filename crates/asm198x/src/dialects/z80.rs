@@ -2851,7 +2851,7 @@ pub(crate) fn string_literal(piece: &str) -> Option<&str> {
 }
 
 /// Parse an operand value: an arithmetic expression over numbers, symbols, and
-/// `+`/`-`/`*`/`/` with C-style precedence and parentheses. Number literals are
+/// `+`/`-`/`*`/`/` with C-style precedence, unary `~`, and parentheses. Number literals are
 /// lexed by the dialect's [`Z80Syntax::parse_number`].
 pub(crate) fn parse_value<S: Z80Syntax>(
     syntax: &S,
@@ -2909,6 +2909,8 @@ enum Tok {
     OrOr,
     /// Unary logical not `!`.
     Not,
+    /// Unary bitwise complement `~` (accepted by both reference dialects).
+    BitNot,
 }
 
 /// Lex an operand expression (see [`tokenize_impl`]).
@@ -2984,6 +2986,10 @@ fn tokenize_impl<S: Z80Syntax>(
             // unknown-character error there.
             '^' if syntax.has_xor_operator() => {
                 tokens.push(Tok::Xor);
+                i += 1;
+            }
+            '~' => {
+                tokens.push(Tok::BitNot);
                 i += 1;
             }
             // Conditions: `=` and `==` are both equality (probe p2), `!=` is
@@ -3254,6 +3260,10 @@ impl ExprParser {
         if matches!(self.tokens.get(self.pos), Some(Tok::Minus)) {
             self.pos += 1;
             return Ok(Expr::Neg(Box::new(self.unary()?)));
+        }
+        if matches!(self.tokens.get(self.pos), Some(Tok::BitNot)) {
+            self.pos += 1;
+            return Ok(Expr::BitNot(Box::new(self.unary()?)));
         }
         self.atom()
     }

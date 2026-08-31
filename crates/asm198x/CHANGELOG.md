@@ -17,6 +17,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   the source-level-debug keyword list. Native probes establish that it changes
   only SjASMPlus's optional `.sld` sidecar, so it is explicitly inert for
   Asm198x's machine output and Debug198x contract.
+- **Z80 expression complements.** SjASMPlus and Pasmo expressions now accept
+  unary `~` with native two's-complement semantics, including composition and
+  the reference assemblers' existing truncation at byte/word output widths.
 
 ## [0.0.53](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.52...asm198x-v0.0.53) - 2026-08-29
 
