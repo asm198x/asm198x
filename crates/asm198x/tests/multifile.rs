@@ -1045,6 +1045,20 @@ fn acme_label_on_include_defined_macro_survives_for_forward_byte_refs() {
     assert_eq!(r.symbols.get("handler"), Some(&0x1238));
 }
 
+/// Source-preserving capture must put a macro body's labels back into the text
+/// handed to the macro collector. A standalone anonymous label is the sharp
+/// case: dropping it used to leak an internal registration invariant.
+#[test]
+fn acme_include_defined_macro_preserves_anonymous_body_labels() {
+    let loader = MemoryLoader::new().text(
+        "defs.a",
+        "!macro spin .count {\n!for .i, .count {\n\t-\n        nop\n        bne -\n}\n}\n",
+    );
+    let src = "* = $1234\n!source \"defs.a\"\n+spin 2\n";
+    let r = assemble_acme_files(src, "main.a", &loader).expect("anonymous label survives capture");
+    assert_eq!(r.bytes, vec![0xEA, 0xD0, 0xFD, 0xEA, 0xD0, 0xFD]);
+}
+
 /// Textual means ordered: a definition later in the includer does not leak
 /// backward into an earlier included file (ACME 0.97 rejects it as undefined).
 #[test]

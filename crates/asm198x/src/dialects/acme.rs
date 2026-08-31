@@ -1256,6 +1256,19 @@ struct MacroCapture {
     line: usize,
 }
 
+/// Rebuild the code-bearing part of a formatter node. Multi-file macro
+/// definitions arrive as source-preserving nodes rather than raw lines, so a
+/// label must be put back before the definition is handed to the shared macro
+/// collector. In particular, an anonymous `-`/`+` label may be the entire
+/// line.
+fn node_code(node: &crate::ast::Node) -> String {
+    match &node.label {
+        Some(sym) if node.source.is_empty() => sym.name.clone(),
+        Some(sym) => format!("{} {}", sym.name, node.source),
+        None => node.source.clone(),
+    }
+}
+
 struct AcmeEval<'a> {
     set: &'static isa::InstructionSet,
     anons: Anons,
@@ -1690,7 +1703,7 @@ impl AcmeEval<'_> {
         // lines until the definition's matching brace, then let the ordinary
         // ACME collector register it with its real file and header line.
         if let Some(mut capture) = self.macro_capture.take() {
-            capture.source.push_str(&node.source);
+            capture.source.push_str(&node_code(node));
             capture.source.push('\n');
             if close_brace(&node.source, &mut capture.depth).is_some() {
                 macros::expand_at(
@@ -1776,9 +1789,17 @@ impl AcmeEval<'_> {
         // numbers — and a definition in an untaken branch never registers,
         // matching acme (probe-pinned, U4).
         self.anons.vline += 1;
-        if let Some(sym) = &node.label
-            && let Some((sign, level)) = anon_marker(&sym.name)
-        {
+        // ACME also accepts an indented anonymous label (the real charset
+        // corpus uses a tab before `-`). FmtCx necessarily keeps that as
+        // operation source because ordinary named labels are column-sensitive,
+        // but parse_statement recognises the anonymous run after canonical
+        // reconstruction. Register either AST shape before it does so.
+        let anon = node
+            .label
+            .as_ref()
+            .and_then(|sym| anon_marker(&sym.name))
+            .or_else(|| anon_marker(split_first_word(node.source.trim()).0));
+        if let Some((sign, level)) = anon {
             self.anons.define(sign, level);
         }
 
@@ -1869,11 +1890,7 @@ impl AcmeEval<'_> {
         // Reconstruct the source line from the node's (label, operation source) —
         // canonical whitespace, which the parser treats identically to the
         // original.
-        let recon = match &node.label {
-            Some(sym) if node.source.is_empty() => sym.name.clone(),
-            Some(sym) => format!("{} {}", sym.name, node.source),
-            None => node.source.clone(),
-        };
+        let recon = node_code(node);
 
         // `!set name = expr` binds/rebinds a variable and emits nothing; later
         // uses are baked to this value. A `.name` is zone-scoped (probe zh6).
