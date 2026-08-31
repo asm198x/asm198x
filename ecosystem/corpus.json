@@ -70,6 +70,42 @@
       ]
     },
     {
+      "id": "cc65-65ce02-opcodes",
+      "name": "cc65 65CE02 opcode test",
+      "cpu": "65ce02",
+      "dialect": "ca65",
+      "upstream": "https://github.com/cc65/cc65.git",
+      "commit": "e11fb5c39371046ebe25485f984f644c5a0d65d3",
+      "license": { "spdx": "Zlib", "path": "LICENSE" },
+      "targets": [
+        {
+          "id": "opcode-space",
+          "cwd": "test/asm/opcodes",
+          "sources": ["test/asm/opcodes/65ce02-opcodes.s", "test/asm/opcodes/65ce02-opcodes.ref"],
+          "reference": ["ca65", "65ce02-opcodes.s", "-o", "65ce02-opcodes.o"],
+          "outputs": ["test/asm/opcodes/65ce02-opcodes.o"]
+        }
+      ]
+    },
+    {
+      "id": "cc65-4510-opcodes",
+      "name": "cc65 CSG 4510 opcode test",
+      "cpu": "4502",
+      "dialect": "ca65",
+      "upstream": "https://github.com/cc65/cc65.git",
+      "commit": "e11fb5c39371046ebe25485f984f644c5a0d65d3",
+      "license": { "spdx": "Zlib", "path": "LICENSE" },
+      "targets": [
+        {
+          "id": "opcode-space",
+          "cwd": "test/asm/opcodes",
+          "sources": ["test/asm/opcodes/4510-opcodes.s", "test/asm/opcodes/4510-opcodes.ref"],
+          "reference": ["ca65", "4510-opcodes.s", "-o", "4510-opcodes.o"],
+          "outputs": ["test/asm/opcodes/4510-opcodes.o"]
+        }
+      ]
+    },
+    {
       "id": "gbdev-gb-asm-tutorial",
       "name": "GB ASM Tutorial — Unbricked",
       "cpu": "sm83",
