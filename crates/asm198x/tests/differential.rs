@@ -1682,6 +1682,18 @@ const MULTI_PROBES: &[MultiProbe] = &[
     },
     MultiProbe {
         dialect: "acme",
+        binaries: &[],
+        note: "standalone anonymous label survives capture inside an include-defined macro",
+        files: &[
+            ("main.a", "* = $1234\n!src \"defs.a\"\n+spin 2\n"),
+            (
+                "defs.a",
+                "!macro spin .count {\n!for .i, .count {\n\t-\n        nop\n        bne -\n}\n}\n",
+            ),
+        ],
+    },
+    MultiProbe {
+        dialect: "acme",
         binaries: &[("data.bin", ASSET)],
         note: "labels on the !src and !bin lines bind at the include point / payload (U4)",
         files: &[
