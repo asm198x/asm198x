@@ -205,6 +205,24 @@ fn split_comment(line: &str) -> (&str, Option<&str>) {
     (code, comment)
 }
 
+/// Whether a column-zero word can be an instruction in any ACME processor
+/// profile this front-end implements. This parse runs before lexical `!cpu`
+/// directives are evaluated; the active-profile check still happens later.
+fn is_known_acme_mnemonic(base: &'static isa::InstructionSet, word: &str) -> bool {
+    let mnemonic = word.to_ascii_uppercase();
+    base.has_mnemonic(&mnemonic)
+        || [
+            &isa::nmos6502_undocumented::SET,
+            &isa::mos65c02::SET,
+            &isa::mos65c02::ROCKWELL_SET,
+            &isa::mos65c02::WDC_SET,
+            &isa::c64dtv2::SET,
+            &isa::mos65816::SET,
+        ]
+        .iter()
+        .any(|set| set.has_mnemonic(&mnemonic))
+}
+
 /// Split ACME's `:`-separated statements without mistaking a column-zero
 /// label suffix or a colon inside a quoted literal for a separator.
 fn split_statements(line: &str) -> Vec<&str> {
@@ -817,10 +835,7 @@ impl<'a> FmtCx<'a> {
             {
                 return Ok(self.labeled_node(span, name, rest.trim(), leading, comment, line));
             }
-            if !word.starts_with('!')
-                && self.set.instruction(&word.to_ascii_uppercase()).is_none()
-                && is_ident(word)
-            {
+            if !word.starts_with('!') && !is_known_acme_mnemonic(self.set, word) && is_ident(word) {
                 return Ok(self.labeled_node(span, word, rest.trim(), leading, comment, line));
             }
         }
@@ -1949,6 +1964,7 @@ impl AcmeEval<'_> {
                 "65c02" => Some(&isa::mos65c02::SET),
                 "r65c02" => Some(&isa::mos65c02::ROCKWELL_SET),
                 "w65c02" => Some(&isa::mos65c02::WDC_SET),
+                "c64dtv2" => Some(&isa::c64dtv2::SET),
                 "65816" => Some(&isa::mos65816::SET),
                 _ => self.target.ext,
             };
@@ -3426,13 +3442,12 @@ fn parse_directive(
             let name = rest.trim().to_ascii_lowercase();
             match name.as_str() {
                 // The processor this dialect already assembles.
-                "6502" | "6510" | "nmos6502" | "65c02" | "r65c02" | "w65c02" | "65816" => {
-                    Ok(Operation::Bytes(Vec::new()))
-                }
+                "6502" | "6510" | "nmos6502" | "65c02" | "r65c02" | "w65c02" | "c64dtv2"
+                | "65816" => Ok(Operation::Bytes(Vec::new())),
                 // ACME's other processors. Each is a different opcode set —
                 // not a spelling of 6502 — so accepting one silently would
                 // assemble the wrong instructions or refuse the right ones.
-                "65ce02" | "4502" | "c64dtv2" | "m65" => Err(AsmError::new(
+                "65ce02" | "4502" | "m65" => Err(AsmError::new(
                     line,
                     format!(
                         "`!cpu {name}` selects a different processor, and asm198x does \
@@ -4160,13 +4175,32 @@ mod tests {
             .expect_err("WAI is WDC-only")
             .to_string();
         assert!(err.contains("unknown instruction `WAI`"), "{err}");
+
+        assert_eq!(
+            asm(
+                "!cpu c64dtv2\nbra done\nsac #$12\nsir #$34\nslo $10\nlax $20\nasr #$40\ndone:\nnop"
+            )
+            .expect("C64DTV2 additions plus shared undocumented opcodes")
+            .bytes,
+            vec![
+                0x12, 0x0A, 0x32, 0x12, 0x42, 0x34, 0x07, 0x10, 0xA7, 0x20, 0x4B, 0x40, 0xEA
+            ]
+        );
+        let err = asm("!cpu c64dtv2\n anc #$12")
+            .expect_err("ANC is not in ACME's C64DTV2 set")
+            .to_string();
+        assert!(err.contains("unknown instruction"), "{err}");
+        let err = asm("!cpu c64dtv2\nsac #$12\n!cpu 6502\nafter sac #$12")
+            .expect_err("C64DTV2 switched back")
+            .to_string();
+        assert!(err.contains("unknown instruction `SAC`"), "{err}");
     }
 
     /// The processor families whose executable sets do not exist yet remain
     /// named gaps rather than aliases for the nearest implemented CPU.
     #[test]
     fn another_processor_is_refused_as_our_gap() {
-        for cpu in ["65ce02", "4502", "c64dtv2", "m65"] {
+        for cpu in ["65ce02", "4502", "m65"] {
             let err = asm(&format!("!cpu {cpu}\nnop")).expect_err(cpu).to_string();
             assert!(err.contains("the gap is ours"), "{cpu}: {err}");
             assert!(!err.contains("unknown processor"), "{cpu}: {err}");
