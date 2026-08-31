@@ -2193,6 +2193,8 @@ impl crate::ast::CondEval for RgbasmEval {
                 op: Some(op),
                 operand_span: node.operand_span.clone(),
                 xor_mask: 0,
+                instruction_set: None,
+                extension_set: None,
             });
             return Ok(());
         }
@@ -2204,6 +2206,8 @@ impl crate::ast::CondEval for RgbasmEval {
                 op,
                 operand_span: node.operand_span.clone(),
                 xor_mask: 0,
+                instruction_set: None,
+                extension_set: None,
             });
             return Ok(());
         }
@@ -2279,6 +2283,8 @@ impl crate::ast::CondEval for RgbasmEval {
             op,
             operand_span: node.operand_span.clone(),
             xor_mask: 0,
+            instruction_set: None,
+            extension_set: None,
         });
         Ok(())
     }
