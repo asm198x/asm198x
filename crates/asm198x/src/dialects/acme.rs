@@ -1946,6 +1946,7 @@ impl AcmeEval<'_> {
             self.target.ext = match cpu.as_str() {
                 "6502" => None,
                 "6510" | "nmos6502" => Some(&isa::nmos6502_undocumented::SET),
+                "65c02" => Some(&isa::mos65c02::SET),
                 "65816" => Some(&isa::mos65816::SET),
                 _ => self.target.ext,
             };
@@ -2876,13 +2877,21 @@ fn parse_op(
     let (mnemonic, remainder) = split_first_word(rest);
     let mnemonic = mnemonic.to_ascii_uppercase();
     let operand = mos6502::parse_operand(remainder, line, &|s, l| parse_value(anons, zone, s, l))?;
-    let insn = target
-        .ext
-        .and_then(|set| set.instruction(&mnemonic))
-        .or_else(|| target.set.instruction(&mnemonic))
-        .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
+    if target.set.instruction(&mnemonic).is_none()
+        && target
+            .ext
+            .and_then(|set| set.instruction(&mnemonic))
+            .is_none()
+    {
+        return Err(AsmError::new(
+            line,
+            format!("unknown instruction `{mnemonic}`"),
+        ));
+    }
     let force_abs = address_forces_absolute(remainder);
-    let (mode, operand) = mos6502::resolve_mode(insn, operand, env, force_abs, line)?;
+    let (mode, operand) = mos6502::resolve_mode_in_sets(
+        target.set, target.ext, &mnemonic, operand, env, force_abs, line,
+    )?;
     Ok(Some(Operation::Instruction {
         mnemonic,
         mode,
@@ -3391,11 +3400,13 @@ fn parse_directive(
             let name = rest.trim().to_ascii_lowercase();
             match name.as_str() {
                 // The processor this dialect already assembles.
-                "6502" | "6510" | "nmos6502" | "65816" => Ok(Operation::Bytes(Vec::new())),
+                "6502" | "6510" | "nmos6502" | "65c02" | "65816" => {
+                    Ok(Operation::Bytes(Vec::new()))
+                }
                 // ACME's other processors. Each is a different opcode set —
                 // not a spelling of 6502 — so accepting one silently would
                 // assemble the wrong instructions or refuse the right ones.
-                "65c02" | "65ce02" | "4502" | "c64dtv2" | "m65" | "w65c02" => Err(AsmError::new(
+                "65ce02" | "4502" | "c64dtv2" | "m65" | "r65c02" | "w65c02" => Err(AsmError::new(
                     line,
                     format!(
                         "`!cpu {name}` selects a different processor, and asm198x does \
@@ -4089,13 +4100,26 @@ mod tests {
             .expect_err("6510 switched back")
             .to_string();
         assert!(err.contains("unknown instruction `LAX`"), "{err}");
+
+        assert_eq!(
+            asm("!cpu 65c02\nlda $12\nlda ($12)\nbit $12\nbit $12,x\ninc\nbra done\ndone: nop")
+                .expect("65c02 base and added modes")
+                .bytes,
+            vec![
+                0xA5, 0x12, 0xB2, 0x12, 0x24, 0x12, 0x34, 0x12, 0x1A, 0x80, 0x00, 0xEA
+            ]
+        );
+        let err = asm("!cpu 65c02\nphx\n!cpu 6502\nafter phx")
+            .expect_err("65c02 switched back")
+            .to_string();
+        assert!(err.contains("unknown instruction `PHX`"), "{err}");
     }
 
     /// The processor families whose executable sets do not exist yet remain
     /// named gaps rather than aliases for the nearest implemented CPU.
     #[test]
     fn another_processor_is_refused_as_our_gap() {
-        for cpu in ["65c02", "65ce02", "4502", "c64dtv2", "m65", "w65c02"] {
+        for cpu in ["65ce02", "4502", "c64dtv2", "m65", "r65c02", "w65c02"] {
             let err = asm(&format!("!cpu {cpu}\nnop")).expect_err(cpu).to_string();
             assert!(err.contains("the gap is ours"), "{cpu}: {err}");
             assert!(!err.contains("unknown processor"), "{cpu}: {err}");
