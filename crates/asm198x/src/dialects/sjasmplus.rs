@@ -125,6 +125,15 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["define"]),
         category: Category::Operation,
     },
+    Directive {
+        id: "opt",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["opt"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
     // Named by its opener, like the blocks above: `ENDMODULE`/`ENDMOD` are
     // parts of the block rather than vocabulary of their own.
     //
@@ -263,7 +272,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "labelslist",
                 "lua",
                 "mmu",
-                "opt",
                 "outend",
                 "output",
                 "phase",
@@ -589,6 +597,31 @@ impl SjasmplusSyntax {
 }
 
 impl Z80Syntax for SjasmplusSyntax {
+    fn lexical_option(
+        &self,
+        word: &str,
+        args: &str,
+        line: usize,
+    ) -> Result<Option<z80::LexicalOption>, AsmError> {
+        if !undot(word).eq_ignore_ascii_case("opt") {
+            return Ok(None);
+        }
+        let option = match args.trim() {
+            "--syntax=abfw" => z80::LexicalOption::SyntaxAbfw,
+            "--zxnext" => z80::LexicalOption::ZxNext { cspect: false },
+            "--zxnext=cspect" => z80::LexicalOption::ZxNext { cspect: true },
+            other => {
+                return Err(AsmError::new(
+                    line,
+                    format!(
+                        "`OPT {other}` is valid SjASMPlus option state that asm198x has not implemented"
+                    ),
+                ));
+            }
+        };
+        Ok(Some(option))
+    }
+
     /// Comparisons in an expression, probed against the binary — see
     /// `docs/comparison-operators.md`. Both answer `$FF` for true.
     fn compare(&self) -> crate::dialects::mos6502::Compare {
@@ -686,6 +719,7 @@ impl Z80Syntax for SjasmplusSyntax {
             || word.eq_ignore_ascii_case("page")
             || word.eq_ignore_ascii_case("assert")
             || word.eq_ignore_ascii_case("display")
+            || word.eq_ignore_ascii_case("opt")
             || word.eq_ignore_ascii_case("savebin")
             || word.eq_ignore_ascii_case("savetap")
             // The data directives beyond the shared set — see the
@@ -1198,7 +1232,52 @@ impl macros::MacroSyntax for SjasmplusSyntax {
 
 #[cfg(test)]
 mod tests {
-    use crate::assemble_sjasmplus as asm;
+    use crate::{assemble_sjasmplus as asm, assemble_sjasmplus_files, source::MemoryLoader};
+
+    /// The three option forms used by SpecNext Invaders, pinned against
+    /// SjASMPlus 1.21.0. `--zxnext` changes the live instruction set;
+    /// `=cspect` additionally admits the emulator's two fake instructions.
+    /// The recommended strict syntax already matches these parser behaviours.
+    #[test]
+    fn opt_enables_the_specnext_invaders_option_state() {
+        assert!(asm("\tnextreg $07,$02\n").is_err());
+        assert_eq!(
+            asm("\topt --zxnext\n\tnextreg $07,$02\n")
+                .expect("Next enabled")
+                .bytes,
+            vec![0xED, 0x91, 0x07, 0x02]
+        );
+        assert_eq!(
+            asm("\t.opt --zxnext=cspect\n\tbreak\n\texit\n")
+                .expect("CSpect fakes enabled")
+                .bytes,
+            vec![0xFD, 0x00, 0xDD, 0x00]
+        );
+        assert_eq!(
+            asm("\topt --syntax=abfw\n\tld a,(hl)\n\tsub a,b\n")
+                .expect("recommended strict syntax")
+                .bytes,
+            vec![0x7E, 0x90]
+        );
+        assert!(asm("\topt --syntax=abfw\n\tld b,(1234)\n").is_err());
+
+        // Option state is lexical across textual includes, as the project's
+        // root OPT lines require for the Z80N instructions in its children.
+        let loader = MemoryLoader::new().text("child.asm", "\tnextreg $07,$02\n");
+        assert_eq!(
+            assemble_sjasmplus_files(
+                "\topt --zxnext\n\tinclude \"child.asm\"\n",
+                "main.asm",
+                &loader,
+            )
+            .expect("option flows into include")
+            .bytes,
+            vec![0xED, 0x91, 0x07, 0x02]
+        );
+
+        let err = asm("\topt push\n").expect_err("unsupported option state");
+        assert!(err.to_string().contains("has not implemented"), "{err}");
+    }
 
     /// The data directives beyond the shared Z80 set. Every expectation was
     /// read off sjasmplus v1.21.0 before it was written here.

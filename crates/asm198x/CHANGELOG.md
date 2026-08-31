@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- **SjASMPlus source options.** `OPT --syntax=abfw`, `OPT --zxnext`, and
+  `OPT --zxnext=cspect` now carry their lexical parser and target state into
+  following source and includes, including CSpect's `BREAK` and `EXIT` fake
+  instructions. This clears SpecNext Invaders' first corpus boundary.
+
 ## [0.0.53](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.52...asm198x-v0.0.53) - 2026-08-29
 
 ### Fixed
