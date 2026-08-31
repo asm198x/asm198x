@@ -142,6 +142,16 @@ engine are exactly the dialects that have sections" should be read as: that is
 and its ROM sizing were built on the shared model rather than a fourth private
 layout, which is the growth this record existed to stop.
 
+**Amended 2026-08-31: address runs are not source sections.** ACME source has no
+section directive, but it may move `*` backwards and write several regions in
+any order. Those regions reuse the engine's internal `Run` placement model and
+still flatten to one image; they do not acquire section names or expose a new
+language surface. ACME also permits overlaps, with later written bytes winning,
+so overlap policy is dialect-gated while ca65, vasm, and rgbasm retain their
+refusal. An `org` gap is not part of a run: placement fills it only after all
+written regions have been overlaid, preventing a later gap from erasing earlier
+data (#463).
+
 ## Drift triggers
 
 Re-read this record when any of these appear:

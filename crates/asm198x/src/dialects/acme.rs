@@ -87,6 +87,14 @@ impl Dialect for Acme {
         true
     }
 
+    fn org_starts_address_run(&self) -> bool {
+        true
+    }
+
+    fn later_run_overwrites(&self) -> bool {
+        true
+    }
+
     fn parse(&self, source: &str) -> Result<Vec<Statement>, AsmError> {
         // Idea 4: assemble by **evaluating the shared conditional AST** — the same
         // source-preserving tree the formatter parses — rather than a separate
@@ -4660,6 +4668,44 @@ mod tests {
         // the source names none, and `*=$c004` below counts as naming one.
         let out = asm("*=$c000\n!initmem $ff\nnop\n*=$c004\nnop").expect("gap");
         assert_eq!(out.bytes, vec![0xEA, 0xFF, 0xFF, 0xFF, 0xEA]);
+    }
+
+    /// ACME places source-ordered regions by address. The lowest written
+    /// address becomes the flat image origin, independently of which region
+    /// appeared first.
+    #[test]
+    fn backwards_origins_are_placed_by_address() {
+        let out = asm("*=$1004\nhigh !byte $44\n*=$1000\nlow !byte $11\n*=$1002\nmid !byte $22")
+            .expect("address-placed regions");
+        assert_eq!(out.origin, Some(0x1000));
+        assert_eq!(out.bytes, vec![0x11, 0, 0x22, 0, 0x44]);
+        assert_eq!(out.symbols.get("low"), Some(&0x1000));
+        assert_eq!(out.symbols.get("mid"), Some(&0x1002));
+        assert_eq!(out.symbols.get("high"), Some(&0x1004));
+        let offsets = out
+            .debug
+            .lines
+            .iter()
+            .map(|line| line.offset)
+            .collect::<Vec<_>>();
+        assert_eq!(offsets, vec![4, 0, 2]);
+    }
+
+    /// A later region overwrites only bytes it writes. Its origin gap remains
+    /// unwritten, so it cannot erase an earlier region that lies inside that
+    /// gap; `!initmem` fills whatever remains unwritten after placement.
+    #[test]
+    fn later_regions_overlay_bytes_but_not_origin_gaps() {
+        let out =
+            asm("!initmem $aa\n*=$1004\n!byte $44\n*=$1000\n!byte $11,$22\n*=$1001\n!byte $33")
+                .expect("overlay");
+        assert_eq!(out.origin, Some(0x1000));
+        assert_eq!(out.bytes, vec![0x11, 0x33, 0xAA, 0xAA, 0x44]);
+        assert!(
+            out.warnings
+                .iter()
+                .any(|warning| warning.message.contains("later bytes overwrite"))
+        );
     }
 
     /// A second `!initmem` is ignored, not obeyed and not refused: ACME warns

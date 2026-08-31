@@ -131,6 +131,23 @@ pub(crate) trait Dialect {
         true
     }
 
+    /// Whether each `org` boundary starts another address-placed run. ACME
+    /// builds one memory image from source-ordered regions, then places them by
+    /// address; keeping the regions separate also prevents an unwritten
+    /// forward gap from overwriting an earlier region it crosses. Most flat
+    /// assemblers retain the default `false` and require monotonically
+    /// increasing origins.
+    fn org_starts_address_run(&self) -> bool {
+        false
+    }
+
+    /// Whether a later address run overwrites bytes already placed there.
+    /// Meaningful only with [`Self::org_starts_address_run`]. ACME warns and
+    /// lets the later region win; section/linker dialects refuse overlaps.
+    fn later_run_overwrites(&self) -> bool {
+        false
+    }
+
     /// Whether a backward `org` discards an initial region containing only
     /// reservations. lwasm raw output starts at the first region that writes
     /// bytes; other dialects retain their normal gap semantics.
