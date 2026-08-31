@@ -1426,6 +1426,8 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             op: None,
             operand_span: None,
             xor_mask: 0,
+            instruction_set: None,
+            extension_set: None,
         });
         Ok(())
     }
@@ -1521,6 +1523,8 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             op,
             operand_span: node.operand_span.clone(),
             xor_mask: 0,
+            instruction_set: None,
+            extension_set: None,
         });
         Ok(())
     }
@@ -1641,6 +1645,8 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             op: Some(Operation::Binary(payload)),
             operand_span: node.operand_span.clone(),
             xor_mask: 0,
+            instruction_set: None,
+            extension_set: None,
         });
         Ok(())
     }

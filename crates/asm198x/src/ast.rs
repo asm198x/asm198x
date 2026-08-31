@@ -653,6 +653,8 @@ pub(crate) fn evaluate<D: CondEval>(
                         op: Some(op),
                         operand_span: None,
                         xor_mask: 0,
+                        instruction_set: None,
+                        extension_set: None,
                     });
                 }
                 dialect.eval(head, node.span.line)?
@@ -783,6 +785,8 @@ pub(crate) fn lower(program: Program) -> Result<Vec<Statement>, AsmError> {
                 op: node.item.map(lower_item).transpose()?,
                 operand_span: node.operand_span,
                 xor_mask: 0,
+                instruction_set: None,
+                extension_set: None,
             })
         })
         .collect()

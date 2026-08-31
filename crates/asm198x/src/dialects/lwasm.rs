@@ -2550,6 +2550,8 @@ impl crate::ast::CondEval for LwasmEval {
                     op: None,
                     operand_span: None,
                     xor_mask: 0,
+                    instruction_set: None,
+                    extension_set: None,
                 });
             }
             let program = parse_program(&inline.0, macros::Expand::Yes)?;
@@ -2577,6 +2579,8 @@ impl crate::ast::CondEval for LwasmEval {
                 op: Some(op),
                 operand_span: None,
                 xor_mask: 0,
+                instruction_set: None,
+                extension_set: None,
             };
             match effect {
                 StructEffect::Nothing => {}
@@ -2652,6 +2656,8 @@ impl crate::ast::CondEval for LwasmEval {
             op,
             operand_span: node.operand_span.clone(),
             xor_mask: 0,
+            instruction_set: None,
+            extension_set: None,
         });
         Ok(())
     }

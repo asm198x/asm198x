@@ -1277,8 +1277,14 @@ fn node_code(node: &crate::ast::Node) -> String {
     }
 }
 
-struct AcmeEval<'a> {
+#[derive(Clone, Copy)]
+struct AcmeTarget {
     set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+}
+
+struct AcmeEval<'a> {
+    target: AcmeTarget,
     anons: Anons,
     env: BTreeMap<String, i64>,
     /// Names bound by `!set` (rebindable): each use is baked to its current value.
@@ -1337,7 +1343,7 @@ struct AcmeEval<'a> {
 impl<'a> AcmeEval<'a> {
     fn new(set: &'static isa::InstructionSet, multi: Option<MultiCx<'a>>) -> Self {
         Self {
-            set,
+            target: AcmeTarget { set, ext: None },
             anons: Anons::default(),
             env: BTreeMap::new(),
             set_names: BTreeSet::new(),
@@ -1389,6 +1395,8 @@ impl<'a> AcmeEval<'a> {
                 op: None,
                 operand_span: None,
                 xor_mask: 0,
+                instruction_set: Some(self.target.set),
+                extension_set: self.target.ext,
             });
         }
         let t = args.trim();
@@ -1479,6 +1487,8 @@ impl<'a> AcmeEval<'a> {
                 op: None,
                 operand_span: None,
                 xor_mask: 0,
+                instruction_set: Some(self.target.set),
+                extension_set: self.target.ext,
             });
         }
         let Some(mcx) = self.multi.as_mut() else {
@@ -1571,6 +1581,8 @@ impl<'a> AcmeEval<'a> {
             op: Some(Operation::Binary(payload)),
             operand_span: node.operand_span.clone(),
             xor_mask: 0,
+            instruction_set: Some(self.target.set),
+            extension_set: self.target.ext,
         });
         Ok(())
     }
@@ -1840,6 +1852,8 @@ impl AcmeEval<'_> {
                     op: Some(Operation::PseudoPc(Some(e))),
                     operand_span: None,
                     xor_mask: 0,
+                    instruction_set: Some(self.target.set),
+                    extension_set: self.target.ext,
                 });
                 return Ok(());
             }
@@ -1893,6 +1907,8 @@ impl AcmeEval<'_> {
                         op: Some(Operation::PseudoPc(None)),
                         operand_span: None,
                         xor_mask: 0,
+                        instruction_set: Some(self.target.set),
+                        extension_set: self.target.ext,
                     }),
                 }
                 return Ok(());
@@ -1917,7 +1933,7 @@ impl AcmeEval<'_> {
         }
 
         let (label, op) = parse_statement(
-            self.set,
+            self.target,
             &self.anons,
             &self.zone,
             &self.env,
@@ -1926,6 +1942,13 @@ impl AcmeEval<'_> {
             line,
         )
         .map_err(|e| stamp_file(e, file))?;
+        if let Some(cpu) = cpu_selector(&recon) {
+            self.target.ext = match cpu.as_str() {
+                "6502" => None,
+                "65816" => Some(&isa::mos65816::SET),
+                _ => self.target.ext,
+            };
+        }
         // A `.name` definition qualifies into the current zone (U7); its
         // references were qualified by `parse_value`.
         let label = label.map(|n| self.qualify_name(n));
@@ -1954,6 +1977,8 @@ impl AcmeEval<'_> {
                 op,
                 operand_span: node.operand_span.clone(),
                 xor_mask: 0,
+                instruction_set: Some(self.target.set),
+                extension_set: self.target.ext,
             });
         }
         Ok(())
@@ -2061,7 +2086,7 @@ impl AcmeEval<'_> {
         let Some(pc) = self.pc else { return };
         // ACME's 6502 is one byte per address unit, and it has no CPU where
         // that is not so.
-        self.pc = crate::engine::next_pc(op, pc, self.set, None, 1, line).ok();
+        self.pc = crate::engine::next_pc(op, pc, self.target.set, self.target.ext, 1, line).ok();
     }
 }
 
@@ -2716,7 +2741,7 @@ fn strip_word_ci<'a>(text: &'a str, word: &str) -> Option<&'a str> {
 }
 
 fn parse_statement(
-    set: &'static isa::InstructionSet,
+    target: AcmeTarget,
     anons: &Anons,
     zone: &str,
     env: &BTreeMap<String, i64>,
@@ -2751,7 +2776,7 @@ fn parse_statement(
     }
 
     // Otherwise: an optional column-0 label, then a directive or instruction.
-    let (label, rest) = split_label(set, anons, code, line)?;
+    let (label, rest) = split_label(target, anons, code, line)?;
     // `!addr`/`!address` names a symbol and marks it an address. The mark has
     // no effect on bytes — probed at every shape, `!addr foo = $10` selects
     // zero page exactly as `foo = $10` does — so what is left is the naming,
@@ -2782,7 +2807,7 @@ fn parse_statement(
         };
         return Ok((Some(name.to_string()), op));
     }
-    let op = parse_op(set, anons, zone, env, conv, rest, line)?;
+    let op = parse_op(target, anons, zone, env, conv, rest, line)?;
     Ok((label, op))
 }
 
@@ -2790,7 +2815,7 @@ fn parse_statement(
 /// A column-0 first word that names a known mnemonic or a `!` directive is the
 /// operation, not a label; an all-`-`/all-`+` run is an anonymous label.
 fn split_label<'a>(
-    set: &'static isa::InstructionSet,
+    target: AcmeTarget,
     anons: &Anons,
     code: &'a str,
     line: usize,
@@ -2815,7 +2840,12 @@ fn split_label<'a>(
         }
         return Ok((Some(name.to_string()), remainder));
     }
-    if word.starts_with('!') || set.instruction(&word.to_ascii_uppercase()).is_some() {
+    if word.starts_with('!')
+        || target.set.instruction(&word.to_ascii_uppercase()).is_some()
+        || target
+            .ext
+            .is_some_and(|set| set.instruction(&word.to_ascii_uppercase()).is_some())
+    {
         return Ok((None, trimmed));
     }
     if is_ident(word) {
@@ -2826,7 +2856,7 @@ fn split_label<'a>(
 
 /// Parse the operation part (after any label): a `!` directive or an instruction.
 fn parse_op(
-    set: &'static isa::InstructionSet,
+    target: AcmeTarget,
     anons: &Anons,
     zone: &str,
     env: &BTreeMap<String, i64>,
@@ -2845,8 +2875,10 @@ fn parse_op(
     let (mnemonic, remainder) = split_first_word(rest);
     let mnemonic = mnemonic.to_ascii_uppercase();
     let operand = mos6502::parse_operand(remainder, line, &|s, l| parse_value(anons, zone, s, l))?;
-    let insn = set
-        .instruction(&mnemonic)
+    let insn = target
+        .ext
+        .and_then(|set| set.instruction(&mnemonic))
+        .or_else(|| target.set.instruction(&mnemonic))
         .ok_or_else(|| AsmError::new(line, format!("unknown instruction `{mnemonic}`")))?;
     let force_abs = address_forces_absolute(remainder);
     let (mode, operand) = mos6502::resolve_mode(insn, operand, env, force_abs, line)?;
@@ -3285,6 +3317,22 @@ pub const DIRECTIVES: &[Directive] = &[
     // processor this dialect assembles and refused by name for the rest.
 ];
 
+/// The processor named by a live `!cpu` statement, including the labelled
+/// form. The regular parser remains responsible for validating the name.
+fn cpu_selector(code: &str) -> Option<String> {
+    let trimmed = code.trim();
+    let directive = if trimmed
+        .get(..4)
+        .is_some_and(|head| head.eq_ignore_ascii_case("!cpu"))
+    {
+        trimmed
+    } else {
+        split_first_word(trimmed).1.trim_start()
+    };
+    let rest = strip_word_ci(directive, "!cpu")?;
+    Some(rest.trim().to_ascii_lowercase())
+}
+
 fn parse_directive(
     anons: &Anons,
     zone: &str,
@@ -3342,11 +3390,11 @@ fn parse_directive(
             let name = rest.trim().to_ascii_lowercase();
             match name.as_str() {
                 // The processor this dialect already assembles.
-                "6502" => Ok(Operation::Bytes(Vec::new())),
+                "6502" | "65816" => Ok(Operation::Bytes(Vec::new())),
                 // ACME's other processors. Each is a different opcode set —
                 // not a spelling of 6502 — so accepting one silently would
                 // assemble the wrong instructions or refuse the right ones.
-                "6510" | "65c02" | "65ce02" | "65816" | "4502" | "c64dtv2" | "m65" | "w65c02" => {
+                "6510" | "65c02" | "65ce02" | "4502" | "c64dtv2" | "m65" | "w65c02" => {
                     Err(AsmError::new(
                         line,
                         format!(
@@ -4013,12 +4061,22 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
 
-    /// `!cpu` selects a processor, and ACME's processors are not spellings of
-    /// one another — so only the one this dialect assembles is a no-op.
+    /// `!cpu` is lexical: 65816 extends the base set, and switching back
+    /// removes those instructions again.
     #[test]
-    fn cpu_takes_the_processor_this_dialect_assembles() {
+    fn cpu_switches_instruction_sets_per_statement() {
         assert_eq!(asm("!cpu 6502\nnop").expect("6502").bytes, vec![0xEA]);
         assert_eq!(asm("!CPU 6502\nnop").expect("case").bytes, vec![0xEA]);
+        assert_eq!(
+            asm("!cpu 65816\nlda #1\nrtl\nxba\n!cpu 6502\nnop")
+                .expect("switch")
+                .bytes,
+            vec![0xA9, 0x01, 0x6B, 0xEB, 0xEA]
+        );
+        let err = asm("!cpu 65816\nrtl\n!cpu 6502\nafter rtl")
+            .expect_err("switched back")
+            .to_string();
+        assert!(err.contains("unknown instruction `RTL`"), "{err}");
     }
 
     /// The seven others ACME knows are a real gap, refused by name rather
@@ -4028,7 +4086,7 @@ mod tests {
     #[test]
     fn another_processor_is_refused_as_our_gap() {
         for cpu in [
-            "6510", "65c02", "65ce02", "65816", "4502", "c64dtv2", "m65", "w65c02",
+            "6510", "65c02", "65ce02", "4502", "c64dtv2", "m65", "w65c02",
         ] {
             let err = asm(&format!("!cpu {cpu}\nnop")).expect_err(cpu).to_string();
             assert!(err.contains("the gap is ours"), "{cpu}: {err}");

@@ -928,6 +928,12 @@ pub(crate) struct Statement {
     /// `00 00` (probed 2026-08-25). Reserved space is not something the
     /// source wrote.
     pub(crate) xor_mask: u8,
+    /// A lexical instruction-set override selected by the source (currently
+    /// ACME's `!cpu`). `None` inherits the dialect's assembly-wide default.
+    pub(crate) instruction_set: Option<&'static isa::InstructionSet>,
+    /// The extension paired with [`Statement::instruction_set`]. Kept
+    /// separately because 65816 extends, rather than replaces, the 6502 set.
+    pub(crate) extension_set: Option<&'static isa::InstructionSet>,
 }
 
 impl Statement {
@@ -1146,8 +1152,8 @@ fn assemble_statements(
     parse_warnings: Vec<Warning>,
     dialect: &dyn Dialect,
 ) -> Result<Assembly, AsmError> {
-    let set = dialect.instruction_set();
-    let ext = dialect.extension_set();
+    let default_set = dialect.instruction_set();
+    let default_ext = dialect.extension_set();
 
     // Pass 1 — assign addresses to labels.
     let require_origin = dialect.requires_explicit_origin();
@@ -1173,6 +1179,10 @@ fn assemble_statements(
     let mut os9_module_start: Option<usize> = None;
     let mut origin: Option<i64> = None;
     for s in &mut statements {
+        let (set, ext) = match s.instruction_set {
+            Some(set) => (set, s.extension_set),
+            None => (default_set, default_ext),
+        };
         // `equ` binds the label to a value, not the current address, and emits
         // nothing — so it is handled before the address-label assignment below.
         if let Some(Operation::Equ(e)) = &s.op {
@@ -1444,6 +1454,10 @@ fn assemble_statements(
     let mut pseudo: i64 = 0;
     let mut pseudo_stack: Vec<i64> = Vec::new();
     for s in &statements {
+        let (set, ext) = match s.instruction_set {
+            Some(set) => (set, s.extension_set),
+            None => (default_set, default_ext),
+        };
         // The location counter (`$`) is the address of this statement's start,
         // in address units (bytes divided by `addr_unit`). Inside a
         // `!pseudopc` block it reads as the address the code will run at.
