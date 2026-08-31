@@ -1694,6 +1694,18 @@ const MULTI_PROBES: &[MultiProbe] = &[
     },
     MultiProbe {
         dialect: "acme",
+        binaries: &[],
+        note: "repeated nested include-defined calls freshly scope indented dotted labels",
+        files: &[
+            ("main.a", "* = $1234\n!src \"defs.a\"\n+outer 2\n"),
+            (
+                "defs.a",
+                "!macro inner {\n\t.again\n        nop\n        bne .again\n}\n!macro outer .count {\n!for .i, .count {\n        +inner\n}\n}\n",
+            ),
+        ],
+    },
+    MultiProbe {
+        dialect: "acme",
         binaries: &[("data.bin", ASSET)],
         note: "labels on the !src and !bin lines bind at the include point / payload (U4)",
         files: &[

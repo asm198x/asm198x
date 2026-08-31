@@ -1743,8 +1743,13 @@ impl AcmeEval<'_> {
         // include walk. Unknown calls remain ordinary source and reach the
         // usual diagnostic path.
         if node.source.trim_start().starts_with('+') {
-            let expanded =
-                macros::expand_at(&AcmeMacros, &node.source, file, line, &mut self.macro_state)?;
+            let expanded = macros::expand_one_at(
+                &AcmeMacros,
+                &node.source,
+                file,
+                line,
+                &mut self.macro_state,
+            )?;
             if expanded.text.trim_end() != node.source.trim_end() {
                 let expansion = Some((expanded.text, expanded.origins));
                 let text = macros::expanded_text(&expansion, &node.source);
@@ -3882,10 +3887,11 @@ impl macros::MacroSyntax for AcmeMacros {
     fn locals(&self, body: &[String]) -> Vec<String> {
         let mut names = Vec::new();
         for line in body {
-            let text = macros::without_comment(line);
-            if text.starts_with(char::is_whitespace) {
-                continue;
-            }
+            // Unlike ordinary named source labels, ACME accepts a dotted
+            // macro-local after indentation. Real macro libraries commonly
+            // indent the whole body, including `.carry`/`.done`; indentation
+            // must not turn those into expansion-global names.
+            let text = macros::without_comment(line).trim_start();
             let name = text
                 .split_whitespace()
                 .next()
