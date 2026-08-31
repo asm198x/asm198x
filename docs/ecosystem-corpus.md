@@ -51,7 +51,7 @@ Their native controls pass with the installed verdict-corpus arbiters: ACME
 
 | Project | Dialect | Targets | Native control | First Asm198x boundary |
 |---|---:|---:|---|---|
-| 6502Assembly | ACME | 3 | passes | `helloworld.asm` is byte-identical; `ex_interrupts.asm` next reaches forward `<irq` (#457), while `ex_charset.asm` reaches anonymous-label registration (#458); cross-file macros (#429) and `%` modulo (#455) are fixed |
+| 6502Assembly | ACME | 3 | passes | `helloworld.asm` and `ex_interrupts.asm` are byte-identical; `ex_charset.asm` reaches anonymous-label registration (#458); cross-file macros (#429), `%` modulo (#455), and labels on live macro calls (#457) are fixed |
 | NES-ca65-example | ca65 | 1 | passes | project-specific `TILES` segment/linker config |
 | GB ASM Tutorial — Unbricked | RGBDS | 1 | passes | raw 16 KiB artifact matches RGBLINK exactly; `--gb-rom` also matches the 32 KiB artifact finalised by `rgbfix -v -p 0xFF` exactly |
 | SpecNext Invaders | SjASMPlus | 1 | passes | `OPT` directive |

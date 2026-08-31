@@ -1670,6 +1670,18 @@ const MULTI_PROBES: &[MultiProbe] = &[
     },
     MultiProbe {
         dialect: "acme",
+        binaries: &[],
+        note: "label on an include-defined macro call survives for forward low/high-byte references",
+        files: &[
+            (
+                "main.a",
+                "* = $1234\n        lda #<handler\n        ldx #>handler\n        !src \"defs.a\"\nhandler +body\n",
+            ),
+            ("defs.a", "!macro body {\n        nop\n}\n"),
+        ],
+    },
+    MultiProbe {
+        dialect: "acme",
         binaries: &[("data.bin", ASSET)],
         note: "labels on the !src and !bin lines bind at the include point / payload (U4)",
         files: &[

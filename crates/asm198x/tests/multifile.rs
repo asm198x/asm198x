@@ -1029,6 +1029,22 @@ fn acme_macros_flow_both_ways_across_source() {
     assert_eq!(r.files, vec!["main.a", "defs.a", "call.a"]);
 }
 
+/// A label on a live-expanded call binds at the expansion's first byte. The
+/// forward `<handler`/`>handler` uses prove the label survives into the shared
+/// engine's second pass (ACME 0.97 bytes a9 38 a2 12 ea at `$1234`).
+#[test]
+fn acme_label_on_include_defined_macro_survives_for_forward_byte_refs() {
+    let loader = MemoryLoader::new().text("defs.a", "!macro body {\n        nop\n}\n");
+    let src = "* = $1234\n\
+                       lda #<handler\n\
+                       ldx #>handler\n\
+                       !source \"defs.a\"\n\
+               handler +body\n";
+    let r = assemble_acme_files(src, "main.a", &loader).expect("forward label settles");
+    assert_eq!(r.bytes, vec![0xA9, 0x38, 0xA2, 0x12, 0xEA]);
+    assert_eq!(r.symbols.get("handler"), Some(&0x1238));
+}
+
 /// Textual means ordered: a definition later in the includer does not leak
 /// backward into an earlier included file (ACME 0.97 rejects it as undefined).
 #[test]
