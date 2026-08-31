@@ -1945,6 +1945,7 @@ impl AcmeEval<'_> {
         if let Some(cpu) = cpu_selector(&recon) {
             self.target.ext = match cpu.as_str() {
                 "6502" => None,
+                "6510" | "nmos6502" => Some(&isa::nmos6502_undocumented::SET),
                 "65816" => Some(&isa::mos65816::SET),
                 _ => self.target.ext,
             };
@@ -2973,9 +2974,9 @@ pub const DIRECTIVES: &[Directive] = &[
     // `!cpu <name>` selects the processor, and ACME's processors are not
     // spellings of one another: `!cpu 6510` enables the undocumented opcodes
     // (`lax $10` is `a7 10`) that `!cpu 6502` refuses, and `!cpu 65816` adds
-    // `rtl` and `xba`. So only `6502` names what this dialect assembles; every
-    // other processor ACME knows is a real gap, and every name it does not
-    // know is its own refusal.
+    // `rtl` and `xba`. The walk binds those real sets lexically; processor
+    // families whose executable specs have not landed remain named gaps, and
+    // a name ACME does not know remains the reference's own refusal.
     Directive {
         id: "cpu",
         pattern: Pattern::Sigilled {
@@ -3390,20 +3391,18 @@ fn parse_directive(
             let name = rest.trim().to_ascii_lowercase();
             match name.as_str() {
                 // The processor this dialect already assembles.
-                "6502" | "65816" => Ok(Operation::Bytes(Vec::new())),
+                "6502" | "6510" | "nmos6502" | "65816" => Ok(Operation::Bytes(Vec::new())),
                 // ACME's other processors. Each is a different opcode set —
                 // not a spelling of 6502 — so accepting one silently would
                 // assemble the wrong instructions or refuse the right ones.
-                "6510" | "65c02" | "65ce02" | "4502" | "c64dtv2" | "m65" | "w65c02" => {
-                    Err(AsmError::new(
-                        line,
-                        format!(
-                            "`!cpu {name}` selects a different processor, and asm198x does \
+                "65c02" | "65ce02" | "4502" | "c64dtv2" | "m65" | "w65c02" => Err(AsmError::new(
+                    line,
+                    format!(
+                        "`!cpu {name}` selects a different processor, and asm198x does \
                              not switch processors mid-assembly yet — the source is valid \
                              and the gap is ours (asm198x#302)"
-                        ),
-                    ))
-                }
+                    ),
+                )),
                 "" => Err(AsmError::new(line, "no string given")),
                 other => Err(AsmError::new(line, format!("unknown processor `{other}`"))),
             }
@@ -4077,17 +4076,26 @@ mod tests {
             .expect_err("switched back")
             .to_string();
         assert!(err.contains("unknown instruction `RTL`"), "{err}");
+
+        for cpu in ["6510", "nmos6502"] {
+            assert_eq!(
+                asm(&format!("!cpu {cpu}\nlax $10\nsre $10\n!cpu 6502\nnop"))
+                    .expect(cpu)
+                    .bytes,
+                vec![0xA7, 0x10, 0x47, 0x10, 0xEA]
+            );
+        }
+        let err = asm("!cpu 6510\nlax $10\n!cpu 6502\nafter lax $10")
+            .expect_err("6510 switched back")
+            .to_string();
+        assert!(err.contains("unknown instruction `LAX`"), "{err}");
     }
 
-    /// The seven others ACME knows are a real gap, refused by name rather
-    /// than accepted as a synonym. `!cpu 6510` is the case that shows why:
-    /// it enables the undocumented opcodes `!cpu 6502` refuses, so treating
-    /// it as the same processor would accept `lax` we cannot encode.
+    /// The processor families whose executable sets do not exist yet remain
+    /// named gaps rather than aliases for the nearest implemented CPU.
     #[test]
     fn another_processor_is_refused_as_our_gap() {
-        for cpu in [
-            "6510", "65c02", "65ce02", "4502", "c64dtv2", "m65", "w65c02",
-        ] {
+        for cpu in ["65c02", "65ce02", "4502", "c64dtv2", "m65", "w65c02"] {
             let err = asm(&format!("!cpu {cpu}\nnop")).expect_err(cpu).to_string();
             assert!(err.contains("the gap is ours"), "{cpu}: {err}");
             assert!(!err.contains("unknown processor"), "{cpu}: {err}");
