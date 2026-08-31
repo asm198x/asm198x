@@ -439,6 +439,30 @@ pub(crate) fn expand_at<S: MacroSyntax>(
     first_line: usize,
     state: &mut MacroState,
 ) -> Result<Expanded, AsmError> {
+    expand_at_inner(syntax, source, file, first_line, state, true)
+}
+
+/// Expand one invocation layer while retaining nested calls in the result.
+/// A live evaluator uses this so a call inside a repetition is expanded anew
+/// on every iteration, receiving a fresh per-invocation local scope.
+pub(crate) fn expand_one_at<S: MacroSyntax>(
+    syntax: &S,
+    source: &str,
+    file: FileId,
+    first_line: usize,
+    state: &mut MacroState,
+) -> Result<Expanded, AsmError> {
+    expand_at_inner(syntax, source, file, first_line, state, false)
+}
+
+fn expand_at_inner<S: MacroSyntax>(
+    syntax: &S,
+    source: &str,
+    file: FileId,
+    first_line: usize,
+    state: &mut MacroState,
+    recursive: bool,
+) -> Result<Expanded, AsmError> {
     let lines: Vec<&str> = source.lines().collect();
     // Definitions are grouped by name rather than replaced, because one dialect
     // — acme — lets a name carry several, told apart by how many arguments they
@@ -560,7 +584,7 @@ pub(crate) fn expand_at<S: MacroSyntax>(
             }
         }
         body = next;
-        if !expanded_any {
+        if !expanded_any || !recursive {
             break;
         }
     }

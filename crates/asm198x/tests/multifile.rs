@@ -1059,6 +1059,21 @@ fn acme_include_defined_macro_preserves_anonymous_body_labels() {
     assert_eq!(r.bytes, vec![0xEA, 0xD0, 0xFD, 0xEA, 0xD0, 0xFD]);
 }
 
+/// Each nested live invocation gets a fresh scope even when the dotted label
+/// is indented in the include-defined body (the shape used by draw_map ->
+/// draw_tile in the pinned charset corpus).
+#[test]
+fn acme_repeated_nested_live_macros_scope_indented_dotted_labels() {
+    let loader = MemoryLoader::new().text(
+        "defs.a",
+        "!macro inner {\n\t.again\n        nop\n        bne .again\n}\n\
+         !macro outer .count {\n!for .i, .count {\n        +inner\n}\n}\n",
+    );
+    let src = "* = $1234\n!source \"defs.a\"\n+outer 2\n";
+    let r = assemble_acme_files(src, "main.a", &loader).expect("nested locals are per invocation");
+    assert_eq!(r.bytes, vec![0xEA, 0xD0, 0xFD, 0xEA, 0xD0, 0xFD]);
+}
+
 /// Textual means ordered: a definition later in the includer does not leak
 /// backward into an earlier included file (ACME 0.97 rejects it as undefined).
 #[test]
