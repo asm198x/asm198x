@@ -3216,6 +3216,33 @@ reset:  lda #$01\n\
     );
 }
 
+/// ca65 text symbols follow the textual splice in both directions: an
+/// includer-defined flag selects code inside the include, and a value defined
+/// there substitutes into the includer's following line. A nested include
+/// then removes the flag, proving the one live environment spans the chain.
+#[test]
+fn ca65_define_state_threads_both_ways_through_nested_includes() {
+    let loader = MemoryLoader::new()
+        .text(
+            "part.s",
+            ".ifdef FLAT\n.byte VALUE\n.else\n.byte $00\n.endif\n\
+             .define FROM_INCLUDE $43\n.include \"nested.s\"\n",
+        )
+        .text("nested.s", ".undefine FLAT\n");
+    let src = "\
+.segment \"CODE\"\n\
+.define FLAT 1\n\
+.define VALUE $42\n\
+.include \"part.s\"\n\
+.ifndef FLAT\n.byte FROM_INCLUDE\n\
+.endif\n\
+.segment \"VECTORS\"\n\
+.word 0, 0, 0\n";
+    let r = assemble_ca65_files(src, "main.s", &loader).expect("defines cross includes");
+    assert_eq!(&prg(&r.bytes)[..2], &[0x42, 0x43]);
+    assert_eq!(r.files, vec!["main.s", "part.s", "nested.s"]);
+}
+
 /// An error inside a nested include names *that* file and line, with the
 /// include chain walking back to the root (R3/AE1 on the NES path) — both a
 /// parse-time failure (unknown instruction) and a layout-time one (duplicate
