@@ -29,9 +29,9 @@ exactly which build of which assembler produced the bytes we compare with:
 | `asl` | Macro Assembler 1.42 Beta [Bld 309] | 14 | 3057 |
 | `ca65` | ca65 V2.18 - N/A | 3 | 621 |
 | `lwasm` | lwasm from lwtools 4.25 | 1 | 622 |
-| `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | 1 | 1091 |
+| `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | 1 | 1092 |
 | `rgbasm` | rgbasm v1.0.3 | 2 | 564 |
-| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | 2 | 260 |
+| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | 2 | 261 |
 | `vasmm68k_mot` | vasm 2.0b (c) in 2002-2025 Volker Barthelmann<br>vasm 2.0f (c) in 2002-2026 Volker Barthelmann | 1 | 1282 |
 <!-- /generated -->
 

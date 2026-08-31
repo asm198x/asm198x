@@ -515,6 +515,7 @@ const PROBES: &[Probe] = &[
     ok ("pasmo", "operator &",           " ld a,5 & 3\n"),
     ok ("pasmo", "operator |",           " ld a,4 | 1\n"),
     ok ("pasmo", "operator >>",          " ld a,16 >> 2\n"),
+    ok ("pasmo", "operator ~",           " db ~0\n dw ~~1\n"),
 
     // ---- sjasmplus / z80 ----------------------------------------------------
     ok ("sjasmplus", "hex $ / 0x / h",   " ld a,$10\n ld b,0x10\n ld c,10h\n"),
@@ -524,6 +525,11 @@ const PROBES: &[Probe] = &[
     ok ("sjasmplus", "operator <<",      " ld a,1<<2\n"),
     ok ("sjasmplus", "operator &",       " ld a,5 & 3\n"),
     ok ("sjasmplus", "operator ^",       " ld a,6 ^ 3\n"),
+    // Native 1.21.0 gives 7f 7f ff f8 ff fb ff ff ff 01 00 ff ff: `~` is
+    // an i64 two's-complement unary, binds before shifts/addition, composes,
+    // and is truncated only when the data directive writes it (#475).
+    ok ("sjasmplus", "operator ~ semantics",
+        " db ~(1<<7)\n dw ~(1<<7)\n dw ~1<<2\n dw ~(1<<2)\n dw ~1+1\n dw ~~1\n dw ~0\n"),
     ok ("sjasmplus", "directive byte",   " byte 1,2\n"),
     // U8: conditional assembly + DEFINE (probe set u8-probes, sjasmplus 1.21.0).
     ok ("sjasmplus", "IF taken/untaken + ELSE",
