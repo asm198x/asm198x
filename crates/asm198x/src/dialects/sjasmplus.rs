@@ -134,6 +134,18 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    // Selects end-of-line comments for SjASMPlus's optional `.sld` sidecar.
+    // It changes neither machine bytes nor Asm198x's Debug198x output, so the
+    // validated COMMENT form is an explicitly inert source-compatibility word.
+    Directive {
+        id: "sldopt-comment",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["sldopt"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
     // Named by its opener, like the blocks above: `ENDMODULE`/`ENDMOD` are
     // parts of the block rather than vocabulary of their own.
     //
@@ -292,7 +304,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "setbreakpoint",
                 "shellexec",
                 "size",
-                "sldopt",
                 "struct",
                 "tapend",
                 "tapout",
@@ -720,6 +731,7 @@ impl Z80Syntax for SjasmplusSyntax {
             || word.eq_ignore_ascii_case("assert")
             || word.eq_ignore_ascii_case("display")
             || word.eq_ignore_ascii_case("opt")
+            || word.eq_ignore_ascii_case("sldopt")
             || word.eq_ignore_ascii_case("savebin")
             || word.eq_ignore_ascii_case("savetap")
             // The data directives beyond the shared set — see the
@@ -768,6 +780,28 @@ impl Z80Syntax for SjasmplusSyntax {
         let word = undot(word);
         if word.eq_ignore_ascii_case("align") {
             return self.parse_align(args, line, consts);
+        }
+        if word.eq_ignore_ascii_case("sldopt") {
+            let (kind, keywords) = crate::dialects::mos6502::split_first_word(args.trim());
+            // The directive word is case-insensitive, but SjASMPlus 1.21.0's
+            // only type is the case-sensitive spelling `COMMENT`.
+            if kind != "COMMENT" {
+                return Err(AsmError::new(
+                    line,
+                    "[SLDOPT] Syntax error in <type> (valid is only COMMENT)",
+                ));
+            }
+            let keywords: Vec<&str> = keywords.split(',').map(str::trim).collect();
+            if keywords.is_empty() || keywords.iter().any(|keyword| keyword.is_empty()) {
+                return Err(AsmError::new(
+                    line,
+                    "`SLDOPT COMMENT` needs a comma-separated keyword list",
+                ));
+            }
+            // Native probes show this changes only `.sld` K records and never
+            // the assembled image. Asm198x writes Debug198x rather than SLD,
+            // and the pinned project contains none of the selected comments.
+            return Ok(None);
         }
         // Validated by `check_device_lines` before any of this ran.
         if word.eq_ignore_ascii_case("device") || word.eq_ignore_ascii_case("slot") {
@@ -1277,6 +1311,24 @@ mod tests {
 
         let err = asm("\topt push\n").expect_err("unsupported option state");
         assert!(err.to_string().contains("has not implemented"), "{err}");
+    }
+
+    /// `SLDOPT COMMENT` changes only the optional native `.sld` sidecar: the
+    /// same four data bytes assemble with and without it. Its type spelling is
+    /// nevertheless case-sensitive in SjASMPlus 1.21.0, so accepting it as
+    /// inert must not make the grammar more permissive.
+    #[test]
+    fn sldopt_comment_is_explicitly_inert_for_machine_output() {
+        let source = "\tdevice zxspectrum128\n\torg $8000\n\tdb 1\n";
+        let with = "\tdevice zxspectrum128\n\tSLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION\n\torg $8000\n\tdb 1\n";
+        assert_eq!(
+            asm(with).expect("SLD keyword selection").bytes,
+            asm(source).expect("same source without SLDOPT").bytes
+        );
+
+        assert!(asm("\tSLDOPT comment WPMEM\n").is_err());
+        assert!(asm("\tSLDOPT COMMENT\n").is_err());
+        assert!(asm("\t.SLDOPT COMMENT WPMEM\n").is_ok());
     }
 
     /// The data directives beyond the shared Z80 set. Every expectation was
