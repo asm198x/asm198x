@@ -36,10 +36,10 @@ dialect does not require a second assembler engine.
 
 ## Current coverage
 
-ACME can switch between the documented 6502 set and the shared 65816 extension.
-The other ACME processor names remain explicit capability gaps until their
-executable ISA sets exist; they are not aliases for 6502. In particular, 6510
-requires the undocumented opcode set rather than a renamed documented 6502.
+ACME can switch among the documented 6502 set, the NMOS undocumented extension
+selected by `6510`/`nmos6502`, and the shared 65816 extension. The other ACME
+processor names remain explicit capability gaps until their executable ISA
+sets exist; they are not aliases for 6502.
 
 ## Drift triggers
 
