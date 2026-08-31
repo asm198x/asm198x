@@ -1040,6 +1040,7 @@ pub(crate) fn lay_out(
     gap_fill: u8,
     addr_unit: i64,
     image_base: Option<i64>,
+    later_overwrites: bool,
     image_size: impl Fn(&[u8]) -> Option<usize>,
 ) -> Result<(i64, Vec<u8>), AsmError> {
     runs.retain(|r| !r.bytes.is_empty() && r.at != Place::Discard);
@@ -1063,6 +1064,26 @@ pub(crate) fn lay_out(
         Place::Discard => unreachable!("discarded runs were removed above"),
         _ => r.base,
     };
+    if later_overwrites {
+        let first = image_base.unwrap_or_else(|| runs.iter().map(placed).min().unwrap_or(0));
+        let end = runs
+            .iter()
+            .map(|r| placed(r) + r.bytes.len() as i64 / addr_unit)
+            .max()
+            .unwrap_or(first);
+        let mut image = vec![gap_fill; ((end - first) * addr_unit) as usize];
+        // Deliberately retain source order: ACME's later segment wins where
+        // two address ranges overlap.
+        for r in &runs {
+            let at = ((placed(r) - first) * addr_unit) as usize;
+            image[at..at + r.bytes.len()].copy_from_slice(&r.bytes);
+        }
+        if let Some(size) = image_size(&image) {
+            image.resize(size, gap_fill);
+        }
+        return Ok((image_base.unwrap_or(first), image));
+    }
+
     runs.sort_by_key(placed);
     let origin = image_base.unwrap_or(runs[0].base);
     let first = image_base.unwrap_or_else(|| placed(&runs[0]));
@@ -1131,6 +1152,7 @@ fn assemble_statements(
     // Pass 1 — assign addresses to labels.
     let require_origin = dialect.requires_explicit_origin();
     let org_moves_output = dialect.org_moves_output();
+    let org_starts_address_run = dialect.org_starts_address_run();
     let org_drops_unwritten_prefix = dialect.org_drops_unwritten_prefix();
     // Emitted bytes per address unit — 1 for the byte-addressed CPUs, 2 for the
     // word-addressed CP1610 (a decle is two bytes). The location counter advances
@@ -1444,6 +1466,33 @@ fn assemble_statements(
                         pseudo = target - cur;
                     }
                 } else {
+                    if org_starts_address_run && target != cur {
+                        let overlaps = runs.iter().any(|r| {
+                            let end = r.base + r.bytes.len() as i64 / addr_unit;
+                            target >= r.base && target < end
+                        }) || (target >= origin && target < cur);
+                        if overlaps {
+                            warnings.push(Warning {
+                                line: s.line,
+                                message:
+                                    "segment starts inside another one; later bytes overwrite it"
+                                        .to_string(),
+                                file: s.file,
+                                kind: WarningKind::Advisory,
+                            });
+                        }
+                        runs.push(Run {
+                            name: format!("origin ${origin:04x}"),
+                            base: origin,
+                            at: Place::ByAddress,
+                            bytes: std::mem::take(&mut bytes),
+                        });
+                        origin = target;
+                        written_len = 0;
+                        written_start = None;
+                        wrote_any = false;
+                        continue;
+                    }
                     if target < cur {
                         return Err(s.err("cannot move origin backwards"));
                     }
@@ -1934,7 +1983,11 @@ fn assemble_statements(
                 // A label lives at this statement's address (`pc`).
                 debug198x::SymbolKind::Label {
                     section: 0,
-                    offset: (pc - origin) as u64,
+                    offset: if org_starts_address_run {
+                        pc as u64
+                    } else {
+                        (pc - origin) as u64
+                    },
                     space: None,
                 }
             };
@@ -1982,7 +2035,11 @@ fn assemble_statements(
         if source_bearing && bytes.len() > len_before {
             debug.lines.push(LineRec {
                 line: s.line as u32,
-                offset: (pc - origin) as u64,
+                offset: if org_starts_address_run {
+                    pc as u64
+                } else {
+                    (pc - origin) as u64
+                },
                 length: ((bytes.len() - len_before) as i64 / addr_unit) as u64,
                 file: s.file,
             });
@@ -1994,7 +2051,11 @@ fn assemble_statements(
         if let (Some(Operation::Entry(e)), Some(v)) = (&s.op, start) {
             let entry = debug198x::SymbolKind::Entry {
                 section: 0,
-                offset: (i64::from(v) - origin) as u64,
+                offset: if org_starts_address_run {
+                    u64::from(v)
+                } else {
+                    (i64::from(v) - origin) as u64
+                },
                 space: None,
             };
             let existing = match e {
@@ -2034,10 +2095,27 @@ fn assemble_statements(
             at: section_at,
             bytes,
         });
-        let (origin_of_image, image) =
-            lay_out(runs, gap_fill, addr_unit, dialect.image_base(), |img| {
-                dialect.image_size(img)
-            })?;
+        let (origin_of_image, image) = lay_out(
+            runs,
+            gap_fill,
+            addr_unit,
+            dialect.image_base(),
+            dialect.later_run_overwrites(),
+            |img| dialect.image_size(img),
+        )?;
+        if org_starts_address_run {
+            let base = origin_of_image as u64;
+            for symbol in &mut debug.symbols {
+                match &mut symbol.kind {
+                    debug198x::SymbolKind::Label { offset, .. }
+                    | debug198x::SymbolKind::Entry { offset, .. } => *offset -= base,
+                    _ => {}
+                }
+            }
+            for line in &mut debug.lines {
+                line.offset -= base;
+            }
+        }
         let artifacts = raw_artifacts(&saves, origin_of_image, &image)?;
         return Ok(Assembly {
             requested_output,
@@ -2071,6 +2149,20 @@ fn assemble_statements(
             // Nothing was ever written, so `truncate` already emptied the image
             // and there is no load address to move.
             _ => {}
+        }
+    }
+
+    if org_starts_address_run {
+        let base = origin as u64;
+        for symbol in &mut debug.symbols {
+            match &mut symbol.kind {
+                debug198x::SymbolKind::Label { offset, .. }
+                | debug198x::SymbolKind::Entry { offset, .. } => *offset -= base,
+                _ => {}
+            }
+        }
+        for line in &mut debug.lines {
+            line.offset -= base;
         }
     }
 

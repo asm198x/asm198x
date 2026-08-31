@@ -644,7 +644,7 @@ fn link(seg_bytes: &BTreeMap<String, Vec<u8>>) -> Result<Vec<u8>, AsmError> {
 
     // The ROM is a fixed shape: 16-byte header, 32K PRG, 8K CHR, `$00` fill.
     let size = HEADER_SIZE + PRG_SIZE + CHR_SIZE;
-    let (_, rom) = crate::engine::lay_out(runs, FILL, 1, Some(0), |_| Some(size))?;
+    let (_, rom) = crate::engine::lay_out(runs, FILL, 1, Some(0), false, |_| Some(size))?;
     Ok(rom)
 }
 

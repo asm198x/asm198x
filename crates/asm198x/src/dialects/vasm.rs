@@ -390,7 +390,7 @@ fn flatten_sections(sections: &[SecOut]) -> Result<Vec<u8>, AsmError> {
             bytes: s.bytes.clone(),
         })
         .collect();
-    let (_, image) = crate::engine::lay_out(runs, 0, 1, None, |_| None)?;
+    let (_, image) = crate::engine::lay_out(runs, 0, 1, None, false, |_| None)?;
     Ok(image)
 }
 

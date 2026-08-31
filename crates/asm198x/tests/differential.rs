@@ -328,6 +328,12 @@ const PROBES: &[Probe] = &[
     // written first and still takes the value.
     ok ("acme", "!initmem is not positional", " !skip 3\n !initmem $ff\n"),
     ok ("acme", "!initmem fills an org gap",  " !initmem $ff\n nop\n *=$0004\n nop\n"),
+    ok ("acme", "backwards origins are placed by address",
+        " *=$1004\n !byte $44\n *=$1000\n !byte $11\n *=$1002\n !byte $22\n"),
+    ok ("acme", "a later overlapping region overwrites earlier bytes",
+        " *=$1000\n !byte $11,$22\n *=$1001\n !byte $33\n"),
+    ok ("acme", "initmem fills gaps between out-of-order regions",
+        " !initmem $aa\n *=$1004\n !byte $44\n *=$1000\n !byte $11\n"),
     ok ("lwasm", "byte truncates up",    " fcb 256\n"),
     ok ("lwasm", "byte truncates down",  " fcb -129\n"),
     ok ("lwasm", "negative word",        " fdb -1\n"),
