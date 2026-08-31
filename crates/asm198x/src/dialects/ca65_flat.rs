@@ -187,6 +187,20 @@ enum BlockClose {
 }
 
 pub(crate) trait FlatWalk {
+    /// Apply a dialect's live, line-oriented source state before structural
+    /// block recognition. Returning `None` consumes a source-only directive.
+    /// The same walker instance crosses include boundaries, so state stored by
+    /// an implementation naturally follows textual-include semantics.
+    fn preprocess_line(
+        &mut self,
+        raw: &str,
+        line: usize,
+        file: FileId,
+    ) -> Result<Option<String>, AsmError> {
+        let _ = (line, file);
+        Ok(Some(raw.to_string()))
+    }
+
     /// Parse one line of `file`. Ordinary lines push their node (or nothing)
     /// and return `None`; a walk-handled directive is returned unresolved.
     ///
@@ -357,9 +371,17 @@ fn walk_block<W: FlatWalk>(
         origins,
     } = cx;
     while *pos < lines.len() {
-        let raw = lines[*pos];
+        let original = lines[*pos];
         let line = *pos + 1;
         *pos += 1;
+
+        let Some(processed) = w
+            .preprocess_line(original, line, file)
+            .map_err(|e| stamp_file(e, file))?
+        else {
+            continue;
+        };
+        let raw = processed.as_str();
 
         // Structure first, so a block keyword never reaches the line parser —
         // which would refuse it as an unknown directive.

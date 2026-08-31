@@ -1082,7 +1082,7 @@ pub(crate) fn parse_program(
     let expanded = ca65_flat::expand_ca65(source, mode, ca65_flat::Target::Mos6502)?;
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
-    let mut w = Walker::new(set);
+    let mut w = Walker::new(set, mode == macros::Expand::Yes);
     // The shared cursor: it groups `.if`/`.repeat` blocks and keeps every
     // include unresolved (KTD1), which is what `--fmt` needs — it renders the
     // directive verbatim and works with a missing target. Macros expanded
@@ -1115,7 +1115,7 @@ pub(crate) fn parse_program_multi(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
 ) -> Result<crate::ast::Program, AsmError> {
-    let mut w = Walker::new(set);
+    let mut w = Walker::new(set, true);
     let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
     let root_lines = root.lines().count() as u32;
     let mut stack = vec![FileId(0)];
@@ -1159,6 +1159,17 @@ struct Walker {
     /// The record definitions open here, outermost first. A `.struct` may hold
     /// another, and the inner one allocates its size in the outer.
     records: Vec<RecordBuild>,
+    /// ca65 `.define` text symbols. Unlike `.macro`, these are deliberately
+    /// consumed line-by-line so their visibility follows textual includes in
+    /// both directions and remains positional around `.undefine`.
+    text_defines: BTreeMap<String, String>,
+    /// False only for formatter parsing, which must preserve source-only
+    /// directives rather than consume or substitute them.
+    expand_text_defines: bool,
+    /// Structural nesting around the live line. Definition directives inside
+    /// a deferred conditional/repetition cannot be applied safely until that
+    /// block is selected, so they are rejected rather than misassembled.
+    text_define_block_depth: usize,
 }
 
 /// A `.struct`, `.union` or `.enum` being read.
@@ -1221,7 +1232,7 @@ struct OpenScope {
 }
 
 impl Walker {
-    fn new(set: &'static isa::InstructionSet) -> Self {
+    fn new(set: &'static isa::InstructionSet, expand_text_defines: bool) -> Self {
         Self {
             set,
             anons: AnonCtx::default(),
@@ -1234,6 +1245,9 @@ impl Walker {
             unnamed: 0,
             ended: false,
             records: Vec::new(),
+            text_defines: BTreeMap::new(),
+            expand_text_defines,
+            text_define_block_depth: 0,
         }
     }
 
@@ -1718,6 +1732,86 @@ impl Walker {
 }
 
 impl FlatWalk for Walker {
+    fn preprocess_line(
+        &mut self,
+        raw: &str,
+        line: usize,
+        _file: FileId,
+    ) -> Result<Option<String>, AsmError> {
+        if !self.expand_text_defines {
+            return Ok(Some(raw.to_string()));
+        }
+        let code = strip_comment(raw);
+        let trimmed = code.trim();
+        let (word, rest) = split_first_word(trimmed);
+        match word.to_ascii_lowercase().as_str() {
+            ".define" => {
+                if self.text_define_block_depth != 0 {
+                    return Err(AsmError::new(
+                        line,
+                        "`.define` inside a conditional or repetition is not yet supported",
+                    ));
+                }
+                let (name, value) = split_first_word(rest.trim());
+                if !is_ident(name) {
+                    return Err(AsmError::new(line, "`.define` needs an identifier"));
+                }
+                self.text_defines
+                    .insert(name.to_string(), value.trim().to_string());
+                return Ok(None);
+            }
+            ".undef" | ".undefine" => {
+                if self.text_define_block_depth != 0 {
+                    return Err(AsmError::new(
+                        line,
+                        "`.undefine` inside a conditional or repetition is not yet supported",
+                    ));
+                }
+                let (name, trailing) = split_first_word(rest.trim());
+                if !is_ident(name) || !trailing.trim().is_empty() {
+                    return Err(AsmError::new(
+                        line,
+                        "`.undefine` needs exactly one identifier",
+                    ));
+                }
+                self.text_defines.remove(name);
+                return Ok(None);
+            }
+            _ => {}
+        }
+
+        match word.to_ascii_lowercase().as_str() {
+            ".if" | ".ifdef" | ".ifndef" | ".ifblank" | ".ifnblank" | ".ifconst" | ".ifnconst"
+            | ".ifp02" | ".ifp4510" | ".ifp816" | ".ifpc02" | ".ifpsc02" | ".ifref" | ".ifnref"
+            | ".repeat" => self.text_define_block_depth += 1,
+            ".endif" | ".endrepeat" => {
+                self.text_define_block_depth = self.text_define_block_depth.saturating_sub(1);
+            }
+            _ => {}
+        }
+
+        // `.ifdef`/`.ifndef` ask whether a text symbol exists; substituting
+        // its value into the operand would instead ask whether that value is a
+        // symbol. Fold only names owned by this live text environment and let
+        // the ordinary conditional evaluator handle every other symbol.
+        let (prefix, head, args) = if word.ends_with(':') {
+            let (head, args) = split_first_word(rest.trim());
+            (format!("{word} "), head, args)
+        } else {
+            (String::new(), word, rest)
+        };
+        let lower = head.to_ascii_lowercase();
+        if matches!(lower.as_str(), ".ifdef" | ".ifndef") {
+            let (name, trailing) = split_first_word(args.trim());
+            if trailing.trim().is_empty() && self.text_defines.contains_key(name) {
+                let value = i32::from(lower == ".ifdef");
+                return Ok(Some(format!("{prefix}.if {value}")));
+            }
+        }
+
+        substitute_text_defines(raw, &self.text_defines, line).map(Some)
+    }
+
     /// ca65's block vocabulary, measured against ca65 V2.18 and
     /// case-insensitive: `.if` and its nine sibling heads, `.elseif`, `.else`,
     /// `.endif`, and `.repeat` / `.endrepeat`.
@@ -2043,6 +2137,64 @@ impl FlatWalk for Walker {
     fn push_node(&mut self, node: crate::ast::Node) {
         self.nodes.push(node);
     }
+}
+
+/// Replace ca65 text-symbol tokens outside quoted strings and comments.
+/// Expansion repeats because one `.define` may name another; the bounded loop
+/// turns a recursive pair into a useful diagnostic instead of hanging.
+fn substitute_text_defines(
+    raw: &str,
+    defines: &BTreeMap<String, String>,
+    line: usize,
+) -> Result<String, AsmError> {
+    let mut current = raw.to_string();
+    for _ in 0..32 {
+        let mut out = String::with_capacity(current.len());
+        let mut chars = current.chars().peekable();
+        let mut quote = None;
+        let mut changed = false;
+        while let Some(ch) = chars.next() {
+            if quote.is_none() && ch == ';' {
+                out.push(ch);
+                out.extend(chars);
+                break;
+            }
+            if matches!(ch, '\'' | '"') {
+                if quote == Some(ch) {
+                    quote = None;
+                } else if quote.is_none() {
+                    quote = Some(ch);
+                }
+                out.push(ch);
+                continue;
+            }
+            if quote.is_none() && (ch.is_ascii_alphabetic() || matches!(ch, '_' | '@')) {
+                let mut name = String::from(ch);
+                while chars
+                    .peek()
+                    .is_some_and(|next| next.is_ascii_alphanumeric() || matches!(next, '_' | '@'))
+                {
+                    name.push(chars.next().expect("peeked character exists"));
+                }
+                if let Some(value) = defines.get(&name) {
+                    out.push_str(value);
+                    changed = true;
+                } else {
+                    out.push_str(&name);
+                }
+            } else {
+                out.push(ch);
+            }
+        }
+        if !changed {
+            return Ok(current);
+        }
+        current = out;
+    }
+    Err(AsmError::new(
+        line,
+        "ca65 text symbols are still expanding after 32 passes — are they recursive?",
+    ))
 }
 
 /// Project the semantic [`Program`](crate::ast::Program) into the assembler's
@@ -3180,14 +3332,23 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
-    // macros
+    // Live text symbols, consumed before ordinary line parsing so their state
+    // follows ca65's textual includes.
+    Directive {
+        id: "text-defines",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["define", "undef", "undefine"],
+            required: true,
+        },
+        category: Category::Operation,
+    },
+    // Remaining unsupported macro-management surface.
     Directive {
         id: "unsupported-macros",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &[
-                "define", "delmac", "delmacro", "macpack", "undef", "undefine",
-            ],
+            names: &["delmac", "delmacro", "macpack"],
             required: true,
         },
         category: Category::KnownUnsupported,
@@ -5025,12 +5186,7 @@ two:\n\
         // constructor table from linker-config features our fixed layout does
         // not declare, so it stays a gap by decision rather than by schedule
         // (`decisions/reference-parity-goal.md`).
-        for d in [
-            ".condes foo, 1",
-            ".charmap $41, $42",
-            ".define X 1",
-            ".macpack cpu",
-        ] {
+        for d in [".condes foo, 1", ".charmap $41, $42", ".macpack cpu"] {
             let e = err(&format!("\t{d}\n"));
             assert!(
                 e.contains("is a real directive here"),
@@ -5041,6 +5197,23 @@ two:\n\
             err("\t.zzqq\n").contains("is not a directive ca65 has"),
             "and a word ca65 does not have should say so"
         );
+    }
+
+    #[test]
+    fn text_defines_substitute_and_can_be_undefined() {
+        let rom = rom(
+            ".segment \"CODE\"\n.define VALUE $42\n.byte VALUE\n.undefine VALUE\n\
+             .ifndef VALUE\n.byte $43\n.endif\n",
+        );
+        assert_eq!(&rom[16..18], &[0x42, 0x43]);
+    }
+
+    #[test]
+    fn a_text_definition_inside_a_deferred_block_is_refused_not_misassembled() {
+        let error =
+            crate::assemble_ca65(".segment \"CODE\"\n.if 0\n.define HIDDEN 1\n.endif\n.byte $42\n")
+                .expect_err("the live pass cannot know whether to apply this definition");
+        assert!(error.to_string().contains("not yet supported"), "{error}");
     }
 
     /// ca65 spells every operator twice, and both spellings are one operator:
