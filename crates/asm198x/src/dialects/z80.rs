@@ -33,6 +33,21 @@ use crate::span::FileId;
 /// The per-dialect surface: the parts of Z80 syntax that actually differ
 /// between assemblers. Everything else in this module is shared.
 pub(crate) trait Z80Syntax {
+    /// A directive that changes instruction parsing for following statements.
+    ///
+    /// Kept as a dialect hook because this is lexical state, not a Z80
+    /// instruction: SjASMPlus's `OPT --zxnext` adopts it, while Pasmo has no
+    /// corresponding word.
+    fn lexical_option(
+        &self,
+        word: &str,
+        args: &str,
+        line: usize,
+    ) -> Result<Option<LexicalOption>, AsmError> {
+        let _ = (word, args, line);
+        Ok(None)
+    }
+
     /// Rewrite source before parsing, returning the new text and, per output
     /// line, where it came from.
     ///
@@ -251,6 +266,17 @@ pub(crate) trait Z80Syntax {
     {
         common_directive(self, word, args, line, consts)
     }
+}
+
+/// The bounded SjASMPlus option state the shared keyword walk needs to carry.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum LexicalOption {
+    /// `--syntax=abfw`; for the source forms Asm198x accepts, the relevant
+    /// strict parsing rules are already its ordinary rules.
+    SyntaxAbfw,
+    /// Enable Spectrum Next instructions, optionally with CSpect's two
+    /// emulator-only fake instructions.
+    ZxNext { cspect: bool },
 }
 
 /// Stamp `file` onto a per-line parse error: the line-oriented helpers below
@@ -1195,6 +1221,10 @@ struct SjasmEval<'a, S: Z80Syntax> {
     syntax: &'a S,
     set: &'static isa::InstructionSet,
     ext: Option<&'static isa::InstructionSet>,
+    /// Whether CSpect's `BREAK`/`EXIT` fake instructions are live.
+    cspect: bool,
+    /// SjASMPlus's recommended `--syntax=abfw` parser posture.
+    syntax_abfw: bool,
     /// `equ` constants as lowered, keyed by qualified name (the walker's rule).
     consts: BTreeMap<String, i64>,
     /// `DEFINE` bindings: name → verbatim replacement text (may be empty for
@@ -1241,6 +1271,8 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             syntax,
             set,
             ext,
+            cspect: false,
+            syntax_abfw: false,
             consts: BTreeMap::new(),
             defines: BTreeMap::new(),
             current_global: None,
@@ -1463,6 +1495,16 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         // chained to a fixed point (probes p4/p5/p20/p21/p24).
         let src = substitute_defines(&node.source, &self.defines, line)?;
         let (word, args) = split_first_word(&src);
+        if let Some(option) = self.syntax.lexical_option(word, args, line)? {
+            match option {
+                LexicalOption::SyntaxAbfw => self.syntax_abfw = true,
+                LexicalOption::ZxNext { cspect } => {
+                    self.ext = Some(&isa::z80::NEXT);
+                    self.cspect = cspect;
+                }
+            }
+            return Ok(());
+        }
         if let Some(kw) = self.syntax.module_keyword(word) {
             return self.lower_module(kw, args, line);
         }
@@ -1472,8 +1514,32 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         if self.syntax.is_incbin(word) {
             return self.lower_incbin(node, args, out);
         }
-        let rest = src.trim();
-        let mut op = if rest.is_empty() {
+        // Under syntax `a`, the comma is no longer the legacy
+        // multi-instruction delimiter. SjASMPlus consequently accepts the
+        // explicit accumulator on the one-operand ALU family and lowers it to
+        // the ordinary implicit-A form (`SUB A,B` is `SUB B`).
+        let normalized;
+        let rest = if self.syntax_abfw
+            && matches!(
+                word.to_ascii_lowercase().as_str(),
+                "sub" | "and" | "xor" | "or" | "cp"
+            )
+            && args
+                .split_once(',')
+                .is_some_and(|(first, _)| first.trim().eq_ignore_ascii_case("a"))
+        {
+            let (_, operand) = args.split_once(',').expect("checked above");
+            normalized = format!("{word} {}", operand.trim());
+            normalized.as_str()
+        } else {
+            src.trim()
+        };
+        let mut op = if self.cspect && word.eq_ignore_ascii_case("break") && args.trim().is_empty()
+        {
+            Some(Operation::Bytes(vec![Expr::Num(0xFD), Expr::Num(0x00)]))
+        } else if self.cspect && word.eq_ignore_ascii_case("exit") && args.trim().is_empty() {
+            Some(Operation::Bytes(vec![Expr::Num(0xDD), Expr::Num(0x00)]))
+        } else if rest.is_empty() {
             None
         } else {
             parse_op(self.syntax, self.set, self.ext, rest, line, &self.consts)?
@@ -1523,8 +1589,10 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             op,
             operand_span: node.operand_span.clone(),
             xor_mask: 0,
-            instruction_set: None,
-            extension_set: None,
+            // Carry the live pair together: the engine treats an extension as
+            // an override only when its base set is stated too.
+            instruction_set: Some(self.set),
+            extension_set: self.ext,
         });
         Ok(())
     }
@@ -1739,6 +1807,10 @@ fn pass_symbols(
     let mut symbols = BTreeMap::new();
     let mut pc = Some(0i64);
     for s in stmts {
+        let (statement_set, statement_ext) = match s.instruction_set {
+            Some(statement_set) => (statement_set, s.extension_set),
+            None => (set, ext),
+        };
         if let (Some(name), Some(Operation::Equ(e))) = (&s.label, &s.op) {
             if let Some(v) = eval_const(e, &symbols) {
                 symbols.insert(name.clone(), v);
@@ -1753,7 +1825,9 @@ fn pass_symbols(
         let Some(op) = &s.op else { continue };
         pc = match op {
             Operation::Org(e) => eval_const(e, &symbols),
-            _ => pc.and_then(|at| crate::engine::next_pc(op, at, set, ext, 1, s.line).ok()),
+            _ => pc.and_then(|at| {
+                crate::engine::next_pc(op, at, statement_set, statement_ext, 1, s.line).ok()
+            }),
         };
     }
     symbols
