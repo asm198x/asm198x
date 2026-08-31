@@ -54,7 +54,7 @@ Their native controls pass with the installed verdict-corpus arbiters: ACME
 | 6502Assembly | ACME | 3 | passes | all three targets are byte-identical; cross-file macros (#429), `%` modulo (#455), labels on live macro calls (#457), indented anonymous labels in macro bodies (#458), repeated nested macro-local scopes (#461), and discontiguous origins (#463) are fixed |
 | NES-ca65-example | ca65 | 1 | passes | project-specific `TILES` segment/linker config |
 | GB ASM Tutorial — Unbricked | RGBDS | 1 | passes | raw 16 KiB artifact matches RGBLINK exactly; `--gb-rom` also matches the 32 KiB artifact finalised by `rgbfix -v -p 0xFF` exactly |
-| SpecNext Invaders | SjASMPlus | 1 | passes | `OPT` (#431) is fixed; the next boundary is `SLDOPT COMMENT WPMEM, LOGPOINT, ASSERTION` (#473) |
+| SpecNext Invaders | SjASMPlus | 1 | passes | `OPT` (#431) and `SLDOPT` (#473) are fixed; the next boundary is unary `~` in `src/input.asm` (#475) |
 | HelloAmi | vasm | 1 | passes | re-audit after the unsigned condition-code alias family; no known source rejection remains |
 
 This is already useful evidence: Unbricked now passes Asm198x unchanged at both

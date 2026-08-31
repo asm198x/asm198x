@@ -13,6 +13,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   `OPT --zxnext=cspect` now carry their lexical parser and target state into
   following source and includes, including CSpect's `BREAK` and `EXIT` fake
   instructions. This clears SpecNext Invaders' first corpus boundary.
+- **SjASMPlus SLD comment selection.** `SLDOPT COMMENT` accepts and validates
+  the source-level-debug keyword list. Native probes establish that it changes
+  only SjASMPlus's optional `.sld` sidecar, so it is explicitly inert for
+  Asm198x's machine output and Debug198x contract.
 
 ## [0.0.53](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.52...asm198x-v0.0.53) - 2026-08-29
 

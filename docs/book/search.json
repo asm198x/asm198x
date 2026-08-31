@@ -949,7 +949,7 @@
       "slug": "reference/dialects/sjasmplus"
     },
     {
-      "context": "23 directives, 212 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
+      "context": "24 directives, 212 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.",
       "heading": "Directives",
       "page": "sjasmplus",
       "slug": "reference/dialects/sjasmplus"
