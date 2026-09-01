@@ -868,6 +868,32 @@ const PROBES: &[Probe] = &[
         " db 1\n align 1\n db 2\n"),
     ok ("sjasmplus", "DUP inside a macro",
         " MACRO m\n DUP 2\n nop\n EDUP\n ENDM\n m\n"),
+    // #477: STRUCT/ENDS — sizes, member offsets, and instantiation, each
+    // shape probed against 1.21.0 before landing.
+    ok ("sjasmplus", "STRUCT binds size and member offsets",
+        " STRUCT Pt\nx BYTE 0\ny BYTE 0\nw WORD 0\n ENDS\n db Pt, Pt.x, Pt.y, Pt.w\n"),
+    ok ("sjasmplus", "STRUCT reserves via DS times count",
+        " STRUCT S\na BYTE 0\nb BYTE 0\n ENDS\nbuf ds S * 3\n db 9\n"),
+    ok ("sjasmplus", "STRUCT with an initial offset",
+        " STRUCT P, 4\nf BYTE 0\n ENDS\n db P, P.f\n"),
+    ok ("sjasmplus", "STRUCT member spellings DB DW DS and no-init",
+        " STRUCT B\nactive BYTE\npAddr WORD\npSeq DW $0000\nloop DB $00\npad DS 2\n ENDS\n db B, B.active, B.pAddr, B.pSeq, B.loop, B.pad\n"),
+    ok ("sjasmplus", "STRUCT embeds a structure and flattens its paths",
+        " STRUCT H\nx0 BYTE 0\ny0 BYTE 0\n ENDS\n STRUCT B\nn BYTE 0\nhb H\n ENDS\n db B, B.n, B.hb, B.hb.x0, B.hb.y0\n"),
+    ok ("sjasmplus", "STRUCT is referenced before its definition",
+        " db Foo\n STRUCT Foo\nf BYTE 0\n ENDS\n"),
+    ok ("sjasmplus", "STRUCT under a module takes its prefix",
+        " MODULE m\n STRUCT S\nf BYTE 0\ng WORD 0\n ENDS\n db S, S.g\n ENDMODULE\n db m.S, m.S.g\n"),
+    ok ("sjasmplus", "STRUCT re-anchors the locals that follow it",
+        "glob:\n STRUCT S\nf BYTE 0\n ENDS\n.after: db 2\n dw S.after\n"),
+    ok ("sjasmplus", "STRUCT instantiation emits defaults and binds addresses",
+        " STRUCT Pt\nx BYTE 5\nw WORD $1234\n ENDS\n STRUCT Box\ntl Pt\nn BYTE 9\n ENDS\np1 Pt\nb1 Box\n dw p1, p1.x, p1.w, b1.tl.w, b1.n\n"),
+    ok ("sjasmplus", "STRUCT sizes fold in ASSERT",
+        " STRUCT V\nf BYTE 0\ng BYTE 0\n ENDS\n ASSERT V.f == 0\n ASSERT V.g == 1\n ASSERT V == 2\n db 7\n"),
+    ok ("sjasmplus", "STRUCT wide member types D24 and DWORD",
+        " STRUCT U\nf D24 0\ng DWORD 0\n ENDS\n db U, U.f, U.g\n"),
+    ok ("sjasmplus", "STRUCT unlabeled member reserves without a name",
+        " STRUCT R\n BYTE 9\nf BYTE 0\n ENDS\n db R, R.f\n"),
     // #225: nine core 6809 instructions the spec had no row for at all —
     // add/subtract-with-carry, bit test, two 16-bit compares and `cwai`. Every
     // mode each one takes, because a missing mnemonic is missing in all of

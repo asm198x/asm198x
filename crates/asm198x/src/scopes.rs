@@ -46,6 +46,8 @@ pub(crate) struct ScopeEnv {
     /// definition the walk has not reached yet, so the choice is repaired by
     /// [`ScopeEnv::alias_repair`] once the whole stream is known.
     aliases: BTreeMap<String, String>,
+    /// Compound bindings by qualified name (#484 rule 3) — structures today.
+    structs: BTreeMap<String, StructDef>,
 }
 
 impl ScopeEnv {
@@ -174,6 +176,31 @@ impl ScopeEnv {
     pub(crate) fn has_aliases(&self) -> bool {
         !self.aliases.is_empty()
     }
+
+    /// Bind a structure under its qualified name.
+    pub(crate) fn bind_struct(&mut self, name: String, def: StructDef) {
+        self.structs.insert(name, def);
+    }
+
+    /// The structure bound to `name`, if one is.
+    pub(crate) fn struct_def(&self, name: &str) -> Option<&StructDef> {
+        self.structs.get(name)
+    }
+}
+
+/// A compound binding (#484 rule 3): a structure binds a total size plus
+/// named member offsets, resolved to plain values at reference time so the
+/// expression evaluator is untouched — the dialect exports each name as an
+/// ordinary constant, and this record is what it exports from.
+pub(crate) struct StructDef {
+    /// `db Name` answers this — the total, an initial offset included.
+    pub size: i64,
+    /// Every named offset the definition binds, in layout order: members,
+    /// and an embedded member's flattened paths (`hb`, `hb.x0`, `hb.y0`).
+    pub names: Vec<(String, i64)>,
+    /// Emission order for an instantiation: each leaf's optional dotted path
+    /// and its default bytes.
+    pub leaves: Vec<(Option<String>, Vec<u8>)>,
 }
 
 /// Rewrite one reference under the open scopes: `@name` escapes to the bare

@@ -8,7 +8,7 @@ Z80, sjasmplus syntax.
 
 ## Directives
 
-24 directives, 212 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
+26 directives, 212 spellings. This is the list the parser looks a word up in, so a spelling here is one the assembler accepts and a spelling missing from it is one it refuses.
 
 | Directive | Spellings | Notes |
 |---|---|---|
@@ -20,6 +20,7 @@ Z80, sjasmplus syntax.
 | `device` | `.device`, `.slot`, `device`, `slot` |  |
 | `display` | `.display`, `display` |  |
 | `end` | `.end`, `end` |  |
+| `ends` | `.ends`, `ends` |  |
 | `equ` | `.equ`, `equ` |  |
 | `incbin` | `.incbin`, `incbin` |  |
 | `include` | `.include`, `include` |  |
@@ -34,7 +35,8 @@ Z80, sjasmplus syntax.
 | `savetap` | `.savetap`, `savetap` |  |
 | `sjasmplus-data` | `.word`, `.dword`, `.dd`, `.defd`, `.d24`, `.dz`, `.dc`, `.dh`, `.hex`, `.defh`, `.dg`, `.defg`, `.abyte`, `.abytec`, `.abytez`, `.block`, `word`, `dword`, `dd`, `defd`, `d24`, `dz`, `dc`, `dh`, `hex`, `defh`, `dg`, `defg`, `abyte`, `abytec`, `abytez`, `block` |  |
 | `sldopt-comment` | `.sldopt`, `sldopt` |  |
-| `unsupported-sjasmplus` | `.binary`, `.bplist`, `.cspectmap`, `.defarray`, `.defdevice`, `.dephase`, `.disp`, `.emptytap`, `.emptytrd`, `.encoding`, `.endlua`, `.endm`, `.ends`, `.endt`, `.endw`, `.ent`, `.exa`, `.exd`, `.export`, `.fpos`, `.ifn`, `.ifnused`, `.ifused`, `.inchob`, `.includelua`, `.inctrd`, `.inf`, `.insert`, `.labelslist`, `.lua`, `.mmu`, `.outend`, `.output`, `.phase`, `.relocate_end`, `.relocate_start`, `.relocate_table`, `.save3dos`, `.saveamsdos`, `.savecdt`, `.savecpcsna`, `.savecpr`, `.savedev`, `.savehob`, `.savenex`, `.savesna`, `.savetrd`, `.setbp`, `.setbreakpoint`, `.shellexec`, `.size`, `.struct`, `.tapend`, `.tapout`, `.textarea`, `.undefine`, `.unphase`, `.while`, `binary`, `bplist`, `cspectmap`, `defarray`, `defdevice`, `dephase`, `disp`, `emptytap`, `emptytrd`, `encoding`, `endlua`, `endm`, `ends`, `endt`, `endw`, `ent`, `exa`, `exd`, `export`, `fpos`, `ifn`, `ifnused`, `ifused`, `inchob`, `includelua`, `inctrd`, `inf`, `insert`, `labelslist`, `lua`, `mmu`, `outend`, `output`, `phase`, `relocate_end`, `relocate_start`, `relocate_table`, `save3dos`, `saveamsdos`, `savecdt`, `savecpcsna`, `savecpr`, `savedev`, `savehob`, `savenex`, `savesna`, `savetrd`, `setbp`, `setbreakpoint`, `shellexec`, `size`, `struct`, `tapend`, `tapout`, `textarea`, `undefine`, `unphase`, `while` | Recognised, and not implemented |
+| `struct` | `.struct`, `struct` |  |
+| `unsupported-sjasmplus` | `.binary`, `.bplist`, `.cspectmap`, `.defarray`, `.defdevice`, `.dephase`, `.disp`, `.emptytap`, `.emptytrd`, `.encoding`, `.endlua`, `.endm`, `.endt`, `.endw`, `.ent`, `.exa`, `.exd`, `.export`, `.fpos`, `.ifn`, `.ifnused`, `.ifused`, `.inchob`, `.includelua`, `.inctrd`, `.inf`, `.insert`, `.labelslist`, `.lua`, `.mmu`, `.outend`, `.output`, `.phase`, `.relocate_end`, `.relocate_start`, `.relocate_table`, `.save3dos`, `.saveamsdos`, `.savecdt`, `.savecpcsna`, `.savecpr`, `.savedev`, `.savehob`, `.savenex`, `.savesna`, `.savetrd`, `.setbp`, `.setbreakpoint`, `.shellexec`, `.size`, `.tapend`, `.tapout`, `.textarea`, `.undefine`, `.unphase`, `.while`, `binary`, `bplist`, `cspectmap`, `defarray`, `defdevice`, `dephase`, `disp`, `emptytap`, `emptytrd`, `encoding`, `endlua`, `endm`, `endt`, `endw`, `ent`, `exa`, `exd`, `export`, `fpos`, `ifn`, `ifnused`, `ifused`, `inchob`, `includelua`, `inctrd`, `inf`, `insert`, `labelslist`, `lua`, `mmu`, `outend`, `output`, `phase`, `relocate_end`, `relocate_start`, `relocate_table`, `save3dos`, `saveamsdos`, `savecdt`, `savecpcsna`, `savecpr`, `savedev`, `savehob`, `savenex`, `savesna`, `savetrd`, `setbp`, `setbreakpoint`, `shellexec`, `size`, `tapend`, `tapout`, `textarea`, `undefine`, `unphase`, `while` | Recognised, and not implemented |
 | `words` | `.defw`, `.dw`, `defw`, `dw` |  |
 
 Instruction mnemonics are not listed here — they come from the instruction-set spec and have their own reference.
