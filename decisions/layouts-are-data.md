@@ -1,6 +1,7 @@
 # Decision: placement layouts are data, and a project may supply its own
 
-**Status:** Proposed (#483). Completes the artifact layer of
+**Status:** Active. Binding for Asm198x (accepted 2026-09-01, #483).
+Completes the artifact layer of
 [`llvm-alike-legacy-assembly-infrastructure.md`](llvm-alike-legacy-assembly-infrastructure.md)
 by generalising at the trigger [`syntax-stance.md`](syntax-stance.md) named;
 builds on [`sections-in-the-shared-engine.md`](sections-in-the-shared-engine.md)
