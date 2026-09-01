@@ -17,5 +17,8 @@ ca65	ca65 V2.18 - N/A
 lwasm	lwasm from lwtools 4.25
 pasmo	PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo
 rgbasm	rgbasm v1.0.3
+# Not a verdict key: the Game Boy ROM differential shells to it, so its absence
+# fails a growth run (2026-09-01) — the gate holds it present at the pinned tag.
+rgbfix	rgbfix v1.0.3
 sjasmplus	SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)
 vasmm68k_mot	vasm 2.0f (c) in 2002-2026 Volker Barthelmann
