@@ -70,6 +70,7 @@ jobs:
       # runner, this is a dozen lines, and a scheduled job that writes to the
       # corpus is the last place to take on a dependency for convenience.
       - name: Open a pull request
+        shell: bash
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
