@@ -1432,6 +1432,75 @@ mod tests {
         );
     }
 
+    /// #548: `label Name { v0, v1, … }` fills the members in declaration
+    /// order, each at its own width; a slot left empty or off the end keeps
+    /// the member's default (probed, SjASMPlus 1.21.0).
+    #[test]
+    fn a_struct_instance_takes_an_initialiser_list() {
+        let hb = "\tSTRUCT Hitbox\nx0\tBYTE 0\nx1\tBYTE 0\ny0\tBYTE 1\ny1\tBYTE 0\n\tENDS\n";
+        let r = asm(&format!(
+            "{hb}a\tHitbox {{ $02, $0e, $00, $07 }}\nb\tHitbox\nc\tHitbox {{ $11, $22 }}\nd\tHitbox {{ , $33 }}\ne\tHitbox {{ }}\nf\tHitbox {{ $11, }}\n\tld a,(c.x1)\n"
+        ))
+        .expect("assembles");
+        assert_eq!(
+            r.bytes,
+            vec![
+                0x02, 0x0E, 0x00, 0x07, // a
+                0x00, 0x00, 0x01, 0x00, // b: the defaults
+                0x11, 0x22, 0x01, 0x00, // c: trailing members keep theirs
+                0x00, 0x33, 0x01, 0x00, // d: an empty slot keeps its default
+                0x00, 0x00, 0x01, 0x00, // e: `{ }` is the bare instance
+                0x11, 0x00, 0x01, 0x00, // f: a trailing comma is an empty slot
+                0x3A, 0x09, 0x00, // ld a,(c.x1): member labels bind as before
+            ]
+        );
+        // A WORD member takes a word, little-endian; the instance name may
+        // lead the line unindented as well as sit in the label column.
+        let r = asm("\tSTRUCT P\nw\tWORD 0\nb\tBYTE 0\n\tENDS\ni P { $1234, $56 }\n")
+            .expect("assembles");
+        assert_eq!(r.bytes, vec![0x34, 0x12, 0x56]);
+        // An unlabelled instance, indented, with the list.
+        let r = asm(&format!("{hb}\tHitbox {{ $00, $02, $00, $06 }}\n")).expect("assembles");
+        assert_eq!(r.bytes, vec![0x00, 0x02, 0x00, 0x06]);
+        // The braces are optional: `Hitbox $2, $d, $0, $7` is the same list
+        // (probed; invaders.asm in the SpecNext Invaders corpus spells it so).
+        let r = asm(&format!(
+            "{hb}g\tHitbox $2, $d, $0, $7\n\tHitbox $3, $d, $0, $7\nh\tHitbox , $33\n"
+        ))
+        .expect("assembles");
+        assert_eq!(
+            r.bytes,
+            vec![
+                0x02, 0x0D, 0x00, 0x07, 0x03, 0x0D, 0x00, 0x07, 0x00, 0x33, 0x01, 0x00
+            ]
+        );
+    }
+
+    /// #548: a value may be any expression, a forward label included; a
+    /// `DS`/`BLOCK` member reserves but takes no slot (probed).
+    #[test]
+    fn a_struct_initialiser_value_is_an_expression_and_ds_takes_no_slot() {
+        let r = asm("\tSTRUCT Hb\nx0\tBYTE 0\nw\tWORD 0\n\tENDS\nn\tequ 3\nc\tHb { n+1, later*2 }\nlater\tequ $1234\n")
+            .expect("assembles");
+        assert_eq!(r.bytes, vec![0x04, 0x68, 0x24]);
+        let r = asm("\tSTRUCT Rec\na\tBYTE 1\npad\tDS 2\nb\tBYTE 2\n\tENDS\nc\tRec { $11, $22 }\n")
+            .expect("assembles");
+        assert_eq!(r.bytes, vec![0x11, 0x00, 0x00, 0x22]);
+    }
+
+    /// #548: more values than members is the reference's `closing } missing`
+    /// / `too many arguments?`; a list that never closes is refused too.
+    #[test]
+    fn a_struct_initialiser_with_too_many_values_is_refused() {
+        let hb = "\tSTRUCT Hb\nx0\tBYTE 0\ny0\tBYTE 1\n\tENDS\n";
+        let e = asm(&format!("{hb}a\tHb {{ 1, 2, 3 }}\n")).expect_err("too many");
+        assert!(e.to_string().contains("too many"), "{e}");
+        let e = asm(&format!("{hb}a\tHb {{ 1, 2\n")).expect_err("unclosed");
+        assert!(e.to_string().contains("closing }"), "{e}");
+        let e = asm(&format!("{hb}a\tHb 1, 2, 3\n")).expect_err("too many, unbraced");
+        assert!(e.to_string().contains("too many"), "{e}");
+    }
+
     /// #477 acceptance: the SpecNext Invaders shapes, in one source — the
     /// STRUCT from sprite.asm, the `ds Name * count` reservation, and the
     /// member-offset arithmetic its code leans on.

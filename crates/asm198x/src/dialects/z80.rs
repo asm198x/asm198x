@@ -1022,11 +1022,12 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                             _ if self.in_struct => true,
                             _ => {
                                 // An instantiation: `label Name`, the name in
-                                // the operation column and nothing after it.
+                                // the operation column, followed by nothing or
+                                // by an initialiser list, braced or not (#548).
                                 !indented && {
                                     let (_, rest) = split_first_word(code);
-                                    let (n, after) = split_first_word(rest);
-                                    after.trim().is_empty() && self.struct_names.contains(n)
+                                    let (n, _) = split_first_word(rest);
+                                    self.struct_names.contains(n)
                                 }
                             }
                         }
@@ -1631,22 +1632,25 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             None => {}
         }
         // `label Name` where `Name` is a structure defined above: an
-        // instantiation, not an instruction (probed). Two spellings arrive:
-        // the ordinary parse split the label off, and a verbatim copy kept
-        // the whole line — the instance name then leads the source.
-        if args.trim().is_empty() && self.lookup_struct(word).is_some() {
+        // instantiation, not an instruction (probed), with an optional
+        // initialiser list after the name — `{ v0, v1 }` or the bare
+        // `v0, v1` (#548). Two spellings arrive: the ordinary parse split
+        // the label off, and a verbatim copy kept the whole line — the
+        // instance name then leads the source.
+        if self.lookup_struct(word).is_some() {
             let label = node.label.as_ref().map(|s| s.name.clone());
-            return self.lower_instance(node, label, word, out);
+            let init = args.trim().to_string();
+            return self.lower_instance(node, label, word, &init, out);
         }
         if matches!(node.item, Some(crate::ast::Item::Verbatim))
             && !node.source.starts_with(|c: char| c.is_whitespace())
         {
             let (second, after) = split_first_word(args);
-            if after.trim().is_empty() && !second.is_empty() && self.lookup_struct(second).is_some()
-            {
+            if !second.is_empty() && self.lookup_struct(second).is_some() {
                 let instance = word.trim_end_matches(':').to_string();
                 let second = second.to_string();
-                return self.lower_instance(node, Some(instance), &second, out);
+                let init = after.trim().to_string();
+                return self.lower_instance(node, Some(instance), &second, &init, out);
             }
         }
         if self.syntax.is_include(word) {
@@ -1877,7 +1881,7 @@ struct StructBuild {
     /// size answered at `ENDS` includes that initial offset (probed).
     cursor: i64,
     names: Vec<(String, i64)>,
-    leaves: Vec<(Option<String>, Vec<u8>)>,
+    leaves: Vec<crate::scopes::StructLeaf>,
 }
 
 impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
@@ -1971,32 +1975,34 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
                 )
             })
         };
-        let (size, bytes): (i64, Vec<u8>) = match word.to_ascii_uppercase().as_str() {
+        // `slot`: whether an instantiation's `{ … }` list fills the member.
+        let (size, bytes, slot): (i64, Vec<u8>, bool) = match word.to_ascii_uppercase().as_str() {
             "BYTE" | "DB" | "DEFB" => {
                 let v = init(args, self.syntax, &self.consts)?;
-                (1, vec![v as u8])
+                (1, vec![v as u8], true)
             }
             "WORD" | "DW" | "DEFW" => {
                 let v = init(args, self.syntax, &self.consts)?;
-                (2, (v as u16).to_le_bytes().to_vec())
+                (2, (v as u16).to_le_bytes().to_vec(), true)
             }
             "D24" => {
                 let v = init(args, self.syntax, &self.consts)?;
-                (3, (v as u32).to_le_bytes()[..3].to_vec())
+                (3, (v as u32).to_le_bytes()[..3].to_vec(), true)
             }
             "DWORD" => {
                 let v = init(args, self.syntax, &self.consts)?;
-                (4, (v as u32).to_le_bytes().to_vec())
+                (4, (v as u32).to_le_bytes().to_vec(), true)
             }
             "DS" | "BLOCK" => {
                 // Reaches forward like a `DS` outside the structure (probed:
-                // `x DS N` above `N EQU 4` sizes the structure at 4).
+                // `x DS N` above `N EQU 4` sizes the structure at 4). It
+                // takes no initialiser slot (probed, #548).
                 let expr = parse_value(self.syntax, args.trim(), line)?;
                 let n = self.fold_count(&expr, line)?;
                 if !(0..=0x1_0000).contains(&n) {
                     return Err(AsmError::new(line, format!("bad `DS` length {n}")));
                 }
-                (n, vec![0u8; n as usize])
+                (n, vec![0u8; n as usize], false)
             }
             _ => {
                 // An embedded structure member (probed: its size lands here,
@@ -2023,12 +2029,16 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
                         b.names.push((format!("{m}.{path}"), b_cursor + off));
                     }
                 }
-                for (path, bytes) in &def.leaves {
-                    let path = match (&member, path) {
+                for leaf in &def.leaves {
+                    let path = match (&member, &leaf.path) {
                         (Some(m), Some(p)) => Some(format!("{m}.{p}")),
                         _ => None,
                     };
-                    b.leaves.push((path, bytes.clone()));
+                    b.leaves.push(crate::scopes::StructLeaf {
+                        path,
+                        bytes: leaf.bytes.clone(),
+                        slot: leaf.slot,
+                    });
                 }
                 let b = self.building.as_mut().expect("caller checked");
                 if let Some(m) = member {
@@ -2039,12 +2049,14 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             }
         };
         let b = self.building.as_mut().expect("caller checked");
-        if let Some(m) = member {
+        if let Some(m) = &member {
             b.names.push((m.clone(), b.cursor));
-            b.leaves.push((Some(m), bytes));
-        } else {
-            b.leaves.push((None, bytes));
         }
+        b.leaves.push(crate::scopes::StructLeaf {
+            path: member,
+            bytes,
+            slot,
+        });
         b.cursor += size;
         Ok(())
     }
@@ -2085,13 +2097,16 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         Ok(())
     }
 
-    /// `label Name`: lay the structure's default bytes down here, binding the
-    /// instance and each named member to its address (probed).
+    /// `label Name [v0, v1, …]`: lay the structure down here, binding
+    /// the instance and each named member to its address (probed). A listed
+    /// value replaces the member's default at the member's width; a slot
+    /// left empty, or off the end of the list, keeps the default (#548).
     fn lower_instance(
         &mut self,
         node: &Node,
         label: Option<String>,
         word: &str,
+        init: &str,
         out: &mut Vec<Statement>,
     ) -> Result<(), AsmError> {
         let line = node.span.line as usize;
@@ -2103,8 +2118,24 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         let def = self
             .lookup_struct(word)
             .expect("caller matched a structure");
+        let values = parse_struct_init(self.syntax, init, line)?;
+        let slots = def.leaves.iter().filter(|l| l.slot).count();
+        if values.len() > slots {
+            // The reference: `closing } missing` then
+            // `[STRUCT] Syntax error - too many arguments?`.
+            return Err(AsmError::new(
+                line,
+                format!(
+                    "`{word}` has {slots} member(s) to initialise, and this list gives \
+                     {} — too many arguments",
+                    values.len()
+                ),
+            ));
+        }
+        let mut values = values.into_iter();
         let mut first = true;
-        for (path, bytes) in &def.leaves {
+        for leaf in &def.leaves {
+            let (path, bytes) = (&leaf.path, &leaf.bytes);
             let label = match (&instance, path) {
                 (Some(i), Some(p)) => Some(format!("{i}.{p}")),
                 _ => None,
@@ -2133,16 +2164,34 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             } else {
                 label
             };
+            let value = if leaf.slot {
+                values.next().flatten()
+            } else {
+                None
+            };
             if bytes.is_empty() && label.is_none() {
                 continue;
             }
+            // A listed value lands at the member's width, the way the data
+            // directive of that width would lay it down.
+            let op = match (value, bytes.len()) {
+                (Some(v), 1) => Some(Operation::Bytes(vec![v])),
+                (Some(v), 2) => Some(Operation::Words(vec![v])),
+                (Some(v), width) => Some(Operation::Encoded(vec![crate::engine::Piece::Val {
+                    expr: v,
+                    bytes: width as u8,
+                    rel: false,
+                    signed: false,
+                }])),
+                (None, _) => (!bytes.is_empty()).then(|| {
+                    Operation::Bytes(bytes.iter().map(|b| Expr::Num(i64::from(*b))).collect())
+                }),
+            };
             out.push(Statement {
                 line,
                 file,
                 label,
-                op: (!bytes.is_empty()).then(|| {
-                    Operation::Bytes(bytes.iter().map(|b| Expr::Num(i64::from(*b))).collect())
-                }),
+                op,
                 operand_span: None,
                 xor_mask: 0,
                 instruction_set: None,
@@ -3224,6 +3273,49 @@ fn is_reg_or_cond(up: &str) -> bool {
 // ---------------------------------------------------------------------------
 // Tokenising and the expression parser
 // ---------------------------------------------------------------------------
+
+/// The values of a `STRUCT` instance's initialiser list — `{ v0, v1, … }`,
+/// or the same list unbraced — one per slot in order; `None` where a slot is
+/// left empty (`{ , $33 }`, or the slot a trailing comma opens). An empty
+/// `init` or `{ }` is the bare instance. Every shape here was probed against
+/// SjASMPlus 1.21.0 (#548).
+fn parse_struct_init<S: Z80Syntax>(
+    syntax: &S,
+    init: &str,
+    line: usize,
+) -> Result<Vec<Option<Expr>>, AsmError> {
+    let init = init.trim();
+    if init.is_empty() {
+        return Ok(Vec::new());
+    }
+    let inner = match init.strip_prefix('{') {
+        Some(rest) => rest.strip_suffix('}').ok_or_else(|| {
+            // The reference: `closing } missing`.
+            AsmError::new(line, "closing } missing on the `STRUCT` initialiser list")
+        })?,
+        None => init,
+    };
+    if inner.contains('{') {
+        return Err(AsmError::new(
+            line,
+            "a nested `{ … }` in a `STRUCT` initialiser list is not read yet — \
+             list the embedded structure's members in line",
+        ));
+    }
+    if inner.trim().is_empty() {
+        return Ok(Vec::new());
+    }
+    split_operands(inner)
+        .into_iter()
+        .map(|slot| {
+            if slot.is_empty() {
+                Ok(None)
+            } else {
+                parse_value(syntax, slot, line).map(Some)
+            }
+        })
+        .collect()
+}
 
 /// Split operand text on top-level commas (commas inside parentheses are kept).
 fn split_operands(args: &str) -> Vec<&str> {
