@@ -68,7 +68,7 @@ state in source order, and belong in the sweep beside the text environment.
 
 A chosen branch's lines are read twice — once structurally at parse, once
 meaningfully at selection. That is bounded by the source's own size, and it
-buys the property the reference actually has: ca65 is a single sequential
+buys the property the reference itself has: ca65 is a single sequential
 reader, and a split pipeline can only imitate one by deferring the half that
 depends on order.
 
