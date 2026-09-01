@@ -699,6 +699,11 @@ impl Z80Syntax for SjasmplusSyntax {
         true
     }
 
+    /// `add (hl)` is `add a,(hl)` (#533; probed with and without `abfw`).
+    fn implicit_accumulator(&self) -> bool {
+        true
+    }
+
     /// sjasmplus takes `:` as a statement separator as well as a label
     /// terminator (#98) — ` ld a,1 : ld b,2` is two instructions, and it is
     /// how hand-written Spectrum source is often laid out.
@@ -1395,6 +1400,36 @@ mod tests {
     fn a_negative_ds_count_is_refused_naming_the_reference() {
         let e = asm("\tDS -1\n\tnop\n").expect_err("refused");
         assert!(e.to_string().contains("Negative BLOCK?"), "{e}");
+    }
+
+    /// #533: a lone operand on `ADD`/`ADC`/`SBC` is `A,<operand>`, with or
+    /// without `--syntax=abfw` (probed, SjASMPlus 1.21.0). The two-operand
+    /// 16-bit forms are untouched — the rule is about one operand, not the
+    /// first — and a lone 16-bit operand is still an error.
+    #[test]
+    fn a_lone_operand_on_add_adc_sbc_is_the_accumulator_form() {
+        let src = "\tadd (hl)\n\tadd b\n\tadd 5\n\tadc c\n\tsbc (ix+1)\n\tadd a\n\tsbc a\n\tadc 200\n\tadd (iy-3)\n\tadd ixh\n";
+        let want = vec![
+            0x86, 0x80, 0xC6, 0x05, 0x89, 0xDD, 0x9E, 0x01, 0x87, 0x9F, 0xCE, 0xC8, 0xFD, 0x86,
+            0xFD, 0xDD, 0x84,
+        ];
+        assert_eq!(asm(src).expect("implicit accumulator").bytes, want);
+        assert_eq!(
+            asm(&format!("\topt --syntax=abfw\n{src}"))
+                .expect("under abfw too")
+                .bytes,
+            want
+        );
+        assert_eq!(
+            asm("\tadd hl,de\n\tadc hl,de\n\tsbc hl,de\n\tadd ix,bc\n\tadd a,(hl)\n")
+                .expect("two operands unchanged")
+                .bytes,
+            vec![0x19, 0xED, 0x5A, 0xED, 0x52, 0xDD, 0x09, 0x86]
+        );
+        assert!(
+            asm("\tadd hl\n").is_err(),
+            "`add hl` is `Comma expected` in the reference"
+        );
     }
 
     /// #477 acceptance: the SpecNext Invaders shapes, in one source — the

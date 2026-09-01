@@ -910,6 +910,14 @@ const PROBES: &[Probe] = &[
         " STRUCT Pt\nx DS N\n ENDS\n DB Pt\nN EQU 4\n"),
     ok ("sjasmplus", "DS count in a taken branch reaches forward",
         " IF 1\n DS COUNT\n ENDIF\n nop\nCOUNT EQU 2\n"),
+    // #533: the accumulator left implicit on ADD/ADC/SBC, probed against
+    // 1.21.0 with and without --syntax=abfw.
+    ok ("sjasmplus", "ADD ADC SBC take a lone operand as A,operand",
+        " add (hl)\n add b\n add 5\n adc c\n sbc (ix+1)\n add a\n sbc a\n adc 200\n add (iy-3)\n add ixh\n"),
+    ok ("sjasmplus", "ADD ADC SBC lone operand under abfw",
+        " opt --syntax=abfw\n add (hl)\n adc c\n sbc (ix+1)\n"),
+    ok ("sjasmplus", "ADD ADC SBC two-operand forms stay 16-bit",
+        " add hl,de\n adc hl,de\n sbc hl,de\n add ix,bc\n add a,(hl)\n"),
     // #225: nine core 6809 instructions the spec had no row for at all —
     // add/subtract-with-carry, bit test, two 16-bit compares and `cwai`. Every
     // mode each one takes, because a missing mnemonic is missing in all of
