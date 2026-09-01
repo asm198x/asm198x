@@ -26,8 +26,35 @@ permissions:
   packages: read
 
 jobs:
+  # A growth PR under review must not be force-pushed over: each run
+  # re-arbitrates from main, so a push would discard any unmerged verdicts
+  # from the previous run and invalidate a review in progress. While one is
+  # open, the run stands down; the corpus is append-only, so the next run
+  # after the merge records whatever remains.
+  preflight:
+    name: Stand down while a growth PR is open
+    runs-on: ubuntu-latest
+    outputs:
+      proceed: ${{ steps.check.outputs.proceed }}
+    steps:
+      - name: Check for an open growth pull request
+        id: check
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          if gh pr view growth/scheduled --repo "${{ github.repository }}" \
+               --json state --jq .state 2>/dev/null | grep -q OPEN; then
+            echo "a growth pull request is open for review; not arbitrating over it"
+            echo "proceed=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "proceed=true" >> "$GITHUB_OUTPUT"
+          fi
+
   grow:
     name: Arbitrate and open a pull request
+    needs: preflight
+    if: needs.preflight.outputs.proceed == 'true'
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository_owner }}/arbiter:latest
@@ -44,6 +71,15 @@ jobs:
       # verdict already held.
       - name: Verify the arbiter identities
         run: verify-arbiters
+
+      # The checkout is owned by a different uid than the container user, and
+      # git refuses a repo it does not own. This must precede *every* step
+      # that touches git — `cargo xtask grow` prints its "what grew" diff via
+      # git, and with the config one step later (#511's placement) that diff
+      # rendered as usage help while the run stayed green (#513's residue).
+      - name: Let the container's git read the workspace
+        shell: bash
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
 
       - name: Read the pinned curriculum revision
         id: pin
@@ -78,12 +114,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # The checkout is owned by a different uid than the container user,
-          # and git refuses a repo it does not own — reported, unhelpfully, as
-          # "not in a git directory". Mark the workspace safe explicitly; the
-          # entry actions/checkout writes does not reliably survive into this
-          # image's git configuration.
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name  "asm198x growth"
           git config user.email "growth@asm198x.invalid"
 
@@ -133,3 +163,12 @@ jobs:
           - did the coverage stamp move, and does \`coverage.accepted\` still explain
             every shortfall?
           - the ledger page is regenerated here, so its counts should match."
+
+      # Everything this job pushed or opened was token-caused, which GitHub
+      # deliberately does not let trigger workflows — so the PR would carry no
+      # checks, Replay included. workflow_dispatch is the documented
+      # exception; run CI on the branch explicitly.
+      - name: Run CI on the growth branch
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: gh workflow run CI --repo "${{ github.repository }}" --ref growth/scheduled
