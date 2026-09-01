@@ -70,7 +70,7 @@ not deferred — nobody has examined it yet, which is a different thing.
 | `dtb`, `dts` | lwasm | [`clock-dependent-directives.md`](clock-dependent-directives.md) — rule 3; refused by name so assembly has no implicit wall-clock input |
 | `os9`, `mod`, `emod` | lwasm | [`multi-artifact-output.md`](multi-artifact-output.md) — accepted, **not yet implemented** |
 | `output` | vasm | the same |
-| the `save*` family | sjasmplus | the same |
+| the `save*` family | sjasmplus | [`sjasmplus-save-family.md`](sjasmplus-save-family.md) — accepted word by word; `SAVEBIN` and the kinded `SAVETAP` forms are done, the rest wait on the upstream each row names |
 | `lua`, `endlua`, `includelua` | sjasmplus | [`sjasmplus-lua.md`](sjasmplus-lua.md) — accepted behind the `lua` build feature, **not yet implemented** |
 | `shellexec` | sjasmplus | rule 3 — refused by name; `sjasmplus-lua.md` records why the sandbox never runs a process |
 | `.condes` | ca65 | builds an ld65 constructor table from linker-config features our fixed NROM layout does not declare |
