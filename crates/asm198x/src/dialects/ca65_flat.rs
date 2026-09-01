@@ -668,28 +668,8 @@ fn walk_one_line<W: FlatWalk>(
                         trivia: d.trivia,
                     });
                 }
-                if stack.len() >= MAX_INCLUDE_DEPTH {
-                    return Err(AsmError::at(
-                        at,
-                        format!("includes nested more than {MAX_INCLUDE_DEPTH} levels deep"),
-                    ));
-                }
-                let id = load_include_defaulted(map, *loader, &request, stack, line as u32, sem)
-                    .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
-                // Cycle detection is membership of the *active* stack: ca65
-                // itself has none (a self-include dies on the OS's open-file
-                // limit), so this diagnostic exceeds the reference — allowed,
-                // diagnostics are not byte-compared (KTD5).
-                if stack.contains(&id) {
-                    let chain = stack
-                        .iter()
-                        .chain(std::iter::once(&id))
-                        .map(|f| map.path(*f).unwrap_or("?"))
-                        .collect::<Vec<_>>()
-                        .join(" -> ");
-                    return Err(AsmError::at(at, format!("include cycle: {chain}")));
-                }
-                let contents = map.contents(id).unwrap_or_default().to_owned();
+                let (id, contents) =
+                    open_include(&request, &at, map, *loader, stack, sem, line as u32)?;
                 stack.push(id);
                 walk_file(w, &contents, id, map, *loader, stack, sem)?;
                 stack.pop();
@@ -703,10 +683,8 @@ fn walk_one_line<W: FlatWalk>(
                 // path mints no FileId (KTD8) — the payload rides a node at
                 // the *directive's* span, which is where the missing-asset /
                 // window diagnostics land too.
-                let data = load_binary(map, *loader, &request, stack, sem.resolution)
-                    .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
-                let payload = (sem.window)(&data, offset, size)
-                    .map_err(|msg| AsmError::at(at.clone(), format!("`{request}`: {msg}")))?;
+                let payload =
+                    incbin_payload(&request, offset, size, &at, map, *loader, stack, sem)?;
                 w.push_node(Node {
                     operand_span: d.operand_span,
                     label: d.label,
@@ -719,6 +697,74 @@ fn walk_one_line<W: FlatWalk>(
         }
     }
     Ok(())
+}
+
+/// Open an `.include` target: the depth backstop, resolution through the
+/// dialect's [`WalkSemantics`], and cycle detection — everything but the walk
+/// of the target itself, which differs by caller: the eager walk recurses
+/// [`walk_file`] here, and the ca65 projection sweep (#481) reads the target
+/// lazily, under the text environment in force at the include point.
+///
+/// # Errors
+/// The depth backstop, a request that does not resolve, or an include cycle
+/// — all at `at`, the directive's operand span.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn open_include(
+    request: &str,
+    at: &Span,
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+    stack: &[FileId],
+    sem: &WalkSemantics,
+    line: u32,
+) -> Result<(FileId, String), AsmError> {
+    if stack.len() >= MAX_INCLUDE_DEPTH {
+        return Err(AsmError::at(
+            at.clone(),
+            format!("includes nested more than {MAX_INCLUDE_DEPTH} levels deep"),
+        ));
+    }
+    let id = load_include_defaulted(map, loader, request, stack, line, sem)
+        .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
+    // Cycle detection is membership of the *active* stack: ca65
+    // itself has none (a self-include dies on the OS's open-file
+    // limit), so this diagnostic exceeds the reference — allowed,
+    // diagnostics are not byte-compared (KTD5).
+    if stack.contains(&id) {
+        let chain = stack
+            .iter()
+            .chain(std::iter::once(&id))
+            .map(|f| map.path(*f).unwrap_or("?"))
+            .collect::<Vec<_>>()
+            .join(" -> ");
+        return Err(AsmError::at(at.clone(), format!("include cycle: {chain}")));
+    }
+    let contents = map.contents(id).unwrap_or_default().to_owned();
+    Ok((id, contents))
+}
+
+/// Resolve an `.incbin` payload: load the binary and cut the requested
+/// window. The binary path mints no FileId (KTD8) — the payload rides a node
+/// at the *directive's* span, which is where the missing-asset / window
+/// diagnostics land too.
+///
+/// # Errors
+/// A request that does not resolve, or a window outside the data.
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn incbin_payload(
+    request: &str,
+    offset: Option<i64>,
+    size: Option<i64>,
+    at: &Span,
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+    stack: &[FileId],
+    sem: &WalkSemantics,
+) -> Result<Vec<u8>, AsmError> {
+    let data = load_binary(map, loader, request, stack, sem.resolution)
+        .map_err(|e| AsmError::at(at.clone(), e.to_string()))?;
+    (sem.window)(&data, offset, size)
+        .map_err(|msg| AsmError::at(at.clone(), format!("`{request}`: {msg}")))
 }
 
 /// The unresolved node a **single-source** parse keeps for a walk-handled
