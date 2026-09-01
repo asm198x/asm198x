@@ -918,6 +918,22 @@ const PROBES: &[Probe] = &[
         " opt --syntax=abfw\n add (hl)\n adc c\n sbc (ix+1)\n"),
     ok ("sjasmplus", "ADD ADC SBC two-operand forms stay 16-bit",
         " add hl,de\n adc hl,de\n sbc hl,de\n add ix,bc\n add a,(hl)\n"),
+    // #548: a STRUCT instance with an initialiser list, probed against
+    // 1.21.0 — values fill the members in order at each member's width, an
+    // empty or missing slot keeps the default, DS members take no slot.
+    ok ("sjasmplus", "STRUCT instance initialiser list",
+        " STRUCT Hitbox\nx0 BYTE 0\nx1 BYTE 0\ny0 BYTE 1\ny1 BYTE 0\n ENDS\n\
+         a Hitbox { $02, $0e, $00, $07 }\nb Hitbox\nc Hitbox { $11, $22 }\nd Hitbox { , $33 }\n\
+         e Hitbox { }\nf Hitbox { $11, }\n Hitbox { $00, $02, $00, $06 }\n ld a,(c.x1)\n"),
+    ok ("sjasmplus", "STRUCT instance initialiser list without braces",
+        " STRUCT Hitbox\nx0 BYTE 0\nx1 BYTE 0\ny0 BYTE 1\ny1 BYTE 0\n ENDS\n\
+         a Hitbox $2, $d, $0, $7\n Hitbox $3, $d, $0, $7\nb Hitbox $11, $22\nc Hitbox , $33\n"),
+    ok ("sjasmplus", "STRUCT initialiser values take the member width",
+        " STRUCT P\nw WORD 0\nb BYTE 0\nt D24 0\nq DWORD 0\n ENDS\n\
+         i P { $1234, $56, $123456, $12345678 }\nj P { $1234 }\n"),
+    ok ("sjasmplus", "STRUCT initialiser values are expressions and DS takes no slot",
+        " STRUCT Rec\na BYTE 1\npad DS 2\nb BYTE 2\n ENDS\nn equ 3\n\
+         c Rec { n+1, later*2 }\nlater equ $12\n"),
     // #225: nine core 6809 instructions the spec had no row for at all —
     // add/subtract-with-carry, bit test, two 16-bit compares and `cwai`. Every
     // mode each one takes, because a missing mnemonic is missing in all of

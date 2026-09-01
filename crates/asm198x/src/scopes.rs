@@ -198,9 +198,21 @@ pub(crate) struct StructDef {
     /// Every named offset the definition binds, in layout order: members,
     /// and an embedded member's flattened paths (`hb`, `hb.x0`, `hb.y0`).
     pub names: Vec<(String, i64)>,
-    /// Emission order for an instantiation: each leaf's optional dotted path
-    /// and its default bytes.
-    pub leaves: Vec<(Option<String>, Vec<u8>)>,
+    /// Emission order for an instantiation.
+    pub leaves: Vec<StructLeaf>,
+}
+
+/// One run of bytes an instantiation lays down: a member, or the reserve a
+/// `DS` member makes.
+pub(crate) struct StructLeaf {
+    /// The member's dotted path under the instance, if it is named.
+    pub path: Option<String>,
+    /// What it emits when the instantiation gives no value: the member's
+    /// default, little-endian where multi-byte.
+    pub bytes: Vec<u8>,
+    /// Whether a `{ … }` initialiser list value lands here. A `DS`/`BLOCK`
+    /// member reserves without taking a slot (probed, #548).
+    pub slot: bool,
 }
 
 /// Rewrite one reference under the open scopes: `@name` escapes to the bare

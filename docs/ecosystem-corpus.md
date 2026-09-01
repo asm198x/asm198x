@@ -54,7 +54,7 @@ Their native controls pass with the installed verdict-corpus arbiters: ACME
 | 6502Assembly | ACME | 3 | passes | all three targets are byte-identical; cross-file macros (#429), `%` modulo (#455), labels on live macro calls (#457), indented anonymous labels in macro bodies (#458), repeated nested macro-local scopes (#461), and discontiguous origins (#463) are fixed |
 | NES-ca65-example | ca65 | 1 | passes | project-specific `TILES` segment/linker config |
 | GB ASM Tutorial — Unbricked | RGBDS | 1 | passes | raw 16 KiB artifact matches RGBLINK exactly; `--gb-rom` also matches the 32 KiB artifact finalised by `rgbfix -v -p 0xFF` exactly |
-| SpecNext Invaders | SjASMPlus | 1 | passes | `OPT` (#431), `SLDOPT` (#473), unary `~` (#475), `STRUCT`/`ENDS` (#477), forward `DS` counts (#528) and the implicit-accumulator `add (hl)` spelling (#533) are fixed; the next boundary is the STRUCT initialiser list `Hitbox { … }` in `src/ship.asm` (#548) |
+| SpecNext Invaders | SjASMPlus | 1 | passes | `OPT` (#431), `SLDOPT` (#473), unary `~` (#475), `STRUCT`/`ENDS` (#477), forward `DS` counts (#528), the implicit-accumulator `add (hl)` spelling (#533) and STRUCT initialiser lists (#548) are fixed; the next boundary is a column-0 `.end` local label read as the `END` directive in `src/invaders.asm` |
 | HelloAmi | vasm | 1 | passes | re-audit after the unsigned condition-code alias family; no known source rejection remains |
 
 This is already useful evidence: Unbricked now passes Asm198x unchanged at both
