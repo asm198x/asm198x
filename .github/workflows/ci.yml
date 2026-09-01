@@ -5,6 +5,11 @@ on:
     branches:
       - main
   pull_request:
+  # The growth job pushes its branch and opens its PR with GITHUB_TOKEN, and
+  # token-caused push/pull_request events never trigger workflows — so a
+  # growth PR would sit with no checks at all, Replay included. Dispatch is
+  # the documented exception: grow.yml invokes CI on the branch explicitly.
+  workflow_dispatch:
 
 concurrency:
   group: ci-${{ github.workflow }}-${{ github.ref }}
