@@ -95,6 +95,10 @@ pub struct AssemblyResult {
     /// symbols the CLI renders into a `.debug198x` sidecar / `--sym` / `--listing`.
     #[serde(default)]
     pub debug: DebugData,
+    /// Memory-area accounting (#499), rendered by `--map` and consulted by
+    /// `free(<area>)` budgets. Additive: empty serializes nothing.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub areas: Vec<crate::engine::AreaUsage>,
     /// Non-fatal diagnostics attached to a *successful* assembly (U2). Empty
     /// until producers populate it (warnings-as-diagnostics, lints); the failure
     /// path returns an [`AsmError`], which the CLI's JSON mode (U4) converts to a
@@ -142,6 +146,7 @@ impl AssemblyResult {
         Self {
             version: CONTRACT_VERSION,
             bytes,
+            areas: Vec::new(),
             origin: None,
             // A linked image has no flat origin, so nothing to sit above.
             reserved_prefix: 0,
@@ -188,6 +193,7 @@ impl From<Assembly> for AssemblyResult {
             requested_output: a.requested_output,
             requested_symbols: a.requested_symbols,
             artifacts: a.artifacts,
+            areas: a.areas,
         }
     }
 }

@@ -531,6 +531,7 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut listing: ArtifactPath = None;
     let mut listing_json: ArtifactPath = None;
     let mut linker_config: Option<PathBuf> = None;
+    let mut map_report: ArtifactPath = None;
     // Repeatable `-I <dir>` include-search directories, in command-line order —
     // the order is the search order (language-surface U1/KTD8). The
     // include-capable entry points (U2) feed them to the filesystem loader.
@@ -570,6 +571,10 @@ fn run(args: &[String]) -> Result<String, String> {
                 i += 1;
                 let value = args.get(i).ok_or("`-C` needs a linker config path")?;
                 linker_config = Some(PathBuf::from(value));
+            }
+            "--map" => map_report = Some(None),
+            f if f.starts_with("--map=") => {
+                map_report = Some(Some(PathBuf::from(&f["--map=".len()..])));
             }
             "--listing-json" => listing_json = Some(None),
             f if f.starts_with("--listing-json=") => {
@@ -647,7 +652,11 @@ fn run(args: &[String]) -> Result<String, String> {
     // The debug artifacts render an *assembly's* captured record; there is no
     // record to render under `--fmt` or `--disasm`, so the combination is an
     // error rather than a silent no-op.
-    if (debug.is_some() || sym.is_some() || listing.is_some() || listing_json.is_some())
+    if (debug.is_some()
+        || sym.is_some()
+        || listing.is_some()
+        || listing_json.is_some()
+        || map_report.is_some())
         && (format || disassemble)
     {
         return Err(
@@ -887,8 +896,9 @@ fn run(args: &[String]) -> Result<String, String> {
             )?,
             None => String::new(),
         };
+        let map_notes = write_map(input, Some(&out_path), &result, &map_report)?;
         return Ok(format!(
-            "assembled {} byte(s) -> {}{artifact_notes}{debug_notes}",
+            "assembled {} byte(s) -> {}{artifact_notes}{debug_notes}{map_notes}",
             result.bytes.len(),
             out_path.display()
         ));
@@ -953,8 +963,9 @@ fn run(args: &[String]) -> Result<String, String> {
             )?,
             None => String::new(),
         };
+        let map_notes = write_map(input, Some(&out_path), &rom, &map_report)?;
         return Ok(format!(
-            "assembled + linked {} byte(s) -> {}{debug_notes}",
+            "assembled + linked {} byte(s) -> {}{debug_notes}{map_notes}",
             rom.bytes.len(),
             out_path.display()
         ));
@@ -1122,28 +1133,30 @@ fn run(args: &[String]) -> Result<String, String> {
     // Debug artifacts (U3) are written only after the image write succeeded, so
     // a failed run never leaves a sidecar describing an image that was not
     // produced. `--debug` alongside `--sna`/`--prg` emits both artifacts.
-    let debug_notes = if debug.is_some() || sym.is_some() || listing.is_some() {
-        let (cpu, dialect) = assembler.identity();
-        // `debug_info` reads the result's own file table (KTD2), so the
-        // sidecar's `sources` and per-file line records are multi-file-true.
-        let info = asm198x::debug_info(&assembly, cpu, dialect, input);
-        let sources = listing_sources(input, &source, &assembly.files, &recorder.take());
-        write_debug_artifacts(
-            input,
-            Some(&image_path),
-            assembler.addr_unit(),
-            &assembly,
-            &info,
-            &sources,
-            &debug,
-            &sym,
-            &listing,
-            &listing_json,
-        )?
-    } else {
-        String::new()
-    };
-    Ok(format!("{summary}{debug_notes}"))
+    let debug_notes =
+        if debug.is_some() || sym.is_some() || listing.is_some() || listing_json.is_some() {
+            let (cpu, dialect) = assembler.identity();
+            // `debug_info` reads the result's own file table (KTD2), so the
+            // sidecar's `sources` and per-file line records are multi-file-true.
+            let info = asm198x::debug_info(&assembly, cpu, dialect, input);
+            let sources = listing_sources(input, &source, &assembly.files, &recorder.take());
+            write_debug_artifacts(
+                input,
+                Some(&image_path),
+                assembler.addr_unit(),
+                &assembly,
+                &info,
+                &sources,
+                &debug,
+                &sym,
+                &listing,
+                &listing_json,
+            )?
+        } else {
+            String::new()
+        };
+    let map_notes = write_map(input, Some(&image_path), &assembly, &map_report)?;
+    Ok(format!("{summary}{debug_notes}{map_notes}"))
 }
 
 /// Write the requested Debug198x artifacts — the `.debug198x` NDJSON sidecar
@@ -1492,6 +1505,37 @@ fn run_convert(args: &[String]) -> Result<String, String> {
     }
 }
 
+/// Write the memory map (#499) when `--map` asked for it, with the same
+/// input/image overwrite guards the other artifacts have. Returns the summary
+/// note, empty when the flag is absent.
+fn write_map(
+    input: &str,
+    image: Option<&Path>,
+    result: &asm198x::AssemblyResult,
+    map_report: &ArtifactPath,
+) -> Result<String, String> {
+    let Some(path) = map_report else {
+        return Ok(String::new());
+    };
+    let path = path
+        .clone()
+        .unwrap_or_else(|| Path::new(input).with_extension("map"));
+    if path == Path::new(input) {
+        return Err(
+            "refusing to overwrite the input with the memory map — pass `--map=<path>`".into(),
+        );
+    }
+    if image.is_some_and(|image| path == image) {
+        return Err(
+            "refusing to overwrite the output image with the memory map — pass `--map=<path>`"
+                .into(),
+        );
+    }
+    std::fs::write(&path, asm198x::render_map(result))
+        .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
+    Ok(format!("\nwrote {} (memory map)", path.display()))
+}
+
 fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
      usage: asm198x [asm|disasm|fmt] [options] <input>\n\
@@ -1519,7 +1563,7 @@ fn usage() -> String {
      \x20            (-C reads a bounded ld65 config; absent, the curriculum\n\
      \x20             NROM layout applies as before)\n\
      debug info:  asm198x [--debug[=path]] [--sym[=path]] [--listing[=path]]\n\
-     \x20            [--listing-json[=path]] <input>\n\
+     \x20            [--listing-json[=path]] [--map[=path]] <input>\n\
      \x20            (--debug writes the .debug198x NDJSON sidecar; --sym a sorted\n\
      \x20             `name = $hex` table; --listing address/bytes/cycles/source rows\n\
      \x20             with per-label cycle totals; --listing-json the same data as\n\

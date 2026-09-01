@@ -503,8 +503,55 @@ pub fn render_listing_json(input: &str, result: &AssemblyResult, addr_unit: u64)
         crate::engine::CycleCoverage::Partial => "partial",
         crate::engine::CycleCoverage::None => "none",
     };
-    let doc = json!({ "coverage": coverage, "lines": lines, "labels": labels });
+    let doc = json!({
+        "coverage": coverage,
+        "lines": lines,
+        "labels": labels,
+        "areas": result.areas,
+    });
     format!("{doc}\n")
+}
+
+/// The memory map (#499): each area of the active layout — capacity, use,
+/// free total, and the largest contiguous free run — with the segments placed
+/// in it. Figures are address units; ranges are the area's span.
+#[must_use]
+pub fn render_map(result: &AssemblyResult) -> String {
+    use std::fmt::Write as _;
+    let mut out = String::new();
+    if result.areas.is_empty() {
+        out.push_str("no memory accounting on this path\n");
+        return out;
+    }
+    let _ = writeln!(out, "memory map (address units):");
+    let name_w = result
+        .areas
+        .iter()
+        .flat_map(|a| std::iter::once(a.name.len()).chain(a.segments.iter().map(|s| s.name.len())))
+        .max()
+        .unwrap_or(0)
+        .max(4);
+    for a in &result.areas {
+        let _ = writeln!(
+            out,
+            "  {:<name_w$}  ${:04X}-${:04X}  size {:>6}  used {:>6}  free {:>6}  largest {:>6}",
+            a.name,
+            a.start,
+            a.start + a.size - 1,
+            a.size,
+            a.used,
+            a.free,
+            a.largest_free,
+        );
+        for s in &a.segments {
+            let _ = writeln!(
+                out,
+                "    {:<name_w$}  ${:04X}  {} unit(s)",
+                s.name, s.base, s.length
+            );
+        }
+    }
+    out
 }
 
 /// The cycles column cell: one number when the cost is fixed, `min/max` when
