@@ -154,6 +154,13 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// Whether a lone operand on `ADD`/`ADC`/`SBC` means `A,<operand>` (#533).
+    /// sjasmplus reads `add (hl)` as `add a,(hl)`, with or without
+    /// `--syntax=abfw`; pasmo rejects the spelling, so it defaults off.
+    fn implicit_accumulator(&self) -> bool {
+        false
+    }
+
     /// Whether `word` is this dialect's include directive (language-surface
     /// U2).
     ///
@@ -1652,6 +1659,10 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         // multi-instruction delimiter. SjASMPlus consequently accepts the
         // explicit accumulator on the one-operand ALU family and lowers it to
         // the ordinary implicit-A form (`SUB A,B` is `SUB B`).
+        // The mirror (#533): on `ADD`/`ADC`/`SBC`, whose 8-bit forms carry
+        // the accumulator explicitly, sjasmplus lets it go unsaid — a lone
+        // operand is `A,<operand>`. One operand, not the first: `add hl,de`
+        // is untouched, and a lone `hl` is left to fail as it does there.
         let normalized;
         let rest = if self.syntax_abfw
             && matches!(
@@ -1664,6 +1675,12 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         {
             let (_, operand) = args.split_once(',').expect("checked above");
             normalized = format!("{word} {}", operand.trim());
+            normalized.as_str()
+        } else if self.syntax.implicit_accumulator()
+            && matches!(word.to_ascii_lowercase().as_str(), "add" | "adc" | "sbc")
+            && split_operands(args).len() == 1
+        {
+            normalized = format!("{word} a,{}", args.trim());
             normalized.as_str()
         } else {
             src.trim()

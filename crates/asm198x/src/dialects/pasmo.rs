@@ -416,6 +416,19 @@ mod tests {
     }
 
     /// pasmo is the only reference that bounds a constant, and only at the top.
+    /// pasmo has no implicit-accumulator spelling: `add (hl)` is "Invalid
+    /// operand" (probed), so the sjasmplus rule (#533) must stay off here.
+    #[test]
+    fn a_lone_operand_on_add_is_refused() {
+        assert!(crate::assemble_pasmo(" add (hl)\n").is_err());
+        assert_eq!(
+            crate::assemble_pasmo(" add a,(hl)\n")
+                .expect("explicit")
+                .bytes,
+            vec![0x86]
+        );
+    }
+
     #[test]
     fn a_constant_is_bounded_upward_only() {
         assert!(crate::assemble_pasmo("V equ $FFFF\n ld hl,V\n").is_ok());
