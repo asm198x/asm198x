@@ -48,54 +48,13 @@ const CHR_SIZE: usize = 0x2000;
 const HEADER_SIZE: usize = 0x10;
 const FILL: u8 = 0x00;
 
-/// The segments the fixed NES (NROM) config defines: name, base address, and
-/// whether the segment contributes bytes to the ROM file. This is the single
-/// source of truth — `seg_info` looks up here, and a rejected `.segment` lists
-/// these names. It mirrors the curriculum's `nes.cfg`; a segment outside it
-/// (e.g. `RODATA`) is rejected here for the same reason `ld65` rejects it with
-/// that config — there is no memory area to place it in.
-///
-/// The curriculum ships **two** `nes.cfg` variants: the `dash` track carries an
-/// `OAM` page at `$0200` and pushes `BSS` to `$0300`, and `meet-the-machine`
-/// omits `OAM` so `BSS` starts at `$0200`. This table is the `dash` layout, and
-/// a `meet-the-machine` program that places a label in `BSS` would land a page
-/// high. Nothing in either track does today, which is why one fixed table has
-/// held; the differential's inlined config matches this one deliberately.
-const NES_SEGMENTS: &[(&str, u32, Option<usize>)] = &[
-    ("ZEROPAGE", 0x0000, None),
-    ("OAM", 0x0200, None),
-    ("BSS", 0x0300, None),
-    ("HEADER", 0x0000, Some(0)),
-    ("CODE", 0x8000, Some(HEADER_SIZE)),
-    (
-        "VECTORS",
-        0xFFFA,
-        Some(HEADER_SIZE + 0xFFFA - PRG_BASE as usize),
-    ),
-    ("CHARS", 0x0000, Some(HEADER_SIZE + PRG_SIZE)),
-];
-
-/// The base address of a segment, and where in the ROM its bytes land.
-///
-/// `file_at` is `None` for a segment that occupies address space and
-/// contributes no bytes — the zero page, RAM, the OAM shadow.
-struct SegInfo {
-    base: u32,
-    file_at: Option<usize>,
-}
-
-impl SegInfo {
-    fn in_file(&self) -> bool {
-        self.file_at.is_some()
-    }
-}
-
-fn seg_info(seg: &str) -> Option<SegInfo> {
-    NES_SEGMENTS
-        .iter()
-        .find(|(name, _, _)| *name == seg)
-        .map(|&(_, base, file_at)| SegInfo { base, file_at })
-}
+/// The segments the assembler places are the active layout's
+/// ([`super::ca65_layout`], #483): resolved names, base addresses, and file
+/// positions. The curriculum's fixed NROM table lives on as
+/// [`super::ca65_layout::Layout::nes_default`] — the same rows it always
+/// resolved to, now as a value a project config can eventually replace (the
+/// `meet-the-machine` `nes.cfg` variant, whose `BSS` sits a page lower,
+/// stops being unrepresentable the moment layouts arrive as input).
 
 /// The segment each shorthand switches to. `.code` is `.segment "CODE"`, and
 /// so on down; `.data` and `.rodata` name segments the fixed NROM config has no
@@ -142,15 +101,6 @@ fn segment_switch(source: &str) -> Option<SegSwitch> {
         ".popseg" => Some(SegSwitch::Pop),
         w => segment_shorthand(w).map(|name| SegSwitch::To(name.to_string())),
     }
-}
-
-/// The valid segment names, for a rejection message.
-fn known_segments() -> String {
-    NES_SEGMENTS
-        .iter()
-        .map(|(name, _, _)| *name)
-        .collect::<Vec<_>>()
-        .join(", ")
 }
 
 // ---------------------------------------------------------------------------
@@ -265,14 +215,6 @@ struct Parsed {
 // capturing it cannot change a byte.
 use crate::listing::{DebugCapture, DebugCaptureMulti};
 
-/// A segment's section id: its index in [`NES_SEGMENTS`] (the config order).
-fn seg_id(seg: &str) -> debug198x::SectionId {
-    NES_SEGMENTS
-        .iter()
-        .position(|(name, _, _)| *name == seg)
-        .expect("seg validated against NES_SEGMENTS") as debug198x::SectionId
-}
-
 /// Assemble ca65 source and link it into a `.nes` ROM image. Single-source: a
 /// `.include`/`.incbin` directive is rejected with a pointer to the multi-file
 /// entry (`assemble_multi`).
@@ -292,11 +234,11 @@ pub(crate) fn assemble(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError
 pub(crate) fn assemble_with_debug(
     source: &str,
 ) -> Result<(Vec<u8>, Vec<Warning>, DebugCapture), AsmError> {
-    let (rom, warnings, capture) = assemble_program(&parse_program(
-        &isa::mos6502::SET,
-        source,
-        macros::Expand::Yes,
-    )?)?;
+    let layout = super::ca65_layout::Layout::nes_default().resolve(&Default::default())?;
+    let (rom, warnings, capture) = assemble_program(
+        &parse_program(&isa::mos6502::SET, source, macros::Expand::Yes)?,
+        &layout,
+    )?;
     Ok((rom, warnings, capture.into_single()))
 }
 
@@ -314,7 +256,11 @@ pub(crate) fn assemble_multi(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
 ) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
-    assemble_program(&parse_program_multi(&isa::mos6502::SET, map, loader)?)
+    let layout = super::ca65_layout::Layout::nes_default().resolve(&Default::default())?;
+    assemble_program(
+        &parse_program_multi(&isa::mos6502::SET, map, loader)?,
+        &layout,
+    )
 }
 
 /// Assemble + link a parsed [`Program`](crate::ast::Program) — the one body
@@ -327,6 +273,7 @@ pub(crate) fn assemble_multi(
 /// failure.
 fn assemble_program(
     program: &crate::ast::Program,
+    layout: &super::ca65_layout::ResolvedLayout,
 ) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
     let set = &isa::mos6502::SET;
     // The AST is the single front-end IR: the parse built the source-preserving
@@ -441,7 +388,7 @@ fn assemble_program(
         .collect();
 
     for stmt in parsed.stmts {
-        let info = seg_info(&stmt.seg).ok_or_else(|| {
+        let info = layout.seg(&stmt.seg).ok_or_else(|| {
             // Layout errors are stamped with the statement's file (U5), so a
             // failure inside an included file names that file.
             ca65_flat::stamp_file(
@@ -452,7 +399,7 @@ fn assemble_program(
                          links the curriculum's fixed NROM layout, which — like `ld65` with \
                          its `nes.cfg` — has no memory area for other segments",
                         stmt.seg,
-                        known_segments()
+                        layout.known()
                     ),
                 ),
                 stmt.file,
@@ -507,7 +454,7 @@ fn assemble_program(
                 dbg_symbols.push(debug198x::Symbol {
                     name: display_label(label),
                     kind: debug198x::SymbolKind::Label {
-                        section: seg_id(&stmt.seg),
+                        section: layout.seg_id(&stmt.seg),
                         offset: u64::from(off),
                         space: None,
                     },
@@ -521,11 +468,11 @@ fn assemble_program(
         // reservations — ZEROPAGE/BSS `.res` — carry no bytes, so no span; the
         // HEADER segment is iNES file metadata, not CPU-addressed code, so its
         // records would alias CPU $0000 — skipped, per AE3's no-fabrication rule).
-        if size > 0 && info.in_file() && stmt.seg != "HEADER" {
+        if size > 0 && info.file_at.is_some() && stmt.seg != "HEADER" {
             dbg_lines.push((
                 stmt.file,
                 stmt.line as u32,
-                seg_id(&stmt.seg),
+                layout.seg_id(&stmt.seg),
                 u64::from(off),
                 size as u64,
             ));
@@ -554,14 +501,15 @@ fn assemble_program(
     // absolute lookups skip them rather than aliasing them onto the zero page,
     // and a PPU-space consumer can supply a `BaseMap` (KTD7). A `Space`
     // qualifier is the eventual richer answer (KTD5, U7).
-    let sections: Vec<debug198x::Section> = NES_SEGMENTS
+    let sections: Vec<debug198x::Section> = layout
+        .segs
         .iter()
         .enumerate()
-        .filter(|(_, (name, _, _))| offsets.contains_key(*name))
-        .map(|(id, (name, base, _))| debug198x::Section {
+        .filter(|(_, s)| offsets.contains_key(&s.name))
+        .map(|(id, s)| debug198x::Section {
             id: id as debug198x::SectionId,
-            name: (*name).to_string(),
-            base: (!matches!(*name, "HEADER" | "CHARS")).then_some(u64::from(*base)),
+            name: s.name.clone(),
+            base: s.cpu_addressable.then_some(u64::from(s.base)),
             // The NES mapper's banking is not modelled here; no space is fabricated.
             space: None,
         })
@@ -576,7 +524,7 @@ fn assemble_program(
         // A diagnostic carries no bytes, so it is answered before the segment
         // filter: an `.out` written inside BSS still prints.
         let diagnostic = matches!(item, Resolved::Message(..) | Resolved::Assert(..));
-        if !diagnostic && !seg_info(&seg).expect("seg").in_file() {
+        if !diagnostic && layout.seg(&seg).expect("seg").file_at.is_none() {
             continue; // bss/zp segments occupy address space but emit no file bytes
         }
         let buf = seg_bytes.entry(seg).or_default();
@@ -595,7 +543,7 @@ fn assemble_program(
         .map_err(|e| ca65_flat::stamp_file(e, file))?;
     }
 
-    let rom = link(&seg_bytes)?;
+    let rom = link(&seg_bytes, layout)?;
     Ok((
         rom,
         warnings,
@@ -607,20 +555,24 @@ fn assemble_program(
     ))
 }
 
-/// Lay the file segments into the NROM ROM image.
-fn link(seg_bytes: &BTreeMap<String, Vec<u8>>) -> Result<Vec<u8>, AsmError> {
+/// Lay the file segments into the layout's image.
+fn link(
+    seg_bytes: &BTreeMap<String, Vec<u8>>,
+    layout: &super::ca65_layout::ResolvedLayout,
+) -> Result<Vec<u8>, AsmError> {
     // Every segment the source wrote bytes into, as a run: addressed where the
     // CPU sees it, placed where the config puts it in the file. The engine's
     // `lay_out` does the rest, so the NES ROM is built by the same code that
     // places a Game Boy bank or a flat program's single section.
-    let runs: Vec<crate::engine::Run> = NES_SEGMENTS
+    let runs: Vec<crate::engine::Run> = layout
+        .segs
         .iter()
-        .filter_map(|(name, base, file_at)| {
-            let bytes = seg_bytes.get(*name)?;
+        .filter_map(|s| {
+            let bytes = seg_bytes.get(&s.name)?;
             Some(crate::engine::Run {
-                name: (*name).to_string(),
-                base: i64::from(*base),
-                at: crate::engine::Place::At((*file_at)? as i64),
+                name: s.name.clone(),
+                base: i64::from(s.base),
+                at: crate::engine::Place::At(s.file_at? as i64),
                 bytes: bytes.clone(),
             })
         })
@@ -642,9 +594,9 @@ fn link(seg_bytes: &BTreeMap<String, Vec<u8>>) -> Result<Vec<u8>, AsmError> {
         ));
     }
 
-    // The ROM is a fixed shape: 16-byte header, 32K PRG, 8K CHR, `$00` fill.
-    let size = HEADER_SIZE + PRG_SIZE + CHR_SIZE;
-    let (_, rom) = crate::engine::lay_out(runs, FILL, 1, Some(0), false, |_| Some(size))?;
+    // The image is the layout's shape: its file areas stacked and filled.
+    let size = layout.image_size;
+    let (_, rom) = crate::engine::lay_out(runs, layout.fill, 1, Some(0), false, |_| Some(size))?;
     Ok(rom)
 }
 
