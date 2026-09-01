@@ -157,9 +157,22 @@ pub const DIRECTIVES: &[Directive] = &[
         pattern: Pattern::Exact(&["module"]),
         category: Category::Operation,
     },
+    // `STRUCT`/`ENDS` (#477): read as a block by the walk, like `MODULE`,
+    // and for the same reason not in `is_directive` — the reference reads a
+    // column-0 `STRUCT` as a label.
+    Directive {
+        id: "struct",
+        pattern: Pattern::Exact(&["struct"]),
+        category: Category::Operation,
+    },
+    Directive {
+        id: "ends",
+        pattern: Pattern::Exact(&["ends"]),
+        category: Category::Operation,
+    },
     // What sjasmplus has here and we do not.
     //
-    // 84 spellings against 1.21.0. The `save*`, `device`, `lua` and
+    // 82 spellings against 1.21.0 (STRUCT/ENDS left for #477). The `save*`, `device`, `lua` and
     // `shellexec` families are in here rather than on a roadmap on purpose:
     // `assemble-io-model.md` scopes output to native containers, and an
     // embedded Lua interpreter is not an assembler feature. For those,
@@ -265,7 +278,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "encoding",
                 "endlua",
                 "endm",
-                "ends",
                 "endt",
                 "endw",
                 "ent",
@@ -304,7 +316,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "setbreakpoint",
                 "shellexec",
                 "size",
-                "struct",
                 "tapend",
                 "tapout",
                 "textarea",
@@ -664,6 +675,10 @@ impl Z80Syntax for SjasmplusSyntax {
 
     fn module_keyword(&self, word: &str) -> Option<z80::ModuleKw> {
         z80::module_keyword(undot(word))
+    }
+
+    fn struct_keyword(&self, word: &str) -> Option<z80::StructKw> {
+        z80::struct_keyword(undot(word))
     }
 
     /// The formatter must copy a macro definition rather than re-lay it out.
@@ -1272,6 +1287,45 @@ impl macros::MacroSyntax for SjasmplusSyntax {
 #[cfg(test)]
 mod tests {
     use crate::{assemble_sjasmplus as asm, assemble_sjasmplus_files, source::MemoryLoader};
+
+    /// #477: the accepted STRUCT shapes are pinned byte-for-byte by the
+    /// differential probes; these are the refusals, which a byte comparison
+    /// cannot record.
+    #[test]
+    fn struct_refusals_match_the_reference() {
+        // Probed: `[ENDS] End structure without structure`.
+        let e = asm("\tENDS\n").expect_err("stray closer");
+        assert!(e.to_string().contains("without"), "{e}");
+        // Probed: `[STRUCT] Unexpected end of structure`.
+        let e = asm("\tSTRUCT W\nf BYTE 0\n").expect_err("never closed");
+        assert!(e.to_string().contains("never closed"), "{e}");
+        // Probed: `[STRUCT] Unexpected: ld a,1` — a statement is not a member.
+        let e = asm("\tSTRUCT Q\nf BYTE 0\n\tld a,1\n\tENDS\n").expect_err("not a member");
+        assert!(e.to_string().contains("not a member"), "{e}");
+        // Probed: `Duplicate label: D.f` — the exported constants collide the
+        // way any duplicate label does.
+        let e = asm("\tSTRUCT D\nf BYTE 0\nf BYTE 0\n\tENDS\n\tdb D\n").expect_err("duplicate");
+        assert!(e.to_string().contains("duplicate"), "{e}");
+    }
+
+    /// #477: a structure's definition emits nothing — bytes begin with the
+    /// first real statement after `ENDS`.
+    #[test]
+    fn a_struct_definition_emits_no_bytes() {
+        let r = asm("\tSTRUCT S\nf BYTE 0\ng WORD 0\n\tENDS\n\tdb S\n").expect("assembles");
+        assert_eq!(r.bytes, vec![3]);
+    }
+
+    /// #477 acceptance: the SpecNext Invaders shapes, in one source — the
+    /// STRUCT from sprite.asm, the `ds Name * count` reservation, and the
+    /// member-offset arithmetic its code leans on.
+    #[test]
+    fn specnext_invaders_struct_shapes_assemble() {
+        let r = asm("\torg $8000\n\tSTRUCT SpriteAttributes\nx BYTE 0\ny BYTE 0\nmrx8 BYTE 0\nvpat BYTE 0\n\tENDS\nsprites\tds SpriteAttributes * 3\n\tld hl,sprites+SpriteAttributes.vpat\n\tld (ix+SpriteAttributes.y),1\n")
+            .expect("assembles");
+        assert_eq!(&r.bytes[12..15], &[0x21, 0x03, 0x80], "sprites + vpat");
+        assert_eq!(&r.bytes[15..19], &[0xDD, 0x36, 0x01, 0x01], "(ix + y)");
+    }
 
     /// The three option forms used by SpecNext Invaders, pinned against
     /// SjASMPlus 1.21.0. `--zxnext` changes the live instruction set;

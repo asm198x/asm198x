@@ -91,6 +91,15 @@ pub(crate) trait Z80Syntax {
         None
     }
 
+    /// Which end of a `STRUCT` block this word is (#477). Defaulted to
+    /// "none" for the same reason as [`module_keyword`](Self::module_keyword):
+    /// structures are sjasmplus's, and a dialect without them must not
+    /// silently accept the spelling.
+    fn struct_keyword(&self, word: &str) -> Option<StructKw> {
+        let _ = word;
+        None
+    }
+
     /// Whether `word` binds a label to a value on the same line, so the
     /// formatter renders `name: equ …` inline rather than putting the label on
     /// a line of its own.
@@ -528,6 +537,25 @@ pub(crate) enum ModuleKw {
     Close,
 }
 
+/// Which end of a `STRUCT` block a word is (#477).
+#[derive(Clone, Copy, PartialEq, Eq, Debug)]
+pub(crate) enum StructKw {
+    Open,
+    Close,
+}
+
+/// The sjasmplus spelling, mirrored on [`module_keyword`]'s posture: the
+/// walk asks the dialect, and a dialect without structures answers none.
+pub(crate) fn struct_keyword(word: &str) -> Option<StructKw> {
+    if word.eq_ignore_ascii_case("struct") {
+        Some(StructKw::Open)
+    } else if word.eq_ignore_ascii_case("ends") {
+        Some(StructKw::Close)
+    } else {
+        None
+    }
+}
+
 /// sjasmplus's module spelling: `MODULE` opens; `ENDMODULE` and `ENDMOD` both
 /// close. The same strict case rule the conditionals and repetition follow —
 /// all-lower or all-upper, never mixed: the reference answers `Module foo`
@@ -720,8 +748,18 @@ struct KwCx<'a, S: Z80Syntax> {
     pending: Vec<Comment>,
     /// Inside a macro definition, whose lines are copied and never read.
     in_macro: bool,
+    /// Inside a `STRUCT` (#477): members are copied verbatim for the same
+    /// reason macro bodies are — the member name sits in the label column,
+    /// where the formatter would peel it onto a line of its own and the
+    /// member would stop being one. The assembling reader splits the name
+    /// back off the copied line.
+    in_struct: bool,
     /// The macros defined so far, so an invocation is copied too.
     macro_names: std::collections::BTreeSet<String>,
+    /// The structures defined so far, so an instantiation (`p1 Pt`) is
+    /// copied too — its label is the instance name, which the re-layout
+    /// would peel off.
+    struct_names: std::collections::BTreeSet<String>,
 }
 
 /// Parse one file of a keyword-conditional program into the source-preserving
@@ -752,7 +790,9 @@ pub(crate) fn parse_program_keyword<S: Z80Syntax>(
         pos: 0,
         pending: Vec::new(),
         in_macro: false,
+        in_struct: false,
         macro_names: std::collections::BTreeSet::new(),
+        struct_names: std::collections::BTreeSet::new(),
     };
     let (mut nodes, close) = cx
         .parse_block(false)
@@ -831,7 +871,9 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             pos: 0,
             pending: Vec::new(),
             in_macro: false,
+            in_struct: false,
             macro_names: self.macro_names.clone(),
+            struct_names: self.struct_names.clone(),
         };
         // No re-basing: a statement carries its own line number now, so the
         // slice a nested block parses is already numbered absolutely.
@@ -921,6 +963,42 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                     macros::MacroLine::Invokes => true,
                     _ => self.in_macro,
                 };
+                // A `STRUCT` body is copied for the same reason (#477); the
+                // keyword test runs on the first word so an indented opener
+                // is seen and a column-0 spelling stays a label, exactly as
+                // the reference reads it.
+                let copy = copy
+                    || if self.in_macro {
+                        false
+                    } else {
+                        let indented = code.starts_with(|c: char| c.is_whitespace());
+                        let (w, _) = split_first_word(code);
+                        match self.syntax.struct_keyword(w) {
+                            Some(StructKw::Open) if indented => {
+                                self.in_struct = true;
+                                let (_, rest) = split_first_word(code);
+                                let name = rest.split(',').next().unwrap_or("").trim();
+                                if !name.is_empty() {
+                                    self.struct_names.insert(name.to_string());
+                                }
+                                true
+                            }
+                            Some(StructKw::Close) if indented && self.in_struct => {
+                                self.in_struct = false;
+                                true
+                            }
+                            _ if self.in_struct => true,
+                            _ => {
+                                // An instantiation: `label Name`, the name in
+                                // the operation column and nothing after it.
+                                !indented && {
+                                    let (_, rest) = split_first_word(code);
+                                    let (n, after) = split_first_word(rest);
+                                    after.trim().is_empty() && self.struct_names.contains(n)
+                                }
+                            }
+                        }
+                    };
                 if copy {
                     nodes.push(Node {
                         operand_span: None,
@@ -1215,6 +1293,9 @@ struct SjasmEval<'a, S: Z80Syntax> {
     /// open and close — and the shared environment owns what they mean for
     /// lookup (`decisions/scoped-symbol-environment.md`).
     scopes: crate::scopes::ScopeEnv,
+    /// The `STRUCT` being read, if one is open (#477): every line until
+    /// `ENDS` declares a member rather than a statement.
+    building: Option<StructBuild>,
     /// Present on a dialect that resolves conditions across passes (#99), and
     /// the reason a `SjasmEval` is built once per pass rather than once.
     forward: Option<Forward>,
@@ -1246,6 +1327,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             consts: BTreeMap::new(),
             defines: BTreeMap::new(),
             scopes: crate::scopes::ScopeEnv::new(),
+            building: None,
             forward: None,
             pc: Some(0),
             multi,
@@ -1402,6 +1484,11 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
     fn lower_line(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
         let line = node.span.line as usize;
         let file = node.span.file;
+        // Inside an open `STRUCT`, every line is a member or the closer —
+        // the reference refuses anything else, and so does the reader.
+        if self.building.is_some() {
+            return self.lower_struct_line(node, out);
+        }
         let (word0, args0) = split_first_word(&node.source);
         // `DEFINE` is handled before substitution, so the name being defined
         // is never itself expanded; chained values expand at use (probe p24).
@@ -1440,6 +1527,32 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         }
         if let Some(kw) = self.syntax.module_keyword(word) {
             return self.lower_module(kw, args, line);
+        }
+        match self.syntax.struct_keyword(word) {
+            Some(StructKw::Open) => return self.open_struct(args, node, out),
+            Some(StructKw::Close) => {
+                return Err(AsmError::new(line, "`ENDS` without `STRUCT`"));
+            }
+            None => {}
+        }
+        // `label Name` where `Name` is a structure defined above: an
+        // instantiation, not an instruction (probed). Two spellings arrive:
+        // the ordinary parse split the label off, and a verbatim copy kept
+        // the whole line — the instance name then leads the source.
+        if args.trim().is_empty() && self.lookup_struct(word).is_some() {
+            let label = node.label.as_ref().map(|s| s.name.clone());
+            return self.lower_instance(node, label, word, out);
+        }
+        if matches!(node.item, Some(crate::ast::Item::Verbatim))
+            && !node.source.starts_with(|c: char| c.is_whitespace())
+        {
+            let (second, after) = split_first_word(args);
+            if after.trim().is_empty() && !second.is_empty() && self.lookup_struct(second).is_some()
+            {
+                let instance = word.trim_end_matches(':').to_string();
+                let second = second.to_string();
+                return self.lower_instance(node, Some(instance), &second, out);
+            }
         }
         if self.syntax.is_include(word) {
             return self.lower_include(node, args, out);
@@ -1644,6 +1757,298 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
     }
 }
 
+/// A `STRUCT` being read (#477): the cursor walks member by member, and
+/// `ENDS` turns the accumulation into a [`crate::scopes::StructDef`] plus the
+/// flat constants the engine resolves references against.
+struct StructBuild {
+    /// The name as written, for diagnostics and the post-`ENDS` re-anchor.
+    name: String,
+    /// The name the environment defined — module-prefixed where one is open.
+    qualified: String,
+    line: usize,
+    /// The next member's offset; `STRUCT name, n` starts it at `n`, and the
+    /// size answered at `ENDS` includes that initial offset (probed).
+    cursor: i64,
+    names: Vec<(String, i64)>,
+    leaves: Vec<(Option<String>, Vec<u8>)>,
+}
+
+impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
+    /// The structure `word` names here, if any: the module-qualified spelling
+    /// first, the bare one second — the same two candidates a reference tries.
+    fn lookup_struct(&self, word: &str) -> Option<&crate::scopes::StructDef> {
+        let prefixed = format!("{}{word}", self.scopes.prefix());
+        self.scopes
+            .struct_def(&prefixed)
+            .or_else(|| self.scopes.struct_def(word))
+    }
+
+    /// Open a `STRUCT name[, offset]` (#477).
+    fn open_struct(
+        &mut self,
+        args: &str,
+        node: &Node,
+        out: &mut Vec<Statement>,
+    ) -> Result<(), AsmError> {
+        let line = node.span.line as usize;
+        if let Some(sym) = &node.label {
+            let name = sym.name.clone();
+            self.push_label(&name, node, out)?;
+        }
+        let (name, offset) = match args.split_once(',') {
+            Some((name, off)) => {
+                let expr = parse_value(self.syntax, off.trim(), line)?;
+                let off = eval_const(&expr, &self.consts).ok_or_else(|| {
+                    AsmError::new(line, "the `STRUCT` offset must be a constant here")
+                })?;
+                (name.trim(), off)
+            }
+            None => (args.trim(), 0),
+        };
+        if !is_ident(name) {
+            return Err(AsmError::new(line, format!("bad `STRUCT` name `{name}`")));
+        }
+        // Defined like any global — the module prefix applies — but without
+        // re-anchoring: the anchor moves to the structure's name at `ENDS`
+        // (probed: a `.local` after `ENDS` binds under the structure).
+        let qualified = format!("{}{name}", self.scopes.prefix());
+        self.building = Some(StructBuild {
+            name: name.to_string(),
+            qualified,
+            line,
+            cursor: offset,
+            names: Vec::new(),
+            leaves: Vec::new(),
+        });
+        Ok(())
+    }
+
+    /// One line inside an open `STRUCT`: a member, or the `ENDS` that closes
+    /// it. Anything else is refused the way the reference refuses it
+    /// (probed: `[STRUCT] Unexpected: ld a,1`).
+    fn lower_struct_line(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
+        let line = node.span.line as usize;
+        let src = substitute_defines(&node.source, &self.defines, line)?;
+        // The member name sits in the label column of the copied line: a
+        // column-0 word names the member, an indented line declares an
+        // anonymous one (probed: it reserves without binding).
+        let (member, rest) = if src.starts_with(|c: char| c.is_whitespace()) {
+            (None, src.trim())
+        } else {
+            let (w, r) = split_first_word(&src);
+            (Some(w.trim_end_matches(':').to_string()), r.trim())
+        };
+        let (word, args) = split_first_word(rest);
+        match self.syntax.struct_keyword(word) {
+            Some(StructKw::Close) => return self.close_struct(out),
+            Some(StructKw::Open) => {
+                return Err(AsmError::new(
+                    line,
+                    "`STRUCT` inside a `STRUCT` is not taken — close the open one first",
+                ));
+            }
+            None => {}
+        }
+        let b = self.building.as_mut().expect("caller checked");
+        // The member's default bytes, little-endian where multi-byte — what
+        // an instantiation emits (probed: `WORD $1234` emits 34 12).
+        let init = |args: &str, syntax: &'a S, consts: &BTreeMap<String, i64>| {
+            if args.trim().is_empty() {
+                return Ok(0i64);
+            }
+            let expr = parse_value(syntax, args.trim(), line)?;
+            eval_const(&expr, consts).ok_or_else(|| {
+                AsmError::new(
+                    line,
+                    "a `STRUCT` member initialiser must be a constant here",
+                )
+            })
+        };
+        let (size, bytes): (i64, Vec<u8>) = match word.to_ascii_uppercase().as_str() {
+            "BYTE" | "DB" | "DEFB" => {
+                let v = init(args, self.syntax, &self.consts)?;
+                (1, vec![v as u8])
+            }
+            "WORD" | "DW" | "DEFW" => {
+                let v = init(args, self.syntax, &self.consts)?;
+                (2, (v as u16).to_le_bytes().to_vec())
+            }
+            "D24" => {
+                let v = init(args, self.syntax, &self.consts)?;
+                (3, (v as u32).to_le_bytes()[..3].to_vec())
+            }
+            "DWORD" => {
+                let v = init(args, self.syntax, &self.consts)?;
+                (4, (v as u32).to_le_bytes().to_vec())
+            }
+            "DS" | "BLOCK" => {
+                let expr = parse_value(self.syntax, args.trim(), line)?;
+                let n = eval_const(&expr, &self.consts).ok_or_else(|| {
+                    AsmError::new(
+                        line,
+                        "a `STRUCT` member's `DS` length must be a constant here",
+                    )
+                })?;
+                if !(0..=0x1_0000).contains(&n) {
+                    return Err(AsmError::new(line, format!("bad `DS` length {n}")));
+                }
+                (n, vec![0u8; n as usize])
+            }
+            _ => {
+                // An embedded structure member (probed: its size lands here,
+                // its members flatten to dotted paths under this member).
+                let b_cursor = b.cursor;
+                let embedded = {
+                    let prefixed = format!("{}{word}", self.scopes.prefix());
+                    self.scopes
+                        .struct_def(&prefixed)
+                        .or_else(|| self.scopes.struct_def(word))
+                };
+                let Some(def) = embedded else {
+                    return Err(AsmError::new(
+                        line,
+                        format!(
+                            "`{word}` is not a member this `STRUCT` reader takes — \
+                             BYTE/WORD/D24/DWORD/DS, or a structure defined above"
+                        ),
+                    ));
+                };
+                let b = self.building.as_mut().expect("caller checked");
+                if let Some(m) = &member {
+                    for (path, off) in &def.names {
+                        b.names.push((format!("{m}.{path}"), b_cursor + off));
+                    }
+                }
+                for (path, bytes) in &def.leaves {
+                    let path = match (&member, path) {
+                        (Some(m), Some(p)) => Some(format!("{m}.{p}")),
+                        _ => None,
+                    };
+                    b.leaves.push((path, bytes.clone()));
+                }
+                let b = self.building.as_mut().expect("caller checked");
+                if let Some(m) = member {
+                    b.names.push((m, b_cursor));
+                }
+                b.cursor += def.size;
+                return Ok(());
+            }
+        };
+        let b = self.building.as_mut().expect("caller checked");
+        if let Some(m) = member {
+            b.names.push((m.clone(), b.cursor));
+            b.leaves.push((Some(m), bytes));
+        } else {
+            b.leaves.push((None, bytes));
+        }
+        b.cursor += size;
+        Ok(())
+    }
+
+    /// `ENDS`: bind the structure and export its names as the flat constants
+    /// references resolve against — forward references then work exactly as
+    /// they do for any symbol, which is the measured posture.
+    fn close_struct(&mut self, out: &mut Vec<Statement>) -> Result<(), AsmError> {
+        let b = self.building.take().expect("caller checked");
+        let mut export = |label: String, value: i64, out: &mut Vec<Statement>| {
+            self.consts.insert(label.clone(), value);
+            out.push(Statement {
+                line: b.line,
+                file: self.current_file,
+                label: Some(label),
+                op: Some(Operation::Equ(Expr::Num(value))),
+                operand_span: None,
+                xor_mask: 0,
+                instruction_set: None,
+                extension_set: None,
+            });
+        };
+        export(b.qualified.clone(), b.cursor, out);
+        for (path, off) in &b.names {
+            export(format!("{}.{path}", b.qualified), *off, out);
+        }
+        self.scopes.bind_struct(
+            b.qualified.clone(),
+            crate::scopes::StructDef {
+                size: b.cursor,
+                names: b.names,
+                leaves: b.leaves,
+            },
+        );
+        // The structure's name is the anchor now (probed: a `.local` after
+        // `ENDS` binds under it).
+        self.scopes.set_anchor(b.name);
+        Ok(())
+    }
+
+    /// `label Name`: lay the structure's default bytes down here, binding the
+    /// instance and each named member to its address (probed).
+    fn lower_instance(
+        &mut self,
+        node: &Node,
+        label: Option<String>,
+        word: &str,
+        out: &mut Vec<Statement>,
+    ) -> Result<(), AsmError> {
+        let line = node.span.line as usize;
+        let file = node.span.file;
+        let instance = match label {
+            Some(name) => Some(self.resolve_label(&name, line)?),
+            None => None,
+        };
+        let def = self
+            .lookup_struct(word)
+            .expect("caller matched a structure");
+        let mut first = true;
+        for (path, bytes) in &def.leaves {
+            let label = match (&instance, path) {
+                (Some(i), Some(p)) => Some(format!("{i}.{p}")),
+                _ => None,
+            };
+            // The instance's own label rides the first statement, at the
+            // same address as its first member.
+            let label = if first {
+                first = false;
+                match (&instance, label) {
+                    (Some(i), Some(member)) => {
+                        out.push(Statement {
+                            line,
+                            file,
+                            label: Some(i.clone()),
+                            op: None,
+                            operand_span: None,
+                            xor_mask: 0,
+                            instruction_set: None,
+                            extension_set: None,
+                        });
+                        Some(member)
+                    }
+                    (Some(i), None) => Some(i.clone()),
+                    (None, member) => member,
+                }
+            } else {
+                label
+            };
+            if bytes.is_empty() && label.is_none() {
+                continue;
+            }
+            out.push(Statement {
+                line,
+                file,
+                label,
+                op: (!bytes.is_empty()).then(|| {
+                    Operation::Bytes(bytes.iter().map(|b| Expr::Num(i64::from(*b))).collect())
+                }),
+                operand_span: None,
+                xor_mask: 0,
+                instruction_set: None,
+                extension_set: None,
+            });
+        }
+        Ok(())
+    }
+}
+
 impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
     /// A repetition count folds exactly as a condition does — DEFINEs
     /// substitute, then the expression folds against the `equ` constants. That
@@ -1790,6 +2195,14 @@ fn run_passes<'a, S: Z80Syntax>(
         }
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
+        // The reference errors at end of source with a structure still open
+        // (probed: `[STRUCT] Unexpected end of structure`).
+        if let Some(b) = &eval.building {
+            return Err(AsmError::new(
+                b.line,
+                format!("`STRUCT {}` is never closed", b.name),
+            ));
+        }
         result = eval.finish(out);
         let mut defined_at: BTreeMap<String, (usize, FileId)> = BTreeMap::new();
         let symbols = pass_symbols(&result, set, ext, |name, line, file| {
