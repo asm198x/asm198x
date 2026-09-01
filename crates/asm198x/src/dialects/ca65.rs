@@ -1184,7 +1184,7 @@ pub(crate) fn parse_program(
 /// resolution, the negative-size incbin sentinel; re-confirmed under the NES
 /// link). Everything the parse accumulates crosses include boundaries in both
 /// directions, exactly as ca65's textual splice does (probe-pinned):
-/// `=` constants, the cheap-local scope (`current_global`), the
+/// `=` constants, the cheap-local anchor (the scoped environment's), the
 /// anonymous-label stream, and — via the projection reading the spliced node
 /// order — the active `.segment` (a switch inside an include persists into
 /// the includer afterwards).
@@ -1225,7 +1225,12 @@ pub(crate) fn parse_program_multi(
 struct Walker {
     set: &'static isa::InstructionSet,
     anons: AnonCtx,
-    current_global: String,
+    /// The scoped symbol environment (#484): the cheap-local anchor — the
+    /// current global that `@cheap` labels key under, re-anchored by plain
+    /// labels and saved/restored around `.proc`/`.scope` — lives in the
+    /// shared environment (`decisions/scoped-symbol-environment.md`); the
+    /// `::`-path scope stack below is staged to follow.
+    scope_env: crate::scopes::ScopeEnv,
     consts: BTreeMap<String, i64>,
     pending_leading: Vec<crate::ast::Comment>,
     nodes: Vec<crate::ast::Node>,
@@ -1323,7 +1328,7 @@ impl Walker {
         Self {
             set,
             anons: AnonCtx::default(),
-            current_global: String::new(),
+            scope_env: crate::scopes::ScopeEnv::new(),
             consts: BTreeMap::new(),
             pending_leading: Vec::new(),
             nodes: Vec::new(),
@@ -1412,7 +1417,7 @@ impl Walker {
             match self.scopes.last() {
                 Some(open) if open.is_proc == is_proc => {
                     let open = self.scopes.pop().expect("just matched");
-                    self.current_global = open.outer_global;
+                    self.scope_env.replace_anchor(open.outer_global);
                     return Ok(Some(None));
                 }
                 // ca65 pairs the closers by kind, so `.endscope` over an open
@@ -1453,10 +1458,9 @@ impl Walker {
             return Err(AsmError::new(line, format!("duplicate scope `{name}`")));
         }
         let label = (is_proc && !rest.is_empty()).then(|| qualify(&self.path(), &name));
-        let outer_global = std::mem::replace(
-            &mut self.current_global,
-            label.clone().unwrap_or_else(|| path.clone()),
-        );
+        let outer_global = self
+            .scope_env
+            .replace_anchor(label.clone().unwrap_or_else(|| path.clone()));
         self.scopes.push(OpenScope {
             segment: name,
             is_proc,
@@ -1473,7 +1477,7 @@ impl Walker {
         if !self.opened.insert(path.clone()) {
             return Err(AsmError::new(line, format!("duplicate scope `{name}`")));
         }
-        let outer_global = std::mem::replace(&mut self.current_global, path.clone());
+        let outer_global = self.scope_env.replace_anchor(path.clone());
         self.scopes.push(OpenScope {
             segment: name.to_string(),
             is_proc: false,
@@ -1534,7 +1538,7 @@ impl Walker {
             let key = Self::record_size_key(&done.path);
             self.consts.insert(key.clone(), done.size());
             if let Some(open) = self.scopes.pop() {
-                self.current_global = open.outer_global;
+                self.scope_env.replace_anchor(open.outer_global);
             }
             // A record declared inside another allocates its size there, the
             // way an unnamed field of that type would.
@@ -1615,7 +1619,7 @@ impl Walker {
             if text.is_empty() {
                 return Ok(default);
             }
-            let expr = parse_value(&self.anons, &self.current_global, text, line)?;
+            let expr = parse_value(&self.anons, self.scope_env.anchor_str(), text, line)?;
             fold_const(&expr, &self.consts, line)
         };
         // `.tag` names another record, whose size this field takes. It is
@@ -1671,7 +1675,8 @@ impl Walker {
     fn enum_member(&mut self, text: &str, line: usize) -> Result<Vec<Kind>, AsmError> {
         let (name, value) = match text.split_once('=') {
             Some((name, expr)) => {
-                let expr = parse_value(&self.anons, &self.current_global, expr.trim(), line)?;
+                let expr =
+                    parse_value(&self.anons, self.scope_env.anchor_str(), expr.trim(), line)?;
                 (name.trim(), Some(fold_const(&expr, &self.consts, line)?))
             }
             None => (text, None),
@@ -1810,7 +1815,7 @@ impl Walker {
             ".incbin" => {
                 let fold = |piece: &str| {
                     fold_const(
-                        &parse_value(&self.anons, &self.current_global, piece, line)?,
+                        &parse_value(&self.anons, self.scope_env.anchor_str(), piece, line)?,
                         &self.consts,
                         line,
                     )
@@ -1932,14 +1937,14 @@ impl FlatWalk for Walker {
             return Ok((None, code.trim()));
         }
         let (symbol, rest) =
-            split_label_symbol(&self.anons, line, &mut self.current_global, code.trim())?;
+            split_label_symbol(&self.anons, line, &mut self.scope_env, code.trim())?;
         let symbol = symbol.map(|mut symbol| {
             if !self.scopes.is_empty()
                 && matches!(symbol.scope, crate::ast::Scope::Global)
                 && !symbol.qualified.starts_with(LABEL_SEP)
             {
                 symbol.qualified = qualify(&self.path(), &symbol.qualified);
-                self.current_global = symbol.qualified.clone();
+                self.scope_env.set_anchor(symbol.qualified.clone());
             }
             symbol
         });
@@ -2115,7 +2120,12 @@ impl FlatWalk for Walker {
                     format!("invalid constant name `{name}`"),
                 ));
             }
-            let expr = parse_value(&self.anons, &self.current_global, &trimmed[eq + 1..], line)?;
+            let expr = parse_value(
+                &self.anons,
+                self.scope_env.anchor_str(),
+                &trimmed[eq + 1..],
+                line,
+            )?;
             let expr = match self.scope_syms(&Kind::Bytes(vec![expr]), line)? {
                 Kind::Bytes(mut es) => es.pop().expect("one expression in, one out"),
                 _ => unreachable!("Bytes maps to Bytes"),
@@ -2146,8 +2156,7 @@ impl FlatWalk for Walker {
         }
 
         // An optional `name:` / `@cheap:` / `:` label, then an optional operation.
-        let (symbol, rest) =
-            split_label_symbol(&self.anons, line, &mut self.current_global, trimmed)?;
+        let (symbol, rest) = split_label_symbol(&self.anons, line, &mut self.scope_env, trimmed)?;
         // `.include`/`.incbin` are walk-handled, not parsed here: the target
         // must not be opened by the parse (KTD1 — `--fmt` succeeds with a
         // missing target), so hand them back for the driver to resolve (or
@@ -2170,7 +2179,7 @@ impl FlatWalk for Walker {
             None => match parse_op(
                 self.set,
                 &self.anons,
-                &self.current_global,
+                self.scope_env.anchor_str(),
                 &self.consts,
                 rest,
                 line,
@@ -2196,7 +2205,7 @@ impl FlatWalk for Walker {
                 && !s.qualified.starts_with(LABEL_SEP)
             {
                 s.qualified = qualify(&self.path(), &s.qualified);
-                self.current_global = s.qualified.clone();
+                self.scope_env.set_anchor(s.qualified.clone());
             }
             s
         });
@@ -3148,12 +3157,12 @@ fn strip_comment(line: &str) -> &str {
 /// [`Symbol`](crate::ast::Symbol) carrying both the **source form** (`name` /
 /// `@cheap` / empty for anonymous — what the formatter re-emits) and the
 /// **resolved** name (what assembly uses: the synthetic anonymous key, the
-/// `global@cheap` cheap key, or the plain name). Updates `current_global` when a
+/// `global@cheap` cheap key, or the plain name). Re-anchors the environment when a
 /// non-cheap named label is defined (cheap locals scope to the preceding global).
 fn split_label_symbol<'a>(
     anons: &AnonCtx,
     line: usize,
-    current_global: &mut String,
+    env: &mut crate::scopes::ScopeEnv,
     trimmed: &'a str,
 ) -> Result<(Option<crate::ast::Symbol>, &'a str), AsmError> {
     use crate::ast::{Scope, Symbol};
@@ -3187,9 +3196,9 @@ fn split_label_symbol<'a>(
             Some(Symbol {
                 name: name.to_string(),
                 scope: Scope::Local {
-                    in_global: current_global.clone(),
+                    in_global: env.anchor_str().to_string(),
                 },
-                qualified: cheap_key(current_global, cheap),
+                qualified: cheap_key(env.anchor_str(), cheap),
             }),
             remainder,
         ));
@@ -3197,7 +3206,7 @@ fn split_label_symbol<'a>(
     if !is_ident(name) {
         return Err(AsmError::new(line, format!("invalid label `{name}`")));
     }
-    *current_global = name.to_string();
+    env.set_anchor(name.to_string());
     Ok((
         Some(Symbol {
             name: name.to_string(),
@@ -3211,7 +3220,7 @@ fn split_label_symbol<'a>(
 fn parse_op(
     set: &'static isa::InstructionSet,
     anons: &AnonCtx,
-    current_global: &str,
+    anchor: &str,
     consts: &BTreeMap<String, i64>,
     rest: &str,
     line: usize,
@@ -3221,13 +3230,12 @@ fn parse_op(
         return Ok(Kind::Empty);
     }
     if let Some(directive) = rest.strip_prefix('.') {
-        return parse_directive(anons, current_global, consts, directive, line);
+        return parse_directive(anons, anchor, consts, directive, line);
     }
     let (mnemonic, operand_text) = split_first_word(rest);
     let mnemonic = mnemonic.to_ascii_uppercase();
-    let operand = mos6502::parse_operand(operand_text, line, &|s, l| {
-        parse_value(anons, current_global, s, l)
-    })?;
+    let operand =
+        mos6502::parse_operand(operand_text, line, &|s, l| parse_value(anons, anchor, s, l))?;
     if set.instruction(&mnemonic).is_none() {
         return Err(AsmError::new(
             line,
@@ -3816,7 +3824,7 @@ pub const DIRECTIVES: &[Directive] = &[
 
 fn parse_directive(
     anons: &AnonCtx,
-    current_global: &str,
+    anchor: &str,
     consts: &BTreeMap<String, i64>,
     directive: &str,
     line: usize,
@@ -3860,30 +3868,10 @@ fn parse_directive(
         ));
     }
     match entry.id {
-        "bytes" => Ok(Kind::Bytes(parse_data_list(
-            anons,
-            current_global,
-            rest,
-            line,
-        )?)),
-        "words" => Ok(Kind::Words(parse_value_list(
-            anons,
-            current_global,
-            rest,
-            line,
-        )?)),
-        "dbyt" => Ok(Kind::DBytes(parse_value_list(
-            anons,
-            current_global,
-            rest,
-            line,
-        )?)),
-        "dword" => Ok(Kind::DWords(parse_value_list(
-            anons,
-            current_global,
-            rest,
-            line,
-        )?)),
+        "bytes" => Ok(Kind::Bytes(parse_data_list(anons, anchor, rest, line)?)),
+        "words" => Ok(Kind::Words(parse_value_list(anons, anchor, rest, line)?)),
+        "dbyt" => Ok(Kind::DBytes(parse_value_list(anons, anchor, rest, line)?)),
+        "dword" => Ok(Kind::DWords(parse_value_list(anons, anchor, rest, line)?)),
         // Each extractor is its list of values with a byte selector wrapped
         // round every one, so a forward label still resolves at layout time and
         // the size is the item count (times three for `.faraddr`). ca65 answers
@@ -3891,7 +3879,7 @@ fn parse_directive(
         // `Expr::Bank` is the engine's 65816 `^` node — bits 16-23 — which is
         // byte 2 exactly.
         "lobytes" | "hibytes" | "bankbytes" | "faraddr" => {
-            let values = parse_value_list(anons, current_global, rest, line)?;
+            let values = parse_value_list(anons, anchor, rest, line)?;
             let mut out = Vec::with_capacity(values.len());
             for value in values {
                 match entry.id {
@@ -3907,12 +3895,7 @@ fn parse_directive(
             }
             Ok(Kind::Bytes(out))
         }
-        "asciiz" => Ok(Kind::Bytes(parse_asciiz(
-            anons,
-            current_global,
-            rest,
-            line,
-        )?)),
+        "asciiz" => Ok(Kind::Bytes(parse_asciiz(anons, anchor, rest, line)?)),
         // The processor words. `.setcpu` takes a quoted name; the `.pNN`
         // shorthands are the name themselves.
         "cpu" => {
@@ -3967,10 +3950,10 @@ fn parse_directive(
             if word.eq_ignore_ascii_case("reloc") {
                 return Ok(Kind::Reloc);
             }
-            Ok(Kind::Org(parse_value(anons, current_global, rest, line)?))
+            Ok(Kind::Org(parse_value(anons, anchor, rest, line)?))
         }
-        "res" => parse_res(anons, current_global, consts, rest, line),
-        "align" => parse_align(anons, current_global, consts, rest, line),
+        "res" => parse_res(anons, anchor, consts, rest, line),
+        "align" => parse_align(anons, anchor, consts, rest, line),
         // `.out` is the strict one: ca65 answers a value list with
         // `Unexpected trailing garbage characters`. The other three read a
         // string and ignore whatever follows it on the line — probed, not
@@ -3990,7 +3973,7 @@ fn parse_directive(
             };
             Ok(Kind::Message(severity, leading_string(rest, line)?))
         }
-        "assert" => parse_assert(anons, current_global, rest, line),
+        "assert" => parse_assert(anons, anchor, rest, line),
         "export" | "import" | "global" => parse_visible(
             match entry.id {
                 "export" => VisRule::MustBeDefined,
@@ -3999,7 +3982,7 @@ fn parse_directive(
             },
             name.to_ascii_lowercase().ends_with("zp"),
             anons,
-            current_global,
+            anchor,
             rest,
             line,
         ),
@@ -4018,25 +4001,21 @@ fn parse_directive(
 /// or a `=` constant such as `NUM_ENEMIES`); `fill` defaults to 0.
 fn parse_res(
     anons: &AnonCtx,
-    current_global: &str,
+    anchor: &str,
     consts: &BTreeMap<String, i64>,
     rest: &str,
     line: usize,
 ) -> Result<Kind, AsmError> {
     let mut parts = rest.splitn(2, ',');
     let count_src = parts.next().unwrap_or("").trim();
-    let count = fold_const(
-        &parse_value(anons, current_global, count_src, line)?,
-        consts,
-        line,
-    )
-    .map_err(|_| AsmError::new(line, "`.res` count must be a constant"))?;
+    let count = fold_const(&parse_value(anons, anchor, count_src, line)?, consts, line)
+        .map_err(|_| AsmError::new(line, "`.res` count must be a constant"))?;
     let count = usize::try_from(count)
         .map_err(|_| AsmError::new(line, "`.res` count must be non-negative"))?;
     let fill = match parts.next() {
         None => 0,
         Some(v) => {
-            let n = fold_const(&parse_value(anons, current_global, v, line)?, consts, line)?;
+            let n = fold_const(&parse_value(anons, anchor, v, line)?, consts, line)?;
             u8::try_from(n).map_err(|_| AsmError::new(line, "`.res` fill must be a byte"))?
         }
     };
@@ -4046,9 +4025,9 @@ fn parse_res(
 /// A visibility operand as the symbol table keys it: a cheap local (`@name`)
 /// is scoped to its global the way its definition is, so the check looks the
 /// same name up that the label pass stored.
-fn vis_name(current_global: &str, raw: &str) -> String {
+fn vis_name(anchor: &str, raw: &str) -> String {
     match raw.strip_prefix('@') {
-        Some(local) => cheap_key(current_global, local),
+        Some(local) => cheap_key(anchor, local),
         None => raw.to_string(),
     }
 }
@@ -4061,7 +4040,7 @@ fn parse_visible(
     rule: VisRule,
     zero_page: bool,
     anons: &AnonCtx,
-    current_global: &str,
+    anchor: &str,
     rest: &str,
     line: usize,
 ) -> Result<Kind, AsmError> {
@@ -4083,10 +4062,10 @@ fn parse_visible(
             if parts.len() > 1 {
                 return Err(AsmError::new(line, "`:=` exports one name"));
             }
-            names.push(vis_name(current_global, name.trim()));
-            define = Some(parse_value(anons, current_global, value.trim(), line)?);
+            names.push(vis_name(anchor, name.trim()));
+            define = Some(parse_value(anons, anchor, value.trim(), line)?);
         } else {
-            names.push(vis_name(current_global, part));
+            names.push(vis_name(anchor, part));
         }
     }
     if names.is_empty() {
@@ -4118,19 +4097,9 @@ fn leading_string(rest: &str, line: usize) -> Result<String, AsmError> {
 /// stops the assembly: `error` and `lderror` do, `warning` and `ldwarning`
 /// note it and carry on. With assembly and linking fused there is no moment
 /// between the two `ld` forms and the others.
-fn parse_assert(
-    anons: &AnonCtx,
-    current_global: &str,
-    rest: &str,
-    line: usize,
-) -> Result<Kind, AsmError> {
+fn parse_assert(anons: &AnonCtx, anchor: &str, rest: &str, line: usize) -> Result<Kind, AsmError> {
     let parts = split_top_level(rest, ',');
-    let cond = parse_value(
-        anons,
-        current_global,
-        parts.first().copied().unwrap_or(""),
-        line,
-    )?;
+    let cond = parse_value(anons, anchor, parts.first().copied().unwrap_or(""), line)?;
     let action = parts.get(1).map(|a| a.trim().to_ascii_lowercase());
     let fatal = match action.as_deref() {
         Some("error" | "lderror") => true,
@@ -4154,7 +4123,7 @@ fn parse_assert(
 /// byte defaults to zero.
 fn parse_align(
     anons: &AnonCtx,
-    current_global: &str,
+    anchor: &str,
     consts: &BTreeMap<String, i64>,
     rest: &str,
     line: usize,
@@ -4162,7 +4131,7 @@ fn parse_align(
     let mut parts = rest.splitn(2, ',');
     let boundary_src = parts.next().unwrap_or("").trim();
     let boundary = fold_const(
-        &parse_value(anons, current_global, boundary_src, line)?,
+        &parse_value(anons, anchor, boundary_src, line)?,
         consts,
         line,
     )
@@ -4173,7 +4142,7 @@ fn parse_align(
     let fill = match parts.next() {
         None => 0,
         Some(v) => {
-            let n = fold_const(&parse_value(anons, current_global, v, line)?, consts, line)?;
+            let n = fold_const(&parse_value(anons, anchor, v, line)?, consts, line)?;
             u8::try_from(n).map_err(|_| AsmError::new(line, "`.align` fill must be a byte"))?
         }
     };
@@ -4183,7 +4152,7 @@ fn parse_align(
 /// `.byte` list: `"..."` strings expand to raw ASCII bytes; values are bytes.
 fn parse_data_list(
     anons: &AnonCtx,
-    current_global: &str,
+    anchor: &str,
     rest: &str,
     line: usize,
 ) -> Result<Vec<Expr>, AsmError> {
@@ -4196,7 +4165,7 @@ fn parse_data_list(
         if let Some(text) = string_literal(piece) {
             out.extend(text.bytes().map(|b| Expr::Num(i64::from(b))));
         } else {
-            out.push(parse_value(anons, current_global, piece, line)?);
+            out.push(parse_value(anons, anchor, piece, line)?);
         }
     }
     Ok(out)
@@ -4206,18 +4175,18 @@ fn parse_data_list(
 /// appended after the last item (ca65 emits one NUL for the whole directive).
 fn parse_asciiz(
     anons: &AnonCtx,
-    current_global: &str,
+    anchor: &str,
     rest: &str,
     line: usize,
 ) -> Result<Vec<Expr>, AsmError> {
-    let mut out = parse_data_list(anons, current_global, rest, line)?;
+    let mut out = parse_data_list(anons, anchor, rest, line)?;
     out.push(Expr::Num(0));
     Ok(out)
 }
 
 fn parse_value_list(
     anons: &AnonCtx,
-    current_global: &str,
+    anchor: &str,
     rest: &str,
     line: usize,
 ) -> Result<Vec<Expr>, AsmError> {
@@ -4227,7 +4196,7 @@ fn parse_value_list(
     }
     split_top_level(rest, ',')
         .iter()
-        .map(|p| parse_value(anons, current_global, p, line))
+        .map(|p| parse_value(anons, anchor, p, line))
         .collect()
 }
 
@@ -4246,12 +4215,7 @@ pub(crate) fn constant_value(raw: &str, line: usize) -> Result<Expr, AsmError> {
     parse_value(&AnonCtx::default(), "", raw, line)
 }
 
-fn parse_value(
-    anons: &AnonCtx,
-    current_global: &str,
-    raw: &str,
-    line: usize,
-) -> Result<Expr, AsmError> {
+fn parse_value(anons: &AnonCtx, anchor: &str, raw: &str, line: usize) -> Result<Expr, AsmError> {
     let t = raw.trim();
     if let Some((sign, level)) = anon_ref(t) {
         return Ok(Expr::Sym(anons.refer(sign, level, line)?));
@@ -4259,7 +4223,7 @@ fn parse_value(
     if let Some(cheap) = t.strip_prefix('@')
         && is_ident(cheap)
     {
-        return Ok(Expr::Sym(cheap_key(current_global, cheap)));
+        return Ok(Expr::Sym(cheap_key(anchor, cheap)));
     }
     mos6502::parse_expr(
         t,

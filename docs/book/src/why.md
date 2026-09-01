@@ -43,7 +43,7 @@ assemble the same source with the reference tool and compare bytes. 8 tools
 across 23 instruction sets: ACME, ca65, lwasm, pasmo, RGBDS, sjasmplus, vasm and
 Macro Assembler AS, which covers the 14 less-travelled ones.
 
-**What they produced is recorded, not remembered.** 15,868 verdicts, each keyed
+**What they produced is recorded, not remembered.** 16,806 verdicts, each keyed
 on the reference tool's own version string, committed to this repository. CI
 replays every one of them on machines with none of those tools installed, so a
 change that alters our output fails against what the real assembler did — not
@@ -53,7 +53,7 @@ against a fixture somebody wrote by hand.
 Code198x curriculum, across the C64, the Amiga, the NES and the Spectrum, in 617
 comparisons. Every one matches the reference tool.
 
-**Where we differ is published.** 4 tracked differences across 11 recorded
+**Where we differ is published.** 4 tracked differences across 13 recorded
 cases, and [the list](divergences.md) says what each one is. A tracked
 difference that silently stops being a difference fails the build.
 <!-- /generated -->
