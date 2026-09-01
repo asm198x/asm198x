@@ -145,7 +145,7 @@ pub struct DebugData {
     /// One spec-sourced timing record per emitted instruction (#497), in
     /// emission order. Empty when nothing captured — a data-only program, or a
     /// path whose instructions carry no spec cycles (see
-    /// [`DebugData::cycles_pending`]). Additive: absent from older payloads.
+    /// [`DebugData::cycle_coverage`]). Additive: absent from older payloads.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub cycles: Vec<CycleRec>,
     /// What an empty `cycles` means — see [`CycleCoverage`]. Additive:
