@@ -410,6 +410,21 @@ pub fn render_listing_files(
     };
     let margin_w = margins.iter().map(String::len).max().unwrap_or(0);
 
+    // Per-line cycle cost (#497), summed over the line's records so a
+    // colon-separated multi-statement line shows the line's whole cost. The
+    // honest range: min is every conditional extra unspent, max is all spent.
+    let mut cycles: BTreeMap<(u32, u32), (u64, u64)> = BTreeMap::new();
+    for c in &result.debug.cycles {
+        let e = cycles.entry((c.file.0, c.line)).or_insert((0, 0));
+        e.0 += u64::from(c.base);
+        e.1 += u64::from(c.base) + u64::from(c.page_cross) + u64::from(c.branch_taken);
+    }
+    let cyc_w = cycles
+        .values()
+        .map(|c| cycle_cell(*c).len())
+        .max()
+        .unwrap_or(0);
+
     let mut out = String::new();
     if !files.is_empty() {
         render_one_file(
@@ -423,11 +438,110 @@ pub fn render_listing_files(
                 addr_unit,
                 margins: &margins,
                 margin_w,
+                cycles: &cycles,
+                cyc_w,
             },
             &mut out,
         );
     }
+    render_cycle_footer(result, base, addr_unit, &mut out);
     out
+}
+
+/// The cycles column cell: one number when the cost is fixed, `min/max` when
+/// conditional extras make it a range — never a collapsed single figure.
+fn cycle_cell((min, max): (u64, u64)) -> String {
+    if min == max {
+        format!("{min}")
+    } else {
+        format!("{min}/{max}")
+    }
+}
+
+/// The listing's cycle tail (#497): per-label straight-line totals, then the
+/// coverage note when an absent record does not mean data.
+///
+/// A label's span runs to the next labelled offset (or the end), so a routine
+/// written straight-line totals exactly; a label inside it splits the figures,
+/// which is the static-analysis contract — this measures code between labels,
+/// it does not execute anything.
+fn render_cycle_footer(result: &AssemblyResult, base: u64, addr_unit: u64, out: &mut String) {
+    use crate::engine::CycleCoverage;
+    use std::fmt::Write as _;
+
+    if !result.debug.cycles.is_empty() {
+        // Labelled offsets, deduped and sorted; entry points count as labels.
+        let mut labels: Vec<(u64, &str)> = result
+            .debug
+            .symbols
+            .iter()
+            .filter_map(|s| match &s.kind {
+                debug198x::SymbolKind::Label { offset, .. }
+                | debug198x::SymbolKind::Entry { offset, .. } => Some((*offset, s.name.as_str())),
+                debug198x::SymbolKind::Const { .. } => None,
+            })
+            .collect();
+        labels.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(b.1)));
+        let mut rows: Vec<(String, u64, (u64, u64))> = Vec::new();
+        for (i, &(start, name)) in labels.iter().enumerate() {
+            let end = labels
+                .get(i + 1)
+                .map_or(u64::MAX, |&(next, _)| next.max(start));
+            let in_span = |offset: u64| offset >= start && (offset < end || start == end);
+            let mut cost = (0u64, 0u64);
+            let mut any = false;
+            for c in result.debug.cycles.iter().filter(|c| in_span(c.offset)) {
+                any = true;
+                cost.0 += u64::from(c.base);
+                cost.1 += u64::from(c.base) + u64::from(c.page_cross) + u64::from(c.branch_taken);
+            }
+            if any {
+                let bytes: u64 = result
+                    .debug
+                    .lines
+                    .iter()
+                    .filter(|l| in_span(l.offset))
+                    .map(|l| l.length * addr_unit)
+                    .sum();
+                rows.push((format!("{name} (${:04X})", base + start), bytes, cost));
+            }
+        }
+        if !rows.is_empty() {
+            let _ = writeln!(
+                out,
+                "
+cycle totals (spec, straight-line to the next label):"
+            );
+            let name_w = rows.iter().map(|r| r.0.len()).max().unwrap_or(0);
+            for (name, bytes, cost) in rows {
+                let _ = writeln!(
+                    out,
+                    "  {name:<name_w$}  {bytes} byte{}, {} cycle{}",
+                    if bytes == 1 { "" } else { "s" },
+                    cycle_cell(cost),
+                    if cost == (1, 1) { "" } else { "s" },
+                );
+            }
+        }
+    }
+    match result.debug.cycle_coverage {
+        CycleCoverage::Full => {}
+        CycleCoverage::Partial => {
+            let _ = writeln!(
+                out,
+                "
+some instructions carry no cycle data (piece-encoded); cycle figures are lower bounds"
+            );
+        }
+        CycleCoverage::None if !result.debug.lines.is_empty() => {
+            let _ = writeln!(
+                out,
+                "
+no cycle data (backfill pending)"
+            );
+        }
+        CycleCoverage::None => {}
+    }
 }
 
 /// The shared rendering context threaded through the splice walk.
@@ -440,6 +554,11 @@ struct RenderCx<'a> {
     addr_unit: u64,
     margins: &'a [String],
     margin_w: usize,
+    /// Per-(file, line) summed cycle cost, empty when nothing captured.
+    cycles: &'a std::collections::BTreeMap<(u32, u32), (u64, u64)>,
+    /// Widest rendered cycle cell; 0 suppresses the column entirely, so a
+    /// capture-less listing is byte-identical to what it always was.
+    cyc_w: usize,
 }
 
 /// Render one file's rows, splicing each included file in after its include
@@ -482,8 +601,24 @@ fn render_one_file(id: usize, cx: &RenderCx<'_>, out: &mut String) {
                         shown.join(" ")
                     }
                 };
-                format!("{addr:04X}  {hex:<bytes_col$}  {text}")
+                if cx.cyc_w > 0 {
+                    let cyc = cx
+                        .cycles
+                        .get(&(id as u32, line))
+                        .map_or(String::new(), |c| cycle_cell(*c));
+                    let cyc_w = cx.cyc_w;
+                    format!("{addr:04X}  {hex:<bytes_col$}  {cyc:<cyc_w$}  {text}")
+                } else {
+                    format!("{addr:04X}  {hex:<bytes_col$}  {text}")
+                }
             }
+            None if cx.cyc_w > 0 => format!(
+                "{:4}  {:<bytes_col$}  {:<w$}  {text}",
+                "",
+                "",
+                "",
+                w = cx.cyc_w
+            ),
             None => format!("{:4}  {:<bytes_col$}  {text}", "", ""),
         };
         // Trim so no-source rows (blank lines) stay genuinely blank.

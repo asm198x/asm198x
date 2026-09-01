@@ -148,6 +148,10 @@ pub struct DebugData {
     /// [`DebugData::cycles_pending`]). Additive: absent from older payloads.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub cycles: Vec<CycleRec>,
+    /// What an empty `cycles` means — see [`CycleCoverage`]. Additive:
+    /// omitted (as `none`) from payloads that predate the capture.
+    #[serde(default, skip_serializing_if = "CycleCoverage::is_none")]
+    pub cycle_coverage: CycleCoverage,
 }
 
 /// A line→address span before the source filename is attached: `length` address
@@ -165,6 +169,30 @@ pub struct LineRec {
     /// engine just carries the data.
     #[serde(default, skip_serializing_if = "FileId::is_root")]
     pub file: FileId,
+}
+
+/// What an empty cycle capture means for this assembly (#497): the dialect's
+/// declaration, carried on the result so a renderer — or a JSON consumer —
+/// can tell "data only" from "instructions whose spec has no cycles yet"
+/// (#498) without knowing the dialect.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
+#[serde(rename_all = "lowercase")]
+pub enum CycleCoverage {
+    /// Every instruction resolves a form: an absent record means data.
+    Full,
+    /// Some instructions pre-encode into pieces and capture nothing; an
+    /// absent record is not proof of data, and totals are lower bounds.
+    Partial,
+    /// No cycle capture on this path — the spec carries no cycle data for
+    /// the CPU (#498), or the driver does not capture yet.
+    #[default]
+    None,
+}
+
+impl CycleCoverage {
+    fn is_none(&self) -> bool {
+        matches!(self, CycleCoverage::None)
+    }
 }
 
 /// Spec-sourced timing for one emitted instruction (#497): the `isa::Cycles`
@@ -1183,6 +1211,7 @@ fn assemble_statements(
 ) -> Result<Assembly, AsmError> {
     let default_set = dialect.instruction_set();
     let default_ext = dialect.extension_set();
+    let cycle_coverage = dialect.cycle_coverage();
 
     // Pass 1 — assign addresses to labels.
     let require_origin = dialect.requires_explicit_origin();
@@ -1477,7 +1506,10 @@ fn assemble_statements(
     let mut runs: Vec<Run> = Vec::new();
     let mut section_name = String::new();
     let mut section_at = Place::ByAddress;
-    let mut debug = DebugData::default();
+    let mut debug = DebugData {
+        cycle_coverage,
+        ..DebugData::default()
+    };
     // The second counter again, rebuilt for pass 2 — the statements are the
     // same, so it retraces the same path.
     let mut pseudo: i64 = 0;
@@ -2174,6 +2206,9 @@ fn assemble_statements(
             for line in &mut debug.lines {
                 line.offset -= base;
             }
+            for c in &mut debug.cycles {
+                c.offset -= base;
+            }
         }
         let artifacts = raw_artifacts(&saves, origin_of_image, &image)?;
         return Ok(Assembly {
@@ -2222,6 +2257,9 @@ fn assemble_statements(
         }
         for line in &mut debug.lines {
             line.offset -= base;
+        }
+        for c in &mut debug.cycles {
+            c.offset -= base;
         }
     }
 

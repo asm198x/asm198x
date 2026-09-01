@@ -43,3 +43,54 @@ fn field_packed_instructions_capture_no_cycles() {
     let r = assemble_lwasm("        org $1000\n        nop\n").expect("assembles");
     assert!(r.debug.cycles.is_empty(), "no fabricated numbers");
 }
+
+use asm198x::{assemble_tms7000, render_listing};
+
+/// AE1/AE3/R1–R3: the listing's cycles column and per-label totals, pinned.
+/// Every figure is the spec's: LDA # fixed(2); LDA abs,x page_crossing(4)
+/// rendered as the honest 4/5, never one number; BNE branch(2) as 2/4; RTS
+/// fixed(6). `loop`'s total is its straight-line span (BNE + RTS): 8/10.
+#[test]
+fn listing_carries_the_cycles_column_and_label_totals() {
+    let src =
+        "        * = $c000\n        lda #1\n        lda $1234,x\nloop    bne loop\n        rts\n";
+    let r = asm198x::assemble_acme(src).expect("assembles");
+    let expected = "                                            * = $c000
+C000  A9 01                    2            lda #1
+C002  BD 34 12                 4/5          lda $1234,x
+C005  D0 FE                    2/4  loop    bne loop
+C007  60                       6            rts
+
+cycle totals (spec, straight-line to the next label):
+  loop ($C005)  3 bytes, 8/10 cycles
+";
+    assert_eq!(render_listing(src, &r, 1), expected);
+}
+
+/// AE5/R6: a CPU whose spec carries no cycle data keeps its exact old listing
+/// — no column, no invented numbers — plus the one honest note.
+#[test]
+fn field_packed_listing_says_backfill_pending() {
+    let src = "        org $1000\n        nop\n";
+    let r = assemble_lwasm(src).expect("assembles");
+    let expected = "                                       org $1000
+1000  12                               nop
+
+no cycle data (backfill pending)
+";
+    assert_eq!(render_listing(src, &r, 1), expected);
+}
+
+/// A partial-coverage dialect (some instructions pre-encode into pieces and
+/// capture nothing) says its figures are lower bounds rather than presenting
+/// them as complete.
+#[test]
+fn partial_coverage_listing_declares_lower_bounds() {
+    let src = "        org 8000h\n        nop\n";
+    let r = assemble_tms7000(src).expect("assembles");
+    let listing = render_listing(src, &r, 1);
+    assert!(
+        listing.contains("cycle figures are lower bounds"),
+        "partial coverage must say so:\n{listing}"
+    );
+}
