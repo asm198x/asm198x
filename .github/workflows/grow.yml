@@ -72,6 +72,15 @@ jobs:
       - name: Verify the arbiter identities
         run: verify-arbiters
 
+      # The checkout is owned by a different uid than the container user, and
+      # git refuses a repo it does not own. This must precede *every* step
+      # that touches git — `cargo xtask grow` prints its "what grew" diff via
+      # git, and with the config one step later (#511's placement) that diff
+      # rendered as usage help while the run stayed green (#513's residue).
+      - name: Let the container's git read the workspace
+        shell: bash
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+
       - name: Read the pinned curriculum revision
         id: pin
         run: echo "sha=$(cat crates/asm198x/tests/verdicts/code-samples.pin)" >> "$GITHUB_OUTPUT"
@@ -105,12 +114,6 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          # The checkout is owned by a different uid than the container user,
-          # and git refuses a repo it does not own — reported, unhelpfully, as
-          # "not in a git directory". Mark the workspace safe explicitly; the
-          # entry actions/checkout writes does not reliably survive into this
-          # image's git configuration.
-          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name  "asm198x growth"
           git config user.email "growth@asm198x.invalid"
 
