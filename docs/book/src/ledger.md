@@ -5,9 +5,9 @@ observation of a real reference assembler, not an expectation written
 by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.55`
-- **Corpus hash:** `9d2c6c5d95f913128dffc48f6a43cd330493def48aa0044f698ae675e84b1624`
+- **Corpus hash:** `a1225f8b7b191cffdd1fbdb93aa8a09642c14f32a83e52c84773d6d0749706e6`
 - **Pinned curriculum:** `f11698d0b51b3a6c1209cec3d649229aa35af97f` (2026-08-27)
-- **CPUs:** 23, holding 15948 verdict(s)
+- **CPUs:** 23, holding 16886 verdict(s)
 
 ## 1802
 
@@ -71,7 +71,7 @@ Form coverage: **838/838** (100.0%)
 
 | arbiter | version | binaries | verdicts |
 |---|---|---|---|
-| `vasmm68k_mot` | vasm 2.0b (c) in 2002-2025 Volker Barthelmann | 1 | curriculum 106, fuzz 100, probe 80, sweep-chunk 160 |
+| `vasmm68k_mot` | vasm 2.0b (c) in 2002-2025 Volker Barthelmann | 1 | curriculum 106, form 838, fuzz 100, probe 80, sweep-chunk 160 |
 | `vasmm68k_mot` | vasm 2.0f (c) in 2002-2026 Volker Barthelmann | 2 | curriculum 106, form 1676, fuzz 91, probe 77, sweep-chunk 160 |
 
 Tracked divergences — differences we know about and check:
@@ -79,7 +79,7 @@ Tracked divergences — differences we know about and check:
 - `canonicalisation-68000-0812FE97` — 1 case(s)
 - `canonicalisation-68000-08AC909FCDFA` — 1 case(s)
 - `canonicalisation-68000-08F7F12AF8BB` — 1 case(s)
-- `issue-110` — 8 case(s)
+- `issue-110` — 10 case(s)
 - `issue-93` — 2 case(s)
 
 ## 6809
@@ -200,7 +200,7 @@ Form coverage: **796/796** (100.0%)
 
 | arbiter | version | binaries | verdicts |
 |---|---|---|---|
-| `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | 2 | curriculum 322, form 1592, fuzz 200, probe 72 |
+| `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | 2 | curriculum 322, form 1592, fuzz 300, probe 72 |
 | `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | 2 | curriculum 322, probe 188 |
 
 Tracked divergences — differences we know about and check:
