@@ -172,12 +172,15 @@ pub const DIRECTIVES: &[Directive] = &[
     },
     // What sjasmplus has here and we do not.
     //
-    // 82 spellings against 1.21.0 (STRUCT/ENDS left for #477). The `save*`, `device`, `lua` and
+    // 82 spellings against 1.21.0 (STRUCT/ENDS left for #477). The `save*`, `device` and
     // `shellexec` families are in here rather than on a roadmap on purpose:
-    // `assemble-io-model.md` scopes output to native containers, and an
-    // embedded Lua interpreter is not an assembler feature. For those,
-    // refusing with a diagnostic that says the source is valid and the gap is
-    // ours is the honest end state, not a staging post.
+    // `assemble-io-model.md` scopes output to native containers, and
+    // `decisions/sjasmplus-lua.md` keeps process execution out of the Lua
+    // sandbox for good. For those, refusing with a diagnostic that says the
+    // source is valid and the gap is ours is the honest end state, not a
+    // staging post. `lua`/`endlua`/`includelua` are different: the same
+    // decision accepts them behind the `lua` build feature, so their stay
+    // here ends when that lands.
     // The device model (`docs/sjasmplus-device-model.md`). `DEVICE` and `SLOT`
     // emit nothing; `PAGE` opens a section, because two pages written at one
     // address concatenate in the output rather than colliding.
