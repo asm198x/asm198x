@@ -142,6 +142,12 @@ pub struct DebugData {
     /// One span per source-bearing statement that emitted bytes. Fill from `org`
     /// gaps and `align` carries no span (the padding rule).
     pub lines: Vec<LineRec>,
+    /// One spec-sourced timing record per emitted instruction (#497), in
+    /// emission order. Empty when nothing captured — a data-only program, or a
+    /// path whose instructions carry no spec cycles (see
+    /// [`DebugData::cycles_pending`]). Additive: absent from older payloads.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub cycles: Vec<CycleRec>,
 }
 
 /// A line→address span before the source filename is attached: `length` address
@@ -157,6 +163,29 @@ pub struct LineRec {
     /// KTD7 — absent means the root, and a root value is not serialized, so
     /// pre-multi-file payloads are byte-identical. U9 renders these; the
     /// engine just carries the data.
+    #[serde(default, skip_serializing_if = "FileId::is_root")]
+    pub file: FileId,
+}
+
+/// Spec-sourced timing for one emitted instruction (#497): the `isa::Cycles`
+/// triple, copied at the moment pass 2 resolved the form, plus the same
+/// line/offset attribution a [`LineRec`] carries. Data emissions get no
+/// record — absence means "nothing executes here", which a zero would
+/// misstate. The honest range derives as `base ..= base + page_cross +
+/// branch_taken`; renderers derive it rather than storing a collapsed number.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+pub struct CycleRec {
+    /// 1-based source line, in `file`.
+    pub line: u32,
+    /// Section-relative offset in address units, exactly as [`LineRec::offset`].
+    pub offset: u64,
+    /// The spec's base cost.
+    pub base: u8,
+    /// Extra when an indexed access crosses a page boundary (0 when fixed).
+    pub page_cross: u8,
+    /// Extra when a branch is taken (0 for non-branches).
+    pub branch_taken: u8,
+    /// The file `line` counts within, as [`LineRec::file`].
     #[serde(default, skip_serializing_if = "FileId::is_root")]
     pub file: FileId,
 }
@@ -1464,6 +1493,10 @@ fn assemble_statements(
         let real_pc = origin + bytes.len() as i64 / addr_unit;
         let pc = real_pc + pseudo;
         let len_before = bytes.len();
+        // The cycle triple pass 2 resolves for this statement, if it is a
+        // form-model instruction; consumed at the LineRec push below so the
+        // record shares the span's exact line/offset attribution (#497).
+        let mut cycle_capture: Option<isa::Cycles> = None;
         match &s.op {
             None => {}
             Some(Operation::Org(e)) => {
@@ -1781,6 +1814,7 @@ fn assemble_statements(
                 operands,
             }) => {
                 let f = form(set, ext, mnemonic, mode, s.line).map_err(|err| s.stamp(err))?;
+                cycle_capture = Some(f.cycles);
                 if operands.len() != f.operands.len() {
                     return Err(s.err(format!(
                         "internal: `{mnemonic}` {mode} takes {} operand value(s), got {}",
@@ -2047,16 +2081,27 @@ fn assemble_statements(
             }
         }
         if source_bearing && bytes.len() > len_before {
+            let offset = if org_starts_address_run {
+                pc as u64
+            } else {
+                (pc - origin) as u64
+            };
             debug.lines.push(LineRec {
                 line: s.line as u32,
-                offset: if org_starts_address_run {
-                    pc as u64
-                } else {
-                    (pc - origin) as u64
-                },
+                offset,
                 length: ((bytes.len() - len_before) as i64 / addr_unit) as u64,
                 file: s.file,
             });
+            if let Some(cy) = cycle_capture {
+                debug.cycles.push(CycleRec {
+                    line: s.line as u32,
+                    offset,
+                    base: cy.base,
+                    page_cross: cy.page_cross,
+                    branch_taken: cy.branch_taken,
+                    file: s.file,
+                });
+            }
         }
         // The entry point (`end <addr>`) is an Entry symbol. When it targets a
         // bare label, upgrade that label's kind in place (the entry *is* that

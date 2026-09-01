@@ -41,6 +41,12 @@ use crate::source::{SourceLoader, SourceMap};
 pub(crate) struct F8;
 
 impl Dialect for F8 {
+    /// Fixed-slot instructions lower by form and capture cycles; the ones on
+    /// the computed-operand seam pre-encode into pieces and capture nothing,
+    /// so an absent record is not proof of data (#497).
+    fn cycle_coverage(&self) -> crate::dialect::CycleCoverage {
+        crate::dialect::CycleCoverage::Partial
+    }
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::f8::SET
     }

@@ -30,6 +30,12 @@ use crate::source::{SourceLoader, SourceMap};
 pub(crate) struct Tms7000;
 
 impl Dialect for Tms7000 {
+    /// Fixed-slot instructions lower by form and capture cycles; the ones on
+    /// the computed-operand seam pre-encode into pieces and capture nothing,
+    /// so an absent record is not proof of data (#497).
+    fn cycle_coverage(&self) -> crate::dialect::CycleCoverage {
+        crate::dialect::CycleCoverage::Partial
+    }
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::tms7000::SET
     }

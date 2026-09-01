@@ -24,6 +24,22 @@ pub(crate) enum Oversize {
     TruncateWarn,
 }
 
+/// How much of a dialect's instruction stream the engine's cycle capture
+/// (#497) covers. The engine records a [`crate::engine::CycleRec`] only where
+/// pass 2 resolves an `isa::Form`; instructions a dialect pre-encodes into
+/// pieces, and CPUs whose specs carry no cycle data at all (#498), capture
+/// nothing — and the listing must say which of those an empty capture means.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum CycleCoverage {
+    /// Every instruction resolves a form: an absent record means data.
+    Full,
+    /// Some instructions ride the computed-operand seam and capture nothing;
+    /// lines without a record may still execute.
+    Partial,
+    /// The spec carries no cycle data for this CPU (#498).
+    None,
+}
+
 pub(crate) trait Dialect {
     /// The primary instruction set this dialect assembles against.
     fn instruction_set(&self) -> &'static isa::InstructionSet;
@@ -33,6 +49,13 @@ pub(crate) trait Dialect {
     /// without one (the default) rejects those opcodes as unknown.
     fn extension_set(&self) -> Option<&'static isa::InstructionSet> {
         None
+    }
+
+    /// What an empty cycle capture means for this dialect — see
+    /// [`CycleCoverage`]. The default is the honest floor: a new dialect
+    /// declares coverage only once its instruction lowering warrants it.
+    fn cycle_coverage(&self) -> CycleCoverage {
+        CycleCoverage::None
     }
 
     /// Parse source into the engine's statement stream, resolving each

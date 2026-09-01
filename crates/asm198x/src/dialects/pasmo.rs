@@ -81,6 +81,11 @@ pub(crate) struct Pasmo {
 }
 
 impl Dialect for Pasmo {
+    /// Every instruction lowers by form; the only piece-encoded emissions
+    /// are data directives, so an absent cycle record means data (#497).
+    fn cycle_coverage(&self) -> crate::dialect::CycleCoverage {
+        crate::dialect::CycleCoverage::Full
+    }
     /// pasmo is the one reference in the set that bounds a constant, and it
     /// bounds only the top: `V equ $FFFF` assembles, `$10000` does not, and
     /// `-65536` is accepted. Probed against PasmoNext v0.1.3.
