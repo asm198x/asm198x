@@ -69,7 +69,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     && rm -rf /var/lib/apt/lists/* \
     && git clone --depth 1 --branch v1.0.3 https://github.com/gbdev/rgbds.git /tmp/rgbds \
     && make -C /tmp/rgbds -j"$(nproc)" \
-    && install -m 0755 /tmp/rgbds/rgbasm /tmp/rgbds/rgblink /usr/local/bin/ \
+    && install -m 0755 /tmp/rgbds/rgbasm /tmp/rgbds/rgblink /tmp/rgbds/rgbfix /usr/local/bin/ \
     && rm -rf /tmp/rgbds
 
 # --- sjasmplus 1.21.0 --------------------------------------------------------
