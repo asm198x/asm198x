@@ -11,51 +11,72 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- *(cycles)* the cycle-honest listing and the cycle budget assertion ([#507](https://github.com/asm198x/asm198x/pull/507))
-- *(z80)* support unary bitwise complement ([#478](https://github.com/asm198x/asm198x/pull/478))
-- *(sjasmplus)* accept SLD comment selection ([#476](https://github.com/asm198x/asm198x/pull/476))
-- *(sjasmplus)* support SpecNext OPT state ([#474](https://github.com/asm198x/asm198x/pull/474))
-- *(acme)* support 65CE02 and 4502 processors ([#472](https://github.com/asm198x/asm198x/pull/472))
-- *(acme)* support C64DTV2 processor
-- *(acme)* support Rockwell and WDC 65C02 targets
-- *(acme)* support CMOS 65C02 target
-- *(acme)* support the 6510 cpu target ([#467](https://github.com/asm198x/asm198x/pull/467))
-- *(acme)* switch instruction sets with cpu directive ([#466](https://github.com/asm198x/asm198x/pull/466))
-
-### Fixed
-
-- *(ca65)* thread text definitions through includes ([#480](https://github.com/asm198x/asm198x/pull/480))
-- *(acme)* place discontiguous origin regions ([#465](https://github.com/asm198x/asm198x/pull/465))
-- *(acme)* scope nested live macro calls ([#464](https://github.com/asm198x/asm198x/pull/464))
-- *(acme)* retain anonymous labels in live macros ([#462](https://github.com/asm198x/asm198x/pull/462))
-- *(acme)* preserve labels on live macro calls ([#460](https://github.com/asm198x/asm198x/pull/460))
-- *(acme)* parse percent as modulo ([#459](https://github.com/asm198x/asm198x/pull/459))
-- *(acme)* share macros across source files ([#456](https://github.com/asm198x/asm198x/pull/456))
-- *(vasm)* accept unsigned condition aliases ([#452](https://github.com/asm198x/asm198x/pull/452))
-- *(rgbasm)* match rgbfix header finalisation ([#451](https://github.com/asm198x/asm198x/pull/451))
-- *(rgbasm)* emit complete raw ROM banks ([#450](https://github.com/asm198x/asm198x/pull/450))
-- *(rgbasm)* place floating RAM sections ([#448](https://github.com/asm198x/asm198x/pull/448))
-- *(rgbasm)* implement definedness expressions ([#446](https://github.com/asm198x/asm198x/pull/446))
-- *(rgbasm)* support operandless storage ([#444](https://github.com/asm198x/asm198x/pull/444))
-- *(rgbasm)* implement graphics literals ([#442](https://github.com/asm198x/asm198x/pull/442))
-- *(rgbasm)* implement STARTOF section queries ([#440](https://github.com/asm198x/asm198x/pull/440))
-- *(rgbasm)* resolve DS counts at the current location ([#438](https://github.com/asm198x/asm198x/pull/438))
-- *(rgbasm)* implement RS offset counters ([#436](https://github.com/asm198x/asm198x/pull/436))
-- *(rgbasm)* accept numeric digit separators ([#432](https://github.com/asm198x/asm198x/pull/432))
-
-### Added
-
+- **Cycle-honest listings, and cycle budgets that fail the build.**
+  ([#507](https://github.com/asm198x/asm198x/pull/507)) Where the instruction
+  spec carries validated cycle data — the 6502, Z80, SM83 and their relatives —
+  `--listing` now annotates each instruction with its cost from that spec: one
+  number when fixed, `4/5` when a page-cross or branch-taken extra makes it a
+  range, never a collapsed figure. A tail totals each label's straight-line
+  span, and `--listing-json` carries the same data for tools. On top of that,
+  `; asm198x: cycles(irq) <= 224` asserts a routine's worst case and **fails
+  the assemble** when the budget is exceeded, naming the routine, the budget,
+  and the actual cost — the raster programmer's contract, checked like a test.
+  Reference assemblers read the line as the comment it is, so the source still
+  assembles byte-identically elsewhere. A CPU whose spec has no cycle data yet
+  says `no cycle data (backfill pending)` instead of inventing figures.
+- **ACME switches CPU targets mid-source.** `!cpu` selects the instruction set
+  lexically ([#466](https://github.com/asm198x/asm198x/pull/466)), and the
+  targets it can name grew across the 6502 family: the 6510
+  ([#467](https://github.com/asm198x/asm198x/pull/467)), the CMOS, Rockwell and
+  WDC 65C02 variants, the C64DTV2, and the 65CE02 and 4502
+  ([#472](https://github.com/asm198x/asm198x/pull/472)).
 - **SjASMPlus source options.** `OPT --syntax=abfw`, `OPT --zxnext`, and
   `OPT --zxnext=cspect` now carry their lexical parser and target state into
   following source and includes, including CSpect's `BREAK` and `EXIT` fake
-  instructions. This clears SpecNext Invaders' first corpus boundary.
+  instructions ([#474](https://github.com/asm198x/asm198x/pull/474)). This
+  clears SpecNext Invaders' first corpus boundary.
 - **SjASMPlus SLD comment selection.** `SLDOPT COMMENT` accepts and validates
-  the source-level-debug keyword list. Native probes establish that it changes
-  only SjASMPlus's optional `.sld` sidecar, so it is explicitly inert for
-  Asm198x's machine output and Debug198x contract.
+  the source-level-debug keyword list
+  ([#476](https://github.com/asm198x/asm198x/pull/476)). Native probes
+  establish that it changes only SjASMPlus's optional `.sld` sidecar, so it is
+  explicitly inert for Asm198x's machine output and Debug198x contract.
 - **Z80 expression complements.** SjASMPlus and Pasmo expressions now accept
   unary `~` with native two's-complement semantics, including composition and
-  the reference assemblers' existing truncation at byte/word output widths.
+  the reference assemblers' existing truncation at byte/word output widths
+  ([#478](https://github.com/asm198x/asm198x/pull/478)).
+
+### Fixed
+
+- **ca65 text definitions travel through includes.** `.define`/`.undefine`
+  state threads across ordinary source and nested includes
+  ([#480](https://github.com/asm198x/asm198x/pull/480)); a definition inside a
+  deferred conditional branch is refused with an explicit diagnostic rather
+  than silently misassembled, until it is implemented at the projection layer.
+- **ACME live macros behave like ACME's.** A label on a live macro call binds
+  ([#460](https://github.com/asm198x/asm198x/pull/460)), anonymous labels
+  survive expansion ([#462](https://github.com/asm198x/asm198x/pull/462)),
+  nested live calls scope correctly
+  ([#464](https://github.com/asm198x/asm198x/pull/464)), and macros are shared
+  across source files ([#456](https://github.com/asm198x/asm198x/pull/456)).
+  `%` parses as modulo ([#459](https://github.com/asm198x/asm198x/pull/459)),
+  and a program that moves `*` backwards places its discontiguous regions the
+  way ACME does ([#465](https://github.com/asm198x/asm198x/pull/465)).
+- **rgbasm rounds out its Game Boy surface.** ROM images match `rgbfix`'s
+  header finalisation ([#451](https://github.com/asm198x/asm198x/pull/451))
+  and banks pad completely
+  ([#450](https://github.com/asm198x/asm198x/pull/450)); floating RAM sections
+  place ([#448](https://github.com/asm198x/asm198x/pull/448)); and the
+  expression and data surface gains definedness queries
+  ([#446](https://github.com/asm198x/asm198x/pull/446)), operandless storage
+  ([#444](https://github.com/asm198x/asm198x/pull/444)), graphics literals
+  ([#442](https://github.com/asm198x/asm198x/pull/442)), `STARTOF`
+  ([#440](https://github.com/asm198x/asm198x/pull/440)), `DS` counts resolved
+  at the current location
+  ([#438](https://github.com/asm198x/asm198x/pull/438)), `RS` offset counters
+  ([#436](https://github.com/asm198x/asm198x/pull/436)), and numeric digit
+  separators ([#432](https://github.com/asm198x/asm198x/pull/432)).
+- **vasm accepts the unsigned condition aliases**
+  ([#452](https://github.com/asm198x/asm198x/pull/452)).
 
 ## [0.0.53](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.52...asm198x-v0.0.53) - 2026-08-29
 
