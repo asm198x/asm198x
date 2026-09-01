@@ -7,6 +7,41 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.56](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.55...asm198x-v0.0.56) - 2026-09-01
+
+### Added
+
+- **sjasmplus structures: `STRUCT` … `ENDS`.**
+  ([#529](https://github.com/asm198x/asm198x/pull/529))
+  A structure binds its total size and every member's offset — embedded
+  structures flatten to dotted paths (`InvaderBullet.hitboxScreenSpace.x0`)
+  — and each name resolves like any symbol, forward references included.
+  Member spellings `BYTE`/`DB`, `WORD`/`DW`, `D24`, `DWORD`, and `DS`, with
+  or without initialisers and labels; `label Name` lays the defaults down
+  and binds the instance and each member to its address. A structure
+  defined under a `MODULE` takes its prefix, and re-anchors the locals
+  that follow it. Every accepted shape is probe-pinned against SjASMPlus
+  1.21.0 and byte-identical in the recorded differential; the refusals —
+  a stray `ENDS`, an unclosed `STRUCT`, a statement inside a body, a
+  duplicate member — error as the reference errors. The pinned SpecNext
+  Invaders corpus advances past its structures to its next genuine
+  boundary, a forward `DS` length ([#528](https://github.com/asm198x/asm198x/issues/528)).
+- **ca65 reads a chosen branch lazily.**
+  ([#524](https://github.com/asm198x/asm198x/pull/524))
+  The assembly parse now reads structure eagerly and meaning lazily: a
+  selected branch's lines are read at the moment the projection sweep
+  reaches them, under the text environment in force there. So
+  `.define`/`.undefine` work inside conditionals and repetitions — a
+  `.repeat` body may define, use, and undefine per iteration — a taken
+  branch's definition flows to the rest of the source, and an untaken
+  branch touches nothing at all: no definitions, no constants, no
+  cheap-local rescoping, and its `.include` target is never opened.
+  Probing also matched three edges to the reference: redefining a live
+  text symbol errors, `.undefine` of an unknown name errors, and
+  `.ifdef` of a live text symbol substitutes its argument like any other
+  use. All probe-pinned against ca65 V2.18, byte-identical across the
+  curriculum and a six-behaviour differential.
+
 ## [0.0.55](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.54...asm198x-v0.0.55) - 2026-09-01
 
 ### Added
