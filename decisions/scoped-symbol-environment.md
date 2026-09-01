@@ -1,6 +1,7 @@
 # Decision: scopes belong to the shared engine, not to the dialects that need them
 
-**Status:** Proposed (#484). Applies the extraction test of
+**Status:** Active. Binding for Asm198x (accepted 2026-09-01, #484).
+Applies the extraction test of
 [`llvm-alike-legacy-assembly-infrastructure.md`](llvm-alike-legacy-assembly-infrastructure.md)
 to the symbol model, the way
 [`sections-in-the-shared-engine.md`](sections-in-the-shared-engine.md) applied
