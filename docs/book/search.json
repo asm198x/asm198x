@@ -558,6 +558,12 @@
       "slug": "reference/cli"
     },
     {
+      "context": "Reads source in one dialect of a CPU and re-emits it in another, through the",
+      "heading": "convert — dialect conversion",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
       "context": "-C hands the ca65 path a project's own ld65 configuration instead of the",
       "heading": "Project linker configurations (ca65)",
       "page": "The command line",

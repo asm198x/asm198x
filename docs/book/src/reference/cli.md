@@ -178,6 +178,27 @@ Available on the flat dialects, plus the ca65 and vasm linked paths for
 `--debug` and `--sym`. They describe an assembly, so combining them with `fmt`
 or `disasm` is an error rather than a silent no-op.
 
+### `convert` — dialect conversion
+
+```
+asm198x convert --from pasmo --to sjasmplus game.asm -o game.sjasm
+```
+
+Reads source in one dialect of a CPU and re-emits it in another, through the
+source-preserving AST — labels, names, and structure survive; this is source
+migration, not disassembly. The conversion is **self-verifying**: output is
+written only when assembling the input under the source dialect and the
+output under the target dialect produce byte-identical images, so a
+conversion is correct by construction or it is a reported error naming what
+diverged — never silent plausible output. Both ends are real reference
+dialects; nothing is invented.
+
+v1 converts pasmo and pasmonext source to sjasmplus, at instruction and
+directive level (comments ride along; macros and includes convert as written
+where the dialects agree). The emblematic rewrite: pasmo closes `REPT` with
+`ENDM`, which sjasmplus refuses — the converter rewrites the repetition
+closer to `ENDR` and leaves a macro's `ENDM` alone.
+
 ### Project linker configurations (ca65)
 
 ```

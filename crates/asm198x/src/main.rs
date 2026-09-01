@@ -456,6 +456,7 @@ enum Mode {
     Assemble,
     Disassemble,
     Format,
+    Convert,
 }
 
 fn run(args: &[String]) -> Result<String, String> {
@@ -498,10 +499,14 @@ fn run(args: &[String]) -> Result<String, String> {
         "asm" => (Mode::Assemble, &args[1..]),
         "disasm" => (Mode::Disassemble, &args[1..]),
         "fmt" => (Mode::Format, &args[1..]),
+        "convert" => (Mode::Convert, &args[1..]),
         _ => (Mode::Assemble, args),
     };
     if args.is_empty() {
         return Ok(usage());
+    }
+    if let Mode::Convert = mode {
+        return run_convert(args);
     }
     let disassemble = mode == Mode::Disassemble;
     let format = mode == Mode::Format;
@@ -1430,6 +1435,63 @@ fn apply_equ_definitions(source: &str, definitions: &[&str]) -> Result<String, S
     Ok(prelude)
 }
 
+/// `asm198x convert --from <dialect> --to <dialect> <input> [-o <out>]`
+/// (#502): parse-and-re-emit conversion between dialects of one CPU,
+/// self-verified — output is written only when both sides assemble to
+/// byte-identical images.
+fn run_convert(args: &[String]) -> Result<String, String> {
+    let mut from = None;
+    let mut to = None;
+    let mut input = None;
+    let mut output: Option<PathBuf> = None;
+    let mut i = 0;
+    while i < args.len() {
+        match args[i].as_str() {
+            "--from" => {
+                i += 1;
+                from = Some(args.get(i).ok_or("`--from` needs a dialect")?.clone());
+            }
+            "--to" => {
+                i += 1;
+                to = Some(args.get(i).ok_or("`--to` needs a dialect")?.clone());
+            }
+            "-o" => {
+                i += 1;
+                output = Some(PathBuf::from(args.get(i).ok_or("`-o` needs a path")?));
+            }
+            flag if flag.starts_with('-') => {
+                return Err(format!("unknown convert flag `{flag}`"));
+            }
+            path if input.is_none() => input = Some(path.to_string()),
+            extra => return Err(format!("unexpected argument `{extra}`")),
+        }
+        i += 1;
+    }
+    let (Some(from), Some(to), Some(input)) = (from, to, input) else {
+        return Err("convert needs `--from <dialect> --to <dialect> <input>`".into());
+    };
+    let source =
+        std::fs::read_to_string(&input).map_err(|e| format!("cannot read {input}: {e}"))?;
+    let conversion =
+        asm198x::convert(&from, &to, &source).map_err(|e| render_error(&input, &[], &e))?;
+    match output {
+        Some(path) => {
+            std::fs::write(&path, &conversion.output)
+                .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
+            Ok(format!(
+                "converted {input} ({from} -> {to}, verified byte-identical) -> {}",
+                path.display()
+            ))
+        }
+        None => {
+            print!("{}", conversion.output);
+            Ok(format!(
+                "converted {input} ({from} -> {to}, verified byte-identical) -> stdout"
+            ))
+        }
+    }
+}
+
 fn usage() -> String {
     "asm198x — 198x family assembler\n\n\
      usage: asm198x [asm|disasm|fmt] [options] <input>\n\
@@ -1450,6 +1512,9 @@ fn usage() -> String {
      \x20            (prepends the 2-byte load address)\n\
      Game Boy ROM: asm198x --dialect rgbasm --gb-rom <input> [-o <out.gb>]\n\
      \x20            (RGBLINK-compatible layout, padding and header checksums)\n\
+     convert:     asm198x convert --from pasmo --to sjasmplus <input> [-o <out>]\n\
+     \x20            (parse-and-re-emit dialect conversion, same CPU; output is\n\
+     \x20             written only when both sides assemble byte-identically)\n\
      NES project: asm198x --dialect ca65 -C <project.cfg> <input> [-o <out.nes>]\n\
      \x20            (-C reads a bounded ld65 config; absent, the curriculum\n\
      \x20             NROM layout applies as before)\n\

@@ -34,6 +34,7 @@
 // dialects lower into it and it lowers to Statement/Operation (U3 wires that).
 mod ast;
 mod contract;
+mod convert;
 mod cycles;
 mod dialect;
 /// The dialect table: every spelling `--dialect` accepts, and what each is
@@ -82,6 +83,7 @@ pub use listing::{
 pub use span::{ExpansionFrame, FileId, Span};
 // Re-exported so consumers of `Assembly.debug` need not depend on debug198x
 // directly for the symbol types the engine captures.
+pub use convert::{Conversion, convert};
 pub use debug198x;
 pub use isa_disasm::{
     Line, disassemble_1802, disassemble_2650, disassemble_6502, disassemble_6809, disassemble_8048,
