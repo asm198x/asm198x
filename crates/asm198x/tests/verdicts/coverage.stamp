@@ -29,26 +29,26 @@ Z8001	271/271	100.0%
 #
 # Verdicts held, by CPU and suite (counted, not scored — these
 # suites have no denominator that ought to exist).
-# 1802	form=255
-# 2650	form=245
-# 6502	curriculum=189 form=151 fuzz=100 probe=99
-# 65816	form=270 probe=69
-# 6800	form=197
-# 68000	curriculum=106 form=838 fuzz=100 probe=79 sweep-chunk=160
-# 6809	form=277 fuzz=198 probe=51 sweep-chunk=98
-# 8039	form=210
-# 8048	form=214
-# 8080	form=244
-# CP1610	form=30 sweep-chunk=100
-# F8	form=253
-# PDP-11	form=96 sweep-chunk=78
-# SC/MP	form=121
-# SM83	probe=64
-# TMS7000	form=203
-# TMS9900	form=69 sweep-chunk=56
-# Z80	curriculum=322 form=796 fuzz=100 probe=132
-# Z8000	form=271 sweep-chunk=97
-# Z8001	form=271 sweep-chunk=97
-# Z80N	probe=9
-# huc6280	form=234
-# sm83	form=504
+# 1802	form=510
+# 2650	form=490
+# 6502	curriculum=378 form=302 fuzz=200 probe=208
+# 65816	form=540 probe=134
+# 6800	form=394
+# 68000	curriculum=212 form=1676 fuzz=191 probe=157 sweep-chunk=320
+# 6809	form=554 fuzz=298 probe=100 sweep-chunk=196
+# 8039	form=420
+# 8048	form=428
+# 8080	form=488
+# CP1610	form=60 sweep-chunk=150
+# F8	form=506
+# PDP-11	form=192 sweep-chunk=156
+# SC/MP	form=242
+# SM83	probe=130
+# TMS7000	form=406
+# TMS9900	form=138 sweep-chunk=112
+# Z80	curriculum=644 form=1592 fuzz=200 probe=260
+# Z8000	form=542 sweep-chunk=193
+# Z8001	form=542 sweep-chunk=193
+# Z80N	probe=18
+# huc6280	form=468
+# sm83	form=1008
