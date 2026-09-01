@@ -1,6 +1,7 @@
 # Decision: a chosen branch is read eagerly, but understood lazily
 
-**Status:** Proposed (#485). Extends
+**Status:** Active. Binding for Asm198x (accepted 2026-09-01, #485).
+Extends
 [`conditionals-in-multipass-dialects.md`](conditionals-in-multipass-dialects.md)
 in the direction it already points; changes nothing that record measured.
 
