@@ -448,6 +448,65 @@ pub fn render_listing_files(
     out
 }
 
+/// The machine-readable listing (#497, the plan's R4): the same per-line and
+/// per-label size/cycle data the human table renders, as one JSON object —
+/// `{"coverage", "lines", "labels"}`. Addresses are absolute; a line without
+/// a capture record carries no `cycles` member rather than a zero, exactly as
+/// the human column leaves its cell blank.
+#[must_use]
+pub fn render_listing_json(input: &str, result: &AssemblyResult, addr_unit: u64) -> String {
+    use serde_json::json;
+
+    let base = u64::from(result.origin.unwrap_or(0));
+    let files: Vec<&str> = if result.files.is_empty() {
+        vec![input]
+    } else {
+        result.files.iter().map(String::as_str).collect()
+    };
+    let mut cycles: std::collections::BTreeMap<(u32, u32), (u64, u64)> =
+        std::collections::BTreeMap::new();
+    for c in &result.debug.cycles {
+        let e = cycles.entry((c.file.0, c.line)).or_insert((0, 0));
+        e.0 += u64::from(c.base);
+        e.1 += u64::from(c.base) + u64::from(c.page_cross) + u64::from(c.branch_taken);
+    }
+    let lines: Vec<serde_json::Value> = result
+        .debug
+        .lines
+        .iter()
+        .map(|l| {
+            let mut o = json!({
+                "file": files.get(l.file.0 as usize).copied().unwrap_or(""),
+                "line": l.line,
+                "address": base + l.offset,
+                "bytes": l.length * addr_unit,
+            });
+            if let Some(&(min, max)) = cycles.get(&(l.file.0, l.line)) {
+                o["cycles"] = json!({ "min": min, "max": max });
+            }
+            o
+        })
+        .collect();
+    let labels: Vec<serde_json::Value> = crate::cycles::label_costs(result, addr_unit)
+        .into_iter()
+        .map(|c| {
+            json!({
+                "name": c.name,
+                "address": base + c.start,
+                "bytes": c.bytes,
+                "cycles": { "min": c.min, "max": c.max },
+            })
+        })
+        .collect();
+    let coverage = match result.debug.cycle_coverage {
+        crate::engine::CycleCoverage::Full => "full",
+        crate::engine::CycleCoverage::Partial => "partial",
+        crate::engine::CycleCoverage::None => "none",
+    };
+    let doc = json!({ "coverage": coverage, "lines": lines, "labels": labels });
+    format!("{doc}\n")
+}
+
 /// The cycles column cell: one number when the cost is fixed, `min/max` when
 /// conditional extras make it a range — never a collapsed single figure.
 fn cycle_cell((min, max): (u64, u64)) -> String {
@@ -470,42 +529,16 @@ fn render_cycle_footer(result: &AssemblyResult, base: u64, addr_unit: u64, out: 
     use std::fmt::Write as _;
 
     if !result.debug.cycles.is_empty() {
-        // Labelled offsets, deduped and sorted; entry points count as labels.
-        let mut labels: Vec<(u64, &str)> = result
-            .debug
-            .symbols
-            .iter()
-            .filter_map(|s| match &s.kind {
-                debug198x::SymbolKind::Label { offset, .. }
-                | debug198x::SymbolKind::Entry { offset, .. } => Some((*offset, s.name.as_str())),
-                debug198x::SymbolKind::Const { .. } => None,
+        let rows: Vec<(String, u64, (u64, u64))> = crate::cycles::label_costs(result, addr_unit)
+            .into_iter()
+            .map(|c| {
+                (
+                    format!("{} (${:04X})", c.name, base + c.start),
+                    c.bytes,
+                    (c.min, c.max),
+                )
             })
             .collect();
-        labels.sort_by(|a, b| a.0.cmp(&b.0).then(a.1.cmp(b.1)));
-        let mut rows: Vec<(String, u64, (u64, u64))> = Vec::new();
-        for (i, &(start, name)) in labels.iter().enumerate() {
-            let end = labels
-                .get(i + 1)
-                .map_or(u64::MAX, |&(next, _)| next.max(start));
-            let in_span = |offset: u64| offset >= start && (offset < end || start == end);
-            let mut cost = (0u64, 0u64);
-            let mut any = false;
-            for c in result.debug.cycles.iter().filter(|c| in_span(c.offset)) {
-                any = true;
-                cost.0 += u64::from(c.base);
-                cost.1 += u64::from(c.base) + u64::from(c.page_cross) + u64::from(c.branch_taken);
-            }
-            if any {
-                let bytes: u64 = result
-                    .debug
-                    .lines
-                    .iter()
-                    .filter(|l| in_span(l.offset))
-                    .map(|l| l.length * addr_unit)
-                    .sum();
-                rows.push((format!("{name} (${:04X})", base + start), bytes, cost));
-            }
-        }
         if !rows.is_empty() {
             let _ = writeln!(
                 out,

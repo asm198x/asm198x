@@ -1037,7 +1037,11 @@ impl Statement {
 /// symbol-resolution failure.
 pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, AsmError> {
     let (statements, warnings) = dialect.parse_warned(source)?;
-    assemble_statements(statements, warnings, dialect)
+    let a = assemble_statements(statements, warnings, dialect)?;
+    // Budget assertions (#497) hold wherever assembly happens, so they run
+    // here rather than in any one front-end.
+    crate::cycles::check_cycle_budgets(&[("input", source)], &a.debug)?;
+    Ok(a)
 }
 
 /// Assemble a multi-file program (language-surface U2): the root is
@@ -1055,7 +1059,15 @@ pub(crate) fn assemble_multi(
     dialect: &dyn Dialect,
 ) -> Result<Assembly, AsmError> {
     let (statements, warnings) = dialect.parse_multi_warned(map, loader)?;
-    assemble_statements(statements, warnings, dialect)
+    let a = assemble_statements(statements, warnings, dialect)?;
+    let sources: Vec<(&str, &str)> = (0..)
+        .map_while(|i| {
+            let id = crate::span::FileId(i);
+            Some((map.path(id)?, map.contents(id)?))
+        })
+        .collect();
+    crate::cycles::check_cycle_budgets(&sources, &a.debug)?;
+    Ok(a)
 }
 
 /// The shared two-pass driver over an already-parsed statement stream — the

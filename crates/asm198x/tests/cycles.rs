@@ -94,3 +94,92 @@ fn partial_coverage_listing_declares_lower_bounds() {
         "partial coverage must say so:\n{listing}"
     );
 }
+
+/// AE2/R5: `; asm198x: cycles(<label>) <= N` fails the assemble when the
+/// routine's straight-line worst case exceeds N, naming routine, budget, and
+/// actual — and passes when it fits. Worst case here: LDA # (2) + RTS (6).
+/// Enforcement is the engine's, so plain `assemble_*` is the whole test.
+#[test]
+fn cycle_budget_passes_within_and_fails_beyond() {
+    let src = "        * = $c000\n; asm198x: cycles(start) <= 8\nstart   lda #1\n        rts\n";
+    assemble_acme(src).expect("within budget");
+
+    let src = "        * = $c000\n; asm198x: cycles(start) <= 7\nstart   lda #1\n        rts\n";
+    let e = assemble_acme(src).expect_err("over budget");
+    assert_eq!(e.line, 2, "the diagnostic points at the assertion");
+    for needle in ["start", "7", "8"] {
+        assert!(
+            e.message.contains(needle),
+            "names routine, budget, actual: {}",
+            e.message
+        );
+    }
+}
+
+/// A budget naming a label the program does not define is an error — a typo'd
+/// assertion that silently checked nothing would fake the very assurance it
+/// exists to give.
+#[test]
+fn cycle_budget_on_an_unknown_label_is_an_error() {
+    let src = "        * = $c000\n; asm198x: cycles(missing) <= 10\nstart   rts\n";
+    let e = assemble_acme(src).expect_err("no such label");
+    assert!(e.message.contains("missing"), "{}", e.message);
+}
+
+/// A malformed `asm198x:` comment is an error for the same reason: it was
+/// written as an assertion, so it must never be skimmed past as prose.
+#[test]
+fn malformed_budget_comment_is_an_error() {
+    let src = "        * = $c000\n; asm198x: cycles(start) < 10\nstart   rts\n";
+    let e = assemble_acme(src).expect_err("bad spelling");
+    assert_eq!(e.line, 2);
+}
+
+/// R6: a budget cannot be proven where the capture is not Full — a CPU with
+/// no cycle data refuses rather than passing on nothing.
+#[test]
+fn cycle_budget_without_cycle_data_is_refused() {
+    let src = "        org $1000\n; asm198x: cycles(start) <= 10\nstart   nop\n";
+    let e = assemble_lwasm(src).expect_err("no data to check against");
+    assert!(e.message.contains("no cycle data"), "{}", e.message);
+}
+
+/// Budgets travel through includes: an assertion in an included file guards
+/// the label it sits beside, through the multi-file entry.
+#[test]
+fn cycle_budget_inside_an_include_is_checked() {
+    use asm198x::source::MemoryLoader;
+    let loader = MemoryLoader::new().text(
+        "part.inc",
+        "; asm198x: cycles(fast) <= 5\nfast    ld a,1\n        ret\n",
+    );
+    let src = "        org $8000\n        include \"part.inc\"\n";
+    let e = asm198x::assemble_sjasmplus_files(src, "main.s", &loader)
+        .expect_err("7 + 10 cycles against 5");
+    assert!(e.error.message.contains("fast"), "{}", e.error.message);
+}
+
+/// R4/AE4: the JSON listing carries the same per-line and per-label data as
+/// the human table — address, size, honest min/max — plus the coverage fact.
+#[test]
+fn json_listing_carries_lines_labels_and_coverage() {
+    let src =
+        "        * = $c000\n        lda #1\n        lda $1234,x\nloop    bne loop\n        rts\n";
+    let r = assemble_acme(src).expect("assembles");
+    let json = asm198x::render_listing_json("main.s", &r, 1);
+    let v: serde_json::Value = serde_json::from_str(&json).expect("valid JSON");
+    assert_eq!(v["coverage"], "full");
+    assert_eq!(v["lines"][1]["address"], 49154);
+    assert_eq!(v["lines"][1]["bytes"], 3);
+    assert_eq!(v["lines"][1]["cycles"]["max"], 5);
+    assert_eq!(
+        v["lines"][3]["cycles"],
+        serde_json::json!({"min": 6, "max": 6})
+    );
+    assert_eq!(
+        v["labels"][0],
+        serde_json::json!({"name": "loop", "address": 49157, "bytes": 3,
+                           "cycles": {"min": 8, "max": 10}})
+    );
+    assert_eq!(v["lines"][0]["file"], "main.s");
+}
