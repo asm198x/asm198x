@@ -7,6 +7,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.54](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.53...asm198x-v0.0.54) - 2026-09-01
+
+### Added
+
+- *(cycles)* the cycle-honest listing and the cycle budget assertion ([#507](https://github.com/asm198x/asm198x/pull/507))
+- *(z80)* support unary bitwise complement ([#478](https://github.com/asm198x/asm198x/pull/478))
+- *(sjasmplus)* accept SLD comment selection ([#476](https://github.com/asm198x/asm198x/pull/476))
+- *(sjasmplus)* support SpecNext OPT state ([#474](https://github.com/asm198x/asm198x/pull/474))
+- *(acme)* support 65CE02 and 4502 processors ([#472](https://github.com/asm198x/asm198x/pull/472))
+- *(acme)* support C64DTV2 processor
+- *(acme)* support Rockwell and WDC 65C02 targets
+- *(acme)* support CMOS 65C02 target
+- *(acme)* support the 6510 cpu target ([#467](https://github.com/asm198x/asm198x/pull/467))
+- *(acme)* switch instruction sets with cpu directive ([#466](https://github.com/asm198x/asm198x/pull/466))
+
+### Fixed
+
+- *(ca65)* thread text definitions through includes ([#480](https://github.com/asm198x/asm198x/pull/480))
+- *(acme)* place discontiguous origin regions ([#465](https://github.com/asm198x/asm198x/pull/465))
+- *(acme)* scope nested live macro calls ([#464](https://github.com/asm198x/asm198x/pull/464))
+- *(acme)* retain anonymous labels in live macros ([#462](https://github.com/asm198x/asm198x/pull/462))
+- *(acme)* preserve labels on live macro calls ([#460](https://github.com/asm198x/asm198x/pull/460))
+- *(acme)* parse percent as modulo ([#459](https://github.com/asm198x/asm198x/pull/459))
+- *(acme)* share macros across source files ([#456](https://github.com/asm198x/asm198x/pull/456))
+- *(vasm)* accept unsigned condition aliases ([#452](https://github.com/asm198x/asm198x/pull/452))
+- *(rgbasm)* match rgbfix header finalisation ([#451](https://github.com/asm198x/asm198x/pull/451))
+- *(rgbasm)* emit complete raw ROM banks ([#450](https://github.com/asm198x/asm198x/pull/450))
+- *(rgbasm)* place floating RAM sections ([#448](https://github.com/asm198x/asm198x/pull/448))
+- *(rgbasm)* implement definedness expressions ([#446](https://github.com/asm198x/asm198x/pull/446))
+- *(rgbasm)* support operandless storage ([#444](https://github.com/asm198x/asm198x/pull/444))
+- *(rgbasm)* implement graphics literals ([#442](https://github.com/asm198x/asm198x/pull/442))
+- *(rgbasm)* implement STARTOF section queries ([#440](https://github.com/asm198x/asm198x/pull/440))
+- *(rgbasm)* resolve DS counts at the current location ([#438](https://github.com/asm198x/asm198x/pull/438))
+- *(rgbasm)* implement RS offset counters ([#436](https://github.com/asm198x/asm198x/pull/436))
+- *(rgbasm)* accept numeric digit separators ([#432](https://github.com/asm198x/asm198x/pull/432))
+
 ### Added
 
 - **SjASMPlus source options.** `OPT --syntax=abfw`, `OPT --zxnext`, and
