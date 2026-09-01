@@ -121,6 +121,11 @@ fn segment_switch(source: &str) -> Option<SegSwitch> {
 #[derive(Clone)]
 enum Kind {
     Empty,
+    /// A line the structural parse (#481) carried verbatim, to be read by the
+    /// projection sweep under the text environment in force when the sweep
+    /// reaches it — `decisions/parse-affecting-directives.md`. The node's
+    /// `source` holds the whole raw line; nothing else is filled in.
+    Unread,
     Bytes(Vec<Expr>),
     Words(Vec<Expr>),
     /// `.dbyt` — 16-bit values emitted **big-endian** (high byte first).
@@ -245,6 +250,7 @@ pub(crate) fn assemble_with_debug(source: &str) -> Assembled<DebugCapture> {
     let (rom, warnings, capture, areas) = assemble_program(
         &parse_program(&isa::mos6502::SET, source, macros::Expand::Yes)?,
         &super::ca65_layout::Layout::nes_default(),
+        Sweep::single(&isa::mos6502::SET),
     )?;
     Ok((rom, warnings, capture.into_single(), areas))
 }
@@ -277,9 +283,11 @@ pub(crate) fn assemble_multi_with(
     loader: &dyn SourceLoader,
     layout: &super::ca65_layout::Layout,
 ) -> Assembled<DebugCaptureMulti> {
+    let program = parse_program_multi(&isa::mos6502::SET, map, loader)?;
     let out = assemble_program(
-        &parse_program_multi(&isa::mos6502::SET, map, loader)?,
+        &program,
         layout,
+        Sweep::multi(&isa::mos6502::SET, map, loader),
     )?;
     let sources: Vec<(&str, &str)> = (0..)
         .map_while(|i| {
@@ -302,6 +310,7 @@ pub(crate) fn assemble_multi_with(
 fn assemble_program(
     program: &crate::ast::Program,
     layout_def: &super::ca65_layout::Layout,
+    sweep: Sweep<'_>,
 ) -> Assembled<DebugCaptureMulti> {
     let set = &isa::mos6502::SET;
     // The AST is the single front-end IR: the parse built the source-preserving
@@ -309,7 +318,7 @@ fn assemble_program(
     // segment directives); project it to the assembler's `Parsed`. Same
     // bytes as the old direct parse — see
     // `decisions/ast-native-payload-for-multipass-cisc.md`.
-    let parsed = parsed_from_program(program)?;
+    let parsed = parsed_from_program(program, sweep)?;
 
     // Scoped label references, answered now that every definition is known:
     // `v` written inside `a::b` is `a::b::v` if that exists, else `a::v`, else
@@ -772,6 +781,9 @@ fn resolve(
 ) -> Result<(Resolved, usize), AsmError> {
     Ok(match kind {
         Kind::Empty => (Resolved::Nothing, 0),
+        // The sweep reads every unread line before projection ends; one
+        // reaching layout is a driver bug, not a source error.
+        Kind::Unread => unreachable!("an unread line survived the projection sweep"),
         // The only statement whose size depends on where it stands: pad to the
         // next multiple of the boundary, measured from the segment's start.
         Kind::Align(boundary, fill) => {
@@ -1147,7 +1159,13 @@ pub(crate) fn parse_program(
     let expanded = ca65_flat::expand_ca65(source, mode, ca65_flat::Target::Mos6502)?;
     let text = macros::expanded_text(&expanded, source);
     let origins = macros::line_origins(&expanded);
-    let mut w = Walker::new(set, mode == macros::Expand::Yes);
+    // Assembly parses structure only (#481): blocks group, lines stay unread
+    // for the projection sweep. The formatter keeps the full eager parse — it
+    // renders both branches from source and applies no text environment.
+    let mut w = match mode {
+        macros::Expand::Yes => Walker::structural(set),
+        macros::Expand::No => Walker::new(set, false),
+    };
     // The shared cursor: it groups `.if`/`.repeat` blocks and keeps every
     // include unresolved (KTD1), which is what `--fmt` needs — it renders the
     // directive verbatim and works with a missing target. Macros expanded
@@ -1180,7 +1198,10 @@ pub(crate) fn parse_program_multi(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
 ) -> Result<crate::ast::Program, AsmError> {
-    let mut w = Walker::new(set, true);
+    // Structure only (#481): includes are not resolved here — the projection
+    // sweep opens each one at the moment it reads the directive, so a target
+    // inside an untaken branch is never opened at all.
+    let mut w = Walker::structural(set);
     let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
     let root_lines = root.lines().count() as u32;
     let mut stack = vec![FileId(0)];
@@ -1231,10 +1252,11 @@ struct Walker {
     /// False only for formatter parsing, which must preserve source-only
     /// directives rather than consume or substitute them.
     expand_text_defines: bool,
-    /// Structural nesting around the live line. Definition directives inside
-    /// a deferred conditional/repetition cannot be applied safely until that
-    /// block is selected, so they are rejected rather than misassembled.
-    text_define_block_depth: usize,
+    /// Structure-only mode (#481): the assembly parse groups blocks and
+    /// resolves nothing — every line becomes an *unread* verbatim node, and
+    /// the projection sweep reads it under the environment in force at that
+    /// point. `decisions/parse-affecting-directives.md`.
+    structural: bool,
 }
 
 /// A `.struct`, `.union` or `.enum` being read.
@@ -1312,7 +1334,16 @@ impl Walker {
             records: Vec::new(),
             text_defines: BTreeMap::new(),
             expand_text_defines,
-            text_define_block_depth: 0,
+            structural: false,
+        }
+    }
+
+    /// The structure-only walker (#481): blocks are grouped, every line is
+    /// kept unread. The projection sweep owns the eager twin that reads them.
+    fn structural(set: &'static isa::InstructionSet) -> Self {
+        Self {
+            structural: true,
+            ..Self::new(set, true)
         }
     }
 
@@ -1803,7 +1834,7 @@ impl FlatWalk for Walker {
         line: usize,
         _file: FileId,
     ) -> Result<Option<String>, AsmError> {
-        if !self.expand_text_defines {
+        if self.structural || !self.expand_text_defines {
             return Ok(Some(raw.to_string()));
         }
         let code = strip_comment(raw);
@@ -1811,12 +1842,6 @@ impl FlatWalk for Walker {
         let (word, rest) = split_first_word(trimmed);
         match word.to_ascii_lowercase().as_str() {
             ".define" => {
-                if self.text_define_block_depth != 0 {
-                    return Err(AsmError::new(
-                        line,
-                        "`.define` inside a conditional or repetition is not yet supported",
-                    ));
-                }
                 let (name, value) = split_first_word(rest.trim());
                 if !is_ident(name) {
                     return Err(AsmError::new(line, "`.define` needs an identifier"));
@@ -1834,12 +1859,6 @@ impl FlatWalk for Walker {
                 return Ok(None);
             }
             ".undef" | ".undefine" => {
-                if self.text_define_block_depth != 0 {
-                    return Err(AsmError::new(
-                        line,
-                        "`.undefine` inside a conditional or repetition is not yet supported",
-                    ));
-                }
                 let (name, trailing) = split_first_word(rest.trim());
                 if !is_ident(name) || !trailing.trim().is_empty() {
                     return Err(AsmError::new(
@@ -1856,16 +1875,6 @@ impl FlatWalk for Walker {
                     ));
                 }
                 return Ok(None);
-            }
-            _ => {}
-        }
-
-        match word.to_ascii_lowercase().as_str() {
-            ".if" | ".ifdef" | ".ifndef" | ".ifblank" | ".ifnblank" | ".ifconst" | ".ifnconst"
-            | ".ifp02" | ".ifp4510" | ".ifp816" | ".ifpc02" | ".ifpsc02" | ".ifref" | ".ifnref"
-            | ".repeat" => self.text_define_block_depth += 1,
-            ".endif" | ".endrepeat" => {
-                self.text_define_block_depth = self.text_define_block_depth.saturating_sub(1);
             }
             _ => {}
         }
@@ -1916,6 +1925,12 @@ impl FlatWalk for Walker {
         code: &'a str,
         line: usize,
     ) -> Result<(Option<crate::ast::Symbol>, &'a str), AsmError> {
+        // Structure-only (#481): the label stays in the head text, unread —
+        // the sweep splits and binds it when the block is reached, under the
+        // scope and anonymous-label state in force at that point.
+        if self.structural {
+            return Ok((None, code.trim()));
+        }
         let (symbol, rest) =
             split_label_symbol(&self.anons, line, &mut self.current_global, code.trim())?;
         let symbol = symbol.map(|mut symbol| {
@@ -1948,6 +1963,21 @@ impl FlatWalk for Walker {
         file: FileId,
     ) -> Result<Option<DirectiveLine>, AsmError> {
         use crate::ast::{Comment, Item, Node, Scope, Span, Symbol, Trivia};
+        // Structure-only (#481): carry the line verbatim; the projection
+        // sweep reads it under the environment in force when it is reached.
+        // An untaken branch's lines are then never read at all — which is the
+        // measured ca65 posture, by construction.
+        if self.structural {
+            self.nodes.push(Node {
+                operand_span: None,
+                label: None,
+                item: Some(Item::Native(Box::new(Kind::Unread))),
+                source: raw.trim_end().to_string(),
+                span: Span::in_file(file, line as u32, 1),
+                trivia: Trivia::default(),
+            });
+            return Ok(None);
+        }
         // Deferred anonymous-reference records need the current file; the
         // parse helpers below only know their line.
         self.anons.file.set(file);
@@ -2270,7 +2300,10 @@ fn substitute_text_defines(
 /// statement in the segment tracked from the `.segment` nodes, a label-only node
 /// becomes an empty placed statement, and an `Item::Equ` node folds into the
 /// constant table in source order.
-fn parsed_from_program(program: &crate::ast::Program) -> Result<Parsed, AsmError> {
+fn parsed_from_program(
+    program: &crate::ast::Program,
+    mut sw: Sweep<'_>,
+) -> Result<Parsed, AsmError> {
     let mut st = Projection {
         seg: "CODE".to_string(),
         seg_stack: Vec::new(),
@@ -2280,12 +2313,65 @@ fn parsed_from_program(program: &crate::ast::Program) -> Result<Parsed, AsmError
         referenced: BTreeSet::new(),
         loop_vars: Vec::new(),
     };
-    project_nodes(&program.nodes, &mut st)?;
+    project_nodes(&program.nodes, &mut st, &mut sw)?;
+    // The reader's end-of-source checks — an unclosed scope or record, a
+    // dangling forward anonymous reference — run where its state is final:
+    // after the sweep, which is where the reading happened.
+    let last = program.nodes.last().map_or(0, |n| n.span.line);
+    sw.reader.finish(last)?;
     Ok(Parsed {
         stmts: st.stmts,
         label_seg: st.label_seg,
         consts: st.consts,
     })
+}
+
+/// The projection's reader (#481): structure was read eagerly at parse, and
+/// this is the machinery that reads *meaning* lazily — an eager [`Walker`]
+/// fed one unread line at a time, in sweep order, so its text environment,
+/// constants, scopes, and anonymous-label stream are all positional in the
+/// order ca65's own single sequential reader would see them. An untaken
+/// branch's lines never pass through it at all.
+/// `decisions/parse-affecting-directives.md`.
+struct Sweep<'a> {
+    reader: Walker,
+    /// The include context — the multi-file entry's map and loader, so an
+    /// `.include` inside a selected branch resolves at the moment the sweep
+    /// reads it. `None` on the single-source path, which keeps meaning "one
+    /// file, no includes".
+    includes: Option<IncludeCx<'a>>,
+}
+
+struct IncludeCx<'a> {
+    map: &'a mut SourceMap,
+    loader: &'a dyn SourceLoader,
+    /// The active include chain, for the cycle and depth checks — the same
+    /// discipline the eager walk applies, at sweep time.
+    stack: Vec<FileId>,
+}
+
+impl<'a> Sweep<'a> {
+    fn single(set: &'static isa::InstructionSet) -> Self {
+        Self {
+            reader: Walker::new(set, true),
+            includes: None,
+        }
+    }
+
+    fn multi(
+        set: &'static isa::InstructionSet,
+        map: &'a mut SourceMap,
+        loader: &'a dyn SourceLoader,
+    ) -> Self {
+        Self {
+            reader: Walker::new(set, true),
+            includes: Some(IncludeCx {
+                map,
+                loader,
+                stack: vec![FileId(0)],
+            }),
+        }
+    }
 }
 
 /// The projection's running state: everything a later line's fold can see.
@@ -2326,33 +2412,60 @@ impl Projection {
 /// No layout state is consulted because a ca65 condition cannot reach any: the
 /// reference refuses `*` and even a backward label in one, since a ca65 label is
 /// relocatable until `ld65` links it and so is never a constant expression.
-fn project_nodes(nodes: &[crate::ast::Node], st: &mut Projection) -> Result<(), AsmError> {
+fn project_nodes(
+    nodes: &[crate::ast::Node],
+    st: &mut Projection,
+    sw: &mut Sweep<'_>,
+) -> Result<(), AsmError> {
     use crate::ast::Item;
     for node in nodes {
+        // `.end` stopped the reader: nothing after it is read, so nothing
+        // after it is projected — a block head included.
+        if sw.reader.ended {
+            break;
+        }
         match &node.item {
+            Some(Item::Native(payload))
+                if matches!(payload.as_any().downcast_ref::<Kind>(), Some(Kind::Unread)) =>
+            {
+                sweep_line(node, st, sw)?;
+                continue;
+            }
             Some(Item::Conditional {
                 head,
                 then_body,
                 else_body,
                 ..
             }) => {
-                project_block_label(node, st);
-                if fold_condition(head, st, node.span.line as usize)? {
-                    project_nodes(then_body, st)?;
+                let line = node.span.line as usize;
+                let head = read_block_head(node, head, st, sw)?;
+                if fold_condition(&head, st, line)? {
+                    project_nodes(then_body, st, sw)?;
                 } else if let Some(body) = else_body {
-                    project_nodes(body, st)?;
+                    project_nodes(body, st, sw)?;
+                }
+                // `.end` inside the block: ca65's reader stops before ever
+                // seeing the closer, and says so (probed: `Conditional
+                // assembly branch was never closed`). The structural parse
+                // saw the closer; the sequential read is what governs.
+                if sw.reader.ended {
+                    return Err(AsmError::at(
+                        node.span.clone(),
+                        "conditional block is never closed".to_string(),
+                    ));
                 }
                 continue;
             }
             Some(Item::Repeat { head, body, .. }) => {
-                project_block_label(node, st);
-                let (count, var) = fold_repeat(head, st, node.span.line as usize)?;
+                let line = node.span.line as usize;
+                let head = read_block_head(node, head, st, sw)?;
+                let (count, var) = fold_repeat(&head, st, line)?;
                 for i in 0..count {
                     if let Some(name) = &var {
                         st.loop_vars.push((name.clone(), i));
                     }
                     let first = st.stmts.len();
-                    let out = project_nodes(body, st);
+                    let out = project_nodes(body, st, sw);
                     if var.is_some() {
                         // Bake this pass's value into everything the body just
                         // produced, then drop the binding: ca65 scopes a loop
@@ -2365,6 +2478,12 @@ fn project_nodes(nodes: &[crate::ast::Node], st: &mut Projection) -> Result<(), 
                     }
                     out?;
                 }
+                if sw.reader.ended {
+                    return Err(AsmError::at(
+                        node.span.clone(),
+                        "repetition block is never closed".to_string(),
+                    ));
+                }
                 continue;
             }
             _ => {}
@@ -2374,22 +2493,204 @@ fn project_nodes(nodes: &[crate::ast::Node], st: &mut Projection) -> Result<(), 
     Ok(())
 }
 
-/// Bind a label carried by a conditional or repetition head before evaluating
-/// the block. ca65 places it at the head line's address, just as if it occupied
-/// its own label-only line.
-fn project_block_label(node: &crate::ast::Node, st: &mut Projection) {
-    let Some(symbol) = node.label.as_ref() else {
-        return;
+/// Read a block head at the moment the sweep reaches it: substitute the text
+/// environment in force, split an optional label, and bind it. ca65 places
+/// the label at the head line's address, just as if it occupied its own
+/// label-only line.
+///
+/// # Errors
+/// A substitution failure, or a label that does not parse.
+fn read_block_head(
+    node: &crate::ast::Node,
+    head: &str,
+    st: &mut Projection,
+    sw: &mut Sweep<'_>,
+) -> Result<String, AsmError> {
+    let line = node.span.line as usize;
+    let file = node.span.file;
+    sw.reader.anons.file.set(file);
+    let processed = sw
+        .reader
+        .preprocess_line(head, line, file)
+        .map_err(|e| ca65_flat::stamp_file(e, file))?
+        // Only a `.define`/`.undefine` line is consumed whole, and a block
+        // head is neither.
+        .unwrap_or_default();
+    let (symbol, rest) = sw
+        .reader
+        .block_open(&processed, line)
+        .map_err(|e| ca65_flat::stamp_file(e, file))?;
+    if let Some(symbol) = symbol {
+        st.label_seg
+            .insert(symbol.qualified.clone(), st.seg.clone());
+        st.stmts.push(Stmt {
+            line,
+            file,
+            seg: st.seg.clone(),
+            label: Some(symbol.qualified.clone()),
+            kind: Kind::Empty,
+        });
+    }
+    Ok(rest.to_string())
+}
+
+/// Read one unread line (#481): apply the reader's live text environment,
+/// parse it, and project whatever it contributes. A walk-handled directive —
+/// `.include`/`.incbin` — resolves here, at the point the sweep reads it,
+/// which is what lets a missing file inside an untaken branch go unnoticed
+/// exactly as ca65's sequential reader never notices it.
+///
+/// # Errors
+/// Any parse failure on the line, or a directive whose target cannot be
+/// resolved.
+fn sweep_line(
+    node: &crate::ast::Node,
+    st: &mut Projection,
+    sw: &mut Sweep<'_>,
+) -> Result<(), AsmError> {
+    let line = node.span.line as usize;
+    let file = node.span.file;
+    let Some(processed) = sw
+        .reader
+        .preprocess_line(&node.source, line, file)
+        .map_err(|e| ca65_flat::stamp_file(e, file))?
+    else {
+        return Ok(());
     };
-    st.label_seg
-        .insert(symbol.qualified.clone(), st.seg.clone());
-    st.stmts.push(Stmt {
-        line: node.span.line as usize,
-        file: node.span.file,
-        seg: st.seg.clone(),
-        label: Some(symbol.qualified.clone()),
-        kind: Kind::Empty,
-    });
+    let start = sw.reader.nodes.len();
+    let walked = sw
+        .reader
+        .walk_line(&processed, line, file)
+        .map_err(|e| ca65_flat::stamp_file(e, file));
+    let mut drained: Vec<crate::ast::Node> = sw.reader.nodes.split_off(start);
+    let walked = walked?;
+    // A macro-expanded line carries its author's frames on the structural
+    // node; the freshly read nodes get the same placement.
+    for n in &mut drained {
+        n.span
+            .expansion_frames
+            .clone_from(&node.span.expansion_frames);
+        if let Some(sp) = n.operand_span.as_mut() {
+            sp.expansion_frames.clone_from(&node.span.expansion_frames);
+        }
+        project_one(n, st)?;
+    }
+    let Some(mut d) = walked else {
+        return Ok(());
+    };
+    d.span
+        .expansion_frames
+        .clone_from(&node.span.expansion_frames);
+    if let Some(sp) = d.operand_span.as_mut() {
+        sp.expansion_frames.clone_from(&node.span.expansion_frames);
+    }
+    if sw.includes.is_none() {
+        // Single-source: the target is never opened (KTD1); the projection's
+        // Include/Incbin arms carry the pointer to the multi-file entry.
+        return project_one(&ca65_flat::unresolved_node(d), st);
+    }
+    resolve_at_sweep(d, st, sw)
+}
+
+/// Resolve an `.include`/`.incbin` the sweep just read, under the same depth,
+/// cycle, and window rules as the eager walk — then read an include's target
+/// the same way the root is read: structure eagerly, meaning through this
+/// sweep, so the target shares the environment in force at the include point
+/// and everything it defines flows back out.
+///
+/// # Errors
+/// Resolution failures at the directive's operand span; any error the
+/// target's own lines raise.
+fn resolve_at_sweep(
+    d: ca65_flat::DirectiveLine,
+    st: &mut Projection,
+    sw: &mut Sweep<'_>,
+) -> Result<(), AsmError> {
+    use super::ca65_flat::WalkDirective;
+    let span = d.span.clone();
+    let at = d.operand_span.clone().unwrap_or_else(|| span.clone());
+    match d.kind {
+        WalkDirective::Include { ref request } => {
+            // A label on the include line binds at the include point's
+            // address (probe-pinned), so it becomes a label-only node
+            // before the target's lines.
+            if let Some(symbol) = d.label {
+                st.label_seg
+                    .insert(symbol.qualified.clone(), st.seg.clone());
+                st.stmts.push(Stmt {
+                    line: span.line as usize,
+                    file: span.file,
+                    seg: st.seg.clone(),
+                    label: Some(symbol.qualified),
+                    kind: Kind::Empty,
+                });
+            }
+            let set = sw.reader.set;
+            let (id, sub) = {
+                let cx = sw.includes.as_mut().expect("checked by the caller");
+                let (id, contents) = ca65_flat::open_include(
+                    request,
+                    &at,
+                    cx.map,
+                    cx.loader,
+                    &cx.stack,
+                    &ca65_flat::CA65_SEMANTICS,
+                    span.line,
+                )?;
+                cx.stack.push(id);
+                // The target's structure, read the way the root's was: its
+                // macros expand (a file expands on its own, #93), its blocks
+                // group, its lines stay unread for this sweep.
+                let mut w = Walker::structural(set);
+                let walked = ca65_flat::walk_file(
+                    &mut w,
+                    &contents,
+                    id,
+                    cx.map,
+                    cx.loader,
+                    &mut cx.stack,
+                    &ca65_flat::CA65_SEMANTICS,
+                );
+                let sub = walked.and_then(|()| w.finish(contents.lines().count() as u32));
+                (id, sub)
+            };
+            let out = sub.and_then(|prog| project_nodes(&prog.nodes, st, sw));
+            let cx = sw.includes.as_mut().expect("checked by the caller");
+            debug_assert_eq!(cx.stack.last(), Some(&id), "include stack is a stack");
+            cx.stack.pop();
+            out
+        }
+        WalkDirective::Incbin {
+            ref request,
+            offset,
+            size,
+        } => {
+            let payload = {
+                let cx = sw.includes.as_mut().expect("checked by the caller");
+                ca65_flat::incbin_payload(
+                    request,
+                    offset,
+                    size,
+                    &at,
+                    cx.map,
+                    cx.loader,
+                    &cx.stack,
+                    &ca65_flat::CA65_SEMANTICS,
+                )?
+            };
+            project_one(
+                &crate::ast::Node {
+                    operand_span: d.operand_span,
+                    label: d.label,
+                    item: Some(crate::ast::Item::Binary(payload)),
+                    source: d.source,
+                    span,
+                    trivia: d.trivia,
+                },
+                st,
+            )
+        }
+    }
 }
 
 /// Fold a `.if` / `.ifdef` / `.ifndef` / `.elseif` head.
@@ -2649,6 +2950,7 @@ fn collect_syms(kind: &Kind, out: &mut BTreeSet<String>) {
 fn map_kind_syms(k: &Kind, f: &dyn Fn(&str) -> Option<Expr>) -> Kind {
     let list = |es: &Vec<Expr>| es.iter().map(|e| map_expr_syms(e, f)).collect();
     match k {
+        Kind::Unread => Kind::Unread,
         Kind::Bytes(es) => Kind::Bytes(list(es)),
         Kind::Words(es) => Kind::Words(list(es)),
         Kind::DBytes(es) => Kind::DBytes(list(es)),
@@ -5283,12 +5585,106 @@ two:\n\
         assert_eq!(&rom[16..18], &[0x42, 0x43]);
     }
 
+    /// #481, probe-pinned against ca65 V2.18: an untaken branch's lines are
+    /// never read, so a definition inside one is invisible afterwards — and
+    /// so is anything else in there, a line that would not parse included.
     #[test]
-    fn a_text_definition_inside_a_deferred_block_is_refused_not_misassembled() {
+    fn an_untaken_branch_defines_nothing_and_need_not_parse() {
+        let rom = rom(
+            ".segment \"CODE\"\n.if 0\n.define six 6\nthis is lexable garbage but not a statement\n\
+             .end\n.endif\n.ifdef six\n.byte 6\n.else\n.byte 1\n.endif\n",
+        );
+        assert_eq!(rom[16], 1, "the untaken definition must be invisible");
+    }
+
+    /// #481: a taken branch's definition flows to the rest of the source —
+    /// the following top-level line included (probed: `a9 06`).
+    #[test]
+    fn a_taken_branch_definition_flows_on() {
+        let first = rom(".segment \"CODE\"\n.if 1\n.define six 6\n.endif\n.byte six\n");
+        assert_eq!(first[16], 6);
+        // ... across a later block too.
+        let second =
+            rom(".segment \"CODE\"\n.if 1\n.define five 5\n.endif\n.if 1\n.byte five\n.endif\n");
+        assert_eq!(second[16], 5);
+    }
+
+    /// #481: `.undefine` has the same positional, selection-time semantics.
+    #[test]
+    fn an_undefine_inside_a_taken_branch_takes_effect() {
+        let rom = rom(
+            ".segment \"CODE\"\n.define six 6\n.if 1\n.undefine six\n.endif\n\
+             .ifdef six\n.byte 6\n.else\n.byte 2\n.endif\n",
+        );
+        assert_eq!(rom[16], 2);
+    }
+
+    /// #481, the shape the old diagnostic refused and ca65 accepts (probed:
+    /// `a9 07` three times): each iteration defines, uses, and undefines in
+    /// execution order.
+    #[test]
+    fn a_repeat_body_applies_definitions_per_iteration() {
+        let rom = rom(
+            ".segment \"CODE\"\n.repeat 3\n.define val 7\n.byte val\n.undefine val\n.endrepeat\n",
+        );
+        assert_eq!(&rom[16..19], &[7, 7, 7]);
+    }
+
+    /// Probed: ca65 refuses a second `.define` of a live name — which is what
+    /// makes the iteration above need its `.undefine`.
+    #[test]
+    fn redefining_a_live_text_symbol_is_refused() {
+        let error = crate::assemble_ca65(
+            ".segment \"CODE\"\n.repeat 2\n.define val 7\n.byte val\n.endrepeat\n",
+        )
+        .expect_err("iteration two redefines");
+        assert!(error.to_string().contains("already defined"), "{error}");
+        let error = crate::assemble_ca65(".define one 1\n.define one 2\n")
+            .expect_err("ca65 refuses to redefine");
+        assert!(error.to_string().contains("already defined"), "{error}");
+    }
+
+    /// Probed: `.undefine` of a name that is not defined is an error
+    /// (`No such macro`), not a no-op.
+    #[test]
+    fn undefining_an_unknown_text_symbol_is_refused() {
+        let error = crate::assemble_ca65(".undefine nothing\n")
+            .expect_err("ca65 refuses to undefine the undefined");
+        assert!(error.to_string().contains("to undefine"), "{error}");
+    }
+
+    /// Probed: `.ifdef` of a *live* text symbol substitutes the argument like
+    /// any other use — `.define hi 8` then `.ifdef hi` is ca65's `Identifier
+    /// expected`, because the question lands on the value.
+    #[test]
+    fn ifdef_of_a_live_text_symbol_lands_on_its_value() {
+        let error = crate::assemble_ca65(".define hi 8\n.ifdef hi\n.byte 1\n.endif\n")
+            .expect_err("the argument was substituted");
+        assert!(error.to_string().contains("identifier"), "{error}");
+    }
+
+    /// Probed: `.end` inside a taken branch stops the reader before the
+    /// closer, and ca65 reports the block unclosed even though the text
+    /// closes it further down.
+    #[test]
+    fn end_inside_a_taken_branch_leaves_the_block_unclosed() {
         let error =
-            crate::assemble_ca65(".segment \"CODE\"\n.if 0\n.define HIDDEN 1\n.endif\n.byte $42\n")
-                .expect_err("the live pass cannot know whether to apply this definition");
-        assert!(error.to_string().contains("not yet supported"), "{error}");
+            crate::assemble_ca65(".segment \"CODE\"\n.if 1\n.byte 4\n.end\n.endif\n.byte 5\n")
+                .expect_err("the reader stops before the closer");
+        assert!(error.to_string().contains("never closed"), "{error}");
+    }
+
+    /// #481: an untaken branch touches no state — a label inside one neither
+    /// binds nor resets the cheap-local scope, and a constant neither.
+    #[test]
+    fn an_untaken_branch_touches_no_binding_state() {
+        // The cheap local before the block still resolves across it (probed).
+        let rom = rom(".segment \"CODE\"\nfoo:\n@b: .byte 1\n.if 0\nother:\n.endif\n.word @b\n");
+        assert_eq!(&rom[16..19], &[1, 0x00, 0x80]);
+        // The constant never folds (probed: `Symbol 'k' is undefined`).
+        let error = crate::assemble_ca65(".segment \"CODE\"\n.if 0\nk = 9\n.endif\n.byte k\n")
+            .expect_err("an untaken constant must not leak");
+        assert!(error.to_string().contains("k"), "{error}");
     }
 
     /// ca65 spells every operator twice, and both spellings are one operator:

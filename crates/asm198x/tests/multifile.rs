@@ -3274,7 +3274,7 @@ fn ca65_define_state_threads_both_ways_through_nested_includes() {
     let loader = MemoryLoader::new()
         .text(
             "part.s",
-            ".ifdef FLAT\n.byte VALUE\n.else\n.byte $00\n.endif\n\
+            ".if FLAT\n.byte VALUE\n.else\n.byte $00\n.endif\n\
              .define FROM_INCLUDE $43\n.include \"nested.s\"\n",
         )
         .text("nested.s", ".undefine FLAT\n");
