@@ -75,6 +75,12 @@ jobs:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
+          # The checkout is owned by a different uid than the container user,
+          # and git refuses a repo it does not own — reported, unhelpfully, as
+          # "not in a git directory". Mark the workspace safe explicitly; the
+          # entry actions/checkout writes does not reliably survive into this
+          # image's git configuration.
+          git config --global --add safe.directory "$GITHUB_WORKSPACE"
           git config user.name  "asm198x growth"
           git config user.email "growth@asm198x.invalid"
 
