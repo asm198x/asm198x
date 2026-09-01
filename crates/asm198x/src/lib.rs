@@ -52,6 +52,7 @@ mod listing;
 mod prg;
 #[cfg(test)]
 mod roundtrip_tests;
+mod scopes;
 mod sna;
 mod tape;
 // The multi-file source model (language-surface U1): the loader seam

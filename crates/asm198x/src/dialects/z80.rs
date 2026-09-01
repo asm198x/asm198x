@@ -521,21 +521,6 @@ pub(crate) fn repeat_keyword(word: &str) -> Option<RepeatKw> {
     })
 }
 
-/// Rewrite one reference under the open modules: `@name` escapes to the bare
-/// global name, anything else is qualified and its bare fallback recorded in
-/// `aliases` for [`SjasmEval::finish`] to choose between.
-fn module_ref(name: String, prefix: &str, aliases: &mut BTreeMap<String, String>) -> String {
-    if let Some(bare) = name.strip_prefix('@') {
-        return bare.to_string();
-    }
-    if prefix.is_empty() {
-        return name;
-    }
-    let qualified = format!("{prefix}{name}");
-    aliases.insert(qualified.clone(), name);
-    qualified
-}
-
 /// Which end of a `MODULE` block a word is.
 #[derive(Clone, Copy, PartialEq, Eq, Debug)]
 pub(crate) enum ModuleKw {
@@ -580,12 +565,6 @@ enum KwClose {
 /// no environment, no DEFINE table — [`SjasmEval`] supplies those on the live
 /// walk.
 /// A `MODULE` that has been opened and not yet closed.
-struct OpenModule {
-    name: String,
-    line: usize,
-    file: FileId,
-}
-
 /// How a condition's forward references are answered, and what that cost.
 ///
 /// The reference runs three passes and reads an as-yet-undefined symbol as
@@ -1230,21 +1209,12 @@ struct SjasmEval<'a, S: Z80Syntax> {
     /// `DEFINE` bindings: name → verbatim replacement text (may be empty for
     /// the bare flag form). Case-sensitive (probe p22).
     defines: BTreeMap<String, String>,
-    /// The most recent global (non-`.`) label, for qualifying locals. Kept
-    /// *unprefixed*: the module prefix wraps the result, so a local under
-    /// `glob` inside module `foo` is `foo.glob.loc` (probe m25).
-    current_global: Option<String>,
-    /// Open `MODULE`s, outermost first. Their dotted join prefixes every label
-    /// defined and every name referenced inside; each carries where it was
-    /// opened, so leaving one open can be reported against the line that did.
-    modules: Vec<OpenModule>,
-    /// Module-qualified reference → the bare name it falls back to. The
-    /// reference tries the qualified name first and the *global* name second,
-    /// with no walk-up through intermediate levels (probes m8/m13/m31); which
-    /// one is right depends on what ends up defined, including by a definition
-    /// the walk has not reached yet, so the choice is repaired in
-    /// [`SjasmEval::finish`] once the whole stream is known.
-    aliases: BTreeMap<String, String>,
+    /// The scoped symbol environment (#484): the current-global anchor, the
+    /// open `MODULE`s, and the qualified→bare fallbacks. This dialect
+    /// declares the events — a plain label re-anchors, `MODULE`/`ENDMODULE`
+    /// open and close — and the shared environment owns what they mean for
+    /// lookup (`decisions/scoped-symbol-environment.md`).
+    scopes: crate::scopes::ScopeEnv,
     /// Present on a dialect that resolves conditions across passes (#99), and
     /// the reason a `SjasmEval` is built once per pass rather than once.
     forward: Option<Forward>,
@@ -1275,9 +1245,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             syntax_abfw: false,
             consts: BTreeMap::new(),
             defines: BTreeMap::new(),
-            current_global: None,
-            modules: Vec::new(),
-            aliases: BTreeMap::new(),
+            scopes: crate::scopes::ScopeEnv::new(),
             forward: None,
             pc: Some(0),
             multi,
@@ -1304,25 +1272,11 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         } else {
             name.to_string()
         };
-        // `@name` opts out of both scopes and defines the bare global name
-        // (probes m4/m15) — it does not become the current global either.
-        if self.syntax.scopes_modules()
-            && let Some(bare) = name.strip_prefix('@')
-        {
-            return Ok(bare.to_string());
-        }
-        let scoped = if self.syntax.scopes_locals() && name.starts_with('.') {
-            match &self.current_global {
-                Some(g) => format!("{g}{name}"),
-                None => name,
-            }
-        } else {
-            if self.syntax.scopes_locals() {
-                self.current_global = Some(name.clone());
-            }
-            name
-        };
-        Ok(format!("{}{scoped}", self.module_prefix()))
+        Ok(self.scopes.define(
+            name,
+            self.syntax.scopes_locals(),
+            self.syntax.scopes_modules(),
+        ))
     }
 
     /// Move the counter over `op`, or give up on knowing where it is. The
@@ -1346,27 +1300,15 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         self.forward.as_ref().map(|f| (f, self.current_file))
     }
 
-    /// The dotted prefix the open modules impose, `""` when none are open (so
-    /// a dialect without modules pays only an empty `format!`).
-    fn module_prefix(&self) -> String {
-        if self.modules.is_empty() {
-            String::new()
-        } else {
-            let names: Vec<&str> = self.modules.iter().map(|m| m.name.as_str()).collect();
-            format!("{}.", names.join("."))
-        }
-    }
-
     /// The innermost module left open at the end of the walk, if any, named by
     /// its full dotted path — the reference reports one advisory naming that,
     /// not one per open module.
     fn unclosed_module(&self) -> Option<Warning> {
-        let last = self.modules.last()?;
-        let names: Vec<&str> = self.modules.iter().map(|m| m.name.as_str()).collect();
+        let (path, line, file) = self.scopes.unclosed()?;
         Some(Warning {
-            line: last.line,
-            message: format!("`ENDMODULE` missing for module `{}`", names.join(".")),
-            file: last.file,
+            line,
+            message: format!("`ENDMODULE` missing for module `{path}`"),
+            file,
             kind: crate::engine::WarningKind::Advisory,
         })
     }
@@ -1392,14 +1334,10 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
                 if !is_ident(name) {
                     return Err(AsmError::new(line, format!("bad module name `{name}`")));
                 }
-                self.modules.push(OpenModule {
-                    name: name.to_string(),
-                    line,
-                    file,
-                });
+                self.scopes.open(name, line, file);
             }
             ModuleKw::Close => {
-                if self.modules.pop().is_none() {
+                if !self.scopes.close() {
                     return Err(AsmError::new(line, "`ENDMODULE` without `MODULE`"));
                 }
             }
@@ -1414,18 +1352,13 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
     /// *and* the bare one is defined. Keeping it when neither exists is what
     /// makes the error name the same candidate the reference names.
     fn finish(&mut self, mut out: Vec<Statement>) -> Vec<Statement> {
-        if self.aliases.is_empty() {
+        if !self.scopes.has_aliases() {
             return out;
         }
         let mut defined: std::collections::BTreeSet<String> =
             out.iter().filter_map(|s| s.label.clone()).collect();
         defined.extend(self.consts.keys().cloned());
-        let fix: BTreeMap<&str, &str> = self
-            .aliases
-            .iter()
-            .filter(|(q, bare)| !defined.contains(*q) && defined.contains(*bare))
-            .map(|(q, bare)| (q.as_str(), bare.as_str()))
-            .collect();
+        let fix: BTreeMap<&str, &str> = self.scopes.alias_repair(&defined);
         if fix.is_empty() {
             return out;
         }
@@ -1548,22 +1481,13 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             Some(sym) => Some(self.resolve_label(&sym.name, line)?),
             None => None,
         };
-        if self.syntax.scopes_locals()
-            && let Some(g) = &self.current_global
-        {
-            op = op.map(|o| crate::ast::qualify_locals(o, g));
-        }
-        // Module qualification wraps the local rule's result, matching the
-        // definition side: `.loc` under `glob` inside `foo` is `foo.glob.loc`.
-        if self.syntax.scopes_modules() {
-            let prefix = self.module_prefix();
-            let aliases = &mut self.aliases;
-            op = op.map(|o| {
-                crate::ast::map_syms(o, &mut |s| {
-                    crate::engine::Expr::Sym(module_ref(s, &prefix, aliases))
-                })
-            });
-        }
+        // Locals under the current global, then module qualification wrapping
+        // the result, matching the definition side: `.loc` under `glob`
+        // inside `foo` is `foo.glob.loc` — the environment owns both rules.
+        op = op.map(|o| {
+            self.scopes
+                .qualify_op(o, self.syntax.scopes_locals(), self.syntax.scopes_modules())
+        });
         // `equ` binds its (qualified) label to a parse-time constant.
         if let (Some(q), Some(Operation::Equ(e))) = (&label, &op)
             && let Some(v) = eval_const(e, &self.consts)
