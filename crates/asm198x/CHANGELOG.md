@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.56](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.55...asm198x-v0.0.56) - 2026-09-01
+
+### Added
+
+- *(sjasmplus)* STRUCT/ENDS — sizes, member offsets, instantiation ([#477](https://github.com/asm198x/asm198x/pull/477)) ([#529](https://github.com/asm198x/asm198x/pull/529))
+- *(ca65)* a chosen branch is read eagerly, understood lazily ([#524](https://github.com/asm198x/asm198x/pull/524))
+
 ## [0.0.55](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.54...asm198x-v0.0.55) - 2026-09-01
 
 ### Added

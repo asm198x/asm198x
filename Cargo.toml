@@ -37,7 +37,7 @@ format198x-tzx = "0.1"
 
 [workspace.package]
 edition = "2024"
-version = "0.0.55"
+version = "0.0.56"
 license = "GPL-2.0-or-later"
 repository = "https://github.com/asm198x/asm198x"
 # The Homebrew formula carries a homepage; without one `dist` warns and the
