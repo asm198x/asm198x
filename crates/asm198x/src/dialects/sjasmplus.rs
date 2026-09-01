@@ -793,6 +793,13 @@ impl Z80Syntax for SjasmplusSyntax {
 
     /// `ALIGN` is sjasmplus's own; `byte` is `db`; everything else is the
     /// shared common set.
+    /// `DS`, `DEFS` and `BLOCK` are one directive to sjasmplus —
+    /// `count[, fill]`, the count resolved across passes (#528).
+    fn is_reserve(&self, word: &str) -> bool {
+        let word = undot(word);
+        word.eq_ignore_ascii_case("block") || z80::is_common_reserve(word)
+    }
+
     fn parse_directive(
         &self,
         word: &str,
@@ -891,24 +898,6 @@ impl Z80Syntax for SjasmplusSyntax {
                 return Ok(Some(Operation::Bytes(bytes)));
             }
             "dc" => return Ok(Some(Operation::Bytes(marked(data_items(args, line)?)))),
-            // `block n[,fill]` is `ds` with a fill byte: the count sets the
-            // statement's size, so it has to be known where it stands.
-            "block" => {
-                let parts: Vec<&str> = args.splitn(2, ',').collect();
-                let count = z80::literal(
-                    &z80::parse_value(self, parts.first().copied().unwrap_or("").trim(), line)?,
-                    consts,
-                    line,
-                )?;
-                let count = usize::try_from(count).map_err(|_| {
-                    AsmError::new(line, "`block` needs a non-negative constant count")
-                })?;
-                let fill = match parts.get(1) {
-                    Some(text) => z80::parse_value(self, text.trim(), line)?,
-                    None => Expr::Num(0),
-                };
-                return Ok(Some(Operation::Bytes(vec![fill; count])));
-            }
             "dh" | "hex" | "defh" => {
                 return Ok(Some(Operation::Bytes(hex_bytes(args, line)?)));
             }
@@ -1317,6 +1306,95 @@ mod tests {
     fn a_struct_definition_emits_no_bytes() {
         let r = asm("\tSTRUCT S\nf BYTE 0\ng WORD 0\n\tENDS\n\tdb S\n").expect("assembles");
         assert_eq!(r.bytes, vec![3]);
+    }
+
+    // #528: a `DS` count reaches forward the way a condition does — the
+    // reference resolves it across its passes, silently. Every shape below
+    // was probed against 1.21.0 before landing.
+
+    /// `DS COUNT * 2` above `COUNT EQU 3` reserves six, and says nothing:
+    /// unlike a condition, the reference raises no `fwdref` advisory here.
+    #[test]
+    fn a_ds_count_reaches_a_later_equ() {
+        let r = asm("buf\tDS COUNT * 2\n\tnop\nCOUNT\tEQU 3\n").expect("assembles");
+        assert_eq!(r.bytes, vec![0, 0, 0, 0, 0, 0, 0]);
+        assert!(r.warnings.is_empty(), "{:?}", r.warnings);
+    }
+
+    /// A count that moves the label it depends on never settles. Pass 1
+    /// reads `later` as 0 and reserves one; each pass reserves one more; the
+    /// reference stops at three and warns that the label still moved.
+    #[test]
+    fn a_ds_count_on_a_moving_label_stops_where_the_reference_stops() {
+        let r = asm("\tDS later+1\nlater:\tnop\n").expect("assembles");
+        assert_eq!(r.bytes, vec![0, 0, 0, 0]);
+        assert_eq!(r.warnings.len(), 1, "{:?}", r.warnings);
+        assert!(
+            r.warnings[0]
+                .message
+                .contains("previous value 2 not equal 3")
+        );
+    }
+
+    /// A count that swings negative in pass 2 (`3 - later` once `later` is
+    /// 3) still ends where the reference ends: pass 3 reads the pass-2 value
+    /// and reserves three again.
+    #[test]
+    fn a_ds_count_that_swings_between_passes_matches_pass_three() {
+        let r = asm("\tDS 3-later\nlater:\tnop\n").expect("assembles");
+        assert_eq!(r.bytes, vec![0, 0, 0, 0]);
+        assert!(
+            r.warnings[0]
+                .message
+                .contains("previous value 0 not equal 3")
+        );
+    }
+
+    /// `DS`, `DEFS` and `BLOCK` are one directive: `count[, fill]`, and both
+    /// the count and the fill may be defined later.
+    #[test]
+    fn ds_defs_and_block_take_a_fill_that_may_be_forward() {
+        let r =
+            asm("\tDS COUNT, $FF\n\tDEFS 2, FILL\n\tBLOCK 1\n\tnop\nCOUNT\tEQU 2\nFILL\tEQU $AA\n")
+                .expect("assembles");
+        assert_eq!(r.bytes, vec![0xFF, 0xFF, 0xAA, 0xAA, 0, 0]);
+    }
+
+    /// `$` in a count is the counter where it stands (`DS $+2` at the origin
+    /// reserves two).
+    #[test]
+    fn a_ds_count_may_use_the_location_counter() {
+        let r = asm("\tDS $+2\n\tnop\n").expect("assembles");
+        assert_eq!(r.bytes, vec![0, 0, 0]);
+    }
+
+    /// A `STRUCT` member's `DS` reaches forward too: `x DS N` above
+    /// `N EQU 4` sizes the structure at 4.
+    #[test]
+    fn a_struct_member_ds_reaches_a_later_equ() {
+        let r = asm("\tSTRUCT Pt\nx\tDS N\n\tENDS\n\tDB Pt\nN\tEQU 4\n").expect("assembles");
+        assert_eq!(r.bytes, vec![4]);
+    }
+
+    /// A symbol no pass defines is the reference's `Label not found` error
+    /// on its last pass — for a count and for a condition alike, which
+    /// until now read zero a third time and assembled.
+    #[test]
+    fn a_symbol_no_pass_defines_is_an_error_on_the_last_pass() {
+        let e = asm("\tDS nothere\n\tnop\n").expect_err("refused");
+        assert!(e.to_string().contains("label not found: `nothere`"), "{e}");
+        let e = asm("\tIF nothere\n\tnop\n\tENDIF\n").expect_err("refused");
+        assert!(e.to_string().contains("label not found: `nothere`"), "{e}");
+    }
+
+    /// The reference warns `Negative BLOCK?` and moves the counter backwards.
+    /// This engine does not move sjasmplus's origin backwards, so the count
+    /// is refused with that behaviour named rather than silently reserving
+    /// nothing.
+    #[test]
+    fn a_negative_ds_count_is_refused_naming_the_reference() {
+        let e = asm("\tDS -1\n\tnop\n").expect_err("refused");
+        assert!(e.to_string().contains("Negative BLOCK?"), "{e}");
     }
 
     /// #477 acceptance: the SpecNext Invaders shapes, in one source — the

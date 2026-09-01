@@ -141,6 +141,13 @@ pub(crate) trait Z80Syntax {
         is_common_directive(word)
     }
 
+    /// Whether `word` reserves space (`ds`/`defs`, plus a dialect's own
+    /// spellings). Under [`Self::resolves_forward_conditions`] the count
+    /// resolves across passes rather than at parse time (#528).
+    fn is_reserve(&self, word: &str) -> bool {
+        is_common_reserve(word)
+    }
+
     /// Whether `^` is the bitwise-XOR operator. sjasmplus has it; pasmo does
     /// not (and rejects `^`), so it defaults off to match pasmo.
     fn has_xor_operator(&self) -> bool {
@@ -611,32 +618,50 @@ struct Forward {
     /// One advisory per condition that reached forward. Collected from pass 1,
     /// where the symbol was genuinely unknown.
     warnings: std::cell::RefCell<Vec<Warning>>,
+    /// Whether this is the pass the reference stops at. A symbol still
+    /// unknown there was never defined, and the reference says so as an
+    /// error (`Label not found`) rather than reading zero a third time.
+    last: bool,
 }
 
 impl Forward {
-    fn new(seed: BTreeMap<String, i64>) -> Self {
+    fn new(seed: BTreeMap<String, i64>, last: bool) -> Self {
         Self {
             seed,
             used: std::cell::Cell::new(false),
             warnings: std::cell::RefCell::new(Vec::new()),
+            last,
         }
     }
 
     /// Answer a symbol the constant table could not, and remember that we had
     /// to. Zero is the reference's answer for a symbol no pass has reached.
-    fn lookup(&self, name: &str, line: usize, file: FileId) -> i64 {
+    /// A condition that reaches forward is advised of it, as the reference
+    /// advises (`warning[fwdref]`).
+    fn lookup(&self, name: &str, line: usize, file: FileId) -> Result<i64, AsmError> {
+        let (value, reached) = self.resolve(name, line)?;
+        if !reached {
+            self.warnings.borrow_mut().push(Warning {
+                line,
+                message: format!("forward reference of symbol `{name}`"),
+                file,
+                kind: crate::engine::WarningKind::Advisory,
+            });
+        }
+        Ok(value)
+    }
+
+    /// The same answer without the advisory, and whether a pass had reached
+    /// the symbol. A `DS` count that reaches forward is answered silently: the
+    /// reference resolves it across its passes and says nothing (#528). On
+    /// the last pass an unreached symbol is the reference's `Label not
+    /// found` error, for a condition and a count alike.
+    fn resolve(&self, name: &str, line: usize) -> Result<(i64, bool), AsmError> {
         self.used.set(true);
         match self.seed.get(name) {
-            Some(v) => *v,
-            None => {
-                self.warnings.borrow_mut().push(Warning {
-                    line,
-                    message: format!("forward reference of symbol `{name}`"),
-                    file,
-                    kind: crate::engine::WarningKind::Advisory,
-                });
-                0
-            }
+            Some(v) => Ok((*v, true)),
+            None if self.last => Err(AsmError::new(line, format!("label not found: `{name}`"))),
+            None => Ok((0, false)),
         }
     }
 }
@@ -1382,6 +1407,69 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         self.forward.as_ref().map(|f| (f, self.current_file))
     }
 
+    /// Fold a count the statement's size depends on — a `DS` length, a
+    /// `STRUCT` member's `DS` length — against the constants known so far,
+    /// then against the previous pass for anything defined later (#528).
+    /// Without a forward pass the parse-time-constant rule stands. `$` is the
+    /// counter where the walk can follow it.
+    fn fold_count(&self, expr: &Expr, line: usize) -> Result<i64, AsmError> {
+        let Some(fwd) = &self.forward else {
+            return literal(expr, &self.consts, line);
+        };
+        // `eval_with` cannot carry the last-pass error out of its resolver,
+        // so an unreached symbol is caught after the fold, on that pass only.
+        let unreached = std::cell::Cell::new(None);
+        let folded = expr.eval_with(
+            &|s| {
+                self.consts
+                    .get(s)
+                    .copied()
+                    .or_else(|| match fwd.resolve(s, line) {
+                        Ok((v, _)) => Some(v),
+                        Err(e) => {
+                            unreached.set(Some(e));
+                            None
+                        }
+                    })
+            },
+            self.pc,
+            line,
+        );
+        match unreached.into_inner() {
+            Some(e) => Err(e),
+            None => folded,
+        }
+    }
+
+    /// `DS`/`DEFS`/`BLOCK count[, fill]` where the count may name a symbol
+    /// defined later. The reference resolves it across its three passes
+    /// (probed: `DS COUNT * 2` above `COUNT EQU 3` reserves six; `DS later+1`
+    /// above `later:` settles on three with the pass-3 advisory). A negative
+    /// count makes it warn `Negative BLOCK?` and move the counter backwards,
+    /// which this engine's origin model does not do for sjasmplus, so that
+    /// case is refused with the reference's behaviour named.
+    fn lower_reserve(&self, args: &str, line: usize) -> Result<Operation, AsmError> {
+        let (count, fill) = match args.split_once(',') {
+            Some((count, fill)) => (count, Some(fill)),
+            None => (args, None),
+        };
+        let count = self.fold_count(&parse_value(self.syntax, count.trim(), line)?, line)?;
+        let count = usize::try_from(count).map_err(|_| {
+            AsmError::new(
+                line,
+                format!(
+                    "`DS` count {count} is negative — sjasmplus warns `Negative BLOCK?` and \
+                     moves the counter backwards, which this assembler does not do"
+                ),
+            )
+        })?;
+        let fill = match fill {
+            Some(text) => parse_value(self.syntax, text.trim(), line)?,
+            None => Expr::Num(0),
+        };
+        Ok(Operation::Bytes(vec![fill; count]))
+    }
+
     /// The innermost module left open at the end of the walk, if any, named by
     /// its full dotted path — the reference reports one advisory naming that,
     /// not one per open module.
@@ -1587,6 +1675,8 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             Some(Operation::Bytes(vec![Expr::Num(0xDD), Expr::Num(0x00)]))
         } else if rest.is_empty() {
             None
+        } else if self.syntax.resolves_forward_conditions() && self.syntax.is_reserve(word) {
+            Some(self.lower_reserve(args, line)?)
         } else {
             parse_op(self.syntax, self.set, self.ext, rest, line, &self.consts)?
         };
@@ -1882,13 +1972,10 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
                 (4, (v as u32).to_le_bytes().to_vec())
             }
             "DS" | "BLOCK" => {
+                // Reaches forward like a `DS` outside the structure (probed:
+                // `x DS N` above `N EQU 4` sizes the structure at 4).
                 let expr = parse_value(self.syntax, args.trim(), line)?;
-                let n = eval_const(&expr, &self.consts).ok_or_else(|| {
-                    AsmError::new(
-                        line,
-                        "a `STRUCT` member's `DS` length must be a constant here",
-                    )
-                })?;
+                let n = self.fold_count(&expr, line)?;
                 if !(0..=0x1_0000).contains(&n) {
                     return Err(AsmError::new(line, format!("bad `DS` length {n}")));
                 }
@@ -2191,7 +2278,7 @@ fn run_passes<'a, S: Z80Syntax>(
     for pass in 1..=PASSES {
         let mut eval = SjasmEval::new(syntax, set, ext, multi.take());
         if syntax.resolves_forward_conditions() {
-            eval.forward = Some(Forward::new(std::mem::take(&mut seed)));
+            eval.forward = Some(Forward::new(std::mem::take(&mut seed), pass == PASSES));
         }
         let mut out = Vec::new();
         crate::ast::evaluate(&mut eval, &program.nodes, true, &mut out)?;
@@ -2615,7 +2702,7 @@ impl CondParser<'_> {
             Tok::Sym(s) => match self.consts.get(&s).copied() {
                 Some(v) => Ok(v),
                 None => match self.forward {
-                    Some((fwd, file)) => Ok(fwd.lookup(&s, self.line, file)),
+                    Some((fwd, file)) => fwd.lookup(&s, self.line, file),
                     None => {
                         let sources = self.sources;
                         Err(AsmError::new(
@@ -2782,6 +2869,11 @@ pub(crate) const COMMON_DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
 ];
+
+/// Whether `word` is the common reserve directive (`ds`/`defs`).
+pub(crate) fn is_common_reserve(word: &str) -> bool {
+    lookup(COMMON_DIRECTIVES, word).is_some_and(|d| d.id == "reserve")
+}
 
 /// Whether `word` is one of them.
 ///
