@@ -178,6 +178,22 @@ Available on the flat dialects, plus the ca65 and vasm linked paths for
 `--debug` and `--sym`. They describe an assembly, so combining them with `fmt`
 or `disasm` is an error rather than a silent no-op.
 
+### Project linker configurations (ca65)
+
+```
+asm198x --dialect ca65 -C project.cfg game.s -o game.nes
+```
+
+`-C` hands the ca65 path a project's own ld65 configuration instead of the
+built-in curriculum layout. The reader is bounded to the shapes real projects
+use — `MEMORY` (`start`, `size`, `type`, `file`, `fill`, `fillval`) and
+`SEGMENTS` (`load`, `type`, `align`, `start`) — and refuses anything outside
+that bound by name rather than linking wrong. Placement follows ld65's rule:
+segments fill their memory area in declaration order, `align` rounds up,
+`start` pins, and a segment with neither lands directly after whatever its
+area already holds. Without `-C` nothing changes: the curriculum default
+applies exactly as before.
+
 ### Cycles in the listing
 
 Where the instruction spec carries validated cycle data (the form-model CPUs

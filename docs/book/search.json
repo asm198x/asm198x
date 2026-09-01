@@ -558,6 +558,12 @@
       "slug": "reference/cli"
     },
     {
+      "context": "-C hands the ca65 path a project's own ld65 configuration instead of the",
+      "heading": "Project linker configurations (ca65)",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
       "context": "Where the instruction spec carries validated cycle data (the form-model CPUs",
       "heading": "Cycles in the listing",
       "page": "The command line",

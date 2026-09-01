@@ -200,6 +200,43 @@ pub fn assemble_ca65_files(
     }
 }
 
+/// [`assemble_ca65_files`] under a project-supplied ld65 configuration — the
+/// CLI's `-C` (#483, `decisions/layouts-are-data.md`): the bounded `.cfg`
+/// reader turns `cfg` into the placement layout the link runs on, instead of
+/// the curriculum default.
+///
+/// # Errors
+/// As [`assemble_ca65_files`], plus a config outside the bounded reader or a
+/// layout that does not resolve (a pinned `start` behind its area's fill).
+pub fn assemble_ca65_files_with_config(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+    cfg: &str,
+) -> Result<AssemblyResult, MultiFileError> {
+    let mut map = new_source_map(input_path, source);
+    let layout = match dialects::ca65_layout::from_cfg(cfg) {
+        Ok(layout) => layout,
+        Err(error) => {
+            return Err(MultiFileError {
+                error,
+                source_map: Box::new(map),
+            });
+        }
+    };
+    match dialects::ca65::assemble_multi_with(&mut map, loader, &layout) {
+        Ok((rom, warnings, _)) => {
+            let mut result = AssemblyResult::image_warned(rom, warnings);
+            result.files = map.file_table();
+            Ok(result)
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
 /// As [`assemble_ca65_files`], also returning the full
 /// [`debug198x::DebugInfo`] read out of layout — the multi-file counterpart of
 /// [`assemble_ca65_debug`]. `Header.sources` is the file table in `FileId`
@@ -218,6 +255,42 @@ pub fn assemble_ca65_files_debug(
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
     let mut map = new_source_map(input_path, source);
     match dialects::ca65::assemble_multi(&mut map, loader) {
+        Ok((rom, warnings, capture)) => {
+            let files = map.file_table();
+            let info = listing::capture_debug_info_multi(capture, "6502", "ca65", files.clone());
+            let mut result = AssemblyResult::image_warned(rom, warnings);
+            result.files = files;
+            Ok((result, info))
+        }
+        Err(error) => Err(MultiFileError {
+            error,
+            source_map: Box::new(map),
+        }),
+    }
+}
+
+/// [`assemble_ca65_files_debug`] under a project-supplied ld65 configuration
+/// (#483) — `-C` composed with the debug artifacts.
+///
+/// # Errors
+/// As [`assemble_ca65_files_with_config`].
+pub fn assemble_ca65_files_debug_with_config(
+    source: &str,
+    input_path: &str,
+    loader: &dyn source::SourceLoader,
+    cfg: &str,
+) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
+    let mut map = new_source_map(input_path, source);
+    let layout = match dialects::ca65_layout::from_cfg(cfg) {
+        Ok(layout) => layout,
+        Err(error) => {
+            return Err(MultiFileError {
+                error,
+                source_map: Box::new(map),
+            });
+        }
+    };
+    match dialects::ca65::assemble_multi_with(&mut map, loader, &layout) {
         Ok((rom, warnings, capture)) => {
             let files = map.file_table();
             let info = listing::capture_debug_info_multi(capture, "6502", "ca65", files.clone());
