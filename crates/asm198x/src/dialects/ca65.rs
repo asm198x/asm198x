@@ -46,6 +46,18 @@ use crate::span::FileId;
 /// number now lives in the layout value.
 const PRG_BASE: u32 = 0x8000;
 
+/// What an assemble hands back: the linked image, its warnings, the debug
+/// capture, and the layout's memory account (#499).
+type Assembled<Capture> = Result<
+    (
+        Vec<u8>,
+        Vec<Warning>,
+        Capture,
+        Vec<crate::engine::AreaUsage>,
+    ),
+    AsmError,
+>;
+
 // The segments the assembler places are the active layout's
 // (`super::ca65_layout`, #483): resolved names, base addresses, and file
 // positions. The curriculum's fixed NROM table lives on as
@@ -211,30 +223,30 @@ struct Parsed {
 // capturing it cannot change a byte.
 use crate::listing::{DebugCapture, DebugCaptureMulti};
 
+/// Assemble to bytes alone — the round-trip and unit tests' entry.
+#[cfg(test)]
+pub(crate) fn assemble(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError> {
+    assemble_with_debug(source).map(|(rom, warnings, _, _)| (rom, warnings))
+}
+
 /// Assemble ca65 source and link it into a `.nes` ROM image. Single-source: a
 /// `.include`/`.incbin` directive is rejected with a pointer to the multi-file
 /// entry (`assemble_multi`).
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
-pub(crate) fn assemble(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError> {
-    assemble_with_debug(source).map(|(rom, warnings, _)| (rom, warnings))
-}
-
 /// Assemble + link, also returning the debug [`Capture`] read out of layout
 /// (Debug198x U4). One code path: [`assemble`] delegates here, so the bytes
 /// with and without capture are identical by construction (AE2).
 ///
 /// # Errors
 /// Returns an [`AsmError`] on any parse, range, or symbol-resolution failure.
-pub(crate) fn assemble_with_debug(
-    source: &str,
-) -> Result<(Vec<u8>, Vec<Warning>, DebugCapture), AsmError> {
-    let (rom, warnings, capture) = assemble_program(
+pub(crate) fn assemble_with_debug(source: &str) -> Assembled<DebugCapture> {
+    let (rom, warnings, capture, areas) = assemble_program(
         &parse_program(&isa::mos6502::SET, source, macros::Expand::Yes)?,
         &super::ca65_layout::Layout::nes_default(),
     )?;
-    Ok((rom, warnings, capture.into_single()))
+    Ok((rom, warnings, capture.into_single(), areas))
 }
 
 /// Assemble + link a **multi-file** NES program (language-surface U5): the
@@ -250,7 +262,7 @@ pub(crate) fn assemble_with_debug(
 pub(crate) fn assemble_multi(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
-) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
+) -> Assembled<DebugCaptureMulti> {
     assemble_multi_with(map, loader, &super::ca65_layout::Layout::nes_default())
 }
 
@@ -264,11 +276,19 @@ pub(crate) fn assemble_multi_with(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
     layout: &super::ca65_layout::Layout,
-) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
-    assemble_program(
+) -> Assembled<DebugCaptureMulti> {
+    let out = assemble_program(
         &parse_program_multi(&isa::mos6502::SET, map, loader)?,
         layout,
-    )
+    )?;
+    let sources: Vec<(&str, &str)> = (0..)
+        .map_while(|i| {
+            let id = crate::span::FileId(i);
+            Some((map.path(id)?, map.contents(id)?))
+        })
+        .collect();
+    crate::cycles::check_cycle_budgets(&sources, &crate::engine::DebugData::default(), &out.3)?;
+    Ok(out)
 }
 
 /// Assemble + link a parsed [`Program`](crate::ast::Program) — the one body
@@ -282,7 +302,7 @@ pub(crate) fn assemble_multi_with(
 fn assemble_program(
     program: &crate::ast::Program,
     layout_def: &super::ca65_layout::Layout,
-) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
+) -> Assembled<DebugCaptureMulti> {
     let set = &isa::mos6502::SET;
     // The AST is the single front-end IR: the parse built the source-preserving
     // `Program` (carrying each statement's native `Kind`, `=` constants, and the
@@ -583,6 +603,7 @@ fn assemble_program(
     }
 
     let rom = link(&seg_bytes, layout)?;
+    let areas = area_usage(layout_def, layout, &offsets);
     Ok((
         rom,
         warnings,
@@ -591,7 +612,60 @@ fn assemble_program(
             symbols: dbg_symbols,
             lines: dbg_lines,
         },
+        areas,
     ))
+}
+
+/// The layout's memory account (#499): each area's capacity against the
+/// segments the program placed or reserved in it, in address order. `free` is
+/// the total unoccupied span; `largest_free` merges the placed intervals and
+/// takes the widest hole — a pinned segment (VECTORS at $FFFA) splits the free
+/// space, and a routine needs one piece, not a total.
+fn area_usage(
+    layout_def: &super::ca65_layout::Layout,
+    layout: &super::ca65_layout::ResolvedLayout,
+    offsets: &BTreeMap<String, u32>,
+) -> Vec<crate::engine::AreaUsage> {
+    layout_def
+        .areas
+        .iter()
+        .enumerate()
+        .map(|(i, area)| {
+            let mut segments: Vec<crate::engine::SegmentUsage> = layout_def
+                .segments
+                .iter()
+                .filter(|s| s.area == i)
+                .filter_map(|s| {
+                    let length = *offsets.get(&s.name)?;
+                    let base = layout.seg(&s.name)?.base;
+                    Some(crate::engine::SegmentUsage {
+                        name: s.name.clone(),
+                        base,
+                        length,
+                    })
+                })
+                .collect();
+            segments.sort_by_key(|s| s.base);
+            let used: u32 = segments.iter().map(|s| s.length).sum();
+            let end = area.start + area.size;
+            let mut largest = 0u32;
+            let mut cursor = area.start;
+            for s in &segments {
+                largest = largest.max(s.base.saturating_sub(cursor));
+                cursor = cursor.max(s.base + s.length);
+            }
+            largest = largest.max(end.saturating_sub(cursor));
+            crate::engine::AreaUsage {
+                name: area.name.clone(),
+                start: area.start,
+                size: area.size,
+                used,
+                free: area.size - used,
+                largest_free: largest,
+                segments,
+            }
+        })
+        .collect()
 }
 
 /// Lay the file segments into the layout's image.

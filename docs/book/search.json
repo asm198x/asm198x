@@ -576,8 +576,14 @@
       "slug": "reference/cli"
     },
     {
-      "context": "A comment of the form",
-      "heading": "Cycle budgets",
+      "context": "--map reports each memory area of the active layout — capacity, units used,",
+      "heading": "The memory map",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "A comment of either form",
+      "heading": "Budgets",
       "page": "The command line",
       "slug": "reference/cli"
     },

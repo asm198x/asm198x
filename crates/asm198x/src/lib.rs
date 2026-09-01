@@ -78,7 +78,8 @@ pub use engine::{
     OutputFormat, RequestedOutput, Warning,
 };
 pub use listing::{
-    ListingFile, debug_info, render_listing, render_listing_files, render_listing_json, render_sym,
+    ListingFile, debug_info, render_listing, render_listing_files, render_listing_json, render_map,
+    render_sym,
 };
 pub use span::{ExpansionFrame, FileId, Span};
 // Re-exported so consumers of `Assembly.debug` need not depend on debug198x
@@ -146,8 +147,10 @@ pub fn assemble_acme_files(
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_ca65(source: &str) -> Result<AssemblyResult, AsmError> {
-    dialects::ca65::assemble(source)
-        .map(|(rom, warnings)| AssemblyResult::image_warned(rom, warnings))
+    let (rom, warnings, _, areas) = dialects::ca65::assemble_with_debug(source)?;
+    let mut result = AssemblyResult::image_warned(rom, warnings);
+    result.areas = areas;
+    Ok(result)
 }
 
 /// The source map every multi-file entry point starts from: the root at
@@ -190,9 +193,10 @@ pub fn assemble_ca65_files(
 ) -> Result<AssemblyResult, MultiFileError> {
     let mut map = new_source_map(input_path, source);
     match dialects::ca65::assemble_multi(&mut map, loader) {
-        Ok((rom, warnings, _)) => {
+        Ok((rom, warnings, _, areas)) => {
             let mut result = AssemblyResult::image_warned(rom, warnings);
             result.files = map.file_table();
+            result.areas = areas;
             Ok(result)
         }
         Err(error) => Err(MultiFileError {
@@ -227,9 +231,10 @@ pub fn assemble_ca65_files_with_config(
         }
     };
     match dialects::ca65::assemble_multi_with(&mut map, loader, &layout) {
-        Ok((rom, warnings, _)) => {
+        Ok((rom, warnings, _, areas)) => {
             let mut result = AssemblyResult::image_warned(rom, warnings);
             result.files = map.file_table();
+            result.areas = areas;
             Ok(result)
         }
         Err(error) => Err(MultiFileError {
@@ -257,11 +262,12 @@ pub fn assemble_ca65_files_debug(
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), MultiFileError> {
     let mut map = new_source_map(input_path, source);
     match dialects::ca65::assemble_multi(&mut map, loader) {
-        Ok((rom, warnings, capture)) => {
+        Ok((rom, warnings, capture, areas)) => {
             let files = map.file_table();
             let info = listing::capture_debug_info_multi(capture, "6502", "ca65", files.clone());
             let mut result = AssemblyResult::image_warned(rom, warnings);
             result.files = files;
+            result.areas = areas;
             Ok((result, info))
         }
         Err(error) => Err(MultiFileError {
@@ -293,11 +299,12 @@ pub fn assemble_ca65_files_debug_with_config(
         }
     };
     match dialects::ca65::assemble_multi_with(&mut map, loader, &layout) {
-        Ok((rom, warnings, capture)) => {
+        Ok((rom, warnings, capture, areas)) => {
             let files = map.file_table();
             let info = listing::capture_debug_info_multi(capture, "6502", "ca65", files.clone());
             let mut result = AssemblyResult::image_warned(rom, warnings);
             result.files = files;
+            result.areas = areas;
             Ok((result, info))
         }
         Err(error) => Err(MultiFileError {
@@ -320,9 +327,11 @@ pub fn assemble_ca65_debug(
     source: &str,
     source_path: &str,
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), AsmError> {
-    let (rom, warnings, capture) = dialects::ca65::assemble_with_debug(source)?;
+    let (rom, warnings, capture, areas) = dialects::ca65::assemble_with_debug(source)?;
+    let mut result = AssemblyResult::image_warned(rom, warnings);
+    result.areas = areas;
     Ok((
-        AssemblyResult::image_warned(rom, warnings),
+        result,
         listing::capture_debug_info(capture, "6502", "ca65", source_path),
     ))
 }

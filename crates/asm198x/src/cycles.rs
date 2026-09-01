@@ -102,6 +102,7 @@ pub(crate) fn label_costs_debug(
 pub(crate) fn check_cycle_budgets(
     sources: &[(&str, &str)],
     debug: &crate::engine::DebugData,
+    areas: &[crate::engine::AreaUsage],
 ) -> Result<(), AsmError> {
     let costs = label_costs_debug(debug, 1);
     for (file, text) in sources {
@@ -118,10 +119,40 @@ pub(crate) fn check_cycle_budgets(
                     line,
                     format!(
                         "malformed asm198x assertion `{directive}` in {file} \
-                         (expected `cycles(<label>) <= <n>`)"
+                         (expected `cycles(<label>) <= <n>` or `free(<area>) >= <n>`)"
                     ),
                 )
             })?;
+            let (label, limit) = match budget {
+                Budget::Cycles(label, limit) => (label, limit),
+                Budget::Free(area, min) => {
+                    let usage = areas.iter().find(|a| a.name == area).ok_or_else(|| {
+                        AsmError::new(
+                            line,
+                            format!(
+                                "`free({area})` names no memory area in this layout \
+                                 (areas: {})",
+                                areas
+                                    .iter()
+                                    .map(|a| a.name.as_str())
+                                    .collect::<Vec<_>>()
+                                    .join(", ")
+                            ),
+                        )
+                    })?;
+                    if u64::from(usage.free) < min {
+                        return Err(AsmError::new(
+                            line,
+                            format!(
+                                "area `{area}` breaks its space budget: {min} unit(s) of \
+                                 headroom required, {} free ({} used of {})",
+                                usage.free, usage.used, usage.size
+                            ),
+                        ));
+                    }
+                    continue;
+                }
+            };
             match debug.cycle_coverage {
                 CycleCoverage::Full => {}
                 CycleCoverage::Partial => {
@@ -131,7 +162,7 @@ pub(crate) fn check_cycle_budgets(
                             "cannot check `cycles({})`: some of this dialect's \
                              instructions carry no cycle data, so figures are \
                              lower bounds and cannot prove a ceiling",
-                            budget.0
+                            label
                         ),
                     ));
                 }
@@ -141,12 +172,11 @@ pub(crate) fn check_cycle_budgets(
                         format!(
                             "cannot check `cycles({})`: no cycle data for this \
                              CPU (backfill pending)",
-                            budget.0
+                            label
                         ),
                     ));
                 }
             }
-            let (label, limit) = budget;
             let cost = costs.iter().find(|c| c.name == label).ok_or_else(|| {
                 AsmError::new(
                     line,
@@ -168,23 +198,41 @@ pub(crate) fn check_cycle_budgets(
     Ok(())
 }
 
-/// Parse `cycles(<label>) <= <n>`; anything else is `None`, which the caller
-/// reports as the error it is.
-fn parse_budget(directive: &str) -> Option<(String, u64)> {
-    let rest = directive.strip_prefix("cycles(")?;
-    let (label, rest) = rest.split_once(')')?;
-    let label = label.trim();
-    if label.is_empty()
-        || !label
+/// One parsed assertion: a cycle ceiling on a routine, or a space floor on a
+/// memory area (#499).
+enum Budget {
+    Cycles(String, u64),
+    Free(String, u64),
+}
+
+/// Parse `cycles(<label>) <= <n>` or `free(<area>) >= <n>`; anything else is
+/// `None`, which the caller reports as the error it is. `<n>` is decimal or
+/// `$hex`.
+fn parse_budget(directive: &str) -> Option<Budget> {
+    let (kind, rest, op) = match directive.split_once('(') {
+        Some(("cycles", rest)) => ("cycles", rest, "<="),
+        Some(("free", rest)) => ("free", rest, ">="),
+        _ => return None,
+    };
+    let (name, rest) = rest.split_once(')')?;
+    let name = name.trim();
+    if name.is_empty()
+        || !name
             .chars()
-            .all(|c| c.is_alphanumeric() || c == '_' || c == '.')
+            .all(|c| c.is_alphanumeric() || c == '_' || c == '.' || c == ' ')
     {
         return None;
     }
-    let rest = rest.trim_start();
-    let n = rest.strip_prefix("<=")?.trim();
-    if n.is_empty() || !n.chars().all(|c| c.is_ascii_digit()) {
+    let n = rest.trim_start().strip_prefix(op)?.trim();
+    let value = if let Some(hex) = n.strip_prefix('$') {
+        u64::from_str_radix(hex, 16).ok()?
+    } else if n.is_empty() || !n.chars().all(|c| c.is_ascii_digit()) {
         return None;
-    }
-    Some((label.to_string(), n.parse().ok()?))
+    } else {
+        n.parse().ok()?
+    };
+    Some(match kind {
+        "cycles" => Budget::Cycles(name.to_string(), value),
+        _ => Budget::Free(name.to_string(), value),
+    })
 }

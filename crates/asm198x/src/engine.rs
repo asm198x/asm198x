@@ -100,6 +100,8 @@ pub struct Assembly {
     pub reserved_prefix: u16,
     /// Assembled machine code, contiguous from `origin`.
     pub bytes: Vec<u8>,
+    /// Memory-area accounting (#499) — see [`AreaUsage`].
+    pub areas: Vec<AreaUsage>,
     /// The output file the source named with `!to`, if it named one. The
     /// command line still wins — this is what ACME does, and it warns rather
     /// than obeying the second choice.
@@ -193,6 +195,37 @@ impl CycleCoverage {
     fn is_none(&self) -> bool {
         matches!(self, CycleCoverage::None)
     }
+}
+
+/// One memory area's account (#499): capacity, occupancy, and the free
+/// remainder, measured against the active layout. For a flat dialect the
+/// whole address space is the one area; the ca65 path reports each layout
+/// area with the segments placed into it. All figures are address units.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct AreaUsage {
+    pub name: String,
+    pub start: u32,
+    pub size: u32,
+    /// Units occupied by placed or reserved content.
+    pub used: u32,
+    /// `size - used` — the budgetable number (`free(<area>) >= N`).
+    pub free: u32,
+    /// The largest contiguous free run, which is what a new routine or table
+    /// actually needs; a pinned segment (VECTORS at $FFFA) can split the free
+    /// space so `free` overstates what fits in one piece.
+    pub largest_free: u32,
+    /// The segments placed in this area, in address order. Empty for the flat
+    /// single-space row, whose occupancy is the program itself.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub segments: Vec<SegmentUsage>,
+}
+
+/// One segment's placement inside an [`AreaUsage`].
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct SegmentUsage {
+    pub name: String,
+    pub base: u32,
+    pub length: u32,
 }
 
 /// Spec-sourced timing for one emitted instruction (#497): the `isa::Cycles`
@@ -1040,7 +1073,7 @@ pub(crate) fn assemble(source: &str, dialect: &dyn Dialect) -> Result<Assembly, 
     let a = assemble_statements(statements, warnings, dialect)?;
     // Budget assertions (#497) hold wherever assembly happens, so they run
     // here rather than in any one front-end.
-    crate::cycles::check_cycle_budgets(&[("input", source)], &a.debug)?;
+    crate::cycles::check_cycle_budgets(&[("input", source)], &a.debug, &a.areas)?;
     Ok(a)
 }
 
@@ -1066,7 +1099,7 @@ pub(crate) fn assemble_multi(
             Some((map.path(id)?, map.contents(id)?))
         })
         .collect();
-    crate::cycles::check_cycle_budgets(&sources, &a.debug)?;
+    crate::cycles::check_cycle_budgets(&sources, &a.debug, &a.areas)?;
     Ok(a)
 }
 
@@ -2227,6 +2260,10 @@ fn assemble_statements(
             requested_output,
             requested_symbols,
             artifacts,
+            areas: flat_space_usage(
+                origin_of_image as u32,
+                (image.len() as i64 / addr_unit) as u32,
+            ),
             origin: origin_of_image as u16,
             reserved_prefix: 0,
             bytes: image,
@@ -2276,10 +2313,15 @@ fn assemble_statements(
     }
 
     let artifacts = raw_artifacts(&saves, origin, &bytes)?;
+    let areas = flat_space_usage(
+        origin as u32 - u32::from(reserved_prefix),
+        (bytes.len() as i64 / addr_unit) as u32 + u32::from(reserved_prefix),
+    );
     Ok(Assembly {
         requested_output,
         requested_symbols,
         artifacts,
+        areas,
         origin: origin as u16,
         reserved_prefix,
         bytes,
@@ -2288,6 +2330,26 @@ fn assemble_statements(
         warnings,
         debug,
     })
+}
+
+/// The flat dialects' memory account (#499): one area — the 64K address
+/// space — occupied by the program's contiguous span. `start` and `used` are
+/// address units. The free space splits into below-origin and above-top, so
+/// the largest contiguous run is whichever side is bigger.
+fn flat_space_usage(start: u32, used: u32) -> Vec<AreaUsage> {
+    const SPACE: u32 = 0x1_0000;
+    let end = start.saturating_add(used).min(SPACE);
+    let below = start;
+    let above = SPACE - end;
+    vec![AreaUsage {
+        name: "address space".to_string(),
+        start: 0,
+        size: SPACE,
+        used: end - start,
+        free: below + above,
+        largest_free: below.max(above),
+        segments: Vec::new(),
+    }]
 }
 
 /// Cut each requested span out of the finished image.

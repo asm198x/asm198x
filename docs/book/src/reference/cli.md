@@ -173,6 +173,7 @@ By default `asm` writes a flat binary. These wrap it for a machine's loader:
 | `--sym[=path]` | Sorted `name = $hex` symbol table | input + `.sym` |
 | `--listing[=path]` | Address / bytes / cycles / source rows, with per-label cycle totals | input + `.lst` |
 | `--listing-json[=path]` | The same per-line and per-label data as JSON | input + `.lst.json` |
+| `--map[=path]` | Memory map: used/free per area of the active layout | input + `.map` |
 
 Available on the flat dialects, plus the ca65 and vasm linked paths for
 `--debug` and `--sym`. They describe an assembly, so combining them with `fmt`
@@ -227,21 +228,36 @@ spec has no cycle data yet says `no cycle data (backfill pending)` instead of
 inventing figures, and a dialect that pre-encodes some instructions marks its
 figures as lower bounds.
 
-### Cycle budgets
+### The memory map
 
-A comment of the form
+`--map` reports each memory area of the active layout — capacity, units used,
+units free, and the largest contiguous free run, which a pinned segment
+(VECTORS at `$FFFA`) can make smaller than the free total suggests. On the
+ca65 path the areas are the linker configuration's (the curriculum default,
+or a `-C` config); a flat dialect reports its one implicit area, the 64K
+address space. The same accounting rides the JSON listing and the JSON
+result as `areas`. The figures measure the program against the layout — what
+a *booted machine* actually leaves free is hardware fact, and arrives with
+the reference work that records it.
+
+### Budgets
+
+A comment of either form
 
 ```asm
 ; asm198x: cycles(irq) <= 224
+; asm198x: free(PRG) >= $1000
 ```
 
-asserts that the label's straight-line span fits the budget, counting every
-conditional extra — the worst case. Assembly **fails** when the budget is
-exceeded, naming the routine, the budget, and the actual cost. The line is an
-ordinary comment to every reference assembler, so the source still assembles
-byte-identically elsewhere; only asm198x acts on it. Because it is an
-assertion, a malformed spelling, an unknown label, or a budget on a CPU
-without cycle data is an error rather than a silently ignored comment.
+is an assertion the assembler enforces. `cycles` holds a routine's
+straight-line worst case under a ceiling, counting every conditional extra;
+`free` holds a memory area's headroom above a floor. Assembly **fails** when
+a budget is broken, naming what was required and what is actual. The line is
+an ordinary comment to every reference assembler, so the source still
+assembles byte-identically elsewhere; only asm198x acts on it. Because it is
+an assertion, a malformed spelling, an unknown label or area, or a cycles
+budget on a CPU without cycle data is an error rather than a silently
+ignored comment.
 
 The sidecar format is specified in
 [`debug198x.md`](https://github.com/asm198x/docs/blob/main/debug198x.md) and is frozen
