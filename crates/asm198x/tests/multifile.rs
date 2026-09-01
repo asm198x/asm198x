@@ -819,6 +819,55 @@ fn pasmo_untaken_include_is_not_loaded() {
     assert_eq!(r.files, vec!["main.asm"]);
 }
 
+/// Pasmo spells its directives case-insensitively, so `INCLUDE` resolves the
+/// same file as `include`. Probed against PasmoNext v0.1.3: the uppercase
+/// form of this source assembles to the same `3E 2B`.
+#[test]
+fn pasmo_include_resolves_however_it_is_spelled() {
+    let loader = MemoryLoader::new().text("defs.inc", "VAL equ $2b\n");
+    for spelling in ["include", "INCLUDE", "Include"] {
+        let src = format!("        org $8000\n        {spelling} \"defs.inc\"\n        ld a,VAL\n");
+        let r = assemble_pasmo_files(&src, "main.asm", &loader)
+            .unwrap_or_else(|e| panic!("`{spelling}` assembles: {}", e.error.message));
+        assert_eq!(r.bytes, vec![0x3E, 0x2B], "`{spelling}` includes the file");
+        assert_eq!(r.files, vec!["main.asm", "defs.inc"]);
+    }
+}
+
+/// The whole reported shape through the binary: the pasmo dialect, an
+/// uppercase `INCLUDE`, and the file supplied by `-I` rather than sitting
+/// beside the input.
+#[test]
+fn cli_assembles_an_uppercase_pasmo_include_via_a_search_dir() {
+    let srcdir = temp_tree("pasmo-cli-src");
+    let incdir = temp_tree("pasmo-cli-inc");
+    let main = srcdir.join("main.asm");
+    std::fs::write(
+        &main,
+        "        org $8000\n        INCLUDE \"defs.inc\"\n        ld a,VAL\n",
+    )
+    .expect("write main");
+    std::fs::write(incdir.join("defs.inc"), "VAL equ $2b\n").expect("write include");
+    let out = srcdir.join("main.bin");
+    let run = bin()
+        .args(["--dialect", "pasmo", "-I"])
+        .arg(&incdir)
+        .arg(&main)
+        .arg("-o")
+        .arg(&out)
+        .output()
+        .expect("run asm198x");
+    assert!(
+        run.status.success(),
+        "assembles: {}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    assert_eq!(
+        std::fs::read(&out).expect("output written"),
+        vec![0x3E, 0x2B]
+    );
+}
+
 /// The single-source entry keeps its one-file contract and points callers to
 /// the loader-backed entry point.
 #[test]
