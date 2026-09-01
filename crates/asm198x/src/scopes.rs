@@ -53,6 +53,29 @@ impl ScopeEnv {
         Self::default()
     }
 
+    /// The current global as a bare string, `""` when none — the spelling
+    /// ca65's cheap-local key mechanics use, where a cheap local before any
+    /// global keys under the empty anchor.
+    pub(crate) fn anchor_str(&self) -> &str {
+        self.anchor.as_deref().unwrap_or("")
+    }
+
+    /// Re-anchor: the event a plain (non-local) label raises. The caller
+    /// hands the name in whatever qualified spelling its scope rules
+    /// produced; the environment owns only what the anchor means.
+    pub(crate) fn set_anchor(&mut self, name: String) {
+        self.anchor = Some(name);
+    }
+
+    /// Swap the anchor for a scope's own — ca65's `.proc`/`.scope` open
+    /// saves the outer anchor and anchors the scope's path; its closer hands
+    /// the saved value back. `""` is the no-anchor spelling on both sides.
+    pub(crate) fn replace_anchor(&mut self, new: String) -> String {
+        let old = self.anchor.take().unwrap_or_default();
+        self.anchor = (!new.is_empty()).then_some(new);
+        old
+    }
+
     /// The dotted prefix the open scopes impose, `""` when none are open (so
     /// a dialect without them pays only an empty `format!`).
     pub(crate) fn prefix(&self) -> String {
