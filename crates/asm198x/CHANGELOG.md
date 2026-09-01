@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.55](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.54...asm198x-v0.0.55) - 2026-09-01
+
+### Added
+
+- *(map)* the memory map report and the space budget ([#499](https://github.com/asm198x/asm198x/pull/499)) ([#520](https://github.com/asm198x/asm198x/pull/520))
+- *(convert)* self-verified dialect conversion, pasmo to sjasmplus ([#502](https://github.com/asm198x/asm198x/pull/502)) ([#517](https://github.com/asm198x/asm198x/pull/517))
+- *(ca65)* placement layouts are data, and a project may supply its own ([#515](https://github.com/asm198x/asm198x/pull/515))
+
+### Fixed
+
+- export AreaUsage and SegmentUsage from the crate root ([#522](https://github.com/asm198x/asm198x/pull/522))
+
 ## [0.0.54](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.53...asm198x-v0.0.54) - 2026-09-01
 
 ### Added
