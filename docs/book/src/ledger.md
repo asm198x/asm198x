@@ -6,7 +6,7 @@ by hand. Regenerate with `cargo xtask ledger`.
 
 - **Release:** `v0.0.54`
 - **Corpus hash:** `9d2c6c5d95f913128dffc48f6a43cd330493def48aa0044f698ae675e84b1624`
-- **Pinned curriculum:** `5435e540cf393c1956362458d5ff0fca3ff705f2` (2026-08-14)
+- **Pinned curriculum:** `f11698d0b51b3a6c1209cec3d649229aa35af97f` (2026-08-27)
 - **CPUs:** 23, holding 15948 verdict(s)
 
 ## 1802
