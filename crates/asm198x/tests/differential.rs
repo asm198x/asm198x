@@ -894,6 +894,22 @@ const PROBES: &[Probe] = &[
         " STRUCT U\nf D24 0\ng DWORD 0\n ENDS\n db U, U.f, U.g\n"),
     ok ("sjasmplus", "STRUCT unlabeled member reserves without a name",
         " STRUCT R\n BYTE 9\nf BYTE 0\n ENDS\n db R, R.f\n"),
+    // #528: a DS count resolved across the passes, each shape probed
+    // against 1.21.0 before landing.
+    ok ("sjasmplus", "DS count reaches a later EQU",
+        "buf DS COUNT * 2\n nop\nCOUNT EQU 3\n"),
+    ok ("sjasmplus", "DS count on a moving label stops at pass three",
+        " DS later+1\nlater: nop\n"),
+    ok ("sjasmplus", "DS count that swings between passes",
+        " DS 3-later\nlater: nop\n"),
+    ok ("sjasmplus", "DS DEFS and BLOCK take a forward count and fill",
+        " DS COUNT, $FF\n DEFS 2, FILL\n BLOCK 1\n nop\nCOUNT EQU 2\nFILL EQU $AA\n"),
+    ok ("sjasmplus", "DS count uses the location counter",
+        " DS $+2\n nop\n"),
+    ok ("sjasmplus", "STRUCT member DS reaches a later EQU",
+        " STRUCT Pt\nx DS N\n ENDS\n DB Pt\nN EQU 4\n"),
+    ok ("sjasmplus", "DS count in a taken branch reaches forward",
+        " IF 1\n DS COUNT\n ENDIF\n nop\nCOUNT EQU 2\n"),
     // #225: nine core 6809 instructions the spec had no row for at all —
     // add/subtract-with-carry, bit test, two 16-bit compares and `cwai`. Every
     // mode each one takes, because a missing mnemonic is missing in all of
