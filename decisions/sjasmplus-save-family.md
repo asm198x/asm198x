@@ -1,0 +1,85 @@
+# Decision: the sjasmplus `SAVE*` family, word by word
+
+**Status:** Active. Binding for Asm198x (accepted 2026-09-01). Refines the
+"`save*` family" row of the deferral register in
+[`reference-parity-goal.md`](reference-parity-goal.md) into one entry per word,
+under the mechanism and the canon rule
+[`multi-artifact-output.md`](multi-artifact-output.md) already settles.
+
+**Date:** 2026-09-01.
+
+## The decision
+
+1. **Every word is accepted.** `multi-artifact-output.md` accepts the family;
+   nothing here narrows that. What this record adds is the basis each word
+   waits on, so the register names a fact rather than "the same".
+2. **A word lands when its layout has an upstream.** The container's byte
+   layout must be held in `reference/` or `syntheses/` before the serialiser is
+   written, and the serialiser cites it. sjasmplus's own output is the
+   *verdict* the differential checks against, never the source the layout is
+   taken from.
+3. **A community standard held in the library is an upstream.** `formats.md`
+   already carries the TZX specification at role `community-standard`, and
+   `SAVETAP` cites it. A layout resting on community material that the library
+   holds (Spectrumpedia's SNA coverage) is citable, with the front matter's
+   provenance warning carried into the serialiser's doc comment. A layout the
+   library holds nothing for is not, and the word waits for acquisition.
+4. **Until it lands, a word is refused by name, with its basis.** The message
+   says which fact is missing and points here, as `SAVEBIN` does for a span
+   that reaches outside what the source assembled
+   ([#318](https://github.com/asm198x/asm198x/issues/318)).
+5. **Device gates are the reference's, verbatim.** Each word is refused
+   outside the devices sjasmplus accepts it in, with sjasmplus's message.
+
+## The words
+
+Every row was probed against sjasmplus 1.21.0 on 2026-09-01; the syntax and
+device columns are what the binary answered, not what its documentation says.
+
+| Word | Syntax as probed | Device gate | Container | Upstream | Waits on |
+|---|---|---|---|---|---|
+| `SAVEBIN` | `"file",start[,length]` | any device | raw span | — | **done** (#316); a span outside the assembled bytes waits on #318 |
+| `SAVETAP` | `"file",CODE\|BASIC,"name",start,length` | Spectrum devices | TAP | `syntheses/zx-spectrum/tape-loading-format.md` §4, via `format198x-sinclair-zx-spectrum-tap` | **done** for the kinded forms; the kindless whole-memory form waits on #318 |
+| `SAVE3DOS` | `"file",start,length` | any device | span with a 128-byte +3DOS header | `reference/by-system/sinclair-zx-spectrum/zx-spectrum-plus-3-manual-amstrad.txt` (the +3DOS header record) | nothing — next |
+| `SAVEAMSDOS` | `"file",start,length` | any device | span with a 128-byte AMSDOS header | **partly held** — the CPC464 firmware guide documents the cassette file-header record and does not mention AMSDOS; the disk header's extension and checksum are not held | acquisition of the AMSDOS header layout (the DDI-1 firmware guide) |
+| `SAVEDEV` | `"file",startPage,startOffset,length` | any device | raw device pages, no container | the device model (`docs/sjasmplus-device-model.md`) | nothing — next; pages never written wait on #318 |
+| `SAVESNA` | `"file"[,start]` | `ZXSPECTRUM48` / `ZXSPECTRUM128` only (`[SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.`) | 48K SNA (27-byte header + 49,152) or 128K SNA | `formats.md` §SNA — community material only, per rule 3 | #318 — a snapshot is the whole of a booted machine's RAM, so this word cannot land before that fact does |
+| `SAVECPCSNA` | `"file"[,start]`; `[SAVECPCSNA] No start address defined` without one | `AMSTRADCPC464` / `AMSTRADCPC6128` only | CPC SNA (256-byte header + 65,536) | `reference/by-system/amstrad-cpc/formats.md` §SNA — community | #318's CPC generalisation: the booted memory of a CPC is not the Spectrum's |
+| `SAVEHOB` | `"file","hobname",start,length` | any device | Hobeta (17-byte header, data padded to sectors: 273 bytes for a 1-byte span) | **none held** — Spectrumpedia mentions the format, no layout | acquisition |
+| `SAVETRD` | `"image","name.C",start,length[,autostart]`; the image must already exist (`Error opening file`), which `EMPTYTRD` creates | any device | file appended to a TR-DOS disk image | **none held** — `formats.md` names TRD in its overview and has no section | acquisition; lands together with `EMPTYTRD` |
+| `SAVECDT` | `FULL\|EMPTY\|BASIC\|CODE\|HEADLESS "file","name",start,length` | `AMSTRADCPC464` / `AMSTRADCPC6128` only | CDT (TZX with CPC block usage) | `reference/by-system/amstrad-cpc/formats.md` §CDT, which its own front matter flags as having no specification held | acquisition of the CDT block usage; the TZX container is held |
+| `SAVECPR` | `"file",size` with size 1–32 in 16 KiB units (`only a size from 1 (16KiB) to 32 (512KiB) is allowed`) | `AMSTRADCPCPLUS` only | CPR (RIFF `AMS!` cartridge: 16,404 bytes for one bank) | `reference/by-system/amstrad-cpc/formats.md` §CPR — community | the `AMSTRADCPCPLUS` device, which the device model does not yet carry |
+| `SAVENEX` | `OPEN\|CORE\|CFG\|BAR\|SCREEN\|BANK\|AUTO\|CLOSE …` — a stateful builder across several lines | `ZXSPECTRUMNEXT` only | NEX | **none held** — `reference/by-system/next-computer/` is NeXT, not the Spectrum Next | acquisition of the NEX specification, then its own record: it is a grammar, not one directive |
+
+Words beside the family that share its basis and land with it: `EMPTYTRD`
+(with `SAVETRD`), `EMPTYTAP`/`TAPOUT`/`TAPEND` (with the TAP serialiser
+already held), `INCHOB`/`INCTRD` (readers of the same two layouts).
+
+## The order
+
+Ordered by what is already held, not by demand:
+
+1. `SAVE3DOS`, `SAVEDEV` — upstream held, no dependency.
+2. `SAVESNA`, `SAVECPCSNA` — after #318, which is a `reference/`/`syntheses/`
+   task before it is an Asm198x one.
+3. `SAVECPR` — after the `AMSTRADCPCPLUS` device.
+4. `SAVEAMSDOS`, `SAVEHOB`, `SAVETRD`/`EMPTYTRD`, `SAVECDT` — after
+   acquisition.
+5. `SAVENEX` — after acquisition, under its own record.
+
+## Why not transcribe the layouts from the reference's output
+
+Each of these formats is read by Emu198x, mastered by Build198x and identified
+by Cat198x. A layout worked out from sjasmplus's bytes would be a fourth,
+private reading of a shared fact, and would drift from the others without
+anyone noticing. `multi-artifact-output.md` § "The formats are the family's"
+binds this; it is restated here only because the temptation is per-word — each
+one looks small enough to do at the keyboard.
+
+## Drift triggers
+
+- "sjasmplus writes N bytes, so the header is N bytes" — that is transcription.
+- "we can zero-fill the snapshot and fix it later" — #318 says the right answer
+  is not zeros; a snapshot with the wrong system variables loads and misbehaves.
+- "SAVENEX is just another save word" — it is eight sub-commands with state
+  between them.
