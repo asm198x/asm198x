@@ -11,9 +11,42 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- *(map)* the memory map report and the space budget ([#499](https://github.com/asm198x/asm198x/pull/499)) ([#520](https://github.com/asm198x/asm198x/pull/520))
-- *(convert)* self-verified dialect conversion, pasmo to sjasmplus ([#502](https://github.com/asm198x/asm198x/pull/502)) ([#517](https://github.com/asm198x/asm198x/pull/517))
-- *(ca65)* placement layouts are data, and a project may supply its own ([#515](https://github.com/asm198x/asm198x/pull/515))
+- **Dialect conversion, self-verified.**
+  ([#517](https://github.com/asm198x/asm198x/pull/517))
+  `asm198x convert --from pasmo --to sjasmplus prog.asm` reads pasmo source
+  and re-emits it as sjasmplus through the source-preserving AST — labels,
+  names, comments, and structure survive, so the output is source, not a
+  disassembly. Output is written **only** when assembling the input under
+  pasmo and the output under sjasmplus produce byte-identical images; a
+  conversion that cannot prove itself is a reported error naming the first
+  divergence. The structural rewrite worth knowing: pasmo closes `REPT`
+  with `ENDM` — the same word that closes a macro — and the converter
+  rewrites the repetition's closer to `ENDR` from the block structure while
+  leaving a macro's `ENDM` alone. Every eligible single-file source in the
+  Spectrum curriculum (226 of 226) converts verified.
+- **Project linker configurations for ca65.**
+  ([#515](https://github.com/asm198x/asm198x/pull/515))
+  `-C project.cfg` hands the ca65 path a project's own ld65 configuration
+  instead of the built-in curriculum layout. The reader is bounded to the
+  shapes real projects use — `MEMORY` and `SEGMENTS` with their placement
+  attributes — refusing anything outside the bound by name; segments
+  without a `start` place sequentially after their area-mates, exactly as
+  ld65 places them. The pinned `bbbradsmith/NES-ca65-example` builds
+  byte-identically to ca65 2.18 + ld65 with its own unmodified config.
+  Without `-C`, nothing changes.
+- **The memory map, and space budgets.**
+  ([#520](https://github.com/asm198x/asm198x/pull/520))
+  `--map` reports each memory area of the active layout — capacity, units
+  used, units free, and the largest contiguous free run, which a pinned
+  `VECTORS` can make smaller than the free total suggests — with the
+  segments placed in it; flat dialects report their one implicit area, the
+  64K address space. The same figures ride the JSON listing and the JSON
+  result. `; asm198x: free(PRG) >= $1000` joins `cycles()` as a
+  build-failing assertion: assembly fails when an area's headroom drops
+  below the floor, naming the requirement and the actuals. Budgets are now
+  also checked on the ca65 path, where a `cycles()` assertion errors
+  honestly (that driver captures no cycle data yet) instead of being
+  silently ignored.
 
 ## [0.0.54](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.53...asm198x-v0.0.54) - 2026-09-01
 
