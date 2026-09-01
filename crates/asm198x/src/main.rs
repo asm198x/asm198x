@@ -525,6 +525,7 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut sym: ArtifactPath = None;
     let mut listing: ArtifactPath = None;
     let mut listing_json: ArtifactPath = None;
+    let mut linker_config: Option<PathBuf> = None;
     // Repeatable `-I <dir>` include-search directories, in command-line order —
     // the order is the search order (language-surface U1/KTD8). The
     // include-capable entry points (U2) feed them to the filesystem loader.
@@ -559,6 +560,11 @@ fn run(args: &[String]) -> Result<String, String> {
             "--listing" => listing = Some(None),
             f if f.starts_with("--listing=") => {
                 listing = Some(Some(PathBuf::from(&f["--listing=".len()..])));
+            }
+            "-C" => {
+                i += 1;
+                let value = args.get(i).ok_or("`-C` needs a linker config path")?;
+                linker_config = Some(PathBuf::from(value));
             }
             "--listing-json" => listing_json = Some(None),
             f if f.starts_with("--listing-json=") => {
@@ -734,6 +740,11 @@ fn run(args: &[String]) -> Result<String, String> {
     // Debug198x artifacts: every path emits them (flat U3, ca65 U4, vasm U5).
     // The ca65/vasm listings wait on a per-section byte map, so only the
     // record-backed artifacts (`--debug`, `--sym`) are live there.
+    if linker_config.is_some() && !matches!(assembler, Assembler::Ca65) {
+        return Err(
+            "`-C` selects a ca65 linker configuration; this dialect has no linker config".into(),
+        );
+    }
     if (listing.is_some() || listing_json.is_some())
         && matches!(assembler, Assembler::Ca65 | Assembler::Vasm)
     {
@@ -887,16 +898,37 @@ fn run(args: &[String]) -> Result<String, String> {
     // same bytes by construction.
     if let Assembler::Ca65 = assembler {
         let loader = fs_loader(input, &include_dirs);
-        let (rom, info) = if debug.is_some() || sym.is_some() {
-            let (rom, info) = asm198x::assemble_ca65_files_debug(&source, input, &loader)
-                .map_err(|e| render_multi_error(input, &e))?;
-            (rom, Some(info))
-        } else {
-            (
+        // `-C` selects the project's own ld65 configuration (#483); absent,
+        // the curriculum default applies exactly as before.
+        let cfg = match &linker_config {
+            Some(path) => Some(
+                std::fs::read_to_string(path)
+                    .map_err(|e| format!("cannot read {}: {e}", path.display()))?,
+            ),
+            None => None,
+        };
+        let (rom, info) = match (&cfg, debug.is_some() || sym.is_some()) {
+            (Some(cfg), true) => {
+                let (rom, info) =
+                    asm198x::assemble_ca65_files_debug_with_config(&source, input, &loader, cfg)
+                        .map_err(|e| render_multi_error(input, &e))?;
+                (rom, Some(info))
+            }
+            (Some(cfg), false) => (
+                asm198x::assemble_ca65_files_with_config(&source, input, &loader, cfg)
+                    .map_err(|e| render_multi_error(input, &e))?,
+                None,
+            ),
+            (None, true) => {
+                let (rom, info) = asm198x::assemble_ca65_files_debug(&source, input, &loader)
+                    .map_err(|e| render_multi_error(input, &e))?;
+                (rom, Some(info))
+            }
+            (None, false) => (
                 asm198x::assemble_ca65_files(&source, input, &loader)
                     .map_err(|e| render_multi_error(input, &e))?,
                 None,
-            )
+            ),
         };
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("nes"));
         std::fs::write(&out_path, &rom.bytes)
@@ -1418,6 +1450,9 @@ fn usage() -> String {
      \x20            (prepends the 2-byte load address)\n\
      Game Boy ROM: asm198x --dialect rgbasm --gb-rom <input> [-o <out.gb>]\n\
      \x20            (RGBLINK-compatible layout, padding and header checksums)\n\
+     NES project: asm198x --dialect ca65 -C <project.cfg> <input> [-o <out.nes>]\n\
+     \x20            (-C reads a bounded ld65 config; absent, the curriculum\n\
+     \x20             NROM layout applies as before)\n\
      debug info:  asm198x [--debug[=path]] [--sym[=path]] [--listing[=path]]\n\
      \x20            [--listing-json[=path]] <input>\n\
      \x20            (--debug writes the .debug198x NDJSON sidecar; --sym a sorted\n\

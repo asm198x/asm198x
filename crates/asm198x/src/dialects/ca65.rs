@@ -41,20 +41,16 @@ use crate::span::FileId;
 // The fixed NES (NROM) layout
 // ---------------------------------------------------------------------------
 
-/// PRG ROM occupies the upper 32K of the CPU address space.
+/// PRG ROM occupies the upper 32K of the CPU address space — kept for the
+/// default layout's CODE/VECTORS overlap message below; every other shape
+/// number now lives in the layout value.
 const PRG_BASE: u32 = 0x8000;
-const PRG_SIZE: usize = 0x8000;
-const CHR_SIZE: usize = 0x2000;
-const HEADER_SIZE: usize = 0x10;
-const FILL: u8 = 0x00;
 
-/// The segments the assembler places are the active layout's
-/// ([`super::ca65_layout`], #483): resolved names, base addresses, and file
-/// positions. The curriculum's fixed NROM table lives on as
-/// [`super::ca65_layout::Layout::nes_default`] — the same rows it always
-/// resolved to, now as a value a project config can eventually replace (the
-/// `meet-the-machine` `nes.cfg` variant, whose `BSS` sits a page lower,
-/// stops being unrepresentable the moment layouts arrive as input).
+// The segments the assembler places are the active layout's
+// (`super::ca65_layout`, #483): resolved names, base addresses, and file
+// positions. The curriculum's fixed NROM table lives on as
+// `Layout::nes_default` — the same rows it always resolved to, now as a value
+// a project config replaces through `-C`.
 
 /// The segment each shorthand switches to. `.code` is `.segment "CODE"`, and
 /// so on down; `.data` and `.rodata` name segments the fixed NROM config has no
@@ -234,10 +230,9 @@ pub(crate) fn assemble(source: &str) -> Result<(Vec<u8>, Vec<Warning>), AsmError
 pub(crate) fn assemble_with_debug(
     source: &str,
 ) -> Result<(Vec<u8>, Vec<Warning>, DebugCapture), AsmError> {
-    let layout = super::ca65_layout::Layout::nes_default().resolve(&Default::default())?;
     let (rom, warnings, capture) = assemble_program(
         &parse_program(&isa::mos6502::SET, source, macros::Expand::Yes)?,
-        &layout,
+        &super::ca65_layout::Layout::nes_default(),
     )?;
     Ok((rom, warnings, capture.into_single()))
 }
@@ -256,10 +251,23 @@ pub(crate) fn assemble_multi(
     map: &mut SourceMap,
     loader: &dyn SourceLoader,
 ) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
-    let layout = super::ca65_layout::Layout::nes_default().resolve(&Default::default())?;
+    assemble_multi_with(map, loader, &super::ca65_layout::Layout::nes_default())
+}
+
+/// [`assemble_multi`] under a caller-supplied layout — the `-C` path (#483):
+/// the same assembly, placed by the project's own configuration.
+///
+/// # Errors
+/// As [`assemble_multi`], plus the layout's own resolution failures (a
+/// pinned `start` behind its area's fill).
+pub(crate) fn assemble_multi_with(
+    map: &mut SourceMap,
+    loader: &dyn SourceLoader,
+    layout: &super::ca65_layout::Layout,
+) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
     assemble_program(
         &parse_program_multi(&isa::mos6502::SET, map, loader)?,
-        &layout,
+        layout,
     )
 }
 
@@ -273,7 +281,7 @@ pub(crate) fn assemble_multi(
 /// failure.
 fn assemble_program(
     program: &crate::ast::Program,
-    layout: &super::ca65_layout::ResolvedLayout,
+    layout_def: &super::ca65_layout::Layout,
 ) -> Result<(Vec<u8>, Vec<Warning>, DebugCaptureMulti), AsmError> {
     let set = &isa::mos6502::SET;
     // The AST is the single front-end IR: the parse built the source-preserving
@@ -340,6 +348,27 @@ fn assemble_program(
         }
     }
 
+    // Where a segment floats behind another in its area (a project config's
+    // RODATA after CODE), its base is a function of the earlier segments'
+    // lengths — so size everything first, with the same `resolve` the layout
+    // pass uses, and feed the lengths to the layout's resolution. No
+    // statement's size depends on its absolute address (`.align` measures
+    // from the segment's start), so this pass cannot disagree with the real
+    // one. The default layout floats nothing and skips this entirely.
+    let seg_lengths = if layout_def.needs_lengths() {
+        let mut lengths: BTreeMap<String, u32> = BTreeMap::new();
+        for stmt in &parsed.stmts {
+            let off = *lengths.entry(stmt.seg.clone()).or_insert(0);
+            let (_, size) = resolve(set, stmt.kind.clone(), &size_env, off, stmt.line)
+                .map_err(|e| ca65_flat::stamp_file(e, stmt.file))?;
+            *lengths.get_mut(&stmt.seg).expect("segment length") += size as u32;
+        }
+        lengths
+    } else {
+        BTreeMap::new()
+    };
+    let layout = &layout_def.resolve(&seg_lengths)?;
+
     // Layout pass: resolve each instruction's mode and size, lay statements out
     // within their segment, and record every label's absolute address.
     let mut offsets: BTreeMap<String, u32> = BTreeMap::new();
@@ -394,13 +423,23 @@ fn assemble_program(
             ca65_flat::stamp_file(
                 AsmError::new(
                     stmt.line,
-                    format!(
-                        "segment `{}` is not in the NES config (valid: {}); this assembler \
-                         links the curriculum's fixed NROM layout, which — like `ld65` with \
-                         its `nes.cfg` — has no memory area for other segments",
-                        stmt.seg,
-                        layout.known()
-                    ),
+                    if layout.from_config {
+                        format!(
+                            "segment `{}` is not in the linker config (valid: {}); like \
+                             `ld65`, a segment outside SEGMENTS has no memory area to \
+                             place it in",
+                            stmt.seg,
+                            layout.known()
+                        )
+                    } else {
+                        format!(
+                            "segment `{}` is not in the NES config (valid: {}); this assembler \
+                             links the curriculum's fixed NROM layout, which — like `ld65` with \
+                             its `nes.cfg` — has no memory area for other segments",
+                            stmt.seg,
+                            layout.known()
+                        )
+                    },
                 ),
                 stmt.file,
             )
