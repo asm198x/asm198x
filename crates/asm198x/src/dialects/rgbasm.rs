@@ -60,6 +60,11 @@ use crate::span::FileId;
 pub(crate) struct Rgbasm;
 
 impl Dialect for Rgbasm {
+    /// Every instruction lowers by form; the only piece-encoded emissions
+    /// are data directives, so an absent cycle record means data (#497).
+    fn cycle_coverage(&self) -> crate::dialect::CycleCoverage {
+        crate::dialect::CycleCoverage::Full
+    }
     /// rgbasm 1.0.3 truncates **and says so**: `db 256` and `ld a,300` both
     /// give `warning: Expression must be 8-bit; use LOW() to force 8-bit
     /// [-Wtruncation]` and assemble to `00` / `3e 2c`. It warns for operands

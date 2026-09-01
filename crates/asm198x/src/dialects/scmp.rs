@@ -32,6 +32,11 @@ use crate::source::{SourceLoader, SourceMap};
 pub(crate) struct Scmp;
 
 impl Dialect for Scmp {
+    /// Every instruction lowers by form; the only piece-encoded emissions
+    /// are data directives, so an absent cycle record means data (#497).
+    fn cycle_coverage(&self) -> crate::dialect::CycleCoverage {
+        crate::dialect::CycleCoverage::Full
+    }
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::scmp::SET
     }

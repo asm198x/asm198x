@@ -171,11 +171,40 @@ By default `asm` writes a flat binary. These wrap it for a machine's loader:
 |---|---|---|
 | `--debug[=path]` | Debug198x NDJSON sidecar | input + `.debug198x` |
 | `--sym[=path]` | Sorted `name = $hex` symbol table | input + `.sym` |
-| `--listing[=path]` | Address / bytes / source rows | input + `.lst` |
+| `--listing[=path]` | Address / bytes / cycles / source rows, with per-label cycle totals | input + `.lst` |
+| `--listing-json[=path]` | The same per-line and per-label data as JSON | input + `.lst.json` |
 
 Available on the flat dialects, plus the ca65 and vasm linked paths for
 `--debug` and `--sym`. They describe an assembly, so combining them with `fmt`
 or `disasm` is an error rather than a silent no-op.
+
+### Cycles in the listing
+
+Where the instruction spec carries validated cycle data (the form-model CPUs
+— 6502, Z80, SM83, and their relatives), the listing annotates each
+instruction with its cost from that spec: one number when the cost is fixed,
+`min/max` when a page-cross or branch-taken extra makes it a range. A tail
+sums each label's straight-line span — the instructions from the label to the
+next label, in address order; it is static cost, not execution. A CPU whose
+spec has no cycle data yet says `no cycle data (backfill pending)` instead of
+inventing figures, and a dialect that pre-encodes some instructions marks its
+figures as lower bounds.
+
+### Cycle budgets
+
+A comment of the form
+
+```asm
+; asm198x: cycles(irq) <= 224
+```
+
+asserts that the label's straight-line span fits the budget, counting every
+conditional extra — the worst case. Assembly **fails** when the budget is
+exceeded, naming the routine, the budget, and the actual cost. The line is an
+ordinary comment to every reference assembler, so the source still assembles
+byte-identically elsewhere; only asm198x acts on it. Because it is an
+assertion, a malformed spelling, an unknown label, or a budget on a CPU
+without cycle data is an error rather than a silently ignored comment.
 
 The sidecar format is specified in
 [`debug198x.md`](https://github.com/asm198x/docs/blob/main/debug198x.md) and is frozen

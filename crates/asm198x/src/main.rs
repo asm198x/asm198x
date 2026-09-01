@@ -524,6 +524,7 @@ fn run(args: &[String]) -> Result<String, String> {
     let mut debug: ArtifactPath = None;
     let mut sym: ArtifactPath = None;
     let mut listing: ArtifactPath = None;
+    let mut listing_json: ArtifactPath = None;
     // Repeatable `-I <dir>` include-search directories, in command-line order —
     // the order is the search order (language-surface U1/KTD8). The
     // include-capable entry points (U2) feed them to the filesystem loader.
@@ -558,6 +559,10 @@ fn run(args: &[String]) -> Result<String, String> {
             "--listing" => listing = Some(None),
             f if f.starts_with("--listing=") => {
                 listing = Some(Some(PathBuf::from(&f["--listing=".len()..])));
+            }
+            "--listing-json" => listing_json = Some(None),
+            f if f.starts_with("--listing-json=") => {
+                listing_json = Some(Some(PathBuf::from(&f["--listing-json=".len()..])));
             }
             "--message-format" => {
                 i += 1;
@@ -631,7 +636,9 @@ fn run(args: &[String]) -> Result<String, String> {
     // The debug artifacts render an *assembly's* captured record; there is no
     // record to render under `--fmt` or `--disasm`, so the combination is an
     // error rather than a silent no-op.
-    if (debug.is_some() || sym.is_some() || listing.is_some()) && (format || disassemble) {
+    if (debug.is_some() || sym.is_some() || listing.is_some() || listing_json.is_some())
+        && (format || disassemble)
+    {
         return Err(
             "`--debug`/`--sym`/`--listing` apply to an assembly run, not `--fmt`/`--disasm`".into(),
         );
@@ -727,7 +734,9 @@ fn run(args: &[String]) -> Result<String, String> {
     // Debug198x artifacts: every path emits them (flat U3, ca65 U4, vasm U5).
     // The ca65/vasm listings wait on a per-section byte map, so only the
     // record-backed artifacts (`--debug`, `--sym`) are live there.
-    if listing.is_some() && matches!(assembler, Assembler::Ca65 | Assembler::Vasm) {
+    if (listing.is_some() || listing_json.is_some())
+        && matches!(assembler, Assembler::Ca65 | Assembler::Vasm)
+    {
         return Err(
             "`--listing` is not yet supported for the ca65/vasm paths (`--debug` and `--sym` are)"
                 .into(),
@@ -790,7 +799,7 @@ fn run(args: &[String]) -> Result<String, String> {
             &include_dirs,
             exe,
             output.as_deref(),
-            (&debug, &sym, &listing),
+            (&debug, &sym, &listing, &listing_json),
         );
     }
 
@@ -858,6 +867,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 &debug,
                 &sym,
                 &listing,
+                &listing_json,
             )?,
             None => String::new(),
         };
@@ -902,6 +912,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 &debug,
                 &sym,
                 &listing,
+                &listing_json,
             )?,
             None => String::new(),
         };
@@ -1090,6 +1101,7 @@ fn run(args: &[String]) -> Result<String, String> {
             &debug,
             &sym,
             &listing,
+            &listing_json,
         )?
     } else {
         String::new()
@@ -1204,6 +1216,7 @@ fn write_debug_artifacts(
     debug: &ArtifactPath,
     sym: &ArtifactPath,
     listing: &ArtifactPath,
+    listing_json: &ArtifactPath,
 ) -> Result<String, String> {
     let mut notes = String::new();
     let mut emit = |path: &Option<PathBuf>, ext: &str, what: &str, content: String| {
@@ -1238,6 +1251,10 @@ fn write_debug_artifacts(
     if let Some(path) = listing {
         let text = asm198x::render_listing_files(sources, assembly, addr_unit);
         emit(path, "lst", "listing", text)?;
+    }
+    if let Some(path) = listing_json {
+        let text = asm198x::render_listing_json(input, assembly, addr_unit);
+        emit(path, "lst.json", "JSON listing", text)?;
     }
     Ok(notes)
 }
@@ -1401,11 +1418,14 @@ fn usage() -> String {
      \x20            (prepends the 2-byte load address)\n\
      Game Boy ROM: asm198x --dialect rgbasm --gb-rom <input> [-o <out.gb>]\n\
      \x20            (RGBLINK-compatible layout, padding and header checksums)\n\
-     debug info:  asm198x [--debug[=path]] [--sym[=path]] [--listing[=path]] <input>\n\
+     debug info:  asm198x [--debug[=path]] [--sym[=path]] [--listing[=path]]\n\
+     \x20            [--listing-json[=path]] <input>\n\
      \x20            (--debug writes the .debug198x NDJSON sidecar; --sym a sorted\n\
-     \x20             `name = $hex` table; --listing address/bytes/source rows —\n\
-     \x20             defaults: input with .debug198x/.sym/.lst; flat dialects only\n\
-     \x20             for now plus the ca65/vasm linked paths for --debug/--sym)\n\
+     \x20             `name = $hex` table; --listing address/bytes/cycles/source rows\n\
+     \x20             with per-label cycle totals; --listing-json the same data as\n\
+     \x20             JSON — defaults: input with .debug198x/.sym/.lst/.lst.json;\n\
+     \x20             flat dialects only for now plus the ca65/vasm linked paths\n\
+     \x20             for --debug/--sym)\n\
      disassemble: asm198x disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\
      format:      asm198x fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
@@ -1500,7 +1520,12 @@ fn emit_json(
     include_dirs: &[PathBuf],
     exe: bool,
     output: Option<&Path>,
-    (debug, sym, listing): (&ArtifactPath, &ArtifactPath, &ArtifactPath),
+    (debug, sym, listing, listing_json): (
+        &ArtifactPath,
+        &ArtifactPath,
+        &ArtifactPath,
+        &ArtifactPath,
+    ),
 ) -> Result<String, String> {
     let debug_requested = debug.is_some() || sym.is_some() || listing.is_some();
     // The ca65/vasm debug-capturing entries return the record alongside the
@@ -1578,6 +1603,7 @@ fn emit_json(
                     debug,
                     sym,
                     listing,
+                    listing_json,
                 )?;
             }
             let json =

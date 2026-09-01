@@ -105,15 +105,21 @@ fn sym_rendering_golden() {
 fn listing_rendering_golden() {
     let r = asm198x::assemble_pasmo(Z80_SRC).expect("assemble");
     let listing = asm198x::render_listing(Z80_SRC, &r, 1);
-    // An empty address/bytes column is 31 spaces: 4 (addr) + 2 + 23 (bytes) + 2.
+    // An empty address/bytes column is 31 spaces: 4 (addr) + 2 + 23 (bytes) + 2;
+    // the cycles column (#497) adds its width + 2 when any record exists —
+    // here "10" is widest, so 4 more. The figures are the spec's own: Z80
+    // `ld a,n` 7, `ret` 10; the data row has no record and no number.
     let expected = [
-        "                               \torg 8000h",
-        "                               start:",
-        "8000  3E 05                    \tld a,5",
-        "                               five\tequ 5",
-        "                               ; setup done",
-        "8002  C9                       \tret",
-        "8003  01 02 03 04 05 06 07 ..  data:\tdb 1,2,3,4,5,6,7,8,9,10",
+        "                                   \torg 8000h",
+        "                                   start:",
+        "8000  3E 05                    7   \tld a,5",
+        "                                   five\tequ 5",
+        "                                   ; setup done",
+        "8002  C9                       10  \tret",
+        "8003  01 02 03 04 05 06 07 ..      data:\tdb 1,2,3,4,5,6,7,8,9,10",
+        "",
+        "cycle totals (spec, straight-line to the next label):",
+        "  start ($8000)  3 bytes, 17 cycles",
         "",
     ]
     .join("\n");
@@ -377,6 +383,8 @@ fn cp1610_listing_indexes_bytes_by_decle() {
         "                               \torg 5000h",
         "5000  00 81                    start:\tmovr r0, r1",
         "5001  00 34                    \tnop",
+        "",
+        "no cycle data (backfill pending)",
         "",
     ]
     .join("\n");
@@ -887,18 +895,26 @@ fn multifile_listing_golden() {
         },
     ];
     let listing = asm198x::render_listing_files(&files, &r, 1);
+    // The cycles column (#497) widens every row by its width + 2 ("10" is
+    // widest here, so 4); the figures are the spec's — `ld a,n`/`ld b,n` 7,
+    // `ret` 10 — and `tiles`'s total spans the incbin's bytes (no cycles)
+    // plus the code after it.
     let expected = [
-        format!("main.s{}\torg $8000", " ".repeat(35)),
-        format!("main.s{}start:", " ".repeat(35)),
-        format!("main.s    8000  3E 01{}\tld a,1", " ".repeat(20)),
-        format!("main.s{}\tinclude \"part.inc\"", " ".repeat(35)),
-        format!("part.inc{}tiles:", " ".repeat(33)),
+        format!("main.s{}\torg $8000", " ".repeat(39)),
+        format!("main.s{}start:", " ".repeat(39)),
+        format!("main.s    8000  3E 01{}7   \tld a,1", " ".repeat(20)),
+        format!("main.s{}\tinclude \"part.inc\"", " ".repeat(39)),
+        format!("part.inc{}tiles:", " ".repeat(37)),
         format!(
             "part.inc  8002  .. 4 bytes{}\tincbin \"tiles.bin\"",
-            " ".repeat(15)
+            " ".repeat(19)
         ),
-        format!("part.inc  8006  06 02{}\tld b,2", " ".repeat(20)),
-        format!("main.s    8008  C9{}\tret", " ".repeat(23)),
+        format!("part.inc  8006  06 02{}7   \tld b,2", " ".repeat(20)),
+        format!("main.s    8008  C9{}10  \tret", " ".repeat(23)),
+        String::new(),
+        "cycle totals (spec, straight-line to the next label):".to_string(),
+        "  start ($8000)  2 bytes, 7 cycles".to_string(),
+        "  tiles ($8002)  7 bytes, 17 cycles".to_string(),
         String::new(),
     ]
     .join("\n");
@@ -986,8 +1002,9 @@ fn flat_multifile_debug_artifacts_tell_the_truth() {
         "the root's rows carry the root margin:\n{lst}"
     );
     let margin_col = |line: &str| line.starts_with("main.s") || line.starts_with("part.inc");
+    let rows = lst.split("\n\n").next().expect("row section");
     assert!(
-        lst.lines().filter(|l| !l.is_empty()).all(margin_col),
+        rows.lines().filter(|l| !l.is_empty()).all(margin_col),
         "every row names its file in the margin:\n{lst}"
     );
 }

@@ -34,6 +34,7 @@
 // dialects lower into it and it lowers to Statement/Operation (U3 wires that).
 mod ast;
 mod contract;
+mod cycles;
 mod dialect;
 /// The dialect table: every spelling `--dialect` accepts, and what each is
 /// for. Public so the CLI and the reference generator read one list.
@@ -72,10 +73,12 @@ pub use contract::{
     resolve_span_path,
 };
 pub use engine::{
-    Artifact, ArtifactFormat, AsmError, Assembly, DebugData, LineRec, OutputFormat,
-    RequestedOutput, Warning,
+    Artifact, ArtifactFormat, AsmError, Assembly, CycleCoverage, CycleRec, DebugData, LineRec,
+    OutputFormat, RequestedOutput, Warning,
 };
-pub use listing::{ListingFile, debug_info, render_listing, render_listing_files, render_sym};
+pub use listing::{
+    ListingFile, debug_info, render_listing, render_listing_files, render_listing_json, render_sym,
+};
 pub use span::{ExpansionFrame, FileId, Span};
 // Re-exported so consumers of `Assembly.debug` need not depend on debug198x
 // directly for the symbol types the engine captures.

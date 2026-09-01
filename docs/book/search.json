@@ -558,6 +558,18 @@
       "slug": "reference/cli"
     },
     {
+      "context": "Where the instruction spec carries validated cycle data (the form-model CPUs",
+      "heading": "Cycles in the listing",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "A comment of the form",
+      "heading": "Cycle budgets",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
       "context": "--dialect selects the source syntax, not the CPU. Each front-end matches",
       "heading": "Dialects",
       "page": "The command line",

@@ -44,6 +44,11 @@ use crate::span::FileId;
 pub(crate) struct Ca65_816;
 
 impl Dialect for Ca65_816 {
+    /// Every instruction lowers by form; the only piece-encoded emissions
+    /// are data directives, so an absent cycle record means data (#497).
+    fn cycle_coverage(&self) -> crate::dialect::CycleCoverage {
+        crate::dialect::CycleCoverage::Full
+    }
     /// ca65 refuses a negative literal at every width — `Range error (-1 not
     /// in [0..255])` for a byte, and the same for a word and a dword. It is
     /// the only reference here that does (probed 2026-08-25); refusing this

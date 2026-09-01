@@ -24,6 +24,8 @@ pub(crate) enum Oversize {
     TruncateWarn,
 }
 
+pub(crate) use crate::engine::CycleCoverage;
+
 pub(crate) trait Dialect {
     /// The primary instruction set this dialect assembles against.
     fn instruction_set(&self) -> &'static isa::InstructionSet;
@@ -33,6 +35,13 @@ pub(crate) trait Dialect {
     /// without one (the default) rejects those opcodes as unknown.
     fn extension_set(&self) -> Option<&'static isa::InstructionSet> {
         None
+    }
+
+    /// What an empty cycle capture means for this dialect — see
+    /// [`CycleCoverage`]. The default is the honest floor: a new dialect
+    /// declares coverage only once its instruction lowering warrants it.
+    fn cycle_coverage(&self) -> CycleCoverage {
+        CycleCoverage::None
     }
 
     /// Parse source into the engine's statement stream, resolving each

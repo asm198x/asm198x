@@ -410,6 +410,21 @@ pub fn render_listing_files(
     };
     let margin_w = margins.iter().map(String::len).max().unwrap_or(0);
 
+    // Per-line cycle cost (#497), summed over the line's records so a
+    // colon-separated multi-statement line shows the line's whole cost. The
+    // honest range: min is every conditional extra unspent, max is all spent.
+    let mut cycles: BTreeMap<(u32, u32), (u64, u64)> = BTreeMap::new();
+    for c in &result.debug.cycles {
+        let e = cycles.entry((c.file.0, c.line)).or_insert((0, 0));
+        e.0 += u64::from(c.base);
+        e.1 += u64::from(c.base) + u64::from(c.page_cross) + u64::from(c.branch_taken);
+    }
+    let cyc_w = cycles
+        .values()
+        .map(|c| cycle_cell(*c).len())
+        .max()
+        .unwrap_or(0);
+
     let mut out = String::new();
     if !files.is_empty() {
         render_one_file(
@@ -423,11 +438,143 @@ pub fn render_listing_files(
                 addr_unit,
                 margins: &margins,
                 margin_w,
+                cycles: &cycles,
+                cyc_w,
             },
             &mut out,
         );
     }
+    render_cycle_footer(result, base, addr_unit, &mut out);
     out
+}
+
+/// The machine-readable listing (#497, the plan's R4): the same per-line and
+/// per-label size/cycle data the human table renders, as one JSON object —
+/// `{"coverage", "lines", "labels"}`. Addresses are absolute; a line without
+/// a capture record carries no `cycles` member rather than a zero, exactly as
+/// the human column leaves its cell blank.
+#[must_use]
+pub fn render_listing_json(input: &str, result: &AssemblyResult, addr_unit: u64) -> String {
+    use serde_json::json;
+
+    let base = u64::from(result.origin.unwrap_or(0));
+    let files: Vec<&str> = if result.files.is_empty() {
+        vec![input]
+    } else {
+        result.files.iter().map(String::as_str).collect()
+    };
+    let mut cycles: std::collections::BTreeMap<(u32, u32), (u64, u64)> =
+        std::collections::BTreeMap::new();
+    for c in &result.debug.cycles {
+        let e = cycles.entry((c.file.0, c.line)).or_insert((0, 0));
+        e.0 += u64::from(c.base);
+        e.1 += u64::from(c.base) + u64::from(c.page_cross) + u64::from(c.branch_taken);
+    }
+    let lines: Vec<serde_json::Value> = result
+        .debug
+        .lines
+        .iter()
+        .map(|l| {
+            let mut o = json!({
+                "file": files.get(l.file.0 as usize).copied().unwrap_or(""),
+                "line": l.line,
+                "address": base + l.offset,
+                "bytes": l.length * addr_unit,
+            });
+            if let Some(&(min, max)) = cycles.get(&(l.file.0, l.line)) {
+                o["cycles"] = json!({ "min": min, "max": max });
+            }
+            o
+        })
+        .collect();
+    let labels: Vec<serde_json::Value> = crate::cycles::label_costs(result, addr_unit)
+        .into_iter()
+        .map(|c| {
+            json!({
+                "name": c.name,
+                "address": base + c.start,
+                "bytes": c.bytes,
+                "cycles": { "min": c.min, "max": c.max },
+            })
+        })
+        .collect();
+    let coverage = match result.debug.cycle_coverage {
+        crate::engine::CycleCoverage::Full => "full",
+        crate::engine::CycleCoverage::Partial => "partial",
+        crate::engine::CycleCoverage::None => "none",
+    };
+    let doc = json!({ "coverage": coverage, "lines": lines, "labels": labels });
+    format!("{doc}\n")
+}
+
+/// The cycles column cell: one number when the cost is fixed, `min/max` when
+/// conditional extras make it a range — never a collapsed single figure.
+fn cycle_cell((min, max): (u64, u64)) -> String {
+    if min == max {
+        format!("{min}")
+    } else {
+        format!("{min}/{max}")
+    }
+}
+
+/// The listing's cycle tail (#497): per-label straight-line totals, then the
+/// coverage note when an absent record does not mean data.
+///
+/// A label's span runs to the next labelled offset (or the end), so a routine
+/// written straight-line totals exactly; a label inside it splits the figures,
+/// which is the static-analysis contract — this measures code between labels,
+/// it does not execute anything.
+fn render_cycle_footer(result: &AssemblyResult, base: u64, addr_unit: u64, out: &mut String) {
+    use crate::engine::CycleCoverage;
+    use std::fmt::Write as _;
+
+    if !result.debug.cycles.is_empty() {
+        let rows: Vec<(String, u64, (u64, u64))> = crate::cycles::label_costs(result, addr_unit)
+            .into_iter()
+            .map(|c| {
+                (
+                    format!("{} (${:04X})", c.name, base + c.start),
+                    c.bytes,
+                    (c.min, c.max),
+                )
+            })
+            .collect();
+        if !rows.is_empty() {
+            let _ = writeln!(
+                out,
+                "
+cycle totals (spec, straight-line to the next label):"
+            );
+            let name_w = rows.iter().map(|r| r.0.len()).max().unwrap_or(0);
+            for (name, bytes, cost) in rows {
+                let _ = writeln!(
+                    out,
+                    "  {name:<name_w$}  {bytes} byte{}, {} cycle{}",
+                    if bytes == 1 { "" } else { "s" },
+                    cycle_cell(cost),
+                    if cost == (1, 1) { "" } else { "s" },
+                );
+            }
+        }
+    }
+    match result.debug.cycle_coverage {
+        CycleCoverage::Full => {}
+        CycleCoverage::Partial => {
+            let _ = writeln!(
+                out,
+                "
+some instructions carry no cycle data (piece-encoded); cycle figures are lower bounds"
+            );
+        }
+        CycleCoverage::None if !result.debug.lines.is_empty() => {
+            let _ = writeln!(
+                out,
+                "
+no cycle data (backfill pending)"
+            );
+        }
+        CycleCoverage::None => {}
+    }
 }
 
 /// The shared rendering context threaded through the splice walk.
@@ -440,6 +587,11 @@ struct RenderCx<'a> {
     addr_unit: u64,
     margins: &'a [String],
     margin_w: usize,
+    /// Per-(file, line) summed cycle cost, empty when nothing captured.
+    cycles: &'a std::collections::BTreeMap<(u32, u32), (u64, u64)>,
+    /// Widest rendered cycle cell; 0 suppresses the column entirely, so a
+    /// capture-less listing is byte-identical to what it always was.
+    cyc_w: usize,
 }
 
 /// Render one file's rows, splicing each included file in after its include
@@ -482,8 +634,24 @@ fn render_one_file(id: usize, cx: &RenderCx<'_>, out: &mut String) {
                         shown.join(" ")
                     }
                 };
-                format!("{addr:04X}  {hex:<bytes_col$}  {text}")
+                if cx.cyc_w > 0 {
+                    let cyc = cx
+                        .cycles
+                        .get(&(id as u32, line))
+                        .map_or(String::new(), |c| cycle_cell(*c));
+                    let cyc_w = cx.cyc_w;
+                    format!("{addr:04X}  {hex:<bytes_col$}  {cyc:<cyc_w$}  {text}")
+                } else {
+                    format!("{addr:04X}  {hex:<bytes_col$}  {text}")
+                }
             }
+            None if cx.cyc_w > 0 => format!(
+                "{:4}  {:<bytes_col$}  {:<w$}  {text}",
+                "",
+                "",
+                "",
+                w = cx.cyc_w
+            ),
             None => format!("{:4}  {:<bytes_col$}  {text}", "", ""),
         };
         // Trim so no-source rows (blank lines) stay genuinely blank.
