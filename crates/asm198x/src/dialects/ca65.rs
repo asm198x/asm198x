@@ -1821,6 +1821,14 @@ impl FlatWalk for Walker {
                 if !is_ident(name) {
                     return Err(AsmError::new(line, "`.define` needs an identifier"));
                 }
+                // ca65 refuses to redefine (probed: `A macro named 'val' is
+                // already defined`) — there is no silent replacement.
+                if self.text_defines.contains_key(name) {
+                    return Err(AsmError::new(
+                        line,
+                        format!("a text symbol named `{name}` is already defined"),
+                    ));
+                }
                 self.text_defines
                     .insert(name.to_string(), value.trim().to_string());
                 return Ok(None);
@@ -1839,7 +1847,14 @@ impl FlatWalk for Walker {
                         "`.undefine` needs exactly one identifier",
                     ));
                 }
-                self.text_defines.remove(name);
+                // ca65 refuses to undefine what is not defined (probed:
+                // `No such macro: nothing`).
+                if self.text_defines.remove(name).is_none() {
+                    return Err(AsmError::new(
+                        line,
+                        format!("no text symbol named `{name}` to undefine"),
+                    ));
+                }
                 return Ok(None);
             }
             _ => {}
@@ -1855,25 +1870,11 @@ impl FlatWalk for Walker {
             _ => {}
         }
 
-        // `.ifdef`/`.ifndef` ask whether a text symbol exists; substituting
-        // its value into the operand would instead ask whether that value is a
-        // symbol. Fold only names owned by this live text environment and let
-        // the ordinary conditional evaluator handle every other symbol.
-        let (prefix, head, args) = if word.ends_with(':') {
-            let (head, args) = split_first_word(rest.trim());
-            (format!("{word} "), head, args)
-        } else {
-            (String::new(), word, rest)
-        };
-        let lower = head.to_ascii_lowercase();
-        if matches!(lower.as_str(), ".ifdef" | ".ifndef") {
-            let (name, trailing) = split_first_word(args.trim());
-            if trailing.trim().is_empty() && self.text_defines.contains_key(name) {
-                let value = i32::from(lower == ".ifdef");
-                return Ok(Some(format!("{prefix}.if {value}")));
-            }
-        }
-
+        // `.ifdef`/`.ifndef` get no carve-out: ca65 expands an active text
+        // symbol in the argument like any other use (probed: `.define hi 8`
+        // then `.ifdef hi` is `Identifier expected` — the question lands on
+        // the *value*), so the general substitution below is the reference
+        // behaviour, and the conditional fold validates what arrives.
         substitute_text_defines(raw, &self.text_defines, line).map(Some)
     }
 
@@ -2403,6 +2404,15 @@ fn fold_condition(head: &str, st: &Projection, line: usize) -> Result<bool, AsmE
                 .split_whitespace()
                 .next()
                 .ok_or_else(|| AsmError::new(line, format!("`{word}` needs a name")))?;
+            // An active text symbol was substituted into the argument before
+            // this fold, so a numeric value lands here — which ca65 answers
+            // `Identifier expected`, not with a membership test.
+            if !is_ident(name) {
+                return Err(AsmError::new(
+                    line,
+                    format!("`{word}` needs an identifier, got `{name}`"),
+                ));
+            }
             let defined = env.contains_key(name) || st.label_seg.contains_key(name);
             Ok(if word == ".ifdef" { defined } else { !defined })
         }
