@@ -20,6 +20,10 @@ concurrency:
 permissions:
   contents: write
   pull-requests: write
+  # The arbiter image is a private package (the reference tools inside it are
+  # not all redistributable), so pulling it needs an authenticated token with
+  # package read — without this the job dies at the docker pull, denied.
+  packages: read
 
 jobs:
   grow:
@@ -27,6 +31,9 @@ jobs:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/${{ github.repository_owner }}/arbiter:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - name: Check out repository
         uses: actions/checkout@v7
