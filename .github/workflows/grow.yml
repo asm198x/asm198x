@@ -69,10 +69,13 @@ jobs:
       # Hand-rolled rather than a pull-request action: `gh` is already on the
       # runner, this is a dozen lines, and a scheduled job that writes to the
       # corpus is the last place to take on a dependency for convenience.
-      - name: Open a pull request
+      # The container has git but not gh, so this step only commits and
+      # pushes; the pull request is opened by the job below, on the plain
+      # runner where gh lives. The first dispatched run proved the split the
+      # hard way — everything up to `gh pr create` worked, and then exit 127.
+      - name: Commit and push the growth branch
+        id: push
         shell: bash
-        env:
-          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           set -euo pipefail
           # The checkout is owned by a different uid than the container user,
@@ -87,23 +90,39 @@ jobs:
           git add crates/asm198x/tests/verdicts/ docs/book/src/
           if git diff --cached --quiet; then
             echo "nothing new was arbitrated — no pull request to open"
+            echo "pushed=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
-          branch=growth/scheduled
-          git checkout -b "$branch"
+          git checkout -b growth/scheduled
           git commit -q -m "chore(corpus): a scheduled growth run
 
           Recorded by the arbiter container, whose tools reported the same
           behavioural identities the corpus is keyed on. Verdicts here are facts
           about what a reference assembler did, not expectations."
-          git push -f origin "$branch"
+          git push -f origin growth/scheduled
+          echo "pushed=true" >> "$GITHUB_OUTPUT"
+    outputs:
+      pushed: ${{ steps.push.outputs.pushed }}
 
-          if gh pr view "$branch" --json state --jq .state 2>/dev/null | grep -q OPEN; then
-            echo "a growth pull request is already open; pushed to it"
+  open-pr:
+    name: Open the growth pull request
+    needs: grow
+    if: needs.grow.outputs.pushed == 'true'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Open or refresh the pull request
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -euo pipefail
+          repo="${{ github.repository }}"
+          if gh pr view growth/scheduled --repo "$repo" --json state --jq .state 2>/dev/null | grep -q OPEN; then
+            echo "a growth pull request is already open; the push refreshed it"
             exit 0
           fi
-          gh pr create --head "$branch" --title "chore(corpus): a scheduled growth run" --body \
+          gh pr create --repo "$repo" --head growth/scheduled \
+            --title "chore(corpus): a scheduled growth run" --body \
           "Arbitrated in \`ghcr.io/${{ github.repository_owner }}/arbiter:latest\`.
 
           The corpus is append-only, so read this as a set of new facts rather than
