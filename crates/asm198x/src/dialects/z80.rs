@@ -52,10 +52,35 @@ pub(crate) trait Z80Syntax {
     /// line, where it came from.
     ///
     /// `None` — the default — means the dialect has nothing to expand, and the
-    /// source is parsed as written. sjasmplus overrides it for macros (#93).
-    /// Because every entry point funnels through `parse_program_keyword`, one
-    /// hook covers the single-source, AST and include-capable paths alike.
+    /// source is parsed as written. pasmo overrides it for macros, which
+    /// expand file by file; sjasmplus did (#93) until its macros went live
+    /// (#557, [`expand_live`](Self::expand_live)). Because every entry point
+    /// funnels through `parse_program_keyword`, one hook covers the
+    /// single-source, AST and include-capable paths alike.
     fn expand_source(&self, _source: &str) -> Result<Option<(String, Vec<LineOrigin>)>, AsmError> {
+        Ok(None)
+    }
+
+    /// Register or expand macros **live**, as the evaluation walk reaches
+    /// them, against a namespace that spans the whole assembly (#557).
+    ///
+    /// `None` — the default — means the dialect's macros are not live: they
+    /// were dealt with before the parse, by [`expand_source`](Self::expand_source),
+    /// or the dialect has none. A dialect that returns `Some` has its
+    /// definitions and invocations left in place by the parse; the walk hands
+    /// a completed definition here to enter the namespace, and an invocation
+    /// here to expand against it. That is what makes a macro visible from its
+    /// definition to the end of the assembly and nowhere earlier, whichever
+    /// files define and invoke it, and leaves one in an untaken branch
+    /// undefined — sjasmplus's measured rules (#557).
+    fn expand_live(
+        &self,
+        source: &str,
+        file: FileId,
+        line: usize,
+        state: &mut macros::MacroState,
+    ) -> Result<Option<macros::Expanded>, AsmError> {
+        let _ = (source, file, line, state);
         Ok(None)
     }
 
@@ -826,6 +851,21 @@ pub(crate) fn parse_program_keyword<S: Z80Syntax>(
     let expanded = expansion(mode, source, |s| syntax.expand_source(s))?;
     let text = expanded_text(&expanded, source);
     let origins = line_origins(&expanded);
+    parse_text_keyword(syntax, set, ext, file, text, origins)
+}
+
+/// The parse proper, over text that may already be a rewrite: every node and
+/// error is placed back on the line `origins` says it came from, when there
+/// is a map. Split from [`parse_program_keyword`] so live macro expansion
+/// (#557) can parse an invocation's body through the same grammar.
+fn parse_text_keyword<S: Z80Syntax>(
+    syntax: &S,
+    set: &'static isa::InstructionSet,
+    ext: Option<&'static isa::InstructionSet>,
+    file: FileId,
+    text: &str,
+    origins: Option<&[LineOrigin]>,
+) -> Result<Program, AsmError> {
     let mut cx = KwCx {
         syntax,
         set,
@@ -1006,8 +1046,10 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             // closes a macro, and the body has to be consumed first for that
             // not to collide.
             //
-            // Only the formatter's parse reaches here with a definition intact:
-            // the assembling path expands it away first.
+            // The formatter's parse reaches here with a definition intact, and
+            // so does the assembling parse of a dialect whose macros are live
+            // (#557): its walk registers the copied lines when it gets to them.
+            // A dialect that expands before the parse has none left by here.
             {
                 let what = self
                     .syntax
@@ -1372,6 +1414,14 @@ struct SjasmEval<'a, S: Z80Syntax> {
     /// An instantiation whose initialiser list left a brace open, waiting
     /// for the lines that close it (#552).
     pending_init: Option<PendingInit>,
+    /// The live macro namespace (#557), for a dialect whose
+    /// [`Z80Syntax::expand_live`] is live: one per pass, filled in the
+    /// walk's textual order across every file, so a definition is visible
+    /// from where the walk registered it to the end of the assembly.
+    macro_state: macros::MacroState,
+    /// A definition being gathered line by line until its closer, for the
+    /// namespace above.
+    macro_capture: Option<MacroCapture>,
     /// Present on a dialect that resolves conditions across passes (#99), and
     /// the reason a `SjasmEval` is built once per pass rather than once.
     forward: Option<Forward>,
@@ -1405,6 +1455,8 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             scopes: crate::scopes::ScopeEnv::new(),
             building: None,
             pending_init: None,
+            macro_state: macros::MacroState::default(),
+            macro_capture: None,
             forward: None,
             pc: Some(0),
             multi,
@@ -1642,6 +1694,9 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             }
             let p = self.pending_init.take().expect("checked above");
             return self.emit_instance(p.line, p.file, p.instance, &p.word, p.items, out);
+        }
+        if self.lower_macro_line(node, out)? {
+            return Ok(());
         }
         let (word0, args0) = split_first_word(&node.source);
         // `DEFINE` is handled before substitution, so the name being defined
@@ -2361,6 +2416,101 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
     }
 }
 
+/// A macro definition the walk is gathering for the live namespace (#557):
+/// the lines so far, and the header's position for the diagnostics.
+struct MacroCapture {
+    source: String,
+    name: String,
+    line: usize,
+    file: FileId,
+}
+
+impl<S: Z80Syntax> SjasmEval<'_, S> {
+    /// The live macro step (#557), for a dialect whose macros are live:
+    /// gather a definition until its closer and register it; expand an
+    /// invocation against what is registered so far and evaluate the body
+    /// in place. `true` when the line was one of those and is dealt with.
+    ///
+    /// Two shapes of node arrive. The parse copies a definition, and an
+    /// invocation of a name it saw defined in the same file, as verbatim
+    /// whole lines; an invocation of a name defined in *another* file was an
+    /// ordinary line to it, so its label is already split off and is put
+    /// back before the expander reads the line — the expander binds a
+    /// leading label to the expansion's first address.
+    fn lower_macro_line(
+        &mut self,
+        node: &Node,
+        out: &mut Vec<Statement>,
+    ) -> Result<bool, AsmError> {
+        let line = node.span.line as usize;
+        let file = node.span.file;
+        if let Some(mut capture) = self.macro_capture.take() {
+            capture.source.push_str(&node.source);
+            capture.source.push('\n');
+            let what = self.syntax.macro_line(&node.source, &|_| false);
+            if matches!(what, macros::MacroLine::Closes) {
+                // Registers the definition; a header-to-closer text expands
+                // to nothing.
+                self.syntax.expand_live(
+                    &capture.source,
+                    capture.file,
+                    capture.line,
+                    &mut self.macro_state,
+                )?;
+            } else {
+                self.macro_capture = Some(capture);
+            }
+            return Ok(true);
+        }
+        let whole;
+        let text = match &node.label {
+            Some(sym) if !matches!(node.item, Some(crate::ast::Item::Verbatim)) => {
+                whole = format!("{} {}", sym.name, node.source);
+                whole.as_str()
+            }
+            _ => node.source.as_str(),
+        };
+        let state = &self.macro_state;
+        match self.syntax.macro_line(text, &|w| state.defines(w)) {
+            macros::MacroLine::Opens(name) => {
+                // Probed: `Duplicate macroname`, at the second header.
+                if self.macro_state.defines(&name) {
+                    return Err(AsmError::new(
+                        line,
+                        format!("duplicate macro name `{name}`"),
+                    ));
+                }
+                self.macro_capture = Some(MacroCapture {
+                    source: format!("{text}\n"),
+                    name,
+                    line,
+                    file,
+                });
+                Ok(true)
+            }
+            macros::MacroLine::Invokes => {
+                let Some(expanded) =
+                    self.syntax
+                        .expand_live(text, file, line, &mut self.macro_state)?
+                else {
+                    return Ok(false);
+                };
+                let program = parse_text_keyword(
+                    self.syntax,
+                    self.set,
+                    self.ext,
+                    file,
+                    &expanded.text,
+                    Some(&expanded.origins),
+                )?;
+                crate::ast::evaluate(self, &program.nodes, true, out)?;
+                Ok(true)
+            }
+            _ => Ok(false),
+        }
+    }
+}
+
 /// An instantiation waiting for the line that closes its initialiser list
 /// (#552).
 struct PendingInit {
@@ -2603,6 +2753,14 @@ fn run_passes<'a, S: Z80Syntax>(
             return Err(AsmError::new(
                 p.last_line,
                 "closing } missing on the `STRUCT` initialiser list",
+            ));
+        }
+        // And a macro definition still open — the wording the expander's
+        // own collector uses for the same fault.
+        if let Some(c) = &eval.macro_capture {
+            return Err(AsmError::new(
+                c.line,
+                format!("`macro {}` has no matching `endm`", c.name),
             ));
         }
         result = eval.finish(out);

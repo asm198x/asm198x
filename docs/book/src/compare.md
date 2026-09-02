@@ -31,7 +31,7 @@ exactly which build of which assembler produced the bytes we compare with:
 | `lwasm` | lwasm from lwtools 4.25 | 1 | 1146 |
 | `pasmo` | PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo | 1 | 2284 |
 | `rgbasm` | rgbasm v1.0.3 | 2 | 1125 |
-| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | 2 | 553 |
+| `sjasmplus` | SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus) | 2 | 554 |
 | `vasmm68k_mot` | vasm 2.0b (c) in 2002-2025 Volker Barthelmann<br>vasm 2.0f (c) in 2002-2026 Volker Barthelmann | 1 | 3392 |
 <!-- /generated -->
 

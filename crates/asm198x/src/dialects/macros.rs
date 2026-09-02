@@ -252,6 +252,13 @@ pub(crate) struct MacroState {
     expansions: usize,
 }
 
+impl MacroState {
+    /// Whether `name` has a definition in this namespace yet.
+    pub(crate) fn defines(&self, name: &str) -> bool {
+        self.macros.contains_key(name)
+    }
+}
+
 /// A definition the pre-pass lifted out of the source.
 pub(crate) struct Definition {
     pub(crate) name: String,

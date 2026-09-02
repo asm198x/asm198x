@@ -950,19 +950,34 @@ impl Z80Syntax for SjasmplusSyntax {
         z80::common_directive(self, word, args, line, consts)
     }
 
-    /// sjasmplus scopes leading-`.` labels under the most recent global label.
-    /// Macros expand before parsing (#93). Returning the map lets the shared
-    /// pipeline report every line against its source rather than against a
-    /// line that only existed inside the expander.
+    /// Nothing is rewritten before the parse: macros are live (below), so
+    /// the source is parsed as written. The device-mode check still runs
+    /// here, over each file's own text.
     fn expand_source(
         &self,
         source: &str,
     ) -> Result<Option<(String, Vec<macros::LineOrigin>)>, AsmError> {
-        let expanded = macros::expand(&SjasmplusSyntax, source)?;
-        // After expansion, so a `PAGE` a macro produced is checked like any
-        // other line.
-        check_device_lines(&expanded.text)?;
-        Ok(Some((expanded.text, expanded.origins)))
+        check_device_lines(source)?;
+        Ok(None)
+    }
+
+    /// Macros are live (#557): a definition enters the namespace when the
+    /// walk reaches it and an invocation expands against what is defined by
+    /// then, across every file in include order. Probed: a definition in an
+    /// included file is visible afterwards in its includer and in later
+    /// sibling includes, one in the includer is visible inside a later
+    /// include, one in a nested include flows all the way out, and an
+    /// invocation above the definition — or above the `INCLUDE` that holds
+    /// it, or of a definition in an untaken `IF` — is `Unrecognized
+    /// instruction`. Until this, each file expanded on its own (#93).
+    fn expand_live(
+        &self,
+        source: &str,
+        file: crate::span::FileId,
+        line: usize,
+        state: &mut macros::MacroState,
+    ) -> Result<Option<macros::Expanded>, AsmError> {
+        macros::expand_at(&SjasmplusSyntax, source, file, line, state).map(Some)
     }
 
     fn scopes_locals(&self) -> bool {
@@ -1585,6 +1600,80 @@ mod tests {
         let e = asm(&format!("{defs}a\tOut {{ $11, {{$22, $33, $34}}, $44 }}\n"))
             .expect_err("too many");
         assert!(e.to_string().contains("too many"), "{e}");
+    }
+    /// #557: a macro is visible from its definition to the end of the
+    /// assembly, whichever file defines it and whichever invokes it — probed
+    /// against 1.21.0 in every direction below. Each file used to expand its
+    /// own macros on its own, so a definition never crossed an `INCLUDE`.
+    #[test]
+    fn a_macro_is_visible_across_files_from_its_definition_on() {
+        let loader = MemoryLoader::new()
+            .text("macros.asm", "\tMACRO SHOW\n\tnop\n\tENDM\n")
+            .text("user.asm", "\tSHOW\n\tld a,1\n")
+            .text("mid.asm", "\tINCLUDE \"macros.asm\"\n\tld b,2\n");
+        let run = |main: &str| assemble_sjasmplus_files(main, "main.asm", &loader);
+        // Defined in an include, invoked by the includer.
+        assert_eq!(
+            run("\tINCLUDE \"macros.asm\"\n\tSHOW\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x00]
+        );
+        // Defined in one include, invoked by a later sibling and the includer.
+        assert_eq!(
+            run("\tINCLUDE \"macros.asm\"\n\tINCLUDE \"user.asm\"\n\tSHOW\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x00, 0x3E, 0x01, 0x00]
+        );
+        // Defined in the includer, invoked inside a later include.
+        assert_eq!(
+            run("\tMACRO SHOW\n\tnop\n\tENDM\n\tINCLUDE \"user.asm\"\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x00, 0x3E, 0x01]
+        );
+        // Defined in a nested include, visible all the way out.
+        assert_eq!(
+            run("\tINCLUDE \"mid.asm\"\n\tSHOW\n")
+                .expect("assembles")
+                .bytes,
+            vec![0x06, 0x02, 0x00]
+        );
+        // An invocation above the `INCLUDE` that defines it is refused
+        // (probed: `Unrecognized instruction: SHOW`), and the file that made
+        // the mistake is the one named.
+        let e = run("\tSHOW\n\tINCLUDE \"macros.asm\"\n\tSHOW\n").expect_err("too early");
+        assert_eq!(e.error.line, 1, "{e}");
+        assert!(e.to_string().contains("unknown instruction `SHOW`"), "{e}");
+    }
+
+    /// #557, the same rule within one file, which the per-file expander got
+    /// wrong: a definition is visible only below itself and only when the
+    /// walk reaches it — one in an untaken `IF` defines nothing — and a
+    /// second definition of the name is an error at its header (probed:
+    /// `Unrecognized instruction` ×2, `Duplicate macroname`).
+    #[test]
+    fn a_macro_is_defined_where_the_walk_reaches_it() {
+        let e = asm("\tSHOW\n\tMACRO SHOW\n\tnop\n\tENDM\n\tSHOW\n").expect_err("used above");
+        assert_eq!(e.line, 1, "{e}");
+        let e = asm("\tIF 0\n\tMACRO SHOW\n\tnop\n\tENDM\n\tENDIF\n\tSHOW\n").expect_err("untaken");
+        assert_eq!(e.line, 6, "{e}");
+        assert!(e.to_string().contains("unknown instruction `SHOW`"), "{e}");
+        assert_eq!(
+            asm("\tIF 1\n\tMACRO SHOW\n\tnop\n\tENDM\n\tENDIF\n\tSHOW\n")
+                .expect("taken")
+                .bytes,
+            vec![0x00]
+        );
+        let e = asm("\tMACRO SHOW\n\tnop\n\tENDM\n\tMACRO SHOW\n\tld a,1\n\tENDM\n\tSHOW\n")
+            .expect_err("duplicate");
+        assert_eq!(e.line, 4, "{e}");
+        assert!(e.to_string().contains("duplicate macro name `SHOW`"), "{e}");
+        // A definition left open is reported against its header.
+        let e = asm("\tnop\n\tMACRO SHOW\n\tnop\n").expect_err("open");
+        assert_eq!(e.line, 2, "{e}");
+        assert!(e.to_string().contains("no matching `endm`"), "{e}");
     }
 
     /// #551: column 0 is the label column, without exception — a directive
