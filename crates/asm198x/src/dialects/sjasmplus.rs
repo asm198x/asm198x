@@ -1507,6 +1507,86 @@ mod tests {
         assert!(e.to_string().contains("too many"), "{e}");
     }
 
+    /// #552: a brace left open carries the list on to the lines that
+    /// follow, until the one that closes it; the continuation lines are
+    /// values, not statements, comments and blank lines aside. A line end
+    /// ends a value where a comma would, but a comma is only taken on the
+    /// line its value ends on (probed, SjASMPlus 1.21.0).
+    #[test]
+    fn a_struct_initialiser_list_runs_across_lines() {
+        let hb = "\tSTRUCT Hitbox\nx0\tBYTE 0\nx1\tBYTE 0\ny0\tBYTE 1\ny1\tBYTE 0\n\tENDS\n";
+        // The corpus shapes: a trailing comma, and one value per line with
+        // the brace and its closer on lines of their own.
+        let r = asm(&format!(
+            "{hb}a\tHitbox {{ $11, $22, ; x0, x1\n\t$33, $44 }} ; y0, y1\n\tHitbox {{\n\t$55, ; one\n\n\t; a comment line\n\t$66,\n\t$77\n}}\n\tnop\n"
+        ))
+        .expect("assembles");
+        assert_eq!(
+            r.bytes,
+            vec![0x11, 0x22, 0x33, 0x44, 0x55, 0x66, 0x77, 0x00, 0x00]
+        );
+        // A value ends at the line end whether or not a comma follows it,
+        // and the reference reads an expression then an *optional* comma, so
+        // two values on one line need no comma either.
+        let r = asm(&format!("{hb}a\tHitbox {{ $11\n\t$22 $33,\n\t$44 }}\n")).expect("assembles");
+        assert_eq!(r.bytes, vec![0x11, 0x22, 0x33, 0x44]);
+        // But a comma is only taken on the line its value ends on: one that
+        // opens the next line is an empty slot.
+        let r = asm(&format!("{hb}a\tHitbox {{ $11\n\t, $22 }}\n")).expect("assembles");
+        assert_eq!(r.bytes, vec![0x11, 0x00, 0x22, 0x00]);
+        // Column 0 on a continuation line is a value, not a label.
+        let r = asm(&format!("{hb}a\tHitbox {{ $11,\n$22, $33, $44 }}\n")).expect("assembles");
+        assert_eq!(r.bytes, vec![0x11, 0x22, 0x33, 0x44]);
+        // Without a brace the list ends with the line.
+        let e = asm(&format!("{hb}a\tHitbox $11,\n\t$22, $33, $44\n")).expect_err("no brace");
+        assert!(e.to_string().contains("unknown instruction"), "{e}");
+        // A brace still open at the end of the source is refused.
+        let e = asm(&format!("{hb}a\tHitbox {{ $11,\n\t$22,\n")).expect_err("unclosed");
+        assert!(e.to_string().contains("closing }"), "{e}");
+        // A DEFINE substitutes on a continuation line as it does anywhere.
+        let r =
+            asm(&format!("{hb}\tDEFINE V $42\na\tHitbox {{ $11,\n\tV }}\n")).expect("assembles");
+        assert_eq!(r.bytes, vec![0x11, 0x42, 0x01, 0x00]);
+    }
+
+    /// #552: a nested `{ … }` at an embedded member's position fills that
+    /// member's own slots — as many as it lists, the rest keeping their
+    /// defaults — and the value after it lands on the member that follows
+    /// the embedded one. The flat list is equivalent (probed).
+    #[test]
+    fn a_nested_group_fills_an_embedded_member() {
+        let defs = "\tSTRUCT In\np\tBYTE 5\nq\tBYTE 6\n\tENDS\n\tSTRUCT Out\nh\tBYTE 1\ni\tIn\nt\tBYTE 9\n\tENDS\n";
+        let r = asm(&format!(
+            "{defs}a\tOut {{ $11, {{$22, $33}}, $44 }}\nb\tOut {{ $11, $22, $33, $44 }}\nc\tOut {{ $11, {{$22}}, $44 }}\n\
+             d\tOut {{ $11, {{}}, $44 }}\ne\tOut {{ $11, {{,$33}}, $44 }}\nf\tOut {{ {{$22}}, $44 }}\ng\tOut $11, {{$22, $33}}, $44\n\
+             h\tOut {{\n\t$11,\n\t{{$22,\n\t$33}}\n}}\n\tld hl,a.i\n\tld hl,a.i.q\n"
+        ))
+        .expect("assembles");
+        assert_eq!(
+            r.bytes,
+            vec![
+                0x11, 0x22, 0x33, 0x44, // a: the group fills the embedded member
+                0x11, 0x22, 0x33, 0x44, // b: the flat list is the same
+                0x11, 0x22, 0x06, 0x44, // c: a partial group keeps the rest of its defaults
+                0x11, 0x05, 0x06, 0x44, // d: an empty group keeps them all
+                0x11, 0x05, 0x33, 0x44, // e: an empty slot inside the group
+                0x01, 0x22, 0x06,
+                0x44, // f: a group where a plain member sits is left for the embedded one
+                0x11, 0x22, 0x33, 0x44, // g: unbraced outer list, braced group
+                0x11, 0x22, 0x33, 0x09, // h: the group may span lines too
+                0x21, 0x01, 0x00, // ld hl,a.i: the embedded member's own label binds
+                0x21, 0x02, 0x00, // ld hl,a.i.q
+            ]
+        );
+        // A group the embedded member cannot take is left over, and refused.
+        let e =
+            asm(&format!("{defs}a\tOut {{ $11, $22, {{$33}}, $44 }}\n")).expect_err("misplaced");
+        assert!(e.to_string().contains("embedded structure"), "{e}");
+        let e = asm(&format!("{defs}a\tOut {{ $11, {{$22, $33, $34}}, $44 }}\n"))
+            .expect_err("too many");
+        assert!(e.to_string().contains("too many"), "{e}");
+    }
+
     /// #551: column 0 is the label column, without exception — a directive
     /// or mnemonic spelled there binds a label, and a dotted name there is
     /// a local label, not the dotted directive (probed, SjASMPlus 1.21.0:

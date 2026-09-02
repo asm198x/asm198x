@@ -801,6 +801,10 @@ struct KwCx<'a, S: Z80Syntax> {
     /// copied too — its label is the instance name, which the re-layout
     /// would peel off.
     struct_names: std::collections::BTreeSet<String>,
+    /// Braces still open from an instantiation's initialiser list: while
+    /// positive, the lines that follow are the rest of that list and are
+    /// copied, not read (#552).
+    struct_init_depth: i32,
 }
 
 /// Parse one file of a keyword-conditional program into the source-preserving
@@ -834,6 +838,7 @@ pub(crate) fn parse_program_keyword<S: Z80Syntax>(
         in_struct: false,
         macro_names: std::collections::BTreeSet::new(),
         struct_names: std::collections::BTreeSet::new(),
+        struct_init_depth: 0,
     };
     let (mut nodes, close) = cx
         .parse_block(false)
@@ -915,6 +920,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             in_struct: false,
             macro_names: self.macro_names.clone(),
             struct_names: self.struct_names.clone(),
+            struct_init_depth: 0,
         };
         // No re-basing: a statement carries its own line number now, so the
         // slice a nested block parses is already numbered absolutely.
@@ -977,6 +983,21 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                 }
                 continue;
             }
+            // The rest of an initialiser list that opened a brace on an
+            // earlier line is copied line by line until the brace closes;
+            // the text is values, not statements (#552).
+            if self.struct_init_depth > 0 {
+                self.struct_init_depth += brace_depth(code);
+                nodes.push(Node {
+                    operand_span: None,
+                    label: None,
+                    item: Some(crate::ast::Item::Verbatim),
+                    source: code.trim_end().to_string(),
+                    span: Span::in_file(self.file, line as u32, col),
+                    trivia: self.trivia(comment, code, line),
+                });
+                continue;
+            }
             // A macro definition is copied, not read — and copied verbatim,
             // because a dialect may spell one `name MACRO` with the name in the
             // *label* column. See `Item::Verbatim`; this is the same rule the
@@ -1031,13 +1052,22 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                             _ if self.in_struct => true,
                             _ => {
                                 // An instantiation: `label Name`, the name in
-                                // the operation column, followed by nothing or
-                                // by an initialiser list, braced or not (#548).
-                                !indented && {
+                                // the operation column, or the unlabelled
+                                // ` Name`, followed by nothing or by an
+                                // initialiser list, braced or not (#548). A
+                                // brace left open carries the list on to the
+                                // lines that follow (#552).
+                                let instance = if indented {
+                                    self.struct_names.contains(w)
+                                } else {
                                     let (_, rest) = split_first_word(code);
                                     let (n, _) = split_first_word(rest);
                                     self.struct_names.contains(n)
+                                };
+                                if instance {
+                                    self.struct_init_depth = brace_depth(code).max(0);
                                 }
+                                instance
                             }
                         }
                     };
@@ -1339,6 +1369,9 @@ struct SjasmEval<'a, S: Z80Syntax> {
     /// The `STRUCT` being read, if one is open (#477): every line until
     /// `ENDS` declares a member rather than a statement.
     building: Option<StructBuild>,
+    /// An instantiation whose initialiser list left a brace open, waiting
+    /// for the lines that close it (#552).
+    pending_init: Option<PendingInit>,
     /// Present on a dialect that resolves conditions across passes (#99), and
     /// the reason a `SjasmEval` is built once per pass rather than once.
     forward: Option<Forward>,
@@ -1371,6 +1404,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             defines: BTreeMap::new(),
             scopes: crate::scopes::ScopeEnv::new(),
             building: None,
+            pending_init: None,
             forward: None,
             pc: Some(0),
             multi,
@@ -1594,6 +1628,20 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         // the reference refuses anything else, and so does the reader.
         if self.building.is_some() {
             return self.lower_struct_line(node, out);
+        }
+        // Inside an open initialiser list, a line is more of the list; the
+        // brace that closes it lays the instance down (#552).
+        if let Some(pending) = self.pending_init.as_mut() {
+            let src = substitute_defines(&node.source, &self.defines, line)?;
+            pending.items.push(InitItem::LineEnd);
+            lex_struct_init(self.syntax, &src, line, &mut pending.items)?;
+            pending.depth += brace_depth(&src);
+            pending.last_line = line;
+            if pending.depth > 0 {
+                return Ok(());
+            }
+            let p = self.pending_init.take().expect("checked above");
+            return self.emit_instance(p.line, p.file, p.instance, &p.word, p.items, out);
         }
         let (word0, args0) = split_first_word(&node.source);
         // `DEFINE` is handled before substitution, so the name being defined
@@ -2039,6 +2087,18 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
                         b.names.push((format!("{m}.{path}"), b_cursor + off));
                     }
                 }
+                // The member's own edges bracket its copied leaves, so an
+                // instantiation can bind the member's name and match a
+                // nested `{ … }` group to it (#552).
+                let edge = |group| crate::scopes::StructLeaf {
+                    path: (group == crate::scopes::Group::Open)
+                        .then(|| member.clone())
+                        .flatten(),
+                    bytes: Vec::new(),
+                    slot: false,
+                    group: Some(group),
+                };
+                b.leaves.push(edge(crate::scopes::Group::Open));
                 for leaf in &def.leaves {
                     let path = match (&member, &leaf.path) {
                         (Some(m), Some(p)) => Some(format!("{m}.{p}")),
@@ -2048,8 +2108,10 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
                         path,
                         bytes: leaf.bytes.clone(),
                         slot: leaf.slot,
+                        group: leaf.group,
                     });
                 }
+                b.leaves.push(edge(crate::scopes::Group::Close));
                 let b = self.building.as_mut().expect("caller checked");
                 if let Some(m) = member {
                     b.names.push((m, b_cursor));
@@ -2066,6 +2128,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             path: member,
             bytes,
             slot,
+            group: None,
         });
         b.cursor += size;
         Ok(())
@@ -2110,7 +2173,9 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
     /// `label Name [v0, v1, …]`: lay the structure down here, binding
     /// the instance and each named member to its address (probed). A listed
     /// value replaces the member's default at the member's width; a slot
-    /// left empty, or off the end of the list, keeps the default (#548).
+    /// left empty, or off the end of the list, keeps the default (#548). A
+    /// brace the line leaves open carries the list on to the lines that
+    /// follow, and the instance waits for the one that closes it (#552).
     fn lower_instance(
         &mut self,
         node: &Node,
@@ -2125,24 +2190,50 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             Some(name) => Some(self.resolve_label(&name, line)?),
             None => None,
         };
+        let mut items = Vec::new();
+        lex_struct_init(self.syntax, init, line, &mut items)?;
+        let depth = brace_depth(init);
+        if depth > 0 {
+            self.pending_init = Some(PendingInit {
+                line,
+                file,
+                instance,
+                word: word.to_string(),
+                items,
+                depth,
+                last_line: line,
+            });
+            return Ok(());
+        }
+        self.emit_instance(line, file, instance, word, items, out)
+    }
+
+    /// Walk the structure's leaves against the initialiser list's items,
+    /// the way the reference does: a member takes the value at the cursor
+    /// if there is one, then a comma if one follows on the same line; an
+    /// embedded structure's edges take a `{` and its `}`; anything the
+    /// member cannot take is left for the next (probed, #548/#552).
+    fn emit_instance(
+        &mut self,
+        line: usize,
+        file: FileId,
+        instance: Option<String>,
+        word: &str,
+        items: Vec<InitItem>,
+        out: &mut Vec<Statement>,
+    ) -> Result<(), AsmError> {
         let def = self
             .lookup_struct(word)
             .expect("caller matched a structure");
-        let values = parse_struct_init(self.syntax, init, line)?;
-        let slots = def.leaves.iter().filter(|l| l.slot).count();
-        if values.len() > slots {
-            // The reference: `closing } missing` then
-            // `[STRUCT] Syntax error - too many arguments?`.
-            return Err(AsmError::new(
-                line,
-                format!(
-                    "`{word}` has {slots} member(s) to initialise, and this list gives \
-                     {} — too many arguments",
-                    values.len()
-                ),
-            ));
+        let given = items
+            .iter()
+            .filter(|i| matches!(i, InitItem::Value(_)))
+            .count();
+        let mut cursor = InitCursor { items, pos: 0 };
+        let mut depth = 0;
+        if cursor.take_here(Punct::Open) {
+            depth += 1;
         }
-        let mut values = values.into_iter();
         let mut first = true;
         for leaf in &def.leaves {
             let (path, bytes) = (&leaf.path, &leaf.bytes);
@@ -2174,10 +2265,33 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             } else {
                 label
             };
-            let value = if leaf.slot {
-                values.next().flatten()
-            } else {
-                None
+            let value = match leaf.group {
+                Some(crate::scopes::Group::Open) => {
+                    if cursor.take(Punct::Open) {
+                        depth += 1;
+                    }
+                    None
+                }
+                Some(crate::scopes::Group::Close) => {
+                    if depth > 0 && cursor.take(Punct::Close) {
+                        depth -= 1;
+                        cursor.take_here(Punct::Comma);
+                    }
+                    None
+                }
+                None if leaf.slot => match cursor.peek() {
+                    Some(InitItem::Punct(Punct::Comma)) => {
+                        cursor.pos += 1;
+                        None
+                    }
+                    Some(InitItem::Value(_)) => {
+                        let v = cursor.value();
+                        cursor.take_here(Punct::Comma);
+                        Some(v)
+                    }
+                    _ => None,
+                },
+                None => None,
             };
             if bytes.is_empty() && label.is_none() {
                 continue;
@@ -2208,7 +2322,124 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
                 extension_set: None,
             });
         }
+        if depth > 0 && cursor.take(Punct::Close) {
+            depth -= 1;
+        }
+        // Text the members did not take: the reference's `closing } missing`
+        // then `[STRUCT] Syntax error - too many arguments?`; the one
+        // message here names the first thing left over.
+        match cursor.peek() {
+            Some(InitItem::Punct(Punct::Open)) => {
+                return Err(AsmError::new(
+                    line,
+                    format!(
+                        "a `{{ … }}` group in the `{word}` initialiser list is only read \
+                         where the member is an embedded structure"
+                    ),
+                ));
+            }
+            Some(_) => {
+                let slots = def.leaves.iter().filter(|l| l.slot).count();
+                return Err(AsmError::new(
+                    line,
+                    format!(
+                        "`{word}` has {slots} member(s) to initialise, and this list gives \
+                         {given} — too many arguments"
+                    ),
+                ));
+            }
+            None => {}
+        }
+        if depth != 0 {
+            // The reference: `closing } missing`.
+            return Err(AsmError::new(
+                line,
+                "closing } missing on the `STRUCT` initialiser list",
+            ));
+        }
         Ok(())
+    }
+}
+
+/// An instantiation waiting for the line that closes its initialiser list
+/// (#552).
+struct PendingInit {
+    line: usize,
+    file: FileId,
+    /// The instance name, already resolved under the scopes open where the
+    /// list began.
+    instance: Option<String>,
+    /// The structure's name.
+    word: String,
+    /// The list so far, lines joined by [`InitItem::LineEnd`].
+    items: Vec<InitItem>,
+    /// Braces still open.
+    depth: i32,
+    /// The last line read, where an unclosed list is reported.
+    last_line: usize,
+}
+
+/// One item of an initialiser list's text, as [`lex_struct_init`] cuts it.
+enum InitItem {
+    Punct(Punct),
+    /// The boundary between two source lines: a comma is only taken on the
+    /// line its value ends on (probed: `{ $11` / `, $22 }` leaves the second
+    /// member at its default, where `{ $11,` / `$22 }` fills it).
+    LineEnd,
+    Value(Expr),
+}
+
+/// The punctuation of an initialiser list.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Punct {
+    Open,
+    Close,
+    Comma,
+}
+
+/// A cursor over an initialiser list's items.
+struct InitCursor {
+    items: Vec<InitItem>,
+    pos: usize,
+}
+
+impl InitCursor {
+    /// The next item, reading past line ends to reach it.
+    fn peek(&mut self) -> Option<&InitItem> {
+        while matches!(self.items.get(self.pos), Some(InitItem::LineEnd)) {
+            self.pos += 1;
+        }
+        self.items.get(self.pos)
+    }
+
+    /// Take `p` if it is next, reading past line ends to reach it.
+    fn take(&mut self, p: Punct) -> bool {
+        if matches!(self.peek(), Some(InitItem::Punct(q)) if *q == p) {
+            self.pos += 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Take `p` if it is next on the same line.
+    fn take_here(&mut self, p: Punct) -> bool {
+        if matches!(self.items.get(self.pos), Some(InitItem::Punct(q)) if *q == p) {
+            self.pos += 1;
+            true
+        } else {
+            false
+        }
+    }
+
+    /// Take the value at the cursor; the caller has peeked one.
+    fn value(&mut self) -> Expr {
+        let at = self.pos;
+        self.pos += 1;
+        match std::mem::replace(&mut self.items[at], InitItem::LineEnd) {
+            InitItem::Value(v) => v,
+            _ => unreachable!("caller peeked a value"),
+        }
     }
 }
 
@@ -2364,6 +2595,14 @@ fn run_passes<'a, S: Z80Syntax>(
             return Err(AsmError::new(
                 b.line,
                 format!("`STRUCT {}` is never closed", b.name),
+            ));
+        }
+        // Likewise an initialiser list still open (probed: `closing }
+        // missing`, reported where the source ran out).
+        if let Some(p) = &eval.pending_init {
+            return Err(AsmError::new(
+                p.last_line,
+                "closing } missing on the `STRUCT` initialiser list",
             ));
         }
         result = eval.finish(out);
@@ -3296,47 +3535,91 @@ fn is_reg_or_cond(up: &str) -> bool {
 // Tokenising and the expression parser
 // ---------------------------------------------------------------------------
 
-/// The values of a `STRUCT` instance's initialiser list — `{ v0, v1, … }`,
-/// or the same list unbraced — one per slot in order; `None` where a slot is
-/// left empty (`{ , $33 }`, or the slot a trailing comma opens). An empty
-/// `init` or `{ }` is the bare instance. Every shape here was probed against
-/// SjASMPlus 1.21.0 (#548).
-fn parse_struct_init<S: Z80Syntax>(
+/// Cut one line of a `STRUCT` instance's initialiser list into its items:
+/// the braces, the commas, and the values between them — several to a run
+/// where no comma separates them, since the reference reads an expression
+/// and then an *optional* comma (probed: `{ $11 $22 }` fills two members).
+/// Every shape here was probed against SjASMPlus 1.21.0 (#548, #552).
+fn lex_struct_init<S: Z80Syntax>(
     syntax: &S,
-    init: &str,
+    text: &str,
     line: usize,
-) -> Result<Vec<Option<Expr>>, AsmError> {
-    let init = init.trim();
-    if init.is_empty() {
-        return Ok(Vec::new());
-    }
-    let inner = match init.strip_prefix('{') {
-        Some(rest) => rest.strip_suffix('}').ok_or_else(|| {
-            // The reference: `closing } missing`.
-            AsmError::new(line, "closing } missing on the `STRUCT` initialiser list")
-        })?,
-        None => init,
-    };
-    if inner.contains('{') {
-        return Err(AsmError::new(
-            line,
-            "a nested `{ … }` in a `STRUCT` initialiser list is not read yet — \
-             list the embedded structure's members in line",
-        ));
-    }
-    if inner.trim().is_empty() {
-        return Ok(Vec::new());
-    }
-    split_operands(inner)
-        .into_iter()
-        .map(|slot| {
-            if slot.is_empty() {
-                Ok(None)
-            } else {
-                parse_value(syntax, slot, line).map(Some)
+    out: &mut Vec<InitItem>,
+) -> Result<(), AsmError> {
+    let mut run = String::new();
+    let mut quote: Option<char> = None;
+    let mut parens = 0i32;
+    let flush = |run: &mut String, out: &mut Vec<InitItem>| -> Result<(), AsmError> {
+        if !run.trim().is_empty() {
+            let tokens = tokenize(syntax, run, line)?;
+            let mut parser = ExprParser {
+                tokens,
+                pos: 0,
+                line,
+            };
+            while parser.pos < parser.tokens.len() {
+                out.push(InitItem::Value(parser.expr()?));
             }
-        })
-        .collect()
+        }
+        run.clear();
+        Ok(())
+    };
+    for ch in text.chars() {
+        if let Some(q) = quote {
+            run.push(ch);
+            if ch == q {
+                quote = None;
+            }
+            continue;
+        }
+        match ch {
+            '"' | '\'' => {
+                quote = Some(ch);
+                run.push(ch);
+            }
+            '(' => {
+                parens += 1;
+                run.push(ch);
+            }
+            ')' => {
+                parens -= 1;
+                run.push(ch);
+            }
+            '{' | '}' | ',' if parens == 0 => {
+                flush(&mut run, out)?;
+                out.push(InitItem::Punct(match ch {
+                    '{' => Punct::Open,
+                    '}' => Punct::Close,
+                    _ => Punct::Comma,
+                }));
+            }
+            _ => run.push(ch),
+        }
+    }
+    flush(&mut run, out)
+}
+
+/// The braces `code` opens minus the ones it closes, quoted text skipped —
+/// positive when an initialiser list runs on past this line (#552).
+fn brace_depth(code: &str) -> i32 {
+    let mut depth = 0;
+    let mut quote: Option<char> = None;
+    for ch in code.chars() {
+        match quote {
+            Some(q) => {
+                if ch == q {
+                    quote = None;
+                }
+            }
+            None => match ch {
+                '"' | '\'' => quote = Some(ch),
+                '{' => depth += 1,
+                '}' => depth -= 1,
+                _ => {}
+            },
+        }
+    }
+    depth
 }
 
 /// Split operand text on top-level commas (commas inside parentheses are kept).
