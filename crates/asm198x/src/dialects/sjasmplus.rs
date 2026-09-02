@@ -432,6 +432,8 @@ const DEVICES: &[(&str, i64, i64)] = &[
     ("ZXSPECTRUMNEXT", 224, 8),
     ("AMSTRADCPC464", 4, 4),
     ("AMSTRADCPC6128", 8, 4),
+    // 32 pages — 512 KiB, the largest cartridge `SAVECPR` writes (#538).
+    ("AMSTRADCPCPLUS", 32, 4),
     ("NOSLOT64K", 32, 1),
 ];
 
@@ -1960,6 +1962,13 @@ mod tests {
         // The Next is the one with eight slots and 224 pages.
         assert!(asm(" DEVICE ZXSPECTRUMNEXT\n SLOT 7\n PAGE 223\n db 1\n").is_ok());
         assert!(asm(" DEVICE ZXSPECTRUM128\n SLOT 4\n db 1\n").is_err());
+
+        // The Plus is sized by its cartridge, not its RAM: 32 pages, four
+        // slots (#538).
+        assert!(asm(" DEVICE AMSTRADCPCPLUS\n SLOT 3\n PAGE 31\n db 1\n").is_ok());
+        let err = asm(" DEVICE AMSTRADCPCPLUS\n PAGE 32\n db 1\n").expect_err("out of range");
+        assert!(err.to_string().contains("32 pages"), "got `{err}`");
+        assert!(asm(" DEVICE AMSTRADCPCPLUS\n SLOT 4\n db 1\n").is_err());
 
         // `NONE` is no device: no bounds, as with no `DEVICE` line at all.
         assert!(asm(" DEVICE NONE\n PAGE 999\n db 1\n").is_ok());

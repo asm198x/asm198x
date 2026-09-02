@@ -845,6 +845,8 @@ const PROBES: &[Probe] = &[
         " DEVICE NONE\n ld a,1\n"),
     ok ("sjasmplus", "the Next has eight slots",
         " DEVICE ZXSPECTRUMNEXT\n SLOT 7\n PAGE 223\n db 1\n"),
+    ok ("sjasmplus", "the CPC Plus has 32 pages",
+        " DEVICE AMSTRADCPCPLUS\n SLOT 3\n PAGE 31\n db 1\n"),
     // `ASSERT` passes silently and reaches forward to labels below it.
     ok ("sjasmplus", "comparisons answer $FF",
         " db 2=2,2==2,2!=3,2<3,2>3,2<=3,2>=3\n"),
