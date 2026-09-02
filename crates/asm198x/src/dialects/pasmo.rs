@@ -415,6 +415,15 @@ mod tests {
         assert_eq!(a(" ld a,16>>2\n"), vec![0x3E, 0x04]);
     }
 
+    /// #551: pasmo reads a column-0 mnemonic or directive as the operation
+    /// (probed: `nop` and `db 1` in column 0 emit `00 01`) — the leniency
+    /// sjasmplus lacks.
+    #[test]
+    fn a_column_zero_mnemonic_or_directive_is_the_operation() {
+        let r = asm("top\tnop\nnop\ndb 1\n").expect("assembles");
+        assert_eq!(r.bytes, vec![0x00, 0x00, 0x01]);
+    }
+
     /// pasmo is the only reference that bounds a constant, and only at the top.
     /// pasmo has no implicit-accumulator spelling: `add (hl)` is "Invalid
     /// operand" (probed), so the sjasmplus rule (#533) must stay off here.

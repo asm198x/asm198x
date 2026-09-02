@@ -934,6 +934,16 @@ const PROBES: &[Probe] = &[
     ok ("sjasmplus", "STRUCT initialiser values are expressions and DS takes no slot",
         " STRUCT Rec\na BYTE 1\npad DS 2\nb BYTE 2\n ENDS\nn equ 3\n\
          c Rec { n+1, later*2 }\nlater equ $12\n"),
+    // #551: column 0 is the label column without exception in sjasmplus,
+    // probed against 1.21.0 — a mnemonic, a directive or a dotted `.end`
+    // there binds a label and the rest of the line is the operation; text
+    // after a `:` separator is in the operation field.
+    ok ("sjasmplus", "column-0 .end is a local label, not END",
+        "top\tnop\n.end\tld (top),a\n\tjr .end\n\tnop\n"),
+    ok ("sjasmplus", "column-0 mnemonics and directives are labels",
+        "top\tnop\nnop\tnop\nend\tnop\ndb\tnop\n\tdw nop,end,db\n"),
+    ok ("sjasmplus", "a statement after a colon is in the operation field",
+        "top\tnop : ld a,1 : ld b,2\nnext:\tld a,(top) : ld c,3\n"),
     // #225: nine core 6809 instructions the spec had no row for at all —
     // add/subtract-with-carry, bit test, two 16-bit compares and `cwai`. Every
     // mode each one takes, because a missing mnemonic is missing in all of
