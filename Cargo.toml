@@ -21,6 +21,11 @@ members = [
     "xtask",
 ]
 default-members = ["crates/asm198x"]
+# `crates/asm198x-web` is a standalone wasm-bindgen shell over the library
+# (#493). Excluded so its wasm toolchain and its bindings stay out of this
+# graph: nothing here builds, tests, or lints it, and CI's `web` job is what
+# does. It carries its own Cargo.lock for the same reason.
+exclude = ["crates/asm198x-web"]
 
 # External dependencies. serde arrived for the debug-info crate, which has since
 # graduated to its own repo; asm198x still needs it directly for the public
