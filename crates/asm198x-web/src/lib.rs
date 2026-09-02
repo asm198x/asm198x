@@ -26,33 +26,57 @@ const ROOT: &str = "input.asm";
 /// here — a test holds that — and aliases collapse through `canonical` first.
 fn entry(dialect: &str) -> Option<Entry> {
     Some(match asm198x::dialect_table::canonical(dialect)? {
+        #[cfg(feature = "mos6502")]
         "acme" => asm198x::assemble_acme_files,
+        #[cfg(feature = "mos6502")]
         "ca65" => asm198x::assemble_ca65_files,
+        #[cfg(feature = "mos6502")]
         "65816" => asm198x::assemble_ca65_816_files,
+        #[cfg(feature = "mos6502")]
         "huc6280" => asm198x::assemble_ca65_huc6280_files,
         // The CLI's default for vasm: a flat binary, warnings kept. The hunk
         // executable is behind `--exe` there and behind nothing here yet.
+        #[cfg(feature = "m68k")]
         "vasm" => asm198x::assemble_vasm_warned_files,
+        #[cfg(feature = "m6809")]
         "lwasm" => asm198x::assemble_lwasm_files,
+        #[cfg(feature = "sm83")]
         "rgbasm" => asm198x::assemble_rgbasm_files,
+        #[cfg(feature = "z80")]
         "pasmo" => asm198x::assemble_pasmo_files,
+        #[cfg(feature = "z80")]
         "pasmonext" => asm198x::assemble_pasmonext_files,
         // Plain Z80; the Next target is the CLI's `--cpu z80n`, which this
         // surface does not take yet.
+        #[cfg(feature = "z80")]
         "sjasmplus" => asm198x::assemble_sjasmplus_files,
+        #[cfg(feature = "i8080")]
         "8080" => asm198x::assemble_i8080_files,
+        #[cfg(feature = "m6800")]
         "6800" => asm198x::assemble_m6800_files,
+        #[cfg(feature = "cdp1802")]
         "1802" => asm198x::assemble_1802_files,
+        #[cfg(feature = "mcs48")]
         "8048" => asm198x::assemble_8048_files,
+        #[cfg(feature = "mcs48")]
         "8035" => asm198x::assemble_8039_files,
+        #[cfg(feature = "scmp")]
         "scmp" => asm198x::assemble_scmp_files,
+        #[cfg(feature = "f8")]
         "f8" => asm198x::assemble_f8_files,
+        #[cfg(feature = "s2650")]
         "2650" => asm198x::assemble_2650_files,
+        #[cfg(feature = "tms7000")]
         "tms7000" => asm198x::assemble_tms7000_files,
+        #[cfg(feature = "pdp11")]
         "pdp11" => asm198x::assemble_pdp11_files,
+        #[cfg(feature = "tms9900")]
         "tms9900" => asm198x::assemble_tms9900_files,
+        #[cfg(feature = "cp1610")]
         "cp1610" => asm198x::assemble_cp1610_files,
+        #[cfg(feature = "z8000")]
         "z8000" => asm198x::assemble_z8000_files,
+        #[cfg(feature = "z8000")]
         "z8001" => asm198x::assemble_z8001_files,
         _ => return None,
     })
@@ -119,7 +143,7 @@ pub fn listing(dialect: &str, source: &str) -> Option<String> {
     Some(asm198x::render_listing(source, &result, addr_unit(dialect)))
 }
 
-/// Every dialect `assemble` accepts, as a JSON array of
+/// Every dialect *this build* accepts, as a JSON array of
 /// `{ "name", "aliases", "blurb" }` in the order the CLI reference presents
 /// them — the same table `asm198x dialects` prints, so a picker built from
 /// this can never offer a name the assembler refuses.
@@ -128,6 +152,11 @@ pub fn listing(dialect: &str, source: &str) -> Option<String> {
 pub fn dialects() -> String {
     let table: Vec<serde_json::Value> = asm198x::dialect_table::DIALECTS
         .iter()
+        // Only what this build can actually assemble. A build selecting one
+        // architecture still links the whole table, which is just names, so
+        // without this filter a picker made from it would offer dialects
+        // `assemble` then refuses — the exact thing the table exists to stop.
+        .filter(|d| entry(d.name).is_some())
         .map(|d| {
             serde_json::json!({
                 "name": d.name,
@@ -146,6 +175,11 @@ mod tests {
     /// The dialect table is the one list of selectable names; a row it has
     /// that `entry` does not fails here rather than returning `null` to a
     /// page that offered the name.
+    ///
+    /// Only meaningful on a build that selects every architecture. A build
+    /// that selects one is *supposed* to leave rows unresolved — which is why
+    /// `dialects` filters, and why the test below holds whatever is selected.
+    #[cfg(feature = "all")]
     #[test]
     fn every_listed_dialect_has_an_entry() {
         for d in asm198x::dialect_table::DIALECTS {
@@ -157,10 +191,52 @@ mod tests {
         assert!(entry("not-a-dialect").is_none());
     }
 
+    /// The invariant that survives feature selection: a page building a picker
+    /// from `dialects` can never be offered a name `assemble` refuses. This is
+    /// the guarantee the whole-table test above gives on a full build, stated
+    /// so it also holds on a build with one architecture.
+    #[test]
+    fn dialects_offers_only_what_this_build_assembles() {
+        let json = dialects();
+        let parsed: serde_json::Value =
+            serde_json::from_str(&json).unwrap_or(serde_json::Value::Null);
+        let rows = parsed.as_array().map(Vec::as_slice).unwrap_or_default();
+
+        assert!(
+            !rows.is_empty(),
+            "a build with no architecture assembles nothing"
+        );
+
+        for row in rows {
+            let name = row
+                .get("name")
+                .and_then(serde_json::Value::as_str)
+                .unwrap_or_default();
+            assert!(
+                entry(name).is_some(),
+                "`{name}` is offered but not assemblable"
+            );
+            for alias in row
+                .get("aliases")
+                .and_then(serde_json::Value::as_array)
+                .map(Vec::as_slice)
+                .unwrap_or_default()
+            {
+                let alias = alias.as_str().unwrap_or_default();
+                assert!(
+                    entry(alias).is_some(),
+                    "alias `{alias}` is offered but not assemblable"
+                );
+            }
+        }
+    }
+
+    #[cfg(any(feature = "z80", feature = "mos6502"))]
     /// The unit-01 program from the Spectrum course: set the border, hold the
     /// picture, and name an entry point.
     const BORDER: &str = "            org 32768\nstart:      ld a, 2\n            out ($FE), a\n.loop:      halt\n            jr .loop\n            end start\n";
 
+    #[cfg(feature = "z80")]
     #[test]
     fn a_snapshot_is_a_48k_image() {
         // `unwrap_or_default` rather than `expect`: the crate denies
@@ -178,19 +254,26 @@ mod tests {
     /// `--sna` demands `end <addr>`, and a page assembling without one must
     /// get the same refusal the command line gives rather than a snapshot
     /// that starts wherever the machine happened to be pointing.
+    #[cfg(feature = "z80")]
     #[test]
     fn a_snapshot_needs_an_entry_point() {
         let no_end = "            org 32768\n            ld a, 2\n            out ($FE), a\n";
         assert!(snapshot("pasmonext", no_end).is_none());
     }
 
+    /// Independent of architecture: the name is refused before the source is
+    /// looked at, so this holds whatever the build selects.
     #[test]
     fn an_unknown_dialect_yields_no_snapshot() {
-        assert!(snapshot("not-a-dialect", BORDER).is_none());
+        assert!(snapshot("not-a-dialect", "            end 0\n").is_none());
     }
 
     /// Snapshots are a Spectrum Z80 output. Asking a 6502 dialect for one
     /// must decline rather than emit something shaped like a Spectrum.
+    ///
+    /// Needs 6502 selected, or the refusal would be for the wrong reason:
+    /// `acme` would be declined for not being in the build at all.
+    #[cfg(feature = "mos6502")]
     #[test]
     fn a_non_spectrum_dialect_yields_no_snapshot() {
         assert!(snapshot("acme", BORDER).is_none());

@@ -70,9 +70,30 @@ Spectrum Z80 only, and the source needs `end <addr>` for its entry point,
 exactly as the command line demands. `null` means it did not assemble;
 `assemble()` says why.
 
-## Size
+## Size: take one architecture
 
-The wasm carries every dialect the assembler supports: 1.4 MB raw, 480 KB
-gzipped, 368 KB brotli. That is a lot to put in front of a reader who may never
-edit anything, so a page that also embeds an emulator should load this lazily —
-on the first keystroke, not on page load.
+`@asm198x/web` carries every dialect — 1.4 MB raw, 480 KB gzipped. Almost none
+of that is useful to a page teaching one machine, so the package is also built
+per CPU architecture:
+
+| package | raw | gzipped |
+|---|---|---|
+| `@asm198x/web` (all) | 1422 KB | 480 KB |
+| `@asm198x/z80` | 416 KB | 153 KB |
+
+`entry` is the only thing that names the library's assembler entry points, so a
+build that does not select an architecture never references it and the linker
+drops it. Nothing is stripped by hand.
+
+```sh
+scripts/build-npm.sh z80        # -> @asm198x/z80
+scripts/build-npm.sh mos6502    # -> @asm198x/mos6502
+scripts/build-npm.sh            # -> @asm198x/web, everything
+```
+
+`dialects()` reports what the build you have can actually assemble, not the
+whole table, so a picker made from it can never offer a name `assemble` then
+refuses.
+
+Even at 153 KB this is bigger than an emulator embed, so a lesson page should
+still load it lazily — on the first keystroke, not on page load.
