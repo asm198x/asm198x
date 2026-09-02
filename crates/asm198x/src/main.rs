@@ -1328,14 +1328,14 @@ fn render_error(input: &str, files: &[String], e: &asm198x::AsmError) -> String 
                 span.line,
                 span.col,
                 e.message,
-                render_expansion_notes(span)
+                render_expansion_notes(span, files)
             )
         }
         Some((span, file)) => format!(
             "{file}:{}: error: {}{}",
             span.line,
             e.message,
-            render_expansion_notes(span)
+            render_expansion_notes(span, files)
         ),
         None => format!("{input}: {e}"),
     }
@@ -1348,7 +1348,13 @@ fn render_error(input: &str, files: &[String], e: &asm198x::AsmError) -> String 
 /// nothing about why: the failing text is nowhere in the file the reader has
 /// open. The note is the difference between "line 6 is wrong" and "line 6
 /// expands a macro whose body is wrong".
-fn render_expansion_notes(span: &asm198x::Span) -> String {
+///
+/// Each location names its file, resolved through the same table as the
+/// error's own span, so a definition in an included file (#429, #557) reads
+/// `defs.asm:1` rather than a bare `line 1` that could be any file's. `line N`
+/// remains only for a file id the table cannot resolve.
+fn render_expansion_notes(span: &asm198x::Span, files: &[String]) -> String {
+    let span = asm198x::resolve_span_path(span.clone(), files);
     span.expansion_frames
         .iter()
         .map(|frame| {
@@ -1917,6 +1923,31 @@ mod tests {
         assert_eq!(
             render_error("main.s", &files, &e),
             "that-file.inc:12:8: error: value 300 does not fit in a byte"
+        );
+    }
+
+    /// An expansion note names each location's file through the table, so a
+    /// macro defined in an include and invoked from the root reads as two
+    /// places, not two bare line numbers.
+    #[test]
+    fn render_error_names_files_in_expansion_notes() {
+        let files = vec!["main.asm".to_string(), "defs.asm".to_string()];
+        // The frame type is `#[non_exhaustive]`; the wire shape builds it.
+        let span: Span = serde_json::from_str(
+            r#"{"file":0,"line":3,"col":0,"expansion_frames":[{"macro_name":"bad",
+                "defined_at":{"file":1,"line":1,"col":1,"expansion_frames":[]},
+                "invoked_at":{"file":0,"line":3,"col":0,"expansion_frames":[]}}]}"#,
+        )
+        .expect("a span");
+        let e = AsmError {
+            line: 3,
+            message: "unknown instruction `frob`".to_string(),
+            span: Some(span),
+        };
+        assert_eq!(
+            render_error("main.asm", &files, &e),
+            "main.asm:3: error: unknown instruction `frob`\n\
+             in expansion of macro `bad` defined at defs.asm:1, invoked at main.asm:3"
         );
     }
 
