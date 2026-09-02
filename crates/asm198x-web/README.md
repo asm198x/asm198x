@@ -4,12 +4,18 @@ The [asm198x](https://github.com/asm198x/asm198x) assembler compiled to
 WebAssembly, with a `wasm-bindgen` surface a web page can call. Nothing is
 uploaded anywhere: the assembler runs in the visitor's tab.
 
-This crate is not published. It is built by the site that embeds it.
+Published to npm as **`@asm198x/web`**; `scripts/build-npm.sh` builds it. The
+crate itself stays off crates.io: a `wasm-bindgen` surface returning JavaScript
+values has no Rust caller.
+
+```sh
+npm install @asm198x/web
+```
 
 ## Surface
 
 ```js
-import init, { assemble, listing, dialects } from './asm198x_web.js';
+import init, { assemble, snapshot, listing, dialects } from '@asm198x/web';
 
 await init();
 
@@ -48,3 +54,25 @@ refreshes the path entry after the library's version moves.
 Every dialect ships in one module. Measured 2026-09-02, `opt-level = "z"`,
 after wasm-opt: 1,451,743 bytes raw, 490,892 gzipped. A per-platform split
 (#495) is a decision for when a consumer needs one.
+
+## Running what you assembled
+
+`snapshot(dialect, source)` returns a 48K `.sna` — the same bytes
+`asm198x --dialect pasmonext --sna` writes, verified byte for byte — so a page
+can assemble and then run the result:
+
+```js
+const sna = snapshot('pasmonext', source);
+if (sna) spectrum.loadSnapshot(sna, 'sna');   // @emu198x/zx-spectrum
+```
+
+Spectrum Z80 only, and the source needs `end <addr>` for its entry point,
+exactly as the command line demands. `null` means it did not assemble;
+`assemble()` says why.
+
+## Size
+
+The wasm carries every dialect the assembler supports: 1.4 MB raw, 480 KB
+gzipped, 368 KB brotli. That is a lot to put in front of a reader who may never
+edit anything, so a page that also embeds an emulator should load this lazily —
+on the first keystroke, not on page load.
