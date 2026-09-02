@@ -56,7 +56,7 @@ One source through three assemblers, snapshots loaded into `emu198x-spectrum`:
 | asm198x `--sna` | 0/348 | 0/168 | no — `$D2D1` |
 | sjasmplus `DEVICE` + `SAVESNA` | 93/348 | 126/168 | yes |
 
-`$5800` is `$38` in all three. We do not merely match pasmo's bytes; we
+`$5800` is `$38` in all three. We match pasmo's bytes and
 reproduce its failure at the same instruction, which is what parity means here.
 
 A program calling a ROM routine derails inside `CHAN_OPEN`, which reads `CHANS`
