@@ -1,12 +1,12 @@
 # sjasmplus's device model
 
 What `DEVICE`, `PAGE` and `SLOT` do, established by probing SjASMPlus 1.21.0 on
-2026-08-24. Written down because none of it is derivable from our code, and the
+2026-08-24 (`AMSTRADCPCPLUS` on 2026-09-02). Written down because none of it is derivable from our code, and the
 manual is not the arbiter — the binary is.
 
 ## The devices
 
-Thirteen names are accepted. Everything else — `SCORPION256`, `PENTAGON128`,
+Fourteen names are accepted. Everything else — `SCORPION256`, `PENTAGON128`,
 `ATM512`, and any nonsense word — is refused.
 
 | device | pages | slots | slot size |
@@ -23,12 +23,15 @@ Thirteen names are accepted. Everything else — `SCORPION256`, `PENTAGON128`,
 | `ZXSPECTRUMNEXT` | 0..223 | 0..7 | 8K |
 | `AMSTRADCPC464` | 0..3 | 0..3 | 16K |
 | `AMSTRADCPC6128` | 0..7 | 0..3 | 16K |
+| `AMSTRADCPCPLUS` | 0..31 | 0..3 | 16K |
 | `NOSLOT64K` | 0..31 | 0..0 | 64K |
 
 Page and slot bounds were found by binary search over `DEVICE d` + `PAGE n` /
 `SLOT n`, taking the highest `n` that assembles. The ZX Spectrum sizes are
 `memory / 16K` throughout, so the pattern holds and the numbers are not
-guesses from the names.
+guesses from the names. `AMSTRADCPCPLUS` has 32 pages, four times the
+`AMSTRADCPC6128`'s — 512 KiB, the largest cartridge `SAVECPR` accepts (sizes
+1–32 in 16 KiB units).
 
 `DEVICE NONE` is not a device with no memory: it behaves exactly as no `DEVICE`
 line at all — no bounds and no write check.
