@@ -85,6 +85,60 @@ jobs:
           done
           exit $leaked
 
+  # `crates/asm198x-web` is excluded from the workspace (see the root
+  # Cargo.toml), so no job above builds, tests, or lints it. This one does.
+  web:
+    name: Web shell (wasm-bindgen)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v7
+
+      - name: Read pinned toolchain
+        id: toolchain
+        run: |
+          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
+          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
+
+      - name: Install Rust toolchain
+        uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.toolchain.outputs.channel }}
+          targets: wasm32-unknown-unknown
+          components: clippy, rustfmt
+
+      - name: Cache Rust build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: crates/asm198x-web -> target
+
+      - name: Install wasm-pack
+        uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack
+
+      # An excluded crate's lockfile is updated by nothing when the library
+      # moves: both crates build, every test passes, and the shell quietly
+      # embeds the library as it was. Refresh with
+      # `cargo update -p asm198x --manifest-path crates/asm198x-web/Cargo.toml`.
+      - name: The shell's lockfile must not lag the library
+        run: cargo fetch --manifest-path crates/asm198x-web/Cargo.toml --locked
+
+      - name: Check formatting
+        run: cargo fmt --manifest-path crates/asm198x-web/Cargo.toml --check
+
+      - name: Run Clippy
+        run: cargo clippy --manifest-path crates/asm198x-web/Cargo.toml --all-targets --target wasm32-unknown-unknown -- -D warnings
+
+      # A host `cargo test` registers none of the `#[wasm_bindgen_test]`s and
+      # reports a false green; `wasm-pack test` runs them under the wasm32
+      # target in Node, which is the form that executes `tests/boundary.rs`.
+      - name: Test the shell under wasm32
+        run: wasm-pack test --node crates/asm198x-web
+
+      - name: Build the browser module
+        run: wasm-pack build --target web crates/asm198x-web --out-dir pkg-web
+
   # Coverage is also the test runner: cargo-llvm-cov compiles and runs every
   # test under instrumentation, so one pass gives both the regression signal
   # and coverage metrics. Gated on fmt + clippy so a fast lint failure

@@ -23,6 +23,7 @@ Hardware facts come from the umbrella primary library at [`../../reference/`](..
 |---|---|
 | [`isa198x`](https://github.com/isa198x/isa198x) | Neutral dependency supplying the executable instruction-set specs and spec-driven disassemblers used by Asm198x and Emu198x. |
 | [`crates/asm198x`](crates/asm198x) | Assembler library, dialect front-ends, shared engine, formatter, diagnostics contract, and `asm198x` CLI. |
+| [`crates/asm198x-web`](crates/asm198x-web) | `wasm-bindgen` shell over the library for the browser playground (#493). Excluded from the workspace; CI's `web` job builds and tests it. |
 
 Isa198x keeps CPU families as modules until an isolated consumer or measured
 build cost makes per-CPU crates worthwhile.

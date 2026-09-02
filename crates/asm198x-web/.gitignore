@@ -1,0 +1,5 @@
+# Cargo's output for this excluded crate, which has its own target directory.
+/target
+# wasm-pack's output. Built on demand, never committed.
+/pkg-web
+/pkg-node
