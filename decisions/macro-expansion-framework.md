@@ -216,6 +216,22 @@ fails rather than passes.
   The pinned 6502Assembly corpus advances to the independent `%` expression
   gap (#455).
 
+- **2026-09-02 — sjasmplus macros are live** (#557). sjasmplus 1.21.0 was
+  probed the same way: a definition in an included file is visible afterwards
+  in its includer and in later sibling includes, one in the includer is
+  visible inside a later include, and a nested include's flows all the way
+  out. The rule is textual from the definition forward and nothing else: an
+  invocation above the definition, or above the `INCLUDE` that holds it, is
+  `Unrecognized instruction`; a definition inside an untaken `IF` defines
+  nothing; a second definition of a name is `Duplicate macroname` at its
+  header. The per-file pre-pass got the last three wrong as well as the
+  cross-file case, because it collected every definition in a file before
+  expanding any line of it. sjasmplus therefore drops the pre-pass rewrite
+  altogether — single-source and multi-file alike — and registers and
+  expands in the evaluation walk, through the namespace #429 added and a
+  new `Z80Syntax::expand_live` hook; pasmo keeps the per-file default. The
+  pinned SpecNext Invaders corpus advances to temporary labels (`1F`).
+
 ## Drift triggers
 
 Stop and re-consult if a change would:
@@ -240,8 +256,9 @@ Stop and re-consult if a change would:
   segfault on self-recursion (exit 139). Byte-identical output is the goal;
   byte-identical crashing is not.
 - **Expand another dialect's macros across an include boundary** without
-  probing what its reference does. ACME's namespace is now deliberately live
-  across `!source`; no conclusion was inferred for the other dialects.
+  probing what its reference does. ACME's namespace is live across `!source`
+  and sjasmplus's across `INCLUDE`, each on its own probes; no conclusion was
+  inferred for the other dialects.
 - **Add a dialect's macros to its single-source parse only.** The CLI assembles
   through the multi-file entry point, so a hook in the wrong place passes every
   library test and does nothing in the tool. It has happened once.

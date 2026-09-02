@@ -957,6 +957,13 @@ const PROBES: &[Probe] = &[
          a Out { $11, {$22, $33}, $44 }\nb Out { $11, $22, $33, $44 }\nc Out { $11, {$22}, $44 }\n\
          d Out { $11, {}, $44 }\ne Out { $11, {,$33}, $44 }\nf Out { {$22}, $44 }\ng Out $11, {$22, $33}, $44\n\
          h Out {\n $11,\n {$22,\n $33}\n}\n ld hl,a.i\n ld hl,a.i.q\n"),
+    // #557: macros register live, so one defined inside a taken `IF` is
+    // there for the invocation below the block, a macro invoking a macro
+    // defined between them expands, and a labelled invocation binds the
+    // label to the expansion's first byte.
+    ok ("sjasmplus", "macro defined in a taken IF, invoked after it",
+        " IF 1\n MACRO SHOW\n nop\n ENDM\n ENDIF\n SHOW\n MACRO OUTER\n INNER\n ENDM\n\
+         \n MACRO INNER\n ld c,3\n ENDM\n OUTER\nx: SHOW\ny SHOW\n dw x,y\n"),
     // #225: nine core 6809 instructions the spec had no row for at all —
     // add/subtract-with-carry, bit test, two 16-bit compares and `cwai`. Every
     // mode each one takes, because a missing mnemonic is missing in all of
