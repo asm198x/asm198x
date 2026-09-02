@@ -7,6 +7,88 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.57](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.56...asm198x-v0.0.57) - 2026-09-02
+
+### Added
+
+- **The assembler runs in the browser.**
+  ([#565](https://github.com/asm198x/asm198x/pull/565))
+  A new `crates/asm198x-web` wraps the library in `wasm-bindgen` glue:
+  `assemble(dialect, source)` returns the same JSON the CLI prints with
+  `--message-format=json`, `listing()` the `--listing` text, and
+  `dialects()` the dialect table. Every dialect is in one 1.4 MB module
+  (490 KB over the wire). The site's playground at
+  [asm198x.github.io/playground/](https://asm198x.github.io/playground/)
+  is built from this release, so what runs in the tab is what this entry
+  describes. One file per run for now; multi-file input, `--cpu`, and
+  vasm's `--exe` are deferred ([#493](https://github.com/asm198x/asm198x/issues/493)).
+- **sjasmplus macros are visible across files, from their definition on.**
+  ([#558](https://github.com/asm198x/asm198x/pull/558))
+  Macros now register and expand live during the evaluation walk, in one
+  namespace spanning the whole assembly, instead of a per-file pre-pass.
+  A macro defined in an include is usable by its includer and every later
+  file; one defined in the includer is usable inside a later include. The
+  same change closes three single-file divergences: an invocation above
+  its definition, a definition inside an untaken `IF`, and a duplicate
+  name now error as SjASMPlus 1.21.0 errors, where they used to assemble.
+  Nine cross-file shapes probed against the reference, all matching.
+- **sjasmplus `STRUCT` instances take initialiser lists.**
+  ([#550](https://github.com/asm198x/asm198x/pull/550),
+  [#556](https://github.com/asm198x/asm198x/pull/556))
+  `label Name { v0, v1, … }` — or the same list without braces — fills the
+  members in declaration order at each member's width; an empty slot or a
+  short list keeps the default, a `DS` member takes no slot, and values may
+  reach forward. Lists span lines, one value per line with comments, and an
+  embedded structure takes a nested `{ … }` group. The reader follows the
+  reference's model, reconstructed from 34 probes against SjASMPlus 1.21.0:
+  a line end ends a value, a comma is only consumed on the same line, and
+  an unclosed brace at end of source is `closing } missing`. Too many
+  values is refused as the reference refuses it.
+- **sjasmplus: column 0 is always the label column.**
+  ([#553](https://github.com/asm198x/asm198x/pull/553))
+  A mnemonic or directive starting in column 0 is a label, as in the
+  reference: `.end ld (x),a` under `top` defines `top.end` and assembles
+  the load. pasmo keeps its behaviour — PasmoNext assembles a column-0
+  `nop` as the instruction, and was probed to confirm it.
+- **sjasmplus: a lone operand on `ADD`/`ADC`/`SBC` is the accumulator form.**
+  ([#549](https://github.com/asm198x/asm198x/pull/549))
+  `add (hl)` reads as `add a,(hl)`, the mirror of the existing `sub a,b` →
+  `sub b` normalisation. Only the one-operand case: `add hl,de` and the
+  16-bit forms are untouched, and a lone `hl` is still an error. pasmo
+  rejects the spelling and continues to.
+- **sjasmplus accepts `DEVICE AMSTRADCPCPLUS`.**
+  ([#562](https://github.com/asm198x/asm198x/pull/562))
+  The fourteenth device in SjASMPlus 1.21.0: 32 pages of 16 KB in four
+  slots — the count follows the largest cartridge `SAVECPR` accepts, not
+  the 6128's RAM. `SAVECPR` itself is still refused by name; it waits on a
+  memory image the engine does not yet keep
+  ([#563](https://github.com/asm198x/asm198x/issues/563)).
+
+### Fixed
+
+- **sjasmplus `DS`/`DEFS`/`BLOCK` counts resolve across the passes.**
+  ([#534](https://github.com/asm198x/asm198x/pull/534))
+  A count that reaches forward — an `EQU` below it, a label the count
+  itself moves, a `STRUCT` member sized by a later constant — now settles
+  over the three passes the way conditions do, warning where the reference
+  warns. A never-defined symbol in a count or a condition is now an error
+  on the last pass, as in the reference, where an `IF` on one used to
+  assemble with an advisory. A negative count is refused naming the
+  reference's behaviour: this engine cannot move the origin backwards.
+- **Macro expansion notes name the file.**
+  ([#560](https://github.com/asm198x/asm198x/pull/560))
+  `in expansion of macro …` under an error read `defined at line 1,
+  invoked at line 3` even when the macro lived in an included file. It now
+  reads `defined at bad.asm:1, invoked at p10.asm:3`, in acme and
+  sjasmplus alike, matching what the JSON output already reported.
+- **The reference suites no longer share scratch files.**
+  ([#561](https://github.com/asm198x/asm198x/pull/561))
+  Concurrent runs — worktrees, agents, CI beside a developer — wrote the
+  same fixed temp paths and overwrote each other between the write and
+  the reference tool's read, reporting phantom mismatches and, in the
+  differential, recording false verdicts. Each run now gets its own
+  directory, keyed by suite and process, removed when it finishes.
+
 ## [0.0.56](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.55...asm198x-v0.0.56) - 2026-09-01
 
 ### Added
