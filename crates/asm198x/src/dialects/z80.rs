@@ -161,6 +161,15 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// Whether column 0 is the label column without exception (#551).
+    /// sjasmplus binds a label there even when the word is a mnemonic or a
+    /// directive — `.end` in column 0 is the local label `top.end`, not the
+    /// dotted `END`. pasmo reads a column-0 mnemonic or directive as the
+    /// operation, so it defaults off.
+    fn column_zero_is_a_label(&self) -> bool {
+        false
+    }
+
     /// Whether `word` is this dialect's include directive (language-surface
     /// U2).
     ///
@@ -1048,7 +1057,8 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             // A label-split failure is deferred, not raised: an untaken
             // branch may hold anything (probe p31), so the whole line becomes
             // verbatim op source — a *live* line still errors when it lowers.
-            let (label, rest) = match split_label(self.syntax, self.set, self.ext, code, line) {
+            let (label, rest) = match split_label(self.syntax, self.set, self.ext, code, col, line)
+            {
                 Ok(v) => v,
                 Err(_) => (None, code.trim()),
             };
@@ -2806,15 +2816,25 @@ impl CondParser<'_> {
 /// Split a (comment-stripped) line into its optional label and the remainder.
 /// A `name:` token is always a label; otherwise a label sits in column 0 and
 /// instructions are indented. A column-0 first word that names a known mnemonic
-/// or directive is the operation, not a label.
+/// or directive is the operation, not a label — unless the dialect says column
+/// 0 is a label without exception ([`Z80Syntax::column_zero_is_a_label`]).
+///
+/// `col` is where the statement starts in its line: past 1 it follows a `:`
+/// separator, which puts it in the operation field whatever its text —
+/// `nop : foo nop` is `Unrecognized instruction: foo nop` in sjasmplus, and
+/// so is `nop : foo: nop` (probed, #551).
 fn split_label<'a, S: Z80Syntax>(
     syntax: &S,
     set: &'static isa::InstructionSet,
     ext: Option<&'static isa::InstructionSet>,
     code: &'a str,
+    col: u32,
     line: usize,
 ) -> Result<(Option<String>, &'a str), AsmError> {
     let trimmed = code.trim();
+    if col > 1 {
+        return Ok((None, trimmed));
+    }
     if let Some(colon) = trimmed.find(':') {
         let before = &trimmed[..colon];
         if !before.contains(char::is_whitespace) {
@@ -2831,7 +2851,9 @@ fn split_label<'a, S: Z80Syntax>(
         return Ok((None, trimmed));
     }
     let (word, remainder) = split_first_word(trimmed);
-    if has_mnemonic(set, ext, &word.to_ascii_uppercase()) || syntax.is_directive(word) {
+    if !syntax.column_zero_is_a_label()
+        && (has_mnemonic(set, ext, &word.to_ascii_uppercase()) || syntax.is_directive(word))
+    {
         return Ok((None, trimmed));
     }
     if !is_label_ident(syntax, word) {

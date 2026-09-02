@@ -704,6 +704,12 @@ impl Z80Syntax for SjasmplusSyntax {
         true
     }
 
+    /// Column 0 is the label column, full stop (#551; probed: `db 1` there
+    /// binds `db` and refuses `1`, `.end nop` binds the local `.end`).
+    fn column_zero_is_a_label(&self) -> bool {
+        true
+    }
+
     /// sjasmplus takes `:` as a statement separator as well as a label
     /// terminator (#98) — ` ld a,1 : ld b,2` is two instructions, and it is
     /// how hand-written Spectrum source is often laid out.
@@ -1499,6 +1505,25 @@ mod tests {
         assert!(e.to_string().contains("closing }"), "{e}");
         let e = asm(&format!("{hb}a\tHb 1, 2, 3\n")).expect_err("too many, unbraced");
         assert!(e.to_string().contains("too many"), "{e}");
+    }
+
+    /// #551: column 0 is the label column, without exception — a directive
+    /// or mnemonic spelled there binds a label, and a dotted name there is
+    /// a local label, not the dotted directive (probed, SjASMPlus 1.21.0:
+    /// `.end nop` under `top` binds `top.end` and assembles the `nop`).
+    #[test]
+    fn a_column_zero_word_is_always_a_label() {
+        let r = asm("top\tnop\n.end\tld (top),a\n\tjr .end\n").expect("assembles");
+        assert_eq!(r.bytes, vec![0x00, 0x32, 0x00, 0x00, 0x18, 0xFB]);
+        // Indented, `.end` is the END directive, which binds nothing.
+        assert!(asm("\tnop\n\t.end\n\tdw .end\n").is_err());
+        // A mnemonic or an undotted directive in column 0 is a label too;
+        // what follows is the operation.
+        let r = asm("top\tnop\nnop\tnop\nend\tnop\n\tdw nop,end\n").expect("assembles");
+        assert_eq!(r.bytes, vec![0x00, 0x00, 0x00, 0x01, 0x00, 0x02, 0x00]);
+        // `db 1` in column 0 is the label `db` and then `1`, which is not an
+        // instruction (the reference: `Unrecognized instruction: 1`).
+        assert!(asm("db\t1\n").is_err());
     }
 
     /// #477 acceptance: the SpecNext Invaders shapes, in one source — the
@@ -2744,11 +2769,11 @@ mod tests {
     #[test]
     fn number_formats() {
         // All of these are $1234.
-        for src in ["ld hl, $1234", "ld hl, 0x1234", "ld hl, 1234h"] {
+        for src in [" ld hl, $1234", " ld hl, 0x1234", " ld hl, 1234h"] {
             assert_eq!(asm(src).expect(src).bytes, vec![0x21, 0x34, 0x12], "{src}");
         }
         // All of these are %1010 = 0x0A.
-        for src in ["ld a, %1010", "ld a, 0b1010", "ld a, 1010b"] {
+        for src in [" ld a, %1010", " ld a, 0b1010", " ld a, 1010b"] {
             assert_eq!(asm(src).expect(src).bytes, vec![0x3E, 0x0A], "{src}");
         }
     }
@@ -2756,7 +2781,7 @@ mod tests {
     #[test]
     fn slash_slash_comment() {
         assert_eq!(
-            asm("ld a, 5  // a comment\n").expect("//").bytes,
+            asm(" ld a, 5  // a comment\n").expect("//").bytes,
             vec![0x3E, 0x05]
         );
     }

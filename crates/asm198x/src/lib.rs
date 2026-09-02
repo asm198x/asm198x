@@ -1648,7 +1648,7 @@ mod tests {
             vec![0x3E, 0x00]
         );
         assert_eq!(
-            assemble_sjasmplus("ld a, 0").expect("sjasm").bytes,
+            assemble_sjasmplus(" ld a, 0").expect("sjasm").bytes,
             vec![0x3E, 0x00]
         );
     }
