@@ -79,8 +79,34 @@ puts it, placed consecutively in the image. `SLOT` selects which slot a
 subsequent `PAGE` applies to and does not itself move the output.
 
 Neither `DEVICE` nor `PAGE` changes the bytes `--raw` writes — only where they
-are addressed and whether the write check fires. Their effect on the `SAVE*`
-family is a separate question, and that family is not implemented.
+are addressed and whether the write check fires. What they change is the
+device's *memory*, which the `SAVE*` words that read pages see and `--raw`
+does not.
+
+## Where a write goes
+
+Probed 2026-09-02 under `DEVICE AMSTRADCPCPLUS`, reading the pages back
+through `SAVECPR` (bank `cbNN` is page N):
+
+| source | where the bytes land |
+|---|---|
+| `ORG 0` / `$4000` / `$8000` / `$C000`, one byte each, no `PAGE` | `cb00[0]`, `cb01[0]`, `cb02[0]`, `cb03[0]` |
+| `SLOT 1` `PAGE 5`, then `db` at `$4000` and at `$C000` | `cb05[0]` and `cb03[0]` |
+| `PAGE 5` alone, same two writes | `cb01[0]` and `cb05[0]` |
+| `ORG $4000` `db 1` `PAGE 5` `db 2` `PAGE 6` `db 3` | `cb01[0..3] = 1,2,3` |
+| `ORG $4000` `db 1` `ORG $4000` `db 9` | `cb01[0] = 9`; `--raw` is `01 09` |
+| nothing written, `SAVECPR "x",32` | 32 banks of zeros |
+
+So: the slots start mapped to the page of the same number; the current slot
+starts as the last one; `SLOT n` selects the current slot and `PAGE p` maps
+page `p` into it; a byte emitted at address `A` is stored at
+`pages[slots[A >> 14]][A & $3FFF]`, overwriting what was there. `--raw`
+appends the same byte to its log regardless. The two are different views of
+one emission, and only the log is implemented — the memory image is
+[#563](https://github.com/asm198x/asm198x/issues/563).
+
+The Plus starts empty. The Spectrum devices do not
+([#318](https://github.com/asm198x/asm198x/issues/318)).
 
 ## What a careless implementation gets wrong
 
@@ -89,6 +115,9 @@ family is a separate question, and that family is not implemented.
   be accepted by us.
 - **Treating two pages at one address as an overlap.** They concatenate. The
   ordinary section-overlap refusal is wrong here.
+- **Reading a page as the section its `PAGE` opened.** The section is the
+  raw output's order; the page is memory, filled by address through the slot
+  mapping. `ORG $4000` / `db 1` / `PAGE 5` / `db 2` puts both bytes in page 1.
 - **Deriving page counts from the device name.** `ZXSPECTRUMNEXT` has 224
   pages of 8K, not 256 of 8K or 128 of 16K, and `NOSLOT64K` has 32 pages with
   a single slot. Both were probed.

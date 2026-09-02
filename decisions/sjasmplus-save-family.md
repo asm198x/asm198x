@@ -42,13 +42,13 @@ device columns are what the binary answered, not what its documentation says.
 | `SAVETAP` | `"file",CODE\|BASIC,"name",start,length` | Spectrum devices | TAP | `syntheses/zx-spectrum/tape-loading-format.md` §4, via `format198x-sinclair-zx-spectrum-tap` | **done** for the kinded forms; the kindless whole-memory form waits on #318 |
 | `SAVE3DOS` | `"file",start,length` | any device | span with a 128-byte +3DOS header | `reference/by-system/sinclair-zx-spectrum/zx-spectrum-plus-3-manual-amstrad.txt` (the +3DOS header record) | nothing — next |
 | `SAVEAMSDOS` | `"file",start,length` | any device | span with a 128-byte AMSDOS header | **partly held** — the CPC464 firmware guide documents the cassette file-header record and does not mention AMSDOS; the disk header's extension and checksum are not held | acquisition of the AMSDOS header layout (the DDI-1 firmware guide) |
-| `SAVEDEV` | `"file",startPage,startOffset,length` | any device | raw device pages, no container | the device model (`docs/sjasmplus-device-model.md`) | nothing — next; pages never written wait on #318 |
+| `SAVEDEV` | `"file",startPage,startOffset,length` | any device | raw device pages, no container | the device model (`docs/sjasmplus-device-model.md`) | the device memory image ([#563](https://github.com/asm198x/asm198x/issues/563)): a page's contents are what the slot routing put there, which the engine does not keep; pages never written wait on #318 besides |
 | `SAVESNA` | `"file"[,start]` | `ZXSPECTRUM48` / `ZXSPECTRUM128` only (`[SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.`) | 48K SNA (27-byte header + 49,152) or 128K SNA | `formats.md` §SNA — community material only, per rule 3 | #318 — a snapshot is the whole of a booted machine's RAM, so this word cannot land before that fact does |
 | `SAVECPCSNA` | `"file"[,start]`; `[SAVECPCSNA] No start address defined` without one | `AMSTRADCPC464` / `AMSTRADCPC6128` only | CPC SNA (256-byte header + 65,536) | `reference/by-system/amstrad-cpc/formats.md` §SNA — community | #318's CPC generalisation: the booted memory of a CPC is not the Spectrum's |
 | `SAVEHOB` | `"file","hobname",start,length` | any device | Hobeta (17-byte header, data padded to sectors: 273 bytes for a 1-byte span) | **none held** — Spectrumpedia mentions the format, no layout | acquisition |
 | `SAVETRD` | `"image","name.C",start,length[,autostart]`; the image must already exist (`Error opening file`), which `EMPTYTRD` creates | any device | file appended to a TR-DOS disk image | **none held** — `formats.md` names TRD in its overview and has no section | acquisition; lands together with `EMPTYTRD` |
 | `SAVECDT` | `FULL\|EMPTY\|BASIC\|CODE\|HEADLESS "file","name",start,length` | `AMSTRADCPC464` / `AMSTRADCPC6128` only | CDT (TZX with CPC block usage) | `reference/by-system/amstrad-cpc/formats.md` §CDT, which its own front matter flags as having no specification held | acquisition of the CDT block usage; the TZX container is held |
-| `SAVECPR` | `"file",size` with size 1–32 in 16 KiB units (`only a size from 1 (16KiB) to 32 (512KiB) is allowed`) | `AMSTRADCPCPLUS` only | CPR (RIFF `AMS!` cartridge: 16,404 bytes for one bank) | `reference/by-system/amstrad-cpc/formats.md` §CPR — community | the `AMSTRADCPCPLUS` device, which the device model does not yet carry ([#538](https://github.com/asm198x/asm198x/issues/538)) |
+| `SAVECPR` | `"file",size` with size 1–32 in 16 KiB units (`only a size from 1 (16KiB) to 32 (512KiB) is allowed`) | `AMSTRADCPCPLUS` only | CPR (RIFF `AMS!` cartridge: 16,404 bytes for one bank) | `reference/by-system/amstrad-cpc/formats.md` §CPR — community | the device memory image ([#563](https://github.com/asm198x/asm198x/issues/563)); the device itself landed with #538, and an empty Plus cartridge is all zeros, so #318 does not apply |
 | `SAVENEX` | `OPEN\|CORE\|CFG\|BAR\|SCREEN\|BANK\|AUTO\|CLOSE …` — a stateful builder across several lines | `ZXSPECTRUMNEXT` only | NEX | **none held** — `reference/by-system/next-computer/` is NeXT, not the Spectrum Next | acquisition of the NEX specification, then its own record: it is a grammar, not one directive |
 
 Words beside the family that share its basis and land with it: `EMPTYTRD`
@@ -59,10 +59,12 @@ already held), `INCHOB`/`INCTRD` (readers of the same two layouts).
 
 Ordered by what is already held, not by demand:
 
-1. `SAVE3DOS`, `SAVEDEV` — upstream held, no dependency.
-2. `SAVESNA`, `SAVECPCSNA` — after #318, which is a `reference/`/`syntheses/`
-   task before it is an Asm198x one.
-3. `SAVECPR` — after the `AMSTRADCPCPLUS` device.
+1. `SAVE3DOS` — upstream held, no dependency.
+2. `SAVEDEV`, `SAVECPR` — after the device memory image (#563), which is
+   engine work: a `SAVE*` word that reads pages reads what the slot routing
+   put there, not the emission log the raw output is.
+3. `SAVESNA`, `SAVECPCSNA` — after #563 and #318, which is a
+   `reference/`/`syntheses/` task before it is an Asm198x one.
 4. `SAVEAMSDOS`, `SAVEHOB`, `SAVETRD`/`EMPTYTRD`, `SAVECDT` — after
    acquisition.
 5. `SAVENEX` — after acquisition, under its own record.
@@ -83,3 +85,6 @@ one looks small enough to do at the keyboard.
   is not zeros; a snapshot with the wrong system variables loads and misbehaves.
 - "SAVENEX is just another save word" — it is eight sub-commands with state
   between them.
+- "page N is the section `PAGE N` opened" — it is not. The section orders the
+  raw output; the page holds whatever was written at an address routed to it,
+  under whichever `SLOT`/`PAGE` mapping was in force at the time (#563).
