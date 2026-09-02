@@ -203,7 +203,8 @@ pub(crate) struct StructDef {
 }
 
 /// One run of bytes an instantiation lays down: a member, or the reserve a
-/// `DS` member makes.
+/// `DS` member makes — or the edge of an embedded structure, which lays
+/// down nothing itself (see [`StructLeaf::group`]).
 pub(crate) struct StructLeaf {
     /// The member's dotted path under the instance, if it is named.
     pub path: Option<String>,
@@ -213,6 +214,18 @@ pub(crate) struct StructLeaf {
     /// Whether a `{ … }` initialiser list value lands here. A `DS`/`BLOCK`
     /// member reserves without taking a slot (probed, #548).
     pub slot: bool,
+    /// Set on the two marker leaves that bracket an embedded structure's
+    /// members: `Open` before its first, carrying the member's own path and
+    /// no bytes, `Close` after its last. A nested `{ … }` group in an
+    /// initialiser list opens and closes against them (#552).
+    pub group: Option<Group>,
+}
+
+/// Which edge of an embedded structure a marker leaf is.
+#[derive(Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Group {
+    Open,
+    Close,
 }
 
 /// Rewrite one reference under the open scopes: `@name` escapes to the bare

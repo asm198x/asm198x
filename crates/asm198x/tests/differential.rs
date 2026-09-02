@@ -944,6 +944,19 @@ const PROBES: &[Probe] = &[
         "top\tnop\nnop\tnop\nend\tnop\ndb\tnop\n\tdw nop,end,db\n"),
     ok ("sjasmplus", "a statement after a colon is in the operation field",
         "top\tnop : ld a,1 : ld b,2\nnext:\tld a,(top) : ld c,3\n"),
+    // #552: a STRUCT initialiser list across lines, and a nested `{ … }`
+    // group for an embedded member, probed against 1.21.0 — a line end
+    // ends a value, a comma is taken only on its own line, and a group
+    // fills the embedded member's slots then hands over to the next member.
+    ok ("sjasmplus", "STRUCT initialiser list across lines",
+        " STRUCT Hitbox\nx0 BYTE 0\nx1 BYTE 0\ny0 BYTE 1\ny1 BYTE 0\n ENDS\n\
+         a Hitbox { $11, $22, ; x0, x1\n $33, $44 } ; y0, y1\n Hitbox {\n $55, ; one\n\n ; comment\n $66,\n $77\n}\n\
+         b Hitbox { $11\n $22 $33,\n $44 }\nc Hitbox { $11\n , $22 }\nd Hitbox { $11,\n$22, $33, $44 }\n nop\n"),
+    ok ("sjasmplus", "STRUCT initialiser nested group for an embedded member",
+        " STRUCT In\np BYTE 5\nq BYTE 6\n ENDS\n STRUCT Out\nh BYTE 1\ni In\nt BYTE 9\n ENDS\n\
+         a Out { $11, {$22, $33}, $44 }\nb Out { $11, $22, $33, $44 }\nc Out { $11, {$22}, $44 }\n\
+         d Out { $11, {}, $44 }\ne Out { $11, {,$33}, $44 }\nf Out { {$22}, $44 }\ng Out $11, {$22, $33}, $44\n\
+         h Out {\n $11,\n {$22,\n $33}\n}\n ld hl,a.i\n ld hl,a.i.q\n"),
     // #225: nine core 6809 instructions the spec had no row for at all —
     // add/subtract-with-carry, bit test, two 16-bit compares and `cwai`. Every
     // mode each one takes, because a missing mnemonic is missing in all of
