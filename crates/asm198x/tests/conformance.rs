@@ -160,8 +160,7 @@ fn ref_assemble(
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]
 fn spec_opcodes_match_reference() {
-    let tmp = std::env::temp_dir().join("asm198x-conformance");
-    fs::create_dir_all(&tmp).expect("temp dir");
+    let tmp = support::scratch::dir("conformance");
     let mut fails: Vec<String> = Vec::new();
     let mut checked = 0usize;
     // Live mode records what each reference did, so the tool-free replay can
@@ -1100,8 +1099,7 @@ fn sweep(
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]
 fn spec_sweep_matches_reference() {
-    let tmp = std::env::temp_dir().join("asm198x-sweep");
-    fs::create_dir_all(&tmp).expect("temp dir");
+    let tmp = support::scratch::dir("sweep");
     let mut fails: Vec<String> = Vec::new();
     let mut checked = 0usize;
     let mut recorder = support::verdicts::Recorder::new();
@@ -1497,8 +1495,7 @@ fn random_insn(
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]
 fn differential_fuzz() {
-    let tmp = std::env::temp_dir().join("asm198x-fuzz");
-    fs::create_dir_all(&tmp).expect("temp dir");
+    let tmp = support::scratch::dir("fuzz");
     let mut fails: Vec<String> = Vec::new();
     let mut checked = 0usize;
     let mut recorder = support::verdicts::Recorder::new();
@@ -1653,8 +1650,7 @@ fn differential_fuzz() {
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]
 fn differential_fuzz_bytewise() {
-    let tmp = std::env::temp_dir().join("asm198x-fuzz-bw");
-    fs::create_dir_all(&tmp).expect("temp dir");
+    let tmp = support::scratch::dir("fuzz-bw");
     let mut fails: Vec<String> = Vec::new();
     let mut checked = 0usize;
     let mut scoped_out = 0usize;
@@ -1861,8 +1857,7 @@ fn unwritten_space_matches_p2bin_across_the_asl_family() {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH");
         return;
     }
-    let tmp = std::env::temp_dir().join("asm198x-gaps");
-    let _ = fs::create_dir_all(&tmp);
+    let tmp = support::scratch::dir("gaps");
 
     type Assemble = fn(&str) -> Result<asm198x::AssemblyResult, asm198x::AsmError>;
     // (our dialect, asl's CPU name, the reserve directive). Note asl spells the
@@ -1932,10 +1927,8 @@ fn unwritten_space_matches_p2bin_across_the_asl_family() {
 // ---------------------------------------------------------------------------
 
 /// A scratch directory of its own, so these never race the real suites.
-fn outcome_tmp(tag: &str) -> std::path::PathBuf {
-    let dir = std::env::temp_dir().join(format!("asm198x-refoutcome-{tag}"));
-    let _ = fs::create_dir_all(&dir);
-    dir
+fn outcome_tmp(tag: &str) -> support::scratch::Scratch {
+    support::scratch::dir(&format!("refoutcome-{tag}"))
 }
 
 /// A clean run that produces an output file is bytes, and the bytes are what
@@ -2094,8 +2087,7 @@ fn lwasm_refuses_its_object_target_words_for_a_binary() {
         eprintln!("SKIP: `lwasm` not on PATH");
         return;
     }
-    let tmp = std::env::temp_dir().join("asm198x-lwasm-objwords");
-    let _ = fs::create_dir_all(&tmp);
+    let tmp = support::scratch::dir("lwasm-objwords");
 
     let mut wrong: Vec<String> = Vec::new();
     for word in ["export", "extdep", "extern", "external", "import"] {
@@ -2155,8 +2147,7 @@ fn vasm_visibility_words_need_a_defined_name() {
         eprintln!("SKIP: `vasmm68k_mot` not on PATH");
         return;
     }
-    let tmp = std::env::temp_dir().join("asm198x-vasm-importwords");
-    let _ = fs::create_dir_all(&tmp);
+    let tmp = support::scratch::dir("vasm-importwords");
 
     let run = |source: &str| {
         ref_outcome(&tmp, source, "s", |src, out| {
@@ -2212,8 +2203,7 @@ fn ca65_cannot_satisfy_forceimport_for_a_binary() {
         eprintln!("SKIP: `ca65`/`ld65` not on PATH");
         return;
     }
-    let tmp = std::env::temp_dir().join("asm198x-ca65-forceimport");
-    let _ = fs::create_dir_all(&tmp);
+    let tmp = support::scratch::dir("ca65-forceimport");
     let cfg = tmp.join("flat.cfg");
     fs::write(
         &cfg,
@@ -2475,8 +2465,7 @@ fn spec_rows_match_reference_6809() {
         eprintln!("SKIP: `lwasm` not on PATH (6809 form audit)");
         return;
     }
-    let tmp = std::env::temp_dir().join("asm198x-form-6809");
-    let _ = fs::create_dir_all(&tmp);
+    let tmp = support::scratch::dir("form-6809");
     let mut recorder = support::verdicts::Recorder::new();
     let mut fails: Vec<String> = Vec::new();
     let mut checked = 0usize;
@@ -2571,8 +2560,7 @@ fn spec_rows_match_reference_word_cpus() {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH (word-CPU form audits)");
         return;
     }
-    let tmp = std::env::temp_dir().join("asm198x-form-word");
-    let _ = fs::create_dir_all(&tmp);
+    let tmp = support::scratch::dir("form-word");
     let mut recorder = support::verdicts::Recorder::new();
     let mut fails: Vec<String> = Vec::new();
     let mut total = 0usize;
@@ -2694,8 +2682,7 @@ fn spec_rows_match_reference_68000() {
         eprintln!("SKIP: `vasmm68k_mot` not on PATH (68000 form audit)");
         return;
     }
-    let tmp = std::env::temp_dir().join("asm198x-form-68000");
-    let _ = fs::create_dir_all(&tmp);
+    let tmp = support::scratch::dir("form-68000");
     let mut recorder = support::verdicts::Recorder::new();
     let mut fails: Vec<String> = Vec::new();
     let mut unplaced: Vec<String> = Vec::new();
@@ -2868,8 +2855,7 @@ fn z8000_form_audit(cpu: &str, seg: bool) {
         eprintln!("SKIP: `asl`/`p2bin` not on PATH ({cpu} form audit)");
         return;
     }
-    let tmp = std::env::temp_dir().join(format!("asm198x-form-{cpu}"));
-    let _ = fs::create_dir_all(&tmp);
+    let tmp = support::scratch::dir(&format!("form-{cpu}"));
     let mut recorder = support::verdicts::Recorder::new();
     let mut fails: Vec<String> = Vec::new();
     let mut unplaced = 0usize;
