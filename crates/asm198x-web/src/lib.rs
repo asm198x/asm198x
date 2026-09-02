@@ -93,6 +93,22 @@ pub fn assemble(dialect: &str, source: &str) -> Option<String> {
     json.ok()
 }
 
+/// Assemble `source` in `dialect` and hand back a 48K `.sna` snapshot.
+///
+/// The same bytes `asm198x --dialect pasmonext --sna` writes, so a page that
+/// assembles and then runs the result is running what the command line would
+/// have produced. Spectrum Z80 only, and the source needs `end <addr>` for its
+/// entry point, exactly as the CLI demands.
+///
+/// `null` when the dialect is unknown, the source does not assemble, or it has
+/// no entry point — [`assemble`] says which.
+#[wasm_bindgen]
+#[must_use]
+pub fn snapshot(dialect: &str, source: &str) -> Option<Vec<u8>> {
+    let result = entry(dialect)?(source, ROOT, &MemoryLoader::new()).ok()?;
+    asm198x::sna_48k(&result).ok()
+}
+
 /// The `--listing` rendering of `source` in `dialect`: address, bytes, and
 /// source per line. `null` when the dialect is unknown or the source does not
 /// assemble — [`assemble`] says why.
@@ -139,5 +155,44 @@ mod tests {
             }
         }
         assert!(entry("not-a-dialect").is_none());
+    }
+
+    /// The unit-01 program from the Spectrum course: set the border, hold the
+    /// picture, and name an entry point.
+    const BORDER: &str = "            org 32768\nstart:      ld a, 2\n            out ($FE), a\n.loop:      halt\n            jr .loop\n            end start\n";
+
+    #[test]
+    fn a_snapshot_is_a_48k_image() {
+        // `unwrap_or_default` rather than `expect`: the crate denies
+        // `expect_used`, and an empty vec fails the length assertion below
+        // with the same clarity.
+        let sna = snapshot("pasmonext", BORDER).unwrap_or_default();
+        assert_eq!(
+            sna.len(),
+            49179,
+            "a 48K .sna is 27 header bytes plus 48K; got {}",
+            sna.len()
+        );
+    }
+
+    /// `--sna` demands `end <addr>`, and a page assembling without one must
+    /// get the same refusal the command line gives rather than a snapshot
+    /// that starts wherever the machine happened to be pointing.
+    #[test]
+    fn a_snapshot_needs_an_entry_point() {
+        let no_end = "            org 32768\n            ld a, 2\n            out ($FE), a\n";
+        assert!(snapshot("pasmonext", no_end).is_none());
+    }
+
+    #[test]
+    fn an_unknown_dialect_yields_no_snapshot() {
+        assert!(snapshot("not-a-dialect", BORDER).is_none());
+    }
+
+    /// Snapshots are a Spectrum Z80 output. Asking a 6502 dialect for one
+    /// must decline rather than emit something shaped like a Spectrum.
+    #[test]
+    fn a_non_spectrum_dialect_yields_no_snapshot() {
+        assert!(snapshot("acme", BORDER).is_none());
     }
 }
