@@ -13,6 +13,39 @@ publish = false
 [lib]
 crate-type = ["cdylib", "rlib"]
 
+# One feature per CPU architecture. `entry` is the only thing that names the
+# library's assembler entry points, so a build that does not select an
+# architecture never references it and the linker drops it: a Z80-only build
+# is 414 KB of wasm against 1422 KB for all of them, 153 KB against 480 KB
+# gzipped. That matters for a page that embeds this beside an emulator.
+#
+# `default = ["all"]`, so nothing that does not ask changes.
+[features]
+default = ["all"]
+all = [
+    "mos6502", "m68k", "m6809", "sm83", "z80", "i8080", "m6800", "cdp1802",
+    "mcs48", "scmp", "f8", "s2650", "tms7000", "pdp11", "tms9900", "cp1610",
+    "z8000",
+]
+
+mos6502 = []   # acme, ca65, 65816, huc6280
+m68k = []      # vasm
+m6809 = []     # lwasm
+sm83 = []      # rgbasm
+z80 = []       # pasmo, pasmonext, sjasmplus
+i8080 = []
+m6800 = []
+cdp1802 = []
+mcs48 = []     # 8048, 8035
+scmp = []
+f8 = []
+s2650 = []
+tms7000 = []
+pdp11 = []
+tms9900 = []
+cp1610 = []
+z8000 = []     # z8000, z8001
+
 [dependencies]
 asm198x = { path = "../asm198x" }
 # The JSON the shell returns is the CLI's `--json` payload, encoded the same way.
