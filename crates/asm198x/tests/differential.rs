@@ -1446,8 +1446,7 @@ const PROBES: &[Probe] = &[
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]
 fn source_matches_reference() {
-    let tmp = std::env::temp_dir().join("asm198x-differential");
-    fs::create_dir_all(&tmp).expect("temp dir");
+    let tmp = support::scratch::dir("differential");
 
     let mut regressions: Vec<String> = Vec::new();
     let mut fixed: Vec<String> = Vec::new();
@@ -2637,7 +2636,7 @@ const MULTI_PROBES: &[MultiProbe] = &[
 #[test]
 #[ignore = "needs sjasmplus + pasmo + acme + ca65/ld65 + rgbasm/rgblink + lwasm; run with --ignored"]
 fn multi_file_source_matches_reference() {
-    let base = std::env::temp_dir().join("asm198x-differential-multi");
+    let base = support::scratch::dir("differential-multi");
     let mut failures: Vec<String> = Vec::new();
     let mut checked = 0usize;
     for (i, p) in MULTI_PROBES.iter().enumerate() {

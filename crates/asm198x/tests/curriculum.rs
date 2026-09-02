@@ -230,8 +230,7 @@ fn curriculum_is_byte_identical() {
         eprintln!("SKIP: Code198x checkout not found next to Asm198x");
         return;
     };
-    let tmp = std::env::temp_dir().join("asm198x-curriculum");
-    fs::create_dir_all(&tmp).expect("create temp dir");
+    let tmp = support::scratch::dir("curriculum");
 
     let mut fails: Vec<String> = Vec::new();
     let mut checked = 0usize;
