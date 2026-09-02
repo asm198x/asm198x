@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.57](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.56...asm198x-v0.0.57) - 2026-09-02
+
+### Added
+
+- *(sjasmplus)* accept DEVICE AMSTRADCPCPLUS ([#562](https://github.com/asm198x/asm198x/pull/562))
+- *(sjasmplus)* make macros visible across files, from their definition on ([#557](https://github.com/asm198x/asm198x/pull/557)) ([#558](https://github.com/asm198x/asm198x/pull/558))
+- *(sjasmplus)* STRUCT initialiser lists across lines, and nested groups ([#552](https://github.com/asm198x/asm198x/pull/552)) ([#556](https://github.com/asm198x/asm198x/pull/556))
+- *(sjasmplus)* column 0 is always the label column ([#551](https://github.com/asm198x/asm198x/pull/551)) ([#553](https://github.com/asm198x/asm198x/pull/553))
+- *(sjasmplus)* a STRUCT instance takes an initialiser list ([#548](https://github.com/asm198x/asm198x/pull/548)) ([#550](https://github.com/asm198x/asm198x/pull/550))
+- *(sjasmplus)* a lone operand on ADD/ADC/SBC is the accumulator form ([#533](https://github.com/asm198x/asm198x/pull/533)) ([#549](https://github.com/asm198x/asm198x/pull/549))
+
+### Fixed
+
+- *(tests)* give each reference-suite run its own scratch directory ([#561](https://github.com/asm198x/asm198x/pull/561))
+- *(cli)* name the file in macro expansion notes ([#560](https://github.com/asm198x/asm198x/pull/560))
+- *(sjasmplus)* resolve a DS count across the passes ([#534](https://github.com/asm198x/asm198x/pull/534))
+
 ## [0.0.56](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.55...asm198x-v0.0.56) - 2026-09-01
 
 ### Added
