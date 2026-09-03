@@ -161,6 +161,33 @@ pub fn tape(dialect: &str, source: &str, name: &str, format: &str) -> Option<Vec
     asm198x::tape(&result, format, name, true).ok()
 }
 
+/// Where the assembled program sits in memory, as JSON.
+///
+/// `{"origin": 32768, "length": 11}` — the load address and the number of
+/// bytes, which together are the range the program occupies.
+///
+/// A page running a reader's code needs this to tell whether the machine is
+/// still executing that code. A program that runs past its own last
+/// instruction has a program counter outside this range, which is the
+/// difference between "the machine stopped" and "your program ran off the end
+/// — that is what the `halt` at the bottom prevents".
+///
+/// `origin` is `null` for a linked image whose bytes are the linker's, with no
+/// single meaningful load address. `null` overall when the dialect is unknown
+/// or the source does not assemble — [`assemble`] says why.
+#[wasm_bindgen]
+#[must_use]
+pub fn extent(dialect: &str, source: &str) -> Option<String> {
+    let result = entry(dialect)?(source, ROOT, &MemoryLoader::new()).ok()?;
+    Some(format!(
+        r#"{{"origin":{},"length":{}}}"#,
+        result
+            .origin
+            .map_or_else(|| "null".to_owned(), |origin| origin.to_string()),
+        result.bytes.len()
+    ))
+}
+
 /// The `--listing` rendering of `source` in `dialect`: address, bytes, and
 /// source per line. `null` when the dialect is unknown or the source does not
 /// assemble — [`assemble`] says why.
@@ -339,6 +366,24 @@ mod tests {
     #[test]
     fn an_unknown_tape_format_is_refused() {
         assert!(tape("pasmonext", "            end 0\n", "b.dsk", "dsk").is_none());
+    }
+
+    /// The range a page checks the program counter against.
+    #[cfg(feature = "z80")]
+    #[test]
+    fn the_extent_is_where_the_program_was_assembled() {
+        let json = extent("pasmonext", BORDER).unwrap_or_default();
+        assert!(
+            json.starts_with(r#"{"origin":32768,"length":"#),
+            "border.asm has `org 32768`; got {json}"
+        );
+    }
+
+    /// Refused for the same reason and in the same way as the others, so a
+    /// caller has one place to look for diagnostics.
+    #[test]
+    fn an_unknown_dialect_has_no_extent() {
+        assert!(extent("not-a-dialect", "            end 0\n").is_none());
     }
 
     /// Independent of architecture: the name is refused before the source is
