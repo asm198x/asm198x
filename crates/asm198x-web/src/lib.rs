@@ -133,6 +133,34 @@ pub fn snapshot(dialect: &str, source: &str) -> Option<Vec<u8>> {
     asm198x::sna_48k(&result).ok()
 }
 
+/// Assemble `source` in `dialect` and hand back a Spectrum tape image.
+///
+/// The same bytes `asm198x --dialect pasmonext --tapbas` writes: the program
+/// with a BASIC loader stub in front, so the machine's own ROM loads and runs
+/// it. `name` goes in the block header, where pasmo puts the output path.
+///
+/// This is how a lesson gets a program the ROM has initialised the machine
+/// for. A snapshot skips the boot, which is faster but leaves the system
+/// variables zeroed, so the program cannot call a ROM routine afterwards —
+/// see asm198x#568. A tape costs a load and has none of that problem, because
+/// the firmware really did the work.
+///
+/// `format` is `"tap"` or `"tzx"`. Spectrum Z80 only.
+///
+/// `null` when the dialect or format is unknown, or the source does not
+/// assemble or does not fit below the top of memory — [`assemble`] says which.
+#[wasm_bindgen]
+#[must_use]
+pub fn tape(dialect: &str, source: &str, name: &str, format: &str) -> Option<Vec<u8>> {
+    let format = match format {
+        "tap" => asm198x::TapeFormat::Tap,
+        "tzx" => asm198x::TapeFormat::Tzx,
+        _ => return None,
+    };
+    let result = entry(dialect)?(source, ROOT, &MemoryLoader::new()).ok()?;
+    asm198x::tape(&result, format, name, true).ok()
+}
+
 /// The `--listing` rendering of `source` in `dialect`: address, bytes, and
 /// source per line. `null` when the dialect is unknown or the source does not
 /// assemble — [`assemble`] says why.
@@ -259,6 +287,58 @@ mod tests {
     fn a_snapshot_needs_an_entry_point() {
         let no_end = "            org 32768\n            ld a, 2\n            out ($FE), a\n";
         assert!(snapshot("pasmonext", no_end).is_none());
+    }
+
+    /// A `.tap` is length-prefixed blocks. With `autorun` there are two: the
+    /// BASIC loader that makes the ROM run the program, and the code itself.
+    /// Checking the structure rather than a byte count, because the loader
+    /// stub's length is the library's business and not this shell's.
+    #[cfg(feature = "z80")]
+    #[test]
+    fn a_tape_carries_a_loader_and_the_code() {
+        let tap = tape("pasmonext", BORDER, "border.tap", "tap").unwrap_or_default();
+
+        let mut blocks = 0;
+        let mut at = 0;
+        while at + 2 <= tap.len() {
+            let len = usize::from(u16::from_le_bytes([tap[at], tap[at + 1]]));
+            at += 2 + len;
+            blocks += 1;
+        }
+
+        assert_eq!(at, tap.len(), "block lengths must tile the file exactly");
+        assert_eq!(
+            blocks, 4,
+            "two headers and two data blocks: loader, then code"
+        );
+    }
+
+    /// The two spellings are different containers of the same program, so a
+    /// page picking one must not silently get the other.
+    #[cfg(feature = "z80")]
+    #[test]
+    fn tap_and_tzx_are_not_the_same_container() {
+        let tap = tape("pasmonext", BORDER, "b.tap", "tap").unwrap_or_default();
+        let tzx = tape("pasmonext", BORDER, "b.tzx", "tzx").unwrap_or_default();
+
+        assert!(!tap.is_empty() && !tzx.is_empty());
+        assert_ne!(tap, tzx);
+        assert_eq!(&tzx[..7], b"ZXTape!", "a .tzx opens with its signature");
+    }
+
+    /// Unlike a snapshot, a tape needs no `end <addr>`: the loader stub falls
+    /// back to the origin, which is what the CLI does.
+    #[cfg(feature = "z80")]
+    #[test]
+    fn a_tape_does_not_need_an_entry_point() {
+        let no_end = "            org 32768\n            ld a, 2\n            out ($FE), a\n";
+        assert!(tape("pasmonext", no_end, "b.tap", "tap").is_some());
+    }
+
+    /// An unrecognised container is refused rather than guessed at.
+    #[test]
+    fn an_unknown_tape_format_is_refused() {
+        assert!(tape("pasmonext", "            end 0\n", "b.dsk", "dsk").is_none());
     }
 
     /// Independent of architecture: the name is refused before the source is
