@@ -18,8 +18,35 @@
 set -euo pipefail
 
 crate_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# Flag first, then the positional: `--publish z80` must reach the arch check
+# as "z80", not as "--publish".
+publish=0
+if [ "${1:-}" = "--publish" ]; then
+  publish=1
+  shift
+fi
 arch="${1:-}"
-package_version="0.1.0"
+
+# Name and version come from the crate's own manifest, not from here. A version
+# in a shell script drifts from the thing it versions, and the last publish
+# needed this line edited by hand — exactly the step a person forgets.
+read_meta() {
+  python3 - "$crate_dir/Cargo.toml" "$1" <<'META'
+import re, sys
+key = sys.argv[2]
+text = open(sys.argv[1]).read()
+parts = text.split("[package.metadata.npm]", 1)
+if len(parts) < 2:
+    sys.exit("Cargo.toml has no [package.metadata.npm] section")
+body = re.split(r"\n\[", parts[1], maxsplit=1)[0]
+found = re.search(r'^' + key + r'\s*=\s*"([^"]+)"', body, re.M)
+if not found:
+    sys.exit("[package.metadata.npm] has no " + key)
+print(found.group(1))
+META
+}
+
+package_version="$(read_meta version)"
 
 if [ -z "$arch" ]; then
   package_name="@asm198x/web"
@@ -61,3 +88,32 @@ PY
 
 wasm="$(ls pkg/*_bg.wasm)"
 echo "built $(du -h "$wasm" | cut -f1) raw / $(gzip -9 -c "$wasm" | wc -c | tr -d ' ') bytes gzipped"
+
+# Publishing from here rather than leaving a `cd pkg && npm publish` for a
+# person to get right. The crate directory has no package.json, so running npm
+# in the obvious place does nothing useful and explains little about why.
+if [ "$publish" -eq 1 ]; then
+  if [ ! -f pkg/package.json ] || [ ! -f pkg/README.md ]; then
+    echo "error: pkg/ is missing package.json or README.md; not publishing" >&2
+    exit 1
+  fi
+
+  cd pkg
+  # --access public because a scoped package defaults to restricted, and a
+  # restricted publish looks identical in the output until an install fails.
+  npm publish --access public
+
+  # Then wait for the registry to serve it. A new package's first version can
+  # take minutes to appear, and "is it there yet" is a question this should
+  # answer rather than a person refreshing a page.
+  echo "waiting for $package_name@$package_version to be served..."
+  for _ in $(seq 1 60); do
+    if npm view "$package_name@$package_version" version >/dev/null 2>&1; then
+      echo "live: $package_name@$package_version"
+      exit 0
+    fi
+    sleep 10
+  done
+  echo "warning: publish reported success but the registry is not serving it yet." >&2
+  echo "Usually propagation. Confirm with: npm view $package_name versions" >&2
+fi
