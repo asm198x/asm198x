@@ -1,0 +1,97 @@
+# Publish the browser assembler to npm, via npm's trusted publishing.
+#
+# No NPM_TOKEN. The `id-token: write` permission below lets this workflow mint
+# a short-lived OIDC credential npm verifies against the trusted publisher
+# configured on each package, so there is no long-lived secret to leak, rotate
+# or forget. Provenance is attested automatically as a side effect: the tarball
+# on the registry can be traced to this workflow and this commit.
+#
+# Reconciling rather than event-driven. It runs on every push to main and asks
+# the registry what is missing, so a publish that failed, or a version bump
+# that landed while the runner was down, is picked up by the next push instead
+# of needing someone to notice. Publishing an already-published version is a
+# normal no-op, not a failure.
+name: Publish to npm
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - "crates/asm198x-web/**"
+      - "crates/asm198x/**"
+      - ".github/workflows/publish-npm.yml"
+  workflow_dispatch:
+
+# One at a time. Two runs racing on the same version would have one of them
+# publish and the other fail on a name it cannot reuse.
+concurrency:
+  group: publish-npm
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: ${{ matrix.package }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      # The whole point: this is what replaces the token.
+      id-token: write
+    strategy:
+      # Independent packages. One failing must not stop the others from
+      # reaching a registry they are missing from.
+      fail-fast: false
+      matrix:
+        # One entry per package that exists on the registry and has a trusted
+        # publisher configured for this workflow — both are manual, per
+        # package, on npmjs.com. Adding an architecture here before doing that
+        # gets a run that fails on a name it is not trusted to publish.
+        #
+        # The rest of the split — mos6502, m68k, m6809, sm83, i8080 and the
+        # eleven others, plus `all` for the full build — is a line each once
+        # someone wants them.
+        package: [z80]
+    steps:
+      - uses: actions/checkout@v7
+
+      - name: Read the toolchain the repository pins
+        id: toolchain
+        run: |
+          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
+          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
+
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.toolchain.outputs.channel }}
+          targets: wasm32-unknown-unknown
+
+      - uses: Swatinem/rust-cache@v2
+        with:
+          shared-key: publish-npm
+
+      # Same installer the repository's CI uses for the web-shell job,
+      # rather than a second way of getting the same binary.
+      - uses: taiki-e/install-action@v2
+        with:
+          tool: wasm-pack
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      # Trusted publishing needs a recent npm; the one bundled with Node may
+      # predate it. Pinned to a major so a new npm cannot change publish
+      # behaviour under us without an edit here.
+      - name: Use an npm that speaks OIDC
+        run: npm install -g npm@11
+
+      - name: Build and publish
+        run: |
+          set -euo pipefail
+          arch='${{ matrix.package }}'
+          if [ "$arch" = "all" ]; then
+            bash scripts/build-npm.sh --publish
+          else
+            bash scripts/build-npm.sh --publish "$arch"
+          fi
+        working-directory: crates/asm198x-web
