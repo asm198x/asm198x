@@ -79,4 +79,4 @@ panic = "abort"
 # comparing them is comparing the same release. Kept here rather than in the
 # script because a version in a shell script drifts from what it versions.
 [package.metadata.npm]
-version = "0.2.0"
+version = "0.3.0"
