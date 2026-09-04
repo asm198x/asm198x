@@ -106,8 +106,9 @@ one emission. Both views are implemented: the raw image remains the emission
 log, while #563 added the independently routed device-memory image used by
 `SAVECPR` and future page-reading save directives.
 
-The Plus starts empty. The Spectrum devices do not
-([#318](https://github.com/asm198x/asm198x/issues/318)).
+The classic Spectrum devices use the ROM-derived 48K initial state recorded in
+`syntheses/zx-spectrum/post-boot-ram.md`; all their additional pages are zero.
+The Next, CPC, Plus, and NOSLOT devices start entirely empty (#318).
 
 ## What a careless implementation gets wrong
 

@@ -187,8 +187,9 @@ pub const DIRECTIVES: &[Directive] = &[
     // `SAVEBIN "file",start[,length]` writes a span of the address space to a
     // file of its own. It needs a `DEVICE` — without one SjASMPlus 1.21.0
     // answers "SAVEBIN only allowed in real device emulation mode" — and the
-    // span is against a 64K space that starts zero-filled, so an address the
-    // source never wrote saves as zero rather than as an error.
+    // span is against the live 64K device window. Classic Spectrum devices
+    // carry the ROM-derived initial state; every other device starts at zero
+    // (#318).
     //
     // A length of zero, or none at all, means to the end of the space. The rest
     // of the `save*` family writes a *container*, and each waits on its format
@@ -208,8 +209,8 @@ pub const DIRECTIVES: &[Directive] = &[
     // layout is `format198x-sinclair-zx-spectrum-tap`'s, which graduated to
     // Format198x when this became its second consumer.
     //
-    // The forms that name no kind save the *device's* memory rather than a
-    // span, so they wait on the same fact `SAVEBIN` does (asm198x#318).
+    // The forms that name no kind save the whole device rather than a named
+    // span. Their grammar remains a separate parity item.
     Directive {
         id: "savetap",
         pattern: Pattern::Sigilled {
@@ -513,8 +514,7 @@ impl SjasmplusSyntax {
     ///
     /// The kind and the name are what a tape's header carries beyond the
     /// bytes. SjASMPlus also takes forms that name neither and save the whole
-    /// of a device's memory; those are refused here for the reason `SAVEBIN`
-    /// refuses a span outside the image (asm198x#318).
+    /// of a device's memory; that separate grammar is not implemented yet.
     fn parse_savetap(&self, args: &str, line: usize) -> Result<Operation, AsmError> {
         let parts = crate::dialects::mos6502::split_top_level(args.trim(), ',');
         let quoted = |p: &str| {
@@ -527,8 +527,8 @@ impl SjasmplusSyntax {
             return Err(AsmError::new(
                 line,
                 "`SAVETAP` needs `\"file\",CODE|BASIC,\"name\",start,length` here — the \
-                 forms that name no kind save a whole device's memory, which asm198x \
-                 has no record of yet, so the source is valid and the gap is ours",
+                 forms that name no kind save a whole device and are not implemented yet, \
+                 so the source is valid and the gap is ours",
             ));
         };
         let file = quoted(file)
@@ -2040,29 +2040,59 @@ mod tests {
         );
     }
 
-    /// A span reaching outside what the source assembled is refused by name.
-    /// A device's memory starts as a booted machine's — the Spectrum's
-    /// attribute file, system variables and UDGs are all non-zero before a
-    /// line is assembled — so answering with zeros would be right across most
-    /// of the address space and wrong in three parts of it.
+    /// #318: `SAVEBIN` reads the live device, including bytes the source did
+    /// not write. Classic Spectrums share the ROM-derived 48K seed; every
+    /// other supported device and every additional page starts at zero.
     #[test]
-    fn a_span_outside_the_image_is_refused_as_our_gap() {
-        for (src, what) in [
-            (" SAVEBIN \"x.bin\",$0000,4\n", "before the image"),
-            (" SAVEBIN \"x.bin\",$8000,10\n", "past the end"),
-            (" SAVEBIN \"x.bin\",$8000\n", "to the end of the space"),
-            (
-                " SAVEBIN \"x.bin\",$8000,0\n",
-                "zero length reads as the same",
-            ),
+    fn savebin_reads_initialised_device_memory_for_every_device_class() {
+        for (device, last_page) in [
+            ("ZXSPECTRUM48", 3),
+            ("ZXSPECTRUM128", 7),
+            ("ZXSPECTRUM256", 15),
+            ("ZXSPECTRUM512", 31),
+            ("ZXSPECTRUM1024", 63),
+            ("ZXSPECTRUM2048", 127),
+            ("ZXSPECTRUM4096", 255),
+            ("ZXSPECTRUM8192", 511),
         ] {
-            let err = asm(&format!(
-                " DEVICE ZXSPECTRUM48\n ORG $8000\n DB 1,2,3,4\n{src}"
+            let spectrum = asm(&format!(
+                " DEVICE {device}\n SAVEBIN \"all.bin\",$4000,$C000\n \
+                 PAGE {last_page}\n SAVEBIN \"extra.bin\",$C000,1\n"
             ))
-            .expect_err(what)
-            .to_string();
-            assert!(err.contains("the gap is ours"), "{what}: {err}");
+            .unwrap_or_else(|error| panic!("{device}: {error}"));
+            let bytes = &spectrum.artifacts[0].bytes;
+            assert_eq!(&bytes[0x1800..0x1b00], &[0x38; 768], "{device}");
+            assert_eq!(&bytes[0x1c00..0x1c05], &[0xff, 0, 0, 0, 0xff], "{device}");
+            assert_eq!(
+                &bytes[0xbf58..0xbf60],
+                &[0, 60, 66, 66, 126, 66, 66, 0],
+                "{device}"
+            );
+            assert_eq!(
+                bytes.iter().filter(|byte| **byte != 0).count(),
+                986,
+                "{device}"
+            );
+            assert_eq!(spectrum.artifacts[1].bytes, [0], "{device} extra page");
         }
+
+        for device in [
+            "ZXSPECTRUMNEXT",
+            "AMSTRADCPC464",
+            "AMSTRADCPC6128",
+            "AMSTRADCPCPLUS",
+            "NOSLOT64K",
+        ] {
+            let out = asm(&format!(" DEVICE {device}\n SAVEBIN \"all.bin\",0,65536\n"))
+                .unwrap_or_else(|error| panic!("{device}: {error}"));
+            assert!(out.artifacts[0].bytes.iter().all(|byte| *byte == 0));
+        }
+
+        let to_end = asm(" DEVICE ZXSPECTRUM48\n SAVEBIN \"a.bin\",$FF58\n \
+             SAVEBIN \"b.bin\",$FF58,0\n")
+        .expect("omitted and zero lengths reach the end");
+        assert_eq!(to_end.artifacts[0].bytes, to_end.artifacts[1].bytes);
+        assert_eq!(to_end.artifacts[0].bytes.len(), 168);
     }
 
     #[test]

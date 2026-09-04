@@ -821,8 +821,8 @@ pub(crate) enum Operation {
     },
 }
 
-/// Geometry of a sjasmplus emulated device. Initial page contents deliberately
-/// live outside this type: #318 will supply machine-specific boot seeds.
+/// Geometry of a sjasmplus emulated device. [`DeviceMemory::new`] applies the
+/// machine-family seed established by #318.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub(crate) struct DeviceSpec {
     pub(crate) name: String,
@@ -1510,9 +1510,8 @@ fn assemble_statements(
     // the command line already chose, which is why these are only a request.
     let mut requested_output: Option<RequestedOutput> = None;
     let mut requested_symbols: Option<String> = None;
-    // Source-requested files, in source order. Flat-image spans wait until
-    // layout is complete; device snapshots are captured where they stand.
-    let mut pending_artifacts: Vec<PendingArtifact> = Vec::new();
+    // Source-requested files, captured and retained in source order.
+    let mut artifacts: Vec<Artifact> = Vec::new();
     let mut device_memory: Option<DeviceMemory> = None;
     for s in &statements {
         if let Some(Operation::InitMem(v)) = &s.op {
@@ -1726,11 +1725,11 @@ fn assemble_statements(
                     .ok_or_else(|| {
                         s.err("[SAVECPR] only a size from 1 (16KiB) to 32 (512KiB) is allowed")
                     })?;
-                pending_artifacts.push(PendingArtifact::Ready(Artifact {
+                artifacts.push(Artifact {
                     name: name.clone(),
                     format: ArtifactFormat::Cpr,
                     bytes: cpr_image(&memory.pages[..pages]),
-                }));
+                });
             }
             Some(Operation::Equ(_) | Operation::DefineSymbols(_)) => {
                 // Define symbols; emit nothing.
@@ -1754,12 +1753,13 @@ fn assemble_statements(
                     Some(e) => Some(e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?),
                     None => None,
                 };
-                pending_artifacts.push(PendingArtifact::Span(Save {
-                    file: name.clone(),
-                    at,
-                    len,
-                    tape: None,
-                }));
+                let len = len.filter(|len| *len > 0).unwrap_or(0x1_0000 - at);
+                let memory = device_memory.as_ref().expect("device checked above");
+                artifacts.push(Artifact {
+                    name: name.clone(),
+                    format: ArtifactFormat::Raw,
+                    bytes: memory.read(at, len).map_err(|err| s.stamp(err))?,
+                });
             }
             Some(Operation::SaveTape {
                 file,
@@ -1779,12 +1779,13 @@ fn assemble_statements(
                 let len = length
                     .eval(&symbols, pc, s.line)
                     .map_err(|err| s.stamp(err))?;
-                pending_artifacts.push(PendingArtifact::Span(Save {
-                    file: file.clone(),
-                    at,
-                    len: Some(len),
-                    tape: Some((*kind, name.clone())),
-                }));
+                let memory = device_memory.as_ref().expect("device checked above");
+                let span = memory.read(at, len).map_err(|err| s.stamp(err))?;
+                artifacts.push(Artifact {
+                    name: file.clone(),
+                    format: ArtifactFormat::Tap,
+                    bytes: tape_image(*kind, name, at, span),
+                });
             }
             // Rebinds where it stands, so a use below reads this value and a
             // use above kept the one pass one left. Emits nothing either way.
@@ -2357,7 +2358,6 @@ fn assemble_statements(
                 c.offset -= base;
             }
         }
-        let artifacts = resolve_artifacts(&pending_artifacts, origin_of_image, &image)?;
         return Ok(Assembly {
             requested_output,
             requested_symbols,
@@ -2414,7 +2414,6 @@ fn assemble_statements(
         }
     }
 
-    let artifacts = resolve_artifacts(&pending_artifacts, origin, &bytes)?;
     let areas = flat_space_usage(
         origin as u32 - u32::from(reserved_prefix),
         (bytes.len() as i64 / addr_unit) as u32 + u32::from(reserved_prefix),
@@ -2454,92 +2453,7 @@ fn flat_space_usage(start: u32, used: u32) -> Vec<AreaUsage> {
     }]
 }
 
-/// Cut each requested span out of the finished image.
-///
-/// **The span has to lie inside what the source assembled.** A `SAVEBIN` reads
-/// a *device's memory*, and a device's memory is not empty: SjASMPlus 1.21.0's
-/// `DEVICE ZXSPECTRUM48` starts as a booted Spectrum's RAM — the attribute file
-/// at `$5800`, the system variables from `$5C00`, the user-defined graphics
-/// under `$FFFF` — so an address the source never wrote reads as whatever the
-/// machine left there, not as zero.
-///
-/// Reproducing that means writing a machine's post-boot RAM down as the
-/// hardware fact it is, in the primary library, and citing it. Transcribing it
-/// out of another assembler's output is the move
-/// `decisions/multi-artifact-output.md` forbids in as many words (asm198x#318).
-/// So a span
-/// that reaches outside the assembled image is refused by name until the fact
-/// exists, rather than answered with zeros that are right in most of the
-/// address space and wrong in three parts of it.
-///
-/// A length of `None` or zero means "to the end of the address space", which is
-/// the reference's reading of both.
-fn resolve_artifacts(
-    pending: &[PendingArtifact],
-    origin: i64,
-    image: &[u8],
-) -> Result<Vec<Artifact>, AsmError> {
-    const SPACE: i64 = 0x1_0000;
-    let end = origin + image.len() as i64;
-    pending
-        .iter()
-        .map(|pending| match pending {
-            PendingArtifact::Ready(artifact) => Ok(artifact.clone()),
-            PendingArtifact::Span(Save {
-                file: name,
-                at,
-                len,
-                tape,
-            }) => {
-                let len = match len {
-                    Some(n) if *n > 0 => *n,
-                    _ => (SPACE - at).max(0),
-                };
-                if *at < origin || at + len > end {
-                    return Err(AsmError::new(
-                        0,
-                        format!(
-                            "`{name}` saves ${at:04X}..${:04X}, which reaches outside the \
-                         ${origin:04X}..${end:04X} this source assembled — a device's \
-                         memory starts as a booted machine's rather than as zeros, and \
-                         asm198x has no record of that yet, so the source is valid and \
-                         the gap is ours",
-                            at + len - 1
-                        ),
-                    ));
-                }
-                let from = (at - origin) as usize;
-                let span = image[from..from + len as usize].to_vec();
-                let (format, bytes) = match tape {
-                    None => (ArtifactFormat::Raw, span),
-                    Some((kind, tape_name)) => {
-                        (ArtifactFormat::Tap, tape_image(*kind, tape_name, *at, span))
-                    }
-                };
-                Ok(Artifact {
-                    name: name.clone(),
-                    format,
-                    bytes,
-                })
-            }
-        })
-        .collect()
-}
-
-enum PendingArtifact {
-    Span(Save),
-    Ready(Artifact),
-}
-
-/// One file the source asked for, waiting for the image to exist.
-struct Save {
-    file: String,
-    at: i64,
-    len: Option<i64>,
-    /// The header a tape image needs, or `None` for a raw span.
-    tape: Option<(TapeKind, String)>,
-}
-
+/// SjASMPlus's live device memory, distinct from its raw emission log.
 struct DeviceMemory {
     spec: DeviceSpec,
     slots: Vec<usize>,
@@ -2549,12 +2463,26 @@ struct DeviceMemory {
 
 impl DeviceMemory {
     fn new(spec: DeviceSpec) -> Self {
-        Self {
+        let mut memory = Self {
             slots: (0..spec.slots).collect(),
             current_slot: spec.slots - 1,
             pages: vec![vec![0; spec.slot_size]; spec.pages],
             spec,
+        };
+        if matches!(
+            memory.spec.name.as_str(),
+            "ZXSPECTRUM48"
+                | "ZXSPECTRUM128"
+                | "ZXSPECTRUM256"
+                | "ZXSPECTRUM512"
+                | "ZXSPECTRUM1024"
+                | "ZXSPECTRUM2048"
+                | "ZXSPECTRUM4096"
+                | "ZXSPECTRUM8192"
+        ) {
+            seed_spectrum_48k(&mut memory.pages);
         }
+        memory
     }
 
     fn select_slot(&mut self, slot: i64) -> Result<(), AsmError> {
@@ -2606,6 +2534,141 @@ impl DeviceMemory {
         }
         Ok(())
     }
+
+    fn read(&self, address: i64, len: i64) -> Result<Vec<u8>, AsmError> {
+        let end = address.checked_add(len).ok_or_else(|| {
+            AsmError::new(0, "device-memory save range overflows its address space")
+        })?;
+        if address < 0 || len < 0 || end > 0x1_0000 {
+            return Err(AsmError::new(
+                0,
+                format!("device-memory save range ${address:04X}..${end:04X} is outside 64K"),
+            ));
+        }
+        Ok((address..end)
+            .map(|address| {
+                let address = address as usize;
+                self.pages[self.slots[address / self.spec.slot_size]][address % self.spec.slot_size]
+            })
+            .collect())
+    }
+}
+
+/// The 48K ROM's deterministic START initialisation, derived in
+/// `syntheses/zx-spectrum/post-boot-ram.md`. Larger classic Spectrum devices
+/// expose this same initial 64K window and leave every additional page zero.
+fn seed_spectrum_48k(pages: &mut [Vec<u8>]) {
+    pages[1][0x1800..0x1b00].fill(0x38);
+
+    const SYSVARS: &[(usize, u8)] = &[
+        (0x00, 0xff),
+        (0x04, 0xff),
+        (0x09, 0x14),
+        (0x0a, 0x01),
+        (0x10, 0x01),
+        (0x12, 0x06),
+        (0x14, 0x0b),
+        (0x16, 0x01),
+        (0x18, 0x01),
+        (0x1a, 0x06),
+        (0x1c, 0x10),
+        (0x37, 0x3c),
+        (0x38, 0x40),
+        (0x3a, 0xff),
+        (0x3b, 0xcc),
+        (0x3c, 0x01),
+        (0x3d, 0x58),
+        (0x3e, 0x5d),
+        (0x48, 0x38),
+        (0x4b, 0xcb),
+        (0x4c, 0x5c),
+        (0x4f, 0xb6),
+        (0x50, 0x5c),
+        (0x51, 0xb6),
+        (0x52, 0x5c),
+        (0x53, 0xcb),
+        (0x54, 0x5c),
+        (0x57, 0xca),
+        (0x58, 0x5c),
+        (0x59, 0xcc),
+        (0x5a, 0x5c),
+        (0x5b, 0xcc),
+        (0x5c, 0x5c),
+        (0x5d, 0xcc),
+        (0x5e, 0x5c),
+        (0x61, 0xce),
+        (0x62, 0x5c),
+        (0x63, 0xce),
+        (0x64, 0x5c),
+        (0x65, 0xce),
+        (0x66, 0x5c),
+        (0x68, 0x92),
+        (0x69, 0x5c),
+        (0x6a, 0x10),
+        (0x6b, 0x02),
+        (0x7b, 0x58),
+        (0x7c, 0xff),
+        (0x7f, 0x21),
+        (0x80, 0x5b),
+        (0x82, 0x21),
+        (0x83, 0x17),
+        (0x85, 0x40),
+        (0x86, 0xe0),
+        (0x87, 0x50),
+        (0x88, 0x21),
+        (0x89, 0x18),
+        (0x8a, 0x21),
+        (0x8b, 0x17),
+        (0x8c, 0x01),
+        (0x8d, 0x38),
+        (0x8f, 0x38),
+        (0xb2, 0x5b),
+        (0xb3, 0x5d),
+        (0xb4, 0xff),
+        (0xb5, 0xff),
+        (0xb6, 0xf4),
+        (0xb7, 0x09),
+        (0xb8, 0xa8),
+        (0xb9, 0x10),
+        (0xba, 0x4b),
+        (0xbb, 0xf4),
+        (0xbc, 0x09),
+        (0xbd, 0xc4),
+        (0xbe, 0x15),
+        (0xbf, 0x53),
+        (0xc0, 0x81),
+        (0xc1, 0x0f),
+        (0xc2, 0xc4),
+        (0xc3, 0x15),
+        (0xc4, 0x52),
+        (0xc5, 0xf4),
+        (0xc6, 0x09),
+        (0xc7, 0xc4),
+        (0xc8, 0x15),
+        (0xc9, 0x50),
+        (0xca, 0x80),
+        (0xcb, 0x80),
+        (0xcc, 0x0d),
+        (0xcd, 0x80),
+        (0x158, 0x03),
+        (0x159, 0x13),
+        (0x15b, 0x3e),
+    ];
+    for &(offset, value) in SYSVARS {
+        pages[1][0x1c00 + offset] = value;
+    }
+
+    const UDG_A_TO_U: [u8; 168] = [
+        0, 60, 66, 66, 126, 66, 66, 0, 0, 124, 66, 124, 66, 66, 124, 0, 0, 60, 66, 64, 64, 66, 60,
+        0, 0, 120, 68, 66, 66, 68, 120, 0, 0, 126, 64, 124, 64, 64, 126, 0, 0, 126, 64, 124, 64,
+        64, 64, 0, 0, 60, 66, 64, 78, 66, 60, 0, 0, 66, 66, 126, 66, 66, 66, 0, 0, 62, 8, 8, 8, 8,
+        62, 0, 0, 2, 2, 2, 66, 66, 60, 0, 0, 68, 72, 112, 72, 68, 66, 0, 0, 64, 64, 64, 64, 64,
+        126, 0, 0, 66, 102, 90, 66, 66, 66, 0, 0, 66, 98, 82, 74, 70, 66, 0, 0, 60, 66, 66, 66, 66,
+        60, 0, 0, 124, 66, 66, 124, 64, 64, 0, 0, 60, 66, 66, 82, 74, 60, 0, 0, 124, 66, 66, 124,
+        68, 66, 0, 0, 60, 64, 60, 2, 66, 60, 0, 0, 254, 16, 16, 16, 16, 16, 0, 0, 66, 66, 66, 66,
+        66, 60, 0,
+    ];
+    pages[3][0x3f58..].copy_from_slice(&UDG_A_TO_U);
 }
 
 /// RIFF CPR layout from `reference/by-system/amstrad-cpc/formats.md` §CPR.

@@ -11,6 +11,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Replay sjasmplus emissions through live `DEVICE`/`SLOT`/`PAGE` mappings and
   implement source-ordered `SAVECPR` cartridge artifacts (#563).
+- Seed every sjasmplus device family correctly and let `SAVEBIN` read
+  unwritten live memory, including the ROM-derived classic Spectrum state
+  (#318).
 
 ### Fixed
 

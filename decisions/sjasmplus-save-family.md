@@ -38,13 +38,13 @@ device columns are what the binary answered, not what its documentation says.
 
 | Word | Syntax as probed | Device gate | Container | Upstream | Waits on |
 |---|---|---|---|---|---|
-| `SAVEBIN` | `"file",start[,length]` | any device | raw span | — | **done** (#316); a span outside the assembled bytes waits on #318 |
-| `SAVETAP` | `"file",CODE\|BASIC,"name",start,length` | Spectrum devices | TAP | `syntheses/zx-spectrum/tape-loading-format.md` §4, via `format198x-sinclair-zx-spectrum-tap` | **done** for the kinded forms; the kindless whole-memory form waits on #318 |
+| `SAVEBIN` | `"file",start[,length]` | any device | raw span | — | **done** (#316, #318), including unwritten device memory |
+| `SAVETAP` | `"file",CODE\|BASIC,"name",start,length` | Spectrum devices | TAP | `syntheses/zx-spectrum/tape-loading-format.md` §4, via `format198x-sinclair-zx-spectrum-tap` | **done** for the kinded forms; the kindless whole-memory grammar remains |
 | `SAVE3DOS` | `"file",start,length` | any device | span with a 128-byte +3DOS header | `reference/by-system/sinclair-zx-spectrum/zx-spectrum-plus-3-manual-amstrad.txt` (the +3DOS header record) | nothing — next |
 | `SAVEAMSDOS` | `"file",start,length` | any device | span with a 128-byte AMSDOS header | **partly held** — the CPC464 firmware guide documents the cassette file-header record and does not mention AMSDOS; the disk header's extension and checksum are not held | acquisition of the AMSDOS header layout (the DDI-1 firmware guide) |
-| `SAVEDEV` | `"file",startPage,startOffset,length` | any device | raw device pages, no container | the device model (`docs/sjasmplus-device-model.md`) | #318 for devices whose unwritten pages begin as booted-machine memory; #563 now retains the routed writes |
-| `SAVESNA` | `"file"[,start]` | `ZXSPECTRUM48` / `ZXSPECTRUM128` only (`[SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.`) | 48K SNA (27-byte header + 49,152) or 128K SNA | `formats.md` §SNA — community material only, per rule 3 | #318 — a snapshot is the whole of a booted machine's RAM, so this word cannot land before that fact does |
-| `SAVECPCSNA` | `"file"[,start]`; `[SAVECPCSNA] No start address defined` without one | `AMSTRADCPC464` / `AMSTRADCPC6128` only | CPC SNA (256-byte header + 65,536) | `reference/by-system/amstrad-cpc/formats.md` §SNA — community | #318's CPC generalisation: the booted memory of a CPC is not the Spectrum's |
+| `SAVEDEV` | `"file",startPage,startOffset,length` | any device | raw device pages, no container | the device model (`docs/sjasmplus-device-model.md`) | unblocked: #318 supplies initial pages and #563 retains routed writes |
+| `SAVESNA` | `"file"[,start]` | `ZXSPECTRUM48` / `ZXSPECTRUM128` only (`[SAVESNA] Device must be ZXSPECTRUM48 or ZXSPECTRUM128.`) | 48K SNA (27-byte header + 49,152) or 128K SNA | `formats.md` §SNA — community material only, per rule 3 | unblocked by #318; serializer remains |
+| `SAVECPCSNA` | `"file"[,start]`; `[SAVECPCSNA] No start address defined` without one | `AMSTRADCPC464` / `AMSTRADCPC6128` only | CPC SNA (256-byte header + 65,536) | `reference/by-system/amstrad-cpc/formats.md` §SNA — community | unblocked by #318's measured zero seed; serializer remains |
 | `SAVEHOB` | `"file","hobname",start,length` | any device | Hobeta (17-byte header, data padded to sectors: 273 bytes for a 1-byte span) | **none held** — Spectrumpedia mentions the format, no layout | acquisition |
 | `SAVETRD` | `"image","name.C",start,length[,autostart]`; the image must already exist (`Error opening file`), which `EMPTYTRD` creates | any device | file appended to a TR-DOS disk image | **none held** — `formats.md` names TRD in its overview and has no section | acquisition; lands together with `EMPTYTRD` |
 | `SAVECDT` | `FULL\|EMPTY\|BASIC\|CODE\|HEADLESS "file","name",start,length` | `AMSTRADCPC464` / `AMSTRADCPC6128` only | CDT (TZX with CPC block usage) | `reference/by-system/amstrad-cpc/formats.md` §CDT, which its own front matter flags as having no specification held | acquisition of the CDT block usage; the TZX container is held |
@@ -60,14 +60,12 @@ already held), `INCHOB`/`INCTRD` (readers of the same two layouts).
 Ordered by what is already held, not by demand:
 
 1. `SAVE3DOS` — upstream held, no dependency.
-2. `SAVEDEV` — after #318 supplies boot memory for devices whose unwritten
-   pages are not zero. The routed device-memory image itself landed in #563.
-   `SAVECPR` landed with that image because a Plus cartridge starts empty.
-3. `SAVESNA`, `SAVECPCSNA` — after #318, which is a
-   `reference/`/`syntheses/` task before it is an Asm198x one.
-4. `SAVEAMSDOS`, `SAVEHOB`, `SAVETRD`/`EMPTYTRD`, `SAVECDT` — after
+2. `SAVEDEV`, `SAVESNA`, `SAVECPCSNA` — now unblocked: #563 supplied routed
+   device memory and #318 supplied its initial contents. Their serializers are
+   the remaining work. `SAVECPR` landed with #563.
+3. `SAVEAMSDOS`, `SAVEHOB`, `SAVETRD`/`EMPTYTRD`, `SAVECDT` — after
    acquisition.
-5. `SAVENEX` — after acquisition, under its own record.
+4. `SAVENEX` — after acquisition, under its own record.
 
 ## Why not transcribe the layouts from the reference's output
 
