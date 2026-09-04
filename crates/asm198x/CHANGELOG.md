@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Replay sjasmplus emissions through live `DEVICE`/`SLOT`/`PAGE` mappings and
+  implement source-ordered `SAVECPR` cartridge artifacts (#563).
+
 ### Fixed
 
 - **SjASMPlus temporary numeric labels resolve in jump targets.**

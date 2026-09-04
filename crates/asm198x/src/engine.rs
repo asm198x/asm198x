@@ -81,6 +81,8 @@ pub enum ArtifactFormat {
     /// span itself. Written by `format198x-sinclair-zx-spectrum-tap`, which holds
     /// the layout and the citations for it.
     Tap,
+    /// An Amstrad Plus cartridge: RIFF `AMS!` with one `cbNN` chunk per bank.
+    Cpr,
 }
 
 /// The result of a successful assembly: where it loads and the bytes to load.
@@ -612,6 +614,17 @@ pub(crate) enum Operation {
         start: Expr,
         length: Expr,
     },
+    /// Select or clear sjasmplus's emulated device memory.
+    Device(Option<DeviceSpec>),
+    /// Select the slot a following [`Operation::DevicePage`] remaps.
+    DeviceSlot(Expr),
+    /// Map a page into the current slot and start a new raw-output run.
+    DevicePage(Expr),
+    /// Save the first `pages` of an Amstrad Plus device as a CPR cartridge.
+    SaveCpr {
+        name: String,
+        pages: Expr,
+    },
     /// A **redefinable** symbol binding — lwasm's `set`, and the same idea
     /// under ca65's `.set`, sjasmplus's `defl` and rgbasm's `=`. Unlike
     /// [`Operation::Equ`] it may bind the same name again, and it rebinds in
@@ -808,6 +821,16 @@ pub(crate) enum Operation {
     },
 }
 
+/// Geometry of a sjasmplus emulated device. Initial page contents deliberately
+/// live outside this type: #318 will supply machine-specific boot seeds.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub(crate) struct DeviceSpec {
+    pub(crate) name: String,
+    pub(crate) pages: usize,
+    pub(crate) slots: usize,
+    pub(crate) slot_size: usize,
+}
+
 /// One piece of a dialect-computed instruction encoding.
 pub(crate) enum Piece {
     /// A byte the dialect already determined (opcode, postbyte, modrm…).
@@ -966,6 +989,10 @@ pub(crate) fn next_pc(
         | Operation::DefineSymbols(_)
         | Operation::SaveRaw { .. }
         | Operation::SaveTape { .. }
+        | Operation::Device(_)
+        | Operation::DeviceSlot(_)
+        | Operation::DevicePage(_)
+        | Operation::SaveCpr { .. }
         | Operation::Entry(_) => pc,
     })
 }
@@ -1483,8 +1510,10 @@ fn assemble_statements(
     // the command line already chose, which is why these are only a request.
     let mut requested_output: Option<RequestedOutput> = None;
     let mut requested_symbols: Option<String> = None;
-    // `SAVEBIN` and its kind, in source order, waiting for the image.
-    let mut saves: Vec<Save> = Vec::new();
+    // Source-requested files, in source order. Flat-image spans wait until
+    // layout is complete; device snapshots are captured where they stand.
+    let mut pending_artifacts: Vec<PendingArtifact> = Vec::new();
+    let mut device_memory: Option<DeviceMemory> = None;
     for s in &statements {
         if let Some(Operation::InitMem(v)) = &s.op {
             if seen_init {
@@ -1648,6 +1677,61 @@ fn assemble_statements(
                 section_name = name.clone();
                 section_at = *at;
             }
+            Some(Operation::Device(spec)) => {
+                device_memory = spec.clone().map(DeviceMemory::new);
+            }
+            Some(Operation::DeviceSlot(slot)) => {
+                let slot = slot
+                    .eval(&symbols, pc, s.line)
+                    .map_err(|err| s.stamp(err))?;
+                if let Some(memory) = &mut device_memory {
+                    memory.select_slot(slot).map_err(|err| s.stamp(err))?;
+                }
+            }
+            Some(Operation::DevicePage(page)) => {
+                let page = page
+                    .eval(&symbols, pc, s.line)
+                    .map_err(|err| s.stamp(err))?;
+                if let Some(memory) = &mut device_memory {
+                    memory.map_page(page).map_err(|err| s.stamp(err))?;
+                }
+                // PAGE is also a raw-output section boundary. Its address is
+                // the live counter; placement remains source-consecutive.
+                runs.push(Run {
+                    name: std::mem::take(&mut section_name),
+                    base: origin,
+                    at: std::mem::replace(&mut section_at, Place::ByAddress),
+                    bytes: std::mem::take(&mut bytes),
+                });
+                origin = real_pc;
+                written_len = 0;
+                written_start = None;
+                wrote_any = false;
+                section_name = format!("page {page}");
+                section_at = Place::Next;
+            }
+            Some(Operation::SaveCpr { name, pages }) => {
+                let pages = pages
+                    .eval(&symbols, pc, s.line)
+                    .map_err(|err| s.stamp(err))?;
+                let memory = device_memory.as_ref().ok_or_else(|| {
+                    s.err("SAVECPR only allowed in real device emulation mode (See DEVICE)")
+                })?;
+                if memory.spec.name != "AMSTRADCPCPLUS" {
+                    return Err(s.err("[SAVECPR] Device must be AMSTRADCPCPLUS."));
+                }
+                let pages = usize::try_from(pages)
+                    .ok()
+                    .filter(|n| (1..=32).contains(n))
+                    .ok_or_else(|| {
+                        s.err("[SAVECPR] only a size from 1 (16KiB) to 32 (512KiB) is allowed")
+                    })?;
+                pending_artifacts.push(PendingArtifact::Ready(Artifact {
+                    name: name.clone(),
+                    format: ArtifactFormat::Cpr,
+                    bytes: cpr_image(&memory.pages[..pages]),
+                }));
+            }
             Some(Operation::Equ(_) | Operation::DefineSymbols(_)) => {
                 // Define symbols; emit nothing.
             }
@@ -1658,6 +1742,11 @@ fn assemble_statements(
                 start,
                 length,
             }) => {
+                if device_memory.is_none() {
+                    return Err(
+                        s.err("SAVEBIN only allowed in real device emulation mode (See DEVICE)")
+                    );
+                }
                 let at = start
                     .eval(&symbols, pc, s.line)
                     .map_err(|err| s.stamp(err))?;
@@ -1665,12 +1754,12 @@ fn assemble_statements(
                     Some(e) => Some(e.eval(&symbols, pc, s.line).map_err(|err| s.stamp(err))?),
                     None => None,
                 };
-                saves.push(Save {
+                pending_artifacts.push(PendingArtifact::Span(Save {
                     file: name.clone(),
                     at,
                     len,
                     tape: None,
-                });
+                }));
             }
             Some(Operation::SaveTape {
                 file,
@@ -1679,18 +1768,23 @@ fn assemble_statements(
                 start,
                 length,
             }) => {
+                if device_memory.is_none() {
+                    return Err(
+                        s.err("SAVETAP only allowed in real device emulation mode (See DEVICE)")
+                    );
+                }
                 let at = start
                     .eval(&symbols, pc, s.line)
                     .map_err(|err| s.stamp(err))?;
                 let len = length
                     .eval(&symbols, pc, s.line)
                     .map_err(|err| s.stamp(err))?;
-                saves.push(Save {
+                pending_artifacts.push(PendingArtifact::Span(Save {
                     file: file.clone(),
                     at,
                     len: Some(len),
                     tape: Some((*kind, name.clone())),
-                });
+                }));
             }
             // Rebinds where it stands, so a use below reads this value and a
             // use above kept the one pass one left. Emits nothing either way.
@@ -2150,6 +2244,14 @@ fn assemble_statements(
                 *b ^= s.xor_mask;
             }
         }
+        if bytes.len() > len_before
+            && !matches!(s.op, Some(Operation::Org(_)) | Some(Operation::Reserve(_)))
+            && let Some(memory) = &mut device_memory
+        {
+            memory
+                .write(real_pc, &bytes[len_before..])
+                .map_err(|err| s.stamp(err))?;
+        }
         if !matches!(s.op, Some(Operation::Org(_)) | Some(Operation::Reserve(_))) {
             written_len = bytes.len();
             if bytes.len() > len_before {
@@ -2255,7 +2357,7 @@ fn assemble_statements(
                 c.offset -= base;
             }
         }
-        let artifacts = raw_artifacts(&saves, origin_of_image, &image)?;
+        let artifacts = resolve_artifacts(&pending_artifacts, origin_of_image, &image)?;
         return Ok(Assembly {
             requested_output,
             requested_symbols,
@@ -2312,7 +2414,7 @@ fn assemble_statements(
         }
     }
 
-    let artifacts = raw_artifacts(&saves, origin, &bytes)?;
+    let artifacts = resolve_artifacts(&pending_artifacts, origin, &bytes)?;
     let areas = flat_space_usage(
         origin as u32 - u32::from(reserved_prefix),
         (bytes.len() as i64 / addr_unit) as u32 + u32::from(reserved_prefix),
@@ -2372,18 +2474,23 @@ fn flat_space_usage(start: u32, used: u32) -> Vec<AreaUsage> {
 ///
 /// A length of `None` or zero means "to the end of the address space", which is
 /// the reference's reading of both.
-fn raw_artifacts(saves: &[Save], origin: i64, image: &[u8]) -> Result<Vec<Artifact>, AsmError> {
+fn resolve_artifacts(
+    pending: &[PendingArtifact],
+    origin: i64,
+    image: &[u8],
+) -> Result<Vec<Artifact>, AsmError> {
     const SPACE: i64 = 0x1_0000;
     let end = origin + image.len() as i64;
-    saves
+    pending
         .iter()
-        .map(
-            |Save {
-                 file: name,
-                 at,
-                 len,
-                 tape,
-             }| {
+        .map(|pending| match pending {
+            PendingArtifact::Ready(artifact) => Ok(artifact.clone()),
+            PendingArtifact::Span(Save {
+                file: name,
+                at,
+                len,
+                tape,
+            }) => {
                 let len = match len {
                     Some(n) if *n > 0 => *n,
                     _ => (SPACE - at).max(0),
@@ -2414,9 +2521,14 @@ fn raw_artifacts(saves: &[Save], origin: i64, image: &[u8]) -> Result<Vec<Artifa
                     format,
                     bytes,
                 })
-            },
-        )
+            }
+        })
         .collect()
+}
+
+enum PendingArtifact {
+    Span(Save),
+    Ready(Artifact),
 }
 
 /// One file the source asked for, waiting for the image to exist.
@@ -2426,6 +2538,89 @@ struct Save {
     len: Option<i64>,
     /// The header a tape image needs, or `None` for a raw span.
     tape: Option<(TapeKind, String)>,
+}
+
+struct DeviceMemory {
+    spec: DeviceSpec,
+    slots: Vec<usize>,
+    current_slot: usize,
+    pages: Vec<Vec<u8>>,
+}
+
+impl DeviceMemory {
+    fn new(spec: DeviceSpec) -> Self {
+        Self {
+            slots: (0..spec.slots).collect(),
+            current_slot: spec.slots - 1,
+            pages: vec![vec![0; spec.slot_size]; spec.pages],
+            spec,
+        }
+    }
+
+    fn select_slot(&mut self, slot: i64) -> Result<(), AsmError> {
+        let slot = usize::try_from(slot)
+            .ok()
+            .filter(|slot| *slot < self.spec.slots)
+            .ok_or_else(|| {
+                AsmError::new(
+                    0,
+                    format!(
+                        "slot {slot} is outside `{}`, which has {} slots",
+                        self.spec.name, self.spec.slots
+                    ),
+                )
+            })?;
+        self.current_slot = slot;
+        Ok(())
+    }
+
+    fn map_page(&mut self, page: i64) -> Result<(), AsmError> {
+        let page = usize::try_from(page)
+            .ok()
+            .filter(|page| *page < self.spec.pages)
+            .ok_or_else(|| {
+                AsmError::new(
+                    0,
+                    format!(
+                        "page {page} is outside `{}`, which has {} pages",
+                        self.spec.name, self.spec.pages
+                    ),
+                )
+            })?;
+        self.slots[self.current_slot] = page;
+        Ok(())
+    }
+
+    fn write(&mut self, address: i64, bytes: &[u8]) -> Result<(), AsmError> {
+        for (offset, byte) in bytes.iter().copied().enumerate() {
+            let address = address + offset as i64;
+            let address = usize::try_from(address)
+                .ok()
+                .filter(|address| *address < 0x1_0000)
+                .ok_or_else(|| {
+                    AsmError::new(0, format!("Write outside of device memory at: {address}"))
+                })?;
+            let slot = address / self.spec.slot_size;
+            let within = address % self.spec.slot_size;
+            self.pages[self.slots[slot]][within] = byte;
+        }
+        Ok(())
+    }
+}
+
+/// RIFF CPR layout from `reference/by-system/amstrad-cpc/formats.md` §CPR.
+fn cpr_image(pages: &[Vec<u8>]) -> Vec<u8> {
+    let payload_len = 4 + pages.iter().map(|page| 8 + page.len()).sum::<usize>();
+    let mut out = Vec::with_capacity(payload_len + 8);
+    out.extend_from_slice(b"RIFF");
+    out.extend_from_slice(&(payload_len as u32).to_le_bytes());
+    out.extend_from_slice(b"AMS!");
+    for (index, page) in pages.iter().enumerate() {
+        out.extend_from_slice(format!("cb{index:02}").as_bytes());
+        out.extend_from_slice(&(page.len() as u32).to_le_bytes());
+        out.extend_from_slice(page);
+    }
+    out
 }
 
 /// Wrap a span as a Spectrum tape: a ROM header block naming it, then the span.
