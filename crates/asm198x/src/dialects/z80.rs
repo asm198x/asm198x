@@ -1637,24 +1637,32 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
     /// defined later. The reference resolves it across its three passes
     /// (probed: `DS COUNT * 2` above `COUNT EQU 3` reserves six; `DS later+1`
     /// above `later:` settles on three with the pass-3 advisory). A negative
-    /// count makes it warn `Negative BLOCK?` and move the counter backwards,
-    /// which this engine's origin model does not do for sjasmplus, so that
-    /// case is refused with the reference's behaviour named.
+    /// count makes it warn `Negative BLOCK?` and move the counter backwards;
+    /// because sjasmplus raw output is append-only, that is represented by an
+    /// `ORG` to the wrapped logical address and emits no bytes.
     fn lower_reserve(&self, args: &str, line: usize) -> Result<Operation, AsmError> {
         let (count, fill) = match args.split_once(',') {
             Some((count, fill)) => (count, Some(fill)),
             None => (args, None),
         };
         let count = self.fold_count(&parse_value(self.syntax, count.trim(), line)?, line)?;
-        let count = usize::try_from(count).map_err(|_| {
-            AsmError::new(
-                line,
-                format!(
-                    "`DS` count {count} is negative — sjasmplus warns `Negative BLOCK?` and \
-                     moves the counter backwards, which this assembler does not do"
-                ),
-            )
-        })?;
+        if count < 0 {
+            if let Some(fwd) = &self.forward {
+                fwd.warnings.borrow_mut().push(Warning {
+                    line,
+                    message: "Negative BLOCK?".to_string(),
+                    file: self.current_file,
+                    kind: crate::engine::WarningKind::Advisory,
+                });
+            }
+            let target = self
+                .pc
+                .unwrap_or(0)
+                .saturating_add(count)
+                .rem_euclid(0x1_0000);
+            return Ok(Operation::Org(Expr::Num(target)));
+        }
+        let count = usize::try_from(count).expect("non-negative reserve count");
         let fill = match fill {
             Some(text) => parse_value(self.syntax, text.trim(), line)?,
             None => Expr::Num(0),

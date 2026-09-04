@@ -2250,7 +2250,7 @@ fn assemble_statements(
             && let Some(memory) = &mut device_memory
         {
             memory
-                .write(real_pc, &bytes[len_before..])
+                .write(pc, &bytes[len_before..])
                 .map_err(|err| s.stamp(err))?;
         }
         if !matches!(s.op, Some(Operation::Org(_)) | Some(Operation::Reserve(_))) {

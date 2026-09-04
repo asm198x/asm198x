@@ -83,6 +83,13 @@ are addressed and whether the write check fires. What they change is the
 device's *memory*, which the `SAVE*` words that read pages see and `--raw`
 does not.
 
+`ORG` follows the same split. Forward or backward, it changes the logical
+address but never pads, seeks, truncates, or overwrites the raw stream. A
+negative `DS`/`DEFS`/`BLOCK` emits the `Negative BLOCK?` advisory and moves the
+logical counter backwards, wrapping at 16 bits; it emits no fill bytes. Bytes
+emitted after either kind of rewind append to `--raw` and overwrite the live
+device memory at their new logical addresses.
+
 ## Where a write goes
 
 Probed 2026-09-02 under `DEVICE AMSTRADCPCPLUS`, reading the pages back
