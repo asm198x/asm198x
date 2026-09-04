@@ -115,7 +115,7 @@ pub const DIRECTIVES: &[Directive] = &[
         id: "conditional",
         pattern: Pattern::Sigilled {
             sigil: '.',
-            names: &["if", "ifdef", "ifndef"],
+            names: &["if", "ifn", "ifdef", "ifndef"],
             required: false,
         },
         category: Category::Operation,
@@ -298,7 +298,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "exd",
                 "export",
                 "fpos",
-                "ifn",
                 "ifnused",
                 "ifused",
                 "inchob",
@@ -3345,6 +3344,31 @@ mod tests {
                    \x20       IF 1\n        ld a,1\n        ELSE\n        ld a,2\n        ENDIF\n\
                    \x20       IF 0\n        ld b,1\n        ELSE\n        ld b,2\n        ENDIF\n";
         assert_eq!(asm(src).expect("p1").bytes, vec![0x3E, 0x01, 0x06, 0x02]);
+    }
+
+    /// #582: `IFN` is the negated expression conditional. It shares the
+    /// ordinary conditional tree, so its dead branch remains lazy and its
+    /// expression may settle on a later symbol across the reference's passes.
+    #[test]
+    fn ifn_takes_the_branch_only_for_zero() {
+        let bytes = |source: &str| asm(source).map(|result| result.bytes).unwrap_or_default();
+        assert_eq!(bytes("\tIFN 0\n\tDB 1\n\tELSE\n\tDB 2\n\tENDIF\n"), vec![1]);
+        for nonzero in ["1", "-1"] {
+            assert_eq!(
+                bytes(&format!(
+                    "\tIFN {nonzero}\n\tDB 1\n\tELSE\n\tDB 2\n\tENDIF\n"
+                )),
+                vec![2]
+            );
+        }
+        let forward = asm("\tIFN later\n\tDB 1\n\tELSE\n\tDB 2\n\tENDIF\nlater EQU 0\n")
+            .expect("forward IFN");
+        assert_eq!(forward.bytes, vec![1]);
+        assert_eq!(forward.warnings.len(), 1);
+        assert!(forward.warnings[0].message.contains("forward reference"));
+
+        assert_eq!(bytes("\t.IFN 0\n\tDB 3\n\t.ENDIF\n"), vec![3]);
+        assert!(asm("\tIfn 0\n\tDB 1\n\tENDIF\n").is_err());
     }
 
     /// Condition grammar: comparisons (`=`/`==`/`>`/`<`/`>=`/`!=`),

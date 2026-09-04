@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Add SjASMPlus `IFN` as the negated expression conditional, with the same
+  dotted, case-sensitive, lazy, and forward-reference behaviour as `IF` (#582).
 - Give the WebAssembly shell named in-memory projects, Z80/Z80N target
   selection, and byte-identical vasm Hunk executable output (#573).
 - Replay sjasmplus emissions through live `DEVICE`/`SLOT`/`PAGE` mappings and
