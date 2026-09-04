@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 224 word(s) outside our surface, across the references installed
+# 215 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -38,7 +38,7 @@
 
 ## sjasmplus (SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus))
 # 4231 candidate(s) harvested; 264 recognised here, 24 more the tool itself
-# refuses on this target; 60 of the 264 outside our surface
+# refuses on this target; 54 of the 264 outside our surface
 bplist
 cspectmap
 defarray
@@ -49,12 +49,10 @@ emptytrd
 encoding
 endlua
 endm
-ends
 endw
 ent
 export
 fpos
-ifn
 ifnused
 ifused
 inchob
@@ -63,14 +61,12 @@ inctrd
 labelslist
 lua
 mmu
-opt
 output
 relocate_table
 save3dos
 saveamsdos
 savecdt
 savecpcsna
-savecpr
 savedev
 savehob
 savenex
@@ -79,8 +75,6 @@ savetrd
 setbreakpoint
 shellexec
 size
-sldopt
-struct
 tapout
 undefine
 while
@@ -254,14 +248,13 @@ __utc_year__
 
 ## ca65 (ca65 V2.18 - N/A)
 # 2906 candidate(s) harvested; 225 recognised here, 4 more the tool itself
-# refuses on this target; 24 of the 225 outside our surface
+# refuses on this target; 21 of the 225 outside our surface
 .bank
 .case
 .charmap
 .condes
 .constructor
 .cpu
-.define
 .delmac
 .delmacro
 .destructor
@@ -276,6 +269,4 @@ __utc_year__
 .null
 .set
 .time
-.undef
-.undefine
 .version

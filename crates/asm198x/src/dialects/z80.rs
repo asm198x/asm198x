@@ -546,6 +546,7 @@ fn slice_incbin(data: &[u8], offset: Option<i64>, length: Option<i64>) -> Result
 #[derive(Clone, Copy, PartialEq, Eq)]
 pub(crate) enum CondKw {
     If,
+    IfNot,
     IfDef,
     IfNDef,
     Else,
@@ -559,6 +560,7 @@ pub(crate) fn cond_keyword(word: &str) -> Option<CondKw> {
     let word = word.strip_prefix('.').unwrap_or(word);
     Some(match word {
         "if" | "IF" => CondKw::If,
+        "ifn" | "IFN" => CondKw::IfNot,
         "ifdef" | "IFDEF" => CondKw::IfDef,
         "ifndef" | "IFNDEF" => CondKw::IfNDef,
         "else" | "ELSE" => CondKw::Else,
@@ -1161,7 +1163,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                 }
             }
             match self.syntax.cond_keyword(word) {
-                Some(CondKw::If | CondKw::IfDef | CondKw::IfNDef) => {
+                Some(CondKw::If | CondKw::IfNot | CondKw::IfDef | CondKw::IfNDef) => {
                     self.parse_conditional(&mut nodes, raw, rest, word, label, comment, line)?;
                 }
                 Some(CondKw::Else) => {
@@ -2783,14 +2785,14 @@ impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
                     None => Err(AsmError::new(line, format!("`{word}` needs a name"))),
                 }
             }
-            Some(CondKw::If | CondKw::ElseIf) => {
+            Some(kw @ (CondKw::If | CondKw::IfNot | CondKw::ElseIf)) => {
                 // An `ELSEIF` leg tests its condition exactly as an `IF` does;
                 // it reaches here only as the head of a chain leg (#67).
                 // DEFINEs substitute into the condition (probe p25) before it
                 // folds against the `equ` constants.
                 substitute_defines(args, &self.defines, line).and_then(|cond| {
                     eval_condition_keyword(self.syntax, &cond, line, &self.consts, self.fwd())
-                        .map(|v| v != 0)
+                        .map(|v| if kw == CondKw::IfNot { v == 0 } else { v != 0 })
                 })
             }
             _ => Err(AsmError::new(
