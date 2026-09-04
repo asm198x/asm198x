@@ -1443,11 +1443,17 @@ fn strip_word_ci<'a>(text: &'a str, word: &str) -> Option<&'a str> {
     }
 }
 
+#[derive(Clone, Copy)]
+pub(super) struct EvalContext<'a> {
+    symbols: &'a BTreeMap<String, i64>,
+    pc: Option<i64>,
+}
+
 fn parse_statement(
     target: AcmeTarget,
     anons: &Anons,
     zone: &str,
-    env: &BTreeMap<String, i64>,
+    context: EvalContext<'_>,
     conv: ConvTable,
     code: &str,
     line: usize,
@@ -1510,7 +1516,7 @@ fn parse_statement(
         };
         return Ok((Some(name.to_string()), op));
     }
-    let op = parse_op(target, anons, zone, env, conv, rest, line)?;
+    let op = parse_op(target, anons, zone, context, conv, rest, line)?;
     Ok((label, op))
 }
 
@@ -1562,7 +1568,7 @@ fn parse_op(
     target: AcmeTarget,
     anons: &Anons,
     zone: &str,
-    env: &BTreeMap<String, i64>,
+    context: EvalContext<'_>,
     conv: ConvTable,
     rest: &str,
     line: usize,
@@ -1572,7 +1578,7 @@ fn parse_op(
     }
     if let Some(directive) = rest.strip_prefix('!') {
         return Ok(Some(parse_directive(
-            anons, zone, env, conv, directive, line,
+            anons, zone, context, conv, directive, line,
         )?));
     }
     let (mnemonic, remainder) = split_first_word(rest);
@@ -1615,7 +1621,13 @@ fn parse_op(
     let operand = mos6502::parse_operand(remainder, line, &|s, l| parse_value(anons, zone, s, l))?;
     let force_abs = address_forces_absolute(remainder);
     let (mode, mut operand) = mos6502::resolve_mode_in_sets(
-        target.set, target.ext, &mnemonic, operand, env, force_abs, line,
+        target.set,
+        target.ext,
+        &mnemonic,
+        operand,
+        context.symbols,
+        force_abs,
+        line,
     )?;
     // Unlike the 65816's 16-bit relative forms, 65CE02 long branches measure
     // from opcode+2 rather than from the end of the three-byte instruction.
@@ -2085,7 +2097,7 @@ fn cpu_selector(code: &str) -> Option<String> {
 fn parse_directive(
     anons: &Anons,
     zone: &str,
-    env: &BTreeMap<String, i64>,
+    context: EvalContext<'_>,
     conv: ConvTable,
     directive: &str,
     line: usize,
@@ -2126,9 +2138,16 @@ fn parse_directive(
     match entry.id {
         "bytes" => Ok(Operation::Bytes(parse_list(anons, zone, rest, line)?)),
         "words" => Ok(Operation::Words(parse_list(anons, zone, rest, line)?)),
-        "fill" => parse_fill(anons, zone, env, rest, line),
-        "diagnose" => Ok(parse_diagnose(anons, zone, env, name, rest, line)),
-        "align" => parse_align(anons, zone, env, rest, line),
+        "fill" => parse_fill(anons, zone, context.symbols, context.pc, rest, line),
+        "diagnose" => Ok(parse_diagnose(
+            anons,
+            zone,
+            context.symbols,
+            name,
+            rest,
+            line,
+        )),
+        "align" => parse_align(anons, zone, context.symbols, rest, line),
         // The current table, which is `raw` until `!ct` says otherwise —
         // the reason `!text` and `!raw` agreed byte-for-byte before this.
         "text" => parse_text(anons, zone, rest, line, move |c| conv.convert(c)),
@@ -2199,7 +2218,11 @@ fn parse_directive(
             Ok(Operation::RequestSymbols { path })
         }
         "skip" => {
-            let n = fold_const(&parse_value(anons, zone, rest.trim(), line)?, env, line)?;
+            let n = fold_const(
+                &parse_value(anons, zone, rest.trim(), line)?,
+                context.symbols,
+                line,
+            )?;
             // ACME's own words for a negative count, because it is the
             // reference's rule and not a house one.
             let n =
@@ -2207,7 +2230,11 @@ fn parse_directive(
             Ok(Operation::Reserve(n))
         }
         "initmem" => {
-            let v = fold_const(&parse_value(anons, zone, rest.trim(), line)?, env, line)?;
+            let v = fold_const(
+                &parse_value(anons, zone, rest.trim(), line)?,
+                context.symbols,
+                line,
+            )?;
             // Signed or unsigned, like every other ACME byte: `!initmem -1`
             // is `$ff`, and `!initmem 256` is "Number out of range".
             if !(-128..=0xFF).contains(&v) {
@@ -2248,7 +2275,11 @@ fn parse_directive(
             let (mask_src, rest) = rest
                 .split_once(',')
                 .ok_or_else(|| AsmError::new(line, "`!scrxor` needs a value and a list"))?;
-            let mask = fold_const(&parse_value(anons, zone, mask_src.trim(), line)?, env, line)?;
+            let mask = fold_const(
+                &parse_value(anons, zone, mask_src.trim(), line)?,
+                context.symbols,
+                line,
+            )?;
             // The low byte, whatever the value. ACME range-checks `!initmem`
             // and does **not** range-check this: `!initmem 256` is "Number
             // out of range" while `!scrxor 256, "a"` silently masks to `$00`,
@@ -2319,12 +2350,17 @@ fn parse_fill(
     anons: &Anons,
     zone: &str,
     env: &BTreeMap<String, i64>,
+    pc: Option<i64>,
     rest: &str,
     line: usize,
 ) -> Result<Operation, AsmError> {
     let mut parts = rest.splitn(2, ',');
     let amount_src = parts.next().unwrap_or("").trim();
-    let amount = fold_const(&parse_value(anons, zone, amount_src, line)?, env, line)?;
+    let amount = parse_value(anons, zone, amount_src, line)?.eval_with(
+        &|name| env.get(name).copied(),
+        pc,
+        line,
+    )?;
     let amount = usize::try_from(amount)
         .map_err(|_| AsmError::new(line, "`!fill` byte count must be a non-negative constant"))?;
     let value = match parts.next() {
@@ -3895,6 +3931,26 @@ mod tests {
     fn fill_reserves_bytes() {
         assert_eq!(asm("!fill 3").expect("fill0").bytes, vec![0, 0, 0]);
         assert_eq!(asm("!fill 2, $ff").expect("fillv").bytes, vec![0xFF, 0xFF]);
+    }
+
+    /// #555: `*` in a size expression is the counter at the directive's
+    /// start. This is ACME's idiomatic cartridge-padding form.
+    #[test]
+    fn fill_count_reads_the_program_counter() {
+        let result = asm("*= $A000\nnop\n!fill $BFFA - *, $FF\n!word $A000\n")
+            .expect("program-counter-relative fill");
+        assert_eq!(result.bytes.len(), 8188);
+        assert_eq!(result.bytes[0], 0xEA);
+        assert!(result.bytes[1..8186].iter().all(|byte| *byte == 0xFF));
+        assert_eq!(&result.bytes[8186..], &[0x00, 0xA0]);
+
+        // The same expression node was already meaningful when the engine
+        // evaluated data, instruction operands and symbol assignments. Keep
+        // those paths pinned beside the newly-live directive-count path.
+        let contexts = asm("*= $10\n!byte *\n!word *\nhere = *\nlda #here\n")
+            .expect("program counter in ordinary value contexts");
+        assert_eq!(contexts.bytes, vec![0x10, 0x11, 0x00, 0xA9, 0x13]);
+        assert_eq!(contexts.symbols.get("here"), Some(&0x13));
     }
 
     #[test]

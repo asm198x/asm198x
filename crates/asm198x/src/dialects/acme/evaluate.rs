@@ -11,11 +11,11 @@ use std::collections::{BTreeMap, BTreeSet};
 use super::super::macros;
 use super::super::mos6502;
 use super::{
-    AcmeMacros, Anons, AsmError, Closer, Conditional, Expr, FileId, FmtCx, MAX_INCLUDE_DEPTH,
-    Operation, SourceLoader, SourceMap, Statement, Warning, anon_marker, bake_set_vars,
-    classify_conditional, close_brace, cpu_selector, eval_condition, fold_const, is_ident,
-    is_macro_head, parse_program_in, parse_set, parse_statement, parse_value, petscii, screen_code,
-    split_first_word, substitute_anon_refs,
+    AcmeMacros, Anons, AsmError, Closer, Conditional, EvalContext, Expr, FileId, FmtCx,
+    MAX_INCLUDE_DEPTH, Operation, SourceLoader, SourceMap, Statement, Warning, anon_marker,
+    bake_set_vars, classify_conditional, close_brace, cpu_selector, eval_condition, fold_const,
+    is_ident, is_macro_head, parse_program_in, parse_set, parse_statement, parse_value, petscii,
+    screen_code, split_first_word, substitute_anon_refs,
 };
 
 // ---------------------------------------------------------------------------
@@ -788,7 +788,10 @@ impl AcmeEval<'_> {
             self.target,
             &self.anons,
             &self.zone,
-            &self.env,
+            EvalContext {
+                symbols: &self.env,
+                pc: self.pc,
+            },
             self.conv,
             &recon,
             line,

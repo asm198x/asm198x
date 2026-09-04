@@ -9,6 +9,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **ACME `*` works in `!fill` count expressions.**
+  ([#555](https://github.com/asm198x/asm198x/issues/555))
+  The current program counter can now size padding, including the idiomatic
+  `!fill target - *, value` form used to extend a cartridge image to its
+  vector table. Its existing meanings in data, instruction operands, and
+  symbol assignments remain unchanged.
 - **Z80 `END` now stops the whole assembly.**
   ([#554](https://github.com/asm198x/asm198x/issues/554))
   Pasmo and sjasmplus stop before every line after a live `END`, including
