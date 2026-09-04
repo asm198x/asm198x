@@ -9,6 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **SjASMPlus temporary numeric labels resolve in jump targets.**
+  ([#559](https://github.com/asm198x/asm198x/issues/559))
+  Repeatable decimal labels can be reached with `F` and `B` suffixes from
+  `JR`, `JP`, `DJNZ`, and `CALL`, choosing the nearest definition in textual
+  order across includes and macro expansions. The contextual spelling leaves
+  binary literals elsewhere unchanged, and temporary definitions do not
+  re-anchor dotted locals. SpecNext Invaders now advances to its next genuine
+  boundary, logical `&&` in an `ASSERT` expression.
 - **ACME `*` works in `!fill` count expressions.**
   ([#555](https://github.com/asm198x/asm198x/issues/555))
   The current program counter can now size padding, including the idiomatic

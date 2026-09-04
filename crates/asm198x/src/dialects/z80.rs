@@ -200,6 +200,12 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// Whether decimal names in the label column define repeatable temporary
+    /// labels, reached as `<digits>F`/`<digits>B` from jump targets.
+    fn temporary_labels(&self) -> bool {
+        false
+    }
+
     /// Whether `word` is this dialect's include directive (language-surface
     /// U2).
     ///
@@ -1444,6 +1450,12 @@ struct SjasmEval<'a, S: Z80Syntax> {
     /// boundary, so an `END` reached through an include or repeated block also
     /// stops the includer and every enclosing block.
     terminated: bool,
+    /// Number of definitions reached for each sjasmplus temporary-label name.
+    /// Includes and live macro expansions share this textual counter.
+    temporary_labels: BTreeMap<String, usize>,
+    /// Forward references, retained for the reference's specific missing-label
+    /// diagnostic once the complete textual walk is known.
+    temporary_forwards: Vec<(String, String, usize, FileId)>,
 }
 
 impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
@@ -1471,7 +1483,68 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             multi,
             current_file: FileId(0),
             terminated: false,
+            temporary_labels: BTreeMap::new(),
+            temporary_forwards: Vec::new(),
         }
+    }
+
+    fn temporary_name(number: &str, occurrence: usize) -> String {
+        format!("__asm198x_sjasmplus_temporary_{number}_{occurrence}")
+    }
+
+    fn define_temporary(&mut self, number: &str) -> String {
+        let occurrence = self.temporary_labels.entry(number.to_string()).or_default();
+        *occurrence += 1;
+        Self::temporary_name(number, *occurrence)
+    }
+
+    /// Rewrite the last operand of a jump/call only. In every other expression
+    /// `1B` remains a binary literal and `1F` remains an invalid number.
+    fn rewrite_temporary_target(
+        &mut self,
+        mnemonic: &str,
+        args: &str,
+        line: usize,
+        file: FileId,
+    ) -> Result<Option<String>, AsmError> {
+        if !self.syntax.temporary_labels()
+            || !matches!(
+                mnemonic.to_ascii_uppercase().as_str(),
+                "JR" | "JP" | "DJNZ" | "CALL"
+            )
+        {
+            return Ok(None);
+        }
+        let mut operands = split_operands(args);
+        let Some(target) = operands.last().copied() else {
+            return Ok(None);
+        };
+        let Some((number, direction)) = temporary_reference(target) else {
+            return Ok(None);
+        };
+        let seen = self.temporary_labels.get(number).copied().unwrap_or(0);
+        let occurrence = if direction.eq_ignore_ascii_case("B") {
+            if seen == 0 {
+                return Err(AsmError::new(
+                    line,
+                    format!("Temporary label not found: {number}{direction}"),
+                ));
+            }
+            seen
+        } else {
+            let occurrence = seen + 1;
+            self.temporary_forwards.push((
+                Self::temporary_name(number, occurrence),
+                format!("{number}{direction}"),
+                line,
+                file,
+            ));
+            occurrence
+        };
+        let replacement = format!("@{}", Self::temporary_name(number, occurrence));
+        *operands.last_mut().expect("target exists") = &replacement;
+        // `operands` borrows its entries, so build while `replacement` lives.
+        Ok(Some(operands.join(",")))
     }
 
     /// Resolve a label's defined name with the live environment: a `DEFINE`'d
@@ -1480,6 +1553,11 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
     /// rule applies — a leading-`.` local qualifies under the current global,
     /// a plain name opens a new scope.
     fn resolve_label(&mut self, name: &str, line: usize) -> Result<String, AsmError> {
+        if self.syntax.temporary_labels()
+            && let Some(number) = numeric_label(name)
+        {
+            return Ok(self.define_temporary(number));
+        }
         let name = if self.defines.contains_key(name) {
             let expanded = substitute_defines(name, &self.defines, line)?;
             let expanded = expanded.trim().to_string();
@@ -1629,33 +1707,59 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         Ok(())
     }
 
-    /// Choose between each module reference's two candidates, now that the
-    /// whole statement stream — and so the set of defined names — is known.
+    /// Settle names that need the complete textual statement stream.
     ///
-    /// A reference keeps its qualified spelling unless that name is undefined
-    /// *and* the bare one is defined. Keeping it when neither exists is what
-    /// makes the error name the same candidate the reference names.
-    fn finish(&mut self, mut out: Vec<Statement>) -> Vec<Statement> {
-        if !self.scopes.has_aliases() {
-            return out;
-        }
-        let mut defined: std::collections::BTreeSet<String> =
-            out.iter().filter_map(|s| s.label.clone()).collect();
-        defined.extend(self.consts.keys().cloned());
-        let fix: BTreeMap<&str, &str> = self.scopes.alias_repair(&defined);
-        if fix.is_empty() {
-            return out;
-        }
-        for st in &mut out {
-            if let Some(op) = st.op.take() {
-                st.op = Some(crate::ast::map_syms(op, &mut |s| {
-                    crate::engine::Expr::Sym(
-                        fix.get(s.as_str()).map_or(s, |bare| (*bare).to_string()),
-                    )
-                }));
+    /// Module references choose their qualified or bare candidate. Temporary
+    /// references become addresses and their internal definition names are
+    /// removed, so neither reaches symbol/debug output.
+    fn finish(&mut self, mut out: Vec<Statement>) -> Result<Vec<Statement>, AsmError> {
+        if self.scopes.has_aliases() {
+            let mut defined: std::collections::BTreeSet<String> =
+                out.iter().filter_map(|s| s.label.clone()).collect();
+            defined.extend(self.consts.keys().cloned());
+            let fix: BTreeMap<&str, &str> = self.scopes.alias_repair(&defined);
+            if !fix.is_empty() {
+                for st in &mut out {
+                    if let Some(op) = st.op.take() {
+                        st.op = Some(crate::ast::map_syms(op, &mut |s| {
+                            crate::engine::Expr::Sym(
+                                fix.get(s.as_str()).map_or(s, |bare| (*bare).to_string()),
+                            )
+                        }));
+                    }
+                }
             }
         }
-        out
+
+        if self.syntax.temporary_labels() {
+            let symbols = pass_symbols(&out, self.set, self.ext, |_, _, _| {});
+            for (name, source, line, file) in &self.temporary_forwards {
+                if !symbols.contains_key(name) {
+                    return Err(stamp_file(
+                        AsmError::new(*line, format!("Temporary label not found: {source}")),
+                        *file,
+                    ));
+                }
+            }
+            for st in &mut out {
+                if let Some(op) = st.op.take() {
+                    st.op = Some(crate::ast::map_syms(op, &mut |s| match symbols.get(&s) {
+                        Some(value) if s.starts_with("__asm198x_sjasmplus_temporary_") => {
+                            Expr::Num(*value)
+                        }
+                        _ => Expr::Sym(s),
+                    }));
+                }
+                if st
+                    .label
+                    .as_ref()
+                    .is_some_and(|s| s.starts_with("__asm198x_sjasmplus_temporary_"))
+                {
+                    st.label = None;
+                }
+            }
+        }
+        Ok(out)
     }
 
     /// Bind a directive line's label at the current address as a label-only
@@ -1813,6 +1917,30 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         } else {
             src.trim()
         };
+        let (rest_word, rest_args) = split_first_word(rest);
+        let temporary_label = node
+            .label
+            .as_ref()
+            .filter(|_| self.syntax.temporary_labels())
+            .and_then(|sym| numeric_label(&sym.name));
+        if let Some(number) = temporary_label
+            && self.syntax.is_equ_word(rest_word)
+        {
+            return Err(AsmError::new(
+                line,
+                format!(
+                    "Number labels are allowed as address labels only, not for DEFL/=/EQU: {}",
+                    number
+                ),
+            ));
+        }
+        let resolved_temporary_label = temporary_label.map(|n| self.define_temporary(n));
+        let rewritten_args = self.rewrite_temporary_target(rest_word, rest_args, line, file)?;
+        let rewritten_rest = rewritten_args
+            .as_ref()
+            .map(|args| format!("{rest_word} {args}"));
+        let rest = rewritten_rest.as_deref().unwrap_or(rest);
+
         let mut op = if self.cspect && word.eq_ignore_ascii_case("break") && args.trim().is_empty()
         {
             Some(Operation::Bytes(vec![Expr::Num(0xFD), Expr::Num(0x00)]))
@@ -1825,9 +1953,10 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         } else {
             parse_op(self.syntax, self.set, self.ext, rest, line, &self.consts)?
         };
-        let label = match &node.label {
-            Some(sym) => Some(self.resolve_label(&sym.name, line)?),
-            None => None,
+        let label = match (&resolved_temporary_label, &node.label) {
+            (Some(name), _) => Some(name.clone()),
+            (None, Some(sym)) => Some(self.resolve_label(&sym.name, line)?),
+            (None, None) => None,
         };
         // Locals under the current global, then module qualification wrapping
         // the result, matching the definition side: `.loc` under `glob`
@@ -2780,7 +2909,7 @@ fn run_passes<'a, S: Z80Syntax>(
                 format!("`macro {}` has no matching `endm`", c.name),
             ));
         }
-        result = eval.finish(out);
+        result = eval.finish(out)?;
         let mut defined_at: BTreeMap<String, (usize, FileId)> = BTreeMap::new();
         let symbols = pass_symbols(&result, set, ext, |name, line, file| {
             defined_at.insert(name.to_string(), (line, file));
@@ -3252,7 +3381,9 @@ fn split_label<'a, S: Z80Syntax>(
     if let Some(colon) = trimmed.find(':') {
         let before = &trimmed[..colon];
         if !before.contains(char::is_whitespace) {
-            if !is_label_ident(syntax, before.trim()) {
+            if !is_label_ident(syntax, before.trim())
+                && !(syntax.temporary_labels() && numeric_label(before.trim()).is_some())
+            {
                 return Err(AsmError::new(
                     line,
                     format!("invalid label `{}`", before.trim()),
@@ -3270,7 +3401,9 @@ fn split_label<'a, S: Z80Syntax>(
     {
         return Ok((None, trimmed));
     }
-    if !is_label_ident(syntax, word) {
+    if !is_label_ident(syntax, word)
+        && !(syntax.temporary_labels() && numeric_label(word).is_some())
+    {
         return Err(AsmError::new(line, format!("invalid label `{word}`")));
     }
     Ok((Some(word.to_string()), remainder))
@@ -4329,6 +4462,22 @@ fn is_label_ident<S: Z80Syntax>(syntax: &S, s: &str) -> bool {
         Some(rest) if syntax.scopes_modules() => is_ident(rest),
         _ => is_ident(s),
     }
+}
+
+fn numeric_label(s: &str) -> Option<&str> {
+    (!s.is_empty() && s.bytes().all(|b| b.is_ascii_digit())).then_some(s)
+}
+
+fn temporary_reference(s: &str) -> Option<(&str, &str)> {
+    let s = s.trim();
+    for direction in ["F", "f", "B", "b"] {
+        if let Some(number) = s.strip_suffix(direction)
+            && numeric_label(number).is_some()
+        {
+            return Some((number, direction));
+        }
+    }
+    None
 }
 
 fn is_ident(s: &str) -> bool {
