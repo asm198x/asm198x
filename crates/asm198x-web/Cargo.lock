@@ -20,6 +20,7 @@ name = "asm198x-web"
 version = "0.1.0"
 dependencies = [
  "asm198x",
+ "serde",
  "serde_json",
  "wasm-bindgen",
  "wasm-bindgen-test",

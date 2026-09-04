@@ -39,6 +39,25 @@ fn an_include_is_a_diagnostic_not_a_trap() {
     assert!(value.is_array(), "diagnostics, got {json}");
 }
 
+/// The browser boundary carries a whole named project without filesystem
+/// access, and target selection reaches the same Z80N entry as the host.
+#[wasm_bindgen_test]
+fn a_named_project_includes_a_second_file_on_the_selected_target() {
+    let request = serde_json::json!({
+        "dialect": "sjasmplus",
+        "target": "z80n",
+        "root": "main.asm",
+        "files": {
+            "main.asm": " include \"part.asm\"\n",
+            "part.asm": " nextreg $12,$34\n"
+        }
+    });
+    let json = asm198x_web::assemble_project(&request.to_string()).expect("valid project");
+    let value: serde_json::Value = serde_json::from_str(&json).expect("json");
+    assert_eq!(value["bytes"], serde_json::json!([0xed, 0x91, 0x12, 0x34]));
+    assert_eq!(value["files"], serde_json::json!(["main.asm", "part.asm"]));
+}
+
 #[wasm_bindgen_test]
 fn an_alias_selects_its_dialect_and_nonsense_is_null() {
     assert!(asm198x_web::assemble("6502", " nop\n").is_some());

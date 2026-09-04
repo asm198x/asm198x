@@ -5,12 +5,14 @@
 //! command line already documents, so a playground and a script reading
 //! `asm198x --json` see the same shape and nothing here needs documenting twice.
 //!
-//! Includes resolve through an empty [`MemoryLoader`] — one source, no files —
-//! which is exactly a browser. A multi-file surface can arrive when a consumer
-//! needs one; the loader seam is already there.
+//! The single-source calls resolve includes through an empty [`MemoryLoader`].
+//! [`assemble_project`] accepts the named in-memory file set that a browser IDE
+//! or lesson already owns and routes it through the same loader seam.
 
 use asm198x::source::MemoryLoader;
 use asm198x::{AssemblyResult, MultiFileError};
+use serde::Deserialize;
+use std::collections::BTreeMap;
 use wasm_bindgen::prelude::*;
 
 /// The shape every multi-file library entry shares (`assemble_*_files`).
@@ -82,6 +84,68 @@ fn entry(dialect: &str) -> Option<Entry> {
     })
 }
 
+/// Select a dialect's target and browser-meaningful output mode. Empty values
+/// retain the dialect's ordinary default, as the existing [`assemble`] call
+/// does. The only syntax with a selectable CPU today is the Z80 pair; the only
+/// additional native output that needs no filesystem is vasm's Hunk image.
+fn project_entry(dialect: &str, target: &str, output: &str) -> Option<Entry> {
+    let canonical = asm198x::dialect_table::canonical(dialect)?;
+    let target = target.to_ascii_lowercase();
+    let output = output.to_ascii_lowercase();
+
+    if !matches!(output.as_str(), "" | "raw" | "hunk") {
+        return None;
+    }
+    if output == "hunk" {
+        #[cfg(feature = "m68k")]
+        if canonical == "vasm" && target.is_empty() {
+            return Some(asm198x::assemble_vasm_exe_files);
+        }
+        return None;
+    }
+
+    match (canonical, target.as_str()) {
+        #[cfg(feature = "z80")]
+        ("pasmo", "z80n" | "next") => Some(asm198x::assemble_pasmonext_files),
+        #[cfg(feature = "z80")]
+        ("pasmonext", "z80") => Some(asm198x::assemble_pasmo_files),
+        #[cfg(feature = "z80")]
+        ("sjasmplus", "z80n" | "next") => Some(asm198x::assemble_sjasmplus_next_files),
+        #[cfg(feature = "z80")]
+        ("pasmo" | "sjasmplus", "" | "z80") | ("pasmonext", "" | "z80n" | "next") => {
+            entry(canonical)
+        }
+        (_, "") => entry(canonical),
+        _ => None,
+    }
+}
+
+#[derive(Deserialize)]
+struct ProjectRequest {
+    dialect: String,
+    #[serde(default)]
+    target: String,
+    root: String,
+    files: BTreeMap<String, String>,
+    #[serde(default)]
+    output: String,
+}
+
+fn result_json(result: Result<AssemblyResult, MultiFileError>) -> Option<String> {
+    let json = match result {
+        Ok(result) => serde_json::to_string(&result),
+        Err(error) => {
+            let files = error.source_map.file_table();
+            let mut diagnostic = asm198x::Diagnostic::from(error.error);
+            diagnostic.span = diagnostic
+                .span
+                .map(|span| asm198x::resolve_span_path(span, &files));
+            serde_json::to_string(&[diagnostic])
+        }
+    };
+    json.ok()
+}
+
 /// Bytes per address unit for the listing's bytes column — 2 for the
 /// word-addressed CP1610, 1 for every byte-addressed CPU (the CLI's rule).
 fn addr_unit(dialect: &str) -> u64 {
@@ -101,20 +165,34 @@ fn addr_unit(dialect: &str) -> u64 {
 #[must_use]
 pub fn assemble(dialect: &str, source: &str) -> Option<String> {
     let entry = entry(dialect)?;
-    let json = match entry(source, ROOT, &MemoryLoader::new()) {
-        Ok(result) => serde_json::to_string(&result),
-        Err(error) => {
-            let files = error.source_map.file_table();
-            let mut diagnostic = asm198x::Diagnostic::from(error.error);
-            diagnostic.span = diagnostic
-                .span
-                .map(|span| asm198x::resolve_span_path(span, &files));
-            serde_json::to_string(&[diagnostic])
-        }
-    };
-    // Serialising the contract types cannot fail: every field is a plain
-    // value or a map with string keys.
-    json.ok()
+    result_json(entry(source, ROOT, &MemoryLoader::new()))
+}
+
+/// Assemble a named in-memory project described by JSON.
+///
+/// The request is `{ dialect, target?, root, files, output? }`: `files` maps
+/// paths to source text and must contain `root`; `target` is `z80` or `z80n`
+/// for pasmo/sjasmplus; `output` is `raw` (the default) or `hunk` for vasm.
+/// Includes resolve against the named file set through the library's existing
+/// [`asm198x::source::SourceLoader`] contract. The returned JSON has exactly
+/// the same success/diagnostic shapes as [`assemble`].
+///
+/// `null` means the request JSON is malformed, the root is absent, or the
+/// dialect/target/output combination is not supported by this build.
+#[wasm_bindgen]
+#[must_use]
+pub fn assemble_project(request: &str) -> Option<String> {
+    let request: ProjectRequest = serde_json::from_str(request).ok()?;
+    let entry = project_entry(&request.dialect, &request.target, &request.output)?;
+    let source = request.files.get(&request.root)?.clone();
+    let loader = request
+        .files
+        .into_iter()
+        .filter(|(path, _)| path != &request.root)
+        .fold(MemoryLoader::new(), |loader, (path, contents)| {
+            loader.text(path, contents)
+        });
+    result_json(entry(&source, &request.root, &loader))
 }
 
 /// Assemble `source` in `dialect` and hand back a 48K `.sna` snapshot.
@@ -284,6 +362,69 @@ mod tests {
                 );
             }
         }
+    }
+
+    #[cfg(feature = "z80")]
+    #[test]
+    fn a_project_resolves_an_include_and_selects_the_z80n_target() {
+        let request = serde_json::json!({
+            "dialect": "sjasmplus",
+            "target": "z80n",
+            "root": "src/main.asm",
+            "files": {
+                "src/main.asm": " include \"part.asm\"\n",
+                "part.asm": " nextreg $07,$02\n"
+            }
+        });
+        let json = assemble_project(&request.to_string()).unwrap_or_default();
+        let value: serde_json::Value =
+            serde_json::from_str(&json).unwrap_or(serde_json::Value::Null);
+        assert_eq!(value["bytes"], serde_json::json!([0xed, 0x91, 0x07, 0x02]));
+        assert_eq!(
+            value["files"],
+            serde_json::json!(["src/main.asm", "part.asm"])
+        );
+
+        let plain = serde_json::json!({
+            "dialect": "sjasmplus",
+            "target": "z80",
+            "root": "main.asm",
+            "files": { "main.asm": " nextreg $07,$02\n" }
+        });
+        let json = assemble_project(&plain.to_string()).unwrap_or_default();
+        let value: serde_json::Value =
+            serde_json::from_str(&json).unwrap_or(serde_json::Value::Null);
+        assert!(value.is_array(), "plain Z80 must reject NEXTREG: {json}");
+    }
+
+    #[cfg(feature = "m68k")]
+    #[test]
+    fn hunk_output_is_byte_identical_to_the_native_library_entry() {
+        let source = " section code,code\n moveq #1,d0\n";
+        let request = serde_json::json!({
+            "dialect": "vasm",
+            "root": "main.s",
+            "files": { "main.s": source },
+            "output": "hunk"
+        });
+        let json = assemble_project(&request.to_string()).unwrap_or_default();
+        let value: serde_json::Value =
+            serde_json::from_str(&json).unwrap_or(serde_json::Value::Null);
+        let web_bytes: Vec<u8> = value["bytes"]
+            .as_array()
+            .map(|bytes| {
+                bytes
+                    .iter()
+                    .filter_map(serde_json::Value::as_u64)
+                    .filter_map(|byte| u8::try_from(byte).ok())
+                    .collect()
+            })
+            .unwrap_or_default();
+        let native = asm198x::assemble_vasm_exe_files(source, "main.s", &MemoryLoader::new())
+            .map(|result| result.bytes)
+            .unwrap_or_default();
+        assert_eq!(web_bytes, native);
+        assert_eq!(&web_bytes[..4], &[0x00, 0x00, 0x03, 0xf3]);
     }
 
     #[cfg(any(feature = "z80", feature = "mos6502"))]
