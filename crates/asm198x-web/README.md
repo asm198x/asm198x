@@ -15,7 +15,7 @@ npm install @asm198x/web
 ## Surface
 
 ```js
-import init, { assemble, snapshot, listing, dialects } from '@asm198x/web';
+import init, { assemble, assemble_project, snapshot, listing, dialects } from '@asm198x/web';
 
 await init();
 
@@ -34,9 +34,25 @@ JSON.parse(dialects());                        // [{ name, aliases, blurb }, …
 [CLI reference](https://asm198x.github.io/docs/cli/) documents the shape.
 It returns `null` for a dialect name the table does not list.
 
-One source file per call; an `include` reports "file not found" as a
-diagnostic. The CLI's `--cpu` switch (sjasmplus for the Spectrum Next) is not
-exposed yet.
+For a named in-memory project, including target selection and the browser-safe
+native output options:
+
+```js
+const result = JSON.parse(assemble_project(JSON.stringify({
+  dialect: 'sjasmplus',
+  target: 'z80n',             // optional: z80, z80n/next
+  root: 'src/main.asm',
+  files: {
+    'src/main.asm': ' include "part.asm"\n',
+    'part.asm': ' nextreg $07,$02\n',
+  },
+  output: 'raw',              // optional; 'hunk' is available for vasm
+})));
+```
+
+The file map is text: source includes are supported, while binary `incbin`
+payloads remain outside this surface. `hunk` is included because it is wholly
+represented by the returned bytes; filesystem-only CLI behaviour is not.
 
 ## Build
 
@@ -51,8 +67,8 @@ refreshes the path entry after the library's version moves.
 
 ## Size
 
-Every dialect ships in one module. Measured 2026-09-02, `opt-level = "z"`,
-after wasm-opt: 1,451,743 bytes raw, 490,892 gzipped. A per-platform split
+Every dialect ships in one module. Measured 2026-09-04, `opt-level = "z"`,
+after wasm-opt: 1,505,582 bytes raw, 514,986 gzipped. A per-platform split
 (#495) is a decision for when a consumer needs one.
 
 ## Running what you assembled
@@ -78,8 +94,8 @@ per CPU architecture:
 
 | package | raw | gzipped |
 |---|---|---|
-| `@asm198x/web` (all) | 1422 KB | 480 KB |
-| `@asm198x/z80` | 416 KB | 153 KB |
+| `@asm198x/web` (all) | 1470 KB | 503 KB |
+| `@asm198x/z80` | 486 KB | 185 KB |
 
 `entry` is the only thing that names the library's assembler entry points, so a
 build that does not select an architecture never references it and the linker
@@ -95,5 +111,5 @@ scripts/build-npm.sh            # -> @asm198x/web, everything
 whole table, so a picker made from it can never offer a name `assemble` then
 refuses.
 
-Even at 153 KB this is bigger than an emulator embed, so a lesson page should
+Even at 185 KB this is bigger than an emulator embed, so a lesson page should
 still load it lazily — on the first keystroke, not on page load.

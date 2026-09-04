@@ -9,6 +9,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Give the WebAssembly shell named in-memory projects, Z80/Z80N target
+  selection, and byte-identical vasm Hunk executable output (#573).
 - Replay sjasmplus emissions through live `DEVICE`/`SLOT`/`PAGE` mappings and
   implement source-ordered `SAVECPR` cartridge artifacts (#563).
 - Seed every sjasmplus device family correctly and let `SAVEBIN` read
@@ -17,6 +19,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- **SjASMPlus can move its location counter backwards.**
+  ([#537](https://github.com/asm198x/asm198x/issues/537))
+  Backward `ORG` and negative `DS`/`DEFS`/`BLOCK` now move the logical address
+  without seeking in the append-only raw output. Negative reserves wrap at 16
+  bits and retain the reference's `Negative BLOCK?` advisory; device-memory
+  writes land at the rewound address and remain last-write-wins.
 - **SjASMPlus temporary numeric labels resolve in jump targets.**
   ([#559](https://github.com/asm198x/asm198x/issues/559))
   Repeatable decimal labels can be reached with `F` and `B` suffixes from
