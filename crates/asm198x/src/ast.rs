@@ -217,6 +217,13 @@ pub(crate) enum Item {
         start: Operand,
         length: Operand,
     },
+    Device(Option<crate::engine::DeviceSpec>),
+    DeviceSlot(Operand),
+    DevicePage(Operand),
+    SaveCpr {
+        name: String,
+        pages: Operand,
+    },
     Bytes(Vec<Operand>),
     Words(Vec<Operand>),
     /// An OS-9 module header (`mod`) and trailer (`emod`).
@@ -868,6 +875,13 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             start: start.clone().into_value()?,
             length: length.clone().into_value()?,
         },
+        Item::Device(spec) => Operation::Device(spec.clone()),
+        Item::DeviceSlot(slot) => Operation::DeviceSlot(slot.clone().into_value()?),
+        Item::DevicePage(page) => Operation::DevicePage(page.clone().into_value()?),
+        Item::SaveCpr { name, pages } => Operation::SaveCpr {
+            name: name.clone(),
+            pages: pages.clone().into_value()?,
+        },
         Item::Bytes(v) => Operation::Bytes(
             v.iter()
                 .cloned()
@@ -999,6 +1013,13 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             name: name.clone(),
             start: start.into_value()?,
             length: length.into_value()?,
+        },
+        Item::Device(spec) => Operation::Device(spec),
+        Item::DeviceSlot(slot) => Operation::DeviceSlot(slot.into_value()?),
+        Item::DevicePage(page) => Operation::DevicePage(page.into_value()?),
+        Item::SaveCpr { name, pages } => Operation::SaveCpr {
+            name,
+            pages: pages.into_value()?,
         },
         Item::Bytes(v) => Operation::Bytes(
             v.into_iter()
@@ -1216,6 +1237,13 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
             start: map_sym_expr(start, f),
             length: map_sym_expr(length, f),
         },
+        Operation::Device(spec) => Operation::Device(spec),
+        Operation::DeviceSlot(slot) => Operation::DeviceSlot(map_sym_expr(slot, f)),
+        Operation::DevicePage(page) => Operation::DevicePage(map_sym_expr(page, f)),
+        Operation::SaveCpr { name, pages } => Operation::SaveCpr {
+            name,
+            pages: map_sym_expr(pages, f),
+        },
         Operation::Bytes(v) => {
             Operation::Bytes(v.into_iter().map(|e| map_sym_expr(e, f)).collect())
         }
@@ -1368,6 +1396,13 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
             name,
             start: Operand::expr(start),
             length: Operand::expr(length),
+        },
+        Operation::Device(spec) => Item::Device(spec),
+        Operation::DeviceSlot(slot) => Item::DeviceSlot(Operand::expr(slot)),
+        Operation::DevicePage(page) => Item::DevicePage(Operand::expr(page)),
+        Operation::SaveCpr { name, pages } => Item::SaveCpr {
+            name,
+            pages: Operand::expr(pages),
         },
         Operation::Bytes(v) => Item::Bytes(v.into_iter().map(Operand::expr).collect()),
         Operation::Words(v) => Item::Words(v.into_iter().map(Operand::expr).collect()),

@@ -238,6 +238,15 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     Directive {
+        id: "savecpr",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["savecpr"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
+    Directive {
         id: "display",
         pattern: Pattern::Sigilled {
             sigil: '.',
@@ -309,7 +318,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "saveamsdos",
                 "savecdt",
                 "savecpcsna",
-                "savecpr",
                 "savedev",
                 "savehob",
                 "savenex",
@@ -420,96 +428,42 @@ impl Dialect for Sjasmplus {
 /// `NONE` is absent on purpose: it behaves as no `DEVICE` line at all, with no
 /// bounds and no write check, so it is handled where the device is set rather
 /// than sitting here with fabricated numbers.
-const DEVICES: &[(&str, i64, i64)] = &[
-    ("ZXSPECTRUM48", 4, 4),
-    ("ZXSPECTRUM128", 8, 4),
-    ("ZXSPECTRUM256", 16, 4),
-    ("ZXSPECTRUM512", 32, 4),
-    ("ZXSPECTRUM1024", 64, 4),
-    ("ZXSPECTRUM2048", 128, 4),
-    ("ZXSPECTRUM4096", 256, 4),
-    ("ZXSPECTRUM8192", 512, 4),
-    ("ZXSPECTRUMNEXT", 224, 8),
-    ("AMSTRADCPC464", 4, 4),
-    ("AMSTRADCPC6128", 8, 4),
+const DEVICES: &[(&str, usize, usize, usize)] = &[
+    ("ZXSPECTRUM48", 4, 4, 0x4000),
+    ("ZXSPECTRUM128", 8, 4, 0x4000),
+    ("ZXSPECTRUM256", 16, 4, 0x4000),
+    ("ZXSPECTRUM512", 32, 4, 0x4000),
+    ("ZXSPECTRUM1024", 64, 4, 0x4000),
+    ("ZXSPECTRUM2048", 128, 4, 0x4000),
+    ("ZXSPECTRUM4096", 256, 4, 0x4000),
+    ("ZXSPECTRUM8192", 512, 4, 0x4000),
+    ("ZXSPECTRUMNEXT", 224, 8, 0x2000),
+    ("AMSTRADCPC464", 4, 4, 0x4000),
+    ("AMSTRADCPC6128", 8, 4, 0x4000),
     // 32 pages — 512 KiB, the largest cartridge `SAVECPR` writes (#538).
-    ("AMSTRADCPCPLUS", 32, 4),
-    ("NOSLOT64K", 32, 1),
+    ("AMSTRADCPCPLUS", 32, 4, 0x4000),
+    ("NOSLOT64K", 32, 1, 0x10000),
 ];
-
-/// Check every `DEVICE`/`PAGE`/`SLOT` line against the device in force at that
-/// point, before anything is lowered.
-///
-/// A source pre-pass rather than a parse-time check because the bound depends
-/// on a *previous* line, and the syntax handle the parser holds has nowhere to
-/// keep that. Run over the macro-expanded text, so a `PAGE` a macro produced is
-/// checked like any other.
-///
-/// `PAGE`/`SLOT` with no device in force are unbounded, which is what
-/// sjasmplus does — both assemble happily with no `DEVICE` line at all.
-fn check_device_lines(source: &str) -> Result<(), AsmError> {
-    let mut device: Option<(&str, i64, i64)> = None;
-    for (n, raw) in source.lines().enumerate() {
-        let line = n + 1;
-        let code = raw.split(';').next().unwrap_or("").trim();
-        let (word, rest) = crate::dialects::mos6502::split_first_word(code);
-        let word = undot(word).to_ascii_uppercase();
-        let arg = rest.split(',').next().unwrap_or("").trim();
-        match word.as_str() {
-            "DEVICE" => {
-                let name = arg.to_ascii_uppercase();
-                if name == "NONE" {
-                    device = None;
-                } else {
-                    device =
-                        Some(*DEVICES.iter().find(|(d, _, _)| *d == name).ok_or_else(|| {
-                            // Not "unknown device": that reads as the
-                            // *directive* being unknown, and the surface
-                            // invariant reads it that way too.
-                            AsmError::new(line, format!("`{arg}` is not a device sjasmplus has"))
-                        })?);
-                }
-            }
-            // `SAVEBIN` writes out of a device's memory, so without one there
-            // is nothing to write out of. `DEVICE NONE` counts as none —
-            // measured both ways, including a `NONE` that closes a real device
-            // opened above it.
-            "SAVEBIN" | "SAVETAP" if device.is_none() => {
-                return Err(AsmError::new(
-                    line,
-                    format!("{word} only allowed in real device emulation mode (See DEVICE)"),
-                ));
-            }
-            "PAGE" | "SLOT" => {
-                let Some((name, pages, slots)) = device else {
-                    continue;
-                };
-                let Ok(n) = arg.parse::<i64>() else { continue };
-                let limit = if word == "PAGE" { pages } else { slots };
-                if !(0..limit).contains(&n) {
-                    return Err(AsmError::new(
-                        line,
-                        format!(
-                            "{} {n} is outside `{name}`, which has {limit}",
-                            word.to_ascii_lowercase(),
-                            limit = if word == "PAGE" {
-                                format!("{pages} pages")
-                            } else {
-                                format!("{slots} slots")
-                            }
-                        ),
-                    ));
-                }
-            }
-            _ => {}
-        }
-    }
-    Ok(())
-}
 
 struct SjasmplusSyntax;
 
 impl SjasmplusSyntax {
+    fn parse_savecpr(&self, args: &str, line: usize) -> Result<Operation, AsmError> {
+        let parts = crate::dialects::mos6502::split_top_level(args.trim(), ',');
+        let [name, pages] = parts.as_slice() else {
+            return Err(AsmError::new(line, "`SAVECPR` needs `\"file\",size`"));
+        };
+        let name = name
+            .trim()
+            .strip_prefix('"')
+            .and_then(|text| text.strip_suffix('"'))
+            .ok_or_else(|| AsmError::new(line, "`SAVECPR` needs a quoted file name"))?;
+        Ok(Operation::SaveCpr {
+            name: name.to_string(),
+            pages: z80::parse_value(self, pages.trim(), line)?,
+        })
+    }
+
     /// `ALIGN [boundary[,fill]]` — pad to the next multiple of `boundary`.
     ///
     /// sjasmplus takes a **power of two** and refuses anything else outright
@@ -774,6 +728,7 @@ impl Z80Syntax for SjasmplusSyntax {
             || word.eq_ignore_ascii_case("sldopt")
             || word.eq_ignore_ascii_case("savebin")
             || word.eq_ignore_ascii_case("savetap")
+            || word.eq_ignore_ascii_case("savecpr")
             // The data directives beyond the shared set — see the
             // `sjasmplus-data` declaration.
             || SJASMPLUS_DATA.iter().any(|d| word.eq_ignore_ascii_case(d))
@@ -854,9 +809,33 @@ impl Z80Syntax for SjasmplusSyntax {
             // and the pinned project contains none of the selected comments.
             return Ok(None);
         }
-        // Validated by `check_device_lines` before any of this ran.
-        if word.eq_ignore_ascii_case("device") || word.eq_ignore_ascii_case("slot") {
-            return Ok(None);
+        if word.eq_ignore_ascii_case("device") {
+            let name = args.trim().to_ascii_uppercase();
+            if name == "NONE" {
+                return Ok(Some(Operation::Device(None)));
+            }
+            let &(name, pages, slots, slot_size) = DEVICES
+                .iter()
+                .find(|(device, _, _, _)| *device == name)
+                .ok_or_else(|| {
+                    AsmError::new(
+                        line,
+                        format!("`{}` is not a device sjasmplus has", args.trim()),
+                    )
+                })?;
+            return Ok(Some(Operation::Device(Some(crate::engine::DeviceSpec {
+                name: name.to_string(),
+                pages,
+                slots,
+                slot_size,
+            }))));
+        }
+        if word.eq_ignore_ascii_case("slot") {
+            return Ok(Some(Operation::DeviceSlot(z80::parse_value(
+                self,
+                args.trim(),
+                line,
+            )?)));
         }
         if word.eq_ignore_ascii_case("display") {
             // sjasmplus prints values as `0x0005`, and prefixes the line with
@@ -896,11 +875,14 @@ impl Z80Syntax for SjasmplusSyntax {
             }));
         }
         if word.eq_ignore_ascii_case("page") {
-            return Ok(Some(Operation::Section {
-                name: format!("page {}", args.trim()),
-                base: None,
-                at: crate::engine::Place::Next,
-            }));
+            return Ok(Some(Operation::DevicePage(z80::parse_value(
+                self,
+                args.trim(),
+                line,
+            )?)));
+        }
+        if word.eq_ignore_ascii_case("savecpr") {
+            return self.parse_savecpr(args, line).map(Some);
         }
         // The data directives sjasmplus has and the shared Z80 set does not.
         // Every shape here was read off v1.21.0 rather than assumed.
@@ -960,14 +942,13 @@ impl Z80Syntax for SjasmplusSyntax {
         z80::common_directive(self, word, args, line, consts)
     }
 
-    /// Nothing is rewritten before the parse: macros are live (below), so
-    /// the source is parsed as written. The device-mode check still runs
-    /// here, over each file's own text.
+    /// Nothing is rewritten before the parse: macros and device state are live
+    /// in the shared textual walk below.
     fn expand_source(
         &self,
         source: &str,
     ) -> Result<Option<(String, Vec<macros::LineOrigin>)>, AsmError> {
-        check_device_lines(source)?;
+        let _ = source;
         Ok(None)
     }
 
@@ -2117,6 +2098,124 @@ mod tests {
             unknown.to_string().contains("is not a device"),
             "got `{unknown}`"
         );
+    }
+
+    fn cpr_page(artifact: &crate::engine::Artifact, page: usize) -> &[u8] {
+        let chunk = 12 + page * (8 + 0x4000);
+        assert_eq!(&artifact.bytes[chunk..chunk + 2], b"cb");
+        assert_eq!(
+            &artifact.bytes[chunk + 2..chunk + 4],
+            format!("{page:02}").as_bytes()
+        );
+        assert_eq!(
+            &artifact.bytes[chunk + 4..chunk + 8],
+            &0x4000u32.to_le_bytes()
+        );
+        &artifact.bytes[chunk + 8..chunk + 8 + 0x4000]
+    }
+
+    /// #563: emitted bytes are replayed through the live CPC Plus slot map.
+    /// Slots initially map to their matching pages; `PAGE` changes the
+    /// current slot (slot 3 by default), while `SLOT` selects another one.
+    #[test]
+    fn savecpr_replays_emission_through_the_live_slot_map() {
+        let out = asm(" DEVICE AMSTRADCPCPLUS\n ORG $0000\n DB $10\n \
+             ORG $4000\n DB $11\n SLOT 1\n PAGE 5\n DB $55\n \
+             ORG $8000\n DB $12\n ORG $C000\n DB $13\n \
+             SAVECPR \"mapped.cpr\",6\n")
+        .expect("mapped cartridge");
+        let cpr = &out.artifacts[0];
+        assert_eq!(cpr.name, "mapped.cpr");
+        assert_eq!(cpr.format, crate::engine::ArtifactFormat::Cpr);
+        assert_eq!(&cpr.bytes[..4], b"RIFF");
+        assert_eq!(&cpr.bytes[8..12], b"AMS!");
+        assert_eq!(cpr_page(cpr, 0)[0], 0x10);
+        assert_eq!(cpr_page(cpr, 1)[0], 0x11);
+        assert_eq!(cpr_page(cpr, 2)[0], 0x12);
+        assert_eq!(cpr_page(cpr, 3)[0], 0x13);
+        assert_eq!(cpr_page(cpr, 5)[1], 0x55);
+    }
+
+    /// A page change is a raw-output boundary, not an address-counter reset.
+    /// At `$4000` it therefore keeps writing slot 1 even though PAGE remaps
+    /// the default current slot 3. Repeated writes use last-write-wins.
+    #[test]
+    fn page_preserves_the_counter_and_device_writes_overwrite() {
+        let out = asm(
+            " DEVICE AMSTRADCPCPLUS\n ORG $4000\n DB 1\n PAGE 5\n DB 2\n \
+             SLOT 2\n PAGE 1\n ORG $8000\n DB 9\n SAVECPR \"x.cpr\",6\n",
+        )
+        .expect("counter and overwrite");
+        let cpr = &out.artifacts[0];
+        assert_eq!(&cpr_page(cpr, 1)[..2], &[9, 2]);
+        assert_eq!(cpr_page(cpr, 5)[0], 0);
+    }
+
+    /// SAVECPR snapshots where it stands and participates in the same
+    /// source-ordered artifact list as span saves.
+    #[test]
+    fn savecpr_is_a_source_ordered_snapshot() {
+        let out = asm(" DEVICE AMSTRADCPCPLUS\n ORG $4000\n DB 1,2\n \
+             SAVEBIN \"before.bin\",$4000,2\n \
+             SAVECPR \"middle.cpr\",2\n DB 3\n \
+             SAVEBIN \"after.bin\",$4000,3\n SAVECPR \"last.cpr\",2\n")
+        .expect("ordered snapshots");
+        assert_eq!(
+            out.artifacts
+                .iter()
+                .map(|a| a.name.as_str())
+                .collect::<Vec<_>>(),
+            ["before.bin", "middle.cpr", "after.bin", "last.cpr"]
+        );
+        assert_eq!(&cpr_page(&out.artifacts[1], 1)[..3], &[1, 2, 0]);
+        assert_eq!(&cpr_page(&out.artifacts[3], 1)[..3], &[1, 2, 3]);
+    }
+
+    /// The Plus cartridge starts zero-filled for #563; booted-machine seeds
+    /// belong to #318 and to the devices whose native saves expose them.
+    #[test]
+    fn savecpr_serialises_zero_filled_pages_and_validates_its_device() {
+        let out =
+            asm(" DEVICE AMSTRADCPCPLUS\n SAVECPR \"empty.cpr\",32\n").expect("empty cartridge");
+        let cpr = &out.artifacts[0];
+        assert_eq!(cpr.bytes.len(), 12 + 32 * (8 + 0x4000));
+        assert!(cpr_page(cpr, 31).iter().all(|byte| *byte == 0));
+        assert_eq!(
+            u32::from_le_bytes(cpr.bytes[4..8].try_into().expect("RIFF size is four bytes"),)
+                as usize,
+            cpr.bytes.len() - 8
+        );
+
+        for src in [
+            " SAVECPR \"x.cpr\",1\n",
+            " DEVICE ZXSPECTRUM48\n SAVECPR \"x.cpr\",1\n",
+            " DEVICE AMSTRADCPCPLUS\n SAVECPR \"x.cpr\",0\n",
+            " DEVICE AMSTRADCPCPLUS\n SAVECPR \"x.cpr\",33\n",
+        ] {
+            assert!(asm(src).is_err(), "{src:?}");
+        }
+    }
+
+    /// Device directives execute in the shared textual stream, including
+    /// includes and macro expansions; no file-local pre-scan may own them.
+    #[test]
+    fn device_mapping_flows_across_includes_and_macros() {
+        let loader = MemoryLoader::new().text("map.asm", " SLOT 1\n PAGE 5\n");
+        let included = assemble_sjasmplus_files(
+            " DEVICE AMSTRADCPCPLUS\n INCLUDE \"map.asm\"\n ORG $4000\n DB $55\n \
+             SAVECPR \"x.cpr\",6\n",
+            "main.asm",
+            &loader,
+        )
+        .expect("include mapping");
+        assert_eq!(cpr_page(&included.artifacts[0], 5)[0], 0x55);
+
+        let expanded = asm(
+            " DEVICE AMSTRADCPCPLUS\n MACRO MAP\n SLOT 2\n PAGE 6\n ENDM\n \
+             MAP\n ORG $8000\n DB $66\n SAVECPR \"x.cpr\",7\n",
+        )
+        .expect("macro mapping");
+        assert_eq!(cpr_page(&expanded.artifacts[0], 6)[0], 0x66);
     }
 
     /// Comparisons answer `$FF`, and the spellings are the dialect's own:

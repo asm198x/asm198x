@@ -102,8 +102,9 @@ starts as the last one; `SLOT n` selects the current slot and `PAGE p` maps
 page `p` into it; a byte emitted at address `A` is stored at
 `pages[slots[A >> 14]][A & $3FFF]`, overwriting what was there. `--raw`
 appends the same byte to its log regardless. The two are different views of
-one emission, and only the log is implemented — the memory image is
-[#563](https://github.com/asm198x/asm198x/issues/563).
+one emission. Both views are implemented: the raw image remains the emission
+log, while #563 added the independently routed device-memory image used by
+`SAVECPR` and future page-reading save directives.
 
 The Plus starts empty. The Spectrum devices do not
 ([#318](https://github.com/asm198x/asm198x/issues/318)).

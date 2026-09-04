@@ -144,6 +144,13 @@ pub(super) fn substitute_anon_refs(
             start: subst(start)?,
             length: subst(length)?,
         },
+        Operation::Device(spec) => Operation::Device(spec),
+        Operation::DeviceSlot(slot) => Operation::DeviceSlot(subst(slot)?),
+        Operation::DevicePage(page) => Operation::DevicePage(subst(page)?),
+        Operation::SaveCpr { name, pages } => Operation::SaveCpr {
+            name,
+            pages: subst(pages)?,
+        },
         Operation::Entry(e) => Operation::Entry(subst(e)?),
         Operation::Bytes(v) => {
             Operation::Bytes(v.into_iter().map(subst).collect::<Result<_, _>>()?)
