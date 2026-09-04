@@ -346,6 +346,15 @@ pub(crate) struct Sjasmplus {
 }
 
 impl Dialect for Sjasmplus {
+    /// SjASMPlus's raw output is an emission log, not an address-placed
+    /// image. `ORG` changes the address claimed by following bytes but never
+    /// seeks within (or pads) that stream; a backward `ORG` is therefore
+    /// ordinary. Device memory still receives those bytes at their logical
+    /// addresses.
+    fn org_moves_output(&self) -> bool {
+        false
+    }
+
     /// Every instruction lowers by form; the only piece-encoded emissions
     /// are data directives, so an absent cycle record means data (#497).
     fn cycle_coverage(&self) -> crate::dialect::CycleCoverage {
@@ -1528,14 +1537,27 @@ mod tests {
         assert!(e.to_string().contains("label not found: `nothere`"), "{e}");
     }
 
-    /// The reference warns `Negative BLOCK?` and moves the counter backwards.
-    /// This engine does not move sjasmplus's origin backwards, so the count
-    /// is refused with that behaviour named rather than silently reserving
-    /// nothing.
+    /// The reference warns `Negative BLOCK?` and moves the counter backwards,
+    /// while its raw output remains unchanged.
     #[test]
-    fn a_negative_ds_count_is_refused_naming_the_reference() {
-        let e = asm("\tDS -1\n\tnop\n").expect_err("refused");
-        assert!(e.to_string().contains("Negative BLOCK?"), "{e}");
+    fn a_negative_ds_count_rewinds_the_counter_without_rewinding_output() {
+        let r = asm("\tORG $100\n\tDB 1,2\n\tDS -1\nhere:\n\tDB 3\n").expect("assembles");
+        assert_eq!(r.bytes, vec![1, 2, 3]);
+        assert_eq!(r.symbols.get("here"), Some(&0x101));
+        assert_eq!(r.warnings.len(), 1);
+        assert_eq!(r.warnings[0].message, "Negative BLOCK?");
+
+        let wrapped = asm("\tORG 0\n\tBLOCK -2,$ff\nhere:\n\tDB 9\n").expect("wraps");
+        assert_eq!(wrapped.bytes, vec![9], "a negative block emits no fill");
+        assert_eq!(wrapped.symbols.get("here"), Some(&0xfffe));
+        assert_eq!(wrapped.warnings[0].message, "Negative BLOCK?");
+    }
+
+    #[test]
+    fn a_backward_org_moves_only_the_logical_counter() {
+        let r = asm("\tORG $100\n\tDB 1,2,3,4\n\tORG $102\nhere:\n\tDB 9\n").expect("assembles");
+        assert_eq!(r.bytes, vec![1, 2, 3, 4, 9]);
+        assert_eq!(r.symbols.get("here"), Some(&0x102));
     }
 
     /// #533: a lone operand on `ADD`/`ADC`/`SBC` is `A,<operand>`, with or
@@ -1968,6 +1990,14 @@ mod tests {
         assert_eq!(two.artifacts.len(), 2);
         assert_eq!(two.artifacts[1].name, "y.bin");
         assert_eq!(two.artifacts[1].bytes, vec![3, 4]);
+
+        // Rewinding the logical counter appends to raw output but overwrites
+        // the corresponding live device byte, which SAVEBIN observes.
+        let rewound = asm(" DEVICE ZXSPECTRUM48\n ORG $8000\n DB 1,2,3,4\n \
+             ORG $8002\n DB 9\n SAVEBIN \"rewound.bin\",$8000,4\n")
+        .expect("rewound device write");
+        assert_eq!(rewound.bytes, vec![1, 2, 3, 4, 9]);
+        assert_eq!(rewound.artifacts[0].bytes, vec![1, 2, 9, 4]);
     }
 
     /// `SAVETAP` wraps the same span in a tape: a ROM header block naming it,
