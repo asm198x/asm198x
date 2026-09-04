@@ -778,6 +778,10 @@ impl Z80Syntax for SjasmplusSyntax {
             || z80::is_common_directive(word)
     }
 
+    fn is_end_word(&self, word: &str) -> bool {
+        undot(word).eq_ignore_ascii_case("end")
+    }
+
     /// sjasmplus's include directive (language-surface U2), walk-handled.
     fn is_include(&self, word: &str) -> bool {
         undot(word).eq_ignore_ascii_case("include")
@@ -1308,6 +1312,47 @@ impl macros::MacroSyntax for SjasmplusSyntax {
 mod tests {
     use crate::{assemble_sjasmplus as asm, assemble_sjasmplus_files, source::MemoryLoader};
 
+    /// #554: a live `END` stops every enclosing source construct. A skipped
+    /// one does nothing, while the dotted spelling and a macro-expanded one
+    /// have the same control effect as the plain directive.
+    #[test]
+    fn end_stops_the_whole_live_assembly() {
+        assert_eq!(
+            asm("\tnop\n\tend\n\tnop\n").expect("plain").bytes,
+            vec![0x00]
+        );
+        assert_eq!(
+            asm("\tnop\n\t.end\n\tnop\n").expect("dotted").bytes,
+            vec![0x00]
+        );
+        assert_eq!(
+            asm("\tIF 0\n\tEND\n\tENDIF\n\tnop\n")
+                .expect("skipped END")
+                .bytes,
+            vec![0x00]
+        );
+        assert_eq!(
+            asm("\tMACRO STOP\n\tEND\n\tENDM\n\tnop\n\tSTOP\n\tnop\n")
+                .expect("macro END")
+                .bytes,
+            vec![0x00]
+        );
+    }
+
+    /// #554: an `END` reached inside an include stops the includer too; it is
+    /// one textual assembly, not a return from the included file.
+    #[test]
+    fn end_in_an_include_stops_the_includer() {
+        let loader = MemoryLoader::new().text("stop.inc", "\tnop\n\tend\n\tnop\n");
+        let result = assemble_sjasmplus_files(
+            "\tnop\n\tinclude \"stop.inc\"\n\tnop\n",
+            "main.asm",
+            &loader,
+        )
+        .expect("assembles");
+        assert_eq!(result.bytes, vec![0x00, 0x00]);
+    }
+
     /// #477: the accepted STRUCT shapes are pinned byte-for-byte by the
     /// differential probes; these are the refusals, which a byte comparison
     /// cannot record.
@@ -1686,8 +1731,14 @@ mod tests {
     fn a_column_zero_word_is_always_a_label() {
         let r = asm("top\tnop\n.end\tld (top),a\n\tjr .end\n").expect("assembles");
         assert_eq!(r.bytes, vec![0x00, 0x32, 0x00, 0x00, 0x18, 0xFB]);
-        // Indented, `.end` is the END directive, which binds nothing.
-        assert!(asm("\tnop\n\t.end\n\tdw .end\n").is_err());
+        // Indented, `.end` is the END directive, which binds nothing and
+        // stops before the otherwise-undefined reference below it (#554).
+        assert_eq!(
+            asm("\tnop\n\t.end\n\tdw .end\n")
+                .expect("END stops the read")
+                .bytes,
+            vec![0x00]
+        );
         // A mnemonic or an undotted directive in column 0 is a label too;
         // what follows is the operation.
         let r = asm("top\tnop\nnop\tnop\nend\tnop\n\tdw nop,end\n").expect("assembles");

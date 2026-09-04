@@ -136,6 +136,11 @@ pub(crate) trait Z80Syntax {
         word.eq_ignore_ascii_case("equ")
     }
 
+    /// Whether this word is the directive that ends the whole assembly.
+    fn is_end_word(&self, word: &str) -> bool {
+        word.eq_ignore_ascii_case("end")
+    }
+
     /// Whether a condition may name a symbol defined later in the file,
     /// resolved by running the walk more than once (#99).
     ///
@@ -1435,6 +1440,10 @@ struct SjasmEval<'a, S: Z80Syntax> {
     /// The file the walk is currently inside — stamps condition-evaluation
     /// errors, which the shared walk raises without node context.
     current_file: FileId,
+    /// Set by a live `END`. The shared evaluator consults it at every tree
+    /// boundary, so an `END` reached through an include or repeated block also
+    /// stops the includer and every enclosing block.
+    terminated: bool,
 }
 
 impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
@@ -1461,6 +1470,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             pc: Some(0),
             multi,
             current_file: FileId(0),
+            terminated: false,
         }
     }
 
@@ -1724,6 +1734,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         // chained to a fixed point (probes p4/p5/p20/p21/p24).
         let src = substitute_defines(&node.source, &self.defines, line)?;
         let (word, args) = split_first_word(&src);
+        let ends_assembly = self.syntax.is_end_word(word);
         if let Some(option) = self.syntax.lexical_option(word, args, line)? {
             match option {
                 LexicalOption::SyntaxAbfw => self.syntax_abfw = true,
@@ -1841,6 +1852,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         }
         self.advance(op.as_ref(), line);
         if label.is_none() && op.is_none() {
+            self.terminated = ends_assembly;
             return Ok(());
         }
         out.push(Statement {
@@ -1855,6 +1867,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             instruction_set: Some(self.set),
             extension_set: self.ext,
         });
+        self.terminated = ends_assembly;
         Ok(())
     }
 
@@ -2594,6 +2607,10 @@ impl InitCursor {
 }
 
 impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
+    fn terminated(&self) -> bool {
+        self.terminated
+    }
+
     /// A repetition count folds exactly as a condition does — DEFINEs
     /// substitute, then the expression folds against the `equ` constants. That
     /// is what lets `DUP n+1` work where `n` is a constant, and why repetition

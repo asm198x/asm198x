@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- **Z80 `END` now stops the whole assembly.**
+  ([#554](https://github.com/asm198x/asm198x/issues/554))
+  Pasmo and sjasmplus stop before every line after a live `END`, including
+  when it is reached through an include or macro expansion. Sjasmplus's
+  dotted `.end` spelling behaves identically, while an `END` in an untaken
+  conditional remains inert. An optional entry-point expression is still
+  recorded for snapshot output.
+
 ## [0.0.57](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.56...asm198x-v0.0.57) - 2026-09-02
 
 ### Added
@@ -21,7 +31,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [asm198x.github.io/playground/](https://asm198x.github.io/playground/)
   is built from this release, so what runs in the tab is what this entry
   describes. One file per run for now; multi-file input, `--cpu`, and
-  vasm's `--exe` are deferred ([#493](https://github.com/asm198x/asm198x/issues/493)).
+  vasm's `--exe` are deferred ([#573](https://github.com/asm198x/asm198x/issues/573)).
 - **sjasmplus macros are visible across files, from their definition on.**
   ([#558](https://github.com/asm198x/asm198x/pull/558))
   Macros now register and expand live during the evaluation walk, in one
