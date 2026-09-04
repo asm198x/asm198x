@@ -538,6 +538,15 @@ pub enum Iteration {
 /// its environment, then calling [`evaluate`]; the ACME (brace) and — when a
 /// keyword dialect adopts them — `IF … ENDIF` styles share this one walk.
 pub(crate) trait CondEval {
+    /// Whether a live directive has ended the whole assembly.
+    ///
+    /// Most dialects always continue. Dialects with an `END` directive use
+    /// this to stop the shared tree walk across nested blocks and includes,
+    /// rather than merely dropping the remainder of the current slice.
+    fn terminated(&self) -> bool {
+        false
+    }
+
     /// Return a diagnostic the conditional head itself must emit.
     ///
     /// Most heads are silent. This hook exists for reference-compatible cases
@@ -637,6 +646,9 @@ pub(crate) fn evaluate<D: CondEval>(
     out: &mut Vec<Statement>,
 ) -> Result<(), AsmError> {
     for node in nodes {
+        if emit && dialect.terminated() {
+            return Ok(());
+        }
         if let Some(Item::Conditional {
             head,
             then_body,
@@ -662,6 +674,9 @@ pub(crate) fn evaluate<D: CondEval>(
                 false
             };
             evaluate(dialect, then_body, emit && taken, out)?;
+            if emit && dialect.terminated() {
+                return Ok(());
+            }
             if let Some(else_body) = else_body {
                 evaluate(dialect, else_body, emit && !taken, out)?;
             }
@@ -691,6 +706,9 @@ pub(crate) fn evaluate<D: CondEval>(
                         break;
                     }
                     evaluate(dialect, body, true, out)?;
+                    if dialect.terminated() {
+                        return Ok(());
+                    }
                     ran += 1;
                     if ran >= MAX_ITERATIONS {
                         return Err(AsmError::new(
@@ -718,12 +736,18 @@ pub(crate) fn evaluate<D: CondEval>(
                     Iteration::Times(n) => {
                         for _ in 0..n.max(0) {
                             evaluate(dialect, body, true, out)?;
+                            if dialect.terminated() {
+                                return Ok(());
+                            }
                         }
                     }
                     Iteration::Over { name, values } => {
                         for value in values {
                             dialect.bind_loop_var(&name, value, node.span.line)?;
                             evaluate(dialect, body, true, out)?;
+                            if dialect.terminated() {
+                                return Ok(());
+                            }
                         }
                     }
                 }

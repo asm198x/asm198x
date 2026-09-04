@@ -400,6 +400,19 @@ fn parameters(text: &str) -> Vec<String> {
 #[cfg(test)]
 mod tests {
 
+    /// #554: `END` is a control directive, not only an optional entry-point
+    /// marker. Pasmo stops reading the whole assembly at the live directive.
+    #[test]
+    fn end_stops_assembly_and_keeps_its_entry_point() {
+        let bare = crate::assemble_pasmo(" nop\n end\n nop\n").expect("assembles");
+        assert_eq!(bare.bytes, vec![0x00]);
+
+        let entry =
+            crate::assemble_pasmo("start: nop\n end start\n nop\n").expect("entry point assembles");
+        assert_eq!(entry.bytes, vec![0x00]);
+        assert_eq!(entry.start, Some(0));
+    }
+
     /// pasmo takes `=` and `!=` but refuses `==` and `<>`, and answers `$FF`.
     #[test]
     fn comparisons_use_pasmos_own_spellings() {
