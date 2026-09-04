@@ -712,6 +712,10 @@ impl Z80Syntax for SjasmplusSyntax {
         true
     }
 
+    fn temporary_labels(&self) -> bool {
+        true
+    }
+
     /// sjasmplus takes `:` as a statement separator as well as a label
     /// terminator (#98) — ` ld a,1 : ld b,2` is two instructions, and it is
     /// how hand-written Spectrum source is often laid out.
@@ -1311,6 +1315,89 @@ impl macros::MacroSyntax for SjasmplusSyntax {
 #[cfg(test)]
 mod tests {
     use crate::{assemble_sjasmplus as asm, assemble_sjasmplus_files, source::MemoryLoader};
+
+    /// #559: decimal labels are repeatable, and a jump target reaches the
+    /// nearest definition in the requested direction.
+    #[test]
+    fn temporary_labels_resolve_forward_and_backward() {
+        let result = asm("\tjr nc,1F\n\tnop\n1\tnop\n\tjr 1B\n1:\tnop\n\tdjnz 1b\n")
+            .expect("temporary labels");
+        assert_eq!(
+            result.bytes,
+            vec![0x30, 0x01, 0x00, 0x00, 0x18, 0xFD, 0x00, 0x10, 0xFD]
+        );
+        assert!(
+            result
+                .symbols
+                .keys()
+                .all(|name| !name.contains("temporary")),
+            "temporary implementation names must not leak"
+        );
+
+        let absolute = asm("\torg $100\n\tjp 12F\n\tcall 12f\n12\tnop\n")
+            .expect("multi-digit absolute targets");
+        assert_eq!(
+            absolute.bytes,
+            vec![0xC3, 0x06, 0x01, 0xCD, 0x06, 0x01, 0x00]
+        );
+    }
+
+    /// The `F`/`B` spelling is contextual, not a new general expression
+    /// token: `1B` keeps its binary-literal meaning outside branch targets,
+    /// while `1F` keeps the reference's invalid-digit refusal.
+    #[test]
+    fn temporary_reference_spelling_is_jump_target_only() {
+        assert_eq!(
+            asm("\tdw 1B\n\tld hl,1B\n\tld a,1B\n\tdw 1B+1\n")
+                .expect("binary literals")
+                .bytes,
+            vec![0x01, 0x00, 0x21, 0x01, 0x00, 0x3E, 0x01, 0x02, 0x00]
+        );
+        for source in ["\tdw 1F\n", "\tld hl,1F+0\n", "\tld hl,(1F)\n"] {
+            let error = asm(source).expect_err("F is not a general expression suffix");
+            assert!(error.to_string().contains("invalid number `1F`"), "{error}");
+        }
+        let error = asm("1\tequ 5\n").expect_err("number EQU");
+        assert!(error.to_string().contains("address labels only"), "{error}");
+        for source in ["\tjr 1F\n", "\tjr 1B\n", "\tjp 2b\n"] {
+            let error = asm(source).expect_err("missing temporary label");
+            assert!(
+                error.to_string().contains("Temporary label not found"),
+                "{error}"
+            );
+        }
+    }
+
+    /// A temporary definition is not a global-label event: it neither opens a
+    /// local scope nor disturbs the preceding global anchor.
+    #[test]
+    fn a_temporary_label_does_not_reanchor_locals() {
+        let result =
+            asm("glob\tnop\n1\tnop\n.loc\tnop\n\tjr glob.loc\n").expect("local stays below glob");
+        assert_eq!(result.symbols.get("glob.loc"), Some(&2));
+        assert_eq!(result.bytes, vec![0x00, 0x00, 0x00, 0x18, 0xFD]);
+    }
+
+    /// Includes and live macro expansions are one textual label stream. Each
+    /// expansion contributes a fresh definition, just as the reference does.
+    #[test]
+    fn temporary_labels_span_includes_and_macro_expansions() {
+        let loader = MemoryLoader::new().text("label.asm", "1\tnop\n");
+        let included = assemble_sjasmplus_files(
+            "\tjr 1F\n\tinclude \"label.asm\"\n\tjr 1B\n",
+            "main.asm",
+            &loader,
+        )
+        .expect("include shares temporary labels");
+        assert_eq!(included.bytes, vec![0x18, 0x00, 0x00, 0x18, 0xFD]);
+
+        let expanded = asm("\tMACRO M\n\tjr 1F\n1\tnop\n\tENDM\n\tM\n\tM\n\tjr 1B\n")
+            .expect("each macro expansion has a fresh temporary label");
+        assert_eq!(
+            expanded.bytes,
+            vec![0x18, 0x00, 0x00, 0x18, 0x00, 0x00, 0x18, 0xFD]
+        );
+    }
 
     /// #554: a live `END` stops every enclosing source construct. A skipped
     /// one does nothing, while the dotted spelling and a macro-expanded one

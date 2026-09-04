@@ -525,6 +525,8 @@ const PROBES: &[Probe] = &[
     ok ("sjasmplus", "operator <<",      " ld a,1<<2\n"),
     ok ("sjasmplus", "operator &",       " ld a,5 & 3\n"),
     ok ("sjasmplus", "operator ^",       " ld a,6 ^ 3\n"),
+    ok ("sjasmplus", "temporary numeric labels",
+        " jr nc,1F\n nop\n1 nop\n jr 1B\n1: nop\n djnz 1b\n jp 12F\n call 12f\n12 nop\n"),
     // Native 1.21.0 gives 7f 7f ff f8 ff fb ff ff ff 01 00 ff ff: `~` is
     // an i64 two's-complement unary, binds before shifts/addition, composes,
     // and is truncated only when the data directive writes it (#475).
