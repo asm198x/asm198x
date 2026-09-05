@@ -19,7 +19,7 @@ fn check(location: &PagedLocation, slot: u8, page: u16, size: u32, offset: u32) 
 
 #[test]
 fn equal_logical_addresses_keep_distinct_pages_and_entry_placement() {
-    let result = assemble_sjasmplus(BANKED).unwrap();
+    let result = assemble_sjasmplus(BANKED).expect("banked assembly");
     assert_eq!(result.bytes, [1, 3]);
     assert_eq!(result.symbols["draw"], result.symbols["music"]);
     let pages = &result.debug.symbol_pages;
@@ -39,7 +39,7 @@ fn equal_logical_addresses_keep_distinct_pages_and_entry_placement() {
 fn page_geometry_comes_from_device_and_address_not_selected_slot() {
     let result = assemble_sjasmplus(
         " DEVICE ZXSPECTRUMNEXT\n ORG $E010\n PAGE 223\nhigh: db 1\n SLOT 0\n PAGE 9\nstill_high: db 2\n ORG $0010\nlow: db 3\n",
-    ).unwrap();
+    ).expect("Next assembly");
     let pages = &result.debug.symbol_pages;
     check(&pages["high"], 7, 223, 0x2000, 0x10);
     check(&pages["still_high"], 7, 223, 0x2000, 0x11);
@@ -52,7 +52,7 @@ fn page_geometry_comes_from_device_and_address_not_selected_slot() {
 fn mapping_changes_do_not_rewrite_earlier_symbols_or_fabricate_flat_pages() {
     let result = assemble_sjasmplus(
         " ORG $C010\nflat: db 0\n DEVICE ZXSPECTRUM128\n PAGE 1\none: db 1\n DEVICE NONE\nnone: db 2\n DEVICE ZXSPECTRUM128\nreset: db 3\n",
-    ).unwrap();
+    ).expect("device switching assembly");
     let pages = &result.debug.symbol_pages;
     assert_eq!(pages.len(), 2);
     check(&pages["one"], 3, 1, 0x4000, 0x11);
@@ -65,26 +65,27 @@ fn numeric_entry_uses_current_mapping_without_rewriting_a_label() {
     let result = assemble_sjasmplus(
         " DEVICE ZXSPECTRUM128\n ORG $C010\n PAGE 1\nfirst: db 1\n PAGE 3\n END $C010\n",
     )
-    .unwrap();
+    .expect("numeric entry assembly");
     check(&result.debug.symbol_pages["first"], 3, 1, 0x4000, 0x10);
     check(&result.debug.symbol_pages["@entry"], 3, 3, 0x4000, 0x10);
 }
 
 #[test]
 fn placement_is_additive_in_the_serialized_contract() {
-    let result = assemble_sjasmplus(BANKED).unwrap();
-    let mut json = serde_json::to_value(&result).unwrap();
-    let restored: asm198x::AssemblyResult = serde_json::from_value(json.clone()).unwrap();
+    let result = assemble_sjasmplus(BANKED).expect("banked assembly");
+    let mut json = serde_json::to_value(&result).expect("serialize result");
+    let restored: asm198x::AssemblyResult =
+        serde_json::from_value(json.clone()).expect("read result");
     assert_eq!(restored.debug.symbol_pages, result.debug.symbol_pages);
     json["debug"]
         .as_object_mut()
-        .unwrap()
+        .expect("debug object")
         .remove("symbol_pages");
-    let old: asm198x::AssemblyResult = serde_json::from_value(json).unwrap();
+    let old: asm198x::AssemblyResult = serde_json::from_value(json).expect("read old result");
     assert!(old.debug.symbol_pages.is_empty());
-    let flat = assemble_sjasmplus(" ORG $8000\nflat: nop\n").unwrap();
+    let flat = assemble_sjasmplus(" ORG $8000\nflat: nop\n").expect("flat assembly");
     assert!(
-        serde_json::to_value(flat).unwrap()["debug"]
+        serde_json::to_value(flat).expect("serialize flat result")["debug"]
             .get("symbol_pages")
             .is_none()
     );
@@ -95,7 +96,7 @@ fn label_on_page_directive_uses_mapping_before_the_directive() {
     let result = assemble_sjasmplus(
         " DEVICE ZXSPECTRUMNEXT\n ORG $E010\n PAGE 4\nbefore: PAGE 5\nafter: db 1\n",
     )
-    .unwrap();
+    .expect("directive label assembly");
     check(&result.debug.symbol_pages["before"], 7, 4, 0x2000, 0x10);
     check(&result.debug.symbol_pages["after"], 7, 5, 0x2000, 0x10);
 }
@@ -104,7 +105,7 @@ fn label_on_page_directive_uses_mapping_before_the_directive() {
 fn remapping_the_same_page_to_another_slot_preserves_physical_identity() {
     let result = assemble_sjasmplus(
         " DEVICE ZXSPECTRUM128\n ORG $C010\n PAGE 1\nupper: db 1\n SLOT 2\n PAGE 1\n ORG $8010\nlower: db 2\n",
-    ).unwrap();
+    ).expect("remapped page assembly");
     let upper = result.debug.symbol_pages["upper"];
     let lower = result.debug.symbol_pages["lower"];
     assert_ne!(upper.logical_address(), lower.logical_address());
@@ -130,7 +131,7 @@ fn all_device_geometries_preserve_the_highest_page() {
         ("NOSLOT64K", 31, 0, 0x10000),
     ] {
         let source = format!(" DEVICE {device}\n ORG $FFFE\n PAGE {page}\nlast: db $42\n");
-        let result = assemble_sjasmplus(&source).unwrap();
+        let result = assemble_sjasmplus(&source).expect("device geometry assembly");
         let location = result.debug.symbol_pages["last"];
         check(&location, slot, page, size, size - 2);
         assert_eq!(location.logical_address(), 0xFFFE, "{device}");
@@ -147,20 +148,23 @@ fn page_placements_match_native_cspectmap_addresses() {
     let dir = scratch::dir("paged-symbols");
     // CSPECTMAP is requested before END so the native assembler sees it.
     let source = BANKED.replace(" END draw", " CSPECTMAP \"native.map\"\n END draw");
-    std::fs::write(dir.join("input.asm"), source).unwrap();
+    std::fs::write(dir.join("input.asm"), source).expect("write probe");
     let output = std::process::Command::new(&identity.path)
         .current_dir(&dir)
         .args(["--nologo", "--raw=native.bin", "input.asm"])
         .output()
-        .unwrap();
+        .expect("run SjASMPlus");
     assert!(
         output.status.success(),
         "{}",
         String::from_utf8_lossy(&output.stderr)
     );
-    let result = assemble_sjasmplus(BANKED).unwrap();
-    assert_eq!(result.bytes, std::fs::read(dir.join("native.bin")).unwrap());
-    let map = std::fs::read_to_string(dir.join("native.map")).unwrap();
+    let result = assemble_sjasmplus(BANKED).expect("banked assembly");
+    assert_eq!(
+        result.bytes,
+        std::fs::read(dir.join("native.bin")).expect("read native bytes")
+    );
+    let map = std::fs::read_to_string(dir.join("native.map")).expect("read native map");
     let mut labels = 0;
     for row in map.lines() {
         let fields: Vec<_> = row.split_whitespace().collect();
@@ -174,11 +178,11 @@ fn page_placements_match_native_cspectmap_addresses() {
         let location = result.debug.symbol_pages[&name];
         assert_eq!(
             location.logical_address(),
-            u64::from_str_radix(fields[0], 16).unwrap()
+            u64::from_str_radix(fields[0], 16).expect("logical hex address")
         );
         assert_eq!(
             location.physical_address(),
-            u64::from_str_radix(fields[1], 16).unwrap()
+            u64::from_str_radix(fields[1], 16).expect("physical hex address")
         );
         labels += 1;
     }
