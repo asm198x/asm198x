@@ -54,6 +54,7 @@ mod prg;
 mod roundtrip_tests;
 mod scopes;
 mod sna;
+mod symbol_export;
 mod tape;
 // The multi-file source model (language-surface U1): the loader seam
 // (filesystem + in-memory), the FileId-allocating source map, and the include
@@ -83,6 +84,7 @@ pub use listing::{
     render_sym,
 };
 pub use span::{ExpansionFrame, FileId, Span};
+pub use symbol_export::{SymbolExportError, SymbolFormat, render_symbol_export};
 // Re-exported so consumers of `Assembly.debug` need not depend on debug198x
 // directly for the symbol types the engine captures.
 pub use convert::{Conversion, convert};
