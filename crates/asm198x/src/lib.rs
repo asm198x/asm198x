@@ -76,7 +76,7 @@ pub use contract::{
 };
 pub use engine::{
     AreaUsage, Artifact, ArtifactFormat, AsmError, Assembly, CycleCoverage, CycleRec, DebugData,
-    LineRec, OutputFormat, RequestedOutput, SegmentUsage, Warning,
+    LineRec, OutputFormat, PagedLocation, RequestedOutput, SegmentUsage, Warning,
 };
 pub use listing::{
     ListingFile, debug_info, render_listing, render_listing_files, render_listing_json, render_map,
