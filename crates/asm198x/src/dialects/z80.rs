@@ -30,9 +30,16 @@ use crate::engine::{AsmError, BinOp, Expr, Operation, Statement, Warning};
 use crate::source::{MAX_INCLUDE_DEPTH, SourceLoader, SourceMap};
 use crate::span::FileId;
 
+#[cfg(feature = "lua")]
+mod lua;
+
 /// The per-dialect surface: the parts of Z80 syntax that actually differ
 /// between assemblers. Everything else in this module is shared.
 pub(crate) trait Z80Syntax {
+    /// SjASMPlus's foreign-language blocks must retain their own syntax.
+    fn has_lua(&self) -> bool {
+        false
+    }
     /// A directive that changes instruction parsing for following statements.
     ///
     /// Kept as a dialect hook because this is lexical state, not a Z80
@@ -749,8 +756,47 @@ struct Src<'a> {
 /// trails, so `ld a,1 ; a:b` stays whole.
 fn split_statements<'a, S: Z80Syntax>(syntax: &S, text: &'a str) -> Vec<Src<'a>> {
     let mut out = Vec::new();
+    let mut lua_start: Option<(usize, u32)> = None;
+    let mut offset = 0;
+    // Keep a Lua block as one source slice, before assembly comment and colon
+    // processing can alter Lua strings, method calls, or control structures.
+    let mut lua_ranges = Vec::new();
+    if syntax.has_lua() {
+        for (i, raw) in text.split_inclusive('\n').enumerate() {
+            let word = split_first_word(raw).0;
+            if lua_start.is_none()
+                && raw.starts_with(char::is_whitespace)
+                && matches!(word.trim_start_matches('.'), "lua" | "LUA")
+            {
+                lua_start = Some((offset, i as u32 + 1));
+            } else if let Some((start, line)) = lua_start
+                && matches!(word.trim_start_matches('.'), "endlua" | "ENDLUA")
+            {
+                lua_ranges.push((line, i as u32 + 1, &text[start..offset + raw.len()]));
+                lua_start = None;
+            }
+            offset += raw.len();
+        }
+        if let Some((start, line)) = lua_start {
+            lua_ranges.push((line, u32::MAX, &text[start..]));
+        }
+    }
+    let mut lua_ranges = lua_ranges.into_iter().peekable();
     for (i, raw) in text.lines().enumerate() {
         let line = i as u32 + 1;
+        while lua_ranges.peek().is_some_and(|(_, last, _)| *last < line) {
+            lua_ranges.next();
+        }
+        if let Some((first, _, body)) = lua_ranges.peek().filter(|(first, _, _)| *first <= line) {
+            if line == *first {
+                out.push(Src {
+                    line,
+                    col: 1,
+                    text: body,
+                });
+            }
+            continue;
+        }
         if !syntax.splits_on_colon() {
             out.push(Src {
                 line,
@@ -1026,6 +1072,20 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             let line = src.line as usize;
             let col = src.col;
             self.pos += 1;
+            if self.syntax.has_lua() && raw.contains('\n') {
+                nodes.push(Node {
+                    operand_span: None,
+                    label: None,
+                    item: Some(crate::ast::Item::Verbatim),
+                    source: raw.trim_end_matches(['\r', '\n']).to_string(),
+                    span: Span::in_file(self.file, line as u32, col),
+                    trivia: Trivia {
+                        leading: std::mem::take(&mut self.pending),
+                        trailing: None,
+                    },
+                });
+                continue;
+            }
             let (code, comment) = self.syntax.split_comment(raw);
             if code.trim().is_empty() {
                 if let Some(text) = comment {
@@ -1403,6 +1463,16 @@ struct MultiCx<'a> {
 /// (an untaken branch's include never loads — KTD1); without one, they error
 /// with a pointer at the multi-file entry points.
 struct SjasmEval<'a, S: Z80Syntax> {
+    #[cfg(feature = "lua")]
+    lua: Option<super::sjasmplus_lua::Runtime>,
+    #[cfg(feature = "lua")]
+    pass: usize,
+    #[cfg(feature = "lua")]
+    lua_warnings: Vec<Warning>,
+    #[cfg(feature = "lua")]
+    lua_memory: Option<(usize, Vec<u8>)>,
+    #[cfg(feature = "lua")]
+    lua_macro_arguments: Vec<BTreeMap<String, String>>,
     syntax: &'a S,
     set: &'static isa::InstructionSet,
     ext: Option<&'static isa::InstructionSet>,
@@ -1468,6 +1538,16 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         multi: Option<MultiCx<'a>>,
     ) -> Self {
         Self {
+            #[cfg(feature = "lua")]
+            lua: None,
+            #[cfg(feature = "lua")]
+            pass: 1,
+            #[cfg(feature = "lua")]
+            lua_warnings: Vec::new(),
+            #[cfg(feature = "lua")]
+            lua_memory: None,
+            #[cfg(feature = "lua")]
+            lua_macro_arguments: Vec::new(),
             syntax,
             set,
             ext,
@@ -1665,6 +1745,11 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             return Ok(Operation::Org(Expr::Num(target)));
         }
         let count = usize::try_from(count).expect("non-negative reserve count");
+        #[cfg(feature = "lua")]
+        if let Some(lua) = &self.lua {
+            lua.charge_host_bytes(count.saturating_mul(std::mem::size_of::<Expr>()))
+                .map_err(|e| AsmError::new(line, e.to_string()))?;
+        }
         let fill = match fill {
             Some(text) => parse_value(self.syntax, text.trim(), line)?,
             None => Expr::Num(0),
@@ -1820,6 +1905,10 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             return self.emit_instance(p.line, p.file, p.instance, &p.word, p.items, out);
         }
         if self.lower_macro_line(node, out)? {
+            return Ok(());
+        }
+        #[cfg(feature = "lua")]
+        if self.syntax.has_lua() && self.lower_lua(node, out)? {
             return Ok(());
         }
         let (word0, args0) = split_first_word(&node.source);
@@ -2641,12 +2730,24 @@ impl<S: Z80Syntax> SjasmEval<'_, S> {
                 Ok(true)
             }
             macros::MacroLine::Invokes => {
-                let Some(expanded) =
+                #[cfg(feature = "lua")]
+                if self.lua_macro_arguments.len() >= 64 {
+                    return Err(AsmError::new(
+                        line,
+                        "macro expansion exceeds 64 levels — is it recursive?",
+                    ));
+                }
+                let Some(mut expanded) =
                     self.syntax
                         .expand_live(text, file, line, &mut self.macro_state)?
                 else {
                     return Ok(false);
                 };
+                for origin in &mut expanded.origins {
+                    origin
+                        .frames
+                        .extend(node.span.expansion_frames.iter().cloned());
+                }
                 let program = parse_text_keyword(
                     self.syntax,
                     self.set,
@@ -2655,7 +2756,12 @@ impl<S: Z80Syntax> SjasmEval<'_, S> {
                     &expanded.text,
                     Some(&expanded.origins),
                 )?;
-                crate::ast::evaluate(self, &program.nodes, true, out)?;
+                #[cfg(feature = "lua")]
+                self.lua_macro_arguments.push(expanded.arguments);
+                let result = crate::ast::evaluate(self, &program.nodes, true, out);
+                #[cfg(feature = "lua")]
+                self.lua_macro_arguments.pop();
+                result?;
                 Ok(true)
             }
             _ => Ok(false),
@@ -2760,8 +2866,13 @@ impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
         let line = line as usize;
         let (_, args) = split_first_word(head);
         let expr = substitute_defines(args, &self.defines, line)?;
-        eval_condition_keyword(self.syntax, &expr, line, &self.consts, self.fwd())
-            .map(crate::ast::Iteration::Times)
+        let count = eval_condition_keyword(self.syntax, &expr, line, &self.consts, self.fwd())?;
+        #[cfg(feature = "lua")]
+        if let Some(lua) = &self.lua {
+            lua.charge_work(count.max(0) as u64)
+                .map_err(|e| AsmError::new(line, e.to_string()))?;
+        }
+        Ok(crate::ast::Iteration::Times(count))
     }
 
     fn eval(&self, head: &str, line: u32) -> Result<bool, AsmError> {
@@ -2806,6 +2917,23 @@ impl<S: Z80Syntax> crate::ast::CondEval for SjasmEval<'_, S> {
     }
 
     fn lower(&mut self, node: &Node, out: &mut Vec<Statement>) -> Result<(), AsmError> {
+        #[cfg(feature = "lua")]
+        if let Some(lua) = &self.lua {
+            lua.charge_work(1)
+                .and_then(|()| {
+                    lua.charge_host_bytes(
+                        node.source
+                            .len()
+                            .saturating_add(std::mem::size_of::<Statement>()),
+                    )
+                })
+                .map_err(|e| {
+                    stamp_file(
+                        AsmError::new(node.span.line as usize, e.to_string()),
+                        node.span.file,
+                    )
+                })?;
+        }
         // Per-line helpers know their line but not their file; stamp at this
         // one boundary — but only span-less errors. An error from a *nested*
         // walk (an include's lines, reached through `lower_include`) was
@@ -2888,8 +3016,15 @@ fn run_passes<'a, S: Z80Syntax>(
     let mut seed = BTreeMap::new();
     let mut previous: Option<BTreeMap<String, i64>> = None;
     let mut result = Vec::new();
+    #[cfg(feature = "lua")]
+    let mut lua = None;
     for pass in 1..=PASSES {
         let mut eval = SjasmEval::new(syntax, set, ext, multi.take());
+        #[cfg(feature = "lua")]
+        {
+            eval.lua = lua.take();
+            eval.pass = pass;
+        }
         if syntax.resolves_forward_conditions() {
             eval.forward = Some(Forward::new(std::mem::take(&mut seed), pass == PASSES));
         }
@@ -2921,10 +3056,42 @@ fn run_passes<'a, S: Z80Syntax>(
         }
         result = eval.finish(out)?;
         let mut defined_at: BTreeMap<String, (usize, FileId)> = BTreeMap::new();
-        let symbols = pass_symbols(&result, set, ext, |name, line, file| {
+        #[allow(unused_mut)] // Lua retains definitions from earlier passes.
+        let mut symbols = pass_symbols(&result, set, ext, |name, line, file| {
             defined_at.insert(name.to_string(), (line, file));
         });
+        // Lua can intentionally insert a label only in PASS1. SjASMPlus keeps
+        // the symbol table across passes, even when a later pass does not
+        // reach its original definition.
+        #[cfg(feature = "lua")]
+        if eval.lua.is_some()
+            && let Some(f) = &eval.forward
+        {
+            for (name, value) in &f.seed {
+                if !symbols.contains_key(name) {
+                    symbols.insert(name.clone(), *value);
+                    if pass == PASSES {
+                        result.push(Statement {
+                            line: 0,
+                            file: FileId(0),
+                            label: Some(name.clone()),
+                            op: Some(Operation::Equ(Expr::Num(*value))),
+                            operand_span: None,
+                            xor_mask: 0,
+                            instruction_set: None,
+                            extension_set: None,
+                        });
+                    }
+                }
+            }
+        }
         let reached_forward = eval.forward.as_ref().is_some_and(|f| f.used.get());
+        #[cfg(feature = "lua")]
+        let reached_lua = eval.lua.is_some();
+        #[cfg(not(feature = "lua"))]
+        let reached_lua = false;
+        #[cfg(feature = "lua")]
+        warnings.append(&mut eval.lua_warnings);
         if pass == 1 {
             // The advisories belong to this pass: it is the one where the
             // symbol was genuinely unknown and read as zero.
@@ -2936,11 +3103,15 @@ fn run_passes<'a, S: Z80Syntax>(
             // Raised on pass 1 because the module structure does not change
             // between passes, and raising it on each would say it three times.
             warnings.extend(eval.unclosed_module());
-            if !reached_forward {
+            if !reached_forward && !reached_lua {
                 return Ok((result, warnings));
             }
         }
         multi = eval.multi;
+        #[cfg(feature = "lua")]
+        {
+            lua = eval.lua;
+        }
         if pass == PASSES {
             // A label that still moved between the last two passes never
             // settled, and the bytes below it describe a layout no pass
@@ -3431,6 +3602,21 @@ fn parse_op<S: Z80Syntax>(
         return Ok(None);
     }
     let (word, args) = split_first_word(rest);
+    if syntax.has_lua()
+        && matches!(
+            word.trim_start_matches('.'),
+            "lua" | "LUA" | "endlua" | "ENDLUA" | "includelua" | "INCLUDELUA"
+        )
+    {
+        return Err(AsmError::new(
+            line,
+            if cfg!(feature = "lua") {
+                "LUA requires a matching ENDLUA block; ENDLUA cannot stand alone"
+            } else {
+                "Lua is not implemented in this build; enable the `lua` Cargo feature"
+            },
+        ));
+    }
     if syntax.is_directive(word) {
         return syntax.parse_directive(word, args, line, consts);
     }

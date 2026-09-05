@@ -26,6 +26,8 @@ pub(crate) mod rgbasm;
 pub(crate) mod s2650;
 pub(crate) mod scmp;
 pub(crate) mod sjasmplus;
+#[cfg(feature = "lua")]
+mod sjasmplus_lua;
 pub(crate) mod text;
 pub(crate) mod tms7000;
 pub(crate) mod tms9900;

@@ -1,6 +1,6 @@
 # Reference vocabulary coverage — what each tool accepts that we do not.
 #
-# 215 word(s) outside our surface, across the references installed
+# 212 word(s) outside our surface, across the references installed
 # here. A word, not a feature: a family of dotted spellings is often one
 # rule, and one line here can be a week's work or an afternoon's.
 #
@@ -38,7 +38,7 @@
 
 ## sjasmplus (SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus))
 # 4231 candidate(s) harvested; 264 recognised here, 24 more the tool itself
-# refuses on this target; 54 of the 264 outside our surface
+# refuses on this target; 51 of the 264 outside our surface
 bplist
 cspectmap
 defarray
@@ -47,7 +47,6 @@ disp
 emptytap
 emptytrd
 encoding
-endlua
 endm
 endw
 ent
@@ -56,10 +55,8 @@ fpos
 ifnused
 ifused
 inchob
-includelua
 inctrd
 labelslist
-lua
 mmu
 output
 relocate_table

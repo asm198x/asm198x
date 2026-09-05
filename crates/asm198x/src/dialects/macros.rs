@@ -41,6 +41,12 @@ const MAX_EXPANSION_DEPTH: usize = 64;
 
 /// One dialect's macro grammar.
 pub(crate) trait MacroSyntax {
+    /// Enter/leave a foreign-language block whose body is not assembler text.
+    /// SjASMPlus Lua reads macro arguments through sj.get_define instead of
+    /// substituting identifiers in the script (probe #532).
+    fn literal_block(&self, _line: &str) -> Option<bool> {
+        None
+    }
     /// Parse a definition header, returning the macro's name and parameters.
     /// `None` if the line does not open a macro.
     fn header(&self, line: &str) -> Option<(String, Vec<String>)>;
@@ -229,6 +235,9 @@ pub(crate) struct LineOrigin {
 pub(crate) struct Expanded {
     pub(crate) text: String,
     pub(crate) origins: Vec<LineOrigin>,
+    /// Arguments of a single live invocation, available to embedded Lua.
+    #[cfg(feature = "lua")]
+    pub(crate) arguments: std::collections::BTreeMap<String, String>,
 }
 
 /// A macro as collected by the pre-pass.
@@ -471,6 +480,8 @@ fn expand_at_inner<S: MacroSyntax>(
     recursive: bool,
 ) -> Result<Expanded, AsmError> {
     let lines: Vec<&str> = source.lines().collect();
+    #[cfg(feature = "lua")]
+    let mut arguments = std::collections::BTreeMap::new();
     // Definitions are grouped by name rather than replaced, because one dialect
     // — acme — lets a name carry several, told apart by how many arguments they
     // take. Where a dialect has only ever one, the group holds one.
@@ -535,6 +546,10 @@ fn expand_at_inner<S: MacroSyntax>(
                 .fit_arguments(&name, &def.params, args)
                 .map_err(|msg| AsmError::new(origin.line, msg))?;
             let params = syntax.argument_names(&def.params, args.len());
+            #[cfg(feature = "lua")]
+            if !recursive {
+                arguments.extend(params.iter().cloned().zip(args.iter().cloned()));
+            }
             if depth == MAX_EXPANSION_DEPTH {
                 return Err(AsmError::new(
                     origin.line,
@@ -566,7 +581,22 @@ fn expand_at_inner<S: MacroSyntax>(
             if let Some(label) = label {
                 next.push((origin.clone(), label));
             }
+            let mut literal = false;
             for body_line in &def.body {
+                let boundary = syntax.literal_block(body_line);
+                if literal || boundary.is_some() {
+                    if let Some(inside) = boundary {
+                        literal = inside;
+                    }
+                    next.push((
+                        LineOrigin {
+                            line: origin.line,
+                            frames: frames.clone(),
+                        },
+                        body_line.clone(),
+                    ));
+                    continue;
+                }
                 if syntax.is_local_decl(body_line) {
                     continue;
                 }
@@ -607,7 +637,12 @@ fn expand_at_inner<S: MacroSyntax>(
         text.push('\n');
         origins.push(origin);
     }
-    Ok(Expanded { text, origins })
+    Ok(Expanded {
+        text,
+        origins,
+        #[cfg(feature = "lua")]
+        arguments,
+    })
 }
 
 /// What a line invokes, if anything: the label in front of it, the macro's

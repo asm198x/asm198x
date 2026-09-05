@@ -55,6 +55,11 @@
         },
         {
           "children": [],
+          "slug": "guide/lua",
+          "title": "SjASMPlus Lua"
+        },
+        {
+          "children": [],
           "slug": "guide/linking",
           "title": "When assembling is not the last step"
         },

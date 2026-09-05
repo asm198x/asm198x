@@ -586,6 +586,7 @@ pub(crate) fn eval_binop(op: BinOp, a: i64, b: i64, line: usize) -> Result<i64, 
 // ---------------------------------------------------------------------------
 
 /// One operation, with its addressing mode already resolved by the dialect.
+#[derive(Clone)]
 pub(crate) enum Operation {
     /// Set the program counter (the `.org`/`org` directive).
     Org(Expr),
@@ -832,6 +833,7 @@ pub(crate) struct DeviceSpec {
 }
 
 /// One piece of a dialect-computed instruction encoding.
+#[derive(Clone)]
 pub(crate) enum Piece {
     /// A byte the dialect already determined (opcode, postbyte, modrm…).
     Lit(u8),
@@ -1019,6 +1021,7 @@ impl Piece {
 }
 
 /// One source line, reduced to an optional label and an optional operation.
+#[derive(Clone)]
 pub(crate) struct Statement {
     pub(crate) line: usize,
     /// The file `line` counts within (language-surface U2). `FileId(0)` for
@@ -1275,6 +1278,67 @@ pub(crate) struct Run {
 // (`Dialect::trims_trailing_gap`) belongs to the asl family, and no asl dialect
 // has sections. A sectioned dialect that trimmed would need the range per
 // section, and this is where it would go.
+
+/// Reuse the ordinary encoder and device replay for a Lua read at a source
+/// boundary. Forward values come from the previous SjASMPlus pass.
+#[cfg(feature = "lua")]
+pub(crate) fn lua_memory_snapshot(
+    statements: &[Statement],
+    seed: &BTreeMap<String, i64>,
+    z80n: bool,
+) -> Result<Vec<u8>, AsmError> {
+    let mut prefix = Vec::new();
+    for (name, value) in seed {
+        if !statements.iter().any(|s| s.label.as_ref() == Some(name)) {
+            prefix.push(Statement {
+                line: 0,
+                file: FileId(0),
+                label: Some(name.clone()),
+                op: Some(Operation::Equ(Expr::Num(*value))),
+                operand_span: None,
+                xor_mask: 0,
+                instruction_set: None,
+                extension_set: None,
+            });
+        }
+    }
+    prefix.extend(
+        statements
+            .iter()
+            .filter(|s| {
+                !matches!(
+                    s.op,
+                    Some(
+                        Operation::SaveRaw { .. }
+                            | Operation::SaveTape { .. }
+                            | Operation::SaveCpr { .. }
+                    )
+                )
+            })
+            .cloned(),
+    );
+    prefix.push(Statement {
+        line: 0,
+        file: FileId(0),
+        label: None,
+        op: Some(Operation::SaveRaw {
+            name: "lua-memory".into(),
+            start: Expr::Num(0),
+            length: Some(Expr::Num(65536)),
+        }),
+        operand_span: None,
+        xor_mask: 0,
+        instruction_set: None,
+        extension_set: None,
+    });
+    let result = assemble_statements(prefix, Vec::new(), &crate::dialects::Sjasmplus { z80n })?;
+    result
+        .artifacts
+        .into_iter()
+        .last()
+        .map(|a| a.bytes)
+        .ok_or_else(|| AsmError::new(0, "Lua device memory was not captured"))
+}
 
 fn assemble_statements(
     mut statements: Vec<Statement>,
