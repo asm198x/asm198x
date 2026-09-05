@@ -4,7 +4,7 @@ version = 4
 
 [[package]]
 name = "asm198x"
-version = "0.0.57"
+version = "0.0.58"
 dependencies = [
  "debug198x",
  "format198x-sinclair-zx-spectrum-tap",
@@ -401,7 +401,7 @@ checksum = "e6e4313cd5fcd3dad5cafa179702e2b244f760991f45397d14d4ebf38247da75"
 
 [[package]]
 name = "verdict-corpus"
-version = "0.0.57"
+version = "0.0.58"
 dependencies = [
  "isa198x",
  "isa198x-disasm",
@@ -426,7 +426,7 @@ checksum = "f0805222e57f7521d6a62e36fa9163bc891acd422f971defe97d64e70d0a4fe5"
 
 [[package]]
 name = "xtask"
-version = "0.0.57"
+version = "0.0.58"
 dependencies = [
  "asm198x",
  "isa198x",
