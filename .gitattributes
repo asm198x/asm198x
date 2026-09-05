@@ -1,0 +1,3 @@
+# These source bytes are keys in the recorded reference corpus. A Windows
+# checkout must not rewrite the upstream fixture before include_str! reads it.
+crates/asm198x/tests/fixtures/lua/*.asm text eol=lf
