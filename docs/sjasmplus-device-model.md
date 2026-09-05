@@ -130,3 +130,37 @@ The Next, CPC, Plus, and NOSLOT devices start entirely empty (#318).
 - **Deriving page counts from the device name.** `ZXSPECTRUMNEXT` has 224
   pages of 8K, not 256 of 8K or 128 of 16K, and `NOSLOT64K` has 32 pages with
   a single slot. Both were probed.
+
+## Symbol placement (#503 prerequisite)
+
+`AssemblyResult.debug.symbol_pages` preserves the live placement of each
+address symbol: expected slot, physical page, page size, and in-page offset.
+It is keyed by the same symbol name as the existing captured symbol records;
+constants have no entry. Absence means no known paged placement, not page zero.
+The field is additive, defaults to empty when reading old JSON, and is omitted
+from flat assembly results. No contract version changes.
+
+The source definition fixes the placement. A later `PAGE`, `SLOT`, or `DEVICE`
+cannot change an earlier label's page. `END label` preserves that label's
+placement; a numeric entry address uses the mapping at `END`. A label on a
+`PAGE` directive itself belongs to the mapping **before** the directive.
+
+SjASMPlus 1.21.0 was probed on 2026-09-05, executable SHA-256
+`454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b`.
+For two labels at `$C010` in Spectrum 128 pages 1 and 3, its CSPECTMAP gives
+logical/physical pairs `$C010/$4010` and `$C010/$C010`; SLD independently
+records pages 1 and 3. Its equal-valued EQU remains a constant. For the Next,
+`before: PAGE 5` with page 4 previously mapped at `$E010` reports physical
+`$8010` for `before` and `$A010` for the following label.
+
+The repeatable native comparison is
+`cargo test -p asm198x --test paged_symbols -- --include-ignored`.
+Always-on tests cover all thirteen device geometries (8K, 16K, and 64K pages),
+remapping one page into another slot,
+device reset/disable, entry placement, byte identity, and old JSON payloads.
+
+This is capture infrastructure, not an exporter release. #503 still needs
+RGBASM bank placement, bank-aware Debug198x section projection, and the VICE,
+NO$-style, and SjASMPlus writers with consuming-tool checks. Existing Debug198x
+and listing rendering are unchanged by this slice; their flat section offsets
+are not a substitute for `symbol_pages` when exporting banked addresses.

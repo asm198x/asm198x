@@ -143,6 +143,12 @@ pub struct Assembly {
 pub struct DebugData {
     /// Every label (address), `equ`/`=` constant (value), and entry point.
     pub symbols: Vec<debug198x::Symbol>,
+    /// Device placement at each address symbol's definition, keyed by the
+    /// same name as `symbols`. Constants have no placement. This is captured
+    /// before later PAGE/SLOT/DEVICE directives can change the mapping; absent
+    /// means unknown, not page zero. Older payloads and flat assemblies omit it.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub symbol_pages: BTreeMap<String, PagedLocation>,
     /// One span per source-bearing statement that emitted bytes. Fill from `org`
     /// gaps and `align` carries no span (the padding rule).
     pub lines: Vec<LineRec>,
@@ -156,6 +162,37 @@ pub struct DebugData {
     /// omitted (as `none`) from payloads that predate the capture.
     #[serde(default, skip_serializing_if = "CycleCoverage::is_none")]
     pub cycle_coverage: CycleCoverage,
+}
+
+/// An address's actual placement in a paged device. The page size comes from
+/// the selected device, never from an assumed CPU or exporter convention.
+/// `page` is the durable identity; `slot` is the expected mapping at assembly
+/// time. The offset is within the page, not within the emitted binary.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct PagedLocation {
+    /// Slot containing the logical address, not the slot selected by SLOT.
+    pub slot: u8,
+    /// Physical page mapped into that slot at the definition.
+    pub page: u16,
+    /// Size of a page (and slot), in bytes.
+    pub page_size: u32,
+    /// Byte offset within the physical page.
+    pub offset: u32,
+}
+
+impl PagedLocation {
+    /// The CPU address under the mapping used at the definition.
+    #[must_use]
+    pub fn logical_address(self) -> u64 {
+        u64::from(self.slot) * u64::from(self.page_size) + u64::from(self.offset)
+    }
+
+    /// The linear address in device memory, independent of the mapped slot.
+    #[must_use]
+    pub fn physical_address(self) -> u64 {
+        u64::from(self.page) * u64::from(self.page_size) + u64::from(self.offset)
+    }
 }
 
 /// A line→address span before the source filename is attached: `length` address
@@ -1661,6 +1698,9 @@ fn assemble_statements(
         // `!pseudopc` block it reads as the address the code will run at.
         let real_pc = origin + bytes.len() as i64 / addr_unit;
         let pc = real_pc + pseudo;
+        // A label on a mapping directive belongs to the mapping before the
+        // directive, just as its address is the pre-directive location counter.
+        let label_page = device_memory.as_ref().and_then(|m| m.location(pc));
         let len_before = bytes.len();
         // The cycle triple pass 2 resolves for this statement, if it is a
         // form-model instruction; consumed at the LineRec push below so the
@@ -2264,6 +2304,9 @@ fn assemble_statements(
                     value: value as u64,
                 }
             } else {
+                if let Some(location) = label_page {
+                    debug.symbol_pages.insert(label.clone(), location);
+                }
                 // A label lives at this statement's address (`pc`).
                 debug198x::SymbolKind::Label {
                     section: 0,
@@ -2374,6 +2417,12 @@ fn assemble_statements(
                     Expr::Sym(n) => n.clone(),
                     _ => "@entry".to_string(),
                 };
+                if let Some(location) = device_memory
+                    .as_ref()
+                    .and_then(|m| m.location(i64::from(v)))
+                {
+                    debug.symbol_pages.insert(name.clone(), location);
+                }
                 debug.symbols.push(debug198x::Symbol { name, kind: entry });
             }
         }
@@ -2526,6 +2575,17 @@ struct DeviceMemory {
 }
 
 impl DeviceMemory {
+    fn location(&self, address: i64) -> Option<PagedLocation> {
+        let address = usize::try_from(address).ok()?;
+        let slot = address / self.spec.slot_size;
+        Some(PagedLocation {
+            slot: u8::try_from(slot).ok()?,
+            page: u16::try_from(*self.slots.get(slot)?).ok()?,
+            page_size: u32::try_from(self.spec.slot_size).ok()?,
+            offset: u32::try_from(address % self.spec.slot_size).ok()?,
+        })
+    }
+
     fn new(spec: DeviceSpec) -> Self {
         let mut memory = Self {
             slots: (0..spec.slots).collect(),
