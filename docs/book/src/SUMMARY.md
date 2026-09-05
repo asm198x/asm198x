@@ -14,6 +14,7 @@
 
 - [A first program](guide/first-program.md)
 - [Projects in more than one file](guide/multi-file.md)
+- [SjASMPlus Lua](guide/lua.md)
 - [When assembling is not the last step](guide/linking.md)
 - [Keeping source tidy](guide/formatting.md)
 - [Reading a binary back](guide/reading-a-binary.md)

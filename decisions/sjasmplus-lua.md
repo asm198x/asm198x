@@ -81,9 +81,27 @@ in the corpus reaches them, and named in the diagnostic when one does. Their
 values are recorded in the implementation, not here, because they are tuned
 against the corpus rather than decided.
 
-## What this does not settle
+## Pass model and implementation evidence (#532)
 
-The binding is the easy half. Fidelity of the **pass model** is the work:
+The feature's executable probes and unchanged upstream sine-table example are
+in `crates/asm198x/tests/lua.rs` and `tests/fixtures/lua/` under that crate.
+Their separate NDJSON corpus records SjASMPlus 1.21.0 identities and executable
+digests; replay runs only with `lua`, leaving default/WASM refusal intact.
+Saved host functions resolve a scoped callback for the current pass, rather
+than retaining a previous pass's borrowed state. Device reads replay the
+current statement prefix through the existing encoder/device model.
+
+Generated assembler work is also budgeted: Lua's allocator and instruction
+hook cannot bound a host-side `DS` allocation or an empty `DUP` on their own.
+Lua `print` becomes an assembly note. Text `load` retains the standard reader
+function form. A no-argument `math.randomseed()` reuses the deterministic seed.
+
+`get_page_at`, requested by #532 but absent from the pinned 1.21.0 bindings,
+is a read-only extension over the existing device mapping. Non-default
+`set_device` RAMTOP values remain explicitly unimplemented. Neither change
+opens additional host access.
+
+Fidelity of the **pass model** remains the acceptance rule:
 `PASS1`/`PASS2`/`PASS3`/`ALLPASS` against our convergence loop,
 `sj.parse_line` re-entering the assembler mid-line, and `sj.get_byte`
 reading device memory, which depends on

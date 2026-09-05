@@ -232,6 +232,18 @@ fails rather than passes.
   new `Z80Syntax::expand_live` hook; pasmo keeps the per-file default. The
   pinned SpecNext Invaders corpus advances to temporary labels (`1F`).
 
+### Lua inside SjASMPlus macros (#532)
+
+SjASMPlus 1.21.0 leaves Lua identifiers untouched by macro substitution:
+`local FOO = 7` inside a macro with parameter `FOO`, invoked with `3`, still
+emits seven through `sj.add_byte(FOO)`. `literal_block` names this measured
+foreign-language boundary; other dialects retain their existing substitution.
+With Lua enabled, live invocations expand one layer at a time so
+`sj.get_define(name, true)` observes the innermost invocation's arguments and
+returning restores the caller's arguments. The normal expansion-depth limit
+and nested diagnostic frames remain in force. The Lua verdict corpus pins
+both behaviours against the reference.
+
 ## Drift triggers
 
 Stop and re-consult if a change would:

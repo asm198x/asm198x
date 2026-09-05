@@ -9,6 +9,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Run SjASMPlus Lua 5.4 table generators with persistent globals, three-pass
+  execution, immediate assembler callbacks, and live banked-memory reads
+  (#532). Native releases include the sandbox; Rust libraries opt in with
+  `lua`, while WebAssembly retains an explicit feature-unavailable diagnostic.
 - Add SjASMPlus `IFN` as the negated expression conditional, with the same
   dotted, case-sensitive, lazy, and forward-reference behaviour as `IF` (#582).
 - Give the WebAssembly shell named in-memory projects, Z80/Z80N target

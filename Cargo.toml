@@ -39,6 +39,7 @@ serde_json = "1"
 # format198x's own crate for the layout facts and their citations.
 format198x-sinclair-zx-spectrum-tap = "0.1"
 format198x-tzx = "0.1"
+mlua = { version = "0.12", features = ["lua54", "vendored"] }
 
 [workspace.package]
 edition = "2024"
@@ -93,6 +94,7 @@ tag-namespace = "asm198x"
 # release created with that token fires no `release: published` event for
 # another workflow to catch. See .github/workflows/notify-discord.yml.
 post-announce-jobs = ["./notify-discord"]
+features = ["lua"]
 
 [profile.dist]
 inherits = "release"

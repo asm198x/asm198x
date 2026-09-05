@@ -126,6 +126,15 @@ pub const DIRECTIVES: &[Directive] = &[
         category: Category::Operation,
     },
     Directive {
+        id: "lua",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["lua", "endlua", "includelua"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
+    Directive {
         id: "opt",
         pattern: Pattern::Sigilled {
             sigil: '.',
@@ -178,9 +187,8 @@ pub const DIRECTIVES: &[Directive] = &[
     // `decisions/sjasmplus-lua.md` keeps process execution out of the Lua
     // sandbox for good. For those, refusing with a diagnostic that says the
     // source is valid and the gap is ours is the honest end state, not a
-    // staging post. `lua`/`endlua`/`includelua` are different: the same
-    // decision accepts them behind the `lua` build feature, so their stay
-    // here ends when that lands.
+    // staging post. `lua`/`endlua`/`includelua` are declared separately above:
+    // the `lua` feature enables them, and a build without it refuses by name.
     // The device model (`docs/sjasmplus-device-model.md`). `DEVICE` and `SLOT`
     // emit nothing; `PAGE` opens a section, because two pages written at one
     // address concatenate in the output rather than colliding.
@@ -289,7 +297,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "emptytap",
                 "emptytrd",
                 "encoding",
-                "endlua",
                 "endm",
                 "endt",
                 "endw",
@@ -301,12 +308,10 @@ pub const DIRECTIVES: &[Directive] = &[
                 "ifnused",
                 "ifused",
                 "inchob",
-                "includelua",
                 "inctrd",
                 "inf",
                 "insert",
                 "labelslist",
-                "lua",
                 "mmu",
                 "outend",
                 "output",
@@ -591,6 +596,9 @@ impl SjasmplusSyntax {
 }
 
 impl Z80Syntax for SjasmplusSyntax {
+    fn has_lua(&self) -> bool {
+        true
+    }
     fn lexical_option(
         &self,
         word: &str,
@@ -976,7 +984,16 @@ impl Z80Syntax for SjasmplusSyntax {
         line: usize,
         state: &mut macros::MacroState,
     ) -> Result<Option<macros::Expanded>, AsmError> {
-        macros::expand_at(&SjasmplusSyntax, source, file, line, state).map(Some)
+        // Lua observes the currently executing invocation's arguments. Nested
+        // calls must remain live until the evaluator enters their bodies.
+        #[cfg(feature = "lua")]
+        {
+            macros::expand_one_at(&SjasmplusSyntax, source, file, line, state).map(Some)
+        }
+        #[cfg(not(feature = "lua"))]
+        {
+            macros::expand_at(&SjasmplusSyntax, source, file, line, state).map(Some)
+        }
     }
 
     fn scopes_locals(&self) -> bool {
@@ -1201,6 +1218,18 @@ fn split_macro_name(rest: &str) -> (&str, &str) {
 }
 
 impl macros::MacroSyntax for SjasmplusSyntax {
+    fn literal_block(&self, line: &str) -> Option<bool> {
+        match line
+            .split_whitespace()
+            .next()
+            .unwrap_or_default()
+            .trim_start_matches('.')
+        {
+            "lua" | "LUA" if line.starts_with(char::is_whitespace) => Some(true),
+            "endlua" | "ENDLUA" => Some(false),
+            _ => None,
+        }
+    }
     /// Two spellings, both the reference's (#205):
     ///
     /// ```text

@@ -85,6 +85,31 @@ jobs:
           done
           exit $leaked
 
+  lua:
+    name: Lua (${{ matrix.os }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+    steps:
+      - uses: actions/checkout@v7
+      - name: Read pinned toolchain
+        id: toolchain
+        shell: bash
+        run: |
+          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
+          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.toolchain.outputs.channel }}
+          components: clippy
+      - uses: Swatinem/rust-cache@v2
+      - name: Lint the release feature
+        run: cargo clippy -p asm198x --features lua --all-targets -- -D warnings
+      - name: Test sandbox, pass integration and saved reference verdicts
+        run: cargo test -p asm198x --features lua --lib --test lua --test directive_surface --test multifile --test fmt --test lazy_branches --test verdict_replay
+
   # `crates/asm198x-web` is excluded from the workspace (see the root
   # Cargo.toml), so no job above builds, tests, or lints it. This one does.
   web:
