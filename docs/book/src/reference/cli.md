@@ -179,6 +179,21 @@ Available on the flat dialects, plus the ca65 and vasm linked paths for
 `--debug` and `--sym`. They describe an assembly, so combining them with `fmt`
 or `disasm` is an error rather than a silent no-op.
 
+Use `--sym-format=vice` with `--sym` for a VICE monitor label file (default
+extension `.vs`), or `--sym-format=nocash` for Game Boy bank:address labels
+(default extension `.sym`):
+
+```sh
+asm198x --dialect acme --sym --sym-format=vice program.asm
+asm198x --dialect rgbasm --sym --sym-format=nocash game.asm
+```
+
+Both formats export address labels, not constants. VICE requires resolved
+16-bit, unbanked locations; the Game Boy format requires captured RGBASM bank
+metadata. Unsupported names and locations are errors, not silently omitted
+symbols. `--sym-format=native` is the default and preserves the original
+symbol table. `--sym=path` overrides the filename for any format.
+
 ### `convert` — dialect conversion
 
 ```

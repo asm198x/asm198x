@@ -528,6 +528,7 @@ fn run(args: &[String]) -> Result<String, String> {
     // path (input with the artifact's extension); `Some(Some(p))` = explicit.
     let mut debug: ArtifactPath = None;
     let mut sym: ArtifactPath = None;
+    let mut sym_format = asm198x::SymbolFormat::Native;
     let mut listing: ArtifactPath = None;
     let mut listing_json: ArtifactPath = None;
     let mut linker_config: Option<PathBuf> = None;
@@ -552,6 +553,14 @@ fn run(args: &[String]) -> Result<String, String> {
                 debug = Some(Some(PathBuf::from(&f["--debug=".len()..])));
             }
             "--sym" => sym = Some(None),
+            "--sym-format" => {
+                i += 1;
+                sym_format =
+                    parse_symbol_format(args.get(i).ok_or("`--sym-format` needs a format")?)?;
+            }
+            f if f.starts_with("--sym-format=") => {
+                sym_format = parse_symbol_format(&f["--sym-format=".len()..])?;
+            }
             f if f.starts_with("--sym=") => {
                 sym = Some(Some(PathBuf::from(&f["--sym=".len()..])));
             }
@@ -644,6 +653,9 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     let input = input.ok_or("no input file given (try --help)")?;
+    if sym_format != asm198x::SymbolFormat::Native && sym.is_none() {
+        return Err("`--sym-format` requires `--sym[=path]`".into());
+    }
     // The FileId→path table for human error rendering: single-file today, so
     // the root input is the whole table. U2's include-capable paths return the
     // real multi-file table (with `include_dirs` wired into the loader).
@@ -825,6 +837,7 @@ fn run(args: &[String]) -> Result<String, String> {
             exe,
             output.as_deref(),
             (&debug, &sym, &listing, &listing_json),
+            sym_format,
         );
     }
 
@@ -891,6 +904,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 &[],
                 &debug,
                 &sym,
+                sym_format,
                 &listing,
                 &listing_json,
             )?,
@@ -958,6 +972,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 &[],
                 &debug,
                 &sym,
+                sym_format,
                 &listing,
                 &listing_json,
             )?,
@@ -1149,6 +1164,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 &sources,
                 &debug,
                 &sym,
+                sym_format,
                 &listing,
                 &listing_json,
             )?
@@ -1255,6 +1271,17 @@ fn frame_output(assembly: &asm198x::AssemblyResult, format: asm198x::OutputForma
     out
 }
 
+fn parse_symbol_format(value: &str) -> Result<asm198x::SymbolFormat, String> {
+    match value {
+        "native" => Ok(asm198x::SymbolFormat::Native),
+        "vice" => Ok(asm198x::SymbolFormat::Vice),
+        "nocash" => Ok(asm198x::SymbolFormat::NoCash),
+        _ => Err(format!(
+            "unknown symbol format `{value}` (expected native, vice, or nocash)"
+        )),
+    }
+}
+
 #[allow(clippy::too_many_arguments)]
 fn write_debug_artifacts(
     input: &str,
@@ -1265,6 +1292,7 @@ fn write_debug_artifacts(
     sources: &[asm198x::ListingFile],
     debug: &ArtifactPath,
     sym: &ArtifactPath,
+    sym_format: asm198x::SymbolFormat,
     listing: &ArtifactPath,
     listing_json: &ArtifactPath,
 ) -> Result<String, String> {
@@ -1296,7 +1324,14 @@ fn write_debug_artifacts(
         emit(path, "debug198x", "debug sidecar", info.to_ndjson())?;
     }
     if let Some(path) = sym {
-        emit(path, "sym", "symbol table", asm198x::render_sym(info))?;
+        let content =
+            asm198x::render_symbol_export(assembly, info, sym_format).map_err(|e| e.to_string())?;
+        let ext = if sym_format == asm198x::SymbolFormat::Vice {
+            "vs"
+        } else {
+            "sym"
+        };
+        emit(path, ext, "symbol table", content)?;
     }
     if let Some(path) = listing {
         let text = asm198x::render_listing_files(sources, assembly, addr_unit);
@@ -1568,6 +1603,9 @@ fn usage() -> String {
      NES project: asm198x --dialect ca65 -C <project.cfg> <input> [-o <out.nes>]\n\
      \x20            (-C reads a bounded ld65 config; absent, the curriculum\n\
      \x20             NROM layout applies as before)\n\
+     symbols:     asm198x --sym[=path] --sym-format=native|vice|nocash <input>\n\
+     \x20            (native preserves --sym output; vice writes .vs monitor labels;\n\
+     \x20             nocash writes .sym Game Boy bank:address labels)\n\
      debug info:  asm198x [--debug[=path]] [--sym[=path]] [--listing[=path]]\n\
      \x20            [--listing-json[=path]] [--map[=path]] <input>\n\
      \x20            (--debug writes the .debug198x NDJSON sidecar; --sym a sorted\n\
@@ -1676,6 +1714,7 @@ fn emit_json(
         &ArtifactPath,
         &ArtifactPath,
     ),
+    sym_format: asm198x::SymbolFormat,
 ) -> Result<String, String> {
     let debug_requested = debug.is_some() || sym.is_some() || listing.is_some();
     // The ca65/vasm debug-capturing entries return the record alongside the
@@ -1752,6 +1791,7 @@ fn emit_json(
                     &sources,
                     debug,
                     sym,
+                    sym_format,
                     listing,
                     listing_json,
                 )?;
