@@ -465,20 +465,49 @@ impl FlatWalk for Walker {
             let pinned = section_origin(code, line)?
                 .map(|e| fold_const(&e, &self.consts, line))
                 .transpose()?;
-            // A banked section is addressed at $4000 whichever bank holds it,
-            // and lands at `bank * $4000` in the ROM. Bank 0 is `ROM0`, which
-            // is addressed and placed at the same $0000.
+            // ROMX starts at $4000 in each bank; preserve any pinned offset
+            // within that window in the file too. Banked RAM has no ROM bytes.
             let kind = section_kind(code);
-            let (base, at) = match bank {
-                Some(n) if n > 0 => (
-                    Some(pinned.unwrap_or(ROMX_BASE)),
-                    crate::engine::Place::At(n * BANK_SIZE),
-                ),
-                _ if kind == "ROM0" => (pinned, crate::engine::Place::ByAddress),
-                _ if kind == "ROMX" => (
-                    Some(pinned.unwrap_or(ROMX_BASE)),
-                    crate::engine::Place::At(BANK_SIZE),
-                ),
+            if let Some(bank) = bank {
+                let range = match kind.as_str() {
+                    "ROMX" => 1..=65535,
+                    "WRAMX" => 1..=7,
+                    "VRAM" => 0..=1,
+                    "SRAM" => 0..=255,
+                    _ => {
+                        return Err(AsmError::new(
+                            line,
+                            "`BANK` only allowed for `ROMX`, `WRAMX`, `SRAM`, or `VRAM` sections",
+                        ));
+                    }
+                };
+                if !range.contains(&bank) {
+                    return Err(AsmError::new(
+                        line,
+                        format!(
+                            "{kind} bank value {bank} out of range ({} to {})",
+                            range.start(),
+                            range.end()
+                        ),
+                    ));
+                }
+            }
+            let bank = bank.unwrap_or(if matches!(kind.as_str(), "ROMX" | "WRAMX") {
+                1
+            } else {
+                0
+            });
+            let bank = u32::try_from(bank)
+                .map_err(|_| AsmError::new(line, "section bank is out of range"))?;
+            let (base, at) = match kind.as_str() {
+                "ROM0" => (pinned, crate::engine::Place::ByAddress),
+                "ROMX" => {
+                    let base = pinned.unwrap_or(ROMX_BASE);
+                    (
+                        Some(base),
+                        crate::engine::Place::At(i64::from(bank) * BANK_SIZE + base - ROMX_BASE),
+                    )
+                }
                 _ => (
                     Some(pinned.unwrap_or_else(|| section_default_base(&kind))),
                     crate::engine::Place::Discard,
@@ -488,6 +517,7 @@ impl FlatWalk for Walker {
                 name: section_name(code),
                 base,
                 at,
+                bank: Some(bank),
             }));
             self.nodes.push(Node {
                 operand_span: None,
@@ -669,14 +699,23 @@ fn section_origin(code: &str, line: usize) -> Result<Option<Expr>, AsmError> {
     // bracketed number and it is not an address — reading the whole line put
     // the bank number in the origin and every label in a banked section came
     // out two bytes into the ROM.
-    let code = match code.to_ascii_uppercase().find("BANK") {
-        Some(i) => &code[..i],
-        None => code,
-    };
+    let fields = section_attributes(code);
+    let code = fields.first().copied().unwrap_or("");
     match (code.find('['), code.rfind(']')) {
         (Some(a), Some(b)) if a < b => Ok(Some(value(code[a + 1..b].trim(), line)?)),
         _ => Ok(None),
     }
+}
+
+/// Region and attributes after the quoted section name. Commas and BANK text
+/// in a section name do not participate in attribute parsing.
+fn section_attributes(code: &str) -> Vec<&str> {
+    let tail = code
+        .split_once('"')
+        .and_then(|(_, tail)| tail.split_once('"'))
+        .and_then(|(_, tail)| tail.split_once(','))
+        .map_or("", |(_, tail)| tail);
+    mos6502::split_top_level(tail, ',')
 }
 
 /// Marks a `BANK("name")` whose section may not have been seen yet. `\u{1}`
@@ -981,18 +1020,16 @@ fn resolve_starts(ops: &mut [Statement], starts: &BTreeMap<String, i64>) -> Resu
     }
 }
 
-/// Every section the program declared, and the bank it went in. A section with
-/// no `BANK[...]` is bank 0 — `ROM0` and the unbanked types all live there.
+/// Every section the program declared, and the bank it went in. Bank identity
+/// is independent of placement in the ROM file.
 fn declared_banks(ops: &[Statement]) -> BTreeMap<String, i64> {
     ops.iter()
         .filter_map(|st| match &st.op {
-            Some(Operation::Section { name, at, .. }) => Some((
-                name.clone(),
-                match at {
-                    crate::engine::Place::At(n) => n / BANK_SIZE,
-                    _ => 0,
-                },
-            )),
+            Some(Operation::Section {
+                name,
+                bank: Some(bank),
+                ..
+            }) => Some((name.clone(), i64::from(*bank))),
             _ => None,
         })
         .collect()
@@ -1026,11 +1063,17 @@ fn resolve_banks(ops: &mut [Statement], banks: &BTreeMap<String, i64>) -> Result
 
 /// The bank in `SECTION "n", ROMX, BANK[k]`, if the source named one.
 fn section_bank(code: &str, line: usize) -> Result<Option<i64>, AsmError> {
-    let upper = code.to_ascii_uppercase();
-    let Some(kw) = upper.find("BANK") else {
+    // BANK is an attribute, never text inside the quoted section name or the
+    // region's address expression. Read only attributes after the region.
+    let Some(attribute) = section_attributes(code).into_iter().skip(1).find(|part| {
+        part.trim_start()
+            .get(..4)
+            .is_some_and(|word| word.eq_ignore_ascii_case("BANK"))
+            && part.trim_start()[4..].trim_start().starts_with('[')
+    }) else {
         return Ok(None);
     };
-    let tail = &code[kw + 4..];
+    let tail = &attribute.trim_start()[4..];
     match (tail.find('['), tail.find(']')) {
         (Some(a), Some(b)) if a < b => match value(tail[a + 1..b].trim(), line)? {
             Expr::Num(n) => Ok(Some(n)),

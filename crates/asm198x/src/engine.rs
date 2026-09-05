@@ -149,6 +149,11 @@ pub struct DebugData {
     /// means unknown, not page zero. Older payloads and flat assemblies omit it.
     #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
     pub symbol_pages: BTreeMap<String, PagedLocation>,
+    /// Bank of an address symbol in a banked section (currently RGBASM).
+    /// Interpret together with the symbol's CPU address: ROM and RAM banks
+    /// are separate spaces. This is not a linear physical address.
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub symbol_banks: BTreeMap<String, u32>,
     /// One span per source-bearing statement that emitted bytes. Fill from `org`
     /// gaps and `align` carries no span (the padding rule).
     pub lines: Vec<LineRec>,
@@ -818,6 +823,7 @@ pub(crate) enum Operation {
         name: String,
         base: Option<i64>,
         at: Place,
+        bank: Option<u32>,
     },
     /// A diagnostic the **source** asked for: ACME's `!error`/`!warn`, lwasm's
     /// `error`, rgbasm's `FAIL`/`WARN`. `fatal` aborts the assembly; otherwise
@@ -1679,6 +1685,7 @@ fn assemble_statements(
     // the flat engine unchanged.
     let mut runs: Vec<Run> = Vec::new();
     let mut section_name = String::new();
+    let mut section_bank = None;
     let mut section_at = Place::ByAddress;
     let mut debug = DebugData {
         cycle_coverage,
@@ -1758,7 +1765,12 @@ fn assemble_statements(
                     );
                 }
             }
-            Some(Operation::Section { name, base, at }) => {
+            Some(Operation::Section {
+                name,
+                base,
+                at,
+                bank,
+            }) => {
                 // Close the run so far and start one at the new base. Bytes
                 // are per-section from here, so the location counter, the
                 // written-range trims and the 64K check all measure within
@@ -1779,6 +1791,7 @@ fn assemble_statements(
                 }
                 section_name = name.clone();
                 section_at = *at;
+                section_bank = *bank;
             }
             Some(Operation::Device(spec)) => {
                 device_memory = spec.clone().map(DeviceMemory::new);
@@ -2306,6 +2319,9 @@ fn assemble_statements(
             } else {
                 if let Some(location) = label_page {
                     debug.symbol_pages.insert(label.clone(), location);
+                }
+                if let Some(bank) = section_bank {
+                    debug.symbol_banks.insert(label.clone(), bank);
                 }
                 // A label lives at this statement's address (`pc`).
                 debug198x::SymbolKind::Label {

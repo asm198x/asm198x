@@ -114,6 +114,7 @@ pub(super) fn place_floating_nonrom_sections(
         base: i64,
         declaration: usize,
         pinned: bool,
+        bank: Option<u32>,
     }
 
     fn extent(ops: &[Statement], section: Section, base: i64) -> Result<i64, AsmError> {
@@ -142,6 +143,7 @@ pub(super) fn place_floating_nonrom_sections(
                 name,
                 base: Some(base),
                 at: crate::engine::Place::Discard,
+                bank,
             }) = &ops[statement].op
             else {
                 continue;
@@ -155,11 +157,16 @@ pub(super) fn place_floating_nonrom_sections(
                 base: *base,
                 declaration: info.declaration,
                 pinned: info.pinned,
+                bank: *bank,
             });
         }
         let mut occupied = Vec::new();
         for section in sections.iter().copied().filter(|s| s.pinned) {
-            occupied.push((section.base, extent(ops, section, section.base)?));
+            occupied.push((
+                section.bank,
+                section.base,
+                extent(ops, section, section.base)?,
+            ));
         }
         occupied.sort_unstable();
         let mut floating = sections
@@ -174,9 +181,10 @@ pub(super) fn place_floating_nonrom_sections(
             let mut base = region_start;
             loop {
                 let end = base + size;
-                if let Some((_, used_end)) = occupied
-                    .iter()
-                    .find(|(used_start, used_end)| base < *used_end && end > *used_start)
+                if let Some((_, _, used_end)) =
+                    occupied.iter().find(|(bank, used_start, used_end)| {
+                        *bank == section.bank && base < *used_end && end > *used_start
+                    })
                 {
                     base = *used_end;
                     continue;
@@ -190,7 +198,7 @@ pub(super) fn place_floating_nonrom_sections(
                 {
                     *slot = Some(base);
                 }
-                occupied.push((base, end));
+                occupied.push((section.bank, base, end));
                 occupied.sort_unstable();
                 break;
             }
