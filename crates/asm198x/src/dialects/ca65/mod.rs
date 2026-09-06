@@ -649,6 +649,13 @@ fn assemble_program(
         rom,
         warnings,
         DebugCaptureMulti {
+            cycle_coverage: crate::engine::CycleCoverage::Full,
+            file_offsets: layout
+                .segs
+                .iter()
+                .enumerate()
+                .filter_map(|(id, s)| Some((id as debug198x::SectionId, s.file_at? as u64)))
+                .collect(),
             sections,
             symbols: dbg_symbols,
             lines: dbg_lines,

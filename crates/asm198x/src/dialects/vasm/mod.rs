@@ -764,6 +764,8 @@ fn assemble_core(
     Ok((
         out,
         DebugCaptureMulti {
+            cycle_coverage: crate::engine::CycleCoverage::None,
+            file_offsets: BTreeMap::new(),
             cycles: Vec::new(),
             sections: dbg_sections,
             symbols: dbg_symbols,

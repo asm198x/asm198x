@@ -503,22 +503,22 @@ fn ca65_sym_renders_post_link_addresses() {
     );
 }
 
-/// `--listing` stays rejected for ca65 (it needs a per-section byte map);
-/// the error says which artifacts are available.
+/// ca65's section byte map enables the ordinary default listing filename.
 #[test]
-fn ca65_listing_still_rejected() {
+fn ca65_listing_uses_the_default_filename() {
     let src_path = temp_source("nes-lst", NES_SRC);
     let out = bin()
         .args(["--dialect", "ca65", "--listing"])
         .arg(&src_path)
         .output()
         .expect("run asm198x");
-    assert!(!out.status.success());
-    let stderr = String::from_utf8_lossy(&out.stderr);
     assert!(
-        stderr.contains("`--debug` and `--sym` are"),
-        "the error names what works: {stderr}"
+        out.status.success(),
+        "{}",
+        String::from_utf8_lossy(&out.stderr)
     );
+    let listing = std::fs::read_to_string(src_path.with_extension("lst")).expect("listing");
+    assert!(listing.contains("section CODE (CPU $8000"), "{listing}");
 }
 
 /// JSON mode + ca65 + `--debug`: the sidecar writes while stdout stays a
