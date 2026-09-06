@@ -7,6 +7,16 @@ license.workspace = true
 repository.workspace = true
 homepage.workspace = true
 
+# cargo-dist uses a namespaced tag and an enclosing directory only on Unix.
+[package.metadata.binstall]
+pkg-url = "{ repo }/releases/download/asm198x-v{ version }/{ name }-{ target }{ archive-suffix }"
+pkg-fmt = "txz"
+bin-dir = "{ name }-{ target }/{ bin }{ binary-ext }"
+
+[package.metadata.binstall.overrides.x86_64-pc-windows-msvc]
+pkg-fmt = "zip"
+bin-dir = "{ bin }{ binary-ext }"
+
 [features]
 default = []
 lua = ["dep:mlua"]

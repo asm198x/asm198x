@@ -1,0 +1,56 @@
+name: Setup action
+
+on:
+  pull_request:
+    paths:
+      - .github/actions/setup/**
+      - .github/workflows/setup-action.yml
+      - Cargo.toml
+      - crates/asm198x/Cargo.toml
+  push:
+    branches: [main]
+    paths:
+      - .github/actions/setup/**
+      - .github/workflows/setup-action.yml
+      - Cargo.toml
+      - crates/asm198x/Cargo.toml
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  install:
+    name: Install release (${{ matrix.runner }})
+    runs-on: ${{ matrix.runner }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - runner: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+          - runner: windows-latest
+            target: x86_64-pc-windows-msvc
+          - runner: macos-latest
+            target: aarch64-apple-darwin
+          - runner: macos-15-intel
+            target: x86_64-apple-darwin
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v6
+        with:
+          node-version: '24'
+      - name: Exercise installation failures without network access
+        run: node --test .github/actions/setup/index.test.cjs
+      - name: Install a real published release
+        id: setup
+        uses: ./.github/actions/setup
+        with:
+          # Deliberately independent of the workspace's next, unreleased version.
+          version: '0.0.57'
+      - name: Use the installed executable from PATH
+        run: node .github/actions/setup/smoke.cjs
+        env:
+          INSTALLED_VERSION: ${{ steps.setup.outputs.version }}
+          INSTALLED_TARGET: ${{ steps.setup.outputs.target }}
+          EXPECTED_TARGET: ${{ matrix.target }}

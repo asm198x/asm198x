@@ -262,8 +262,14 @@
       "slug": "install"
     },
     {
-      "context": "cargo install asm198x will not find it. The binary ships through the GitHub",
-      "heading": "Not on crates.io",
+      "context": "To fetch a prebuilt release instead of compiling, use",
+      "heading": "Cargo",
+      "page": "Install",
+      "slug": "install"
+    },
+    {
+      "context": "Replace main with a reviewed full commit SHA for reproducible workflows.",
+      "heading": "GitHub Actions",
       "page": "Install",
       "slug": "install"
     },
