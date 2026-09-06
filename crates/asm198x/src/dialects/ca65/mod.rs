@@ -254,6 +254,12 @@ pub(crate) fn assemble_with_debug(source: &str) -> Assembled<DebugCapture> {
         &super::ca65_layout::Layout::nes_default(),
         Sweep::single(&isa::mos6502::SET),
     )?;
+    crate::cycles::check_budgets(
+        &[("input", source)],
+        &capture.cycle_costs(),
+        crate::engine::CycleCoverage::Full,
+        &areas,
+    )?;
     Ok((rom, warnings, capture.into_single(), areas))
 }
 
@@ -297,7 +303,17 @@ pub(crate) fn assemble_multi_with(
             Some((map.path(id)?, map.contents(id)?))
         })
         .collect();
-    crate::cycles::check_cycle_budgets(&sources, &crate::engine::DebugData::default(), &out.3)?;
+    let costs = out.2.cycle_costs();
+    // Check each file separately so the diagnostic retains its actual FileId.
+    for (i, source) in sources.iter().enumerate() {
+        crate::cycles::check_budgets(
+            &[*source],
+            &costs,
+            crate::engine::CycleCoverage::Full,
+            &out.3,
+        )
+        .map_err(|e| ca65_flat::stamp_file(e, FileId(i as u32)))?;
+    }
     Ok(out)
 }
 
@@ -422,6 +438,7 @@ fn assemble_program(
     // values already in hand — `(section, offset)` is `(seg, addr - base)`.
     let mut dbg_symbols: Vec<debug198x::Symbol> = Vec::new();
     let mut dbg_lines: Vec<(FileId, u32, debug198x::SectionId, u64, u64)> = Vec::new();
+    let mut dbg_cycles = Vec::new();
     for (name, value) in &parsed.consts {
         dbg_symbols.push(debug198x::Symbol {
             name: name.clone(),
@@ -546,6 +563,19 @@ fn assemble_program(
                 u64::from(off),
                 size as u64,
             ));
+            if let Resolved::Insn { form, .. } = &resolved {
+                dbg_cycles.push((
+                    layout.seg_id(&stmt.seg),
+                    crate::engine::CycleRec {
+                        file: stmt.file,
+                        line: stmt.line as u32,
+                        offset: u64::from(off),
+                        base: form.cycles.base,
+                        page_cross: form.cycles.page_cross,
+                        branch_taken: form.cycles.branch_taken,
+                    },
+                ));
+            }
         }
         if !matches!(resolved, Resolved::Nothing) {
             // The address the statement *reports* — what `*` reads and what a
@@ -622,6 +652,7 @@ fn assemble_program(
             sections,
             symbols: dbg_symbols,
             lines: dbg_lines,
+            cycles: dbg_cycles,
         },
         areas,
     ))

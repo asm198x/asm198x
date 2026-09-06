@@ -274,6 +274,15 @@ an assertion, a malformed spelling, an unknown label or area, or a cycles
 budget on a CPU without cycle data is an error rather than a silently
 ignored comment.
 
+The native ca65 linker checks cycle budgets too, with either its default NES
+layout or a project configuration. A routine ends at the next greater labelled
+offset **in its own segment**; equal offsets in other segments do not mix.
+Data and reservations carry no execution cost. Includes and macro expansions
+count the instructions they emit. The native ca65 timing capture currently
+serves budget checks only: cycle columns and public JSON timing records remain
+limited to the flat drivers. The native vasm path still rejects cycle budgets
+because its instruction timing data is not available.
+
 The sidecar format is specified in
 [`debug198x.md`](https://github.com/asm198x/docs/blob/main/debug198x.md) and is frozen
 at v1.
