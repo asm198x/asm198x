@@ -91,6 +91,18 @@ fn repeated_include_instances_have_per_emission_not_per_line_costs() {
     assert_eq!(lines[2]["cycles"]["max"], 2);
     assert_eq!(lines[2]["address"], 0x8003);
     assert_eq!(lines[2]["file"], "part.inc");
+
+    let r =
+        assemble_ca65(".macro body\n lda #1\n rts\n.endmacro\n.segment \"CODE\"\nstart: body\n")
+            .expect("macro");
+    let v: Value =
+        serde_json::from_str(&render_listing_json("macro.s", &r, 1)).expect("macro JSON");
+    assert_eq!(
+        v["lines"][0]["line"], v["lines"][1]["line"],
+        "one invocation line"
+    );
+    assert_eq!(v["lines"][0]["cycles"]["max"], 2);
+    assert_eq!(v["lines"][1]["cycles"]["max"], 6);
 }
 
 #[test]
