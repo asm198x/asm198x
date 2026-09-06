@@ -59,9 +59,12 @@ fn includes_default_names_conditionals_and_formatting_preserve_requests() {
     assert_eq!(result.artifacts.len(), 1);
     assert_eq!(result.artifacts[0].name, "maps.inc.map");
     let formatted = asm198x::format_sjasmplus(BANKED).expect("format");
-    assert_eq!(asm198x::format_sjasmplus(&formatted).unwrap(), formatted);
+    assert_eq!(
+        asm198x::format_sjasmplus(&formatted).expect("format again"),
+        formatted
+    );
     let reformatted = assemble_sjasmplus(&formatted).expect("reassemble");
-    let original = assemble_sjasmplus(BANKED).unwrap();
+    let original = assemble_sjasmplus(BANKED).expect("original");
     assert_eq!(reformatted.bytes, original.bytes);
     assert_eq!(reformatted.artifacts, original.artifacts);
 }
@@ -70,11 +73,12 @@ fn includes_default_names_conditionals_and_formatting_preserve_requests() {
 fn cli_writes_source_maps_under_outprefix_and_json_describes_them() {
     let dir = scratch::dir("sjasm-symbol-cli");
     let prefix = dir.join("exports");
-    std::fs::create_dir(&prefix).unwrap();
-    std::fs::write(dir.join("input.asm"), BANKED).unwrap();
+    std::fs::create_dir(&prefix).expect("export directory");
+    std::fs::write(dir.join("input.asm"), BANKED).expect("source");
     // The library is pure even with an absolute artifact name.
     let absolute = dir.join("not-written.map");
-    assemble_sjasmplus(&BANKED.replace("native.map", absolute.to_str().unwrap())).unwrap();
+    assemble_sjasmplus(&BANKED.replace("native.map", absolute.to_str().expect("UTF-8 path")))
+        .expect("absolute request");
     assert!(!absolute.exists());
     let output = Command::new(env!("CARGO_BIN_EXE_asm198x"))
         .current_dir(&dir)
@@ -88,20 +92,23 @@ fn cli_writes_source_maps_under_outprefix_and_json_describes_them() {
         ])
         .arg(&prefix)
         .output()
-        .unwrap();
+        .expect("human CLI");
     assert!(
         output.status.success(),
         "{}",
         String::from_utf8_lossy(&output.stderr)
     );
-    let expected = assemble_sjasmplus(BANKED).unwrap();
+    let expected = assemble_sjasmplus(BANKED).expect("assembly");
     for artifact in &expected.artifacts {
         assert_eq!(
-            std::fs::read(prefix.join(&artifact.name)).unwrap(),
+            std::fs::read(prefix.join(&artifact.name)).expect("written artifact"),
             artifact.bytes
         );
     }
-    assert_eq!(std::fs::read(dir.join("code.bin")).unwrap(), expected.bytes);
+    assert_eq!(
+        std::fs::read(dir.join("code.bin")).expect("image"),
+        expected.bytes
+    );
     let json = Command::new(env!("CARGO_BIN_EXE_asm198x"))
         .current_dir(&dir)
         .args([
@@ -111,9 +118,9 @@ fn cli_writes_source_maps_under_outprefix_and_json_describes_them() {
             "--message-format=json",
         ])
         .output()
-        .unwrap();
+        .expect("JSON CLI");
     assert!(json.status.success());
-    let value: serde_json::Value = serde_json::from_slice(&json.stdout).unwrap();
+    let value: serde_json::Value = serde_json::from_slice(&json.stdout).expect("JSON result");
     assert_eq!(value["artifacts"][0]["format"], "cspectmap");
     assert_eq!(value["artifacts"][1]["format"], "labelslist");
     assert!(!dir.join("native.map").exists());
