@@ -163,9 +163,35 @@ pub(crate) struct DebugCaptureMulti {
     /// `(file, line, section, offset, length)` — the [`DebugCapture`] span
     /// plus the file the line counts within.
     pub(crate) lines: Vec<(FileId, u32, debug198x::SectionId, u64, u64)>,
+    /// Native timing records retain their section; equal offsets in different
+    /// segments must never contribute to the same routine's budget.
+    pub(crate) cycles: Vec<(debug198x::SectionId, crate::engine::CycleRec)>,
 }
 
 impl DebugCaptureMulti {
+    pub(crate) fn cycle_costs(&self) -> Vec<crate::cycles::LabelCost> {
+        self.sections
+            .iter()
+            .flat_map(|section| {
+                let debug = crate::engine::DebugData {
+                    symbols: self.symbols.iter().filter(|s| matches!(s.kind,
+                        debug198x::SymbolKind::Label { section: id, .. }
+                        | debug198x::SymbolKind::Entry { section: id, .. } if id == section.id
+                    )).cloned().collect(),
+                    lines: self.lines.iter().filter(|l| l.2 == section.id).map(
+                        |&(file, line, _, offset, length)| crate::engine::LineRec {
+                            file, line, offset, length,
+                        }
+                    ).collect(),
+                    cycles: self.cycles.iter().filter(|c| c.0 == section.id)
+                        .map(|c| c.1).collect(),
+                    ..crate::engine::DebugData::default()
+                };
+                crate::cycles::label_costs_debug(&debug, 1)
+            })
+            .collect()
+    }
+
     /// Collapse to the single-file [`DebugCapture`] (every record in the root
     /// input) — the single-source entry points keep their exact pre-multi-file
     /// shape through this.

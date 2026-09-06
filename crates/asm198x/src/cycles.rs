@@ -105,6 +105,17 @@ pub(crate) fn check_cycle_budgets(
     areas: &[crate::engine::AreaUsage],
 ) -> Result<(), AsmError> {
     let costs = label_costs_debug(debug, 1);
+    check_budgets(sources, &costs, debug.cycle_coverage, areas)
+}
+
+/// Check an already section-aware account from a native driver. Keeping the
+/// assertion parser here gives native and flat assembly identical semantics.
+pub(crate) fn check_budgets(
+    sources: &[(&str, &str)],
+    costs: &[LabelCost],
+    coverage: CycleCoverage,
+    areas: &[crate::engine::AreaUsage],
+) -> Result<(), AsmError> {
     for (file, text) in sources {
         for (i, raw) in text.lines().enumerate() {
             let line = i + 1;
@@ -153,7 +164,7 @@ pub(crate) fn check_cycle_budgets(
                     continue;
                 }
             };
-            match debug.cycle_coverage {
+            match coverage {
                 CycleCoverage::Full => {}
                 CycleCoverage::Partial => {
                     return Err(AsmError::new(

@@ -764,6 +764,7 @@ fn assemble_core(
     Ok((
         out,
         DebugCaptureMulti {
+            cycles: Vec::new(),
             sections: dbg_sections,
             symbols: dbg_symbols,
             lines: dbg_lines,
