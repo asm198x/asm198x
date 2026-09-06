@@ -71,6 +71,14 @@ them (a secondary trigger, per R7):
 
 ## Dated notes (additive changes while draft)
 
+- **2026-09-06 — native ca65 section records (#521).** `AssemblyResult.section_debug`
+  composes the existing Debug198x `Section` and `DebugData`, plus an optional
+  output-file byte offset. Each nested debug record's offsets are relative to
+  that section. Flat producers omit the new field; older payloads default it
+  to empty. No Debug198x format change, contract version bump, or freeze:
+  this is the native listing consumer exercising the still-draft section slice.
+  CPU bases and file offsets remain independent per `layouts-are-data.md`.
+
 - **2026-07-07 — multi-file source model (language-surface U1).** Two additive
   fields, both `#[serde(default)]` and skipped when empty/absent so existing
   payloads stay byte-identical: `AssemblyResult.files` (the FileId→path table,

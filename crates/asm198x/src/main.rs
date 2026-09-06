@@ -784,19 +784,16 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     // Debug198x artifacts: every path emits them (flat U3, ca65 U4, vasm U5).
-    // The ca65/vasm listings wait on a per-section byte map, so only the
-    // record-backed artifacts (`--debug`, `--sym`) are live there.
+    // ca65 supplies the section byte map for listings; vasm still exposes only
+    // the record-backed artifacts (`--debug`, `--sym`).
     if linker_config.is_some() && !matches!(assembler, Assembler::Ca65) {
         return Err(
             "`-C` selects a ca65 linker configuration; this dialect has no linker config".into(),
         );
     }
-    if (listing.is_some() || listing_json.is_some())
-        && matches!(assembler, Assembler::Ca65 | Assembler::Vasm)
-    {
+    if (listing.is_some() || listing_json.is_some()) && matches!(assembler, Assembler::Vasm) {
         return Err(
-            "`--listing` is not yet supported for the ca65/vasm paths (`--debug` and `--sym` are)"
-                .into(),
+            "`--listing` is not yet supported for the vasm path (`--debug` and `--sym` are)".into(),
         );
     }
 
@@ -858,6 +855,7 @@ fn run(args: &[String]) -> Result<String, String> {
             output.as_deref(),
             (&debug, &sym, &listing, &listing_json),
             sym_format,
+            linker_config.as_deref(),
         );
     }
 
@@ -946,7 +944,8 @@ fn run(args: &[String]) -> Result<String, String> {
     // read out of layout (U4), its line records naming each statement's file —
     // same bytes by construction.
     if let Assembler::Ca65 = assembler {
-        let loader = fs_loader(input, &include_dirs);
+        let fs = fs_loader(input, &include_dirs);
+        let loader = RecordingLoader::new(&fs);
         // `-C` selects the project's own ld65 configuration (#483); absent,
         // the curriculum default applies exactly as before.
         let cfg = match &linker_config {
@@ -956,7 +955,10 @@ fn run(args: &[String]) -> Result<String, String> {
             ),
             None => None,
         };
-        let (rom, info) = match (&cfg, debug.is_some() || sym.is_some()) {
+        let (rom, info) = match (
+            &cfg,
+            debug.is_some() || sym.is_some() || listing.is_some() || listing_json.is_some(),
+        ) {
             (Some(cfg), true) => {
                 let (rom, info) =
                     asm198x::assemble_ca65_files_debug_with_config(&source, input, &loader, cfg)
@@ -982,6 +984,7 @@ fn run(args: &[String]) -> Result<String, String> {
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("nes"));
         std::fs::write(&out_path, &rom.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
+        let sources = listing_sources(input, &source, &rom.files, &loader.take());
         let debug_notes = match &info {
             Some(info) => write_debug_artifacts(
                 input,
@@ -989,7 +992,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 1,
                 &rom,
                 info,
-                &[],
+                &sources,
                 &debug,
                 &sym,
                 sym_format,
@@ -1202,8 +1205,7 @@ fn run(args: &[String]) -> Result<String, String> {
 /// `info` (the flat engine's via [`asm198x::debug_info`], ca65's read out of
 /// layout); default paths are the input with the artifact's extension.
 /// `sources` is the listing's spliced source set ([`listing_sources`]) — the
-/// linked ca65/vasm paths, where `--listing` is rejected upstream, pass an
-/// empty slice.
+/// vasm path, where `--listing` is rejected upstream, passes an empty slice.
 /// Resolve a path the **source** named, against the input's directory.
 ///
 /// Source is data, not a command: a `!to "../../elsewhere"` names a file
@@ -1641,8 +1643,7 @@ fn usage() -> String {
      \x20             `name = $hex` table; --listing address/bytes/cycles/source rows\n\
      \x20             with per-label cycle totals; --listing-json the same data as\n\
      \x20             JSON — defaults: input with .debug198x/.sym/.lst/.lst.json;\n\
-     \x20             flat dialects only for now plus the ca65/vasm linked paths\n\
-     \x20             for --debug/--sym)\n\
+     \x20             flat dialects and ca65; vasm supports --debug/--sym only)\n\
      disassemble: asm198x disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\
      format:      asm198x fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
@@ -1745,8 +1746,14 @@ fn emit_json(
         &ArtifactPath,
     ),
     sym_format: asm198x::SymbolFormat,
+    linker_config: Option<&Path>,
 ) -> Result<String, String> {
-    let debug_requested = debug.is_some() || sym.is_some() || listing.is_some();
+    let debug_requested =
+        debug.is_some() || sym.is_some() || listing.is_some() || listing_json.is_some();
+    let cfg = linker_config
+        .map(std::fs::read_to_string)
+        .transpose()
+        .map_err(|e| format!("cannot read linker config: {e}"))?;
     // The ca65/vasm debug-capturing entries return the record alongside the
     // image; the flat paths build theirs from the result below.
     let mut linked_info: Option<asm198x::debug198x::DebugInfo> = None;
@@ -1759,8 +1766,8 @@ fn emit_json(
     // shape needs no change.
     let mut failure_files: Vec<String> = Vec::new();
     // One filesystem loader for every route, wrapped in the include recorder
-    // so a flat `--listing` can splice included files (U9); the linked paths
-    // reject `--listing` upstream and ignore the recording.
+    // so flat listings splice includes and native ca65 rows show included
+    // source. vasm rejects listings upstream and ignores the recording.
     let fs = fs_loader(input, include_dirs);
     let loader = RecordingLoader::new(&fs);
     let result = match assembler {
@@ -1782,6 +1789,23 @@ fn emit_json(
         // ca65 goes through its include-capable entries too (U5); a failure
         // carries the file table so the diagnostic's span can name an
         // included file.
+        Assembler::Ca65 if cfg.is_some() && debug_requested => {
+            asm198x::assemble_ca65_files_debug_with_config(
+                source,
+                input,
+                &loader,
+                cfg.as_deref().expect("config present"),
+            )
+            .map_err(|e| capture_failure(&mut failure_files, e))
+            .map(&mut capture)
+        }
+        Assembler::Ca65 if cfg.is_some() => asm198x::assemble_ca65_files_with_config(
+            source,
+            input,
+            &loader,
+            cfg.as_deref().expect("config present"),
+        )
+        .map_err(|e| capture_failure(&mut failure_files, e)),
         Assembler::Ca65 if debug_requested => {
             asm198x::assemble_ca65_files_debug(source, input, &loader)
                 .map_err(|e| capture_failure(&mut failure_files, e))

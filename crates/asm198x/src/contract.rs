@@ -80,8 +80,8 @@ pub struct AssemblyResult {
     /// existing consumer's JSON is unchanged.
     #[serde(default, skip_serializing_if = "is_zero")]
     pub reserved_prefix: u16,
-    /// Resolved labels and constants. Empty for a linked image, which exposes no
-    /// symbol table through the public API today.
+    /// Flat resolved labels and constants. Linked ca65 labels are section-relative
+    /// in `section_debug`, not flattened into this table.
     #[serde(default)]
     pub symbols: BTreeMap<String, i64>,
     /// The program's entry point, if an `end <addr>` directive gave one.
@@ -95,6 +95,10 @@ pub struct AssemblyResult {
     /// symbols the CLI renders into a `.debug198x` sidecar / `--sym` / `--listing`.
     #[serde(default)]
     pub debug: DebugData,
+    /// Linked-section records. Offsets in each `debug` are relative to its
+    /// section, not the output image. Flat drivers keep using `debug` above.
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub section_debug: Vec<SectionDebug>,
     /// Memory-area accounting (#499), rendered by `--map` and consulted by
     /// `free(<area>)` budgets. Additive: empty serializes nothing.
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -138,6 +142,36 @@ pub struct AssemblyResult {
     pub artifacts: Vec<crate::engine::Artifact>,
 }
 
+/// One linked section's existing debug record plus its two placement axes.
+/// The section's optional base is a CPU address; `file_offset` indexes the
+/// result's bytes. Neither can be inferred from the other (for example CHR
+/// data has file bytes but no CPU base, and BSS has a base but no file bytes).
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct SectionDebug {
+    /// Debug198x section identity and optional CPU base, unchanged from the sidecar.
+    pub section: debug198x::Section,
+    /// Byte offset of the section in the linked output, absent for reservations.
+    #[serde(default)]
+    pub file_offset: Option<u64>,
+    /// Section-relative symbols, lines and spec timing records.
+    #[serde(default)]
+    pub debug: DebugData,
+}
+
+impl SectionDebug {
+    /// Create a section record with no file placement. Set `file_offset` when
+    /// the linker supplies one; a missing placement must not imply byte zero.
+    #[must_use]
+    pub fn new(section: debug198x::Section, debug: DebugData) -> Self {
+        Self {
+            section,
+            file_offset: None,
+            debug,
+        }
+    }
+}
+
 impl AssemblyResult {
     /// A linked image (ca65 `.nes`, vasm hunk exe) — bytes only, no flat origin,
     /// symbols, or entry point exposed through the public API.
@@ -154,6 +188,7 @@ impl AssemblyResult {
             start: None,
             warnings: Vec::new(),
             debug: DebugData::default(),
+            section_debug: Vec::new(),
             diagnostics: Vec::new(),
             files: Vec::new(),
             // A linked image comes from a toolchain with its own output
@@ -188,6 +223,7 @@ impl From<Assembly> for AssemblyResult {
             start: a.start,
             warnings: a.warnings,
             debug: a.debug,
+            section_debug: Vec::new(),
             diagnostics: Vec::new(),
             files: Vec::new(),
             requested_output: a.requested_output,

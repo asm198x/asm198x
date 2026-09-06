@@ -278,9 +278,17 @@ The native ca65 linker checks cycle budgets too, with either its default NES
 layout or a project configuration. A routine ends at the next greater labelled
 offset **in its own segment**; equal offsets in other segments do not mix.
 Data and reservations carry no execution cost. Includes and macro expansions
-count the instructions they emit. The native ca65 timing capture currently
-serves budget checks only: cycle columns and public JSON timing records remain
-limited to the flat drivers. The native vasm path still rejects cycle budgets
+count the instructions they emit. Native ca65 listings group emitted source
+records by segment, with cycle columns and per-label totals. Segment headings
+distinguish CPU bases from file offsets; CHR offsets are section-relative, not
+CPU addresses. Header metadata and address-only reservations have no source
+rows. Repeated includes and macro expansions list each emitted instance.
+
+The ca65 JSON result carries `section_debug`: each entry composes a Debug198x
+`section`, an optional `file_offset`, and the existing `debug` record with
+section-relative offsets. The JSON listing carries a `sections` table and
+section-qualified lines and labels; an unavailable CPU address is `null`.
+Flat results and listings retain their existing shape. The native vasm path still rejects cycle budgets
 because its instruction timing data is not available.
 
 The sidecar format is specified in

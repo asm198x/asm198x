@@ -11,6 +11,8 @@
 use crate::contract::AssemblyResult;
 use crate::span::FileId;
 
+mod native;
+
 /// Wrap an assembly's captured debug record as a full [`debug198x::DebugInfo`]
 /// — the shape the `.debug198x` sidecar serializes and the Emu198x importer
 /// reads. The flat engine is a single section (`main`, id 0) based at the load
@@ -145,6 +147,7 @@ fn path_in(sources: &[String], file: FileId) -> String {
 /// completes it. Collection is strictly passive — read out beside layout or
 /// emission, never branching on it.
 pub(crate) struct DebugCapture {
+    pub(crate) section_debug: Vec<crate::contract::SectionDebug>,
     pub(crate) sections: Vec<debug198x::Section>,
     pub(crate) symbols: Vec<debug198x::Symbol>,
     pub(crate) lines: Vec<(u32, debug198x::SectionId, u64, u64)>,
@@ -158,6 +161,8 @@ pub(crate) struct DebugCapture {
 /// source map's file table, and the single-source entries collapse it via
 /// [`into_single`](Self::into_single).
 pub(crate) struct DebugCaptureMulti {
+    pub(crate) cycle_coverage: crate::engine::CycleCoverage,
+    pub(crate) file_offsets: std::collections::BTreeMap<debug198x::SectionId, u64>,
     pub(crate) sections: Vec<debug198x::Section>,
     pub(crate) symbols: Vec<debug198x::Symbol>,
     /// `(file, line, section, offset, length)` — the [`DebugCapture`] span
@@ -169,10 +174,10 @@ pub(crate) struct DebugCaptureMulti {
 }
 
 impl DebugCaptureMulti {
-    pub(crate) fn cycle_costs(&self) -> Vec<crate::cycles::LabelCost> {
+    pub(crate) fn section_debug(&self) -> Vec<crate::contract::SectionDebug> {
         self.sections
             .iter()
-            .flat_map(|section| {
+            .map(|section| {
                 let debug = crate::engine::DebugData {
                     symbols: self.symbols.iter().filter(|s| matches!(s.kind,
                         debug198x::SymbolKind::Label { section: id, .. }
@@ -185,10 +190,22 @@ impl DebugCaptureMulti {
                     ).collect(),
                     cycles: self.cycles.iter().filter(|c| c.0 == section.id)
                         .map(|c| c.1).collect(),
+                    cycle_coverage: self.cycle_coverage,
                     ..crate::engine::DebugData::default()
                 };
-                crate::cycles::label_costs_debug(&debug, 1)
+                crate::contract::SectionDebug {
+                    section: section.clone(),
+                    file_offset: self.file_offsets.get(&section.id).copied(),
+                    debug,
+                }
             })
+            .collect()
+    }
+
+    pub(crate) fn cycle_costs(&self) -> Vec<crate::cycles::LabelCost> {
+        self.section_debug()
+            .iter()
+            .flat_map(|s| crate::cycles::label_costs_debug(&s.debug, 1))
             .collect()
     }
 
@@ -197,6 +214,7 @@ impl DebugCaptureMulti {
     /// shape through this.
     pub(crate) fn into_single(self) -> DebugCapture {
         DebugCapture {
+            section_debug: self.section_debug(),
             sections: self.sections,
             symbols: self.symbols,
             lines: self
@@ -391,6 +409,9 @@ pub fn render_listing_files(
     result: &AssemblyResult,
     addr_unit: u64,
 ) -> String {
+    if !result.section_debug.is_empty() {
+        return native::text(files, result, addr_unit);
+    }
     use std::collections::BTreeMap;
 
     let base = u64::from(result.origin.unwrap_or(0));
@@ -481,6 +502,9 @@ pub fn render_listing_files(
 /// the human column leaves its cell blank.
 #[must_use]
 pub fn render_listing_json(input: &str, result: &AssemblyResult, addr_unit: u64) -> String {
+    if !result.section_debug.is_empty() {
+        return native::json(input, result, addr_unit);
+    }
     use serde_json::json;
 
     let base = u64::from(result.origin.unwrap_or(0));

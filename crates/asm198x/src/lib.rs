@@ -73,8 +73,8 @@ mod span;
 // every `assemble_*` entry point. `Assembly` stays exported as the engine's
 // internal flat builder that `AssemblyResult` wraps.
 pub use contract::{
-    AssemblyResult, CONTRACT_VERSION, Code, Diagnostic, DiagnosticEnvelope, Fix, Severity,
-    resolve_span_path,
+    AssemblyResult, CONTRACT_VERSION, Code, Diagnostic, DiagnosticEnvelope, Fix, SectionDebug,
+    Severity, resolve_span_path,
 };
 pub use engine::{
     AreaUsage, Artifact, ArtifactFormat, AsmError, Assembly, CycleCoverage, CycleRec, DebugData,
@@ -151,8 +151,9 @@ pub fn assemble_acme_files(
 /// Returns an [`AsmError`] (with source line) on any parse, range, or
 /// symbol-resolution failure.
 pub fn assemble_ca65(source: &str) -> Result<AssemblyResult, AsmError> {
-    let (rom, warnings, _, areas) = dialects::ca65::assemble_with_debug(source)?;
+    let (rom, warnings, capture, areas) = dialects::ca65::assemble_with_debug(source)?;
     let mut result = AssemblyResult::image_warned(rom, warnings);
+    result.section_debug = capture.section_debug;
     result.areas = areas;
     Ok(result)
 }
@@ -197,8 +198,9 @@ pub fn assemble_ca65_files(
 ) -> Result<AssemblyResult, MultiFileError> {
     let mut map = new_source_map(input_path, source);
     match dialects::ca65::assemble_multi(&mut map, loader) {
-        Ok((rom, warnings, _, areas)) => {
+        Ok((rom, warnings, capture, areas)) => {
             let mut result = AssemblyResult::image_warned(rom, warnings);
+            result.section_debug = capture.section_debug();
             result.files = map.file_table();
             result.areas = areas;
             Ok(result)
@@ -235,8 +237,9 @@ pub fn assemble_ca65_files_with_config(
         }
     };
     match dialects::ca65::assemble_multi_with(&mut map, loader, &layout) {
-        Ok((rom, warnings, _, areas)) => {
+        Ok((rom, warnings, capture, areas)) => {
             let mut result = AssemblyResult::image_warned(rom, warnings);
+            result.section_debug = capture.section_debug();
             result.files = map.file_table();
             result.areas = areas;
             Ok(result)
@@ -268,9 +271,11 @@ pub fn assemble_ca65_files_debug(
     match dialects::ca65::assemble_multi(&mut map, loader) {
         Ok((rom, warnings, capture, areas)) => {
             let files = map.file_table();
+            let section_debug = capture.section_debug();
             let info = listing::capture_debug_info_multi(capture, "6502", "ca65", files.clone());
             let mut result = AssemblyResult::image_warned(rom, warnings);
             result.files = files;
+            result.section_debug = section_debug;
             result.areas = areas;
             Ok((result, info))
         }
@@ -305,9 +310,11 @@ pub fn assemble_ca65_files_debug_with_config(
     match dialects::ca65::assemble_multi_with(&mut map, loader, &layout) {
         Ok((rom, warnings, capture, areas)) => {
             let files = map.file_table();
+            let section_debug = capture.section_debug();
             let info = listing::capture_debug_info_multi(capture, "6502", "ca65", files.clone());
             let mut result = AssemblyResult::image_warned(rom, warnings);
             result.files = files;
+            result.section_debug = section_debug;
             result.areas = areas;
             Ok((result, info))
         }
@@ -333,6 +340,7 @@ pub fn assemble_ca65_debug(
 ) -> Result<(AssemblyResult, debug198x::DebugInfo), AsmError> {
     let (rom, warnings, capture, areas) = dialects::ca65::assemble_with_debug(source)?;
     let mut result = AssemblyResult::image_warned(rom, warnings);
+    result.section_debug = capture.section_debug.clone();
     result.areas = areas;
     Ok((
         result,
