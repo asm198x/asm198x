@@ -53,6 +53,7 @@ mod prg;
 #[cfg(test)]
 mod roundtrip_tests;
 mod scopes;
+mod sjasm_symbols;
 mod sna;
 mod symbol_export;
 mod tape;

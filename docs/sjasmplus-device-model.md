@@ -182,8 +182,8 @@ Always-on tests cover all thirteen device geometries (8K, 16K, and 64K pages),
 remapping one page into another slot,
 device switching/disable, entry placement, byte identity, and old JSON payloads.
 
-This is capture infrastructure, not an exporter release. #503 still needs
-RGBASM bank placement, bank-aware Debug198x section projection, and the VICE,
-NO$-style, and SjASMPlus writers with consuming-tool checks. Existing Debug198x
-and listing rendering are unchanged by this slice; their flat section offsets
-are not a substitute for `symbol_pages` when exporting banked addresses.
+The [SjASMPlus map writers](sjasmplus-symbol-exports.md) use this placement
+information. [VICE and Game Boy exports](symbol-exports.md) have their own
+format constraints and consumer checks. Debug198x and listing rendering
+retain their existing flat section offsets; those offsets are not a
+substitute for `symbol_pages` when exporting banked addresses.

@@ -224,6 +224,12 @@ pub(crate) enum Item {
         name: String,
         pages: Operand,
     },
+    SymbolMap {
+        name: String,
+        format: crate::engine::ArtifactFormat,
+        virtual_labels: bool,
+    },
+    StructSymbol(String),
     Bytes(Vec<Operand>),
     Words(Vec<Operand>),
     /// An OS-9 module header (`mod`) and trailer (`emod`).
@@ -883,6 +889,16 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             name: name.clone(),
             pages: pages.clone().into_value()?,
         },
+        Item::SymbolMap {
+            name,
+            format,
+            virtual_labels,
+        } => Operation::SymbolMap {
+            name: name.clone(),
+            format: *format,
+            virtual_labels: *virtual_labels,
+        },
+        Item::StructSymbol(name) => Operation::StructSymbol(name.clone()),
         Item::Bytes(v) => Operation::Bytes(
             v.iter()
                 .cloned()
@@ -1028,6 +1044,16 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             name,
             pages: pages.into_value()?,
         },
+        Item::SymbolMap {
+            name,
+            format,
+            virtual_labels,
+        } => Operation::SymbolMap {
+            name,
+            format,
+            virtual_labels,
+        },
+        Item::StructSymbol(name) => Operation::StructSymbol(name),
         Item::Bytes(v) => Operation::Bytes(
             v.into_iter()
                 .map(Operand::into_value)
@@ -1261,6 +1287,16 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
             name,
             pages: map_sym_expr(pages, f),
         },
+        Operation::SymbolMap {
+            name,
+            format,
+            virtual_labels,
+        } => Operation::SymbolMap {
+            name,
+            format,
+            virtual_labels,
+        },
+        Operation::StructSymbol(name) => Operation::StructSymbol(name),
         Operation::Bytes(v) => {
             Operation::Bytes(v.into_iter().map(|e| map_sym_expr(e, f)).collect())
         }
@@ -1421,6 +1457,16 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
             name,
             pages: Operand::expr(pages),
         },
+        Operation::SymbolMap {
+            name,
+            format,
+            virtual_labels,
+        } => Item::SymbolMap {
+            name,
+            format,
+            virtual_labels,
+        },
+        Operation::StructSymbol(name) => Item::StructSymbol(name),
         Operation::Bytes(v) => Item::Bytes(v.into_iter().map(Operand::expr).collect()),
         Operation::Words(v) => Item::Words(v.into_iter().map(Operand::expr).collect()),
         Operation::Os9Module { fields } => {

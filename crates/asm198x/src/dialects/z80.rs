@@ -2052,6 +2052,16 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         } else {
             parse_op(self.syntax, self.set, self.ext, rest, line, &self.consts)?
         };
+        if let Some(Operation::SymbolMap { name, .. }) = &mut op
+            && name.is_empty()
+        {
+            let source = self
+                .multi
+                .as_ref()
+                .and_then(|mcx| mcx.map.path(file))
+                .unwrap_or("input.asm");
+            *name = format!("{source}.map");
+        }
         let label = match (&resolved_temporary_label, &node.label) {
             (Some(name), _) => Some(name.clone()),
             (None, Some(sym)) => Some(self.resolve_label(&sym.name, line)?),
@@ -2447,6 +2457,9 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
                 instruction_set: None,
                 extension_set: None,
             });
+            let mut marker = out.last().expect("just inserted structure symbol").clone();
+            marker.op = marker.label.take().map(Operation::StructSymbol);
+            out.push(marker);
         };
         export(b.qualified.clone(), b.cursor, out);
         for (path, off) in &b.names {
