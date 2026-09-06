@@ -151,6 +151,16 @@ pub(super) fn substitute_anon_refs(
             name,
             pages: subst(pages)?,
         },
+        Operation::SymbolMap {
+            name,
+            format,
+            virtual_labels,
+        } => Operation::SymbolMap {
+            name,
+            format,
+            virtual_labels,
+        },
+        Operation::StructSymbol(name) => Operation::StructSymbol(name),
         Operation::Entry(e) => Operation::Entry(subst(e)?),
         Operation::Bytes(v) => {
             Operation::Bytes(v.into_iter().map(subst).collect::<Result<_, _>>()?)

@@ -68,5 +68,7 @@ The harness loads the generated `.sym` and asks SameBoy to resolve `Banked`;
 it requires bank 3 and CPU address `$4010`. None of these consumer dependencies
 enter the assembler's library or distribution.
 
-SjASMPlus `CSPECTMAP`/`LABELSLIST` and bank-aware Debug198x projection remain
-separate parts of #503; these switches do not claim those formats.
+SjASMPlus [CSPECTMAP and LABELSLIST](sjasmplus-symbol-exports.md) are requested
+in source, not through these switches. Their native layouts and consumer
+limitations differ from the VICE and Game Boy exports. Bank-aware Debug198x
+section projection remains separate from these writers.

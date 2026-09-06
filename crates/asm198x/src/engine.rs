@@ -83,6 +83,10 @@ pub enum ArtifactFormat {
     Tap,
     /// An Amstrad Plus cartridge: RIFF `AMS!` with one `cbNN` chunk per bank.
     Cpr,
+    /// SjASMPlus's CSpect logical/physical symbol map.
+    CspectMap,
+    /// SjASMPlus's UnrealSpeccy label list.
+    LabelsList,
 }
 
 /// The result of a successful assembly: where it loads and the bytes to load.
@@ -668,6 +672,14 @@ pub(crate) enum Operation {
         name: String,
         pages: Expr,
     },
+    /// Request a symbol view of the finished assembly.
+    SymbolMap {
+        name: String,
+        format: ArtifactFormat,
+        virtual_labels: bool,
+    },
+    /// Preserve the distinction between a structure definition and an EQU.
+    StructSymbol(String),
     /// A **redefinable** symbol binding — lwasm's `set`, and the same idea
     /// under ca65's `.set`, sjasmplus's `defl` and rgbasm's `=`. Unlike
     /// [`Operation::Equ`] it may bind the same name again, and it rebinds in
@@ -1038,6 +1050,8 @@ pub(crate) fn next_pc(
         | Operation::DeviceSlot(_)
         | Operation::DevicePage(_)
         | Operation::SaveCpr { .. }
+        | Operation::SymbolMap { .. }
+        | Operation::StructSymbol(_)
         | Operation::Entry(_) => pc,
     })
 }
@@ -1355,6 +1369,7 @@ pub(crate) fn lua_memory_snapshot(
                         Operation::SaveRaw { .. }
                             | Operation::SaveTape { .. }
                             | Operation::SaveCpr { .. }
+                            | Operation::SymbolMap { .. }
                     )
                 )
             })
@@ -1621,6 +1636,8 @@ fn assemble_statements(
     let mut artifacts: Vec<Artifact> = Vec::new();
     let mut device_memory: Option<DeviceMemory> = None;
     let mut inactive_devices: BTreeMap<String, DeviceMemory> = BTreeMap::new();
+    let mut export_symbols = BTreeMap::new();
+    let mut symbol_maps: Vec<(String, ArtifactFormat, bool, u32)> = Vec::new();
     for s in &statements {
         if let Some(Operation::InitMem(v)) = &s.op {
             if seen_init {
@@ -1803,6 +1820,34 @@ fn assemble_statements(
                         .remove(&spec.name)
                         .unwrap_or_else(|| DeviceMemory::new(spec.clone()))
                 });
+            }
+            Some(Operation::SymbolMap {
+                name,
+                format,
+                virtual_labels,
+            }) => {
+                if !matches!(
+                    format,
+                    ArtifactFormat::CspectMap | ArtifactFormat::LabelsList
+                ) {
+                    return Err(s.err("invalid symbol map format"));
+                }
+                let memory = device_memory
+                    .as_ref()
+                    .ok_or_else(|| s.err("symbol maps require DEVICE emulation mode"))?;
+                symbol_maps.retain(|(_, previous, _, _)| previous != format);
+                symbol_maps.push((
+                    name.clone(),
+                    *format,
+                    *virtual_labels,
+                    memory.spec.slot_size as u32,
+                ));
+            }
+            Some(Operation::StructSymbol(name)) => {
+                if let Some(symbol) = export_symbols.get_mut(name) {
+                    let symbol: &mut crate::sjasm_symbols::Symbol = symbol;
+                    symbol.kind = crate::sjasm_symbols::Kind::Structure;
+                }
             }
             Some(Operation::DeviceSlot(slot)) => {
                 let slot = slot
@@ -2318,6 +2363,28 @@ fn assemble_statements(
                 }));
         }
         if let Some(label) = &s.label {
+            if !label.starts_with(|c: char| c.is_ascii_control() || c.is_ascii_digit()) {
+                let value = symbols.get(label).copied().unwrap_or(pc);
+                let (kind, page) = match &s.op {
+                    Some(Operation::Equ(_)) => (
+                        crate::sjasm_symbols::Kind::Constant,
+                        device_memory.as_ref().and_then(|m| m.location(value)),
+                    ),
+                    Some(Operation::Set(_)) => (
+                        crate::sjasm_symbols::Kind::Variable,
+                        device_memory.as_ref().and_then(|m| m.location(value)),
+                    ),
+                    _ => (crate::sjasm_symbols::Kind::Label, label_page),
+                };
+                export_symbols.insert(
+                    label.clone(),
+                    crate::sjasm_symbols::Symbol {
+                        value,
+                        page: page.map(|p| p.page),
+                        kind,
+                    },
+                );
+            }
             let kind = if matches!(&s.op, Some(Operation::Equ(_))) {
                 // An `equ`/`=` constant: its value, not an address, and no space.
                 let value = symbols.get(label).copied().unwrap_or_default();
@@ -2460,6 +2527,25 @@ fn assemble_statements(
         if origin + bytes.len().div_ceil(addr_unit as usize) as i64 > 0x1_0000 {
             return Err(s.err("program exceeds the 64K address space"));
         }
+    }
+
+    for (name, format, virtual_labels, page_size) in symbol_maps {
+        let text = match format {
+            ArtifactFormat::CspectMap => crate::sjasm_symbols::cspect(&export_symbols, page_size),
+            ArtifactFormat::LabelsList => crate::sjasm_symbols::labels(
+                &export_symbols,
+                device_memory
+                    .as_ref()
+                    .map(|m| (m.spec.name.as_str(), m.spec.slot_size as u32)),
+                virtual_labels,
+            ),
+            _ => unreachable!("only symbol-map formats enter symbol_maps"),
+        };
+        artifacts.push(Artifact {
+            name,
+            format,
+            bytes: text.into_bytes(),
+        });
     }
 
     // Lay the sections into one image. Only a dialect that opened a section

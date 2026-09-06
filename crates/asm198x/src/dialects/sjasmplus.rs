@@ -155,6 +155,15 @@ pub const DIRECTIVES: &[Directive] = &[
         },
         category: Category::Operation,
     },
+    Directive {
+        id: "symbol-maps",
+        pattern: Pattern::Sigilled {
+            sigil: '.',
+            names: &["cspectmap", "labelslist"],
+            required: false,
+        },
+        category: Category::Operation,
+    },
     // Named by its opener, like the blocks above: `ENDMODULE`/`ENDMOD` are
     // parts of the block rather than vocabulary of their own.
     //
@@ -289,7 +298,6 @@ pub const DIRECTIVES: &[Directive] = &[
             names: &[
                 "binary",
                 "bplist",
-                "cspectmap",
                 "defarray",
                 "defdevice",
                 "dephase",
@@ -311,7 +319,6 @@ pub const DIRECTIVES: &[Directive] = &[
                 "inctrd",
                 "inf",
                 "insert",
-                "labelslist",
                 "mmu",
                 "outend",
                 "output",
@@ -742,6 +749,8 @@ impl Z80Syntax for SjasmplusSyntax {
             || word.eq_ignore_ascii_case("display")
             || word.eq_ignore_ascii_case("opt")
             || word.eq_ignore_ascii_case("sldopt")
+            || word.eq_ignore_ascii_case("cspectmap")
+            || word.eq_ignore_ascii_case("labelslist")
             || word.eq_ignore_ascii_case("savebin")
             || word.eq_ignore_ascii_case("savetap")
             || word.eq_ignore_ascii_case("savecpr")
@@ -802,6 +811,54 @@ impl Z80Syntax for SjasmplusSyntax {
         let word = undot(word);
         if word.eq_ignore_ascii_case("align") {
             return self.parse_align(args, line, consts);
+        }
+        if word.eq_ignore_ascii_case("cspectmap") || word.eq_ignore_ascii_case("labelslist") {
+            let cspect = word.eq_ignore_ascii_case("cspectmap");
+            let args = args.trim();
+            let (name, tail) = if let Some(quote) = args
+                .chars()
+                .next()
+                .filter(|c| *c == '"' || *c == '\'' || *c == '<')
+            {
+                let quote = if quote == '<' { '>' } else { quote };
+                let end = args[1..]
+                    .find(quote)
+                    .map(|n| n + 1)
+                    .ok_or_else(|| AsmError::new(line, "unterminated symbol-map filename"))?;
+                (args[1..end].to_string(), args[end + 1..].trim())
+            } else {
+                let end = args.find(|c: char| c.is_whitespace()).unwrap_or(args.len());
+                (args[..end].to_string(), args[end..].trim())
+            };
+            if !cspect && name.is_empty() {
+                return Err(AsmError::new(line, "`LABELSLIST` needs a filename"));
+            }
+            if cspect && !tail.is_empty() {
+                return Err(AsmError::new(
+                    line,
+                    "unexpected text after CSPECTMAP filename",
+                ));
+            }
+            let virtual_labels = if !cspect && !tail.is_empty() {
+                let value = tail.strip_prefix(',').ok_or_else(|| {
+                    AsmError::new(line, "expected comma before virtual-label option")
+                })?;
+                let expr = z80::parse_value(self, value.trim(), line)?;
+                z80::eval_const(&expr, consts).ok_or_else(|| {
+                    AsmError::new(line, "virtual-label option must be known in the first pass")
+                })? != 0
+            } else {
+                false
+            };
+            return Ok(Some(Operation::SymbolMap {
+                name,
+                format: if cspect {
+                    crate::engine::ArtifactFormat::CspectMap
+                } else {
+                    crate::engine::ArtifactFormat::LabelsList
+                },
+                virtual_labels,
+            }));
         }
         if word.eq_ignore_ascii_case("sldopt") {
             let (kind, keywords) = crate::dialects::mos6502::split_first_word(args.trim());
