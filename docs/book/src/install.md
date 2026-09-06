@@ -40,11 +40,47 @@ put the binary on your `PATH`:
 | `x86_64-unknown-linux-gnu` | Linux |
 | `x86_64-pc-windows-msvc` | Windows |
 
-## Not on crates.io
+## Cargo
 
-`cargo install asm198x` will not find it. The binary ships through the GitHub
-Release instead, and the generic `isa` crate name is deliberately unclaimed.
-Use the installer or an archive.
+```sh
+cargo install asm198x --locked
+```
+
+To fetch a prebuilt release instead of compiling, use
+[cargo-binstall](https://github.com/cargo-bins/cargo-binstall):
+
+```sh
+cargo binstall asm198x
+```
+
+Binstall reads the selected crate version's published metadata. The metadata
+names the GitHub release archives and their platform-specific layouts; older
+versions without that metadata may require the installer or a direct archive
+download instead. Binstall can fall back to compilation when a binary is
+unavailable. Use `--strategies crate-meta-data` if the build must fail instead
+of compiling or trying another binary provider.
+
+## GitHub Actions
+
+```yaml
+- uses: asm198x/asm198x/.github/actions/setup@main
+  with:
+    version: '0.0.57'
+- run: asm198x --version
+```
+
+Replace `main` with a reviewed full commit SHA for reproducible workflows.
+The action revision and binary version are independent pins: old release
+tags may not contain the action. `version` must be exact; `latest`, branches
+and version ranges are rejected.
+
+The action verifies the archive against its SHA-256 sidecar, checks the
+executable's version, and adds it to PATH for subsequent steps. It supports
+the four archive targets above, requires no Rust toolchain or token, and uses
+the Node 24 action runtime and the hosted runner's `tar`. The checksum is an
+integrity check against the release, not an independent publisher signature.
+See the [setup action reference](https://github.com/asm198x/asm198x/tree/main/.github/actions/setup)
+for outputs, self-hosted runner requirements and verification details.
 
 ## Check it worked
 

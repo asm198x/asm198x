@@ -1,0 +1,16 @@
+name: Set up asm198x
+description: Install an exact asm198x release, verify its checksum, and add it to PATH
+inputs:
+  version:
+    description: Exact release version (for example 0.0.57, v0.0.57, or asm198x-v0.0.57)
+    required: true
+outputs:
+  version:
+    description: Installed version without a prefix
+  target:
+    description: Rust target triple of the release archive
+  path:
+    description: Directory containing the installed executable
+runs:
+  using: node24
+  main: index.cjs
