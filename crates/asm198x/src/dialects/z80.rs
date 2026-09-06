@@ -3628,7 +3628,12 @@ fn parse_op<S: Z80Syntax>(
             } else {
                 "Lua is not implemented in this build; enable the `lua` Cargo feature"
             },
-        ));
+        )
+        .with_code(if cfg!(feature = "lua") {
+            crate::contract::Code::AssemblyError
+        } else {
+            crate::contract::Code::UnsupportedFeature
+        }));
     }
     if syntax.is_directive(word) {
         return syntax.parse_directive(word, args, line, consts);
@@ -3650,7 +3655,7 @@ fn parse_op<S: Z80Syntax>(
     if let Some(entry) = crate::directives::lookup(syntax.own_directives(), word)
         && entry.category == crate::directives::Category::KnownUnsupported
     {
-        return Err(AsmError::new(
+        return Err(AsmError::unsupported(
             line,
             format!(
                 "`{word}` is a directive this dialect has and asm198x does not \

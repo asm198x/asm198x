@@ -221,6 +221,7 @@ pub(super) fn substitute_anon_refs(
         | Operation::Align { .. }
         | Operation::AlignTo { .. }
         | Operation::Diagnose { .. }
+        | Operation::Unsupported(_)
         | Operation::Section { .. }
         | Operation::Reserve(_)) => other,
         Operation::Fill { count, value } => Operation::Fill {

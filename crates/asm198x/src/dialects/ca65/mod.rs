@@ -2629,7 +2629,7 @@ fn parse_directive(
         ));
     }
     if entry.category == Category::KnownUnsupported {
-        return Err(AsmError::new(
+        return Err(AsmError::unsupported(
             line,
             format!(
                 "`.{name}` is a real directive here and asm198x does not implement \
@@ -2698,7 +2698,7 @@ fn parse_directive(
             ];
             match selected.as_deref() {
                 None | Some("6502") => Ok(Kind::Empty),
-                Some(name) if KNOWN.contains(&name) => Err(AsmError::new(
+                Some(name) if KNOWN.contains(&name) => Err(AsmError::unsupported(
                     line,
                     format!(
                         "`{name}` is a different opcode set, and asm198x assembles a 6502 \

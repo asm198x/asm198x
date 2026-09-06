@@ -112,6 +112,12 @@ fn write_pages(repo: &Path, check: bool, report: &mut Report) -> Result<(), Stri
                 .into_iter()
                 .map(|p| (p.path, p.body)),
         )
+        .chain(asm198x::Code::ALL.iter().map(|code| {
+            (
+                format!("reference/diagnostics/{}.md", code.page_slug()),
+                code.explanation().to_owned(),
+            )
+        }))
         // The conformance ledger is generated like any other page, which is
         // what makes it a release artefact without a release step: `--check`
         // runs on every PR, so a release PR cannot merge carrying a ledger
@@ -192,6 +198,18 @@ fn generate(command: &str, path: &Path, repo: &Path) -> Result<String, String> {
         "asm198x dialects --markdown" => Ok(asm198x::dialect_table::markdown()),
         "xtask instructions --summary" => Ok(crate::instructions::summary_lines()),
         "xtask dialects --summary" => Ok(crate::dialect_pages::summary_lines()),
+        "xtask diagnostics --summary" => {
+            let mut text =
+                String::from("- [Understanding diagnostics](reference/diagnostics.md)\n");
+            for code in asm198x::Code::ALL {
+                text.push_str(&format!(
+                    "  - [{}](reference/diagnostics/{}.md)\n",
+                    code.as_str(),
+                    code.page_slug()
+                ));
+            }
+            Ok(text)
+        }
         "xtask divergences --markdown" => Ok(crate::divergences::markdown(repo)),
         "xtask includes --markdown" => Ok(crate::includes::markdown()),
         "xtask includes --anchors" => Ok(crate::includes::anchors()),

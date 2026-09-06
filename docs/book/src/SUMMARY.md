@@ -48,6 +48,14 @@
 
 # Reference
 
+<!-- generated: xtask diagnostics --summary -->
+- [Understanding diagnostics](reference/diagnostics.md)
+  - [AssemblyError](reference/diagnostics/assembly-error.md)
+  - [BranchOutOfRange](reference/diagnostics/branch-out-of-range.md)
+  - [CycleBudgetExceeded](reference/diagnostics/cycle-budget-exceeded.md)
+  - [UnsupportedFeature](reference/diagnostics/unsupported-feature.md)
+<!-- /generated -->
+
 <!-- generated: xtask instructions --summary -->
 - [Instruction reference](reference/instructions.md)
   - [MOS 6502](reference/instructions/mos6502.md)

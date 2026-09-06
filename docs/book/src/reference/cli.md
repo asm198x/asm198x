@@ -307,10 +307,11 @@ knows — `asm198x: file:line:col: error: message`, dropping the column where th
 parse did not record one — and the full record is on the
 `--message-format=json` path.
 
-**Every diagnostic currently carries the code `AssemblyError`.** Codes are
-assigned as error sites are classified, and new ones are added without
-renumbering the existing ones, so a consumer can switch on a code today and keep
-working as more arrive. Until then the severity carries the same information.
+Use `asm198x --explain <code>` for a longer explanation of a diagnostic.
+The [diagnostic reference](diagnostics.md) carries the same text as the binary.
+Codes are assigned at error sites without renumbering existing ones;
+`AssemblyError` remains the catch-all for sites not yet classified. JSON
+consumers should allow for new code names instead of parsing message wording.
 
 **stdout carries output; stderr carries everything else.** `disasm` and `fmt`
 write their result to stdout, `asm` writes bytes to a file, and the summary line

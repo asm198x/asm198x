@@ -617,6 +617,31 @@
       "slug": "reference/cli"
     },
     {
+      "context": "Assembly stopped before a valid result could be produced. This is the",
+      "page": "AssemblyError",
+      "slug": "reference/diagnostics/assembly-error"
+    },
+    {
+      "context": "A relative branch encodes a distance, not a complete destination address.",
+      "page": "BranchOutOfRange",
+      "slug": "reference/diagnostics/branch-out-of-range"
+    },
+    {
+      "context": "A comment such as ; asm198x: cycles(draw) <= 100 gives a routine a",
+      "page": "CycleBudgetExceeded",
+      "slug": "reference/diagnostics/cycle-budget-exceeded"
+    },
+    {
+      "context": "The named construct belongs to the reference assembler, but this asm198x",
+      "page": "UnsupportedFeature",
+      "slug": "reference/diagnostics/unsupported-feature"
+    },
+    {
+      "context": "An error's short message describes the immediate problem. Its code names a",
+      "page": "Understanding diagnostics",
+      "slug": "reference/diagnostics"
+    },
+    {
       "context": "RCA COSMAC CDP1802.",
       "page": "1802",
       "slug": "reference/dialects/1802"
