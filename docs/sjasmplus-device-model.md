@@ -117,6 +117,29 @@ The classic Spectrum devices use the ROM-derived 48K initial state recorded in
 `syntheses/zx-spectrum/post-boot-ram.md`; all their additional pages are zero.
 The Next, CPC, Plus, and NOSLOT devices start entirely empty (#318).
 
+Initial slot mappings are not universally sequential. SjASMPlus 1.21.0
+CSPECTMAP probes of every slot establish these page IDs, in slot order:
+
+| Device family | Initial pages |
+|---|---|
+| Spectrum 48 | 0, 1, 2, 3 |
+| Spectrum 128 through 8192 | 7, 5, 2, 0 |
+| Spectrum Next | 14, 15, 10, 11, 4, 5, 0, 1 |
+| CPC 464, 6128, Plus | 0, 1, 2, 3 |
+| NOSLOT64K | 0 |
+
+The Spectrum seed follows those mappings: attributes at `$5800` belong to
+physical page 5 on a Spectrum 128, and follow that page when remapped.
+Returning to a previously selected device restores its memory and slot
+mapping, including across `DEVICE NONE`; it does not create a fresh device.
+These are assembler-device rules, not a claim about a machine's power-on MMU.
+They also appear in the reference's
+[`devices.cpp`](https://github.com/z00m128/sjasmplus/blob/v1.21.0/sjasm/devices.cpp).
+
+`cargo test -p asm198x --test device_defaults -- --include-ignored` compares
+all thirteen devices' default symbol addresses and remapped/restored memory
+with the native assembler.
+
 ## What a careless implementation gets wrong
 
 - **Accepting `DEVICE` and ignoring it.** The write check is real and
@@ -157,7 +180,7 @@ The repeatable native comparison is
 `cargo test -p asm198x --test paged_symbols -- --include-ignored`.
 Always-on tests cover all thirteen device geometries (8K, 16K, and 64K pages),
 remapping one page into another slot,
-device reset/disable, entry placement, byte identity, and old JSON payloads.
+device switching/disable, entry placement, byte identity, and old JSON payloads.
 
 This is capture infrastructure, not an exporter release. #503 still needs
 RGBASM bank placement, bank-aware Debug198x section projection, and the VICE,

@@ -1620,6 +1620,7 @@ fn assemble_statements(
     // Source-requested files, captured and retained in source order.
     let mut artifacts: Vec<Artifact> = Vec::new();
     let mut device_memory: Option<DeviceMemory> = None;
+    let mut inactive_devices: BTreeMap<String, DeviceMemory> = BTreeMap::new();
     for s in &statements {
         if let Some(Operation::InitMem(v)) = &s.op {
             if seen_init {
@@ -1794,7 +1795,14 @@ fn assemble_statements(
                 section_bank = *bank;
             }
             Some(Operation::Device(spec)) => {
-                device_memory = spec.clone().map(DeviceMemory::new);
+                if let Some(memory) = device_memory.take() {
+                    inactive_devices.insert(memory.spec.name.clone(), memory);
+                }
+                device_memory = spec.as_ref().map(|spec| {
+                    inactive_devices
+                        .remove(&spec.name)
+                        .unwrap_or_else(|| DeviceMemory::new(spec.clone()))
+                });
             }
             Some(Operation::DeviceSlot(slot)) => {
                 let slot = slot
@@ -2603,8 +2611,16 @@ impl DeviceMemory {
     }
 
     fn new(spec: DeviceSpec) -> Self {
+        // SjASMPlus 1.21.0's initial slot mapping, not sequential bank IDs.
+        // Native CSPECTMAP probes cover every slot of every built-in device.
+        let slots = match spec.name.as_str() {
+            "ZXSPECTRUMNEXT" => vec![14, 15, 10, 11, 4, 5, 0, 1],
+            "ZXSPECTRUM128" | "ZXSPECTRUM256" | "ZXSPECTRUM512" | "ZXSPECTRUM1024"
+            | "ZXSPECTRUM2048" | "ZXSPECTRUM4096" | "ZXSPECTRUM8192" => vec![7, 5, 2, 0],
+            _ => (0..spec.slots).collect(),
+        };
         let mut memory = Self {
-            slots: (0..spec.slots).collect(),
+            slots,
             current_slot: spec.slots - 1,
             pages: vec![vec![0; spec.slot_size]; spec.pages],
             spec,
@@ -2620,7 +2636,7 @@ impl DeviceMemory {
                 | "ZXSPECTRUM4096"
                 | "ZXSPECTRUM8192"
         ) {
-            seed_spectrum_48k(&mut memory.pages);
+            seed_spectrum_48k(&mut memory.pages, &memory.slots);
         }
         memory
     }
@@ -2697,8 +2713,8 @@ impl DeviceMemory {
 /// The 48K ROM's deterministic START initialisation, derived in
 /// `syntheses/zx-spectrum/post-boot-ram.md`. Larger classic Spectrum devices
 /// expose this same initial 64K window and leave every additional page zero.
-fn seed_spectrum_48k(pages: &mut [Vec<u8>]) {
-    pages[1][0x1800..0x1b00].fill(0x38);
+fn seed_spectrum_48k(pages: &mut [Vec<u8>], slots: &[usize]) {
+    pages[slots[1]][0x1800..0x1b00].fill(0x38);
 
     const SYSVARS: &[(usize, u8)] = &[
         (0x00, 0xff),
@@ -2795,7 +2811,7 @@ fn seed_spectrum_48k(pages: &mut [Vec<u8>]) {
         (0x15b, 0x3e),
     ];
     for &(offset, value) in SYSVARS {
-        pages[1][0x1c00 + offset] = value;
+        pages[slots[1]][0x1c00 + offset] = value;
     }
 
     const UDG_A_TO_U: [u8; 168] = [
@@ -2808,7 +2824,7 @@ fn seed_spectrum_48k(pages: &mut [Vec<u8>]) {
         68, 66, 0, 0, 60, 64, 60, 2, 66, 60, 0, 0, 254, 16, 16, 16, 16, 16, 0, 0, 66, 66, 66, 66,
         66, 60, 0,
     ];
-    pages[3][0x3f58..].copy_from_slice(&UDG_A_TO_U);
+    pages[slots[3]][0x3f58..].copy_from_slice(&UDG_A_TO_U);
 }
 
 /// RIFF CPR layout from `reference/by-system/amstrad-cpc/formats.md` §CPR.

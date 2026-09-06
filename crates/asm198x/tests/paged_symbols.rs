@@ -56,7 +56,7 @@ fn mapping_changes_do_not_rewrite_earlier_symbols_or_fabricate_flat_pages() {
     let pages = &result.debug.symbol_pages;
     assert_eq!(pages.len(), 2);
     check(&pages["one"], 3, 1, 0x4000, 0x11);
-    check(&pages["reset"], 3, 3, 0x4000, 0x13);
+    check(&pages["reset"], 3, 1, 0x4000, 0x13);
     assert_eq!(result.bytes, [0, 1, 2, 3]);
 }
 
