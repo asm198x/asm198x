@@ -378,7 +378,8 @@ pub(super) fn emit(
                             return Err(AsmError::new(
                                 line_for_errors,
                                 format!("branch target out of range ({offset} bytes)"),
-                            ));
+                            )
+                            .with_code(crate::contract::Code::BranchOutOfRange));
                         }
                         out.push(offset as i8 as u8);
                     }

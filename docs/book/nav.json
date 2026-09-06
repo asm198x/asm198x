@@ -208,6 +208,32 @@
           "children": [
             {
               "children": [],
+              "slug": "reference/diagnostics/assembly-error",
+              "title": "AssemblyError"
+            },
+            {
+              "children": [],
+              "slug": "reference/diagnostics/branch-out-of-range",
+              "title": "BranchOutOfRange"
+            },
+            {
+              "children": [],
+              "slug": "reference/diagnostics/cycle-budget-exceeded",
+              "title": "CycleBudgetExceeded"
+            },
+            {
+              "children": [],
+              "slug": "reference/diagnostics/unsupported-feature",
+              "title": "UnsupportedFeature"
+            }
+          ],
+          "slug": "reference/diagnostics",
+          "title": "Understanding diagnostics"
+        },
+        {
+          "children": [
+            {
+              "children": [],
               "slug": "reference/instructions/mos6502",
               "title": "MOS 6502"
             },

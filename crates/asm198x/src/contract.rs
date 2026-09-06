@@ -229,16 +229,58 @@ pub enum Severity {
     Warning,
 }
 
-/// A stable, machine-readable diagnostic code a consumer can switch on (R2).
-/// Codes are assigned incrementally as error sites are classified; today every
-/// engine error maps to [`Code::AssemblyError`], the catch-all. More-specific
-/// codes are added additively (`#[non_exhaustive]`), never renumbered.
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
-#[non_exhaustive]
-pub enum Code {
-    /// The unclassified default — an assembly error with no more-specific code
-    /// assigned yet. Stable: consumers may switch on it.
-    AssemblyError,
+// One registry defines the wire names, exhaustive list and embedded pages.
+// A new code cannot compile without its explanation; xtask publishes precisely
+// these pages into the book, and --check detects stale text or navigation.
+macro_rules! diagnostic_codes {
+    ($( $(#[$doc:meta])* $variant:ident => $page:literal ),+ $(,)?) => {
+        /// Stable diagnostic codes, classified at the error site rather than
+        /// inferred from wording. Unclassified errors retain `AssemblyError`.
+        #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+        #[non_exhaustive]
+        pub enum Code { $( $(#[$doc])* $variant ),+ }
+
+        impl Code {
+            /// Every code this binary can emit, in documentation order.
+            pub const ALL: &'static [Self] = &[$(Self::$variant),+];
+
+            /// The stable spelling used in JSON and by `--explain`.
+            #[must_use]
+            pub const fn as_str(self) -> &'static str {
+                match self { $(Self::$variant => stringify!($variant)),+ }
+            }
+
+            /// Look up an exact stable code name. Unknown names are not aliases
+            /// for an unrelated explanation.
+            #[must_use]
+            pub fn from_name(name: &str) -> Option<Self> {
+                match name { $(stringify!($variant) => Some(Self::$variant)),+, _ => None }
+            }
+
+            /// Markdown shared verbatim by the CLI and generated book page.
+            #[must_use]
+            pub const fn explanation(self) -> &'static str {
+                match self { $(Self::$variant => include_str!(concat!("../docs/diagnostics/", $page, ".md"))),+ }
+            }
+
+            /// Stable book filename, without directory or extension.
+            #[must_use]
+            pub const fn page_slug(self) -> &'static str {
+                match self { $(Self::$variant => $page),+ }
+            }
+        }
+    };
+}
+
+diagnostic_codes! {
+    /// An assembly error not yet assigned a more specific code.
+    AssemblyError => "assembly-error",
+    /// The encoded PC-relative displacement cannot reach the target.
+    BranchOutOfRange => "branch-out-of-range",
+    /// A statically counted routine exceeds the source's declared ceiling.
+    CycleBudgetExceeded => "cycle-budget-exceeded",
+    /// Valid reference syntax requests behaviour this build does not implement.
+    UnsupportedFeature => "unsupported-feature",
 }
 
 /// A machine-applicable suggested fix (rustc's model): a human description and,
@@ -344,8 +386,7 @@ impl Diagnostic {
 /// An engine [`AsmError`] becomes a line-granular [`Diagnostic`]: it keeps its
 /// span when the raising site had one (the AST-routed dialects, once U3 wires
 /// them), else a synthesized line-only span from `AsmError::line` (`0` → no
-/// span). The message is preserved verbatim; the code is the
-/// [`Code::AssemblyError`] catch-all until sites are classified (R2).
+/// span). The message and the raising site's code are preserved verbatim.
 impl From<AsmError> for Diagnostic {
     fn from(e: AsmError) -> Self {
         let span = e
@@ -353,7 +394,7 @@ impl From<AsmError> for Diagnostic {
             .or_else(|| (e.line != 0).then(|| Span::at(e.line as u32, 0)));
         Self {
             span,
-            code: Code::AssemblyError,
+            code: e.code,
             severity: Severity::Error,
             message: e.message,
             fix: None,

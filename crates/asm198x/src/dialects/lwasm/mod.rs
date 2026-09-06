@@ -1258,7 +1258,7 @@ fn set_pragma(
     if let Some(what) = gap
         && pragma_is_on(set, index) != want_on
     {
-        return Err(AsmError::new(
+        return Err(AsmError::unsupported(
             line,
             format!(
                 "`{name}` asks for {what}, which asm198x does not do — the source is \
@@ -1444,12 +1444,9 @@ fn parse_op(
         // parse and object at assembly time. `Operation::Diagnose` is that:
         // the engine raises it where the statement stands, and a statement
         // inside a dead branch never becomes one.
-        Category::KnownUnsupported => Ok(Some(Operation::Diagnose {
-            severity: crate::engine::DiagSeverity::Error,
-            message: format!(
-                "`{m}` is a real directive here and asm198x does not implement it yet"
-            ),
-        })),
+        Category::KnownUnsupported => Ok(Some(Operation::Unsupported(format!(
+            "`{m}` is a real directive here and asm198x does not implement it yet"
+        )))),
         // Declared for `lwasm` only where lwasm itself refuses the word for the
         // binary we emit; the refusal is the match, not a gap.
         Category::RefusedByReference(rule) => Ok(Some(Operation::Diagnose {
@@ -1516,6 +1513,9 @@ fn parse_op(
                 // engine before it objects.
                 for name in pragma_names(operand) {
                     if let Err(e) = set_pragma(&name, strict, &mut state.pragmas, line) {
+                        if e.code == crate::contract::Code::UnsupportedFeature {
+                            return Ok(Some(Operation::Unsupported(e.message)));
+                        }
                         return Ok(Some(refused(e.message)));
                     }
                 }

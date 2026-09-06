@@ -237,7 +237,7 @@ fn parse_op(rest: &str, line: usize) -> Result<Option<Operation>, AsmError> {
                 ));
             }
             Category::KnownUnsupported => {
-                return Err(AsmError::new(
+                return Err(AsmError::unsupported(
                     line,
                     format!(
                         "`{word}` is a real directive here and asm198x does not implement it yet"

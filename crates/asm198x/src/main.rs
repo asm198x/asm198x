@@ -471,6 +471,26 @@ fn run(args: &[String]) -> Result<String, String> {
         return Ok(version());
     }
 
+    if args[0] == "--explain" || args[0].starts_with("--explain=") {
+        let name = if args[0] == "--explain" && args.len() == 2 {
+            args[1].as_str()
+        } else if args.len() == 1 {
+            args[0].strip_prefix("--explain=").unwrap_or("")
+        } else {
+            return Err("usage: asm198x --explain <code> (without assembly options)".into());
+        };
+        let code = asm198x::Code::from_name(name).ok_or_else(|| {
+            let known = asm198x::Code::ALL
+                .iter()
+                .map(|code| code.as_str())
+                .collect::<Vec<_>>()
+                .join(", ");
+            format!("unknown diagnostic code `{name}`; available codes: {known}")
+        })?;
+        print!("{}", code.explanation());
+        return Ok(String::new());
+    }
+
     // `dialects` prints the table `--dialect` resolves against, `--markdown`
     // in the shape the CLI reference wants. The reference lives in another
     // repo and had drifted — five dialects missing, and the ROM-less MCS-48
@@ -1356,7 +1376,7 @@ fn render_error(input: &str, files: &[String], e: &asm198x::AsmError) -> String 
         .span
         .as_ref()
         .and_then(|span| files.get(span.file.0 as usize).map(|file| (span, file)));
-    match resolved {
+    let mut text = match resolved {
         Some((span, file)) if span.col != 0 => {
             format!(
                 "{file}:{}:{}: error: {}{}",
@@ -1373,7 +1393,16 @@ fn render_error(input: &str, files: &[String], e: &asm198x::AsmError) -> String 
             render_expansion_notes(span, files)
         ),
         None => format!("{input}: {e}"),
+    };
+    // Preserve the catch-all's existing rendering. Classified failures carry
+    // an actionable command without disrupting source/expansion locations.
+    if e.code != asm198x::Code::AssemblyError {
+        text.push_str(&format!(
+            "\nFor more information: asm198x --explain {}",
+            e.code.as_str()
+        ));
     }
+    text
 }
 
 /// One rustc-style note per macro expansion the failing text came through,
@@ -1618,6 +1647,7 @@ fn usage() -> String {
      \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\
      format:      asm198x fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
      \x20            (canonical layout, comments + operand spelling preserved; Z80/8080/6800/1802/scmp/rgbasm/6809)\n\
+     explain:     asm198x --explain <code>\n\
      version:     asm198x --version (also -V, or `asm198x version`)\n\n\
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
@@ -1957,6 +1987,7 @@ mod tests {
         let files = vec!["main.s".to_string(), "that-file.inc".to_string()];
         let e = AsmError {
             line: 12,
+            code: asm198x::Code::AssemblyError,
             message: "value 300 does not fit in a byte".to_string(),
             span: Some(Span::in_file(FileId(1), 12, 8)),
         };
@@ -1981,6 +2012,7 @@ mod tests {
         .expect("a span");
         let e = AsmError {
             line: 3,
+            code: asm198x::Code::AssemblyError,
             message: "unknown instruction `frob`".to_string(),
             span: Some(span),
         };
@@ -1998,6 +2030,7 @@ mod tests {
         let files = vec!["main.s".to_string()];
         let e = AsmError {
             line: 4,
+            code: asm198x::Code::AssemblyError,
             message: "boom".to_string(),
             span: Some(Span::in_file(FileId(0), 4, 0)),
         };
@@ -2010,6 +2043,7 @@ mod tests {
     fn render_error_falls_back_without_a_resolvable_span() {
         let files = vec!["main.s".to_string()];
         let spanless = AsmError {
+            code: asm198x::Code::AssemblyError,
             line: 2,
             message: "no entry point".to_string(),
             span: None,
@@ -2020,6 +2054,7 @@ mod tests {
         );
 
         let out_of_table = AsmError {
+            code: asm198x::Code::AssemblyError,
             line: 3,
             message: "boom".to_string(),
             span: Some(Span::in_file(FileId(7), 3, 1)),

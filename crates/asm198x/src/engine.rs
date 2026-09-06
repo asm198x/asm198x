@@ -305,6 +305,8 @@ pub struct CycleRec {
 pub struct AsmError {
     pub line: usize,
     pub message: String,
+    /// Stable classification, preserved through source-span enrichment.
+    pub code: crate::contract::Code,
     /// The source span, when the raising site knows a column-level position (the
     /// AST-routed dialects, once U3 wires them). `None` for the line-only sites,
     /// where the diagnostic is line-granular. Per contract KTD1 the span rides
@@ -314,22 +316,36 @@ pub struct AsmError {
 }
 
 impl AsmError {
-    pub(crate) fn new(line: usize, message: impl Into<String>) -> Self {
+    /// A line-granular error with the catch-all diagnostic code.
+    pub fn new(line: usize, message: impl Into<String>) -> Self {
         Self {
             line,
             message: message.into(),
             span: None,
+            code: crate::contract::Code::AssemblyError,
         }
     }
 
     /// An error carrying a source span. `line` mirrors the span's line so the
     /// `Display` impl and existing `.line` readers keep working unchanged.
-    pub(crate) fn at(span: Span, message: impl Into<String>) -> Self {
+    pub fn at(span: Span, message: impl Into<String>) -> Self {
         Self {
             line: span.line as usize,
             message: message.into(),
             span: Some(span),
+            code: crate::contract::Code::AssemblyError,
         }
+    }
+
+    /// Classify at the raising site without changing its message or location.
+    #[must_use]
+    pub fn with_code(mut self, code: crate::contract::Code) -> Self {
+        self.code = code;
+        self
+    }
+
+    pub(crate) fn unsupported(line: usize, message: impl Into<String>) -> Self {
+        Self::new(line, message).with_code(crate::contract::Code::UnsupportedFeature)
     }
 }
 
@@ -849,6 +865,8 @@ pub(crate) enum Operation {
         severity: DiagSeverity,
         message: String,
     },
+    /// A reference-valid construct refused only if evaluation reaches it.
+    Unsupported(String),
     /// An assertion the source asked for: `ASSERT`/`assert`/`.assert`. The
     /// diagnostic fires when `cond` evaluates to zero.
     ///
@@ -1052,6 +1070,7 @@ pub(crate) fn next_pc(
         | Operation::SaveCpr { .. }
         | Operation::SymbolMap { .. }
         | Operation::StructSymbol(_)
+        | Operation::Unsupported(_)
         | Operation::Entry(_) => pc,
     })
 }
@@ -2007,6 +2026,11 @@ fn assemble_statements(
             }
             // An assertion that holds says nothing.
             Some(Operation::Assert { .. }) => {}
+            Some(Operation::Unsupported(message)) => {
+                return Err(s
+                    .err(message)
+                    .with_code(crate::contract::Code::UnsupportedFeature));
+            }
             Some(Operation::Diagnose { severity, message }) => match severity {
                 DiagSeverity::Error => return Err(s.err(message)),
                 DiagSeverity::Warning | DiagSeverity::Note => warnings.push(Warning {
@@ -2232,7 +2256,7 @@ fn assemble_statements(
                                     if !(-128..=127).contains(&offset) {
                                         return Err(s.operand_err(format!(
                                             "branch target out of range ({offset} bytes; must be -128..=127)"
-                                        )));
+                                        )).with_code(crate::contract::Code::BranchOutOfRange));
                                     }
                                     bytes.push(offset as i8 as u8);
                                 }
@@ -2241,7 +2265,7 @@ fn assemble_statements(
                                     if !(-32768..=32767).contains(&offset) {
                                         return Err(s.operand_err(format!(
                                             "long branch target out of range ({offset} bytes; must be -32768..=32767)"
-                                        )));
+                                        )).with_code(crate::contract::Code::BranchOutOfRange));
                                     }
                                     push_word(
                                         &mut bytes,
@@ -2286,7 +2310,14 @@ fn assemble_statements(
                             // would be off by the block's offset.
                             let next = origin + pseudo + bytes.len() as i64 + i64::from(*width);
                             let v = if *rel { raw - next } else { raw };
-                            emit_value(&mut bytes, v, *width, *rel || *signed, set.endianness, s)?;
+                            emit_value(&mut bytes, v, *width, *rel || *signed, set.endianness, s)
+                                .map_err(|error| {
+                                if *rel {
+                                    error.with_code(crate::contract::Code::BranchOutOfRange)
+                                } else {
+                                    error
+                                }
+                            })?;
                         }
                         Piece::Packed {
                             expr,
@@ -2334,9 +2365,9 @@ fn assemble_statements(
                                 (i64::from(*base | *dir_bit), -d - 1)
                             };
                             if !(0..=0xFFFF).contains(&mag) {
-                                return Err(
-                                    s.operand_err(format!("{what} out of range ({d} words)"))
-                                );
+                                return Err(s
+                                    .operand_err(format!("{what} out of range ({d} words)"))
+                                    .with_code(crate::contract::Code::BranchOutOfRange));
                             }
                             emit_value(&mut bytes, word1, 2, false, set.endianness, s)?;
                             emit_value(&mut bytes, mag, 2, false, set.endianness, s)?;

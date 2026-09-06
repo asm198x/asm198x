@@ -2127,7 +2127,7 @@ fn parse_directive(
         ));
     }
     if entry.category == Category::KnownUnsupported {
-        return Err(AsmError::new(
+        return Err(AsmError::unsupported(
             line,
             format!(
                 "`!{name}` is a real pseudo opcode here and asm198x does not \
@@ -2163,7 +2163,7 @@ fn parse_directive(
                 // ACME's other processors. Each is a different opcode set —
                 // not a spelling of 6502 — so accepting one silently would
                 // assemble the wrong instructions or refuse the right ones.
-                "m65" => Err(AsmError::new(
+                "m65" => Err(AsmError::unsupported(
                     line,
                     format!(
                         "`!cpu {name}` selects a different processor, and asm198x does \

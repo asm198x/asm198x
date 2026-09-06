@@ -191,7 +191,8 @@ pub(crate) fn check_cycle_budgets(
                          {} worst case (straight-line to the next label)",
                         cost.max
                     ),
-                ));
+                )
+                .with_code(crate::contract::Code::CycleBudgetExceeded));
             }
         }
     }

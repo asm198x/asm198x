@@ -293,6 +293,8 @@ pub(crate) enum Item {
         at: crate::engine::Place,
         bank: Option<u32>,
     },
+    /// A reference-valid construct refused only when evaluation reaches it.
+    Unsupported(String),
     /// A source-requested diagnostic (ACME `!error`/`!warn`, lwasm `error`,
     /// rgbasm `FAIL`/`WARN`). Like the aligns it has no emit arm: the
     /// formatter re-emits it from [`Node::source`](Node).
@@ -949,6 +951,7 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
             modulus: *modulus,
             fill: fill.clone(),
         },
+        Item::Unsupported(message) => Operation::Unsupported(message.clone()),
         Item::Diagnose { severity, message } => Operation::Diagnose {
             severity: *severity,
             message: message.clone(),
@@ -1119,6 +1122,7 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
             fill,
         },
         Item::AlignTo { modulus, fill } => Operation::AlignTo { modulus, fill },
+        Item::Unsupported(message) => Operation::Unsupported(message),
         Item::Diagnose { severity, message } => Operation::Diagnose { severity, message },
         Item::Assert {
             cond,
@@ -1357,6 +1361,7 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
         | Operation::Align { .. }
         | Operation::AlignTo { .. }
         | Operation::Diagnose { .. }
+        | Operation::Unsupported(_)
         | Operation::Section { .. }
         | Operation::Reserve(_)) => other,
         Operation::Fill { count, value } => Operation::Fill {
@@ -1520,6 +1525,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
             fill,
         },
         Operation::AlignTo { modulus, fill } => Item::AlignTo { modulus, fill },
+        Operation::Unsupported(message) => Item::Unsupported(message),
         Operation::Diagnose { severity, message } => Item::Diagnose { severity, message },
         Operation::Assert {
             cond,

@@ -1109,6 +1109,7 @@ fn encode(
         if matches!(size, Some(Size::B)) {
             let d = i8::try_from(disp).map_err(|_| {
                 AsmError::new(line, format!("short branch out of range ({disp} bytes)"))
+                    .with_code(crate::contract::Code::BranchOutOfRange)
             })?;
             if d == 0 {
                 // A zero low byte is the word-form marker; vasm rejects `.s` here.
@@ -1120,8 +1121,10 @@ fn encode(
             word |= u16::from(d as u8);
             return Ok((word.to_be_bytes().to_vec(), relocs));
         }
-        let d = i16::try_from(disp)
-            .map_err(|_| AsmError::new(line, format!("branch out of range ({disp} bytes)")))?;
+        let d = i16::try_from(disp).map_err(|_| {
+            AsmError::new(line, format!("branch out of range ({disp} bytes)"))
+                .with_code(crate::contract::Code::BranchOutOfRange)
+        })?;
         let mut out = word.to_be_bytes().to_vec();
         out.extend_from_slice(&d.to_be_bytes());
         return Ok((out, relocs));
@@ -2774,7 +2777,7 @@ fn parse_op(
             return Ok(Stmt::Empty);
         }
         if directive.category == crate::directives::Category::KnownUnsupported {
-            return Err(AsmError::new(
+            return Err(AsmError::unsupported(
                 line,
                 format!(
                     "`{lower}` is a real directive here and asm198x does not implement \
