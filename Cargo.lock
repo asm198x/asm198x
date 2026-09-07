@@ -124,9 +124,9 @@ checksum = "3e0f1c7c3a72c66fd80abe965175f7523475c0489a87d3ff9d6e8c87d87a9d2d"
 
 [[package]]
 name = "format198x-sinclair-zx-spectrum-tap"
-version = "0.1.0"
+version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "7f95b7efab7ed3ec45d45c379bc3f1d11ab04ecb633f7f6810d33b42eb5da300"
+checksum = "4d24ed83a7027015be0e62bd801812f1f36dac769e59b6c69bbd3dcdf1a8411c"
 
 [[package]]
 name = "format198x-tzx"
