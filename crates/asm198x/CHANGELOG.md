@@ -7,6 +7,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.58](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.57...asm198x-v0.0.58) - 2026-09-07
+
+### Added
+
+- *(ca65)* expose section-aware listings and timing records ([#593](https://github.com/asm198x/asm198x/pull/593))
+- *(ca65)* enforce section-aware cycle budgets ([#592](https://github.com/asm198x/asm198x/pull/592))
+- add pinned setup action and cargo-binstall metadata ([#591](https://github.com/asm198x/asm198x/pull/591))
+- explain diagnostic codes from shared documentation ([#590](https://github.com/asm198x/asm198x/pull/590))
+- *(sjasmplus)* export CSpect and UnrealSpeccy symbol maps ([#589](https://github.com/asm198x/asm198x/pull/589))
+- export VICE and Game Boy symbols ([#587](https://github.com/asm198x/asm198x/pull/587))
+- preserve paged symbol placement for exports
+- embed sandboxed SjASMPlus Lua 5.4 ([#584](https://github.com/asm198x/asm198x/pull/584))
+- *(sjasmplus)* add IFN conditionals ([#583](https://github.com/asm198x/asm198x/pull/583))
+- *(web)* assemble named projects and targets ([#581](https://github.com/asm198x/asm198x/pull/581))
+- *(sjasmplus)* replay device memory for SAVECPR ([#578](https://github.com/asm198x/asm198x/pull/578))
+
+### Fixed
+
+- *(sjasmplus)* preserve native device mappings and memory ([#588](https://github.com/asm198x/asm198x/pull/588))
+- *(rgbasm)* preserve bank identity and section placement ([#586](https://github.com/asm198x/asm198x/pull/586))
+- *(sjasmplus)* support backward location counters ([#580](https://github.com/asm198x/asm198x/pull/580))
+- *(sjasmplus)* seed every device memory model ([#579](https://github.com/asm198x/asm198x/pull/579))
+- *(sjasmplus)* resolve temporary numeric labels ([#577](https://github.com/asm198x/asm198x/pull/577))
+- *(acme)* evaluate star in fill counts ([#576](https://github.com/asm198x/asm198x/pull/576))
+- *(z80)* stop assembly at END ([#574](https://github.com/asm198x/asm198x/pull/574))
+
 ### Added
 
 - Run SjASMPlus Lua 5.4 table generators with persistent globals, three-pass
