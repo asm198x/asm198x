@@ -50,6 +50,7 @@ pub mod includes;
 // `--listing` text views of the same captured record (Debug198x U3, KTD2).
 mod listing;
 mod prg;
+mod recover;
 #[cfg(test)]
 mod roundtrip_tests;
 mod scopes;
@@ -90,6 +91,8 @@ pub use symbol_export::{SymbolExportError, SymbolFormat, render_symbol_export};
 // directly for the symbol types the engine captures.
 pub use convert::{Conversion, convert};
 pub use debug198x;
+pub use recover::{RecoveryOptions, recover_6502};
+
 pub use isa_disasm::{
     Line, disassemble_1802, disassemble_2650, disassemble_6502, disassemble_6809, disassemble_8048,
     disassemble_65816, disassemble_68000, disassemble_cp1610, disassemble_f8, disassemble_huc6280,

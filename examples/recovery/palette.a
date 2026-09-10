@@ -1,0 +1,19 @@
+; A small 6502 program to take apart, name, and change.
+; Copies eight palette bytes through a subroutine into a buffer at $0400.
+; Change the EOR mask to $0f to invert the low four bits of each byte.
+* = $2000
+
+start:  ldx #$00
+loop:   lda palette,x
+        jsr paint
+        inx
+        cpx #$08
+        bne loop
+        rts
+
+paint:  eor #$00
+        sta $0400,x
+        rts
+
+palette:
+        !byte $00,$03,$06,$09,$0c,$0f,$0c,$06

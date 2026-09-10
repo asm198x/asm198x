@@ -7,6 +7,8 @@
 use std::path::{Path, PathBuf};
 use std::process::ExitCode;
 
+mod recovery_cli;
+
 /// A resolved assembler: a syntax dialect plus, for Z80, a target instruction
 /// set. Dialect (`--dialect`, syntax) and target (`--cpu`/`--target`, the chip)
 /// are orthogonal; Z80N availability is a target property, not a syntax one.
@@ -508,6 +510,14 @@ fn run(args: &[String]) -> Result<String, String> {
             println!("{}", dialect_help());
         }
         return Ok(String::new());
+    }
+
+    if args[0] == "disasm"
+        && args[1..]
+            .iter()
+            .any(|arg| matches!(arg.as_str(), "--recover" | "--code" | "--data" | "--label"))
+    {
+        return recovery_cli::run(&args[1..]);
     }
 
     // Assembling is the default when no subcommand is given, so `asm198x
@@ -1645,7 +1655,12 @@ fn usage() -> String {
      \x20             JSON — defaults: input with .debug198x/.sym/.lst/.lst.json;\n\
      \x20             flat dialects and ca65; vasm supports --debug/--sym only)\n\
      disassemble: asm198x disasm [-d <dialect>] [--org <addr>] <input.bin>\n\
-     \x20            (6502 for acme/ca65/6502; Z80 otherwise)\n\
+     \x20            (CPU selected by --dialect or --cpu)\n\
+     recover:     asm198x disasm --recover [-d acme] [--org <addr>]\n\
+     \x20            [--code START:END]... [--data START:END]...\n\
+     \x20            [--label ADDRESS:NAME]... <input.bin> [-o <new-source.a>]\n\
+     \x20            (raw 6502, end-exclusive CPU ranges; unmarked bytes are data;\n\
+     \x20             data overrides code; output is verified by reassembly)\n\
      format:      asm198x fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n\
      \x20            (canonical layout, comments + operand spelling preserved; Z80/8080/6800/1802/scmp/rgbasm/6809)\n\
      explain:     asm198x --explain <code>\n\

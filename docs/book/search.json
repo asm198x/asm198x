@@ -204,7 +204,7 @@
       "slug": "guide/multi-file"
     },
     {
-      "context": "asm198x disasm turns bytes into source. It works for every dialect, and it",
+      "context": "asm198x disasm decodes bytes using the CPU selected by --dialect.",
       "page": "Reading a binary back",
       "slug": "guide/reading-a-binary"
     },
@@ -227,13 +227,19 @@
       "slug": "guide/reading-a-binary"
     },
     {
-      "context": "Feeding the listing back to the assembler produces the byte-for-byte original.",
+      "context": "For this program, feeding the listing back to the assembler produces the",
       "heading": "It reassembles",
       "page": "Reading a binary back",
       "slug": "guide/reading-a-binary"
     },
     {
-      "context": "disasm takes the CPU from --dialect: a 6502 dialect disassembles as 6502,",
+      "context": "The repository includes a 28-byte palette-copy program.",
+      "heading": "Recover, name, and change a program",
+      "page": "Reading a binary back",
+      "slug": "guide/reading-a-binary"
+    },
+    {
+      "context": "The ordinary disasm command selects the CPU through --dialect or --cpu.",
       "heading": "Picking the CPU",
       "page": "Reading a binary back",
       "slug": "guide/reading-a-binary"
@@ -619,6 +625,12 @@
     {
       "context": "0 on success, non-zero on failure. A diagnostic carries a severity, a",
       "heading": "Exit status and diagnostics",
+      "page": "The command line",
+      "slug": "reference/cli"
+    },
+    {
+      "context": "asm198x disasm --recover -d acme --org 0x2000 --code 0x2000:0x2014 input.bin -o recovered.a",
+      "heading": "Verified 6502 recovery",
       "page": "The command line",
       "slug": "reference/cli"
     },
