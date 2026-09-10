@@ -44,6 +44,13 @@ pub(crate) trait Dialect {
         CycleCoverage::None
     }
 
+    /// Resolve timing from the final bytes of a computed instruction.
+    /// Data encoded into pieces never reaches this hook. `None` means the
+    /// instruction has no documented timing and makes coverage partial.
+    fn computed_timing(&self, _bytes: &[u8]) -> Option<crate::engine::CycleBounds> {
+        None
+    }
+
     /// Parse source into the engine's statement stream, resolving each
     /// instruction's addressing mode (so form sizes are stable across passes).
     ///

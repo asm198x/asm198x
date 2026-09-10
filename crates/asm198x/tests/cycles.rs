@@ -4,7 +4,7 @@
 //! `page_crossing(4)`, BNE relative `branch(2)`), so a change here means the
 //! capture drifted from the spec, not that timing changed.
 
-use asm198x::{assemble_acme, assemble_lwasm};
+use asm198x::{assemble_acme, assemble_z8000};
 
 /// R1/R6: pass 2 records the chosen form's cycle triple per instruction, in
 /// emission order, from the spec and nowhere else.
@@ -40,7 +40,7 @@ fn data_lines_carry_no_cycle_records() {
 /// from the dialect's declared coverage, pinned in the listing tests.
 #[test]
 fn field_packed_instructions_capture_no_cycles() {
-    let r = assemble_lwasm("        org $1000\n        nop\n").expect("assembles");
+    let r = assemble_z8000("        org 1000h\n        nop\n").expect("assembles");
     assert!(r.debug.cycles.is_empty(), "no fabricated numbers");
 }
 
@@ -71,10 +71,10 @@ cycle totals (spec, straight-line to the next label):
 /// — no column, no invented numbers — plus the one honest note.
 #[test]
 fn field_packed_listing_says_backfill_pending() {
-    let src = "        org $1000\n        nop\n";
-    let r = assemble_lwasm(src).expect("assembles");
-    let expected = "                                       org $1000
-1000  12                               nop
+    let src = "        org 1000h\n        nop\n";
+    let r = assemble_z8000(src).expect("assembles");
+    let expected = "                                       org 1000h
+1000  8D 07                            nop
 
 no cycle data (backfill pending)
 ";
@@ -139,8 +139,8 @@ fn malformed_budget_comment_is_an_error() {
 /// no cycle data refuses rather than passing on nothing.
 #[test]
 fn cycle_budget_without_cycle_data_is_refused() {
-    let src = "        org $1000\n; asm198x: cycles(start) <= 10\nstart   nop\n";
-    let e = assemble_lwasm(src).expect_err("no data to check against");
+    let src = "        org 1000h\n; asm198x: cycles(start) <= 10\nstart:  nop\n";
+    let e = assemble_z8000(src).expect_err("no data to check against");
     assert!(e.message.contains("no cycle data"), "{}", e.message);
 }
 

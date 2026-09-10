@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Show 6809 cycle costs in lwasm listings and enforce straight-line cycle
+  budgets using shared Isa198x timing metadata. Indexed and stack costs follow
+  the emitted operands; RTI retains its 6–15-cycle range. SYNC and CWAI have
+  no finite maximum, so their listings show lower bounds and their budgets
+  are refused. JSON computed-instruction records expose explicit `bounds`;
+  consumers should use those when present, or `CycleRec::range()` in Rust.
+  `CycleRec` is now non-exhaustive; Rust callers that constructed it with a
+  struct literal must migrate. Older serialized records remain readable.
+  ([#595](https://github.com/asm198x/asm198x/pull/595))
+
 ## [0.0.58](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.57...asm198x-v0.0.58) - 2026-09-06
 
 ### Added

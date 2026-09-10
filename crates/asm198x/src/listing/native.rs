@@ -4,7 +4,7 @@ use crate::{LineRec, SectionDebug};
 use serde_json::json;
 use std::fmt::Write as _;
 
-fn cost(section: &SectionDebug, line: &LineRec) -> Option<(u64, u64)> {
+fn cost(section: &SectionDebug, line: &LineRec) -> Option<(u64, Option<u64>)> {
     section
         .debug
         .cycles
@@ -15,13 +15,8 @@ fn cost(section: &SectionDebug, line: &LineRec) -> Option<(u64, u64)> {
                 && c.offset >= line.offset
                 && c.offset < line.offset.saturating_add(line.length)
         })
-        .map(|c| {
-            (
-                u64::from(c.base),
-                u64::from(c.base) + u64::from(c.page_cross) + u64::from(c.branch_taken),
-            )
-        })
-        .reduce(|a, b| (a.0 + b.0, a.1 + b.1))
+        .map(crate::CycleRec::range)
+        .reduce(|a, b| (a.0 + b.0, a.1.zip(b.1).map(|(x, y)| x + y)))
 }
 
 fn coverage(section: &SectionDebug) -> &'static str {

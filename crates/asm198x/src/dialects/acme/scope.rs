@@ -216,6 +216,7 @@ pub(super) fn substitute_anon_refs(
         // No expressions to rewrite: pre-encoded pieces, binary payloads, and
         // the constant-argument align.
         other @ (Operation::Encoded(_)
+        | Operation::ComputedInstruction(_)
         | Operation::Binary(_)
         | Operation::DefineSymbols(_)
         | Operation::Align { .. }

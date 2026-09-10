@@ -460,11 +460,12 @@ pub fn render_listing_files(
     // Per-line cycle cost (#497), summed over the line's records so a
     // colon-separated multi-statement line shows the line's whole cost. The
     // honest range: min is every conditional extra unspent, max is all spent.
-    let mut cycles: BTreeMap<(u32, u32), (u64, u64)> = BTreeMap::new();
+    let mut cycles: BTreeMap<(u32, u32), (u64, Option<u64>)> = BTreeMap::new();
     for c in &result.debug.cycles {
-        let e = cycles.entry((c.file.0, c.line)).or_insert((0, 0));
-        e.0 += u64::from(c.base);
-        e.1 += u64::from(c.base) + u64::from(c.page_cross) + u64::from(c.branch_taken);
+        let e = cycles.entry((c.file.0, c.line)).or_insert((0, Some(0)));
+        let (min, max) = c.range();
+        e.0 += min;
+        e.1 = e.1.zip(max).map(|(a, b)| a + b);
     }
     let cyc_w = cycles
         .values()
@@ -513,12 +514,13 @@ pub fn render_listing_json(input: &str, result: &AssemblyResult, addr_unit: u64)
     } else {
         result.files.iter().map(String::as_str).collect()
     };
-    let mut cycles: std::collections::BTreeMap<(u32, u32), (u64, u64)> =
+    let mut cycles: std::collections::BTreeMap<(u32, u32), (u64, Option<u64>)> =
         std::collections::BTreeMap::new();
     for c in &result.debug.cycles {
-        let e = cycles.entry((c.file.0, c.line)).or_insert((0, 0));
-        e.0 += u64::from(c.base);
-        e.1 += u64::from(c.base) + u64::from(c.page_cross) + u64::from(c.branch_taken);
+        let e = cycles.entry((c.file.0, c.line)).or_insert((0, Some(0)));
+        let (min, max) = c.range();
+        e.0 += min;
+        e.1 = e.1.zip(max).map(|(a, b)| a + b);
     }
     let lines: Vec<serde_json::Value> = result
         .debug
@@ -605,12 +607,12 @@ pub fn render_map(result: &AssemblyResult) -> String {
 }
 
 /// The cycles column cell: one number when the cost is fixed, `min/max` when
-/// conditional extras make it a range — never a collapsed single figure.
-fn cycle_cell((min, max): (u64, u64)) -> String {
-    if min == max {
-        format!("{min}")
-    } else {
-        format!("{min}/{max}")
+/// conditional extras make it a range, or `>=min` for an unbounded wait.
+fn cycle_cell((min, max): (u64, Option<u64>)) -> String {
+    match max {
+        None => format!(">={min}"),
+        Some(max) if min == max => format!("{min}"),
+        Some(max) => format!("{min}/{max}"),
     }
 }
 
@@ -626,16 +628,17 @@ fn render_cycle_footer(result: &AssemblyResult, base: u64, addr_unit: u64, out: 
     use std::fmt::Write as _;
 
     if !result.debug.cycles.is_empty() {
-        let rows: Vec<(String, u64, (u64, u64))> = crate::cycles::label_costs(result, addr_unit)
-            .into_iter()
-            .map(|c| {
-                (
-                    format!("{} (${:04X})", c.name, base + c.start),
-                    c.bytes,
-                    (c.min, c.max),
-                )
-            })
-            .collect();
+        let rows: Vec<(String, u64, (u64, Option<u64>))> =
+            crate::cycles::label_costs(result, addr_unit)
+                .into_iter()
+                .map(|c| {
+                    (
+                        format!("{} (${:04X})", c.name, base + c.start),
+                        c.bytes,
+                        (c.min, c.max),
+                    )
+                })
+                .collect();
         if !rows.is_empty() {
             let _ = writeln!(
                 out,
@@ -649,7 +652,7 @@ cycle totals (spec, straight-line to the next label):"
                     "  {name:<name_w$}  {bytes} byte{}, {} cycle{}",
                     if bytes == 1 { "" } else { "s" },
                     cycle_cell(cost),
-                    if cost == (1, 1) { "" } else { "s" },
+                    if cost == (1, Some(1)) { "" } else { "s" },
                 );
             }
         }
@@ -685,7 +688,7 @@ struct RenderCx<'a> {
     margins: &'a [String],
     margin_w: usize,
     /// Per-(file, line) summed cycle cost, empty when nothing captured.
-    cycles: &'a std::collections::BTreeMap<(u32, u32), (u64, u64)>,
+    cycles: &'a std::collections::BTreeMap<(u32, u32), (u64, Option<u64>)>,
     /// Widest rendered cycle cell; 0 suppresses the column entirely, so a
     /// capture-less listing is byte-identical to what it always was.
     cyc_w: usize,
