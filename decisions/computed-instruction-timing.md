@@ -24,7 +24,7 @@ coverage. RTI has a finite runtime-dependent range, which must not be
 misrepresented as a page-cross or branch-taken penalty.
 
 Existing form records omit `bounds` and retain their JSON shape.
-`CycleRec::range()` resolves either shape. New JSON consumers must honor
+`CycleRec::range()` resolves either shape. New JSON consumers must honour
 `bounds` when present. Human listings show unbounded costs as `>=min`, JSON
 listings use `max: null`, and cycle ceilings refuse the affected label.
 Coverage describes completeness of metadata, not whether execution finishes.

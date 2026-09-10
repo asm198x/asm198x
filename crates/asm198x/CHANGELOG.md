@@ -17,6 +17,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   consumers should use those when present, or `CycleRec::range()` in Rust.
   `CycleRec` is now non-exhaustive; Rust callers that constructed it with a
   struct literal must migrate. Older serialized records remain readable.
+  ([#595](https://github.com/asm198x/asm198x/pull/595))
 
 ## [0.0.58](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.57...asm198x-v0.0.58) - 2026-09-06
 
