@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.59](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.58...asm198x-v0.0.59) - 2026-09-10
+
+### Added
+
+- *(disasm)* recover verified labelled 6502 source ([#597](https://github.com/asm198x/asm198x/pull/597))
+- *(6809)* capture operand-resolved cycle costs and budgets ([#595](https://github.com/asm198x/asm198x/pull/595))
+
 ### Added
 
 - Recover raw 6502 binaries as labelled ACME source with `disasm --recover`.
