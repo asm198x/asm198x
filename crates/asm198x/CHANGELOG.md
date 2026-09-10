@@ -9,6 +9,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Recover raw 6502 binaries as labelled ACME source with `disasm --recover`.
+  Mark code and data ranges, name addresses, and rebuild byte-identically
+  before any source is written. The included palette example walks from a
+  binary through recovered loop/subroutine labels to an intentional edit.
+
 - Show 6809 cycle costs in lwasm listings and enforce straight-line cycle
   budgets using shared Isa198x timing metadata. Indexed and stack costs follow
   the emitted operands; RTI retains its 6–15-cycle range. SYNC and CWAI have

@@ -388,3 +388,15 @@ payload is one line on the wire; it is shown indented here:
 first, and stays empty until a dialect expands macros. `fix` carries a suggested
 edit where one is available: a `description`, plus a `replacement` when the fix
 is a concrete piece of text to apply at the span.
+
+### Verified 6502 recovery
+
+`asm198x disasm --recover -d acme --org 0x2000 --code 0x2000:0x2014 input.bin -o recovered.a`
+produces ACME source only after a byte-identical rebuild. `--code START:END`
+and `--data START:END` are repeatable half-open CPU address ranges. Unmarked
+bytes remain data; data ranges override code. `--label ADDRESS:NAME` supplies
+a name, and direct control-flow targets inside the image receive generated
+labels. `-o` must name a new file; omit it for stdout.
+
+The [worked recovery example](../guide/reading-a-binary.md#recover-name-and-change-a-program)
+shows how to identify a table, recover a subroutine, and change one instruction.
