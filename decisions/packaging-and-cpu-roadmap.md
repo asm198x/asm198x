@@ -32,6 +32,12 @@ fork: one codebase producing either a fat binary or per-CPU binaries
 **Splitting by *architecture* (a binary per CPU) is off the table** unless those
 metrics later say otherwise.
 
+The browser uses this feature-selection path: `asm198x-web` builds either all
+architectures or a selected subset from the same library. This keeps the
+native CLI whole and requires no runtime plugin interface. The measured
+browser case and its consumer are recorded in
+[`browser-builds-use-features.md`](browser-builds-use-features.md).
+
 ### 2. Function split = subcommands, not separate binaries
 
 The natural way to expose assembler / disassembler / linker as distinct

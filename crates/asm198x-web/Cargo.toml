@@ -15,9 +15,8 @@ crate-type = ["cdylib", "rlib"]
 
 # One feature per CPU architecture. `entry` is the only thing that names the
 # library's assembler entry points, so a build that does not select an
-# architecture never references it and the linker drops it: a Z80-only build
-# is 414 KB of wasm against 1422 KB for all of them, 153 KB against 480 KB
-# gzipped. That matters for a page that embeds this beside an emulator.
+# architecture never references it and the linker drops it. See README.md
+# for the recorded bundle sizes and the browser packaging decision.
 #
 # `default = ["all"]`, so nothing that does not ask changes.
 [features]
