@@ -1,0 +1,27 @@
+; Full-screen C64 raster bars, entered at $2000 after the normal ROM boot.
+; VIC-II registers: C64 Programmer's Reference Guide (1983), Appendix N.
+; Disable the text display so the border colour fills the whole picture.
+; The low raster byte selects one of eight colours every 32 scanlines.
+* = $2000
+
+start:  sei
+        lda #$0b
+        sta $d011
+
+loop:   lda $d012
+        lsr
+        lsr
+        lsr
+        lsr
+        lsr
+        tax
+        lda palette,x
+        jsr paint
+        jmp loop
+
+paint:  eor #$00
+        sta $d020
+        rts
+
+palette:
+        !byte $06,$0e,$03,$01,$07,$08,$02,$04

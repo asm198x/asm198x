@@ -1,5 +1,8 @@
 # Take a binary apart
 
+For a visible result, try the [C64 raster-bar workflow](C64.md): recover a
+program, rebuild it, change its colours, and run it in Emu198x.
+
 `palette.a` is a 28-byte 6502 program: 20 bytes of code followed by an
 eight-byte palette. A loop loads each palette byte, calls a subroutine that
 XORs it with a mask, and writes it into the buffer at `$0400`.

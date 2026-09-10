@@ -107,6 +107,11 @@ assemblers, which is where the disassembler's correctness is established — see
 
 ## Recover, name, and change a program
 
+Want to see the edit run? The [C64 raster-bar walkthrough](https://github.com/asm198x/asm198x/blob/main/examples/recovery/C64.md)
+takes a 38-byte program through recovery, an identical rebuild, and a one-byte
+colour change, then runs both versions in Emu198x. It includes PRG packaging
+and a script for capturing the result without a window.
+
 The repository includes a [28-byte palette-copy program](https://github.com/asm198x/asm198x/blob/main/examples/recovery/palette.a).
 Its loop loads eight bytes from a table, calls a subroutine that XORs each
 with a mask, and stores them in a buffer at `$0400`. The code occupies
