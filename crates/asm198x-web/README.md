@@ -65,12 +65,6 @@ The crate is excluded from the workspace, so it carries its own `Cargo.lock`;
 `cargo update -p asm198x --manifest-path crates/asm198x-web/Cargo.toml`
 refreshes the path entry after the library's version moves.
 
-## Size
-
-Every dialect ships in one module. Measured 2026-09-04, `opt-level = "z"`,
-after wasm-opt: 1,505,582 bytes raw, 514,986 gzipped. A per-platform split
-(#495) is a decision for when a consumer needs one.
-
 ## Running what you assembled
 
 `snapshot(dialect, source)` returns a 48K `.sna` — the same bytes
@@ -88,9 +82,14 @@ exactly as the command line demands. `null` means it did not assemble;
 
 ## Size: take one architecture
 
-`@asm198x/web` carries every dialect — 1.4 MB raw, 480 KB gzipped. Almost none
-of that is useful to a page teaching one machine, so the package is also built
-per CPU architecture:
+`@asm198x/web` carries every dialect. A page teaching one machine can instead
+use a build containing only its CPU architecture. These are compile-time
+feature selections from the same assembler, with no runtime plugins. See the
+[browser packaging decision](../../decisions/browser-builds-use-features.md).
+
+The recorded 2026-09-04 measurements, using `opt-level = "z"` and wasm-opt,
+illustrate the saving. Sizes change as the assembler grows; these are a
+baseline, not a measurement of every subsequent release:
 
 | package | raw | gzipped |
 |---|---|---|
@@ -111,5 +110,5 @@ scripts/build-npm.sh            # -> @asm198x/web, everything
 whole table, so a picker made from it can never offer a name `assemble` then
 refuses.
 
-Even at 185 KB this is bigger than an emulator embed, so a lesson page should
-still load it lazily — on the first keystroke, not on page load.
+A lesson page should load the assembler when the learner starts editing.
+Code198x already imports `@asm198x/z80` lazily for its Spectrum lessons.
