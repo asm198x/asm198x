@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   Mark code and data ranges, name addresses, and rebuild byte-identically
   before any source is written. The included palette example walks from a
   binary through recovered loop/subroutine labels to an intentional edit.
+  ([#597](https://github.com/asm198x/asm198x/pull/597))
 
 - Show 6809 cycle costs in lwasm listings and enforce straight-line cycle
   budgets using shared Isa198x timing metadata. Indexed and stack costs follow
