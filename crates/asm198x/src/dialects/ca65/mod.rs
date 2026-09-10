@@ -573,6 +573,7 @@ fn assemble_program(
                         base: form.cycles.base,
                         page_cross: form.cycles.page_cross,
                         branch_taken: form.cycles.branch_taken,
+                        bounds: None,
                     },
                 ));
             }

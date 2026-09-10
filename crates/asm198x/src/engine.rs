@@ -228,7 +228,8 @@ pub struct LineRec {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default, Serialize, Deserialize)]
 #[serde(rename_all = "lowercase")]
 pub enum CycleCoverage {
-    /// Every instruction resolves a form: an absent record means data.
+    /// Every instruction has timing metadata: an absent record means data.
+    /// Complete metadata may still describe an unbounded wait.
     Full,
     /// Some instructions pre-encode into pieces and capture nothing; an
     /// absent record is not proof of data, and totals are lower bounds.
@@ -276,13 +277,26 @@ pub struct SegmentUsage {
     pub length: u32,
 }
 
+/// Nominal processor-cycle bounds, excluding external stalls and called code.
+/// `max: None` denotes a documented unbounded wait, not missing metadata.
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
+pub struct CycleBounds {
+    /// Minimum nominal cost.
+    pub min: u8,
+    /// Finite maximum, or `None` when the instruction may wait indefinitely.
+    pub max: Option<u8>,
+}
+
 /// Spec-sourced timing for one emitted instruction (#497): the `isa::Cycles`
 /// triple, copied at the moment pass 2 resolved the form, plus the same
 /// line/offset attribution a [`LineRec`] carries. Data emissions get no
 /// record — absence means "nothing executes here", which a zero would
 /// misstate. The honest range derives as `base ..= base + page_cross +
-/// branch_taken`; renderers derive it rather than storing a collapsed number.
+/// branch_taken` unless `bounds` is present. Computed instructions supply
+/// explicit bounds, including runtime-dependent costs and unbounded waits.
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[non_exhaustive]
 pub struct CycleRec {
     /// 1-based source line, in `file`.
     pub line: u32,
@@ -294,9 +308,33 @@ pub struct CycleRec {
     pub page_cross: u8,
     /// Extra when a branch is taken (0 for non-branches).
     pub branch_taken: u8,
+    /// Authoritative bounds for computed instructions. When present, use
+    /// these instead of deriving a range from the legacy form triple.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub bounds: Option<CycleBounds>,
     /// The file `line` counts within, as [`LineRec::file`].
     #[serde(default, skip_serializing_if = "FileId::is_root")]
     pub file: FileId,
+}
+
+impl CycleRec {
+    /// Nominal bounds, resolving explicit computed timing or the form triple.
+    #[must_use]
+    pub fn range(&self) -> (u64, Option<u64>) {
+        self.bounds.map_or_else(
+            || {
+                (
+                    u64::from(self.base),
+                    Some(
+                        u64::from(self.base)
+                            + u64::from(self.page_cross)
+                            + u64::from(self.branch_taken),
+                    ),
+                )
+            },
+            |b| (u64::from(b.min), b.max.map(u64::from)),
+        )
+    }
 }
 
 /// An assembly error, with the 1-based source line it occurred on (0 = no
@@ -783,6 +821,8 @@ pub(crate) enum Operation {
     /// seam for CPUs whose operands are computed, not fixed-width slots; the
     /// dialect still reuses this engine's two-pass driver, symbols, and `org`.
     Encoded(Vec<Piece>),
+    /// An instruction encoded by its dialect; pass two resolves its timing.
+    ComputedInstruction(Vec<Piece>),
     /// A 6809 bare address whose direct/extended width depends on whether its
     /// expression is already known at this point in pass one. Backward labels
     /// may select direct page; forward labels deliberately stay extended.
@@ -1035,7 +1075,9 @@ pub(crate) fn next_pc(
         Operation::Instruction { mnemonic, mode, .. } => {
             pc + form(set, ext, mnemonic, mode, line)?.len() as i64 / addr_unit
         }
-        Operation::Encoded(pieces) => pc + pieces.iter().map(Piece::len).sum::<i64>() / addr_unit,
+        Operation::Encoded(pieces) | Operation::ComputedInstruction(pieces) => {
+            pc + pieces.iter().map(Piece::len).sum::<i64>() / addr_unit
+        }
         Operation::DirectPage { .. } => {
             return Err(AsmError::new(
                 line,
@@ -1535,7 +1577,9 @@ fn assemble_statements(
             } else {
                 expr.clone()
             };
-            s.op = Some(Operation::Encoded(encoded_pieces(opcode, value, width)));
+            s.op = Some(Operation::ComputedInstruction(encoded_pieces(
+                opcode, value, width,
+            )));
         }
         match &s.op {
             None => {}
@@ -1582,6 +1626,7 @@ fn assemble_statements(
                 | Operation::Words(_)
                 | Operation::Instruction { .. }
                 | Operation::Encoded(_)
+                | Operation::ComputedInstruction(_)
                 | Operation::DirectPage { .. }
                 | Operation::Binary(_)
                 | Operation::Fill { .. }
@@ -2289,7 +2334,7 @@ fn assemble_statements(
                 // Trailing opcode bytes after the operands (Z80 DD CB / FD CB).
                 bytes.extend_from_slice(f.suffix);
             }
-            Some(Operation::Encoded(pieces)) => {
+            Some(Operation::Encoded(pieces) | Operation::ComputedInstruction(pieces)) => {
                 for piece in pieces {
                     match piece {
                         Piece::Lit(b) => bytes.push(*b),
@@ -2456,6 +2501,7 @@ fn assemble_statements(
                     | Operation::Os9EndModule
                     | Operation::Instruction { .. }
                     | Operation::Encoded(_)
+                    | Operation::ComputedInstruction(_)
                     | Operation::DirectPage { .. }
                     | Operation::Binary(_)
                     | Operation::Reserve(_)
@@ -2501,13 +2547,24 @@ fn assemble_statements(
                 length: ((bytes.len() - len_before) as i64 / addr_unit) as u64,
                 file: s.file,
             });
-            if let Some(cy) = cycle_capture {
+            let bounds = if matches!(s.op, Some(Operation::ComputedInstruction(_))) {
+                let timing = dialect.computed_timing(&bytes[len_before..]);
+                if timing.is_none() {
+                    debug.cycle_coverage = CycleCoverage::Partial;
+                }
+                timing
+            } else {
+                None
+            };
+            if cycle_capture.is_some() || bounds.is_some() {
+                let cy = cycle_capture.unwrap_or(isa::Cycles::fixed(0));
                 debug.cycles.push(CycleRec {
                     line: s.line as u32,
                     offset,
-                    base: cy.base,
+                    base: bounds.map_or(cy.base, |b| b.min),
                     page_cross: cy.page_cross,
                     branch_taken: cy.branch_taken,
+                    bounds,
                     file: s.file,
                 });
             }

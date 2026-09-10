@@ -7,7 +7,7 @@
 //! The 6809 is the first CPU whose operands are not fixed-width slots: indexed
 //! addressing carries a *computed postbyte* plus 0/1/2 extension bytes. So this
 //! dialect does not hand the engine an `Operation::Instruction` to encode from a
-//! form; it computes the bytes itself into [`Operation::Encoded`] pieces and
+//! form; it computes the bytes itself into [`Operation::ComputedInstruction`] pieces and
 //! reuses the engine only for the two-pass driver, the symbol table, `org`, and
 //! `equ`. Encoding facts come from [`isa::mos6809`]. The 6809 is big-endian.
 //!
@@ -33,12 +33,21 @@ use crate::source::{SourceLoader, SourceMap};
 use crate::span::FileId;
 
 mod project;
+mod timing;
 use project::LwasmEval;
 
 /// The lwasm 6809 dialect.
 pub(crate) struct Lwasm;
 
 impl Dialect for Lwasm {
+    fn cycle_coverage(&self) -> crate::engine::CycleCoverage {
+        crate::engine::CycleCoverage::Full
+    }
+
+    fn computed_timing(&self, bytes: &[u8]) -> Option<crate::engine::CycleBounds> {
+        timing::resolve(bytes)
+    }
+
     /// lwtools 4.25 truncates a data directive rather than refusing it:
     /// `fcb 256` is `00` and `fdb 65536` is `00 00`, with no diagnostic
     /// (probed 2026-08-25).
@@ -76,9 +85,9 @@ impl Dialect for Lwasm {
         // Route assembly through the semantic AST (U6): parse into a `Program`,
         // then lower to the engine's statement stream — byte-identical to the old
         // direct parse (AE1). The 6809 is the first **computed-operand** CPU to
-        // migrate: its instructions carry a precomputed `Operation::Encoded`
+        // migrate: its instructions carry a precomputed `Operation::ComputedInstruction`
         // (postbyte + extension bytes), which the AST holds verbatim as
-        // `Item::Encoded` and the formatter re-emits via `Node::source`.
+        // `Item::ComputedInstruction` and the formatter re-emits via `Node::source`.
         let program = parse_program(source, macros::Expand::Yes)?;
         let mut eval = LwasmEval {
             env: BTreeMap::new(),
@@ -170,8 +179,8 @@ fn check_modules(statements: &[Statement]) -> Result<(), AsmError> {
 /// becomes a node with its (global) label, operation, verbatim source, span, and
 /// comment trivia. The 6809 has no local-label scoping, so every label is a
 /// [`Scope::Global`](crate::ast::Scope) symbol whose qualified name is the source
-/// name. An instruction lowers to a computed [`Operation::Encoded`], carried as
-/// [`Item::Encoded`](crate::ast::Item::Encoded) — the formatter re-emits it from
+/// name. An instruction lowers to a computed [`Operation::ComputedInstruction`], carried as
+/// [`Item::ComputedInstruction`](crate::ast::Item::ComputedInstruction) — the formatter re-emits it from
 /// the node's source, so it round-trips byte-identical (the computed-operand path
 /// U1 axis 2 proved, now exercised on production code).
 /// An `include`/`use`/`includebin` becomes an **unresolved**
@@ -1706,7 +1715,7 @@ fn parse_instruction(
     dp: u8,
     line: usize,
 ) -> Result<Operation, AsmError> {
-    if let Some(insn) = mos6809::lookup(m) {
+    let op = if let Some(insn) = mos6809::lookup(m) {
         match &insn.kind {
             Kind::Inherent(opcode) => encode_inherent(m, opcode, operand, line),
             Kind::Branch { short, .. } => encode_branch(short, 1, operand, line),
@@ -1732,6 +1741,11 @@ fn parse_instruction(
         encode_branch(long, 2, operand, line)
     } else {
         Err(AsmError::new(line, format!("unknown instruction `{m}`")))
+    }?;
+    match op {
+        Operation::Encoded(pieces) => Ok(Operation::ComputedInstruction(pieces)),
+        op @ Operation::DirectPage { .. } => Ok(op),
+        _ => unreachable!("instruction encoders return pieces or a direct-page selection"),
     }
 }
 
@@ -3528,7 +3542,7 @@ mod tests {
     }
 
     /// U6 — the 6809 front-end routes through the AST. Its computed-operand
-    /// instructions carry `Item::Encoded`, and comments are carried as trivia
+    /// instructions carry `Item::ComputedInstruction`, and comments are carried as trivia
     /// (both `*` whole-line and `;` inline) without changing the bytes (AE1).
     #[test]
     fn comments_are_carried_as_trivia() {
@@ -3551,12 +3565,12 @@ mod tests {
             "same-line `;` comment attaches as trailing trivia"
         );
         // The indexed `leax 5,x` is a computed-operand instruction: its item is
-        // `Item::Encoded`, proving the wrap path.
+        // `Item::ComputedInstruction`, proving the wrap path.
         assert!(
             prog.nodes
                 .iter()
-                .any(|n| matches!(n.item, Some(crate::ast::Item::Encoded(_)))),
-            "a computed-operand instruction carries Item::Encoded"
+                .any(|n| matches!(n.item, Some(crate::ast::Item::ComputedInstruction(_)))),
+            "a computed-operand instruction carries Item::ComputedInstruction"
         );
         assert_eq!(
             asm(src).expect("with comments").bytes,

@@ -26,8 +26,8 @@ pub(crate) struct LabelCost {
     pub(crate) bytes: u64,
     /// Cycle cost with every conditional extra unspent.
     pub(crate) min: u64,
-    /// Cycle cost with every page-cross and branch-taken extra spent.
-    pub(crate) max: u64,
+    /// Worst nominal cycle cost, or no finite maximum for a wait.
+    pub(crate) max: Option<u64>,
 }
 
 /// Every label whose straight-line span contains at least one captured
@@ -60,12 +60,13 @@ pub(crate) fn label_costs_debug(
             .find(|&o| o > start)
             .unwrap_or(u64::MAX);
         let in_span = |offset: u64| offset >= start && offset < end;
-        let mut cost = (0u64, 0u64);
+        let mut cost = (0u64, Some(0u64));
         let mut any = false;
         for c in debug.cycles.iter().filter(|c| in_span(c.offset)) {
             any = true;
-            cost.0 += u64::from(c.base);
-            cost.1 += u64::from(c.base) + u64::from(c.page_cross) + u64::from(c.branch_taken);
+            let (min, max) = c.range();
+            cost.0 += min;
+            cost.1 = cost.1.zip(max).map(|(a, b)| a + b);
         }
         if any {
             let bytes: u64 = debug
@@ -194,13 +195,16 @@ pub(crate) fn check_budgets(
                     format!("`cycles({label})` names no label with instructions in this program"),
                 )
             })?;
-            if cost.max > limit {
+            let max = cost.max.ok_or_else(|| AsmError::new(line, format!(
+                "cannot check `cycles({label})`: the routine contains an unbounded wait;                  its minimum of {} cycles cannot prove a ceiling", cost.min
+            )))?;
+            if max > limit {
                 return Err(AsmError::new(
                     line,
                     format!(
                         "`{label}` exceeds its cycle budget: {limit} allowed, \
                          {} worst case (straight-line to the next label)",
-                        cost.max
+                        max
                     ),
                 )
                 .with_code(crate::contract::Code::CycleBudgetExceeded));

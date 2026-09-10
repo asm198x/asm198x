@@ -587,7 +587,7 @@
       "slug": "reference/cli"
     },
     {
-      "context": "Where the instruction spec carries validated cycle data (the form-model CPUs",
+      "context": "Where the instruction spec carries validated cycle data (6502, Z80, SM83,",
       "heading": "Cycles in the listing",
       "page": "The command line",
       "slug": "reference/cli"

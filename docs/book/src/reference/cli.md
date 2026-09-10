@@ -233,8 +233,8 @@ applies exactly as before.
 
 ### Cycles in the listing
 
-Where the instruction spec carries validated cycle data (the form-model CPUs
-— 6502, Z80, SM83, and their relatives), the listing annotates each
+Where the instruction spec carries validated cycle data (6502, Z80, SM83,
+6809, and their relatives), the listing annotates each
 instruction with its cost from that spec: one number when the cost is fixed,
 `min/max` when a page-cross or branch-taken extra makes it a range. A tail
 sums each label's straight-line span — the instructions from the label to the
@@ -242,6 +242,20 @@ next label, in address order; it is static cost, not execution. A CPU whose
 spec has no cycle data yet says `no cycle data (backfill pending)` instead of
 inventing figures, and a dialect that pre-encodes some instructions marks its
 figures as lower bounds.
+
+The lwasm 6809 dialect resolves indexed and stack costs from the emitted
+operand bytes. RTI shows `6/15`, since its cost depends on the saved state;
+SYNC and CWAI show `>=4` and `>=20`, since they may wait indefinitely.
+A label containing either wait has no finite maximum. JSON listings express
+that as `"max": null`; complete timing coverage does not imply a finite cost.
+Undocumented instructions keep timing unknown and make coverage partial.
+
+The JSON result's computed-instruction cycle records carry authoritative
+`bounds: {"min": ..., "max": ...}`. When `bounds` is present, consumers use it
+instead of adding the legacy `base`, `page_cross`, and `branch_taken` fields.
+Rust consumers can call `CycleRec::range()` for either record shape.
+These are nominal processor cycles; external stalls and called routines or
+interrupt handlers are outside the straight-line account.
 
 ### The memory map
 
@@ -272,7 +286,9 @@ an ordinary comment to every reference assembler, so the source still
 assembles byte-identically elsewhere; only asm198x acts on it. Because it is
 an assertion, a malformed spelling, an unknown label or area, or a cycles
 budget on a CPU without cycle data is an error rather than a silently
-ignored comment.
+ignored comment. A cycle budget also refuses a routine containing an unbounded
+wait: a minimum cost cannot prove a ceiling. RTI budgets use its 15-cycle
+maximum.
 
 The native ca65 linker checks cycle budgets too, with either its default NES
 layout or a project configuration. A routine ends at the next greater labelled

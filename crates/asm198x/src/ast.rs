@@ -265,6 +265,8 @@ pub(crate) enum Item {
     /// (U6) round-trips byte-identical; the formatter re-emits it via
     /// [`Node::source`](Node).
     Encoded(Vec<Piece>),
+    /// A dialect-encoded instruction, distinct from precomputed data.
+    ComputedInstruction(Vec<Piece>),
     DirectPage {
         direct: Vec<u8>,
         extended: Vec<u8>,
@@ -989,7 +991,9 @@ pub(crate) fn lower_item_ref(item: &Item) -> Result<Operation, AsmError> {
                 // A computed-operand payload (the 6809's postbyte + extension
                 // bytes). Its pieces are not `Clone`, and the dialects that
                 // build one re-parse their lines anyway, so no caller needs it.
-                Item::Encoded(_) | Item::DirectPage { .. } => "a precomputed encoding",
+                Item::Encoded(_) | Item::ComputedInstruction(_) | Item::DirectPage { .. } => {
+                    "a precomputed encoding"
+                }
                 _ => "this item",
             };
             return Err(AsmError::new(
@@ -1100,6 +1104,7 @@ fn lower_item(item: Item) -> Result<Operation, AsmError> {
         Item::RequestSymbols { path } => Operation::RequestSymbols { path },
         Item::Entry(o) => Operation::Entry(o.into_value()?),
         Item::Encoded(pieces) => Operation::Encoded(pieces),
+        Item::ComputedInstruction(pieces) => Operation::ComputedInstruction(pieces),
         Item::DirectPage {
             direct,
             extended,
@@ -1357,6 +1362,7 @@ pub(crate) fn map_syms(op: Operation, f: &mut impl FnMut(String) -> Expr) -> Ope
         // No sub-expressions to rewrite: pre-encoded pieces, resolved binary
         // payloads, and the constant-argument align.
         other @ (Operation::Encoded(_)
+        | Operation::ComputedInstruction(_)
         | Operation::Binary(_)
         | Operation::Align { .. }
         | Operation::AlignTo { .. }
@@ -1501,6 +1507,7 @@ pub(crate) fn item_from_operation(op: Operation) -> Item {
         Operation::RequestSymbols { path } => Item::RequestSymbols { path },
         Operation::Entry(e) => Item::Entry(Operand::expr(e)),
         Operation::Encoded(pieces) => Item::Encoded(pieces),
+        Operation::ComputedInstruction(pieces) => Item::ComputedInstruction(pieces),
         Operation::DirectPage {
             direct,
             extended,
