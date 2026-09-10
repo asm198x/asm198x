@@ -233,7 +233,7 @@
       "slug": "guide/reading-a-binary"
     },
     {
-      "context": "The repository includes a 28-byte palette-copy program.",
+      "context": "Want to see the edit run? The C64 raster-bar walkthrough",
       "heading": "Recover, name, and change a program",
       "page": "Reading a binary back",
       "slug": "guide/reading-a-binary"
