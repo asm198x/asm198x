@@ -114,7 +114,7 @@ log, while #563 added the independently routed device-memory image used by
 `SAVECPR` and future page-reading save directives.
 
 The classic Spectrum devices use the ROM-derived 48K initial state recorded in
-`syntheses/zx-spectrum/post-boot-ram.md`; all their additional pages are zero.
+`syntheses/sinclair-zx-spectrum/post-boot-ram.md`; all their additional pages are zero.
 The Next, CPC, Plus, and NOSLOT devices start entirely empty (#318).
 
 Initial slot mappings are not universally sequential. SjASMPlus 1.21.0

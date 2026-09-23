@@ -94,7 +94,7 @@ here cites upward. It is not derived from an emulator's loader, and it is not
 worked out at the keyboard from a file that happened to load.
 
 That upstream already exists for the first two Spectrum targets.
-`syntheses/zx-spectrum/tape-loading-format.md` documents the TAP file format
+`syntheses/sinclair-zx-spectrum/tape-loading-format.md` documents the TAP file format
 (§4) and the TZX file format (§5) alongside the physical encoding they frame,
 so `SAVETAP` has something to cite on the day it is written.
 

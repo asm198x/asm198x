@@ -60,7 +60,7 @@ The fixture's arithmetic is `slot_addr = 0x4000 * slot`, so slot 3 is `$C000`,
 covering `$C000–$FFFF`. It further assumes this is the window RAM banks page
 *into*.
 
-Our source layer agrees — `syntheses/zx-spectrum/128k-extras.md` § *The memory
+Our source layer agrees — `syntheses/sinclair-zx-spectrum/128k-extras.md` § *The memory
 map*: `$C000–$FFFF: RAM bank 0–7 (paged via $7FFD bits 0–2)`, with `$4000` (bank
 5) and `$8000` (bank 2) fixed.
 
@@ -69,7 +69,7 @@ slots such that the switchable one is not 3.
 
 ### H2 — pages 1 and 3 are both legally pageable into slot 3
 
-`syntheses/zx-spectrum/128k-extras.md`: *"The remaining six banks (0, 1, 3, 4, 6,
+`syntheses/sinclair-zx-spectrum/128k-extras.md`: *"The remaining six banks (0, 1, 3, 4, 6,
 7) can be paged into `$C000–$FFFF` one at a time."* Both 1 and 3 are in that set.
 
 **Falsified if** Emu198x's model refuses either bank in that window, or treats

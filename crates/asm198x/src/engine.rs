@@ -2885,7 +2885,7 @@ impl DeviceMemory {
 }
 
 /// The 48K ROM's deterministic START initialisation, derived in
-/// `syntheses/zx-spectrum/post-boot-ram.md`. Larger classic Spectrum devices
+/// `syntheses/sinclair-zx-spectrum/post-boot-ram.md`. Larger classic Spectrum devices
 /// expose this same initial 64K window and leave every additional page zero.
 fn seed_spectrum_48k(pages: &mut [Vec<u8>], slots: &[usize]) {
     pages[slots[1]][0x1800..0x1b00].fill(0x38);

@@ -34,7 +34,7 @@ pub enum TapeFormat {
     Tzx,
 }
 
-/// TZX's signature and terminator (`syntheses/zx-spectrum/tape-loading-format.md`
+/// TZX's signature and terminator (`syntheses/sinclair-zx-spectrum/tape-loading-format.md`
 /// §5, citing fuse's `tzx_read.c`).
 /// The version pasmo writes. **1.13, not the format's current 1.20** — every
 /// byte here is diffed against pasmo, so this follows it rather than the spec.
