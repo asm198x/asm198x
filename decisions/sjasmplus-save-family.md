@@ -39,7 +39,7 @@ device columns are what the binary answered, not what its documentation says.
 | Word | Syntax as probed | Device gate | Container | Upstream | Waits on |
 |---|---|---|---|---|---|
 | `SAVEBIN` | `"file",start[,length]` | any device | raw span | — | **done** (#316, #318), including unwritten device memory |
-| `SAVETAP` | `"file",CODE\|BASIC,"name",start,length` | Spectrum devices | TAP | `syntheses/zx-spectrum/tape-loading-format.md` §4, via `format198x-sinclair-zx-spectrum-tap` | **done** for the kinded forms; the kindless whole-memory grammar remains |
+| `SAVETAP` | `"file",CODE\|BASIC,"name",start,length` | Spectrum devices | TAP | `syntheses/sinclair-zx-spectrum/tape-loading-format.md` §4, via `format198x-sinclair-zx-spectrum-tap` | **done** for the kinded forms; the kindless whole-memory grammar remains |
 | `SAVE3DOS` | `"file",start,length` | any device | span with a 128-byte +3DOS header | `reference/by-system/sinclair-zx-spectrum/zx-spectrum-plus-3-manual-amstrad.txt` (the +3DOS header record) | nothing — next |
 | `SAVEAMSDOS` | `"file",start,length` | any device | span with a 128-byte AMSDOS header | **partly held** — the CPC464 firmware guide documents the cassette file-header record and does not mention AMSDOS; the disk header's extension and checksum are not held | acquisition of the AMSDOS header layout (the DDI-1 firmware guide) |
 | `SAVEDEV` | `"file",startPage,startOffset,length` | any device | raw device pages, no container | the device model (`docs/sjasmplus-device-model.md`) | unblocked: #318 supplies initial pages and #563 retains routed writes |
