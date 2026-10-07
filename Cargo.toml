@@ -85,8 +85,9 @@ tap = "asm198x/homebrew-tap"
 # Publishing the formula is a separate job from building the installer; without
 # it the tap is named and never written to.
 publish-jobs = ["homebrew"]
-targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
+targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
 pr-run-mode = "plan"
+host-jobs = ["./test-linux-packages"]
 # Restrict dist to the flagship crate's tags.
 tag-namespace = "asm198x"
 # Announce each release in Discord. A custom job rather than an `on: release`
@@ -95,6 +96,11 @@ tag-namespace = "asm198x"
 # another workflow to catch. See .github/workflows/notify-discord.yml.
 post-announce-jobs = ["./notify-discord"]
 features = ["lua"]
+
+# Build ARM Linux natively, with the same glibc baseline as x86-64 Linux.
+[workspace.metadata.dist.github-custom-runners.aarch64-unknown-linux-gnu]
+runner = "ubuntu-22.04-arm"
+host = "aarch64-unknown-linux-gnu"
 
 [profile.dist]
 inherits = "release"
