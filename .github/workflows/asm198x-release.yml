@@ -278,10 +278,21 @@ jobs:
 
           gh release create "${{ needs.plan.outputs.tag }}" --target "$RELEASE_COMMIT" $PRERELEASE_FLAG --title "$ANNOUNCEMENT_TITLE" --notes-file "$RUNNER_TEMP/notes.txt" artifacts/*
 
+  custom-test-linux-packages:
+    needs:
+      - plan
+      - build-local-artifacts
+      - build-global-artifacts
+    uses: ./.github/workflows/test-linux-packages.yml
+    with:
+      plan: ${{ needs.plan.outputs.val }}
+    secrets: inherit
+
   publish-homebrew-formula:
     needs:
       - plan
       - host
+      - custom-test-linux-packages
     runs-on: "ubuntu-22.04"
     env:
       GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
@@ -329,6 +340,7 @@ jobs:
       - plan
       - host
       - publish-homebrew-formula
+      - custom-test-linux-packages
     # use "always() && ..." to allow us to wait for all publish jobs while
     # still allowing individual publish jobs to skip themselves (for prereleases).
     # "host" however must run to completion, no skipping allowed!

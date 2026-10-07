@@ -61,6 +61,14 @@ asm198x --dialect lwasm      game.s               -o game.bin        # Dragon/Co
 asm198x --disasm --dialect 6502 --org 0x0200      countdown.bin      # back to source
 ```
 
+## Homebrew
+
+On macOS (Apple Silicon or Intel) and Linux (ARM64 or x86-64):
+
+```sh
+brew install asm198x/tap/asm198x
+```
+
 ## Architecture
 
 Four crates, split only where a boundary is real:

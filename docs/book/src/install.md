@@ -5,6 +5,8 @@ Windows. Pick whichever of these suits you.
 
 ## Homebrew
 
+For macOS (Apple Silicon or Intel) and Linux (x86-64 or ARM64).
+
 ```sh
 brew install asm198x/tap/asm198x
 ```
@@ -37,7 +39,8 @@ put the binary on your `PATH`:
 |---|---|
 | `aarch64-apple-darwin` | macOS, Apple silicon |
 | `x86_64-apple-darwin` | macOS, Intel |
-| `x86_64-unknown-linux-gnu` | Linux |
+| `x86_64-unknown-linux-gnu` | Linux, x86-64 |
+| `aarch64-unknown-linux-gnu` | Linux, ARM64 |
 | `x86_64-pc-windows-msvc` | Windows |
 
 ## Cargo
@@ -76,7 +79,7 @@ and version ranges are rejected.
 
 The action verifies the archive against its SHA-256 sidecar, checks the
 executable's version, and adds it to PATH for subsequent steps. It supports
-the four archive targets above, requires no Rust toolchain or token, and uses
+macOS ARM64 and x86-64, Linux x86-64, and Windows x86-64, requires no Rust toolchain or token, and uses
 the Node 24 action runtime and the hosted runner's `tar`. The checksum is an
 integrity check against the release, not an independent publisher signature.
 See the [setup action reference](https://github.com/asm198x/asm198x/tree/main/.github/actions/setup)
