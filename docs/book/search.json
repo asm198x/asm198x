@@ -250,7 +250,7 @@
       "slug": "install"
     },
     {
-      "context": "Homebrew asks you to trust a third-party formula the first time. Approving",
+      "context": "For macOS (Apple Silicon or Intel) and Linux (x86-64 or ARM64).",
       "heading": "Homebrew",
       "page": "Install",
       "slug": "install"
