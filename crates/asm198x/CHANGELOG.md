@@ -11,10 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
-- *(disasm)* recover verified labelled 6502 source ([#597](https://github.com/asm198x/asm198x/pull/597))
-- *(6809)* capture operand-resolved cycle costs and budgets ([#595](https://github.com/asm198x/asm198x/pull/595))
-
-### Added
+- Install native ARM64 Linux archives and Homebrew packages, alongside the
+  existing x86-64 Linux and macOS packages. Native Linux installation checks
+  verify the formula's checksum and assemble a program before updating the tap.
+  ([#604](https://github.com/asm198x/asm198x/pull/604))
 
 - Recover raw 6502 binaries as labelled ACME source with `disasm --recover`.
   Mark code and data ranges, name addresses, and rebuild byte-identically
