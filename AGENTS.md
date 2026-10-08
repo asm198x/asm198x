@@ -12,7 +12,7 @@ Asm198x owns:
 
 - assembler and disassembler front-ends for retro CPU dialects;
 - the assembler's use of the neutral Isa198x instruction specifications;
-- the `debug198x` debug-info format emitted by the assembler and consumed by Emu198x;
+- emission of debug sidecars using the independent [Debug198x format](https://github.com/debug198x/debug198x), also consumed by Emu198x;
 - the command-line contract for diagnostics, JSON output, formatting, listings, symbols, and debug sidecars.
 
 Hardware facts come from the umbrella primary library at [`../../reference/`](../../reference/) and syntheses at [`../../syntheses/`](../../syntheses/). The ISA spec is the executable distillation of instruction encoding facts and should cite those sources, not emulator code.
