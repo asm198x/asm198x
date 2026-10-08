@@ -105,8 +105,8 @@ enum OpenBlock {
     Xor(u8),
     /// The conversion table to go back to.
     Ct(ConvTable),
-    /// A `!pseudopc` block, whose restore the engine performs.
-    PseudoPc,
+    /// The enclosing logical-PC offset, restored alongside the engine's marker.
+    PseudoPc(Option<i64>),
 }
 
 struct MacroCapture {
@@ -151,6 +151,8 @@ pub(super) struct AcmeEval<'a> {
     /// that is merely *probably* right would pick zero page on a bad guess and
     /// emit the wrong bytes, which is worse than the gap being fixed.
     pc: Option<i64>,
+    /// Logical minus physical PC inside `!pseudopc`; unknown stays unknown.
+    pseudo: Option<i64>,
     /// Instructions that took an absolute form only because their operand was
     /// not yet resolvable. If the value turns out to fit a byte, ACME says so
     /// — see [`AcmeEval::oversized_warnings`].
@@ -202,6 +204,7 @@ impl<'a> AcmeEval<'a> {
             // No origin yet. ACME requires `*=` before code, so the first
             // origin sets this before anything can be sized.
             pc: None,
+            pseudo: Some(0),
             oversize: Vec::new(),
             multi,
             macro_state: macros::MacroState::default(),
@@ -450,9 +453,14 @@ impl crate::ast::CondEval for AcmeEval<'_> {
         let taken = match classify_conditional(head) {
             Some(Conditional::IfDef(s)) => Ok(defined(s)),
             Some(Conditional::IfNDef(s)) => Ok(!defined(s)),
-            Some(Conditional::If(e)) => {
-                eval_condition(&self.anons, &self.zone, &self.env, &e, line)
-            }
+            Some(Conditional::If(e)) => eval_condition(
+                &self.anons,
+                &self.zone,
+                &self.env,
+                self.logical_pc(),
+                &e,
+                line,
+            ),
             None => Err(AsmError::new(line, format!("bad conditional `{head}`"))),
         };
         // The shared walk raises condition errors without node context, so a
@@ -696,7 +704,12 @@ impl AcmeEval<'_> {
                 let target = args.trim().trim_end_matches('{').trim();
                 let e = parse_value(&self.anons, &self.zone, target, line)
                     .map_err(|err| stamp_file(err, file))?;
-                self.block_stack.push(OpenBlock::PseudoPc);
+                self.block_stack.push(OpenBlock::PseudoPc(self.pseudo));
+                self.pseudo = e
+                    .eval_with(&|name| self.env.get(name).copied(), self.logical_pc(), line)
+                    .ok()
+                    .zip(self.pc)
+                    .and_then(|(logical, physical)| logical.checked_sub(physical));
                 out.push(Statement {
                     line,
                     file,
@@ -749,19 +762,19 @@ impl AcmeEval<'_> {
                     OpenBlock::Zone(zone) => self.zone = zone,
                     OpenBlock::Xor(mask) => self.xor_mask = mask,
                     OpenBlock::Ct(conv) => self.conv = conv,
-                    // Unlike the others there is nothing to restore here: the
-                    // engine keeps the stack, because only it knows the real
-                    // address the block opened at.
-                    OpenBlock::PseudoPc => out.push(Statement {
-                        line,
-                        file,
-                        label: None,
-                        op: Some(Operation::PseudoPc(None)),
-                        operand_span: None,
-                        xor_mask: 0,
-                        instruction_set: Some(self.target.set),
-                        extension_set: self.target.ext,
-                    }),
+                    OpenBlock::PseudoPc(previous) => {
+                        self.pseudo = previous;
+                        out.push(Statement {
+                            line,
+                            file,
+                            label: None,
+                            op: Some(Operation::PseudoPc(None)),
+                            operand_span: None,
+                            xor_mask: 0,
+                            instruction_set: Some(self.target.set),
+                            extension_set: self.target.ext,
+                        });
+                    }
                 }
                 return Ok(());
             }
@@ -790,7 +803,7 @@ impl AcmeEval<'_> {
             &self.zone,
             EvalContext {
                 symbols: &self.env,
-                pc: self.pc,
+                pc: self.logical_pc(),
             },
             self.conv,
             &recon,
@@ -828,7 +841,7 @@ impl AcmeEval<'_> {
         // A plain label names the address the counter is standing on. Binding
         // it here — before the counter moves — is what makes a later reference
         // to it foldable, and so sizeable to zero page when it is low.
-        if let (Some(name), Some(pc)) = (&label, self.pc)
+        if let (Some(name), Some(pc)) = (&label, self.logical_pc())
             && !matches!(op, Some(Operation::Equ(_)))
         {
             self.env.insert(name.clone(), pc);
@@ -931,6 +944,13 @@ impl AcmeEval<'_> {
             .collect()
     }
 
+    /// The address expressions see, including the active relocation.
+    fn logical_pc(&self) -> Option<i64> {
+        self.pc
+            .zip(self.pseudo)
+            .and_then(|(pc, offset)| pc.checked_add(offset))
+    }
+
     /// Move the location counter over `op`, or give up on knowing where it is.
     ///
     /// The width comes from [`crate::engine::next_pc`], the same rule the
@@ -946,7 +966,9 @@ impl AcmeEval<'_> {
     fn advance(&mut self, op: Option<&Operation>, line: usize) {
         let Some(op) = op else { return };
         if let Operation::Org(e) = op {
-            self.pc = fold_const(e, &self.env, line).ok();
+            self.pc = e
+                .eval_with(&|name| self.env.get(name).copied(), self.logical_pc(), line)
+                .ok();
             return;
         }
         let Some(pc) = self.pc else { return };

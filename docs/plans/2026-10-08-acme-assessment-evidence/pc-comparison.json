@@ -1,0 +1,112 @@
+[
+  {
+    "name": "greater",
+    "source": "*=$1000\nnop\n!if * > $0fff { !byte 1 } else { !byte 2 }\n",
+    "reference_exit": 0,
+    "hex": "ea01",
+    "stderr": "",
+    "ours_exit": 0,
+    "ours_hex": "ea01",
+    "ours_stderr": "assembled 2 byte(s) at $1000 -> /private/tmp/198x-acme-probes/greater.ours\n"
+  },
+  {
+    "name": "low",
+    "source": "*=$1000\nnop\n!if <* = 1 { !byte 3 }\n",
+    "reference_exit": 0,
+    "hex": "ea03",
+    "stderr": "",
+    "ours_exit": 0,
+    "ours_hex": "ea03",
+    "ours_stderr": "assembled 2 byte(s) at $1000 -> /private/tmp/198x-acme-probes/low.ours\n"
+  },
+  {
+    "name": "high",
+    "source": "*=$1000\nnop\n!if >* = $10 { !byte 4 }\n",
+    "reference_exit": 0,
+    "hex": "ea04",
+    "stderr": "",
+    "ours_exit": 0,
+    "ours_hex": "ea04",
+    "ours_stderr": "assembled 2 byte(s) at $1000 -> /private/tmp/198x-acme-probes/high.ours\n"
+  },
+  {
+    "name": "arithmetic",
+    "source": "*=$1000\nnop\n!if * + * > $2000 { !byte 5 }\n",
+    "reference_exit": 0,
+    "hex": "ea05",
+    "stderr": "",
+    "ours_exit": 0,
+    "ours_hex": "ea05",
+    "ours_stderr": "assembled 2 byte(s) at $1000 -> /private/tmp/198x-acme-probes/arithmetic.ours\n"
+  },
+  {
+    "name": "multiply-prefix",
+    "source": "*=$1000\n!if 2 * >$1234 = $24 { !byte 6 }\n",
+    "reference_exit": 0,
+    "hex": "06",
+    "stderr": "",
+    "ours_exit": 0,
+    "ours_hex": "06",
+    "ours_stderr": "assembled 1 byte(s) at $1000 -> /private/tmp/198x-acme-probes/multiply-prefix.ours\n"
+  },
+  {
+    "name": "multiply-truth",
+    "source": "*=$1000\n!if 2 * >$1234 { !byte 7 }\n",
+    "reference_exit": 0,
+    "hex": "07",
+    "stderr": "",
+    "ours_exit": 0,
+    "ours_hex": "07",
+    "ours_stderr": "assembled 1 byte(s) at $1000 -> /private/tmp/198x-acme-probes/multiply-truth.ours\n"
+  },
+  {
+    "name": "false",
+    "source": "*=$1000\nnop\n!if * < $1000 { !byte 8 } else { !byte 9 }\n",
+    "reference_exit": 0,
+    "hex": "ea09",
+    "stderr": "",
+    "ours_exit": 0,
+    "ours_hex": "ea09",
+    "ours_stderr": "assembled 2 byte(s) at $1000 -> /private/tmp/198x-acme-probes/false.ours\n"
+  },
+  {
+    "name": "loop",
+    "source": "*=$1000\n!for i,1,3 {\nnop\n!if * >= $1002 { !byte 10 }\n}\n",
+    "reference_exit": 0,
+    "hex": "eaea0aea0a",
+    "stderr": "",
+    "ours_exit": 0,
+    "ours_hex": "eaea0aea0a",
+    "ours_stderr": "assembled 5 byte(s) at $1000 -> /private/tmp/198x-acme-probes/loop.ours\n"
+  },
+  {
+    "name": "pseudopc",
+    "source": "*=$1000\n!pseudopc $2000 {\nnop\n!if * = $2001 { !byte 11 } else { !byte 12 }\n}\n!if * = $1002 { !byte 13 }\n",
+    "reference_exit": 0,
+    "hex": "ea0b0d",
+    "stderr": "",
+    "ours_exit": 0,
+    "ours_hex": "ea0b0d",
+    "ours_stderr": "assembled 3 byte(s) at $1000 -> /private/tmp/198x-acme-probes/pseudopc.ours\n"
+  },
+  {
+    "name": "nested-pseudopc",
+    "source": "*=$1000\n!pseudopc $2000 {\nnop\n!pseudopc $3000 {\n!if * = $3000 { !byte 14 }\n}\n!if * = $2002 { !byte 15 }\n}\n!if * = $1003 { !byte 16 }\n",
+    "reference_exit": 0,
+    "hex": "ea0e0f10",
+    "stderr": "",
+    "ours_exit": 0,
+    "ours_hex": "ea0e0f10",
+    "ours_stderr": "assembled 4 byte(s) at $1000 -> /private/tmp/198x-acme-probes/nested-pseudopc.ours\n"
+  },
+  {
+    "name": "unknown",
+    "source": "!if * > 0 { !byte 1 }\n",
+    "reference_exit": 1,
+    "hex": null,
+    "stderr": "Error - File /private/tmp/198x-acme-probes/unknown.asm, line 1 (Zone <untitled>): Value not defined (*).\n",
+    "ours_exit": 1,
+    "ours_hex": null,
+    "ours_stderr": "asm198x: /private/tmp/198x-acme-probes/unknown.asm:1: error: `*` cannot be used here\n"
+  }
+]

@@ -29,3 +29,36 @@ Approved under assessment F5. Keep the existing dialect walk and engine.
 - Record red/green output, run ACME-focused library tests, differential tests,
   formatter round trips, then workspace tests and Clippy. No dependency or
   public contract change is planned. Commit locally; do not push yet.
+
+## Narrow expression probe after rollback
+
+The attempted PC extension exposed an independent expression fault. Two
+attempts were rolled back to `872800f`; the patch and failing cases are
+retained under `/private/tmp/198x-acme-pc-experiment.patch` and
+`/private/tmp/198x-acme-probes/`. The lexer calls every `*` a completed value,
+even when it is multiplication. Consequently `2 * >value` tokenises `>` as
+a comparison. Loose byte extraction is also only admitted at the start of
+the arithmetic ladder, not on a binary operator's right side.
+
+Prove this with an ordinary `!byte` probe first. Distinguish the existing PC
+atom from multiplication in the existing token enum, and admit loose byte
+prefixes through the existing unary entry. Then restore the PC condition
+change and run all reference fixtures. This is an internal parser correction;
+no new dialect, evaluator, convergence pass or external API is introduced.
+
+## Verified result
+
+The existing walk now supplies its logical PC to condition evaluation, including
+nested `!pseudopc` blocks. The shared lexer distinguishes the PC atom from
+multiplication; byte prefixes remain valid on the right of multiplication.
+A separate false-branch probe exposed an inline parser fault: text after the
+first `}` was discarded, including `else`. The existing conditional node now
+retains that body and malformed trailing text fails explicitly.
+
+All eleven CLI PC/reference cases agree with ACME 0.97, including the expected
+unknown-PC error. All 117 ACME library tests pass. Formatter round trips cover
+each live-PC case and both inline branches. The full workspace passes, as do
+strict library Clippy and 521 reference-accepted differential snippets plus
+the multi-file differential suite. Compressed logs and CLI bytes are retained
+in `2026-10-08-acme-assessment-evidence/`. The final inline-tail regression was
+added after the workspace run and passes in the focused 117-test run.
