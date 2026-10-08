@@ -2845,6 +2845,27 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
 
+    #[test]
+    fn cpu_selection_before_origin_does_not_emit_data() {
+        for cpu in [
+            "6502", "6510", "65c02", "r65c02", "w65c02", "c64dtv2", "65ce02", "4502", "65816",
+        ] {
+            let source = format!("!cpu {cpu}\n* = $1001\n lda #1\n");
+            let result = assemble_acme(&source).expect("CPU selection does not require an origin");
+            assert_eq!(result.origin, Some(0x1001), "{cpu}");
+            assert_eq!(result.bytes, [0xa9, 1], "{cpu}");
+            let formatted = crate::format_acme(&source).expect("format CPU selection");
+            let roundtrip = assemble_acme(&formatted).expect("assemble formatted selection");
+            assert_eq!(roundtrip.bytes, result.bytes);
+            assert_eq!(roundtrip.origin, result.origin);
+        }
+        let error = assemble_acme("!cpu 6502\n lda #1\n").expect_err("code still needs an origin");
+        assert_eq!(
+            error.line, 2,
+            "the instruction, not the selector, emits bytes"
+        );
+    }
+
     /// `!cpu` is lexical: 65816 extends the base set, and switching back
     /// removes those instructions again.
     #[test]

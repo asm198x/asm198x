@@ -784,7 +784,7 @@ impl AcmeEval<'_> {
             return Ok(());
         }
 
-        let (label, op) = parse_statement(
+        let (label, mut op) = parse_statement(
             self.target,
             &self.anons,
             &self.zone,
@@ -810,6 +810,10 @@ impl AcmeEval<'_> {
                 "65816" => Some(&isa::mos65816::SET),
                 _ => self.target.ext,
             };
+            // The parser validates the selector using an empty-byte marker.
+            // Retire it here: CPU selection changes lexical state, not output,
+            // and therefore must not ask the engine for an origin.
+            op = None;
         }
         // A `.name` definition qualifies into the current zone (U7); its
         // references were qualified by `parse_value`.
