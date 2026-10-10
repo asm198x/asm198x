@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.60](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.59...asm198x-v0.0.60) - 2026-10-10
+
+### Fixed
+
+- preserve ACME CPU selection and live PC conditions ([#605](https://github.com/asm198x/asm198x/pull/605))
+
 ## [0.0.59](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.58...asm198x-v0.0.59) - 2026-10-07
 
 ### Added
