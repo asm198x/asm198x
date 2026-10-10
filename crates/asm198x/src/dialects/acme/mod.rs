@@ -737,8 +737,27 @@ impl<'a> FmtCx<'a> {
             } else {
                 self.parse_statements(body_text, None, line, Vec::new())?
             };
+            let tail = after[close + 1..].trim();
+            let else_body = if tail.is_empty() {
+                None
+            } else {
+                let body = strip_word_ci(tail, "else")
+                    .and_then(|rest| rest.trim().strip_prefix('{'))
+                    .ok_or_else(|| AsmError::new(line, "expected `else {` after conditional"))?;
+                let end = find_top(body, b'}')
+                    .ok_or_else(|| AsmError::new(line, "unterminated inline `else` body"))?;
+                if !body[end + 1..].trim().is_empty() {
+                    return Err(AsmError::new(
+                        line,
+                        "unexpected text after inline `else` body",
+                    ));
+                }
+                Some(self.parse_statements(body[..end].trim(), None, line, Vec::new())?)
+            };
             self.pos += 1;
-            return Ok(self.conditional_node(head, then_body, None, true, leading, comment, line));
+            return Ok(
+                self.conditional_node(head, then_body, else_body, true, leading, comment, line)
+            );
         }
 
         // Multi-line: the body starts on the following line.
@@ -1303,11 +1322,12 @@ fn eval_condition(
     anons: &Anons,
     zone: &str,
     env: &BTreeMap<String, i64>,
+    pc: Option<i64>,
     cond: &str,
     line: usize,
 ) -> Result<bool, AsmError> {
     let value = |s: &str| -> Result<i64, AsmError> {
-        fold_const(&parse_value(anons, zone, s, line)?, env, line)
+        parse_value(anons, zone, s, line)?.eval_with(&|name| env.get(name).copied(), pc, line)
     };
     // A string is a type of its own to ACME, and **no operator applies to
     // one** — `"a" = 97` is *"Cannot apply test for equality to string and
@@ -1338,10 +1358,11 @@ fn eval_condition(
     if let Some(i) = top_level_lone_eq(c) {
         return Ok(operand(&c[..i])? == operand(&c[i + 1..])?);
     }
-    if let Some(i) = infix_relation(c, b'<') {
+    let complete_left = |left: &str| parse_value(anons, zone, left, line).is_ok();
+    if let Some(i) = infix_relation(c, b'<', &complete_left) {
         return Ok(operand(&c[..i])? < operand(&c[i + 1..])?);
     }
-    if let Some(i) = infix_relation(c, b'>') {
+    if let Some(i) = infix_relation(c, b'>', &complete_left) {
         return Ok(operand(&c[..i])? > operand(&c[i + 1..])?);
     }
     Ok(value(c)? != 0)
@@ -1350,11 +1371,12 @@ fn eval_condition(
 /// The byte index of a top-level `op` used as a **comparison** rather than as a
 /// byte-extract prefix — that is, one with an expression to its left.
 ///
-/// "An expression to its left" means non-empty text that does not end in an
-/// operator: `5 <` compares, `5 + <` does not, and neither does a bare `<`.
+/// The left text must parse as a complete expression: `* >` compares the PC,
+/// while `2 * >value` multiplies a high byte. The final character alone cannot
+/// distinguish a location-counter atom from a multiplication operator.
 /// The two-character operators are matched before this is reached, so a `<`
 /// found here is never the first half of `<=` or `<>`.
-fn infix_relation(s: &str, op: u8) -> Option<usize> {
+fn infix_relation(s: &str, op: u8, complete_left: &impl Fn(&str) -> bool) -> Option<usize> {
     let bytes = s.as_bytes();
     let mut depth: i32 = 0;
     let (mut in_char, mut in_str) = (false, false);
@@ -1366,11 +1388,7 @@ fn infix_relation(s: &str, op: u8) -> Option<usize> {
             b')' if !in_char && !in_str => depth -= 1,
             b if b == op && depth == 0 && !in_char && !in_str => {
                 let left = s[..i].trim_end();
-                let ends_in_operator = left
-                    .as_bytes()
-                    .last()
-                    .is_some_and(|c| b"+-*/&|^!<>=(,".contains(c));
-                if !left.is_empty() && !ends_in_operator {
+                if !left.is_empty() && complete_left(left) {
                     return Some(i);
                 }
             }
@@ -2844,6 +2862,185 @@ fn expand_acme(source: &str, mode: macros::Expand) -> Result<macros::Expansion, 
 #[cfg(test)]
 mod tests {
     use crate::{AsmError, AssemblyResult, assemble_acme};
+
+    #[test]
+    fn cpu_selection_before_origin_does_not_emit_data() {
+        for cpu in [
+            "6502", "6510", "65c02", "r65c02", "w65c02", "c64dtv2", "65ce02", "4502", "65816",
+        ] {
+            let source = format!("!cpu {cpu}\n* = $1001\n lda #1\n");
+            let result = assemble_acme(&source).expect("CPU selection does not require an origin");
+            assert_eq!(result.origin, Some(0x1001), "{cpu}");
+            assert_eq!(result.bytes, [0xa9, 1], "{cpu}");
+            let formatted = crate::format_acme(&source).expect("format CPU selection");
+            let roundtrip = assemble_acme(&formatted).expect("assemble formatted selection");
+            assert_eq!(roundtrip.bytes, result.bytes);
+            assert_eq!(roundtrip.origin, result.origin);
+        }
+        let error = assemble_acme("!cpu 6502\n lda #1\n").expect_err("code still needs an origin");
+        assert_eq!(
+            error.line, 2,
+            "the instruction, not the selector, emits bytes"
+        );
+    }
+
+    #[test]
+    fn conditions_use_the_live_logical_program_counter() {
+        // ACME 0.97 results retained with the assessment probes.
+        {
+            let source = "*=$1000\nnop\n!if * > $0fff { !byte 1 } else { !byte 2 }\n";
+            let result = assemble_acme(source).expect("greater");
+            assert_eq!(result.bytes, [0xea, 0x01], "greater");
+            let formatted = crate::format_acme(source).expect("format condition");
+            assert_eq!(
+                assemble_acme(&formatted)
+                    .expect("formatted condition")
+                    .bytes,
+                result.bytes
+            );
+        }
+        {
+            let source = "*=$1000\nnop\n!if <* = 1 { !byte 3 }\n";
+            let result = assemble_acme(source).expect("low");
+            assert_eq!(result.bytes, [0xea, 0x03], "low");
+            let formatted = crate::format_acme(source).expect("format condition");
+            assert_eq!(
+                assemble_acme(&formatted)
+                    .expect("formatted condition")
+                    .bytes,
+                result.bytes
+            );
+        }
+        {
+            let source = "*=$1000\nnop\n!if >* = $10 { !byte 4 }\n";
+            let result = assemble_acme(source).expect("high");
+            assert_eq!(result.bytes, [0xea, 0x04], "high");
+            let formatted = crate::format_acme(source).expect("format condition");
+            assert_eq!(
+                assemble_acme(&formatted)
+                    .expect("formatted condition")
+                    .bytes,
+                result.bytes
+            );
+        }
+        {
+            let source = "*=$1000\nnop\n!if * + * > $2000 { !byte 5 }\n";
+            let result = assemble_acme(source).expect("arithmetic");
+            assert_eq!(result.bytes, [0xea, 0x05], "arithmetic");
+            let formatted = crate::format_acme(source).expect("format condition");
+            assert_eq!(
+                assemble_acme(&formatted)
+                    .expect("formatted condition")
+                    .bytes,
+                result.bytes
+            );
+        }
+        {
+            let source = "*=$1000\n!if 2 * >$1234 = $24 { !byte 6 }\n";
+            let result = assemble_acme(source).expect("multiply-prefix");
+            assert_eq!(result.bytes, [0x06], "multiply-prefix");
+            let formatted = crate::format_acme(source).expect("format condition");
+            assert_eq!(
+                assemble_acme(&formatted)
+                    .expect("formatted condition")
+                    .bytes,
+                result.bytes
+            );
+        }
+        {
+            let source = "*=$1000\n!if 2 * >$1234 { !byte 7 }\n";
+            let result = assemble_acme(source).expect("multiply-truth");
+            assert_eq!(result.bytes, [0x07], "multiply-truth");
+            let formatted = crate::format_acme(source).expect("format condition");
+            assert_eq!(
+                assemble_acme(&formatted)
+                    .expect("formatted condition")
+                    .bytes,
+                result.bytes
+            );
+        }
+        {
+            let source = "*=$1000\nnop\n!if * < $1000 { !byte 8 } else { !byte 9 }\n";
+            let result = assemble_acme(source).expect("false");
+            assert_eq!(result.bytes, [0xea, 0x09], "false");
+            let formatted = crate::format_acme(source).expect("format condition");
+            assert_eq!(
+                assemble_acme(&formatted)
+                    .expect("formatted condition")
+                    .bytes,
+                result.bytes
+            );
+        }
+        {
+            let source = "*=$1000\n!for i,1,3 {\nnop\n!if * >= $1002 { !byte 10 }\n}\n";
+            let result = assemble_acme(source).expect("loop");
+            assert_eq!(result.bytes, [0xea, 0xea, 0x0a, 0xea, 0x0a], "loop");
+            let formatted = crate::format_acme(source).expect("format condition");
+            assert_eq!(
+                assemble_acme(&formatted)
+                    .expect("formatted condition")
+                    .bytes,
+                result.bytes
+            );
+        }
+        {
+            let source = "*=$1000\n!pseudopc $2000 {\nnop\n!if * = $2001 { !byte 11 } else { !byte 12 }\n}\n!if * = $1002 { !byte 13 }\n";
+            let result = assemble_acme(source).expect("pseudopc");
+            assert_eq!(result.bytes, [0xea, 0x0b, 0x0d], "pseudopc");
+            let formatted = crate::format_acme(source).expect("format condition");
+            assert_eq!(
+                assemble_acme(&formatted)
+                    .expect("formatted condition")
+                    .bytes,
+                result.bytes
+            );
+        }
+        {
+            let source = "*=$1000\n!pseudopc $2000 {\nnop\n!pseudopc $3000 {\n!if * = $3000 { !byte 14 }\n}\n!if * = $2002 { !byte 15 }\n}\n!if * = $1003 { !byte 16 }\n";
+            let result = assemble_acme(source).expect("nested-pseudopc");
+            assert_eq!(result.bytes, [0xea, 0x0e, 0x0f, 0x10], "nested-pseudopc");
+            let formatted = crate::format_acme(source).expect("format condition");
+            assert_eq!(
+                assemble_acme(&formatted)
+                    .expect("formatted condition")
+                    .bytes,
+                result.bytes
+            );
+        }
+        assemble_acme("!if * > 0 { !byte 1 }\n").expect_err("PC remains unknown before origin");
+    }
+
+    #[test]
+    fn inline_else_is_preserved_and_trailing_text_is_rejected() {
+        for (condition, expected) in [(0, 2), (1, 1)] {
+            let source = format!("*=$1000\n!if {condition} {{ !byte 1 }} else {{ !byte 2 }}\n");
+            assert_eq!(
+                assemble_acme(&source).expect("inline else").bytes,
+                [expected]
+            );
+            let formatted = crate::format_acme(&source).expect("format inline else");
+            assert_eq!(
+                assemble_acme(&formatted).expect("formatted else").bytes,
+                [expected]
+            );
+        }
+        for tail in [
+            "garbage",
+            "else",
+            "else { !byte 2",
+            "else { !byte 2 } garbage",
+        ] {
+            let source = format!("*=$1000\n!if 0 {{ !byte 1 }} {tail}\n");
+            assemble_acme(&source).expect_err("malformed tail must not be discarded");
+        }
+    }
+
+    #[test]
+    fn byte_prefixes_after_multiplication_match_acme() {
+        let result = assemble_acme("*=$1000\n!byte 2 * >$1234, 2 * <$1234, 2 * >($00ff + 1)\n")
+            .expect("ACME accepts a byte prefix on the right of multiplication");
+        assert_eq!(result.bytes, [36, 104, 2]);
+    }
 
     /// `!cpu` is lexical: 65816 extends the base set, and switching back
     /// removes those instructions again.

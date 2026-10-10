@@ -1,0 +1,3 @@
+mise WARN  tracking config: failed to ln -sf /private/tmp/198x-assessment-asm/rust-toolchain.toml /Users/stevehill/.local/state/mise/tracked-configs/df25667554d6f36: Operation not permitted (os error 1)
+    Checking asm198x v0.0.59 (/private/tmp/198x-assessment-asm/crates/asm198x)
+    Finished `dev` profile [unoptimized + debuginfo] target(s) in 3.17s

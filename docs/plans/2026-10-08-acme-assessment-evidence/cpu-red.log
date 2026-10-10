@@ -1,0 +1,24 @@
+mise WARN  tracking config: failed to ln -sf /private/tmp/198x-assessment-asm/rust-toolchain.toml /Users/stevehill/.local/state/mise/tracked-configs/df25667554d6f36: Operation not permitted (os error 1)
+   Compiling verdict-corpus v0.0.59 (/private/tmp/198x-assessment-asm/crates/verdict-corpus)
+   Compiling asm198x v0.0.59 (/private/tmp/198x-assessment-asm/crates/asm198x)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 7.82s
+     Running unittests src/lib.rs (/Users/stevehill/Projects/198x/Asm198x/asm198x/target/debug/deps/asm198x-ba760d22b8996edb)
+
+running 1 test
+test dialects::acme::tests::cpu_selection_before_origin_does_not_emit_data ... FAILED
+
+failures:
+
+---- dialects::acme::tests::cpu_selection_before_origin_does_not_emit_data stdout ----
+
+thread 'dialects::acme::tests::cpu_selection_before_origin_does_not_emit_data' (72685583) panicked at crates/asm198x/src/dialects/acme/mod.rs:2852:49:
+CPU selection does not require an origin: AsmError { line: 1, message: "program counter undefined — set an origin (`*=`) before any code or data", code: AssemblyError, span: Some(Span { file: FileId(0), line: 1, col: 0, expansion_frames: [], path: None }) }
+note: run with `RUST_BACKTRACE=1` environment variable to display a backtrace
+
+
+failures:
+    dialects::acme::tests::cpu_selection_before_origin_does_not_emit_data
+
+test result: FAILED. 0 passed; 1 failed; 0 ignored; 0 measured; 744 filtered out; finished in 0.00s
+
+error: test failed, to rerun pass `-p asm198x --lib`

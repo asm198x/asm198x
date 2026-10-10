@@ -597,6 +597,7 @@ enum Tok {
     Num(i64),
     Sym(String),
     Star,
+    Pc,
     Plus,
     Minus,
     Slash,
@@ -675,7 +676,7 @@ fn tokenize(
         // one did. That is the whole of how `<` tells its two meanings apart.
         let after_value = matches!(
             tokens.last(),
-            Some(Tok::Num(_) | Tok::Sym(_) | Tok::Star | Tok::RParen | Tok::Str(_))
+            Some(Tok::Num(_) | Tok::Sym(_) | Tok::Pc | Tok::RParen | Tok::Str(_))
         );
         let c = chars[i];
         match c {
@@ -689,13 +690,13 @@ fn tokenize(
                 i += 1;
             }
             '*' => {
-                tokens.push(Tok::Star);
+                tokens.push(if after_value { Tok::Star } else { Tok::Pc });
                 i += 1;
             }
             // rgbasm spells the program counter `@`; it tokenises as a PC atom,
             // the same node `*` produces for the other dialects.
             '@' if opts.at_is_pc => {
-                tokens.push(Tok::Star);
+                tokens.push(Tok::Pc);
                 i += 1;
             }
             '/' => {
@@ -1038,20 +1039,6 @@ impl ExprParser {
 
     /// The dialect's arithmetic ladder, below any comparison.
     fn ladder(&mut self) -> Result<Expr, AsmError> {
-        // Loose `<`/`>` wrap the whole expression to their right.
-        if matches!(self.prec, BytePrec::Loose) {
-            match self.tokens.get(self.pos) {
-                Some(Tok::Lo) => {
-                    self.pos += 1;
-                    return Ok(Expr::Lo(Box::new(self.expr()?)));
-                }
-                Some(Tok::Hi) => {
-                    self.pos += 1;
-                    return Ok(Expr::Hi(Box::new(self.expr()?)));
-                }
-                _ => {}
-            }
-        }
         // ACME's precedence differs from the vasm-style ladder used by the other
         // 6502-family dialects: its bitwise/shift operators bind *looser* than
         // arithmetic, and `^` is exponentiation (tightest). Use ACME's ladder
@@ -1266,6 +1253,21 @@ impl ExprParser {
             self.pos += 1;
             return Ok(Expr::Neg(Box::new(self.unary()?)));
         }
+        // Loose byte prefixes also occur after a binary operator (2 * >value).
+        // They still wrap the whole expression to their right.
+        if matches!(self.prec, BytePrec::Loose) {
+            match self.tokens.get(self.pos) {
+                Some(Tok::Lo) => {
+                    self.pos += 1;
+                    return Ok(Expr::Lo(Box::new(self.expr()?)));
+                }
+                Some(Tok::Hi) => {
+                    self.pos += 1;
+                    return Ok(Expr::Hi(Box::new(self.expr()?)));
+                }
+                _ => {}
+            }
+        }
         // Tight `<`/`>` are unary operators binding to the next term.
         if matches!(self.prec, BytePrec::Tight) {
             match self.tokens.get(self.pos) {
@@ -1342,7 +1344,7 @@ impl ExprParser {
                     _ => Ok(Expr::Sym(s)),
                 }
             }
-            Tok::Star => Ok(Expr::Pc),
+            Tok::Pc => Ok(Expr::Pc),
             Tok::LParen => {
                 let inner = self.expr()?;
                 if matches!(self.tokens.get(self.pos), Some(Tok::RParen)) {

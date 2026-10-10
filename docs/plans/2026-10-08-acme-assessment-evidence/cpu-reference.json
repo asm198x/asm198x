@@ -1,0 +1,47 @@
+[
+  {
+    "cpu": "6502",
+    "source": "!cpu 6502\n* = $1001\n lda #1\n",
+    "prg_hex": "0110a901"
+  },
+  {
+    "cpu": "6510",
+    "source": "!cpu 6510\n* = $1001\n lda #1\n",
+    "prg_hex": "0110a901"
+  },
+  {
+    "cpu": "65c02",
+    "source": "!cpu 65c02\n* = $1001\n lda #1\n",
+    "prg_hex": "0110a901"
+  },
+  {
+    "cpu": "r65c02",
+    "source": "!cpu r65c02\n* = $1001\n lda #1\n",
+    "prg_hex": "0110a901"
+  },
+  {
+    "cpu": "w65c02",
+    "source": "!cpu w65c02\n* = $1001\n lda #1\n",
+    "prg_hex": "0110a901"
+  },
+  {
+    "cpu": "c64dtv2",
+    "source": "!cpu c64dtv2\n* = $1001\n lda #1\n",
+    "prg_hex": "0110a901"
+  },
+  {
+    "cpu": "65ce02",
+    "source": "!cpu 65ce02\n* = $1001\n lda #1\n",
+    "prg_hex": "0110a901"
+  },
+  {
+    "cpu": "4502",
+    "source": "!cpu 4502\n* = $1001\n lda #1\n",
+    "prg_hex": "0110a901"
+  },
+  {
+    "cpu": "65816",
+    "source": "!cpu 65816\n* = $1001\n lda #1\n",
+    "prg_hex": "0110a901"
+  }
+]
