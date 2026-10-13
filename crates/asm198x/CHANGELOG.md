@@ -11,7 +11,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- write requested artifacts in both reporting modes
+- JSON assembly now writes source-requested SAVE and symbol-map files rather
+  than only describing them. The files follow the same output-directory and
+  `--outprefix` rules as human reporting; successful writes appear as
+  informational notes in the JSON result. Human output also honors SAVE
+  requests when a CLI container such as `--tapbas` is selected.
+  ([#626](https://github.com/asm198x/asm198x/pull/626))
 
 ## [0.0.62](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.61...asm198x-v0.0.62) - 2026-10-13
 
