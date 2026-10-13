@@ -70,7 +70,7 @@ fn includes_default_names_conditionals_and_formatting_preserve_requests() {
 }
 
 #[test]
-fn cli_writes_source_maps_under_outprefix_and_json_describes_them() {
+fn cli_writes_source_maps_under_outprefix_in_human_and_json_modes() {
     let dir = scratch::dir("sjasm-symbol-cli");
     let prefix = dir.join("exports");
     std::fs::create_dir(&prefix).expect("export directory");
@@ -109,6 +109,9 @@ fn cli_writes_source_maps_under_outprefix_and_json_describes_them() {
         std::fs::read(dir.join("code.bin")).expect("image"),
         expected.bytes
     );
+    for artifact in &expected.artifacts {
+        std::fs::remove_file(prefix.join(&artifact.name)).expect("remove human artifact");
+    }
     let json = Command::new(env!("CARGO_BIN_EXE_asm198x"))
         .current_dir(&dir)
         .args([
@@ -116,13 +119,21 @@ fn cli_writes_source_maps_under_outprefix_and_json_describes_them() {
             "sjasmplus",
             "input.asm",
             "--message-format=json",
+            "--outprefix",
         ])
+        .arg(&prefix)
         .output()
         .expect("JSON CLI");
     assert!(json.status.success());
     let value: serde_json::Value = serde_json::from_slice(&json.stdout).expect("JSON result");
     assert_eq!(value["artifacts"][0]["format"], "cspectmap");
     assert_eq!(value["artifacts"][1]["format"], "labelslist");
+    for artifact in &expected.artifacts {
+        assert_eq!(
+            std::fs::read(prefix.join(&artifact.name)).expect("JSON writes artifact"),
+            artifact.bytes
+        );
+    }
     assert!(!dir.join("native.map").exists());
     assert!(!dir.join("native.lbl").exists());
 }

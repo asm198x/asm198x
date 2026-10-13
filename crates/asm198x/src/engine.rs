@@ -443,6 +443,18 @@ impl WarningKind {
 }
 
 impl Warning {
+    /// An informational note, not a warning about questionable source.
+    /// A line of zero means the note has no specific source location.
+    #[must_use]
+    pub fn note(line: usize, message: impl Into<String>) -> Self {
+        Self {
+            line,
+            message: message.into(),
+            file: FileId(0),
+            kind: WarningKind::Note,
+        }
+    }
+
     pub(crate) fn new(line: usize, message: impl Into<String>) -> Self {
         Self {
             line,

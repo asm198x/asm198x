@@ -73,6 +73,14 @@ what happened, give the host a control rather than a veto:
 - Every write is emitted as a diagnostic, so a JSON consumer sees the full set
   of side effects without scraping a log.
 
+This applies to both human and JSON CLI reporting. `--message-format=json`
+does not turn an explicit source output directive into a description-only
+query. The CLI writes requested artifacts with the same path resolution as
+human mode, then records each resolved destination as an informational
+`warnings` entry with `kind: "Note"`. These are not advisory warnings or
+errors. The library continues to describe artifacts without writing them.
+A JSON invocation with no output requests still creates no files.
+
 ## Contract cost
 
 None. `AssemblyResult` is `#[non_exhaustive]` and `core-contract-freeze.md` is

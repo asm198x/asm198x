@@ -891,6 +891,7 @@ fn run(args: &[String]) -> Result<String, String> {
             exe,
             (sna, prg, tape),
             output.as_deref(),
+            outprefix.as_deref(),
             (&debug, &sym, &listing, &listing_json),
             sym_format,
             linker_config.as_deref(),
@@ -949,7 +950,8 @@ fn run(args: &[String]) -> Result<String, String> {
         };
         std::fs::write(&out_path, &result.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
-        let artifact_notes = write_artifacts(&result.artifacts, &out_path, outprefix.as_deref())?;
+        let artifact_notes =
+            write_artifacts(&result.artifacts, &out_path, outprefix.as_deref())?.join("");
         let debug_notes = match &info {
             Some(info) => write_debug_artifacts(
                 input,
@@ -1161,15 +1163,16 @@ fn run(args: &[String]) -> Result<String, String> {
         };
         std::fs::write(&out_path, image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
-        let artifact_notes = write_artifacts(&assembly.artifacts, &out_path, outprefix.as_deref())?;
         let summary = format!(
-            "assembled {} byte(s) at ${:04X} -> {}{artifact_notes}",
+            "assembled {} byte(s) at ${:04X} -> {}",
             image.len(),
             assembly.origin.unwrap_or(0),
             out_path.display(),
         );
         (summary, out_path)
     };
+    let artifact_notes =
+        write_artifacts(&assembly.artifacts, &image_path, outprefix.as_deref())?.join("");
 
     // ACME's `!symbollist` names a symbol dump, on the same terms as `!to`:
     // a request the flag overrides. `--sym` in any form counts as the name
@@ -1206,7 +1209,7 @@ fn run(args: &[String]) -> Result<String, String> {
             String::new()
         };
     let map_notes = write_map(input, Some(&image_path), &assembly, &map_report)?;
-    Ok(format!("{summary}{debug_notes}{map_notes}"))
+    Ok(format!("{summary}{artifact_notes}{debug_notes}{map_notes}"))
 }
 
 /// Write the requested Debug198x artifacts — the `.debug198x` NDJSON sidecar
@@ -1265,8 +1268,8 @@ fn write_artifacts(
     artifacts: &[asm198x::Artifact],
     out_path: &Path,
     outprefix: Option<&Path>,
-) -> Result<String, String> {
-    let mut notes = String::new();
+) -> Result<Vec<String>, String> {
+    let mut notes = Vec::new();
     for artifact in artifacts {
         let named = Path::new(&artifact.name);
         let path = match (outprefix, named.is_absolute()) {
@@ -1276,7 +1279,7 @@ fn write_artifacts(
         };
         std::fs::write(&path, &artifact.bytes)
             .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
-        notes.push_str(&format!(
+        notes.push(format!(
             "\nwrote {} byte(s) -> {}",
             artifact.bytes.len(),
             path.display()
@@ -1756,6 +1759,7 @@ fn emit_json(
     exe: bool,
     (sna, prg, tape): (bool, bool, Option<(asm198x::TapeFormat, bool)>),
     output: Option<&Path>,
+    outprefix: Option<&Path>,
     (debug, sym, listing, listing_json): (
         &ArtifactPath,
         &ArtifactPath,
@@ -1877,7 +1881,7 @@ fn emit_json(
         Ok((assembly, image))
     });
     match result {
-        Ok((assembly, image)) => {
+        Ok((mut assembly, image)) => {
             // Source-named output is an explicit request, just like `-o` or
             // a container flag. Resolve it only when the CLI chose no image,
             // using the same path constraints and framing as human mode.
@@ -1905,6 +1909,19 @@ fn emit_json(
                 )
                 .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
             }
+            // A SAVE directive requests an artifact even without a primary
+            // image. The default output directory is still beside the input.
+            let default_image = Path::new(input).with_extension("bin");
+            let artifact_notes = write_artifacts(
+                &assembly.artifacts,
+                output.unwrap_or(&default_image),
+                outprefix,
+            )?;
+            assembly.warnings.extend(
+                artifact_notes
+                    .into_iter()
+                    .map(|note| asm198x::Warning::note(0, note.trim_start())),
+            );
             // Debug artifacts are written in JSON mode too; the notes are
             // dropped — stdout carries only the JSON result.
             if debug_requested || sym.is_some() {
