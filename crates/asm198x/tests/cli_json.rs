@@ -207,3 +207,166 @@ fn the_withdrawn_mode_flags_name_their_replacement() {
         );
     }
 }
+
+/// Own the complete output directory so failed assertions also clean up.
+struct NativeOutputDir(PathBuf);
+
+impl NativeOutputDir {
+    fn new(tag: &str) -> Self {
+        let path =
+            std::env::temp_dir().join(format!("asm198x-json-native-{}-{tag}", std::process::id()));
+        std::fs::create_dir(&path).expect("create isolated native-output directory");
+        Self(path)
+    }
+}
+
+impl Drop for NativeOutputDir {
+    fn drop(&mut self) {
+        let _ = std::fs::remove_dir_all(&self.0);
+    }
+}
+
+#[test]
+fn json_native_images_match_human_output_and_keep_machine_code_in_result() {
+    for (flag, extension, dialect, source, code) in [
+        (
+            "--tap",
+            "tap",
+            "pasmo",
+            "org $8000\nstart: di\njr start\nend start\n",
+            vec![0xf3, 0x18, 0xfd],
+        ),
+        (
+            "--tapbas",
+            "tap",
+            "pasmo",
+            "org $8000\nstart: di\njr start\nend start\n",
+            vec![0xf3, 0x18, 0xfd],
+        ),
+        (
+            "--tzx",
+            "tzx",
+            "pasmo",
+            "org $8000\nstart: di\njr start\nend start\n",
+            vec![0xf3, 0x18, 0xfd],
+        ),
+        (
+            "--tzxbas",
+            "tzx",
+            "pasmo",
+            "org $8000\nstart: di\njr start\nend start\n",
+            vec![0xf3, 0x18, 0xfd],
+        ),
+        (
+            "--sna",
+            "sna",
+            "pasmo",
+            "org $8000\nstart: di\njr start\nend start\n",
+            vec![0xf3, 0x18, 0xfd],
+        ),
+        ("--prg", "prg", "acme", "*=$8000\n rts\n", vec![0x60]),
+    ] {
+        let dir = NativeOutputDir::new(flag);
+        std::fs::write(dir.0.join("program.s"), source).expect("write source");
+        let image = dir.0.join(format!("program.{extension}"));
+        // Exercise explicit and derived output paths. Use the same path for
+        // both report modes: Pasmo puts the output name in tape headers.
+        for explicit in [true, false] {
+            for json in [false, true] {
+                let mut command = bin();
+                command
+                    .current_dir(&dir.0)
+                    .args(["--dialect", dialect, flag, "program.s"]);
+                if explicit {
+                    command.args(["-o", &format!("program.{extension}")]);
+                }
+                if json {
+                    command.arg("--message-format=json");
+                }
+                let run = command.output().expect("run assembler");
+                assert!(
+                    run.status.success(),
+                    "{flag}: {}",
+                    String::from_utf8_lossy(&run.stderr)
+                );
+                let bytes = std::fs::read(&image).expect("native artifact written");
+                assert!(bytes.len() > code.len(), "{flag} must frame the code");
+                if json {
+                    let result: AssemblyResult =
+                        serde_json::from_slice(&run.stdout).expect("JSON result");
+                    assert_eq!(result.bytes, code, "JSON bytes retain machine code");
+                    assert_eq!(
+                        bytes,
+                        std::fs::read(dir.0.join("human.image")).expect("human image"),
+                        "{flag}: report mode cannot change artifact bytes"
+                    );
+                } else {
+                    std::fs::write(dir.0.join("human.image"), bytes).expect("retain human image");
+                }
+                std::fs::remove_file(&image).expect("remove output before next invocation");
+            }
+        }
+    }
+}
+
+#[test]
+fn json_rejects_native_formats_for_incompatible_dialects_before_writing() {
+    for (flag, dialect, source) in [
+        ("--tapbas", "acme", "*=$8000\n rts\n"),
+        ("--sna", "acme", "*=$8000\n rts\n"),
+        ("--prg", "pasmo", "org $8000\n ret\n"),
+    ] {
+        let dir = NativeOutputDir::new(&format!("invalid-{flag}"));
+        std::fs::write(dir.0.join("program.s"), source).expect("write source");
+        let run = bin()
+            .current_dir(&dir.0)
+            .args([
+                "--dialect",
+                dialect,
+                flag,
+                "--message-format=json",
+                "program.s",
+                "-o",
+                "image",
+            ])
+            .output()
+            .expect("run assembler");
+        assert!(!run.status.success(), "{flag} must reject {dialect}");
+        assert!(String::from_utf8_lossy(&run.stderr).contains("only for"));
+        assert!(!dir.0.join("image").exists());
+    }
+}
+
+#[test]
+fn json_native_framing_errors_are_diagnostics_and_do_not_write_output() {
+    for (flag, source) in [
+        ("--sna", "org $8000\n ret\n"),
+        ("--tapbas", "org $ffff\n db 1,2\n"),
+        ("--tzxbas", "org $ffff\n db 1,2\n"),
+    ] {
+        let dir = NativeOutputDir::new(&format!("no-entry-{flag}"));
+        std::fs::write(dir.0.join("program.s"), source).expect("write source");
+        let run = bin()
+            .current_dir(&dir.0)
+            .args([
+                "--dialect",
+                "pasmo",
+                flag,
+                "--message-format=json",
+                "program.s",
+                "-o",
+                "image",
+            ])
+            .output()
+            .expect("run assembler");
+        assert!(
+            !run.status.success(),
+            "{flag} must reject invalid framing inputs"
+        );
+        let diagnostics: Vec<Diagnostic> =
+            serde_json::from_slice(&run.stdout).expect("JSON diagnostics");
+        assert_eq!(diagnostics.len(), 1);
+        assert!(matches!(diagnostics[0].severity, Severity::Error));
+        assert!(!dir.0.join("image").exists());
+    }
+}
