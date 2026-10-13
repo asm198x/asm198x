@@ -793,6 +793,33 @@ fn run(args: &[String]) -> Result<String, String> {
         return Err("`--gb-rom` is not yet available with `--message-format=json`".into());
     }
 
+    // Container flags pair with specific dialects — validate before anything is
+    // written, so a doomed invocation leaves no files behind.
+    if sna
+        && !matches!(
+            assembler,
+            Assembler::Pasmo { .. } | Assembler::Sjasmplus { .. }
+        )
+    {
+        return Err(
+            "`--sna` is only for the Spectrum Z80 dialects (pasmo/pasmonext/sjasmplus)".into(),
+        );
+    }
+    if prg && !matches!(assembler, Assembler::Acme) {
+        return Err("`--prg` is only for the C64 dialect (acme)".into());
+    }
+    if tape.is_some()
+        && !matches!(
+            assembler,
+            Assembler::Pasmo { .. } | Assembler::Sjasmplus { .. }
+        )
+    {
+        return Err(
+            "`--tap`/`--tzx` are only for the Spectrum Z80 dialects (pasmo/pasmonext/sjasmplus)"
+                .into(),
+        );
+    }
+
     // Debug198x artifacts: every path emits them (flat U3, ca65 U4, vasm U5).
     // ca65 supplies the section byte map for listings; vasm still exposes only
     // the record-backed artifacts (`--debug`, `--sym`).
@@ -862,6 +889,7 @@ fn run(args: &[String]) -> Result<String, String> {
             &source,
             &include_dirs,
             exe,
+            (sna, prg, tape),
             output.as_deref(),
             (&debug, &sym, &listing, &listing_json),
             sym_format,
@@ -1017,33 +1045,6 @@ fn run(args: &[String]) -> Result<String, String> {
             rom.bytes.len(),
             out_path.display()
         ));
-    }
-
-    // Container flags pair with specific dialects — validate before anything is
-    // written, so a doomed invocation leaves no files behind.
-    if sna
-        && !matches!(
-            assembler,
-            Assembler::Pasmo { .. } | Assembler::Sjasmplus { .. }
-        )
-    {
-        return Err(
-            "`--sna` is only for the Spectrum Z80 dialects (pasmo/pasmonext/sjasmplus)".into(),
-        );
-    }
-    if prg && !matches!(assembler, Assembler::Acme) {
-        return Err("`--prg` is only for the C64 dialect (acme)".into());
-    }
-    if tape.is_some()
-        && !matches!(
-            assembler,
-            Assembler::Pasmo { .. } | Assembler::Sjasmplus { .. }
-        )
-    {
-        return Err(
-            "`--tap`/`--tzx` are only for the Spectrum Z80 dialects (pasmo/pasmonext/sjasmplus)"
-                .into(),
-        );
     }
 
     // Every flat dialect assembles through its multi-file entry (U2–U4 — the
@@ -1753,6 +1754,7 @@ fn emit_json(
     source: &str,
     include_dirs: &[PathBuf],
     exe: bool,
+    (sna, prg, tape): (bool, bool, Option<(asm198x::TapeFormat, bool)>),
     output: Option<&Path>,
     (debug, sym, listing, listing_json): (
         &ArtifactPath,
@@ -1837,10 +1839,47 @@ fn emit_json(
             entry(source, input, &loader).map_err(|e| capture_failure(&mut failure_files, e))
         }
     };
+    // An explicit container is an artifact request even without `-o`. Plain
+    // JSON queries retain their existing no-file default. Reporting must not
+    // replace the image with raw bytes, or change `AssemblyResult.bytes`.
+    let extension = if let Some((format, _)) = tape {
+        Some(match format {
+            asm198x::TapeFormat::Tap => "tap",
+            asm198x::TapeFormat::Tzx => "tzx",
+        })
+    } else if sna {
+        Some("sna")
+    } else if prg {
+        Some("prg")
+    } else {
+        None
+    };
+    let default_output = extension.map(|ext| Path::new(input).with_extension(ext));
+    let output = output.or(default_output.as_deref());
+    // Framing failures use the same structured diagnostic path as assembly
+    // failures, before any artifact or sidecar is written.
+    let result = result.and_then(|assembly| {
+        let image = if let Some((format, autorun)) = tape {
+            let path = output.expect("a tape format supplies a default output path");
+            Some(asm198x::tape(
+                &assembly,
+                format,
+                &path.to_string_lossy(),
+                autorun,
+            )?)
+        } else if sna {
+            Some(asm198x::sna_48k(&assembly)?)
+        } else if prg {
+            Some(asm198x::prg(&assembly))
+        } else {
+            None
+        };
+        Ok((assembly, image))
+    });
     match result {
-        Ok(assembly) => {
+        Ok((assembly, image)) => {
             if let Some(path) = output {
-                std::fs::write(path, &assembly.bytes)
+                std::fs::write(path, image.as_deref().unwrap_or(&assembly.bytes))
                     .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
             }
             // Debug artifacts are written in JSON mode too; the notes are
