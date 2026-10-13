@@ -11,7 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- honor source-named files with JSON reports
+- JSON assembly now writes the files requested by ACME `!to` and
+  `!symbollist`, and vasm `output`, instead of returning success without
+  creating them. Source-relative paths, native framing and CLI overrides
+  match human reporting. Plain JSON queries still create no file.
+  ([#624](https://github.com/asm198x/asm198x/pull/624))
 
 ## [0.0.61](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.60...asm198x-v0.0.61) - 2026-10-13
 
