@@ -227,6 +227,148 @@ impl Drop for NativeOutputDir {
 }
 
 #[test]
+fn json_save_artifacts_match_human_files_and_report_resolved_writes() {
+    for (tag, explicit_output, prefix, container) in [
+        ("default", false, false, false),
+        ("output", true, false, false),
+        ("prefix", false, true, false),
+        ("both", true, true, false),
+        ("container", true, false, true),
+    ] {
+        let dir = NativeOutputDir::new(&format!("save-{tag}"));
+        let mut saved = Vec::new();
+        for mode in ["human", "json"] {
+            let cwd = dir.0.join(mode);
+            for name in ["src", "out", "exports"] {
+                std::fs::create_dir_all(cwd.join(name)).expect("test directory");
+            }
+            let src = cwd.join("src/program.s");
+            std::fs::write(&src, " DEVICE ZXSPECTRUM48\n ORG $8000\n db 42\n SAVEBIN \"saved.bin\",$8000,1\n END $8000\n").expect("source");
+            let mut command = bin();
+            command
+                .current_dir(&cwd)
+                .args([
+                    "--dialect",
+                    "sjasmplus",
+                    &format!("--message-format={mode}"),
+                ])
+                .arg(&src);
+            if explicit_output {
+                command.args(["-o", "out/image.bin"]);
+            }
+            if prefix {
+                command.args(["--outprefix", "exports"]);
+            }
+            if container {
+                command.arg("--tapbas");
+            }
+            let run = command.output().expect("assemble artifact");
+            assert!(
+                run.status.success(),
+                "{tag}/{mode}: {}",
+                String::from_utf8_lossy(&run.stderr)
+            );
+            let relative = if prefix {
+                "exports/saved.bin"
+            } else if explicit_output {
+                "out/saved.bin"
+            } else {
+                "src/saved.bin"
+            };
+            let path = cwd.join(relative);
+            saved.push(std::fs::read(&path).unwrap_or_else(|error| {
+                panic!("{tag}/{mode}: requested artifact is written: {error}")
+            }));
+            if mode == "json" {
+                let result: AssemblyResult =
+                    serde_json::from_slice(&run.stdout).expect("JSON result");
+                assert_eq!(result.bytes, [42]);
+                assert_eq!(result.artifacts.len(), 1);
+                assert_eq!(result.artifacts[0].bytes, saved[0]);
+                assert!(
+                    result.diagnostics.is_empty(),
+                    "successful writes aren't errors"
+                );
+                assert_eq!(result.warnings.len(), 1, "one resolved write note");
+                assert_eq!(
+                    serde_json::to_value(result.warnings[0].kind).expect("note kind"),
+                    "Note",
+                    "not an advisory warning"
+                );
+                assert!(result.warnings[0].message.ends_with(relative));
+                assert!(
+                    !src.with_extension("bin").exists(),
+                    "SAVE doesn't request a default primary image"
+                );
+            }
+        }
+        assert_eq!(saved[0], [42]);
+        assert_eq!(saved[0], saved[1], "{tag} reports preserve artifact bytes");
+    }
+}
+
+#[test]
+fn json_save_paths_keep_parent_absolute_and_failure_behavior() {
+    let dir = NativeOutputDir::new("save-paths");
+    let src = dir.0.join("src/program.s");
+    std::fs::create_dir(src.parent().expect("source parent")).expect("source directory");
+    let absolute = dir.0.join("absolute.bin");
+    for named in [
+        "../parent.bin".to_owned(),
+        absolute.to_string_lossy().into_owned(),
+    ] {
+        std::fs::write(
+            &src,
+            format!(" DEVICE ZXSPECTRUM48\n ORG $8000\n db 42\n SAVEBIN \"{named}\",$8000,1\n"),
+        )
+        .expect("source");
+        let run = bin()
+            .args(["--dialect", "sjasmplus", "--message-format=json"])
+            .arg(&src)
+            .output()
+            .expect("assemble SAVE path");
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        let result: AssemblyResult = serde_json::from_slice(&run.stdout).expect("JSON result");
+        assert_eq!(
+            std::fs::read(src.parent().expect("parent").join(&named)).expect("SAVE path"),
+            [42]
+        );
+        assert_eq!(
+            result.artifacts[0].name, named,
+            "source spelling remains in artifact descriptor"
+        );
+        assert_eq!(
+            serde_json::to_value(result.warnings[0].kind).expect("note kind"),
+            "Note"
+        );
+    }
+    std::fs::write(
+        &src,
+        " DEVICE ZXSPECTRUM48\n ORG $8000\n db 42\n SAVEBIN \"missing/saved.bin\",$8000,1\n",
+    )
+    .expect("unwritable source request");
+    let run = bin()
+        .args(["--dialect", "sjasmplus", "--message-format=json"])
+        .arg(&src)
+        .output()
+        .expect("fail SAVE write");
+    assert!(
+        !run.status.success(),
+        "assembly success alone cannot hide a failed write"
+    );
+    assert!(String::from_utf8_lossy(&run.stderr).contains("cannot write"));
+    assert!(
+        run.stdout.is_empty(),
+        "no successful JSON result on a failed artifact write"
+    );
+    assert!(!src.with_extension("bin").exists());
+}
+
+#[test]
 fn json_source_named_images_match_human_output_beside_the_source() {
     for (tag, dialect, source, expected, code) in [
         (

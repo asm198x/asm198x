@@ -354,6 +354,16 @@ and diagnostics go to stderr, so a pipeline gets the artifact and nothing else.
 stdout — bytes, symbols and the full diagnostic list — for a build script or an
 editor. The human form stays on stderr.
 
+JSON reporting still writes explicitly requested files: CLI output options,
+source-named images and symbol lists, and source artifacts such as `SAVEBIN`,
+`CSPECTMAP` and `LABELSLIST`. SAVE artifacts use the output directory, or
+`--outprefix` when supplied, just as in human mode. Each successful artifact
+write appears in the JSON result's `warnings` array with `kind: "Note"` and its
+resolved destination; these informational notes are not advisory warnings.
+`bytes` remains the assembled machine code. A plain JSON query with no output
+request writes no file. A failed write returns a non-zero exit status; files
+written earlier in that invocation can remain.
+
 <!-- sample: acme, file: fill.a, refuses: does not fit in a byte -->
 ```asm
 * = $c000
