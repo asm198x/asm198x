@@ -227,6 +227,269 @@ impl Drop for NativeOutputDir {
 }
 
 #[test]
+fn json_source_named_images_match_human_output_beside_the_source() {
+    for (tag, dialect, source, expected, code) in [
+        (
+            "cbm",
+            "acme",
+            "!to \"named.out\", cbm\n*=$8000\nrts\n",
+            vec![0, 0x80, 0x60],
+            vec![0x60],
+        ),
+        (
+            "apple",
+            "acme",
+            "!to \"named.out\", apple\n*=$8000\nrts\n",
+            vec![0, 0x80, 1, 0, 0x60],
+            vec![0x60],
+        ),
+        (
+            "plain",
+            "acme",
+            "!to \"named.out\", plain\n*=$8000\nrts\n",
+            vec![0x60],
+            vec![0x60],
+        ),
+        (
+            "vasm",
+            "vasm",
+            " output \"named.out\"\n rts\n",
+            vec![0x4e, 0x75],
+            vec![0x4e, 0x75],
+        ),
+    ] {
+        let dir = NativeOutputDir::new(&format!("source-{tag}"));
+        let mut images = Vec::new();
+        for mode in ["human", "json"] {
+            let source_dir = dir.0.join(mode);
+            std::fs::create_dir(&source_dir).expect("source directory");
+            let source_path = source_dir.join("program.s");
+            std::fs::write(&source_path, source).expect("source");
+            let run = bin()
+                .current_dir(&dir.0)
+                .args(["--dialect", dialect, &format!("--message-format={mode}")])
+                .arg(&source_path)
+                .output()
+                .expect("assemble");
+            assert!(
+                run.status.success(),
+                "{tag}/{mode}: {}",
+                String::from_utf8_lossy(&run.stderr)
+            );
+            if mode == "json" {
+                let result: AssemblyResult =
+                    serde_json::from_slice(&run.stdout).expect("JSON result");
+                assert_eq!(result.bytes, code, "JSON retains machine code");
+            }
+            assert!(
+                !dir.0.join("named.out").exists(),
+                "output is source-relative, not cwd-relative"
+            );
+            assert!(
+                !source_path.with_extension("bin").exists(),
+                "no extra default image"
+            );
+            images.push(std::fs::read(source_dir.join("named.out")).expect("source-named image"));
+        }
+        assert_eq!(images[0], expected, "{tag} native framing");
+        assert_eq!(
+            images[0], images[1],
+            "{tag} reporting does not change output"
+        );
+    }
+}
+
+#[test]
+fn json_source_named_symbols_match_human_and_respect_cli_precedence() {
+    let dir = NativeOutputDir::new("source-symbols");
+    let mut symbols = Vec::new();
+    for mode in ["human", "json"] {
+        let source_dir = dir.0.join(mode);
+        std::fs::create_dir(&source_dir).expect("source directory");
+        let src = source_dir.join("program.s");
+        std::fs::write(&src, "!symbollist \"named.sym\"\n*=$8000\nstart: rts\n").expect("source");
+        let run = bin()
+            .current_dir(&dir.0)
+            .args(["--dialect", "acme", &format!("--message-format={mode}")])
+            .arg(&src)
+            .output()
+            .expect("assemble");
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        if mode == "json" {
+            let result: AssemblyResult = serde_json::from_slice(&run.stdout).expect("JSON result");
+            assert_eq!(result.symbols.get("start"), Some(&0x8000));
+            assert!(
+                !src.with_extension("bin").exists(),
+                "a symbol request does not request an image"
+            );
+        }
+        symbols.push(std::fs::read(source_dir.join("named.sym")).expect("source-named symbols"));
+        std::fs::remove_file(source_dir.join("named.sym")).expect("remove first symbols");
+        let run = bin()
+            .current_dir(&dir.0)
+            .args([
+                "--dialect",
+                "acme",
+                &format!("--message-format={mode}"),
+                "--sym",
+            ])
+            .arg(&src)
+            .output()
+            .expect("assemble with CLI symbol override");
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        assert!(
+            !source_dir.join("named.sym").exists(),
+            "--sym overrides source name"
+        );
+        assert_eq!(
+            std::fs::read(src.with_extension("sym")).expect("CLI symbols"),
+            symbols[0]
+        );
+    }
+    assert_eq!(symbols[0], symbols[1]);
+    assert!(!symbols[0].is_empty());
+}
+
+#[test]
+fn json_source_names_reject_escaping_paths_but_cli_overrides_them() {
+    let dir = NativeOutputDir::new("source-paths");
+    let source_dir = dir.0.join("src");
+    std::fs::create_dir(&source_dir).expect("source directory");
+    let src = source_dir.join("program.s");
+    let escaped = dir.0.join("escaped.out");
+    for directive in ["!to", "!symbollist"] {
+        for named in [
+            "../escaped.out".to_owned(),
+            escaped.to_string_lossy().into_owned(),
+        ] {
+            std::fs::write(&src, format!("{directive} \"{named}\"\n*=$8000\nrts\n"))
+                .expect("source");
+            let run = bin()
+                .args(["--dialect", "acme", "--message-format=json"])
+                .arg(&src)
+                .output()
+                .expect("reject path");
+            assert!(
+                !run.status.success(),
+                "unsafe source name must fail: {directive} {named}"
+            );
+            assert!(String::from_utf8_lossy(&run.stderr).contains("source-named output"));
+            assert!(!escaped.exists());
+            let override_path = dir.0.join("override.out");
+            let mut command = bin();
+            command
+                .args(["--dialect", "acme", "--message-format=json"])
+                .arg(&src);
+            if directive == "!to" {
+                command.arg("-o").arg(&override_path);
+            } else {
+                command.arg(format!("--sym={}", override_path.display()));
+            }
+            let run = command.output().expect("override path");
+            assert!(
+                run.status.success(),
+                "{}",
+                String::from_utf8_lossy(&run.stderr)
+            );
+            let _: AssemblyResult = serde_json::from_slice(&run.stdout).expect("JSON result");
+            assert!(override_path.exists(), "CLI destination written");
+            assert!(
+                !escaped.exists(),
+                "overridden source destination never written"
+            );
+            std::fs::remove_file(override_path).expect("remove override");
+        }
+    }
+}
+
+#[test]
+fn json_output_override_ignores_source_framing_and_plain_queries_write_nothing() {
+    let dir = NativeOutputDir::new("source-override");
+    let src = dir.0.join("program.s");
+    std::fs::write(&src, "!to \"named.prg\", cbm\n*=$8000\nrts\n").expect("source");
+    let out = dir.0.join("override.bin");
+    for mode in ["human", "json"] {
+        let run = bin()
+            .args(["--dialect", "acme", &format!("--message-format={mode}")])
+            .arg(&src)
+            .arg("-o")
+            .arg(&out)
+            .output()
+            .expect("assemble");
+        assert!(
+            run.status.success(),
+            "{}",
+            String::from_utf8_lossy(&run.stderr)
+        );
+        assert_eq!(std::fs::read(&out).expect("CLI image"), [0x60]);
+        assert!(!dir.0.join("named.prg").exists());
+    }
+    std::fs::remove_file(out).expect("remove override");
+    std::fs::write(&src, "*=$8000\nrts\n").expect("plain source");
+    let run = bin()
+        .args(["--dialect", "acme", "--message-format=json"])
+        .arg(&src)
+        .output()
+        .expect("plain JSON query");
+    assert!(run.status.success());
+    let result: AssemblyResult = serde_json::from_slice(&run.stdout).expect("JSON result");
+    assert_eq!(result.bytes, [0x60]);
+    assert_eq!(
+        std::fs::read_dir(&dir.0).expect("directory").count(),
+        1,
+        "only source remains"
+    );
+}
+
+#[test]
+fn json_source_named_output_keeps_container_precedence_and_sidecar_collision_checks() {
+    let dir = NativeOutputDir::new("source-container");
+    let src = dir.0.join("program.s");
+    std::fs::write(&src, "!to \"named.apple\", apple\n*=$8000\nrts\n").expect("source");
+    let run = bin()
+        .args(["--dialect", "acme", "--message-format=json", "--prg"])
+        .arg(&src)
+        .output()
+        .expect("CLI container overrides source");
+    assert!(
+        run.status.success(),
+        "{}",
+        String::from_utf8_lossy(&run.stderr)
+    );
+    assert_eq!(
+        std::fs::read(src.with_extension("prg")).expect("PRG image"),
+        [0, 0x80, 0x60]
+    );
+    assert!(!dir.0.join("named.apple").exists());
+    std::fs::write(
+        &src,
+        "!to \"named.prg\", cbm\n!symbollist \"named.prg\"\n*=$8000\nrts\n",
+    )
+    .expect("colliding source");
+    let run = bin()
+        .args(["--dialect", "acme", "--message-format=json"])
+        .arg(&src)
+        .output()
+        .expect("reject colliding symbols");
+    assert!(!run.status.success());
+    assert!(
+        String::from_utf8_lossy(&run.stderr).contains("refusing to overwrite the output image")
+    );
+    assert_eq!(
+        std::fs::read(dir.0.join("named.prg")).expect("image remains intact"),
+        [0, 0x80, 0x60]
+    );
+}
+
+#[test]
 fn json_native_images_match_human_output_and_keep_machine_code_in_result() {
     for (flag, extension, dialect, source, code) in [
         (
