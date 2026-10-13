@@ -11,7 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- preserve native image framing with JSON reports
+- Write native TAP, TZX, SNA and PRG images when JSON reporting is enabled.
+  Previously these container switches could write raw machine code to the image
+  file and report success. Invalid container inputs now fail before writing;
+  the JSON result continues to report the assembled machine code.
+  ([#620](https://github.com/asm198x/asm198x/pull/620))
 
 ## [0.0.60](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.59...asm198x-v0.0.60) - 2026-10-10
 
