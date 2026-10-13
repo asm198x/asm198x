@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.63](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.62...asm198x-v0.0.63) - 2026-10-13
+
+### Fixed
+
+- write requested artifacts in both reporting modes
+
 ## [0.0.62](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.61...asm198x-v0.0.62) - 2026-10-13
 
 ### Fixed
