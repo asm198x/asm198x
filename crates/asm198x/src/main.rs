@@ -1878,13 +1878,36 @@ fn emit_json(
     });
     match result {
         Ok((assembly, image)) => {
+            // Source-named output is an explicit request, just like `-o` or
+            // a container flag. Resolve it only when the CLI chose no image,
+            // using the same path constraints and framing as human mode.
+            let (requested_output, source_image) = match (output, &assembly.requested_output) {
+                (None, Some(request)) => (
+                    Some(source_named_path(input, &request.path)?),
+                    Some(frame_output(&assembly, request.format)),
+                ),
+                _ => (None, None),
+            };
+            let output = output.or(requested_output.as_deref());
+            // `--sym` in any form wins over a source's `!symbollist`.
+            let requested_sym = match (sym, &assembly.requested_symbols) {
+                (None, Some(named)) => Some(Some(source_named_path(input, named)?)),
+                _ => None,
+            };
+            let sym = if sym.is_some() { sym } else { &requested_sym };
             if let Some(path) = output {
-                std::fs::write(path, image.as_deref().unwrap_or(&assembly.bytes))
-                    .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
+                std::fs::write(
+                    path,
+                    image
+                        .as_deref()
+                        .or(source_image.as_deref())
+                        .unwrap_or(&assembly.bytes),
+                )
+                .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
             }
             // Debug artifacts are written in JSON mode too; the notes are
             // dropped — stdout carries only the JSON result.
-            if debug_requested {
+            if debug_requested || sym.is_some() {
                 let info = linked_info.unwrap_or_else(|| {
                     let (cpu, dialect) = assembler.identity();
                     asm198x::debug_info(&assembly, cpu, dialect, input)
