@@ -520,9 +520,11 @@ const PROBES: &[Probe] = &[
     ok ("pasmo", "operator ~",           " db ~0\n dw ~~1\n"),
 
     ok ("pasmo", "word bitwise DEFS fill", " org $8000\n defs 2,($ >> 8) XOR $a5\n"),
-    ok ("pasmo", "word bitwise precedence", " dw 1 OR 2 XOR 3,1 XOR 3 AND 2,1 XOR 1 = 1\n dw NOT 1+1,2*3 SHL 1+1,16 SHR 1*2,1+2<<1\n"),
-    ok ("pasmo", "word bitwise mixed case", " dw 1 xOr 2,1 aNd 3,1 oR 2,nOt 1,1 sHl 2,8 sHr 1\n"),
+    ok ("pasmo", "word bitwise precedence", " dw 1 OR 2 XOR 3,1 XOR 3 AND 2,1 XOR 1 = 1\n dw NOT 1+1,2*3 << 1+1,16 >> 1*2,1+2<<1\n"),
+    ok ("pasmo", "word bitwise mixed case", " dw 1 xOr 2,1 aNd 3,1 oR 2,nOt 1\n"),
     ok ("pasmo", "word bitwise identifier boundaries", "XOR_mask equ 7\nORvalue equ 3\n dw XOR_mask XOR ORvalue\n"),
+    ok ("pasmo", "word binary bitwise unsigned intermediate", " dw (1 XOR -1) > 0,(0 OR -1) / 256,(65536 AND 65536) > 0\n"),
+    ok ("pasmo", "word NOT unsigned intermediate", " dw (NOT 0) > 0,(NOT 0) / 256\n if (NOT 0) > 0\n db $a5\n else\n db $5a\n endif\n defs NOT 65534,$a5\n"),
     ok ("pasmo", "word bitwise conditions", " if 1 OR 2 XOR 3\n db 0\n else\n db 1\n endif\n if 1 XOR 1 = 1\n db 2\n endif\n if NOT 1+1\n db 3\n endif\n"),
 
     // ---- sjasmplus / z80 ----------------------------------------------------

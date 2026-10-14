@@ -4537,8 +4537,6 @@ fn tokenize_impl<S: Z80Syntax>(
                         "OR" => Tok::Or,
                         "XOR" => Tok::Xor,
                         "NOT" => Tok::BitNot,
-                        "SHL" => Tok::Shl,
-                        "SHR" => Tok::Shr,
                         _ => Tok::Sym(word),
                     }
                 } else {
@@ -4597,7 +4595,7 @@ impl ExprParser {
                 match token {
                     Tok::Minus => Expr::Neg(operand),
                     Tok::Plus => *operand,
-                    Tok::BitNot => Expr::BitNot(operand),
+                    Tok::BitNot => Self::pasmo_word(Expr::BitNot(operand)),
                     Tok::Not => Expr::Neg(Box::new(Expr::LogNot(operand))),
                     _ => unreachable!("prefix operator matched above"),
                 }
@@ -4633,9 +4631,17 @@ impl ExprParser {
             left = Expr::Bin(op, Box::new(left), Box::new(right));
             if truth {
                 left = Expr::Neg(Box::new(left));
+            } else if matches!(op, BinOp::And | BinOp::Or | BinOp::Xor) {
+                left = Self::pasmo_word(left);
             }
         }
         Ok(left)
+    }
+
+    /// Bitwise operations produce an unsigned word before any enclosing
+    /// comparison, division, condition or reserve count consumes the result.
+    fn pasmo_word(value: Expr) -> Expr {
+        Expr::Bin(BinOp::And, Box::new(value), Box::new(Expr::Num(0xffff)))
     }
 
     /// The comparison at the cursor, if there is one.
