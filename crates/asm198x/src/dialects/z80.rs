@@ -1688,7 +1688,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
     /// counter where the walk can follow it.
     fn fold_count(&self, expr: &Expr, line: usize) -> Result<i64, AsmError> {
         let Some(fwd) = &self.forward else {
-            return literal(expr, &self.consts, line);
+            return expr.eval_with(&|name| self.consts.get(name).copied(), self.pc, line);
         };
         // `eval_with` cannot carry the last-pass error out of its resolver,
         // so an unreached symbol is caught after the fold, on that pass only.
@@ -1715,8 +1715,9 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         }
     }
 
-    /// `DS`/`DEFS`/`BLOCK count[, fill]` where the count may name a symbol
-    /// defined later. The reference resolves it across its three passes
+    /// `DS`/`DEFS`/`BLOCK count[, fill]`, including a live `$` count. Pasmo
+    /// requires the count to be known now; SjASMPlus can name a symbol
+    /// defined later and resolves it across its three passes
     /// (probed: `DS COUNT * 2` above `COUNT EQU 3` reserves six; `DS later+1`
     /// above `later:` settles on three with the pass-3 advisory). A negative
     /// count makes it warn `Negative BLOCK?` and move the counter backwards;
@@ -1729,6 +1730,12 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
         };
         let count = self.fold_count(&parse_value(self.syntax, count.trim(), line)?, line)?;
         if count < 0 {
+            if !self.syntax.resolves_forward_conditions() {
+                return Err(AsmError::new(
+                    line,
+                    "`ds`/`defs` count must be a non-negative constant",
+                ));
+            }
             if let Some(fwd) = &self.forward {
                 fwd.warnings.borrow_mut().push(Warning {
                     line,
@@ -2047,7 +2054,7 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             Some(Operation::Bytes(vec![Expr::Num(0xDD), Expr::Num(0x00)]))
         } else if rest.is_empty() {
             None
-        } else if self.syntax.resolves_forward_conditions() && self.syntax.is_reserve(word) {
+        } else if self.syntax.is_reserve(word) {
             Some(self.lower_reserve(args, line)?)
         } else {
             parse_op(self.syntax, self.set, self.ext, rest, line, &self.consts)?

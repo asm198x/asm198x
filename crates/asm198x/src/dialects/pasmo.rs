@@ -644,6 +644,40 @@ mod tests {
         assert_eq!(asm("        ds 4\n").expect("ds").bytes, vec![0, 0, 0, 0]);
     }
 
+    /// PasmoNext 0.1.3 emits a5 a5 a5 a5 04 04 04 00 00 ff ff.
+    #[test]
+    fn defs_accepts_fill_and_live_location_counter() {
+        let source = " org $8000\n defs $8004-$,$a5\n ds 3,$\n defs 2,256\n defs 2,-1\n";
+        let expected = vec![0xa5, 0xa5, 0xa5, 0xa5, 4, 4, 4, 0, 0, 0xff, 0xff];
+        for assembled in [
+            crate::assemble_pasmo(source),
+            crate::assemble_pasmonext(source),
+        ] {
+            assert_eq!(
+                assembled.expect("count and fill expressions").bytes,
+                expected
+            );
+        }
+    }
+
+    #[test]
+    fn defs_count_uses_prior_labels_and_defaults_to_zero_fill() {
+        let source = " org $8000\nstart: db 1\n defs $-start,7\n defs $8004-$\n";
+        assert_eq!(asm(source).expect("live count").bytes, vec![1, 7, 0, 0]);
+    }
+
+    #[test]
+    fn defs_rejects_malformed_operands_and_unknown_counts() {
+        for source in [
+            " defs 2,\n",
+            " defs 2,1,3\n",
+            " defs ,1\n",
+            " defs N,1\nN equ 2\n",
+        ] {
+            assert!(asm(source).is_err(), "{source}");
+        }
+    }
+
     #[test]
     fn ed_block_move_assembles() {
         assert_eq!(asm("        ldir\n").expect("ldir").bytes, vec![0xED, 0xB0]);
