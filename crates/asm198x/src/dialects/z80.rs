@@ -1729,13 +1729,15 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             None => (args, None),
         };
         let count = self.fold_count(&parse_value(self.syntax, count.trim(), line)?, line)?;
+        // Pasmo evaluates the count as a 16-bit word, including negative and
+        // oversized positive expressions. Normalize before allocating bytes
+        // or advancing the counter. SjASMPlus has its own negative-count rule.
+        let count = if self.syntax.resolves_forward_conditions() {
+            count
+        } else {
+            count.rem_euclid(0x1_0000)
+        };
         if count < 0 {
-            if !self.syntax.resolves_forward_conditions() {
-                return Err(AsmError::new(
-                    line,
-                    "`ds`/`defs` count must be a non-negative constant",
-                ));
-            }
             if let Some(fwd) = &self.forward {
                 fwd.warnings.borrow_mut().push(Warning {
                     line,

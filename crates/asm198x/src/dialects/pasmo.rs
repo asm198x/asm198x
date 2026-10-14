@@ -667,6 +667,38 @@ mod tests {
     }
 
     #[test]
+    fn defs_counts_wrap_to_sixteen_bits_before_allocation() {
+        // Lengths observed with PasmoNext 0.1.3; live probes also retain bytes.
+        for (count, length) in [
+            (-1, 65535),
+            (-65535, 1),
+            (-65536, 0),
+            (-65537, 65535),
+            (65535, 65535),
+            (65536, 0),
+            (65537, 1),
+            (131072, 0),
+        ] {
+            let source = format!(" org 0\n defs {count},$a5\n");
+            for assembled in [
+                crate::assemble_pasmo(&source),
+                crate::assemble_pasmonext(&source),
+            ] {
+                assert_eq!(assembled.expect("16-bit count").bytes, vec![0xa5; length]);
+            }
+        }
+    }
+
+    #[test]
+    fn defs_normalized_count_advances_labels_and_live_counter() {
+        let source = " org $8000\n ds -65535,$a5\nafter: defs 65536\n dw after,$\n";
+        assert_eq!(
+            asm(source).expect("normalized layout").bytes,
+            [0xa5, 1, 0x80, 1, 0x80]
+        );
+    }
+
+    #[test]
     fn defs_rejects_malformed_operands_and_unknown_counts() {
         for source in [
             " defs 2,\n",
