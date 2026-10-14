@@ -1735,13 +1735,15 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             None => (args, None),
         };
         let count = self.fold_count(&parse_value(self.syntax, count.trim(), line)?, line)?;
+        // Pasmo evaluates the count as a 16-bit word, including negative and
+        // oversized positive expressions. Normalize before allocating bytes
+        // or advancing the counter. SjASMPlus has its own negative-count rule.
+        let count = if self.syntax.resolves_forward_conditions() {
+            count
+        } else {
+            count.rem_euclid(0x1_0000)
+        };
         if count < 0 {
-            if !self.syntax.resolves_forward_conditions() {
-                return Err(AsmError::new(
-                    line,
-                    "`ds`/`defs` count must be a non-negative constant",
-                ));
-            }
             if let Some(fwd) = &self.forward {
                 fwd.warnings.borrow_mut().push(Warning {
                     line,
@@ -4596,7 +4598,7 @@ impl ExprParser {
                     Tok::Minus => Expr::Neg(operand),
                     Tok::Plus => *operand,
                     Tok::BitNot => Self::pasmo_word(Expr::BitNot(operand)),
-                    Tok::Not => Expr::Neg(Box::new(Expr::LogNot(operand))),
+                    Tok::Not => Self::pasmo_word(Expr::Neg(Box::new(Expr::LogNot(operand)))),
                     _ => unreachable!("prefix operator matched above"),
                 }
             }
@@ -4630,7 +4632,7 @@ impl ExprParser {
             let right = self.pasmo_expr(precedence + 1)?;
             left = Expr::Bin(op, Box::new(left), Box::new(right));
             if truth {
-                left = Expr::Neg(Box::new(left));
+                left = Self::pasmo_word(Expr::Neg(Box::new(left)));
             } else if matches!(op, BinOp::And | BinOp::Or | BinOp::Xor) {
                 left = Self::pasmo_word(left);
             }
@@ -4638,7 +4640,7 @@ impl ExprParser {
         Ok(left)
     }
 
-    /// Bitwise operations produce an unsigned word before any enclosing
+    /// Bitwise and truth operations produce an unsigned word before any enclosing
     /// comparison, division, condition or reserve count consumes the result.
     fn pasmo_word(value: Expr) -> Expr {
         Expr::Bin(BinOp::And, Box::new(value), Box::new(Expr::Num(0xffff)))

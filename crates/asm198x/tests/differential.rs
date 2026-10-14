@@ -501,6 +501,9 @@ const PROBES: &[Probe] = &[
     ok ("pasmo", "defw / dw",            " defw $1234\n dw $5678\n"),
     ok ("pasmo", "defs / ds reserve",    " ld a,1\n defs 3\n ds 2\n ld b,2\n"),
     ok ("pasmo", "defs explicit fill and live counter", " org $8000\n defs $8004-$,$a5\n ds 3,$\n defs 2,256\n defs 2,-1\n"),
+    ok ("pasmo", "defs negative count fills 65535 bytes", " defs -1,$a5\n"),
+    ok ("pasmo", "defs positive count fills 65535 bytes", " defs 65535,$a5\n"),
+    ok ("pasmo", "defs counts normalize before layout", " org $8000\n ds -65535,$a5\nafter: defs 65536\n defs -65536\n defs 131072\n ds 65537,$3c\n dw after,$\n"),
     ok ("pasmo", "defs prior label and default fill", " org $8000\nstart: db 1\n defs $-start,7\n defs $8004-$\n"),
     ok ("pasmo", "if taken",             " if 1\n nop\n endif\n ret\n"),
     ok ("pasmo", "if not taken",         " if 0\n nop\n endif\n ret\n"),
@@ -524,6 +527,7 @@ const PROBES: &[Probe] = &[
     ok ("pasmo", "word bitwise mixed case", " dw 1 xOr 2,1 aNd 3,1 oR 2,nOt 1\n"),
     ok ("pasmo", "word bitwise identifier boundaries", "XOR_mask equ 7\nORvalue equ 3\n dw XOR_mask XOR ORvalue\n"),
     ok ("pasmo", "word binary bitwise unsigned intermediate", " dw (1 XOR -1) > 0,(0 OR -1) / 256,(65536 AND 65536) > 0\n"),
+    ok ("pasmo", "nested condition unsigned truth", " org 0\n if (1=1)>0\n db $a5\n else\n db $5a\n endif\n if (1!=2)>0\n db $a5\n else\n db $5a\n endif\n if (1<2)>0\n db $a5\n else\n db $5a\n endif\n if (2>1)>0\n db $a5\n else\n db $5a\n endif\n if (1<=1)>0\n db $a5\n else\n db $5a\n endif\n if (1>=1)>0\n db $a5\n else\n db $5a\n endif\n if (1&&1)>0\n db $a5\n else\n db $5a\n endif\n if (1||0)>0\n db $a5\n else\n db $5a\n endif\n if (!0)>0\n db $a5\n else\n db $5a\n endif\n if (1=2)=0\n db $a5\n else\n db $5a\n endif\n if (1&&0)=0\n db $a5\n else\n db $5a\n endif\n if (0||0)=0\n db $a5\n else\n db $5a\n endif\n if (!1)=0\n db $a5\n else\n db $5a\n endif\n if ((1=1) AND 255)=255\n db $a5\n else\n db $5a\n endif\n if (1&&1)=65535\n db $a5\n else\n db $5a\n endif\n if (1||0)=65535\n db $a5\n else\n db $5a\n endif\n if (!0)=65535\n db $a5\n else\n db $5a\n endif\n"),
     ok ("pasmo", "word NOT unsigned intermediate", " dw (NOT 0) > 0,(NOT 0) / 256\n if (NOT 0) > 0\n db $a5\n else\n db $5a\n endif\n defs NOT 65534,$a5\n"),
     ok ("pasmo", "word bitwise conditions", " if 1 OR 2 XOR 3\n db 0\n else\n db 1\n endif\n if 1 XOR 1 = 1\n db 2\n endif\n if NOT 1+1\n db 3\n endif\n"),
 

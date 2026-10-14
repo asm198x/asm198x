@@ -676,6 +676,15 @@ mod tests {
     }
 
     #[test]
+    fn nested_condition_truth_values_are_unsigned_words() {
+        let source = " org 0\n if (1=1)>0\n db $a5\n else\n db $5a\n endif\n if (1!=2)>0\n db $a5\n else\n db $5a\n endif\n if (1<2)>0\n db $a5\n else\n db $5a\n endif\n if (2>1)>0\n db $a5\n else\n db $5a\n endif\n if (1<=1)>0\n db $a5\n else\n db $5a\n endif\n if (1>=1)>0\n db $a5\n else\n db $5a\n endif\n if (1&&1)>0\n db $a5\n else\n db $5a\n endif\n if (1||0)>0\n db $a5\n else\n db $5a\n endif\n if (!0)>0\n db $a5\n else\n db $5a\n endif\n if (1=2)=0\n db $a5\n else\n db $5a\n endif\n if (1&&0)=0\n db $a5\n else\n db $5a\n endif\n if (0||0)=0\n db $a5\n else\n db $5a\n endif\n if (!1)=0\n db $a5\n else\n db $5a\n endif\n if ((1=1) AND 255)=255\n db $a5\n else\n db $5a\n endif\n if (1&&1)=65535\n db $a5\n else\n db $5a\n endif\n if (1||0)=65535\n db $a5\n else\n db $5a\n endif\n if (!0)=65535\n db $a5\n else\n db $5a\n endif\n";
+        assert_eq!(
+            asm(source).expect("nested condition results").bytes,
+            vec![0xa5; 17]
+        );
+    }
+
+    #[test]
     fn word_operators_have_the_same_grouping_in_conditions() {
         let source = " if 1 OR 2 XOR 3\n db 0\n else\n db 1\n endif\n if 1 XOR 1 = 1\n db 2\n endif\n if NOT 1+1\n db 3\n endif\n";
         assert_eq!(
@@ -727,6 +736,38 @@ mod tests {
     fn defs_count_uses_prior_labels_and_defaults_to_zero_fill() {
         let source = " org $8000\nstart: db 1\n defs $-start,7\n defs $8004-$\n";
         assert_eq!(asm(source).expect("live count").bytes, vec![1, 7, 0, 0]);
+    }
+
+    #[test]
+    fn defs_counts_wrap_to_sixteen_bits_before_allocation() {
+        // Lengths observed with PasmoNext 0.1.3; live probes also retain bytes.
+        for (count, length) in [
+            (-1, 65535),
+            (-65535, 1),
+            (-65536, 0),
+            (-65537, 65535),
+            (65535, 65535),
+            (65536, 0),
+            (65537, 1),
+            (131072, 0),
+        ] {
+            let source = format!(" org 0\n defs {count},$a5\n");
+            for assembled in [
+                crate::assemble_pasmo(&source),
+                crate::assemble_pasmonext(&source),
+            ] {
+                assert_eq!(assembled.expect("16-bit count").bytes, vec![0xa5; length]);
+            }
+        }
+    }
+
+    #[test]
+    fn defs_normalized_count_advances_labels_and_live_counter() {
+        let source = " org $8000\n ds -65535,$a5\nafter: defs 65536\n dw after,$\n";
+        assert_eq!(
+            asm(source).expect("normalized layout").bytes,
+            [0xa5, 1, 0x80, 1, 0x80]
+        );
     }
 
     #[test]

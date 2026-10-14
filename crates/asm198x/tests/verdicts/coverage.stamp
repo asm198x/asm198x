@@ -46,7 +46,7 @@ Z8001	271/271	100.0%
 # SM83	probe=130
 # TMS7000	form=406
 # TMS9900	form=138 sweep-chunk=112
-# Z80	curriculum=644 form=1592 fuzz=300 probe=308
+# Z80	curriculum=644 form=1592 fuzz=300 probe=312
 # Z8000	form=542 sweep-chunk=193
 # Z8001	form=542 sweep-chunk=193
 # Z80N	probe=18
