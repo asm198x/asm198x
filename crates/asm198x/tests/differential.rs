@@ -522,6 +522,15 @@ const PROBES: &[Probe] = &[
     ok ("pasmo", "operator >>",          " ld a,16 >> 2\n"),
     ok ("pasmo", "operator ~",           " db ~0\n dw ~~1\n"),
 
+    ok ("pasmo", "word bitwise DEFS fill", " org $8000\n defs 2,($ >> 8) XOR $a5\n"),
+    ok ("pasmo", "word bitwise precedence", " dw 1 OR 2 XOR 3,1 XOR 3 AND 2,1 XOR 1 = 1\n dw NOT 1+1,2*3 << 1+1,16 >> 1*2,1+2<<1\n"),
+    ok ("pasmo", "word bitwise mixed case", " dw 1 xOr 2,1 aNd 3,1 oR 2,nOt 1\n"),
+    ok ("pasmo", "word bitwise identifier boundaries", "XOR_mask equ 7\nORvalue equ 3\n dw XOR_mask XOR ORvalue\n"),
+    ok ("pasmo", "word binary bitwise unsigned intermediate", " dw (1 XOR -1) > 0,(0 OR -1) / 256,(65536 AND 65536) > 0\n"),
+    ok ("pasmo", "nested condition unsigned truth", " org 0\n if (1=1)>0\n db $a5\n else\n db $5a\n endif\n if (1!=2)>0\n db $a5\n else\n db $5a\n endif\n if (1<2)>0\n db $a5\n else\n db $5a\n endif\n if (2>1)>0\n db $a5\n else\n db $5a\n endif\n if (1<=1)>0\n db $a5\n else\n db $5a\n endif\n if (1>=1)>0\n db $a5\n else\n db $5a\n endif\n if (1&&1)>0\n db $a5\n else\n db $5a\n endif\n if (1||0)>0\n db $a5\n else\n db $5a\n endif\n if (!0)>0\n db $a5\n else\n db $5a\n endif\n if (1=2)=0\n db $a5\n else\n db $5a\n endif\n if (1&&0)=0\n db $a5\n else\n db $5a\n endif\n if (0||0)=0\n db $a5\n else\n db $5a\n endif\n if (!1)=0\n db $a5\n else\n db $5a\n endif\n if ((1=1) AND 255)=255\n db $a5\n else\n db $5a\n endif\n if (1&&1)=65535\n db $a5\n else\n db $5a\n endif\n if (1||0)=65535\n db $a5\n else\n db $5a\n endif\n if (!0)=65535\n db $a5\n else\n db $5a\n endif\n"),
+    ok ("pasmo", "word NOT unsigned intermediate", " dw (NOT 0) > 0,(NOT 0) / 256\n if (NOT 0) > 0\n db $a5\n else\n db $5a\n endif\n defs NOT 65534,$a5\n"),
+    ok ("pasmo", "word bitwise conditions", " if 1 OR 2 XOR 3\n db 0\n else\n db 1\n endif\n if 1 XOR 1 = 1\n db 2\n endif\n if NOT 1+1\n db 3\n endif\n"),
+
     // ---- sjasmplus / z80 ----------------------------------------------------
     ok ("sjasmplus", "hex $ / 0x / h",   " ld a,$10\n ld b,0x10\n ld c,10h\n"),
     ok ("sjasmplus", "binary 0b / %",    " ld a,0b1010\n ld b,%1010\n"),
@@ -1451,6 +1460,62 @@ const PROBES: &[Probe] = &[
     ok ("ca65-816", "directive .dbyt",   " .dbyt $1234\n"),
     ok ("ca65-816", "directive .asciiz", " .asciiz \"hi\"\n"),
 ];
+
+#[test]
+#[ignore = "needs pasmo and sjasmplus; run with --ignored"]
+fn word_bitwise_spellings_stay_dialect_specific() {
+    assert!(
+        have("pasmo") && have("sjasmplus"),
+        "both reference tools are required"
+    );
+    let tmp = support::scratch::dir("word-bitwise-rejections");
+    let mut recorder = support::verdicts::Recorder::new();
+    for (dialect, source) in [
+        ("pasmo", " dw 1 ^ 2\n"),
+        ("pasmo", " dw 1 EOR 2\n"),
+        ("sjasmplus", " dw 1 xOr 2\n"),
+        ("sjasmplus", " dw nOt 1\n"),
+        ("sjasmplus", " dw 1 sHl 2\n"),
+    ] {
+        let src = tmp.join("ref.asm");
+        let out = tmp.join("ref.bin");
+        fs::write(&src, source).expect("write probe");
+        let mut command = Command::new(dialect);
+        if dialect == "pasmo" {
+            command.arg("--bin").arg(&src).arg(&out);
+        } else {
+            command
+                .arg("--nologo")
+                .arg(format!("--raw={}", out.display()))
+                .arg(&src);
+        }
+        let result = command.output().expect("run reference");
+        assert!(!result.status.success(), "{dialect} accepted {source}");
+        assert!(
+            ours(dialect, source).is_none(),
+            "we accepted {dialect}: {source}"
+        );
+        recorder.record(
+            support::verdicts::CaseRef {
+                suite: Suite::Probe,
+                cpu: "Z80",
+                tool: dialect,
+                dialect,
+                case: "bitwise operator dialect rejection".to_owned(),
+                source,
+            },
+            verdict_corpus::Outcome::Rejected {
+                diagnostic: String::from_utf8_lossy(&result.stderr)
+                    .lines()
+                    .filter(|line| line.contains("ERROR") || line.contains("error:"))
+                    .collect::<Vec<_>>()
+                    .join("\n")
+                    .replace(tmp.to_string_lossy().as_ref(), "<scratch>"),
+            },
+        );
+    }
+    recorder.flush().expect("record reference rejections");
+}
 
 #[test]
 #[ignore = "needs the reference assemblers; run with --ignored"]

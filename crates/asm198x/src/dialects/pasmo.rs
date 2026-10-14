@@ -144,6 +144,10 @@ impl Dialect for Pasmo {
 struct PasmoSyntax;
 
 impl Z80Syntax for PasmoSyntax {
+    fn pasmo_expressions(&self) -> bool {
+        true
+    }
+
     /// Comparisons in an expression, probed against the binary — see
     /// `docs/comparison-operators.md`. Both answer `$FF` for true.
     fn compare(&self) -> crate::dialects::mos6502::Compare {
@@ -631,6 +635,74 @@ mod tests {
         );
         let a = asm("ROW equ 64\n        ld a, ROW / 8\n").expect("div");
         assert_eq!(a.bytes, vec![0x3E, 0x08]);
+    }
+
+    #[test]
+    fn word_bitwise_operators_match_pasmo() {
+        let source = " org $8000\n defs 2,($ >> 8) XOR $a5\n dw 1 OR 2 XOR 3,1 XOR 3 AND 2,1 XOR 1 = 1\n dw NOT 1+1,2*3 << 1+1,16 >> 1*2,1+2<<1\n dw 1 xOr 2,1 aNd 3,1 oR 2,nOt 1\n";
+        let expected = vec![
+            0x25, 0x25, 0, 0, 3, 0, 0xfe, 0xff, 0xfd, 0xff, 13, 0, 16, 0, 5, 0, 3, 0, 1, 0, 3, 0,
+            0xfe, 0xff,
+        ];
+        for result in [
+            crate::assemble_pasmo(source),
+            crate::assemble_pasmonext(source),
+        ] {
+            assert_eq!(result.expect("Pasmo word operators").bytes, expected);
+        }
+    }
+
+    #[test]
+    fn word_not_is_unsigned_before_comparison_division_and_reserve() {
+        let source = " dw (NOT 0) > 0,(NOT 0) / 256\n if (NOT 0) > 0\n db $a5\n else\n db $5a\n endif\n defs NOT 65534,$a5\n";
+        for result in [
+            crate::assemble_pasmo(source),
+            crate::assemble_pasmonext(source),
+        ] {
+            assert_eq!(
+                result.expect("unsigned NOT value").bytes,
+                vec![0xff, 0xff, 0xff, 0, 0xa5, 0xa5]
+            );
+        }
+    }
+
+    #[test]
+    fn word_binary_bitwise_results_are_unsigned() {
+        let source = " dw (1 XOR -1) > 0,(0 OR -1) / 256,(65536 AND 65536) > 0\n";
+        assert_eq!(
+            asm(source).expect("unsigned bitwise results").bytes,
+            vec![0xff, 0xff, 0xff, 0, 0, 0]
+        );
+    }
+
+    #[test]
+    fn nested_condition_truth_values_are_unsigned_words() {
+        let source = " org 0\n if (1=1)>0\n db $a5\n else\n db $5a\n endif\n if (1!=2)>0\n db $a5\n else\n db $5a\n endif\n if (1<2)>0\n db $a5\n else\n db $5a\n endif\n if (2>1)>0\n db $a5\n else\n db $5a\n endif\n if (1<=1)>0\n db $a5\n else\n db $5a\n endif\n if (1>=1)>0\n db $a5\n else\n db $5a\n endif\n if (1&&1)>0\n db $a5\n else\n db $5a\n endif\n if (1||0)>0\n db $a5\n else\n db $5a\n endif\n if (!0)>0\n db $a5\n else\n db $5a\n endif\n if (1=2)=0\n db $a5\n else\n db $5a\n endif\n if (1&&0)=0\n db $a5\n else\n db $5a\n endif\n if (0||0)=0\n db $a5\n else\n db $5a\n endif\n if (!1)=0\n db $a5\n else\n db $5a\n endif\n if ((1=1) AND 255)=255\n db $a5\n else\n db $5a\n endif\n if (1&&1)=65535\n db $a5\n else\n db $5a\n endif\n if (1||0)=65535\n db $a5\n else\n db $5a\n endif\n if (!0)=65535\n db $a5\n else\n db $5a\n endif\n";
+        assert_eq!(
+            asm(source).expect("nested condition results").bytes,
+            vec![0xa5; 17]
+        );
+    }
+
+    #[test]
+    fn word_operators_have_the_same_grouping_in_conditions() {
+        let source = " if 1 OR 2 XOR 3\n db 0\n else\n db 1\n endif\n if 1 XOR 1 = 1\n db 2\n endif\n if NOT 1+1\n db 3\n endif\n";
+        assert_eq!(
+            asm(source).expect("condition word operators").bytes,
+            vec![1, 2, 3]
+        );
+    }
+
+    #[test]
+    fn word_operators_preserve_identifier_boundaries_and_dialect() {
+        let source = "XOR_mask equ 7\nORvalue equ 3\n dw XOR_mask XOR ORvalue\n";
+        assert_eq!(asm(source).expect("whole words only").bytes, vec![4, 0]);
+        for source in [" dw 1 ^ 2\n", " dw 1 EOR 2\n"] {
+            assert!(asm(source).is_err(), "{source}");
+        }
+        for source in [" dw 1 xOr 2\n", " dw nOt 1\n", " dw 1 sHl 2\n"] {
+            assert!(crate::assemble_sjasmplus(source).is_err(), "{source}");
+        }
     }
 
     #[test]
