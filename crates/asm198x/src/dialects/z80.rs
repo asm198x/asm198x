@@ -191,6 +191,12 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// Pasmo's word-form bitwise operators and precedence table. SjASMPlus
+    /// keeps its existing operator spellings and C-style grouping.
+    fn pasmo_expressions(&self) -> bool {
+        false
+    }
+
     /// Whether a lone operand on `ADD`/`ADC`/`SBC` means `A,<operand>` (#533).
     /// sjasmplus reads `add (hl)` as `add a,(hl)`, with or without
     /// `--syntax=abfw`; pasmo rejects the spelling, so it defaults off.
@@ -3342,6 +3348,26 @@ fn eval_condition_keyword<S: Z80Syntax>(
     if tokens.is_empty() {
         return Err(AsmError::new(line, "`IF` needs a condition"));
     }
+    if syntax.pasmo_expressions() {
+        let mut parser = ExprParser {
+            tokens,
+            pos: 0,
+            line,
+            pasmo: true,
+        };
+        let expression = parser.expr()?;
+        return expression
+            .eval_with(&|name| consts.get(name).copied(), None, line)
+            .map_err(|error| {
+                AsmError::new(
+                    line,
+                    format!(
+                        "{}; a condition needs numbers or equ constants here",
+                        error.message
+                    ),
+                )
+            });
+    }
     CondParser {
         tokens,
         pos: 0,
@@ -4085,6 +4111,7 @@ fn lex_struct_init<S: Z80Syntax>(
                 tokens,
                 pos: 0,
                 line,
+                pasmo: syntax.pasmo_expressions(),
             };
             while parser.pos < parser.tokens.len() {
                 out.push(InitItem::Value(parser.expr()?));
@@ -4223,8 +4250,9 @@ pub(crate) fn string_literal(piece: &str) -> Option<&str> {
 }
 
 /// Parse an operand value: an arithmetic expression over numbers, symbols, and
-/// `+`/`-`/`*`/`/` with C-style precedence, unary `~`, and parentheses. Number literals are
-/// lexed by the dialect's [`Z80Syntax::parse_number`].
+/// arithmetic/bitwise operators, unary `~`, and parentheses. The dialect
+/// selects precedence and word spellings; number literals are lexed by its
+/// [`Z80Syntax::parse_number`].
 pub(crate) fn parse_value<S: Z80Syntax>(
     syntax: &S,
     raw: &str,
@@ -4238,6 +4266,7 @@ pub(crate) fn parse_value<S: Z80Syntax>(
         tokens,
         pos: 0,
         line,
+        pasmo: syntax.pasmo_expressions(),
     };
     let expr = parser.expr()?;
     if parser.pos != parser.tokens.len() {
@@ -4501,7 +4530,21 @@ fn tokenize_impl<S: Z80Syntax>(
                 {
                     i += 1;
                 }
-                tokens.push(Tok::Sym(chars[start..i].iter().collect()));
+                let word: String = chars[start..i].iter().collect();
+                let token = if syntax.pasmo_expressions() {
+                    match word.to_ascii_uppercase().as_str() {
+                        "AND" => Tok::And,
+                        "OR" => Tok::Or,
+                        "XOR" => Tok::Xor,
+                        "NOT" => Tok::BitNot,
+                        "SHL" => Tok::Shl,
+                        "SHR" => Tok::Shr,
+                        _ => Tok::Sym(word),
+                    }
+                } else {
+                    Tok::Sym(word)
+                };
+                tokens.push(token);
             }
             other => {
                 return Err(AsmError::new(
@@ -4520,10 +4563,14 @@ struct ExprParser {
     tokens: Vec<Tok>,
     pos: usize,
     line: usize,
+    pasmo: bool,
 }
 
 impl ExprParser {
     fn expr(&mut self) -> Result<Expr, AsmError> {
+        if self.pasmo {
+            return self.pasmo_expr(0);
+        }
         let mut left = self.bit_or()?;
         while let Some(op) = self.compare_op() {
             self.pos += 1;
@@ -4532,6 +4579,61 @@ impl ExprParser {
             // Both Z80 dialects answer `$FF` for true, so the negation is
             // unconditional here rather than a knob.
             left = Expr::Neg(Box::new(cmp));
+        }
+        Ok(left)
+    }
+
+    /// Pasmo's precedence is not SjASMPlus's: OR/XOR share one level;
+    /// comparisons bind before bitwise operators; shifts share `*` and `/`.
+    /// Prefix operators take everything down through comparisons as their
+    /// operand. Keep the existing AST/evaluator, including its true-value
+    /// negation, and leave the SjASMPlus grammar below unchanged.
+    fn pasmo_expr(&mut self, minimum: u8) -> Result<Expr, AsmError> {
+        let mut left = match self.tokens.get(self.pos) {
+            Some(Tok::Minus | Tok::Plus | Tok::BitNot | Tok::Not) => {
+                let token = self.tokens[self.pos].clone();
+                self.pos += 1;
+                let operand = Box::new(self.pasmo_expr(4)?);
+                match token {
+                    Tok::Minus => Expr::Neg(operand),
+                    Tok::Plus => *operand,
+                    Tok::BitNot => Expr::BitNot(operand),
+                    Tok::Not => Expr::Neg(Box::new(Expr::LogNot(operand))),
+                    _ => unreachable!("prefix operator matched above"),
+                }
+            }
+            _ => self.atom()?,
+        };
+        loop {
+            let (precedence, op, truth) = match self.tokens.get(self.pos) {
+                Some(Tok::OrOr) => (0, BinOp::LogOr, true),
+                Some(Tok::AndAnd) => (1, BinOp::LogAnd, true),
+                Some(Tok::Or) => (2, BinOp::Or, false),
+                Some(Tok::Xor) => (2, BinOp::Xor, false),
+                Some(Tok::And) => (3, BinOp::And, false),
+                Some(Tok::Eq | Tok::Ne | Tok::Lt | Tok::Gt | Tok::Le | Tok::Ge) => {
+                    let Some(op) = self.compare_op() else {
+                        unreachable!("comparison matched above")
+                    };
+                    (5, op, true)
+                }
+                Some(Tok::Plus) => (6, BinOp::Add, false),
+                Some(Tok::Minus) => (6, BinOp::Sub, false),
+                Some(Tok::Star) => (7, BinOp::Mul, false),
+                Some(Tok::Slash) => (7, BinOp::Div, false),
+                Some(Tok::Shl) => (7, BinOp::Shl, false),
+                Some(Tok::Shr) => (7, BinOp::Shr, false),
+                _ => break,
+            };
+            if precedence < minimum {
+                break;
+            }
+            self.pos += 1;
+            let right = self.pasmo_expr(precedence + 1)?;
+            left = Expr::Bin(op, Box::new(left), Box::new(right));
+            if truth {
+                left = Expr::Neg(Box::new(left));
+            }
         }
         Ok(left)
     }
@@ -4551,8 +4653,7 @@ impl ExprParser {
 
     // Bitwise and shift operators, C-style: `|` loosest, then `^`, `&`, then the
     // shifts, all looser than `+`/`-` (so `1+2<<1` is `(1+2)<<1`). This matches
-    // sjasmplus; pasmo binds its shifts tighter than additive, a divergence that
-    // only shows on unparenthesised mixed expressions.
+    // sjasmplus; Pasmo uses `pasmo_expr` above instead.
     fn bit_or(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.bit_xor()?;
         while matches!(self.tokens.get(self.pos), Some(Tok::Or)) {
