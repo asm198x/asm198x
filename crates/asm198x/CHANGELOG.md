@@ -11,8 +11,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- *(pasmo)* accept word-form bitwise expressions with native precedence ([#638](https://github.com/asm198x/asm198x/pull/638))
-- *(pasmo)* normalize DEFS counts before reserving bytes
+- Pasmo and PasmoNext accept `AND`, `OR`, `XOR` and `NOT` in expressions,
+  with native operator precedence. Bitwise and boolean results remain unsigned
+  16-bit values when another expression, `IF` or `DEFS` uses them, so nested
+  conditions and fill expressions match the reference assembler.
+  ([#638](https://github.com/asm198x/asm198x/pull/638))
+- Pasmo `DEFS`/`DS` use the low 16 bits of the final reserve count before
+  allocating bytes and advancing labels. For example, `defs -65535,$a5`
+  emits one byte and `defs 65536` emits none.
+  ([#636](https://github.com/asm198x/asm198x/pull/636))
 
 ## [0.0.64](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.63...asm198x-v0.0.64) - 2026-10-14
 
