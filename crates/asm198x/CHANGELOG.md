@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.64](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.63...asm198x-v0.0.64) - 2026-10-14
+
+### Fixed
+
+- Pasmo and PasmoNext now accept the optional fill byte in `DEFS`/`DS` and
+  the live `$` location counter in their length expressions. Existing source
+  such as `defs $8040-$,0` assembles unchanged, with reference-checked fill
+  bytes and formatter round trips.
+  ([#630](https://github.com/asm198x/asm198x/pull/630))
+
 ## [0.0.63](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.62...asm198x-v0.0.63) - 2026-10-13
 
 ### Fixed
