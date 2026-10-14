@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.65](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.64...asm198x-v0.0.65) - 2026-10-14
+
+### Fixed
+
+- *(pasmo)* accept word-form bitwise expressions with native precedence ([#638](https://github.com/asm198x/asm198x/pull/638))
+- *(pasmo)* normalize DEFS counts before reserving bytes
+
 ## [0.0.64](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.63...asm198x-v0.0.64) - 2026-10-14
 
 ### Fixed
