@@ -641,7 +641,7 @@ impl AcmeEval<'_> {
                     pos: 0,
                     pending: Vec::new(),
                 };
-                let (mut nodes, closer) = cx
+                let (mut nodes, closer, _) = cx
                     .parse_block()
                     .map_err(|e| macros::remap_lines(e, origins))?;
                 if !matches!(closer, Closer::Eof | Closer::EofDirective) {

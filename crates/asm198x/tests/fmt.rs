@@ -1802,3 +1802,88 @@ fn fmt_sjasmplus_guarded_include_is_verbatim_and_never_opens_the_target() {
         "idempotent"
     );
 }
+
+/// Comment preservation is independent of byte parity and idempotence.
+#[test]
+fn fmt_acme_keeps_block_delimiter_comments() {
+    for source in [
+        "*=$1000\n!if 1 { ; head\n!byte 1\n} else { ; middle\n!byte 2\n} ; tail\n",
+        "*=$1000\n!if 0 { ; head\n} else { ; middle\n} ; tail\n",
+        "*=$1000\n!for i,1,3 { ; head\n!byte i\n} ; tail\n",
+        "*=$1000\n!set i=0\n!do { ; head\n!byte i\n!set i=i+1\n} until i=3 ; tail\n",
+        "*=$1000\n!set i=0\n!while i<2 { ; head\n!set i=i+1\n!byte i\n} ; tail\n",
+        "*=$1000\n!if 1 { ; head\n!for i,1,2 { ; inner head\n!byte i\n} ; inner tail\n} else { ; middle\n} ; tail\n",
+        "*=$1000\n!zone z { ; head\n.loop: nop\n} ; tail\n",
+        "*=$1000\n!macro m .a { ; head\nlda #.a\n} ; tail\n+m 2\n",
+        "*=$1000\n!ifndef X { X = 1 } ; tail\n!byte X\n",
+    ] {
+        let original = assemble_acme(source).expect("source assembles").bytes;
+        let formatted = format_acme(source).expect("formats");
+        let comments = |s: &str| -> Vec<String> {
+            s.lines()
+                .filter_map(|l| l.split_once(';').map(|(_, c)| c.trim().to_owned()))
+                .collect()
+        };
+        assert_eq!(
+            comments(source),
+            comments(&formatted),
+            "comments survive in order:\n{formatted}"
+        );
+        assert_eq!(
+            original,
+            assemble_acme(&formatted)
+                .expect("formatted assembles")
+                .bytes,
+            "{formatted}"
+        );
+        assert_eq!(
+            formatted,
+            format_acme(&formatted).expect("formats twice"),
+            "{formatted}"
+        );
+        for line in source.lines().filter(|line| line.starts_with('}')) {
+            if let Some((_, comment)) = line.split_once(';') {
+                assert!(
+                    formatted
+                        .lines()
+                        .any(|l| l.trim_start().starts_with('}') && l.ends_with(comment.trim())),
+                    "closer comment stays on a closer: {formatted}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn fmt_sjasmplus_keeps_repetition_comments() {
+    for source in [
+        " org $8000\n DUP 2 ; head\n DB 1\n EDUP ; tail\n",
+        " org $8000\n DUP 0 ; head\n EDUP ; tail\n",
+        " org $8000\n DUP 2 ; head\n DUP 3 ; inner head\n DB 1\n ENDR ; inner tail\n EDUP ; tail\n",
+        " org $8000\n REPT 2 ; head\n DB 1\n ; body end\n ENDR ; tail\n",
+        " org $8000\n IF 1 ; head\n DB 1\n ELSE ; middle\n DB 2\n ENDIF ; tail\n",
+    ] {
+        let original = assemble_sjasmplus(source).expect("source assembles").bytes;
+        let formatted = format_sjasmplus(source).expect("formats");
+        let comments = |s: &str| -> Vec<String> {
+            s.lines()
+                .filter_map(|l| l.split_once(';').map(|(_, c)| c.trim().to_owned()))
+                .collect()
+        };
+        assert_eq!(
+            comments(source),
+            comments(&formatted),
+            "comments survive in order:\n{formatted}"
+        );
+        assert_eq!(
+            original,
+            assemble_sjasmplus(&formatted)
+                .expect("formatted assembles")
+                .bytes
+        );
+        assert_eq!(
+            formatted,
+            format_sjasmplus(&formatted).expect("formats twice")
+        );
+    }
+}
