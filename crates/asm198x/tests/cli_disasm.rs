@@ -162,21 +162,145 @@ fn ordinary_68000_disassembly_matches_the_decoder_at_the_requested_origin() {
     let dir = Scratch::new();
     let bytes = [0x60, 2];
     std::fs::write(dir.0.join("input.bin"), bytes).expect("input binary");
-    for (flags, origin) in [(&[][..], 0_u32), (&["--org", "0x8000"][..], 0x8000)] {
-        let result = Command::new(env!("CARGO_BIN_EXE_asm198x"))
-            .current_dir(&dir.0)
-            .args(["disasm", "--target", "68000", "input.bin"])
-            .args(flags)
-            .output()
-            .expect("run disassembler");
-        assert!(result.status.success(), "{result:?}");
-        assert_eq!(
-            String::from_utf8(result.stdout).expect("UTF-8 listing"),
-            asm198x::listing_68000(&bytes, origin)
-        );
-        assert_eq!(
-            String::from_utf8_lossy(&result.stderr),
-            format!("disassembled 2 byte(s) at ${origin:04X}\n")
-        );
+    for (flags, origin) in [
+        (&[][..], 0_u32),
+        (&["--org", "0x8000"][..], 0x8000),
+        (&["--org", "0x10000"][..], 0x10000),
+        (&["--org", "$10000"][..], 0x10000),
+        (&["--org", "65536"][..], 0x10000),
+        (&["--org", "0x12345678"][..], 0x12345678),
+        (&["--org", "0xfffffffc"][..], 0xfffffffc),
+        (&["--org", "4294967295"][..], u32::MAX),
+    ] {
+        for selection in [
+            ["--target", "68000"],
+            ["--cpu", "m68k"],
+            ["--dialect", "vasm"],
+        ] {
+            for origin_first in [false, true] {
+                let mut command = Command::new(env!("CARGO_BIN_EXE_asm198x"));
+                command.current_dir(&dir.0).args(["disasm", "input.bin"]);
+                if origin_first {
+                    command.args(flags).args(selection);
+                } else {
+                    command.args(selection).args(flags);
+                }
+                let result = command.output().expect("run disassembler");
+                assert!(result.status.success(), "{result:?}");
+                assert_eq!(
+                    String::from_utf8(result.stdout).expect("UTF-8 listing"),
+                    asm198x::listing_68000(&bytes, origin)
+                );
+                assert_eq!(
+                    String::from_utf8_lossy(&result.stderr),
+                    format!("disassembled 2 byte(s) at ${origin:04X}\n")
+                );
+            }
+        }
     }
+}
+
+#[test]
+fn wide_origins_remain_invalid_for_every_narrow_disassembler_and_recovery() {
+    let dir = Scratch::new();
+    let bytes = [0x60, 2];
+    std::fs::write(dir.0.join("input.bin"), bytes).expect("input binary");
+    for input in ["input.bin", "missing.bin"] {
+        for address in ["0x10000", "4294967295"] {
+            for dialect in asm198x::dialect_table::DIALECTS {
+                if dialect.name == "vasm" {
+                    continue;
+                }
+                let result = Command::new(env!("CARGO_BIN_EXE_asm198x"))
+                    .current_dir(&dir.0)
+                    .args(["disasm", "--dialect", dialect.name, "--org", address, input])
+                    .output()
+                    .expect("run narrow disassembler");
+                assert!(
+                    !result.status.success(),
+                    "{}/{address}: {result:?}",
+                    dialect.name
+                );
+                assert!(result.stdout.is_empty(), "{result:?}");
+                let stderr = String::from_utf8_lossy(&result.stderr);
+                assert!(stderr.contains("invalid address"), "{stderr}");
+                assert!(!stderr.contains("cannot read"), "{stderr}");
+            }
+            for mode in ["--recover", "asm"] {
+                let args = if mode == "asm" {
+                    vec!["asm", "--dialect", "vasm", "--org", address, input]
+                } else {
+                    vec!["disasm", "--recover", "--org", address, input]
+                };
+                let result = Command::new(env!("CARGO_BIN_EXE_asm198x"))
+                    .current_dir(&dir.0)
+                    .args(args)
+                    .output()
+                    .expect("run bounded operation");
+                assert!(!result.status.success(), "{mode}/{address}: {result:?}");
+                assert!(result.stdout.is_empty(), "{result:?}");
+                assert!(
+                    String::from_utf8_lossy(&result.stderr).contains("invalid address"),
+                    "{result:?}"
+                );
+            }
+        }
+    }
+    assert_eq!(
+        std::fs::read(dir.0.join("input.bin")).expect("preserved binary"),
+        bytes
+    );
+    assert_eq!(
+        std::fs::read_dir(&dir.0).expect("remaining files").count(),
+        1
+    );
+}
+
+#[test]
+fn invalid_or_overflowing_68000_origins_fail_before_input_reads() {
+    let dir = Scratch::new();
+    for address in [
+        "0x100000000",
+        "4294967296",
+        "-1",
+        "not-an-address",
+        "0x",
+        "$",
+        "",
+    ] {
+        for trailing in [&[][..], &["--org", "0"][..]] {
+            let result = Command::new(env!("CARGO_BIN_EXE_asm198x"))
+                .current_dir(&dir.0)
+                .args([
+                    "disasm",
+                    "--dialect",
+                    "vasm",
+                    "--org",
+                    address,
+                    "missing.bin",
+                ])
+                .args(trailing)
+                .output()
+                .expect("run disassembler");
+            assert!(!result.status.success(), "{address}: {result:?}");
+            assert!(result.stdout.is_empty(), "{result:?}");
+            assert_eq!(
+                String::from_utf8_lossy(&result.stderr),
+                format!("asm198x: invalid address `{address}`\n")
+            );
+        }
+    }
+}
+
+#[test]
+fn maximum_narrow_origin_still_reaches_the_narrow_decoder() {
+    let dir = Scratch::new();
+    let bytes = [0xd0, 0xfe];
+    std::fs::write(dir.0.join("input.bin"), bytes).expect("input binary");
+    let result = dir.disassemble("input.bin", &["--org", "0xffff"]);
+    assert!(result.status.success(), "{result:?}");
+    assert_eq!(
+        String::from_utf8(result.stdout).expect("listing"),
+        asm198x::listing_6502(&bytes, u16::MAX)
+    );
 }
