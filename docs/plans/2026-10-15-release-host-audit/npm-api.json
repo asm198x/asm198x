@@ -1,0 +1,174 @@
+{
+  "package": "@asm198x/z80",
+  "version": "0.4.0",
+  "host": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "node": "v24.9.0"
+  },
+  "checks": {
+    "assembly_reference_bytes": true,
+    "repeated_bytes": true,
+    "wrong_bytes_rejected": true,
+    "multi_file_z80n": true,
+    "diagnostic_array": true,
+    "unsupported_target_refused": true,
+    "dialect_discovery": true
+  },
+  "assembled": {
+    "version": 1,
+    "bytes": [
+      62,
+      7,
+      118
+    ],
+    "origin": 32768,
+    "symbols": {
+      "start": 32768
+    },
+    "start": null,
+    "warnings": [],
+    "debug": {
+      "symbols": [
+        {
+          "name": "start",
+          "kind": "label",
+          "section": 0,
+          "offset": 0
+        }
+      ],
+      "lines": [
+        {
+          "line": 3,
+          "offset": 0,
+          "length": 2
+        },
+        {
+          "line": 4,
+          "offset": 2,
+          "length": 1
+        }
+      ],
+      "cycles": [
+        {
+          "line": 3,
+          "offset": 0,
+          "base": 7,
+          "page_cross": 0,
+          "branch_taken": 0
+        },
+        {
+          "line": 4,
+          "offset": 2,
+          "base": 4,
+          "page_cross": 0,
+          "branch_taken": 0
+        }
+      ],
+      "cycle_coverage": "full"
+    },
+    "areas": [
+      {
+        "name": "address space",
+        "start": 0,
+        "size": 65536,
+        "used": 3,
+        "free": 65533,
+        "largest_free": 32768
+      }
+    ],
+    "diagnostics": [],
+    "files": [
+      "input.asm"
+    ]
+  },
+  "project": {
+    "version": 1,
+    "bytes": [
+      237,
+      48,
+      66
+    ],
+    "origin": 32768,
+    "symbols": {},
+    "start": null,
+    "warnings": [],
+    "debug": {
+      "symbols": [],
+      "lines": [
+        {
+          "line": 1,
+          "offset": 0,
+          "length": 2,
+          "file": 1
+        },
+        {
+          "line": 2,
+          "offset": 2,
+          "length": 1,
+          "file": 1
+        }
+      ],
+      "cycles": [
+        {
+          "line": 1,
+          "offset": 0,
+          "base": 8,
+          "page_cross": 0,
+          "branch_taken": 0,
+          "file": 1
+        }
+      ],
+      "cycle_coverage": "full"
+    },
+    "areas": [
+      {
+        "name": "address space",
+        "start": 0,
+        "size": 65536,
+        "used": 3,
+        "free": 65533,
+        "largest_free": 32768
+      }
+    ],
+    "diagnostics": [],
+    "files": [
+      "main.asm",
+      "lib.asm"
+    ]
+  },
+  "diagnostics": [
+    {
+      "span": {
+        "file": 0,
+        "line": 2,
+        "col": 0,
+        "expansion_frames": [],
+        "path": "input.asm"
+      },
+      "code": "AssemblyError",
+      "severity": "Error",
+      "message": "undefined symbol `undefined_symbol`",
+      "fix": null
+    }
+  ],
+  "dialects": [
+    {
+      "aliases": [],
+      "blurb": "Z80, pasmo syntax",
+      "name": "pasmo"
+    },
+    {
+      "aliases": [],
+      "blurb": "Z80, pasmo syntax, Spectrum Next target by default",
+      "name": "pasmonext"
+    },
+    {
+      "aliases": [
+        "sjasm"
+      ],
+      "blurb": "Z80, sjasmplus syntax",
+      "name": "sjasmplus"
+    }
+  ]
+}

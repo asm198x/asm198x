@@ -1,0 +1,47 @@
+{
+  "release": "asm198x-v0.0.65",
+  "source": "fa06f5617f32bec52ac14f3a25bdd8e13dae9287",
+  "published_at": "2026-10-14T09:20:25Z",
+  "assets": [
+    {
+      "archive": "asm198x-aarch64-apple-darwin.tar.xz",
+      "size": 1265616,
+      "sha256": "7b4dcef1b0b6fa164eabf47293e10bbada3d8e5899a6766d2e3cfe35f141db8c",
+      "executable_sha256": "f546f460f43d25ccbf84edffec100b7b2fe1d69b38477dddb88ce1c008ca3570",
+      "release_api_digest_matches": true,
+      "sidecar_matches": true
+    },
+    {
+      "archive": "asm198x-aarch64-unknown-linux-gnu.tar.xz",
+      "size": 1410080,
+      "sha256": "e79305ee5208670ddbc40a97c4d3725575ce7efe35d5fcf71d961efb3fd3fc93",
+      "executable_sha256": "b4db070bc4bba59749b8043b641840e0e44eeff44fff37f4a4138c953a54a32c",
+      "release_api_digest_matches": true,
+      "sidecar_matches": true
+    },
+    {
+      "archive": "asm198x-x86_64-apple-darwin.tar.xz",
+      "size": 1438924,
+      "sha256": "7b3d122ad26dcda50a13c8b2f3ee48f3a2f8afeb00d18ec9e0b952f858c0893d",
+      "executable_sha256": "cd7daf1fbf98881bf3c196545402b6858242269b6de1c804eba7cd080b1d92e4",
+      "release_api_digest_matches": true,
+      "sidecar_matches": true
+    },
+    {
+      "archive": "asm198x-x86_64-pc-windows-msvc.zip",
+      "size": 2145027,
+      "sha256": "5a94fa17553411f337b37c4278873140c9bad2c66fe3e78e5d986382be877f93",
+      "executable_sha256": "6e860e8f20151e80f4ef04d520dcfe801017e074b4476de29a8a1b8f69eb0362",
+      "release_api_digest_matches": true,
+      "sidecar_matches": true
+    },
+    {
+      "archive": "asm198x-x86_64-unknown-linux-gnu.tar.xz",
+      "size": 1534740,
+      "sha256": "02cd6c868f100a37d46fe6283927b13583594e620f966c0865f3f0a705f2d20e",
+      "executable_sha256": "a197ded3948455fc990d5e2c888d5011a1ee1f5c4293618841966a5c9fdfdcf6",
+      "release_api_digest_matches": true,
+      "sidecar_matches": true
+    }
+  ]
+}

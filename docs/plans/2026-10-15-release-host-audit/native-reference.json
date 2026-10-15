@@ -1,0 +1,30 @@
+{
+  "version": "This is ACME, release 0.97 (\"Zem\"), 28 June 2020\n  Platform independent version.\n",
+  "executable_sha256": "7be6afb147f75c974a48a0540cdb8affc0760ed94bed4d822d95c7e8ee4bb35c",
+  "host": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "upstream_commit": "35b4968be3bdd26804a5d195557d1225497a0358",
+  "command": [
+    "acme",
+    "--cpu",
+    "6510",
+    "--format",
+    "cbm",
+    "--outfile",
+    "../reference.prg",
+    "helloworld.asm"
+  ],
+  "exit": 0,
+  "stdout": "",
+  "stderr": "",
+  "output_size": 2081,
+  "output_sha256": "16e5a63289e474e84706517c592c0ba7f2ae86b5278d7d1e6eeb9a0c5ef205fc",
+  "simple_command": [
+    "acme",
+    "--format",
+    "plain",
+    "--outfile",
+    "/private/tmp/198x-release-host-downloads/simple.bin",
+    "/private/tmp/198x-release-host-downloads/simple.s"
+  ],
+  "simple_expected_hex": "a90560"
+}

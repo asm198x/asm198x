@@ -1,0 +1,5 @@
+{
+  "mutated_counts_with_updated_manifest_rejected": true,
+  "exit": 1,
+  "stderr": "Traceback (most recent call last):\n  File \"/private/tmp/198x-release-host-audit/docs/plans/2026-10-15-release-host-audit/verify.py\", line 103, in <module>\n    main()\n    ~~~~^^\n  File \"/private/tmp/198x-release-host-audit/docs/plans/2026-10-15-release-host-audit/verify.py\", line 99, in main\n    verify(args.directory)\n    ~~~~~~^^^^^^^^^^^^^^^^\n  File \"/private/tmp/198x-release-host-audit/docs/plans/2026-10-15-release-host-audit/verify.py\", line 72, in verify\n    assert counts == report[\"counts\"] and counts[\"pass\"] >= 12, (\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: invalid result counts\n"
+}
