@@ -897,7 +897,7 @@ fn run(args: &[String]) -> Result<String, String> {
             (sna, prg, tape),
             output.as_deref(),
             outprefix.as_deref(),
-            (&debug, &sym, &listing, &listing_json),
+            (&debug, &sym, &listing, &listing_json, &map_report),
             sym_format,
             linker_config.as_deref(),
         )
@@ -1901,7 +1901,8 @@ fn emit_json(
     (sna, prg, tape): (bool, bool, Option<(asm198x::TapeFormat, bool)>),
     output: Option<&Path>,
     outprefix: Option<&Path>,
-    (debug, sym, listing, listing_json): (
+    (debug, sym, listing, listing_json, map): (
+        &ArtifactPath,
         &ArtifactPath,
         &ArtifactPath,
         &ArtifactPath,
@@ -2045,7 +2046,7 @@ fn emit_json(
                 output,
                 &assembly,
                 outprefix,
-                [debug, sym, listing, listing_json, &None],
+                [debug, sym, listing, listing_json, map],
                 sym_format,
             )?;
             if let Some(path) = output {
@@ -2092,6 +2093,12 @@ fn emit_json(
                     listing,
                     listing_json,
                 )?;
+            }
+            let map_note = write_map(input, output, &assembly, map)?;
+            if !map_note.is_empty() {
+                assembly
+                    .warnings
+                    .push(asm198x::Warning::note(0, map_note.trim_start()));
             }
             let json =
                 serde_json::to_string(&assembly).map_err(|e| format!("json encode failed: {e}"))?;
