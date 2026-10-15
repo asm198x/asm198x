@@ -779,7 +779,12 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     let assembler = Assembler::resolve(dialect, target)?;
-    let source = std::fs::read_to_string(input).map_err(|e| format!("cannot read {input}: {e}"))?;
+    let source = std::fs::read_to_string(input)
+        .map_err(|e| format!("cannot read {input}: {e}"))
+        .or_else(|message| match message_format {
+            MessageFormat::Json => emit_json_failure(message),
+            MessageFormat::Human => Err(message),
+        })?;
     if !equ_definitions.is_empty()
         && (!matches!(mode, Mode::Assemble) || !matches!(assembler, Assembler::Pasmo { .. }))
     {
@@ -895,7 +900,8 @@ fn run(args: &[String]) -> Result<String, String> {
             (&debug, &sym, &listing, &listing_json),
             sym_format,
             linker_config.as_deref(),
-        );
+        )
+        .or_else(emit_json_failure);
     }
 
     // vasm (68000): a flat big-endian code image, or an Amiga hunk executable
@@ -1859,6 +1865,24 @@ fn capture_failure(
 ) -> asm198x::AsmError {
     *failure_files = e.source_map.file_table();
     e.error
+}
+
+/// Report failures outside the assembler through the same diagnostic channel.
+fn emit_json_failure(message: String) -> Result<String, String> {
+    // Assembly failures have already emitted their diagnostic, then return an
+    // empty message to suppress the terminal summary.
+    if message.is_empty() {
+        return Err(message);
+    }
+    let diagnostic = asm198x::Diagnostic::new(
+        asm198x::Severity::Error,
+        asm198x::Code::AssemblyError,
+        message,
+    );
+    let json =
+        serde_json::to_string(&[diagnostic]).map_err(|e| format!("json encode failed: {e}"))?;
+    println!("{json}");
+    Err(String::new())
 }
 
 /// Emit the assembly result (or its diagnostics) as JSON on stdout — the

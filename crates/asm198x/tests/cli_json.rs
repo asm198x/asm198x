@@ -227,6 +227,109 @@ impl Drop for NativeOutputDir {
 }
 
 #[test]
+fn json_io_failures_use_the_diagnostic_array_and_preserve_previous_outputs() {
+    for (tag, dialect, source, options, message) in [
+        ("missing-input", "acme", None, vec![], "cannot read"),
+        ("directory-input", "acme", None, vec![], "cannot read"),
+        (
+            "output",
+            "acme",
+            Some("*=$1000\nstart: lda #$2a\n"),
+            vec!["-o", "missing/image.bin"],
+            "cannot write",
+        ),
+        (
+            "symbols",
+            "acme",
+            Some("*=$1000\nstart: lda #$2a\n"),
+            vec!["-o", "previous.bin", "--sym=missing/symbols.sym"],
+            "cannot write",
+        ),
+        (
+            "save",
+            "sjasmplus",
+            Some(
+                " DEVICE ZXSPECTRUM48\n ORG $8000\n db 42\n SAVEBIN \"missing/saved.bin\",$8000,1\n",
+            ),
+            vec!["-o", "previous.bin"],
+            "cannot write",
+        ),
+        (
+            "config",
+            "ca65",
+            Some(".segment \"CODE\"\nstart: nop\n"),
+            vec!["-C", "missing.cfg"],
+            "cannot read linker config",
+        ),
+        (
+            "include",
+            "acme",
+            Some("*=$1000\n!source \"missing.a\"\n"),
+            vec![],
+            "cannot load",
+        ),
+    ] {
+        let dir = NativeOutputDir::new(&format!("io-{tag}"));
+        let input = dir.0.join("program.s");
+        if let Some(source) = source {
+            std::fs::write(&input, source).expect("source");
+        } else if tag == "directory-input" {
+            std::fs::create_dir(&input).expect("unreadable source directory");
+        }
+        std::fs::write(dir.0.join("previous.bin"), b"previous image").expect("previous image");
+        let run = bin()
+            .current_dir(&dir.0)
+            .args(["--dialect", dialect, "--message-format=json", "program.s"])
+            .args(options)
+            .output()
+            .expect("run I/O failure");
+        assert!(!run.status.success(), "{tag}: rejected");
+        assert!(
+            run.stderr.is_empty(),
+            "{tag}: JSON mode emitted terminal text: {run:?}"
+        );
+        let diagnostics: Vec<asm198x::Diagnostic> = serde_json::from_slice(&run.stdout)
+            .unwrap_or_else(|error| panic!("{tag}: no diagnostic JSON: {error}: {run:?}"));
+        assert_eq!(diagnostics.len(), 1, "{tag}: exactly one failure");
+        assert_eq!(diagnostics[0].severity, asm198x::Severity::Error);
+        assert!(
+            diagnostics[0].message.contains(message),
+            "{tag}: {:?}",
+            diagnostics[0]
+        );
+        if tag == "include" {
+            let span = diagnostics[0]
+                .span
+                .as_ref()
+                .expect("include source location");
+            assert_eq!(span.line, 2, "retain the assembler's existing span");
+        } else {
+            assert!(
+                diagnostics[0].span.is_none(),
+                "{tag}: no invented source location"
+            );
+        }
+        assert_eq!(
+            std::fs::read(dir.0.join("previous.bin")).expect("previous output"),
+            b"previous image"
+        );
+    }
+}
+
+#[test]
+fn human_io_failures_keep_terminal_messages() {
+    let dir = NativeOutputDir::new("human-io");
+    let run = bin()
+        .current_dir(&dir.0)
+        .args(["--dialect", "acme", "missing.s"])
+        .output()
+        .expect("missing source");
+    assert!(!run.status.success());
+    assert!(run.stdout.is_empty());
+    assert!(String::from_utf8_lossy(&run.stderr).contains("asm198x: cannot read missing.s:"));
+}
+
+#[test]
 fn json_save_artifacts_match_human_files_and_report_resolved_writes() {
     for (tag, explicit_output, prefix, container) in [
         ("default", false, false, false),
@@ -360,11 +463,10 @@ fn json_save_paths_keep_parent_absolute_and_failure_behavior() {
         !run.status.success(),
         "assembly success alone cannot hide a failed write"
     );
-    assert!(String::from_utf8_lossy(&run.stderr).contains("cannot write"));
-    assert!(
-        run.stdout.is_empty(),
-        "no successful JSON result on a failed artifact write"
-    );
+    assert!(run.stderr.is_empty());
+    let diagnostics: Vec<Diagnostic> = serde_json::from_slice(&run.stdout).expect("JSON failure");
+    assert_eq!(diagnostics.len(), 1);
+    assert!(diagnostics[0].message.contains("cannot write"));
     assert!(!src.with_extension("bin").exists());
 }
 
@@ -523,7 +625,11 @@ fn json_source_names_reject_escaping_paths_but_cli_overrides_them() {
                 !run.status.success(),
                 "unsafe source name must fail: {directive} {named}"
             );
-            assert!(String::from_utf8_lossy(&run.stderr).contains("source-named output"));
+            assert!(run.stderr.is_empty());
+            let diagnostics: Vec<Diagnostic> =
+                serde_json::from_slice(&run.stdout).expect("JSON failure");
+            assert_eq!(diagnostics.len(), 1);
+            assert!(diagnostics[0].message.contains("source-named output"));
             assert!(!escaped.exists());
             let override_path = dir.0.join("override.out");
             let mut command = bin();
@@ -624,8 +730,13 @@ fn json_source_named_output_keeps_container_precedence_and_sidecar_collision_che
         .output()
         .expect("reject colliding symbols");
     assert!(!run.status.success());
+    assert!(run.stderr.is_empty());
+    let diagnostics: Vec<Diagnostic> = serde_json::from_slice(&run.stdout).expect("JSON failure");
+    assert_eq!(diagnostics.len(), 1);
     assert!(
-        String::from_utf8_lossy(&run.stderr).contains("refusing to overwrite the output image")
+        diagnostics[0]
+            .message
+            .contains("refusing to overwrite the output image")
     );
     assert_eq!(
         std::fs::read(dir.0.join("named.prg")).expect("image remains intact"),
