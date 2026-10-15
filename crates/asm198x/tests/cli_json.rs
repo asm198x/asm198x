@@ -616,6 +616,8 @@ fn json_source_named_output_keeps_container_precedence_and_sidecar_collision_che
         "!to \"named.prg\", cbm\n!symbollist \"named.prg\"\n*=$8000\nrts\n",
     )
     .expect("colliding source");
+    let previous = [0x01, 0x08, 0x60];
+    std::fs::write(dir.0.join("named.prg"), previous).expect("previous successful image");
     let run = bin()
         .args(["--dialect", "acme", "--message-format=json"])
         .arg(&src)
@@ -627,7 +629,7 @@ fn json_source_named_output_keeps_container_precedence_and_sidecar_collision_che
     );
     assert_eq!(
         std::fs::read(dir.0.join("named.prg")).expect("image remains intact"),
-        [0, 0x80, 0x60]
+        previous
     );
 }
 

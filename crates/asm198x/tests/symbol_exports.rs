@@ -96,6 +96,8 @@ fn cli_rejects_bad_options_and_protects_source_and_image_paths() {
             .expect("CLI");
         assert!(!output.status.success());
     }
+    let previous_image = [0xA9, 0x2A, 0x60];
+    std::fs::write(&image, previous_image).expect("previous image");
     for protected in [&input, &image] {
         let output = Command::new(env!("CARGO_BIN_EXE_asm198x"))
             .arg(&input)
@@ -112,7 +114,7 @@ fn cli_rejects_bad_options_and_protects_source_and_image_paths() {
         );
         assert_eq!(
             std::fs::read(&image).expect("image preserved"),
-            [0xEA, 0x60]
+            previous_image
         );
     }
 }
