@@ -1,0 +1,7 @@
+{
+  "reference_path": "docs/book/src/reference/cli.md",
+  "source_commit": "35a07893a57cbb42c3a341cc293fc4b713af99f4",
+  "reference_sha256": "dede3795827c5f1b20189079d2d8b95bd3b8542b9fedd7efc383a046655aef6c",
+  "disassembly_claim": "Writes a listing to stdout. The CPU follows the dialect: a 6502 dialect\ndisassembles as 6502, otherwise Z80 \u2014 so pass `-d` when the default is wrong.",
+  "help_formatter_claim": "(canonical layout, comments + operand spelling preserved; Z80/8080/6800/1802/scmp/rgbasm/6809)"
+}

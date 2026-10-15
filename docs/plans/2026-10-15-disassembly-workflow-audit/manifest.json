@@ -1,0 +1,10 @@
+{
+  "documentation-claims.json": "fb33ed2e7409a9596def4a768faf6c381ef1856ac7344d9306ea690318aaca3f",
+  "identity.json": "f4198e2675788752f53608b9e58e4277014f1557ded2c68a02f9ec8d4ebb9e33",
+  "observations.json": "727c167aab11ee372a22d7475dcba82e827fc7410782cd750d8a1f6b6d32c6fa",
+  "origin-api-control.json": "7b08fa9b264d01eab2a986f7a69505cfded2d1e15ae94714ab228b00e863871b",
+  "probe.py": "e490668bb080936e0afec548e3bfa634512b8d266bfd8ebc1dbf67dbb0ee6057",
+  "report.md": "cb6808b8ebd5f0893e0a94444441c2f49fd527bb4d19d374ceda864cdcb8da97",
+  "verification-controls.json": "507505d483c5e102008fcacd6f73053c354ad195e70aea6adbcf8764d38d6713",
+  "verify.py": "d8813bee1238972e545d310ad22e332ee20f0f19f8db4ff714cece2f616255ab"
+}

@@ -1,0 +1,1510 @@
+{
+  "version": "0.0.66",
+  "source_commit": "35a07893a57cbb42c3a341cc293fc4b713af99f4",
+  "binary_sha256": "f0535a9bac7c082cd5d141537e7d46cd78616671d7ca2289f294324640b3ce15",
+  "host": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "python": "3.14.3",
+  "help": {
+    "argv": [
+      "<asm198x>",
+      "--help"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "asm198x \u2014 198x family assembler\n\nusage: asm198x [asm|disasm|fmt] [options] <input>\n       (the operation is a subcommand; with none given, asm198x assembles)\n\nassemble:    asm198x [asm] [--dialect <name>] [--cpu <target>] [-I <dir>]... <input> [-o <out.bin>]\n             (add --message-format=json for a machine-readable result +\n              diagnostics on stdout; --message-format=human is the default;\n              -I adds an include-search directory, repeatable, in order)\n             (--equ NAME=VALUE defines a repeatable pasmo/pasmonext constant\n              before conditional assembly, matching Pasmo's spelling)\nsnapshot:    asm198x --dialect pasmonext --sna <input> [-o <out.sna>]\n             (Spectrum Z80 only; needs `end <addr>` for the entry point)\ntape:        asm198x --dialect pasmonext --tap|--tzx <input> [-o <out.tap>]\n             (Spectrum Z80 only; the `bas` spellings \u2014 --tapbas/--tzxbas \u2014\n              put an auto-run BASIC loader in front, which needs `end <addr>`\n              for its RANDOMIZE USR line)\nC64 program: asm198x --dialect acme --prg <input> [-o <out.prg>]\n             (prepends the 2-byte load address)\nGame Boy ROM: asm198x --dialect rgbasm --gb-rom <input> [-o <out.gb>]\n             (RGBLINK-compatible layout, padding and header checksums)\nconvert:     asm198x convert --from pasmo --to sjasmplus <input> [-o <out>]\n             (parse-and-re-emit dialect conversion, same CPU; output is\n              written only when both sides assemble byte-identically)\nNES project: asm198x --dialect ca65 -C <project.cfg> <input> [-o <out.nes>]\n             (-C reads a bounded ld65 config; absent, the curriculum\n              NROM layout applies as before)\nsymbols:     asm198x --sym[=path] --sym-format=native|vice|nocash <input>\n             (native preserves --sym output; vice writes .vs monitor labels;\n              nocash writes .sym Game Boy bank:address labels)\ndebug info:  asm198x [--debug[=path]] [--sym[=path]] [--listing[=path]]\n             [--listing-json[=path]] [--map[=path]] <input>\n             (--debug writes the .debug198x NDJSON sidecar; --sym a sorted\n              `name = $hex` table; --listing address/bytes/cycles/source rows\n              with per-label cycle totals; --listing-json the same data as\n              JSON \u2014 defaults: input with .debug198x/.sym/.lst/.lst.json;\n              flat dialects and ca65; vasm supports --debug/--sym only)\ndisassemble: asm198x disasm [-d <dialect>] [--org <addr>] <input.bin>\n             (CPU selected by --dialect or --cpu)\nrecover:     asm198x disasm --recover [-d acme] [--org <addr>]\n             [--code START:END]... [--data START:END]...\n             [--label ADDRESS:NAME]... <input.bin> [-o <new-source.a>]\n             (raw 6502, end-exclusive CPU ranges; unmarked bytes are data;\n              data overrides code; output is verified by reassembly)\nformat:      asm198x fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n             (canonical layout, comments + operand spelling preserved; Z80/8080/6800/1802/scmp/rgbasm/6809)\nexplain:     asm198x --explain <code>\nversion:     asm198x --version (also -V, or `asm198x version`)\n\ntargets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n                  for pasmonext) \u2014 Z80N opcodes follow the target, not\n                  the dialect. --cpu also names a chip directly when\n                  --dialect is absent (`--cpu 6809` is lwasm syntax).\n                  Unknown CPUs and incompatible pairs are errors.\n\ndialects (--dialect):\n                   acme       C64 6502, ACME syntax; also 6502/mos6502\n                   ca65       NES 6502, ca65 syntax (assemble + link); also nes\n                   65816      65816, ca65 syntax; also 816/ca65-816\n                   huc6280    PC Engine HuC6280, ca65 syntax; also pce/pc-engine\n                   vasm       Amiga 68000, vasm Motorola syntax; also 68000/m68k/mot\n                   lwasm      6809, lwasm syntax; also 6809\n                   rgbasm     Game Boy SM83, RGBDS syntax; also sm83/gb/gameboy/game-boy\n                   pasmo      Z80, pasmo syntax\n                   pasmonext  Z80, pasmo syntax, Spectrum Next target by default\n                   sjasmplus  Z80, sjasmplus syntax; also sjasm\n                   8080       Intel 8080, Intel syntax; also i8080/intel8080\n                   6800       Motorola 6800, Motorola syntax; also m6800\n                   1802       RCA COSMAC CDP1802; also cdp1802/cosmac\n                   8048       MCS-48 with on-chip ROM; also i8048/mcs48/mcs-48/8049/8050/80c48/80c49\n                   8035       MCS-48, ROM-less parts \u2014 the four BUS instructions are refused; also 8039/8040/80c35/80c39/80c40\n                   scmp       National SC/MP (INS8060); also sc/mp/ins8060\n                   f8         Fairchild F8 (3850), Channel F; also 3850/f3850/channelf/channel-f\n                   2650       Signetics 2650; also s2650/signetics2650\n                   tms7000    TI TMS7000; also 7000/tms70c00\n                   pdp11      DEC PDP-11; also pdp-11/lsi11/lsi-11\n                   tms9900    TI TMS9900 (TI-99/4A); also 9900/ti99\n                   cp1610     GI CP1610 (Intellivision); also cp1600/cp-1600/intellivision/intv\n                   z8000      Zilog Z8000, non-segmented; also z8002\n                   z8001      Zilog Z8001, segmented\nAssembles retro CPU source to a flat binary, or disassembles one back.\n"
+  },
+  "observations": [
+    {
+      "repeat": 0,
+      "name": "linear_6502",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "linear_z80",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--dialect",
+          "pasmo",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        org $8000\n        JR $8004\n",
+        "stderr": "disassembled 2 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "1802",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "1802",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "linear_68000",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--dialect",
+          "vasm",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "\tbra.s $8004\n",
+        "stderr": "disassembled 2 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "6002",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "6002",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "valid_assembly",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "--dialect",
+          "acme",
+          "input.asm",
+          "-o",
+          "image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> image.bin\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "image.bin": "a90560",
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "invalid_cpu",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--cpu",
+          "nonsense",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: unknown CPU target `nonsense`\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "invalid_sidecar",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--debug=out.s",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: `--debug`/`--sym`/`--listing` apply to an assembly run, not `--fmt`/`--disasm`\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "recovery_new",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--recover",
+          "--org",
+          "0x8000",
+          "--code",
+          "0x8000:0x8003",
+          "input.bin",
+          "-o",
+          "recovered.a"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "recovered 3 byte(s) at $8000 as ACME source (verified byte-identical) -> recovered.a\n"
+      },
+      "additional_processes": [
+        {
+          "argv": [
+            "<asm198x>",
+            "recovered.a",
+            "-o",
+            "rebuilt.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> rebuilt.bin\n"
+        }
+      ],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a",
+        "rebuilt.bin": "a90560",
+        "recovered.a": "3b205265636f7665726564203635303220736f75726365202841434d45292e20556e6d61726b65642062797465732061726520646174612e0a0a20202020202020202a3d2024383030300a6c5f383030303a0a20202020202020204c444120232430350a20202020202020205254530a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "recovery_existing",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--recover",
+          "--org",
+          "0x8000",
+          "--code",
+          "0x8000:0x8003",
+          "input.bin",
+          "-o",
+          "out.s"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: cannot create out.s (recovery output must be a new file): File exists (os error 17)\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "format_acme",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "fmt",
+          "--dialect",
+          "acme",
+          "input.asm",
+          "-o",
+          "formatted.a"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "formatted input.asm -> formatted.a\n"
+      },
+      "additional_processes": [
+        {
+          "argv": [
+            "<asm198x>",
+            "formatted.a",
+            "-o",
+            "rebuilt.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> rebuilt.bin\n"
+        }
+      ],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "formatted.a": "20202020202020202a3d2024383030300a20202020202020206c646120232430350a20202020202020207274730a",
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a",
+        "rebuilt.bin": "a90560"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "output_short",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "-o",
+          "out.s",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "output_long",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--output",
+          "out.s",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "container_prg",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--prg",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "container_sna",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--sna",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "container_tap",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--tap",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "container_tzx",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--tzx",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "container_exe",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--exe",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "container_gb",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--gb-rom",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "linker_config",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "-C",
+          "missing.cfg",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "outprefix",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--outprefix",
+          "missing-prefix/",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "equ",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--equ",
+          "ONE=1",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "include_dir",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "-I",
+          "missing-includes/",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "json",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--message-format=json",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 0,
+      "name": "origin_68000_high",
+      "classification": "limitation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--dialect",
+          "vasm",
+          "--org",
+          "0x10000",
+          "input.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: invalid address `0x10000`\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "6002",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "6002",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "linear_6502",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "linear_z80",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--dialect",
+          "pasmo",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        org $8000\n        JR $8004\n",
+        "stderr": "disassembled 2 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "1802",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "1802",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "linear_68000",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--dialect",
+          "vasm",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "\tbra.s $8004\n",
+        "stderr": "disassembled 2 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "6002",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "6002",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "valid_assembly",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "--dialect",
+          "acme",
+          "input.asm",
+          "-o",
+          "image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> image.bin\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "image.bin": "a90560",
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "invalid_cpu",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--cpu",
+          "nonsense",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: unknown CPU target `nonsense`\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "invalid_sidecar",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--debug=out.s",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: `--debug`/`--sym`/`--listing` apply to an assembly run, not `--fmt`/`--disasm`\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "recovery_new",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--recover",
+          "--org",
+          "0x8000",
+          "--code",
+          "0x8000:0x8003",
+          "input.bin",
+          "-o",
+          "recovered.a"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "recovered 3 byte(s) at $8000 as ACME source (verified byte-identical) -> recovered.a\n"
+      },
+      "additional_processes": [
+        {
+          "argv": [
+            "<asm198x>",
+            "recovered.a",
+            "-o",
+            "rebuilt.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> rebuilt.bin\n"
+        }
+      ],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a",
+        "rebuilt.bin": "a90560",
+        "recovered.a": "3b205265636f7665726564203635303220736f75726365202841434d45292e20556e6d61726b65642062797465732061726520646174612e0a0a20202020202020202a3d2024383030300a6c5f383030303a0a20202020202020204c444120232430350a20202020202020205254530a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "recovery_existing",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--recover",
+          "--org",
+          "0x8000",
+          "--code",
+          "0x8000:0x8003",
+          "input.bin",
+          "-o",
+          "out.s"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: cannot create out.s (recovery output must be a new file): File exists (os error 17)\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "format_acme",
+      "classification": "pass",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "fmt",
+          "--dialect",
+          "acme",
+          "input.asm",
+          "-o",
+          "formatted.a"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "formatted input.asm -> formatted.a\n"
+      },
+      "additional_processes": [
+        {
+          "argv": [
+            "<asm198x>",
+            "formatted.a",
+            "-o",
+            "rebuilt.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> rebuilt.bin\n"
+        }
+      ],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "formatted.a": "20202020202020202a3d2024383030300a20202020202020206c646120232430350a20202020202020207274730a",
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a",
+        "rebuilt.bin": "a90560"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "output_short",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "-o",
+          "out.s",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "output_long",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--output",
+          "out.s",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "container_prg",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--prg",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "container_sna",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--sna",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "container_tap",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--tap",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "container_tzx",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--tzx",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "container_exe",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--exe",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "container_gb",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--gb-rom",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "linker_config",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "-C",
+          "missing.cfg",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "outprefix",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--outprefix",
+          "missing-prefix/",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "equ",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--equ",
+          "ONE=1",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "include_dir",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "-I",
+          "missing-includes/",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "json",
+      "classification": "violation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--message-format=json",
+          "--dialect",
+          "acme",
+          "--org",
+          "0x8000",
+          "input.bin"
+        ],
+        "exit": 0,
+        "stdout": "        *= $8000\n        LDA #$05\n        RTS\n",
+        "stderr": "disassembled 3 byte(s) at $8000\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "a90560",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    },
+    {
+      "repeat": 1,
+      "name": "origin_68000_high",
+      "classification": "limitation",
+      "process": {
+        "argv": [
+          "<asm198x>",
+          "disasm",
+          "--dialect",
+          "vasm",
+          "--org",
+          "0x10000",
+          "input.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: invalid address `0x10000`\n"
+      },
+      "additional_processes": [],
+      "before": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "6002",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      },
+      "after": {
+        "input.asm": "2a3d24383030300a206c646120232430350a207274730a",
+        "input.bin": "6002",
+        "out.s": "70726573657276652070726576696f757320736f757263650a"
+      }
+    }
+  ]
+}

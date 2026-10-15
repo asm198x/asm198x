@@ -1,0 +1,19 @@
+{
+  "invalid_executable": {
+    "argv": [
+      "python3",
+      "docs/plans/2026-10-15-disassembly-workflow-audit/probe.py",
+      "/usr/bin/false",
+      "/private/tmp/198x-metadata-audit-evidence/invalid-positive.json"
+    ],
+    "exit": 1,
+    "stdout": "",
+    "stderr": "Traceback (most recent call last):\n  File \"/private/tmp/198x-metadata-audit/docs/plans/2026-10-15-disassembly-workflow-audit/probe.py\", line 207, in <module>\n    main()\n    ~~~~^^\n  File \"/private/tmp/198x-metadata-audit/docs/plans/2026-10-15-disassembly-workflow-audit/probe.py\", line 173, in main\n    {\"repeat\": repeat, **observe(binary, name)}\n                         ~~~~~~~^^^^^^^^^^^^^^\n  File \"/private/tmp/198x-metadata-audit/docs/plans/2026-10-15-disassembly-workflow-audit/probe.py\", line 131, in observe\n    assert result[\"exit\"] == 0, (\n           ^^^^^^^^^^^^^^^^^^^\nAssertionError: positive success control failed: linear_6502: {'argv': ['<asm198x>', 'disasm', '--dialect', 'acme', '--org', '0x8000', 'input.bin'], 'exit': 1, 'stdout': '', 'stderr': ''}\n",
+    "rejected": true
+  },
+  "empty_observations": {
+    "rejected": true,
+    "reason": "missing/empty observations",
+    "manifest_rehashed": true
+  }
+}

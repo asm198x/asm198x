@@ -4,3 +4,6 @@ crates/asm198x/tests/fixtures/lua/*.asm text eol=lf
 
 # Retained qualification manifests hash exact bytes on every checkout platform.
 docs/plans/2026-10-15-post-fix-release-qualification/** text eol=lf
+
+# Preserve exact retained disassembly-audit bytes across checkout platforms.
+docs/plans/2026-10-15-disassembly-workflow-audit/** text eol=lf
