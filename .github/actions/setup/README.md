@@ -46,7 +46,7 @@ node --test .github/actions/setup/index.test.cjs
 Unit tests cover all four target selections, version validation, archive
 layouts, checksum/name mismatches, failed downloads/extraction/version checks,
 and publication of PATH only after verification. The `Setup action` workflow
-also downloads release 0.0.57 on all four architectures and assembles a 6502
+also downloads release 0.0.65 on all four architectures and assembles a 6502
 fixture using the installed executable from the following step's PATH.
 
 ## cargo-binstall
@@ -67,3 +67,7 @@ remain untouched. `--target` can exercise other archives, but a foreign binary
 cannot necessarily execute on the checking host. Metadata reaches ordinary
 `cargo binstall asm198x` users when the containing crate version is published.
 See [binstall's metadata specification](https://github.com/cargo-bins/cargo-binstall/blob/main/SUPPORT.md).
+
+The same workflow retains a bounded 0.0.65 release audit report for each host.
+Its completed audit step means the controls and collection ran; individual
+capability failures remain explicit in the report and do not qualify support.

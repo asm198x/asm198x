@@ -4,7 +4,8 @@ const fs = require('node:fs');
 const path = require('node:path');
 const { spawnSync } = require('node:child_process');
 
-assert.equal(process.env.INSTALLED_VERSION, '0.0.57');
+assert.match(process.env.EXPECTED_VERSION, /^\d+\.\d+\.\d+$/);
+assert.equal(process.env.INSTALLED_VERSION, process.env.EXPECTED_VERSION);
 assert.equal(process.env.INSTALLED_TARGET, process.env.EXPECTED_TARGET);
 const output = path.join(process.env.RUNNER_TEMP, 'asm198x-setup-smoke.bin');
 const result = spawnSync('asm198x', ['--dialect', 'acme', path.join(__dirname, 'smoke.asm'), '-o', output], { encoding: 'utf8' });

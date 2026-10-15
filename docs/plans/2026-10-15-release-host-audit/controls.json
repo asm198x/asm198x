@@ -1,0 +1,17 @@
+{
+  "command": [
+    "python3.13",
+    "docs/plans/2026-10-15-release-host-audit/probe.py",
+    "--target",
+    "aarch64-apple-darwin",
+    "--cache",
+    "/private/tmp/198x-release-host-downloads",
+    "--out",
+    "/private/tmp/198x-release-host-downloads/should-not-pass.json",
+    "--control-corrupt-output"
+  ],
+  "exit": 1,
+  "stderr": "Traceback (most recent call last):\n  File \"/private/tmp/198x-release-host-audit/docs/plans/2026-10-15-release-host-audit/probe.py\", line 493, in <module>\n    main()\n    ~~~~^^\n  File \"/private/tmp/198x-release-host-audit/docs/plans/2026-10-15-release-host-audit/probe.py\", line 476, in main\n    report = audit(\n        args.target, args.cache.resolve(), args.binary, args.control_corrupt_output\n    )\n  File \"/private/tmp/198x-release-host-audit/docs/plans/2026-10-15-release-host-audit/probe.py\", line 438, in audit\n    assert next(r for r in results if r[\"name\"] == name)[\"status\"] == \"pass\", (\n           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^\nAssertionError: positive control failed: deterministic_bytes\n",
+  "corrupt_output_rejected": true,
+  "setup_wrong_version_rejected": true
+}

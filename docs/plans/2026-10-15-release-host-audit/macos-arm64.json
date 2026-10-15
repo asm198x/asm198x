@@ -1,0 +1,565 @@
+{
+  "version": "0.0.65",
+  "source": "fa06f5617f32bec52ac14f3a25bdd8e13dae9287",
+  "probe_sha256": "e4dd7344ab70f9a7f7e328d2023aa299c747bd1c62d3997a9e5e0946487faf81",
+  "target": "aarch64-apple-darwin",
+  "archive": "asm198x-aarch64-apple-darwin.tar.xz",
+  "archive_sha256": "7b4dcef1b0b6fa164eabf47293e10bbada3d8e5899a6766d2e3cfe35f141db8c",
+  "executable_sha256": "f546f460f43d25ccbf84edffec100b7b2fe1d69b38477dddb88ce1c008ca3570",
+  "host": {
+    "system": "Darwin",
+    "release": "27.0.0",
+    "machine": "arm64",
+    "python": "3.13.16 (main, Sep 30 2026, 18:57:20) [Clang 21.0.0 (clang-2100.3.34.2)]",
+    "github_run_id": null,
+    "runner_os": null,
+    "runner_arch": null,
+    "libc": [
+      "",
+      ""
+    ]
+  },
+  "checksum_mutation_rejected": true,
+  "counts": {
+    "pass": 13,
+    "fail": 6,
+    "unavailable": 0
+  },
+  "qualification_passed": false,
+  "results": [
+    {
+      "name": "published_installer",
+      "status": "pass",
+      "checks": {
+        "success": true,
+        "archive_binary": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/bin/sh",
+            "/private/tmp/198x-release-host-downloads/asm198x-installer.sh"
+          ],
+          "exit": 0,
+          "stdout": "installing to /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/installed\n  asm198x\neverything's installed!\n",
+          "stderr": "downloading asm198x 0.0.65 aarch64-apple-darwin\nWARN: The following commands are shadowed by other commands in your PATH: asm198x\n",
+          "unmanaged_install": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/installed"
+        }
+      ],
+      "installer_sha256": "477e3cb7d775d9602b0177bcf8b760877b397826f36883122af88f0dc6d293da"
+    },
+    {
+      "name": "version",
+      "status": "pass",
+      "checks": {
+        "exact": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--version"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "asm198x v0.0.65\n",
+          "seconds": 0.0058
+        }
+      ]
+    },
+    {
+      "name": "help",
+      "status": "pass",
+      "checks": {
+        "success": true,
+        "describes_cli": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--help"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "asm198x \u2014 198x family assembler\n\nusage: asm198x [asm|disasm|fmt] [options] <input>\n       (the operation is a subcommand; with none given, asm198x assembles)\n\nassemble:    asm198x [asm] [--dialect <name>] [--cpu <target>] [-I <dir>]... <input> [-o <out.bin>]\n             (add --message-format=json for a machine-readable result +\n              diagnostics on stdout; --message-format=human is the default;\n              -I adds an include-search directory, repeatable, in order)\n             (--equ NAME=VALUE defines a repeatable pasmo/pasmonext constant\n              before conditional assembly, matching Pasmo's spelling)\nsnapshot:    asm198x --dialect pasmonext --sna <input> [-o <out.sna>]\n             (Spectrum Z80 only; needs `end <addr>` for the entry point)\ntape:        asm198x --dialect pasmonext --tap|--tzx <input> [-o <out.tap>]\n             (Spectrum Z80 only; the `bas` spellings \u2014 --tapbas/--tzxbas \u2014\n              put an auto-run BASIC loader in front, which needs `end <addr>`\n              for its RANDOMIZE USR line)\nC64 program: asm198x --dialect acme --prg <input> [-o <out.prg>]\n             (prepends the 2-byte load address)\nGame Boy ROM: asm198x --dialect rgbasm --gb-rom <input> [-o <out.gb>]\n             (RGBLINK-compatible layout, padding and header checksums)\nconvert:     asm198x convert --from pasmo --to sjasmplus <input> [-o <out>]\n             (parse-and-re-emit dialect conversion, same CPU; output is\n              written only when both sides assemble byte-identically)\nNES project: asm198x --dialect ca65 -C <project.cfg> <input> [-o <out.nes>]\n             (-C reads a bounded ld65 config; absent, the curriculum\n              NROM layout applies as before)\nsymbols:     asm198x --sym[=path] --sym-format=native|vice|nocash <input>\n             (native preserves --sym output; vice writes .vs monitor labels;\n              nocash writes .sym Game Boy bank:address labels)\ndebug info:  asm198x [--debug[=path]] [--sym[=path]] [--listing[=path]]\n             [--listing-json[=path]] [--map[=path]] <input>\n             (--debug writes the .debug198x NDJSON sidecar; --sym a sorted\n              `name = $hex` table; --listing address/bytes/cycles/source rows\n              with per-label cycle totals; --listing-json the same data as\n              JSON \u2014 defaults: input with .debug198x/.sym/.lst/.lst.json;\n              flat dialects and ca65; vasm supports --debug/--sym only)\ndisassemble: asm198x disasm [-d <dialect>] [--org <addr>] <input.bin>\n             (CPU selected by --dialect or --cpu)\nrecover:     asm198x disasm --recover [-d acme] [--org <addr>]\n             [--code START:END]... [--data START:END]...\n             [--label ADDRESS:NAME]... <input.bin> [-o <new-source.a>]\n             (raw 6502, end-exclusive CPU ranges; unmarked bytes are data;\n              data overrides code; output is verified by reassembly)\nformat:      asm198x fmt [--cpu <pasmo|sjasmplus|8080|6800|1802|scmp|rgbasm|6809>] <input.asm> [-o <out.asm>]\n             (canonical layout, comments + operand spelling preserved; Z80/8080/6800/1802/scmp/rgbasm/6809)\nexplain:     asm198x --explain <code>\nversion:     asm198x --version (also -V, or `asm198x version`)\n\ntargets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n                  for pasmonext) \u2014 Z80N opcodes follow the target, not\n                  the dialect. --cpu also names a chip directly when\n                  --dialect is absent (`--cpu 6809` is lwasm syntax).\n\ndialects (--dialect):\n                   acme       C64 6502, ACME syntax; also 6502/mos6502\n                   ca65       NES 6502, ca65 syntax (assemble + link); also nes\n                   65816      65816, ca65 syntax; also 816/ca65-816\n                   huc6280    PC Engine HuC6280, ca65 syntax; also pce/pc-engine\n                   vasm       Amiga 68000, vasm Motorola syntax; also 68000/m68k/mot\n                   lwasm      6809, lwasm syntax; also 6809\n                   rgbasm     Game Boy SM83, RGBDS syntax; also sm83/gb/gameboy/game-boy\n                   pasmo      Z80, pasmo syntax\n                   pasmonext  Z80, pasmo syntax, Spectrum Next target by default\n                   sjasmplus  Z80, sjasmplus syntax; also sjasm\n                   8080       Intel 8080, Intel syntax; also i8080/intel8080\n                   6800       Motorola 6800, Motorola syntax; also m6800\n                   1802       RCA COSMAC CDP1802; also cdp1802/cosmac\n                   8048       MCS-48 with on-chip ROM; also i8048/mcs48/mcs-48/8049/8050/80c48/80c49\n                   8035       MCS-48, ROM-less parts \u2014 the four BUS instructions are refused; also 8039/8040/80c35/80c39/80c40\n                   scmp       National SC/MP (INS8060); also sc/mp/ins8060\n                   f8         Fairchild F8 (3850), Channel F; also 3850/f3850/channelf/channel-f\n                   2650       Signetics 2650; also s2650/signetics2650\n                   tms7000    TI TMS7000; also 7000/tms70c00\n                   pdp11      DEC PDP-11; also pdp-11/lsi11/lsi-11\n                   tms9900    TI TMS9900 (TI-99/4A); also 9900/ti99\n                   cp1610     GI CP1610 (Intellivision); also cp1600/cp-1600/intellivision/intv\n                   z8000      Zilog Z8000, non-segmented; also z8002\n                   z8001      Zilog Z8001, segmented\nAssembles retro CPU source to a flat binary, or disassembles one back.\n",
+          "seconds": 0.0049
+        }
+      ]
+    },
+    {
+      "name": "deterministic_bytes",
+      "status": "pass",
+      "checks": {
+        "success": true,
+        "reference_bytes": true,
+        "repeat_bytes": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "good.s",
+            "-o",
+            "good0.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> good0.bin\n",
+          "seconds": 0.0049
+        },
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "good.s",
+            "-o",
+            "good1.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> good1.bin\n",
+          "seconds": 0.0042
+        }
+      ]
+    },
+    {
+      "name": "structured_assembly",
+      "status": "pass",
+      "checks": {
+        "success": true,
+        "json_bytes": true,
+        "file_bytes": true,
+        "quiet_stderr": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "good.s",
+            "--message-format=json",
+            "-o",
+            "json.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 0,
+          "stdout": "{\"version\":1,\"bytes\":[169,5,96],\"origin\":32768,\"symbols\":{\"start\":32768},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[{\"name\":\"start\",\"kind\":\"label\",\"section\":0,\"offset\":0}],\"lines\":[{\"line\":3,\"offset\":0,\"length\":2},{\"line\":4,\"offset\":2,\"length\":1}],\"cycles\":[{\"line\":3,\"offset\":0,\"base\":2,\"page_cross\":0,\"branch_taken\":0},{\"line\":4,\"offset\":2,\"base\":6,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"good.s\"]}\n",
+          "stderr": "",
+          "seconds": 0.004
+        }
+      ]
+    },
+    {
+      "name": "unicode_spaces_crlf_include",
+      "status": "pass",
+      "checks": {
+        "success": true,
+        "bytes": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "paths.s",
+            "-o",
+            "paths.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> paths.bin\n",
+          "seconds": 0.0044
+        }
+      ]
+    },
+    {
+      "name": "invalid_input_diagnostic_parity",
+      "status": "pass",
+      "checks": {
+        "both_reject": true,
+        "json_diagnostic": true,
+        "same_message": true,
+        "quiet_json_stderr": true,
+        "no_artifact": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "bad.s",
+            "-o",
+            "bad.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: bad.s:2:6: error: value 4095 does not fit in a byte\n",
+          "seconds": 0.004
+        },
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "bad.s",
+            "--message-format=json",
+            "-o",
+            "bad.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 1,
+          "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":6,\"expansion_frames\":[],\"path\":\"bad.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 4095 does not fit in a byte\",\"fix\":null}]\n",
+          "stderr": "",
+          "seconds": 0.0038
+        }
+      ]
+    },
+    {
+      "name": "invalid_input_preserves_output",
+      "status": "pass",
+      "checks": {
+        "reject": true,
+        "preserved": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "bad.s",
+            "-o",
+            "preserved.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: bad.s:2:6: error: value 4095 does not fit in a byte\n",
+          "seconds": 0.0039
+        }
+      ]
+    },
+    {
+      "name": "missing_input_json",
+      "status": "fail",
+      "checks": {
+        "reject": true,
+        "diagnostic_array": false,
+        "quiet_stderr": false,
+        "no_output": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "missing.s",
+            "--message-format=json",
+            "-o",
+            "missing.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: cannot read missing.s: No such file or directory (os error 2)\n",
+          "seconds": 0.0042
+        }
+      ],
+      "existing_issue": 650
+    },
+    {
+      "name": "cpu_nonsense",
+      "status": "fail",
+      "checks": {
+        "reject": false,
+        "no_output": false
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "pasmo",
+            "--cpu",
+            "nonsense",
+            "z80.s",
+            "-o",
+            "nonsense.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $8000 -> nonsense.bin\n",
+          "seconds": 0.0048
+        }
+      ],
+      "existing_issue": 608
+    },
+    {
+      "name": "cpu_68000",
+      "status": "fail",
+      "checks": {
+        "reject": false,
+        "no_output": false
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "pasmo",
+            "--cpu",
+            "68000",
+            "z80.s",
+            "-o",
+            "68000.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $8000 -> 68000.bin\n",
+          "seconds": 0.0046
+        }
+      ],
+      "existing_issue": 608
+    },
+    {
+      "name": "release_lua",
+      "status": "pass",
+      "checks": {
+        "success": true,
+        "bytes": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "lua.s",
+            "-o",
+            "lua.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $0000 -> lua.bin\n",
+          "seconds": 0.0045
+        }
+      ]
+    },
+    {
+      "name": "formatter_option_658",
+      "status": "fail",
+      "checks": {
+        "reject": false,
+        "no_output": false
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "fmt",
+            "--dialect",
+            "acme",
+            "good.s",
+            "-o",
+            "fmt658.s",
+            "--prg"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted good.s -> fmt658.s\n",
+          "seconds": 0.0044
+        }
+      ],
+      "existing_issue": 658
+    },
+    {
+      "name": "formatter_option_663",
+      "status": "fail",
+      "checks": {
+        "reject": false,
+        "no_output": false
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "fmt",
+            "--dialect",
+            "acme",
+            "good.s",
+            "-o",
+            "fmt663.s",
+            "--org",
+            "0"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted good.s -> fmt663.s\n",
+          "seconds": 0.0047
+        }
+      ],
+      "existing_issue": 663
+    },
+    {
+      "name": "source_alias_--debug",
+      "status": "pass",
+      "checks": {
+        "reject": true,
+        "source_preserved": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "alias.s",
+            "-o",
+            "alias.bin",
+            "--debug=alias.s"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: refusing to overwrite the input with the debug sidecar \u2014 pass an explicit `=<path>`\n",
+          "seconds": 0.0041
+        }
+      ],
+      "existing_issue": 651
+    },
+    {
+      "name": "source_alias_--sym",
+      "status": "pass",
+      "checks": {
+        "reject": true,
+        "source_preserved": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "alias.s",
+            "-o",
+            "alias.bin",
+            "--sym=alias.s"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: refusing to overwrite the input with the symbol table \u2014 pass an explicit `=<path>`\n",
+          "seconds": 0.0041
+        }
+      ],
+      "existing_issue": 651
+    },
+    {
+      "name": "source_alias_--listing",
+      "status": "pass",
+      "checks": {
+        "reject": true,
+        "source_preserved": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "alias.s",
+            "-o",
+            "alias.bin",
+            "--listing=alias.s"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: refusing to overwrite the input with the listing \u2014 pass an explicit `=<path>`\n",
+          "seconds": 0.005
+        }
+      ],
+      "existing_issue": 651
+    },
+    {
+      "name": "hardlink_output",
+      "status": "fail",
+      "checks": {
+        "reject": false,
+        "source_preserved": false
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "hardlink.s",
+            "-o",
+            "hardlink.bin"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $8000 -> hardlink.bin\n",
+          "seconds": 0.0047
+        }
+      ],
+      "existing_issue": 651
+    },
+    {
+      "name": "upstream_hello_world",
+      "status": "pass",
+      "checks": {
+        "success": true,
+        "native_acme_bytes": true
+      },
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/asm198x",
+            "--dialect",
+            "acme",
+            "--prg",
+            "helloworld.asm",
+            "-o",
+            "hello.prg"
+          ],
+          "cwd": "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-host-audit-ajp48_m0/upstream",
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 2081 byte(s) -> hello.prg (load $0801)\n",
+          "seconds": 0.0046
+        }
+      ],
+      "output_sha256": "16e5a63289e474e84706517c592c0ba7f2ae86b5278d7d1e6eeb9a0c5ef205fc",
+      "expected_size": 2081,
+      "upstream_commit": "35b4968be3bdd26804a5d195557d1225497a0358",
+      "source_hashes": {
+        "LICENSE": "62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203",
+        "helloworld.asm": "9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5",
+        "libs/loader.asm": "32b0dfd80eacbbdfa69774280122d9c7f115fe0602a14bc5d630b24e08cd82cc",
+        "libs/screen.asm": "d33fbb4f0d549567438138efa38adbb4eb154aa17d6e1c0dee496f065cf469c6"
+      }
+    }
+  ]
+}
