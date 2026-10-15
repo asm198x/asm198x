@@ -63,7 +63,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
   verifyChecksum(archive, checksum, identity.archive);
   assert.throws(() => verifyChecksum(Buffer.concat([archive, Buffer.from('corrupt')]), checksum, identity.archive), /SHA-256 mismatch/);
   const member = target.includes('windows') ? 'asm198x.exe' : `asm198x-${target}/asm198x`;
-  const executable = runChecked('tar', ['-xOf', archivePath, member], { timeout: 30000, maxBuffer: 128 * 1024 * 1024 });
+  const executable = runChecked('tar', ['-xOf', path.basename(archivePath), member], { cwd: path.dirname(archivePath), timeout: 30000, maxBuffer: 128 * 1024 * 1024 });
   assert.equal(binaryTarget(executable), target, 'archive contains wrong architecture');
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'asm198x-candidate-'));
   const results = [];

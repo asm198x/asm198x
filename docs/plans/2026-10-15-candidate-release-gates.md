@@ -64,3 +64,9 @@ from candidate runs. Linux formula installation remains a candidate check.
 The first Windows run exposed CRLF assumptions in two test readers
 (`TypeError: Cannot read properties of undefined (reading 'split')`). Normalize
 line endings before parsing workflow text; the generator already did this.
+
+Windows then built its package successfully but archive extraction failed with
+`tar: Cannot connect to D: resolve failed`: Git Bash selects GNU tar, which
+interprets a drive-letter archive argument as a remote host. Extract using the
+archive basename with its directory as cwd, keeping member selection and byte
+verification unchanged. The fatal JSON report preserved this acquisition error.
