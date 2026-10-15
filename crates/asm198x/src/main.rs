@@ -1551,6 +1551,7 @@ fn preflight_outputs(
     } else {
         "sym"
     };
+    let mut destinations: Vec<(&str, PathBuf)> = Vec::new();
     for (flag, ext, what) in [
         (debug, "debug198x", "debug sidecar"),
         (sym, sym_ext, "symbol table"),
@@ -1561,6 +1562,15 @@ fn preflight_outputs(
         if let Some(requested) = flag {
             let destination = sidecar_destination(input, image, requested, ext, what)?;
             preflight_destination(&destination)?;
+            for (previous_kind, previous_path) in &destinations {
+                if output_collides(&destination, previous_path)? {
+                    return Err(format!(
+                        "conflicting sidecar destinations: {previous_kind} at {} and {what} at {} refer to the same file",
+                        previous_path.display(),
+                        destination.display()
+                    ));
+                }
+            }
             for source in consumed_inputs {
                 if output_collides(&destination, source)? {
                     return Err(format!(
@@ -1584,6 +1594,7 @@ fn preflight_outputs(
                     ));
                 }
             }
+            destinations.push((what, destination));
         }
     }
     Ok(())

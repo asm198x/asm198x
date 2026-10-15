@@ -470,3 +470,125 @@ fn write_only_sidecars_do_not_require_read_access_for_identity_checks() {
         );
     }
 }
+
+#[test]
+fn conflicting_sidecars_are_rejected_before_any_output_changes() {
+    let options = [
+        ("--debug", "debug sidecar"),
+        ("--sym", "symbol table"),
+        ("--listing", "listing"),
+        ("--listing-json", "JSON listing"),
+        ("--map", "memory map"),
+    ];
+    for mode in ["human", "json"] {
+        for first in 0..options.len() {
+            for second in (first + 1)..options.len() {
+                let control = Scratch::new();
+                let source = "*=$1000\nstart: lda #42\n";
+                std::fs::write(control.0.join("program.s"), source).expect("control source");
+                let a = format!("{}=first.out", options[first].0);
+                let b = format!("{}=second.out", options[second].0);
+                let valid = assemble(&control.0, "acme", mode, &["-o", "image.bin", &a, &b]);
+                assert!(valid.status.success(), "{mode}/{a}/{b}: {valid:?}");
+                for name in ["first.out", "second.out"] {
+                    assert!(
+                        !std::fs::read(control.0.join(name))
+                            .expect("both distinct sidecars exist")
+                            .is_empty()
+                    );
+                }
+                assert_eq!(
+                    std::fs::read(control.0.join("image.bin")).expect("control machine code"),
+                    [0xa9, 42]
+                );
+                for existing in [false, true] {
+                    for alias in ["exact", "parent", "hard-link", "symlink", "windows-case"] {
+                        if alias == "hard-link" && !existing {
+                            continue;
+                        }
+                        #[cfg(not(unix))]
+                        if alias == "symlink" {
+                            continue;
+                        }
+                        #[cfg(not(windows))]
+                        if alias == "windows-case" {
+                            continue;
+                        }
+                        let dir = Scratch::new();
+                        std::fs::create_dir(dir.0.join("nested")).expect("alias parent");
+                        std::fs::write(dir.0.join("program.s"), source).expect("source");
+                        std::fs::write(dir.0.join("image.bin"), b"previous image")
+                            .expect("previous image");
+                        if existing {
+                            std::fs::write(dir.0.join("shared.out"), b"previous sidecar")
+                                .expect("previous sidecar");
+                        }
+                        let target = match alias {
+                            "exact" => "shared.out",
+                            "parent" => "nested/../shared.out",
+                            "hard-link" => {
+                                std::fs::hard_link(dir.0.join("shared.out"), dir.0.join("alias"))
+                                    .expect("hard link");
+                                "alias"
+                            }
+                            "symlink" => {
+                                #[cfg(unix)]
+                                std::os::unix::fs::symlink("shared.out", dir.0.join("alias"))
+                                    .expect("possibly dangling symlink");
+                                "alias"
+                            }
+                            _ => "SHARED.OUT",
+                        };
+                        let a = format!("{}=shared.out", options[first].0);
+                        let b = format!("{}={target}", options[second].0);
+                        let run = assemble(&dir.0, "acme", mode, &["-o", "image.bin", &a, &b]);
+                        assert!(!run.status.success(), "{mode}/{a}/{b}/{existing}: {run:?}");
+                        assert_preserved(&dir.0.join("image.bin"), Some(b"previous image"));
+                        assert_preserved(
+                            &dir.0.join("shared.out"),
+                            existing.then_some(b"previous sidecar".as_slice()),
+                        );
+                        let message = if mode == "json" {
+                            assert!(run.stderr.is_empty());
+                            let errors: Vec<asm198x::Diagnostic> =
+                                serde_json::from_slice(&run.stdout).expect("JSON rejection");
+                            assert_eq!(errors.len(), 1);
+                            errors[0].message.clone()
+                        } else {
+                            String::from_utf8_lossy(&run.stderr).into_owned()
+                        };
+                        for expected in [options[first].1, options[second].1, "shared.out"] {
+                            assert!(message.contains(expected), "{message}");
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn inferred_sidecar_names_participate_in_collision_checks() {
+    for mode in ["human", "json"] {
+        for source_named in [false, true] {
+            let dir = Scratch::new();
+            let source = if source_named {
+                "!symbollist \"program.sym\"\n*=$1000\nstart: lda #42\n"
+            } else {
+                "*=$1000\nstart: lda #42\n"
+            };
+            std::fs::write(dir.0.join("program.s"), source).expect("source");
+            std::fs::write(dir.0.join("program.sym"), b"previous symbols")
+                .expect("previous symbols");
+            let args = if source_named {
+                vec!["-o", "image.bin", "--listing=program.sym"]
+            } else {
+                vec!["-o", "image.bin", "--sym", "--listing=program.sym"]
+            };
+            let run = assemble(&dir.0, "acme", mode, &args);
+            assert!(!run.status.success(), "{run:?}");
+            assert!(!dir.0.join("image.bin").exists());
+            assert_preserved(&dir.0.join("program.sym"), Some(b"previous symbols"));
+        }
+    }
+}
