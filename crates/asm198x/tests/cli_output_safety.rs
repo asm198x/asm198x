@@ -60,11 +60,8 @@ fn invalid_sidecar_destinations_preserve_primary_images_in_every_driver() {
     ] {
         for mode in ["human", "json"] {
             for option in ["--sym", "--debug", "--listing", "--listing-json", "--map"] {
-                // vasm listings are explicitly unsupported; JSON map output
-                // is a separate audit gap, not a path this test may skip silently.
-                if (dialect == "vasm" && option.starts_with("--listing"))
-                    || (mode == "json" && option == "--map")
-                {
+                // vasm listings are explicitly unsupported.
+                if dialect == "vasm" && option.starts_with("--listing") {
                     continue;
                 }
                 let dir = Scratch::new();
@@ -174,6 +171,47 @@ fn directory_and_readonly_sidecars_do_not_truncate_an_existing_image() {
                 permissions.set_readonly(false);
                 std::fs::set_permissions(&sidecar, permissions).expect("restore permissions");
             }
+        }
+    }
+}
+
+#[test]
+fn memory_maps_match_between_reporting_modes_and_validate_before_writes() {
+    for (dialect, source) in [
+        ("acme", "*=$1000\nstart: lda #$2a\n rts\n"),
+        ("pasmo", " org $8000\nstart: nop\n"),
+        ("ca65", ".segment \"CODE\"\nstart: nop\n"),
+        ("vasm", "start: moveq #42,d0\n rts\n"),
+    ] {
+        for flag in ["--map", "--map=memory.txt"] {
+            let mut maps = Vec::new();
+            for mode in ["human", "json"] {
+                let dir = Scratch::new();
+                std::fs::write(dir.0.join("program.s"), source).expect("source");
+                let run = assemble(&dir.0, dialect, mode, &["-o", "image.bin", flag]);
+                assert!(run.status.success(), "{dialect}/{mode}: {run:?}");
+                let path = dir.0.join(if flag == "--map" {
+                    "program.map"
+                } else {
+                    "memory.txt"
+                });
+                let map = std::fs::read(&path).expect("requested map exists");
+                assert!(!map.is_empty());
+                if mode == "json" {
+                    assert!(run.stderr.is_empty());
+                    let result: asm198x::AssemblyResult =
+                        serde_json::from_slice(&run.stdout).expect("JSON result");
+                    assert_eq!(map, asm198x::render_map(&result).as_bytes());
+                    assert!(
+                        result
+                            .warnings
+                            .iter()
+                            .any(|warning| warning.message.contains("memory map"))
+                    );
+                }
+                maps.push(map);
+            }
+            assert_eq!(maps[0], maps[1], "{dialect}/{flag}");
         }
     }
 }
