@@ -1,0 +1,2 @@
+mise WARN  tracking config: failed to ln -sf /private/tmp/198x-audit-batch-3/rust-toolchain.toml /Users/stevehill/.local/state/mise/tracked-configs/4a679499721fb0f: Operation not permitted (os error 1)
+9 generated block(s) across 64 page(s), and 47 generated page(s), are current; the nav lists 63 page(s), all present
