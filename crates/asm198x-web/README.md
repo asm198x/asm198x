@@ -4,18 +4,23 @@ The [asm198x](https://github.com/asm198x/asm198x) assembler compiled to
 WebAssembly, with a `wasm-bindgen` surface a web page can call. Nothing is
 uploaded anywhere: the assembler runs in the visitor's tab.
 
-Published to npm as **`@asm198x/web`**; `scripts/build-npm.sh` builds it. The
-crate itself stays off crates.io: a `wasm-bindgen` surface returning JavaScript
-values has no Rust caller.
+The published npm package is **`@asm198x/z80`**, currently version **0.4.0**.
+It assembles Z80/Z80N using `pasmo`, `pasmonext` and `sjasmplus` syntax
+(`sjasm` is an alias). Its version is separate from the native CLI's.
+
+The all-architecture `@asm198x/web` bundle and other architecture bundles can
+be built locally; they are not published installation choices. The crate itself
+stays off crates.io: a `wasm-bindgen` surface returning JavaScript values has
+no Rust caller.
 
 ```sh
-npm install @asm198x/web
+npm install @asm198x/z80@0.4.0
 ```
 
 ## Surface
 
 ```js
-import init, { assemble, assemble_project, snapshot, listing, dialects } from '@asm198x/web';
+import init, { assemble, assemble_project, snapshot, listing, dialects } from '@asm198x/z80';
 
 await init();
 
@@ -26,13 +31,14 @@ if (Array.isArray(result)) {
   // The `AssemblyResult` object: `result.bytes`, `result.origin`, `result.symbols`.
 }
 
-listing('acme', '*=$c000\n lda #1\n rts\n');  // the `--listing` text, or null
+listing('pasmo', 'org $8000\n ld a,1\n ret\n'); // the `--listing` text, or undefined
 JSON.parse(dialects());                        // [{ name, aliases, blurb }, …]
 ```
 
 `assemble` returns the string `asm198x --message-format=json` prints, so the
 [CLI reference](https://asm198x.github.io/docs/cli/) documents the shape.
-It returns `null` for a dialect name the table does not list.
+It returns `undefined` for a dialect name this build does not list.
+The example above runs in a browser/bundler that serves the package's `.wasm` file.
 
 For a named in-memory project, including target selection and the browser-safe
 native output options:
@@ -46,15 +52,40 @@ const result = JSON.parse(assemble_project(JSON.stringify({
     'src/main.asm': ' include "part.asm"\n',
     'part.asm': ' nextreg $07,$02\n',
   },
-  output: 'raw',              // optional; 'hunk' is available for vasm
+  output: 'raw',              // optional; the published Z80 package emits raw bytes
 })));
 ```
 
 The file map is text: source includes are supported, while binary `incbin`
-payloads remain outside this surface. `hunk` is included because it is wholly
-represented by the returned bytes; filesystem-only CLI behaviour is not.
+payloads remain outside this surface. A locally built bundle containing vasm
+also accepts `output: 'hunk'`; it is not an option in the published Z80 package.
+Filesystem-only CLI behaviour is not exposed.
 
-## Build
+## Verify the installed package in Node
+
+After the install command above, save this as `verify.mjs` in the same directory
+and run `node verify.mjs`. Node initializes the published WASM bytes explicitly;
+a browser normally fetches them through `init()`.
+
+```js
+import assert from 'node:assert/strict';
+import { readFile } from 'node:fs/promises';
+import init, { assemble } from '@asm198x/z80';
+
+await init({ module_or_path: await readFile(new URL(
+  './node_modules/@asm198x/z80/asm198x_web_bg.wasm', import.meta.url
+)) });
+const result = JSON.parse(assemble('pasmo', 'org $8000\n ld a,7\n halt\n'));
+assert.deepEqual(result.bytes, [0x3e, 7, 0x76]);
+const errors = JSON.parse(assemble('pasmo', 'org $8000\n ld a,missing_symbol\n'));
+assert(Array.isArray(errors) && errors.some(error => error.severity === 'Error'));
+console.log('Published package assembled the expected bytes and diagnosed invalid input');
+```
+
+## Build locally
+
+`scripts/build-npm.sh` can build the all-architecture `@asm198x/web` bundle
+or select architectures. Those build names do not imply registry publication.
 
 ```sh
 wasm-pack build --target web crates/asm198x-web --out-dir pkg-web
@@ -77,13 +108,14 @@ if (sna) spectrum.loadSnapshot(sna, 'sna');   // @emu198x/zx-spectrum
 ```
 
 Spectrum Z80 only, and the source needs `end <addr>` for its entry point,
-exactly as the command line demands. `null` means it did not assemble;
+exactly as the command line demands. `undefined` means it did not assemble;
 `assemble()` says why.
 
 ## Size: take one architecture
 
-`@asm198x/web` carries every dialect. A page teaching one machine can instead
-use a build containing only its CPU architecture. These are compile-time
+A locally built `@asm198x/web` carries every dialect. The published
+`@asm198x/z80` contains only the Z80 family; other architecture selections
+can be built locally. These are compile-time
 feature selections from the same assembler, with no runtime plugins. See the
 [browser packaging decision](../../decisions/browser-builds-use-features.md).
 
