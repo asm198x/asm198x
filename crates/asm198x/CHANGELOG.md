@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.66](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.65...asm198x-v0.0.66) - 2026-10-15
+
+### Fixed
+
+- Protect source and binary inputs when a primary image or sidecar names the same file through a path alias, symlink or hard link. Reject conflicting sidecar destinations before writing. ([#654](https://github.com/asm198x/asm198x/pull/654), [#655](https://github.com/asm198x/asm198x/pull/655), [#671](https://github.com/asm198x/asm198x/pull/671))
+- Preserve the previous image when a requested sidecar or SAVE destination fails preflight validation. ([#646](https://github.com/asm198x/asm198x/pull/646))
+- Return file I/O failures as JSON diagnostics and write requested memory maps in JSON mode. ([#648](https://github.com/asm198x/asm198x/pull/648), [#653](https://github.com/asm198x/asm198x/pull/653))
+- Reject unknown or incompatible `--cpu` selections instead of silently assembling for the dialect's default CPU. ([#665](https://github.com/asm198x/asm198x/pull/665))
+- Keep Pasmo diagnostics, listings and debug records on their original source lines when `--equ` supplies constants. ([#660](https://github.com/asm198x/asm198x/pull/660))
+- Preserve comments on ACME block delimiters and SjASMPlus repetition delimiters during formatting. Reject assembly-only container, linker, prefix and origin options under `fmt` before opening its destination. ([#661](https://github.com/asm198x/asm198x/pull/661), [#662](https://github.com/asm198x/asm198x/pull/662), [#664](https://github.com/asm198x/asm198x/pull/664))
+- Locate invalid device page and slot diagnostics at the statement that caused them. ([#649](https://github.com/asm198x/asm198x/pull/649))
+- Install and import the actual published `@asm198x/z80@0.4.0` package in the npm instructions, including Node's WASM initialization. ([#669](https://github.com/asm198x/asm198x/pull/669))
+
+### Changed
+
+- Require the candidate archives to pass 16 behavioral and identity checks on native Windows x86-64, macOS ARM64/x86-64 and Linux ARM64/x86-64 before GitHub hosting and Homebrew publication. Missing, failed, cancelled or skipped qualification blocks hosting; corruption controls prove the gate can reject bad archives and output. ([#672](https://github.com/asm198x/asm198x/pull/672))
+
 ## [0.0.65](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.64...asm198x-v0.0.65) - 2026-10-14
 
 ### Fixed
