@@ -108,7 +108,7 @@ jobs:
       - name: Lint the release feature
         run: cargo clippy -p asm198x --features lua --all-targets -- -D warnings
       - name: Test sandbox, pass integration and saved reference verdicts
-        run: cargo test -p asm198x --features lua --lib --test lua --test directive_surface --test multifile --test fmt --test lazy_branches --test verdict_replay --test cli_output_safety --test cli_equ
+        run: cargo test -p asm198x --features lua --lib --test lua --test directive_surface --test multifile --test fmt --test lazy_branches --test verdict_replay --test cli_output_safety --test cli_equ --test cli_cpu
 
   # `crates/asm198x-web` is excluded from the workspace (see the root
   # Cargo.toml), so no job above builds, tests, or lints it. This one does.
