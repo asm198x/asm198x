@@ -337,7 +337,7 @@ fn parse_program_in(
         pos: 0,
         pending: Vec::new(),
     };
-    let (mut nodes, closer) = cx
+    let (mut nodes, closer, _) = cx
         .parse_block()
         .map_err(|e| macros::remap_lines(e, origins))?;
     if !matches!(closer, Closer::Eof | Closer::EofDirective) {
@@ -366,7 +366,9 @@ impl<'a> FmtCx<'a> {
     }
 
     /// Parse a run of nodes until a block close (`}`, `} else {`) or EOF.
-    fn parse_block(&mut self) -> Result<(Vec<crate::ast::Node>, Closer), AsmError> {
+    fn parse_block(
+        &mut self,
+    ) -> Result<(Vec<crate::ast::Node>, Closer, Option<crate::ast::Comment>), AsmError> {
         let mut nodes = Vec::new();
         // `!zone { … }` blocks opened (and not yet closed) inside *this* block
         // level: their `}` becomes a marker node, not a block closer (U7).
@@ -423,7 +425,7 @@ impl<'a> FmtCx<'a> {
                         ));
                     }
                     self.pos = self.lines.len();
-                    return Ok((nodes, Closer::EofDirective));
+                    return Ok((nodes, Closer::EofDirective, None));
                 }
             }
 
@@ -457,12 +459,12 @@ impl<'a> FmtCx<'a> {
                     continue;
                 }
                 if rest.is_empty() {
-                    return Ok((nodes, Closer::Brace));
+                    return Ok((nodes, Closer::Brace, self.trailing(comment, line, 1)));
                 }
                 if let Some(after) = rest.strip_prefix("else")
                     && (after.trim().is_empty() || after.trim() == "{")
                 {
-                    return Ok((nodes, Closer::BraceElse));
+                    return Ok((nodes, Closer::BraceElse, self.trailing(comment, line, 1)));
                 }
                 // `} while <cond>` / `} until <cond>`: an ACME `!do` loop
                 // testing after the body, so the body always runs once.
@@ -478,6 +480,7 @@ impl<'a> FmtCx<'a> {
                                 cond: cond.to_string(),
                                 invert,
                             },
+                            self.trailing(comment, line, 1),
                         ));
                     }
                 }
@@ -565,7 +568,7 @@ impl<'a> FmtCx<'a> {
                             pos: 0,
                             pending: Vec::new(),
                         };
-                        let (mut inner, _) = sub.parse_block()?;
+                        let (mut inner, _, _) = sub.parse_block()?;
                         for node in &mut inner {
                             node.span.line = line as u32;
                             if let Some(span) = node.operand_span.as_mut() {
@@ -585,11 +588,15 @@ impl<'a> FmtCx<'a> {
                         format!("unexpected `{after}` after the `!for` block's `{{`"),
                     ));
                 }
-                let (body, closer) = self.parse_block()?;
+                let (body, closer, closing) = self.parse_block()?;
                 if closer != Closer::Brace {
                     return Err(AsmError::new(line, "`!for` block is never closed"));
                 }
-                nodes.push(self.repeat_node(head, body, leading, comment, line));
+                let mut node = self.repeat_node(head, body, leading, comment, line);
+                if let Some(crate::ast::Item::Repeat { delimiters, .. }) = &mut node.item {
+                    delimiters.closing = closing;
+                }
+                nodes.push(node);
                 continue;
             }
 
@@ -614,7 +621,7 @@ impl<'a> FmtCx<'a> {
                     ));
                 }
                 self.pos += 1;
-                let (body, closer) = self.parse_block()?;
+                let (body, closer, closing) = self.parse_block()?;
                 let (cond, invert, test_first) = match loop_head_condition(head, line)? {
                     // A head condition: the closer must be a plain `}`.
                     Some((cond, invert)) => {
@@ -642,7 +649,7 @@ impl<'a> FmtCx<'a> {
                 // evaluate it, and every dialect spells its conditions its own
                 // way. `Item::Conditional` carries its head for the same
                 // reason.
-                nodes.push(self.loop_node(
+                let mut node = self.loop_node(
                     format!("!if {cond}"),
                     head.to_string(),
                     invert,
@@ -651,7 +658,11 @@ impl<'a> FmtCx<'a> {
                     leading,
                     comment,
                     line,
-                ));
+                );
+                if let Some(crate::ast::Item::Loop { delimiters, .. }) = &mut node.item {
+                    delimiters.closing = closing;
+                }
+                nodes.push(node);
                 continue;
             }
 
@@ -711,7 +722,7 @@ impl<'a> FmtCx<'a> {
                 "unterminated `!zone` block (missing `}`)",
             ));
         }
-        Ok((nodes, Closer::Eof))
+        Ok((nodes, Closer::Eof, None))
     }
 
     /// Parse a conditional block from the head line at `self.pos`. Handles the
@@ -762,7 +773,7 @@ impl<'a> FmtCx<'a> {
 
         // Multi-line: the body starts on the following line.
         self.pos += 1;
-        let (then_body, closer) = self.parse_block()?;
+        let (then_body, closer, mut closing) = self.parse_block()?;
         // A conditional body must be closed. Running out of input instead —
         // whether the file simply ended or `!eof` ended it — is ACME's "Found
         // end-of-file instead of '}'", and was silently accepted here before:
@@ -771,8 +782,14 @@ impl<'a> FmtCx<'a> {
         if eof_in_block(&closer) {
             return Err(AsmError::new(line, "found end-of-file instead of `}`"));
         }
+        let branch = if closer == Closer::BraceElse {
+            closing.take()
+        } else {
+            None
+        };
         let else_body = if closer == Closer::BraceElse {
-            let (eb, eb_closer) = self.parse_block()?;
+            let (eb, eb_closer, eb_comment) = self.parse_block()?;
+            closing = eb_comment;
             if eof_in_block(&eb_closer) {
                 return Err(AsmError::new(line, "found end-of-file instead of `}`"));
             }
@@ -780,7 +797,12 @@ impl<'a> FmtCx<'a> {
         } else {
             None
         };
-        Ok(self.conditional_node(head, then_body, else_body, false, leading, comment, line))
+        let mut node =
+            self.conditional_node(head, then_body, else_body, false, leading, comment, line);
+        if let Some(crate::ast::Item::Conditional { delimiters, .. }) = &mut node.item {
+            *delimiters = crate::ast::BlockTrivia { branch, closing };
+        }
+        Ok(node)
     }
 
     /// Build the flat nodes from one physical line. ACME treats a top-level
@@ -986,6 +1008,7 @@ impl<'a> FmtCx<'a> {
             operand_span: None,
             label: None,
             item: Some(crate::ast::Item::Loop {
+                delimiters: crate::ast::BlockTrivia::default(),
                 cond,
                 invert,
                 test_first,
@@ -1012,6 +1035,7 @@ impl<'a> FmtCx<'a> {
             operand_span: None,
             label: None,
             item: Some(crate::ast::Item::Repeat {
+                delimiters: crate::ast::BlockTrivia::default(),
                 head: head.clone(),
                 body,
                 close: "}".to_string(),
@@ -1063,6 +1087,7 @@ impl<'a> FmtCx<'a> {
             operand_span: None,
             label: None,
             item: Some(crate::ast::Item::Conditional {
+                delimiters: crate::ast::BlockTrivia::default(),
                 close: "}".to_string(),
                 head,
                 then_body,

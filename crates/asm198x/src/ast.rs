@@ -58,6 +58,13 @@ pub(crate) struct Trivia {
     pub(crate) trailing: Option<Comment>,
 }
 
+/// Comments on delimiters belong to the block, not to its last body node.
+#[derive(Clone, Debug, Default, PartialEq, Eq)]
+pub(crate) struct BlockTrivia {
+    pub(crate) branch: Option<Comment>,
+    pub(crate) closing: Option<Comment>,
+}
+
 // ---------------------------------------------------------------------------
 // Symbols with scope (R4)
 // ---------------------------------------------------------------------------
@@ -331,6 +338,7 @@ pub(crate) enum Item {
     /// `lower`, so the rejection never fires; it guards against a future one
     /// doing so by mistake.
     Conditional {
+        delimiters: BlockTrivia,
         head: String,
         /// The closing keyword exactly as the author wrote it (`ENDIF`,
         /// `endc`, `}`), or empty to derive it from the head's case and dot.
@@ -356,6 +364,7 @@ pub(crate) enum Item {
     /// may run the body no times, from `!do { … } while c`, which always runs
     /// it once. `invert` is the `until` spelling.
     Loop {
+        delimiters: BlockTrivia,
         cond: String,
         invert: bool,
         test_first: bool,
@@ -375,6 +384,7 @@ pub(crate) enum Item {
     /// a repeated block, so scoping it would accept source the reference
     /// refuses.
     Repeat {
+        delimiters: BlockTrivia,
         head: String,
         body: Vec<Node>,
         /// The closing keyword exactly as the author wrote it (`EDUP`, `ENDR`,
@@ -703,6 +713,7 @@ pub(crate) fn evaluate<D: CondEval>(
             invert,
             test_first,
             body,
+            ..
         }) = &node.item
         {
             if emit {
@@ -1611,6 +1622,7 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
         // A conditional block renders its style's delimiters and recurses
         // into its bodies (the idea-4 tree shape).
         if let Some(Item::Conditional {
+            delimiters,
             head,
             then_body,
             else_body,
@@ -1626,6 +1638,7 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
                     then_body,
                     else_body.as_deref(),
                     *inline,
+                    delimiters,
                     out,
                     equ_label_colon,
                 ),
@@ -1649,6 +1662,7 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
         // have not read, and a formatter that deletes a loop body is the exact
         // opposite.
         if let Some(Item::Repeat {
+            delimiters,
             head,
             body,
             close,
@@ -1682,6 +1696,7 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
                     out.push_str(close);
                 }
             }
+            emit_comment(out, delimiters.closing.as_ref());
             out.push('\n');
             continue;
         }
@@ -1690,6 +1705,7 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
         // carries it when it is tested after. Rendering the wrong one would
         // change the loop's meaning, not just its layout.
         if let Some(Item::Loop {
+            delimiters,
             cond,
             invert,
             test_first,
@@ -1715,6 +1731,7 @@ fn emit_nodes(nodes: &[Node], out: &mut String, equ_label_colon: bool, comment_i
                 emit_nodes(body, out, equ_label_colon, INDENT);
                 out.push_str(&format!("}} {word} {expr}"));
             }
+            emit_comment(out, delimiters.closing.as_ref());
             out.push('\n');
             continue;
         }
@@ -1844,16 +1861,25 @@ fn equ_run_widths(nodes: &[Node], equ_label_colon: bool) -> Vec<usize> {
     widths
 }
 
+fn emit_comment(out: &mut String, comment: Option<&Comment>) {
+    if let Some(comment) = comment {
+        out.push_str("   ");
+        out.push_str(&comment.text);
+    }
+}
+
 /// Emit one conditional block. Delimiters (`!if … {`, `} else {`, `}`) sit at
 /// column 0; each body formats with the normal rules. The idiomatic one-line
 /// guard (`!ifndef X { X = 0 }`) is preserved when the source wrote it inline
 /// and the body is a single simple node — expanding it would be less idiomatic.
+#[allow(clippy::too_many_arguments)]
 fn emit_conditional(
     node: &Node,
     head: &str,
     then_body: &[Node],
     else_body: Option<&[Node]>,
     inline: bool,
+    delimiters: &BlockTrivia,
     out: &mut String,
     equ_label_colon: bool,
 ) {
@@ -1884,10 +1910,14 @@ fn emit_conditional(
     const BODY: &str = "        ";
     emit_nodes(then_body, out, equ_label_colon, BODY);
     if let Some(else_body) = else_body {
-        out.push_str("} else {\n");
+        out.push_str("} else {");
+        emit_comment(out, delimiters.branch.as_ref());
+        out.push('\n');
         emit_nodes(else_body, out, equ_label_colon, BODY);
     }
-    out.push_str("}\n");
+    out.push('}');
+    emit_comment(out, delimiters.closing.as_ref());
+    out.push('\n');
 }
 
 /// Emit one **keyword-style** conditional block (the recipe's step 4, built
@@ -2248,6 +2278,7 @@ second:
             operand_span: None,
             label: None,
             item: Some(Item::Conditional {
+                delimiters: BlockTrivia::default(),
                 close: String::new(),
                 head: "!if DEBUG = 1".into(),
                 then_body: vec![body],
@@ -2279,6 +2310,7 @@ second:
             operand_span: None,
             label: None,
             item: Some(Item::Conditional {
+                delimiters: BlockTrivia::default(),
                 close: String::new(),
                 head: "!ifndef FOO".into(),
                 then_body: vec![guard_body],
@@ -2302,6 +2334,7 @@ second:
     #[test]
     fn conditional_block_rejects_lowering() {
         let cond = Item::Conditional {
+            delimiters: BlockTrivia::default(),
             close: String::new(),
             head: "!if X = 1".into(),
             then_body: vec![],
@@ -2337,6 +2370,7 @@ second:
             operand_span: None,
             label: None,
             item: Some(Item::Conditional {
+                delimiters: BlockTrivia::default(),
                 close: String::new(),
                 head: "IF DEBUG = 1".into(),
                 then_body: vec![then_node],
@@ -2367,6 +2401,7 @@ second:
             operand_span: None,
             label: None,
             item: Some(Item::Conditional {
+                delimiters: BlockTrivia::default(),
                 close: String::new(),
                 head: "ifdef FLAG".into(),
                 then_body: vec![body],

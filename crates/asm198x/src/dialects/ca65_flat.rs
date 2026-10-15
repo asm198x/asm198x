@@ -535,6 +535,7 @@ fn parse_conditional<W: FlatWalk>(
         operand_span: None,
         label,
         item: Some(crate::ast::Item::Conditional {
+            delimiters: crate::ast::BlockTrivia::default(),
             close: closer,
             head: head.clone(),
             then_body,
@@ -588,6 +589,7 @@ fn parse_repeat<W: FlatWalk>(
         operand_span: None,
         label,
         item: Some(crate::ast::Item::Repeat {
+            delimiters: crate::ast::BlockTrivia::default(),
             head: head.clone(),
             body,
             close,

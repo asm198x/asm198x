@@ -983,6 +983,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
         nodes: &mut Vec<Node>,
         rest: &str,
         label: Option<String>,
+        comment: Option<&str>,
         line: usize,
     ) -> Result<(), AsmError> {
         let start = self.pos;
@@ -1029,7 +1030,25 @@ impl<S: Z80Syntax> KwCx<'_, S> {
         };
         // No re-basing: a statement carries its own line number now, so the
         // slice a nested block parses is already numbered absolutely.
-        let (body, _) = sub.parse_block(false)?;
+        let (mut body, _) = sub.parse_block(false)?;
+        if !sub.pending.is_empty() {
+            body.push(Node {
+                operand_span: None,
+                label: None,
+                item: None,
+                source: String::new(),
+                span: Span::in_file(self.file, self.lines[end].line, 1),
+                trivia: Trivia {
+                    leading: std::mem::take(&mut sub.pending),
+                    trailing: None,
+                },
+            });
+        }
+        let (_, closing_comment) = self.syntax.split_comment(self.lines[end].text);
+        let closing = closing_comment.map(|text| Comment {
+            text: text.to_string(),
+            span: Span::in_file(self.file, self.lines[end].line, 1),
+        });
         // A label before the block becomes its own node, exactly as it does
         // before a conditional, so the block itself carries none.
         let mut leading = std::mem::take(&mut self.pending);
@@ -1054,6 +1073,10 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             operand_span: None,
             label: None,
             item: Some(crate::ast::Item::Repeat {
+                delimiters: crate::ast::BlockTrivia {
+                    branch: None,
+                    closing,
+                },
                 head: rest.to_string(),
                 body,
                 close: close.to_string(),
@@ -1063,7 +1086,10 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             span: Span::in_file(self.file, line as u32, 1),
             trivia: Trivia {
                 leading,
-                trailing: None,
+                trailing: comment.map(|text| Comment {
+                    text: text.to_string(),
+                    span: Span::in_file(self.file, line as u32, 1),
+                }),
             },
         });
         self.pos = end + 1;
@@ -1217,7 +1243,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             if let Some(kw) = self.syntax.repeat_keyword(word) {
                 match kw {
                     RepeatKw::Open => {
-                        self.parse_repeat(&mut nodes, rest, label, line)?;
+                        self.parse_repeat(&mut nodes, rest, label, comment, line)?;
                         continue;
                     }
                     RepeatKw::Close => {
@@ -1411,6 +1437,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             operand_span: None,
             label: None,
             item: Some(crate::ast::Item::Conditional {
+                delimiters: crate::ast::BlockTrivia::default(),
                 close: String::new(),
                 head,
                 then_body,
