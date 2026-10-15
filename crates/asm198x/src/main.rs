@@ -68,81 +68,78 @@ enum Assembler {
 
 impl Assembler {
     fn resolve(dialect: Option<&str>, target: Option<&str>) -> Result<Self, String> {
-        // The Z80 target, if one was given explicitly via --cpu/--target.
-        let z80n = match target {
-            Some(t) if t.eq_ignore_ascii_case("z80") => Some(false),
-            Some(t) if t.eq_ignore_ascii_case("z80n") || t.eq_ignore_ascii_case("next") => {
-                Some(true)
-            }
-            _ => None,
+        // Resolve the CPU independently: an explicit syntax must not hide an
+        // unknown chip, nor silently ignore a target it cannot apply.
+        let cpu = target.map(Self::from_cpu).transpose()?;
+        let Some(name) = dialect else {
+            return Ok(cpu.unwrap_or(Self::Acme));
         };
-        // A non-Z80 `--cpu` names a single-dialect chip directly (`8048`, `6800`,
-        // `1802`, `8080`, `6502`, …): use it as the dialect when no explicit
-        // `--dialect` was given. Z80 variants are handled via `z80n` above.
-        let chip =
-            target.filter(|t| !matches!(t.to_ascii_lowercase().as_str(), "z80" | "z80n" | "next"));
-        let spelling = dialect
-            .map(str::to_ascii_lowercase)
-            .or_else(|| chip.map(str::to_ascii_lowercase));
-        // Aliases collapse to the canonical name in the table, so the arms
-        // below name each dialect once and a spelling with no row is refused
-        // before it gets here.
-        let key = match spelling.as_deref() {
-            Some(name) => match asm198x::dialect_table::canonical(name) {
-                Some(canonical) => Some(canonical),
-                None => {
-                    return Err(format!(
-                        "unknown dialect `{name}` (try acme, ca65, pasmo, pasmonext, or sjasmplus)"
-                    ));
+        let assembler = Self::from_dialect(name)?;
+        if let (Some(cpu), Some(target)) = (cpu, target) {
+            return match (assembler, cpu) {
+                (Self::Pasmo { .. }, Self::Pasmo { z80n } | Self::Sjasmplus { z80n }) => {
+                    Ok(Self::Pasmo { z80n })
                 }
-            },
-            None => None,
-        };
+                (Self::Sjasmplus { .. }, Self::Pasmo { z80n } | Self::Sjasmplus { z80n }) => {
+                    Ok(Self::Sjasmplus { z80n })
+                }
+                _ if assembler.identity().0 == cpu.identity().0 => Ok(assembler),
+                _ => Err(format!(
+                    "CPU target `{target}` is incompatible with dialect `{name}`"
+                )),
+            };
+        }
+        Ok(assembler)
+    }
+
+    fn from_cpu(name: &str) -> Result<Self, String> {
+        match name.to_ascii_lowercase().as_str() {
+            "z80" => Ok(Self::Pasmo { z80n: false }),
+            "z80n" | "next" => Ok(Self::Pasmo { z80n: true }),
+            // Preserve the documented CPU-only dialect names and aliases as
+            // shorthand for that frontend's initial instruction set.
+            _ => Self::from_dialect(name).map_err(|_| format!("unknown CPU target `{name}`")),
+        }
+    }
+
+    fn from_dialect(name: &str) -> Result<Self, String> {
+        let key = asm198x::dialect_table::canonical(name).ok_or_else(|| {
+            format!("unknown dialect `{name}` (try acme, ca65, pasmo, pasmonext, or sjasmplus)")
+        })?;
         match key {
             // ACME is the default 6502 dialect (C64); ca65 targets the NES.
-            Some("acme") => Ok(Self::Acme),
-            Some("ca65") => Ok(Self::Ca65),
-            Some("vasm") => Ok(Self::Vasm),
-            Some("lwasm") => Ok(Self::Lwasm),
-            Some("65816") => Ok(Self::Ca65_816),
-            Some("huc6280") => Ok(Self::Ca65Huc6280),
-            Some("rgbasm") => Ok(Self::Rgbasm),
-            Some("8080") => Ok(Self::I8080),
-            Some("6800") => Ok(Self::M6800),
-            Some("1802") => Ok(Self::Cdp1802),
+            "acme" => Ok(Self::Acme),
+            "ca65" => Ok(Self::Ca65),
+            "vasm" => Ok(Self::Vasm),
+            "lwasm" => Ok(Self::Lwasm),
+            "65816" => Ok(Self::Ca65_816),
+            "huc6280" => Ok(Self::Ca65Huc6280),
+            "rgbasm" => Ok(Self::Rgbasm),
+            "8080" => Ok(Self::I8080),
+            "6800" => Ok(Self::M6800),
+            "1802" => Ok(Self::Cdp1802),
             // The ROM'd MCS-48 parts share the 8048's full set; the ROM-less kin
             // (8035/8039/8040, incl. CMOS) forbid the four BUS-port instructions.
-            Some("8048") => Ok(Self::I8048 { romless: false }),
-            Some("8035") => Ok(Self::I8048 { romless: true }),
-            Some("scmp") => Ok(Self::Scmp),
-            Some("f8") => Ok(Self::F8),
-            Some("2650") => Ok(Self::S2650),
-            Some("tms7000") => Ok(Self::Tms7000),
-            Some("pdp11") => Ok(Self::Pdp11),
-            Some("tms9900") => Ok(Self::Tms9900),
-            Some("cp1610") => Ok(Self::Cp1610),
-            Some("z8000") => Ok(Self::Z8000),
-            Some("z8001") => Ok(Self::Z8001),
+            "8048" => Ok(Self::I8048 { romless: false }),
+            "8035" => Ok(Self::I8048 { romless: true }),
+            "scmp" => Ok(Self::Scmp),
+            "f8" => Ok(Self::F8),
+            "2650" => Ok(Self::S2650),
+            "tms7000" => Ok(Self::Tms7000),
+            "pdp11" => Ok(Self::Pdp11),
+            "tms9900" => Ok(Self::Tms9900),
+            "cp1610" => Ok(Self::Cp1610),
+            "z8000" => Ok(Self::Z8000),
+            "z8001" => Ok(Self::Z8001),
             // pasmo defaults to plain Z80; pasmonext defaults to Z80N. An
-            // explicit --cpu/--target wins.
-            Some("pasmo") => Ok(Self::Pasmo {
-                z80n: z80n.unwrap_or(false),
-            }),
-            Some("pasmonext") => Ok(Self::Pasmo {
-                z80n: z80n.unwrap_or(true),
-            }),
-            Some("sjasmplus") => Ok(Self::Sjasmplus {
-                z80n: z80n.unwrap_or(false),
-            }),
+            // explicit --cpu/--target is applied by resolve.
+            "pasmo" => Ok(Self::Pasmo { z80n: false }),
+            "pasmonext" => Ok(Self::Pasmo { z80n: true }),
+            "sjasmplus" => Ok(Self::Sjasmplus { z80n: false }),
             // Unreachable: `canonical` already refused anything with no row,
             // so this arm fires only if the table gains an entry that
             // resolution does not handle — which a test catches first.
-            Some(other) => Err(format!("dialect `{other}` has no assembler wired up")),
-            // No --dialect: a Z80 target implies pasmo syntax; otherwise 6502/acme.
-            None => match z80n {
-                Some(z) => Ok(Self::Pasmo { z80n: z }),
-                None => Ok(Self::Acme),
-            },
+            other => Err(format!("dialect `{other}` has no assembler wired up")),
         }
     }
 
@@ -760,9 +757,17 @@ fn run(args: &[String]) -> Result<String, String> {
         );
     }
 
+    let assembler = match Assembler::resolve(dialect, target) {
+        Ok(assembler) => assembler,
+        Err(message) => {
+            return match message_format {
+                MessageFormat::Json => emit_json_failure(message),
+                MessageFormat::Human => Err(message),
+            };
+        }
+    };
     if disassemble {
         let origin = origin.unwrap_or(0);
-        let assembler = Assembler::resolve(dialect, target)?;
         let bytes = std::fs::read(input).map_err(|e| format!("cannot read {input}: {e}"))?;
         // A 6502 dialect disassembles to 6502 syntax; otherwise Z80.
         match assembler {
@@ -833,7 +838,6 @@ fn run(args: &[String]) -> Result<String, String> {
         ));
     }
 
-    let assembler = Assembler::resolve(dialect, target)?;
     let source = std::fs::read_to_string(input)
         .map_err(|e| format!("cannot read {input}: {e}"))
         .or_else(|message| match message_format {
@@ -1991,7 +1995,8 @@ fn usage() -> String {
      targets (--cpu):   z80 (default for pasmo), z80n (Spectrum Next; default\n\
      \x20                 for pasmonext) — Z80N opcodes follow the target, not\n\
      \x20                 the dialect. --cpu also names a chip directly when\n\
-     \x20                 --dialect is absent (`--cpu 6809` is lwasm syntax).\n\n"
+     \x20                 --dialect is absent (`--cpu 6809` is lwasm syntax).\n\
+     \x20                 Unknown CPUs and incompatible pairs are errors.\n\n"
         .to_string()
         + &dialect_help()
         + "\nAssembles retro CPU source to a flat binary, or disassembles one back."

@@ -332,6 +332,53 @@ gets them, `pasmonext --cpu z80` does not.
 name from the dialect table works there. With both given, `--dialect` chooses
 the syntax and `--cpu` the target.
 
+Unknown CPU names and incompatible CPU/dialect pairs fail before producing any
+output files, including with `--message-format=json`. `--target` is a synonym
+for `--cpu`; names are case-insensitive.
+
+The table below lists **initial CLI targets**. Dialect aliases from the
+[Dialect table](dialects.md) also work in the first column. For compatibility,
+`--cpu` accepts those same names and aliases as shorthand for their default CPU
+(for example, `--cpu nes` means 6502 and `--cpu pasmonext` means Z80N).
+
+| CLI dialect | Default CPU | Accepted CLI CPUs |
+|---|---|---|
+| `acme` | `6502` | `6502` |
+| `ca65` | `6502` | `6502` |
+| `65816` | `65816` | `65816` |
+| `huc6280` | `huc6280` | `huc6280` |
+| `vasm` | `68000` | `68000` |
+| `lwasm` | `6809` | `6809` |
+| `rgbasm` | `sm83` | `sm83` |
+| `pasmo` | `z80` | `z80`, `z80n` |
+| `pasmonext` | `z80n` | `z80`, `z80n` |
+| `sjasmplus` | `z80` | `z80`, `z80n` |
+| `8080` | `8080` | `8080` |
+| `6800` | `6800` | `6800` |
+| `1802` | `1802` | `1802` |
+| `8048` | `8048` | `8048` |
+| `8035` | `8035` | `8035` |
+| `scmp` | `scmp` | `scmp` |
+| `f8` | `f8` | `f8` |
+| `2650` | `2650` | `2650` |
+| `tms7000` | `tms7000` | `tms7000` |
+| `pdp11` | `pdp11` | `pdp11` |
+| `tms9900` | `tms9900` | `tms9900` |
+| `cp1610` | `cp1610` | `cp1610` |
+| `z8000` | `z8000` | `z8000` |
+| `z8001` | `z8001` | `z8001` |
+
+`next` is also accepted for Z80N. The `8048` row includes its ROM-equipped
+aliases; the `8035` row includes the ROM-less 8039/8040 aliases. These two groups
+are distinct CLI targets.
+
+These choices set the frontend's initial ISA. Source-level CPU directives retain
+their lexical meaning: for example, ACME `!cpu 65816` can enable instructions
+later in the source even with `--cpu 6502`. That does not make
+`--dialect acme --cpu 65816` a supported CLI combination. For the ca65-family
+65816 and HuC6280 frontends, select `--dialect 65816` and `--dialect huc6280`
+respectively, rather than combining those CPUs with `--dialect ca65`.
+
 ## Exit status and diagnostics
 
 `0` on success, non-zero on failure. A diagnostic carries a severity, a
