@@ -22,3 +22,20 @@ changelog-is-authored decisions bind this self-contained cross-cutting release.
    in a follow-up report PR. Update #668 and umbrella #72/#108 with the observed
    result; keep broader #641/#640 open for their remaining scope. Clean task
    worktrees/caches only after exact remote retention and final evidence checks.
+
+## Published setup verification
+
+After public 0.0.66 exists, refresh `.github/workflows/setup-action.yml` to install
+and smoke-test 0.0.66 from PATH. Its historical observational probe deliberately
+asserts version 0.0.65, so retain that probe and install its exact baseline in a
+separate step before collecting it. Preserve the old probe and retained evidence
+unchanged. Use the existing setup action and smoke script for both identities;
+update the existing setup-node action to v7, already used by the package workflow.
+The resulting PR must execute the 0.0.66 setup smoke on all four action-supported
+targets. Linux ARM64 remains archive-qualified, outside the action's four-target
+contract. This extends verification, without dropping the historical controls.
+
+Retained qualification files use scoped LF Git attributes because their manifest
+hashes exact bytes. Setup CI must execute the fixed-version evidence verifier
+on every supported host; its historical case contract is independent of future
+changes to the live candidate gate.

@@ -1,0 +1,371 @@
+{
+  "kind": "candidate",
+  "version": "0.0.66",
+  "parsed_plan_sha256": "87c80a49b889b3f702047bb407e9b00d6b82b4b934663a539342b15fe0e29ba1",
+  "checkout_commit": "35a07893a57cbb42c3a341cc293fc4b713af99f4",
+  "target": "x86_64-unknown-linux-gnu",
+  "host": {
+    "platform": "linux",
+    "arch": "x64",
+    "release": "6.8.0-1064-azure",
+    "node": "v24.21.0",
+    "github_run": "38754905144",
+    "github_attempt": "1"
+  },
+  "archive": "asm198x-x86_64-unknown-linux-gnu.tar.xz",
+  "archive_sha256": "5fdae66e509d1cb5e7641f79be6544e2d034335d1e489da3dd6e66b059fc998c",
+  "executable_sha256": "7054b9f25c4314db3eaa43cb3bc98eb3f8eff4d2c8c8a942ae059db1e405d239",
+  "checksum_mutation_rejected": true,
+  "fixture": {
+    "commit": "35b4968be3bdd26804a5d195557d1225497a0358",
+    "files": {
+      "LICENSE": "62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203",
+      "helloworld.asm": "9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5",
+      "libs/loader.asm": "32b0dfd80eacbbdfa69774280122d9c7f115fe0602a14bc5d630b24e08cd82cc",
+      "libs/screen.asm": "d33fbb4f0d549567438138efa38adbb4eb154aa17d6e1c0dee496f065cf469c6"
+    }
+  },
+  "qualified": true,
+  "results": [
+    {
+      "name": "archive_identity",
+      "status": "pass",
+      "runs": []
+    },
+    {
+      "name": "version",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "--version"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x v0.0.66\n"
+        }
+      ]
+    },
+    {
+      "name": "reference_bytes",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "--dialect",
+            "acme",
+            "good.s",
+            "-o",
+            "first.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> first.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "determinism",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "--dialect",
+            "acme",
+            "good.s",
+            "-o",
+            "second.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> second.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "structured_success",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "--dialect",
+            "acme",
+            "--message-format=json",
+            "good.s",
+            "-o",
+            "json.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[169,5,96],\"origin\":32768,\"symbols\":{\"start\":32768},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[{\"name\":\"start\",\"kind\":\"label\",\"section\":0,\"offset\":0}],\"lines\":[{\"line\":3,\"offset\":0,\"length\":2},{\"line\":4,\"offset\":2,\"length\":1}],\"cycles\":[{\"line\":3,\"offset\":0,\"base\":2,\"page_cross\":0,\"branch_taken\":0},{\"line\":4,\"offset\":2,\"base\":6,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"good.s\"]}\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "structured_failure",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "--dialect",
+            "acme",
+            "bad.s",
+            "-o",
+            "bad.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: bad.s:2:6: error: value 4095 does not fit in a byte\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "--dialect",
+            "acme",
+            "--message-format=json",
+            "bad.s",
+            "-o",
+            "bad.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":6,\"expansion_frames\":[],\"path\":\"bad.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 4095 does not fit in a byte\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "preserve_previous_outputs",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "--dialect",
+            "acme",
+            "bad.s",
+            "-o",
+            "previous.bin",
+            "--debug=previous.debug198x",
+            "--sym=previous.sym",
+            "--listing=previous.lst"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: bad.s:2:6: error: value 4095 does not fit in a byte\n"
+        }
+      ]
+    },
+    {
+      "name": "missing_input_json",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "--message-format=json",
+            "missing.s",
+            "-o",
+            "missing.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"cannot read missing.s: No such file or directory (os error 2)\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "unknown_cpu",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "--dialect",
+            "pasmo",
+            "--cpu",
+            "nonsense",
+            "--message-format=json",
+            "z80.s",
+            "-o",
+            "unknown_cpu.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"unknown CPU target `nonsense`\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "incompatible_cpu",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "--dialect",
+            "pasmo",
+            "--cpu",
+            "68000",
+            "--message-format=json",
+            "z80.s",
+            "-o",
+            "incompatible_cpu.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"CPU target `68000` is incompatible with dialect `pasmo`\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "hardlink_source",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "linked.s",
+            "-o",
+            "linked.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: refusing to overwrite input linked.s with the primary image at linked.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "hardlink_sidecar",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "sidecar.s",
+            "-o",
+            "sidecar.bin",
+            "--sym=sidecar.sym"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: refusing to overwrite the input with the symbol table — pass an explicit `=<path>`\n"
+        }
+      ]
+    },
+    {
+      "name": "formatter_container",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "fmt",
+            "--prg",
+            "good.s",
+            "-o",
+            "formatter_container.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: container output options apply to assembly, not `fmt`\n"
+        }
+      ]
+    },
+    {
+      "name": "formatter_origin",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "fmt",
+            "--org",
+            "0",
+            "good.s",
+            "-o",
+            "formatter_origin.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: `--org` is a disassembly option, not valid with `fmt`\n"
+        }
+      ]
+    },
+    {
+      "name": "lua",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "lua.s",
+            "-o",
+            "lua.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $0000 -> lua.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "upstream_project",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-lyCsQI/asm198x",
+            "--dialect",
+            "acme",
+            "--prg",
+            "helloworld.asm",
+            "-o",
+            "hello.prg"
+          ],
+          "cwd": "/tmp/asm198x-candidate-lyCsQI/upstream",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2081 byte(s) -> hello.prg (load $0801)\n"
+        }
+      ]
+    }
+  ]
+}
