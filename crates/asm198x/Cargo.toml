@@ -49,6 +49,11 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 mlua = { workspace = true, optional = true }
 
+# Stable Rust exposes Unix file IDs directly. Windows uses this safe wrapper
+# because std's by-handle file-ID access remains experimental.
+[target.'cfg(windows)'.dependencies]
+same-file = "1.0.6"
+
 [lints]
 workspace = true
 
