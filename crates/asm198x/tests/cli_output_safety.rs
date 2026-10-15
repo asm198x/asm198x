@@ -702,3 +702,166 @@ fn formatter_rejects_container_options_without_changing_destinations() {
         }
     }
 }
+
+fn assert_formatter_rejects_irrelevant_option(dialect: &str, source: &str, options: &[&str]) {
+    for mode in ["human", "json"] {
+        for target in [Some("destination.s"), Some("program.s"), None] {
+            for existing in [false, true] {
+                if (target == Some("program.s") && !existing) || (target.is_none() && existing) {
+                    continue;
+                }
+                let dir = Scratch::new();
+                std::fs::write(dir.0.join("program.s"), source).expect("source");
+                let cfg = "MEMORY { ROM: start=$9000, size=$10, file=%O, fill=yes; }\nSEGMENTS { CODE: load=ROM, type=ro; }\n";
+                std::fs::write(dir.0.join("layout.cfg"), cfg).expect("config");
+                std::fs::write(dir.0.join("image.bin"), b"previous image").expect("image");
+                let previous = if target == Some("program.s") {
+                    source.as_bytes()
+                } else {
+                    b"previous destination"
+                };
+                if existing {
+                    std::fs::write(dir.0.join(target.expect("existing target")), previous)
+                        .expect("seed");
+                }
+                let mut command = Command::new(env!("CARGO_BIN_EXE_asm198x"));
+                command
+                    .current_dir(&dir.0)
+                    .args([
+                        "fmt",
+                        "--dialect",
+                        dialect,
+                        "--message-format",
+                        mode,
+                        "program.s",
+                    ])
+                    .args(options);
+                if let Some(target) = target {
+                    command.args(["-o", target]);
+                }
+                let run = command.output().expect("formatter");
+                assert!(
+                    !run.status.success(),
+                    "{dialect}/{mode}/{options:?}/{target:?}: {run:?}"
+                );
+                assert!(
+                    run.stdout.is_empty(),
+                    "rejection emits no formatted source: {run:?}"
+                );
+                let message = String::from_utf8_lossy(&run.stderr);
+                assert!(
+                    message.contains("fmt")
+                        && message.contains(options[0].split('=').next().expect("option")),
+                    "{message}"
+                );
+                if let Some(target) = target {
+                    assert_preserved(&dir.0.join(target), existing.then_some(previous));
+                }
+                assert_eq!(
+                    std::fs::read(dir.0.join("program.s")).expect("source remains"),
+                    source.as_bytes()
+                );
+                assert_eq!(
+                    std::fs::read_to_string(dir.0.join("layout.cfg")).expect("config remains"),
+                    cfg
+                );
+                assert_preserved(&dir.0.join("image.bin"), Some(b"previous image"));
+                assert!(!dir.0.join("exports").exists());
+                assert!(!dir.0.join("missing.cfg").exists());
+            }
+        }
+    }
+}
+
+#[test]
+fn formatter_rejects_linker_config_before_writing() {
+    for path in ["layout.cfg", "missing.cfg"] {
+        assert_formatter_rejects_irrelevant_option(
+            "ca65",
+            ".segment \"CODE\"\nstart: nop\n",
+            &["-C", path],
+        );
+    }
+}
+
+#[test]
+fn formatter_rejects_save_prefix_before_writing() {
+    for options in [
+        &["--outprefix", "exports"][..],
+        &["--outprefix=exports"][..],
+    ] {
+        assert_formatter_rejects_irrelevant_option("acme", "*=$1000\nstart: lda #42\n", options);
+    }
+}
+
+#[test]
+fn formatter_rejects_explicit_origin_including_zero_before_writing() {
+    for address in ["0", "$0000", "$2000"] {
+        assert_formatter_rejects_irrelevant_option(
+            "acme",
+            "*=$1000\nstart: lda #42\n",
+            &["--org", address],
+        );
+    }
+}
+
+#[test]
+fn linker_save_and_origin_options_keep_their_intended_effects() {
+    let dir = Scratch::new();
+    let config = "MEMORY { ROM: start=$9000, size=$10, file=%O, fill=yes, fillval=$3c; }\nSEGMENTS { CODE: load=ROM, type=ro; }\n";
+    std::fs::write(dir.0.join("layout.cfg"), config).expect("config");
+    std::fs::write(dir.0.join("program.s"), ".segment \"CODE\"\n.byte $a5\n").expect("source");
+    for mode in ["human", "json"] {
+        let image_path = format!("configured-{mode}.bin");
+        let run = assemble(
+            &dir.0,
+            "ca65",
+            mode,
+            &["-C", "layout.cfg", "-o", &image_path],
+        );
+        assert!(run.status.success(), "{run:?}");
+        let image = std::fs::read(dir.0.join(&image_path)).expect("configured image");
+        assert_eq!(image.len(), 0x10);
+        assert_eq!(image[0], 0xa5);
+        assert!(image[1..].iter().all(|b| *b == 0x3c));
+    }
+    std::fs::write(
+        dir.0.join("program.s"),
+        " DEVICE ZXSPECTRUM48\n ORG $8000\n db 42\n SAVEBIN \"saved.bin\",$8000,1\n",
+    )
+    .expect("source");
+    std::fs::create_dir(dir.0.join("exports")).expect("export directory");
+    for mode in ["human", "json"] {
+        for options in [
+            &["--outprefix", "exports"][..],
+            &["--outprefix=exports"][..],
+        ] {
+            let run = assemble(&dir.0, "sjasmplus", mode, options);
+            assert!(run.status.success(), "{run:?}");
+            assert_eq!(
+                std::fs::read(dir.0.join("exports/saved.bin")).expect("prefixed save"),
+                [42]
+            );
+            assert!(!dir.0.join("saved.bin").exists());
+            std::fs::remove_file(dir.0.join("exports/saved.bin")).expect("reset save control");
+        }
+    }
+    std::fs::write(dir.0.join("branch.bin"), [0x18, 0xfe]).expect("relative jump");
+    for (options, target) in [
+        (&[][..], "JR $0000"),
+        (&["--org", "0"][..], "JR $0000"),
+        (&["--org", "$2000"][..], "JR $2000"),
+    ] {
+        let run = Command::new(env!("CARGO_BIN_EXE_asm198x"))
+            .current_dir(&dir.0)
+            .args(["disasm", "--dialect", "pasmo", "branch.bin"])
+            .args(options)
+            .output()
+            .expect("disassembly");
+        assert!(run.status.success(), "{run:?}");
+        assert!(
+            String::from_utf8_lossy(&run.stdout).contains(target),
+            "{run:?}"
+        );
+    }
+}

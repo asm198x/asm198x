@@ -1,0 +1,5 @@
+# Reject irrelevant formatter options (#663)
+
+1. Add failing CLI regressions in `crates/asm198x/tests/cli_output_safety.rs` for -C (existing/missing config), both --outprefix spellings and --org (including explicit zero). Check human/JSON modes, stdout, absent/existing separate destinations and in-place source preservation. Keep ordinary formatting and controls proving that linker configuration, SAVE prefixes and disassembly origins still affect their intended operations.
+2. In `crates/asm198x/src/main.rs`, reject those options under fmt in the existing early validation section. Track --org presence separately from its default value using Option, so zero cannot bypass the guard. Keep disassembly's default origin zero and leave other command modes unchanged. No new dependencies, public schemas or CLI architecture.
+3. Run focused red/green regressions, workspace tests, strict Clippy, formatting, docs and locked browser checks. Push a conventional commit/PR, wait for every CI check, squash merge, verify the landed tree and rerun the reported cases. Update #663/#641, verify exact remote retention and remove the task worktree, build and scratch directories.
