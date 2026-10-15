@@ -593,7 +593,8 @@ fn run(args: &[String]) -> Result<String, String> {
     // `--tap`/`--tzx` frame the program for tape; the `bas` spellings put
     // pasmo's auto-run BASIC loader in front of it.
     let mut tape: Option<(asm198x::TapeFormat, bool)> = None;
-    let mut origin: u16 = 0;
+    // Presence matters for mode validation: an explicit zero is still --org.
+    let mut origin: Option<u16> = None;
     let mut message_format = MessageFormat::Human;
     // Debug198x artifacts (U3): `None` = flag absent; `Some(None)` = default
     // path (input with the artifact's extension); `Some(Some(p))` = explicit.
@@ -710,7 +711,7 @@ fn run(args: &[String]) -> Result<String, String> {
             "--org" => {
                 i += 1;
                 let value = args.get(i).ok_or("`--org` needs an address")?;
-                origin = parse_u16(value)?;
+                origin = Some(parse_u16(value)?);
             }
             flag if flag.starts_with('-') => return Err(format!("unknown flag `{flag}`")),
             path => {
@@ -729,6 +730,15 @@ fn run(args: &[String]) -> Result<String, String> {
     }
     if format && (exe || sna || prg || tape.is_some() || gb_rom) {
         return Err("container output options apply to assembly, not `fmt`".into());
+    }
+    if format && linker_config.is_some() {
+        return Err("`-C` is an assembly option, not valid with `fmt`".into());
+    }
+    if format && outprefix.is_some() {
+        return Err("`--outprefix` is an assembly option, not valid with `fmt`".into());
+    }
+    if format && origin.is_some() {
+        return Err("`--org` is a disassembly option, not valid with `fmt`".into());
     }
     // The FileId→path table for human error rendering: single-file today, so
     // the root input is the whole table. U2's include-capable paths return the
@@ -751,6 +761,7 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     if disassemble {
+        let origin = origin.unwrap_or(0);
         let assembler = Assembler::resolve(dialect, target)?;
         let bytes = std::fs::read(input).map_err(|e| format!("cannot read {input}: {e}"))?;
         // A 6502 dialect disassembles to 6502 syntax; otherwise Z80.
