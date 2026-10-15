@@ -592,3 +592,113 @@ fn inferred_sidecar_names_participate_in_collision_checks() {
         }
     }
 }
+
+#[test]
+fn formatter_rejects_container_options_without_changing_destinations() {
+    for (dialect, source, flags) in [
+        ("acme", "*=$1000\nstart: lda #42\n", &["--prg"][..]),
+        (
+            "pasmo",
+            " org $8000\nstart: nop\n end start\n",
+            &["--tap", "--tapbas", "--tzx", "--tzxbas", "--sna"][..],
+        ),
+        (
+            "vasm",
+            "start: moveq #42,d0\n rts\n",
+            &["--exe", "--hunkexe"][..],
+        ),
+        (
+            "rgbasm",
+            "SECTION \"main\", ROM0[$100]\n ds $50,0\nstart: nop\n",
+            &["--gb-rom"][..],
+        ),
+    ] {
+        for flag in flags {
+            let dir = Scratch::new();
+            std::fs::write(dir.0.join("program.s"), source).expect("source");
+            let control = assemble(&dir.0, dialect, "human", &[flag, "-o", "image.bin"]);
+            assert!(
+                control.status.success(),
+                "assembly/{dialect}/{flag}: {control:?}"
+            );
+            assert!(
+                !std::fs::read(dir.0.join("image.bin"))
+                    .expect("container")
+                    .is_empty()
+            );
+            let original_image = std::fs::read(dir.0.join("image.bin")).expect("previous image");
+            for mode in ["human", "json"] {
+                for target in ["destination.s", "program.s"] {
+                    for existing in [false, true] {
+                        if target == "program.s" && !existing {
+                            continue;
+                        }
+                        let path = dir.0.join(target);
+                        let previous = if target == "program.s" {
+                            source.as_bytes()
+                        } else {
+                            b"previous destination"
+                        };
+                        if existing {
+                            std::fs::write(&path, previous).expect("seed destination");
+                        } else if path.exists() {
+                            std::fs::remove_file(&path).expect("reset destination");
+                        }
+                        let run = Command::new(env!("CARGO_BIN_EXE_asm198x"))
+                            .current_dir(&dir.0)
+                            .args([
+                                "fmt",
+                                "--dialect",
+                                dialect,
+                                "--message-format",
+                                mode,
+                                "program.s",
+                                flag,
+                                "-o",
+                                target,
+                            ])
+                            .output()
+                            .expect("formatter");
+                        assert!(
+                            !run.status.success(),
+                            "{dialect}/{mode}/{flag}/{target}: {run:?}"
+                        );
+                        assert_preserved(&path, existing.then_some(previous));
+                        assert_eq!(
+                            std::fs::read(dir.0.join("image.bin")).expect("image"),
+                            original_image
+                        );
+                        let message = String::from_utf8_lossy(&run.stderr);
+                        assert!(
+                            message.contains("assembly") && message.contains("fmt"),
+                            "{message}"
+                        );
+                    }
+                }
+            }
+        }
+        // Formatting separately or deliberately in place remains supported.
+        for target in ["formatted.s", "program.s"] {
+            let dir = Scratch::new();
+            std::fs::write(dir.0.join("program.s"), source).expect("source");
+            let baseline = assemble(&dir.0, dialect, "human", &["-o", "before.bin"]);
+            assert!(baseline.status.success(), "{baseline:?}");
+            let fmt = Command::new(env!("CARGO_BIN_EXE_asm198x"))
+                .current_dir(&dir.0)
+                .args(["fmt", "--dialect", dialect, "program.s", "-o", target])
+                .output()
+                .expect("formatter control");
+            assert!(fmt.status.success(), "{fmt:?}");
+            let after = Command::new(env!("CARGO_BIN_EXE_asm198x"))
+                .current_dir(&dir.0)
+                .args(["--dialect", dialect, target, "-o", "after.bin"])
+                .output()
+                .expect("reassembly");
+            assert!(after.status.success(), "{after:?}");
+            assert_eq!(
+                std::fs::read(dir.0.join("before.bin")).expect("before"),
+                std::fs::read(dir.0.join("after.bin")).expect("after")
+            );
+        }
+    }
+}

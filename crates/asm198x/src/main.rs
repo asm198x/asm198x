@@ -727,6 +727,9 @@ fn run(args: &[String]) -> Result<String, String> {
     if sym_format != asm198x::SymbolFormat::Native && sym.is_none() {
         return Err("`--sym-format` requires `--sym[=path]`".into());
     }
+    if format && (exe || sna || prg || tape.is_some() || gb_rom) {
+        return Err("container output options apply to assembly, not `fmt`".into());
+    }
     // The FileId→path table for human error rendering: single-file today, so
     // the root input is the whole table. U2's include-capable paths return the
     // real multi-file table (with `include_dirs` wired into the loader).
