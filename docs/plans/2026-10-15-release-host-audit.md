@@ -33,7 +33,8 @@ separating actual release execution from source builds and fixes on main.
 All five CLI targets executed the same 19 cases. The four hosted targets recorded
 13 passes and six failures each. Local Linux ARM64 recorded 12 passes, the same
 six failures, and one unavailable installer check (curl/wget absent). All failed
-checks map to existing source fixes; no new platform-specific assembler defect
+checks map to four earlier source fixes and the primary-image guard in #670;
+no new platform-specific assembler defect
 was established. A complete upstream target matched native ACME on every host.
 The published npm Z80 package passed seven bounded API checks on the local Mac.
 
