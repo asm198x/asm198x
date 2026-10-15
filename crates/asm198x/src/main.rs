@@ -591,7 +591,7 @@ fn run(args: &[String]) -> Result<String, String> {
     // pasmo's auto-run BASIC loader in front of it.
     let mut tape: Option<(asm198x::TapeFormat, bool)> = None;
     // Presence matters for mode validation: an explicit zero is still --org.
-    let mut origin: Option<u16> = None;
+    let mut origin: Option<&str> = None;
     let mut message_format = MessageFormat::Human;
     let mut message_format_explicit = false;
     // Debug198x artifacts (U3): `None` = flag absent; `Some(None)` = default
@@ -714,7 +714,14 @@ fn run(args: &[String]) -> Result<String, String> {
             "--org" => {
                 i += 1;
                 let value = args.get(i).ok_or("`--org` needs an address")?;
-                origin = Some(parse_u16(value)?);
+                // Width depends on the resolved disassembler, which may be
+                // selected after --org. Other modes retain their u16 check.
+                if disassemble {
+                    parse_u32(value)?;
+                } else {
+                    parse_u16(value)?;
+                }
+                origin = Some(value);
             }
             flag if flag.starts_with('-') => return Err(format!("unknown flag `{flag}`")),
             path => {
@@ -795,69 +802,77 @@ fn run(args: &[String]) -> Result<String, String> {
         }
     };
     if disassemble {
-        let origin = origin.unwrap_or(0);
+        let origin_text = origin.unwrap_or("0");
+        let narrow_origin = parse_u16(origin_text);
+        // Validate the selected decoder's width before reading input. Keep the
+        // checked u16 value for narrow decoders; 68000 receives the full u32.
+        let origin = if matches!(assembler, Assembler::Vasm) {
+            parse_u32(origin_text)?
+        } else {
+            u32::from(narrow_origin.clone()?)
+        };
         let bytes = std::fs::read(input).map_err(|e| format!("cannot read {input}: {e}"))?;
         // A 6502 dialect disassembles to 6502 syntax; otherwise Z80.
         match assembler {
             Assembler::Acme | Assembler::Ca65 => {
-                print!("{}", asm198x::listing_6502(&bytes, origin));
+                print!("{}", asm198x::listing_6502(&bytes, narrow_origin?));
             }
             Assembler::Pasmo { z80n } | Assembler::Sjasmplus { z80n } => {
-                print!("{}", asm198x::listing_z80(&bytes, origin, z80n));
+                print!("{}", asm198x::listing_z80(&bytes, narrow_origin?, z80n));
             }
             Assembler::Vasm => {
-                print!("{}", asm198x::listing_68000(&bytes, u32::from(origin)));
+                print!("{}", asm198x::listing_68000(&bytes, origin));
             }
             Assembler::Lwasm => {
-                print!("{}", asm198x::listing_6809(&bytes, origin));
+                print!("{}", asm198x::listing_6809(&bytes, narrow_origin?));
             }
             Assembler::Ca65_816 => {
-                print!("{}", asm198x::listing_65816(&bytes, origin));
+                print!("{}", asm198x::listing_65816(&bytes, narrow_origin?));
             }
             Assembler::Ca65Huc6280 => {
-                print!("{}", asm198x::listing_huc6280(&bytes, origin));
+                print!("{}", asm198x::listing_huc6280(&bytes, narrow_origin?));
             }
             Assembler::Rgbasm => {
-                print!("{}", asm198x::listing_sm83(&bytes, origin));
+                print!("{}", asm198x::listing_sm83(&bytes, narrow_origin?));
             }
             Assembler::I8080 => {
-                print!("{}", asm198x::listing_i8080(&bytes, origin));
+                print!("{}", asm198x::listing_i8080(&bytes, narrow_origin?));
             }
             Assembler::M6800 => {
-                print!("{}", asm198x::listing_m6800(&bytes, origin));
+                print!("{}", asm198x::listing_m6800(&bytes, narrow_origin?));
             }
             Assembler::Cdp1802 => {
-                print!("{}", asm198x::listing_1802(&bytes, origin));
+                print!("{}", asm198x::listing_1802(&bytes, narrow_origin?));
             }
             Assembler::I8048 { .. } => {
-                print!("{}", asm198x::listing_8048(&bytes, origin));
+                print!("{}", asm198x::listing_8048(&bytes, narrow_origin?));
             }
             Assembler::Scmp => {
-                print!("{}", asm198x::listing_scmp(&bytes, origin));
+                print!("{}", asm198x::listing_scmp(&bytes, narrow_origin?));
             }
             Assembler::F8 => {
-                print!("{}", asm198x::listing_f8(&bytes, origin));
+                print!("{}", asm198x::listing_f8(&bytes, narrow_origin?));
             }
             Assembler::S2650 => {
-                print!("{}", asm198x::listing_2650(&bytes, origin));
+                print!("{}", asm198x::listing_2650(&bytes, narrow_origin?));
             }
             Assembler::Tms7000 => {
-                print!("{}", asm198x::listing_tms7000(&bytes, origin));
+                print!("{}", asm198x::listing_tms7000(&bytes, narrow_origin?));
             }
             Assembler::Pdp11 => {
-                print!("{}", asm198x::listing_pdp11(&bytes, origin));
+                print!("{}", asm198x::listing_pdp11(&bytes, narrow_origin?));
             }
             Assembler::Tms9900 => {
-                print!("{}", asm198x::listing_tms9900(&bytes, origin));
+                print!("{}", asm198x::listing_tms9900(&bytes, narrow_origin?));
             }
             Assembler::Cp1610 => {
-                print!("{}", asm198x::listing_cp1610(&bytes, origin));
+                print!("{}", asm198x::listing_cp1610(&bytes, narrow_origin?));
             }
             Assembler::Z8000 => {
-                print!("{}", asm198x::listing_z8000(&bytes, origin));
+                print!("{}", asm198x::listing_z8000(&bytes, narrow_origin?));
             }
             Assembler::Z8001 => {
-                print!("{}", asm198x::listing_z8001(&bytes, origin));
+                print!("{}", asm198x::listing_z8001(&bytes, narrow_origin?));
             }
         }
         return Ok(format!(
@@ -1875,6 +1890,15 @@ fn fs_loader(input: &str, include_dirs: &[PathBuf]) -> asm198x::source::FsLoader
 }
 
 /// Parse an address: `$hhhh`, `0xhhhh`, or decimal.
+fn parse_u32(value: &str) -> Result<u32, String> {
+    let parsed = if let Some(hex) = value.strip_prefix('$').or_else(|| value.strip_prefix("0x")) {
+        u32::from_str_radix(hex, 16)
+    } else {
+        value.parse::<u32>()
+    };
+    parsed.map_err(|_| format!("invalid address `{value}`"))
+}
+
 fn parse_u16(value: &str) -> Result<u16, String> {
     let parsed = if let Some(hex) = value.strip_prefix('$').or_else(|| value.strip_prefix("0x")) {
         u16::from_str_radix(hex, 16)
