@@ -1,0 +1,50 @@
+{
+  "package": "@asm198x/z80",
+  "version": "0.4.0",
+  "registry": [
+    {
+      "url": "https://registry.npmjs.org/@asm198x%2fweb",
+      "status": 404
+    },
+    {
+      "url": "https://registry.npmjs.org/@asm198x%2fz80/latest",
+      "status": 200,
+      "name": "@asm198x/z80",
+      "version": "0.4.0",
+      "dist": {
+        "shasum": "310ae03f2b51c63810666c47b4da0b747abae133",
+        "tarball": "https://registry.npmjs.org/@asm198x/z80/-/z80-0.4.0.tgz",
+        "fileCount": 6,
+        "integrity": "sha512-Z3coAY4YFDTLrXiy3ej7nPRJrLd13G8dQmrOZPgDS8Xiciev5ZlpQNUVw4mY2AwDQxuZZevUU5pF0lSX0m3GBA==",
+        "signatures": [
+          {
+            "sig": "MEQCIENJWAPdZz40ZLKQwbe/UO3SMdiN9IWywEwYzoKkbw1fAiAuoNceGJTDjlb8S2LLSHQPmJ9nBqcSOb4eEZWhJAdsqw==",
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U"
+          }
+        ],
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/@asm198x%2fz80@0.4.0",
+          "provenance": {
+            "predicateType": "https://slsa.dev/provenance/v1"
+          }
+        },
+        "unpackedSize": 540718
+      }
+    }
+  ],
+  "install_command": [
+    "npm",
+    "install",
+    "@asm198x/z80@0.4.0"
+  ],
+  "install_stdout": "mise WARN  tracking config: failed to ln -sf /private/tmp/198x-npm-install-fix/rust-toolchain.toml /Users/stevehill/.local/state/mise/tracked-configs/daf81ffce2a2df2e: Operation not permitted (os error 1)\n\nadded 1 package in 1s\n",
+  "node_version": "v24.9.0",
+  "example_sha256": "0da124e34fc6f816ee5b3470e1ca74943d8bb6c65768e3d1ab47d192edfbf5d0",
+  "command": [
+    "node",
+    "verify.mjs"
+  ],
+  "exit": 0,
+  "stdout": "Published package assembled the expected bytes and diagnosed invalid input\n",
+  "stderr": "mise WARN  tracking config: failed to ln -sf /private/tmp/198x-npm-doc-evidence/package.json /Users/stevehill/.local/state/mise/tracked-configs/2fb7b4455d135cae: Operation not permitted (os error 1)\n"
+}
