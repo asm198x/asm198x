@@ -292,6 +292,8 @@ pub struct SourceMap {
     files: Vec<SourceFile>,
     /// Canonical path → allocated id (the dedup index).
     by_path: HashMap<String, FileId>,
+    /// Optional synthetic definitions evaluated before the unchanged root.
+    prelude: Option<FileId>,
 }
 
 impl SourceMap {
@@ -309,7 +311,26 @@ impl SourceMap {
                 included_from: None,
             }],
             by_path,
+            prelude: None,
         }
+    }
+
+    /// Register CLI definitions as source, not lines prepended to FileId(0).
+    /// This virtual file is not an include and has no filesystem dedup key.
+    pub(crate) fn set_prelude(&mut self, contents: &str) {
+        if !contents.is_empty() {
+            let id = FileId(self.files.len() as u32);
+            self.files.push(SourceFile {
+                path: "<command-line --equ>".to_owned(),
+                contents: contents.to_owned(),
+                included_from: None,
+            });
+            self.prelude = Some(id);
+        }
+    }
+
+    pub(crate) fn prelude(&self) -> Option<(FileId, &str)> {
+        self.prelude.and_then(|id| Some((id, self.contents(id)?)))
     }
 
     /// Seed the dedup index with the root's **canonical** path, so an include

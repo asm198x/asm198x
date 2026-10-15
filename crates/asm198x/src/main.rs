@@ -225,6 +225,30 @@ impl Assembler {
     }
 }
 
+/// Keep CLI definitions separate from the original root for both reporters.
+fn assemble_flat(
+    assembler: &Assembler,
+    source: &str,
+    input: &str,
+    loader: &dyn asm198x::source::SourceLoader,
+    definitions: &str,
+) -> Result<asm198x::AssemblyResult, asm198x::MultiFileError> {
+    match assembler {
+        Assembler::Pasmo { z80n: false } if !definitions.is_empty() => {
+            asm198x::assemble_pasmo_files_with_definitions(source, input, loader, definitions)
+        }
+        Assembler::Pasmo { z80n: true } if !definitions.is_empty() => {
+            asm198x::assemble_pasmonext_files_with_definitions(source, input, loader, definitions)
+        }
+        other => {
+            let entry = other
+                .multi_entry()
+                .expect("ca65/vasm handled before flat assembly");
+            entry(source, input, loader)
+        }
+    }
+}
+
 /// The shape every multi-file library entry shares (`assemble_*_files`):
 /// root source, root path, and the loader seam (KTD8).
 type MultiEntry = fn(
@@ -807,7 +831,7 @@ fn run(args: &[String]) -> Result<String, String> {
     {
         return Err("`--equ` is an assembly option for the pasmo/pasmonext dialects".into());
     }
-    let source = apply_equ_definitions(&source, &equ_definitions)?;
+    let definitions = equ_source(&equ_definitions)?;
     if gb_rom && !matches!(assembler, Assembler::Rgbasm) {
         return Err("`--gb-rom` is only for the Game Boy dialect (rgbasm)".into());
     }
@@ -917,6 +941,7 @@ fn run(args: &[String]) -> Result<String, String> {
             (&debug, &sym, &listing, &listing_json, &map_report),
             sym_format,
             linker_config.as_deref(),
+            &definitions,
         )
         .or_else(emit_json_failure);
     }
@@ -1100,15 +1125,13 @@ fn run(args: &[String]) -> Result<String, String> {
     // filesystem loader; a failure renders with the real file table and the
     // include-graph notes. Only the non-flat ca65/vasm paths (handled above)
     // sit outside the table.
-    let Some(entry) = assembler.multi_entry() else {
-        unreachable!("ca65/vasm handled above")
-    };
     let loader = fs_loader(input, &include_dirs);
     // The recorder keeps each include's contents + include point so a
     // `--listing` on a multi-file program can splice the files (U9); the
     // resolution behaviour is the wrapped filesystem loader's, unchanged.
     let recorder = RecordingLoader::new(&loader);
-    let assembly = entry(&source, input, &recorder).map_err(|e| render_multi_error(input, &e))?;
+    let assembly = assemble_flat(&assembler, &source, input, &recorder, &definitions)
+        .map_err(|e| render_multi_error(input, &e))?;
     for w in &assembly.warnings {
         // A warning inside an included file names that file (the multi-file
         // table); single-file results have an empty table and keep naming the
@@ -1805,7 +1828,7 @@ fn parse_u16(value: &str) -> Result<u16, String> {
 /// Turn Pasmo's repeatable `--equ NAME=VALUE` arguments into a source prelude.
 /// Keeping the value as source text deliberately gives it Pasmo's own numeric
 /// and expression grammar rather than inventing a second CLI-only parser.
-fn apply_equ_definitions(source: &str, definitions: &[&str]) -> Result<String, String> {
+fn equ_source(definitions: &[&str]) -> Result<String, String> {
     let mut prelude = String::new();
     for definition in definitions {
         let (name, value) = definition.split_once('=').ok_or_else(|| {
@@ -1826,7 +1849,6 @@ fn apply_equ_definitions(source: &str, definitions: &[&str]) -> Result<String, S
         prelude.push_str(value);
         prelude.push('\n');
     }
-    prelude.push_str(source);
     Ok(prelude)
 }
 
@@ -2070,6 +2092,7 @@ fn emit_json(
     ),
     sym_format: asm198x::SymbolFormat,
     linker_config: Option<&Path>,
+    definitions: &str,
 ) -> Result<String, String> {
     let debug_requested =
         debug.is_some() || sym.is_some() || listing.is_some() || listing_json.is_some();
@@ -2141,12 +2164,8 @@ fn emit_json(
             .map_err(|e| capture_failure(&mut failure_files, e)),
         // Every flat dialect goes through its multi-file entry (the same
         // table as the human path); ca65/vasm are the arms above.
-        other => {
-            let Some(entry) = other.multi_entry() else {
-                unreachable!("ca65/vasm handled above")
-            };
-            entry(source, input, &loader).map_err(|e| capture_failure(&mut failure_files, e))
-        }
+        other => assemble_flat(other, source, input, &loader, definitions)
+            .map_err(|e| capture_failure(&mut failure_files, e)),
     };
     // An explicit container is an artifact request even without `-o`. Plain
     // JSON queries retain their existing no-file default. Reporting must not
@@ -2313,19 +2332,29 @@ mod tests {
     fn pasmo_equ_definitions_are_visible_to_conditionals() {
         let source =
             "        if NEXT\n        defb 1\n        else\n        defb 2\n        endif\n";
-        let next =
-            apply_equ_definitions(source, &["NEXT=1", "SPECTRANET=0"]).expect("valid definitions");
-        let spectranet =
-            apply_equ_definitions(source, &["NEXT=0", "SPECTRANET=1"]).expect("valid definitions");
+        let next = equ_source(&["NEXT=1", "SPECTRANET=0"]).expect("valid definitions");
+        let spectranet = equ_source(&["NEXT=0", "SPECTRANET=1"]).expect("valid definitions");
 
         assert_eq!(
-            asm198x::assemble_pasmo(&next).expect("NEXT build").bytes,
+            asm198x::assemble_pasmo_files_with_definitions(
+                source,
+                "input.s",
+                &MemoryLoader::new(),
+                &next
+            )
+            .expect("NEXT build")
+            .bytes,
             [1]
         );
         assert_eq!(
-            asm198x::assemble_pasmo(&spectranet)
-                .expect("Spectranet build")
-                .bytes,
+            asm198x::assemble_pasmo_files_with_definitions(
+                source,
+                "input.s",
+                &MemoryLoader::new(),
+                &spectranet
+            )
+            .expect("Spectranet build")
+            .bytes,
             [2]
         );
     }
@@ -2333,10 +2362,7 @@ mod tests {
     #[test]
     fn equ_definitions_require_a_symbol_and_value() {
         for bad in ["NEXT", "=1", "1NEXT=1", "NEXT="] {
-            assert!(
-                apply_equ_definitions("", &[bad]).is_err(),
-                "`{bad}` must be rejected"
-            );
+            assert!(equ_source(&[bad]).is_err(), "`{bad}` must be rejected");
         }
     }
 

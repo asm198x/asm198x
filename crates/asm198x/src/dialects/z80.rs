@@ -3217,7 +3217,16 @@ pub(crate) fn parse_program_multi_keyword_warned<S: Z80Syntax>(
     loader: &dyn SourceLoader,
 ) -> Result<(Vec<Statement>, Vec<Warning>), AsmError> {
     let root = map.contents(FileId(0)).unwrap_or_default().to_owned();
-    let program = parse_program_keyword(syntax, set, ext, FileId(0), &root, Expand::Yes)?;
+    // Parse each source with its own identity before joining the node stream.
+    // In particular, CLI EQU lines must not shift root lines or macro origins.
+    let mut program = if let Some((file, text)) = map.prelude() {
+        parse_program_keyword(syntax, set, ext, file, text, Expand::Yes)?
+    } else {
+        Program::default()
+    };
+    program
+        .nodes
+        .extend(parse_program_keyword(syntax, set, ext, FileId(0), &root, Expand::Yes)?.nodes);
     run_passes(
         syntax,
         set,
