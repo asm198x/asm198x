@@ -26,3 +26,22 @@ separating actual release execution from source builds and fixes on main.
    for its checks, verify retained report hashes and merge only a green tested
    head. Update audit trackers with bounded conclusions; clean task worktree,
    downloads and task-owned Docker containers.
+
+
+## Results
+
+All five CLI targets executed the same 19 cases. The four hosted targets recorded
+13 passes and six failures each. Local Linux ARM64 recorded 12 passes, the same
+six failures, and one unavailable installer check (curl/wget absent). All failed
+checks map to existing source fixes; no new platform-specific assembler defect
+was established. A complete upstream target matched native ACME on every host.
+The published npm Z80 package passed seven bounded API checks on the local Mac.
+
+New findings: #667 (unavailable npm package in the README) and #668 (candidate
+archive failure/output-safety gates). The reviewed report, host reports, pinned
+identities, controls and integrity verifier are retained in the adjacent folder.
+The verifier rejects altered counts even if the outer manifest is updated.
+Local verification passed 13 setup tests, the installed PATH smoke and its
+wrong-version control, byte/checksum corruption controls, Ruff and generated
+docs. Hosted Setup action run 38739136853 completed successfully on all four
+native runners; capability failures remain explicit and are not qualification.

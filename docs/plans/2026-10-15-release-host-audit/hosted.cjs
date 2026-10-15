@@ -18,6 +18,9 @@ const python = candidates.find(candidate => {
 });
 assert(python, 'A preinstalled Python 3.13+ is required');
 assert(process.env.RUNNER_TEMP && process.env.INSTALLED_TARGET && process.env.INSTALLED_PATH);
+const retained = spawnSync(python, [path.join(__dirname, 'verify.py')], { stdio: 'inherit', timeout: 10000 });
+assert.ifError(retained.error);
+assert.equal(retained.status, 0, 'Retained evidence verification failed');
 const result = spawnSync(python, [path.join(__dirname, 'probe.py'),
   '--target', process.env.INSTALLED_TARGET,
   '--binary', path.join(process.env.INSTALLED_PATH, process.platform === 'win32' ? 'asm198x.exe' : 'asm198x'),

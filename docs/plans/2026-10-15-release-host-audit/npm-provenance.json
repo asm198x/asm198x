@@ -1,0 +1,71 @@
+{
+  "registry_attestation_url": "https://registry.npmjs.org/-/npm/v1/attestations/@asm198x%2fz80@0.4.0",
+  "tarball_sha512": "677728018e181434cbad78b2dde8fb9cf449acb775dc6f1d426ace64f8034bc5e27227afe5996940d515c38998d80c03431b9965ebd4539a45d25497d26dc604",
+  "decoded_statements": [
+    {
+      "_type": "https://in-toto.io/Statement/v0.1",
+      "subject": [
+        {
+          "name": "pkg:npm/%40asm198x/z80@0.4.0",
+          "digest": {
+            "sha512": "677728018e181434cbad78b2dde8fb9cf449acb775dc6f1d426ace64f8034bc5e27227afe5996940d515c38998d80c03431b9965ebd4539a45d25497d26dc604"
+          }
+        }
+      ],
+      "predicateType": "https://github.com/npm/attestation/tree/main/specs/publish/v0.1",
+      "predicate": {
+        "name": "@asm198x/z80",
+        "version": "0.4.0",
+        "registry": "https://registry.npmjs.org"
+      }
+    },
+    {
+      "_type": "https://in-toto.io/Statement/v1",
+      "subject": [
+        {
+          "name": "pkg:npm/%40asm198x/z80@0.4.0",
+          "digest": {
+            "sha512": "677728018e181434cbad78b2dde8fb9cf449acb775dc6f1d426ace64f8034bc5e27227afe5996940d515c38998d80c03431b9965ebd4539a45d25497d26dc604"
+          }
+        }
+      ],
+      "predicateType": "https://slsa.dev/provenance/v1",
+      "predicate": {
+        "buildDefinition": {
+          "buildType": "https://slsa-framework.github.io/github-actions-buildtypes/workflow/v1",
+          "externalParameters": {
+            "workflow": {
+              "ref": "refs/heads/main",
+              "repository": "https://github.com/asm198x/asm198x",
+              "path": ".github/workflows/publish-npm.yml"
+            }
+          },
+          "internalParameters": {
+            "github": {
+              "event_name": "push",
+              "repository_id": "1254221926",
+              "repository_owner_id": "289150388"
+            }
+          },
+          "resolvedDependencies": [
+            {
+              "uri": "git+https://github.com/asm198x/asm198x@refs/heads/main",
+              "digest": {
+                "gitCommit": "00e7193329b0bbe6732f19646eeac06a6444ffd2"
+              }
+            }
+          ]
+        },
+        "runDetails": {
+          "builder": {
+            "id": "https://github.com/actions/runner/github-hosted"
+          },
+          "metadata": {
+            "invocationId": "https://github.com/asm198x/asm198x/actions/runs/33925227597/attempts/1"
+          }
+        }
+      }
+    }
+  ],
+  "signature_verification": "not independently performed"
+}

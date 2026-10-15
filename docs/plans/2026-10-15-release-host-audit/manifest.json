@@ -1,0 +1,82 @@
+{
+  ".gitattributes": {
+    "size": 14,
+    "sha256": "a79691a93b46e49ce460c26ef22afcc03d6eca1e63bf2edbc20e96159510f6c9"
+  },
+  "REPORT.md": {
+    "size": 9587,
+    "sha256": "d249eb3cb88d055777d5769d52d161ca9e5133cf0d992612abc979038b01dd3d"
+  },
+  "aarch64-apple-darwin.json": {
+    "size": 22237,
+    "sha256": "830f85cd13ae64d9ade895c1f98082c27428561fcde369f3df7d3f62935649de"
+  },
+  "archive-inventory.json": {
+    "size": 1873,
+    "sha256": "b165dc38b1154d29cf407929f01b85be68e22fd8dafadddc2071850b53f9e1ba"
+  },
+  "controls.json": {
+    "size": 1181,
+    "sha256": "03d5e357b33c7cd586df52045c9eec041975673d63a3178816e20d4bcedb0045"
+  },
+  "hosted.cjs": {
+    "size": 1912,
+    "sha256": "d122306df05532c4e2d8a28ed868e61afeb13a6f92368bdd5356c417585caa0b"
+  },
+  "linux-arm64.json": {
+    "size": 20234,
+    "sha256": "295b1c847aa6327fcc36ea540e23632618c8512ac826a9c9607545309e10048b"
+  },
+  "macos-arm64.json": {
+    "size": 22717,
+    "sha256": "ce9658c5495c0f124d9327da2a26bbf52d4f4cf5feb7a4e46f90d17786ab3f34"
+  },
+  "native-reference.json": {
+    "size": 844,
+    "sha256": "41d8caa5aabc337ea369ad60977d28f4f22407e3ae8a3b60612a074fb9195a3e"
+  },
+  "npm-api.json": {
+    "size": 3149,
+    "sha256": "c2978cd93aada587adbd23877380e43ed0fce6a2f60b670d7861e5a187617502"
+  },
+  "npm-inventory.json": {
+    "size": 1193,
+    "sha256": "53d351b6b8c1266a76a4c2483373cd055ed299bc0ab66c4b9e2f41c5ec06c223"
+  },
+  "npm-native-reference.json": {
+    "size": 488,
+    "sha256": "41ade04a509afdc2fcb0b52889a212178264388a66220201490b3f2510c89283"
+  },
+  "npm-probe.mjs": {
+    "size": 2021,
+    "sha256": "6af9a5c9e5cb56254897ef5e49b4461a35b8b60e25ccee56298d0bb520fadb06"
+  },
+  "npm-provenance.json": {
+    "size": 2506,
+    "sha256": "b5e55587d2c0f6c85650382d9db693e7c7a7a8e853ea870a21239f209a9333e1"
+  },
+  "probe.py": {
+    "size": 18457,
+    "sha256": "e4dd7344ab70f9a7f7e328d2023aa299c747bd1c62d3997a9e5e0946487faf81"
+  },
+  "verification-controls.json": {
+    "size": 740,
+    "sha256": "d4e44f8de428df061e9ea27897200fa35d498813fc729503cf42296b262960af"
+  },
+  "verify.py": {
+    "size": 4018,
+    "sha256": "d9a9e255ef37453304625916b1688e5a127826ff19e8bc6492bc09455c8809a3"
+  },
+  "x86_64-apple-darwin.json": {
+    "size": 22233,
+    "sha256": "7adce9a54199ee4605c37e62690e7f33f081927f56195ce6b13039064603095d"
+  },
+  "x86_64-pc-windows-msvc.json": {
+    "size": 22024,
+    "sha256": "95996321b5f6fe68670c1870f0549575bb3a9d21b55dbd66765df79081d9da54"
+  },
+  "x86_64-unknown-linux-gnu.json": {
+    "size": 21243,
+    "sha256": "fb0bc5ac180e5b7280c8bb82b3ea44cefdf9f4d3a9e5c2b53e44cad2f895e145"
+  }
+}

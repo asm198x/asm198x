@@ -1,0 +1,37 @@
+{
+  "queried_utc": "2026-10-15T13:04:17.701591+00:00",
+  "registry": "https://registry.npmjs.org",
+  "packages": [
+    {
+      "package": "@asm198x/web",
+      "status": 404
+    },
+    {
+      "package": "@asm198x/z80",
+      "latest": "0.4.0",
+      "version_0_0_65_present": false,
+      "dist": {
+        "integrity": "sha512-Z3coAY4YFDTLrXiy3ej7nPRJrLd13G8dQmrOZPgDS8Xiciev5ZlpQNUVw4mY2AwDQxuZZevUU5pF0lSX0m3GBA==",
+        "shasum": "310ae03f2b51c63810666c47b4da0b747abae133",
+        "tarball": "https://registry.npmjs.org/@asm198x/z80/-/z80-0.4.0.tgz",
+        "fileCount": 6,
+        "unpackedSize": 540718,
+        "attestations": {
+          "url": "https://registry.npmjs.org/-/npm/v1/attestations/@asm198x%2fz80@0.4.0",
+          "provenance": {
+            "predicateType": "https://slsa.dev/provenance/v1"
+          }
+        },
+        "signatures": [
+          {
+            "keyid": "SHA256:DhQ8wR5APBvFHLF/+Tc+AYvPOdTpcIDqOhxsBHRwC7U",
+            "sig": "MEQCIENJWAPdZz40ZLKQwbe/UO3SMdiN9IWywEwYzoKkbw1fAiAuoNceGJTDjlb8S2LLSHQPmJ9nBqcSOb4eEZWhJAdsqw=="
+          }
+        ]
+      },
+      "exports": null,
+      "main": "asm198x_web.js",
+      "type": "module"
+    }
+  ]
+}
