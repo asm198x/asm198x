@@ -593,11 +593,13 @@ fn run(args: &[String]) -> Result<String, String> {
     // Presence matters for mode validation: an explicit zero is still --org.
     let mut origin: Option<u16> = None;
     let mut message_format = MessageFormat::Human;
+    let mut message_format_explicit = false;
     // Debug198x artifacts (U3): `None` = flag absent; `Some(None)` = default
     // path (input with the artifact's extension); `Some(Some(p))` = explicit.
     let mut debug: ArtifactPath = None;
     let mut sym: ArtifactPath = None;
     let mut sym_format = asm198x::SymbolFormat::Native;
+    let mut sym_format_explicit = false;
     let mut listing: ArtifactPath = None;
     let mut listing_json: ArtifactPath = None;
     let mut linker_config: Option<PathBuf> = None;
@@ -623,11 +625,13 @@ fn run(args: &[String]) -> Result<String, String> {
             }
             "--sym" => sym = Some(None),
             "--sym-format" => {
+                sym_format_explicit = true;
                 i += 1;
                 sym_format =
                     parse_symbol_format(args.get(i).ok_or("`--sym-format` needs a format")?)?;
             }
             f if f.starts_with("--sym-format=") => {
+                sym_format_explicit = true;
                 sym_format = parse_symbol_format(&f["--sym-format=".len()..])?;
             }
             f if f.starts_with("--sym=") => {
@@ -659,11 +663,13 @@ fn run(args: &[String]) -> Result<String, String> {
                 listing_json = Some(Some(PathBuf::from(&f["--listing-json=".len()..])));
             }
             "--message-format" => {
+                message_format_explicit = true;
                 i += 1;
                 let value = args.get(i).ok_or("`--message-format` needs a value")?;
                 message_format = parse_message_format(value)?;
             }
             f if f.starts_with("--message-format=") => {
+                message_format_explicit = true;
                 message_format = parse_message_format(&f["--message-format=".len()..])?;
             }
             "-o" | "--output" => {
@@ -722,6 +728,28 @@ fn run(args: &[String]) -> Result<String, String> {
     }
 
     let input = input.ok_or("no input file given (try --help)")?;
+    // Ordinary listings write stdout only. Reject requests for effects that
+    // this branch would otherwise silently skip, before resolving or reading
+    // the input. Recovery has its own parser and supports new-file output.
+    if disassemble {
+        for (present, option) in [
+            (output.is_some(), "-o/--output"),
+            (
+                exe || sna || prg || tape.is_some() || gb_rom,
+                "container output",
+            ),
+            (linker_config.is_some(), "-C"),
+            (outprefix.is_some(), "--outprefix"),
+            (!include_dirs.is_empty(), "-I"),
+            (!equ_definitions.is_empty(), "--equ"),
+            (message_format_explicit, "--message-format"),
+            (sym_format_explicit, "--sym-format"),
+        ] {
+            if present {
+                return Err(format!("`{option}` is not valid with ordinary `disasm`"));
+            }
+        }
+    }
     if sym_format != asm198x::SymbolFormat::Native && sym.is_none() {
         return Err("`--sym-format` requires `--sym[=path]`".into());
     }
