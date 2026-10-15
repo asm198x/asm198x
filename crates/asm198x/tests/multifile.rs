@@ -368,6 +368,68 @@ fn error_in_included_file_names_that_file_with_its_chain() {
     );
 }
 
+/// Device range checks must name the responsible statement, including its
+/// include and macro provenance, rather than returning a locationless error.
+#[test]
+fn sjasmplus_device_range_errors_preserve_source_locations() {
+    for (directive, valid, invalid) in [("PAGE", 7, 8), ("SLOT", 3, 4)] {
+        let loader = MemoryLoader::new();
+        let valid_source =
+            format!(" DEVICE ZXSPECTRUM128\n ORG $8000\n {directive} {valid}\n db 42\n");
+        assemble_sjasmplus_files(&valid_source, "main.asm", &loader)
+            .expect("last valid device index");
+        for value in [-1, invalid] {
+            let body = format!("; device selection\n {directive} {value}\n");
+            let cases = [
+                (
+                    format!(" DEVICE ZXSPECTRUM128\n{body}"),
+                    MemoryLoader::new(),
+                    "main.asm",
+                    3,
+                ),
+                (
+                    " DEVICE ZXSPECTRUM128\n include \"body.inc\"\n".to_owned(),
+                    MemoryLoader::new().text("body.inc", &body),
+                    "body.inc",
+                    2,
+                ),
+                (
+                    " DEVICE ZXSPECTRUM128\n include \"defs.inc\"\n broken\n".to_owned(),
+                    MemoryLoader::new().text(
+                        "defs.inc",
+                        format!(" MACRO broken\n {directive} {value}\n ENDM\n"),
+                    ),
+                    "main.asm",
+                    3,
+                ),
+            ];
+            for (source, loader, path, line) in cases {
+                let error = assemble_sjasmplus_files(&source, "main.asm", &loader)
+                    .expect_err("index outside device range");
+                assert!(
+                    error.error.message.contains("is outside"),
+                    "{}",
+                    error.error.message
+                );
+                let span = error.error.span.as_ref().expect("device error source span");
+                assert_eq!(error.source_map.file_table()[span.file.0 as usize], path);
+                assert_eq!(span.line, line);
+                if source.contains("broken") {
+                    let frame = span.expansion_frames.first().expect("macro provenance");
+                    assert_eq!(frame.macro_name, "broken");
+                    assert_eq!(frame.invoked_at.line, 3);
+                    let definition = frame.defined_at.as_ref().expect("definition location");
+                    assert_eq!(
+                        error.source_map.file_table()[definition.file.0 as usize],
+                        "defs.inc"
+                    );
+                    assert_eq!(definition.line, 1);
+                }
+            }
+        }
+    }
+}
+
 /// A missing include target is a diagnostic at the directive's span — the
 /// includer's file:line (and the operand's column) — not a CLI read error.
 #[test]
