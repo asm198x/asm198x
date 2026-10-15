@@ -1,0 +1,191 @@
+'use strict';
+const fs = require('node:fs');
+const os = require('node:os');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const { createHash } = require('node:crypto');
+const { spawnSync } = require('node:child_process');
+const { versionOf, verifyChecksum, runChecked } = require('../.github/actions/setup/index.cjs');
+const targets = ['aarch64-apple-darwin', 'x86_64-apple-darwin', 'x86_64-pc-windows-msvc', 'x86_64-unknown-linux-gnu', 'aarch64-unknown-linux-gnu'];
+const requiredCases = ['archive_identity', 'version', 'reference_bytes', 'determinism', 'structured_success', 'structured_failure', 'preserve_previous_outputs', 'missing_input_json', 'unknown_cpu', 'incompatible_cpu', 'hardlink_source', 'hardlink_sidecar', 'formatter_container', 'formatter_origin', 'lua', 'upstream_project'];
+const sourceFiles = {
+  'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
+  'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
+  'libs/loader.asm': '32b0dfd80eacbbdfa69774280122d9c7f115fe0602a14bc5d630b24e08cd82cc',
+  'libs/screen.asm': 'd33fbb4f0d549567438138efa38adbb4eb154aa17d6e1c0dee496f065cf469c6',
+};
+const upstreamCommit = '35b4968be3bdd26804a5d195557d1225497a0358';
+const sha = data => createHash('sha256').update(data).digest('hex');
+const archiveName = target => `asm198x-${target}.${target.includes('windows') ? 'zip' : 'tar.xz'}`;
+function packageIdentity(plan, target) {
+  assert(targets.includes(target), 'unsupported target');
+  assert.equal(plan.releases?.length, 1, 'expected one release');
+  const release = plan.releases[0];
+  assert.equal(release.app_name, 'asm198x');
+  const version = versionOf(release.app_version);
+  for (const expected of targets) {
+    const name = archiveName(expected);
+    assert(release.artifacts.includes(name), `plan omits ${expected}`);
+    assert.deepEqual(plan.artifacts[name]?.target_triples, [expected], `wrong planned target ${expected}`);
+    assert.equal(plan.artifacts[name]?.checksum, name + '.sha256');
+  }
+  return { version, archive: archiveName(target), target };
+}
+function nativeTarget(platform = process.platform, arch = process.arch) {
+  const target = { 'darwin-arm64': targets[0], 'darwin-x64': targets[1], 'win32-x64': targets[2], 'linux-x64': targets[3], 'linux-arm64': targets[4] }[`${platform}-${arch}`];
+  assert(target, `unsupported native runner ${platform}/${arch}`);
+  return target;
+}
+function binaryTarget(data) {
+  if (data.subarray(0, 4).equals(Buffer.from([0x7f, 0x45, 0x4c, 0x46]))) {
+    assert.equal(data[4], 2); assert.equal(data[5], 1);
+    return { 62: targets[3], 183: targets[4] }[data.readUInt16LE(18)];
+  }
+  if (data.readUInt32LE(0) === 0xfeedfacf) return { 0x100000c: targets[0], 0x1000007: targets[1] }[data.readUInt32LE(4)];
+  if (data.subarray(0, 2).toString() === 'MZ') {
+    const offset = data.readUInt32LE(0x3c);
+    assert.equal(data.subarray(offset, offset + 4).toString(), 'PE\0\0');
+    if (data.readUInt16LE(offset + 4) === 0x8664) return targets[2];
+  }
+  throw new Error('unknown or unsupported executable architecture');
+}
+function qualifies(results) {
+  return results.length === requiredCases.length && new Set(results.map(r => r.name)).size === requiredCases.length &&
+    requiredCases.every(name => results.some(r => r.name === name && r.status === 'pass'));
+}
+async function audit(plan, target, dist, { corruptOutput = false, corruptArchive = false } = {}) {
+  const identity = packageIdentity(plan, target);
+  assert.equal(nativeTarget(), target, 'candidate must execute on its native runner');
+  const archivePath = path.join(dist, identity.archive);
+  let archive = fs.readFileSync(archivePath);
+  if (corruptArchive) archive = Buffer.concat([archive, Buffer.from('corrupt')]);
+  const checksum = fs.readFileSync(archivePath + '.sha256', 'utf8');
+  verifyChecksum(archive, checksum, identity.archive);
+  assert.throws(() => verifyChecksum(Buffer.concat([archive, Buffer.from('corrupt')]), checksum, identity.archive), /SHA-256 mismatch/);
+  const member = target.includes('windows') ? 'asm198x.exe' : `asm198x-${target}/asm198x`;
+  const executable = runChecked('tar', ['-xOf', archivePath, member], { timeout: 30000, maxBuffer: 128 * 1024 * 1024 });
+  assert.equal(binaryTarget(executable), target, 'archive contains wrong architecture');
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'asm198x-candidate-'));
+  const results = [];
+  const program = path.join(root, target.includes('windows') ? 'asm198x.exe' : 'asm198x');
+  fs.writeFileSync(program, executable, { mode: 0o755 });
+  let runs;
+  function run(args, cwd = root) {
+    const p = spawnSync(program, args, { cwd, encoding: 'utf8', timeout: 30000, maxBuffer: 4 * 1024 * 1024 });
+    runs.push({ argv: [program, ...args], cwd, exit: p.status, signal: p.signal, stdout: p.stdout, stderr: p.stderr, error: p.error?.message });
+    if (p.error) throw p.error;
+    assert.equal(p.signal, null, 'candidate terminated by signal');
+    return p;
+  }
+  const read = name => fs.readFileSync(path.join(root, name));
+  const write = (name, data) => fs.writeFileSync(path.join(root, name), data);
+  const test = (name, fn) => {
+    runs = [];
+    try { fn(); results.push({ name, status: 'pass', runs }); }
+    catch (error) { results.push({ name, status: 'fail', reason: error.message, runs }); }
+  };
+  const reject = p => assert(p.status !== 0 && p.status !== null, 'invalid selection/input was accepted');
+  try {
+    write('good.s', '*=$8000\nstart:\n lda #$05\n rts\n');
+    write('bad.s', '*=$8000\n lda #$fff\n');
+    write('z80.s', 'org $8000\nnop\n');
+    test('archive_identity', () => { assert.equal(binaryTarget(executable), target); });
+    test('version', () => {
+      const p = run(['--version']); assert.equal(p.status, 0);
+      assert.equal((p.stdout + p.stderr).trim(), `asm198x v${identity.version}`);
+    });
+    test('reference_bytes', () => {
+      assert.equal(run(['--dialect', 'acme', 'good.s', '-o', 'first.bin']).status, 0);
+      if (corruptOutput) write('first.bin', 'wrong bytes');
+      assert.deepEqual(read('first.bin'), Buffer.from('a90560', 'hex'));
+    });
+    test('determinism', () => {
+      assert.equal(run(['--dialect', 'acme', 'good.s', '-o', 'second.bin']).status, 0);
+      assert.deepEqual(read('first.bin'), read('second.bin'));
+    });
+    test('structured_success', () => {
+      const p = run(['--dialect', 'acme', '--message-format=json', 'good.s', '-o', 'json.bin']);
+      assert.equal(p.status, 0); assert.equal(p.stderr, '');
+      const obj = JSON.parse(p.stdout); assert.deepEqual(obj.bytes, [...read('first.bin')]);
+      assert.equal(obj.origin, 32768); assert.equal(obj.symbols.start, 32768); assert.deepEqual(obj.diagnostics, []);
+      assert.deepEqual(read('json.bin'), Buffer.from(obj.bytes));
+    });
+    test('structured_failure', () => {
+      const human = run(['--dialect', 'acme', 'bad.s', '-o', 'bad.bin']); reject(human);
+      const p = run(['--dialect', 'acme', '--message-format=json', 'bad.s', '-o', 'bad.bin']); reject(p);
+      assert.equal(p.stderr, ''); const diagnostics = JSON.parse(p.stdout);
+      assert(Array.isArray(diagnostics) && diagnostics.length > 0);
+      assert(diagnostics.some(d => d.severity === 'Error' && d.message && d.span?.line === 2 && human.stderr.includes(d.message)));
+      assert(!fs.existsSync(path.join(root, 'bad.bin')));
+    });
+    test('preserve_previous_outputs', () => {
+      const names = ['previous.bin', 'previous.debug198x', 'previous.sym', 'previous.lst'];
+      for (const name of names) write(name, 'preserve previous');
+      const p = run(['--dialect', 'acme', 'bad.s', '-o', names[0], '--debug=' + names[1], '--sym=' + names[2], '--listing=' + names[3]]); reject(p);
+      for (const name of names) assert.equal(read(name).toString(), 'preserve previous');
+    });
+    test('missing_input_json', () => {
+      const p = run(['--message-format=json', 'missing.s', '-o', 'missing.bin']); reject(p);
+      assert(Array.isArray(JSON.parse(p.stdout))); assert.equal(p.stderr, '');
+      assert(!fs.existsSync(path.join(root, 'missing.bin')));
+    });
+    for (const [name, cpu] of [['unknown_cpu', 'nonsense'], ['incompatible_cpu', '68000']]) test(name, () => {
+      const p = run(['--dialect', 'pasmo', '--cpu', cpu, '--message-format=json', 'z80.s', '-o', name + '.bin']); reject(p);
+      const diagnostics = JSON.parse(p.stdout); assert.equal(p.stderr, '');
+      assert(diagnostics.some(d => d.message.includes(cpu) && (cpu === 'nonsense' || d.message.includes('pasmo'))));
+      assert(!fs.existsSync(path.join(root, name + '.bin')));
+    });
+    test('hardlink_source', () => {
+      write('linked.s', '*=$8000\n nop\n'); fs.linkSync(path.join(root, 'linked.s'), path.join(root, 'linked.bin'));
+      reject(run(['linked.s', '-o', 'linked.bin'])); assert.equal(read('linked.s').toString(), '*=$8000\n nop\n');
+    });
+    test('hardlink_sidecar', () => {
+      write('sidecar.s', '*=$8000\n nop\n'); fs.linkSync(path.join(root, 'sidecar.s'), path.join(root, 'sidecar.sym'));
+      reject(run(['sidecar.s', '-o', 'sidecar.bin', '--sym=sidecar.sym']));
+      assert.equal(read('sidecar.s').toString(), '*=$8000\n nop\n');
+    });
+    for (const [name, flags] of [['formatter_container', ['--prg']], ['formatter_origin', ['--org', '0']]]) test(name, () => {
+      reject(run(['fmt', ...flags, 'good.s', '-o', name + '.s']));
+      assert(!fs.existsSync(path.join(root, name + '.s')));
+    });
+    test('lua', () => {
+      write('lua.s', ' LUA ALLPASS\n sj.add_byte(7)\n ENDLUA\n');
+      assert.equal(run(['--dialect', 'sjasmplus', 'lua.s', '-o', 'lua.bin']).status, 0); assert.deepEqual(read('lua.bin'), Buffer.from([7]));
+    });
+    const project = path.join(root, 'upstream');
+    try {
+      for (const [name, digest] of Object.entries(sourceFiles)) {
+        const response = await fetch(`https://raw.githubusercontent.com/kindjie/6502Assembly/${upstreamCommit}/${name}`, { signal: AbortSignal.timeout(30000) });
+        assert(response.ok, `fixture acquisition: ${response.status}`); const bytes = Buffer.from(await response.arrayBuffer());
+        assert(bytes.length <= 100000 && sha(bytes) === digest, `fixture checksum ${name}`);
+        fs.mkdirSync(path.dirname(path.join(project, name)), { recursive: true }); fs.writeFileSync(path.join(project, name), bytes);
+      }
+      test('upstream_project', () => {
+        assert.equal(run(['--dialect', 'acme', '--prg', 'helloworld.asm', '-o', 'hello.prg'], project).status, 0);
+        const bytes = fs.readFileSync(path.join(project, 'hello.prg')); assert.equal(bytes.length, 2081);
+        assert.equal(sha(bytes), '16e5a63289e474e84706517c592c0ba7f2ae86b5278d7d1e6eeb9a0c5ef205fc');
+      });
+    } catch (error) { results.push({ name: 'upstream_project', status: 'unavailable', reason: error.message }); }
+    return { kind: 'candidate', version: identity.version, parsed_plan_sha256: sha(Buffer.from(JSON.stringify(plan))), checkout_commit: process.env.GITHUB_SHA || runChecked('git', ['rev-parse', 'HEAD'], { encoding: 'utf8', timeout: 10000 }).trim(),
+      target, host: { platform: process.platform, arch: process.arch, release: os.release(), node: process.version, github_run: process.env.GITHUB_RUN_ID, github_attempt: process.env.GITHUB_RUN_ATTEMPT },
+      archive: identity.archive, archive_sha256: sha(archive), executable_sha256: sha(executable), checksum_mutation_rejected: true,
+      fixture: { commit: upstreamCommit, files: sourceFiles }, qualified: qualifies(results), results };
+  } finally { fs.rmSync(root, { recursive: true, force: true }); }
+}
+module.exports = { audit, packageIdentity, nativeTarget, binaryTarget, qualifies, requiredCases, targets };
+if (require.main === module) {
+  const [plan, target, dist, output, control] = process.argv.slice(2);
+  (async () => {
+    assert(plan && target && dist && output, 'usage: node test-candidate-package.cjs <plan.json> <target> <distrib> <report.json> [--control-wrong-bytes]');
+    const report = await audit(JSON.parse(fs.readFileSync(plan, 'utf8')), target, path.resolve(dist), { corruptOutput: control === '--control-wrong-bytes', corruptArchive: control === '--control-corrupt-archive' });
+    fs.mkdirSync(path.dirname(path.resolve(output)), { recursive: true }); fs.writeFileSync(output, JSON.stringify(report, null, 2) + '\n');
+    console.log(JSON.stringify({ target, qualified: report.qualified, cases: report.results.length, failures: report.results.filter(r => r.status !== 'pass').map(r => r.name) }));
+    if (!report.qualified) process.exitCode = 1;
+  })().catch(error => {
+    if (output) {
+      fs.mkdirSync(path.dirname(path.resolve(output)), { recursive: true });
+      fs.writeFileSync(output, JSON.stringify({ kind: 'candidate', target, qualified: false, results: [], error: error.message }, null, 2) + '\n');
+    }
+    console.error(error.stack); process.exitCode = 1;
+  });
+}

@@ -1,4 +1,4 @@
-name: Linux packages
+name: Candidate packages
 
 on:
   pull_request:
@@ -10,7 +10,7 @@ on:
         type: string
 
 concurrency:
-  group: linux-packages-${{ github.ref }}
+  group: candidate-packages-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 permissions:
@@ -18,7 +18,8 @@ permissions:
 
 jobs:
   install:
-    name: Install and exercise (${{ matrix.target }})
+    name: Qualify archive (${{ matrix.target }})
+    timeout-minutes: 30
     strategy:
       fail-fast: false
       matrix:
@@ -27,6 +28,12 @@ jobs:
             target: x86_64-unknown-linux-gnu
           - runner: ubuntu-22.04-arm
             target: aarch64-unknown-linux-gnu
+          - runner: macos-latest
+            target: aarch64-apple-darwin
+          - runner: macos-15-intel
+            target: x86_64-apple-darwin
+          - runner: windows-latest
+            target: x86_64-pc-windows-msvc
     runs-on: ${{ matrix.runner }}
     env:
       RELEASE_PLAN: ${{ inputs.plan }}
@@ -34,9 +41,34 @@ jobs:
       HOMEBREW_NO_AUTO_UPDATE: '1'
       HOMEBREW_NO_INSTALL_CLEANUP: '1'
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
         with:
           persist-credentials: false
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+      - name: Install pinned dist (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          set -euo pipefail
+          dist_version=$(awk -F'"' '/^cargo-dist-version/{print $2}' Cargo.toml)
+          curl --proto '=https' --tlsv1.2 -LsSf "https://github.com/axodotdev/cargo-dist/releases/download/v${dist_version}/cargo-dist-installer.sh" -o "$RUNNER_TEMP/install-dist.sh"
+          sh "$RUNNER_TEMP/install-dist.sh"
+      - name: Install pinned dist (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          $version = (Select-String -Path Cargo.toml -Pattern '^cargo-dist-version = "([^"]+)"').Matches.Groups[1].Value
+          if (-not $version) { throw 'Missing pinned cargo-dist version' }
+          Invoke-WebRequest "https://github.com/axodotdev/cargo-dist/releases/download/v$version/cargo-dist-installer.ps1" -OutFile "$env:RUNNER_TEMP/install-dist.ps1"
+          & "$env:RUNNER_TEMP/install-dist.ps1"
+      - name: Check full release workflow regeneration and fail-closed controls
+        shell: bash
+        run: |
+          set -euo pipefail
+          node scripts/generate-release-workflow.cjs --check
+          node --test scripts/candidate-package.test.cjs .github/actions/setup/index.test.cjs
       - name: Cache Rust artifacts
         if: inputs.plan == ''
         uses: Swatinem/rust-cache@v2
@@ -45,23 +77,50 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          dist_version=$(awk -F'"' '/^cargo-dist-version/{print $2}' Cargo.toml)
-          curl --proto '=https' --tlsv1.2 -LsSf "https://github.com/axodotdev/cargo-dist/releases/download/v${dist_version}/cargo-dist-installer.sh" -o "$RUNNER_TEMP/install-dist.sh"
-          sh "$RUNNER_TEMP/install-dist.sh"
           mkdir -p target
+          dist plan --output-format=json > target/candidate-plan.json
           dist build --artifacts=all --target "$PACKAGE_TARGET" --output-format=json > target/package-test-manifest.json
-      - name: Fetch the actual release packages
+      - name: Fetch actual candidate packages
         if: inputs.plan != ''
         uses: actions/download-artifact@v8
         with:
           pattern: artifacts-*
           path: target/distrib
           merge-multiple: true
-      - name: Save the release plan
+      - name: Save candidate plan
         if: inputs.plan != ''
         shell: bash
-        run: printf '%s\n' "$RELEASE_PLAN" > target/package-test-manifest.json
+        run: |
+          set -euo pipefail
+          printf '%s\n' "$RELEASE_PLAN" > target/package-test-manifest.json
+          cp target/package-test-manifest.json target/candidate-plan.json
+      - name: Qualify the actual archive and run its corruption control
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p "$RUNNER_TEMP/qualification"
+          cp target/candidate-plan.json "$RUNNER_TEMP/qualification/plan.json"
+          node scripts/test-candidate-package.cjs target/candidate-plan.json "$PACKAGE_TARGET" target/distrib "$RUNNER_TEMP/qualification/report.json"
+          if node scripts/test-candidate-package.cjs target/candidate-plan.json "$PACKAGE_TARGET" target/distrib "$RUNNER_TEMP/qualification/wrong-bytes.json" --control-wrong-bytes; then
+            echo 'Wrong bytes unexpectedly qualified' >&2
+            exit 1
+          fi
+          node -e "const r=require(process.argv[1]);if(r.qualified!==false||!r.results.some(x=>x.name==='reference_bytes'&&x.status==='fail'))process.exit(1)" "$RUNNER_TEMP/qualification/wrong-bytes.json"
+          if node scripts/test-candidate-package.cjs target/candidate-plan.json "$PACKAGE_TARGET" target/distrib "$RUNNER_TEMP/qualification/corrupt-archive.json" --control-corrupt-archive; then
+            echo 'Corrupted archive unexpectedly qualified' >&2
+            exit 1
+          fi
+          node -e "const r=require(process.argv[1]);if(r.qualified!==false||!r.error?.includes('SHA-256 mismatch'))process.exit(1)" "$RUNNER_TEMP/qualification/corrupt-archive.json"
+      - name: Retain per-host qualification records
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: candidate-qualification-${{ matrix.target }}-${{ github.run_attempt }}
+          retention-days: 90
+          path: ${{ runner.temp }}/qualification/*.json
+          if-no-files-found: error
       - name: Set up Homebrew
+        if: runner.os == 'Linux'
         shell: bash
         run: |
           set -euo pipefail
@@ -71,5 +130,6 @@ jobs:
           fi
           echo /home/linuxbrew/.linuxbrew/bin >> "$GITHUB_PATH"
       - name: Install generated formulae and check output
+        if: runner.os == 'Linux'
         shell: bash
         run: python3 scripts/test-linux-packages.py target/package-test-manifest.json "$PACKAGE_TARGET"
