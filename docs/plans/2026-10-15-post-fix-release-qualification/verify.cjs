@@ -1,0 +1,87 @@
+'use strict';
+const fs = require('node:fs');
+const path = require('node:path');
+const assert = require('node:assert/strict');
+const {createHash} = require('node:crypto');
+// Freeze the 0.0.66 evidence contract; later gate additions must not invalidate it.
+const targets = ['aarch64-apple-darwin', 'x86_64-apple-darwin', 'x86_64-pc-windows-msvc', 'x86_64-unknown-linux-gnu', 'aarch64-unknown-linux-gnu'];
+const requiredCases = ['archive_identity', 'version', 'reference_bytes', 'determinism', 'structured_success', 'structured_failure', 'preserve_previous_outputs', 'missing_input_json', 'unknown_cpu', 'incompatible_cpu', 'hardlink_source', 'hardlink_sidecar', 'formatter_container', 'formatter_origin', 'lua', 'upstream_project'];
+function qualifies(results) {
+  return results.length === 16 && new Set(results.map(r => r.name)).size === 16 && requiredCases.every(name => results.some(r => r.name === name && r.status === 'pass'));
+}
+function nativeTarget(platform, arch) {
+  return {'darwin-arm64': targets[0], 'darwin-x64': targets[1], 'win32-x64': targets[2], 'linux-x64': targets[3], 'linux-arm64': targets[4]}[`${platform}-${arch}`];
+}
+function packageIdentity(plan) {
+  assert.equal(plan.releases.length, 1); const release = plan.releases[0];
+  assert.equal(release.app_name, 'asm198x'); assert.equal(release.app_version, '0.0.66');
+  for (const target of targets) {
+    const name = `asm198x-${target}.${target.includes('windows') ? 'zip' : 'tar.xz'}`;
+    assert(release.artifacts.includes(name)); assert.deepEqual(plan.artifacts[name].target_triples, [target]);
+    assert.equal(plan.artifacts[name].checksum, name + '.sha256');
+  }
+  return {version: release.app_version};
+}
+const sha = bytes => createHash('sha256').update(bytes).digest('hex');
+function verify(root) {
+  const manifest = JSON.parse(fs.readFileSync(path.join(root, 'manifest.json')));
+  assert.equal(manifest.version, '0.0.66');
+  assert.equal(manifest.tag, 'asm198x-v0.0.66');
+  assert.match(manifest.release_commit, /^[a-f0-9]{40}$/);
+  const expected = ['verify.cjs', 'report.md', 'release-timeline.json'];
+  for (const phase of ['candidate', 'published']) for (const target of targets) {
+    for (const name of ['report.json', 'plan.json', 'acquisition.json', 'wrong-bytes.json', 'corrupt-archive.json']) expected.push(`${phase}/${target}/${name}`);
+  }
+  assert.deepEqual(Object.keys(manifest.files).sort(), expected.sort());
+  for (const [name, checksum] of Object.entries(manifest.files)) {
+    assert.equal(sha(fs.readFileSync(path.join(root, name))), checksum, `retained checksum ${name}`);
+  }
+  const timeline = JSON.parse(fs.readFileSync(path.join(root, 'release-timeline.json')));
+  assert.equal(timeline.databaseId.toString(), manifest.candidate_run);
+  assert.equal(timeline.headSha, manifest.release_commit);
+  assert.equal(timeline.status, 'completed'); assert.equal(timeline.conclusion, 'success');
+  const qualification = timeline.jobs.filter(j => j.name.includes('Qualify archive ('));
+  assert.equal(qualification.length, targets.length);
+  for (const job of qualification) assert.equal(job.conclusion, 'success');
+  const host = timeline.jobs.find(j => j.name === 'host');
+  assert(host && host.conclusion === 'success');
+  assert(Date.parse(host.startedAt) >= Math.max(...qualification.map(j => Date.parse(j.completedAt))), 'hosting preceded qualification');
+  const records = {};
+  for (const phase of ['candidate', 'published']) {
+    records[phase] = {};
+    for (const target of targets) {
+      const read = name => JSON.parse(fs.readFileSync(path.join(root, phase, target, name)));
+      const r = read('report.json');
+      assert.equal(r.target, target); assert.equal(r.version, manifest.version);
+      assert.equal(r.qualified, true); assert(qualifies(r.results), `${phase}/${target} qualification`);
+      assert.equal(nativeTarget(r.host.platform, r.host.arch), target);
+      assert.equal(r.host.github_run, manifest[`${phase}_run`]);
+      assert.equal(r.checksum_mutation_rejected, true);
+      for (const name of ['archive_sha256', 'executable_sha256']) assert.match(r[name], /^[a-f0-9]{64}$/);
+      const plan = read('plan.json');
+      assert.equal(packageIdentity(plan, target).version, manifest.version);
+      assert.equal(r.parsed_plan_sha256, sha(Buffer.from(JSON.stringify(plan))));
+      const acquisition = read('acquisition.json');
+      assert.equal(acquisition.run, manifest[`${phase}_run`]);
+      assert.equal(acquisition.checkout_commit, r.checkout_commit);
+      assert.equal(acquisition.kind, phase === 'candidate' ? 'candidate' : 'published-release');
+      if (phase === 'candidate') assert.equal(r.checkout_commit, manifest.release_commit);
+      else assert.equal(acquisition.published_version, manifest.version);
+      const wrong = read('wrong-bytes.json');
+      assert.equal(wrong.qualified, false);
+      assert.equal(wrong.target, target); assert.equal(wrong.archive_sha256, r.archive_sha256);
+      assert.equal(wrong.executable_sha256, r.executable_sha256);
+      assert.deepEqual(wrong.results.filter(x => x.status !== 'pass').map(x => x.name).sort(), ['reference_bytes', 'determinism', 'structured_success'].sort());
+      const corrupt = read('corrupt-archive.json');
+      assert.equal(corrupt.qualified, false); assert.equal(corrupt.target, target);
+      assert.deepEqual(corrupt.results, []); assert(corrupt.error.includes('SHA-256 mismatch'));
+      records[phase][target] = r;
+    }
+  }
+  for (const target of targets) for (const key of ['archive_sha256', 'executable_sha256', 'version', 'target']) {
+    assert.equal(records.candidate[target][key], records.published[target][key], `publication identity ${target}/${key}`);
+  }
+  console.log('Verified five native candidate/public pairs, 160 passing cases, 20 rejected corruption controls and retained-file hashes.');
+}
+module.exports = {verify};
+if (require.main === module) verify(path.resolve(process.argv[2] || __dirname));

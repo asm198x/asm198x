@@ -1,3 +1,6 @@
 # These source bytes are keys in the recorded reference corpus. A Windows
 # checkout must not rewrite the upstream fixture before include_str! reads it.
 crates/asm198x/tests/fixtures/lua/*.asm text eol=lf
+
+# Retained qualification manifests hash exact bytes on every checkout platform.
+docs/plans/2026-10-15-post-fix-release-qualification/** text eol=lf
