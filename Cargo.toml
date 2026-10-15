@@ -71,7 +71,7 @@ codegen-units = 1
 # cargo-dist release configuration. On a `v*` tag push (created by
 # release-plz when its release PR merges), .github/workflows/release.yml
 # builds the `asm198x` CLI for each target and attaches archives to a
-# GitHub Release. Regenerate that workflow with `dist generate` after
+# GitHub Release. Regenerate with `node scripts/generate-release-workflow.cjs` after
 # editing this section. The ISA crates now release from Isa198x.
 [workspace.metadata.dist]
 cargo-dist-version = "0.32.0"
@@ -87,7 +87,10 @@ tap = "asm198x/homebrew-tap"
 publish-jobs = ["homebrew"]
 targets = ["aarch64-apple-darwin", "x86_64-apple-darwin", "x86_64-unknown-linux-gnu", "aarch64-unknown-linux-gnu", "x86_64-pc-windows-msvc"]
 pr-run-mode = "plan"
-host-jobs = ["./test-linux-packages"]
+# The checked wrapper preserves cargo-dist output and tightens its skipped-job
+# publication guard. Candidate CI regenerates and compares the entire workflow.
+allow-dirty = ["ci"]
+global-artifacts-jobs = ["./test-linux-packages"]
 # Restrict dist to the flagship crate's tags.
 tag-namespace = "asm198x"
 # Announce each release in Discord. A custom job rather than an `on: release`
