@@ -1,6 +1,6 @@
 [package]
 name = "asm198x"
-description = "A family of modern, single-binary assemblers for retro CPUs. 6502 today; more to follow."
+description = "Assemblers and disassemblers for retro CPUs in a single binary"
 version.workspace = true
 edition.workspace = true
 license.workspace = true

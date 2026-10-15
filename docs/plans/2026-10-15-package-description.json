@@ -1,0 +1,8 @@
+{
+  "before": "A family of modern, single-binary assemblers for retro CPUs. 6502 today; more to follow.",
+  "after": "Assemblers and disassemblers for retro CPUs in a single binary",
+  "generated_formula_description": "desc \"Assemblers and disassemblers for retro CPUs in a single binary\"",
+  "formula_sha256": "8af760a4b1b5d5349510ae266064355be73978dda5492aa51ea48464800fc58d",
+  "metadata_other_fields_unchanged": true,
+  "dist_version": "0.32.0"
+}
