@@ -1,17 +1,20 @@
 # Distributed release host audit — 2026-10-15
 
 I exercised all five official CLI 0.0.65 archives. The same six checks fail on
-every architecture tested; they match defects already fixed on main. The
+every architecture tested. Their source fixes are linked below, including
+primary-image input protection in #670. The
 unchanged upstream Hello World build matches native ACME on every host. This
 is evidence of consistent behavior across these hosts, including consistent
 failures, rather than qualification of the release as defect-free.
 
-Two new follow-ups are filed:
+The follow-ups are:
 
 - [#667](https://github.com/asm198x/asm198x/issues/667): the browser README's
   `@asm198x/web` installation example returns public-registry HTTP 404.
 - [#668](https://github.com/asm198x/asm198x/issues/668): make the small failure
   and output-safety corpus gate actual candidate archives before promotion.
+- [#670](https://github.com/asm198x/asm198x/issues/670): protect consumed inputs
+  from primary-image writes; sidecar protection does not cover that write path.
 
 ## Release and method
 
@@ -98,12 +101,16 @@ controls worked; individual capability failures remain explicit in JSON and
 | Incompatible CPU with explicit dialect succeeds | [#608](https://github.com/asm198x/asm198x/issues/608) | [#665](https://github.com/asm198x/asm198x/pull/665) |
 | Formatter accepts an irrelevant container flag | [#658](https://github.com/asm198x/asm198x/issues/658) | [#662](https://github.com/asm198x/asm198x/pull/662) |
 | Formatter accepts irrelevant `--org 0` | [#663](https://github.com/asm198x/asm198x/issues/663) | [#664](https://github.com/asm198x/asm198x/pull/664) |
-| Hard-linked output overwrites source | [#651](https://github.com/asm198x/asm198x/issues/651) | [#654](https://github.com/asm198x/asm198x/pull/654) |
+| Hard-linked primary output overwrites source | [#670](https://github.com/asm198x/asm198x/issues/670) | Primary-image input guard (#670) |
 
-These are six failed checks for five previously tracked defects. I did not
-reopen the source-fixed issues or file duplicate implementation requests. They
-still affect the audited published version. The first release containing the
-fixes needs fresh archive execution; source CI alone cannot close that gap.
+These are six failed checks for five defects. The primary-image case is #670;
+#651/#654 protect sidecars and do not cover a primary-image write. The retained
+raw records' `existing_issue: 651` field is a historical attribution, not evidence
+that the primary case was fixed. Implementing #668 reproduced it on a current
+source candidate, so the primary-image guard is required independently.
+All six failures affect the audited published version. The first release
+containing their fixes needs fresh archive execution; source CI alone cannot
+close that gap.
 
 ## Shipped API surfaces
 

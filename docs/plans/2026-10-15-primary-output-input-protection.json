@@ -1,0 +1,16 @@
+{
+  "candidate_archive": "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin.tar.xz",
+  "before_hex": "2a3d24383030300a206e6f700a",
+  "after_hex": "ea",
+  "exit": 0,
+  "stdout": "",
+  "stderr": "assembled 1 byte(s) at $8000 -> output.bin\n",
+  "command": [
+    "asm198x",
+    "source.s",
+    "-o",
+    "output.bin"
+  ],
+  "source_checkout": "9ab2c7569edd962aeb778a72192777f22220528a",
+  "build_context": "Current assembler Rust tree; only #668 packaging/workflow files were uncommitted during the cargo-dist build."
+}

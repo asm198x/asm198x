@@ -865,3 +865,109 @@ fn linker_save_and_origin_options_keep_their_intended_effects() {
         );
     }
 }
+
+#[test]
+fn primary_images_preserve_consumed_inputs_through_aliases() {
+    for (dialect, source, included) in [
+        (
+            "acme",
+            "*=$1000\n!source \"body.inc\"\n!binary \"data.bin\"\n",
+            "start: lda #42\n",
+        ),
+        (
+            "pasmo",
+            " org $8000\n include \"body.inc\"\n incbin \"data.bin\"\n",
+            "start: nop\n",
+        ),
+        (
+            "ca65",
+            ".segment \"CODE\"\n.include \"body.inc\"\n.incbin \"data.bin\"\n",
+            "start: nop\n",
+        ),
+        (
+            "vasm",
+            " include \"body.inc\"\n incbin \"data.bin\"\n",
+            "start: moveq #42,d0\n",
+        ),
+    ] {
+        for mode in ["human", "json"] {
+            for target in ["program.s", "body.inc", "data.bin"] {
+                for alias in ["exact", "parent", "hard-link", "symlink", "windows-case"] {
+                    #[cfg(not(unix))]
+                    if alias == "symlink" {
+                        continue;
+                    }
+                    #[cfg(not(windows))]
+                    if alias == "windows-case" {
+                        continue;
+                    }
+                    let dir = Scratch::new();
+                    std::fs::create_dir(dir.0.join("nested")).expect("parent alias");
+                    std::fs::write(dir.0.join("program.s"), source).expect("root");
+                    std::fs::write(dir.0.join("body.inc"), included).expect("include");
+                    std::fs::write(dir.0.join("data.bin"), [0xde, 0xad]).expect("binary input");
+                    let control =
+                        assemble(&dir.0, dialect, mode, &["-o", "safe.bin", "--sym=out.sym"]);
+                    assert!(control.status.success(), "{dialect}/{mode}: {control:?}");
+                    let safe = std::fs::read(dir.0.join("safe.bin")).expect("valid output");
+                    assert!(!safe.is_empty());
+                    std::fs::write(dir.0.join("out.sym"), "previous symbols")
+                        .expect("seed sidecar");
+                    let destination = match alias {
+                        "exact" => target.to_string(),
+                        "parent" => format!("nested/../{target}"),
+                        "hard-link" => {
+                            std::fs::hard_link(dir.0.join(target), dir.0.join("alias.out"))
+                                .expect("hard link");
+                            "alias.out".into()
+                        }
+                        #[cfg(unix)]
+                        "symlink" => {
+                            std::os::unix::fs::symlink(target, dir.0.join("alias.out"))
+                                .expect("symlink");
+                            "alias.out".into()
+                        }
+                        "windows-case" => target.to_ascii_uppercase(),
+                        _ => unreachable!(),
+                    };
+                    let result = assemble(
+                        &dir.0,
+                        dialect,
+                        mode,
+                        &["-o", &destination, "--sym=out.sym"],
+                    );
+                    assert!(
+                        !result.status.success(),
+                        "{dialect}/{mode}/{target}/{alias}: {result:?}"
+                    );
+                    if mode == "json" {
+                        let value: serde_json::Value =
+                            serde_json::from_slice(&result.stdout).expect("diagnostic JSON");
+                        assert!(value.as_array().is_some_and(|items| !items.is_empty()));
+                        assert!(result.stderr.is_empty(), "{result:?}");
+                    }
+                    assert_eq!(
+                        std::fs::read_to_string(dir.0.join("program.s")).expect("preserved root"),
+                        source
+                    );
+                    assert_eq!(
+                        std::fs::read_to_string(dir.0.join("body.inc")).expect("preserved include"),
+                        included
+                    );
+                    assert_eq!(
+                        std::fs::read(dir.0.join("data.bin")).expect("preserved data"),
+                        [0xde, 0xad]
+                    );
+                    assert_eq!(
+                        std::fs::read(dir.0.join("safe.bin")).expect("prior image"),
+                        safe
+                    );
+                    assert_eq!(
+                        std::fs::read_to_string(dir.0.join("out.sym")).expect("prior sidecar"),
+                        "previous symbols"
+                    );
+                }
+            }
+        }
+    }
+}

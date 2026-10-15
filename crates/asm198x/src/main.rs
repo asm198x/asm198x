@@ -1572,6 +1572,19 @@ fn preflight_outputs(
     sym_format: asm198x::SymbolFormat,
 ) -> Result<(), String> {
     if let Some(image) = image {
+        // The root is read before the recording loader; its inputs contain
+        // includes, binary data and linker configuration, not the root itself.
+        for source in
+            std::iter::once(Path::new(input)).chain(consumed_inputs.iter().map(PathBuf::as_path))
+        {
+            if output_collides(image, source)? {
+                return Err(format!(
+                    "refusing to overwrite input {} with the primary image at {}",
+                    source.display(),
+                    image.display()
+                ));
+            }
+        }
         preflight_destination(image)?;
     }
     let default_image = Path::new(input).with_extension("bin");
