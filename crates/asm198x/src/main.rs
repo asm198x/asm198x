@@ -948,6 +948,14 @@ fn run(args: &[String]) -> Result<String, String> {
             _ => output
                 .unwrap_or_else(|| Path::new(input).with_extension(if exe { "" } else { "bin" })),
         };
+        preflight_outputs(
+            input,
+            Some(&out_path),
+            &result,
+            outprefix.as_deref(),
+            [&debug, &sym, &listing, &listing_json, &map_report],
+            sym_format,
+        )?;
         std::fs::write(&out_path, &result.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
         let artifact_notes =
@@ -1022,6 +1030,14 @@ fn run(args: &[String]) -> Result<String, String> {
             ),
         };
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("nes"));
+        preflight_outputs(
+            input,
+            Some(&out_path),
+            &rom,
+            outprefix.as_deref(),
+            [&debug, &sym, &listing, &listing_json, &map_report],
+            sym_format,
+        )?;
         std::fs::write(&out_path, &rom.bytes)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
         let sources = listing_sources(input, &source, &rom.files, &loader.take());
@@ -1075,6 +1091,17 @@ fn run(args: &[String]) -> Result<String, String> {
         eprintln!("asm198x: {file}: {w}");
     }
 
+    let preflight = |image: &Path| {
+        preflight_outputs(
+            input,
+            Some(image),
+            &assembly,
+            outprefix.as_deref(),
+            [&debug, &sym, &listing, &listing_json, &map_report],
+            sym_format,
+        )
+    };
+
     // `--sna`: wrap the assembled Spectrum program in a 48K snapshot; `--prg`:
     // prefix the C64 load address; else a flat binary.
     let (summary, image_path) = if let Some((format, autorun)) = tape {
@@ -1088,6 +1115,7 @@ fn run(args: &[String]) -> Result<String, String> {
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension(extension));
         let image = asm198x::tape(&assembly, format, &out_path.to_string_lossy(), autorun)
             .map_err(|e| render_error(input, &files, &e))?;
+        preflight(&out_path)?;
         std::fs::write(&out_path, &image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
         let summary = format!(
@@ -1103,6 +1131,7 @@ fn run(args: &[String]) -> Result<String, String> {
         // `end <addr>` fails here, before any file is written.
         let image = asm198x::sna_48k(&assembly).map_err(|e| render_error(input, &files, &e))?;
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("sna"));
+        preflight(&out_path)?;
         std::fs::write(&out_path, &image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
         let summary = format!(
@@ -1114,6 +1143,7 @@ fn run(args: &[String]) -> Result<String, String> {
     } else if prg {
         let image = asm198x::prg(&assembly);
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("prg"));
+        preflight(&out_path)?;
         std::fs::write(&out_path, &image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
         let summary = format!(
@@ -1129,6 +1159,7 @@ fn run(args: &[String]) -> Result<String, String> {
             eprintln!("asm198x: warning: overwrote a non-zero byte in the Nintendo logo");
         }
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("gb"));
+        preflight(&out_path)?;
         std::fs::write(&out_path, &image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
         let summary = format!(
@@ -1161,6 +1192,7 @@ fn run(args: &[String]) -> Result<String, String> {
                 )
             }
         };
+        preflight(&out_path)?;
         std::fs::write(&out_path, image)
             .map_err(|e| format!("cannot write {}: {e}", out_path.display()))?;
         let summary = format!(
@@ -1271,12 +1303,7 @@ fn write_artifacts(
 ) -> Result<Vec<String>, String> {
     let mut notes = Vec::new();
     for artifact in artifacts {
-        let named = Path::new(&artifact.name);
-        let path = match (outprefix, named.is_absolute()) {
-            (Some(prefix), _) => prefix.join(named),
-            (None, true) => named.to_path_buf(),
-            (None, false) => out_path.parent().unwrap_or(Path::new(".")).join(named),
-        };
+        let path = artifact_destination(&artifact.name, out_path, outprefix);
         std::fs::write(&path, &artifact.bytes)
             .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
         notes.push(format!(
@@ -1286,6 +1313,125 @@ fn write_artifacts(
         ));
     }
     Ok(notes)
+}
+
+fn artifact_destination(name: &str, image: &Path, prefix: Option<&Path>) -> PathBuf {
+    let named = Path::new(name);
+    match (prefix, named.is_absolute()) {
+        (Some(prefix), _) => prefix.join(named),
+        (None, true) => named.to_path_buf(),
+        (None, false) => image.parent().unwrap_or(Path::new(".")).join(named),
+    }
+}
+
+/// Reject predictable destination failures without creating or truncating files.
+/// Actual writes must still handle I/O errors: permissions can change, disks can
+/// fill, and this check does not make a group of writes atomic.
+fn preflight_destination(path: &Path) -> Result<(), String> {
+    let check = || -> std::io::Result<()> {
+        match std::fs::metadata(path) {
+            Ok(metadata) => {
+                if metadata.is_dir() {
+                    return Err(std::io::ErrorKind::IsADirectory.into());
+                }
+                if metadata.permissions().readonly() {
+                    return Err(std::io::ErrorKind::PermissionDenied.into());
+                }
+            }
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                let parent = path
+                    .parent()
+                    .filter(|p| !p.as_os_str().is_empty())
+                    .unwrap_or(Path::new("."));
+                let metadata = std::fs::metadata(parent)?;
+                if !metadata.is_dir() {
+                    return Err(std::io::ErrorKind::NotADirectory.into());
+                }
+                if metadata.permissions().readonly() {
+                    return Err(std::io::ErrorKind::PermissionDenied.into());
+                }
+            }
+            Err(error) => return Err(error),
+        }
+        Ok(())
+    };
+    check().map_err(|error| format!("cannot write {}: {error}", path.display()))
+}
+
+fn sidecar_destination(
+    input: &str,
+    image: Option<&Path>,
+    requested: &Option<PathBuf>,
+    extension: &str,
+    what: &str,
+) -> Result<PathBuf, String> {
+    let path = requested
+        .clone()
+        .unwrap_or_else(|| Path::new(input).with_extension(extension));
+    if path == Path::new(input) {
+        let hint = if what == "memory map" {
+            "pass `--map=<path>`"
+        } else {
+            "pass an explicit `=<path>`"
+        };
+        return Err(format!(
+            "refusing to overwrite the input with the {what} — {hint}"
+        ));
+    }
+    if image.is_some_and(|image| path == image) {
+        let hint = if what == "memory map" {
+            "pass `--map=<path>`"
+        } else {
+            "pass a different `=<path>`"
+        };
+        return Err(format!(
+            "refusing to overwrite the output image with the {what} — {hint}"
+        ));
+    }
+    Ok(path)
+}
+
+fn preflight_outputs(
+    input: &str,
+    image: Option<&Path>,
+    assembly: &asm198x::AssemblyResult,
+    outprefix: Option<&Path>,
+    [debug, sym, listing, listing_json, map]: [&ArtifactPath; 5],
+    sym_format: asm198x::SymbolFormat,
+) -> Result<(), String> {
+    if let Some(image) = image {
+        preflight_destination(image)?;
+    }
+    let default_image = Path::new(input).with_extension("bin");
+    for artifact in &assembly.artifacts {
+        preflight_destination(&artifact_destination(
+            &artifact.name,
+            image.unwrap_or(&default_image),
+            outprefix,
+        ))?;
+    }
+    let requested_sym = match (sym, &assembly.requested_symbols) {
+        (None, Some(named)) => Some(Some(source_named_path(input, named)?)),
+        _ => None,
+    };
+    let sym = if sym.is_some() { sym } else { &requested_sym };
+    let sym_ext = if sym_format == asm198x::SymbolFormat::Vice {
+        "vs"
+    } else {
+        "sym"
+    };
+    for (flag, ext, what) in [
+        (debug, "debug198x", "debug sidecar"),
+        (sym, sym_ext, "symbol table"),
+        (listing, "lst", "listing"),
+        (listing_json, "lst.json", "JSON listing"),
+        (map, "map", "memory map"),
+    ] {
+        if let Some(requested) = flag {
+            preflight_destination(&sidecar_destination(input, image, requested, ext, what)?)?;
+        }
+    }
+    Ok(())
 }
 
 /// Frame the image the way `!to`'s format asks.
@@ -1334,23 +1480,7 @@ fn write_debug_artifacts(
 ) -> Result<String, String> {
     let mut notes = String::new();
     let mut emit = |path: &Option<PathBuf>, ext: &str, what: &str, content: String| {
-        let path = path
-            .clone()
-            .unwrap_or_else(|| Path::new(input).with_extension(ext));
-        // An input already named `*.{ext}` would make the default path the
-        // input itself — refuse rather than overwrite the source. The image
-        // output gets the same protection: an artifact landing on the just-
-        // written binary would silently clobber it.
-        if path == Path::new(input) {
-            return Err(format!(
-                "refusing to overwrite the input with the {what} — pass an explicit `=<path>`"
-            ));
-        }
-        if image.is_some_and(|image| path == image) {
-            return Err(format!(
-                "refusing to overwrite the output image with the {what} — pass a different `=<path>`"
-            ));
-        }
+        let path = sidecar_destination(input, image, path, ext, what)?;
         std::fs::write(&path, content)
             .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
         notes.push_str(&format!("\nwrote {} ({what})", path.display()));
@@ -1603,20 +1733,7 @@ fn write_map(
     let Some(path) = map_report else {
         return Ok(String::new());
     };
-    let path = path
-        .clone()
-        .unwrap_or_else(|| Path::new(input).with_extension("map"));
-    if path == Path::new(input) {
-        return Err(
-            "refusing to overwrite the input with the memory map — pass `--map=<path>`".into(),
-        );
-    }
-    if image.is_some_and(|image| path == image) {
-        return Err(
-            "refusing to overwrite the output image with the memory map — pass `--map=<path>`"
-                .into(),
-        );
-    }
+    let path = sidecar_destination(input, image, path, "map", "memory map")?;
     std::fs::write(&path, asm198x::render_map(result))
         .map_err(|e| format!("cannot write {}: {e}", path.display()))?;
     Ok(format!("\nwrote {} (memory map)", path.display()))
@@ -1899,6 +2016,14 @@ fn emit_json(
                 _ => None,
             };
             let sym = if sym.is_some() { sym } else { &requested_sym };
+            preflight_outputs(
+                input,
+                output,
+                &assembly,
+                outprefix,
+                [debug, sym, listing, listing_json, &None],
+                sym_format,
+            )?;
             if let Some(path) = output {
                 std::fs::write(
                     path,
