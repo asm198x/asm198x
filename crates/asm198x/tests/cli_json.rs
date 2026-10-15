@@ -317,6 +317,44 @@ fn json_io_failures_use_the_diagnostic_array_and_preserve_previous_outputs() {
 }
 
 #[test]
+fn device_range_errors_name_the_included_source_in_both_reporting_modes() {
+    let dir = NativeOutputDir::new("device-span");
+    let src = dir.0.join("main.asm");
+    std::fs::write(&src, " DEVICE ZXSPECTRUM128\n include \"body.inc\"\n").expect("root");
+    let included = dir.0.join("body.inc");
+    for directive in ["PAGE 8", "SLOT 4"] {
+        std::fs::write(&included, format!("; device selection\n {directive}\n")).expect("include");
+        for mode in ["human", "json"] {
+            let output = bin()
+                .args(["--dialect", "sjasmplus", "--message-format", mode])
+                .arg(&src)
+                .output()
+                .expect("invalid device index");
+            assert!(!output.status.success());
+            if mode == "json" {
+                assert!(output.stderr.is_empty());
+                let diagnostics: Vec<Diagnostic> =
+                    serde_json::from_slice(&output.stdout).expect("JSON diagnostics");
+                assert_eq!(diagnostics.len(), 1);
+                let span = diagnostics[0].span.as_ref().expect("source location");
+                assert_eq!(span.line, 2);
+                assert!(
+                    span.path
+                        .as_ref()
+                        .expect("resolved path")
+                        .ends_with("body.inc")
+                );
+            } else {
+                assert!(output.stdout.is_empty());
+                let message = String::from_utf8_lossy(&output.stderr);
+                assert!(message.contains("body.inc:2:"), "{message}");
+                assert!(message.contains("included from"), "{message}");
+            }
+        }
+    }
+}
+
+#[test]
 fn human_io_failures_keep_terminal_messages() {
     let dir = NativeOutputDir::new("human-io");
     let run = bin()

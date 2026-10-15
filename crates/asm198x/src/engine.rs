@@ -1930,7 +1930,9 @@ fn assemble_statements(
                     .eval(&symbols, pc, s.line)
                     .map_err(|err| s.stamp(err))?;
                 if let Some(memory) = &mut device_memory {
-                    memory.select_slot(slot).map_err(|err| s.stamp(err))?;
+                    memory
+                        .select_slot(slot)
+                        .map_err(|err| s.operand_err(err.message))?;
                 }
             }
             Some(Operation::DevicePage(page)) => {
@@ -1938,7 +1940,9 @@ fn assemble_statements(
                     .eval(&symbols, pc, s.line)
                     .map_err(|err| s.stamp(err))?;
                 if let Some(memory) = &mut device_memory {
-                    memory.map_page(page).map_err(|err| s.stamp(err))?;
+                    memory
+                        .map_page(page)
+                        .map_err(|err| s.operand_err(err.message))?;
                 }
                 // PAGE is also a raw-output section boundary. Its address is
                 // the live counter; placement remains source-consecutive.
