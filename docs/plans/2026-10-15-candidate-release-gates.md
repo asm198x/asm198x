@@ -70,3 +70,9 @@ Windows then built its package successfully but archive extraction failed with
 interprets a drive-letter archive argument as a remote host. Extract using the
 archive basename with its directory as cwd, keeping member selection and byte
 verification unchanged. The fatal JSON report preserved this acquisition error.
+
+A local ZIP control also proves GNU tar cannot read the Windows archive at all
+(exit 2, "This does not look like a tar archive"), while libarchive tar extracts
+the exact control bytes. Select Windows' built-in System32 tar explicitly under
+Git Bash, matching the working setup-action extractor, and keep basename/cwd
+extraction. This addresses both drive-letter interpretation and ZIP support.
