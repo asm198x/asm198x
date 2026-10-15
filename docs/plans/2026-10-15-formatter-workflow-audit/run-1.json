@@ -1,0 +1,1124 @@
+{
+  "identity": {
+    "source_commit": "b2835c87886f76fdb4686901c7ed1aeb930c826a",
+    "binary_sha256": "eb473a460793d44f8b6571ab47646b398a3a553dc9a7705e7f3c352095567d5b",
+    "binary_version": "asm198x v0.0.65",
+    "host": "macOS-27.0-arm64-arm-64bit-Mach-O",
+    "python": "3.14.3"
+  },
+  "cases": [
+    {
+      "name": "acme-conditional",
+      "control": false,
+      "checks": {
+        "comments_preserved": false,
+        "byte_parity": true,
+        "idempotent": true
+      },
+      "violations": [
+        "comments_preserved"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "acme",
+            "program.s",
+            "-o",
+            "original.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $1000 -> original.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "program.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> formatted.s\n"
+        },
+        {
+          "args": [
+            "--dialect",
+            "acme",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $1000 -> formatted.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        }
+      ],
+      "details": {
+        "source": "*=$1000\n!if 1 { ; head\n!byte 1\n} else { ; middle\n!byte 2\n} ; tail\n",
+        "formatted": "        *= $1000\n!if 1 {   ; head\n        !byte 1\n} else {\n        !byte 2\n}\n",
+        "missing_comments": [
+          "; middle",
+          "; tail"
+        ]
+      }
+    },
+    {
+      "name": "acme-for",
+      "control": false,
+      "checks": {
+        "comments_preserved": false,
+        "byte_parity": true,
+        "idempotent": true
+      },
+      "violations": [
+        "comments_preserved"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "acme",
+            "program.s",
+            "-o",
+            "original.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> original.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "program.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> formatted.s\n"
+        },
+        {
+          "args": [
+            "--dialect",
+            "acme",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> formatted.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        }
+      ],
+      "details": {
+        "source": "*=$1000\n!for i,1,3 { ; head\n!byte i\n} ; tail\n",
+        "formatted": "        *= $1000\n!for i,1,3 {   ; head\n        !byte i\n}\n",
+        "missing_comments": [
+          "; tail"
+        ]
+      }
+    },
+    {
+      "name": "acme-do",
+      "control": false,
+      "checks": {
+        "comments_preserved": false,
+        "byte_parity": true,
+        "idempotent": true
+      },
+      "violations": [
+        "comments_preserved"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "acme",
+            "program.s",
+            "-o",
+            "original.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> original.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "program.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> formatted.s\n"
+        },
+        {
+          "args": [
+            "--dialect",
+            "acme",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $1000 -> formatted.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        }
+      ],
+      "details": {
+        "source": "*=$1000\n!set i=0\n!do { ; head\n!byte i\n!set i=i+1\n} until i=3 ; tail\n",
+        "formatted": "        *= $1000\n        !set i=0\n!do {   ; head\n        !byte i\n        !set i=i+1\n} until i=3\n",
+        "missing_comments": [
+          "; tail"
+        ]
+      }
+    },
+    {
+      "name": "sjasmplus-dup",
+      "control": false,
+      "checks": {
+        "comments_preserved": false,
+        "byte_parity": true,
+        "idempotent": true
+      },
+      "violations": [
+        "comments_preserved"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "sjasmplus",
+            "program.s",
+            "-o",
+            "original.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> original.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "program.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> formatted.s\n"
+        },
+        {
+          "args": [
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        }
+      ],
+      "details": {
+        "source": " org $8000\n DUP 2 ; head\n DB 1\n EDUP ; tail\n",
+        "formatted": "        org $8000\n        DUP 2\n        DB 1\n        EDUP\n",
+        "missing_comments": [
+          "; head",
+          "; tail"
+        ]
+      }
+    },
+    {
+      "name": "acme-zone-control",
+      "control": true,
+      "checks": {
+        "comments_preserved": true,
+        "byte_parity": true,
+        "idempotent": true
+      },
+      "violations": [],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "acme",
+            "program.s",
+            "-o",
+            "original.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $1000 -> original.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "program.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> formatted.s\n"
+        },
+        {
+          "args": [
+            "--dialect",
+            "acme",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $1000 -> formatted.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        }
+      ],
+      "details": {
+        "source": "*=$1000\n!zone z { ; head\n.loop: nop\n} ; tail\n",
+        "formatted": "        *= $1000\n        !zone z {   ; head\n.loop:\n        nop\n        }   ; tail\n",
+        "missing_comments": []
+      }
+    },
+    {
+      "name": "acme-macro-control",
+      "control": true,
+      "checks": {
+        "comments_preserved": true,
+        "byte_parity": true,
+        "idempotent": true
+      },
+      "violations": [],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "acme",
+            "program.s",
+            "-o",
+            "original.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> original.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "program.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> formatted.s\n"
+        },
+        {
+          "args": [
+            "--dialect",
+            "acme",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> formatted.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        }
+      ],
+      "details": {
+        "source": "*=$1000\n!macro m .a { ; head\nlda #.a\n} ; tail\n+m 2\n",
+        "formatted": "        *= $1000\n!macro m .a {   ; head\nlda #.a\n}   ; tail\n        +m 2\n",
+        "missing_comments": []
+      }
+    },
+    {
+      "name": "sjasmplus-if-control",
+      "control": true,
+      "checks": {
+        "comments_preserved": true,
+        "byte_parity": true,
+        "idempotent": true
+      },
+      "violations": [],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "sjasmplus",
+            "program.s",
+            "-o",
+            "original.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $8000 -> original.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "program.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> formatted.s\n"
+        },
+        {
+          "args": [
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        }
+      ],
+      "details": {
+        "source": " org $8000\n IF 1 ; head\n DB 1\n ELSE ; middle\n DB 2\n ENDIF ; tail\n",
+        "formatted": "        org $8000\n        IF 1   ; head\n        DB 1\n        ELSE\n        ; middle\n        DB 2\n        ENDIF\n; tail\n",
+        "missing_comments": []
+      }
+    },
+    {
+      "name": "equ-error-human-0",
+      "control": true,
+      "checks": {
+        "rejected": true,
+        "root_line_is_two": true,
+        "image_preserved": true
+      },
+      "violations": [],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "human",
+            "program.s",
+            "-o",
+            "image.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: program.s:2: error: expected a value\n"
+        }
+      ],
+      "details": {
+        "source": " org $8000\n ld a,(\n",
+        "reported_line": 2
+      }
+    },
+    {
+      "name": "equ-error-human-1",
+      "control": false,
+      "checks": {
+        "rejected": true,
+        "root_line_is_two": false,
+        "image_preserved": true
+      },
+      "violations": [
+        "root_line_is_two"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "human",
+            "program.s",
+            "-o",
+            "image.bin",
+            "--equ",
+            "FEATURE0=1"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: program.s:3: error: expected a value\n"
+        }
+      ],
+      "details": {
+        "source": " org $8000\n ld a,(\n",
+        "reported_line": 3
+      }
+    },
+    {
+      "name": "equ-error-human-2",
+      "control": false,
+      "checks": {
+        "rejected": true,
+        "root_line_is_two": false,
+        "image_preserved": true
+      },
+      "violations": [
+        "root_line_is_two"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "human",
+            "program.s",
+            "-o",
+            "image.bin",
+            "--equ",
+            "FEATURE0=1",
+            "--equ",
+            "FEATURE1=1"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: program.s:4: error: expected a value\n"
+        }
+      ],
+      "details": {
+        "source": " org $8000\n ld a,(\n",
+        "reported_line": 4
+      }
+    },
+    {
+      "name": "equ-error-json-0",
+      "control": true,
+      "checks": {
+        "rejected": true,
+        "root_line_is_two": true,
+        "image_preserved": true
+      },
+      "violations": [],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "json",
+            "program.s",
+            "-o",
+            "image.bin"
+          ],
+          "exit": 1,
+          "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":0,\"expansion_frames\":[],\"path\":\"program.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ],
+      "details": {
+        "source": " org $8000\n ld a,(\n",
+        "reported_line": 2
+      }
+    },
+    {
+      "name": "equ-error-json-1",
+      "control": false,
+      "checks": {
+        "rejected": true,
+        "root_line_is_two": false,
+        "image_preserved": true
+      },
+      "violations": [
+        "root_line_is_two"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "json",
+            "program.s",
+            "-o",
+            "image.bin",
+            "--equ",
+            "FEATURE0=1"
+          ],
+          "exit": 1,
+          "stdout": "[{\"span\":{\"file\":0,\"line\":3,\"col\":0,\"expansion_frames\":[],\"path\":\"program.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ],
+      "details": {
+        "source": " org $8000\n ld a,(\n",
+        "reported_line": 3
+      }
+    },
+    {
+      "name": "equ-error-json-2",
+      "control": false,
+      "checks": {
+        "rejected": true,
+        "root_line_is_two": false,
+        "image_preserved": true
+      },
+      "violations": [
+        "root_line_is_two"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "json",
+            "program.s",
+            "-o",
+            "image.bin",
+            "--equ",
+            "FEATURE0=1",
+            "--equ",
+            "FEATURE1=1"
+          ],
+          "exit": 1,
+          "stdout": "[{\"span\":{\"file\":0,\"line\":4,\"col\":0,\"expansion_frames\":[],\"path\":\"program.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"expected a value\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ],
+      "details": {
+        "source": " org $8000\n ld a,(\n",
+        "reported_line": 4
+      }
+    },
+    {
+      "name": "equ-debug-0",
+      "control": true,
+      "checks": {
+        "machine_code": true,
+        "debug_root_line_is_two": true,
+        "cycle_root_line_is_two": true
+      },
+      "violations": [],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "pasmo",
+            "--message-format=json",
+            "program.s"
+          ],
+          "exit": 0,
+          "stdout": "{\"version\":1,\"bytes\":[62,1],\"origin\":32768,\"symbols\":{\"start\":32768},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[{\"name\":\"start\",\"kind\":\"label\",\"section\":0,\"offset\":0}],\"lines\":[{\"line\":2,\"offset\":0,\"length\":2}],\"cycles\":[{\"line\":2,\"offset\":0,\"base\":7,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"program.s\"]}\n",
+          "stderr": ""
+        }
+      ],
+      "details": {
+        "source": " org $8000\nstart: ld a,1\n",
+        "debug_lines": [
+          2
+        ],
+        "cycle_lines": [
+          2
+        ]
+      }
+    },
+    {
+      "name": "equ-debug-1",
+      "control": false,
+      "checks": {
+        "machine_code": true,
+        "debug_root_line_is_two": false,
+        "cycle_root_line_is_two": false
+      },
+      "violations": [
+        "debug_root_line_is_two",
+        "cycle_root_line_is_two"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "pasmo",
+            "--message-format=json",
+            "program.s",
+            "--equ",
+            "FEATURE0=1"
+          ],
+          "exit": 0,
+          "stdout": "{\"version\":1,\"bytes\":[62,1],\"origin\":32768,\"symbols\":{\"FEATURE0\":1,\"start\":32768},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[{\"name\":\"FEATURE0\",\"kind\":\"const\",\"value\":1},{\"name\":\"start\",\"kind\":\"label\",\"section\":0,\"offset\":0}],\"lines\":[{\"line\":3,\"offset\":0,\"length\":2}],\"cycles\":[{\"line\":3,\"offset\":0,\"base\":7,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"program.s\"]}\n",
+          "stderr": ""
+        }
+      ],
+      "details": {
+        "source": " org $8000\nstart: ld a,1\n",
+        "debug_lines": [
+          3
+        ],
+        "cycle_lines": [
+          3
+        ]
+      }
+    },
+    {
+      "name": "equ-debug-2",
+      "control": false,
+      "checks": {
+        "machine_code": true,
+        "debug_root_line_is_two": false,
+        "cycle_root_line_is_two": false
+      },
+      "violations": [
+        "debug_root_line_is_two",
+        "cycle_root_line_is_two"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "pasmo",
+            "--message-format=json",
+            "program.s",
+            "--equ",
+            "FEATURE0=1",
+            "--equ",
+            "FEATURE1=1"
+          ],
+          "exit": 0,
+          "stdout": "{\"version\":1,\"bytes\":[62,1],\"origin\":32768,\"symbols\":{\"FEATURE0\":1,\"FEATURE1\":1,\"start\":32768},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[{\"name\":\"FEATURE0\",\"kind\":\"const\",\"value\":1},{\"name\":\"FEATURE1\",\"kind\":\"const\",\"value\":1},{\"name\":\"start\",\"kind\":\"label\",\"section\":0,\"offset\":0}],\"lines\":[{\"line\":4,\"offset\":0,\"length\":2}],\"cycles\":[{\"line\":4,\"offset\":0,\"base\":7,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"program.s\"]}\n",
+          "stderr": ""
+        }
+      ],
+      "details": {
+        "source": " org $8000\nstart: ld a,1\n",
+        "debug_lines": [
+          4
+        ],
+        "cycle_lines": [
+          4
+        ]
+      }
+    },
+    {
+      "name": "fmt-container---prg",
+      "control": false,
+      "checks": {
+        "incompatible_option_rejected": false,
+        "destination_preserved": false
+      },
+      "violations": [
+        "incompatible_option_rejected",
+        "destination_preserved"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "acme",
+            "program.s",
+            "--prg",
+            "-o",
+            "image.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 4 byte(s) -> image.bin (load $1000)\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "program.s",
+            "-o",
+            "valid.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> valid.s\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "program.s",
+            "--prg",
+            "-o",
+            "destination"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> destination\n"
+        }
+      ],
+      "details": {
+        "source": "*=$1000\nlda #1\n",
+        "destination": "        *= $1000\n        lda #1\n"
+      }
+    },
+    {
+      "name": "fmt-container---tapbas",
+      "control": false,
+      "checks": {
+        "incompatible_option_rejected": false,
+        "destination_preserved": false
+      },
+      "violations": [
+        "incompatible_option_rejected",
+        "destination_preserved"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "pasmo",
+            "program.s",
+            "--tapbas",
+            "-o",
+            "image.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 122 byte(s) -> image.bin (tap tape, auto-run)\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "pasmo",
+            "program.s",
+            "-o",
+            "valid.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> valid.s\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "pasmo",
+            "program.s",
+            "--tapbas",
+            "-o",
+            "destination"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> destination\n"
+        }
+      ],
+      "details": {
+        "source": " org $8000\nstart: nop\n end start\n",
+        "destination": "        org $8000\nstart:\n        nop\n        end start\n"
+      }
+    },
+    {
+      "name": "fmt-container---exe",
+      "control": false,
+      "checks": {
+        "incompatible_option_rejected": false,
+        "destination_preserved": false
+      },
+      "violations": [
+        "incompatible_option_rejected",
+        "destination_preserved"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "vasm",
+            "program.s",
+            "--exe",
+            "-o",
+            "image.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 40 byte(s) -> image.bin\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "vasm",
+            "program.s",
+            "-o",
+            "valid.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> valid.s\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "vasm",
+            "program.s",
+            "--exe",
+            "-o",
+            "destination"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> destination\n"
+        }
+      ],
+      "details": {
+        "source": "start: moveq #1,d0\n rts\n",
+        "destination": "start:\n        moveq #1,d0\n        rts\n"
+      }
+    },
+    {
+      "name": "fmt-container---gb-rom",
+      "control": false,
+      "checks": {
+        "incompatible_option_rejected": false,
+        "destination_preserved": false
+      },
+      "violations": [
+        "incompatible_option_rejected",
+        "destination_preserved"
+      ],
+      "runs": [
+        {
+          "args": [
+            "--dialect",
+            "rgbasm",
+            "program.s",
+            "--gb-rom",
+            "-o",
+            "image.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + finalised 32768 byte(s) -> image.bin (Game Boy ROM)\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "rgbasm",
+            "program.s",
+            "-o",
+            "valid.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> valid.s\n"
+        },
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "rgbasm",
+            "program.s",
+            "--gb-rom",
+            "-o",
+            "destination"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted program.s -> destination\n"
+        }
+      ],
+      "details": {
+        "source": "SECTION \"main\", ROM0[$100]\n ds $50,0\nstart: nop\n",
+        "destination": "        SECTION \"main\", ROM0[$100]\n        ds $50,0\nstart:\n        nop\n"
+      }
+    },
+    {
+      "name": "fmt-rejection-control---sym",
+      "control": true,
+      "checks": {
+        "rejected": true,
+        "destination_preserved": true
+      },
+      "violations": [],
+      "runs": [
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "pasmo",
+            "program.s",
+            "--sym",
+            "-o",
+            "destination"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: `--debug`/`--sym`/`--listing` apply to an assembly run, not `--fmt`/`--disasm`\n"
+        }
+      ],
+      "details": {
+        "source": " org $8000\n ld a,1\n"
+      }
+    },
+    {
+      "name": "fmt-rejection-control---equ=FEATURE=1",
+      "control": true,
+      "checks": {
+        "rejected": true,
+        "destination_preserved": true
+      },
+      "violations": [],
+      "runs": [
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "pasmo",
+            "program.s",
+            "--equ=FEATURE=1",
+            "-o",
+            "destination"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: `--equ` is an assembly option for the pasmo/pasmonext dialects\n"
+        }
+      ],
+      "details": {
+        "source": " org $8000\n ld a,1\n"
+      }
+    },
+    {
+      "name": "fmt-invalid-source-control",
+      "control": true,
+      "checks": {
+        "rejected": true,
+        "destination_preserved": true
+      },
+      "violations": [],
+      "runs": [
+        {
+          "args": [
+            "fmt",
+            "--dialect",
+            "acme",
+            "program.s",
+            "-o",
+            "destination"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: program.s: line 2: found end-of-file instead of `}`\n"
+        }
+      ],
+      "details": {}
+    }
+  ],
+  "summary": {
+    "cases": 23,
+    "violating_cases": 14,
+    "passing_cases": 9
+  }
+}
