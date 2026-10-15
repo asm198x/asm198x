@@ -253,11 +253,12 @@ struct IncludeLoad {
 /// loader. The success path of the `assemble_*_files` entries returns only
 /// the file table, so this is how the CLI keeps each included file's contents
 /// and include point for `--listing` (language-surface U9). Un-lined
-/// `load_text` probes (the ca65-flat resolution probing) and binary loads
-/// pass through unrecorded — they are not include registrations.
+/// `load_text` probes and binary loads are tracked separately as consumed
+/// inputs for output preflight; they are not include registrations.
 struct RecordingLoader<'a> {
     inner: &'a dyn asm198x::source::SourceLoader,
     log: std::cell::RefCell<Vec<IncludeLoad>>,
+    inputs: std::cell::RefCell<Vec<PathBuf>>,
 }
 
 impl<'a> RecordingLoader<'a> {
@@ -265,6 +266,7 @@ impl<'a> RecordingLoader<'a> {
         Self {
             inner,
             log: std::cell::RefCell::new(Vec::new()),
+            inputs: std::cell::RefCell::new(Vec::new()),
         }
     }
 
@@ -281,7 +283,9 @@ impl asm198x::source::SourceLoader for RecordingLoader<'_> {
         request: &str,
         from: Option<&str>,
     ) -> Result<(String, String), asm198x::source::LoadError> {
-        self.inner.load_text(request, from)
+        let loaded = self.inner.load_text(request, from)?;
+        self.inputs.borrow_mut().push(PathBuf::from(&loaded.0));
+        Ok(loaded)
     }
 
     fn load_text_at(
@@ -291,6 +295,7 @@ impl asm198x::source::SourceLoader for RecordingLoader<'_> {
         line: u32,
     ) -> Result<(String, String), asm198x::source::LoadError> {
         let (canonical, contents) = self.inner.load_text_at(request, from, line)?;
+        self.inputs.borrow_mut().push(PathBuf::from(&canonical));
         self.log.borrow_mut().push(IncludeLoad {
             canonical: canonical.clone(),
             contents: contents.clone(),
@@ -305,7 +310,19 @@ impl asm198x::source::SourceLoader for RecordingLoader<'_> {
         request: &str,
         from: Option<&str>,
     ) -> Result<Vec<u8>, asm198x::source::LoadError> {
-        self.inner.load_binary(request, from)
+        let bytes = self.inner.load_binary(request, from)?;
+        // The CLI's FsLoader resolves text and binary requests identically,
+        // and this probe canonicalizes the path without interpreting bytes.
+        let canonical =
+            self.inner
+                .resolve_text(request, from)
+                .ok_or_else(|| asm198x::source::LoadError {
+                    request: request.to_owned(),
+                    from: from.map(str::to_owned),
+                    message: "cannot resolve consumed binary input".to_owned(),
+                })?;
+        self.inputs.borrow_mut().push(PathBuf::from(canonical));
+        Ok(bytes)
     }
 
     fn resolve_text(&self, request: &str, from: Option<&str>) -> Option<String> {
@@ -913,7 +930,8 @@ fn run(args: &[String]) -> Result<String, String> {
     // section-relative record with per-file line spans — same bytes by
     // construction.
     if let Assembler::Vasm = assembler {
-        let loader = fs_loader(input, &include_dirs);
+        let fs = fs_loader(input, &include_dirs);
+        let loader = RecordingLoader::new(&fs);
         let debug_requested = debug.is_some() || sym.is_some();
         let (result, info) = if exe && debug_requested {
             let (image, info) = asm198x::assemble_vasm_exe_files_debug(&source, input, &loader)
@@ -958,6 +976,7 @@ fn run(args: &[String]) -> Result<String, String> {
             input,
             Some(&out_path),
             &result,
+            &loader.inputs.borrow(),
             outprefix.as_deref(),
             [&debug, &sym, &listing, &listing_json, &map_report],
             sym_format,
@@ -1035,11 +1054,15 @@ fn run(args: &[String]) -> Result<String, String> {
                 None,
             ),
         };
+        if let Some(path) = &linker_config {
+            loader.inputs.borrow_mut().push(path.clone());
+        }
         let out_path = output.unwrap_or_else(|| Path::new(input).with_extension("nes"));
         preflight_outputs(
             input,
             Some(&out_path),
             &rom,
+            &loader.inputs.borrow(),
             outprefix.as_deref(),
             [&debug, &sym, &listing, &listing_json, &map_report],
             sym_format,
@@ -1102,6 +1125,7 @@ fn run(args: &[String]) -> Result<String, String> {
             input,
             Some(image),
             &assembly,
+            &recorder.inputs.borrow(),
             outprefix.as_deref(),
             [&debug, &sym, &listing, &listing_json, &map_report],
             sym_format,
@@ -1364,6 +1388,102 @@ fn preflight_destination(path: &Path) -> Result<(), String> {
     check().map_err(|error| format!("cannot write {}: {error}", path.display()))
 }
 
+/// Resolve an output name without creating it. Follow an existing symlink even
+/// when its final target does not exist yet; canonicalizing just the parent of
+/// that symlink would retain the alias instead of the intended destination.
+fn resolved_destination(path: &Path) -> std::io::Result<PathBuf> {
+    let mut path = path.to_path_buf();
+    for _ in 0..40 {
+        match std::fs::canonicalize(&path) {
+            Ok(path) => return Ok(path),
+            Err(error) if error.kind() == std::io::ErrorKind::NotFound => {
+                match std::fs::read_link(&path) {
+                    Ok(target) => {
+                        path = if target.is_absolute() {
+                            target
+                        } else {
+                            path.parent().unwrap_or(Path::new(".")).join(target)
+                        };
+                    }
+                    Err(error)
+                        if matches!(
+                            error.kind(),
+                            std::io::ErrorKind::NotFound | std::io::ErrorKind::InvalidInput
+                        ) =>
+                    {
+                        let parent = path
+                            .parent()
+                            .filter(|p| !p.as_os_str().is_empty())
+                            .unwrap_or(Path::new("."));
+                        let name = path.file_name().ok_or(std::io::ErrorKind::InvalidInput)?;
+                        return Ok(std::fs::canonicalize(parent)?.join(name));
+                    }
+                    Err(error) => return Err(error),
+                }
+            }
+            Err(error) => return Err(error),
+        }
+    }
+    Err(std::io::Error::other(
+        "too many symbolic links in output destination",
+    ))
+}
+
+fn paths_collide(left: &Path, right: &Path) -> std::io::Result<bool> {
+    let left_resolved = resolved_destination(left)?;
+    let right_resolved = resolved_destination(right)?;
+    if left_resolved == right_resolved {
+        return Ok(true);
+    }
+    // Canonical names alone cannot detect hard links. Do not use file contents
+    // as identity: distinct files may deliberately contain the same bytes.
+    let metadata = |path| match std::fs::metadata(path) {
+        Ok(metadata) => Ok(Some(metadata)),
+        Err(error) if error.kind() == std::io::ErrorKind::NotFound => Ok(None),
+        Err(error) => Err(error),
+    };
+    let left_metadata = metadata(left)?;
+    let right_metadata = metadata(right)?;
+    #[cfg(windows)]
+    if left_metadata.is_none()
+        && right_metadata.is_none()
+        && left_resolved
+            .as_os_str()
+            .to_string_lossy()
+            .eq_ignore_ascii_case(&right_resolved.as_os_str().to_string_lossy())
+    {
+        return Ok(true);
+    }
+    let (Some(left_metadata), Some(right_metadata)) = (left_metadata, right_metadata) else {
+        return Ok(false);
+    };
+    #[cfg(unix)]
+    {
+        // Metadata identity also works for write-only files and never opens a
+        // FIFO merely to compare it with another destination.
+        use std::os::unix::fs::MetadataExt;
+        Ok((left_metadata.dev(), left_metadata.ino())
+            == (right_metadata.dev(), right_metadata.ino()))
+    }
+    #[cfg(not(unix))]
+    let _ = (left_metadata, right_metadata);
+    #[cfg(windows)]
+    {
+        same_file::is_same_file(left, right)
+    }
+    #[cfg(not(any(unix, windows)))]
+    {
+        Err(std::io::Error::new(
+            std::io::ErrorKind::Unsupported,
+            "file identity is unavailable on this platform",
+        ))
+    }
+}
+
+fn output_collides(path: &Path, other: &Path) -> Result<bool, String> {
+    paths_collide(path, other).map_err(|error| format!("cannot write {}: {error}", path.display()))
+}
+
 fn sidecar_destination(
     input: &str,
     image: Option<&Path>,
@@ -1374,7 +1494,7 @@ fn sidecar_destination(
     let path = requested
         .clone()
         .unwrap_or_else(|| Path::new(input).with_extension(extension));
-    if path == Path::new(input) {
+    if output_collides(&path, Path::new(input))? {
         let hint = if what == "memory map" {
             "pass `--map=<path>`"
         } else {
@@ -1384,7 +1504,11 @@ fn sidecar_destination(
             "refusing to overwrite the input with the {what} — {hint}"
         ));
     }
-    if image.is_some_and(|image| path == image) {
+    if image
+        .map(|image| output_collides(&path, image))
+        .transpose()?
+        .unwrap_or(false)
+    {
         let hint = if what == "memory map" {
             "pass `--map=<path>`"
         } else {
@@ -1401,6 +1525,7 @@ fn preflight_outputs(
     input: &str,
     image: Option<&Path>,
     assembly: &asm198x::AssemblyResult,
+    consumed_inputs: &[PathBuf],
     outprefix: Option<&Path>,
     [debug, sym, listing, listing_json, map]: [&ArtifactPath; 5],
     sym_format: asm198x::SymbolFormat,
@@ -1434,7 +1559,31 @@ fn preflight_outputs(
         (map, "map", "memory map"),
     ] {
         if let Some(requested) = flag {
-            preflight_destination(&sidecar_destination(input, image, requested, ext, what)?)?;
+            let destination = sidecar_destination(input, image, requested, ext, what)?;
+            preflight_destination(&destination)?;
+            for source in consumed_inputs {
+                if output_collides(&destination, source)? {
+                    return Err(format!(
+                        "refusing to overwrite input {} with the {what} at {}",
+                        source.display(),
+                        destination.display()
+                    ));
+                }
+            }
+            for artifact in &assembly.artifacts {
+                let artifact_path = artifact_destination(
+                    &artifact.name,
+                    image.unwrap_or(&default_image),
+                    outprefix,
+                );
+                if output_collides(&destination, &artifact_path)? {
+                    return Err(format!(
+                        "refusing to overwrite output artifact {} with the {what} at {}",
+                        artifact_path.display(),
+                        destination.display()
+                    ));
+                }
+            }
         }
     }
     Ok(())
@@ -1933,6 +2082,9 @@ fn emit_json(
     // source. vasm rejects listings upstream and ignores the recording.
     let fs = fs_loader(input, include_dirs);
     let loader = RecordingLoader::new(&fs);
+    if let Some(path) = linker_config {
+        loader.inputs.borrow_mut().push(path.to_path_buf());
+    }
     let result = match assembler {
         // vasm goes through its include-capable entries (U6); a failure
         // carries the file table so the diagnostic's span can name an
@@ -2045,6 +2197,7 @@ fn emit_json(
                 input,
                 output,
                 &assembly,
+                &loader.inputs.borrow(),
                 outprefix,
                 [debug, sym, listing, listing_json, map],
                 sym_format,

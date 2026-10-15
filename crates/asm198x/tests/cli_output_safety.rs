@@ -215,3 +215,258 @@ fn memory_maps_match_between_reporting_modes_and_validate_before_writes() {
         }
     }
 }
+
+#[test]
+fn sidecars_preserve_inputs_and_binary_images_through_aliases() {
+    for (dialect, source, included) in [
+        (
+            "acme",
+            "*=$1000\n!source \"body.inc\"\n!binary \"data.bin\"\n",
+            "start: lda #42\n",
+        ),
+        (
+            "pasmo",
+            " org $8000\n include \"body.inc\"\n incbin \"data.bin\"\n",
+            "start: nop\n",
+        ),
+        (
+            "ca65",
+            ".segment \"CODE\"\n.include \"body.inc\"\n.incbin \"data.bin\"\n",
+            "start: nop\n",
+        ),
+        (
+            "vasm",
+            " include \"body.inc\"\n incbin \"data.bin\"\n",
+            "start: moveq #42,d0\n",
+        ),
+    ] {
+        for mode in ["human", "json"] {
+            for option in ["--debug", "--sym", "--listing", "--listing-json", "--map"] {
+                if dialect == "vasm" && option.starts_with("--listing") {
+                    continue;
+                }
+                for target in ["program.s", "body.inc", "data.bin", "image.bin"] {
+                    for alias in ["parent", "hard-link", "symlink", "windows-case"] {
+                        #[cfg(not(unix))]
+                        if alias == "symlink" {
+                            continue;
+                        }
+                        #[cfg(not(windows))]
+                        if alias == "windows-case" {
+                            continue;
+                        }
+                        let dir = Scratch::new();
+                        std::fs::create_dir(dir.0.join("nested")).expect("alias parent");
+                        std::fs::write(dir.0.join("program.s"), source).expect("root");
+                        std::fs::write(dir.0.join("body.inc"), included).expect("include");
+                        std::fs::write(dir.0.join("data.bin"), [0xde, 0xad]).expect("binary input");
+                        let valid = format!("{option}=separate.out");
+                        let control = assemble(&dir.0, dialect, mode, &["-o", "image.bin", &valid]);
+                        assert!(control.status.success(), "{dialect}/{mode}: {control:?}");
+                        assert!(
+                            !std::fs::read(dir.0.join("image.bin"))
+                                .expect("control image")
+                                .is_empty()
+                        );
+                        std::fs::write(dir.0.join("image.bin"), b"previous image")
+                            .expect("previous image");
+                        let destination = match alias {
+                            "parent" => format!("nested/../{target}"),
+                            "windows-case" => target.to_ascii_uppercase(),
+                            "hard-link" => {
+                                std::fs::hard_link(dir.0.join(target), dir.0.join("alias"))
+                                    .expect("hard link");
+                                "alias".to_owned()
+                            }
+                            _ => {
+                                #[cfg(unix)]
+                                std::os::unix::fs::symlink(target, dir.0.join("alias"))
+                                    .expect("symlink");
+                                "alias".to_owned()
+                            }
+                        };
+                        let bad = format!("{option}={destination}");
+                        let run = assemble(&dir.0, dialect, mode, &["-o", "image.bin", &bad]);
+                        assert!(
+                            !run.status.success(),
+                            "{dialect}/{mode}/{option}/{target}/{alias}: {run:?}"
+                        );
+                        assert_eq!(
+                            std::fs::read(dir.0.join("program.s")).expect("root survives"),
+                            source.as_bytes()
+                        );
+                        assert_eq!(
+                            std::fs::read(dir.0.join("body.inc")).expect("include survives"),
+                            included.as_bytes()
+                        );
+                        assert_eq!(
+                            std::fs::read(dir.0.join("data.bin")).expect("binary survives"),
+                            [0xde, 0xad]
+                        );
+                        assert_preserved(&dir.0.join("image.bin"), Some(b"previous image"));
+                        if mode == "json" {
+                            assert!(run.stderr.is_empty());
+                            let errors: Vec<asm198x::Diagnostic> =
+                                serde_json::from_slice(&run.stdout).expect("JSON rejection");
+                            assert_eq!(errors.len(), 1);
+                            assert!(errors[0].message.contains("refusing"));
+                        }
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn sidecars_preserve_linker_configuration_and_source_named_images() {
+    for mode in ["human", "json"] {
+        let dir = Scratch::new();
+        let config = "MEMORY { PRG: start=$8000, size=$100, file=%O, fill=yes; }\nSEGMENTS { CODE: load=PRG, type=ro; }\n";
+        std::fs::write(dir.0.join("program.s"), ".segment \"CODE\"\nstart: nop\n").expect("source");
+        std::fs::write(dir.0.join("layout.cfg"), config).expect("configuration");
+        std::fs::write(dir.0.join("image.bin"), b"previous image").expect("previous image");
+        let control = assemble(
+            &dir.0,
+            "ca65",
+            mode,
+            &["-C", "layout.cfg", "-o", "control.bin", "--sym=valid.sym"],
+        );
+        assert!(control.status.success(), "valid config: {control:?}");
+        let run = assemble(
+            &dir.0,
+            "ca65",
+            mode,
+            &["-C", "layout.cfg", "-o", "image.bin", "--sym=layout.cfg"],
+        );
+        assert!(!run.status.success(), "{run:?}");
+        assert_eq!(
+            std::fs::read_to_string(dir.0.join("layout.cfg")).expect("config survives"),
+            config
+        );
+        assert_preserved(&dir.0.join("image.bin"), Some(b"previous image"));
+        std::fs::write(
+            dir.0.join("program.s"),
+            "!to \"image.bin\",plain\n!symbollist \"alias\"\n*=$1000\nstart: lda #42\n",
+        )
+        .expect("source request");
+        std::fs::hard_link(dir.0.join("image.bin"), dir.0.join("alias")).expect("image alias");
+        let run = assemble(&dir.0, "acme", mode, &[]);
+        assert!(!run.status.success(), "{run:?}");
+        assert_preserved(&dir.0.join("image.bin"), Some(b"previous image"));
+    }
+}
+
+#[test]
+fn sidecars_cannot_replace_absent_images_or_save_artifacts_through_aliases() {
+    for mode in ["human", "json"] {
+        for saved in [false, true] {
+            for existing in [false, true] {
+                for symlink in [false, true] {
+                    #[cfg(not(unix))]
+                    if symlink {
+                        continue;
+                    }
+                    let dir = Scratch::new();
+                    std::fs::create_dir(dir.0.join("nested")).expect("alias parent");
+                    let source = if saved {
+                        " DEVICE ZXSPECTRUM48\n ORG $8000\nstart: db 42\n SAVEBIN \"saved.bin\",$8000,1\n"
+                    } else {
+                        "*=$1000\nstart: lda #42\n"
+                    };
+                    std::fs::write(dir.0.join("program.s"), source).expect("source");
+                    let target = if saved { "saved.bin" } else { "image.bin" };
+                    if existing {
+                        std::fs::write(dir.0.join(target), b"previous output")
+                            .expect("previous output");
+                    }
+                    let alias = if symlink {
+                        #[cfg(unix)]
+                        std::os::unix::fs::symlink(target, dir.0.join("alias"))
+                            .expect("possibly dangling symlink");
+                        "alias".to_owned()
+                    } else {
+                        format!("nested/../{target}")
+                    };
+                    let flag = format!("--sym={alias}");
+                    let run = assemble(
+                        &dir.0,
+                        if saved { "sjasmplus" } else { "acme" },
+                        mode,
+                        &["-o", "image.bin", &flag],
+                    );
+                    assert!(
+                        !run.status.success(),
+                        "{mode}/{saved}/{existing}/{symlink}: {run:?}"
+                    );
+                    assert_preserved(
+                        &dir.0.join(target),
+                        existing.then_some(b"previous output".as_slice()),
+                    );
+                    if saved {
+                        assert!(!dir.0.join("image.bin").exists());
+                    }
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn distinct_files_with_identical_bytes_are_valid_output_destinations() {
+    for mode in ["human", "json"] {
+        let dir = Scratch::new();
+        std::fs::write(dir.0.join("program.s"), "*=$1000\nstart: lda #42\n").expect("source");
+        for name in ["image.bin", "symbols.sym"] {
+            std::fs::write(dir.0.join(name), b"same previous bytes").expect("distinct file");
+        }
+        let run = assemble(
+            &dir.0,
+            "acme",
+            mode,
+            &["-o", "image.bin", "--sym=symbols.sym"],
+        );
+        assert!(run.status.success(), "{run:?}");
+        assert_eq!(
+            std::fs::read(dir.0.join("image.bin")).expect("machine code"),
+            [0xa9, 42]
+        );
+        assert!(
+            std::fs::read_to_string(dir.0.join("symbols.sym"))
+                .expect("symbols")
+                .contains("start")
+        );
+    }
+}
+
+#[cfg(unix)]
+#[test]
+fn write_only_sidecars_do_not_require_read_access_for_identity_checks() {
+    use std::os::unix::fs::PermissionsExt;
+    for mode in ["human", "json"] {
+        let dir = Scratch::new();
+        std::fs::write(dir.0.join("program.s"), "*=$1000\nstart: lda #42\n").expect("source");
+        let symbols = dir.0.join("symbols.sym");
+        std::fs::write(&symbols, b"previous symbols").expect("previous symbols");
+        std::fs::set_permissions(&symbols, std::fs::Permissions::from_mode(0o200))
+            .expect("write only");
+        let run = assemble(
+            &dir.0,
+            "acme",
+            mode,
+            &["-o", "image.bin", "--sym=symbols.sym"],
+        );
+        std::fs::set_permissions(&symbols, std::fs::Permissions::from_mode(0o600))
+            .expect("restore read access");
+        assert!(run.status.success(), "{run:?}");
+        assert_eq!(
+            std::fs::read(dir.0.join("image.bin")).expect("machine code"),
+            [0xa9, 42]
+        );
+        assert!(
+            std::fs::read_to_string(symbols)
+                .expect("new symbols")
+                .contains("start")
+        );
+    }
+}
