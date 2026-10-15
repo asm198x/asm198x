@@ -1,0 +1,1282 @@
+{
+  "host": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "source_commit": "8f3813f861debf658f5329f1f8f922cb6e5b82d3",
+  "identity": [
+    {
+      "path": "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+      "sha256": "44b9a815c7d1f7e7521f07b72cca4440c1db3b5ba0a8f34e0bd5a2fe43d931ba",
+      "version": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--version"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "asm198x v0.0.65\n"
+      }
+    },
+    {
+      "path": "/usr/local/bin/sjasmplus",
+      "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+      "version": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--version"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+      }
+    }
+  ],
+  "observations": [
+    {
+      "repeat": 0,
+      "case": "relative",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/saved.bin": "2a"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> out/image.bin\nwrote 1 byte(s) -> out/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/out/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "relative",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/saved.bin": "2a"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[42,43,44],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":0,\"message\":\"wrote 1 byte(s) -> out/saved.bin\",\"kind\":\"Note\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"source.asm\"],\"artifacts\":[{\"name\":\"saved.bin\",\"format\":\"raw\",\"bytes\":[42]}]}\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/out/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "parent",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "saved.bin": "2a",
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> out/image.bin\nwrote 1 byte(s) -> out/../saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "parent",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "saved.bin": "2a",
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[42,43,44],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":0,\"message\":\"wrote 1 byte(s) -> out/../saved.bin\",\"kind\":\"Note\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"source.asm\"],\"artifacts\":[{\"name\":\"../saved.bin\",\"format\":\"raw\",\"bytes\":[42]}]}\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "absolute",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/absolute.bin": "2a",
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> out/image.bin\nwrote 1 byte(s) -> <root>/absolute.bin\n",
+        "files": {
+          "work/absolute.bin": "2a",
+          "work/out/image.bin": "2a2b2c"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "absolute",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/absolute.bin": "2a",
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[42,43,44],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":0,\"message\":\"wrote 1 byte(s) -> <root>/absolute.bin\",\"kind\":\"Note\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"source.asm\"],\"artifacts\":[{\"name\":\"<root>/absolute.bin\",\"format\":\"raw\",\"bytes\":[42]}]}\n",
+        "stderr": "",
+        "files": {
+          "work/absolute.bin": "2a",
+          "work/out/image.bin": "2a2b2c"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "relative_prefix",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "--outprefix=prefix/",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--outprefix=prefix/",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> out/image.bin\nwrote 1 byte(s) -> prefix/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "relative_prefix",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "--outprefix=prefix/",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--outprefix=prefix/",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[42,43,44],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":0,\"message\":\"wrote 1 byte(s) -> prefix/saved.bin\",\"kind\":\"Note\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"source.asm\"],\"artifacts\":[{\"name\":\"saved.bin\",\"format\":\"raw\",\"bytes\":[42]}]}\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "absolute_prefix",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "--outprefix=<root>/prefix/",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--outprefix=<root>/prefix/",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> out/image.bin\nwrote 1 byte(s) -> <root>/prefix/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "absolute_prefix",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "--outprefix=<root>/prefix/",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--outprefix=<root>/prefix/",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[42,43,44],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":0,\"message\":\"wrote 1 byte(s) -> <root>/prefix/saved.bin\",\"kind\":\"Note\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"source.asm\"],\"artifacts\":[{\"name\":\"saved.bin\",\"format\":\"raw\",\"bytes\":[42]}]}\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "prefix_no_slash",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "--outprefix=prefix/result-",
+          "source.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nsource.asm(4): error: opening file for write: prefix/result-/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--outprefix=prefix/result-",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: cannot write prefix/result-/saved.bin: No such file or directory (os error 2)\n",
+        "files": {
+          "work/out/image.bin": "70726576696f7573"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "prefix_no_slash",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "--outprefix=prefix/result-",
+          "source.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nsource.asm(4): error: opening file for write: prefix/result-/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--outprefix=prefix/result-",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 1,
+        "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"cannot write prefix/result-/saved.bin: No such file or directory (os error 2)\",\"fix\":null}]\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "70726576696f7573"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "missing_parent",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nsource.asm(4): error: opening file for write: missing/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: cannot write out/missing/saved.bin: No such file or directory (os error 2)\n",
+        "files": {
+          "work/out/image.bin": "70726576696f7573"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "missing_parent",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nsource.asm(4): error: opening file for write: missing/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 1,
+        "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"cannot write out/missing/saved.bin: No such file or directory (os error 2)\",\"fix\":null}]\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "70726576696f7573"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "two_saves",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 6 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/saved.bin": "2a",
+          "work/second.bin": "2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> out/image.bin\nwrote 1 byte(s) -> out/saved.bin\nwrote 2 byte(s) -> out/second.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/out/saved.bin": "2a",
+          "work/out/second.bin": "2b2c"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 0,
+      "case": "two_saves",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 6 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/saved.bin": "2a",
+          "work/second.bin": "2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[42,43,44],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":0,\"message\":\"wrote 1 byte(s) -> out/saved.bin\",\"kind\":\"Note\"},{\"line\":0,\"message\":\"wrote 2 byte(s) -> out/second.bin\",\"kind\":\"Note\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"source.asm\"],\"artifacts\":[{\"name\":\"saved.bin\",\"format\":\"raw\",\"bytes\":[42]},{\"name\":\"second.bin\",\"format\":\"raw\",\"bytes\":[43,44]}]}\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/out/saved.bin": "2a",
+          "work/out/second.bin": "2b2c"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "relative",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/saved.bin": "2a"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> out/image.bin\nwrote 1 byte(s) -> out/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/out/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "relative",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/saved.bin": "2a"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[42,43,44],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":0,\"message\":\"wrote 1 byte(s) -> out/saved.bin\",\"kind\":\"Note\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"source.asm\"],\"artifacts\":[{\"name\":\"saved.bin\",\"format\":\"raw\",\"bytes\":[42]}]}\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/out/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "parent",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "saved.bin": "2a",
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> out/image.bin\nwrote 1 byte(s) -> out/../saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "parent",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "saved.bin": "2a",
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[42,43,44],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":0,\"message\":\"wrote 1 byte(s) -> out/../saved.bin\",\"kind\":\"Note\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"source.asm\"],\"artifacts\":[{\"name\":\"../saved.bin\",\"format\":\"raw\",\"bytes\":[42]}]}\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "absolute",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+        "files": {
+          "work/absolute.bin": "2a",
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> out/image.bin\nwrote 1 byte(s) -> <root>/absolute.bin\n",
+        "files": {
+          "work/absolute.bin": "2a",
+          "work/out/image.bin": "2a2b2c"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "absolute",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+        "files": {
+          "work/absolute.bin": "2a",
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[42,43,44],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":0,\"message\":\"wrote 1 byte(s) -> <root>/absolute.bin\",\"kind\":\"Note\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"source.asm\"],\"artifacts\":[{\"name\":\"<root>/absolute.bin\",\"format\":\"raw\",\"bytes\":[42]}]}\n",
+        "stderr": "",
+        "files": {
+          "work/absolute.bin": "2a",
+          "work/out/image.bin": "2a2b2c"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "relative_prefix",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "--outprefix=prefix/",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--outprefix=prefix/",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> out/image.bin\nwrote 1 byte(s) -> prefix/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "relative_prefix",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "--outprefix=prefix/",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--outprefix=prefix/",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[42,43,44],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":0,\"message\":\"wrote 1 byte(s) -> prefix/saved.bin\",\"kind\":\"Note\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"source.asm\"],\"artifacts\":[{\"name\":\"saved.bin\",\"format\":\"raw\",\"bytes\":[42]}]}\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "absolute_prefix",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "--outprefix=<root>/prefix/",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.000 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--outprefix=<root>/prefix/",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> out/image.bin\nwrote 1 byte(s) -> <root>/prefix/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "absolute_prefix",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "--outprefix=<root>/prefix/",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.000 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--outprefix=<root>/prefix/",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[42,43,44],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":0,\"message\":\"wrote 1 byte(s) -> <root>/prefix/saved.bin\",\"kind\":\"Note\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"source.asm\"],\"artifacts\":[{\"name\":\"saved.bin\",\"format\":\"raw\",\"bytes\":[42]}]}\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/prefix/saved.bin": "2a"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "prefix_no_slash",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "--outprefix=prefix/result-",
+          "source.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nsource.asm(4): error: opening file for write: prefix/result-/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--outprefix=prefix/result-",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: cannot write prefix/result-/saved.bin: No such file or directory (os error 2)\n",
+        "files": {
+          "work/out/image.bin": "70726576696f7573"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "prefix_no_slash",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "--outprefix=prefix/result-",
+          "source.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nsource.asm(4): error: opening file for write: prefix/result-/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--outprefix=prefix/result-",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 1,
+        "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"cannot write prefix/result-/saved.bin: No such file or directory (os error 2)\",\"fix\":null}]\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "70726576696f7573"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "missing_parent",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nsource.asm(4): error: opening file for write: missing/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: cannot write out/missing/saved.bin: No such file or directory (os error 2)\n",
+        "files": {
+          "work/out/image.bin": "70726576696f7573"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "missing_parent",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nsource.asm(4): error: opening file for write: missing/saved.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 1,
+        "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"cannot write out/missing/saved.bin: No such file or directory (os error 2)\",\"fix\":null}]\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "70726576696f7573"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "two_saves",
+      "json": false,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 6 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/saved.bin": "2a",
+          "work/second.bin": "2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "assembled 3 byte(s) at $8000 -> out/image.bin\nwrote 1 byte(s) -> out/saved.bin\nwrote 2 byte(s) -> out/second.bin\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/out/saved.bin": "2a",
+          "work/out/second.bin": "2b2c"
+        },
+        "status": "pass"
+      }
+    },
+    {
+      "repeat": 1,
+      "case": "two_saves",
+      "json": true,
+      "reference": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--nologo",
+          "--raw=out/image.bin",
+          "source.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "Pass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 6 lines, work time: 0.001 seconds\n",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/saved.bin": "2a",
+          "work/second.bin": "2b2c"
+        }
+      },
+      "candidate": {
+        "argv": [
+          "/private/tmp/198x-candidate-gates-build/distrib/asm198x-aarch64-apple-darwin/asm198x",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "source.asm",
+          "-o",
+          "out/image.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[42,43,44],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":0,\"message\":\"wrote 1 byte(s) -> out/saved.bin\",\"kind\":\"Note\"},{\"line\":0,\"message\":\"wrote 2 byte(s) -> out/second.bin\",\"kind\":\"Note\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"source.asm\"],\"artifacts\":[{\"name\":\"saved.bin\",\"format\":\"raw\",\"bytes\":[42]},{\"name\":\"second.bin\",\"format\":\"raw\",\"bytes\":[43,44]}]}\n",
+        "stderr": "",
+        "files": {
+          "work/out/image.bin": "2a2b2c",
+          "work/out/saved.bin": "2a",
+          "work/out/second.bin": "2b2c"
+        },
+        "status": "pass"
+      }
+    }
+  ]
+}
