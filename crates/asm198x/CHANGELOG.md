@@ -7,6 +7,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.66](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.65...asm198x-v0.0.66) - 2026-10-15
+
+### Fixed
+
+- preserve input files when primary output aliases them ([#671](https://github.com/asm198x/asm198x/pull/671))
+- reject ignored CPU selections ([#665](https://github.com/asm198x/asm198x/pull/665))
+- reject irrelevant formatter options before writing ([#664](https://github.com/asm198x/asm198x/pull/664))
+- reject formatter container options before writing ([#662](https://github.com/asm198x/asm198x/pull/662))
+- preserve comments on formatter block delimiters ([#661](https://github.com/asm198x/asm198x/pull/661))
+- preserve source lines with Pasmo command-line constants ([#660](https://github.com/asm198x/asm198x/pull/660))
+- reject conflicting sidecars before writing output ([#655](https://github.com/asm198x/asm198x/pull/655))
+- preserve inputs and images across sidecar path aliases ([#654](https://github.com/asm198x/asm198x/pull/654))
+- honor memory map requests in JSON reporting ([#653](https://github.com/asm198x/asm198x/pull/653))
+- locate invalid device page and slot diagnostics ([#649](https://github.com/asm198x/asm198x/pull/649))
+- report assembly file failures as JSON diagnostics ([#648](https://github.com/asm198x/asm198x/pull/648))
+- preserve output images when a sidecar destination is invalid ([#646](https://github.com/asm198x/asm198x/pull/646))
+
 ## [0.0.65](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.64...asm198x-v0.0.65) - 2026-10-14
 
 ### Fixed
