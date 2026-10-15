@@ -1,0 +1,10 @@
+{
+  "source": "fn main() { for origin in [0x8000_u32, 0x10000_u32] { println!(\"{origin:x}:{}\", isa_disasm::listing_68000(&[0x60, 0x02], origin)); } }\n",
+  "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+  "compile_stderr": "",
+  "stdout": "8000:\tbra.s $8004\n\n10000:\tbra.s $10004\n\n",
+  "stderr": "",
+  "exit": 0,
+  "lock_matches_release": true,
+  "lock_sha256": "011c22b2935ce1dc57bd713a02e712c4da92148e14a1b3ce85b1e106046f0e68"
+}

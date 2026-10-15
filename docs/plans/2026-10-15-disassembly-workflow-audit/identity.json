@@ -1,0 +1,18 @@
+{
+  "version": "0.0.66",
+  "target": "aarch64-apple-darwin",
+  "host": {
+    "platform": "darwin",
+    "arch": "arm64",
+    "release": "27.0.0",
+    "node": "v24.9.0"
+  },
+  "archive": "asm198x-aarch64-apple-darwin.tar.xz",
+  "archive_sha256": "2a38257f7a87745cf29931d6d9b97ed62b1dd20397393678087b283b9cb5d1f6",
+  "executable_sha256": "f0535a9bac7c082cd5d141537e7d46cd78616671d7ca2289f294324640b3ce15",
+  "parsed_plan_sha256": "87c80a49b889b3f702047bb407e9b00d6b82b4b934663a539342b15fe0e29ba1",
+  "binary_source_commit": "35a07893a57cbb42c3a341cc293fc4b713af99f4",
+  "qualification_runner_checkout": "a35b042dfb163130c1a099354f76afd4c426c761",
+  "public_archive_url": "https://github.com/asm198x/asm198x/releases/download/asm198x-v0.0.66/asm198x-aarch64-apple-darwin.tar.xz",
+  "existing_archive_gate_passed": true
+}
