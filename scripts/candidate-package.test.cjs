@@ -33,7 +33,7 @@ test('a missing target or substituted architecture in the plan cannot qualify', 
   assert.throws(() => packageIdentity(changed, targets[0]), /wrong planned target/);
 });
 test('generated workflow cannot publish unsuccessful or missing qualification', () => {
-  const text = fs.readFileSync(path.join(__dirname, '../.github/workflows/asm198x-release.yml'), 'utf8');
+  const text = fs.readFileSync(path.join(__dirname, '../.github/workflows/asm198x-release.yml'), 'utf8').replaceAll('\r\n', '\n');
   const host = text.split('\n  host:\n')[1].split('\n  publish-homebrew-formula:')[0];
   assert(host.includes('      - custom-test-linux-packages'));
   assert(!host.includes(permissive));assert(host.includes(required));
@@ -52,9 +52,9 @@ test('generator changes must be reviewed instead of silently losing the guard', 
   assert.throws(() => tighten(input + permissive));
 });
 test('every declared release architecture has exactly one native qualification job', () => {
-  const config = fs.readFileSync(path.join(__dirname, '../Cargo.toml'), 'utf8');
+  const config = fs.readFileSync(path.join(__dirname, '../Cargo.toml'), 'utf8').replaceAll('\r\n', '\n');
   const declared = JSON.parse(config.match(/^targets = (\[.*\])$/m)[1]);
-  const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows/test-linux-packages.yml'), 'utf8');
+  const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows/test-linux-packages.yml'), 'utf8').replaceAll('\r\n', '\n');
   const matrix = [...workflow.matchAll(/^            target: ([\w-]+)$/gm)].map(m => m[1]);
   assert.deepEqual([...declared].sort(), [...targets].sort());
   assert.deepEqual(matrix.sort(), [...targets].sort());
@@ -62,7 +62,7 @@ test('every declared release architecture has exactly one native qualification j
 test('reusable workflow writes the exact supplied candidate plan as valid JSON', () => {
   const os = require('node:os');
   const {spawnSync} = require('node:child_process');
-  const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows/test-linux-packages.yml'), 'utf8');
+  const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows/test-linux-packages.yml'), 'utf8').replaceAll('\r\n', '\n');
   const block = workflow.split('      - name: Save candidate plan\n')[1].split('      - name: Qualify the actual archive')[0];
   const script = block.split('        run: |\n')[1].split('\n').filter(line => line.trim()).map(line => line.slice(10)).join('\n');
   const directory = fs.mkdtempSync(path.join(os.tmpdir(), 'asm198x-plan-control-'));

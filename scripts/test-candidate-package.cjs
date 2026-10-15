@@ -126,7 +126,8 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
     });
     test('missing_input_json', () => {
       const p = run(['--message-format=json', 'missing.s', '-o', 'missing.bin']); reject(p);
-      assert(Array.isArray(JSON.parse(p.stdout))); assert.equal(p.stderr, '');
+      const diagnostics = JSON.parse(p.stdout);
+      assert(Array.isArray(diagnostics) && diagnostics.some(d => d.severity === 'Error' && d.message)); assert.equal(p.stderr, '');
       assert(!fs.existsSync(path.join(root, 'missing.bin')));
     });
     for (const [name, cpu] of [['unknown_cpu', 'nonsense'], ['incompatible_cpu', '68000']]) test(name, () => {

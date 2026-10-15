@@ -3,6 +3,11 @@ name: Candidate packages
 on:
   pull_request:
   workflow_dispatch:
+    inputs:
+      published-version:
+        description: 'Exact public version to qualify without rebuilding (empty builds current checkout)'
+        required: false
+        type: string
   workflow_call:
     inputs:
       plan:
@@ -37,6 +42,7 @@ jobs:
     runs-on: ${{ matrix.runner }}
     env:
       RELEASE_PLAN: ${{ inputs.plan }}
+      PUBLISHED_VERSION: ${{ inputs.published-version }}
       PACKAGE_TARGET: ${{ matrix.target }}
       HOMEBREW_NO_AUTO_UPDATE: '1'
       HOMEBREW_NO_INSTALL_CLEANUP: '1'
@@ -70,16 +76,20 @@ jobs:
           node scripts/generate-release-workflow.cjs --check
           node --test scripts/candidate-package.test.cjs .github/actions/setup/index.test.cjs
       - name: Cache Rust artifacts
-        if: inputs.plan == ''
+        if: inputs.plan == '' && inputs.published-version == ''
         uses: Swatinem/rust-cache@v2
       - name: Build packages for this native runner
-        if: inputs.plan == ''
+        if: inputs.plan == '' && inputs.published-version == ''
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p target
           dist plan --output-format=json > target/candidate-plan.json
           dist build --artifacts=all --target "$PACKAGE_TARGET" --output-format=json > target/package-test-manifest.json
+      - name: Download published archives for post-release reconciliation
+        if: inputs.published-version != ''
+        shell: bash
+        run: node scripts/fetch-published-package.cjs "$PUBLISHED_VERSION" "$PACKAGE_TARGET" target
       - name: Fetch actual candidate packages
         if: inputs.plan != ''
         uses: actions/download-artifact@v8
@@ -100,6 +110,7 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/qualification"
           cp target/candidate-plan.json "$RUNNER_TEMP/qualification/plan.json"
+          node -e "require('node:fs').writeFileSync(process.argv[1],JSON.stringify({kind:process.env.PUBLISHED_VERSION?'published-release':'candidate',published_version:process.env.PUBLISHED_VERSION||null,checkout_commit:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID}))" "$RUNNER_TEMP/qualification/acquisition.json"
           node scripts/test-candidate-package.cjs target/candidate-plan.json "$PACKAGE_TARGET" target/distrib "$RUNNER_TEMP/qualification/report.json"
           if node scripts/test-candidate-package.cjs target/candidate-plan.json "$PACKAGE_TARGET" target/distrib "$RUNNER_TEMP/qualification/wrong-bytes.json" --control-wrong-bytes; then
             echo 'Wrong bytes unexpectedly qualified' >&2
@@ -120,7 +131,7 @@ jobs:
           path: ${{ runner.temp }}/qualification/*.json
           if-no-files-found: error
       - name: Set up Homebrew
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && inputs.published-version == ''
         shell: bash
         run: |
           set -euo pipefail
@@ -130,6 +141,6 @@ jobs:
           fi
           echo /home/linuxbrew/.linuxbrew/bin >> "$GITHUB_PATH"
       - name: Install generated formulae and check output
-        if: runner.os == 'Linux'
+        if: runner.os == 'Linux' && inputs.published-version == ''
         shell: bash
         run: python3 scripts/test-linux-packages.py target/package-test-manifest.json "$PACKAGE_TARGET"

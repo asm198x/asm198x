@@ -54,3 +54,13 @@ comparison passes. Native CI reports and post-publication reconciliation remain
 required before closing #668. Each workflow job is bounded to 30 minutes, each
 CLI subprocess to 30 seconds and each fixture download to 30 seconds; reports
 are retained by Actions for 90 days.
+
+The same reusable workflow accepts an exact `published-version` on manual
+dispatch for public-release reconciliation. It downloads the public manifest,
+archive and checksum, validates native target/version, and runs the identical
+gate without rebuilding. Acquisition records distinguish public observations
+from candidate runs. Linux formula installation remains a candidate check.
+
+The first Windows run exposed CRLF assumptions in two test readers
+(`TypeError: Cannot read properties of undefined (reading 'split')`). Normalize
+line endings before parsing workflow text; the generator already did this.
