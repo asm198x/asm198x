@@ -164,6 +164,12 @@ pub(crate) trait Dialect {
         false
     }
 
+    /// Whether byte-addressed output and the location counter wrap at 64 KiB.
+    /// Pasmo writes a memory image; other dialects retain their existing cap.
+    fn wraps_address_space(&self) -> bool {
+        false
+    }
+
     /// Whether a backward `org` discards an initial region containing only
     /// reservations. lwasm raw output starts at the first region that writes
     /// bytes; other dialects retain their normal gap semantics.

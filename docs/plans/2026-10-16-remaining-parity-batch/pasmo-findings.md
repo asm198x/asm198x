@@ -1,0 +1,17 @@
+# Pasmo wrapping and reserve counts (#629, #631)
+
+PasmoNext 0.1.3 writes into a 16-bit memory image. The existing DEFS count normalization already reduces counts modulo 65536; the shared engine instead rejected the original #629 example when its emission crossed $FFFF. Enabling the existing source-order address-run placement for Pasmo and splitting physical runs at that boundary resolves both issues. The other dialects retain their existing placement policies.
+
+`probe-pasmo.py` captures the native executable identity, exact source and argv, process results, complete binary hex and symbols in `tests/fixtures/pasmo-output-wrap.json`. All 22 cases run against both Pasmo frontends without requiring a reference executable in CI. Six cases establish native refusals, including branches across the wrap and out-of-range `$`/`%` numeric prefixes. Sixteen establish accepted bytes and symbols, including negative counts, repeated wrapping writes, sparse/backward origins and labels after the last byte. The first new test failed with `program exceeds the 64K address space` before the engine change.
+
+A decimal `65536` wraps to zero; `$10000` is a native number-range error. The earlier constant-normalization unit test incorrectly used the latter as a positive case. The captured native EQU cases distinguish them; the test now uses decimal 65536 and separately rejects the hex prefix. Radix suffix and `0x` parsing retains its existing path.
+
+The debug capture splits source spans at the physical boundary and rebases labels onto existing debug sections. A label that wraps below the lowest emitted byte uses the existing unwritten-prefix representation, without inventing output bytes or counting that region as used memory. Listings account for that prefix when resolving addresses and file byte offsets. JSON listings retain each physical span; the human listing retains its existing first-span-per-source-line convention.
+
+Warnings preserve the native condition: crossing *beyond* 65536 warns; ending exactly at it does not. Asm198x reports one advisory per offending source statement, whereas native Pasmo prints it in both assembly passes. Source-order overwrites do not produce an ACME overlap advisory.
+
+A 65536-byte raw memory image cannot fit a standard-speed TAP/TZX block: its 16-bit block length includes the flag and checksum. Native Pasmo silently drops the data in that case (a bare TAP is only 25 bytes). Asm198x explicitly rejects more than 65533 code bytes before writing any output. CLI controls cover both reporting modes, every tape flag, absent and previously successful output files, and prove that the corresponding raw image succeeds.
+
+The release package gate adds `pasmo_wrapped_image`, comparing the complete image and symbols and preserving it on a subsequent rejected cross-boundary branch. Frozen 0.0.69 evidence remains a 28-case historical report; it cannot qualify the new 29-case cohort.
+
+Local validation: `cargo test --workspace --features lua` passed 1460 tests (37 reference-tool tests remain explicitly ignored); Clippy with all targets and Lua passed with warnings denied; formatting, generated docs and checked release-workflow regeneration passed. All 38 Node release-control tests passed. Ruff format/check passed for the capture script. The checked negative controls reject pre-change wrapping, invalid native inputs, unsupported tape framing, stale 28-case qualification reports and changes in both bytes and symbols after formatting.

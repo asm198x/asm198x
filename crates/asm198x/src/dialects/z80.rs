@@ -1717,7 +1717,15 @@ impl<'a, S: Z80Syntax> SjasmEval<'a, S> {
             return;
         }
         let Some(pc) = self.pc else { return };
-        self.pc = crate::engine::next_pc(op, pc, self.set, self.ext, 1, line).ok();
+        self.pc = crate::engine::next_pc(op, pc, self.set, self.ext, 1, line)
+            .ok()
+            .map(|next| {
+                if self.syntax.pasmo_expressions() {
+                    next & 0xffff
+                } else {
+                    next
+                }
+            });
     }
 
     /// The forward-resolution state paired with the file a condition is being

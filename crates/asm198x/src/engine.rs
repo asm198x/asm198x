@@ -92,13 +92,15 @@ pub enum ArtifactFormat {
 /// The result of a successful assembly: where it loads and the bytes to load.
 #[derive(Debug, Clone)]
 pub struct Assembly {
-    /// Load address (first origin directive, or 0 if none given). On a dialect
+    /// Load address (first origin directive, or the lowest written address for
+    /// a memory-image dialect). On a dialect
     /// whose toolchain reserves rather than materialises, a leading gap moves
     /// this past the unwritten region — see `reserved_prefix`.
     pub origin: u16,
     /// Address units of leading `org` gap or reservation dropped from the front
     /// of the image, so `origin` is that far above where the source's own
-    /// addresses start (#90). Zero on every dialect that materialises its gaps.
+    /// addresses start (#90). Also keeps wrapped labels below the lowest
+    /// emitted address representable without adding bytes to the image.
     ///
     /// Debug offsets are relative to the source's origin — `origin -
     /// reserved_prefix` — not to `origin`, because they are captured before the
@@ -1471,6 +1473,20 @@ pub(crate) fn lua_memory_snapshot(
         .ok_or_else(|| AsmError::new(0, "Lua device memory was not captured"))
 }
 
+fn address_debug_base(debug: &DebugData, image_origin: u64) -> u64 {
+    debug
+        .symbols
+        .iter()
+        .filter_map(|symbol| match symbol.kind {
+            debug198x::SymbolKind::Label { offset, .. }
+            | debug198x::SymbolKind::Entry { offset, .. } => Some(offset),
+            _ => None,
+        })
+        .chain(debug.lines.iter().map(|line| line.offset))
+        .chain(debug.cycles.iter().map(|cycle| cycle.offset))
+        .fold(image_origin, u64::min)
+}
+
 fn assemble_statements(
     mut statements: Vec<Statement>,
     parse_warnings: Vec<Warning>,
@@ -1484,6 +1500,7 @@ fn assemble_statements(
     let require_origin = dialect.requires_explicit_origin();
     let org_moves_output = dialect.org_moves_output();
     let org_starts_address_run = dialect.org_starts_address_run();
+    let wraps_address_space = dialect.wraps_address_space();
     let org_drops_unwritten_prefix = dialect.org_drops_unwritten_prefix();
     // Emitted bytes per address unit — 1 for the byte-addressed CPUs, 2 for the
     // word-addressed CP1610 (a decle is two bytes). The location counter advances
@@ -1667,6 +1684,9 @@ fn assemble_statements(
                 pc = next_pc(op, pc, set, ext, addr_unit, s.line).map_err(|err| s.stamp(err))?;
             }
         }
+        if wraps_address_space {
+            pc &= 0xffff;
+        }
     }
     let mut origin = origin.unwrap_or(0);
 
@@ -1798,7 +1818,11 @@ fn assemble_statements(
         // in address units (bytes divided by `addr_unit`). Inside a
         // `!pseudopc` block it reads as the address the code will run at.
         let real_pc = origin + bytes.len() as i64 / addr_unit;
-        let pc = real_pc + pseudo;
+        let pc = if wraps_address_space {
+            (real_pc & 0xffff) + pseudo
+        } else {
+            real_pc + pseudo
+        };
         // A label on a mapping directive belongs to the mapping before the
         // directive, just as its address is the pre-directive location counter.
         let label_page = device_memory.as_ref().and_then(|m| m.location(pc));
@@ -1828,7 +1852,7 @@ fn assemble_statements(
                             let end = r.base + r.bytes.len() as i64 / addr_unit;
                             target >= r.base && target < end
                         }) || (target >= origin && target < cur);
-                        if overlaps {
+                        if overlaps && !wraps_address_space {
                             warnings.push(Warning {
                                 line: s.line,
                                 message:
@@ -2557,12 +2581,23 @@ fn assemble_statements(
             } else {
                 (pc - origin) as u64
             };
-            debug.lines.push(LineRec {
-                line: s.line as u32,
-                offset,
-                length: ((bytes.len() - len_before) as i64 / addr_unit) as u64,
-                file: s.file,
-            });
+            let mut length = ((bytes.len() - len_before) as i64 / addr_unit) as u64;
+            let mut at = offset;
+            while length > 0 {
+                let part = if wraps_address_space {
+                    length.min(0x1_0000 - at)
+                } else {
+                    length
+                };
+                debug.lines.push(LineRec {
+                    line: s.line as u32,
+                    offset: at,
+                    length: part,
+                    file: s.file,
+                });
+                length -= part;
+                at = 0;
+            }
             let bounds = if matches!(s.op, Some(Operation::ComputedInstruction(_))) {
                 let timing = dialect.computed_timing(&bytes[len_before..]);
                 if timing.is_none() {
@@ -2622,13 +2657,48 @@ fn assemble_statements(
             }
         }
 
-        // The 64K cap, checked as bytes land so the error carries the span of
-        // the statement that crossed it (`bytes` only grows, so the first
-        // offender fires) — a failure in an included file names that file.
-        // The cap is on the **address space**, so the byte count converts to
-        // address units first (a CP1610 decle is 2 bytes but 1 address); a
-        // trailing partial unit still occupies its address.
-        if origin + bytes.len().div_ceil(addr_unit as usize) as i64 > 0x1_0000 {
+        if wraps_address_space {
+            let end = origin + bytes.len() as i64;
+            if pc + (bytes.len().saturating_sub(len_before)) as i64 > 0x1_0000 {
+                warnings.push(Warning {
+                    line: s.line,
+                    file: s.file,
+                    kind: WarningKind::Advisory,
+                    message: "64KB limit passed inside instruction".to_string(),
+                });
+            }
+            if end >= 0x1_0000 {
+                // Close physical address runs at the boundary and reuse the
+                // shared overwrite placement. Compact after each wrap, keeping
+                // the accumulated memory image at no more than 64 KiB.
+                let pending = std::mem::take(&mut bytes);
+                let mut at = origin;
+                let mut remaining = pending.as_slice();
+                while !remaining.is_empty() {
+                    let count = remaining.len().min((0x1_0000 - at) as usize);
+                    runs.push(Run {
+                        name: "wrapped address run".to_string(),
+                        base: at,
+                        at: Place::ByAddress,
+                        bytes: remaining[..count].to_vec(),
+                    });
+                    let (base, image) =
+                        lay_out(std::mem::take(&mut runs), gap_fill, 1, None, true, |_| None)?;
+                    runs.push(Run {
+                        name: "memory image".to_string(),
+                        base,
+                        at: Place::ByAddress,
+                        bytes: image,
+                    });
+                    remaining = &remaining[count..];
+                    at = 0;
+                }
+                origin = end & 0xffff;
+                written_len = 0;
+                written_start = None;
+                wrote_any = false;
+            }
+        } else if origin + bytes.len().div_ceil(addr_unit as usize) as i64 > 0x1_0000 {
             return Err(s.err("program exceeds the 64K address space"));
         }
     }
@@ -2669,8 +2739,13 @@ fn assemble_statements(
             dialect.later_run_overwrites(),
             |img| dialect.image_size(img),
         )?;
+        let debug_base = if wraps_address_space {
+            address_debug_base(&debug, origin_of_image as u64)
+        } else {
+            origin_of_image as u64
+        };
         if org_starts_address_run {
-            let base = origin_of_image as u64;
+            let base = debug_base;
             for symbol in &mut debug.symbols {
                 match &mut symbol.kind {
                     debug198x::SymbolKind::Label { offset, .. }
@@ -2694,7 +2769,11 @@ fn assemble_statements(
                 (image.len() as i64 / addr_unit) as u32,
             ),
             origin: origin_of_image as u16,
-            reserved_prefix: 0,
+            reserved_prefix: if wraps_address_space {
+                (origin_of_image as u64 - debug_base) as u16
+            } else {
+                0
+            },
             bytes: image,
             symbols,
             start,
@@ -2725,7 +2804,14 @@ fn assemble_statements(
     }
 
     if org_starts_address_run {
-        let base = origin as u64;
+        let base = if wraps_address_space {
+            address_debug_base(&debug, origin as u64)
+        } else {
+            origin as u64
+        };
+        if wraps_address_space {
+            reserved_prefix = (origin as u64 - base) as u16;
+        }
         for symbol in &mut debug.symbols {
             match &mut symbol.kind {
                 debug198x::SymbolKind::Label { offset, .. }
@@ -2742,8 +2828,17 @@ fn assemble_statements(
     }
 
     let areas = flat_space_usage(
-        origin as u32 - u32::from(reserved_prefix),
-        (bytes.len() as i64 / addr_unit) as u32 + u32::from(reserved_prefix),
+        if wraps_address_space {
+            origin as u32
+        } else {
+            origin as u32 - u32::from(reserved_prefix)
+        },
+        (bytes.len() as i64 / addr_unit) as u32
+            + if wraps_address_space {
+                0
+            } else {
+                u32::from(reserved_prefix)
+            },
     );
     Ok(Assembly {
         requested_output,

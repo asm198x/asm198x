@@ -86,6 +86,15 @@ impl Dialect for Pasmo {
     fn cycle_coverage(&self) -> crate::dialect::CycleCoverage {
         crate::dialect::CycleCoverage::Full
     }
+    fn wraps_address_space(&self) -> bool {
+        true
+    }
+    fn org_starts_address_run(&self) -> bool {
+        true
+    }
+    fn later_run_overwrites(&self) -> bool {
+        true
+    }
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::z80::SET
     }
@@ -279,14 +288,16 @@ impl Z80Syntax for PasmoSyntax {
     fn parse_number(&self, tok: &str, line: usize) -> Result<i64, AsmError> {
         let t = tok.trim();
         let bad = || AsmError::new(line, format!("invalid number `{tok}`"));
-        if let Some(hex) = t
-            .strip_prefix('$')
-            .or_else(|| t.strip_prefix("0x"))
-            .or_else(|| t.strip_prefix("0X"))
-        {
+        if let Some(hex) = t.strip_prefix('$') {
+            u16::from_str_radix(hex, 16)
+                .map(i64::from)
+                .map_err(|_| bad())
+        } else if let Some(hex) = t.strip_prefix("0x").or_else(|| t.strip_prefix("0X")) {
             i64::from_str_radix(hex, 16).map_err(|_| bad())
         } else if let Some(bin) = t.strip_prefix('%') {
-            i64::from_str_radix(bin, 2).map_err(|_| bad())
+            u16::from_str_radix(bin, 2)
+                .map(i64::from)
+                .map_err(|_| bad())
         } else if t.starts_with('\'') && t.ends_with('\'') && t.chars().count() == 3 {
             t.chars().nth(1).map(|c| c as i64).ok_or_else(bad)
         } else {
@@ -511,9 +522,10 @@ mod tests {
     fn constants_use_native_unsigned_word_values() {
         assert!(crate::assemble_pasmo("V equ $FFFF\n ld hl,V\n").is_ok());
         assert!(crate::assemble_pasmo("V equ -5\n ld a,V\n").is_ok());
-        let result = crate::assemble_pasmo("V equ $10000\n ld hl,V\n").expect("wrapped EQU");
+        let result = crate::assemble_pasmo("V equ 65536\n ld hl,V\n").expect("wrapped decimal EQU");
         assert_eq!(result.symbols.get("V"), Some(&0));
         assert_eq!(result.bytes, [0x21, 0, 0]);
+        assert!(crate::assemble_pasmo("V equ $10000\n ld hl,V\n").is_err());
     }
 
     #[test]
