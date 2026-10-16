@@ -191,9 +191,14 @@ pub(crate) trait Z80Syntax {
         false
     }
 
-    /// Pasmo's word-form bitwise operators and precedence table. SjASMPlus
-    /// keeps its existing operator spellings and C-style grouping.
+    /// Pasmo's word-form bitwise operators and precedence table.
     fn pasmo_expressions(&self) -> bool {
+        false
+    }
+
+    /// SjASMPlus's all-upper/all-lower word operators, with logical NOT and
+    /// the existing C-style grouping. Pasmo has a separate expression grammar.
+    fn sjasmplus_word_operators(&self) -> bool {
         false
     }
 
@@ -3590,6 +3595,10 @@ impl CondParser<'_> {
                 self.pos += 1;
                 Ok(i64::from(self.unary()? == 0))
             }
+            Some(Tok::WordNot) => {
+                self.pos += 1;
+                Ok(-i64::from(self.unary()? == 0))
+            }
             _ => self.atom(),
         }
     }
@@ -4404,6 +4413,8 @@ enum Tok {
     Not,
     /// Unary bitwise complement `~` (accepted by both reference dialects).
     BitNot,
+    /// SjASMPlus word-form NOT: logical true is -1, rather than bitwise NOT.
+    WordNot,
 }
 
 /// Lex an operand expression (see [`tokenize_impl`]).
@@ -4633,6 +4644,16 @@ fn tokenize_impl<S: Z80Syntax>(
                         "SHR" => Tok::Shr,
                         _ => Tok::Sym(word),
                     }
+                } else if syntax.sjasmplus_word_operators() {
+                    match word.as_str() {
+                        "AND" | "and" => Tok::And,
+                        "OR" | "or" => Tok::Or,
+                        "XOR" | "xor" => Tok::Xor,
+                        "NOT" | "not" => Tok::WordNot,
+                        "SHL" | "shl" => Tok::Shl,
+                        "SHR" | "shr" => Tok::Shr,
+                        _ => Tok::Sym(word),
+                    }
                 } else {
                     Tok::Sym(word)
                 };
@@ -4843,6 +4864,10 @@ impl ExprParser {
         if matches!(self.tokens.get(self.pos), Some(Tok::BitNot)) {
             self.pos += 1;
             return Ok(Expr::BitNot(Box::new(self.unary()?)));
+        }
+        if matches!(self.tokens.get(self.pos), Some(Tok::WordNot)) {
+            self.pos += 1;
+            return Ok(Expr::Neg(Box::new(Expr::LogNot(Box::new(self.unary()?)))));
         }
         self.atom()
     }
