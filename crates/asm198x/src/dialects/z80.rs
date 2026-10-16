@@ -4275,19 +4275,22 @@ fn parse_list<S: Z80Syntax>(syntax: &S, rest: &str, line: usize) -> Result<Vec<E
     Ok(out)
 }
 
-/// Split a data list on commas not inside a `"..."` string.
+/// Split a data list on commas outside strings and character literals.
+/// The quote inside `'"'` is a character, and the comma inside `','` is data.
 pub(crate) fn split_data_items(s: &str) -> Vec<&str> {
     let mut out = Vec::new();
-    let mut in_string = false;
+    let mut quote = None;
     let mut start = 0;
     for (i, c) in s.char_indices() {
-        match c {
-            '"' => in_string = !in_string,
-            ',' if !in_string => {
+        match quote {
+            Some(q) if c == q => quote = None,
+            Some(_) => {}
+            None if c == '"' || c == '\'' => quote = Some(c),
+            None if c == ',' => {
                 out.push(s[start..i].trim());
                 start = i + 1;
             }
-            _ => {}
+            None => {}
         }
     }
     out.push(s[start..].trim());
