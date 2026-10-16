@@ -6,6 +6,77 @@
 use asm198x::assemble_ca65_files_with_config;
 use asm198x::source::MemoryLoader;
 
+#[test]
+fn used_file_extents_match_captured_native_builds() {
+    let facts: serde_json::Value =
+        serde_json::from_str(include_str!("fixtures/ca65-used-extents.json"))
+            .expect("captured native facts");
+    let cases = facts["cases"].as_array().expect("cases");
+    assert_eq!(cases.len(), 51);
+    for case in cases {
+        let name = case["name"].as_str().expect("case name");
+        let result = assemble_ca65_files_with_config(
+            case["source"].as_str().expect("source"),
+            "input.s",
+            &MemoryLoader::new(),
+            case["config"].as_str().expect("config"),
+        );
+        let native = case["native"].as_array().expect("native stages");
+        if native.last().expect("native result")["exit"] != 0 {
+            assert!(result.is_err(), "{name}: native refused this build");
+            continue;
+        }
+        let result = result.unwrap_or_else(|error| panic!("{name}: {error:?}"));
+        let actual: String = result.bytes.iter().map(|b| format!("{b:02x}")).collect();
+        assert_eq!(
+            actual,
+            case["native_hex"].as_str().expect("native bytes"),
+            "{name}"
+        );
+    }
+}
+
+#[test]
+fn compact_file_offsets_preserve_cpu_addresses_and_memory_capacity() {
+    let cfg = "MEMORY { A:start=$1000,size=$10,file=%O; B:start=$2000,size=$10,file=%O; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n";
+    let source = ".segment \"CODE\"\nfirst_label: .byte $a5\n.segment \"TAIL\"\nsecond_label: .word first_label,second_label\n";
+    let result = assemble_ca65_files_with_config(source, "input.s", &MemoryLoader::new(), cfg)
+        .expect("two compact areas");
+    let tail = result
+        .section_debug
+        .iter()
+        .find(|section| section.section.name == "TAIL")
+        .expect("TAIL debug section");
+    assert_eq!(tail.file_offset, Some(1));
+    assert_eq!(tail.section.base, Some(0x2000));
+    let label = tail
+        .debug
+        .symbols
+        .iter()
+        .find(|symbol| symbol.name == "second_label")
+        .expect("section label");
+    let debug198x::SymbolKind::Label { offset, .. } = &label.kind else {
+        panic!("expected a section-relative label");
+    };
+    assert_eq!(*offset, 0);
+    assert_eq!(&result.bytes[1..], &[0x00, 0x10, 0x00, 0x20]);
+    assert_eq!(result.areas[0].size, 16);
+    assert_eq!(result.areas[0].free, 15);
+    assert_eq!(result.areas[1].size, 16);
+    assert_eq!(result.areas[1].free, 12);
+    let listing: serde_json::Value =
+        serde_json::from_str(&asm198x::render_listing_json("input.s", &result, 1))
+            .expect("JSON listing");
+    assert_eq!(
+        listing["lines"][1]["file_offset"],
+        tail.file_offset.expect("file offset")
+    );
+    assert_eq!(
+        listing["lines"][1]["address"],
+        tail.section.base.expect("CPU base") + offset
+    );
+}
+
 /// The layout shape that forced the feature: a floating segment (`RODATA`)
 /// placed sequentially after `CODE`, and a segment opening a second file
 /// area (`TILES` in CHR). Addresses and file offsets follow ld65's rule.

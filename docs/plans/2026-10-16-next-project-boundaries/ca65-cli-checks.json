@@ -1,0 +1,4740 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "assembler_sha256": "d9e94daf14ca98b5a9d5d8a3cc74e512369f8d65ccc237155903191eb8149897",
+  "cases": [
+    {
+      "name": "one_byte,default",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n"
+      }
+    },
+    {
+      "name": "empty,default",
+      "source": ".segment \"CODE\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n"
+      }
+    },
+    {
+      "name": "absent,default",
+      "source": ".end\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> formatted.bin\n"
+        },
+        "source": ""
+      }
+    },
+    {
+      "name": "pinned,default",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccca5",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204,165],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4100},\"file_offset\":4,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":11,\"segments\":[{\"name\":\"CODE\",\"base\":4100,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccca5",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 5 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n"
+      }
+    },
+    {
+      "name": "empty_pinned,default",
+      "source": ".segment \"CODE\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 4 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n"
+      }
+    },
+    {
+      "name": "absent_pinned,default",
+      "source": ".end\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 4 byte(s) -> formatted.bin\n"
+        },
+        "source": ""
+      }
+    },
+    {
+      "name": "alignment,default",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro,align=8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n"
+      }
+    },
+    {
+      "name": "reserve,default",
+      "source": ".segment \"CODE\"\n.res 3\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":3,\"free\":13,\"largest_free\":13,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":3}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .res 3\n"
+      }
+    },
+    {
+      "name": "overflow,default",
+      "source": ".segment \"CODE\"\n.res 17\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(1): Segment 'CODE' overflows memory area 'MAIN' by 1 byte \nld65: Error: Cannot generate most of the files due to memory area overflow \n"
+        }
+      ],
+      "native_hex": null,
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 1,
+        "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"segment `CODE` (17 bytes at $1000) exceeds memory area `MAIN` ($1000..$1010)\",\"fix\":null}]\n",
+        "stderr": ""
+      },
+      "asm_hex": "70726576696f757320696d616765"
+    },
+    {
+      "name": "one_byte,fill=no",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n"
+      }
+    },
+    {
+      "name": "empty,fill=no",
+      "source": ".segment \"CODE\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n"
+      }
+    },
+    {
+      "name": "absent,fill=no",
+      "source": ".end\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 0 byte(s) -> formatted.bin\n"
+        },
+        "source": ""
+      }
+    },
+    {
+      "name": "pinned,fill=no",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccca5",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204,165],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4100},\"file_offset\":4,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":11,\"segments\":[{\"name\":\"CODE\",\"base\":4100,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccca5",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 5 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n"
+      }
+    },
+    {
+      "name": "empty_pinned,fill=no",
+      "source": ".segment \"CODE\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 4 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n"
+      }
+    },
+    {
+      "name": "absent_pinned,fill=no",
+      "source": ".end\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 4 byte(s) -> formatted.bin\n"
+        },
+        "source": ""
+      }
+    },
+    {
+      "name": "alignment,fill=no",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro,align=8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n"
+      }
+    },
+    {
+      "name": "reserve,fill=no",
+      "source": ".segment \"CODE\"\n.res 3\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":3,\"free\":13,\"largest_free\":13,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":3}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .res 3\n"
+      }
+    },
+    {
+      "name": "overflow,fill=no",
+      "source": ".segment \"CODE\"\n.res 17\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(1): Segment 'CODE' overflows memory area 'MAIN' by 1 byte \nld65: Error: Cannot generate most of the files due to memory area overflow \n"
+        }
+      ],
+      "native_hex": null,
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 1,
+        "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"segment `CODE` (17 bytes at $1000) exceeds memory area `MAIN` ($1000..$1010)\",\"fix\":null}]\n",
+        "stderr": ""
+      },
+      "asm_hex": "70726576696f757320696d616765"
+    },
+    {
+      "name": "one_byte,fill=yes",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5cccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 16 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n"
+      }
+    },
+    {
+      "name": "empty,fill=yes",
+      "source": ".segment \"CODE\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 16 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n"
+      }
+    },
+    {
+      "name": "absent,fill=yes",
+      "source": ".end\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 16 byte(s) -> formatted.bin\n"
+        },
+        "source": ""
+      }
+    },
+    {
+      "name": "pinned,fill=yes",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccca5cccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204,165,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4100},\"file_offset\":4,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":11,\"segments\":[{\"name\":\"CODE\",\"base\":4100,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccca5cccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 16 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n"
+      }
+    },
+    {
+      "name": "empty_pinned,fill=yes",
+      "source": ".segment \"CODE\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 16 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n"
+      }
+    },
+    {
+      "name": "absent_pinned,fill=yes",
+      "source": ".end\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 16 byte(s) -> formatted.bin\n"
+        },
+        "source": ""
+      }
+    },
+    {
+      "name": "alignment,fill=yes",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro,align=8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5cccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 16 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n"
+      }
+    },
+    {
+      "name": "reserve,fill=yes",
+      "source": ".segment \"CODE\"\n.res 3\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"MAIN\",\"start\":4096,\"size\":16,\"used\":3,\"free\":13,\"largest_free\":13,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":3}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 16 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .res 3\n"
+      }
+    },
+    {
+      "name": "overflow,fill=yes",
+      "source": ".segment \"CODE\"\n.res 17\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(1): Segment 'CODE' overflows memory area 'MAIN' by 1 byte \nld65: Error: Cannot generate most of the files due to memory area overflow \n"
+        }
+      ],
+      "native_hex": null,
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 1,
+        "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"segment `CODE` (17 bytes at $1000) exceeds memory area `MAIN` ($1000..$1010)\",\"fix\":null}]\n",
+        "stderr": ""
+      },
+      "asm_hex": "70726576696f757320696d616765"
+    },
+    {
+      "name": "areas_both_no_no",
+      "source": ".segment \"CODE\"\nfirst_label: .byte $a5\n.segment \"TAIL\"\nsecond_label: .word first_label,second_label\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a500100020",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,0,16,0,32],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[{\"name\":\"first_label\",\"kind\":\"label\",\"section\":0,\"offset\":0}],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}},{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":8192},\"file_offset\":1,\"debug\":{\"symbols\":[{\"name\":\"second_label\",\"kind\":\"label\",\"section\":1,\"offset\":0}],\"lines\":[{\"line\":4,\"offset\":0,\"length\":4}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":4,\"free\":12,\"largest_free\":12,\"segments\":[{\"name\":\"TAIL\",\"base\":8192,\"length\":4}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a500100020",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 5 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\nfirst_label:\n        .byte $a5\n        .segment \"TAIL\"\nsecond_label:\n        .word first_label,second_label\n"
+      }
+    },
+    {
+      "name": "areas_empty_first_no_no",
+      "source": ".segment \"CODE\"\n.segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "5a",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[90],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":8192},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"TAIL\",\"base\":8192,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "5a",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .segment \"TAIL\"\n        .byte $5a\n"
+      }
+    },
+    {
+      "name": "areas_absent_first_no_no",
+      "source": ".segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "5a",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[90],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":8192},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"TAIL\",\"base\":8192,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "5a",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"TAIL\"\n        .byte $5a\n"
+      }
+    },
+    {
+      "name": "areas_trailing_empty_no_no",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n        .segment \"TAIL\"\n"
+      }
+    },
+    {
+      "name": "areas_both_no_yes",
+      "source": ".segment \"CODE\"\nfirst_label: .byte $a5\n.segment \"TAIL\"\nsecond_label: .word first_label,second_label\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a500100020cccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,0,16,0,32,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[{\"name\":\"first_label\",\"kind\":\"label\",\"section\":0,\"offset\":0}],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}},{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":8192},\"file_offset\":1,\"debug\":{\"symbols\":[{\"name\":\"second_label\",\"kind\":\"label\",\"section\":1,\"offset\":0}],\"lines\":[{\"line\":4,\"offset\":0,\"length\":4}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":4,\"free\":12,\"largest_free\":12,\"segments\":[{\"name\":\"TAIL\",\"base\":8192,\"length\":4}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a500100020cccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 17 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\nfirst_label:\n        .byte $a5\n        .segment \"TAIL\"\nsecond_label:\n        .word first_label,second_label\n"
+      }
+    },
+    {
+      "name": "areas_empty_first_no_yes",
+      "source": ".segment \"CODE\"\n.segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "5acccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[90,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":8192},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"TAIL\",\"base\":8192,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "5acccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 16 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .segment \"TAIL\"\n        .byte $5a\n"
+      }
+    },
+    {
+      "name": "areas_absent_first_no_yes",
+      "source": ".segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "5acccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[90,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":8192},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"TAIL\",\"base\":8192,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "5acccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 16 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"TAIL\"\n        .byte $5a\n"
+      }
+    },
+    {
+      "name": "areas_trailing_empty_no_yes",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5cccccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 17 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n        .segment \"TAIL\"\n"
+      }
+    },
+    {
+      "name": "areas_both_yes_no",
+      "source": ".segment \"CODE\"\nfirst_label: .byte $a5\n.segment \"TAIL\"\nsecond_label: .word first_label,second_label\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccc00100020",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,0,16,0,32],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[{\"name\":\"first_label\",\"kind\":\"label\",\"section\":0,\"offset\":0}],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}},{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":8192},\"file_offset\":16,\"debug\":{\"symbols\":[{\"name\":\"second_label\",\"kind\":\"label\",\"section\":1,\"offset\":0}],\"lines\":[{\"line\":4,\"offset\":0,\"length\":4}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":4,\"free\":12,\"largest_free\":12,\"segments\":[{\"name\":\"TAIL\",\"base\":8192,\"length\":4}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5cccccccccccccccccccccccccccccc00100020",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 20 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\nfirst_label:\n        .byte $a5\n        .segment \"TAIL\"\nsecond_label:\n        .word first_label,second_label\n"
+      }
+    },
+    {
+      "name": "areas_empty_first_yes_no",
+      "source": ".segment \"CODE\"\n.segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc5a",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,90],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":8192},\"file_offset\":16,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"TAIL\",\"base\":8192,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccccccccccccccccccccccccccc5a",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 17 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .segment \"TAIL\"\n        .byte $5a\n"
+      }
+    },
+    {
+      "name": "areas_absent_first_yes_no",
+      "source": ".segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc5a",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,90],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":8192},\"file_offset\":16,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"TAIL\",\"base\":8192,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccccccccccccccccccccccccccc5a",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 17 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"TAIL\"\n        .byte $5a\n"
+      }
+    },
+    {
+      "name": "areas_trailing_empty_yes_no",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5cccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 16 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n        .segment \"TAIL\"\n"
+      }
+    },
+    {
+      "name": "areas_both_yes_yes",
+      "source": ".segment \"CODE\"\nfirst_label: .byte $a5\n.segment \"TAIL\"\nsecond_label: .word first_label,second_label\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccc00100020cccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,0,16,0,32,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[{\"name\":\"first_label\",\"kind\":\"label\",\"section\":0,\"offset\":0}],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}},{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":8192},\"file_offset\":16,\"debug\":{\"symbols\":[{\"name\":\"second_label\",\"kind\":\"label\",\"section\":1,\"offset\":0}],\"lines\":[{\"line\":4,\"offset\":0,\"length\":4}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":4,\"free\":12,\"largest_free\":12,\"segments\":[{\"name\":\"TAIL\",\"base\":8192,\"length\":4}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5cccccccccccccccccccccccccccccc00100020cccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 32 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\nfirst_label:\n        .byte $a5\n        .segment \"TAIL\"\nsecond_label:\n        .word first_label,second_label\n"
+      }
+    },
+    {
+      "name": "areas_empty_first_yes_yes",
+      "source": ".segment \"CODE\"\n.segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc5acccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,90,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":8192},\"file_offset\":16,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":3,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"TAIL\",\"base\":8192,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccccccccccccccccccccccccccc5acccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 32 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .segment \"TAIL\"\n        .byte $5a\n"
+      }
+    },
+    {
+      "name": "areas_absent_first_yes_yes",
+      "source": ".segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc5acccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,90,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":8192},\"file_offset\":16,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"TAIL\",\"base\":8192,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "cccccccccccccccccccccccccccccccc5acccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 32 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"TAIL\"\n        .byte $5a\n"
+      }
+    },
+    {
+      "name": "areas_trailing_empty_yes_yes",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]},{\"name\":\"B\",\"start\":8192,\"size\":16,\"used\":0,\"free\":16,\"largest_free\":16}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 32 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n        .segment \"TAIL\"\n"
+      }
+    },
+    {
+      "name": "gap_start=$1008",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,start=$1008; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccc5a",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,204,204,204,204,204,204,204,90],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}},{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":4104},\"file_offset\":8,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":4,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":2,\"free\":14,\"largest_free\":7,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1},{\"name\":\"TAIL\",\"base\":4104,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5cccccccccccccc5a",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 9 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n        .segment \"TAIL\"\n        .byte $5a\n"
+      }
+    },
+    {
+      "name": "gap_align=8",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,align=8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccc5a",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,204,204,204,204,204,204,204,90],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}},{\"section\":{\"id\":1,\"name\":\"TAIL\",\"base\":4104},\"file_offset\":8,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":4,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":2,\"free\":14,\"largest_free\":7,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1},{\"name\":\"TAIL\",\"base\":4104,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5cccccccccccccc5a",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 9 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n        .segment \"TAIL\"\n        .byte $5a\n"
+      }
+    },
+    {
+      "name": "ram_does_not_write",
+      "source": ".segment \"BSS\"\n.res 3\n.segment \"CODE\"\n.word $1234\n",
+      "config": "MEMORY { R:start=$200,size=$10,file=\"\"; A:start=$1000,size=$10,file=%O; }\nSEGMENTS { BSS:load=R,type=bss; CODE:load=A,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "3412",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[52,18],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"BSS\",\"base\":512},\"file_offset\":null,\"debug\":{\"symbols\":[],\"lines\":[],\"cycle_coverage\":\"full\"}},{\"section\":{\"id\":1,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":4,\"offset\":0,\"length\":2}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"R\",\"start\":512,\"size\":16,\"used\":3,\"free\":13,\"largest_free\":13,\"segments\":[{\"name\":\"BSS\",\"base\":512,\"length\":3}]},{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":2,\"free\":14,\"largest_free\":14,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":2}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "3412",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 2 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"BSS\"\n        .res 3\n        .segment \"CODE\"\n        .word $1234\n"
+      }
+    },
+    {
+      "name": "explicit_zero_reserve",
+      "source": ".segment \"CODE\"\n.res 3,0\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,start=$1008; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'TAIL' does not exist\n"
+        }
+      ],
+      "native_hex": "000000",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[0,0,0],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":3}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":3,\"free\":13,\"largest_free\":13,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":3}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "000000",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 3 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .res 3,0\n"
+      }
+    },
+    {
+      "name": "implicit_align",
+      "source": ".segment \"CODE\"\n.byte $a5\n.align 8\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,start=$1008; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'TAIL' does not exist\nld65: Warning: input.cfg(2): Segment 'CODE' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "a5cccccccccccccc5a",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,204,204,204,204,204,204,204,90],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1},{\"line\":3,\"offset\":1,\"length\":7},{\"line\":4,\"offset\":8,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":9,\"free\":7,\"largest_free\":7,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":9}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5cccccccccccccc5a",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 9 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n        .align 8\n        .byte $5a\n"
+      }
+    },
+    {
+      "name": "explicit_zero_align",
+      "source": ".segment \"CODE\"\n.byte $a5\n.align 8,0\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,start=$1008; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'TAIL' does not exist\nld65: Warning: input.cfg(2): Segment 'CODE' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "a5000000000000005a",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,0,0,0,0,0,0,0,90],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1},{\"line\":3,\"offset\":1,\"length\":7},{\"line\":4,\"offset\":8,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":9,\"free\":7,\"largest_free\":7,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":9}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5000000000000005a",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 9 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n        .align 8,0\n        .byte $5a\n"
+      }
+    },
+    {
+      "name": "empty_trailing_start",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,start=$1008; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccc",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165,204,204,204,204,204,204,204],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5cccccccccccccc",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 8 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n        .segment \"TAIL\"\n"
+      }
+    },
+    {
+      "name": "absent_trailing_start",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,start=$1008; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'TAIL' does not exist\n"
+        }
+      ],
+      "native_hex": "a5",
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+          "--dialect",
+          "ca65",
+          "--message-format=json",
+          "-C",
+          "input.cfg",
+          "input.s",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[165],\"origin\":null,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[]},\"section_debug\":[{\"section\":{\"id\":0,\"name\":\"CODE\",\"base\":4096},\"file_offset\":0,\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":1}],\"cycle_coverage\":\"full\"}}],\"areas\":[{\"name\":\"A\",\"start\":4096,\"size\":16,\"used\":1,\"free\":15,\"largest_free\":15,\"segments\":[{\"name\":\"CODE\",\"base\":4096,\"length\":1}]}],\"diagnostics\":[],\"files\":[\"input.s\"]}\n",
+        "stderr": ""
+      },
+      "asm_hex": "a5",
+      "format": {
+        "first": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "input.s",
+            "-o",
+            "formatted.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted input.s -> formatted.s\n"
+        },
+        "second": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "fmt",
+            "-d",
+            "ca65",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        "rebuild": {
+          "argv": [
+            "/private/tmp/asm198x-next-boundaries-build/debug/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "input.cfg",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled + linked 1 byte(s) -> formatted.bin\n"
+        },
+        "source": "        .segment \"CODE\"\n        .byte $a5\n"
+      }
+    }
+  ]
+}

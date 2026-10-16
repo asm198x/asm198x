@@ -1,0 +1,1664 @@
+{
+  "tools": {
+    "ca65": {
+      "path": "/opt/homebrew/bin/ca65",
+      "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ca65",
+          "--version"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ca65 V2.18 - N/A\n"
+      }
+    },
+    "ld65": {
+      "path": "/opt/homebrew/bin/ld65",
+      "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+      "version": {
+        "argv": [
+          "/opt/homebrew/bin/ld65",
+          "--version"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "ld65 V2.18 - N/A\n"
+      }
+    }
+  },
+  "cases": [
+    {
+      "name": "one_byte,default",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5"
+    },
+    {
+      "name": "empty,default",
+      "source": ".segment \"CODE\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": ""
+    },
+    {
+      "name": "absent,default",
+      "source": ".end\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": ""
+    },
+    {
+      "name": "pinned,default",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccca5"
+    },
+    {
+      "name": "empty_pinned,default",
+      "source": ".segment \"CODE\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccc"
+    },
+    {
+      "name": "absent_pinned,default",
+      "source": ".end\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccc"
+    },
+    {
+      "name": "alignment,default",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro,align=8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5"
+    },
+    {
+      "name": "reserve,default",
+      "source": ".segment \"CODE\"\n.res 3\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccc"
+    },
+    {
+      "name": "overflow,default",
+      "source": ".segment \"CODE\"\n.res 17\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(1): Segment 'CODE' overflows memory area 'MAIN' by 1 byte \nld65: Error: Cannot generate most of the files due to memory area overflow \n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "one_byte,fill=no",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5"
+    },
+    {
+      "name": "empty,fill=no",
+      "source": ".segment \"CODE\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": ""
+    },
+    {
+      "name": "absent,fill=no",
+      "source": ".end\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": ""
+    },
+    {
+      "name": "pinned,fill=no",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccca5"
+    },
+    {
+      "name": "empty_pinned,fill=no",
+      "source": ".segment \"CODE\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccc"
+    },
+    {
+      "name": "absent_pinned,fill=no",
+      "source": ".end\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccc"
+    },
+    {
+      "name": "alignment,fill=no",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro,align=8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5"
+    },
+    {
+      "name": "reserve,fill=no",
+      "source": ".segment \"CODE\"\n.res 3\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccc"
+    },
+    {
+      "name": "overflow,fill=no",
+      "source": ".segment \"CODE\"\n.res 17\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(1): Segment 'CODE' overflows memory area 'MAIN' by 1 byte \nld65: Error: Cannot generate most of the files due to memory area overflow \n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "one_byte,fill=yes",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "empty,fill=yes",
+      "source": ".segment \"CODE\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "absent,fill=yes",
+      "source": ".end\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "pinned,fill=yes",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccca5cccccccccccccccccccccc"
+    },
+    {
+      "name": "empty_pinned,fill=yes",
+      "source": ".segment \"CODE\"\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "absent_pinned,fill=yes",
+      "source": ".end\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro,start=$1004; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "alignment,fill=yes",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro,align=8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "reserve,fill=yes",
+      "source": ".segment \"CODE\"\n.res 3\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "overflow,fill=yes",
+      "source": ".segment \"CODE\"\n.res 17\n",
+      "config": "MEMORY { MAIN:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=MAIN,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(1): Segment 'CODE' overflows memory area 'MAIN' by 1 byte \nld65: Error: Cannot generate most of the files due to memory area overflow \n"
+        }
+      ],
+      "native_hex": null
+    },
+    {
+      "name": "areas_both_no_no",
+      "source": ".segment \"CODE\"\nfirst_label: .byte $a5\n.segment \"TAIL\"\nsecond_label: .word first_label,second_label\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a500100020"
+    },
+    {
+      "name": "areas_empty_first_no_no",
+      "source": ".segment \"CODE\"\n.segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "5a"
+    },
+    {
+      "name": "areas_absent_first_no_no",
+      "source": ".segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "5a"
+    },
+    {
+      "name": "areas_trailing_empty_no_no",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5"
+    },
+    {
+      "name": "areas_both_no_yes",
+      "source": ".segment \"CODE\"\nfirst_label: .byte $a5\n.segment \"TAIL\"\nsecond_label: .word first_label,second_label\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a500100020cccccccccccccccccccccccc"
+    },
+    {
+      "name": "areas_empty_first_no_yes",
+      "source": ".segment \"CODE\"\n.segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "5acccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "areas_absent_first_no_yes",
+      "source": ".segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "5acccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "areas_trailing_empty_no_yes",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=no; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "areas_both_yes_no",
+      "source": ".segment \"CODE\"\nfirst_label: .byte $a5\n.segment \"TAIL\"\nsecond_label: .word first_label,second_label\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccc00100020"
+    },
+    {
+      "name": "areas_empty_first_yes_no",
+      "source": ".segment \"CODE\"\n.segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc5a"
+    },
+    {
+      "name": "areas_absent_first_yes_no",
+      "source": ".segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc5a"
+    },
+    {
+      "name": "areas_trailing_empty_yes_no",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=no; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "areas_both_yes_yes",
+      "source": ".segment \"CODE\"\nfirst_label: .byte $a5\n.segment \"TAIL\"\nsecond_label: .word first_label,second_label\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccc00100020cccccccccccccccccccccccc"
+    },
+    {
+      "name": "areas_empty_first_yes_yes",
+      "source": ".segment \"CODE\"\n.segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc5acccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "areas_absent_first_yes_yes",
+      "source": ".segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "cccccccccccccccccccccccccccccccc5acccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "areas_trailing_empty_yes_yes",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc,fill=yes; B:start=$2000,size=$10,file=%O,fillval=$cc,fill=yes; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=B,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccc"
+    },
+    {
+      "name": "gap_start=$1008",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,start=$1008; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccc5a"
+    },
+    {
+      "name": "gap_align=8",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,align=8; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccc5a"
+    },
+    {
+      "name": "ram_does_not_write",
+      "source": ".segment \"BSS\"\n.res 3\n.segment \"CODE\"\n.word $1234\n",
+      "config": "MEMORY { R:start=$200,size=$10,file=\"\"; A:start=$1000,size=$10,file=%O; }\nSEGMENTS { BSS:load=R,type=bss; CODE:load=A,type=ro; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "3412"
+    },
+    {
+      "name": "explicit_zero_reserve",
+      "source": ".segment \"CODE\"\n.res 3,0\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,start=$1008; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'TAIL' does not exist\n"
+        }
+      ],
+      "native_hex": "000000"
+    },
+    {
+      "name": "implicit_align",
+      "source": ".segment \"CODE\"\n.byte $a5\n.align 8\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,start=$1008; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'TAIL' does not exist\nld65: Warning: input.cfg(2): Segment 'CODE' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "a5cccccccccccccc5a"
+    },
+    {
+      "name": "explicit_zero_align",
+      "source": ".segment \"CODE\"\n.byte $a5\n.align 8,0\n.byte $5a\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,start=$1008; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'TAIL' does not exist\nld65: Warning: input.cfg(2): Segment 'CODE' isn't aligned properly; the resulting executable might not be functional.\n"
+        }
+      ],
+      "native_hex": "a5000000000000005a"
+    },
+    {
+      "name": "empty_trailing_start",
+      "source": ".segment \"CODE\"\n.byte $a5\n.segment \"TAIL\"\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,start=$1008; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        }
+      ],
+      "native_hex": "a5cccccccccccccc"
+    },
+    {
+      "name": "absent_trailing_start",
+      "source": ".segment \"CODE\"\n.byte $a5\n",
+      "config": "MEMORY { A:start=$1000,size=$10,file=%O,fillval=$cc; }\nSEGMENTS { CODE:load=A,type=ro; TAIL:load=A,type=ro,start=$1008; }\n",
+      "native": [
+        {
+          "argv": [
+            "/opt/homebrew/bin/ca65",
+            "input.s",
+            "-o",
+            "native.o"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/opt/homebrew/bin/ld65",
+            "-C",
+            "input.cfg",
+            "native.o",
+            "-o",
+            "native.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "ld65: Warning: input.cfg(3): Segment 'TAIL' does not exist\n"
+        }
+      ],
+      "native_hex": "a5"
+    }
+  ]
+}

@@ -1,0 +1,15 @@
+# Unfilled ca65 file extents (#716)
+
+The bounded config reader rejected every file area without `fill=yes`. Its layout model then stacked full memory capacities before resolving segment lengths, so merely removing that rejection would emit trailing capacity and wrong offsets for later areas.
+
+Fresh ca65 V2.18 / ld65 V2.18 probes establish 51 cases. Unfilled areas contribute their used extent, including internal start/alignment gaps. An explicitly selected empty segment reserves its start; an absent non-default segment does not. ca65 begins in CODE even for an empty source, which makes its configured start observable. Filled areas retain their full capacity, including when every segment is empty. Consecutive areas pack independently of their CPU addresses. RAM-only areas contribute no file bytes. Existing area overflow and placement refusals remain.
+
+The private layout now retains each area's fill policy and computes file bases after CPU placement. Memory accounting still uses full capacities; debug sections/listings use the resulting compact file offsets. The default NES layout keeps its historical behavior. The probe also found that unspecified `.res`/`.align` fill was being collapsed to explicit zero. That omission now survives the private parsed payload until layout supplies its fill byte; explicit zero remains zero. The existing bound of one fill byte across file areas remains explicit.
+
+The native-only fixture is `crates/asm198x/tests/fixtures/ca65-used-extents.json`. It retains versions, executable hashes, commands, sources, configs, streams, bytes and refusals. The regression failed before the change on the exact unsupported partial-extent diagnostic. `ca65-cli-checks.json` retains the successful current executable comparisons, formatter/idempotence/reassembly checks and preservation of prior output on refused builds. No upstream build script is executed.
+
+Validation: 1,480 workspace tests pass with Lua (37 explicit reference-tool ignores), plus both live ca65/ld65 config differentials. Clippy with all targets/Lua and denied warnings, Rust formatting, generated docs and Ruff pass. Release-control Node tests pass. A new mandatory `ca65_used_extents` package case runs all 51 captured facts, including prior-output preservation, making 31 required named qualification cases. Historical 0.0.70 qualification remains frozen at its original 30 names.
+
+The unchanged pinned 4510 target was audited from clean producer `18be570`. The native output is 564 bytes and exactly matches the pinned upstream `.ref`. The file-extent boundary is gone; the next measured Asm failure is ``4510-opcodes.s:22: error: `ORA` has no (indirect),z form``. `4510-after-extents.json` retains the complete focused report. This is an instruction-form boundary, separate from the corrected file layout; the complete target is not yet equivalent.
+
+The newly measured instruction boundary is tracked separately in #722. Its minimal native control emits `1207`; the complete target remains blocked.

@@ -135,7 +135,7 @@ enum Kind {
     /// `.dword` — 32-bit values emitted little-endian.
     DWords(Vec<Expr>),
     /// `.res count [, fill]` — `count` bytes of `fill`.
-    Res(usize, u8),
+    Res(usize, Option<u8>),
     /// `.org expr` — the address a following label reads, without moving where
     /// its bytes land. `.reloc` ends it.
     Org(Expr),
@@ -178,7 +178,7 @@ enum Kind {
     /// lands at segment offset 3 and draws ld65's "isn't aligned properly"
     /// warning rather than moving the bytes. The boundary need not be a power
     /// of two.
-    Align(i64, u8),
+    Align(i64, Option<u8>),
     /// A resolved `.incbin` payload (language-surface U5): raw asset bytes at
     /// the directive's location in the active segment. Never parsed into a
     /// native node — the multi-file walk resolves the directive into a shared
@@ -414,8 +414,15 @@ fn assemble_program(
             .collect();
         for stmt in &parsed.stmts {
             let off = *lengths.entry(stmt.seg.clone()).or_insert(0);
-            let (_, size) = resolve(set, stmt.kind.clone(), &size_env, off, stmt.line)
-                .map_err(|e| ca65_flat::stamp_file(e, stmt.file))?;
+            let (_, size) = resolve(
+                set,
+                stmt.kind.clone(),
+                &size_env,
+                off,
+                stmt.line,
+                layout_def.fill,
+            )
+            .map_err(|e| ca65_flat::stamp_file(e, stmt.file))?;
             *lengths.get_mut(&stmt.seg).expect("segment length") += size as u32;
         }
         lengths
@@ -556,7 +563,7 @@ fn assemble_program(
                 });
             }
         }
-        let (resolved, size) = resolve(set, stmt.kind, &size_env, off, stmt.line)
+        let (resolved, size) = resolve(set, stmt.kind, &size_env, off, stmt.line, layout_def.fill)
             .map_err(|e| ca65_flat::stamp_file(e, stmt.file))?;
         *offsets.get_mut(&stmt.seg).expect("segment offset") += size as u32;
         // A line span per byte-emitting statement (address-space-only
@@ -1377,7 +1384,7 @@ impl Walker {
         };
         let bytes = usize::try_from(size)
             .map_err(|_| AsmError::new(line, "`.tag` reserves a negative amount of space"))?;
-        Ok(Some(Kind::Res(bytes, 0)))
+        Ok(Some(Kind::Res(bytes, None)))
     }
 
     /// A name written here, as the key it is stored or looked up under.
@@ -2821,7 +2828,7 @@ fn parse_directive(
 }
 
 /// `.res count [, fill]`. `count` must fold to a constant (a literal expression
-/// or a `=` constant such as `NUM_ENEMIES`); `fill` defaults to 0.
+/// or a `=` constant such as `NUM_ENEMIES`); omitted fill is supplied by layout.
 fn parse_res(
     anons: &AnonCtx,
     anchor: &str,
@@ -2836,10 +2843,10 @@ fn parse_res(
     let count = usize::try_from(count)
         .map_err(|_| AsmError::new(line, "`.res` count must be non-negative"))?;
     let fill = match parts.next() {
-        None => 0,
+        None => None,
         Some(v) => {
             let n = fold_const(&parse_value(anons, anchor, v, line)?, consts, line)?;
-            u8::try_from(n).map_err(|_| AsmError::new(line, "`.res` fill must be a byte"))?
+            Some(u8::try_from(n).map_err(|_| AsmError::new(line, "`.res` fill must be a byte"))?)
         }
     };
     Ok(Kind::Res(count, fill))
@@ -2943,7 +2950,7 @@ fn parse_assert(anons: &AnonCtx, anchor: &str, rest: &str, line: usize) -> Resul
 
 /// `.align boundary [, fill]` — pad to the next multiple of `boundary` within
 /// the active segment. The boundary need not be a power of two, and the pad
-/// byte defaults to zero.
+/// byte is supplied by layout when omitted.
 fn parse_align(
     anons: &AnonCtx,
     anchor: &str,
@@ -2963,10 +2970,10 @@ fn parse_align(
         return Err(AsmError::new(line, "`.align` boundary must be positive"));
     }
     let fill = match parts.next() {
-        None => 0,
+        None => None,
         Some(v) => {
             let n = fold_const(&parse_value(anons, anchor, v, line)?, consts, line)?;
-            u8::try_from(n).map_err(|_| AsmError::new(line, "`.align` fill must be a byte"))?
+            Some(u8::try_from(n).map_err(|_| AsmError::new(line, "`.align` fill must be a byte"))?)
         }
     };
     Ok(Kind::Align(boundary, fill))

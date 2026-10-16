@@ -13,7 +13,7 @@
 use crate::engine::AsmError;
 
 /// One named memory area: a span of address space, optionally contributing
-/// its full extent to the output file (ld65 `file = %O, fill = yes`).
+/// its used or full extent to the output file.
 #[derive(Debug)]
 pub(crate) struct Area {
     pub(crate) name: String,
@@ -22,6 +22,9 @@ pub(crate) struct Area {
     /// Whether the area's bytes land in the output file. A `file = ""` area
     /// (RAM, zero page) occupies address space only.
     pub(crate) in_file: bool,
+    /// `fill = yes` retains the area's entire capacity; otherwise only its
+    /// occupied extent, including internal gaps, contributes file bytes.
+    pub(crate) fill_to_capacity: bool,
 }
 
 /// One segment definition: which area holds it, and the placement attributes
@@ -112,6 +115,7 @@ impl Layout {
             start,
             size,
             in_file,
+            fill_to_capacity: true,
         };
         let seg = |name: &str, area: usize, start: Option<u32>| SegmentDef {
             name: name.to_string(),
@@ -165,16 +169,6 @@ impl Layout {
         &self,
         lengths: &std::collections::BTreeMap<String, u32>,
     ) -> Result<ResolvedLayout, AsmError> {
-        // File areas stack in declaration order, each contributing its full
-        // extent (the bounded `fill = yes` shape).
-        let mut file_base = vec![0usize; self.areas.len()];
-        let mut image_size = 0usize;
-        for (i, a) in self.areas.iter().enumerate() {
-            if a.in_file {
-                file_base[i] = image_size;
-                image_size += a.size as usize;
-            }
-        }
         let addressable: Vec<bool> = self
             .areas
             .iter()
@@ -213,13 +207,32 @@ impl Layout {
             segs.push(ResolvedSeg {
                 name: s.name.clone(),
                 base: at,
-                file_at: a
-                    .in_file
-                    .then(|| file_base[s.area] + (at - a.start) as usize),
+                file_at: a.in_file.then(|| at.saturating_sub(a.start) as usize),
                 cpu_addressable: addressable[s.area],
             });
             if present {
                 cursor[s.area] = at + lengths.get(&s.name).copied().unwrap_or(0);
+            }
+        }
+        // CPU placement is independent of file packing. Only after all area
+        // cursors are known can an unfilled area's following file offset be
+        // resolved. Explicit empty segments reserve their start; absent ones
+        // have not advanced the cursor.
+        let mut file_base = vec![0usize; self.areas.len()];
+        let mut image_size = 0usize;
+        for (index, area) in self.areas.iter().enumerate() {
+            if area.in_file {
+                file_base[index] = image_size;
+                image_size += if area.fill_to_capacity {
+                    area.size
+                } else {
+                    cursor[index].saturating_sub(area.start)
+                } as usize;
+            }
+        }
+        for (segment, definition) in segs.iter_mut().zip(&self.segments) {
+            if let Some(offset) = &mut segment.file_at {
+                *offset += file_base[definition.area];
             }
         }
         Ok(ResolvedLayout {
@@ -289,8 +302,7 @@ impl Layout {
 /// fails loudly instead of linking wrong.
 ///
 /// # Errors
-/// An unknown block, attribute, or value shape; a file area without
-/// `fill = yes` (partial-extent output is outside the bound); differing
+/// An unknown block, attribute, or value shape; differing
 /// `fillval`s (the image carries one fill byte); a segment loading into an
 /// unknown area.
 pub(crate) fn from_cfg(text: &str) -> Result<Layout, AsmError> {
@@ -361,15 +373,6 @@ pub(crate) fn from_cfg(text: &str) -> Result<Layout, AsmError> {
                         ));
                     };
                     if in_file {
-                        if !fill {
-                            return Err(AsmError::new(
-                                0,
-                                format!(
-                                    "config: file area `{name}` without `fill = yes` writes a \
-                                     partial extent, which is outside this bounded reader"
-                                ),
-                            ));
-                        }
                         fills.push(fillval);
                     }
                     areas.push(Area {
@@ -377,6 +380,7 @@ pub(crate) fn from_cfg(text: &str) -> Result<Layout, AsmError> {
                         start,
                         size,
                         in_file,
+                        fill_to_capacity: fill,
                     });
                 }
             }
@@ -595,7 +599,7 @@ mod tests {
     }
 
     /// The refusals hold their bound: an unknown block, an unknown attribute,
-    /// and a file area without fill all fail by name.
+    /// and an unknown fill mode all fail by name.
     #[test]
     fn out_of_bound_configs_are_refused_by_name() {
         let e = from_cfg("FEATURES { }\nSEGMENTS { A: load = X; }").expect_err("no FEATURES");
@@ -605,8 +609,8 @@ mod tests {
                 .expect_err("no bank attr");
         assert!(e.message.contains("bank"), "{}", e.message);
         let e =
-            from_cfg("MEMORY { P: start = $0, size = $10, file = %O; }\nSEGMENTS { A: load = P; }")
-                .expect_err("file area needs fill");
+            from_cfg("MEMORY { P: start = $0, size = $10, file = %O, fill = auto; }\nSEGMENTS { A: load = P; }")
+                .expect_err("unknown fill mode");
         assert!(e.message.contains("fill"), "{}", e.message);
     }
 
