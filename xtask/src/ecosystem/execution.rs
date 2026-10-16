@@ -133,6 +133,26 @@ fn plan_hash(plan: &BuildPlan) -> Result<String, String> {
         &serde_json::to_vec(plan).map_err(|e| e.to_string())?,
     ))
 }
+fn reviewed_issues(repo: &Path, project: &Project, target: &Target) -> Result<Vec<String>, String> {
+    let path = repo.join("ecosystem/results/current.json");
+    if path.exists() {
+        let previous = read_report(&path)?;
+        let expected_plan = target.build.as_ref().map(plan_hash).transpose()?;
+        if let Some(record) = previous.records.iter().find(|r| {
+            r.project == project.id
+                && r.target == target.id
+                && r.source_commit == project.commit
+                && r.plan_sha256 == expected_plan
+        }) {
+            return Ok(record.issues.clone());
+        }
+    }
+    Ok(target
+        .build
+        .as_ref()
+        .map_or_else(Vec::new, |p| p.issues.clone()))
+}
+
 fn key(project: &Project, target: &Target) -> String {
     format!("{}/{}", project.id, target.id)
 }
@@ -380,10 +400,7 @@ fn audit_inner(repo: &Path, manifest: &Manifest, args: &[String]) -> Result<(), 
             reference_steps: Vec::new(),
             assembler_steps: Vec::new(),
             comparisons: Vec::new(),
-            issues: target
-                .build
-                .as_ref()
-                .map_or_else(Vec::new, |p| p.issues.clone()),
+            issues: reviewed_issues(repo, project, target)?,
         };
         if let Err(e) = target_audit(
             &AuditContext {
@@ -578,22 +595,6 @@ fn target_audit(
             && let Some(control) = control
         {
             record.reference_steps = control.reference_steps.clone();
-            for pair in &control.comparisons {
-                let bytes = decode_hex(
-                    pair.reference
-                        .hex
-                        .as_deref()
-                        .ok_or("reference output has no permissible captured bytes")?,
-                )?;
-                if process::bytes_hash(&bytes) != pair.reference.sha256 {
-                    return Err("reference bytes were corrupted".into());
-                }
-                let path = within(root, &pair.reference.path)?;
-                if let Some(parent) = path.parent() {
-                    std::fs::create_dir_all(parent).map_err(|e| e.to_string())?;
-                }
-                std::fs::write(path, bytes).map_err(|e| e.to_string())?;
-            }
             continue;
         }
         for (index, step) in steps.iter().enumerate() {
@@ -686,10 +687,9 @@ fn target_audit(
                 process,
                 outputs,
             });
-            let failure = failure.or_else(|| match tree_hash(root, &files, &excluded) {
-                Ok(hash) if hash == protected => None,
-                _ => Some("build changed protected upstream source".into()),
-            });
+            if tree_hash(root, &files, &excluded)? != protected {
+                return Err("build changed protected upstream source".into());
+            }
             if let Some(failure) = failure {
                 record.outcome = if side == "reference" {
                     Outcome::ReferenceFailure
@@ -704,7 +704,13 @@ fn target_audit(
         }
     }
     for pair in &plan.compare {
-        let reference = artifact(&native, &pair.reference, true)?;
+        let reference = if let Some(control) = control {
+            recorded_reference(control, &pair.reference)
+                .ok_or("missing captured native final artifact")?
+                .clone()
+        } else {
+            artifact(&native, &pair.reference, true)?
+        };
         let assembler = artifact(&asm, &pair.assembler, true)?;
         let equal = reference.length == assembler.length && reference.sha256 == assembler.sha256;
         record.comparisons.push(Pair {
@@ -727,6 +733,15 @@ fn target_audit(
     Ok(())
 }
 
+fn recorded_reference<'a>(record: &'a Record, path: &str) -> Option<&'a Artifact> {
+    record
+        .reference_steps
+        .iter()
+        .rev()
+        .flat_map(|step| &step.outputs)
+        .find(|artifact| artifact.path == path)
+}
+
 fn read_report(path: &Path) -> Result<Report, String> {
     if path.metadata().map_err(|e| e.to_string())?.len() > 64 * 1024 * 1024 {
         return Err("report exceeds size bound".into());
@@ -741,6 +756,31 @@ fn valid_hash(hash: &str) -> bool {
     hash.len() == 64 && hash.bytes().all(|b| b.is_ascii_hexdigit())
 }
 fn validate_report(repo: &Path, manifest: &Manifest, report: &Report) -> Result<(), String> {
+    let problems = super::validate(manifest);
+    if !problems.is_empty() {
+        return Err(format!(
+            "invalid admission manifest: {}",
+            problems.join("; ")
+        ));
+    }
+
+    let now = SystemTime::now()
+        .duration_since(UNIX_EPOCH)
+        .map_err(|e| e.to_string())?
+        .as_secs();
+    if report.captured_unix_seconds > now + 300
+        || report
+            .reference_report_sha256
+            .as_deref()
+            .is_some_and(|hash| !valid_hash(hash))
+        || report.reference_report_sha256.is_some()
+            && report.reference_captured_unix_seconds.is_none()
+        || report
+            .reference_captured_unix_seconds
+            .is_some_and(|time| time > report.captured_unix_seconds)
+    {
+        return Err("invalid capture date or reference replay provenance".into());
+    }
     if report.schema != 1
         || report.manifest_sha256 != manifest_hash(repo)?
         || report.records.is_empty()
@@ -774,6 +814,14 @@ fn validate_report(repo: &Path, manifest: &Manifest, report: &Report) -> Result<
         return Err("duplicate or unmatched target records".into());
     }
     for record in &report.records {
+        if record
+            .issues
+            .iter()
+            .any(|issue| !issue.starts_with("https://github.com/") || !issue.contains("/issues/"))
+        {
+            return Err("invalid evidence issue link".into());
+        }
+
         let (project, target) = targets(manifest)
             .find(|(p, t)| p.id == record.project && t.id == record.target)
             .ok_or("report names an unadmitted target")?;
@@ -863,6 +911,24 @@ fn validate_report(repo: &Path, manifest: &Manifest, report: &Report) -> Result<
                 return Err("native control stages do not match the reviewed plan".into());
             }
         }
+        for artifact in record
+            .reference_steps
+            .iter()
+            .chain(&record.assembler_steps)
+            .flat_map(|step| &step.outputs)
+        {
+            if artifact.length == 0 || !valid_hash(&artifact.sha256) {
+                return Err("invalid recorded build artifact".into());
+            }
+            if let Some(hex) = &artifact.hex {
+                let bytes = decode_hex(hex)?;
+                if bytes.len() as u64 != artifact.length
+                    || process::bytes_hash(&bytes) != artifact.sha256
+                {
+                    return Err("recorded artifact bytes disagree with their identity".into());
+                }
+            }
+        }
         if matches!(record.outcome, Outcome::Equivalent) {
             let plan = target.build.as_ref().ok_or("equivalence without a plan")?;
             if record.first_failure.is_some()
@@ -943,10 +1009,21 @@ fn replay_inner(repo: &Path, manifest: &Manifest, args: &[String]) -> Result<(),
     let controls: Vec<_> = control
         .records
         .iter()
-        .filter(|r| matches!(r.outcome, Outcome::Equivalent))
+        .filter(|r| {
+            matches!(
+                r.outcome,
+                Outcome::Equivalent
+                    | Outcome::AssemblerRejected
+                    | Outcome::PostprocessFailure
+                    | Outcome::ArtifactMismatch
+            )
+        })
         .collect();
-    if controls.is_empty() {
-        return Err("reference report contains no successes to replay".into());
+    if !controls
+        .iter()
+        .any(|r| matches!(r.outcome, Outcome::Equivalent))
+    {
+        return Err("reference report contains no known successes to regression-gate".into());
     }
     let destination = Path::new(destination);
     if !destination.is_absolute() {
@@ -977,6 +1054,7 @@ fn replay_inner(repo: &Path, manifest: &Manifest, args: &[String]) -> Result<(),
             .collect(),
         records: Vec::new(),
     };
+    let mut regressions = Vec::new();
     for native in controls {
         let (project, target) = targets(manifest)
             .find(|(p, t)| p.id == native.project && t.id == native.target)
@@ -1003,17 +1081,46 @@ fn replay_inner(repo: &Path, manifest: &Manifest, args: &[String]) -> Result<(),
             record.outcome = Outcome::InfrastructureUnavailable;
             record.first_failure = Some(e);
         }
-        println!("{}/{}: {:?}", record.project, record.target, record.outcome);
+        println!(
+            "{}/{}: {:?}{}",
+            record.project,
+            record.target,
+            record.outcome,
+            record
+                .first_failure
+                .as_ref()
+                .map_or(String::new(), |message| format!(" — {message}"))
+        );
+        if matches!(
+            record.outcome,
+            Outcome::InfrastructureUnavailable | Outcome::ReferenceFailure | Outcome::Unknown
+        ) || matches!(native.outcome, Outcome::Equivalent)
+            && !matches!(record.outcome, Outcome::Equivalent)
+        {
+            regressions.push(format!("{}/{}", record.project, record.target));
+        }
         report.records.push(record);
         json_write(&destination.join("report.json"), &report)?;
     }
     validate_report(repo, manifest, &report)?;
-    if report
+    if !regressions.is_empty() {
+        return Err(format!(
+            "known success regressed or replay infrastructure failed: {}; inspect report.json",
+            regressions.join(", ")
+        ));
+    }
+    Ok(())
+}
+
+fn complete_cohort(manifest: &Manifest, report: &Report) -> Result<(), String> {
+    let expected: BTreeSet<_> = targets(manifest).map(|(p, t)| key(p, t)).collect();
+    let actual: BTreeSet<_> = report
         .records
         .iter()
-        .any(|r| !matches!(r.outcome, Outcome::Equivalent))
-    {
-        return Err("known ecosystem success regressed; inspect report.json".into());
+        .map(|r| format!("{}/{}", r.project, r.target))
+        .collect();
+    if expected != actual {
+        return Err("publishing requires the complete admitted cohort; a focused capture cannot replace known results".into());
     }
     Ok(())
 }
@@ -1031,21 +1138,21 @@ fn ledger_inner(repo: &Path, manifest: &Manifest, args: &[String]) -> Result<(),
     if flag != "--write" && flag != "--check" {
         return Err("unknown ledger action".into());
     }
+    complete_cohort(manifest, &report)?;
+    let committed = repo.join("ecosystem/results/current.json");
+    if Path::new(report_path)
+        .canonicalize()
+        .map_err(|e| e.to_string())?
+        != committed.canonicalize().map_err(|e| e.to_string())?
+    {
+        return Err("copy the reviewed capture to ecosystem/results/current.json before publishing its table".into());
+    }
     let path = repo.join("docs/ecosystem-corpus.md");
     let text = std::fs::read_to_string(&path).map_err(|e| e.to_string())?;
-    let start = text
-        .find("<!-- ecosystem-results -->")
-        .ok_or("ecosystem results marker missing")?;
-    let end = text[start..]
-        .find("<!-- /ecosystem-results -->")
-        .map(|n| start + n)
-        .ok_or("ecosystem results end marker missing")?;
-    let updated = format!(
-        "{}<!-- ecosystem-results -->\n{}\n{}",
-        &text[..start],
-        table(manifest, &report),
-        &text[end..]
-    );
+    let (updated, blocks) = crate::docs::regenerate(&text, &path, repo)?;
+    if blocks == 0 {
+        return Err("ecosystem table has no generated block".into());
+    }
     if flag == "--check" {
         if updated != text {
             return Err("published ecosystem table is stale; regenerate it".into());
@@ -1055,11 +1162,62 @@ fn ledger_inner(repo: &Path, manifest: &Manifest, args: &[String]) -> Result<(),
     }
     Ok(())
 }
+
+pub(super) fn markdown(repo: &Path) -> Result<String, String> {
+    let manifest = super::read(repo)?;
+    let report = read_report(&repo.join("ecosystem/results/current.json"))?;
+    validate_report(repo, &manifest, &report)?;
+    complete_cohort(&manifest, &report)?;
+    Ok(table(&manifest, &report))
+}
+
+fn utc(seconds: u64) -> String {
+    let mut days = seconds / 86400;
+    let mut year = 1970u32;
+    let leap = |year| year % 4 == 0 && (year % 100 != 0 || year % 400 == 0);
+    while year < 10000 {
+        let length = if leap(year) { 366 } else { 365 };
+        if days < length {
+            break;
+        }
+        days -= length;
+        year += 1;
+    }
+    let months = [
+        31,
+        if leap(year) { 29 } else { 28 },
+        31,
+        30,
+        31,
+        30,
+        31,
+        31,
+        30,
+        31,
+        30,
+        31,
+    ];
+    let mut month = 0;
+    while month < 11 && days >= months[month] {
+        days -= months[month];
+        month += 1;
+    }
+    let time = seconds % 86400;
+    format!(
+        "{year:04}-{:02}-{:02} {:02}:{:02}:{:02} UTC",
+        month + 1,
+        days + 1,
+        time / 3600,
+        time / 60 % 60,
+        time % 60
+    )
+}
+
 fn table(manifest: &Manifest, report: &Report) -> String {
     use std::fmt::Write as _;
     let mut out = format!(
-        "\nCaptured at UTC Unix time `{}`. Asm198x revision `{}`; executable SHA-256 `{}`.\n\nManifest SHA-256 `{}`. These results measure assembly artifact equivalence; emulator execution and real hardware are separate checks. Unrun targets remain unknown.\n\n| Project / target | Dialect | Result | First boundary / exact output |\n|---|---|---|---|\n",
-        report.captured_unix_seconds,
+        "\nCaptured at **{}**. Asm198x revision `{}`; executable SHA-256 `{}`.\n\nManifest SHA-256 `{}`. These results measure assembly artifact equivalence; emulator execution and real hardware are separate checks. Unrun targets remain unknown.\n\n| Project / target | Dialect | Result | First boundary / exact output |\n|---|---|---|---|\n",
+        utc(report.captured_unix_seconds),
         report.assembler.source_commit,
         report.assembler.executable_sha256,
         report.manifest_sha256
@@ -1067,8 +1225,8 @@ fn table(manifest: &Manifest, report: &Report) -> String {
     if let Some(reference) = &report.reference_report_sha256 {
         let _ = writeln!(
             out,
-            "Reference replay uses captured native control `{reference}` from UTC Unix time `{}`. It does not refresh the native control date.\n",
-            report.reference_captured_unix_seconds.unwrap_or(0)
+            "Reference replay uses captured native control `{reference}` from **{}**. It does not refresh the native control date.\n",
+            utc(report.reference_captured_unix_seconds.unwrap_or(0))
         );
     }
     for (project, target) in targets(manifest) {
@@ -1093,6 +1251,9 @@ fn table(manifest: &Manifest, report: &Report) -> String {
                     .collect::<Vec<_>>()
                     .join("; ")
             });
+            for step in r.reference_steps.iter().chain(&r.assembler_steps) {
+                boundary = boundary.replace(&format!("{}/", step.process.cwd), "");
+            }
             for issue in &r.issues {
                 let _ = write!(boundary, " [issue]({issue})");
             }
@@ -1105,7 +1266,11 @@ fn table(manifest: &Manifest, report: &Report) -> String {
             target.id,
             project.dialect,
             outcome,
-            boundary.replace('|', "\\|").replace(['\n', '\r'], " ")
+            boundary
+                .replace('<', "&lt;")
+                .replace('>', "&gt;")
+                .replace('|', "\\|")
+                .replace(['\n', '\r'], " ")
         );
     }
     out
@@ -1300,6 +1465,75 @@ mod tests {
         symlink(outside.0.join("absent"), dir.0.join("dangling")).expect("dangling link");
         assert!(within(&dir.0, "escape/output").is_err());
         assert!(within(&dir.0, "dangling/output").is_err());
+    }
+    #[test]
+    fn replay_uses_the_finalised_artifact_and_supports_hash_only_controls() {
+        let report =
+            read_report(&repo().join("ecosystem/results/current.json")).expect("native capture");
+        let gameboy = report
+            .records
+            .iter()
+            .find(|r| r.project == "gbdev-gb-asm-tutorial")
+            .expect("Game Boy control");
+        let path = &gameboy.comparisons[0].reference.path;
+        let finalised = recorded_reference(gameboy, path).expect("final ROM");
+        assert_eq!(finalised.sha256, gameboy.comparisons[0].reference.sha256);
+        let linked = gameboy
+            .reference_steps
+            .iter()
+            .flat_map(|step| &step.outputs)
+            .find(|artifact| &artifact.path == path)
+            .expect("linked ROM");
+        assert_ne!(
+            linked.sha256, finalised.sha256,
+            "finalisation must be observed"
+        );
+        let mut next = report
+            .records
+            .iter()
+            .find(|r| r.project == "howprice-specnext-invaders")
+            .expect("NEX control")
+            .clone();
+        let original = recorded_reference(&next, "bin/invaders.nex")
+            .expect("native final NEX")
+            .clone();
+        for step in &mut next.reference_steps {
+            for output in &mut step.outputs {
+                output.hex = None;
+            }
+        }
+        let identity = recorded_reference(&next, "bin/invaders.nex").expect("hash-only control");
+        assert!(identity.hex.is_none());
+        assert_eq!(identity.length, original.length);
+        assert_eq!(identity.sha256, original.sha256);
+    }
+
+    #[test]
+    fn focused_captures_cannot_replace_the_published_complete_cohort() {
+        let manifest = super::super::read(&repo()).expect("manifest");
+        let partial = control(&manifest);
+        validate_report(&repo(), &manifest, &partial).expect("valid focused result");
+        assert!(complete_cohort(&manifest, &partial).is_err());
+        let complete = read_report(&repo().join("ecosystem/results/current.json"))
+            .expect("retained native capture");
+        validate_report(&repo(), &manifest, &complete).expect("valid complete capture");
+        complete_cohort(&manifest, &complete).expect("positive publication control");
+    }
+    #[test]
+    fn capture_dates_use_gregorian_utc_and_replay_keeps_the_native_date() {
+        assert_eq!(utc(0), "1970-01-01 00:00:00 UTC");
+        assert_eq!(utc(951782400), "2000-02-29 00:00:00 UTC");
+        let manifest = super::super::read(&repo()).expect("manifest");
+        let mut report = control(&manifest);
+        report.captured_unix_seconds = 86400;
+        report.reference_report_sha256 = Some("1".repeat(64));
+        report.reference_captured_unix_seconds = Some(1);
+        validate_report(&repo(), &manifest, &report).expect("dated replay control");
+        let text = table(&manifest, &report);
+        assert!(text.contains("1970-01-02 00:00:00 UTC"));
+        assert!(text.contains("1970-01-01 00:00:01 UTC"));
+        report.reference_captured_unix_seconds = Some(86401);
+        assert!(validate_report(&repo(), &manifest, &report).is_err());
     }
     #[test]
     fn native_hunk_comparisons_cannot_accidentally_select_raw_asm_output() {

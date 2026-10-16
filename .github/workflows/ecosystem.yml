@@ -36,9 +36,11 @@ jobs:
         # or a failed native control still fail this capture command.
         run: cargo xtask ecosystem audit "$RUNNER_TEMP/ecosystem-sources" "$RUNNER_TEMP/ecosystem-results" --all --record-findings
       - name: Validate complete results before rendering
+        id: evidence
         if: always()
         run: cargo xtask ecosystem ledger "$RUNNER_TEMP/ecosystem-results/report.json" --validate
       - name: Render the captured table for review
+        if: always() && steps.evidence.outcome == 'success'
         run: |
           cp "$RUNNER_TEMP/ecosystem-results/report.json" ecosystem/results/current.json
           cargo xtask ecosystem ledger ecosystem/results/current.json --write

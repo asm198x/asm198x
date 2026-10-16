@@ -45,6 +45,7 @@
 <!-- /generated -->
 - [Where we differ](divergences.md)
 - [Conformance ledger](ledger.md)
+- [Complete-project compatibility](reference/ecosystem.md)
 
 # Reference
 

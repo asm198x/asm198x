@@ -47,6 +47,10 @@ struct Target {
     build: Option<plan::BuildPlan>,
 }
 
+pub(crate) fn markdown(repo: &Path) -> Result<String, String> {
+    execution::markdown(repo)
+}
+
 pub(crate) fn run(repo: &Path, args: &[String]) -> ExitCode {
     let manifest = match read(repo) {
         Ok(manifest) => manifest,
@@ -65,6 +69,16 @@ pub(crate) fn run(repo: &Path, args: &[String]) -> ExitCode {
     }
 
     match args.first().map(String::as_str) {
+        Some("--markdown") => match markdown(repo) {
+            Ok(text) => {
+                print!("{text}");
+                ExitCode::SUCCESS
+            }
+            Err(error) => {
+                eprintln!("xtask ecosystem: {error}");
+                ExitCode::FAILURE
+            }
+        },
         Some("audit") => execution::audit(repo, &manifest, &args[1..]),
         Some("replay") => execution::replay(repo, &manifest, &args[1..]),
         Some("ledger") => execution::ledger(repo, &manifest, &args[1..]),
