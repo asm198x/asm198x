@@ -73,3 +73,5 @@ without an error. Native `DEFINE X 3` followed by `db 1X` emits `0d`, while Asm
 rejects the number. Both executables, versions, hashes, exact source, diagnostics
 and bytes are retained. The hex/digit-led protection in `substitute_once` is
 unchanged by this remainder correction and needs its own native-parity fix.
+
+Separate follow-ups: [#734](https://github.com/asm198x/asm198x/issues/734) (SjASMPlus DEFINE protection silently changes hexadecimal output bytes), [#735](https://github.com/asm198x/asm198x/issues/735) (SjASMPlus DISPLAY refuses the native /H format option).
