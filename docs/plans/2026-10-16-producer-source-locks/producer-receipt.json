@@ -1,0 +1,28 @@
+{
+  "schema_version": 1,
+  "kind": "producer-source-lock",
+  "signed": false,
+  "source_commit": "91961d9a618d518aaa8946c6d3c1ca55d6afdae3",
+  "committed_lock_sha256": "011c22b2935ce1dc57bd713a02e712c4da92148e14a1b3ce85b1e106046f0e68",
+  "before_lock_sha256": "011c22b2935ce1dc57bd713a02e712c4da92148e14a1b3ce85b1e106046f0e68",
+  "after_lock_sha256": "011c22b2935ce1dc57bd713a02e712c4da92148e14a1b3ce85b1e106046f0e68",
+  "target": "aarch64-apple-darwin",
+  "archive": "asm198x-aarch64-apple-darwin.tar.xz",
+  "archive_sha256": "feb47385f0b66dd903b0d29870fc68bb2c23618532837d887da0ecd7792f992a",
+  "executable_sha256": "f5e6a3974f3fb65ac3d68cb2a548814c37d43d1e56b5cd8d1ebb1591d7fbb791",
+  "version": "0.0.66",
+  "build": {
+    "job": "local",
+    "run_id": "local",
+    "run_attempt": "local"
+  },
+  "command": [
+    "dist",
+    "build",
+    "--artifacts=all",
+    "--target",
+    "aarch64-apple-darwin",
+    "--output-format=json"
+  ],
+  "compiled_dependency_graph": "unknown"
+}
