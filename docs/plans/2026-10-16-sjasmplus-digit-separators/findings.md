@@ -38,3 +38,23 @@ satisfy that expanded required-case set.
 This correction covers separators in the existing decimal/hexadecimal/binary
 number grammar. It does not establish complete SjASMPlus syntax compatibility.
 The unchanged pinned whole-project build is checked separately below.
+
+
+## Whole-project result and validation
+
+The clean producer is `fa4014a428204ff2f50166950fda535dd0f583ef`.
+`specnext-after-separators/report.json` and all ten adjacent process logs retain
+its explicit ecosystem audit. The unmodified upstream pin remains
+`e3211ea8ad2e83aca4d07d70bd8e09b7b51a9a1d`. Native assembly succeeds and emits
+33,280 bytes, SHA-256
+`5fbed92a7d60dab47de8b22162c9227df051eaf67c26e85e618b24f6429dd07f`;
+the complete NEX bytes are retained as hex in that report. Asm198x now reaches
+`src/sprite_data.asm:19` and reports `invalid number `%`` at the infix
+remainder operator. This is a distinct next boundary, not a failure of the
+accepted separator cases. `remainder-boundary.json` retains the minimal native
+`ASSERT (5 % 2)==1` / `db 5 % 2,%101` control: native bytes `0105`, Asm rejection.
+
+The final workspace test run passed 1,494 tests with 38 explicitly ignored;
+Clippy with all targets and Lua passed with warnings denied. Formatting,
+generated docs, Ruff and all 49 Node package/workflow tests passed. The
+compressed validation logs are retained alongside the initial red test.
