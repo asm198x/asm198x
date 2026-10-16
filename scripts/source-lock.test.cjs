@@ -83,7 +83,7 @@ test('generation requires the lock guard and receipt upload exactly once', () =>
   assert.throws(() => lockBuild(text));
 });
 test('native PR and reusable candidates cannot silently use artifact-only evidence', () => {
-  const text = fs.readFileSync(path.join(__dirname, '../.github/workflows/test-linux-packages.yml'), 'utf8');
+  const text = fs.readFileSync(path.join(__dirname, '../.github/workflows/test-linux-packages.yml'), 'utf8').replaceAll('\r\n', '\n');
   assert(text.includes('node scripts/build-locked-package.cjs "$PACKAGE_TARGET"'));
   assert(text.includes('receipt_flags=(--require-source-lock)'));
   assert(text.includes('if [ -n "$PUBLISHED_VERSION" ]; then\n            receipt_flags=(--published-source)'));
