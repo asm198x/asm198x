@@ -1097,6 +1097,24 @@ impl Z80Syntax for SjasmplusSyntax {
         if t.starts_with('\'') && t.ends_with('\'') && t.chars().count() == 3 {
             return t.chars().nth(1).map(|c| c as i64).ok_or_else(bad);
         }
+        // Validate separators in the actual digit body, after selecting its
+        // radix. Removing quotes first would wrongly accept `0'xff` or `10'h`.
+        let number = |digits: &str, radix: u32| -> Result<i64, AsmError> {
+            let bytes = digits.as_bytes();
+            for (at, byte) in bytes.iter().enumerate() {
+                if *byte == b'\''
+                    && (at == 0
+                        || !bytes[at - 1].is_ascii_alphanumeric()
+                        || !bytes.get(at + 1).is_some_and(u8::is_ascii_alphanumeric))
+                {
+                    return Err(bad());
+                }
+            }
+            let digits = digits.replace('\'', "");
+            u32::from_str_radix(&digits, radix)
+                .map(|v| i64::from(v as i32))
+                .map_err(|_| bad())
+        };
         // Hex: $, 0x, or # prefix, or h suffix.
         if let Some(hex) = t
             .strip_prefix('$')
@@ -1104,14 +1122,10 @@ impl Z80Syntax for SjasmplusSyntax {
             .or_else(|| t.strip_prefix("0X"))
             .or_else(|| t.strip_prefix('#'))
         {
-            return u32::from_str_radix(hex, 16)
-                .map(|v| i64::from(v as i32))
-                .map_err(|_| bad());
+            return number(hex, 16);
         }
-        if let Some(hex) = t.strip_suffix(['h', 'H'])
-            && let Ok(v) = u32::from_str_radix(hex, 16)
-        {
-            return Ok(i64::from(v as i32));
+        if let Some(hex) = t.strip_suffix(['h', 'H']) {
+            return number(hex, 16);
         }
         // Binary: % or 0b prefix, or b suffix.
         if let Some(bin) = t
@@ -1119,18 +1133,12 @@ impl Z80Syntax for SjasmplusSyntax {
             .or_else(|| t.strip_prefix("0b"))
             .or_else(|| t.strip_prefix("0B"))
         {
-            return u32::from_str_radix(bin, 2)
-                .map(|v| i64::from(v as i32))
-                .map_err(|_| bad());
+            return number(bin, 2);
         }
-        if let Some(bin) = t.strip_suffix(['b', 'B'])
-            && let Ok(v) = u32::from_str_radix(bin, 2)
-        {
-            return Ok(i64::from(v as i32));
+        if let Some(bin) = t.strip_suffix(['b', 'B']) {
+            return number(bin, 2);
         }
-        t.parse::<u32>()
-            .map(|v| i64::from(v as i32))
-            .map_err(|_| bad())
+        number(t, 10)
     }
 }
 
@@ -1162,7 +1170,9 @@ fn data_items(rest: &str, line: usize) -> Result<Vec<DataItem>, AsmError> {
             Some('"') if ch == '\\' => escaped = true,
             Some(q) if ch == q => quote = None,
             Some(_) => {}
-            None if ch == '"' || ch == '\'' => quote = Some(ch),
+            None if ch == '"' || (ch == '\'' && !z80::numeric_separator(rest, i)) => {
+                quote = Some(ch)
+            }
             None if ch == ',' => {
                 pieces.push(rest[start..i].trim());
                 start = i + 1;
@@ -1392,6 +1402,10 @@ fn split_macro_name(rest: &str) -> (&str, &str) {
 }
 
 impl macros::MacroSyntax for SjasmplusSyntax {
+    fn numeric_separator(&self, text: &str, at: usize) -> bool {
+        z80::numeric_separator(text, at)
+    }
+
     fn literal_block(&self, line: &str) -> Option<bool> {
         match line
             .split_whitespace()

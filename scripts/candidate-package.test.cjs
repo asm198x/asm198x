@@ -100,3 +100,10 @@ test('0.0.70 evidence cannot qualify the three new native parity boundaries', ()
   assert.equal(old.qualified, true); assert.equal(qualifies(old.results), false);
   for (const name of ['ca65_used_extents', 'sjasmplus_logical_expressions', 'sjasmplus_shift_widths']) assert(requiredCases.includes(name));
 });
+
+
+test('0.0.71 evidence cannot qualify numeric separator support', () => {
+  const old = JSON.parse(fs.readFileSync(path.join(__dirname, '../docs/plans/2026-10-16-release-0071-checkpoint/published/aarch64-apple-darwin/report.json'), 'utf8'));
+  assert.equal(old.qualified, true); assert.equal(qualifies(old.results), false);
+  assert(requiredCases.includes('sjasmplus_digit_separators'));
+});
