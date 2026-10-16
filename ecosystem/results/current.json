@@ -1,14 +1,14 @@
 {
   "schema": 1,
-  "captured_unix_seconds": 1792164580,
+  "captured_unix_seconds": 1792168276,
   "manifest_sha256": "a853f20bf150f97a3238c3c92bbd12e68f9a63363ce189aa42abb52e3892a8ef",
   "assembler": {
-    "source_commit": "652114a082cad7b094201e3ad7966544bb676a92",
-    "cargo_lock_sha256": "2a5b6ea0c33464cb57953b68d102fa244fd8f224bb772dcff4523053559732b7",
-    "executable_sha256": "cc168f4f4d9632836793a3f743d6ef6b956c9b02156bc6373e3b2a2d7863cf6d",
+    "source_commit": "21464e98864f673fd586c46260c4046c03662fcd",
+    "cargo_lock_sha256": "db159ba5cfbe63c0c21cbeb00e8629c695daa999d423a9e3ab08792e0058730d",
+    "executable_sha256": "57ddfcbb9650b51c6d213bf18bb0cc60ce4c8239c6c057cfc27766c4dcb772fd",
     "build": {
       "argv": [
-        "/Users/stevehill/.cargo/bin/cargo",
+        "/root/.cargo/bin/cargo",
         "build",
         "--locked",
         "--release",
@@ -17,26 +17,26 @@
         "--features",
         "lua",
         "--target-dir",
-        "/private/tmp/asm198x-ecosystem-qualified-audit/work/asm-build"
+        "/__w/_temp/ecosystem-results/work/asm-build"
       ],
-      "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+      "cwd": "/__w/asm198x/asm198x",
       "exit": 0,
       "failure": null,
       "stdout": "",
-      "stderr": "   Compiling libc v0.2.189\n   Compiling find-msvc-tools v0.1.12\n   Compiling shlex v2.0.1\n   Compiling proc-macro2 v1.0.107\n   Compiling unicode-ident v1.0.24\n   Compiling quote v1.0.47\n   Compiling serde_core v1.0.229\n   Compiling autocfg v1.5.1\n   Compiling zmij v1.0.23\n   Compiling parking_lot_core v0.9.12\n   Compiling pkg-config v0.3.34\n   Compiling cfg-if v1.0.4\n   Compiling memchr v2.8.3\n   Compiling cc v1.4.5\n   Compiling serde_json v1.0.151\n   Compiling scopeguard v1.2.0\n   Compiling smallvec v1.16.0\n   Compiling serde v1.0.229\n   Compiling lock_api v0.4.14\n   Compiling itoa v1.0.18\n   Compiling num-traits v0.2.19\n   Compiling bstr v1.13.1\n   Compiling isa198x v0.1.7\n   Compiling either v1.18.0\n   Compiling rustc-hash v2.1.3\n   Compiling format198x-sinclair-zx-spectrum-tap v0.1.1\n   Compiling format198x-tzx v0.1.0\n   Compiling lua-src v551.0.1\n   Compiling which v8.0.6\n   Compiling parking_lot v0.12.5\n   Compiling syn v3.0.4\n   Compiling luajit-src v210.7.3+1ee778a\n   Compiling mlua-sys v0.12.0\n   Compiling isa198x-disasm v0.1.7\n   Compiling serde_derive v1.0.229\n   Compiling debug198x v0.1.0\n   Compiling mlua v0.12.1\n   Compiling asm198x v0.0.69 (/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap/crates/asm198x)\n    Finished `release` profile [optimized] target(s) in 1m 03s\n",
-      "elapsed_millis": 63397
+      "stderr": " Downloading crates ...\n  Downloaded either v1.18.0\n  Downloaded autocfg v1.5.1\n  Downloaded rustc-hash v2.1.3\n  Downloaded scopeguard v1.2.0\n  Downloaded find-msvc-tools v0.1.12\n  Downloaded lock_api v0.4.14\n  Downloaded pkg-config v0.3.34\n  Downloaded smallvec v1.16.0\n  Downloaded which v8.0.6\n  Downloaded shlex v2.0.1\n  Downloaded num-traits v0.2.19\n  Downloaded parking_lot v0.12.5\n  Downloaded parking_lot_core v0.9.12\n  Downloaded mlua-sys v0.12.0\n  Downloaded cc v1.4.5\n  Downloaded bstr v1.13.1\n  Downloaded mlua v0.12.1\n  Downloaded libc v0.2.189\n  Downloaded lua-src v551.0.1\n  Downloaded luajit-src v210.7.3+1ee778a\n   Compiling libc v0.2.189\n   Compiling shlex v2.0.1\n   Compiling proc-macro2 v1.0.107\n   Compiling find-msvc-tools v0.1.12\n   Compiling cc v1.4.5\n   Compiling quote v1.0.47\n   Compiling unicode-ident v1.0.24\n   Compiling serde_core v1.0.229\n   Compiling lua-src v551.0.1\n   Compiling parking_lot_core v0.9.12\n   Compiling which v8.0.6\n   Compiling memchr v2.8.3\n   Compiling luajit-src v210.7.3+1ee778a\n   Compiling pkg-config v0.3.34\n   Compiling cfg-if v1.0.4\n   Compiling zmij v1.0.23\n   Compiling autocfg v1.5.1\n   Compiling syn v3.0.4\n   Compiling mlua-sys v0.12.0\n   Compiling num-traits v0.2.19\n   Compiling serde v1.0.229\n   Compiling smallvec v1.16.0\n   Compiling scopeguard v1.2.0\n   Compiling serde_json v1.0.151\n   Compiling lock_api v0.4.14\n   Compiling itoa v1.0.18\n   Compiling parking_lot v0.12.5\n   Compiling serde_derive v1.0.229\n   Compiling bstr v1.13.1\n   Compiling either v1.18.0\n   Compiling rustc-hash v2.1.3\n   Compiling isa198x v0.1.7\n   Compiling format198x-sinclair-zx-spectrum-tap v0.1.1\n   Compiling format198x-tzx v0.1.0\n   Compiling isa198x-disasm v0.1.7\n   Compiling debug198x v0.1.0\n   Compiling mlua v0.12.1\n   Compiling asm198x v0.0.70 (/__w/asm198x/asm198x/crates/asm198x)\n    Finished `release` profile [optimized] target(s) in 51.69s\n",
+      "elapsed_millis": 51721
     },
     "version": {
       "argv": [
-        "/private/tmp/asm198x-ecosystem-qualified-audit/work/asm-build/release/asm198x",
+        "/__w/_temp/ecosystem-results/work/asm-build/release/asm198x",
         "--version"
       ],
-      "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+      "cwd": "/__w/asm198x/asm198x",
       "exit": 0,
       "failure": null,
       "stdout": "",
-      "stderr": "asm198x v0.0.69\n",
-      "elapsed_millis": 25
+      "stderr": "asm198x v0.0.70\n",
+      "elapsed_millis": 20
     }
   },
   "reference_report_sha256": null,
@@ -70,19 +70,19 @@
       "first_failure": null,
       "tools": {
         "acme": {
-          "path": "/opt/homebrew/bin/acme",
-          "sha256": "7be6afb147f75c974a48a0540cdb8affc0760ed94bed4d822d95c7e8ee4bb35c",
+          "path": "/usr/local/bin/acme",
+          "sha256": "9e536fdb1b35c5645587799048449ec203cd5f9fed3aa663e8691b803b63138b",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/acme",
+              "/usr/local/bin/acme",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/kindjie-6502assembly--hello-world-version-probes/acme",
             "exit": 0,
             "failure": null,
             "stdout": "This is ACME, release 0.97 (\"Zem\"), 28 June 2020\n  Platform independent version.\n",
             "stderr": "",
-            "elapsed_millis": 25
+            "elapsed_millis": 20
           }
         }
       },
@@ -92,7 +92,7 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/opt/homebrew/bin/acme",
+              "/usr/local/bin/acme",
               "--cpu",
               "6510",
               "--format",
@@ -101,12 +101,12 @@
               "helloworld.prg",
               "helloworld.asm"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/kindjie-6502assembly--hello-world/reference/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/kindjie-6502assembly--hello-world/reference/.",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "",
-            "elapsed_millis": 26
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -123,7 +123,7 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/private/tmp/asm198x-ecosystem-qualified-audit/work/asm-build/release/asm198x",
+              "/__w/_temp/ecosystem-results/work/asm-build/release/asm198x",
               "--dialect",
               "acme",
               "--prg",
@@ -131,12 +131,12 @@
               "-o",
               "helloworld.prg"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/kindjie-6502assembly--hello-world/assembler/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/kindjie-6502assembly--hello-world/assembler/.",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "assembled 2081 byte(s) -> helloworld.prg (load $0801)\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -183,19 +183,19 @@
       "first_failure": null,
       "tools": {
         "acme": {
-          "path": "/opt/homebrew/bin/acme",
-          "sha256": "7be6afb147f75c974a48a0540cdb8affc0760ed94bed4d822d95c7e8ee4bb35c",
+          "path": "/usr/local/bin/acme",
+          "sha256": "9e536fdb1b35c5645587799048449ec203cd5f9fed3aa663e8691b803b63138b",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/acme",
+              "/usr/local/bin/acme",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/kindjie-6502assembly--interrupts-version-probes/acme",
             "exit": 0,
             "failure": null,
             "stdout": "This is ACME, release 0.97 (\"Zem\"), 28 June 2020\n  Platform independent version.\n",
             "stderr": "",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           }
         }
       },
@@ -205,7 +205,7 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/opt/homebrew/bin/acme",
+              "/usr/local/bin/acme",
               "--cpu",
               "6510",
               "--format",
@@ -214,12 +214,12 @@
               "ex_interrupts.prg",
               "ex_interrupts.asm"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/kindjie-6502assembly--interrupts/reference/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/kindjie-6502assembly--interrupts/reference/.",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "Warning - File ./libs/screen.asm, line 22 (Macro draw_text): Label name not in leftmost column.\nWarning - File ex_interrupts.asm, line 36 (Zone <untitled>): ...called from here.\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -236,7 +236,7 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/private/tmp/asm198x-ecosystem-qualified-audit/work/asm-build/release/asm198x",
+              "/__w/_temp/ecosystem-results/work/asm-build/release/asm198x",
               "--dialect",
               "acme",
               "--prg",
@@ -244,12 +244,12 @@
               "-o",
               "ex_interrupts.prg"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/kindjie-6502assembly--interrupts/assembler/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/kindjie-6502assembly--interrupts/assembler/.",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "assembled 2156 byte(s) -> ex_interrupts.prg (load $0801)\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -296,19 +296,19 @@
       "first_failure": null,
       "tools": {
         "acme": {
-          "path": "/opt/homebrew/bin/acme",
-          "sha256": "7be6afb147f75c974a48a0540cdb8affc0760ed94bed4d822d95c7e8ee4bb35c",
+          "path": "/usr/local/bin/acme",
+          "sha256": "9e536fdb1b35c5645587799048449ec203cd5f9fed3aa663e8691b803b63138b",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/acme",
+              "/usr/local/bin/acme",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/kindjie-6502assembly--charset-version-probes/acme",
             "exit": 0,
             "failure": null,
             "stdout": "This is ACME, release 0.97 (\"Zem\"), 28 June 2020\n  Platform independent version.\n",
             "stderr": "",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           }
         }
       },
@@ -318,7 +318,7 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/opt/homebrew/bin/acme",
+              "/usr/local/bin/acme",
               "--cpu",
               "6510",
               "--format",
@@ -327,12 +327,12 @@
               "ex_charset.prg",
               "ex_charset.asm"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/kindjie-6502assembly--charset/reference/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/kindjie-6502assembly--charset/reference/.",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "Warning - File ./libs/screen.asm, line 80 (Macro draw_map): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 82 (Macro draw_map): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 43 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 55 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 63 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 64 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 71 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 85 (Macro draw_map): ...called from here.\nWarning - File ./libs/screen.asm, line 82 (Macro draw_map): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 43 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 55 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 63 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 64 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 71 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 85 (Macro draw_map): ...called from here.\nWarning - File ./libs/screen.asm, line 82 (Macro draw_map): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 43 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 55 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 63 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 64 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 71 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 85 (Macro draw_map): ...called from here.\nWarning - File ./libs/screen.asm, line 82 (Macro draw_map): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 43 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 55 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 63 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 64 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 71 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 85 (Macro draw_map): ...called from here.\nWarning - File ./libs/screen.asm, line 82 (Macro draw_map): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 43 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 55 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 63 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 64 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 71 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 85 (Macro draw_map): ...called from here.\nWarning - File ./libs/screen.asm, line 82 (Macro draw_map): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 43 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 55 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 63 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 64 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 71 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 85 (Macro draw_map): ...called from here.\nWarning - File ./libs/screen.asm, line 82 (Macro draw_map): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 43 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 55 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 63 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 64 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 71 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 85 (Macro draw_map): ...called from here.\nWarning - File ./libs/screen.asm, line 82 (Macro draw_map): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 43 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 55 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 63 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 64 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 71 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 85 (Macro draw_map): ...called from here.\nWarning - File ./libs/screen.asm, line 82 (Macro draw_map): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 43 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 55 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 63 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 64 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 71 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 85 (Macro draw_map): ...called from here.\nWarning - File ./libs/screen.asm, line 82 (Macro draw_map): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 43 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 55 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 63 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 64 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 71 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 85 (Macro draw_map): ...called from here.\nWarning - File ./libs/screen.asm, line 82 (Macro draw_map): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 43 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 55 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 63 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 64 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 71 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 85 (Macro draw_map): ...called from here.\nWarning - File ./libs/screen.asm, line 82 (Macro draw_map): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 43 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 44 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 55 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 56 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 63 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 64 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 65 (Macro draw_tile): Found old \"!for\" syntax.\nWarning - File ./libs/screen.asm, line 71 (Macro draw_tile): Label name not in leftmost column.\nWarning - File ./libs/screen.asm, line 85 (Macro draw_map): ...called from here.\nWarning - File ./libs/screen.asm, line 91 (Macro draw_map): Label name not in leftmost column.\nWarning - File ex_charset.asm, line 57 (Zone <untitled>): ...called from here.\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -349,7 +349,7 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/private/tmp/asm198x-ecosystem-qualified-audit/work/asm-build/release/asm198x",
+              "/__w/_temp/ecosystem-results/work/asm-build/release/asm198x",
               "--dialect",
               "acme",
               "--prg",
@@ -357,12 +357,12 @@
               "-o",
               "ex_charset.prg"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/kindjie-6502assembly--charset/assembler/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/kindjie-6502assembly--charset/assembler/.",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "assembled 48266 byte(s) -> ex_charset.prg (load $0801)\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -409,35 +409,35 @@
       "first_failure": null,
       "tools": {
         "ca65": {
-          "path": "/opt/homebrew/bin/ca65",
-          "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+          "path": "/usr/local/bin/ca65",
+          "sha256": "c9c00d823edf9eea2efd2a9ae13154b4bdfec241c2c50c77197ead9e0204c851",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/ca65",
+              "/usr/local/bin/ca65",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/bradsmith-nes-ca65-example--example-version-probes/ca65",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "ca65 V2.18 - N/A\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           }
         },
         "ld65": {
-          "path": "/opt/homebrew/bin/ld65",
-          "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+          "path": "/usr/local/bin/ld65",
+          "sha256": "7df89e6bf2bc8f63de20b38b398776c9213af1f05387d16c358c48dba28b7a84",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/ld65",
+              "/usr/local/bin/ld65",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/bradsmith-nes-ca65-example--example-version-probes/ld65",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "ld65 V2.18 - N/A\n",
-            "elapsed_millis": 25
+            "elapsed_millis": 20
           }
         }
       },
@@ -447,24 +447,24 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/opt/homebrew/bin/ca65",
+              "/usr/local/bin/ca65",
               "example.s",
               "-g",
               "-o",
               "example.o"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/bradsmith-nes-ca65-example--example/reference/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/bradsmith-nes-ca65-example--example/reference/.",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": [
             {
               "path": "example.o",
               "length": 26908,
-              "sha256": "7d9715b122c47f9b18be780dc613b0c0b3d344d642953dd7b0d76c6d4e5af96b",
+              "sha256": "d4299adab6bbc4b34e768a2539ffe71bae946a22859791aaeb456a50a797f528",
               "hex": null
             }
           ]
@@ -473,19 +473,19 @@
           "stage": "link",
           "process": {
             "argv": [
-              "/opt/homebrew/bin/ld65",
+              "/usr/local/bin/ld65",
               "-o",
               "example.nes",
               "-C",
               "example.cfg",
               "example.o"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/bradsmith-nes-ca65-example--example/reference/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/bradsmith-nes-ca65-example--example/reference/.",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "",
-            "elapsed_millis": 22
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -502,7 +502,7 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/private/tmp/asm198x-ecosystem-qualified-audit/work/asm-build/release/asm198x",
+              "/__w/_temp/ecosystem-results/work/asm-build/release/asm198x",
               "--dialect",
               "ca65",
               "-C",
@@ -511,12 +511,12 @@
               "-o",
               "example.nes"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/bradsmith-nes-ca65-example--example/assembler/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/bradsmith-nes-ca65-example--example/assembler/.",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "assembled + linked 40976 byte(s) -> example.nes\n",
-            "elapsed_millis": 23
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -563,35 +563,35 @@
       "first_failure": "reference assemble step 1 failed: ca65: Invalid CPU: '6502dtv'",
       "tools": {
         "ca65": {
-          "path": "/opt/homebrew/bin/ca65",
-          "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+          "path": "/usr/local/bin/ca65",
+          "sha256": "c9c00d823edf9eea2efd2a9ae13154b4bdfec241c2c50c77197ead9e0204c851",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/ca65",
+              "/usr/local/bin/ca65",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/cc65-6502dtv-opcodes--opcode-space-version-probes/ca65",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "ca65 V2.18 - N/A\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           }
         },
         "ld65": {
-          "path": "/opt/homebrew/bin/ld65",
-          "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+          "path": "/usr/local/bin/ld65",
+          "sha256": "7df89e6bf2bc8f63de20b38b398776c9213af1f05387d16c358c48dba28b7a84",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/ld65",
+              "/usr/local/bin/ld65",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/cc65-6502dtv-opcodes--opcode-space-version-probes/ld65",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "ld65 V2.18 - N/A\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           }
         }
       },
@@ -608,19 +608,19 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/opt/homebrew/bin/ca65",
+              "/usr/local/bin/ca65",
               "--cpu",
               "6502dtv",
               "-o",
               "6502dtv-opcodes.o",
               "6502dtv-opcodes.s"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/cc65-6502dtv-opcodes--opcode-space/reference/test/asm/opcodes",
+            "cwd": "/__w/_temp/ecosystem-results/work/cc65-6502dtv-opcodes--opcode-space/reference/test/asm/opcodes",
             "exit": 1,
             "failure": null,
             "stdout": "",
             "stderr": "ca65: Invalid CPU: '6502dtv'\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": []
         }
@@ -647,35 +647,35 @@
       "first_failure": "reference assemble step 1 failed: ca65: Invalid CPU: '65ce02'",
       "tools": {
         "ca65": {
-          "path": "/opt/homebrew/bin/ca65",
-          "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+          "path": "/usr/local/bin/ca65",
+          "sha256": "c9c00d823edf9eea2efd2a9ae13154b4bdfec241c2c50c77197ead9e0204c851",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/ca65",
+              "/usr/local/bin/ca65",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/cc65-65ce02-opcodes--opcode-space-version-probes/ca65",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "ca65 V2.18 - N/A\n",
-            "elapsed_millis": 26
+            "elapsed_millis": 20
           }
         },
         "ld65": {
-          "path": "/opt/homebrew/bin/ld65",
-          "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+          "path": "/usr/local/bin/ld65",
+          "sha256": "7df89e6bf2bc8f63de20b38b398776c9213af1f05387d16c358c48dba28b7a84",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/ld65",
+              "/usr/local/bin/ld65",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/cc65-65ce02-opcodes--opcode-space-version-probes/ld65",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "ld65 V2.18 - N/A\n",
-            "elapsed_millis": 22
+            "elapsed_millis": 20
           }
         }
       },
@@ -692,19 +692,19 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/opt/homebrew/bin/ca65",
+              "/usr/local/bin/ca65",
               "--cpu",
               "65ce02",
               "-o",
               "65ce02-opcodes.o",
               "65ce02-opcodes.s"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/cc65-65ce02-opcodes--opcode-space/reference/test/asm/opcodes",
+            "cwd": "/__w/_temp/ecosystem-results/work/cc65-65ce02-opcodes--opcode-space/reference/test/asm/opcodes",
             "exit": 1,
             "failure": null,
             "stdout": "",
             "stderr": "ca65: Invalid CPU: '65ce02'\n",
-            "elapsed_millis": 26
+            "elapsed_millis": 20
           },
           "outputs": []
         }
@@ -731,35 +731,35 @@
       "first_failure": "assembler assemble step 1 failed: asm198x: 4510-opcodes.s: config: file area `MAIN` without `fill = yes` writes a partial extent, which is outside this bounded reader",
       "tools": {
         "ca65": {
-          "path": "/opt/homebrew/bin/ca65",
-          "sha256": "1a57997819fd98814e4601b5160df589e7a1a24e1888a80fee51ae450d8fd0ea",
+          "path": "/usr/local/bin/ca65",
+          "sha256": "c9c00d823edf9eea2efd2a9ae13154b4bdfec241c2c50c77197ead9e0204c851",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/ca65",
+              "/usr/local/bin/ca65",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/cc65-4510-opcodes--opcode-space-version-probes/ca65",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "ca65 V2.18 - N/A\n",
-            "elapsed_millis": 23
+            "elapsed_millis": 20
           }
         },
         "ld65": {
-          "path": "/opt/homebrew/bin/ld65",
-          "sha256": "36bb196207a6b2c90a4aa991b419d6113885303951b14b60b455f51c777b3339",
+          "path": "/usr/local/bin/ld65",
+          "sha256": "7df89e6bf2bc8f63de20b38b398776c9213af1f05387d16c358c48dba28b7a84",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/ld65",
+              "/usr/local/bin/ld65",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/cc65-4510-opcodes--opcode-space-version-probes/ld65",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "ld65 V2.18 - N/A\n",
-            "elapsed_millis": 26
+            "elapsed_millis": 20
           }
         }
       },
@@ -776,25 +776,25 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/opt/homebrew/bin/ca65",
+              "/usr/local/bin/ca65",
               "--cpu",
               "4510",
               "-o",
               "4510-opcodes.o",
               "4510-opcodes.s"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/cc65-4510-opcodes--opcode-space/reference/test/asm/opcodes",
+            "cwd": "/__w/_temp/ecosystem-results/work/cc65-4510-opcodes--opcode-space/reference/test/asm/opcodes",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": [
             {
               "path": "test/asm/opcodes/4510-opcodes.o",
               "length": 3680,
-              "sha256": "6d939fecab19efcdc3bb951149ccc111d4d6134c69f0a50c146d19ba17f29ad0",
+              "sha256": "c4f9cb6e8fb1ae02a3dbe7b1fdd826999fc7a3e922ae487a0bf7be3d6ca81366",
               "hex": null
             }
           ]
@@ -803,19 +803,19 @@
           "stage": "link",
           "process": {
             "argv": [
-              "/opt/homebrew/bin/ld65",
+              "/usr/local/bin/ld65",
               "-C",
-              "/private/tmp/asm198x-ecosystem-qualified-audit/work/cc65-4510-opcodes--opcode-space/reference/.asm198x-adapters/ecosystem/adapters/cc65-opcodes.cfg",
+              "/__w/_temp/ecosystem-results/work/cc65-4510-opcodes--opcode-space/reference/.asm198x-adapters/ecosystem/adapters/cc65-opcodes.cfg",
               "-o",
               "4510-opcodes.bin",
               "4510-opcodes.o"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/cc65-4510-opcodes--opcode-space/reference/test/asm/opcodes",
+            "cwd": "/__w/_temp/ecosystem-results/work/cc65-4510-opcodes--opcode-space/reference/test/asm/opcodes",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -832,21 +832,21 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/private/tmp/asm198x-ecosystem-qualified-audit/work/asm-build/release/asm198x",
+              "/__w/_temp/ecosystem-results/work/asm-build/release/asm198x",
               "--dialect",
               "ca65",
               "-C",
-              "/private/tmp/asm198x-ecosystem-qualified-audit/work/cc65-4510-opcodes--opcode-space/assembler/.asm198x-adapters/ecosystem/adapters/cc65-opcodes.cfg",
+              "/__w/_temp/ecosystem-results/work/cc65-4510-opcodes--opcode-space/assembler/.asm198x-adapters/ecosystem/adapters/cc65-opcodes.cfg",
               "4510-opcodes.s",
               "-o",
               "4510-opcodes.bin"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/cc65-4510-opcodes--opcode-space/assembler/test/asm/opcodes",
+            "cwd": "/__w/_temp/ecosystem-results/work/cc65-4510-opcodes--opcode-space/assembler/test/asm/opcodes",
             "exit": 1,
             "failure": null,
             "stdout": "",
             "stderr": "asm198x: 4510-opcodes.s: config: file area `MAIN` without `fill = yes` writes a partial extent, which is outside this bounded reader\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": []
         }
@@ -865,58 +865,58 @@
         "spdx": "MIT",
         "path": "LICENSE",
         "sha256": "303d0f13d18ec75cc6e537fea121c5443e0fb018c0febfa13876b6200b37d847",
-        "text": "Copyright \u00a9 2021\u20132022 Eldred Habert\nCopyright \u00a9 2022\u20132023 gb-asm-tutorial contributors\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in\nall copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\nTHE SOFTWARE.\n"
+        "text": "Copyright © 2021–2022 Eldred Habert\nCopyright © 2022–2023 gb-asm-tutorial contributors\n\nPermission is hereby granted, free of charge, to any person obtaining a copy\nof this software and associated documentation files (the \"Software\"), to deal\nin the Software without restriction, including without limitation the rights\nto use, copy, modify, merge, publish, distribute, sublicense, and/or sell\ncopies of the Software, and to permit persons to whom the Software is\nfurnished to do so, subject to the following conditions:\n\nThe above copyright notice and this permission notice shall be included in\nall copies or substantial portions of the Software.\n\nTHE SOFTWARE IS PROVIDED \"AS IS\", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR\nIMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,\nFITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE\nAUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER\nLIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,\nOUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN\nTHE SOFTWARE.\n"
       },
       "plan_sha256": "d6fff02a2bf9f851f53c11c790a1c962610034b75e973f1a9ea6727bd995a7a3",
       "outcome": "equivalent",
       "first_failure": null,
       "tools": {
         "rgbasm": {
-          "path": "/opt/homebrew/bin/rgbasm",
-          "sha256": "406211981c842b006fb54c642b05a5a48ae1f49fd0fa36ae7121ee68737f3896",
+          "path": "/usr/local/bin/rgbasm",
+          "sha256": "6548b646ec831eb8d65223d8a59b8103ccfed0f4735304f55f242d9e77c46562",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/rgbasm",
+              "/usr/local/bin/rgbasm",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/gbdev-gb-asm-tutorial--unbricked-version-probes/rgbasm",
             "exit": 0,
             "failure": null,
-            "stdout": "rgbasm v1.0.4\n",
+            "stdout": "rgbasm v1.0.3\n",
             "stderr": "",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           }
         },
         "rgbfix": {
-          "path": "/opt/homebrew/bin/rgbfix",
-          "sha256": "826397094ce9d25426d26a1e2707d098deca038f7265d03b72fb09f271ca7cb0",
+          "path": "/usr/local/bin/rgbfix",
+          "sha256": "1f886ad1a540bf8edf270ad5837f88c800cd48a3cf1f2b72d28bf642d504f3e8",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/rgbfix",
+              "/usr/local/bin/rgbfix",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/gbdev-gb-asm-tutorial--unbricked-version-probes/rgbfix",
             "exit": 0,
             "failure": null,
-            "stdout": "rgbfix v1.0.4\n",
+            "stdout": "rgbfix v1.0.3\n",
             "stderr": "",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           }
         },
         "rgblink": {
-          "path": "/opt/homebrew/bin/rgblink",
-          "sha256": "a5f1ea3561fec2aa0f07b307e05bb21664de357106d0515c04ea93df919eea26",
+          "path": "/usr/local/bin/rgblink",
+          "sha256": "163c0c40ee1194bcf44f3dcc26aaf5b3e642d3478a7a1ad5801e7f32df19d13f",
           "version": {
             "argv": [
-              "/opt/homebrew/bin/rgblink",
+              "/usr/local/bin/rgblink",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/gbdev-gb-asm-tutorial--unbricked-version-probes/rgblink",
             "exit": 0,
             "failure": null,
-            "stdout": "rgblink v1.0.4\n",
+            "stdout": "rgblink v1.0.3\n",
             "stderr": "",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           }
         }
       },
@@ -926,23 +926,23 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/opt/homebrew/bin/rgbasm",
+              "/usr/local/bin/rgbasm",
               "-o",
               "main.o",
               "main.asm"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/gbdev-gb-asm-tutorial--unbricked/reference/unbricked/bricks",
+            "cwd": "/__w/_temp/ecosystem-results/work/gbdev-gb-asm-tutorial--unbricked/reference/unbricked/bricks",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "",
-            "elapsed_millis": 23
+            "elapsed_millis": 20
           },
           "outputs": [
             {
               "path": "unbricked/bricks/main.o",
               "length": 22954,
-              "sha256": "4d55b2c7c0e1ba7af1f8f8473128b8db0e491dc099e1e73cec4d8797c1c5139f",
+              "sha256": "e94cb78424de84fbd56f33fad6e525e0aaf289de62affd8053e8680c4a24c936",
               "hex": null
             }
           ]
@@ -951,17 +951,17 @@
           "stage": "link",
           "process": {
             "argv": [
-              "/opt/homebrew/bin/rgblink",
+              "/usr/local/bin/rgblink",
               "-o",
               "unbricked.gb",
               "main.o"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/gbdev-gb-asm-tutorial--unbricked/reference/unbricked/bricks",
+            "cwd": "/__w/_temp/ecosystem-results/work/gbdev-gb-asm-tutorial--unbricked/reference/unbricked/bricks",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "",
-            "elapsed_millis": 76
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -976,18 +976,18 @@
           "stage": "finalize",
           "process": {
             "argv": [
-              "/opt/homebrew/bin/rgbfix",
+              "/usr/local/bin/rgbfix",
               "-v",
               "-p",
               "0xFF",
               "unbricked.gb"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/gbdev-gb-asm-tutorial--unbricked/reference/unbricked/bricks",
+            "cwd": "/__w/_temp/ecosystem-results/work/gbdev-gb-asm-tutorial--unbricked/reference/unbricked/bricks",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "",
-            "elapsed_millis": 23
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -1004,7 +1004,7 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/private/tmp/asm198x-ecosystem-qualified-audit/work/asm-build/release/asm198x",
+              "/__w/_temp/ecosystem-results/work/asm-build/release/asm198x",
               "--dialect",
               "rgbasm",
               "--gb-rom",
@@ -1012,12 +1012,12 @@
               "-o",
               "unbricked.gb"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/gbdev-gb-asm-tutorial--unbricked/assembler/unbricked/bricks",
+            "cwd": "/__w/_temp/ecosystem-results/work/gbdev-gb-asm-tutorial--unbricked/assembler/unbricked/bricks",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "assembled + finalised 32768 byte(s) -> unbricked.gb (Game Boy ROM)\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -1061,22 +1061,22 @@
       },
       "plan_sha256": "7207c2160d2dae50d854f61eaed319cb549bc84ccf6b2bd44b3ffd0939fc1ffb",
       "outcome": "assembler_rejected",
-      "first_failure": "assembler assemble step 1 failed: asm198x: /private/tmp/asm198x-ecosystem-qualified-audit/work/howprice-specnext-invaders--game/assembler/src/ayfxplay.asm:345: error: expected a value",
+      "first_failure": "assembler assemble step 1 failed: asm198x: /__w/_temp/ecosystem-results/work/howprice-specnext-invaders--game/assembler/src/ayfxplay.asm:345: error: expected a value",
       "tools": {
         "sjasmplus": {
           "path": "/usr/local/bin/sjasmplus",
-          "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+          "sha256": "67410f29cab6e6b0a3965bea4b3790d91b1bcedb89de3cb82a1bf7c45f7ccbeb",
           "version": {
             "argv": [
               "/usr/local/bin/sjasmplus",
               "--version"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/howprice-specnext-invaders--game-version-probes/sjasmplus",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           }
         }
       },
@@ -1095,12 +1095,12 @@
               "--msg=war",
               "src/main.asm"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/howprice-specnext-invaders--game/reference/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/howprice-specnext-invaders--game/reference/.",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n> Code start:           0x8000\n> Code end:             0x9B46\n> Code size:            0x1B46\n> Code free bytes:      0x1CB9\n> Stack bottom:         0xB800\n> Stack size (bytes):   0x0800\n> Pattern data start:   0xC000\n> Pattern data end:     0xDD1A\n> Pattern data size:    0x1D1A\n> AYFX bank start:      0xDD1A\n> AYFX bank end:        0xDFAE\n> AYFX bank size:       0x0294\n> Data free bytes:      0x1D4D\n> Program size:         0x7F01\n",
-            "elapsed_millis": 52
+            "elapsed_millis": 40
           },
           "outputs": [
             {
@@ -1117,7 +1117,7 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/private/tmp/asm198x-ecosystem-qualified-audit/work/asm-build/release/asm198x",
+              "/__w/_temp/ecosystem-results/work/asm-build/release/asm198x",
               "--dialect",
               "sjasmplus",
               "--cpu",
@@ -1126,12 +1126,12 @@
               "-o",
               "asm198x.raw"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/howprice-specnext-invaders--game/assembler/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/howprice-specnext-invaders--game/assembler/.",
             "exit": 1,
             "failure": null,
             "stdout": "",
-            "stderr": "asm198x: /private/tmp/asm198x-ecosystem-qualified-audit/work/howprice-specnext-invaders--game/assembler/src/ayfxplay.asm:345: error: expected a value\nincluded from src/main.asm:48\n",
-            "elapsed_millis": 27
+            "stderr": "asm198x: /__w/_temp/ecosystem-results/work/howprice-specnext-invaders--game/assembler/src/ayfxplay.asm:345: error: expected a value\nincluded from src/main.asm:48\n",
+            "elapsed_millis": 20
           },
           "outputs": []
         }
@@ -1158,17 +1158,17 @@
       "tools": {
         "vasmm68k_mot": {
           "path": "/usr/local/bin/vasmm68k_mot",
-          "sha256": "1906c8525cfff9a13de3d047e399a03e6173814867c8f4de0826e0ebc5eff05a",
+          "sha256": "e8b7055c89c9af7626c8d6a68a8addfe56eeab26f9925152871e482cb2b14cce",
           "version": {
             "argv": [
               "/usr/local/bin/vasmm68k_mot"
             ],
-            "cwd": "/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap",
+            "cwd": "/__w/_temp/ecosystem-results/work/nicodex-helloami--hello-ami-version-probes/vasmm68k_mot",
             "exit": 0,
             "failure": null,
-            "stdout": "vasm 2.0b (c) in 2002-2025 Volker Barthelmann\nvasm M68k/CPU32/ColdFire cpu backend 2.7c (c) 2002-2024 Frank Wille\nvasm motorola syntax module 3.19b (c) 2002-2025 Frank Wille\nvasm test output module 1.0 (c) 2002 Volker Barthelmann\n\n",
+            "stdout": "vasm 2.0f (c) in 2002-2026 Volker Barthelmann\nvasm M68k/CPU32/ColdFire cpu backend 2.8c (c) 2002-2026 Frank Wille\nvasm motorola syntax module 3.19f (c) 2002-2026 Frank Wille\nvasm test output module 1.0 (c) 2002 Volker Barthelmann\n\n",
             "stderr": "",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           }
         }
       },
@@ -1190,12 +1190,12 @@
               "HelloAmi",
               "HelloAmi.asm"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/nicodex-helloami--hello-ami/reference/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/nicodex-helloami--hello-ami/reference/.",
             "exit": 0,
             "failure": null,
-            "stdout": "",
+            "stdout": "\nTotal: 0 optimizations and 0 translations.\n",
             "stderr": "",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": [
             {
@@ -1212,7 +1212,7 @@
           "stage": "assemble",
           "process": {
             "argv": [
-              "/private/tmp/asm198x-ecosystem-qualified-audit/work/asm-build/release/asm198x",
+              "/__w/_temp/ecosystem-results/work/asm-build/release/asm198x",
               "--dialect",
               "vasm",
               "--exe",
@@ -1220,12 +1220,12 @@
               "-o",
               "HelloAmi"
             ],
-            "cwd": "/private/tmp/asm198x-ecosystem-qualified-audit/work/nicodex-helloami--hello-ami/assembler/.",
+            "cwd": "/__w/_temp/ecosystem-results/work/nicodex-helloami--hello-ami/assembler/.",
             "exit": 0,
             "failure": null,
             "stdout": "",
             "stderr": "assembled 244 byte(s) -> HelloAmi\n",
-            "elapsed_millis": 27
+            "elapsed_millis": 20
           },
           "outputs": [
             {
