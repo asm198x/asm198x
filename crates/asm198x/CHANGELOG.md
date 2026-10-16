@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.68](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.67...asm198x-v0.0.68) - 2026-10-16
+
+### Fixed
+
+- *(ca65)* validate segment extents against the active layout
+- *(pasmo)* evaluate arithmetic as native unsigned words
+
 ## [0.0.67](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.66...asm198x-v0.0.67) - 2026-10-16
 
 ### Fixed
