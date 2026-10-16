@@ -462,6 +462,8 @@ jobs:
         run: cargo check --workspace --all-targets
   ecosystem:
     name: Ecosystem replay
+    permissions:
+      contents: read
     runs-on: ubuntu-latest
     timeout-minutes: 30
     needs: [fmt, clippy]
