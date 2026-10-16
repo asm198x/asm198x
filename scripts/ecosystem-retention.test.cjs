@@ -6,7 +6,7 @@ const path = require('node:path');
 const {spawnSync} = require('node:child_process');
 const {test} = require('node:test');
 
-const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows/ecosystem.yml'), 'utf8');
+const workflow = fs.readFileSync(path.join(__dirname, '../.github/workflows/ecosystem.yml'), 'utf8').replace(/\r\n/g, '\n');
 const block = workflow.match(/      - name: Stage every required evidence file for retention\n        if: always\(\)\n        run: \|\n([\s\S]*?)      - name: Retain actual target evidence and proposed table/);
 assert(block, 'required evidence staging step');
 const script = block[1].trimEnd().split('\n').map(line => line.replace(/^          /, '')).join('\n');
