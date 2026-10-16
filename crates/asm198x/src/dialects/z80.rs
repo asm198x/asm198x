@@ -4919,6 +4919,21 @@ impl ExprParser {
         Ok(left)
     }
 
+    /// Sign-extend the low 32 bits through the shared 64-bit evaluator. Native
+    /// SjASMPlus stores each intermediate in `aint` (int32_t), before its
+    /// enclosing operation. These internal shifts are not source shift counts.
+    fn sjasmplus_word(value: Expr) -> Expr {
+        Expr::Bin(
+            BinOp::Shr,
+            Box::new(Expr::Bin(
+                BinOp::Shl,
+                Box::new(value),
+                Box::new(Expr::Num(32)),
+            )),
+            Box::new(Expr::Num(32)),
+        )
+    }
+
     fn shift(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.add_sub()?;
         loop {
@@ -4928,8 +4943,12 @@ impl ExprParser {
                 _ => break,
             };
             self.pos += 1;
-            let right = self.add_sub()?;
-            left = Expr::Bin(op, Box::new(left), Box::new(right));
+            let right = Expr::Bin(
+                BinOp::And,
+                Box::new(self.add_sub()?),
+                Box::new(Expr::Num(31)),
+            );
+            left = Self::sjasmplus_word(Expr::Bin(op, Box::new(left), Box::new(right)));
         }
         Ok(left)
     }
@@ -4944,7 +4963,7 @@ impl ExprParser {
             };
             self.pos += 1;
             let right = self.mul_div()?;
-            left = Expr::Bin(op, Box::new(left), Box::new(right));
+            left = Self::sjasmplus_word(Expr::Bin(op, Box::new(left), Box::new(right)));
         }
         Ok(left)
     }
@@ -4959,19 +4978,23 @@ impl ExprParser {
             };
             self.pos += 1;
             let right = self.unary()?;
-            left = Expr::Bin(op, Box::new(left), Box::new(right));
+            left = Self::sjasmplus_word(Expr::Bin(op, Box::new(left), Box::new(right)));
         }
         Ok(left)
     }
 
     fn unary(&mut self) -> Result<Expr, AsmError> {
+        if matches!(self.tokens.get(self.pos), Some(Tok::Plus)) {
+            self.pos += 1;
+            return self.unary();
+        }
         if matches!(self.tokens.get(self.pos), Some(Tok::Minus)) {
             self.pos += 1;
-            return Ok(Expr::Neg(Box::new(self.unary()?)));
+            return Ok(Self::sjasmplus_word(Expr::Neg(Box::new(self.unary()?))));
         }
         if matches!(self.tokens.get(self.pos), Some(Tok::BitNot)) {
             self.pos += 1;
-            return Ok(Expr::BitNot(Box::new(self.unary()?)));
+            return Ok(Self::sjasmplus_word(Expr::BitNot(Box::new(self.unary()?))));
         }
         if matches!(self.tokens.get(self.pos), Some(Tok::WordNot | Tok::Not)) {
             self.pos += 1;

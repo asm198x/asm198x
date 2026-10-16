@@ -94,3 +94,9 @@ test('0.0.69 evidence cannot qualify the Pasmo memory-wrap correction', () => {
   assert(requiredCases.includes('sjasmplus_word_operators'));
   assert(requiredCases.includes('sjasmplus_logical_expressions'));
 });
+
+test('0.0.70 evidence cannot qualify the three new native parity boundaries', () => {
+  const old = JSON.parse(fs.readFileSync(path.join(__dirname, '../docs/plans/2026-10-16-release-0070-checkpoint/published/aarch64-apple-darwin/report.json'), 'utf8'));
+  assert.equal(old.qualified, true); assert.equal(qualifies(old.results), false);
+  for (const name of ['ca65_used_extents', 'sjasmplus_logical_expressions', 'sjasmplus_shift_widths']) assert(requiredCases.includes(name));
+});

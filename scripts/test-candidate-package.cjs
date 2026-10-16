@@ -13,6 +13,7 @@ requiredCases.push('pasmo_word_arithmetic', 'ca65_configured_extent', 'ca65_exte
 requiredCases.push('sjasmplus_word_operators');
 requiredCases.push('ca65_used_extents');
 requiredCases.push('sjasmplus_logical_expressions');
+requiredCases.push('sjasmplus_shift_widths');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -234,6 +235,20 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           assert.deepEqual(read('logical.bin'), Buffer.from(fact.hex, 'hex'), fact.name);
         } else {
           reject(p); assert.equal(read('logical.bin').toString(), 'previous image', fact.name);
+        }
+      }
+    });
+    test('sjasmplus_shift_widths', () => {
+      const facts = require('../crates/asm198x/tests/fixtures/sjasmplus-shift-widths.json');
+      assert.equal(facts.cases.length, 646);
+      for (const fact of facts.cases) {
+        write('shifts.asm', fact.source); write('shifts.bin', 'previous image');
+        const p = run(['--dialect', 'sjasmplus', 'shifts.asm', '-o', 'shifts.bin']);
+        if (fact.exit === 0) {
+          assert.equal(p.status, 0, fact.name + ': ' + p.stderr);
+          assert.deepEqual(read('shifts.bin'), Buffer.from(fact.hex, 'hex'), fact.name);
+        } else {
+          reject(p); assert.equal(read('shifts.bin').toString(), 'previous image', fact.name);
         }
       }
     });

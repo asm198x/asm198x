@@ -29,6 +29,10 @@ jobs:
         run: verify-arbiters
       - name: Allow Git metadata in this checkout
         run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Corroborate native SjASMPlus shift widths on Linux
+        env:
+          ASM198X_NATIVE_SHIFT_REPORT: ${{ runner.temp }}/sjasmplus-shift-native.json
+        run: timeout --kill-after=5s 10m cargo test -p asm198x --test sjasmplus_shift_widths live_native_shift_fixture_is_corroborated -- --ignored --nocapture
       - name: Fetch and verify pinned source without executing it
         run: cargo xtask ecosystem fetch "$RUNNER_TEMP/ecosystem-sources"
       - name: Execute the reviewed complete build plans
@@ -52,6 +56,7 @@ jobs:
           name: ecosystem-build-results
           if-no-files-found: error
           path: |
+            ${{ runner.temp }}/sjasmplus-shift-native.json
             ${{ runner.temp }}/ecosystem-results/report.json
             ${{ runner.temp }}/ecosystem-results/logs/
             docs/ecosystem-corpus.md

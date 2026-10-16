@@ -1104,12 +1104,14 @@ impl Z80Syntax for SjasmplusSyntax {
             .or_else(|| t.strip_prefix("0X"))
             .or_else(|| t.strip_prefix('#'))
         {
-            return i64::from_str_radix(hex, 16).map_err(|_| bad());
+            return u32::from_str_radix(hex, 16)
+                .map(|v| i64::from(v as i32))
+                .map_err(|_| bad());
         }
         if let Some(hex) = t.strip_suffix(['h', 'H'])
-            && let Ok(v) = i64::from_str_radix(hex, 16)
+            && let Ok(v) = u32::from_str_radix(hex, 16)
         {
-            return Ok(v);
+            return Ok(i64::from(v as i32));
         }
         // Binary: % or 0b prefix, or b suffix.
         if let Some(bin) = t
@@ -1117,14 +1119,18 @@ impl Z80Syntax for SjasmplusSyntax {
             .or_else(|| t.strip_prefix("0b"))
             .or_else(|| t.strip_prefix("0B"))
         {
-            return i64::from_str_radix(bin, 2).map_err(|_| bad());
+            return u32::from_str_radix(bin, 2)
+                .map(|v| i64::from(v as i32))
+                .map_err(|_| bad());
         }
         if let Some(bin) = t.strip_suffix(['b', 'B'])
-            && let Ok(v) = i64::from_str_radix(bin, 2)
+            && let Ok(v) = u32::from_str_radix(bin, 2)
         {
-            return Ok(v);
+            return Ok(i64::from(v as i32));
         }
-        t.parse::<i64>().map_err(|_| bad())
+        t.parse::<u32>()
+            .map(|v| i64::from(v as i32))
+            .map_err(|_| bad())
     }
 }
 
