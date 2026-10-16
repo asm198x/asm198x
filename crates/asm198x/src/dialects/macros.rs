@@ -692,7 +692,9 @@ fn invocation<S: MacroSyntax>(
 pub(crate) enum MacroLine {
     /// Opens a definition, and names it.
     Opens(String),
-    /// Closes the definition that is open.
+    /// Opens a body block sharing the macro's closer (Pasmo REPT/ENDM).
+    NestedOpen,
+    /// Closes the definition, or an inner block sharing its closer.
     Closes,
     /// Invokes a macro already defined.
     Invokes,
@@ -783,6 +785,22 @@ pub(crate) fn place_nodes(nodes: &mut [Node], origins: Option<&[LineOrigin]>) {
         place(&mut node.span, origins);
         if let Some(span) = node.operand_span.as_mut() {
             place(span, origins);
+        }
+        match node.item.as_mut() {
+            Some(crate::ast::Item::Repeat { body, .. } | crate::ast::Item::Loop { body, .. }) => {
+                place_nodes(body, Some(origins));
+            }
+            Some(crate::ast::Item::Conditional {
+                then_body,
+                else_body,
+                ..
+            }) => {
+                place_nodes(then_body, Some(origins));
+                if let Some(body) = else_body {
+                    place_nodes(body, Some(origins));
+                }
+            }
+            _ => {}
         }
     }
 }

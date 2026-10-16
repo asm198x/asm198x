@@ -202,7 +202,11 @@ impl Z80Syntax for PasmoSyntax {
     /// Delegated to this dialect's own macro grammar, so the walk and the
     /// expander agree on what opens, closes and invokes a definition.
     fn macro_line(&self, line: &str, known: &dyn Fn(&str) -> bool) -> macros::MacroLine {
-        macros::macro_line(self, line, known)
+        if opens_repetition(line) {
+            macros::MacroLine::NestedOpen
+        } else {
+            macros::macro_line(self, line, known)
+        }
     }
 
     /// `REPT n` … `ENDM`, case-insensitively — and **`ENDM`**, not `ENDR`.
@@ -213,9 +217,9 @@ impl Z80Syntax for PasmoSyntax {
     ///
     /// The sharing is safe because a macro definition is consumed by the walk
     /// *before* this is consulted, so the `ENDM` that closes a body is never
-    /// offered here. pasmo itself refuses a `REPT` nested inside a macro — the
-    /// first `ENDM` ends the definition there too — so the two constructs
-    /// never legitimately overlap.
+    /// offered here. Pasmo's collector counts inner REPT blocks, so their
+    /// ENDM lines remain in the macro body until expansion. The AST reader
+    /// uses the same opener classification when copying that body (#687).
     ///
     /// `DUP`/`EDUP` are sjasmplus's and are not pasmo's.
     fn repeat_keyword(&self, word: &str) -> Option<z80::RepeatKw> {
@@ -333,6 +337,34 @@ impl macros::MacroSyntax for PasmoSyntax {
         (!name.is_empty()).then(|| (name.to_string(), parameters(tail)))
     }
 
+    /// Pasmo uses ENDM for both repetitions and the surrounding macro. Keep
+    /// inner closers in the verbatim body until the whole definition ends.
+    fn collect(&self, lines: &[&str], start: usize) -> Option<Result<macros::Definition, String>> {
+        let (name, params) = self.header(lines[start])?;
+        let mut body = Vec::new();
+        let mut repetitions = 0_usize;
+        for (offset, line) in lines.iter().enumerate().skip(start + 1) {
+            if self.is_end(line) {
+                if repetitions == 0 {
+                    return Some(Ok(macros::Definition {
+                        name,
+                        def: macros::MacroDef {
+                            params,
+                            body,
+                            defined_at: None,
+                        },
+                        last_line: offset,
+                    }));
+                }
+                repetitions -= 1;
+            } else if opens_repetition(line) {
+                repetitions += 1;
+            }
+            body.push((*line).to_string());
+        }
+        Some(Err(format!("`macro {name}` has no matching `endm`")))
+    }
+
     /// `ENDM`, alone on its line.
     fn is_end(&self, line: &str) -> bool {
         macros::without_comment(line)
@@ -381,6 +413,13 @@ impl macros::MacroSyntax for PasmoSyntax {
     fn is_local_decl(&self, line: &str) -> bool {
         local_declaration(line).is_some()
     }
+}
+
+fn opens_repetition(line: &str) -> bool {
+    macros::without_comment(line)
+        .split_whitespace()
+        .next()
+        .is_some_and(|word| word.eq_ignore_ascii_case("rept"))
 }
 
 /// The names a `LOCAL` line declares, or `None` if the line is not one.

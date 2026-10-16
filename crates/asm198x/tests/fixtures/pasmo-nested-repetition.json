@@ -1,0 +1,153 @@
+{
+  "reference": {
+    "path": "/usr/local/bin/pasmo",
+    "sha256": "e9628f5c32f3c74a963c649781e6cb87e9eaeb4bbfe7b52d3de27f4986bbf136",
+    "version_process": {
+      "exit": 1,
+      "stdout": "",
+      "stderr": "PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo\nModified by C Kirby\nUsage:\n\n\tpasmo [options] source object [symbol]\n\nSee the README file for details.\n"
+    }
+  },
+  "cases": [
+    {
+      "name": "one_level",
+      "source": " org 8000h\nsetv macro\n rept 2\n nop\n endm\n endm\n setv\n",
+      "argv": [
+        "pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000288833 s\n",
+      "hex": "0000"
+    },
+    {
+      "name": "two_levels",
+      "source": " org 8000h\nsetv macro\n rept 2\n rept 3\n nop\n endm\n endm\n endm\n setv\n ret\n",
+      "argv": [
+        "pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000199083 s\n",
+      "hex": "000000000000c9"
+    },
+    {
+      "name": "parameters",
+      "source": " org 8000h\n MACRO setv, count\n rept count\n db count\n endm\n endm\n setv 2\n setv 3\n",
+      "argv": [
+        "pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000284583 s\n",
+      "hex": "0202030303"
+    },
+    {
+      "name": "comments_strings",
+      "source": " org 8000h\nsetv macro\n REPT 2 ; ENDM is only comment\n db \"rept endm\"\n ENDM ; inner\n ENDM ; macro\n setv\n",
+      "argv": [
+        "pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000247416 s\n",
+      "hex": "7265707420656e646d7265707420656e646d"
+    },
+    {
+      "name": "zero_count",
+      "source": " org 8000h\nsetv macro\n rept 0\n nop\n endm\n endm\n setv\n ret\n",
+      "argv": [
+        "pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000160833 s\n",
+      "hex": "c9"
+    },
+    {
+      "name": "labelled_repeat",
+      "source": " org 8000h\nsetv macro\nstart: rept 2\n nop\n endm\n endm\n setv\n",
+      "argv": [
+        "pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 6 of file input.asm\nERROR: ENDM outside of macro\n",
+      "hex": null
+    },
+    {
+      "name": "conditional",
+      "source": " org 8000h\nsetv macro\n if 1\n rept 2\n db 5\n endm\n endif\n endm\n setv\n",
+      "argv": [
+        "pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000171375 s\n",
+      "hex": "0505"
+    },
+    {
+      "name": "missing_macro_end",
+      "source": " org 8000h\nsetv macro\n rept 2\n nop\n endm\n",
+      "argv": [
+        "pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: MACRO without ENDM\n",
+      "hex": null
+    },
+    {
+      "name": "extra_end",
+      "source": " org 8000h\nsetv macro\n rept 2\n nop\n endm\n endm\n endm\n setv\n",
+      "argv": [
+        "pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 7 of file input.asm\nERROR: ENDM outside of macro\n",
+      "hex": null
+    },
+    {
+      "name": "body_error",
+      "source": " org 8000h\nsetv macro\n rept 2\n ld a,(\n endm\n endm\n setv\n",
+      "argv": [
+        "pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR: expanding macro on line 7 of file input.asm\nERROR on line 4 of file input.asm\nERROR: Value expected but '(eol)'found\n",
+      "hex": null
+    }
+  ]
+}
