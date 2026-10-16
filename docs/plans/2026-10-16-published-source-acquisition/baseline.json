@@ -1,0 +1,39 @@
+{
+  "source_commit": "e72627027df5a576215e24826cdf96ac3d66e664",
+  "method": "Injected 403 reproduces handling; does not establish the hosted server-side cause",
+  "requests": [
+    {
+      "host": "github.com",
+      "kind": "asset",
+      "authorization_present": false
+    },
+    {
+      "host": "github.com",
+      "kind": "asset",
+      "authorization_present": false
+    },
+    {
+      "host": "github.com",
+      "kind": "asset",
+      "authorization_present": false
+    },
+    {
+      "host": "github.com",
+      "kind": "asset",
+      "authorization_present": false
+    },
+    {
+      "host": "api.github.com",
+      "kind": "source-commit",
+      "authorization_present": false
+    }
+  ],
+  "error": "published source commit: 403",
+  "retained_files": [
+    "candidate-plan.json",
+    "distrib/asm198x-aarch64-apple-darwin.tar.xz",
+    "distrib/asm198x-aarch64-apple-darwin.tar.xz.sha256",
+    "package-test-manifest.json"
+  ],
+  "acquisition_record_present": false
+}
