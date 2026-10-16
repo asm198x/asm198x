@@ -1,0 +1,6 @@
+# SjASMPlus escaped data (#696)
+
+1. Re-run the existing 95 printable-pair and 51 directive-spelling native probes. Capture additional mixed quoting, escaped quote/backslash, commas/comments, string marking/termination, wide data, macro/include/repeat and malformed cases with full native tool identity and results.
+2. Replace the explicit unsupported-escape refusal in SjASMPlus `data_items` with measured double-quoted decoding and escape-aware item scanning. Keep single-quoted character expressions and unknown pairs literal. Keep Pasmo and other dialect grammars unchanged; use existing expression/lowering and directive-specific transformations.
+3. Turn prior bounded-refusal controls into native-byte/formatting invariants only where the native probes establish support. Malformed inputs still fail without replacing images or sources. Compare CLI JSON/human, debug/listing and formatter results in both CPU entry points.
+4. Extend native archive qualification with an escaped-data success and malformed-data preservation control; retain frozen prior release evidence. Run workspace/Lua, Clippy, docs, formatting and release-control checks; push and merge a focused PR only after all exact-head checks and triggered workflows finish successfully.

@@ -8,7 +8,7 @@ const { verifyChecksum, runChecked } = require('../.github/actions/setup/index.c
 const { targets, sha, packageIdentity, nativeTarget, binaryTarget, archiveIdentity } = require('./package-identity.cjs');
 const { verifyReceipt, sourceIdentity } = require('./build-locked-package.cjs');
 const requiredCases = ['archive_identity', 'version', 'reference_bytes', 'determinism', 'structured_success', 'structured_failure', 'preserve_previous_outputs', 'missing_input_json', 'unknown_cpu', 'incompatible_cpu', 'hardlink_source', 'hardlink_sidecar', 'formatter_container', 'formatter_origin', 'lua', 'upstream_project'];
-requiredCases.push('disasm_options', 'disasm_wide_origin', 'pasmo_nested_repeat', 'quoted_data_native', 'quoted_data_format', 'conversion_quoted_data', 'conversion_file_scope', 'unsupported_escape');
+requiredCases.push('disasm_options', 'disasm_wide_origin', 'pasmo_nested_repeat', 'quoted_data_native', 'quoted_data_format', 'conversion_quoted_data', 'conversion_file_scope', 'sjasmplus_decoded_escapes');
 requiredCases.push('pasmo_word_arithmetic', 'ca65_configured_extent', 'ca65_extent_refusal', 'ca65_absent_segments', 'pasmo_wrapped_image');
 requiredCases.push('sjasmplus_word_operators');
 const sourceFiles = {
@@ -288,14 +288,17 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         assert.equal(read('converted.s').toString(), 'previous conversion'); assert.equal(read('convert.s').toString(), source);
       }
     });
-    test('unsupported_escape', () => {
-      const fact = nativeCase('sjasmplus-escape-boundaries', '\\n'); write('escaped.s', fact.source);
-      for (const cpu of ['z80', 'z80n']) for (const mode of ['human', 'json']) {
-        write('escaped.bin', 'previous image');
-        const p = run(['--dialect', 'sjasmplus', '--cpu', cpu, '--message-format', mode, 'escaped.s', '-o', 'escaped.bin']); reject(p);
-        if (mode === 'json') { assert.equal(p.stderr, ''); assert(JSON.parse(p.stdout).some(d => d.code === 'UnsupportedFeature' && d.span?.line === 2)); }
-        else assert.match(p.stderr, /escape/);
-        assert.equal(read('escaped.bin').toString(), 'previous image'); assert.equal(read('escaped.s').toString(), fact.source);
+    test('sjasmplus_decoded_escapes', () => {
+      for (const name of ['\\n', '\\"', '\\\\']) {
+        const fact = nativeCase('sjasmplus-escape-boundaries', name); write('escaped.s', fact.source);
+        for (const cpu of ['z80', 'z80n']) for (const mode of ['human', 'json']) {
+          const p = run(['--dialect', 'sjasmplus', '--cpu', cpu, '--message-format', mode, 'escaped.s', '-o', 'escaped.bin']);
+          assert.equal(p.status, 0); assert.deepEqual(read('escaped.bin'), Buffer.from(fact.hex, 'hex'));
+          assert.equal(read('escaped.s').toString(), fact.source);
+          write('malformed-escape.s', ' db "unterminated' + String.fromCharCode(92) + '\n');
+          reject(run(['--dialect', 'sjasmplus', '--cpu', cpu, '--message-format', mode, 'malformed-escape.s', '-o', 'escaped.bin']));
+          assert.deepEqual(read('escaped.bin'), Buffer.from(fact.hex, 'hex'));
+        }
       }
     });
     const project = path.join(root, 'upstream');

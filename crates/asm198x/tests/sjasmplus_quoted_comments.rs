@@ -222,12 +222,14 @@ fn formatting_retains_actual_comments_after_quoted_data() {
 }
 
 #[test]
-fn escape_boundaries_emit_native_bytes_or_fail_explicitly_without_writing() {
+fn escape_boundaries_emit_native_bytes_in_both_frontends_and_cli_modes() {
     let facts: Value =
         serde_json::from_str(include_str!("fixtures/sjasmplus-escape-boundaries.json"))
             .expect("escape facts");
     let cases = facts["cases"].as_array().expect("cases");
     assert_eq!(cases.len(), 95);
+    // This historical field identifies the 23 pairs that native decodes,
+    // which the bounded #695 implementation deliberately refused.
     assert_eq!(
         cases
             .iter()
@@ -240,66 +242,47 @@ fn escape_boundaries_emit_native_bytes_or_fail_explicitly_without_writing() {
         let source = case["source"].as_str().expect("source");
         std::fs::write(dir.join("input.asm"), source).expect("source");
         for dialect in dialects(case) {
-            let formatted = format(dialect, source).expect("preserve escaped source");
+            let formatted = format(dialect, source).expect("format escaped source");
             assert_eq!(
-                formatted.lines().nth(1).expect("formatted data").trim(),
-                source.lines().nth(1).expect("source data").trim()
+                format(dialect, &formatted).expect("format twice"),
+                formatted
             );
-            if case["unsupported"] == true {
-                let error =
-                    assemble(dialect, source).expect_err("escapes must not emit undecoded bytes");
-                assert_eq!(error.code, asm198x::Code::UnsupportedFeature);
-                assert!(error.message.contains("escape"), "{error:?}");
-                for mode in ["human", "json"] {
-                    std::fs::write(dir.join("image.bin"), b"previous image").expect("old image");
-                    let result = Command::new(env!("CARGO_BIN_EXE_asm198x"))
-                        .current_dir(&dir)
-                        .args([
-                            "--dialect",
-                            "sjasmplus",
-                            "--cpu",
-                            if dialect == "sjasmplus" {
-                                "z80"
-                            } else {
-                                "z80n"
-                            },
-                            "--message-format",
-                            mode,
-                            "input.asm",
-                            "-o",
-                            "image.bin",
-                        ])
-                        .output()
-                        .expect("escape refusal");
-                    assert!(!result.status.success(), "{result:?}");
-                    if mode == "json" {
-                        let diagnostics: Value =
-                            serde_json::from_slice(&result.stdout).expect("diagnostics");
-                        assert_eq!(diagnostics[0]["code"], "UnsupportedFeature");
-                        assert_eq!(diagnostics[0]["span"]["line"], 2);
-                    } else {
-                        assert!(String::from_utf8_lossy(&result.stderr).contains("escape"));
-                    }
-                    assert_eq!(
-                        std::fs::read(dir.join("image.bin")).expect("preserved image"),
-                        b"previous image"
-                    );
-                    assert_eq!(
-                        std::fs::read_to_string(dir.join("input.asm")).expect("preserved source"),
-                        source
-                    );
-                }
-            } else {
+            assert_eq!(
+                assemble(dialect, source).expect("decoded data").bytes,
+                bytes(case)
+            );
+            assert_eq!(
+                assemble(dialect, &formatted).expect("formatted data").bytes,
+                bytes(case)
+            );
+            for mode in ["human", "json"] {
+                let result = Command::new(env!("CARGO_BIN_EXE_asm198x"))
+                    .current_dir(&dir)
+                    .args([
+                        "--dialect",
+                        "sjasmplus",
+                        "--cpu",
+                        if dialect == "sjasmplus" {
+                            "z80"
+                        } else {
+                            "z80n"
+                        },
+                        "--message-format",
+                        mode,
+                        "input.asm",
+                        "-o",
+                        "image.bin",
+                    ])
+                    .output()
+                    .expect("escaped data CLI");
+                assert!(result.status.success(), "{}: {result:?}", case["escape"]);
                 assert_eq!(
-                    assemble(dialect, source).expect("literal backslash").bytes,
+                    std::fs::read(dir.join("image.bin")).expect("native bytes"),
                     bytes(case)
                 );
-                let formatted = format(dialect, source).expect("format literal backslash");
                 assert_eq!(
-                    assemble(dialect, &formatted)
-                        .expect("formatted literal backslash")
-                        .bytes,
-                    bytes(case)
+                    std::fs::read_to_string(dir.join("input.asm")).expect("source preserved"),
+                    source
                 );
             }
         }
@@ -307,20 +290,28 @@ fn escape_boundaries_emit_native_bytes_or_fail_explicitly_without_writing() {
 }
 
 #[test]
-fn decoded_escapes_fail_explicitly_across_data_directive_spellings() {
+fn decoded_escapes_keep_native_data_directive_semantics() {
     let facts: Value =
         serde_json::from_str(include_str!("fixtures/sjasmplus-escape-boundaries.json"))
             .expect("escape facts");
     let cases = facts["directives"].as_array().expect("directive probes");
     assert_eq!(cases.len(), 51);
     for case in cases {
+        let source = case["source"].as_str().expect("source");
         for dialect in dialects(case) {
-            let error = assemble(dialect, case["source"].as_str().expect("source"))
-                .expect_err("no undecoded data");
             assert_eq!(
-                error.code,
-                asm198x::Code::UnsupportedFeature,
-                "{}: {error:?}",
+                assemble(dialect, source).expect("decoded directive").bytes,
+                bytes(case),
+                "{}",
+                case["word"]
+            );
+            let formatted = format(dialect, source).expect("format directive");
+            assert_eq!(
+                assemble(dialect, &formatted)
+                    .expect("formatted directive")
+                    .bytes,
+                bytes(case),
+                "{}",
                 case["word"]
             );
         }
