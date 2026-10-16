@@ -98,3 +98,100 @@ fn conversion_matches_the_real_tools() {
     let converted = std::fs::read(dir.join("conv.bin")).expect("converted");
     assert_eq!(converted, reference, "real tools agree on the conversion");
 }
+
+#[path = "support/scratch.rs"]
+mod scratch;
+
+#[test]
+fn unresolved_conversion_files_have_actionable_guidance_and_keep_the_source_error() {
+    for directive in ["include", "incbin"] {
+        let source = format!(" org 8000h\n {directive} \"child.dat\"\n ret\n");
+        for from in ["pasmo", "pasmonext"] {
+            let original =
+                asm198x::assemble_pasmo(&source).expect_err("single source has no loader");
+            assert!(original.message.contains("the CLI resolves"));
+            let error = convert(from, "sjasmplus", &source).expect_err("conversion has no loader");
+            assert_eq!(error.line, original.line);
+            assert_eq!(error.span, original.span);
+            assert_eq!(error.code, original.code);
+            assert!(error.message.contains(directive), "{error:?}");
+            assert!(error.message.contains("child.dat"), "{error:?}");
+            assert!(error.message.contains("self-contained source"), "{error:?}");
+            assert!(!error.message.contains("the CLI resolves"), "{error:?}");
+            assert!(
+                !error.message.contains("multi-file entry point"),
+                "{error:?}"
+            );
+        }
+    }
+}
+
+#[test]
+fn inactive_file_directives_do_not_prevent_verified_conversion() {
+    for directive in ["include", "incbin"] {
+        let source = format!(" org 8000h\n if 0\n {directive} \"missing.dat\"\n endif\n ret\n");
+        for from in ["pasmo", "pasmonext"] {
+            let converted = convert(from, "sjasmplus", &source).expect("inactive directive");
+            assert_eq!(
+                asm198x::assemble_sjasmplus(&converted.output)
+                    .expect("converted source")
+                    .bytes,
+                [0xc9]
+            );
+        }
+    }
+}
+
+#[test]
+fn cli_conversion_explains_existing_files_and_preserves_outputs() {
+    use std::process::Command;
+    let dir = scratch::dir("convert-file-scope");
+    std::fs::write(dir.join("child.inc"), " db 42\n").expect("include");
+    std::fs::write(dir.join("data.bin"), [42]).expect("binary include");
+    for (directive, name) in [("include", "child.inc"), ("incbin", "data.bin")] {
+        for from in ["pasmo", "pasmonext"] {
+            let source = format!(" org 8000h\n {directive} \"{name}\"\n ret\n");
+            std::fs::write(dir.join("input.asm"), &source).expect("input");
+            let assembled = Command::new(env!("CARGO_BIN_EXE_asm198x"))
+                .current_dir(&dir)
+                .args(["--dialect", from, "input.asm", "-o", "image.bin"])
+                .output()
+                .expect("ordinary assembly");
+            assert!(assembled.status.success(), "{assembled:?}");
+            assert_eq!(
+                std::fs::read(dir.join("image.bin")).expect("image"),
+                [42, 0xc9]
+            );
+            for write_file in [true, false] {
+                std::fs::write(dir.join("out.asm"), b"previous conversion").expect("old output");
+                let mut command = Command::new(env!("CARGO_BIN_EXE_asm198x"));
+                command.current_dir(&dir).args([
+                    "convert",
+                    "--from",
+                    from,
+                    "--to",
+                    "sjasmplus",
+                    "input.asm",
+                ]);
+                if write_file {
+                    command.args(["-o", "out.asm"]);
+                }
+                let result = command.output().expect("convert");
+                assert!(!result.status.success(), "{result:?}");
+                assert!(result.stdout.is_empty(), "{result:?}");
+                let message = String::from_utf8_lossy(&result.stderr);
+                assert!(message.contains("input.asm: line 2:"), "{message}");
+                assert!(message.contains("self-contained source"), "{message}");
+                assert!(!message.contains("the CLI resolves"), "{message}");
+                assert_eq!(
+                    std::fs::read(dir.join("out.asm")).expect("preserved output"),
+                    b"previous conversion"
+                );
+                assert_eq!(
+                    std::fs::read_to_string(dir.join("input.asm")).expect("preserved input"),
+                    source
+                );
+            }
+        }
+    }
+}
