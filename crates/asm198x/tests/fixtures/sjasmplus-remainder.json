@@ -1,0 +1,3083 @@
+{
+  "tool": "/usr/local/bin/sjasmplus",
+  "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+  "version": {
+    "argv": [
+      "/usr/local/bin/sjasmplus",
+      "--version"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+  },
+  "cases": [
+    {
+      "name": "signed_%_-7_-7",
+      "source": "Value equ ((-7) % (-7))\n dd ((-7) % (-7)),Value\n IF ((-7) % (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) % (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_-7_-2",
+      "source": "Value equ ((-7) % (-2))\n dd ((-7) % (-2)),Value\n IF ((-7) % (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) % (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_%_-7_-1",
+      "source": "Value equ ((-7) % (-1))\n dd ((-7) % (-1)),Value\n IF ((-7) % (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) % (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_-7_1",
+      "source": "Value equ ((-7) % (1))\n dd ((-7) % (1)),Value\n IF ((-7) % (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) % (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_-7_2",
+      "source": "Value equ ((-7) % (2))\n dd ((-7) % (2)),Value\n IF ((-7) % (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) % (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_%_-7_7",
+      "source": "Value equ ((-7) % (7))\n dd ((-7) % (7)),Value\n IF ((-7) % (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) % (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_-5_-7",
+      "source": "Value equ ((-5) % (-7))\n dd ((-5) % (-7)),Value\n IF ((-5) % (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) % (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "fbfffffffbffffffa5"
+    },
+    {
+      "name": "signed_%_-5_-2",
+      "source": "Value equ ((-5) % (-2))\n dd ((-5) % (-2)),Value\n IF ((-5) % (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) % (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_%_-5_-1",
+      "source": "Value equ ((-5) % (-1))\n dd ((-5) % (-1)),Value\n IF ((-5) % (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) % (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_-5_1",
+      "source": "Value equ ((-5) % (1))\n dd ((-5) % (1)),Value\n IF ((-5) % (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) % (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_-5_2",
+      "source": "Value equ ((-5) % (2))\n dd ((-5) % (2)),Value\n IF ((-5) % (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) % (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_%_-5_7",
+      "source": "Value equ ((-5) % (7))\n dd ((-5) % (7)),Value\n IF ((-5) % (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) % (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "fbfffffffbffffffa5"
+    },
+    {
+      "name": "signed_%_-1_-7",
+      "source": "Value equ ((-1) % (-7))\n dd ((-1) % (-7)),Value\n IF ((-1) % (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) % (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_%_-1_-2",
+      "source": "Value equ ((-1) % (-2))\n dd ((-1) % (-2)),Value\n IF ((-1) % (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) % (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_%_-1_-1",
+      "source": "Value equ ((-1) % (-1))\n dd ((-1) % (-1)),Value\n IF ((-1) % (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) % (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_-1_1",
+      "source": "Value equ ((-1) % (1))\n dd ((-1) % (1)),Value\n IF ((-1) % (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) % (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_-1_2",
+      "source": "Value equ ((-1) % (2))\n dd ((-1) % (2)),Value\n IF ((-1) % (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) % (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_%_-1_7",
+      "source": "Value equ ((-1) % (7))\n dd ((-1) % (7)),Value\n IF ((-1) % (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) % (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_%_0_-7",
+      "source": "Value equ ((0) % (-7))\n dd ((0) % (-7)),Value\n IF ((0) % (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) % (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_0_-2",
+      "source": "Value equ ((0) % (-2))\n dd ((0) % (-2)),Value\n IF ((0) % (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) % (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_0_-1",
+      "source": "Value equ ((0) % (-1))\n dd ((0) % (-1)),Value\n IF ((0) % (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) % (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_0_1",
+      "source": "Value equ ((0) % (1))\n dd ((0) % (1)),Value\n IF ((0) % (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) % (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_0_2",
+      "source": "Value equ ((0) % (2))\n dd ((0) % (2)),Value\n IF ((0) % (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) % (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_0_7",
+      "source": "Value equ ((0) % (7))\n dd ((0) % (7)),Value\n IF ((0) % (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) % (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_1_-7",
+      "source": "Value equ ((1) % (-7))\n dd ((1) % (-7)),Value\n IF ((1) % (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) % (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_%_1_-2",
+      "source": "Value equ ((1) % (-2))\n dd ((1) % (-2)),Value\n IF ((1) % (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) % (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_%_1_-1",
+      "source": "Value equ ((1) % (-1))\n dd ((1) % (-1)),Value\n IF ((1) % (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) % (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_1_1",
+      "source": "Value equ ((1) % (1))\n dd ((1) % (1)),Value\n IF ((1) % (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) % (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_1_2",
+      "source": "Value equ ((1) % (2))\n dd ((1) % (2)),Value\n IF ((1) % (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) % (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_%_1_7",
+      "source": "Value equ ((1) % (7))\n dd ((1) % (7)),Value\n IF ((1) % (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) % (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_%_5_-7",
+      "source": "Value equ ((5) % (-7))\n dd ((5) % (-7)),Value\n IF ((5) % (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) % (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "05000000050000005a"
+    },
+    {
+      "name": "signed_%_5_-2",
+      "source": "Value equ ((5) % (-2))\n dd ((5) % (-2)),Value\n IF ((5) % (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) % (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_%_5_-1",
+      "source": "Value equ ((5) % (-1))\n dd ((5) % (-1)),Value\n IF ((5) % (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) % (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_5_1",
+      "source": "Value equ ((5) % (1))\n dd ((5) % (1)),Value\n IF ((5) % (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) % (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_5_2",
+      "source": "Value equ ((5) % (2))\n dd ((5) % (2)),Value\n IF ((5) % (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) % (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_%_5_7",
+      "source": "Value equ ((5) % (7))\n dd ((5) % (7)),Value\n IF ((5) % (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) % (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "05000000050000005a"
+    },
+    {
+      "name": "signed_%_7_-7",
+      "source": "Value equ ((7) % (-7))\n dd ((7) % (-7)),Value\n IF ((7) % (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) % (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_7_-2",
+      "source": "Value equ ((7) % (-2))\n dd ((7) % (-2)),Value\n IF ((7) % (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) % (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_%_7_-1",
+      "source": "Value equ ((7) % (-1))\n dd ((7) % (-1)),Value\n IF ((7) % (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) % (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_7_1",
+      "source": "Value equ ((7) % (1))\n dd ((7) % (1)),Value\n IF ((7) % (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) % (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_7_2",
+      "source": "Value equ ((7) % (2))\n dd ((7) % (2)),Value\n IF ((7) % (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) % (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_%_7_7",
+      "source": "Value equ ((7) % (7))\n dd ((7) % (7)),Value\n IF ((7) % (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) % (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_$80000000_-7",
+      "source": "Value equ (($80000000) % (-7))\n dd (($80000000) % (-7)),Value\n IF (($80000000) % (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) % (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "fefffffffeffffffa5"
+    },
+    {
+      "name": "signed_%_$80000000_-2",
+      "source": "Value equ (($80000000) % (-2))\n dd (($80000000) % (-2)),Value\n IF (($80000000) % (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) % (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_$80000000_1",
+      "source": "Value equ (($80000000) % (1))\n dd (($80000000) % (1)),Value\n IF (($80000000) % (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) % (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_$80000000_2",
+      "source": "Value equ (($80000000) % (2))\n dd (($80000000) % (2)),Value\n IF (($80000000) % (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) % (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_$80000000_7",
+      "source": "Value equ (($80000000) % (7))\n dd (($80000000) % (7)),Value\n IF (($80000000) % (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) % (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "fefffffffeffffffa5"
+    },
+    {
+      "name": "signed_%_$ffffffff_-7",
+      "source": "Value equ (($ffffffff) % (-7))\n dd (($ffffffff) % (-7)),Value\n IF (($ffffffff) % (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) % (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_%_$ffffffff_-2",
+      "source": "Value equ (($ffffffff) % (-2))\n dd (($ffffffff) % (-2)),Value\n IF (($ffffffff) % (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) % (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_%_$ffffffff_-1",
+      "source": "Value equ (($ffffffff) % (-1))\n dd (($ffffffff) % (-1)),Value\n IF (($ffffffff) % (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) % (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_$ffffffff_1",
+      "source": "Value equ (($ffffffff) % (1))\n dd (($ffffffff) % (1)),Value\n IF (($ffffffff) % (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) % (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_$ffffffff_2",
+      "source": "Value equ (($ffffffff) % (2))\n dd (($ffffffff) % (2)),Value\n IF (($ffffffff) % (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) % (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_%_$ffffffff_7",
+      "source": "Value equ (($ffffffff) % (7))\n dd (($ffffffff) % (7)),Value\n IF (($ffffffff) % (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) % (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_%_$7fffffff_-7",
+      "source": "Value equ (($7fffffff) % (-7))\n dd (($7fffffff) % (-7)),Value\n IF (($7fffffff) % (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) % (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_%_$7fffffff_-2",
+      "source": "Value equ (($7fffffff) % (-2))\n dd (($7fffffff) % (-2)),Value\n IF (($7fffffff) % (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) % (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_%_$7fffffff_-1",
+      "source": "Value equ (($7fffffff) % (-1))\n dd (($7fffffff) % (-1)),Value\n IF (($7fffffff) % (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) % (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_$7fffffff_1",
+      "source": "Value equ (($7fffffff) % (1))\n dd (($7fffffff) % (1)),Value\n IF (($7fffffff) % (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) % (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_%_$7fffffff_2",
+      "source": "Value equ (($7fffffff) % (2))\n dd (($7fffffff) % (2)),Value\n IF (($7fffffff) % (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) % (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_%_$7fffffff_7",
+      "source": "Value equ (($7fffffff) % (7))\n dd (($7fffffff) % (7)),Value\n IF (($7fffffff) % (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) % (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_MOD_-7_-7",
+      "source": "Value equ ((-7) MOD (-7))\n dd ((-7) MOD (-7)),Value\n IF ((-7) MOD (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) MOD (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_-7_-2",
+      "source": "Value equ ((-7) MOD (-2))\n dd ((-7) MOD (-2)),Value\n IF ((-7) MOD (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) MOD (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_MOD_-7_-1",
+      "source": "Value equ ((-7) MOD (-1))\n dd ((-7) MOD (-1)),Value\n IF ((-7) MOD (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) MOD (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_-7_1",
+      "source": "Value equ ((-7) MOD (1))\n dd ((-7) MOD (1)),Value\n IF ((-7) MOD (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) MOD (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_-7_2",
+      "source": "Value equ ((-7) MOD (2))\n dd ((-7) MOD (2)),Value\n IF ((-7) MOD (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) MOD (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_MOD_-7_7",
+      "source": "Value equ ((-7) MOD (7))\n dd ((-7) MOD (7)),Value\n IF ((-7) MOD (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) MOD (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_-5_-7",
+      "source": "Value equ ((-5) MOD (-7))\n dd ((-5) MOD (-7)),Value\n IF ((-5) MOD (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) MOD (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "fbfffffffbffffffa5"
+    },
+    {
+      "name": "signed_MOD_-5_-2",
+      "source": "Value equ ((-5) MOD (-2))\n dd ((-5) MOD (-2)),Value\n IF ((-5) MOD (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) MOD (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_MOD_-5_-1",
+      "source": "Value equ ((-5) MOD (-1))\n dd ((-5) MOD (-1)),Value\n IF ((-5) MOD (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) MOD (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_-5_1",
+      "source": "Value equ ((-5) MOD (1))\n dd ((-5) MOD (1)),Value\n IF ((-5) MOD (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) MOD (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_-5_2",
+      "source": "Value equ ((-5) MOD (2))\n dd ((-5) MOD (2)),Value\n IF ((-5) MOD (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) MOD (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_MOD_-5_7",
+      "source": "Value equ ((-5) MOD (7))\n dd ((-5) MOD (7)),Value\n IF ((-5) MOD (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) MOD (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "fbfffffffbffffffa5"
+    },
+    {
+      "name": "signed_MOD_-1_-7",
+      "source": "Value equ ((-1) MOD (-7))\n dd ((-1) MOD (-7)),Value\n IF ((-1) MOD (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) MOD (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_MOD_-1_-2",
+      "source": "Value equ ((-1) MOD (-2))\n dd ((-1) MOD (-2)),Value\n IF ((-1) MOD (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) MOD (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_MOD_-1_-1",
+      "source": "Value equ ((-1) MOD (-1))\n dd ((-1) MOD (-1)),Value\n IF ((-1) MOD (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) MOD (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_-1_1",
+      "source": "Value equ ((-1) MOD (1))\n dd ((-1) MOD (1)),Value\n IF ((-1) MOD (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) MOD (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_-1_2",
+      "source": "Value equ ((-1) MOD (2))\n dd ((-1) MOD (2)),Value\n IF ((-1) MOD (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) MOD (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_MOD_-1_7",
+      "source": "Value equ ((-1) MOD (7))\n dd ((-1) MOD (7)),Value\n IF ((-1) MOD (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) MOD (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_MOD_0_-7",
+      "source": "Value equ ((0) MOD (-7))\n dd ((0) MOD (-7)),Value\n IF ((0) MOD (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) MOD (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_0_-2",
+      "source": "Value equ ((0) MOD (-2))\n dd ((0) MOD (-2)),Value\n IF ((0) MOD (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) MOD (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_0_-1",
+      "source": "Value equ ((0) MOD (-1))\n dd ((0) MOD (-1)),Value\n IF ((0) MOD (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) MOD (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_0_1",
+      "source": "Value equ ((0) MOD (1))\n dd ((0) MOD (1)),Value\n IF ((0) MOD (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) MOD (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_0_2",
+      "source": "Value equ ((0) MOD (2))\n dd ((0) MOD (2)),Value\n IF ((0) MOD (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) MOD (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_0_7",
+      "source": "Value equ ((0) MOD (7))\n dd ((0) MOD (7)),Value\n IF ((0) MOD (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) MOD (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_1_-7",
+      "source": "Value equ ((1) MOD (-7))\n dd ((1) MOD (-7)),Value\n IF ((1) MOD (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) MOD (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.002 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_MOD_1_-2",
+      "source": "Value equ ((1) MOD (-2))\n dd ((1) MOD (-2)),Value\n IF ((1) MOD (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) MOD (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_MOD_1_-1",
+      "source": "Value equ ((1) MOD (-1))\n dd ((1) MOD (-1)),Value\n IF ((1) MOD (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) MOD (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_1_1",
+      "source": "Value equ ((1) MOD (1))\n dd ((1) MOD (1)),Value\n IF ((1) MOD (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) MOD (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_1_2",
+      "source": "Value equ ((1) MOD (2))\n dd ((1) MOD (2)),Value\n IF ((1) MOD (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) MOD (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_MOD_1_7",
+      "source": "Value equ ((1) MOD (7))\n dd ((1) MOD (7)),Value\n IF ((1) MOD (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) MOD (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_MOD_5_-7",
+      "source": "Value equ ((5) MOD (-7))\n dd ((5) MOD (-7)),Value\n IF ((5) MOD (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) MOD (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "05000000050000005a"
+    },
+    {
+      "name": "signed_MOD_5_-2",
+      "source": "Value equ ((5) MOD (-2))\n dd ((5) MOD (-2)),Value\n IF ((5) MOD (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) MOD (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_MOD_5_-1",
+      "source": "Value equ ((5) MOD (-1))\n dd ((5) MOD (-1)),Value\n IF ((5) MOD (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) MOD (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_5_1",
+      "source": "Value equ ((5) MOD (1))\n dd ((5) MOD (1)),Value\n IF ((5) MOD (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) MOD (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_5_2",
+      "source": "Value equ ((5) MOD (2))\n dd ((5) MOD (2)),Value\n IF ((5) MOD (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) MOD (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_MOD_5_7",
+      "source": "Value equ ((5) MOD (7))\n dd ((5) MOD (7)),Value\n IF ((5) MOD (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) MOD (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "05000000050000005a"
+    },
+    {
+      "name": "signed_MOD_7_-7",
+      "source": "Value equ ((7) MOD (-7))\n dd ((7) MOD (-7)),Value\n IF ((7) MOD (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) MOD (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_7_-2",
+      "source": "Value equ ((7) MOD (-2))\n dd ((7) MOD (-2)),Value\n IF ((7) MOD (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) MOD (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_MOD_7_-1",
+      "source": "Value equ ((7) MOD (-1))\n dd ((7) MOD (-1)),Value\n IF ((7) MOD (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) MOD (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_7_1",
+      "source": "Value equ ((7) MOD (1))\n dd ((7) MOD (1)),Value\n IF ((7) MOD (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) MOD (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_7_2",
+      "source": "Value equ ((7) MOD (2))\n dd ((7) MOD (2)),Value\n IF ((7) MOD (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) MOD (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_MOD_7_7",
+      "source": "Value equ ((7) MOD (7))\n dd ((7) MOD (7)),Value\n IF ((7) MOD (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) MOD (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_$80000000_-7",
+      "source": "Value equ (($80000000) MOD (-7))\n dd (($80000000) MOD (-7)),Value\n IF (($80000000) MOD (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) MOD (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "fefffffffeffffffa5"
+    },
+    {
+      "name": "signed_MOD_$80000000_-2",
+      "source": "Value equ (($80000000) MOD (-2))\n dd (($80000000) MOD (-2)),Value\n IF (($80000000) MOD (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) MOD (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_$80000000_1",
+      "source": "Value equ (($80000000) MOD (1))\n dd (($80000000) MOD (1)),Value\n IF (($80000000) MOD (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) MOD (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_$80000000_2",
+      "source": "Value equ (($80000000) MOD (2))\n dd (($80000000) MOD (2)),Value\n IF (($80000000) MOD (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) MOD (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_$80000000_7",
+      "source": "Value equ (($80000000) MOD (7))\n dd (($80000000) MOD (7)),Value\n IF (($80000000) MOD (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) MOD (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "fefffffffeffffffa5"
+    },
+    {
+      "name": "signed_MOD_$ffffffff_-7",
+      "source": "Value equ (($ffffffff) MOD (-7))\n dd (($ffffffff) MOD (-7)),Value\n IF (($ffffffff) MOD (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) MOD (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_MOD_$ffffffff_-2",
+      "source": "Value equ (($ffffffff) MOD (-2))\n dd (($ffffffff) MOD (-2)),Value\n IF (($ffffffff) MOD (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) MOD (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_MOD_$ffffffff_-1",
+      "source": "Value equ (($ffffffff) MOD (-1))\n dd (($ffffffff) MOD (-1)),Value\n IF (($ffffffff) MOD (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) MOD (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_$ffffffff_1",
+      "source": "Value equ (($ffffffff) MOD (1))\n dd (($ffffffff) MOD (1)),Value\n IF (($ffffffff) MOD (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) MOD (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_$ffffffff_2",
+      "source": "Value equ (($ffffffff) MOD (2))\n dd (($ffffffff) MOD (2)),Value\n IF (($ffffffff) MOD (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) MOD (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_MOD_$ffffffff_7",
+      "source": "Value equ (($ffffffff) MOD (7))\n dd (($ffffffff) MOD (7)),Value\n IF (($ffffffff) MOD (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) MOD (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_MOD_$7fffffff_-7",
+      "source": "Value equ (($7fffffff) MOD (-7))\n dd (($7fffffff) MOD (-7)),Value\n IF (($7fffffff) MOD (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) MOD (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_MOD_$7fffffff_-2",
+      "source": "Value equ (($7fffffff) MOD (-2))\n dd (($7fffffff) MOD (-2)),Value\n IF (($7fffffff) MOD (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) MOD (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_MOD_$7fffffff_-1",
+      "source": "Value equ (($7fffffff) MOD (-1))\n dd (($7fffffff) MOD (-1)),Value\n IF (($7fffffff) MOD (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) MOD (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_$7fffffff_1",
+      "source": "Value equ (($7fffffff) MOD (1))\n dd (($7fffffff) MOD (1)),Value\n IF (($7fffffff) MOD (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) MOD (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_MOD_$7fffffff_2",
+      "source": "Value equ (($7fffffff) MOD (2))\n dd (($7fffffff) MOD (2)),Value\n IF (($7fffffff) MOD (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) MOD (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_MOD_$7fffffff_7",
+      "source": "Value equ (($7fffffff) MOD (7))\n dd (($7fffffff) MOD (7)),Value\n IF (($7fffffff) MOD (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) MOD (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_mod_-7_-7",
+      "source": "Value equ ((-7) mod (-7))\n dd ((-7) mod (-7)),Value\n IF ((-7) mod (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) mod (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_-7_-2",
+      "source": "Value equ ((-7) mod (-2))\n dd ((-7) mod (-2)),Value\n IF ((-7) mod (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) mod (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_mod_-7_-1",
+      "source": "Value equ ((-7) mod (-1))\n dd ((-7) mod (-1)),Value\n IF ((-7) mod (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) mod (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_-7_1",
+      "source": "Value equ ((-7) mod (1))\n dd ((-7) mod (1)),Value\n IF ((-7) mod (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) mod (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_-7_2",
+      "source": "Value equ ((-7) mod (2))\n dd ((-7) mod (2)),Value\n IF ((-7) mod (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) mod (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_mod_-7_7",
+      "source": "Value equ ((-7) mod (7))\n dd ((-7) mod (7)),Value\n IF ((-7) mod (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-7) mod (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_-5_-7",
+      "source": "Value equ ((-5) mod (-7))\n dd ((-5) mod (-7)),Value\n IF ((-5) mod (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) mod (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "fbfffffffbffffffa5"
+    },
+    {
+      "name": "signed_mod_-5_-2",
+      "source": "Value equ ((-5) mod (-2))\n dd ((-5) mod (-2)),Value\n IF ((-5) mod (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) mod (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_mod_-5_-1",
+      "source": "Value equ ((-5) mod (-1))\n dd ((-5) mod (-1)),Value\n IF ((-5) mod (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) mod (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_-5_1",
+      "source": "Value equ ((-5) mod (1))\n dd ((-5) mod (1)),Value\n IF ((-5) mod (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) mod (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_-5_2",
+      "source": "Value equ ((-5) mod (2))\n dd ((-5) mod (2)),Value\n IF ((-5) mod (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) mod (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_mod_-5_7",
+      "source": "Value equ ((-5) mod (7))\n dd ((-5) mod (7)),Value\n IF ((-5) mod (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-5) mod (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.002 seconds\n",
+      "hex": "fbfffffffbffffffa5"
+    },
+    {
+      "name": "signed_mod_-1_-7",
+      "source": "Value equ ((-1) mod (-7))\n dd ((-1) mod (-7)),Value\n IF ((-1) mod (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) mod (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_mod_-1_-2",
+      "source": "Value equ ((-1) mod (-2))\n dd ((-1) mod (-2)),Value\n IF ((-1) mod (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) mod (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_mod_-1_-1",
+      "source": "Value equ ((-1) mod (-1))\n dd ((-1) mod (-1)),Value\n IF ((-1) mod (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) mod (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_-1_1",
+      "source": "Value equ ((-1) mod (1))\n dd ((-1) mod (1)),Value\n IF ((-1) mod (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) mod (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_-1_2",
+      "source": "Value equ ((-1) mod (2))\n dd ((-1) mod (2)),Value\n IF ((-1) mod (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) mod (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.003 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_mod_-1_7",
+      "source": "Value equ ((-1) mod (7))\n dd ((-1) mod (7)),Value\n IF ((-1) mod (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((-1) mod (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.010 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_mod_0_-7",
+      "source": "Value equ ((0) mod (-7))\n dd ((0) mod (-7)),Value\n IF ((0) mod (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) mod (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_0_-2",
+      "source": "Value equ ((0) mod (-2))\n dd ((0) mod (-2)),Value\n IF ((0) mod (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) mod (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_0_-1",
+      "source": "Value equ ((0) mod (-1))\n dd ((0) mod (-1)),Value\n IF ((0) mod (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) mod (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.002 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_0_1",
+      "source": "Value equ ((0) mod (1))\n dd ((0) mod (1)),Value\n IF ((0) mod (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) mod (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_0_2",
+      "source": "Value equ ((0) mod (2))\n dd ((0) mod (2)),Value\n IF ((0) mod (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) mod (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_0_7",
+      "source": "Value equ ((0) mod (7))\n dd ((0) mod (7)),Value\n IF ((0) mod (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((0) mod (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_1_-7",
+      "source": "Value equ ((1) mod (-7))\n dd ((1) mod (-7)),Value\n IF ((1) mod (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) mod (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.004 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_mod_1_-2",
+      "source": "Value equ ((1) mod (-2))\n dd ((1) mod (-2)),Value\n IF ((1) mod (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) mod (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_mod_1_-1",
+      "source": "Value equ ((1) mod (-1))\n dd ((1) mod (-1)),Value\n IF ((1) mod (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) mod (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_1_1",
+      "source": "Value equ ((1) mod (1))\n dd ((1) mod (1)),Value\n IF ((1) mod (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) mod (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_1_2",
+      "source": "Value equ ((1) mod (2))\n dd ((1) mod (2)),Value\n IF ((1) mod (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) mod (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_mod_1_7",
+      "source": "Value equ ((1) mod (7))\n dd ((1) mod (7)),Value\n IF ((1) mod (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1) mod (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_mod_5_-7",
+      "source": "Value equ ((5) mod (-7))\n dd ((5) mod (-7)),Value\n IF ((5) mod (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) mod (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "05000000050000005a"
+    },
+    {
+      "name": "signed_mod_5_-2",
+      "source": "Value equ ((5) mod (-2))\n dd ((5) mod (-2)),Value\n IF ((5) mod (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) mod (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_mod_5_-1",
+      "source": "Value equ ((5) mod (-1))\n dd ((5) mod (-1)),Value\n IF ((5) mod (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) mod (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_5_1",
+      "source": "Value equ ((5) mod (1))\n dd ((5) mod (1)),Value\n IF ((5) mod (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) mod (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_5_2",
+      "source": "Value equ ((5) mod (2))\n dd ((5) mod (2)),Value\n IF ((5) mod (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) mod (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_mod_5_7",
+      "source": "Value equ ((5) mod (7))\n dd ((5) mod (7)),Value\n IF ((5) mod (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5) mod (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "05000000050000005a"
+    },
+    {
+      "name": "signed_mod_7_-7",
+      "source": "Value equ ((7) mod (-7))\n dd ((7) mod (-7)),Value\n IF ((7) mod (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) mod (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_7_-2",
+      "source": "Value equ ((7) mod (-2))\n dd ((7) mod (-2)),Value\n IF ((7) mod (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) mod (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_mod_7_-1",
+      "source": "Value equ ((7) mod (-1))\n dd ((7) mod (-1)),Value\n IF ((7) mod (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) mod (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_7_1",
+      "source": "Value equ ((7) mod (1))\n dd ((7) mod (1)),Value\n IF ((7) mod (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) mod (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_7_2",
+      "source": "Value equ ((7) mod (2))\n dd ((7) mod (2)),Value\n IF ((7) mod (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) mod (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_mod_7_7",
+      "source": "Value equ ((7) mod (7))\n dd ((7) mod (7)),Value\n IF ((7) mod (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((7) mod (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_$80000000_-7",
+      "source": "Value equ (($80000000) mod (-7))\n dd (($80000000) mod (-7)),Value\n IF (($80000000) mod (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) mod (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "fefffffffeffffffa5"
+    },
+    {
+      "name": "signed_mod_$80000000_-2",
+      "source": "Value equ (($80000000) mod (-2))\n dd (($80000000) mod (-2)),Value\n IF (($80000000) mod (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) mod (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_$80000000_1",
+      "source": "Value equ (($80000000) mod (1))\n dd (($80000000) mod (1)),Value\n IF (($80000000) mod (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) mod (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_$80000000_2",
+      "source": "Value equ (($80000000) mod (2))\n dd (($80000000) mod (2)),Value\n IF (($80000000) mod (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) mod (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_$80000000_7",
+      "source": "Value equ (($80000000) mod (7))\n dd (($80000000) mod (7)),Value\n IF (($80000000) mod (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($80000000) mod (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "fefffffffeffffffa5"
+    },
+    {
+      "name": "signed_mod_$ffffffff_-7",
+      "source": "Value equ (($ffffffff) mod (-7))\n dd (($ffffffff) mod (-7)),Value\n IF (($ffffffff) mod (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) mod (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_mod_$ffffffff_-2",
+      "source": "Value equ (($ffffffff) mod (-2))\n dd (($ffffffff) mod (-2)),Value\n IF (($ffffffff) mod (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) mod (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_mod_$ffffffff_-1",
+      "source": "Value equ (($ffffffff) mod (-1))\n dd (($ffffffff) mod (-1)),Value\n IF (($ffffffff) mod (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) mod (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_$ffffffff_1",
+      "source": "Value equ (($ffffffff) mod (1))\n dd (($ffffffff) mod (1)),Value\n IF (($ffffffff) mod (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) mod (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_$ffffffff_2",
+      "source": "Value equ (($ffffffff) mod (2))\n dd (($ffffffff) mod (2)),Value\n IF (($ffffffff) mod (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) mod (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_mod_$ffffffff_7",
+      "source": "Value equ (($ffffffff) mod (7))\n dd (($ffffffff) mod (7)),Value\n IF (($ffffffff) mod (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff) mod (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "signed_mod_$7fffffff_-7",
+      "source": "Value equ (($7fffffff) mod (-7))\n dd (($7fffffff) mod (-7)),Value\n IF (($7fffffff) mod (-7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) mod (-7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_mod_$7fffffff_-2",
+      "source": "Value equ (($7fffffff) mod (-2))\n dd (($7fffffff) mod (-2)),Value\n IF (($7fffffff) mod (-2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) mod (-2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_mod_$7fffffff_-1",
+      "source": "Value equ (($7fffffff) mod (-1))\n dd (($7fffffff) mod (-1)),Value\n IF (($7fffffff) mod (-1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) mod (-1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_$7fffffff_1",
+      "source": "Value equ (($7fffffff) mod (1))\n dd (($7fffffff) mod (1)),Value\n IF (($7fffffff) mod (1))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) mod (1))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "signed_mod_$7fffffff_2",
+      "source": "Value equ (($7fffffff) mod (2))\n dd (($7fffffff) mod (2)),Value\n IF (($7fffffff) mod (2))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) mod (2))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "signed_mod_$7fffffff_7",
+      "source": "Value equ (($7fffffff) mod (7))\n dd (($7fffffff) mod (7)),Value\n IF (($7fffffff) mod (7))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff) mod (7))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_0",
+      "source": "Value equ (5%2)\n dd (5%2),Value\n IF (5%2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5%2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.003 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_1",
+      "source": "Value equ (5 %2)\n dd (5 %2),Value\n IF (5 %2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5 %2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_2",
+      "source": "Value equ (5% 2)\n dd (5% 2),Value\n IF (5% 2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5% 2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_3",
+      "source": "Value equ (5 % 2)\n dd (5 % 2),Value\n IF (5 % 2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5 % 2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.002 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_4",
+      "source": "Value equ (5%10)\n dd (5%10),Value\n IF (5%10)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5%10)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "05000000050000005a"
+    },
+    {
+      "name": "expression_5",
+      "source": "Value equ (5%%10)\n dd (5%%10),Value\n IF (5%%10)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5%%10)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_6",
+      "source": "Value equ (5 % %10)\n dd (5 % %10),Value\n IF (5 % %10)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5 % %10)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_7",
+      "source": "Value equ (%101%10)\n dd (%101%10),Value\n IF (%101%10)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(%101%10)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "05000000050000005a"
+    },
+    {
+      "name": "expression_8",
+      "source": "Value equ (%101%%10)\n dd (%101%%10),Value\n IF (%101%%10)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(%101%%10)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_9",
+      "source": "Value equ (%101 % %10)\n dd (%101 % %10),Value\n IF (%101 % %10)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(%101 % %10)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_10",
+      "source": "Value equ ((%101)%(%10))\n dd ((%101)%(%10)),Value\n IF ((%101)%(%10))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((%101)%(%10))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_11",
+      "source": "Value equ (20%6%3)\n dd (20%6%3),Value\n IF (20%6%3)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(20%6%3)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "02000000020000005a"
+    },
+    {
+      "name": "expression_12",
+      "source": "Value equ (20/6%2)\n dd (20/6%2),Value\n IF (20/6%2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(20/6%2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_13",
+      "source": "Value equ (20%6*3)\n dd (20%6*3),Value\n IF (20%6*3)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(20%6*3)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "06000000060000005a"
+    },
+    {
+      "name": "expression_14",
+      "source": "Value equ (20*6%7)\n dd (20*6%7),Value\n IF (20*6%7)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(20*6%7)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_15",
+      "source": "Value equ (1+8%3)\n dd (1+8%3),Value\n IF (1+8%3)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(1+8%3)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "03000000030000005a"
+    },
+    {
+      "name": "expression_16",
+      "source": "Value equ (8%3+1)\n dd (8%3+1),Value\n IF (8%3+1)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(8%3+1)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "03000000030000005a"
+    },
+    {
+      "name": "expression_17",
+      "source": "Value equ (1<<5%3)\n dd (1<<5%3),Value\n IF (1<<5%3)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(1<<5%3)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "04000000040000005a"
+    },
+    {
+      "name": "expression_18",
+      "source": "Value equ (8%3<<1)\n dd (8%3<<1),Value\n IF (8%3<<1)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(8%3<<1)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.002 seconds\n",
+      "hex": "04000000040000005a"
+    },
+    {
+      "name": "expression_19",
+      "source": "Value equ (8%3==2)\n dd (8%3==2),Value\n IF (8%3==2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(8%3==2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "expression_20",
+      "source": "Value equ (8%3&1)\n dd (8%3&1),Value\n IF (8%3&1)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(8%3&1)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "expression_21",
+      "source": "Value equ (8%3|1)\n dd (8%3|1),Value\n IF (8%3|1)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(8%3|1)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "03000000030000005a"
+    },
+    {
+      "name": "expression_22",
+      "source": "Value equ (8%3^1)\n dd (8%3^1),Value\n IF (8%3^1)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(8%3^1)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "03000000030000005a"
+    },
+    {
+      "name": "expression_23",
+      "source": "Value equ (-5%2)\n dd (-5%2),Value\n IF (-5%2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(-5%2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "expression_24",
+      "source": "Value equ (5%-2)\n dd (5%-2),Value\n IF (5%-2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5%-2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_25",
+      "source": "Value equ (-5%-2)\n dd (-5%-2),Value\n IF (-5%-2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(-5%-2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "expression_26",
+      "source": "Value equ (~5%3)\n dd (~5%3),Value\n IF (~5%3)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(~5%3)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "expression_27",
+      "source": "Value equ (!5%3)\n dd (!5%3),Value\n IF (!5%3)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(!5%3)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "expression_28",
+      "source": "Value equ ((1<<31)%3)\n dd ((1<<31)%3),Value\n IF ((1<<31)%3)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((1<<31)%3)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.004 seconds\n",
+      "hex": "fefffffffeffffffa5"
+    },
+    {
+      "name": "expression_29",
+      "source": "Value equ (($7fffffff+1)%3)\n dd (($7fffffff+1)%3),Value\n IF (($7fffffff+1)%3)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff+1)%3)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "fefffffffeffffffa5"
+    },
+    {
+      "name": "expression_30",
+      "source": "Value equ (($ffffffff+6)%3)\n dd (($ffffffff+6)%3),Value\n IF (($ffffffff+6)%3)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($ffffffff+6)%3)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "02000000020000005a"
+    },
+    {
+      "name": "expression_31",
+      "source": "Value equ (($7fffffff*$7fffffff)%3)\n dd (($7fffffff*$7fffffff)%3),Value\n IF (($7fffffff*$7fffffff)%3)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(($7fffffff*$7fffffff)%3)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_32",
+      "source": "Value equ (1'2%5)\n dd (1'2%5),Value\n IF (1'2%5)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(1'2%5)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "02000000020000005a"
+    },
+    {
+      "name": "expression_33",
+      "source": "Value equ (%1'01%%1'0)\n dd (%1'01%%1'0),Value\n IF (%1'01%%1'0)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(%1'01%%1'0)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_34",
+      "source": "Value equ (0xFFFFFFFF%2)\n dd (0xFFFFFFFF%2),Value\n IF (0xFFFFFFFF%2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(0xFFFFFFFF%2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "expression_35",
+      "source": "Value equ ((5%2)%2)\n dd ((5%2)%2),Value\n IF ((5%2)%2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==((5%2)%2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "expression_36",
+      "source": "Value equ (5%(2%3))\n dd (5%(2%3)),Value\n IF (5%(2%3))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5%(2%3))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "01000000010000005a"
+    },
+    {
+      "name": "refusal_0",
+      "source": "Value equ (5%0)\n dd (5%0),Value\n IF (5%0)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5%0)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\ninput.asm(2): error: Division by zero\ninput.asm(3): error: Division by zero\ninput.asm(8): error: Division by zero\nPass 3 complete\nErrors: 4, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "refusal_1",
+      "source": "Value equ (0%0)\n dd (0%0),Value\n IF (0%0)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(0%0)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\ninput.asm(2): error: Division by zero\ninput.asm(3): error: Division by zero\ninput.asm(8): error: Division by zero\nPass 3 complete\nErrors: 4, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "refusal_2",
+      "source": "Value equ (5 MOD 0)\n dd (5 MOD 0),Value\n IF (5 MOD 0)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5 MOD 0)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\ninput.asm(2): error: Division by zero\ninput.asm(3): error: Division by zero\ninput.asm(8): error: Division by zero\nPass 3 complete\nErrors: 4, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "refusal_3",
+      "source": "Value equ (5 mod 0)\n dd (5 mod 0),Value\n IF (5 mod 0)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5 mod 0)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\ninput.asm(2): error: Division by zero\ninput.asm(3): error: Division by zero\ninput.asm(8): error: Division by zero\nPass 3 complete\nErrors: 4, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "refusal_4",
+      "source": "Value equ (1 || (5%0))\n dd (1 || (5%0)),Value\n IF (1 || (5%0))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(1 || (5%0))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\ninput.asm(2): error: Division by zero\ninput.asm(3): error: Division by zero\ninput.asm(8): error: Division by zero\nPass 3 complete\nErrors: 4, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffffffffffa5"
+    },
+    {
+      "name": "refusal_5",
+      "source": "Value equ (0 && (5%0))\n dd (0 && (5%0)),Value\n IF (0 && (5%0))<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(0 && (5%0))\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\ninput.asm(2): error: Division by zero\ninput.asm(3): error: Division by zero\ninput.asm(8): error: Division by zero\nPass 3 complete\nErrors: 4, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "refusal_6",
+      "source": "Value equ (5%)\n dd (5%),Value\n IF (5%)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5%)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Expression error:\ninput.asm(2): error: [DWORD] Syntax error: ,Value\ninput.asm(3): error: Syntax error: )<0\ninput.asm(3): error: Unexpected: <0\ninput.asm(5): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(7): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(8): error: [ASSERT] Syntax error:  Value==(5%)\nPass 3 complete\nErrors: 7, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n",
+      "hex": "a55a"
+    },
+    {
+      "name": "refusal_7",
+      "source": "Value equ (%2)\n dd (%2),Value\n IF (%2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(%2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Digit not in base: %2)\ninput.asm(2): error: Digit not in base: %2),Value\ninput.asm(3): error: Digit not in base: %2)<0\ninput.asm(5): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(7): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(8): error: Digit not in base: %2)\nPass 3 complete\nErrors: 6, warnings: 0, compiled: 9 lines, work time: 0.000 seconds\n",
+      "hex": "a55a"
+    },
+    {
+      "name": "refusal_8",
+      "source": "Value equ (5%%%10)\n dd (5%%%10),Value\n IF (5%%%10)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5%%%10)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: %%10)\ninput.asm(2): error: Syntax error: %%10),Value\ninput.asm(3): error: Syntax error: %%10)<0\ninput.asm(5): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(7): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(8): error: Syntax error: %%10)\nPass 3 complete\nErrors: 6, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n",
+      "hex": "a55a"
+    },
+    {
+      "name": "refusal_9",
+      "source": "Value equ (5 Mod 2)\n dd (5 Mod 2),Value\n IF (5 Mod 2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5 Mod 2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: ')' expected\ninput.asm(1): error: Expression error: Mod 2)\ninput.asm(1): error: Unexpected: Mod 2)\ninput.asm(2): error: ')' expected\ninput.asm(2): error: [DWORD] Syntax error: Mod 2),Value\ninput.asm(3): error: ')' expected\ninput.asm(3): error: Unexpected: Mod 2)<0\ninput.asm(5): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(7): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(8): error: ')' expected\ninput.asm(8): error: [ASSERT] Syntax error:  Value==(5 Mod 2)\nPass 3 complete\nErrors: 11, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n",
+      "hex": "a55a"
+    },
+    {
+      "name": "refusal_10",
+      "source": "Value equ (5 mOd 2)\n dd (5 mOd 2),Value\n IF (5 mOd 2)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5 mOd 2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: ')' expected\ninput.asm(1): error: Expression error: mOd 2)\ninput.asm(1): error: Unexpected: mOd 2)\ninput.asm(2): error: ')' expected\ninput.asm(2): error: [DWORD] Syntax error: mOd 2),Value\ninput.asm(3): error: ')' expected\ninput.asm(3): error: Unexpected: mOd 2)<0\ninput.asm(5): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(7): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(8): error: ')' expected\ninput.asm(8): error: [ASSERT] Syntax error:  Value==(5 mOd 2)\nPass 3 complete\nErrors: 11, warnings: 0, compiled: 9 lines, work time: 0.000 seconds\n",
+      "hex": "a55a"
+    },
+    {
+      "name": "refusal_11",
+      "source": "Value equ (5%4294967296)\n dd (5%4294967296),Value\n IF (5%4294967296)<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(5%4294967296)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Overflow: 4294967296)\ninput.asm(2): error: Overflow: 4294967296),Value\ninput.asm(3): error: Overflow: 4294967296)<0\ninput.asm(8): error: Overflow: 4294967296)\nPass 3 complete\nErrors: 4, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "00000000000000005a"
+    },
+    {
+      "name": "original",
+      "source": " ASSERT (5 % 2)==1\n db 5 % 2,%101\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "0105"
+    },
+    {
+      "name": "pc",
+      "source": " org 5\nstart: db $%2\n ASSERT ($-start)%2==1\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 4 lines, work time: 0.000 seconds\n",
+      "hex": "01"
+    },
+    {
+      "name": "symbols",
+      "source": "MOD equ 3\nmod equ 4\nMODX equ 5\n dd MOD,mod,MODX,8 MOD MOD,9 mod mod\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\ninput.asm(2): warning[opkeyword]: Label collides with one of the operator keywords, try capitalizing it or other name: mod\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 5 lines, work time: 0.000 seconds\n",
+      "hex": "0300000004000000050000000200000001000000"
+    },
+    {
+      "name": "define",
+      "source": " DEFINE VALUE 5\n DEFINE DIVISOR %10\n db VALUE%DIVISOR\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 4 lines, work time: 0.001 seconds\n",
+      "hex": "01"
+    },
+    {
+      "name": "prefix_define",
+      "source": " DEFINE DIGITS 101\n db %DIGITS\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "05"
+    },
+    {
+      "name": "rhs_define",
+      "source": " DEFINE FF 7\n db 5%FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "05"
+    },
+    {
+      "name": "macro",
+      "source": " MACRO emit x,y\n db x%y\n ENDM\n emit 5,%10\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 7 lines, work time: 0.001 seconds\n",
+      "hex": "01"
+    },
+    {
+      "name": "struct",
+      "source": " STRUCT S\nmember WORD 7%3\nflag BYTE 8 mod 3\n ENDS\nthing S {8%3,7%3}\n ASSERT S==3\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 7 lines, work time: 0.001 seconds\n",
+      "hex": "020001"
+    },
+    {
+      "name": "binary",
+      "source": " db %101,5%10,5%%10,(5)%2,'%'\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "0505010125"
+    },
+    {
+      "name": "forward",
+      "source": " dd Later%2\nLater equ 5\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "01000000"
+    }
+  ]
+}
