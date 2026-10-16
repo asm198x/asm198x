@@ -211,7 +211,7 @@ fn tree_hash(root: &Path, files: &[String], excluded: &BTreeSet<String>) -> Resu
     let mut total = 0;
     for file in files.iter().filter(|f| !excluded.contains(*f)) {
         let path = within(root, file)?;
-        let (length, hash) = process::digest(&path, process::MAX_ARTIFACT)?;
+        let (length, hash) = process::digest(&path, 512 * 1024 * 1024)?;
         total += length;
         if total > 512 * 1024 * 1024 {
             return Err("source tree exceeds 512 MiB".into());
@@ -632,17 +632,23 @@ fn target_audit(
                 &watched,
             )?;
             let mut failure = if !process.succeeded() {
+                let streams = format!("{}{}", process.stderr, process.stdout);
+                let reason = process.failure.as_deref().unwrap_or_else(|| {
+                    streams
+                        .lines()
+                        .find(|line| {
+                            let line = line.to_ascii_lowercase();
+                            ["error", "invalid", "unknown", "unsupported"]
+                                .iter()
+                                .any(|word| line.contains(word))
+                        })
+                        .or_else(|| streams.lines().find(|line| !line.trim().is_empty()))
+                        .unwrap_or("process exited unsuccessfully")
+                });
                 Some(format!(
-                    "{side} {} step {} failed: {}",
+                    "{side} {} step {} failed: {reason}",
                     step.stage,
-                    index + 1,
-                    process.failure.as_deref().unwrap_or(
-                        process
-                            .stderr
-                            .lines()
-                            .find(|line| line.to_ascii_lowercase().contains("error"))
-                            .unwrap_or("nonzero process exit")
-                    )
+                    index + 1
                 ))
             } else {
                 watched
@@ -699,7 +705,7 @@ fn target_audit(
     }
     for pair in &plan.compare {
         let reference = artifact(&native, &pair.reference, true)?;
-        let assembler = artifact(&asm, &pair.assembler, false)?;
+        let assembler = artifact(&asm, &pair.assembler, true)?;
         let equal = reference.length == assembler.length && reference.sha256 == assembler.sha256;
         record.comparisons.push(Pair {
             reference,
