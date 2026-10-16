@@ -1,0 +1,1292 @@
+{
+  "source_lock": {
+    "schema_version": 1,
+    "kind": "producer-source-lock",
+    "signed": false,
+    "source_commit": "46cedb445a01f8fefd9d2a96d63961414036fcf4",
+    "committed_lock_sha256": "a249badd5d4855f1071caf88b54ab8faaeb739fa5605de256319c534903009de",
+    "before_lock_sha256": "a249badd5d4855f1071caf88b54ab8faaeb739fa5605de256319c534903009de",
+    "after_lock_sha256": "a249badd5d4855f1071caf88b54ab8faaeb739fa5605de256319c534903009de",
+    "target": "x86_64-apple-darwin",
+    "archive": "asm198x-x86_64-apple-darwin.tar.xz",
+    "archive_sha256": "d1588919b26dfbb52d2db9cedfaa1ab1629dc1f560f3a321bcc5eaa66e5055fd",
+    "executable_sha256": "366aee2c3818bb935364b36dd5bbf1f0640dc87304e0ed51011897253a0b459f",
+    "version": "0.0.67",
+    "build": {
+      "job": "build-local-artifacts",
+      "run_id": "38887216141",
+      "run_attempt": "1"
+    },
+    "command": [
+      "dist",
+      "build",
+      "--tag=asm198x-v0.0.67",
+      "--print=linkage",
+      "--output-format=json",
+      "--artifacts=local",
+      "--target=x86_64-apple-darwin"
+    ],
+    "compiled_dependency_graph": "unknown"
+  },
+  "source_lock_scope": "verified-producer-lock",
+  "kind": "candidate",
+  "version": "0.0.67",
+  "parsed_plan_sha256": "2a045a0e3669847868f597ddb7ef086edd56b93eaca2a3967c61495c0a93b031",
+  "checkout_commit": "46cedb445a01f8fefd9d2a96d63961414036fcf4",
+  "target": "x86_64-apple-darwin",
+  "host": {
+    "platform": "darwin",
+    "arch": "x64",
+    "release": "24.6.0",
+    "node": "v24.19.0",
+    "github_run": "38887216141",
+    "github_attempt": "1"
+  },
+  "archive": "asm198x-x86_64-apple-darwin.tar.xz",
+  "archive_sha256": "d1588919b26dfbb52d2db9cedfaa1ab1629dc1f560f3a321bcc5eaa66e5055fd",
+  "executable_sha256": "366aee2c3818bb935364b36dd5bbf1f0640dc87304e0ed51011897253a0b459f",
+  "checksum_mutation_rejected": true,
+  "fixture": {
+    "commit": "35b4968be3bdd26804a5d195557d1225497a0358",
+    "files": {
+      "LICENSE": "62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203",
+      "helloworld.asm": "9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5",
+      "libs/loader.asm": "32b0dfd80eacbbdfa69774280122d9c7f115fe0602a14bc5d630b24e08cd82cc",
+      "libs/screen.asm": "d33fbb4f0d549567438138efa38adbb4eb154aa17d6e1c0dee496f065cf469c6"
+    }
+  },
+  "qualified": true,
+  "results": [
+    {
+      "name": "archive_identity",
+      "status": "pass",
+      "runs": []
+    },
+    {
+      "name": "version",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--version"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x v0.0.67\n"
+        }
+      ]
+    },
+    {
+      "name": "reference_bytes",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "acme",
+            "good.s",
+            "-o",
+            "first.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> first.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "determinism",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "acme",
+            "good.s",
+            "-o",
+            "second.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> second.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "structured_success",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "acme",
+            "--message-format=json",
+            "good.s",
+            "-o",
+            "json.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[169,5,96],\"origin\":32768,\"symbols\":{\"start\":32768},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[{\"name\":\"start\",\"kind\":\"label\",\"section\":0,\"offset\":0}],\"lines\":[{\"line\":3,\"offset\":0,\"length\":2},{\"line\":4,\"offset\":2,\"length\":1}],\"cycles\":[{\"line\":3,\"offset\":0,\"base\":2,\"page_cross\":0,\"branch_taken\":0},{\"line\":4,\"offset\":2,\"base\":6,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"good.s\"]}\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "structured_failure",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "acme",
+            "bad.s",
+            "-o",
+            "bad.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: bad.s:2:6: error: value 4095 does not fit in a byte\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "acme",
+            "--message-format=json",
+            "bad.s",
+            "-o",
+            "bad.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":6,\"expansion_frames\":[],\"path\":\"bad.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 4095 does not fit in a byte\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "preserve_previous_outputs",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "acme",
+            "bad.s",
+            "-o",
+            "previous.bin",
+            "--debug=previous.debug198x",
+            "--sym=previous.sym",
+            "--listing=previous.lst"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: bad.s:2:6: error: value 4095 does not fit in a byte\n"
+        }
+      ]
+    },
+    {
+      "name": "missing_input_json",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--message-format=json",
+            "missing.s",
+            "-o",
+            "missing.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"cannot read missing.s: No such file or directory (os error 2)\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "unknown_cpu",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmo",
+            "--cpu",
+            "nonsense",
+            "--message-format=json",
+            "z80.s",
+            "-o",
+            "unknown_cpu.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"unknown CPU target `nonsense`\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "incompatible_cpu",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmo",
+            "--cpu",
+            "68000",
+            "--message-format=json",
+            "z80.s",
+            "-o",
+            "incompatible_cpu.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"CPU target `68000` is incompatible with dialect `pasmo`\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "hardlink_source",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "linked.s",
+            "-o",
+            "linked.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: refusing to overwrite input linked.s with the primary image at linked.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "hardlink_sidecar",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "sidecar.s",
+            "-o",
+            "sidecar.bin",
+            "--sym=sidecar.sym"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: refusing to overwrite the input with the symbol table — pass an explicit `=<path>`\n"
+        }
+      ]
+    },
+    {
+      "name": "formatter_container",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--prg",
+            "good.s",
+            "-o",
+            "formatter_container.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: container output options apply to assembly, not `fmt`\n"
+        }
+      ]
+    },
+    {
+      "name": "formatter_origin",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--org",
+            "0",
+            "good.s",
+            "-o",
+            "formatter_origin.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: `--org` is a disassembly option, not valid with `fmt`\n"
+        }
+      ]
+    },
+    {
+      "name": "lua",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "lua.s",
+            "-o",
+            "lua.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $0000 -> lua.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "disasm_options",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "disasm",
+            "--cpu",
+            "z80",
+            "raw-z80.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "        org $0000\n        NOP\n",
+          "stderr": "disassembled 1 byte(s) at $0000\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "disasm",
+            "--cpu",
+            "z80",
+            "raw-z80.bin",
+            "-o",
+            "listing.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: `-o/--output` is not valid with ordinary `disasm`\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "disasm",
+            "--cpu",
+            "z80",
+            "raw-z80.bin",
+            "--map=listing.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: `--debug`/`--sym`/`--listing` apply to an assembly run, not `--fmt`/`--disasm`\n"
+        }
+      ]
+    },
+    {
+      "name": "disasm_wide_origin",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "disasm",
+            "--cpu",
+            "68000",
+            "--org",
+            "0xff8000",
+            "m68k.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "\tbra.s $FF8004\n",
+          "stderr": "disassembled 2 byte(s) at $FF8000\n"
+        }
+      ]
+    },
+    {
+      "name": "pasmo_nested_repeat",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmo",
+            "nested.s",
+            "-o",
+            "nested.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 7 byte(s) at $8000 -> nested.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmonext",
+            "nested.s",
+            "-o",
+            "nested.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 7 byte(s) at $8000 -> nested.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "quoted_data_native",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 14 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[97,59,98,44,99,59,42,97,39,98,59,99,120,7],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":7},{\"line\":3,\"offset\":7,\"length\":7}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":14,\"free\":65522,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmonext",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmonext",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[34,7],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":2}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[44,7],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":2}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 10 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[34,97,39,59,47,47,98,59,44,7],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":10}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":10,\"free\":65526,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 14 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[97,47,47,98,59,99,7,100,59,101,47,47,102,8],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":7},{\"line\":3,\"offset\":7,\"length\":7}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":14,\"free\":65522,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[92,7],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":2}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 6 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[97,92,113,59,98,7],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":6}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":6,\"free\":65530,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "quoted_data_format",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "pasmo",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "pasmo",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmo",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 14 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "pasmonext",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "pasmonext",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmonext",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "pasmo",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "pasmo",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmo",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 10 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 14 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 6 byte(s) at $8000 -> formatted.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "conversion_quoted_data",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "convert",
+            "--from",
+            "pasmo",
+            "--to",
+            "sjasmplus",
+            "convert.s",
+            "-o",
+            "converted.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "converted convert.s (pasmo -> sjasmplus, verified byte-identical) -> converted.s\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "converted.s",
+            "-o",
+            "converted.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 9 byte(s) at $8000 -> converted.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "conversion_file_scope",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmo",
+            "convert.s",
+            "-o",
+            "included.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> included.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "convert",
+            "--from",
+            "pasmo",
+            "--to",
+            "sjasmplus",
+            "convert.s",
+            "-o",
+            "converted.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: convert.s: line 2: the input does not assemble under pasmo: cannot resolve `include \"child.inc\"` here — conversion accepts one self-contained source file and does not resolve INCLUDE or INCBIN files; replace file directives with source or data directives before converting\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "pasmo",
+            "convert.s",
+            "-o",
+            "included.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> included.bin\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "convert",
+            "--from",
+            "pasmo",
+            "--to",
+            "sjasmplus",
+            "convert.s",
+            "-o",
+            "converted.s"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: convert.s: line 2: the input does not assemble under pasmo: cannot resolve `incbin \"data.bin\"` here — conversion accepts one self-contained source file and does not resolve INCLUDE or INCBIN files; replace file directives with source or data directives before converting\n"
+        }
+      ]
+    },
+    {
+      "name": "unsupported_escape",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80",
+            "--message-format",
+            "human",
+            "escaped.s",
+            "-o",
+            "escaped.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: escaped.s:2: error: SjASMPlus string escape decoding is not supported yet; use numeric data values for escaped bytes\nFor more information: asm198x --explain UnsupportedFeature\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80",
+            "--message-format",
+            "json",
+            "escaped.s",
+            "-o",
+            "escaped.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":0,\"expansion_frames\":[],\"path\":\"escaped.s\"},\"code\":\"UnsupportedFeature\",\"severity\":\"Error\",\"message\":\"SjASMPlus string escape decoding is not supported yet; use numeric data values for escaped bytes\",\"fix\":null}]\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "--message-format",
+            "human",
+            "escaped.s",
+            "-o",
+            "escaped.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: escaped.s:2: error: SjASMPlus string escape decoding is not supported yet; use numeric data values for escaped bytes\nFor more information: asm198x --explain UnsupportedFeature\n"
+        },
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "--message-format",
+            "json",
+            "escaped.s",
+            "-o",
+            "escaped.bin"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":0,\"expansion_frames\":[],\"path\":\"escaped.s\"},\"code\":\"UnsupportedFeature\",\"severity\":\"Error\",\"message\":\"SjASMPlus string escape decoding is not supported yet; use numeric data values for escaped bytes\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "upstream_project",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/asm198x",
+            "--dialect",
+            "acme",
+            "--prg",
+            "helloworld.asm",
+            "-o",
+            "hello.prg"
+          ],
+          "cwd": "/var/folders/20/jp1_0n3n7kndh6rnbqb5344m0000gn/T/asm198x-candidate-a1HDGU/upstream",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2081 byte(s) -> hello.prg (load $0801)\n"
+        }
+      ]
+    }
+  ]
+}

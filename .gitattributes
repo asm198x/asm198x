@@ -13,3 +13,6 @@ Cargo.lock text eol=lf
 
 # Preserve exact retained conversion-audit bytes across checkout platforms.
 docs/plans/2026-10-16-conversion-workflow-audit/** text eol=lf
+
+# Preserve exact retained 0.0.67 qualification bytes across checkout platforms.
+docs/plans/2026-10-16-release-0067-checkpoint/** text eol=lf

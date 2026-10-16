@@ -1,0 +1,7 @@
+{
+  "kind": "candidate",
+  "target": "aarch64-apple-darwin",
+  "qualified": false,
+  "results": [],
+  "error": "SHA-256 mismatch for asm198x-aarch64-apple-darwin.tar.xz"
+}
