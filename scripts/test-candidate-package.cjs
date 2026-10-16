@@ -8,6 +8,7 @@ const { verifyChecksum, runChecked } = require('../.github/actions/setup/index.c
 const { targets, sha, packageIdentity, nativeTarget, binaryTarget, archiveIdentity } = require('./package-identity.cjs');
 const { verifyReceipt, sourceIdentity } = require('./build-locked-package.cjs');
 const requiredCases = ['archive_identity', 'version', 'reference_bytes', 'determinism', 'structured_success', 'structured_failure', 'preserve_previous_outputs', 'missing_input_json', 'unknown_cpu', 'incompatible_cpu', 'hardlink_source', 'hardlink_sidecar', 'formatter_container', 'formatter_origin', 'lua', 'upstream_project'];
+requiredCases.push('disasm_options', 'disasm_wide_origin', 'pasmo_nested_repeat', 'quoted_data_native', 'quoted_data_format', 'conversion_quoted_data', 'conversion_file_scope', 'unsupported_escape');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -125,6 +126,97 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
     test('lua', () => {
       write('lua.s', ' LUA ALLPASS\n sj.add_byte(7)\n ENDLUA\n');
       assert.equal(run(['--dialect', 'sjasmplus', 'lua.s', '-o', 'lua.bin']).status, 0); assert.deepEqual(read('lua.bin'), Buffer.from([7]));
+    });
+    const nativeCase = (file, name, dialect) => {
+      const data = JSON.parse(fs.readFileSync(path.join(__dirname, '../crates/asm198x/tests/fixtures', file + '.json'), 'utf8'));
+      const fact = data.cases.find(c => (c.name === name || c.escape === name) && (!dialect || c.dialect === dialect));
+      assert(fact && fact.exit === 0 && typeof fact.source === 'string' && fact.source.trim());
+      assert.match(fact.hex, /^(?:[a-f0-9]{2})+$/i);
+      return fact;
+    };
+    const quoted = [
+      ['pasmo', [], nativeCase('pasmo-quoted-semicolon', 'mixed')],
+      ['pasmonext', [], nativeCase('pasmo-character-data-lists', 'quote', 'pasmo')],
+      ['pasmo', [], nativeCase('pasmo-character-data-lists', 'comma', 'pasmo')],
+      ['sjasmplus', [], nativeCase('sjasmplus-quoted-comments', 'mixed')],
+      ['sjasmplus', ['--cpu', 'z80n'], nativeCase('sjasmplus-quoted-comments', 'comment_order')],
+      ['sjasmplus', [], nativeCase('sjasmplus-quoted-comments', 'backslash_character')],
+      ['sjasmplus', [], nativeCase('sjasmplus-escape-boundaries', '\\q')],
+    ];
+    test('disasm_options', () => {
+      write('raw-z80.bin', Buffer.from([0]));
+      const ordinary = run(['disasm', '--cpu', 'z80', 'raw-z80.bin']);
+      assert.equal(ordinary.status, 0); assert.match(ordinary.stdout, /nop/i);
+      write('listing.s', 'previous source');
+      for (const flags of [['-o', 'listing.s'], ['--map=listing.s']]) {
+        const p = run(['disasm', '--cpu', 'z80', 'raw-z80.bin', ...flags]); reject(p);
+        assert.equal(p.stdout, ''); assert.match(p.stderr, /disasm/);
+        assert.equal(read('listing.s').toString(), 'previous source');
+      }
+    });
+    test('disasm_wide_origin', () => {
+      write('m68k.bin', Buffer.from('4e71', 'hex'));
+      const p = run(['disasm', '--cpu', '68000', '--org', '0xff8000', 'm68k.bin']);
+      assert.equal(p.status, 0); assert.match(p.stdout, /ff8000/i); assert.match(p.stdout, /nop/i);
+      assert.match(p.stderr, /ff8000/i); assert.deepEqual(read('m68k.bin'), Buffer.from('4e71', 'hex'));
+    });
+    test('pasmo_nested_repeat', () => {
+      const fact = nativeCase('pasmo-nested-repetition', 'two_levels');
+      write('nested.s', fact.source);
+      for (const dialect of ['pasmo', 'pasmonext']) {
+        assert.equal(run(['--dialect', dialect, 'nested.s', '-o', 'nested.bin']).status, 0);
+        assert.deepEqual(read('nested.bin'), Buffer.from(fact.hex, 'hex'));
+      }
+      assert.equal(read('nested.s').toString(), fact.source);
+    });
+    test('quoted_data_native', () => {
+      for (const [dialect, flags, fact] of quoted) for (const mode of ['human', 'json']) {
+        write('quoted.s', fact.source); write('quoted.bin', 'previous image');
+        const p = run(['--dialect', dialect, ...flags, '--message-format', mode, 'quoted.s', '-o', 'quoted.bin']);
+        assert.equal(p.status, 0); assert.deepEqual(read('quoted.bin'), Buffer.from(fact.hex, 'hex'));
+        if (mode === 'json') { assert.equal(p.stderr, ''); assert.deepEqual(JSON.parse(p.stdout).bytes, [...read('quoted.bin')]); }
+        assert.equal(read('quoted.s').toString(), fact.source);
+      }
+    });
+    test('quoted_data_format', () => {
+      for (const [dialect, flags, fact] of quoted) {
+        write('quoted.s', fact.source);
+        assert.equal(run(['fmt', '--dialect', dialect, ...flags, 'quoted.s', '-o', 'formatted.s']).status, 0);
+        assert.equal(run(['fmt', '--dialect', dialect, ...flags, 'formatted.s', '-o', 'twice.s']).status, 0);
+        assert.deepEqual(read('formatted.s'), read('twice.s'));
+        assert.equal(run(['--dialect', dialect, ...flags, 'formatted.s', '-o', 'formatted.bin']).status, 0);
+        assert.deepEqual(read('formatted.bin'), Buffer.from(fact.hex, 'hex'));
+        assert.equal(read('quoted.s').toString(), fact.source);
+      }
+    });
+    test('conversion_quoted_data', () => {
+      const fact = nativeCase('pasmo-quoted-semicolon', 'double'); write('convert.s', fact.source);
+      assert.equal(run(['convert', '--from', 'pasmo', '--to', 'sjasmplus', 'convert.s', '-o', 'converted.s']).status, 0);
+      assert.equal(run(['--dialect', 'sjasmplus', 'converted.s', '-o', 'converted.bin']).status, 0);
+      assert.deepEqual(read('converted.bin'), Buffer.from(fact.hex, 'hex'));
+      assert.equal(read('convert.s').toString(), fact.source);
+    });
+    test('conversion_file_scope', () => {
+      write('child.inc', ' db 42\n'); write('data.bin', Buffer.from([42]));
+      for (const [directive, file] of [['include', 'child.inc'], ['incbin', 'data.bin']]) {
+        const source = ` org 8000h\n ${directive} "${file}"\n ret\n`; write('convert.s', source);
+        assert.equal(run(['--dialect', 'pasmo', 'convert.s', '-o', 'included.bin']).status, 0);
+        assert.deepEqual(read('included.bin'), Buffer.from('2ac9', 'hex'));
+        write('converted.s', 'previous conversion');
+        const p = run(['convert', '--from', 'pasmo', '--to', 'sjasmplus', 'convert.s', '-o', 'converted.s']); reject(p);
+        assert.equal(p.stdout, ''); assert.match(p.stderr, /self-contained source/); assert(!p.stderr.includes('the CLI resolves'));
+        assert.equal(read('converted.s').toString(), 'previous conversion'); assert.equal(read('convert.s').toString(), source);
+      }
+    });
+    test('unsupported_escape', () => {
+      const fact = nativeCase('sjasmplus-escape-boundaries', '\\n'); write('escaped.s', fact.source);
+      for (const cpu of ['z80', 'z80n']) for (const mode of ['human', 'json']) {
+        write('escaped.bin', 'previous image');
+        const p = run(['--dialect', 'sjasmplus', '--cpu', cpu, '--message-format', mode, 'escaped.s', '-o', 'escaped.bin']); reject(p);
+        if (mode === 'json') { assert.equal(p.stderr, ''); assert(JSON.parse(p.stdout).some(d => d.code === 'UnsupportedFeature' && d.span?.line === 2)); }
+        else assert.match(p.stderr, /escape/);
+        assert.equal(read('escaped.bin').toString(), 'previous image'); assert.equal(read('escaped.s').toString(), fact.source);
+      }
     });
     const project = path.join(root, 'upstream');
     try {

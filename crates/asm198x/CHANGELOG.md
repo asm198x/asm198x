@@ -38,6 +38,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   not establish the compiled dependency/features graph or a signing identity.
   ([#684](https://github.com/asm198x/asm198x/pull/684))
 
+- Require 24 archive qualification cases on all five native targets, including
+  the recent disassembly, conversion and quoted-data fixes.
+  ([#680](https://github.com/asm198x/asm198x/pull/680))
+- Reject SjASMPlus string escapes that require unsupported decoding rather than
+  emitting incorrect bytes. Full native escape compatibility remains tracked
+  in [#696](https://github.com/asm198x/asm198x/issues/696).
+  ([#697](https://github.com/asm198x/asm198x/pull/697))
+
 ## [0.0.66](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.65...asm198x-v0.0.66) - 2026-10-15
 
 ### Fixed
