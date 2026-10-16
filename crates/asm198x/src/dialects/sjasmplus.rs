@@ -603,6 +603,10 @@ impl SjasmplusSyntax {
 }
 
 impl Z80Syntax for SjasmplusSyntax {
+    fn sjasmplus_word_operators(&self) -> bool {
+        true
+    }
+
     fn has_lua(&self) -> bool {
         true
     }

@@ -1,0 +1,9 @@
+# Word operators (#635)
+
+The identifier lexer admitted Pasmo word operators but treated every SjASMPlus word operator as a symbol. The new fixture failed first on `1 XOR 2` with `unexpected trailing tokens` before the change. SjASMPlus now admits AND, OR, XOR, SHL, SHR and logical NOT through its existing syntax seam; the default and Pasmo paths retain their vocabulary.
+
+All 38 native cases match both SjASMPlus frontends, including uppercase/lowercase acceptance, mixed-case refusals, whole identifier boundaries, EQU, conditional expansion, macros and repetition. Native NOT returns -1 for true and zero for false. A distinct word-NOT token retains this value in data and conditions without changing the pre-existing symbolic condition NOT path. The existing C-style precedence parser matches the measured combinations, including the distinction from Pasmo's equal-precedence OR/XOR.
+
+Each accepted source formats idempotently and reassembles with identical bytes and symbols. CLI tests include a separate source file, both CPUs/reporting modes, debug/symbol/listing output and preservation of the successful image after a mixed-case refusal. The archive gate adds a named word-operator case for the native EQU, macro and precedence probes, bringing the required cohort to 30 cases. Historical qualification remains frozen.
+
+Validation: 1463 Rust tests passed with Lua (37 explicitly ignored reference-tool tests); Clippy with all targets/Lua and denied warnings, formatting, generated docs and checked workflow generation passed. All 38 release-control Node tests passed. Ruff passed for the bounded native capture script. This is measured word-vocabulary coverage, not a claim of complete SjASMPlus expression arithmetic parity; native 32-bit shift-count behavior warrants an independent follow-up.

@@ -10,6 +10,7 @@ const { verifyReceipt, sourceIdentity } = require('./build-locked-package.cjs');
 const requiredCases = ['archive_identity', 'version', 'reference_bytes', 'determinism', 'structured_success', 'structured_failure', 'preserve_previous_outputs', 'missing_input_json', 'unknown_cpu', 'incompatible_cpu', 'hardlink_source', 'hardlink_sidecar', 'formatter_container', 'formatter_origin', 'lua', 'upstream_project'];
 requiredCases.push('disasm_options', 'disasm_wide_origin', 'pasmo_nested_repeat', 'quoted_data_native', 'quoted_data_format', 'conversion_quoted_data', 'conversion_file_scope', 'unsupported_escape');
 requiredCases.push('pasmo_word_arithmetic', 'ca65_configured_extent', 'ca65_extent_refusal', 'ca65_absent_segments', 'pasmo_wrapped_image');
+requiredCases.push('sjasmplus_word_operators');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -184,6 +185,20 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         write('wrap.bin', 'previous image'); reject(run(['--dialect', dialect, 'wrap.s', '-o', 'wrap.bin']));
         assert.equal(read('wrap.bin').toString(), 'previous image');
         write('wrap.s', fact.source);
+      }
+    });
+    test('sjasmplus_word_operators', () => {
+      for (const name of ['equ', 'macro_repeat', 'expr_25']) {
+        const fact = nativeCase('sjasmplus-word-operators', name);
+        for (const cpu of ['z80', 'z80n']) {
+          write('words.s', fact.source);
+          const p = run(['--dialect', 'sjasmplus', '--cpu', cpu, '--message-format=json', 'words.s', '-o', 'words.bin']);
+          assert.equal(p.status, 0); assert.equal(p.stderr, '');
+          assert.deepEqual(read('words.bin'), Buffer.from(fact.hex, 'hex'));
+          write('words.s', ' dw 1 xOr 2\n');
+          reject(run(['--dialect', 'sjasmplus', '--cpu', cpu, 'words.s', '-o', 'words.bin']));
+          assert.deepEqual(read('words.bin'), Buffer.from(fact.hex, 'hex'));
+        }
       }
     });
     test('pasmo_word_arithmetic', () => {
