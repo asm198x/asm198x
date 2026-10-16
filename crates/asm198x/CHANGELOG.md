@@ -7,6 +7,18 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.69](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.68...asm198x-v0.0.69) - 2026-10-16
+
+Native archive publication for 0.0.68 was stopped after finding the regression
+below. This release also includes its Pasmo arithmetic and ca65 layout fixes.
+
+### Fixed
+
+- Supplied ca65 linker layouts now skip absent segments, including their pinned
+  starts and alignment. Explicitly selecting an empty segment still reserves its
+  position, as ld65 does. The built-in NROM vector reservation is preserved.
+  ([#705](https://github.com/asm198x/asm198x/pull/705))
+
 ## [0.0.68](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.67...asm198x-v0.0.68) - 2026-10-16
 
 ### Fixed
