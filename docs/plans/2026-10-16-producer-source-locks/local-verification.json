@@ -1,0 +1,113 @@
+{
+  "code_commit": "91961d9a618d518aaa8946c6d3c1ca55d6afdae3",
+  "target": "aarch64-apple-darwin",
+  "qualified": true,
+  "cases": [
+    {
+      "name": "archive_identity",
+      "status": "pass"
+    },
+    {
+      "name": "version",
+      "status": "pass"
+    },
+    {
+      "name": "reference_bytes",
+      "status": "pass"
+    },
+    {
+      "name": "determinism",
+      "status": "pass"
+    },
+    {
+      "name": "structured_success",
+      "status": "pass"
+    },
+    {
+      "name": "structured_failure",
+      "status": "pass"
+    },
+    {
+      "name": "preserve_previous_outputs",
+      "status": "pass"
+    },
+    {
+      "name": "missing_input_json",
+      "status": "pass"
+    },
+    {
+      "name": "unknown_cpu",
+      "status": "pass"
+    },
+    {
+      "name": "incompatible_cpu",
+      "status": "pass"
+    },
+    {
+      "name": "hardlink_source",
+      "status": "pass"
+    },
+    {
+      "name": "hardlink_sidecar",
+      "status": "pass"
+    },
+    {
+      "name": "formatter_container",
+      "status": "pass"
+    },
+    {
+      "name": "formatter_origin",
+      "status": "pass"
+    },
+    {
+      "name": "lua",
+      "status": "pass"
+    },
+    {
+      "name": "upstream_project",
+      "status": "pass"
+    }
+  ],
+  "source_lock_scope": "verified-producer-lock",
+  "archive_sha256": "feb47385f0b66dd903b0d29870fc68bb2c23618532837d887da0ecd7792f992a",
+  "executable_sha256": "f5e6a3974f3fb65ac3d68cb2a548814c37d43d1e56b5cd8d1ebb1591d7fbb791",
+  "controls": [
+    {
+      "name": "missing-receipt",
+      "qualified": false,
+      "runtime_cases_executed": 0,
+      "reason": "missing source-lock receipt"
+    },
+    {
+      "name": "wrong-archive",
+      "qualified": false,
+      "runtime_cases_executed": 0,
+      "reason": "receipt archive_sha256 differs"
+    },
+    {
+      "name": "wrong-source",
+      "qualified": false,
+      "runtime_cases_executed": 0,
+      "reason": "receipt source commit differs"
+    },
+    {
+      "name": "wrong-bytes",
+      "qualified": false,
+      "failures": [
+        "reference_bytes",
+        "determinism",
+        "structured_success"
+      ],
+      "reason": "runtime output mutation rejected"
+    },
+    {
+      "name": "corrupt-archive",
+      "qualified": false,
+      "failures": [],
+      "reason": "SHA-256 mismatch for asm198x-aarch64-apple-darwin.tar.xz"
+    }
+  ],
+  "unit_tests": 35,
+  "compiled_dependency_graph": "unknown",
+  "published_release": false
+}

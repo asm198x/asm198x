@@ -120,6 +120,9 @@ jobs:
         with:
           persist-credentials: false
           submodules: recursive
+      - uses: actions/setup-node@v7
+        with:
+          node-version: '24'
       - name: Install Rust non-interactively if not already installed
         if: ${{ matrix.container }}
         run: |
@@ -142,7 +145,7 @@ jobs:
       - name: Build artifacts
         run: |
           # Actually do builds and make zips and whatnot
-          dist build ${{ needs.plan.outputs.tag-flag }} --print=linkage --output-format=json ${{ matrix.dist_args }} > dist-manifest.json
+          node scripts/build-locked-package.cjs "${{ join(matrix.targets, ',') }}" dist-manifest.json target/distrib -- dist build ${{ needs.plan.outputs.tag-flag }} --print=linkage --output-format=json ${{ matrix.dist_args }}
           echo "dist ran successfully"
       - id: cargo-dist
         name: Post-build
@@ -164,6 +167,7 @@ jobs:
           path: |
             ${{ steps.cargo-dist.outputs.paths }}
             ${{ env.BUILD_MANIFEST_NAME }}
+            target/distrib/asm198x-${{ join(matrix.targets, ',') }}-source-lock.json
 
   # Build and package all the platform-agnostic(ish) things
   build-global-artifacts:

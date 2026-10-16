@@ -1,6 +1,6 @@
 'use strict';
 // cargo-dist 0.32 permits skipped custom jobs to reach hosting. Keep its full
-// generated workflow, then tighten only our required qualification dependency.
+// generated workflow, then require qualification and guard the producer lock.
 const fs = require('node:fs');
 const os = require('node:os');
 const path = require('node:path');
@@ -14,6 +14,16 @@ function tighten(text) {
   const dependency = '  custom-test-linux-packages:\n    needs:\n      - plan\n      - build-local-artifacts\n';
   assert.equal(text.split(dependency).length, 2, 'cargo-dist qualification dependencies changed');
   return text.replace(permissive, required).replace(dependency, dependency + '      - build-global-artifacts\n');
+}
+const buildCommand = '          dist build ${{ needs.plan.outputs.tag-flag }} --print=linkage --output-format=json ${{ matrix.dist_args }} > dist-manifest.json';
+const guardedBuild = '          node scripts/build-locked-package.cjs "${{ join(matrix.targets, \',\') }}" dist-manifest.json target/distrib -- dist build ${{ needs.plan.outputs.tag-flag }} --print=linkage --output-format=json ${{ matrix.dist_args }}';
+function lockBuild(text) {
+  const rustStep = '      - name: Install Rust non-interactively if not already installed';
+  const upload = "          name: artifacts-build-local-${{ join(matrix.targets, '_') }}\n          path: |\n            ${{ steps.cargo-dist.outputs.paths }}\n            ${{ env.BUILD_MANIFEST_NAME }}";
+  for (const anchor of [buildCommand, rustStep, upload]) assert.equal(text.split(anchor).length, 2, 'cargo-dist local build template changed; review lock guard');
+  return text.replace(buildCommand, guardedBuild)
+    .replace(rustStep, "      - uses: actions/setup-node@v7\n        with:\n          node-version: '24'\n" + rustStep)
+    .replace(upload, upload + '\n            target/distrib/asm198x-${{ join(matrix.targets, \',\') }}-source-lock.json');
 }
 function run(command, args, cwd) {
   const p = spawnSync(command, args, { cwd, encoding: 'utf8', timeout: 120000, maxBuffer: 4 * 1024 * 1024 });
@@ -39,10 +49,10 @@ function generate(root, check) {
     assert.equal(config.split('allow-dirty = ["ci"]').length, 2);
     fs.writeFileSync(cargo, config.replace('allow-dirty = ["ci"]', 'allow-dirty = []'));
     run('dist', ['generate', '--mode', 'ci'], temporary);
-    const result = tighten(fs.readFileSync(path.join(temporary, workflow), 'utf8').replaceAll('\r\n', '\n'));
+    const result = lockBuild(tighten(fs.readFileSync(path.join(temporary, workflow), 'utf8').replaceAll('\r\n', '\n')));
     if (check) assert.equal(fs.readFileSync(path.join(root, workflow), 'utf8').replaceAll('\r\n', '\n'), result, 'Release workflow is stale; run node scripts/generate-release-workflow.cjs');
     else fs.writeFileSync(path.join(root, workflow), result);
   } finally { fs.rmSync(temporary, { recursive: true, force: true }); }
 }
-module.exports = { tighten, generate, permissive, required };
+module.exports = { tighten, generate, permissive, required, lockBuild, buildCommand, guardedBuild };
 if (require.main === module) generate(path.resolve(__dirname, '..'), process.argv.includes('--check'));
