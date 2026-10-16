@@ -1,0 +1,329 @@
+{
+  "references": {
+    "pasmo": {
+      "path": "/usr/local/bin/pasmo",
+      "sha256": "e9628f5c32f3c74a963c649781e6cb87e9eaeb4bbfe7b52d3de27f4986bbf136",
+      "version_process": {
+        "exit": 1,
+        "stdout": "",
+        "stderr": "PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo\nModified by C Kirby\nUsage:\n\n\tpasmo [options] source object [symbol]\n\nSee the README file for details.\n"
+      }
+    },
+    "sjasmplus": {
+      "path": "/usr/local/bin/sjasmplus",
+      "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+      "version_process": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+      }
+    }
+  },
+  "cases": [
+    {
+      "dialect": "pasmo",
+      "name": "quote",
+      "source": " org 8000h\n db '\"',7\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000190708 s\n",
+      "hex": "2207"
+    },
+    {
+      "dialect": "pasmo",
+      "name": "comma",
+      "source": " org 8000h\n db ',',7\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00014325 s\n",
+      "hex": "2c07"
+    },
+    {
+      "dialect": "pasmo",
+      "name": "mixed",
+      "source": " org 8000h\n db 1,'\"',\",x\",',',\"a'b,c\",7\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000116541 s\n",
+      "hex": "01222c782c6127622c6307"
+    },
+    {
+      "dialect": "pasmo",
+      "name": "word",
+      "source": " org 8000h\n dw '\"',',',7\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000140417 s\n",
+      "hex": "22002c000700"
+    },
+    {
+      "dialect": "pasmo",
+      "name": "expressions",
+      "source": " org 8000h\n db ','+1,'\"'+1,7\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000199625 s\n",
+      "hex": "2d2307"
+    },
+    {
+      "dialect": "pasmo",
+      "name": "comment",
+      "source": " org 8000h\n db '\"',',',7 ; db 99, \"unterminated\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000150542 s\n",
+      "hex": "222c07"
+    },
+    {
+      "dialect": "pasmo",
+      "name": "repetition",
+      "source": " org 8000h\n rept 2\n db '\"',',',7\n endm\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000127833 s\n",
+      "hex": "222c07222c07"
+    },
+    {
+      "dialect": "pasmo",
+      "name": "macro",
+      "source": " org 8000h\nput macro v\n db v,7\n endm\n put '\"'\n put ','\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000155459 s\n",
+      "hex": "22072c07"
+    },
+    {
+      "dialect": "pasmo",
+      "name": "semicolon",
+      "source": " org 8000h\n db ';','\"',',',7 ; real comment\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000145625 s\n",
+      "hex": "3b222c07"
+    },
+    {
+      "dialect": "pasmo",
+      "name": "malformed_character",
+      "source": " org 8000h\n db ',,7\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Unclosed literal\n",
+      "hex": null
+    },
+    {
+      "dialect": "pasmo",
+      "name": "malformed_value",
+      "source": " org 8000h\n db '\"',?,7\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "out.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Value expected but '?'found\n",
+      "hex": null
+    },
+    {
+      "dialect": "sjasmplus",
+      "name": "quote",
+      "source": " org 8000h\n db '\"',7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "2207"
+    },
+    {
+      "dialect": "sjasmplus",
+      "name": "comma",
+      "source": " org 8000h\n db ',',7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "2c07"
+    },
+    {
+      "dialect": "sjasmplus",
+      "name": "mixed",
+      "source": " org 8000h\n db 1,'\"',\",x\",',',\"a'b,c\",7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "01222c782c6127622c6307"
+    },
+    {
+      "dialect": "sjasmplus",
+      "name": "word",
+      "source": " org 8000h\n dw '\"',',',7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "22002c000700"
+    },
+    {
+      "dialect": "sjasmplus",
+      "name": "expressions",
+      "source": " org 8000h\n db ','+1,'\"'+1,7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "2d2307"
+    },
+    {
+      "dialect": "sjasmplus",
+      "name": "comment",
+      "source": " org 8000h\n db '\"',',',7 ; db 99, \"unterminated\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "222c07"
+    },
+    {
+      "dialect": "sjasmplus",
+      "name": "repetition",
+      "source": " org 8000h\n rept 2\n db '\"',',',7\n endr\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "222c07222c07"
+    },
+    {
+      "dialect": "sjasmplus",
+      "name": "macro",
+      "source": " org 8000h\nput macro v\n db v,7\n endm\n put '\"'\n put ','\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 11 lines, work time: 0.000 seconds\n",
+      "hex": "22072c07"
+    },
+    {
+      "dialect": "sjasmplus",
+      "name": "malformed_character",
+      "source": " org 8000h\n db ',,7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Syntax error: ',,7\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "2c2c37"
+    },
+    {
+      "dialect": "sjasmplus",
+      "name": "malformed_value",
+      "source": " org 8000h\n db '\"',?,7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Syntax error: ?,7\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "22"
+    }
+  ]
+}
