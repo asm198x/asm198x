@@ -72,8 +72,9 @@ pub struct AssemblyResult {
     pub origin: Option<u16>,
     /// Address units of leading `org` gap or reservation that are **not** in
     /// `bytes`, so `origin` sits that far above where the source's own
-    /// addresses begin (#90). Non-zero only on the asl-family dialects, whose
-    /// `p2bin` starts the image at the lowest written address.
+    /// addresses begin (#90). The asl-family's `p2bin` drops an unwritten
+    /// prefix. Pasmo can also name wrapped addresses below its minimal image;
+    /// the same prefix maps those labels without fabricating output bytes.
     ///
     /// Debug offsets are relative to `origin - reserved_prefix`, since they are
     /// captured before the trim. Absent from the payload when zero, so every

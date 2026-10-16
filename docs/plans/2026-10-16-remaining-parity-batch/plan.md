@@ -1,0 +1,11 @@
+# Remaining compatibility and ecosystem execution batch
+
+1. Pasmo #629/#631: recheck count normalization and capture native origins, bytes, warnings, symbols and overwritten addresses around $FFFF. Inspect `engine.rs`, the dialect trait and `dialects/pasmo.rs`/`z80.rs`; retain default placement contracts for other dialects. Write red regressions before implementing the smallest measured dialect-specific wrapping behavior. Verify listings, Debug198x and containers, preserving existing output on rejection. Keep this a separate PR/commit unit.
+2. SjASMPlus #635: probe native uppercase/lowercase/mixed-case word operators, precedence and NOT semantics. Add dialect-gated expression vocabulary in the existing parser/lowering, retaining native facts and isolation tests. Verify and land separately.
+3. SjASMPlus #696: use and refresh recorded native escape/directive facts. Decode only the measured double-quoted grammar; preserve unknown pairs, single-quoted semantics, formatting, includes/macros/repetition, output preservation and directive-specific output. Verify and land separately.
+4. Ecosystem #618: reconsult `decisions/ecosystem-source-corpus.md`, `xtask/src/ecosystem.rs` and the actual manifest. Agree the full ordered-build schema/runner design before changing behavior or schemas. Acquisition must remain inert; execution must be opt-in, bounded and pinned. Distinguish reference failures, Asm rejections, output mismatches and unavailable infrastructure; compare complete artifacts and generate the ledger from retained results.
+5. Each unit: native red/green proofs, appropriate workspace/format/Clippy/docs checks, push a focused PR, and require every exact-head check and triggered workflow before squash-merging. Extend qualification with representative outcomes as appropriate; use existing release cadence for green units. Preserve earlier evidence. Inspect and remove owned worktree, caches, scratch and processes after proving remote retention.
+
+Workspace: `/Users/stevehill/Projects/198x/Asm198x/asm198x-pasmo-wrap`.
+Build cache: `/private/tmp/asm198x-parity-batch-build` (create only when building).
+No new dependencies or public/schema breaks are authorized without the required concrete review and approval.

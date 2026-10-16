@@ -73,6 +73,14 @@ pub fn tape(
             "code runs past the top of memory ($FFFF); it cannot go on a tape",
         ));
     }
+    // A standard-speed block's 16-bit length includes its flag and checksum.
+    // A wrapped 64 KiB memory image is valid raw output, but cannot fit here.
+    if asm.bytes.len() > usize::from(u16::MAX) - 2 {
+        return Err(AsmError::new(
+            0,
+            "program does not fit a tape block (maximum 65533 code bytes)",
+        ));
+    }
 
     let mut blocks = Vec::new();
     if autorun {

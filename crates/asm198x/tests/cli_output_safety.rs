@@ -971,3 +971,33 @@ fn primary_images_preserve_consumed_inputs_through_aliases() {
         }
     }
 }
+
+#[test]
+fn wrapped_pasmo_images_cannot_silently_overflow_tape_blocks() {
+    for mode in ["human", "json"] {
+        for flag in ["--tap", "--tapbas", "--tzx", "--tzxbas"] {
+            let dir = Scratch::new();
+            std::fs::write(dir.0.join("program.s"), " org $ffff\n db 1,2\n").expect("source");
+            let raw = assemble(&dir.0, "pasmo", mode, &["-o", "raw.bin"]);
+            assert!(raw.status.success(), "{raw:?}");
+            let image = std::fs::read(dir.0.join("raw.bin")).expect("raw image");
+            assert_eq!(image.len(), 65536);
+            assert_eq!((image[0], image[65535]), (2, 1));
+            for previous in [None, Some(b"previous successful image".as_slice())] {
+                let path = dir.0.join("image");
+                if let Some(bytes) = previous {
+                    std::fs::write(&path, bytes).expect("previous image");
+                }
+                let run = assemble(&dir.0, "pasmo", mode, &[flag, "-o", "image"]);
+                assert!(!run.status.success(), "{flag}/{mode}");
+                let message = format!(
+                    "{}{}",
+                    String::from_utf8_lossy(&run.stdout),
+                    String::from_utf8_lossy(&run.stderr)
+                );
+                assert!(message.contains("maximum 65533 code bytes"), "{message}");
+                assert_preserved(&path, previous);
+            }
+        }
+    }
+}

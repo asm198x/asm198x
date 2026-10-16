@@ -414,7 +414,7 @@ pub fn render_listing_files(
     }
     use std::collections::BTreeMap;
 
-    let base = u64::from(result.origin.unwrap_or(0));
+    let base = u64::from(result.origin.unwrap_or(0)) - u64::from(result.reserved_prefix);
     // One span per source-bearing statement, keyed by (file, line); first one
     // wins so a re-included file lists its first instantiation.
     let mut spans: BTreeMap<(u32, u32), &crate::engine::LineRec> = BTreeMap::new();
@@ -508,7 +508,7 @@ pub fn render_listing_json(input: &str, result: &AssemblyResult, addr_unit: u64)
     }
     use serde_json::json;
 
-    let base = u64::from(result.origin.unwrap_or(0));
+    let base = u64::from(result.origin.unwrap_or(0)) - u64::from(result.reserved_prefix);
     let files: Vec<&str> = if result.files.is_empty() {
         vec![input]
     } else {
@@ -715,7 +715,11 @@ fn render_one_file(id: usize, cx: &RenderCx<'_>, out: &mut String) {
                     // hex dump the reader would never scan.
                     format!(".. {} bytes", span.length * cx.addr_unit)
                 } else {
-                    let start = usize::try_from(span.offset * cx.addr_unit).unwrap_or(usize::MAX);
+                    let start = span
+                        .offset
+                        .checked_sub(u64::from(cx.result.reserved_prefix))
+                        .and_then(|offset| usize::try_from(offset * cx.addr_unit).ok())
+                        .unwrap_or(usize::MAX);
                     let len = usize::try_from(span.length * cx.addr_unit).unwrap_or(0);
                     let emitted = cx
                         .result

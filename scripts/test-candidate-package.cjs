@@ -9,7 +9,7 @@ const { targets, sha, packageIdentity, nativeTarget, binaryTarget, archiveIdenti
 const { verifyReceipt, sourceIdentity } = require('./build-locked-package.cjs');
 const requiredCases = ['archive_identity', 'version', 'reference_bytes', 'determinism', 'structured_success', 'structured_failure', 'preserve_previous_outputs', 'missing_input_json', 'unknown_cpu', 'incompatible_cpu', 'hardlink_source', 'hardlink_sidecar', 'formatter_container', 'formatter_origin', 'lua', 'upstream_project'];
 requiredCases.push('disasm_options', 'disasm_wide_origin', 'pasmo_nested_repeat', 'quoted_data_native', 'quoted_data_format', 'conversion_quoted_data', 'conversion_file_scope', 'unsupported_escape');
-requiredCases.push('pasmo_word_arithmetic', 'ca65_configured_extent', 'ca65_extent_refusal', 'ca65_absent_segments');
+requiredCases.push('pasmo_word_arithmetic', 'ca65_configured_extent', 'ca65_extent_refusal', 'ca65_absent_segments', 'pasmo_wrapped_image');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -169,6 +169,22 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         assert.deepEqual(read('nested.bin'), Buffer.from(fact.hex, 'hex'));
       }
       assert.equal(read('nested.s').toString(), fact.source);
+    });
+    test('pasmo_wrapped_image', () => {
+      const fact = nativeCase('pasmo-output-wrap', 'subsequent_pc');
+      write('wrap.s', fact.source);
+      for (const dialect of ['pasmo', 'pasmonext']) {
+        const p = run(['--dialect', dialect, '--message-format=json', 'wrap.s', '-o', 'wrap.bin']);
+        assert.equal(p.status, 0); assert.equal(p.stderr, '');
+        assert.deepEqual(read('wrap.bin'), Buffer.from(fact.hex, 'hex'));
+        const result = JSON.parse(p.stdout); assert.equal(result.origin, 0);
+        assert.equal(result.symbols.first, 65535); assert.equal(result.symbols.after, 1);
+        assert.equal(result.start, 1); assert(result.warnings.some(w => w.message.includes('64KB')));
+        write('wrap.s', ' org $ffff\n jr target\ntarget: db 1\n');
+        write('wrap.bin', 'previous image'); reject(run(['--dialect', dialect, 'wrap.s', '-o', 'wrap.bin']));
+        assert.equal(read('wrap.bin').toString(), 'previous image');
+        write('wrap.s', fact.source);
+      }
     });
     test('pasmo_word_arithmetic', () => {
       for (const name of ['dw_0', 'dw_1', 'dw_3', 'dw_15', 'dw_28', 'dw_29', 'dw_37']) {
