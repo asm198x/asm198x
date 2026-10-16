@@ -1,9 +1,11 @@
 //! The real-world ecosystem corpus: pinned, licensed upstream source trees.
 //!
-//! This command deliberately fetches but never executes upstream code. Native
-//! and Asm198x build invocations are data for the audit runner that follows;
-//! reviewing admission and acquiring source must not imply permission to run a
-//! third party's Makefile or scripts.
+//! Fetch remains inert. The explicit audit action executes only reviewed argv
+//! plans in isolated trees; it never runs an upstream Makefile or script.
+
+mod execution;
+mod plan;
+mod process;
 
 use serde::Deserialize;
 use std::collections::BTreeSet;
@@ -41,6 +43,12 @@ struct Target {
     sources: Vec<String>,
     reference: Vec<String>,
     outputs: Vec<String>,
+    #[serde(default)]
+    build: Option<plan::BuildPlan>,
+}
+
+pub(crate) fn markdown(repo: &Path) -> Result<String, String> {
+    execution::markdown(repo)
 }
 
 pub(crate) fn run(repo: &Path, args: &[String]) -> ExitCode {
@@ -61,6 +69,19 @@ pub(crate) fn run(repo: &Path, args: &[String]) -> ExitCode {
     }
 
     match args.first().map(String::as_str) {
+        Some("--markdown") => match markdown(repo) {
+            Ok(text) => {
+                print!("{text}");
+                ExitCode::SUCCESS
+            }
+            Err(error) => {
+                eprintln!("xtask ecosystem: {error}");
+                ExitCode::FAILURE
+            }
+        },
+        Some("audit") => execution::audit(repo, &manifest, &args[1..]),
+        Some("replay") => execution::replay(repo, &manifest, &args[1..]),
+        Some("ledger") => execution::ledger(repo, &manifest, &args[1..]),
         Some("check") => {
             println!(
                 "{} admitted project(s), {} build target(s), all pinned and licensed",
@@ -108,7 +129,7 @@ pub(crate) fn run(repo: &Path, args: &[String]) -> ExitCode {
         Some(other) => {
             eprintln!(
                 "xtask ecosystem: unknown action `{other}`\n\n\
-                 usage: cargo xtask ecosystem check|list|fetch|verify <directory> [project-id]"
+                 usage: cargo xtask ecosystem check|list|fetch|verify|audit|replay|ledger <directory> [project-id]"
             );
             ExitCode::FAILURE
         }
@@ -184,8 +205,16 @@ fn validate(manifest: &Manifest) -> Vec<String> {
         let mut target_ids = BTreeSet::new();
         for target in &project.targets {
             let target_label = format!("{label}, target `{}`", target.id);
-            if target.id.is_empty() || !target_ids.insert(target.id.as_str()) {
-                problems.push(format!("{target_label}: id must be non-empty and unique"));
+            if target.id.is_empty()
+                || !target
+                    .id
+                    .chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+                || !target_ids.insert(target.id.as_str())
+            {
+                problems.push(format!(
+                    "{target_label}: id must be lower-case ASCII, digits and hyphens, and unique"
+                ));
             }
             if !safe_relative(&target.cwd)
                 || target.sources.is_empty()
@@ -196,6 +225,14 @@ fn validate(manifest: &Manifest) -> Vec<String> {
                 problems.push(format!(
                     "{target_label}: cwd, sources and outputs must be non-empty safe relative paths"
                 ));
+            }
+            if let Some(build) = &target.build {
+                problems.extend(
+                    build
+                        .problems()
+                        .into_iter()
+                        .map(|p| format!("{target_label}: {p}")),
+                );
             }
             if target.reference.is_empty() || target.reference.iter().any(|a| a.is_empty()) {
                 problems.push(format!("{target_label}: reference argv must not be empty"));

@@ -1154,6 +1154,11 @@
       "slug": "reference/dialects"
     },
     {
+      "context": "This table compares complete, pinned upstream build targets with native tools.",
+      "page": "Complete-project compatibility",
+      "slug": "reference/ecosystem"
+    },
+    {
       "context": "79 mnemonics, 255 encoded forms, operands big-endian. Generated from `crates/isa/src/cdp1802.rs`.",
       "page": "RCA CDP1802 (COSMAC)",
       "slug": "reference/instructions/cdp1802"

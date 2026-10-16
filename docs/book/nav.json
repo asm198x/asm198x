@@ -198,6 +198,11 @@
           "children": [],
           "slug": "ledger",
           "title": "Conformance ledger"
+        },
+        {
+          "children": [],
+          "slug": "reference/ecosystem",
+          "title": "Complete-project compatibility"
         }
       ],
       "title": "Using it"

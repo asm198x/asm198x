@@ -460,3 +460,38 @@ jobs:
 
       - name: Check workspace
         run: cargo check --workspace --all-targets
+  ecosystem:
+    name: Ecosystem replay
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    needs: [fmt, clippy]
+    steps:
+      - uses: actions/checkout@v7
+      - name: Read pinned toolchain
+        id: toolchain
+        run: |
+          channel=$(awk -F'"' '/^channel/{print $2}' rust-toolchain.toml)
+          echo "channel=${channel}" >> "$GITHUB_OUTPUT"
+      - uses: dtolnay/rust-toolchain@master
+        with:
+          toolchain: ${{ steps.toolchain.outputs.channel }}
+      - uses: Swatinem/rust-cache@v2
+      - name: Check admission and retained evidence
+        run: |
+          cargo xtask ecosystem check
+          cargo xtask ecosystem ledger ecosystem/results/current.json --check
+      - name: Acquire pinned source without executing upstream code
+        run: cargo xtask ecosystem fetch "$RUNNER_TEMP/ecosystem-sources"
+      - name: Replay qualified controls and refresh blocked boundaries without native tools
+        run: cargo xtask ecosystem replay "$RUNNER_TEMP/ecosystem-sources" ecosystem/results/current.json "$RUNNER_TEMP/ecosystem-replay"
+      - name: Retain actual replay results
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ecosystem-replay
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/ecosystem-replay/report.json
+            ${{ runner.temp }}/ecosystem-replay/logs/

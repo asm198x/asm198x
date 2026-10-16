@@ -8,28 +8,266 @@
       "dialect": "acme",
       "upstream": "https://github.com/kindjie/6502Assembly.git",
       "commit": "35b4968be3bdd26804a5d195557d1225497a0358",
-      "license": { "spdx": "MIT", "path": "LICENSE" },
+      "license": {
+        "spdx": "MIT",
+        "path": "LICENSE"
+      },
       "targets": [
         {
           "id": "hello-world",
           "cwd": ".",
-          "sources": ["helloworld.asm"],
-          "reference": ["acme", "--cpu", "6510", "--format", "cbm", "--outfile", "helloworld.prg", "helloworld.asm"],
-          "outputs": ["helloworld.prg"]
+          "sources": [
+            "helloworld.asm"
+          ],
+          "reference": [
+            "acme",
+            "--cpu",
+            "6510",
+            "--format",
+            "cbm",
+            "--outfile",
+            "helloworld.prg",
+            "helloworld.asm"
+          ],
+          "outputs": [
+            "helloworld.prg"
+          ],
+          "build": {
+            "tools": [
+              {
+                "name": "acme",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "This is ACME, release 0.97 (\"Zem\"), 28 June 2020"
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "stage": "assemble",
+                "cwd": ".",
+                "argv": [
+                  "acme",
+                  "--cpu",
+                  "6510",
+                  "--format",
+                  "cbm",
+                  "--outfile",
+                  "helloworld.prg",
+                  "helloworld.asm"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "helloworld.prg"
+                ]
+              }
+            ],
+            "assembler": [
+              {
+                "stage": "assemble",
+                "cwd": ".",
+                "argv": [
+                  "asm198x",
+                  "--dialect",
+                  "acme",
+                  "--prg",
+                  "helloworld.asm",
+                  "-o",
+                  "helloworld.prg"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "helloworld.prg"
+                ]
+              }
+            ],
+            "compare": [
+              {
+                "reference": "helloworld.prg",
+                "assembler": "helloworld.prg"
+              }
+            ],
+            "directories": [],
+            "adapters": [],
+            "issues": [
+              "https://github.com/asm198x/asm198x/issues/618"
+            ]
+          }
         },
         {
           "id": "interrupts",
           "cwd": ".",
-          "sources": ["ex_interrupts.asm", "libs/interrupt.asm"],
-          "reference": ["acme", "--cpu", "6510", "--format", "cbm", "--outfile", "ex_interrupts.prg", "ex_interrupts.asm"],
-          "outputs": ["ex_interrupts.prg"]
+          "sources": [
+            "ex_interrupts.asm",
+            "libs/interrupt.asm"
+          ],
+          "reference": [
+            "acme",
+            "--cpu",
+            "6510",
+            "--format",
+            "cbm",
+            "--outfile",
+            "ex_interrupts.prg",
+            "ex_interrupts.asm"
+          ],
+          "outputs": [
+            "ex_interrupts.prg"
+          ],
+          "build": {
+            "tools": [
+              {
+                "name": "acme",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "This is ACME, release 0.97 (\"Zem\"), 28 June 2020"
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "stage": "assemble",
+                "cwd": ".",
+                "argv": [
+                  "acme",
+                  "--cpu",
+                  "6510",
+                  "--format",
+                  "cbm",
+                  "--outfile",
+                  "ex_interrupts.prg",
+                  "ex_interrupts.asm"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "ex_interrupts.prg"
+                ]
+              }
+            ],
+            "assembler": [
+              {
+                "stage": "assemble",
+                "cwd": ".",
+                "argv": [
+                  "asm198x",
+                  "--dialect",
+                  "acme",
+                  "--prg",
+                  "ex_interrupts.asm",
+                  "-o",
+                  "ex_interrupts.prg"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "ex_interrupts.prg"
+                ]
+              }
+            ],
+            "compare": [
+              {
+                "reference": "ex_interrupts.prg",
+                "assembler": "ex_interrupts.prg"
+              }
+            ],
+            "directories": [],
+            "adapters": [],
+            "issues": [
+              "https://github.com/asm198x/asm198x/issues/618"
+            ]
+          }
         },
         {
           "id": "charset",
           "cwd": ".",
-          "sources": ["ex_charset.asm", "libs/loader.asm", "libs/screen.asm", "charsets/chars.raw", "charsets/attribs.raw", "charsets/map.raw", "charsets/tiles.raw"],
-          "reference": ["acme", "--cpu", "6510", "--format", "cbm", "--outfile", "ex_charset.prg", "ex_charset.asm"],
-          "outputs": ["ex_charset.prg"]
+          "sources": [
+            "ex_charset.asm",
+            "libs/loader.asm",
+            "libs/screen.asm",
+            "charsets/chars.raw",
+            "charsets/attribs.raw",
+            "charsets/map.raw",
+            "charsets/tiles.raw"
+          ],
+          "reference": [
+            "acme",
+            "--cpu",
+            "6510",
+            "--format",
+            "cbm",
+            "--outfile",
+            "ex_charset.prg",
+            "ex_charset.asm"
+          ],
+          "outputs": [
+            "ex_charset.prg"
+          ],
+          "build": {
+            "tools": [
+              {
+                "name": "acme",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "This is ACME, release 0.97 (\"Zem\"), 28 June 2020"
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "stage": "assemble",
+                "cwd": ".",
+                "argv": [
+                  "acme",
+                  "--cpu",
+                  "6510",
+                  "--format",
+                  "cbm",
+                  "--outfile",
+                  "ex_charset.prg",
+                  "ex_charset.asm"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "ex_charset.prg"
+                ]
+              }
+            ],
+            "assembler": [
+              {
+                "stage": "assemble",
+                "cwd": ".",
+                "argv": [
+                  "asm198x",
+                  "--dialect",
+                  "acme",
+                  "--prg",
+                  "ex_charset.asm",
+                  "-o",
+                  "ex_charset.prg"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "ex_charset.prg"
+                ]
+              }
+            ],
+            "compare": [
+              {
+                "reference": "ex_charset.prg",
+                "assembler": "ex_charset.prg"
+              }
+            ],
+            "directories": [],
+            "adapters": [],
+            "issues": [
+              "https://github.com/asm198x/asm198x/issues/618"
+            ]
+          }
         }
       ]
     },
@@ -40,14 +278,117 @@
       "dialect": "ca65",
       "upstream": "https://github.com/bbbradsmith/NES-ca65-example.git",
       "commit": "1bb961dcdf317f39460c0c28a13f33a82feb29c4",
-      "license": { "spdx": "LicenseRef-BradSmith-Permissive", "path": "readme.md" },
+      "license": {
+        "spdx": "LicenseRef-BradSmith-Permissive",
+        "path": "readme.md"
+      },
       "targets": [
         {
           "id": "example",
           "cwd": ".",
-          "sources": ["example.s", "example.cfg", "background.chr", "sprite.chr"],
-          "reference": ["ca65", "example.s", "-g", "-o", "example.o"],
-          "outputs": ["example.o", "example.nes"]
+          "sources": [
+            "example.s",
+            "example.cfg",
+            "background.chr",
+            "sprite.chr"
+          ],
+          "reference": [
+            "ca65",
+            "example.s",
+            "-g",
+            "-o",
+            "example.o"
+          ],
+          "outputs": [
+            "example.o",
+            "example.nes"
+          ],
+          "build": {
+            "tools": [
+              {
+                "name": "ca65",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "ca65 V2.18 - N/A"
+                ]
+              },
+              {
+                "name": "ld65",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "ld65 V2.18 - N/A"
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "stage": "assemble",
+                "cwd": ".",
+                "argv": [
+                  "ca65",
+                  "example.s",
+                  "-g",
+                  "-o",
+                  "example.o"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "example.o"
+                ]
+              },
+              {
+                "stage": "link",
+                "cwd": ".",
+                "argv": [
+                  "ld65",
+                  "-o",
+                  "example.nes",
+                  "-C",
+                  "example.cfg",
+                  "example.o"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "example.nes"
+                ]
+              }
+            ],
+            "assembler": [
+              {
+                "stage": "assemble",
+                "cwd": ".",
+                "argv": [
+                  "asm198x",
+                  "--dialect",
+                  "ca65",
+                  "-C",
+                  "example.cfg",
+                  "example.s",
+                  "-o",
+                  "example.nes"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "example.nes"
+                ]
+              }
+            ],
+            "compare": [
+              {
+                "reference": "example.nes",
+                "assembler": "example.nes"
+              }
+            ],
+            "directories": [],
+            "adapters": [],
+            "issues": [
+              "https://github.com/asm198x/asm198x/issues/618"
+            ]
+          }
         }
       ]
     },
@@ -58,14 +399,116 @@
       "dialect": "ca65",
       "upstream": "https://github.com/cc65/cc65.git",
       "commit": "e11fb5c39371046ebe25485f984f644c5a0d65d3",
-      "license": { "spdx": "Zlib", "path": "LICENSE" },
+      "license": {
+        "spdx": "Zlib",
+        "path": "LICENSE"
+      },
       "targets": [
         {
           "id": "opcode-space",
           "cwd": "test/asm/opcodes",
-          "sources": ["test/asm/opcodes/6502dtv-opcodes.s", "test/asm/opcodes/6502dtv-opcodes.ref"],
-          "reference": ["ca65", "6502dtv-opcodes.s", "-o", "6502dtv-opcodes.o"],
-          "outputs": ["test/asm/opcodes/6502dtv-opcodes.o"]
+          "sources": [
+            "test/asm/opcodes/6502dtv-opcodes.s",
+            "test/asm/opcodes/6502dtv-opcodes.ref"
+          ],
+          "reference": [
+            "ca65",
+            "6502dtv-opcodes.s",
+            "-o",
+            "6502dtv-opcodes.o"
+          ],
+          "outputs": [
+            "test/asm/opcodes/6502dtv-opcodes.o"
+          ],
+          "build": {
+            "tools": [
+              {
+                "name": "ca65",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "ca65 V2.18 - N/A"
+                ]
+              },
+              {
+                "name": "ld65",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "ld65 V2.18 - N/A"
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "stage": "assemble",
+                "cwd": "test/asm/opcodes",
+                "argv": [
+                  "ca65",
+                  "--cpu",
+                  "6502dtv",
+                  "-o",
+                  "6502dtv-opcodes.o",
+                  "6502dtv-opcodes.s"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "test/asm/opcodes/6502dtv-opcodes.o"
+                ]
+              },
+              {
+                "stage": "link",
+                "cwd": "test/asm/opcodes",
+                "argv": [
+                  "ld65",
+                  "-C",
+                  "@adapter:ecosystem/adapters/cc65-opcodes.cfg",
+                  "-o",
+                  "6502dtv-opcodes.bin",
+                  "6502dtv-opcodes.o"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "test/asm/opcodes/6502dtv-opcodes.bin"
+                ]
+              }
+            ],
+            "assembler": [
+              {
+                "stage": "assemble",
+                "cwd": "test/asm/opcodes",
+                "argv": [
+                  "asm198x",
+                  "--dialect",
+                  "ca65",
+                  "-C",
+                  "@adapter:ecosystem/adapters/cc65-opcodes.cfg",
+                  "6502dtv-opcodes.s",
+                  "-o",
+                  "6502dtv-opcodes.bin"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "test/asm/opcodes/6502dtv-opcodes.bin"
+                ]
+              }
+            ],
+            "compare": [
+              {
+                "reference": "test/asm/opcodes/6502dtv-opcodes.bin",
+                "assembler": "test/asm/opcodes/6502dtv-opcodes.bin"
+              }
+            ],
+            "directories": [],
+            "adapters": [
+              "ecosystem/adapters/cc65-opcodes.cfg"
+            ],
+            "issues": [
+              "https://github.com/asm198x/asm198x/issues/618"
+            ]
+          }
         }
       ]
     },
@@ -76,14 +519,116 @@
       "dialect": "ca65",
       "upstream": "https://github.com/cc65/cc65.git",
       "commit": "e11fb5c39371046ebe25485f984f644c5a0d65d3",
-      "license": { "spdx": "Zlib", "path": "LICENSE" },
+      "license": {
+        "spdx": "Zlib",
+        "path": "LICENSE"
+      },
       "targets": [
         {
           "id": "opcode-space",
           "cwd": "test/asm/opcodes",
-          "sources": ["test/asm/opcodes/65ce02-opcodes.s", "test/asm/opcodes/65ce02-opcodes.ref"],
-          "reference": ["ca65", "65ce02-opcodes.s", "-o", "65ce02-opcodes.o"],
-          "outputs": ["test/asm/opcodes/65ce02-opcodes.o"]
+          "sources": [
+            "test/asm/opcodes/65ce02-opcodes.s",
+            "test/asm/opcodes/65ce02-opcodes.ref"
+          ],
+          "reference": [
+            "ca65",
+            "65ce02-opcodes.s",
+            "-o",
+            "65ce02-opcodes.o"
+          ],
+          "outputs": [
+            "test/asm/opcodes/65ce02-opcodes.o"
+          ],
+          "build": {
+            "tools": [
+              {
+                "name": "ca65",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "ca65 V2.18 - N/A"
+                ]
+              },
+              {
+                "name": "ld65",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "ld65 V2.18 - N/A"
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "stage": "assemble",
+                "cwd": "test/asm/opcodes",
+                "argv": [
+                  "ca65",
+                  "--cpu",
+                  "65ce02",
+                  "-o",
+                  "65ce02-opcodes.o",
+                  "65ce02-opcodes.s"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "test/asm/opcodes/65ce02-opcodes.o"
+                ]
+              },
+              {
+                "stage": "link",
+                "cwd": "test/asm/opcodes",
+                "argv": [
+                  "ld65",
+                  "-C",
+                  "@adapter:ecosystem/adapters/cc65-opcodes.cfg",
+                  "-o",
+                  "65ce02-opcodes.bin",
+                  "65ce02-opcodes.o"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "test/asm/opcodes/65ce02-opcodes.bin"
+                ]
+              }
+            ],
+            "assembler": [
+              {
+                "stage": "assemble",
+                "cwd": "test/asm/opcodes",
+                "argv": [
+                  "asm198x",
+                  "--dialect",
+                  "ca65",
+                  "-C",
+                  "@adapter:ecosystem/adapters/cc65-opcodes.cfg",
+                  "65ce02-opcodes.s",
+                  "-o",
+                  "65ce02-opcodes.bin"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "test/asm/opcodes/65ce02-opcodes.bin"
+                ]
+              }
+            ],
+            "compare": [
+              {
+                "reference": "test/asm/opcodes/65ce02-opcodes.bin",
+                "assembler": "test/asm/opcodes/65ce02-opcodes.bin"
+              }
+            ],
+            "directories": [],
+            "adapters": [
+              "ecosystem/adapters/cc65-opcodes.cfg"
+            ],
+            "issues": [
+              "https://github.com/asm198x/asm198x/issues/618"
+            ]
+          }
         }
       ]
     },
@@ -94,32 +639,257 @@
       "dialect": "ca65",
       "upstream": "https://github.com/cc65/cc65.git",
       "commit": "e11fb5c39371046ebe25485f984f644c5a0d65d3",
-      "license": { "spdx": "Zlib", "path": "LICENSE" },
+      "license": {
+        "spdx": "Zlib",
+        "path": "LICENSE"
+      },
       "targets": [
         {
           "id": "opcode-space",
           "cwd": "test/asm/opcodes",
-          "sources": ["test/asm/opcodes/4510-opcodes.s", "test/asm/opcodes/4510-opcodes.ref"],
-          "reference": ["ca65", "4510-opcodes.s", "-o", "4510-opcodes.o"],
-          "outputs": ["test/asm/opcodes/4510-opcodes.o"]
+          "sources": [
+            "test/asm/opcodes/4510-opcodes.s",
+            "test/asm/opcodes/4510-opcodes.ref"
+          ],
+          "reference": [
+            "ca65",
+            "4510-opcodes.s",
+            "-o",
+            "4510-opcodes.o"
+          ],
+          "outputs": [
+            "test/asm/opcodes/4510-opcodes.o"
+          ],
+          "build": {
+            "tools": [
+              {
+                "name": "ca65",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "ca65 V2.18 - N/A"
+                ]
+              },
+              {
+                "name": "ld65",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "ld65 V2.18 - N/A"
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "stage": "assemble",
+                "cwd": "test/asm/opcodes",
+                "argv": [
+                  "ca65",
+                  "--cpu",
+                  "4510",
+                  "-o",
+                  "4510-opcodes.o",
+                  "4510-opcodes.s"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "test/asm/opcodes/4510-opcodes.o"
+                ]
+              },
+              {
+                "stage": "link",
+                "cwd": "test/asm/opcodes",
+                "argv": [
+                  "ld65",
+                  "-C",
+                  "@adapter:ecosystem/adapters/cc65-opcodes.cfg",
+                  "-o",
+                  "4510-opcodes.bin",
+                  "4510-opcodes.o"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "test/asm/opcodes/4510-opcodes.bin"
+                ]
+              }
+            ],
+            "assembler": [
+              {
+                "stage": "assemble",
+                "cwd": "test/asm/opcodes",
+                "argv": [
+                  "asm198x",
+                  "--dialect",
+                  "ca65",
+                  "-C",
+                  "@adapter:ecosystem/adapters/cc65-opcodes.cfg",
+                  "4510-opcodes.s",
+                  "-o",
+                  "4510-opcodes.bin"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "test/asm/opcodes/4510-opcodes.bin"
+                ]
+              }
+            ],
+            "compare": [
+              {
+                "reference": "test/asm/opcodes/4510-opcodes.bin",
+                "assembler": "test/asm/opcodes/4510-opcodes.bin"
+              }
+            ],
+            "directories": [],
+            "adapters": [
+              "ecosystem/adapters/cc65-opcodes.cfg"
+            ],
+            "issues": [
+              "https://github.com/asm198x/asm198x/issues/618"
+            ]
+          }
         }
       ]
     },
     {
       "id": "gbdev-gb-asm-tutorial",
-      "name": "GB ASM Tutorial — Unbricked",
+      "name": "GB ASM Tutorial \u2014 Unbricked",
       "cpu": "sm83",
       "dialect": "rgbasm",
       "upstream": "https://github.com/gbdev/gb-asm-tutorial.git",
       "commit": "d127fc21a136eb3a081d358f3bd0d322bd399a29",
-      "license": { "spdx": "MIT", "path": "LICENSE" },
+      "license": {
+        "spdx": "MIT",
+        "path": "LICENSE"
+      },
       "targets": [
         {
           "id": "unbricked",
           "cwd": "unbricked/bricks",
-          "sources": ["unbricked/bricks/main.asm", "unbricked/bricks/hardware.inc"],
-          "reference": ["rgbasm", "-o", "main.o", "main.asm"],
-          "outputs": ["unbricked/bricks/main.o", "unbricked/bricks/unbricked.gb"]
+          "sources": [
+            "unbricked/bricks/main.asm",
+            "unbricked/bricks/hardware.inc"
+          ],
+          "reference": [
+            "rgbasm",
+            "-o",
+            "main.o",
+            "main.asm"
+          ],
+          "outputs": [
+            "unbricked/bricks/main.o",
+            "unbricked/bricks/unbricked.gb"
+          ],
+          "build": {
+            "tools": [
+              {
+                "name": "rgbasm",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "rgbasm v1.0.3",
+                  "rgbasm v1.0.4"
+                ]
+              },
+              {
+                "name": "rgbfix",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "rgbfix v1.0.3",
+                  "rgbfix v1.0.4"
+                ]
+              },
+              {
+                "name": "rgblink",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "rgblink v1.0.3",
+                  "rgblink v1.0.4"
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "stage": "assemble",
+                "cwd": "unbricked/bricks",
+                "argv": [
+                  "rgbasm",
+                  "-o",
+                  "main.o",
+                  "main.asm"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "unbricked/bricks/main.o"
+                ]
+              },
+              {
+                "stage": "link",
+                "cwd": "unbricked/bricks",
+                "argv": [
+                  "rgblink",
+                  "-o",
+                  "unbricked.gb",
+                  "main.o"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "unbricked/bricks/unbricked.gb"
+                ]
+              },
+              {
+                "stage": "finalize",
+                "cwd": "unbricked/bricks",
+                "argv": [
+                  "rgbfix",
+                  "-v",
+                  "-p",
+                  "0xFF",
+                  "unbricked.gb"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "unbricked/bricks/unbricked.gb"
+                ]
+              }
+            ],
+            "assembler": [
+              {
+                "stage": "assemble",
+                "cwd": "unbricked/bricks",
+                "argv": [
+                  "asm198x",
+                  "--dialect",
+                  "rgbasm",
+                  "--gb-rom",
+                  "main.asm",
+                  "-o",
+                  "unbricked.gb"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "unbricked/bricks/unbricked.gb"
+                ]
+              }
+            ],
+            "compare": [
+              {
+                "reference": "unbricked/bricks/unbricked.gb",
+                "assembler": "unbricked/bricks/unbricked.gb"
+              }
+            ],
+            "directories": [],
+            "adapters": [],
+            "issues": [
+              "https://github.com/asm198x/asm198x/issues/618"
+            ]
+          }
         }
       ]
     },
@@ -130,14 +900,101 @@
       "dialect": "sjasmplus",
       "upstream": "https://github.com/howprice/specnext-invaders.git",
       "commit": "e3211ea8ad2e83aca4d07d70bd8e09b7b51a9a1d",
-      "license": { "spdx": "MIT", "path": "LICENSE" },
+      "license": {
+        "spdx": "MIT",
+        "path": "LICENSE"
+      },
       "targets": [
         {
           "id": "game",
           "cwd": ".",
-          "sources": ["src/main.asm", "src/macros.asm", "src/game_state.asm", "src/sprite_data.asm", "data"],
-          "reference": ["sjasmplus", "--fullpath", "--sld=bin/invaders.sld", "--lst=bin/invaders.lst", "--lstlab", "--sym=bin/invaders.labels", "--msg=war", "src/main.asm"],
-          "outputs": ["bin/invaders.nex"]
+          "sources": [
+            "src/main.asm",
+            "src/macros.asm",
+            "src/game_state.asm",
+            "src/sprite_data.asm",
+            "data"
+          ],
+          "reference": [
+            "sjasmplus",
+            "--fullpath",
+            "--sld=bin/invaders.sld",
+            "--lst=bin/invaders.lst",
+            "--lstlab",
+            "--sym=bin/invaders.labels",
+            "--msg=war",
+            "src/main.asm"
+          ],
+          "outputs": [
+            "bin/invaders.nex"
+          ],
+          "build": {
+            "tools": [
+              {
+                "name": "sjasmplus",
+                "probe": [
+                  "--version"
+                ],
+                "versions": [
+                  "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)"
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "stage": "assemble",
+                "cwd": ".",
+                "argv": [
+                  "sjasmplus",
+                  "--fullpath",
+                  "--sld=bin/invaders.sld",
+                  "--lst=bin/invaders.lst",
+                  "--lstlab",
+                  "--sym=bin/invaders.labels",
+                  "--msg=war",
+                  "src/main.asm"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "bin/invaders.nex"
+                ]
+              }
+            ],
+            "assembler": [
+              {
+                "stage": "assemble",
+                "cwd": ".",
+                "argv": [
+                  "asm198x",
+                  "--dialect",
+                  "sjasmplus",
+                  "--cpu",
+                  "z80n",
+                  "src/main.asm",
+                  "-o",
+                  "asm198x.raw"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "asm198x.raw",
+                  "bin/invaders.nex"
+                ]
+              }
+            ],
+            "compare": [
+              {
+                "reference": "bin/invaders.nex",
+                "assembler": "bin/invaders.nex"
+              }
+            ],
+            "directories": [
+              "bin"
+            ],
+            "adapters": [],
+            "issues": [
+              "https://github.com/asm198x/asm198x/issues/618"
+            ]
+          }
         }
       ]
     },
@@ -148,14 +1005,98 @@
       "dialect": "vasm",
       "upstream": "https://github.com/nicodex/HelloAmi.git",
       "commit": "6dae73b6968cc2caaea356b7a35b0ae1dd78fe09",
-      "license": { "spdx": "MIT", "path": "LICENSE" },
+      "license": {
+        "spdx": "MIT",
+        "path": "LICENSE"
+      },
       "targets": [
         {
           "id": "hello-ami",
           "cwd": ".",
-          "sources": ["HelloAmi.asm"],
-          "reference": ["vasmm68k_mot", "-quiet", "-Fhunkexe", "-nosym", "-pic", "-m68000", "-no-fpu", "-showopt", "-o", "HelloAmi", "HelloAmi.asm"],
-          "outputs": ["HelloAmi"]
+          "sources": [
+            "HelloAmi.asm"
+          ],
+          "reference": [
+            "vasmm68k_mot",
+            "-quiet",
+            "-Fhunkexe",
+            "-nosym",
+            "-pic",
+            "-m68000",
+            "-no-fpu",
+            "-showopt",
+            "-o",
+            "HelloAmi",
+            "HelloAmi.asm"
+          ],
+          "outputs": [
+            "HelloAmi"
+          ],
+          "build": {
+            "tools": [
+              {
+                "name": "vasmm68k_mot",
+                "probe": [],
+                "versions": [
+                  "vasm 2.0b (c) in 2002-2025 Volker Barthelmann",
+                  "vasm 2.0f (c) in 2002-2026 Volker Barthelmann"
+                ]
+              }
+            ],
+            "reference": [
+              {
+                "stage": "assemble",
+                "cwd": ".",
+                "argv": [
+                  "vasmm68k_mot",
+                  "-quiet",
+                  "-Fhunkexe",
+                  "-nosym",
+                  "-pic",
+                  "-m68000",
+                  "-no-fpu",
+                  "-showopt",
+                  "-o",
+                  "HelloAmi",
+                  "HelloAmi.asm"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "HelloAmi"
+                ]
+              }
+            ],
+            "assembler": [
+              {
+                "stage": "assemble",
+                "cwd": ".",
+                "argv": [
+                  "asm198x",
+                  "--dialect",
+                  "vasm",
+                  "--exe",
+                  "HelloAmi.asm",
+                  "-o",
+                  "HelloAmi"
+                ],
+                "timeout_seconds": 120,
+                "outputs": [
+                  "HelloAmi"
+                ]
+              }
+            ],
+            "compare": [
+              {
+                "reference": "HelloAmi",
+                "assembler": "HelloAmi"
+              }
+            ],
+            "directories": [],
+            "adapters": [],
+            "issues": [
+              "https://github.com/asm198x/asm198x/issues/618"
+            ]
+          }
         }
       ]
     }

@@ -1,0 +1,58 @@
+name: Ecosystem builds
+
+on:
+  schedule:
+    - cron: '43 6 * * 0'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  packages: read
+
+concurrency:
+  group: ecosystem-builds
+  cancel-in-progress: false
+
+jobs:
+  audit:
+    name: Audit complete pinned targets
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    container:
+      image: ghcr.io/${{ github.repository_owner }}/arbiter:latest
+      credentials:
+        username: ${{ github.actor }}
+        password: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v7
+      - name: Verify native tool identities
+        run: verify-arbiters
+      - name: Allow Git metadata in this checkout
+        run: git config --global --add safe.directory "$GITHUB_WORKSPACE"
+      - name: Fetch and verify pinned source without executing it
+        run: cargo xtask ecosystem fetch "$RUNNER_TEMP/ecosystem-sources"
+      - name: Execute the reviewed complete build plans
+        # Expected Asm incompatibilities are findings. Missing infrastructure
+        # or a failed native control still fail this capture command.
+        run: cargo xtask ecosystem audit "$RUNNER_TEMP/ecosystem-sources" "$RUNNER_TEMP/ecosystem-results" --all --record-findings
+      - name: Validate complete results before rendering
+        id: evidence
+        if: always()
+        run: cargo xtask ecosystem ledger "$RUNNER_TEMP/ecosystem-results/report.json" --validate
+      - name: Render the captured table for review
+        if: always() && steps.evidence.outcome == 'success'
+        run: |
+          cp "$RUNNER_TEMP/ecosystem-results/report.json" ecosystem/results/current.json
+          cargo xtask ecosystem ledger ecosystem/results/current.json --write
+          cargo xtask docs
+      - name: Retain actual target evidence and proposed table
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: ecosystem-build-results
+          if-no-files-found: error
+          path: |
+            ${{ runner.temp }}/ecosystem-results/report.json
+            ${{ runner.temp }}/ecosystem-results/logs/
+            docs/ecosystem-corpus.md
+            docs/book/src/reference/ecosystem.md

@@ -1,0 +1,19 @@
+{
+  "argv": [
+    "/private/tmp/asm198x-sj-followup-cli",
+    "--dialect",
+    "vasm",
+    "--exe",
+    "/private/tmp/asm198x-ecosystem-batch-sources/nicodex-helloami/HelloAmi.asm",
+    "-o",
+    "/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-hello-boundary-iqwllr5g/HelloAmi"
+  ],
+  "exit": 0,
+  "stdout": "",
+  "stderr": "assembled 244 byte(s) -> /var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-hello-boundary-iqwllr5g/HelloAmi\n",
+  "native_length": 244,
+  "asm_length": 244,
+  "native_sha256": "826d98fbcae710038965fb94e5366acf8bbf4af1ab11a61c3e2aad5945c32dab",
+  "asm_sha256": "826d98fbcae710038965fb94e5366acf8bbf4af1ab11a61c3e2aad5945c32dab",
+  "equal": true
+}
