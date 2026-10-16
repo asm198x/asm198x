@@ -1,0 +1,37 @@
+{
+  "schema": 1,
+  "producer_source": "27e8a87c376fc7a41e1f098184e4aef6cec697de",
+  "reference_report_sha256": "4699188774496de35ef412d9bad4944365a5cf9b0926af4315dc21cf39ba078d",
+  "replay_report_sha256": "68ae0c035e4f5e12a0b2edbfecf18fd0da83e57edb9a3ff5748fe65757dc6078",
+  "reference_captured_unix_seconds": 1792164580,
+  "replay_captured_unix_seconds": 1792167035,
+  "positive_control": {
+    "tools": [
+      "acme",
+      "ca65",
+      "ld65",
+      "rgbasm",
+      "rgblink",
+      "rgbfix",
+      "sjasmplus",
+      "vasmm68k_mot"
+    ],
+    "expected_exit": 99,
+    "observed_calls": [
+      "acme",
+      "ca65",
+      "ld65",
+      "rgbasm",
+      "rgblink",
+      "rgbfix",
+      "sjasmplus",
+      "vasmm68k_mot"
+    ]
+  },
+  "calls_during_replay": [],
+  "outcomes": {
+    "equivalent": 6,
+    "assembler_rejected": 2
+  },
+  "task_work_directory_removed": true
+}

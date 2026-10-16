@@ -155,7 +155,11 @@ fn write_pages(repo: &Path, check: bool, report: &mut Report) -> Result<(), Stri
 
 /// Rewrite every generated block in one file, returning the new text and how
 /// many blocks it held.
-fn regenerate(source: &str, path: &Path, repo: &Path) -> Result<(String, usize), String> {
+pub(crate) fn regenerate(
+    source: &str,
+    path: &Path,
+    repo: &Path,
+) -> Result<(String, usize), String> {
     let mut out = String::with_capacity(source.len());
     let mut rest = source;
     let mut blocks = 0;
@@ -214,6 +218,7 @@ fn generate(command: &str, path: &Path, repo: &Path) -> Result<String, String> {
         "xtask includes --markdown" => Ok(crate::includes::markdown()),
         "xtask includes --anchors" => Ok(crate::includes::anchors()),
         "xtask compare --markdown" => Ok(crate::compare::markdown(repo)),
+        "xtask ecosystem --markdown" => crate::ecosystem::markdown(repo),
         "xtask evidence --markdown" => Ok(crate::evidence::markdown(repo)),
         other => Err(format!(
             "{}: no generator for `{other}`\n\
