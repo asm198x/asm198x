@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.69](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.68...asm198x-v0.0.69) - 2026-10-16
+
+### Fixed
+
+- *(ca65)* skip absent custom segments during placement
+
 ## [0.0.68](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.67...asm198x-v0.0.68) - 2026-10-16
 
 ### Fixed
