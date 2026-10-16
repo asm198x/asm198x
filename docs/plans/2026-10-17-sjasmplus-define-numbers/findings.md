@@ -53,3 +53,22 @@ being rewritten to an accepted, incorrect `'7'` while that parser gap remains.
 Final local validation: 1,501 workspace tests passed, 38 explicitly ignored.
 Clippy with all targets/Lua and warnings denied, formatting, generated docs,
 Ruff and all 51 Node package/workflow checks passed. Their logs are retained.
+
+
+## Clean whole-project control
+
+Producer `44288a241c2f341bb35dfb6b12a1e8a9283d2905` was built clean by the
+explicit ecosystem runner against unchanged SpecNext pin
+`e3211ea8ad2e83aca4d07d70bd8e09b7b51a9a1d`. The native build still emits
+33,280 bytes, SHA-256
+`5fbed92a7d60dab47de8b22162c9227df051eaf67c26e85e618b24f6429dd07f`.
+The complete image, report and ten raw process streams are retained in
+`specnext-after-define-numbers/`; all streams were checked against the report.
+Asm198x remains blocked at `src/main.asm:272` on DISPLAY `/H`, as already tracked
+in #735. This capture does not claim the whole project is equivalent.
+
+`packed-single-boundary.json` retains the independent packed-single-quote gap
+from the same clean checkout and freshly built debug executable, including both
+tool identities and full process results. Native `dd 'FF'`, with or without
+DEFINE, emits `46460000`; Asm refuses `malformed character literal`. Positive
+controls `dd "FF"` and `dd 'F'` match native. The build log is retained as well.
