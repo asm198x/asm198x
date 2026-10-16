@@ -163,6 +163,33 @@ fn extent_cases() -> Vec<(&'static str, String, String, Option<Vec<u8>>)> {
     let pinned = format!(
         "{full}\nSEGMENTS {{ PROGRAM: load=PRG, type=ro; TABLE: load=PRG, type=ro, start=$fffa; }}"
     );
+    cases.push((
+        "absent_pinned_segment",
+        pinned.clone(),
+        ".segment \"PROGRAM\"\n.res $8000,$ea\n".into(),
+        Some(vec![0xea; 0x8000]),
+    ));
+    for suffix in [
+        ".segment \"TABLE\"\n",
+        ".segment \"TABLE\"\ntable:\n",
+        ".segment \"TABLE\"\n.res 0\n",
+    ] {
+        cases.push((
+            "present_empty_pinned_segment",
+            pinned.clone(),
+            format!(".segment \"PROGRAM\"\n.res $8000,$ea\n{suffix}"),
+            None,
+        ));
+    }
+    let floating = "MEMORY { PRG: start=$8000, size=16, file=%O, fill=yes; } SEGMENTS { PROGRAM: load=PRG, type=ro; UNUSED: load=PRG, type=ro, align=16; TAIL: load=PRG, type=ro; }";
+    let mut expected = vec![0xea, 0xbb];
+    expected.resize(16, 0);
+    cases.push((
+        "absent_aligned_segment",
+        floating.into(),
+        ".segment \"PROGRAM\"\n.byte $ea\n.segment \"TAIL\"\n.byte $bb\n".into(),
+        Some(expected),
+    ));
     let mut split = vec![0xea; 0x7ffa];
     split.extend([0x00, 0x80, 0x01, 0x80, 0x02, 0x80]);
     cases.push((

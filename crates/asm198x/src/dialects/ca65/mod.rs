@@ -212,6 +212,8 @@ impl crate::ast::NativeItem for Kind {
 }
 
 struct Parsed {
+    /// Explicit segment selections, including empty segments, in taken source.
+    declared_segments: BTreeSet<String>,
     stmts: Vec<Stmt>,
     /// Each label's segment, for the zero-page-vs-absolute decision.
     label_seg: BTreeMap<String, String>,
@@ -402,8 +404,14 @@ fn assemble_program(
     // statement's size depends on its absolute address (`.align` measures
     // from the segment's start), so this pass cannot disagree with the real
     // one. The default layout floats nothing and skips this entirely.
-    let seg_lengths = if layout_def.needs_lengths() {
-        let mut lengths: BTreeMap<String, u32> = BTreeMap::new();
+    let seg_lengths = if layout_def.from_config || layout_def.needs_lengths() {
+        // Config resolution also needs presence: an explicitly selected empty
+        // segment exists for ld65, while an absent declaration reserves nothing.
+        let mut lengths: BTreeMap<String, u32> = parsed
+            .declared_segments
+            .iter()
+            .map(|name| (name.clone(), 0))
+            .collect();
         for stmt in &parsed.stmts {
             let off = *lengths.entry(stmt.seg.clone()).or_insert(0);
             let (_, size) = resolve(set, stmt.kind.clone(), &size_env, off, stmt.line)
@@ -595,7 +603,11 @@ fn assemble_program(
         }
     }
 
-    layout_def.validate_extents(layout, &offsets)?;
+    let mut actual_lengths = offsets.clone();
+    for name in &parsed.declared_segments {
+        actual_lengths.entry(name.clone()).or_insert(0);
+    }
+    layout_def.validate_extents(layout, &actual_lengths)?;
 
     // The section table: every segment the program touched (placed bytes or
     // just labels/reservations), in config order. CPU-addressed segments carry

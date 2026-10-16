@@ -33,6 +33,7 @@ pub(super) fn parsed_from_program(
     let mut st = Projection {
         seg: "CODE".to_string(),
         seg_stack: Vec::new(),
+        declared_segments: BTreeSet::new(),
         stmts: Vec::new(),
         label_seg: BTreeMap::new(),
         consts: BTreeMap::new(),
@@ -46,6 +47,7 @@ pub(super) fn parsed_from_program(
     let last = program.nodes.last().map_or(0, |n| n.span.line);
     sw.reader.finish(last)?;
     Ok(Parsed {
+        declared_segments: st.declared_segments,
         stmts: st.stmts,
         label_seg: st.label_seg,
         consts: st.consts,
@@ -105,6 +107,7 @@ struct Projection {
     seg: String,
     /// Segments saved by `.pushseg`, innermost last; `.popseg` restores one.
     seg_stack: Vec<String>,
+    declared_segments: BTreeSet<String>,
     stmts: Vec<Stmt>,
     label_seg: BTreeMap<String, String>,
     consts: BTreeMap<String, i64>,
@@ -819,7 +822,10 @@ fn project_one(node: &crate::ast::Node, st: &mut Projection) -> Result<(), AsmEr
             _ => {
                 if let Some(switch) = segment_switch(&node.source) {
                     match switch {
-                        SegSwitch::To(name) => *seg = name,
+                        SegSwitch::To(name) => {
+                            st.declared_segments.insert(name.clone());
+                            *seg = name;
+                        }
                         SegSwitch::Push => seg_stack.push(seg.clone()),
                         // ca65 pops an empty stack with a diagnostic of its own;
                         // ours is the parse-time refusal, so an unmatched
