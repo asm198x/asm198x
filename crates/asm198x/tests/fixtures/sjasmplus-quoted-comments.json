@@ -1,0 +1,195 @@
+{
+  "reference": {
+    "path": "/usr/local/bin/sjasmplus",
+    "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+    "version_process": {
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+    }
+  },
+  "cases": [
+    {
+      "name": "semicolon_string",
+      "source": " org 8000h\n db \"a;b\",7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "613b6207"
+    },
+    {
+      "name": "slashes_string",
+      "source": " org 8000h\n db \"a//b\",7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "612f2f6207"
+    },
+    {
+      "name": "semicolon_character",
+      "source": " org 8000h\n db ';',7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "3b07"
+    },
+    {
+      "name": "mixed",
+      "source": " org 8000h\n db '\"',\"a';//b\",';',',',7 ; actual comment\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "2261273b2f2f623b2c07"
+    },
+    {
+      "name": "real_semicolon",
+      "source": " org 8000h\n db \"ok\",7 ; db 99, \"unterminated\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "6f6b07"
+    },
+    {
+      "name": "real_slashes",
+      "source": " org 8000h\n db \"ok\",7 // db 99, \"unterminated\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "6f6b07"
+    },
+    {
+      "name": "comment_order",
+      "source": " org 8000h\n db \"a//b;c\",7 ; // db 99\n db \"d;e//f\",8 // ; db 99\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 4 lines, work time: 0.000 seconds\n",
+      "hex": "612f2f623b6307643b652f2f6608"
+    },
+    {
+      "name": "register",
+      "source": " org 8000h\n ex af,af' ; comment with ' and nonsense\n ex af,af' // comment with ' and nonsense\n db \";\"\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "08083b"
+    },
+    {
+      "name": "backslash_character",
+      "source": " org 8000h\n db '\\',7\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "5c07"
+    },
+    {
+      "name": "word",
+      "source": " org 8000h\n dw ';',',',7 ; real\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "3b002c000700"
+    },
+    {
+      "name": "macro",
+      "source": " org 8000h\nput macro\n db \"a;b//c\",7 ; body\n endm\n put\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "613b622f2f6307"
+    },
+    {
+      "name": "repetition",
+      "source": " org 8000h\n rept 2\n db \"a;b//c\",7 // body\n endr\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n",
+      "hex": "613b622f2f6307613b622f2f6307"
+    },
+    {
+      "name": "unterminated",
+      "source": " org 8000h\n db \"a;b//c\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Syntax error: \"a;b//c\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "613b622f2f63"
+    },
+    {
+      "name": "malformed",
+      "source": " org 8000h\n db \"a;b//c\",?\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=out.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Syntax error: ?\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "613b622f2f63"
+    }
+  ]
+}

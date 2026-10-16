@@ -719,14 +719,37 @@ impl Z80Syntax for SjasmplusSyntax {
     }
 
     fn strip_comment<'a>(&self, line: &'a str) -> &'a str {
-        // The earlier of `;` and `//` starts the comment.
-        let semi = line.find(';');
-        let slashes = line.find("//");
-        let cut = match (semi, slashes) {
-            (Some(a), Some(b)) => Some(a.min(b)),
-            (a, b) => a.or(b),
-        };
-        cut.map_or(line, |i| &line[..i])
+        // Only unquoted delimiters start comments. The apostrophe in AF'
+        // belongs to the register name, not to a character literal.
+        let mut quote = None;
+        let mut previous = None;
+        let mut escaped = false;
+        for (i, ch) in line.char_indices() {
+            if escaped {
+                escaped = false;
+                previous = Some(ch);
+                continue;
+            }
+            match quote {
+                Some('"') if ch == '\\' => escaped = true,
+                Some(q) if ch == q => quote = None,
+                Some(_) => {}
+                None if ch == ';' || (ch == '/' && line[i..].starts_with("//")) => {
+                    return &line[..i];
+                }
+                None if ch == '"'
+                    || (ch == '\''
+                        && !previous.is_some_and(|c: char| {
+                            c.is_ascii_alphanumeric() || c == '_' || c == '.'
+                        })) =>
+                {
+                    quote = Some(ch);
+                }
+                None => {}
+            }
+            previous = Some(ch);
+        }
+        line
     }
 
     /// sjasmplus has the `^` bitwise-XOR operator (pasmo does not).
@@ -957,11 +980,16 @@ impl Z80Syntax for SjasmplusSyntax {
         if word.eq_ignore_ascii_case("savecpr") {
             return self.parse_savecpr(args, line).map(Some);
         }
-        // The data directives sjasmplus has and the shared Z80 set does not.
-        // Every shape here was read off v1.21.0 rather than assumed.
+        // Keep common and SjASMPlus-specific data on the same item parser,
+        // including its explicit refusal of unsupported decoded escapes.
         let lower = word.to_ascii_lowercase();
         match lower.as_str() {
-            "word" => return Ok(Some(Operation::Words(flat(data_items(args, line)?)))),
+            "db" | "defb" | "defm" | "dm" | "byte" => {
+                return Ok(Some(Operation::Bytes(flat(data_items(args, line)?))));
+            }
+            "dw" | "defw" | "word" => {
+                return Ok(Some(Operation::Words(flat(data_items(args, line)?))));
+            }
             "dword" | "dd" | "defd" => {
                 return Ok(Some(wide(flat(data_items(args, line)?), 4)));
             }
@@ -1007,11 +1035,6 @@ impl Z80Syntax for SjasmplusSyntax {
             }
             _ => {}
         }
-        let word = if word.eq_ignore_ascii_case("byte") {
-            "db"
-        } else {
-            word
-        };
         z80::common_directive(self, word, args, line, consts)
     }
 
@@ -1111,6 +1134,44 @@ fn data_items(rest: &str, line: usize) -> Result<Vec<DataItem>, AsmError> {
     let rest = rest.trim();
     if rest.is_empty() {
         return Err(AsmError::new(line, "directive needs at least one value"));
+    }
+    // The reference decodes these pairs only inside double quotes. Refuse
+    // rather than emit their undecoded characters; single-quoted backslashes
+    // and unknown pairs such as \q remain literal in native SjASMPlus.
+    let mut quote = None;
+    for (i, ch) in rest.char_indices() {
+        if quote == Some('"')
+            && ch == '\\'
+            && rest.as_bytes().get(i + 1).is_some_and(|next| {
+                matches!(
+                    next.to_ascii_lowercase(),
+                    b'\\'
+                        | b'"'
+                        | b'\''
+                        | b'?'
+                        | b'0'
+                        | b'a'
+                        | b'b'
+                        | b'd'
+                        | b'e'
+                        | b'f'
+                        | b'n'
+                        | b'r'
+                        | b't'
+                        | b'v'
+                )
+            })
+        {
+            return Err(AsmError::unsupported(
+                line,
+                "SjASMPlus string escape decoding is not supported yet; use numeric data values for escaped bytes",
+            ));
+        }
+        match quote {
+            Some(q) if ch == q => quote = None,
+            None if ch == '"' || ch == '\'' => quote = Some(ch),
+            _ => {}
+        }
     }
     let mut out = Vec::new();
     for piece in z80::split_data_items(rest) {

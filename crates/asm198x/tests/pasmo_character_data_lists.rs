@@ -191,9 +191,10 @@ fn malformed_data_lists_preserve_previous_images_and_source() {
 
 #[test]
 fn conversion_preserves_native_data_bytes() {
-    for case in fixtures().into_iter().filter(|case| {
-        case["dialect"] == "pasmo" && case["exit"] == 0 && case["name"] != "semicolon"
-    }) {
+    for case in fixtures()
+        .into_iter()
+        .filter(|case| case["dialect"] == "pasmo" && case["exit"] == 0)
+    {
         let source = case["source"].as_str().expect("source");
         for dialect in dialects(&case) {
             let conversion =
