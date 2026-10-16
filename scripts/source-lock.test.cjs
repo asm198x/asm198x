@@ -105,3 +105,39 @@ test('producer manifests validate their selected target while qualification requ
     assert.throws(() => packageIdentity(local, target, false), /wrong planned target/);
   }
 });
+
+for (const receiptStatus of [200, 404, 403, 500]) {
+  test(`published receipt HTTP ${receiptStatus} preserves its actual evidence scope`, async t => {
+    const { fetchPublished } = require('./fetch-published-package.cjs');
+    const { nativeTarget } = require('./package-identity.cjs');
+    const root = fs.mkdtempSync(path.join(os.tmpdir(), 'asm198x-public-lock-control-'));
+    t.after(() => fs.rmSync(root, {recursive: true, force: true}));
+    const target = nativeTarget();const archive = archiveName(target);
+    const plan = { releases: [{ app_name: 'asm198x', app_version: '1.0.0', artifacts: targets.map(archiveName) }], artifacts: {} };
+    for (const item of targets) plan.artifacts[archiveName(item)] = { target_triples: [item], checksum: archiveName(item) + '.sha256' };
+    const lock = 'version = 4\n';const commit = 'a'.repeat(40);const requests = [];
+    const fetcher = async url => {
+      requests.push(url);
+      if (url.endsWith('dist-manifest.json')) return new Response(JSON.stringify(plan));
+      if (url.endsWith(archive)) return new Response('archive bytes');
+      if (url.endsWith(archive + '.sha256')) return new Response('checksum bytes');
+      if (url.endsWith('-source-lock.json')) return new Response(JSON.stringify({receipt: 'retained for later validation'}), {status: receiptStatus});
+      if (url.includes('/commits/')) return new Response(JSON.stringify({sha: commit}));
+      if (url.endsWith('/Cargo.lock')) { assert(url.includes(commit));return new Response(lock); }
+      assert.fail(`unexpected request: ${url}`);
+    };
+    if (![200,404].includes(receiptStatus)) {
+      await assert.rejects(fetchPublished('1.0.0', target, root, fetcher), /download .*source-lock.json/);
+      return;
+    }
+    await fetchPublished('1.0.0', target, root, fetcher);
+    const source = path.join(root, 'distrib', 'published-source.json');
+    const receipt = path.join(root, 'distrib', `asm198x-${target}-source-lock.json`);
+    assert.equal(fs.existsSync(source), receiptStatus === 200);
+    assert.equal(fs.existsSync(receipt), receiptStatus === 200);
+    if (receiptStatus === 200) {
+      assert.deepEqual(JSON.parse(fs.readFileSync(source)), {commit, cargo_lock_sha256: sha(Buffer.from(lock))});
+      assert.deepEqual(JSON.parse(fs.readFileSync(receipt)), {receipt: 'retained for later validation'});
+    } else assert(!requests.some(url => url.includes('/commits/')));
+  });
+}
