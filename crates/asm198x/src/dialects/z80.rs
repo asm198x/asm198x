@@ -3308,9 +3308,10 @@ pub(crate) fn parse_program_multi_keyword_warned<S: Z80Syntax>(
 /// Expand `DEFINE` names in one line of source, per the probe-pinned
 /// reference semantics: identifier tokens replace at exact boundaries (`NN`
 /// is not an occurrence of `N` — probe p20); `"…"` strings and `'c'` char
-/// literals are untouched (probe p21); number tokens — digit-led runs and
-/// `$`/`%`/`#`-sigil runs — are skipped whole, so a define named `FF` never
-/// rewrites `$FF`. Chained defines expand pass by pass to a fixed point
+/// literals are untouched (probe p21). Existing digit-led and hexadecimal
+/// token protection stays here; `%` leaves the next identifier available for
+/// DEFINE expansion in binary literals and remainder operands. Chained defines
+/// expand pass by pass to a fixed point
 /// (probe p24), with a depth cap against recursive definitions.
 fn substitute_defines(
     s: &str,
@@ -3367,8 +3368,10 @@ fn substitute_once(s: &str, defines: &BTreeMap<String, String>) -> (String, bool
             out.push(chars[i + 1]);
             out.push(chars[i + 2]);
             i += 3;
-        } else if c == '$' || c == '%' || c == '#' {
-            // A number sigil: copy it and its alphanumeric run untouched.
+        } else if c == '$' || c == '#' {
+            // Hex sigils retain their existing substitution behavior. `%`
+            // must leave the following DEFINE visible: `5%DIVISOR` is
+            // remainder, and even `%DIGITS` expands before binary parsing.
             out.push(c);
             i += 1;
             while i < chars.len() && chars[i].is_ascii_alphanumeric() {
@@ -4447,6 +4450,7 @@ enum Tok {
     Minus,
     Star,
     Slash,
+    Mod,
     And,
     Or,
     Xor,
@@ -4472,6 +4476,14 @@ enum Tok {
     BitNot,
     /// SjASMPlus word-form NOT: logical true is -1, rather than bitwise NOT.
     WordNot,
+}
+
+impl Tok {
+    /// Whether the next infix spelling follows an operand, rather than a
+    /// value being required (where `%` is binary and `MOD` can be a symbol).
+    fn ends_value(&self) -> bool {
+        matches!(self, Self::Num(_) | Self::Sym(_) | Self::Pc | Self::RParen)
+    }
 }
 
 /// An apostrophe inside a digit-led or sigil-led numeric token, rather than
@@ -4679,6 +4691,12 @@ fn tokenize_impl<S: Z80Syntax>(
                 tokens.push(Tok::Pc);
                 i += 1;
             }
+            // In value position `%` starts binary digits. After a complete
+            // operand it is remainder instead, including `5%%10` (5 mod 2).
+            '%' if syntax.sjasmplus_expressions() && tokens.last().is_some_and(Tok::ends_value) => {
+                tokens.push(Tok::Mod);
+                i += 1;
+            }
             // A number: a prefix sigil ($/%/#) or a digit, then an alnum run.
             '$' | '%' | '#' => {
                 let start = i;
@@ -4737,6 +4755,7 @@ fn tokenize_impl<S: Z80Syntax>(
                         "NOT" | "not" => Tok::WordNot,
                         "SHL" | "shl" => Tok::Shl,
                         "SHR" | "shr" => Tok::Shr,
+                        "MOD" | "mod" if tokens.last().is_some_and(Tok::ends_value) => Tok::Mod,
                         _ => Tok::Sym(word),
                     }
                 } else {
@@ -5012,6 +5031,7 @@ impl ExprParser {
             let op = match self.tokens.get(self.pos) {
                 Some(Tok::Star) => BinOp::Mul,
                 Some(Tok::Slash) => BinOp::Div,
+                Some(Tok::Mod) => BinOp::Mod,
                 _ => break,
             };
             self.pos += 1;
