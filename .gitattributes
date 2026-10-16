@@ -19,3 +19,7 @@ docs/plans/2026-10-16-release-0067-checkpoint/** text eol=lf
 
 # Preserve exact retained ACME recheck evidence on every checkout platform.
 docs/plans/2026-10-16-acme-602-603-recheck/** text eol=lf
+
+# Keep text evidence exact on every host while preserving compressed binaries.
+docs/plans/2026-10-16-next-project-boundaries/** text=auto eol=lf
+docs/plans/2026-10-16-release-0071-checkpoint/** text=auto eol=lf

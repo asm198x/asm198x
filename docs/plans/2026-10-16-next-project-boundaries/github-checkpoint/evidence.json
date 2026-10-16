@@ -1,0 +1,79 @@
+{
+  "schema": 1,
+  "native_source": "c85d1ddf0608013a52b3a3d072e68892d658e255",
+  "native_run": 38945646806,
+  "files": {
+    "README.md": {
+      "length": 2768,
+      "sha256": "d42dd1bc310b3f1f39d66730c5acbdd6589f2aebeffe982123228243259f1270"
+    },
+    "artifact-api.json": {
+      "length": 763,
+      "sha256": "948a1a71cc9aad2e3d140a44ba0699391f8455edd84121faca0ce38c5be32ee6"
+    },
+    "artifact-inventory.json": {
+      "length": 15781,
+      "sha256": "5160c0b260109bdb17a42a145897f8ebd155276cd05e35e6c7ad76fbbe36687d"
+    },
+    "book-ecosystem.md": {
+      "length": 4688,
+      "sha256": "5c571a766b29c96be06c9ce7ce9c433606c9eeffd685216efddf3c57d1a3189f"
+    },
+    "capture-artifact.zip": {
+      "length": 66220,
+      "sha256": "6a5bc0c8e80b8b06737a762f22821a992c1382c3d261c344296b7cb90514cf76"
+    },
+    "captured-book-ecosystem.md": {
+      "length": 4688,
+      "sha256": "1c5c6f9b124e3a7c3e9e7bd8c75e5d646070828bcac391a0c8246af4075c4809"
+    },
+    "captured-ecosystem-corpus.md": {
+      "length": 6217,
+      "sha256": "7c9dce2b1b5f195b62b566dc9c233e31cc8081a4fb1ac07969b4c9e2c125ece6"
+    },
+    "captured-native-report.json": {
+      "length": 927508,
+      "sha256": "c7f01df202bf2207dbb3a484d65dde4601dfa371f0c45463827376ecb0c19e46"
+    },
+    "cc65-opcodes.cfg": {
+      "length": 412,
+      "sha256": "e2ed542368d9e81f132e2305741d74a9572c5900818ccc8140a3d6d0677b5f43"
+    },
+    "corpus.json": {
+      "length": 29709,
+      "sha256": "a853f20bf150f97a3238c3c92bbd12e68f9a63363ce189aa42abb52e3892a8ef"
+    },
+    "ecosystem-corpus.md": {
+      "length": 6217,
+      "sha256": "8a8f68e1a40df7a6d12040db09d3b1da0543911e94ba53efb9b2d863cf26394d"
+    },
+    "native-job.log": {
+      "length": 240342,
+      "sha256": "3eac79aa8c55f35cd9cd73f2e70630c127e446a3c4058fb8c54a8cc78a507001"
+    },
+    "native-report.json": {
+      "length": 927508,
+      "sha256": "5d0020b67ec670b23d45cff4916b72bd8ffd946b83289352bf8e925f9293a4e8"
+    },
+    "native-run.json": {
+      "length": 18787,
+      "sha256": "370f8bb501136de787f27a2f11148a8d0222252089b1a979ed0366b4cd097a70"
+    },
+    "sjasmplus-shift-native.json": {
+      "length": 235994,
+      "sha256": "777b92ecfd99d3b8ab7ea6f3959aa71e43ccbd06632e88469adc18132c6ebd47"
+    },
+    "sjasmplus-shift-widths.json": {
+      "length": 414347,
+      "sha256": "6add3e1c20082ac434e21b8c03c4860d1182abab784b76b6b80dbf5667865010"
+    },
+    "verify-controls.cjs": {
+      "length": 2729,
+      "sha256": "2a459de843571ef892e992aab99d26d55ecdd7b4174e91414a5080ca5724a8bc"
+    },
+    "verify.cjs": {
+      "length": 9860,
+      "sha256": "39100383426fc33ee5014e5b7d02c7599ee719331820d7806aba0c5fbfa40c48"
+    }
+  }
+}
