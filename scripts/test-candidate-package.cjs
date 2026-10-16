@@ -9,6 +9,7 @@ const { targets, sha, packageIdentity, nativeTarget, binaryTarget, archiveIdenti
 const { verifyReceipt, sourceIdentity } = require('./build-locked-package.cjs');
 const requiredCases = ['archive_identity', 'version', 'reference_bytes', 'determinism', 'structured_success', 'structured_failure', 'preserve_previous_outputs', 'missing_input_json', 'unknown_cpu', 'incompatible_cpu', 'hardlink_source', 'hardlink_sidecar', 'formatter_container', 'formatter_origin', 'lua', 'upstream_project'];
 requiredCases.push('disasm_options', 'disasm_wide_origin', 'pasmo_nested_repeat', 'quoted_data_native', 'quoted_data_format', 'conversion_quoted_data', 'conversion_file_scope', 'unsupported_escape');
+requiredCases.push('pasmo_word_arithmetic', 'ca65_configured_extent', 'ca65_extent_refusal');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -168,6 +169,40 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         assert.deepEqual(read('nested.bin'), Buffer.from(fact.hex, 'hex'));
       }
       assert.equal(read('nested.s').toString(), fact.source);
+    });
+    test('pasmo_word_arithmetic', () => {
+      for (const name of ['dw_0', 'dw_1', 'dw_3', 'dw_15', 'dw_28', 'dw_29', 'dw_37']) {
+        const fact = nativeCase('pasmo-arithmetic', name);
+        write('arithmetic.s', fact.source);
+        for (const dialect of ['pasmo', 'pasmonext']) {
+          const p = run(['--dialect', dialect, 'arithmetic.s', '-o', 'arithmetic.bin']);
+          assert.equal(p.status, 0); assert.deepEqual(read('arithmetic.bin'), Buffer.from(fact.hex, 'hex'));
+        }
+      }
+    });
+    test('ca65_configured_extent', () => {
+      for (const name of ['CODE', 'PROGRAM']) {
+        write('extent.cfg', `MEMORY { PRG: start=$8000, size=$8000, file=%O, fill=yes; } SEGMENTS { ${name}: load=PRG, type=ro; }`);
+        write('extent.s', `.segment "${name}"\n.res $7ffa,$ea\n.word $8000,$8001,$8002\n`);
+        const p = run(['--dialect', 'ca65', '-C', 'extent.cfg', 'extent.s', '-o', 'extent.bin']);
+        assert.equal(p.status, 0);
+        const expected = Buffer.concat([Buffer.alloc(0x7ffa, 0xea), Buffer.from('008001800280', 'hex')]);
+        assert.deepEqual(read('extent.bin'), expected);
+      }
+    });
+    test('ca65_extent_refusal', () => {
+      const cases = [
+        ['MEMORY { PRG: start=$8000, size=4, file=%O, fill=yes; NEXT: start=$9000, size=4, file=%O, fill=yes; } SEGMENTS { PROGRAM: load=PRG, type=ro; }', '.segment "PROGRAM"\n.res 5,$ea\n', 'PRG'],
+        ['MEMORY { PRG: start=$8000, size=16, file=%O, fill=yes; } SEGMENTS { PROGRAM: load=PRG, type=ro; TABLE: load=PRG, type=ro, start=$8002; }', '.segment "PROGRAM"\n.res 3,$ea\n.segment "TABLE"\n.byte 1\n', 'TABLE'],
+      ];
+      for (const [cfg, source, detail] of cases) {
+        write('extent.cfg', cfg); write('extent.s', source);
+        const outputs = ['extent.bin', 'extent.sym', 'extent.lst', 'extent.debug198x'];
+        for (const name of outputs) write(name, 'previous output');
+        const p = run(['--dialect', 'ca65', '-C', 'extent.cfg', 'extent.s', '-o', outputs[0], '--sym=' + outputs[1], '--listing=' + outputs[2], '--debug=' + outputs[3]]);
+        reject(p); assert(p.stderr.includes(detail), p.stderr);
+        for (const name of outputs) assert.equal(read(name).toString(), 'previous output');
+      }
     });
     test('quoted_data_native', () => {
       for (const [dialect, flags, fact] of quoted) for (const mode of ['human', 'json']) {
