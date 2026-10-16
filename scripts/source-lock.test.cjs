@@ -131,6 +131,9 @@ for (const receiptStatus of [200, 404, 403, 500]) {
       return;
     }
     await fetchPublished('1.0.0', target, root, fetcher);
+    const acquisition = JSON.parse(fs.readFileSync(path.join(root, 'acquisition.json')));
+    assert.equal(acquisition.status, 'acquired');
+    assert.equal(acquisition.receipt, receiptStatus === 200 ? 'present' : 'absent');
     const source = path.join(root, 'distrib', 'published-source.json');
     const receipt = path.join(root, 'distrib', `asm198x-${target}-source-lock.json`);
     assert.equal(fs.existsSync(source), receiptStatus === 200);
@@ -141,3 +144,87 @@ for (const receiptStatus of [200, 404, 403, 500]) {
     } else assert(!requests.some(url => url.includes('/commits/')));
   });
 }
+
+function publishedFixture(t, apiStatus = 200) {
+  const root = fs.mkdtempSync(path.join(os.tmpdir(), 'asm198x-acquisition-control-'));
+  t.after(() => fs.rmSync(root, {recursive: true, force: true}));
+  const { nativeTarget } = require('./package-identity.cjs');
+  const target = nativeTarget();const archive = archiveName(target);const requests = [];
+  const plan = { releases: [{app_name: 'asm198x', app_version: '1.0.0', artifacts: targets.map(archiveName)}], artifacts: {} };
+  for (const item of targets) plan.artifacts[archiveName(item)] = {target_triples: [item], checksum: archiveName(item) + '.sha256'};
+  const token = 'fixture-read-only-token';
+  const acquisitionPath = path.join(root, 'retained', 'acquisition.json');
+  const fetcher = async (url, options) => {
+    requests.push({url, options});
+    if (url.endsWith('dist-manifest.json')) return new Response(JSON.stringify(plan));
+    if (url.endsWith(archive) || url.endsWith(archive + '.sha256')) return new Response('fixture bytes');
+    if (url.endsWith('-source-lock.json')) return new Response('{}');
+    if (url.includes('/commits/')) return new Response(JSON.stringify({sha: 'a'.repeat(40), message: token}), {
+      status: apiStatus, headers: {'x-ratelimit-remaining': '0', 'x-ratelimit-reset': '1800000000', 'x-github-request-id': 'ABC:123', 'x-not-retained': token},
+    });
+    if (url.endsWith('/Cargo.lock')) return new Response('version = 4\n');
+    assert.fail(`unexpected request: ${url}`);
+  };
+  return {root, target, token, acquisitionPath, requests, fetcher};
+}
+
+test('published lookup authenticates only the API and retains acquired status', async t => {
+  const f = publishedFixture(t);const {fetchPublished} = require('./fetch-published-package.cjs');
+  await fetchPublished('1.0.0', f.target, f.root, f.fetcher, {token: f.token, acquisitionPath: f.acquisitionPath});
+  for (const {url, options} of f.requests) {
+    const api = new URL(url).hostname === 'api.github.com';
+    assert.equal(new Headers(options.headers).get('authorization'), api ? `Bearer ${f.token}` : null);
+    if (api) assert.equal(options.redirect, 'error', 'authenticated API must not follow redirects');
+  }
+  const record = JSON.parse(fs.readFileSync(f.acquisitionPath));
+  assert.equal(record.status, 'acquired');assert.equal(record.kind, 'published-release');
+  assert.equal(record.published_version, '1.0.0');assert.equal(record.target, f.target);
+  assert(!fs.readFileSync(f.acquisitionPath, 'utf8').includes(f.token));
+});
+
+for (const status of [403, 429, 500]) {
+  test(`source lookup HTTP ${status} retains a failed record without qualifying or leaking credentials`, async t => {
+    const f = publishedFixture(t, status);const {fetchPublished} = require('./fetch-published-package.cjs');
+    await assert.rejects(fetchPublished('1.0.0', f.target, f.root, f.fetcher, {token: f.token, acquisitionPath: f.acquisitionPath}), new RegExp(`published source commit: ${status}`));
+    const raw = fs.readFileSync(f.acquisitionPath, 'utf8');const record = JSON.parse(raw);
+    assert.equal(record.status, 'failed');assert.equal(record.qualified, false);assert.equal(record.stage, 'source_commit');
+    assert.deepEqual(record.http, {status, headers: {'x-ratelimit-remaining': '0', 'x-ratelimit-reset': '1800000000', 'x-github-request-id': 'ABC:123'}});
+    assert(!raw.includes(f.token));assert(!raw.includes('x-not-retained'));
+    assert(!f.requests.some(r => r.url.endsWith('/Cargo.lock')));
+    assert(!fs.existsSync(path.join(f.root, 'distrib', 'published-source.json')));
+  });
+}
+
+test('early acquisition errors retain a nonzero failure outcome and redact error text', async t => {
+  const f = publishedFixture(t);const {fetchPublished} = require('./fetch-published-package.cjs');
+  const fetcher = async () => { throw new Error(`network error ${f.token}`); };
+  await assert.rejects(fetchPublished('1.0.0', f.target, f.root, fetcher, {token: f.token, acquisitionPath: f.acquisitionPath}), error => !error.message.includes(f.token));
+  const raw = fs.readFileSync(f.acquisitionPath, 'utf8');const record = JSON.parse(raw);
+  assert.equal(record.status, 'failed');assert.equal(record.stage, 'manifest');assert.equal(record.qualified, false);
+  assert(!raw.includes(f.token));
+});
+
+test('the CLI exits unsuccessfully and retains acquisition failure before qualification', t => {
+  const f = publishedFixture(t);
+  const preload = path.join(f.root, 'refuse-fetch.cjs');
+  fs.writeFileSync(preload, "global.fetch = async () => new Response('not retained', {status:403,headers:{'x-ratelimit-remaining':'0'}});\n");
+  const result = spawnSync(process.execPath, ['--require', preload, path.join(__dirname, 'fetch-published-package.cjs'), '1.0.0', f.target, f.root, f.acquisitionPath], {
+    encoding: 'utf8', timeout: 10000, env: {...process.env, GH_TOKEN: f.token},
+  });
+  assert.ifError(result.error);assert.equal(result.status, 1);assert.equal(result.signal, null);
+  assert(result.stderr.includes('download dist-manifest.json: 403'));
+  assert(!result.stderr.includes(f.token));
+  const record = JSON.parse(fs.readFileSync(f.acquisitionPath));
+  assert.equal(record.status, 'failed');assert.equal(record.qualified, false);
+  assert(!fs.existsSync(path.join(f.root, 'candidate-plan.json')));
+});
+
+test('published workflow scopes its existing token and retains acquisition before qualification', () => {
+  const text = fs.readFileSync(path.join(__dirname, '../.github/workflows/test-linux-packages.yml'), 'utf8').replaceAll('\r\n', '\n');
+  const acquisition = text.slice(text.indexOf('      - name: Download published archives'), text.indexOf('      - name: Fetch actual candidate packages'));
+  assert(acquisition.includes('GH_TOKEN: ${{ github.token }}'));
+  assert(acquisition.includes('"$RUNNER_TEMP/qualification/acquisition.json"'));
+  assert(!text.slice(0, text.indexOf('    steps:')).includes('GH_TOKEN:'));
+  assert(text.includes('if [ -z "$PUBLISHED_VERSION" ]; then\n            node -e'));
+  assert(text.includes('      - name: Retain per-host qualification records\n        if: always()'));
+});

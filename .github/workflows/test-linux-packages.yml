@@ -89,7 +89,9 @@ jobs:
       - name: Download published archives for post-release reconciliation
         if: inputs.published-version != ''
         shell: bash
-        run: node scripts/fetch-published-package.cjs "$PUBLISHED_VERSION" "$PACKAGE_TARGET" target
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: node scripts/fetch-published-package.cjs "$PUBLISHED_VERSION" "$PACKAGE_TARGET" target "$RUNNER_TEMP/qualification/acquisition.json"
       - name: Fetch actual candidate packages
         if: inputs.plan != ''
         uses: actions/download-artifact@v8
@@ -110,7 +112,9 @@ jobs:
           set -euo pipefail
           mkdir -p "$RUNNER_TEMP/qualification"
           cp target/candidate-plan.json "$RUNNER_TEMP/qualification/plan.json"
-          node -e "require('node:fs').writeFileSync(process.argv[1],JSON.stringify({kind:process.env.PUBLISHED_VERSION?'published-release':'candidate',published_version:process.env.PUBLISHED_VERSION||null,checkout_commit:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID}))" "$RUNNER_TEMP/qualification/acquisition.json"
+          if [ -z "$PUBLISHED_VERSION" ]; then
+            node -e "require('node:fs').writeFileSync(process.argv[1],JSON.stringify({kind:'candidate',published_version:null,checkout_commit:process.env.GITHUB_SHA,run:process.env.GITHUB_RUN_ID}))" "$RUNNER_TEMP/qualification/acquisition.json"
+          fi
           receipt_flags=(--require-source-lock)
           if [ -n "$PUBLISHED_VERSION" ]; then
             receipt_flags=(--published-source)

@@ -1,0 +1,101 @@
+mise WARN  tracking config: failed to ln -sf /private/tmp/asm198x-published-source-acquisition/rust-toolchain.toml /Users/stevehill/.local/state/mise/tracked-configs/9289fdb3ef228806: Operation not permitted (os error 1)
+✖ published lookup authenticates only the API and retains acquired status (52.008875ms)
+✖ source lookup HTTP 403 retains a failed record without qualifying or leaking credentials (17.873875ms)
+✖ source lookup HTTP 429 retains a failed record without qualifying or leaking credentials (25.390333ms)
+✖ source lookup HTTP 500 retains a failed record without qualifying or leaking credentials (257.051209ms)
+✖ early acquisition errors retain a nonzero failure outcome and redact error text (10.856667ms)
+ℹ tests 5
+ℹ suites 0
+ℹ pass 0
+ℹ fail 5
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 467.933125
+
+✖ failing tests:
+
+test at scripts/source-lock.test.cjs:168:1
+✖ published lookup authenticates only the API and retains acquired status (52.008875ms)
+  AssertionError [ERR_ASSERTION]: Expected values to be strictly equal:
+  + actual - expected
+  
+  + null
+  - 'Bearer fixture-read-only-token'
+  
+      at TestContext.<anonymous> (/private/tmp/asm198x-published-source-acquisition/scripts/source-lock.test.cjs:173:12)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async startSubtestAfterBootstrap (node:internal/test_runner/harness:387:3) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: null,
+    expected: 'Bearer fixture-read-only-token',
+    operator: 'strictEqual',
+    diff: 'simple'
+  }
+
+test at scripts/source-lock.test.cjs:183:3
+✖ source lookup HTTP 403 retains a failed record without qualifying or leaking credentials (17.873875ms)
+  Error: ENOENT: no such file or directory, open '/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acquisition-control-BHx703/retained/acquisition.json'
+      at Object.readFileSync (node:fs:483:20)
+      at TestContext.<anonymous> (/private/tmp/asm198x-published-source-acquisition/scripts/source-lock.test.cjs:186:20)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acquisition-control-BHx703/retained/acquisition.json'
+  }
+
+test at scripts/source-lock.test.cjs:183:3
+✖ source lookup HTTP 429 retains a failed record without qualifying or leaking credentials (25.390333ms)
+  Error: ENOENT: no such file or directory, open '/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acquisition-control-PtZ28n/retained/acquisition.json'
+      at Object.readFileSync (node:fs:483:20)
+      at TestContext.<anonymous> (/private/tmp/asm198x-published-source-acquisition/scripts/source-lock.test.cjs:186:20)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acquisition-control-PtZ28n/retained/acquisition.json'
+  }
+
+test at scripts/source-lock.test.cjs:183:3
+✖ source lookup HTTP 500 retains a failed record without qualifying or leaking credentials (257.051209ms)
+  Error: ENOENT: no such file or directory, open '/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acquisition-control-AyKnck/retained/acquisition.json'
+      at Object.readFileSync (node:fs:483:20)
+      at TestContext.<anonymous> (/private/tmp/asm198x-published-source-acquisition/scripts/source-lock.test.cjs:186:20)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    errno: -2,
+    code: 'ENOENT',
+    syscall: 'open',
+    path: '/var/folders/94/p_ng_dqx7tq9rx2rcw0y8zth0000gn/T/asm198x-acquisition-control-AyKnck/retained/acquisition.json'
+  }
+
+test at scripts/source-lock.test.cjs:195:1
+✖ early acquisition errors retain a nonzero failure outcome and redact error text (10.856667ms)
+  AssertionError [ERR_ASSERTION]: The validation function is expected to return "true". Received false
+  
+  Caught error:
+  
+  Error: network error fixture-read-only-token
+      at async TestContext.<anonymous> (/private/tmp/asm198x-published-source-acquisition/scripts/source-lock.test.cjs:198:3)
+      at async Test.run (node:internal/test_runner/test:1409:7)
+      at async Test.processPendingSubtests (node:internal/test_runner/test:974:7) {
+    generatedMessage: true,
+    code: 'ERR_ASSERTION',
+    actual: Error: network error fixture-read-only-token
+        at fetcher (/private/tmp/asm198x-published-source-acquisition/scripts/source-lock.test.cjs:197:39)
+        at download (/private/tmp/asm198x-published-source-acquisition/scripts/fetch-published-package.cjs:13:28)
+        at fetchPublished (/private/tmp/asm198x-published-source-acquisition/scripts/fetch-published-package.cjs:23:26)
+        at TestContext.<anonymous> (/private/tmp/asm198x-published-source-acquisition/scripts/source-lock.test.cjs:198:24)
+        at Test.runInAsyncScope (node:async_hooks:227:14)
+        at Test.run (node:internal/test_runner/test:1402:25)
+        at Test.processPendingSubtests (node:internal/test_runner/test:974:18)
+        at Test.postRun (node:internal/test_runner/test:1542:19)
+        at Test.run (node:internal/test_runner/test:1467:12)
+        at async Test.processPendingSubtests (node:internal/test_runner/test:974:7),
+    operator: 'rejects',
+    diff: 'simple'
+  }

@@ -1,0 +1,30 @@
+mise WARN  tracking config: failed to ln -sf /private/tmp/asm198x-published-source-acquisition/rust-toolchain.toml /Users/stevehill/.local/state/mise/tracked-configs/9289fdb3ef228806: Operation not permitted (os error 1)
+✔ the packaging boundary verifies the lock against Git on both sides (129.302834ms)
+✔ changed lock is rejected before the packager runs (59.724041ms)
+✔ changed lock during packaging rejects a successful command (102.995625ms)
+✔ missing lock is rejected before the packager runs (56.658959ms)
+✔ missing lock during packaging rejects a successful command (107.261291ms)
+✔ empty lock is rejected before the packager runs (58.10925ms)
+✔ empty lock during packaging rejects a successful command (98.766708ms)
+✔ a failed packaging command cannot produce a success receipt (82.785209ms)
+✔ every receipt identity is checked against independent source and artifact observations (57.485375ms)
+✔ generation requires the lock guard and receipt upload exactly once (0.849791ms)
+✔ native PR and reusable candidates cannot silently use artifact-only evidence (0.199708ms)
+✔ producer manifests validate their selected target while qualification requires the full set (1.245625ms)
+✔ published receipt HTTP 200 preserves its actual evidence scope (18.999042ms)
+✔ published receipt HTTP 404 preserves its actual evidence scope (2.609542ms)
+✔ published receipt HTTP 403 preserves its actual evidence scope (2.300709ms)
+✔ published receipt HTTP 500 preserves its actual evidence scope (2.047041ms)
+✔ published lookup authenticates only the API and retains acquired status (3.857917ms)
+✔ source lookup HTTP 403 retains a failed record without qualifying or leaking credentials (2.33325ms)
+✔ source lookup HTTP 429 retains a failed record without qualifying or leaking credentials (2.033917ms)
+✔ source lookup HTTP 500 retains a failed record without qualifying or leaking credentials (1.991166ms)
+✔ early acquisition errors retain a nonzero failure outcome and redact error text (0.9155ms)
+ℹ tests 21
+ℹ suites 0
+ℹ pass 21
+ℹ fail 0
+ℹ cancelled 0
+ℹ skipped 0
+ℹ todo 0
+ℹ duration_ms 845.918417
