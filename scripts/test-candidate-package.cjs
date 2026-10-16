@@ -157,7 +157,7 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
     test('disasm_wide_origin', () => {
       write('m68k.bin', Buffer.from('4e71', 'hex'));
       const p = run(['disasm', '--cpu', '68000', '--org', '0xff8000', 'm68k.bin']);
-      assert.equal(p.status, 0); assert.match(p.stdout, /ff8000/i); assert.match(p.stdout, /nop/i);
+      assert.equal(p.status, 0); assert.match(p.stdout, /^\s*nop\s*$/i);
       assert.match(p.stderr, /ff8000/i); assert.deepEqual(read('m68k.bin'), Buffer.from('4e71', 'hex'));
     });
     test('pasmo_nested_repeat', () => {
