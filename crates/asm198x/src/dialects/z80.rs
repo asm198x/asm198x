@@ -196,6 +196,12 @@ pub(crate) trait Z80Syntax {
         false
     }
 
+    /// SjASMPlus uses its ordinary expression grammar in IF as well, with
+    /// eager logical operators and -1 for true.
+    fn sjasmplus_expressions(&self) -> bool {
+        false
+    }
+
     /// SjASMPlus's all-upper/all-lower word operators, with logical NOT and
     /// the existing C-style grouping. Pasmo has a separate expression grammar.
     fn sjasmplus_word_operators(&self) -> bool {
@@ -3392,14 +3398,13 @@ fn substitute_once(s: &str, defines: &BTreeMap<String, String>) -> (String, bool
 }
 
 /// Evaluate a keyword `IF` condition to a value (nonzero = taken) against the
-/// parse-time constants. The grammar mirrors the operand expression grammar
-/// and adds the condition operators the reference accepts (probes p2/p45):
-/// `||`/`&&` (loosest), one comparison (`=`/`==`/`!=`/`<`/`>`/`<=`/`>=`),
-/// unary `!`, and parentheses that enclose the full condition grammar.
+/// parse-time constants and the dialect's admitted forward reads. Pasmo and
+/// SjASMPlus reuse their respective ordinary expression grammars; SjASMPlus
+/// keeps eager logical operands and -1 truth values in this context too.
 /// Trailing text after a complete condition is ignored, as the reference does
-/// (probe p50). Symbols resolve against `equ` constants (DEFINEs substituted
-/// before this) — a label-valued or forward symbol, and the location counter
-/// `$`, are the reference's multi-pass territory and error here (#67).
+/// (probe p50). DEFINEs are substituted before this; admitted forward symbols
+/// resolve through the existing pass context. The location counter keeps its
+/// explicit unavailable-in-conditions diagnostic.
 fn eval_condition_keyword<S: Z80Syntax>(
     syntax: &S,
     s: &str,
@@ -3410,6 +3415,46 @@ fn eval_condition_keyword<S: Z80Syntax>(
     let tokens = tokenize_cond(syntax, s, line)?;
     if tokens.is_empty() {
         return Err(AsmError::new(line, "`IF` needs a condition"));
+    }
+    if syntax.sjasmplus_expressions() {
+        let mut parser = ExprParser {
+            tokens,
+            pos: 0,
+            line,
+            pasmo: false,
+        };
+        let expression = parser.expr()?;
+        let mut values = BTreeMap::new();
+        // Resolve only the consumed expression: native IF ignores trailing
+        // text. Both logical operands remain eager, including forward reads.
+        for token in &parser.tokens[..parser.pos] {
+            match token {
+                Tok::Sym(name) => {
+                    let value = if let Some(value) = consts.get(name) {
+                        *value
+                    } else if let Some((fwd, file)) = forward {
+                        fwd.lookup(name, line, file)?
+                    } else {
+                        return Err(AsmError::new(
+                            line,
+                            format!(
+                                "`{name}` must be a constant here (a number, an expression of constants, or {})",
+                                syntax.constant_sources()
+                            ),
+                        ));
+                    };
+                    values.insert(name.clone(), value);
+                }
+                Tok::Pc => {
+                    return Err(AsmError::new(
+                        line,
+                        "the location counter `$` cannot be tested in a conditional here",
+                    ));
+                }
+                _ => {}
+            }
+        }
+        return expression.eval_with(&|name| values.get(name).copied(), None, line);
     }
     if syntax.pasmo_expressions() {
         let mut parser = ExprParser {
@@ -4396,9 +4441,8 @@ enum Tok {
     Shr,
     LParen,
     RParen,
-    // Condition-only tokens (keyword conditionals, U8): produced only by
-    // [`tokenize_cond`], so operand expressions keep rejecting them exactly
-    // as before.
+    // Comparison/logical tokens: always available in IF; the dialect's
+    // expression rules govern which are admitted in data and operands.
     /// `=` or `==` — the reference treats both as equality (probe p2).
     Eq,
     /// `!=`.
@@ -4432,8 +4476,7 @@ fn tokenize_cond<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Vec
 /// Lex an expression. The number *extent* (a `$`/`%`/`#`/digit start then an
 /// alphanumeric run) is shared; the dialect's `parse_number` interprets it,
 /// which is where hex/binary format differences live. `cond` admits the
-/// condition-only operators; operand expressions (`cond = false`) reject them
-/// unchanged.
+/// condition operators; ordinary expressions follow their dialect's gates.
 fn tokenize_impl<S: Z80Syntax>(
     syntax: &S,
     raw: &str,
@@ -4470,7 +4513,9 @@ fn tokenize_impl<S: Z80Syntax>(
                 tokens.push(Tok::Slash);
                 i += 1;
             }
-            '&' if (cond || syntax.pasmo_expressions()) && chars.get(i + 1) == Some(&'&') => {
+            '&' if (cond || syntax.pasmo_expressions() || syntax.sjasmplus_expressions())
+                && chars.get(i + 1) == Some(&'&') =>
+            {
                 tokens.push(Tok::AndAnd);
                 i += 2;
             }
@@ -4478,7 +4523,9 @@ fn tokenize_impl<S: Z80Syntax>(
                 tokens.push(Tok::And);
                 i += 1;
             }
-            '|' if (cond || syntax.pasmo_expressions()) && chars.get(i + 1) == Some(&'|') => {
+            '|' if (cond || syntax.pasmo_expressions() || syntax.sjasmplus_expressions())
+                && chars.get(i + 1) == Some(&'|') =>
+            {
                 tokens.push(Tok::OrOr);
                 i += 2;
             }
@@ -4502,7 +4549,7 @@ fn tokenize_impl<S: Z80Syntax>(
                 tokens.push(Tok::Eq);
                 i += if chars.get(i + 1) == Some(&'=') { 2 } else { 1 };
             }
-            '!' if cond || syntax.pasmo_expressions() => {
+            '!' if cond || syntax.pasmo_expressions() || syntax.sjasmplus_expressions() => {
                 if chars.get(i + 1) == Some(&'=') {
                     tokens.push(Tok::Ne);
                     i += 2;
@@ -4684,16 +4731,45 @@ impl ExprParser {
         if self.pasmo {
             return self.pasmo_expr(0);
         }
-        let mut left = self.bit_or()?;
-        while let Some(op) = self.compare_op() {
+        self.logical_or()
+    }
+
+    fn logical_or(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.logical_and()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::OrOr)) {
             self.pos += 1;
-            let right = self.bit_or()?;
-            let cmp = Expr::Bin(op, Box::new(left), Box::new(right));
-            // Both Z80 dialects answer `$FF` for true, so the negation is
-            // unconditional here rather than a knob.
-            left = Expr::Neg(Box::new(cmp));
+            let right = self.logical_and()?;
+            left = Expr::Bin(
+                BinOp::Or,
+                Box::new(Self::truth(left)),
+                Box::new(Self::truth(right)),
+            );
         }
         Ok(left)
+    }
+
+    fn logical_and(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.bit_or()?;
+        while matches!(self.tokens.get(self.pos), Some(Tok::AndAnd)) {
+            self.pos += 1;
+            let right = self.bit_or()?;
+            // Bitwise combination of normalized truths evaluates both sides;
+            // the shared LogAnd/LogOr nodes deliberately short-circuit.
+            left = Expr::Bin(
+                BinOp::And,
+                Box::new(Self::truth(left)),
+                Box::new(Self::truth(right)),
+            );
+        }
+        Ok(left)
+    }
+
+    fn truth(value: Expr) -> Expr {
+        Expr::Neg(Box::new(Expr::Bin(
+            BinOp::Ne,
+            Box::new(value),
+            Box::new(Expr::Num(0)),
+        )))
     }
 
     /// Pasmo's precedence is not SjASMPlus's: OR/XOR share one level;
@@ -4779,8 +4855,8 @@ impl ExprParser {
     }
 
     // Bitwise and shift operators, C-style: `|` loosest, then `^`, `&`, then the
-    // shifts, all looser than `+`/`-` (so `1+2<<1` is `(1+2)<<1`). This matches
-    // sjasmplus; Pasmo uses `pasmo_expr` above instead.
+    // equality, relations, then shifts, all looser than `+`/`-` (so `1+2<<1`
+    // is `(1+2)<<1`). Pasmo uses `pasmo_expr` above instead.
     fn bit_or(&mut self) -> Result<Expr, AsmError> {
         let mut left = self.bit_xor()?;
         while matches!(self.tokens.get(self.pos), Some(Tok::Or)) {
@@ -4802,11 +4878,43 @@ impl ExprParser {
     }
 
     fn bit_and(&mut self) -> Result<Expr, AsmError> {
-        let mut left = self.shift()?;
+        let mut left = self.equality()?;
         while matches!(self.tokens.get(self.pos), Some(Tok::And)) {
             self.pos += 1;
-            let right = self.shift()?;
+            let right = self.equality()?;
             left = Expr::Bin(BinOp::And, Box::new(left), Box::new(right));
+        }
+        Ok(left)
+    }
+
+    fn equality(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.relational()?;
+        loop {
+            let op = match self.tokens.get(self.pos) {
+                Some(Tok::Eq) => BinOp::Eq,
+                Some(Tok::Ne) => BinOp::Ne,
+                _ => break,
+            };
+            self.pos += 1;
+            let right = self.relational()?;
+            left = Expr::Neg(Box::new(Expr::Bin(op, Box::new(left), Box::new(right))));
+        }
+        Ok(left)
+    }
+
+    fn relational(&mut self) -> Result<Expr, AsmError> {
+        let mut left = self.shift()?;
+        loop {
+            let op = match self.tokens.get(self.pos) {
+                Some(Tok::Lt) => BinOp::Lt,
+                Some(Tok::Gt) => BinOp::Gt,
+                Some(Tok::Le) => BinOp::Le,
+                Some(Tok::Ge) => BinOp::Ge,
+                _ => break,
+            };
+            self.pos += 1;
+            let right = self.shift()?;
+            left = Expr::Neg(Box::new(Expr::Bin(op, Box::new(left), Box::new(right))));
         }
         Ok(left)
     }
@@ -4865,7 +4973,7 @@ impl ExprParser {
             self.pos += 1;
             return Ok(Expr::BitNot(Box::new(self.unary()?)));
         }
-        if matches!(self.tokens.get(self.pos), Some(Tok::WordNot)) {
+        if matches!(self.tokens.get(self.pos), Some(Tok::WordNot | Tok::Not)) {
             self.pos += 1;
             return Ok(Expr::Neg(Box::new(Expr::LogNot(Box::new(self.unary()?)))));
         }

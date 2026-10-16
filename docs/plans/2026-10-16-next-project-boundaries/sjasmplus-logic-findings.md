@@ -1,0 +1,11 @@
+# SjASMPlus logical expressions (#717)
+
+The ordinary expression lexer admitted neither `&&`/`||` nor bare `!`; ASSERT calls that parser, so the real project stopped at `expected a value`. IF had a separate eager folding grammar, and the ordinary parser also placed comparisons below bitwise operations rather than following native precedence.
+
+The native fixture captures 190 SjASMPlus 1.21.0 cases: 144 accepted and 46 refusals, covering ASSERT, data, EQU, IF, relational/equality/bitwise precedence, chaining, logical -1/zero truth, STRUCT members, forward symbols, macro/repetition composition and ignored trailing IF text. Both logical operands are evaluated even when the left side determines the answer: guarded division by zero and missing symbols are native refusals. Both Asm frontends match these captured results and refusals; every accepted source formats idempotently and reassembles with identical bytes and symbols. Pasmo's own grammar and captured word behavior remain unchanged.
+
+The existing ordinary parser now represents eager logical operations as bitwise combinations of normalized truths in the existing expression IR. It does not use the shared short-circuit LogAnd/LogOr nodes. IF reuses the SjASMPlus grammar while resolving only consumed symbols through the existing constant/forward pass context. Public contracts and the shared evaluator are unchanged.
+
+CLI checks cover Z80/Z80N and human/JSON reporting. Included STRUCT assertions assemble to the native four-byte payload. A false assertion and an eagerly read missing symbol both report the included file and line 5; binary, symbols, debug, text listing and JSON listing remain unchanged after each refusal. Package qualification adds the mandatory `sjasmplus_logical_expressions` case over all 190 native facts, making 32 required named cases.
+
+Validation: 1,482 workspace tests pass with Lua (37 explicit external-tool ignores), Clippy with all targets/Lua and denied warnings, formatting, generated docs, Ruff and all release-control Node tests pass. `sjasmplus-logic-red.log.gz` retains the original failing regression. The complete unchanged SpecNext target is audited from a clean committed producer before making any final-artifact claim.
