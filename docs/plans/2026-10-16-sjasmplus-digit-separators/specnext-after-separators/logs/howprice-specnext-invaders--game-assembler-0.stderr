@@ -1,0 +1,2 @@
+asm198x: /private/tmp/asm198x-digit-separators-audit/work/howprice-specnext-invaders--game/assembler/src/sprite_data.asm:19: error: invalid number `%`
+included from src/main.asm:198

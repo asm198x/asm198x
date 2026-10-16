@@ -47,6 +47,10 @@ pub(crate) trait MacroSyntax {
     fn literal_block(&self, _line: &str) -> Option<bool> {
         None
     }
+    /// Apostrophes within numeric tokens are separators, not quoted arguments.
+    fn numeric_separator(&self, _text: &str, _at: usize) -> bool {
+        false
+    }
     /// Parse a definition header, returning the macro's name and parameters.
     /// `None` if the line does not open a macro.
     fn header(&self, line: &str) -> Option<(String, Vec<String>)>;
@@ -282,6 +286,10 @@ pub(crate) struct Definition {
 /// Strip a trailing comment, respecting string literals so a `;` inside quotes
 /// is not mistaken for one.
 pub(crate) fn without_comment(line: &str) -> &str {
+    without_comment_impl(line, |_| false)
+}
+
+fn without_comment_impl(line: &str, separator: impl Fn(usize) -> bool) -> &str {
     let bytes = line.as_bytes();
     let mut quote: Option<u8> = None;
     let mut i = 0;
@@ -294,7 +302,7 @@ pub(crate) fn without_comment(line: &str) -> &str {
                 }
             }
             None => {
-                if c == b'"' || c == b'\'' {
+                if c == b'"' || (c == b'\'' && !separator(i)) {
                     quote = Some(c);
                 } else if c == b';' || (c == b'/' && bytes.get(i + 1) == Some(&b'/')) {
                     return &line[..i];
@@ -336,7 +344,7 @@ pub(crate) fn substitute<S: MacroSyntax>(
             i += 1;
             continue;
         }
-        if c == b'"' || c == b'\'' {
+        if c == b'"' || (c == b'\'' && !syntax.numeric_separator(line, i)) {
             quote = Some(c);
             out.push(c as char);
             i += 1;
@@ -362,11 +370,11 @@ pub(crate) fn substitute<S: MacroSyntax>(
 }
 
 /// Split an argument list on commas outside strings.
-pub(crate) fn split_args(text: &str) -> Vec<String> {
+fn split_args(text: &str, separator: impl Fn(usize) -> bool) -> Vec<String> {
     let mut args = Vec::new();
     let mut current = String::new();
     let mut quote: Option<char> = None;
-    for c in text.chars() {
+    for (at, c) in text.char_indices() {
         match quote {
             Some(q) => {
                 current.push(c);
@@ -374,7 +382,7 @@ pub(crate) fn split_args(text: &str) -> Vec<String> {
                     quote = None;
                 }
             }
-            None if c == '"' || c == '\'' => {
+            None if c == '"' || (c == '\'' && !separator(at)) => {
                 quote = Some(c);
                 current.push(c);
             }
@@ -665,13 +673,17 @@ fn invocation<S: MacroSyntax>(
             .filter(|name| known(name))
             .map(str::to_string)
     };
-    let stripped = without_comment(line);
+    let stripped = without_comment_impl(line, |at| syntax.numeric_separator(line, at));
     let trimmed = stripped.trim();
     let (head, tail) = trimmed
         .split_once(char::is_whitespace)
         .unwrap_or((trimmed, ""));
     if let Some(name) = named(head) {
-        return Some((None, name, split_args(tail)));
+        return Some((
+            None,
+            name,
+            split_args(tail, |at| syntax.numeric_separator(tail, at)),
+        ));
     }
     // Only a word at column 0 can be a label; anywhere else it is a mnemonic,
     // and every reference measured takes the colon as optional.
@@ -680,7 +692,13 @@ fn invocation<S: MacroSyntax>(
     }
     let tail = tail.trim();
     let (word, args) = tail.split_once(char::is_whitespace).unwrap_or((tail, ""));
-    named(word).map(|name| (Some(head.to_string()), name, split_args(args)))
+    named(word).map(|name| {
+        (
+            Some(head.to_string()),
+            name,
+            split_args(args, |at| syntax.numeric_separator(args, at)),
+        )
+    })
 }
 
 /// What a line does to a macro definition, as far as a **walk** is concerned.

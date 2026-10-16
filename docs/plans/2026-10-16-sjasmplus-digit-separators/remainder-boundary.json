@@ -1,0 +1,31 @@
+{
+  "source": " ASSERT (5 % 2)==1\n db 5 % 2,%101\n",
+  "producer": "fa4014a428204ff2f50166950fda535dd0f583ef",
+  "runs": [
+    {
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "0105"
+    },
+    {
+      "argv": [
+        "/private/tmp/asm198x-digit-separators-build/debug/asm198x",
+        "--dialect",
+        "sjasmplus",
+        "input.asm",
+        "-o",
+        "asm.bin"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "asm198x: input.asm:1: error: invalid number `%`\n",
+      "hex": null
+    }
+  ]
+}

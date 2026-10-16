@@ -830,7 +830,14 @@ fn split_statements<'a, S: Z80Syntax>(syntax: &S, text: &'a str) -> Vec<Src<'a>>
         for i in 0..bytes.len() {
             match bytes[i] {
                 b'"' if !in_char => in_str = !in_str,
-                b'\'' if !in_str => in_char = !in_char,
+                b'\''
+                    if !in_str
+                        && (in_char
+                            || !syntax.sjasmplus_expressions()
+                            || !numeric_separator(code, i)) =>
+                {
+                    in_char = !in_char;
+                }
                 b':' if !in_str && !in_char => {
                     let head = code[start..i].trim();
                     if !labelled && !head.is_empty() && is_ident(head) {
@@ -4263,7 +4270,7 @@ fn lex_struct_init<S: Z80Syntax>(
         run.clear();
         Ok(())
     };
-    for ch in text.chars() {
+    for (at, ch) in text.char_indices() {
         if let Some(q) = quote {
             run.push(ch);
             if ch == q {
@@ -4272,6 +4279,9 @@ fn lex_struct_init<S: Z80Syntax>(
             continue;
         }
         match ch {
+            '\'' if syntax.sjasmplus_expressions() && numeric_separator(text, at) => {
+                run.push(ch);
+            }
             '"' | '\'' => {
                 quote = Some(ch);
                 run.push(ch);
@@ -4303,7 +4313,7 @@ fn lex_struct_init<S: Z80Syntax>(
 fn brace_depth(code: &str) -> i32 {
     let mut depth = 0;
     let mut quote: Option<char> = None;
-    for ch in code.chars() {
+    for (at, ch) in code.char_indices() {
         match quote {
             Some(q) => {
                 if ch == q {
@@ -4311,6 +4321,7 @@ fn brace_depth(code: &str) -> i32 {
                 }
             }
             None => match ch {
+                '\'' if numeric_separator(code, at) => {}
                 '"' | '\'' => quote = Some(ch),
                 '{' => depth += 1,
                 '}' => depth -= 1,
@@ -4358,7 +4369,7 @@ fn parse_list<S: Z80Syntax>(syntax: &S, rest: &str, line: usize) -> Result<Vec<E
         return Err(AsmError::new(line, "directive needs at least one value"));
     }
     let mut out = Vec::new();
-    for piece in split_data_items(rest) {
+    for piece in split_data_items(rest, syntax.sjasmplus_expressions()) {
         if let Some(text) = string_literal(piece) {
             out.extend(text.chars().map(|c| Expr::Num(c as i64)));
         } else {
@@ -4370,7 +4381,7 @@ fn parse_list<S: Z80Syntax>(syntax: &S, rest: &str, line: usize) -> Result<Vec<E
 
 /// Split a data list on commas outside strings and character literals.
 /// The quote inside `'"'` is a character, and the comma inside `','` is data.
-pub(crate) fn split_data_items(s: &str) -> Vec<&str> {
+fn split_data_items(s: &str, separators: bool) -> Vec<&str> {
     let mut out = Vec::new();
     let mut quote = None;
     let mut start = 0;
@@ -4378,7 +4389,9 @@ pub(crate) fn split_data_items(s: &str) -> Vec<&str> {
         match quote {
             Some(q) if c == q => quote = None,
             Some(_) => {}
-            None if c == '"' || c == '\'' => quote = Some(c),
+            None if c == '"' || (c == '\'' && !(separators && numeric_separator(s, i))) => {
+                quote = Some(c)
+            }
             None if c == ',' => {
                 out.push(s[start..i].trim());
                 start = i + 1;
@@ -4461,6 +4474,25 @@ enum Tok {
     WordNot,
 }
 
+/// An apostrophe inside a digit-led or sigil-led numeric token, rather than
+/// a character delimiter. Call only outside an already-open quoted literal.
+/// Radix validity belongs to the dialect's number parser.
+pub(crate) fn numeric_separator(text: &str, at: usize) -> bool {
+    let bytes = text.as_bytes();
+    if bytes.get(at) != Some(&b'\'')
+        || at == 0
+        || !bytes[at - 1].is_ascii_alphanumeric()
+        || !bytes.get(at + 1).is_some_and(u8::is_ascii_alphanumeric)
+    {
+        return false;
+    }
+    let mut start = at;
+    while start > 0 && (bytes[start - 1].is_ascii_alphanumeric() || bytes[start - 1] == b'\'') {
+        start -= 1;
+    }
+    bytes[start].is_ascii_digit() || (start > 0 && matches!(bytes[start - 1], b'$' | b'%' | b'#'))
+}
+
 /// Lex an operand expression (see [`tokenize_impl`]).
 fn tokenize<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Vec<Tok>, AsmError> {
     tokenize_impl(syntax, raw, line, false)
@@ -4474,8 +4506,8 @@ fn tokenize_cond<S: Z80Syntax>(syntax: &S, raw: &str, line: usize) -> Result<Vec
 }
 
 /// Lex an expression. The number *extent* (a `$`/`%`/`#`/digit start then an
-/// alphanumeric run) is shared; the dialect's `parse_number` interprets it,
-/// which is where hex/binary format differences live. `cond` admits the
+/// alphanumeric run, with numeric apostrophes for SjASMPlus) is shared; the
+/// dialect's `parse_number` validates separators and interprets the radix. `cond` admits the
 /// condition operators; ordinary expressions follow their dialect's gates.
 fn tokenize_impl<S: Z80Syntax>(
     syntax: &S,
@@ -4651,7 +4683,10 @@ fn tokenize_impl<S: Z80Syntax>(
             '$' | '%' | '#' => {
                 let start = i;
                 i += 1;
-                while i < chars.len() && chars[i].is_ascii_alphanumeric() {
+                while i < chars.len()
+                    && (chars[i].is_ascii_alphanumeric()
+                        || (syntax.sjasmplus_expressions() && chars[i] == '\''))
+                {
                     i += 1;
                 }
                 let s: String = chars[start..i].iter().collect();
@@ -4659,7 +4694,10 @@ fn tokenize_impl<S: Z80Syntax>(
             }
             d if d.is_ascii_digit() => {
                 let start = i;
-                while i < chars.len() && chars[i].is_ascii_alphanumeric() {
+                while i < chars.len()
+                    && (chars[i].is_ascii_alphanumeric()
+                        || (syntax.sjasmplus_expressions() && chars[i] == '\''))
+                {
                     i += 1;
                 }
                 let s: String = chars[start..i].iter().collect();
