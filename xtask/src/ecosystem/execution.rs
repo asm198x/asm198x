@@ -861,6 +861,18 @@ fn validate_report(repo: &Path, manifest: &Manifest, report: &Report) -> Result<
                 .build
                 .as_ref()
                 .ok_or("interpreted result without a plan")?;
+            if record.adapters.len() != plan.adapters.len() {
+                return Err("native evidence is missing reviewed adapter identities".into());
+            }
+            for (actual, path) in record.adapters.iter().zip(&plan.adapters) {
+                let expected = artifact(repo, path, false)?;
+                if actual.path != expected.path
+                    || actual.length != expected.length
+                    || actual.sha256 != expected.sha256
+                {
+                    return Err("native evidence has a stale build adapter".into());
+                }
+            }
             let license = record
                 .license
                 .as_ref()
@@ -1074,6 +1086,7 @@ fn replay_inner(repo: &Path, manifest: &Manifest, args: &[String]) -> Result<(),
         let mut record = native.clone();
         record.reference_steps.clear();
         record.assembler_steps.clear();
+        record.adapters.clear();
         record.comparisons.clear();
         record.first_failure = None;
         record.outcome = Outcome::Unknown;
@@ -1455,6 +1468,24 @@ mod tests {
         assert!(validate_report(&repo, &manifest, &changed).is_err());
         let mut changed = report;
         changed.assembler.build.failure = Some("producer timed out".into());
+        assert!(validate_report(&repo, &manifest, &changed).is_err());
+        let complete = read_report(&repo.join("ecosystem/results/current.json"))
+            .expect("retained native capture");
+        let mut changed = complete.clone();
+        let target = changed
+            .records
+            .iter_mut()
+            .find(|record| record.project == "cc65-4510-opcodes")
+            .expect("native-qualified adapter control");
+        target.adapters[0].sha256 = "0".repeat(64);
+        assert!(validate_report(&repo, &manifest, &changed).is_err());
+        let mut changed = complete;
+        let target = changed
+            .records
+            .iter_mut()
+            .find(|record| record.project == "cc65-4510-opcodes")
+            .expect("native-qualified adapter control");
+        target.adapters.clear();
         assert!(validate_report(&repo, &manifest, &changed).is_err());
     }
     #[test]
