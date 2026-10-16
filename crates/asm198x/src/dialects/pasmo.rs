@@ -174,7 +174,28 @@ impl Z80Syntax for PasmoSyntax {
     }
 
     fn strip_comment<'a>(&self, line: &'a str) -> &'a str {
-        line.find(';').map_or(line, |idx| &line[..idx])
+        // Data strings and character literals may contain semicolons. An
+        // apostrophe after an identifier (notably AF') is not an opening quote.
+        let mut quote = None;
+        let mut previous = None;
+        for (i, ch) in line.char_indices() {
+            match quote {
+                Some(q) if ch == q => quote = None,
+                Some(_) => {}
+                None if ch == ';' => return &line[..i],
+                None if ch == '"'
+                    || (ch == '\''
+                        && !previous.is_some_and(|c: char| {
+                            c.is_ascii_alphanumeric() || c == '_' || c == '.'
+                        })) =>
+                {
+                    quote = Some(ch);
+                }
+                None => {}
+            }
+            previous = Some(ch);
+        }
+        line
     }
 
     /// File directives are listed so a column-0 spelling reads as an
