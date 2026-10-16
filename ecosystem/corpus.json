@@ -1074,6 +1074,7 @@
                   "asm198x",
                   "--dialect",
                   "vasm",
+                  "--exe",
                   "HelloAmi.asm",
                   "-o",
                   "HelloAmi"

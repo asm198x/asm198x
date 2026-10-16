@@ -191,8 +191,16 @@ fn validate(manifest: &Manifest) -> Vec<String> {
         let mut target_ids = BTreeSet::new();
         for target in &project.targets {
             let target_label = format!("{label}, target `{}`", target.id);
-            if target.id.is_empty() || !target_ids.insert(target.id.as_str()) {
-                problems.push(format!("{target_label}: id must be non-empty and unique"));
+            if target.id.is_empty()
+                || !target
+                    .id
+                    .chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-')
+                || !target_ids.insert(target.id.as_str())
+            {
+                problems.push(format!(
+                    "{target_label}: id must be lower-case ASCII, digits and hyphens, and unique"
+                ));
             }
             if !safe_relative(&target.cwd)
                 || target.sources.is_empty()
