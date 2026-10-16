@@ -3846,7 +3846,20 @@ pub(crate) fn common_directive<S: Z80Syntax>(
         // `end [addr]` marks the entry point. A flat binary ignores it, but a
         // `.sna` snapshot needs the start address — capture it when given.
         "end" if args.trim().is_empty() => None,
-        "end" => Some(Operation::Entry(parse_value(syntax, args, line)?)),
+        "end" => {
+            let mut entry = parse_value(syntax, args, line)?;
+            let name = args.trim();
+            // A known bare symbol already in the word domain needs no mask.
+            // Preserve its identity so debug output still upgrades that label
+            // to an entry rather than manufacturing a separate @entry symbol.
+            if syntax.pasmo_expressions()
+                && is_ident(name)
+                && consts.get(name).is_some_and(|v| (0..=0xffff).contains(v))
+            {
+                entry = Expr::Sym(name.to_string());
+            }
+            Some(Operation::Entry(entry))
+        }
         other => {
             return Err(AsmError::new(
                 line,
@@ -3976,6 +3989,24 @@ fn classify<S: Z80Syntax>(syntax: &S, piece: &str, line: usize) -> Result<Operan
             } else {
                 Some(parse_value(syntax, rest, line)?) // '-': unary minus
             };
+            // Pasmo expressions yield unsigned words, but an index offset
+            // interprets that word as signed before its 8-bit range check.
+            // For example, both -1 and 65535 mean an offset of -1.
+            let disp = disp.map(|expr| {
+                if syntax.pasmo_expressions() {
+                    Expr::Bin(
+                        BinOp::Sub,
+                        Box::new(Expr::Bin(
+                            BinOp::Xor,
+                            Box::new(expr),
+                            Box::new(Expr::Num(0x8000)),
+                        )),
+                        Box::new(Expr::Num(0x8000)),
+                    )
+                } else {
+                    expr
+                }
+            });
             return Ok(Operand::Indexed { reg, disp });
         }
         let up = inner.to_ascii_uppercase();
@@ -4420,7 +4451,7 @@ fn tokenize_impl<S: Z80Syntax>(
                 tokens.push(Tok::Slash);
                 i += 1;
             }
-            '&' if cond && chars.get(i + 1) == Some(&'&') => {
+            '&' if (cond || syntax.pasmo_expressions()) && chars.get(i + 1) == Some(&'&') => {
                 tokens.push(Tok::AndAnd);
                 i += 2;
             }
@@ -4428,7 +4459,7 @@ fn tokenize_impl<S: Z80Syntax>(
                 tokens.push(Tok::And);
                 i += 1;
             }
-            '|' if cond && chars.get(i + 1) == Some(&'|') => {
+            '|' if (cond || syntax.pasmo_expressions()) && chars.get(i + 1) == Some(&'|') => {
                 tokens.push(Tok::OrOr);
                 i += 2;
             }
@@ -4452,7 +4483,7 @@ fn tokenize_impl<S: Z80Syntax>(
                 tokens.push(Tok::Eq);
                 i += if chars.get(i + 1) == Some(&'=') { 2 } else { 1 };
             }
-            '!' if cond => {
+            '!' if cond || syntax.pasmo_expressions() => {
                 if chars.get(i + 1) == Some(&'=') {
                     tokens.push(Tok::Ne);
                     i += 2;
@@ -4590,6 +4621,8 @@ fn tokenize_impl<S: Z80Syntax>(
                         "OR" => Tok::Or,
                         "XOR" => Tok::Xor,
                         "NOT" => Tok::BitNot,
+                        "SHL" => Tok::Shl,
+                        "SHR" => Tok::Shr,
                         _ => Tok::Sym(word),
                     }
                 } else {
@@ -4641,19 +4674,19 @@ impl ExprParser {
     /// negation, and leave the SjASMPlus grammar below unchanged.
     fn pasmo_expr(&mut self, minimum: u8) -> Result<Expr, AsmError> {
         let mut left = match self.tokens.get(self.pos) {
-            Some(Tok::Minus | Tok::Plus | Tok::BitNot | Tok::Not) => {
+            Some(Tok::Minus | Tok::Plus | Tok::BitNot | Tok::Not) if minimum <= 4 => {
                 let token = self.tokens[self.pos].clone();
                 self.pos += 1;
                 let operand = Box::new(self.pasmo_expr(4)?);
                 match token {
-                    Tok::Minus => Expr::Neg(operand),
+                    Tok::Minus => Self::pasmo_word(Expr::Neg(operand)),
                     Tok::Plus => *operand,
                     Tok::BitNot => Self::pasmo_word(Expr::BitNot(operand)),
                     Tok::Not => Self::pasmo_word(Expr::Neg(Box::new(Expr::LogNot(operand)))),
                     _ => unreachable!("prefix operator matched above"),
                 }
             }
-            _ => self.atom()?,
+            _ => Self::pasmo_word(self.atom()?),
         };
         loop {
             let (precedence, op, truth) = match self.tokens.get(self.pos) {
@@ -4680,19 +4713,25 @@ impl ExprParser {
                 break;
             }
             self.pos += 1;
-            let right = self.pasmo_expr(precedence + 1)?;
+            let mut right = self.pasmo_expr(precedence + 1)?;
+            if matches!(op, BinOp::Shl | BinOp::Shr) {
+                // The measured reference repeats shift counts every 32 bits:
+                // counts 32/64 act as zero, while 16 shifts a word to zero.
+                // Keep this local; the shared evaluator shifts i64 values.
+                right = Expr::Bin(BinOp::And, Box::new(right), Box::new(Expr::Num(31)));
+            }
             left = Expr::Bin(op, Box::new(left), Box::new(right));
             if truth {
                 left = Self::pasmo_word(Expr::Neg(Box::new(left)));
-            } else if matches!(op, BinOp::And | BinOp::Or | BinOp::Xor) {
+            } else {
                 left = Self::pasmo_word(left);
             }
         }
         Ok(left)
     }
 
-    /// Bitwise and truth operations produce an unsigned word before any enclosing
-    /// comparison, division, condition or reserve count consumes the result.
+    /// Every atom and operation produces an unsigned word before an enclosing
+    /// operation, condition, EQU binding or reserve count consumes the result.
     fn pasmo_word(value: Expr) -> Expr {
         Expr::Bin(BinOp::And, Box::new(value), Box::new(Expr::Num(0xffff)))
     }

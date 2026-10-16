@@ -494,8 +494,8 @@ const PROBES: &[Probe] = &[
 
     // ---- pasmo / z80 --------------------------------------------------------
     ok ("pasmo", "hex $ / binary %",     " ld a,$10\n ld b,%1010\n"),
-    // pasmo alone bounds a constant, and only upward: `$FFFF` assembles,
-    // `$10000` does not, and a negative is fine (#228).
+    // Pasmo constants use unsigned word arithmetic; native replay in
+    // pasmo_arithmetic.rs includes oversized EQU values wrapping to 16 bits (#634).
     ok ("pasmo", "a 16-bit constant",     "V equ $FFFF\n ld hl,V\n"),
     ok ("pasmo", "a negative constant",   "V equ -5\n ld a,V\n"),
     ok ("pasmo", "defw / dw",            " defw $1234\n dw $5678\n"),

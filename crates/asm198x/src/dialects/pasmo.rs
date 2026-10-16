@@ -86,13 +86,6 @@ impl Dialect for Pasmo {
     fn cycle_coverage(&self) -> crate::dialect::CycleCoverage {
         crate::dialect::CycleCoverage::Full
     }
-    /// pasmo is the one reference in the set that bounds a constant, and it
-    /// bounds only the top: `V equ $FFFF` assembles, `$10000` does not, and
-    /// `-65536` is accepted. Probed against PasmoNext v0.1.3.
-    fn equ_range(&self) -> Option<std::ops::RangeInclusive<i64>> {
-        Some(i64::MIN..=0xFFFF)
-    }
-
     fn instruction_set(&self) -> &'static isa::InstructionSet {
         &isa::z80::SET
     }
@@ -501,7 +494,6 @@ mod tests {
         assert_eq!(r.bytes, vec![0x00, 0x00, 0x01]);
     }
 
-    /// pasmo is the only reference that bounds a constant, and only at the top.
     /// pasmo has no implicit-accumulator spelling: `add (hl)` is "Invalid
     /// operand" (probed), so the sjasmplus rule (#533) must stay off here.
     #[test]
@@ -516,11 +508,12 @@ mod tests {
     }
 
     #[test]
-    fn a_constant_is_bounded_upward_only() {
+    fn constants_use_native_unsigned_word_values() {
         assert!(crate::assemble_pasmo("V equ $FFFF\n ld hl,V\n").is_ok());
         assert!(crate::assemble_pasmo("V equ -5\n ld a,V\n").is_ok());
-        let err = crate::assemble_pasmo("V equ $10000\n ld a,1\n").expect_err("refused");
-        assert!(err.to_string().contains("out of range"), "got `{err}`");
+        let result = crate::assemble_pasmo("V equ $10000\n ld hl,V\n").expect("wrapped EQU");
+        assert_eq!(result.symbols.get("V"), Some(&0));
+        assert_eq!(result.bytes, [0x21, 0, 0]);
     }
 
     #[test]

@@ -1,0 +1,3311 @@
+{
+  "host": "macOS-27.0-arm64-arm-64bit-Mach-O",
+  "python": "3.14.3",
+  "tool": "/usr/local/bin/pasmo",
+  "sha256": "e9628f5c32f3c74a963c649781e6cb87e9eaeb4bbfe7b52d3de27f4986bbf136",
+  "version": {
+    "exit": 1,
+    "stdout": "",
+    "stderr": "PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo\nModified by C Kirby\nUsage:\n\n\tpasmo [options] source object [symbol]\n\nSee the README file for details.\n"
+  },
+  "cases": [
+    {
+      "name": "dw_0",
+      "expression": "65536/2",
+      "source": " org $1000\n dw 65536/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000251917 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_1",
+      "expression": "(65535+2)/2",
+      "source": " org $1000\n dw (65535+2)/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000267833 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_2",
+      "expression": "-65537/2",
+      "source": " org $1000\n dw -65537/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000202375 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_3",
+      "expression": "(-65535-2)/2",
+      "source": " org $1000\n dw (-65535-2)/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000204958 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_4",
+      "expression": "65536",
+      "source": " org $1000\n dw 65536\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000219166 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_5",
+      "expression": "65537",
+      "source": " org $1000\n dw 65537\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000281583 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_6",
+      "expression": "-1",
+      "source": " org $1000\n dw -1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000210583 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_7",
+      "expression": "-65536",
+      "source": " org $1000\n dw -65536\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000183 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_8",
+      "expression": "-65537",
+      "source": " org $1000\n dw -65537\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000243417 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_9",
+      "expression": "65535+2",
+      "source": " org $1000\n dw 65535+2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000200208 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_10",
+      "expression": "(65535+2)=1",
+      "source": " org $1000\n dw (65535+2)=1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000224791 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_11",
+      "expression": "65536=0",
+      "source": " org $1000\n dw 65536=0\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000223375 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_12",
+      "expression": "65536<1",
+      "source": " org $1000\n dw 65536<1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000212583 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_13",
+      "expression": "-1<1",
+      "source": " org $1000\n dw -1<1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000184417 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_14",
+      "expression": "(-1)<1",
+      "source": " org $1000\n dw (-1)<1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000214083 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_15",
+      "expression": "-1/2",
+      "source": " org $1000\n dw -1/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000192792 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_16",
+      "expression": "(-1)/2",
+      "source": " org $1000\n dw (-1)/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000224916 s\n",
+      "hex": "ff7f",
+      "symbols": ""
+    },
+    {
+      "name": "dw_17",
+      "expression": "-65535-2",
+      "source": " org $1000\n dw -65535-2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000184708 s\n",
+      "hex": "0300",
+      "symbols": ""
+    },
+    {
+      "name": "dw_18",
+      "expression": "(-65535)-2",
+      "source": " org $1000\n dw (-65535)-2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000188041 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_19",
+      "expression": "-(65535+2)",
+      "source": " org $1000\n dw -(65535+2)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000217208 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_20",
+      "expression": "NOT 65536",
+      "source": " org $1000\n dw NOT 65536\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000261208 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_21",
+      "expression": "!65536",
+      "source": " org $1000\n dw !65536\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000185417 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_22",
+      "expression": "65536 && 1",
+      "source": " org $1000\n dw 65536 && 1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000182042 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_23",
+      "expression": "65536 || 0",
+      "source": " org $1000\n dw 65536 || 0\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000185709 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_24",
+      "expression": "1/65536",
+      "source": " org $1000\n dw 1/65536\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Division by zero\n",
+      "hex": null,
+      "symbols": null
+    },
+    {
+      "name": "dw_25",
+      "expression": "65536/0",
+      "source": " org $1000\n dw 65536/0\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Division by zero\n",
+      "hex": null,
+      "symbols": null
+    },
+    {
+      "name": "dw_26",
+      "expression": "65535*65535",
+      "source": " org $1000\n dw 65535*65535\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000273792 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_27",
+      "expression": "(65535*65535)/2",
+      "source": " org $1000\n dw (65535*65535)/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000213834 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_28",
+      "expression": "65535 SHL 1",
+      "source": " org $1000\n dw 65535 SHL 1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.0001825 s\n",
+      "hex": "feff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_29",
+      "expression": "65535 SHR 1",
+      "source": " org $1000\n dw 65535 SHR 1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000194542 s\n",
+      "hex": "ff7f",
+      "symbols": ""
+    },
+    {
+      "name": "dw_30",
+      "expression": "(-1) SHR 1",
+      "source": " org $1000\n dw (-1) SHR 1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000203209 s\n",
+      "hex": "ff7f",
+      "symbols": ""
+    },
+    {
+      "name": "dw_31",
+      "expression": "1 SHL 16",
+      "source": " org $1000\n dw 1 SHL 16\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000217792 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_32",
+      "expression": "1 SHL 17",
+      "source": " org $1000\n dw 1 SHL 17\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000202709 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_33",
+      "expression": "65535 SHR 16",
+      "source": " org $1000\n dw 65535 SHR 16\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000238791 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_34",
+      "expression": "1 SHL 65536",
+      "source": " org $1000\n dw 1 SHL 65536\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.0002225 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_35",
+      "expression": "1 SHL -1",
+      "source": " org $1000\n dw 1 SHL -1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Value expected but '-'found\n",
+      "hex": null,
+      "symbols": null
+    },
+    {
+      "name": "dw_36",
+      "expression": "1 SHL 31",
+      "source": " org $1000\n dw 1 SHL 31\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000197583 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_37",
+      "expression": "1 SHL 32",
+      "source": " org $1000\n dw 1 SHL 32\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000203084 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_38",
+      "expression": "1 SHL 63",
+      "source": " org $1000\n dw 1 SHL 63\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000191916 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_39",
+      "expression": "1 SHL 64",
+      "source": " org $1000\n dw 1 SHL 64\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000179667 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_40",
+      "expression": "1 SHL 65535",
+      "source": " org $1000\n dw 1 SHL 65535\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000205792 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_41",
+      "expression": "65535 SHR 32",
+      "source": " org $1000\n dw 65535 SHR 32\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000258292 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_42",
+      "expression": "65535 SHR 64",
+      "source": " org $1000\n dw 65535 SHR 64\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000278 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_43",
+      "expression": "1+-1",
+      "source": " org $1000\n dw 1+-1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Value expected but '-'found\n",
+      "hex": null,
+      "symbols": null
+    },
+    {
+      "name": "dw_44",
+      "expression": "1=-1",
+      "source": " org $1000\n dw 1=-1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Value expected but '-'found\n",
+      "hex": null,
+      "symbols": null
+    },
+    {
+      "name": "dw_45",
+      "expression": "1 AND -1",
+      "source": " org $1000\n dw 1 AND -1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00024775 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_46",
+      "expression": "1 OR -1",
+      "source": " org $1000\n dw 1 OR -1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000238291 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_47",
+      "expression": "1 XOR NOT 0",
+      "source": " org $1000\n dw 1 XOR NOT 0\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00021425 s\n",
+      "hex": "feff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_48",
+      "expression": "1 AND NOT 0",
+      "source": " org $1000\n dw 1 AND NOT 0\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000205417 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_49",
+      "expression": "1+( -1)",
+      "source": " org $1000\n dw 1+( -1)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000205625 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_50",
+      "expression": "1+NOT 0",
+      "source": " org $1000\n dw 1+NOT 0\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Value expected but 'NOT'found\n",
+      "hex": null,
+      "symbols": null
+    },
+    {
+      "name": "dw_51",
+      "expression": "0 && (1/0)",
+      "source": " org $1000\n dw 0 && (1/0)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00020925 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_52",
+      "expression": "1 || (1/0)",
+      "source": " org $1000\n dw 1 || (1/0)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000192125 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_53",
+      "expression": "0 && missing",
+      "source": " org $1000\n dw 0 && missing\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000186416 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_54",
+      "expression": "1 || missing",
+      "source": " org $1000\n dw 1 || missing\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00021475 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_55",
+      "expression": "!!65536",
+      "source": " org $1000\n dw !!65536\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000226958 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_56",
+      "expression": "1 shl 32",
+      "source": " org $1000\n dw 1 shl 32\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000196417 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_57",
+      "expression": "1 ShR 32",
+      "source": " org $1000\n dw 1 ShR 32\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000202125 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_58",
+      "expression": "1<<32",
+      "source": " org $1000\n dw 1<<32\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000190416 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_59",
+      "expression": "65535>>32",
+      "source": " org $1000\n dw 65535>>32\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00024025 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_60",
+      "expression": "1/(-1)",
+      "source": " org $1000\n dw 1/(-1)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000208083 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_61",
+      "expression": "1/(65536)",
+      "source": " org $1000\n dw 1/(65536)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Division by zero\n",
+      "hex": null,
+      "symbols": null
+    },
+    {
+      "name": "dw_62",
+      "expression": "-(-1)",
+      "source": " org $1000\n dw -(-1)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000280042 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_63",
+      "expression": "0 && (65535+2)",
+      "source": " org $1000\n dw 0 && (65535+2)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000204041 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_64",
+      "expression": "65536+1",
+      "source": " org $1000\n dw 65536+1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00024875 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_65",
+      "expression": "65536-1",
+      "source": " org $1000\n dw 65536-1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00018625 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_66",
+      "expression": "65537*2",
+      "source": " org $1000\n dw 65537*2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000205666 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_67",
+      "expression": "65537 AND 3",
+      "source": " org $1000\n dw 65537 AND 3\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000234875 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_68",
+      "expression": "65537 XOR 3",
+      "source": " org $1000\n dw 65537 XOR 3\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000190583 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_69",
+      "expression": "65537 OR 3",
+      "source": " org $1000\n dw 65537 OR 3\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000212833 s\n",
+      "hex": "0300",
+      "symbols": ""
+    },
+    {
+      "name": "dw_70",
+      "expression": "$+65536",
+      "source": " org $1000\n dw $+65536\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000196875 s\n",
+      "hex": "0010",
+      "symbols": ""
+    },
+    {
+      "name": "dw_71",
+      "expression": "($+65536)/2",
+      "source": " org $1000\n dw ($+65536)/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000187584 s\n",
+      "hex": "0008",
+      "symbols": ""
+    },
+    {
+      "name": "dw_72",
+      "expression": "(65535+2) > 0",
+      "source": " org $1000\n dw (65535+2) > 0\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000176 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_73",
+      "expression": "0 + 2",
+      "source": " org $1000\n dw 0 + 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00019025 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_74",
+      "expression": "0 - 2",
+      "source": " org $1000\n dw 0 - 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00019025 s\n",
+      "hex": "feff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_75",
+      "expression": "0 * 2",
+      "source": " org $1000\n dw 0 * 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000201042 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_76",
+      "expression": "0 / 2",
+      "source": " org $1000\n dw 0 / 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000243208 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_77",
+      "expression": "0 = 2",
+      "source": " org $1000\n dw 0 = 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000200417 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_78",
+      "expression": "0 < 2",
+      "source": " org $1000\n dw 0 < 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000219042 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_79",
+      "expression": "0 > 2",
+      "source": " org $1000\n dw 0 > 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000193667 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_80",
+      "expression": "0 SHL 2",
+      "source": " org $1000\n dw 0 SHL 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000195125 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_81",
+      "expression": "0 SHR 2",
+      "source": " org $1000\n dw 0 SHR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000207792 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_82",
+      "expression": "0 AND 2",
+      "source": " org $1000\n dw 0 AND 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000287291 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_83",
+      "expression": "0 XOR 2",
+      "source": " org $1000\n dw 0 XOR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000203083 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_84",
+      "expression": "0 OR 2",
+      "source": " org $1000\n dw 0 OR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000204208 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_85",
+      "expression": "1 + 2",
+      "source": " org $1000\n dw 1 + 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000198333 s\n",
+      "hex": "0300",
+      "symbols": ""
+    },
+    {
+      "name": "dw_86",
+      "expression": "1 - 2",
+      "source": " org $1000\n dw 1 - 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000215083 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_87",
+      "expression": "1 * 2",
+      "source": " org $1000\n dw 1 * 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000226459 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_88",
+      "expression": "1 / 2",
+      "source": " org $1000\n dw 1 / 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000245291 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_89",
+      "expression": "1 = 2",
+      "source": " org $1000\n dw 1 = 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000236583 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_90",
+      "expression": "1 < 2",
+      "source": " org $1000\n dw 1 < 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000178584 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_91",
+      "expression": "1 > 2",
+      "source": " org $1000\n dw 1 > 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000293167 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_92",
+      "expression": "1 SHL 2",
+      "source": " org $1000\n dw 1 SHL 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000247458 s\n",
+      "hex": "0400",
+      "symbols": ""
+    },
+    {
+      "name": "dw_93",
+      "expression": "1 SHR 2",
+      "source": " org $1000\n dw 1 SHR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000261583 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_94",
+      "expression": "1 AND 2",
+      "source": " org $1000\n dw 1 AND 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000205458 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_95",
+      "expression": "1 XOR 2",
+      "source": " org $1000\n dw 1 XOR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000200083 s\n",
+      "hex": "0300",
+      "symbols": ""
+    },
+    {
+      "name": "dw_96",
+      "expression": "1 OR 2",
+      "source": " org $1000\n dw 1 OR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000229875 s\n",
+      "hex": "0300",
+      "symbols": ""
+    },
+    {
+      "name": "dw_97",
+      "expression": "32768 + 2",
+      "source": " org $1000\n dw 32768 + 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000228292 s\n",
+      "hex": "0280",
+      "symbols": ""
+    },
+    {
+      "name": "dw_98",
+      "expression": "32768 - 2",
+      "source": " org $1000\n dw 32768 - 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000233041 s\n",
+      "hex": "fe7f",
+      "symbols": ""
+    },
+    {
+      "name": "dw_99",
+      "expression": "32768 * 2",
+      "source": " org $1000\n dw 32768 * 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000223125 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_100",
+      "expression": "32768 / 2",
+      "source": " org $1000\n dw 32768 / 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000209708 s\n",
+      "hex": "0040",
+      "symbols": ""
+    },
+    {
+      "name": "dw_101",
+      "expression": "32768 = 2",
+      "source": " org $1000\n dw 32768 = 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000185292 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_102",
+      "expression": "32768 < 2",
+      "source": " org $1000\n dw 32768 < 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00019175 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_103",
+      "expression": "32768 > 2",
+      "source": " org $1000\n dw 32768 > 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000249291 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_104",
+      "expression": "32768 SHL 2",
+      "source": " org $1000\n dw 32768 SHL 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000253292 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_105",
+      "expression": "32768 SHR 2",
+      "source": " org $1000\n dw 32768 SHR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000252166 s\n",
+      "hex": "0020",
+      "symbols": ""
+    },
+    {
+      "name": "dw_106",
+      "expression": "32768 AND 2",
+      "source": " org $1000\n dw 32768 AND 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000204541 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_107",
+      "expression": "32768 XOR 2",
+      "source": " org $1000\n dw 32768 XOR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00025175 s\n",
+      "hex": "0280",
+      "symbols": ""
+    },
+    {
+      "name": "dw_108",
+      "expression": "32768 OR 2",
+      "source": " org $1000\n dw 32768 OR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.0001985 s\n",
+      "hex": "0280",
+      "symbols": ""
+    },
+    {
+      "name": "dw_109",
+      "expression": "65535 + 2",
+      "source": " org $1000\n dw 65535 + 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000184708 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_110",
+      "expression": "65535 - 2",
+      "source": " org $1000\n dw 65535 - 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000215708 s\n",
+      "hex": "fdff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_111",
+      "expression": "65535 * 2",
+      "source": " org $1000\n dw 65535 * 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000218625 s\n",
+      "hex": "feff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_112",
+      "expression": "65535 / 2",
+      "source": " org $1000\n dw 65535 / 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000205959 s\n",
+      "hex": "ff7f",
+      "symbols": ""
+    },
+    {
+      "name": "dw_113",
+      "expression": "65535 = 2",
+      "source": " org $1000\n dw 65535 = 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000232708 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_114",
+      "expression": "65535 < 2",
+      "source": " org $1000\n dw 65535 < 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000289833 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_115",
+      "expression": "65535 > 2",
+      "source": " org $1000\n dw 65535 > 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000228 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_116",
+      "expression": "65535 SHL 2",
+      "source": " org $1000\n dw 65535 SHL 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.0002215 s\n",
+      "hex": "fcff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_117",
+      "expression": "65535 SHR 2",
+      "source": " org $1000\n dw 65535 SHR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000214292 s\n",
+      "hex": "ff3f",
+      "symbols": ""
+    },
+    {
+      "name": "dw_118",
+      "expression": "65535 AND 2",
+      "source": " org $1000\n dw 65535 AND 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00020975 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_119",
+      "expression": "65535 XOR 2",
+      "source": " org $1000\n dw 65535 XOR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000218792 s\n",
+      "hex": "fdff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_120",
+      "expression": "65535 OR 2",
+      "source": " org $1000\n dw 65535 OR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000205042 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_121",
+      "expression": "65536 + 2",
+      "source": " org $1000\n dw 65536 + 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000210125 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_122",
+      "expression": "65536 - 2",
+      "source": " org $1000\n dw 65536 - 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000246292 s\n",
+      "hex": "feff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_123",
+      "expression": "65536 * 2",
+      "source": " org $1000\n dw 65536 * 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000236416 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_124",
+      "expression": "65536 / 2",
+      "source": " org $1000\n dw 65536 / 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000278667 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_125",
+      "expression": "65536 = 2",
+      "source": " org $1000\n dw 65536 = 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000261791 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_126",
+      "expression": "65536 < 2",
+      "source": " org $1000\n dw 65536 < 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000252042 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_127",
+      "expression": "65536 > 2",
+      "source": " org $1000\n dw 65536 > 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000225958 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_128",
+      "expression": "65536 SHL 2",
+      "source": " org $1000\n dw 65536 SHL 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000230125 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_129",
+      "expression": "65536 SHR 2",
+      "source": " org $1000\n dw 65536 SHR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000301084 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_130",
+      "expression": "65536 AND 2",
+      "source": " org $1000\n dw 65536 AND 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000201209 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_131",
+      "expression": "65536 XOR 2",
+      "source": " org $1000\n dw 65536 XOR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000237292 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_132",
+      "expression": "65536 OR 2",
+      "source": " org $1000\n dw 65536 OR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.0002705 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_133",
+      "expression": "65537 + 2",
+      "source": " org $1000\n dw 65537 + 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.0002465 s\n",
+      "hex": "0300",
+      "symbols": ""
+    },
+    {
+      "name": "dw_134",
+      "expression": "65537 - 2",
+      "source": " org $1000\n dw 65537 - 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000233542 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_135",
+      "expression": "65537 * 2",
+      "source": " org $1000\n dw 65537 * 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000222916 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_136",
+      "expression": "65537 / 2",
+      "source": " org $1000\n dw 65537 / 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000205416 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_137",
+      "expression": "65537 = 2",
+      "source": " org $1000\n dw 65537 = 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000263875 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_138",
+      "expression": "65537 < 2",
+      "source": " org $1000\n dw 65537 < 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000203917 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_139",
+      "expression": "65537 > 2",
+      "source": " org $1000\n dw 65537 > 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000264375 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_140",
+      "expression": "65537 SHL 2",
+      "source": " org $1000\n dw 65537 SHL 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000210708 s\n",
+      "hex": "0400",
+      "symbols": ""
+    },
+    {
+      "name": "dw_141",
+      "expression": "65537 SHR 2",
+      "source": " org $1000\n dw 65537 SHR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000235291 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_142",
+      "expression": "65537 AND 2",
+      "source": " org $1000\n dw 65537 AND 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000263125 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_143",
+      "expression": "65537 XOR 2",
+      "source": " org $1000\n dw 65537 XOR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00023925 s\n",
+      "hex": "0300",
+      "symbols": ""
+    },
+    {
+      "name": "dw_144",
+      "expression": "65537 OR 2",
+      "source": " org $1000\n dw 65537 OR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000217375 s\n",
+      "hex": "0300",
+      "symbols": ""
+    },
+    {
+      "name": "dw_145",
+      "expression": "(-1) + 2",
+      "source": " org $1000\n dw (-1) + 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000289417 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_146",
+      "expression": "(-1) - 2",
+      "source": " org $1000\n dw (-1) - 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000185 s\n",
+      "hex": "fdff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_147",
+      "expression": "(-1) * 2",
+      "source": " org $1000\n dw (-1) * 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.0002025 s\n",
+      "hex": "feff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_148",
+      "expression": "(-1) / 2",
+      "source": " org $1000\n dw (-1) / 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000192125 s\n",
+      "hex": "ff7f",
+      "symbols": ""
+    },
+    {
+      "name": "dw_149",
+      "expression": "(-1) = 2",
+      "source": " org $1000\n dw (-1) = 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000269292 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_150",
+      "expression": "(-1) < 2",
+      "source": " org $1000\n dw (-1) < 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000197292 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_151",
+      "expression": "(-1) > 2",
+      "source": " org $1000\n dw (-1) > 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000217291 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_152",
+      "expression": "(-1) SHL 2",
+      "source": " org $1000\n dw (-1) SHL 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000377583 s\n",
+      "hex": "fcff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_153",
+      "expression": "(-1) SHR 2",
+      "source": " org $1000\n dw (-1) SHR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000224875 s\n",
+      "hex": "ff3f",
+      "symbols": ""
+    },
+    {
+      "name": "dw_154",
+      "expression": "(-1) AND 2",
+      "source": " org $1000\n dw (-1) AND 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000252125 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_155",
+      "expression": "(-1) XOR 2",
+      "source": " org $1000\n dw (-1) XOR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000217542 s\n",
+      "hex": "fdff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_156",
+      "expression": "(-1) OR 2",
+      "source": " org $1000\n dw (-1) OR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00019375 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_157",
+      "expression": "(-65537) + 2",
+      "source": " org $1000\n dw (-65537) + 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000254875 s\n",
+      "hex": "0100",
+      "symbols": ""
+    },
+    {
+      "name": "dw_158",
+      "expression": "(-65537) - 2",
+      "source": " org $1000\n dw (-65537) - 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000221333 s\n",
+      "hex": "fdff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_159",
+      "expression": "(-65537) * 2",
+      "source": " org $1000\n dw (-65537) * 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000192958 s\n",
+      "hex": "feff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_160",
+      "expression": "(-65537) / 2",
+      "source": " org $1000\n dw (-65537) / 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000210291 s\n",
+      "hex": "ff7f",
+      "symbols": ""
+    },
+    {
+      "name": "dw_161",
+      "expression": "(-65537) = 2",
+      "source": " org $1000\n dw (-65537) = 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000206208 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_162",
+      "expression": "(-65537) < 2",
+      "source": " org $1000\n dw (-65537) < 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000191459 s\n",
+      "hex": "0000",
+      "symbols": ""
+    },
+    {
+      "name": "dw_163",
+      "expression": "(-65537) > 2",
+      "source": " org $1000\n dw (-65537) > 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.0003205 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_164",
+      "expression": "(-65537) SHL 2",
+      "source": " org $1000\n dw (-65537) SHL 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000200042 s\n",
+      "hex": "fcff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_165",
+      "expression": "(-65537) SHR 2",
+      "source": " org $1000\n dw (-65537) SHR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000249959 s\n",
+      "hex": "ff3f",
+      "symbols": ""
+    },
+    {
+      "name": "dw_166",
+      "expression": "(-65537) AND 2",
+      "source": " org $1000\n dw (-65537) AND 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000221417 s\n",
+      "hex": "0200",
+      "symbols": ""
+    },
+    {
+      "name": "dw_167",
+      "expression": "(-65537) XOR 2",
+      "source": " org $1000\n dw (-65537) XOR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000204875 s\n",
+      "hex": "fdff",
+      "symbols": ""
+    },
+    {
+      "name": "dw_168",
+      "expression": "(-65537) OR 2",
+      "source": " org $1000\n dw (-65537) OR 2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000263459 s\n",
+      "hex": "ffff",
+      "symbols": ""
+    },
+    {
+      "name": "equ_0",
+      "expression": "65536",
+      "source": " org $1000\nV equ 65536\n dw V,V/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000281042 s\n",
+      "hex": "00000000",
+      "symbols": "V\t\tEQU 00000H\n"
+    },
+    {
+      "name": "equ_1",
+      "expression": "65537",
+      "source": " org $1000\nV equ 65537\n dw V,V/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000249833 s\n",
+      "hex": "01000000",
+      "symbols": "V\t\tEQU 00001H\n"
+    },
+    {
+      "name": "equ_2",
+      "expression": "-1",
+      "source": " org $1000\nV equ -1\n dw V,V/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000228 s\n",
+      "hex": "ffffff7f",
+      "symbols": "V\t\tEQU 0FFFFH\n"
+    },
+    {
+      "name": "equ_3",
+      "expression": "-65536",
+      "source": " org $1000\nV equ -65536\n dw V,V/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000318542 s\n",
+      "hex": "00000000",
+      "symbols": "V\t\tEQU 00000H\n"
+    },
+    {
+      "name": "equ_4",
+      "expression": "-65537",
+      "source": " org $1000\nV equ -65537\n dw V,V/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000284625 s\n",
+      "hex": "ffffff7f",
+      "symbols": "V\t\tEQU 0FFFFH\n"
+    },
+    {
+      "name": "equ_5",
+      "expression": "65535+2",
+      "source": " org $1000\nV equ 65535+2\n dw V,V/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00029025 s\n",
+      "hex": "01000000",
+      "symbols": "V\t\tEQU 00001H\n"
+    },
+    {
+      "name": "equ_6",
+      "expression": "65536/2",
+      "source": " org $1000\nV equ 65536/2\n dw V,V/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000304792 s\n",
+      "hex": "00000000",
+      "symbols": "V\t\tEQU 00000H\n"
+    },
+    {
+      "name": "equ_7",
+      "expression": "(-65535-2)/2",
+      "source": " org $1000\nV equ (-65535-2)/2\n dw V,V/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000243958 s\n",
+      "hex": "01000000",
+      "symbols": "V\t\tEQU 00001H\n"
+    },
+    {
+      "name": "equ_usage",
+      "expression": "V",
+      "source": " org $1000\nV equ -1\n dw V,V/2,V<1\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000282583 s\n",
+      "hex": "ffffff7f0000",
+      "symbols": "V\t\tEQU 0FFFFH\n"
+    },
+    {
+      "name": "forward",
+      "expression": "later",
+      "source": " org $1000\n dw (later+65536)/2\nlater: nop\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000257292 s\n",
+      "hex": "010800",
+      "symbols": "later\t\tEQU 01002H\n"
+    },
+    {
+      "name": "backward",
+      "expression": "label",
+      "source": " org $1000\nlabel: nop\n dw (label+65536)/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000359 s\n",
+      "hex": "000008",
+      "symbols": "label\t\tEQU 01000H\n"
+    },
+    {
+      "name": "condition",
+      "expression": "65536=0",
+      "source": " org $1000\n IF 65536=0\n db $a5\n ELSE\n db $5a\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000235042 s\n",
+      "hex": "a5",
+      "symbols": ""
+    },
+    {
+      "name": "repeat",
+      "expression": "65536/2",
+      "source": " org $1000\n REPT 65536/2\n db $a5\n ENDM\n db $5a\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00024825 s\n",
+      "hex": "5a",
+      "symbols": ""
+    },
+    {
+      "name": "defs",
+      "expression": "65536/2",
+      "source": " org $1000\n defs 65536/2,$a5\n db $5a\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000236542 s\n",
+      "hex": "5a",
+      "symbols": ""
+    },
+    {
+      "name": "immediate",
+      "expression": "65536/2",
+      "source": " org $1000\n ld hl,65536/2\n ld a,0+(65535+2)/2\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000232042 s\n",
+      "hex": "2100003e00",
+      "symbols": ""
+    },
+    {
+      "name": "index_0",
+      "expression": "-129",
+      "source": " org $1000\n ld a,(ix-129)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "Warning: TypeMinus IX or IY index 129 ($7F) is potentially wrong at line 1\nERROR on line 2 of file input.asm\nERROR: Offset out of range\n",
+      "hex": null,
+      "symbols": null
+    },
+    {
+      "name": "index_1",
+      "expression": "-128",
+      "source": " org $1000\n ld a,(ix-128)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Warning: TypeMinus IX or IY index 128 ($80) is potentially wrong at line 1\nWarning: TypeMinus IX or IY index 128 ($80) is potentially wrong at line 1\n\nElapsed time: 0.000257125 s\n",
+      "hex": "dd7e80",
+      "symbols": ""
+    },
+    {
+      "name": "index_2",
+      "expression": "-1",
+      "source": " org $1000\n ld a,(ix-1)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "Warning: TypeMinus IX or IY index 1 ($FF) is potentially wrong at line 1\nWarning: TypeMinus IX or IY index 1 ($FF) is potentially wrong at line 1\n\nElapsed time: 0.000213042 s\n",
+      "hex": "dd7eff",
+      "symbols": ""
+    },
+    {
+      "name": "index_3",
+      "expression": "127",
+      "source": " org $1000\n ld a,(ix+127)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.00020825 s\n",
+      "hex": "dd7e7f",
+      "symbols": ""
+    },
+    {
+      "name": "index_4",
+      "expression": "128",
+      "source": " org $1000\n ld a,(ix+128)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Offset out of range\n",
+      "hex": null,
+      "symbols": null
+    },
+    {
+      "name": "index_5",
+      "expression": "255",
+      "source": " org $1000\n ld a,(ix+255)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Offset out of range\n",
+      "hex": null,
+      "symbols": null
+    },
+    {
+      "name": "index_6",
+      "expression": "256",
+      "source": " org $1000\n ld a,(ix+256)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Offset out of range\n",
+      "hex": null,
+      "symbols": null
+    },
+    {
+      "name": "index_7",
+      "expression": "65535",
+      "source": " org $1000\n ld a,(ix+65535)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000218792 s\n",
+      "hex": "dd7eff",
+      "symbols": ""
+    },
+    {
+      "name": "index_8",
+      "expression": "65536",
+      "source": " org $1000\n ld a,(ix+65536)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "\nElapsed time: 0.000231792 s\n",
+      "hex": "dd7e00",
+      "symbols": ""
+    },
+    {
+      "name": "index_9",
+      "expression": "32768",
+      "source": " org $1000\n ld a,(ix+32768)\n",
+      "argv": [
+        "/usr/local/bin/pasmo",
+        "--bin",
+        "input.asm",
+        "output.bin",
+        "output.sym"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "ERROR on line 2 of file input.asm\nERROR: Offset out of range\n",
+      "hex": null,
+      "symbols": null
+    }
+  ]
+}
