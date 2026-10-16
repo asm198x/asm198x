@@ -1,0 +1,20 @@
+{
+  "run": 38943372230,
+  "files": [
+    {
+      "path": "__w/_temp/sjasmplus-shift-native.json",
+      "length": 235994,
+      "sha256": "21070477517903a80d80f3c0819fb701da340b4f80f23b8e4d99f7c926eb27d9"
+    },
+    {
+      "path": "__w/asm198x/asm198x/docs/ecosystem-corpus.md",
+      "length": 6217,
+      "sha256": "2896b94daf0744539f45f0a931755e93777bdde18541d5996bcaba6f9bdef671"
+    },
+    {
+      "path": "__w/asm198x/asm198x/docs/book/src/reference/ecosystem.md",
+      "length": 4688,
+      "sha256": "6f60b675857fc7d3797c122168b8487585c5b45ccdb43808e247d4ba84b91397"
+    }
+  ]
+}

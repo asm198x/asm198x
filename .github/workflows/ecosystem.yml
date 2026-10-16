@@ -49,15 +49,27 @@ jobs:
           cp "$RUNNER_TEMP/ecosystem-results/report.json" ecosystem/results/current.json
           cargo xtask ecosystem ledger ecosystem/results/current.json --write
           cargo xtask docs
+      - name: Stage every required evidence file for retention
+        if: always()
+        run: |
+          set -eu
+          destination=target/ecosystem-evidence
+          mkdir "$destination"
+          cp "$RUNNER_TEMP/ecosystem-results/report.json" "$destination/report.json"
+          cp "$RUNNER_TEMP/sjasmplus-shift-native.json" "$destination/sjasmplus-shift-native.json"
+          cp -R "$RUNNER_TEMP/ecosystem-results/logs" "$destination/logs"
+          cp docs/ecosystem-corpus.md "$destination/ecosystem-corpus.md"
+          cp docs/book/src/reference/ecosystem.md "$destination/book-ecosystem.md"
+          for name in build-assembler.stdout build-assembler.stderr assembler-version.stdout assembler-version.stderr; do
+            test -f "$destination/logs/$name"
+          done
+          for name in report.json sjasmplus-shift-native.json ecosystem-corpus.md book-ecosystem.md; do
+            test -s "$destination/$name"
+          done
       - name: Retain actual target evidence and proposed table
         if: always()
         uses: actions/upload-artifact@v7
         with:
           name: ecosystem-build-results
           if-no-files-found: error
-          path: |
-            ${{ runner.temp }}/sjasmplus-shift-native.json
-            ${{ runner.temp }}/ecosystem-results/report.json
-            ${{ runner.temp }}/ecosystem-results/logs/
-            docs/ecosystem-corpus.md
-            docs/book/src/reference/ecosystem.md
+          path: target/ecosystem-evidence/
