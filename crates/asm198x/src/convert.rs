@@ -29,6 +29,11 @@ pub struct Conversion {
 
 /// Convert `source` between two dialects of one CPU, self-verified.
 ///
+/// Conversion accepts one self-contained source string. It does not resolve
+/// `INCLUDE` or `INCBIN` files. Inline included source and replace binary
+/// inclusions with data directives before converting. Macros are preserved only
+/// where both dialect verifiers accept the resulting source.
+///
 /// # Errors
 /// An unknown dialect pair; input that does not assemble under the source
 /// dialect; output the target dialect refuses; or a byte divergence between
@@ -69,7 +74,7 @@ fn pasmo_to_sjasmplus(source: &str, z80n: bool) -> Result<Conversion, AsmError> 
     } else {
         crate::assemble_pasmo(source)
     }
-    .map_err(|e| context(e, "the input does not assemble under pasmo"))?;
+    .map_err(input_verification_error)?;
     let theirs = if z80n {
         crate::assemble_sjasmplus_next(&output)
     } else {
@@ -160,4 +165,20 @@ fn first_divergence(a: &[u8], b: &[u8]) -> Option<usize> {
 fn context(mut e: AsmError, what: &str) -> AsmError {
     e.message = format!("{what}: {}", e.message);
     e
+}
+
+/// The single-source assembler's hint is for ordinary assembly clients. This
+/// converter is itself a CLI consumer without a multi-file entry point, so keep
+/// the failing request and source span but replace that inapplicable advice.
+fn input_verification_error(mut error: AsmError) -> AsmError {
+    const SINGLE_SOURCE_HINT: &str =
+        " — the single-source API assembles one file; use the multi-file entry point ";
+    if let Some((detail, _)) = error.message.split_once(SINGLE_SOURCE_HINT) {
+        error.message = format!(
+            "{detail} — conversion accepts one self-contained source file and does not \
+             resolve INCLUDE or INCBIN files; replace file directives with source or data \
+             directives before converting"
+        );
+    }
+    context(error, "the input does not assemble under pasmo")
 }

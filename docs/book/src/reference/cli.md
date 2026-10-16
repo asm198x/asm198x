@@ -238,9 +238,13 @@ conversion is correct by construction or it is a reported error naming what
 diverged — never silent plausible output. Both ends are real reference
 dialects; nothing is invented.
 
-v1 converts pasmo and pasmonext source to sjasmplus, at instruction and
-directive level (comments ride along; macros and includes convert as written
-where the dialects agree). The emblematic rewrite: pasmo closes `REPT` with
+v1 converts one self-contained pasmo or pasmonext source file to sjasmplus,
+at instruction and directive level. It does not resolve `INCLUDE` or `INCBIN`
+files, even when they exist beside the input. Inline included source and replace
+binary inclusions with data directives before converting. Ordinary assembly
+resolves these files. Comments ride along, and
+macros are preserved where both dialect verifiers accept the resulting source.
+The emblematic rewrite: pasmo closes `REPT` with
 `ENDM`, which sjasmplus refuses — the converter rewrites the repetition
 closer to `ENDR` and leaves a macro's `ENDM` alone.
 
