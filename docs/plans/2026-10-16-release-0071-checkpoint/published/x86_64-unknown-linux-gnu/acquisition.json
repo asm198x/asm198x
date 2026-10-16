@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "kind": "published-release",
+  "published_version": "0.0.71",
+  "target": "x86_64-unknown-linux-gnu",
+  "checkout_commit": "60babae495e4e37963a5bbec23068ae21ff71eb3",
+  "run": "38948976392",
+  "status": "acquired",
+  "stage": "complete",
+  "receipt": "present"
+}

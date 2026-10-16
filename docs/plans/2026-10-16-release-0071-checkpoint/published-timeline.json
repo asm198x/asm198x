@@ -1,0 +1,1099 @@
+{
+  "id": 38948976392,
+  "name": "Candidate packages",
+  "node_id": "WFR_kwLOSsHoZs8AAAAJEYo3CA",
+  "head_branch": "asm198x-v0.0.71",
+  "head_sha": "60babae495e4e37963a5bbec23068ae21ff71eb3",
+  "path": ".github/workflows/test-linux-packages.yml",
+  "display_title": "Candidate packages",
+  "run_number": 211,
+  "event": "workflow_dispatch",
+  "status": "completed",
+  "conclusion": "success",
+  "workflow_id": 377185821,
+  "check_suite_id": 105557428107,
+  "check_suite_node_id": "CS_kwDOSsHoZs8AAAAYk7aHiw",
+  "url": "https://api.github.com/repos/asm198x/asm198x/actions/runs/38948976392",
+  "html_url": "https://github.com/asm198x/asm198x/actions/runs/38948976392",
+  "pull_requests": [],
+  "created_at": "2026-10-16T18:39:11Z",
+  "updated_at": "2026-10-16T18:40:44Z",
+  "actor": {
+    "login": "stevehill1981",
+    "id": 67447,
+    "node_id": "MDQ6VXNlcjY3NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/67447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/stevehill1981",
+    "html_url": "https://github.com/stevehill1981",
+    "followers_url": "https://api.github.com/users/stevehill1981/followers",
+    "following_url": "https://api.github.com/users/stevehill1981/following{/other_user}",
+    "gists_url": "https://api.github.com/users/stevehill1981/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/stevehill1981/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/stevehill1981/subscriptions",
+    "organizations_url": "https://api.github.com/users/stevehill1981/orgs",
+    "repos_url": "https://api.github.com/users/stevehill1981/repos",
+    "events_url": "https://api.github.com/users/stevehill1981/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/stevehill1981/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "run_attempt": 1,
+  "referenced_workflows": [],
+  "run_started_at": "2026-10-16T18:39:11Z",
+  "triggering_actor": {
+    "login": "stevehill1981",
+    "id": 67447,
+    "node_id": "MDQ6VXNlcjY3NDQ3",
+    "avatar_url": "https://avatars.githubusercontent.com/u/67447?v=4",
+    "gravatar_id": "",
+    "url": "https://api.github.com/users/stevehill1981",
+    "html_url": "https://github.com/stevehill1981",
+    "followers_url": "https://api.github.com/users/stevehill1981/followers",
+    "following_url": "https://api.github.com/users/stevehill1981/following{/other_user}",
+    "gists_url": "https://api.github.com/users/stevehill1981/gists{/gist_id}",
+    "starred_url": "https://api.github.com/users/stevehill1981/starred{/owner}{/repo}",
+    "subscriptions_url": "https://api.github.com/users/stevehill1981/subscriptions",
+    "organizations_url": "https://api.github.com/users/stevehill1981/orgs",
+    "repos_url": "https://api.github.com/users/stevehill1981/repos",
+    "events_url": "https://api.github.com/users/stevehill1981/events{/privacy}",
+    "received_events_url": "https://api.github.com/users/stevehill1981/received_events",
+    "type": "User",
+    "user_view_type": "public",
+    "site_admin": false
+  },
+  "jobs_url": "https://api.github.com/repos/asm198x/asm198x/actions/runs/38948976392/jobs",
+  "logs_url": "https://api.github.com/repos/asm198x/asm198x/actions/runs/38948976392/logs",
+  "check_suite_url": "https://api.github.com/repos/asm198x/asm198x/check-suites/105557428107",
+  "artifacts_url": "https://api.github.com/repos/asm198x/asm198x/actions/runs/38948976392/artifacts",
+  "cancel_url": "https://api.github.com/repos/asm198x/asm198x/actions/runs/38948976392/cancel",
+  "rerun_url": "https://api.github.com/repos/asm198x/asm198x/actions/runs/38948976392/rerun",
+  "previous_attempt_url": null,
+  "workflow_url": "https://api.github.com/repos/asm198x/asm198x/actions/workflows/377185821",
+  "head_commit": {
+    "id": "60babae495e4e37963a5bbec23068ae21ff71eb3",
+    "tree_id": "063b38d31a0bfac39b6c703cb78f231ce81aa867",
+    "message": "chore: release v0.0.71\n\n* chore: release v0.0.71\n\n* docs: regenerate release documentation\n\n* chore(web): point the shell's lockfile at the released version\n\n* docs: author the 0.0.71 checkpoint and retain the complete native audit\n\nDescribe the three assembler corrections and complete-capture upload fix. Promote the actual ten-target native report with only reviewed issue links changed; retain the ZIP, API identity, 80 process logs, Linux shift control and nine independent rejection controls.\n\n---------\n\nCo-authored-by: github-actions[bot] <41898282+github-actions[bot]@users.noreply.github.com>",
+    "timestamp": "2026-10-16T18:29:30Z",
+    "author": {
+      "name": "Steve Hill",
+      "email": "steve@stevehill.xyz"
+    },
+    "committer": {
+      "name": "GitHub",
+      "email": "noreply@github.com"
+    }
+  },
+  "repository": {
+    "id": 1254221926,
+    "node_id": "R_kgDOSsHoZg",
+    "name": "asm198x",
+    "full_name": "asm198x/asm198x",
+    "private": false,
+    "owner": {
+      "login": "asm198x",
+      "id": 289150388,
+      "node_id": "O_kgDOETwVtA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/289150388?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/asm198x",
+      "html_url": "https://github.com/asm198x",
+      "followers_url": "https://api.github.com/users/asm198x/followers",
+      "following_url": "https://api.github.com/users/asm198x/following{/other_user}",
+      "gists_url": "https://api.github.com/users/asm198x/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/asm198x/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/asm198x/subscriptions",
+      "organizations_url": "https://api.github.com/users/asm198x/orgs",
+      "repos_url": "https://api.github.com/users/asm198x/repos",
+      "events_url": "https://api.github.com/users/asm198x/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/asm198x/received_events",
+      "type": "Organization",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "html_url": "https://github.com/asm198x/asm198x",
+    "description": "A family of modern, single-binary assemblers for retro CPUs (6502, Z80, 68000\u2026). Third sibling of the 198x family.",
+    "fork": false,
+    "url": "https://api.github.com/repos/asm198x/asm198x",
+    "forks_url": "https://api.github.com/repos/asm198x/asm198x/forks",
+    "keys_url": "https://api.github.com/repos/asm198x/asm198x/keys{/key_id}",
+    "collaborators_url": "https://api.github.com/repos/asm198x/asm198x/collaborators{/collaborator}",
+    "teams_url": "https://api.github.com/repos/asm198x/asm198x/teams",
+    "hooks_url": "https://api.github.com/repos/asm198x/asm198x/hooks",
+    "issue_events_url": "https://api.github.com/repos/asm198x/asm198x/issues/events{/number}",
+    "events_url": "https://api.github.com/repos/asm198x/asm198x/events",
+    "assignees_url": "https://api.github.com/repos/asm198x/asm198x/assignees{/user}",
+    "branches_url": "https://api.github.com/repos/asm198x/asm198x/branches{/branch}",
+    "tags_url": "https://api.github.com/repos/asm198x/asm198x/tags",
+    "blobs_url": "https://api.github.com/repos/asm198x/asm198x/git/blobs{/sha}",
+    "git_tags_url": "https://api.github.com/repos/asm198x/asm198x/git/tags{/sha}",
+    "git_refs_url": "https://api.github.com/repos/asm198x/asm198x/git/refs{/sha}",
+    "trees_url": "https://api.github.com/repos/asm198x/asm198x/git/trees{/sha}",
+    "statuses_url": "https://api.github.com/repos/asm198x/asm198x/statuses/{sha}",
+    "languages_url": "https://api.github.com/repos/asm198x/asm198x/languages",
+    "stargazers_url": "https://api.github.com/repos/asm198x/asm198x/stargazers",
+    "contributors_url": "https://api.github.com/repos/asm198x/asm198x/contributors",
+    "subscribers_url": "https://api.github.com/repos/asm198x/asm198x/subscribers",
+    "subscription_url": "https://api.github.com/repos/asm198x/asm198x/subscription",
+    "commits_url": "https://api.github.com/repos/asm198x/asm198x/commits{/sha}",
+    "git_commits_url": "https://api.github.com/repos/asm198x/asm198x/git/commits{/sha}",
+    "comments_url": "https://api.github.com/repos/asm198x/asm198x/comments{/number}",
+    "issue_comment_url": "https://api.github.com/repos/asm198x/asm198x/issues/comments{/number}",
+    "contents_url": "https://api.github.com/repos/asm198x/asm198x/contents/{+path}",
+    "compare_url": "https://api.github.com/repos/asm198x/asm198x/compare/{base}...{head}",
+    "merges_url": "https://api.github.com/repos/asm198x/asm198x/merges",
+    "archive_url": "https://api.github.com/repos/asm198x/asm198x/{archive_format}{/ref}",
+    "downloads_url": "https://api.github.com/repos/asm198x/asm198x/downloads",
+    "issues_url": "https://api.github.com/repos/asm198x/asm198x/issues{/number}",
+    "pulls_url": "https://api.github.com/repos/asm198x/asm198x/pulls{/number}",
+    "milestones_url": "https://api.github.com/repos/asm198x/asm198x/milestones{/number}",
+    "notifications_url": "https://api.github.com/repos/asm198x/asm198x/notifications{?since,all,participating}",
+    "labels_url": "https://api.github.com/repos/asm198x/asm198x/labels{/name}",
+    "releases_url": "https://api.github.com/repos/asm198x/asm198x/releases{/id}",
+    "deployments_url": "https://api.github.com/repos/asm198x/asm198x/deployments"
+  },
+  "head_repository": {
+    "id": 1254221926,
+    "node_id": "R_kgDOSsHoZg",
+    "name": "asm198x",
+    "full_name": "asm198x/asm198x",
+    "private": false,
+    "owner": {
+      "login": "asm198x",
+      "id": 289150388,
+      "node_id": "O_kgDOETwVtA",
+      "avatar_url": "https://avatars.githubusercontent.com/u/289150388?v=4",
+      "gravatar_id": "",
+      "url": "https://api.github.com/users/asm198x",
+      "html_url": "https://github.com/asm198x",
+      "followers_url": "https://api.github.com/users/asm198x/followers",
+      "following_url": "https://api.github.com/users/asm198x/following{/other_user}",
+      "gists_url": "https://api.github.com/users/asm198x/gists{/gist_id}",
+      "starred_url": "https://api.github.com/users/asm198x/starred{/owner}{/repo}",
+      "subscriptions_url": "https://api.github.com/users/asm198x/subscriptions",
+      "organizations_url": "https://api.github.com/users/asm198x/orgs",
+      "repos_url": "https://api.github.com/users/asm198x/repos",
+      "events_url": "https://api.github.com/users/asm198x/events{/privacy}",
+      "received_events_url": "https://api.github.com/users/asm198x/received_events",
+      "type": "Organization",
+      "user_view_type": "public",
+      "site_admin": false
+    },
+    "html_url": "https://github.com/asm198x/asm198x",
+    "description": "A family of modern, single-binary assemblers for retro CPUs (6502, Z80, 68000\u2026). Third sibling of the 198x family.",
+    "fork": false,
+    "url": "https://api.github.com/repos/asm198x/asm198x",
+    "forks_url": "https://api.github.com/repos/asm198x/asm198x/forks",
+    "keys_url": "https://api.github.com/repos/asm198x/asm198x/keys{/key_id}",
+    "collaborators_url": "https://api.github.com/repos/asm198x/asm198x/collaborators{/collaborator}",
+    "teams_url": "https://api.github.com/repos/asm198x/asm198x/teams",
+    "hooks_url": "https://api.github.com/repos/asm198x/asm198x/hooks",
+    "issue_events_url": "https://api.github.com/repos/asm198x/asm198x/issues/events{/number}",
+    "events_url": "https://api.github.com/repos/asm198x/asm198x/events",
+    "assignees_url": "https://api.github.com/repos/asm198x/asm198x/assignees{/user}",
+    "branches_url": "https://api.github.com/repos/asm198x/asm198x/branches{/branch}",
+    "tags_url": "https://api.github.com/repos/asm198x/asm198x/tags",
+    "blobs_url": "https://api.github.com/repos/asm198x/asm198x/git/blobs{/sha}",
+    "git_tags_url": "https://api.github.com/repos/asm198x/asm198x/git/tags{/sha}",
+    "git_refs_url": "https://api.github.com/repos/asm198x/asm198x/git/refs{/sha}",
+    "trees_url": "https://api.github.com/repos/asm198x/asm198x/git/trees{/sha}",
+    "statuses_url": "https://api.github.com/repos/asm198x/asm198x/statuses/{sha}",
+    "languages_url": "https://api.github.com/repos/asm198x/asm198x/languages",
+    "stargazers_url": "https://api.github.com/repos/asm198x/asm198x/stargazers",
+    "contributors_url": "https://api.github.com/repos/asm198x/asm198x/contributors",
+    "subscribers_url": "https://api.github.com/repos/asm198x/asm198x/subscribers",
+    "subscription_url": "https://api.github.com/repos/asm198x/asm198x/subscription",
+    "commits_url": "https://api.github.com/repos/asm198x/asm198x/commits{/sha}",
+    "git_commits_url": "https://api.github.com/repos/asm198x/asm198x/git/commits{/sha}",
+    "comments_url": "https://api.github.com/repos/asm198x/asm198x/comments{/number}",
+    "issue_comment_url": "https://api.github.com/repos/asm198x/asm198x/issues/comments{/number}",
+    "contents_url": "https://api.github.com/repos/asm198x/asm198x/contents/{+path}",
+    "compare_url": "https://api.github.com/repos/asm198x/asm198x/compare/{base}...{head}",
+    "merges_url": "https://api.github.com/repos/asm198x/asm198x/merges",
+    "archive_url": "https://api.github.com/repos/asm198x/asm198x/{archive_format}{/ref}",
+    "downloads_url": "https://api.github.com/repos/asm198x/asm198x/downloads",
+    "issues_url": "https://api.github.com/repos/asm198x/asm198x/issues{/number}",
+    "pulls_url": "https://api.github.com/repos/asm198x/asm198x/pulls{/number}",
+    "milestones_url": "https://api.github.com/repos/asm198x/asm198x/milestones{/number}",
+    "notifications_url": "https://api.github.com/repos/asm198x/asm198x/notifications{?since,all,participating}",
+    "labels_url": "https://api.github.com/repos/asm198x/asm198x/labels{/name}",
+    "releases_url": "https://api.github.com/repos/asm198x/asm198x/releases{/id}",
+    "deployments_url": "https://api.github.com/repos/asm198x/asm198x/deployments"
+  },
+  "databaseId": 38948976392,
+  "headSha": "60babae495e4e37963a5bbec23068ae21ff71eb3",
+  "attempt": 1,
+  "jobs": [
+    {
+      "id": 117135239775,
+      "run_id": 38948976392,
+      "workflow_name": "Candidate packages",
+      "head_branch": "asm198x-v0.0.71",
+      "run_url": "https://api.github.com/repos/asm198x/asm198x/actions/runs/38948976392",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOSsHoZs8AAAAbRc3qXw",
+      "head_sha": "60babae495e4e37963a5bbec23068ae21ff71eb3",
+      "url": "https://api.github.com/repos/asm198x/asm198x/actions/jobs/117135239775",
+      "html_url": "https://github.com/asm198x/asm198x/actions/runs/38948976392/job/117135239775",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-16T18:39:13Z",
+      "started_at": "2026-10-16T18:39:20Z",
+      "completed_at": "2026-10-16T18:39:54Z",
+      "name": "Qualify archive (aarch64-apple-darwin)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-16T18:39:21Z",
+          "completed_at": "2026-10-16T18:39:24Z"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-16T18:39:24Z",
+          "completed_at": "2026-10-16T18:39:28Z"
+        },
+        {
+          "name": "Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-16T18:39:28Z",
+          "completed_at": "2026-10-16T18:39:29Z"
+        },
+        {
+          "name": "Install pinned dist (Unix)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-16T18:39:29Z",
+          "completed_at": "2026-10-16T18:39:30Z"
+        },
+        {
+          "name": "Install pinned dist (Windows)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-10-16T18:39:30Z",
+          "completed_at": "2026-10-16T18:39:30Z"
+        },
+        {
+          "name": "Check full release workflow regeneration and fail-closed controls",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-16T18:39:30Z",
+          "completed_at": "2026-10-16T18:39:41Z"
+        },
+        {
+          "name": "Cache Rust artifacts",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-16T18:39:41Z",
+          "completed_at": "2026-10-16T18:39:41Z"
+        },
+        {
+          "name": "Build packages for this native runner",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-16T18:39:41Z",
+          "completed_at": "2026-10-16T18:39:41Z"
+        },
+        {
+          "name": "Download published archives for post-release reconciliation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-16T18:39:41Z",
+          "completed_at": "2026-10-16T18:39:42Z"
+        },
+        {
+          "name": "Fetch actual candidate packages",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-16T18:39:42Z",
+          "completed_at": "2026-10-16T18:39:42Z"
+        },
+        {
+          "name": "Save candidate plan",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-16T18:39:42Z",
+          "completed_at": "2026-10-16T18:39:42Z"
+        },
+        {
+          "name": "Qualify the actual archive and run its corruption control",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-16T18:39:42Z",
+          "completed_at": "2026-10-16T18:39:51Z"
+        },
+        {
+          "name": "Retain per-host qualification records",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-16T18:39:51Z",
+          "completed_at": "2026-10-16T18:39:52Z"
+        },
+        {
+          "name": "Set up Homebrew",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-16T18:39:52Z",
+          "completed_at": "2026-10-16T18:39:52Z"
+        },
+        {
+          "name": "Install generated formulae and check output",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-16T18:39:52Z",
+          "completed_at": "2026-10-16T18:39:52Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-16T18:39:52Z",
+          "completed_at": "2026-10-16T18:39:52Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30,
+          "started_at": "2026-10-16T18:39:52Z",
+          "completed_at": "2026-10-16T18:39:52Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31,
+          "started_at": "2026-10-16T18:39:52Z",
+          "completed_at": "2026-10-16T18:39:52Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/asm198x/asm198x/check-runs/117135239775",
+      "labels": [
+        "macos-latest"
+      ],
+      "runner_id": 1000019329,
+      "runner_name": "GitHub Actions 1000019329",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "startedAt": "2026-10-16T18:39:20Z",
+      "completedAt": "2026-10-16T18:39:54Z"
+    },
+    {
+      "id": 117135240160,
+      "run_id": 38948976392,
+      "workflow_name": "Candidate packages",
+      "head_branch": "asm198x-v0.0.71",
+      "run_url": "https://api.github.com/repos/asm198x/asm198x/actions/runs/38948976392",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOSsHoZs8AAAAbRc3r4A",
+      "head_sha": "60babae495e4e37963a5bbec23068ae21ff71eb3",
+      "url": "https://api.github.com/repos/asm198x/asm198x/actions/jobs/117135240160",
+      "html_url": "https://github.com/asm198x/asm198x/actions/runs/38948976392/job/117135240160",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-16T18:39:13Z",
+      "started_at": "2026-10-16T18:39:18Z",
+      "completed_at": "2026-10-16T18:39:48Z",
+      "name": "Qualify archive (aarch64-unknown-linux-gnu)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-16T18:39:19Z",
+          "completed_at": "2026-10-16T18:39:21Z"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-16T18:39:21Z",
+          "completed_at": "2026-10-16T18:39:22Z"
+        },
+        {
+          "name": "Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-16T18:39:22Z",
+          "completed_at": "2026-10-16T18:39:23Z"
+        },
+        {
+          "name": "Install pinned dist (Unix)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-16T18:39:23Z",
+          "completed_at": "2026-10-16T18:39:24Z"
+        },
+        {
+          "name": "Install pinned dist (Windows)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-10-16T18:39:24Z",
+          "completed_at": "2026-10-16T18:39:24Z"
+        },
+        {
+          "name": "Check full release workflow regeneration and fail-closed controls",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-16T18:39:24Z",
+          "completed_at": "2026-10-16T18:39:33Z"
+        },
+        {
+          "name": "Cache Rust artifacts",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-16T18:39:33Z",
+          "completed_at": "2026-10-16T18:39:33Z"
+        },
+        {
+          "name": "Build packages for this native runner",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-16T18:39:33Z",
+          "completed_at": "2026-10-16T18:39:33Z"
+        },
+        {
+          "name": "Download published archives for post-release reconciliation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-16T18:39:33Z",
+          "completed_at": "2026-10-16T18:39:35Z"
+        },
+        {
+          "name": "Fetch actual candidate packages",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-16T18:39:35Z",
+          "completed_at": "2026-10-16T18:39:35Z"
+        },
+        {
+          "name": "Save candidate plan",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-16T18:39:35Z",
+          "completed_at": "2026-10-16T18:39:35Z"
+        },
+        {
+          "name": "Qualify the actual archive and run its corruption control",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-16T18:39:35Z",
+          "completed_at": "2026-10-16T18:39:43Z"
+        },
+        {
+          "name": "Retain per-host qualification records",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-16T18:39:43Z",
+          "completed_at": "2026-10-16T18:39:45Z"
+        },
+        {
+          "name": "Set up Homebrew",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-16T18:39:45Z",
+          "completed_at": "2026-10-16T18:39:45Z"
+        },
+        {
+          "name": "Install generated formulae and check output",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-16T18:39:45Z",
+          "completed_at": "2026-10-16T18:39:45Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-16T18:39:45Z",
+          "completed_at": "2026-10-16T18:39:45Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30,
+          "started_at": "2026-10-16T18:39:45Z",
+          "completed_at": "2026-10-16T18:39:45Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31,
+          "started_at": "2026-10-16T18:39:45Z",
+          "completed_at": "2026-10-16T18:39:45Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/asm198x/asm198x/check-runs/117135240160",
+      "labels": [
+        "ubuntu-22.04-arm"
+      ],
+      "runner_id": 1000019327,
+      "runner_name": "GitHub Actions 1000019327",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "startedAt": "2026-10-16T18:39:18Z",
+      "completedAt": "2026-10-16T18:39:48Z"
+    },
+    {
+      "id": 117135240219,
+      "run_id": 38948976392,
+      "workflow_name": "Candidate packages",
+      "head_branch": "asm198x-v0.0.71",
+      "run_url": "https://api.github.com/repos/asm198x/asm198x/actions/runs/38948976392",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOSsHoZs8AAAAbRc3sGw",
+      "head_sha": "60babae495e4e37963a5bbec23068ae21ff71eb3",
+      "url": "https://api.github.com/repos/asm198x/asm198x/actions/jobs/117135240219",
+      "html_url": "https://github.com/asm198x/asm198x/actions/runs/38948976392/job/117135240219",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-16T18:39:13Z",
+      "started_at": "2026-10-16T18:39:17Z",
+      "completed_at": "2026-10-16T18:40:43Z",
+      "name": "Qualify archive (x86_64-apple-darwin)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-16T18:39:18Z",
+          "completed_at": "2026-10-16T18:39:22Z"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-16T18:39:22Z",
+          "completed_at": "2026-10-16T18:39:27Z"
+        },
+        {
+          "name": "Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-16T18:39:27Z",
+          "completed_at": "2026-10-16T18:39:28Z"
+        },
+        {
+          "name": "Install pinned dist (Unix)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-16T18:39:28Z",
+          "completed_at": "2026-10-16T18:39:30Z"
+        },
+        {
+          "name": "Install pinned dist (Windows)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-10-16T18:39:30Z",
+          "completed_at": "2026-10-16T18:39:30Z"
+        },
+        {
+          "name": "Check full release workflow regeneration and fail-closed controls",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-16T18:39:30Z",
+          "completed_at": "2026-10-16T18:40:12Z"
+        },
+        {
+          "name": "Cache Rust artifacts",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-16T18:40:12Z",
+          "completed_at": "2026-10-16T18:40:12Z"
+        },
+        {
+          "name": "Build packages for this native runner",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-16T18:40:12Z",
+          "completed_at": "2026-10-16T18:40:12Z"
+        },
+        {
+          "name": "Download published archives for post-release reconciliation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-16T18:40:12Z",
+          "completed_at": "2026-10-16T18:40:13Z"
+        },
+        {
+          "name": "Fetch actual candidate packages",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-16T18:40:13Z",
+          "completed_at": "2026-10-16T18:40:13Z"
+        },
+        {
+          "name": "Save candidate plan",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-16T18:40:13Z",
+          "completed_at": "2026-10-16T18:40:13Z"
+        },
+        {
+          "name": "Qualify the actual archive and run its corruption control",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-16T18:40:13Z",
+          "completed_at": "2026-10-16T18:40:34Z"
+        },
+        {
+          "name": "Retain per-host qualification records",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-16T18:40:35Z",
+          "completed_at": "2026-10-16T18:40:37Z"
+        },
+        {
+          "name": "Set up Homebrew",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-16T18:40:37Z",
+          "completed_at": "2026-10-16T18:40:37Z"
+        },
+        {
+          "name": "Install generated formulae and check output",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-16T18:40:37Z",
+          "completed_at": "2026-10-16T18:40:37Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-16T18:40:37Z",
+          "completed_at": "2026-10-16T18:40:38Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30,
+          "started_at": "2026-10-16T18:40:38Z",
+          "completed_at": "2026-10-16T18:40:39Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31,
+          "started_at": "2026-10-16T18:40:39Z",
+          "completed_at": "2026-10-16T18:40:41Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/asm198x/asm198x/check-runs/117135240219",
+      "labels": [
+        "macos-15-intel"
+      ],
+      "runner_id": 1000019328,
+      "runner_name": "GitHub Actions 1000019328",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "startedAt": "2026-10-16T18:39:17Z",
+      "completedAt": "2026-10-16T18:40:43Z"
+    },
+    {
+      "id": 117135240341,
+      "run_id": 38948976392,
+      "workflow_name": "Candidate packages",
+      "head_branch": "asm198x-v0.0.71",
+      "run_url": "https://api.github.com/repos/asm198x/asm198x/actions/runs/38948976392",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOSsHoZs8AAAAbRc3slQ",
+      "head_sha": "60babae495e4e37963a5bbec23068ae21ff71eb3",
+      "url": "https://api.github.com/repos/asm198x/asm198x/actions/jobs/117135240341",
+      "html_url": "https://github.com/asm198x/asm198x/actions/runs/38948976392/job/117135240341",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-16T18:39:13Z",
+      "started_at": "2026-10-16T18:39:16Z",
+      "completed_at": "2026-10-16T18:39:53Z",
+      "name": "Qualify archive (x86_64-unknown-linux-gnu)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-16T18:39:16Z",
+          "completed_at": "2026-10-16T18:39:19Z"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-16T18:39:19Z",
+          "completed_at": "2026-10-16T18:39:21Z"
+        },
+        {
+          "name": "Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-16T18:39:21Z",
+          "completed_at": "2026-10-16T18:39:21Z"
+        },
+        {
+          "name": "Install pinned dist (Unix)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 4,
+          "started_at": "2026-10-16T18:39:21Z",
+          "completed_at": "2026-10-16T18:39:22Z"
+        },
+        {
+          "name": "Install pinned dist (Windows)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 5,
+          "started_at": "2026-10-16T18:39:22Z",
+          "completed_at": "2026-10-16T18:39:22Z"
+        },
+        {
+          "name": "Check full release workflow regeneration and fail-closed controls",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-16T18:39:22Z",
+          "completed_at": "2026-10-16T18:39:38Z"
+        },
+        {
+          "name": "Cache Rust artifacts",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-16T18:39:38Z",
+          "completed_at": "2026-10-16T18:39:38Z"
+        },
+        {
+          "name": "Build packages for this native runner",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-16T18:39:38Z",
+          "completed_at": "2026-10-16T18:39:38Z"
+        },
+        {
+          "name": "Download published archives for post-release reconciliation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-16T18:39:38Z",
+          "completed_at": "2026-10-16T18:39:40Z"
+        },
+        {
+          "name": "Fetch actual candidate packages",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-16T18:39:40Z",
+          "completed_at": "2026-10-16T18:39:40Z"
+        },
+        {
+          "name": "Save candidate plan",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-16T18:39:40Z",
+          "completed_at": "2026-10-16T18:39:40Z"
+        },
+        {
+          "name": "Qualify the actual archive and run its corruption control",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-16T18:39:40Z",
+          "completed_at": "2026-10-16T18:39:50Z"
+        },
+        {
+          "name": "Retain per-host qualification records",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-16T18:39:50Z",
+          "completed_at": "2026-10-16T18:39:51Z"
+        },
+        {
+          "name": "Set up Homebrew",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-16T18:39:51Z",
+          "completed_at": "2026-10-16T18:39:51Z"
+        },
+        {
+          "name": "Install generated formulae and check output",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-16T18:39:51Z",
+          "completed_at": "2026-10-16T18:39:51Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-16T18:39:51Z",
+          "completed_at": "2026-10-16T18:39:51Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30,
+          "started_at": "2026-10-16T18:39:51Z",
+          "completed_at": "2026-10-16T18:39:51Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31,
+          "started_at": "2026-10-16T18:39:51Z",
+          "completed_at": "2026-10-16T18:39:51Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/asm198x/asm198x/check-runs/117135240341",
+      "labels": [
+        "ubuntu-22.04"
+      ],
+      "runner_id": 1000019330,
+      "runner_name": "GitHub Actions 1000019330",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "startedAt": "2026-10-16T18:39:16Z",
+      "completedAt": "2026-10-16T18:39:53Z"
+    },
+    {
+      "id": 117135240427,
+      "run_id": 38948976392,
+      "workflow_name": "Candidate packages",
+      "head_branch": "asm198x-v0.0.71",
+      "run_url": "https://api.github.com/repos/asm198x/asm198x/actions/runs/38948976392",
+      "run_attempt": 1,
+      "node_id": "CR_kwDOSsHoZs8AAAAbRc3s6w",
+      "head_sha": "60babae495e4e37963a5bbec23068ae21ff71eb3",
+      "url": "https://api.github.com/repos/asm198x/asm198x/actions/jobs/117135240427",
+      "html_url": "https://github.com/asm198x/asm198x/actions/runs/38948976392/job/117135240427",
+      "status": "completed",
+      "conclusion": "success",
+      "created_at": "2026-10-16T18:39:13Z",
+      "started_at": "2026-10-16T18:39:16Z",
+      "completed_at": "2026-10-16T18:40:41Z",
+      "name": "Qualify archive (x86_64-pc-windows-msvc)",
+      "steps": [
+        {
+          "name": "Set up job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 1,
+          "started_at": "2026-10-16T18:39:18Z",
+          "completed_at": "2026-10-16T18:39:20Z"
+        },
+        {
+          "name": "Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 2,
+          "started_at": "2026-10-16T18:39:20Z",
+          "completed_at": "2026-10-16T18:39:30Z"
+        },
+        {
+          "name": "Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 3,
+          "started_at": "2026-10-16T18:39:30Z",
+          "completed_at": "2026-10-16T18:39:35Z"
+        },
+        {
+          "name": "Install pinned dist (Unix)",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 4,
+          "started_at": "2026-10-16T18:39:35Z",
+          "completed_at": "2026-10-16T18:39:35Z"
+        },
+        {
+          "name": "Install pinned dist (Windows)",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 5,
+          "started_at": "2026-10-16T18:39:35Z",
+          "completed_at": "2026-10-16T18:39:38Z"
+        },
+        {
+          "name": "Check full release workflow regeneration and fail-closed controls",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 6,
+          "started_at": "2026-10-16T18:39:38Z",
+          "completed_at": "2026-10-16T18:40:09Z"
+        },
+        {
+          "name": "Cache Rust artifacts",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 7,
+          "started_at": "2026-10-16T18:40:09Z",
+          "completed_at": "2026-10-16T18:40:09Z"
+        },
+        {
+          "name": "Build packages for this native runner",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 8,
+          "started_at": "2026-10-16T18:40:09Z",
+          "completed_at": "2026-10-16T18:40:09Z"
+        },
+        {
+          "name": "Download published archives for post-release reconciliation",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 9,
+          "started_at": "2026-10-16T18:40:09Z",
+          "completed_at": "2026-10-16T18:40:11Z"
+        },
+        {
+          "name": "Fetch actual candidate packages",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 10,
+          "started_at": "2026-10-16T18:40:11Z",
+          "completed_at": "2026-10-16T18:40:11Z"
+        },
+        {
+          "name": "Save candidate plan",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 11,
+          "started_at": "2026-10-16T18:40:11Z",
+          "completed_at": "2026-10-16T18:40:11Z"
+        },
+        {
+          "name": "Qualify the actual archive and run its corruption control",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 12,
+          "started_at": "2026-10-16T18:40:11Z",
+          "completed_at": "2026-10-16T18:40:36Z"
+        },
+        {
+          "name": "Retain per-host qualification records",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 13,
+          "started_at": "2026-10-16T18:40:36Z",
+          "completed_at": "2026-10-16T18:40:37Z"
+        },
+        {
+          "name": "Set up Homebrew",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 14,
+          "started_at": "2026-10-16T18:40:37Z",
+          "completed_at": "2026-10-16T18:40:37Z"
+        },
+        {
+          "name": "Install generated formulae and check output",
+          "status": "completed",
+          "conclusion": "skipped",
+          "number": 15,
+          "started_at": "2026-10-16T18:40:37Z",
+          "completed_at": "2026-10-16T18:40:37Z"
+        },
+        {
+          "name": "Post Run actions/setup-node@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 29,
+          "started_at": "2026-10-16T18:40:37Z",
+          "completed_at": "2026-10-16T18:40:37Z"
+        },
+        {
+          "name": "Post Run actions/checkout@v7",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 30,
+          "started_at": "2026-10-16T18:40:37Z",
+          "completed_at": "2026-10-16T18:40:40Z"
+        },
+        {
+          "name": "Complete job",
+          "status": "completed",
+          "conclusion": "success",
+          "number": 31,
+          "started_at": "2026-10-16T18:40:40Z",
+          "completed_at": "2026-10-16T18:40:40Z"
+        }
+      ],
+      "check_run_url": "https://api.github.com/repos/asm198x/asm198x/check-runs/117135240427",
+      "labels": [
+        "windows-latest"
+      ],
+      "runner_id": 1000019331,
+      "runner_name": "GitHub Actions 1000019331",
+      "runner_group_id": 0,
+      "runner_group_name": "GitHub Actions",
+      "startedAt": "2026-10-16T18:39:16Z",
+      "completedAt": "2026-10-16T18:40:41Z"
+    }
+  ]
+}
