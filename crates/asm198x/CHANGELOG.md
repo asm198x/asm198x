@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.70](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.69...asm198x-v0.0.70) - 2026-10-16
+
+### Fixed
+
+- *(sjasmplus)* emit native bytes for escaped data strings
+- *(sjasmplus)* accept native word expression operators
+- *(pasmo)* preserve wrapped memory images and addresses
+
 ## [0.0.69](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.68...asm198x-v0.0.69) - 2026-10-16
 
 Native archive publication for 0.0.68 was stopped after finding the regression
