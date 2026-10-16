@@ -7,7 +7,7 @@ with a final ROM or executable.
 
 <!-- generated: xtask ecosystem --markdown -->
 
-Captured at **2026-10-16 15:29:40 UTC**. Asm198x revision `652114a082cad7b094201e3ad7966544bb676a92`; executable SHA-256 `cc168f4f4d9632836793a3f743d6ef6b956c9b02156bc6373e3b2a2d7863cf6d`.
+Captured at **2026-10-16 16:31:16 UTC**. Asm198x revision `21464e98864f673fd586c46260c4046c03662fcd`; executable SHA-256 `57ddfcbb9650b51c6d213bf18bb0cc60ce4c8239c6c057cfc27766c4dcb772fd`.
 
 Manifest SHA-256 `a853f20bf150f97a3238c3c92bbd12e68f9a63363ce189aa42abb52e3892a8ef`. These results measure assembly artifact equivalence; emulator execution and real hardware are separate checks. Unrun targets remain unknown.
 

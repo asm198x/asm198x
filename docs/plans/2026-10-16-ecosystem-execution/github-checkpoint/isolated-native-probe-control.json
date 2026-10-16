@@ -1,0 +1,22 @@
+{
+  "producer_source": "5b97360f5df3612721c18142a01e40718046eec8",
+  "positive_control": {
+    "command": [
+      "vasmm68k_mot"
+    ],
+    "exit": 0,
+    "created_files": {
+      "a.out": 288
+    },
+    "cwd": "fresh task-owned temporary directory"
+  },
+  "audit": {
+    "target": "nicodex-helloami/hello-ami",
+    "outcome": "equivalent",
+    "probe_cwd": "/private/tmp/asm198x-ecosystem-probe-audit/work/nicodex-helloami--hello-ami-version-probes/vasmm68k_mot",
+    "probe_directory_removed": true,
+    "ignored_sentinel_before_and_after_sha256": "3b64e14b28873d19c9e550d10072ac1b1b4f5e347b2730ed2ad08e3b41d90ae9",
+    "ignored_sentinel_hex": "7461736b2d6f776e65642073656e74696e656c3a207072657365727665207072652d6578697374696e672069676e6f726564206f75747075740a",
+    "report_sha256": "0d7e842d29c2548b3325b35c3ac713999fe89f61c64b92df48be2e2abed3e95e"
+  }
+}

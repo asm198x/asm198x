@@ -1,0 +1,125 @@
+{
+  "conclusion": "failure",
+  "databaseId": 38932324538,
+  "event": "workflow_dispatch",
+  "headSha": "21464e98864f673fd586c46260c4046c03662fcd",
+  "jobs": [
+    {
+      "completedAt": "2026-10-16T16:31:54Z",
+      "conclusion": "failure",
+      "databaseId": 117079150738,
+      "name": "Audit complete pinned targets",
+      "startedAt": "2026-10-16T16:29:20Z",
+      "status": "completed",
+      "steps": [
+        {
+          "completedAt": "2026-10-16T16:29:22Z",
+          "conclusion": "success",
+          "name": "Set up job",
+          "number": 1,
+          "startedAt": "2026-10-16T16:29:21Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-16T16:29:39Z",
+          "conclusion": "success",
+          "name": "Initialize containers",
+          "number": 2,
+          "startedAt": "2026-10-16T16:29:22Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-16T16:29:40Z",
+          "conclusion": "success",
+          "name": "Run actions/checkout@v7",
+          "number": 3,
+          "startedAt": "2026-10-16T16:29:39Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-16T16:29:40Z",
+          "conclusion": "success",
+          "name": "Verify native tool identities",
+          "number": 4,
+          "startedAt": "2026-10-16T16:29:40Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-16T16:29:41Z",
+          "conclusion": "success",
+          "name": "Allow Git metadata in this checkout",
+          "number": 5,
+          "startedAt": "2026-10-16T16:29:40Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-16T16:30:24Z",
+          "conclusion": "success",
+          "name": "Fetch and verify pinned source without executing it",
+          "number": 6,
+          "startedAt": "2026-10-16T16:29:41Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-16T16:31:46Z",
+          "conclusion": "failure",
+          "name": "Execute the reviewed complete build plans",
+          "number": 7,
+          "startedAt": "2026-10-16T16:30:24Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-16T16:31:46Z",
+          "conclusion": "success",
+          "name": "Validate complete results before rendering",
+          "number": 8,
+          "startedAt": "2026-10-16T16:31:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-16T16:31:49Z",
+          "conclusion": "success",
+          "name": "Render the captured table for review",
+          "number": 9,
+          "startedAt": "2026-10-16T16:31:46Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-16T16:31:50Z",
+          "conclusion": "success",
+          "name": "Retain actual target evidence and proposed table",
+          "number": 10,
+          "startedAt": "2026-10-16T16:31:49Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-16T16:31:51Z",
+          "conclusion": "success",
+          "name": "Post Run actions/checkout@v7",
+          "number": 19,
+          "startedAt": "2026-10-16T16:31:50Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-16T16:31:51Z",
+          "conclusion": "success",
+          "name": "Stop containers",
+          "number": 20,
+          "startedAt": "2026-10-16T16:31:51Z",
+          "status": "completed"
+        },
+        {
+          "completedAt": "2026-10-16T16:31:51Z",
+          "conclusion": "success",
+          "name": "Complete job",
+          "number": 21,
+          "startedAt": "2026-10-16T16:31:51Z",
+          "status": "completed"
+        }
+      ],
+      "url": "https://github.com/asm198x/asm198x/actions/runs/38932324538/job/117079150738"
+    }
+  ],
+  "status": "completed",
+  "url": "https://github.com/asm198x/asm198x/actions/runs/38932324538"
+}

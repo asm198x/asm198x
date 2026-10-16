@@ -1,6 +1,6 @@
 # Reviewed target boundaries
 
-The acquisition at `/private/tmp/asm198x-ecosystem-batch-sources` contains the eight manifest-pinned, clean source trees. No upstream Makefile or script was executed during acquisition/review. Licence paths were inspected; retained binary-byte facts carry the complete captured notice, its digest, the SPDX expression and original path.
+The task acquisition at `/private/tmp/asm198x-ecosystem-batch-sources` contained the eight manifest-pinned, clean source trees. They were removed after their full pins and clean tracked/untracked/ignored status were verified. No upstream Makefile or script was executed during acquisition/review. Licence paths were inspected; retained binary-byte facts carry the complete captured notice, its digest, the SPDX expression and original path.
 
 - ACME: the three existing native argv invocations emit their complete PRG files. Asm198x uses the same root source and CPU, with PRG framing.
 - NES-ca65-example: pinned `compile_example.bat` invokes ca65, then ld65 with `example.cfg`. The Python FCEUX symbol helper is outside the final ROM boundary. The reference plan keeps native object and final ROM stages; Asm198x uses its fused assembler/linker with the unchanged project configuration. The tracked sample ROM is removed only from the fresh execution copies before building.

@@ -7,11 +7,14 @@ commands, first failures and final artifact identities. Small reference bytes
 and their original licence notices are retained for reproducible replay.
 Upstream source trees remain an index and are fetched at their full pins.
 
-The native capture was built from development producer revision
-`652114a082cad7b094201e3ad7966544bb676a92`, retained on the remote evidence branch
-`evidence/ecosystem-producer-2026-10-16`. Its version string was 0.0.69; the
-source revision, not that pre-release string, identifies the producer. The
-public 0.0.70 package qualification has its separate release checkpoint.
+The current capture was built from main revision
+`21464e98864f673fd586c46260c4046c03662fcd` by the actual
+[native workflow](https://github.com/asm198x/asm198x/actions/runs/38932324538).
+Its permanent reports, workflow log, table copies and independent verifier are
+in `docs/plans/2026-10-16-ecosystem-execution/github-checkpoint/`.
+The earlier development capture remains there as `original-native-report.json`;
+its producer is retained on `evidence/ecosystem-producer-2026-10-16`.
+Public 0.0.70 package qualification has its separate release checkpoint.
 
 Issue links can be attached during triage; native process results and binary
 identities are retained unchanged. Regeneration checks the complete report,
