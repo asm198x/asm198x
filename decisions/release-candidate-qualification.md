@@ -59,3 +59,11 @@ receipts retain explicit `artifact-only` scope. A bad available receipt is a
 failure, not a reason to discard it and retry without provenance. Passing receipts
 are recorded as `verified-producer-lock`; they do not establish a per-binary
 compiled dependency/features graph or a cryptographic signer identity.
+
+Published-source acquisition uses the workflow's existing read-only token only
+for the fixed GitHub API lookup, without authenticated redirects or credentials
+on public archive/raw hosts. Acquisition records are written before fetching,
+including unsuccessful outcomes and bounded status/rate-limit/request-ID
+diagnostics, so failure can be retained before qualification starts. A successful
+acquisition is not qualification; source, receipt and archive checks remain
+mandatory. Response bodies and credentials are not acquisition evidence.

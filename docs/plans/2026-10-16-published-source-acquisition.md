@@ -6,10 +6,9 @@ commit lookup and writes acquisition metadata only after acquisition succeeds.
 The response body/headers from the hosted failure are absent; do not assert a
 rate-limit cause. Release-candidate qualification remains mandatory.
 
-Approach agreement is pending the user's answer to the 16 October question:
-use the existing read-only workflow token only for api.github.com, retain safe
-HTTP diagnostics and a structured failed-acquisition record, without weakening
-archive validation or adding broad retries. No implementation before agreement.
+The user approved using the existing read-only workflow token only for
+api.github.com, retaining safe HTTP diagnostics and a structured failed-
+acquisition record, without weakening archive validation or adding broad retries.
 
 1. Reproduce current behaviour with an injected fetch returning a source-lookup
    403. Retain request credential-presence (never token values), error and
