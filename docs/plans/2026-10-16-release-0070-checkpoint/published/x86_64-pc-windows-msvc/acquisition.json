@@ -1,0 +1,11 @@
+{
+  "schema_version": 1,
+  "kind": "published-release",
+  "published_version": "0.0.70",
+  "target": "x86_64-pc-windows-msvc",
+  "checkout_commit": "4d778cd2b424ff2b7b2e93c03e4096ec79e1ccf0",
+  "run": "38924403779",
+  "status": "acquired",
+  "stage": "complete",
+  "receipt": "present"
+}

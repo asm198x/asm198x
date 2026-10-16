@@ -1,0 +1,127 @@
+{
+  "source_commit": "dd3058d69feec7cd6e10aa52c155d148894a2b58",
+  "asm_executable_sha256": "5bc6a84f9dcbec8156f2fd586d99e84a1f15c996963f91d9d74ea039375cc604",
+  "native_executable_sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+  "cases": [
+    {
+      "name": "symbolic_shift",
+      "source": " dw 1<<32\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n",
+        "hex": "0100"
+      },
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-sj-followup-cli",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "input.asm",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[0,0],\"origin\":0,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":1,\"message\":\"value 4294967296 truncated to a word\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":1,\"offset\":0,\"length\":2}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":65534}],\"diagnostics\":[],\"files\":[\"input.asm\"]}\n",
+        "stderr": "",
+        "hex": "0000"
+      }
+    },
+    {
+      "name": "word_shift",
+      "source": " dw 1 SHL 32\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n",
+        "hex": "0100"
+      },
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-sj-followup-cli",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "input.asm",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[0,0],\"origin\":0,\"symbols\":{},\"start\":null,\"warnings\":[{\"line\":1,\"message\":\"value 4294967296 truncated to a word\"}],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":1,\"offset\":0,\"length\":2}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":65534}],\"diagnostics\":[],\"files\":[\"input.asm\"]}\n",
+        "stderr": "",
+        "hex": "0000"
+      }
+    },
+    {
+      "name": "nested_shift",
+      "source": " dw (1 SHL 31) SHR 31\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+        "hex": "ffff"
+      },
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-sj-followup-cli",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "input.asm",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[1,0],\"origin\":0,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":1,\"offset\":0,\"length\":2}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":65534}],\"diagnostics\":[],\"files\":[\"input.asm\"]}\n",
+        "stderr": "",
+        "hex": "0100"
+      }
+    },
+    {
+      "name": "long_packed_warning",
+      "source": " dd \"abcde\"\n",
+      "native": {
+        "argv": [
+          "/usr/local/bin/sjasmplus",
+          "--raw=native.bin",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): warning: String literal truncated to 0x62636465: \"abcde\"\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 2 lines, work time: 0.001 seconds\n",
+        "hex": "65646362"
+      },
+      "asm": {
+        "argv": [
+          "/private/tmp/asm198x-sj-followup-cli",
+          "--dialect",
+          "sjasmplus",
+          "--message-format=json",
+          "input.asm",
+          "-o",
+          "asm.bin"
+        ],
+        "exit": 0,
+        "stdout": "{\"version\":1,\"bytes\":[101,100,99,98],\"origin\":0,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":1,\"offset\":0,\"length\":4}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":4,\"free\":65532,\"largest_free\":65532}],\"diagnostics\":[],\"files\":[\"input.asm\"]}\n",
+        "stderr": "",
+        "hex": "65646362"
+      }
+    }
+  ]
+}

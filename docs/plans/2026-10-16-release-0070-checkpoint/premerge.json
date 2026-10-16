@@ -1,0 +1,229 @@
+{
+  "head": "f0667ec277d3ca531be195856055abbe7d824a6f",
+  "checks": [
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486256/job/117043040079",
+      "name": "Build (macos-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486256/job/117043039797",
+      "name": "Coverage",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486256/job/117043039920",
+      "name": "Build (windows-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486256/job/117043039711",
+      "name": "Replay",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486256/job/117043039684",
+      "name": "Docs",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486256/job/117042448001",
+      "name": "Format",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486256/job/117042447917",
+      "name": "Lua (windows-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/runs/117042822805",
+      "name": "CodeQL",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486256/job/117042448176",
+      "name": "Lua (ubuntu-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486256/job/117042447650",
+      "name": "Lua (macos-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486342/job/117042242229",
+      "name": "Install release (ubuntu-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921470156/job/117042193697",
+      "name": "Analyze (python)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486254/job/117042253027",
+      "name": "Qualify archive (aarch64-apple-darwin)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921470156/job/117042193854",
+      "name": "Analyze (actions)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921470156/job/117042193564",
+      "name": "Analyze (c-cpp)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921470156/job/117042193701",
+      "name": "Analyze (javascript-typescript)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486256/job/117042447892",
+      "name": "Clippy",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486342/job/117042241526",
+      "name": "Install release (macos-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486256/job/117042447145",
+      "name": "Web shell (wasm-bindgen)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486254/job/117042253342",
+      "name": "Qualify archive (x86_64-apple-darwin)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486272/job/117042240891",
+      "name": "Released versions have changelog entries",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486355/job/117042481812",
+      "name": "custom-notify-discord",
+      "state": "SKIPPED"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486355/job/117042480769",
+      "name": "publish-homebrew-formula",
+      "state": "SKIPPED"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486355/job/117042481167",
+      "name": "announce",
+      "state": "SKIPPED"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486355/job/117042478884",
+      "name": "custom-test-linux-packages",
+      "state": "SKIPPED"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486355/job/117042480434",
+      "name": "host",
+      "state": "SKIPPED"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486355/job/117042478820",
+      "name": "build-global-artifacts",
+      "state": "SKIPPED"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486355/job/117042478435",
+      "name": "build-local-artifacts (${{ join(matrix.targets, ', ') }})",
+      "state": "SKIPPED"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921470156/job/117042193708",
+      "name": "Analyze (csharp)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921470156/job/117042193665",
+      "name": "Analyze (rust)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486254/job/117042253506",
+      "name": "Qualify archive (aarch64-unknown-linux-gnu)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486254/job/117042253375",
+      "name": "Qualify archive (x86_64-pc-windows-msvc)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486342/job/117042241977",
+      "name": "Install release (macos-15-intel)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486254/job/117042253621",
+      "name": "Qualify archive (x86_64-unknown-linux-gnu)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486342/job/117042241894",
+      "name": "Install release (windows-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "link": "https://github.com/asm198x/asm198x/actions/runs/38921486355/job/117042242632",
+      "name": "plan",
+      "state": "SUCCESS"
+    }
+  ],
+  "runs": [
+    {
+      "conclusion": "success",
+      "databaseId": 38921486355,
+      "headSha": "f0667ec277d3ca531be195856055abbe7d824a6f",
+      "name": "Release",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38921486272,
+      "headSha": "f0667ec277d3ca531be195856055abbe7d824a6f",
+      "name": "Release PR",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38921486342,
+      "headSha": "f0667ec277d3ca531be195856055abbe7d824a6f",
+      "name": "Setup action",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38921486254,
+      "headSha": "f0667ec277d3ca531be195856055abbe7d824a6f",
+      "name": "Candidate packages",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38921486256,
+      "headSha": "f0667ec277d3ca531be195856055abbe7d824a6f",
+      "name": "CI",
+      "status": "completed"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38921470156,
+      "headSha": "f0667ec277d3ca531be195856055abbe7d824a6f",
+      "name": "PR #712",
+      "status": "completed"
+    }
+  ]
+}
