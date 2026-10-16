@@ -1302,6 +1302,26 @@ mod tests {
         assert!(within(&dir.0, "dangling/output").is_err());
     }
     #[test]
+    fn native_hunk_comparisons_cannot_accidentally_select_raw_asm_output() {
+        let manifest = super::super::read(&repo()).expect("manifest");
+        let mut plan = targets(&manifest)
+            .find(|(project, _)| project.dialect == "vasm")
+            .expect("hunk target")
+            .1
+            .build
+            .clone()
+            .expect("plan");
+        assert!(plan.problems().is_empty());
+        for step in &mut plan.assembler {
+            step.argv.retain(|arg| arg != "--exe" && arg != "--hunkexe");
+        }
+        assert!(
+            plan.problems()
+                .iter()
+                .any(|problem| problem.contains("executable framing"))
+        );
+    }
+    #[test]
     fn incomplete_plans_cannot_admit_shells_unproduced_outputs_or_empty_comparisons() {
         let manifest = super::super::read(&repo()).expect("manifest");
         let mut plan = targets(&manifest)

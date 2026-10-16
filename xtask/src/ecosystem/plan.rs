@@ -127,6 +127,20 @@ impl BuildPlan {
         {
             problems.push("assembler build does not invoke Asm198x".into());
         }
+        if self
+            .reference
+            .iter()
+            .any(|step| step.argv.iter().any(|arg| arg == "-Fhunkexe"))
+            && !self.assembler.iter().any(|step| {
+                step.argv
+                    .iter()
+                    .any(|arg| arg == "--exe" || arg == "--hunkexe")
+            })
+        {
+            problems.push(
+                "native hunk-executable comparison requires Asm198x executable framing".into(),
+            );
+        }
         if self.compare.is_empty() {
             problems.push("no exact comparison outputs".into());
         }
