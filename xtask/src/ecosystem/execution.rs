@@ -970,6 +970,18 @@ fn validate_report(repo: &Path, manifest: &Manifest, report: &Report) -> Result<
                 {
                     return Err("comparison does not identify the native final artifact".into());
                 }
+                let assembled = record
+                    .assembler_steps
+                    .iter()
+                    .rev()
+                    .flat_map(|step| &step.outputs)
+                    .find(|artifact| artifact.path == pair.assembler.path)
+                    .ok_or("missing Asm198x final artifact")?;
+                if assembled.length != pair.assembler.length
+                    || assembled.sha256 != pair.assembler.sha256
+                {
+                    return Err("comparison does not identify the Asm198x final artifact".into());
+                }
                 if let Some(hex) = &pair.reference.hex {
                     let bytes = decode_hex(hex)?;
                     if bytes.len() as u64 != pair.reference.length
@@ -1252,7 +1264,8 @@ fn table(manifest: &Manifest, report: &Report) -> String {
                     .join("; ")
             });
             for step in r.reference_steps.iter().chain(&r.assembler_steps) {
-                boundary = boundary.replace(&format!("{}/", step.process.cwd), "");
+                let cwd = step.process.cwd.trim_end_matches("/.");
+                boundary = boundary.replace(&format!("{cwd}/"), "");
             }
             for issue in &r.issues {
                 let _ = write!(boundary, " [issue]({issue})");
@@ -1421,6 +1434,12 @@ mod tests {
         assert!(validate_report(&repo, &manifest, &changed).is_err());
         let mut changed = report.clone();
         changed.records[0].reference_steps.clear();
+        assert!(validate_report(&repo, &manifest, &changed).is_err());
+        let mut changed = report.clone();
+        changed.records[0].assembler_steps[0].outputs.clear();
+        assert!(validate_report(&repo, &manifest, &changed).is_err());
+        let mut changed = report.clone();
+        changed.records[0].assembler_steps[0].outputs[0].sha256 = "0".repeat(64);
         assert!(validate_report(&repo, &manifest, &changed).is_err());
         let mut changed = report.clone();
         changed.records[0].assembler_steps[0].process.exit = Some(1);

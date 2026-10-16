@@ -67,7 +67,7 @@ Manifest SHA-256 `a853f20bf150f97a3238c3c92bbd12e68f9a63363ce189aa42abb52e3892a8
 | cc65 65CE02 opcode test / `opcode-space` | ca65 | reference_failure | reference assemble step 1 failed: ca65: Invalid CPU: '65ce02' [issue](https://github.com/asm198x/asm198x/issues/718) |
 | cc65 CSG 4510 opcode test / `opcode-space` | ca65 | assembler_rejected | assembler assemble step 1 failed: asm198x: 4510-opcodes.s: config: file area `MAIN` without `fill = yes` writes a partial extent, which is outside this bounded reader [issue](https://github.com/asm198x/asm198x/issues/716) |
 | GB ASM Tutorial — Unbricked / `unbricked` | rgbasm | equivalent | `unbricked/bricks/unbricked.gb` (32768 bytes, `c235cb25c228259c80d2c2930cdefc2c22abd48a1e9affeedeabc5e3e570fb85`) |
-| SpecNext Invaders / `game` | sjasmplus | assembler_rejected | assembler assemble step 1 failed: asm198x: /private/tmp/asm198x-ecosystem-qualified-audit/work/howprice-specnext-invaders--game/assembler/src/ayfxplay.asm:345: error: expected a value [issue](https://github.com/asm198x/asm198x/issues/717) |
+| SpecNext Invaders / `game` | sjasmplus | assembler_rejected | assembler assemble step 1 failed: asm198x: src/ayfxplay.asm:345: error: expected a value [issue](https://github.com/asm198x/asm198x/issues/717) |
 | HelloAmi / `hello-ami` | vasm | equivalent | `HelloAmi` (244 bytes, `826d98fbcae710038965fb94e5366acf8bbf4af1ab11a61c3e2aad5945c32dab`) |
 <!-- /generated -->
 
