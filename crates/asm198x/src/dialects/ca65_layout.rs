@@ -192,12 +192,13 @@ impl Layout {
         let mut segs = Vec::with_capacity(self.segments.len());
         for s in &self.segments {
             let a = &self.areas[s.area];
+            let present = !self.from_config || lengths.contains_key(&s.name);
             let mut at = cursor[s.area];
-            if let Some(align) = s.align.filter(|&al| al > 1) {
+            if let Some(align) = s.align.filter(|&al| al > 1 && present) {
                 at = at.div_ceil(align) * align;
             }
             if let Some(start) = s.start {
-                if start < at {
+                if present && start < at {
                     return Err(AsmError::new(
                         0,
                         format!(
@@ -217,7 +218,9 @@ impl Layout {
                     .then(|| file_base[s.area] + (at - a.start) as usize),
                 cpu_addressable: addressable[s.area],
             });
-            cursor[s.area] = at + lengths.get(&s.name).copied().unwrap_or(0);
+            if present {
+                cursor[s.area] = at + lengths.get(&s.name).copied().unwrap_or(0);
+            }
         }
         Ok(ResolvedLayout {
             segs,
@@ -228,9 +231,9 @@ impl Layout {
     }
 
     /// Check actual occupied extents before emission or the memory account.
-    /// A following configured segment reserves its start even when empty,
-    /// preserving the default NROM vector slot without assigning meaning to
-    /// any particular name or address. Separate memory areas may share CPU
+    /// A source-selected segment reserves its start even when empty; absent
+    /// custom segments do not. The default NROM vector slot remains reserved.
+    /// Separate memory areas may share CPU
     /// addresses (banks); the shared placement pass checks file extents.
     pub(crate) fn validate_extents(
         &self,
@@ -238,6 +241,9 @@ impl Layout {
         lengths: &std::collections::BTreeMap<String, u32>,
     ) -> Result<(), AsmError> {
         for (index, def) in self.segments.iter().enumerate() {
+            if self.from_config && !lengths.contains_key(&def.name) {
+                continue;
+            }
             let segment = &resolved.segs[index];
             let length = lengths.get(&def.name).copied().unwrap_or(0);
             let end = u64::from(segment.base) + u64::from(length);
@@ -252,12 +258,15 @@ impl Layout {
                     ),
                 ));
             }
-            if let Some((next_index, next)) = self
-                .segments
-                .iter()
-                .enumerate()
-                .skip(index + 1)
-                .find(|(_, next)| next.area == def.area)
+            if let Some((next_index, next)) =
+                self.segments
+                    .iter()
+                    .enumerate()
+                    .skip(index + 1)
+                    .find(|(_, next)| {
+                        next.area == def.area
+                            && (!self.from_config || lengths.contains_key(&next.name))
+                    })
                 && end > u64::from(resolved.segs[next_index].base)
             {
                 return Err(AsmError::new(

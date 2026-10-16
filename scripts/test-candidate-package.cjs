@@ -9,7 +9,7 @@ const { targets, sha, packageIdentity, nativeTarget, binaryTarget, archiveIdenti
 const { verifyReceipt, sourceIdentity } = require('./build-locked-package.cjs');
 const requiredCases = ['archive_identity', 'version', 'reference_bytes', 'determinism', 'structured_success', 'structured_failure', 'preserve_previous_outputs', 'missing_input_json', 'unknown_cpu', 'incompatible_cpu', 'hardlink_source', 'hardlink_sidecar', 'formatter_container', 'formatter_origin', 'lua', 'upstream_project'];
 requiredCases.push('disasm_options', 'disasm_wide_origin', 'pasmo_nested_repeat', 'quoted_data_native', 'quoted_data_format', 'conversion_quoted_data', 'conversion_file_scope', 'unsupported_escape');
-requiredCases.push('pasmo_word_arithmetic', 'ca65_configured_extent', 'ca65_extent_refusal');
+requiredCases.push('pasmo_word_arithmetic', 'ca65_configured_extent', 'ca65_extent_refusal', 'ca65_absent_segments');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -189,6 +189,20 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
         const expected = Buffer.concat([Buffer.alloc(0x7ffa, 0xea), Buffer.from('008001800280', 'hex')]);
         assert.deepEqual(read('extent.bin'), expected);
       }
+    });
+    test('ca65_absent_segments', () => {
+      const pinned = 'MEMORY { PRG: start=$8000, size=$8000, file=%O, fill=yes; } SEGMENTS { PROGRAM: load=PRG, type=ro; TABLE: load=PRG, type=ro, start=$fffa; }';
+      write('absent.cfg', pinned); write('absent.s', '.segment "PROGRAM"\n.res $8000,$ea\n');
+      const args = ['--dialect', 'ca65', '-C', 'absent.cfg', 'absent.s', '-o', 'absent.bin'];
+      assert.equal(run(args).status, 0); assert.deepEqual(read('absent.bin'), Buffer.alloc(0x8000, 0xea));
+      write('absent.s', '.segment "PROGRAM"\n.res $8000,$ea\n.segment "TABLE"\n');
+      const selected = run(args); reject(selected); assert(selected.stderr.includes('TABLE'));
+      assert.deepEqual(read('absent.bin'), Buffer.alloc(0x8000, 0xea));
+      write('absent.cfg', 'MEMORY { PRG: start=$8000, size=16, file=%O, fill=yes; } SEGMENTS { PROGRAM: load=PRG, type=ro; UNUSED: load=PRG, type=ro, align=16; TAIL: load=PRG, type=ro; }');
+      write('absent.s', '.segment "PROGRAM"\n.byte $ea\n.segment "TAIL"\n.byte $bb\n');
+      assert.equal(run(args).status, 0);
+      const expected = Buffer.alloc(16); expected[0] = 0xea; expected[1] = 0xbb;
+      assert.deepEqual(read('absent.bin'), expected);
     });
     test('ca65_extent_refusal', () => {
       const cases = [
