@@ -264,11 +264,11 @@ pub(crate) trait Dialect {
     /// A property of the toolchain, not of the CPU. Probed against every
     /// reference installed here: acme, sjasmplus, rgbasm, vasm, lwasm and ca65
     /// all take `$12345678`, and acme, sjasmplus, rgbasm, vasm and lwasm all
-    /// take negatives. **pasmo alone constrains**, and only upward — `$FFFF`
-    /// assembles, `$10000` does not, while `-65536` is fine.
+    /// take negatives. Pasmo normalizes expression values to unsigned words
+    /// before binding them, including `$10000` becoming zero (#634).
     ///
-    /// So the default is no constraint, which matches six of the seven, and
-    /// pasmo narrows it. The engine previously checked every dialect against
+    /// The default is no additional constraint after dialect lowering.
+    /// The engine previously checked every dialect against
     /// `0..=0xFF_FFFF` — a 65816 long address applied to all twenty-one —
     /// which refused source five references assemble, in both directions
     /// (#228).
