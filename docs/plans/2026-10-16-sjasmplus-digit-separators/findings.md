@@ -49,7 +49,7 @@ its explicit ecosystem audit. The unmodified upstream pin remains
 33,280 bytes, SHA-256
 `5fbed92a7d60dab47de8b22162c9227df051eaf67c26e85e618b24f6429dd07f`;
 the complete NEX bytes are retained as hex in that report. Asm198x now reaches
-`src/sprite_data.asm:19` and reports `invalid number `%`` at the infix
+`src/sprite_data.asm:19` and reports ``invalid number `%` `` at the infix
 remainder operator. This is a distinct next boundary, not a failure of the
 accepted separator cases. `remainder-boundary.json` retains the minimal native
 `ASSERT (5 % 2)==1` / `db 5 % 2,%101` control: native bytes `0105`, Asm rejection.
@@ -58,3 +58,5 @@ The final workspace test run passed 1,494 tests with 38 explicitly ignored;
 Clippy with all targets and Lua passed with warnings denied. Formatting,
 generated docs, Ruff and all 49 Node package/workflow tests passed. The
 compressed validation logs are retained alongside the initial red test.
+
+The next remainder boundary is tracked in [#731](https://github.com/asm198x/asm198x/issues/731).
