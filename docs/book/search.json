@@ -545,7 +545,7 @@
       "slug": "reference/cli"
     },
     {
-      "context": "Writes a listing to stdout. The CPU follows the dialect: a 6502 dialect",
+      "context": "Writes a linear listing to stdout. The decoder follows --cpu, or the default",
       "heading": "disasm — disassemble",
       "page": "The command line",
       "slug": "reference/cli"
