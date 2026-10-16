@@ -1,0 +1,2485 @@
+{
+  "tool": "/usr/local/bin/sjasmplus",
+  "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+  "version": {
+    "argv": [
+      "/usr/local/bin/sjasmplus",
+      "--version"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+  },
+  "cases": [
+    {
+      "name": "data_0",
+      "source": " dw (1==1)&&(2==2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_0",
+      "source": "V equ (1==1)&&(2==2)\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_0",
+      "source": " IF (1==1)&&(2==2)\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_0",
+      "source": " ASSERT (1==1)&&(2==2)\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_1",
+      "source": " dw 1&&2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_1",
+      "source": "V equ 1&&2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_1",
+      "source": " IF 1&&2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_1",
+      "source": " ASSERT 1&&2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_2",
+      "source": " dw 0||2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_2",
+      "source": "V equ 0||2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_2",
+      "source": " IF 0||2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.004 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_2",
+      "source": " ASSERT 0||2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_3",
+      "source": " dw !0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_3",
+      "source": "V equ !0\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_3",
+      "source": " IF !0\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_3",
+      "source": " ASSERT !0\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_4",
+      "source": " dw !2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "equ_4",
+      "source": "V equ !2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_4",
+      "source": " IF !2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "22"
+    },
+    {
+      "name": "assert_4",
+      "source": " ASSERT !2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Assertion failed:  !2\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_5",
+      "source": " dw !!1\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.004 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_5",
+      "source": "V equ !!1\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_5",
+      "source": " IF !!1\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_5",
+      "source": " ASSERT !!1\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_6",
+      "source": " dw 1==1\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.003 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_6",
+      "source": "V equ 1==1\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_6",
+      "source": " IF 1==1\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_6",
+      "source": " ASSERT 1==1\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_7",
+      "source": " dw 1!=2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_7",
+      "source": "V equ 1!=2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_7",
+      "source": " IF 1!=2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.003 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_7",
+      "source": " ASSERT 1!=2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_8",
+      "source": " dw 1<2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_8",
+      "source": "V equ 1<2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_8",
+      "source": " IF 1<2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_8",
+      "source": " ASSERT 1<2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_9",
+      "source": " dw 1<=2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.003 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_9",
+      "source": "V equ 1<=2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_9",
+      "source": " IF 1<=2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_9",
+      "source": " ASSERT 1<=2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_10",
+      "source": " dw 1>2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "equ_10",
+      "source": "V equ 1>2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_10",
+      "source": " IF 1>2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "22"
+    },
+    {
+      "name": "assert_10",
+      "source": " ASSERT 1>2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Assertion failed:  1>2\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_11",
+      "source": " dw 1>=2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.003 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "equ_11",
+      "source": "V equ 1>=2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_11",
+      "source": " IF 1>=2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "22"
+    },
+    {
+      "name": "assert_11",
+      "source": " ASSERT 1>=2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Assertion failed:  1>=2\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_12",
+      "source": " dw 1|2==3\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "0100"
+    },
+    {
+      "name": "equ_12",
+      "source": "V equ 1|2==3\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "0100"
+    },
+    {
+      "name": "if_12",
+      "source": " IF 1|2==3\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_12",
+      "source": " ASSERT 1|2==3\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_13",
+      "source": " dw 1&2==0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "equ_13",
+      "source": "V equ 1&2==0\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_13",
+      "source": " IF 1&2==0\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.006 seconds\n",
+      "hex": "22"
+    },
+    {
+      "name": "assert_13",
+      "source": " ASSERT 1&2==0\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Assertion failed:  1&2==0\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_14",
+      "source": " dw 1^3==2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "0100"
+    },
+    {
+      "name": "equ_14",
+      "source": "V equ 1^3==2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "0100"
+    },
+    {
+      "name": "if_14",
+      "source": " IF 1^3==2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.000 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_14",
+      "source": " ASSERT 1^3==2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_15",
+      "source": " dw 1==1==1\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "equ_15",
+      "source": "V equ 1==1==1\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_15",
+      "source": " IF 1==1==1\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "22"
+    },
+    {
+      "name": "assert_15",
+      "source": " ASSERT 1==1==1\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Assertion failed:  1==1==1\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_16",
+      "source": " dw 1==2<3\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "equ_16",
+      "source": "V equ 1==2<3\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_16",
+      "source": " IF 1==2<3\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "22"
+    },
+    {
+      "name": "assert_16",
+      "source": " ASSERT 1==2<3\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Assertion failed:  1==2<3\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_17",
+      "source": " dw 1<2==0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "equ_17",
+      "source": "V equ 1<2==0\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_17",
+      "source": " IF 1<2==0\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "22"
+    },
+    {
+      "name": "assert_17",
+      "source": " ASSERT 1<2==0\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Assertion failed:  1<2==0\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.003 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_18",
+      "source": " dw 2==3>0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "equ_18",
+      "source": "V equ 2==3>0\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_18",
+      "source": " IF 2==3>0\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.004 seconds\n",
+      "hex": "22"
+    },
+    {
+      "name": "assert_18",
+      "source": " ASSERT 2==3>0\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Assertion failed:  2==3>0\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_19",
+      "source": " dw 1==1!=0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_19",
+      "source": "V equ 1==1!=0\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_19",
+      "source": " IF 1==1!=0\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_19",
+      "source": " ASSERT 1==1!=0\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_20",
+      "source": " dw 1==1<0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "equ_20",
+      "source": "V equ 1==1<0\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_20",
+      "source": " IF 1==1<0\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.000 seconds\n",
+      "hex": "22"
+    },
+    {
+      "name": "assert_20",
+      "source": " ASSERT 1==1<0\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Assertion failed:  1==1<0\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_21",
+      "source": " dw 1|0==0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_21",
+      "source": "V equ 1|0==0\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_21",
+      "source": " IF 1|0==0\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_21",
+      "source": " ASSERT 1|0==0\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_22",
+      "source": " dw 2&3==3\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "0200"
+    },
+    {
+      "name": "equ_22",
+      "source": "V equ 2&3==3\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "0200"
+    },
+    {
+      "name": "if_22",
+      "source": " IF 2&3==3\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.000 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_22",
+      "source": " ASSERT 2&3==3\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_23",
+      "source": " dw 2 AND 3==3\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n",
+      "hex": "0200"
+    },
+    {
+      "name": "equ_23",
+      "source": "V equ 2 AND 3==3\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.004 seconds\n",
+      "hex": "0200"
+    },
+    {
+      "name": "if_23",
+      "source": " IF 2 AND 3==3\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_23",
+      "source": " ASSERT 2 AND 3==3\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_24",
+      "source": " dw 0||2&3\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_24",
+      "source": "V equ 0||2&3\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_24",
+      "source": " IF 0||2&3\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_24",
+      "source": " ASSERT 0||2&3\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_25",
+      "source": " dw (0||2)==-1\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_25",
+      "source": "V equ (0||2)==-1\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_25",
+      "source": " IF (0||2)==-1\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_25",
+      "source": " ASSERT (0||2)==-1\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_26",
+      "source": " dw (1&&2)==-1\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_26",
+      "source": "V equ (1&&2)==-1\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_26",
+      "source": " IF (1&&2)==-1\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.000 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_26",
+      "source": " ASSERT (1&&2)==-1\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.003 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_27",
+      "source": " dw !0&2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n",
+      "hex": "0200"
+    },
+    {
+      "name": "equ_27",
+      "source": "V equ !0&2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "0200"
+    },
+    {
+      "name": "if_27",
+      "source": " IF !0&2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.003 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_27",
+      "source": " ASSERT !0&2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_28",
+      "source": " dw NOT 0&2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "0200"
+    },
+    {
+      "name": "equ_28",
+      "source": "V equ NOT 0&2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "0200"
+    },
+    {
+      "name": "if_28",
+      "source": " IF NOT 0&2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.003 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_28",
+      "source": " ASSERT NOT 0&2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.003 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_29",
+      "source": " dw !(1|2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "equ_29",
+      "source": "V equ !(1|2)\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_29",
+      "source": " IF !(1|2)\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "22"
+    },
+    {
+      "name": "assert_29",
+      "source": " ASSERT !(1|2)\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Assertion failed:  !(1|2)\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_30",
+      "source": " dw NOT 1+1\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "0100"
+    },
+    {
+      "name": "equ_30",
+      "source": "V equ NOT 1+1\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "0100"
+    },
+    {
+      "name": "if_30",
+      "source": " IF NOT 1+1\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_30",
+      "source": " ASSERT NOT 1+1\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.003 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_31",
+      "source": " dw 0&&(1/0)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "equ_31",
+      "source": "V equ 0&&(1/0)\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.004 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_31",
+      "source": " IF 0&&(1/0)\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 5 lines, work time: 0.003 seconds\n",
+      "hex": "22"
+    },
+    {
+      "name": "assert_31",
+      "source": " ASSERT 0&&(1/0)\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\ninput.asm(1): error: [ASSERT] Assertion failed:  0&&(1/0)\nPass 3 complete\nErrors: 2, warnings: 0, compiled: 3 lines, work time: 0.004 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_32",
+      "source": " dw 1||(1/0)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_32",
+      "source": "V equ 1||(1/0)\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_32",
+      "source": " IF 1||(1/0)\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_32",
+      "source": " ASSERT 1||(1/0)\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Division by zero\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.004 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_33",
+      "source": " dw 0&&undefined\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Label not found: undefined\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "equ_33",
+      "source": "V equ 0&&undefined\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Label not found: undefined\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.003 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_33",
+      "source": " IF 0&&undefined\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\ninput.asm(1): warning[fwdref]: forward reference of symbol: IF 0&&undefined\nPass 1 complete (0 errors)\ninput.asm(1): warning[fwdref]: forward reference of symbol: IF 0&&undefined\nPass 2 complete (0 errors)\ninput.asm(1): error: Label not found: undefined\nPass 3 complete\nErrors: 1, warnings: 2, compiled: 5 lines, work time: 0.003 seconds\n",
+      "hex": "22"
+    },
+    {
+      "name": "assert_33",
+      "source": " ASSERT 0&&undefined\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Label not found: undefined\ninput.asm(1): error: [ASSERT] Assertion failed:  0&&undefined\nPass 3 complete\nErrors: 2, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_34",
+      "source": " dw 1||undefined\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Label not found: undefined\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.005 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_34",
+      "source": "V equ 1||undefined\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Label not found: undefined\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_34",
+      "source": " IF 1||undefined\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\ninput.asm(1): warning[fwdref]: forward reference of symbol: IF 1||undefined\nPass 1 complete (0 errors)\ninput.asm(1): warning[fwdref]: forward reference of symbol: IF 1||undefined\nPass 2 complete (0 errors)\ninput.asm(1): error: Label not found: undefined\nPass 3 complete\nErrors: 1, warnings: 2, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_34",
+      "source": " ASSERT 1||undefined\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Label not found: undefined\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_35",
+      "source": " dw (1==1)&&3==3\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_35",
+      "source": "V equ (1==1)&&3==3\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_35",
+      "source": " IF (1==1)&&3==3\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.003 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_35",
+      "source": " ASSERT (1==1)&&3==3\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_36",
+      "source": " dw 1||0&&0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.008 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_36",
+      "source": "V equ 1||0&&0\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_36",
+      "source": " IF 1||0&&0\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.003 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_36",
+      "source": " ASSERT 1||0&&0\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_37",
+      "source": " dw 2+3==5&&4\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_37",
+      "source": "V equ 2+3==5&&4\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_37",
+      "source": " IF 2+3==5&&4\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_37",
+      "source": " ASSERT 2+3==5&&4\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.003 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_38",
+      "source": " dw !1==0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_38",
+      "source": "V equ !1==0\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_38",
+      "source": " IF !1==0\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_38",
+      "source": " ASSERT !1==0\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_39",
+      "source": " dw 1+2<<1==6&&3*4==12\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_39",
+      "source": "V equ 1+2<<1==6&&3*4==12\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_39",
+      "source": " IF 1+2<<1==6&&3*4==12\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_39",
+      "source": " ASSERT 1+2<<1==6&&3*4==12\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_40",
+      "source": " dw 1&&\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [DW/DEFW/WORD] Syntax error:\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "equ_40",
+      "source": "V equ 1&&\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Expression error:\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_40",
+      "source": " IF 1&&\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [IF/IFN] Syntax error:\ninput.asm(3): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(5): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\nPass 3 complete\nErrors: 3, warnings: 0, compiled: 6 lines, work time: 0.001 seconds\n",
+      "hex": "1122"
+    },
+    {
+      "name": "assert_40",
+      "source": " ASSERT 1&&\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Syntax error:  1&&\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_41",
+      "source": " dw ||2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [DW/DEFW/WORD] Syntax error: ||2\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.003 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "equ_41",
+      "source": "V equ ||2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Expression error: ||2\ninput.asm(1): error: Unexpected: ||2\nPass 3 complete\nErrors: 2, warnings: 0, compiled: 3 lines, work time: 0.005 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_41",
+      "source": " IF ||2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: ||2\ninput.asm(1): error: Unexpected: ||2\ninput.asm(3): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(5): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\nPass 3 complete\nErrors: 4, warnings: 0, compiled: 6 lines, work time: 0.004 seconds\n",
+      "hex": "1122"
+    },
+    {
+      "name": "assert_41",
+      "source": " ASSERT ||2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Syntax error:  ||2\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_42",
+      "source": " dw !\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [DW/DEFW/WORD] Syntax error:\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "equ_42",
+      "source": "V equ !\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Expression error:\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_42",
+      "source": " IF !\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [IF/IFN] Syntax error:\ninput.asm(3): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(5): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\nPass 3 complete\nErrors: 3, warnings: 0, compiled: 6 lines, work time: 0.003 seconds\n",
+      "hex": "1122"
+    },
+    {
+      "name": "assert_42",
+      "source": " ASSERT !\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Syntax error:  !\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_43",
+      "source": " dw 1<>2\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [DW/DEFW/WORD] Syntax error: >2\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "equ_43",
+      "source": "V equ 1<>2\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Expression error: >2\ninput.asm(1): error: Unexpected: >2\nPass 3 complete\nErrors: 2, warnings: 0, compiled: 3 lines, work time: 0.004 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_43",
+      "source": " IF 1<>2\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: >2\ninput.asm(1): error: Unexpected: >2\ninput.asm(3): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(5): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\nPass 3 complete\nErrors: 4, warnings: 0, compiled: 6 lines, work time: 0.001 seconds\n",
+      "hex": "1122"
+    },
+    {
+      "name": "assert_43",
+      "source": " ASSERT 1<>2\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Syntax error:  1<>2\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_44",
+      "source": " dw 1=1\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "equ_44",
+      "source": "V equ 1=1\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "ffff"
+    },
+    {
+      "name": "if_44",
+      "source": " IF 1=1\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "assert_44",
+      "source": " ASSERT 1=1\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.003 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "data_45",
+      "source": " dw 1===1\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [DW/DEFW/WORD] Syntax error: =1\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "equ_45",
+      "source": "V equ 1===1\n dw V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Expression error: =1\ninput.asm(1): error: Unexpected: =1\nPass 3 complete\nErrors: 2, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": "0000"
+    },
+    {
+      "name": "if_45",
+      "source": " IF 1===1\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: Syntax error: =1\ninput.asm(1): error: Unexpected: =1\ninput.asm(3): error: ELSE without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\ninput.asm(5): error: ENDIF without IF/IFN/IFUSED/IFNUSED/IFDEF/IFNDEF\nPass 3 complete\nErrors: 4, warnings: 0, compiled: 6 lines, work time: 0.002 seconds\n",
+      "hex": "1122"
+    },
+    {
+      "name": "assert_45",
+      "source": " ASSERT 1===1\n db $33\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(1): error: [ASSERT] Syntax error:  1===1\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.005 seconds\n",
+      "hex": "33"
+    },
+    {
+      "name": "struct_assert",
+      "source": " STRUCT Channel\nmember WORD 0\nflag BYTE 0\n ENDS\n ASSERT (Channel==3)&&Channel.member==0\n dw Channel,Channel.flag\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 7 lines, work time: 0.004 seconds\n",
+      "hex": "03000200"
+    },
+    {
+      "name": "forward_assert",
+      "source": " ASSERT (future==5)&&1\nfuture equ 5\n dw future\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 4 lines, work time: 0.002 seconds\n",
+      "hex": "0500"
+    },
+    {
+      "name": "forward_if",
+      "source": " IF (future==5)&&1\n db $11\n ELSE\n db $22\n ENDIF\nfuture equ 5\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\ninput.asm(1): warning[fwdref]: forward reference of symbol: IF (future==5)&&1\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 1, compiled: 6 lines, work time: 0.002 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "macro_repeat",
+      "source": "put macro x\n ASSERT (x==2)&&1\n dw (x==2)||0\n endm\n rept 2\n put 2\n endr\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 17 lines, work time: 0.003 seconds\n",
+      "hex": "ffffffff"
+    },
+    {
+      "name": "value_if",
+      "source": "V equ 1&&2\n IF V==-1\n db $11\n ELSE\n db $22\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 6 lines, work time: 0.004 seconds\n",
+      "hex": "11"
+    },
+    {
+      "name": "trailing_if_text",
+      "source": " IF 1&&2 ignored\n db $11\n ENDIF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 4 lines, work time: 0.004 seconds\n",
+      "hex": "11"
+    }
+  ]
+}

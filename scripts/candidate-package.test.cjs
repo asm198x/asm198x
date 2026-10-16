@@ -92,4 +92,5 @@ test('0.0.69 evidence cannot qualify the Pasmo memory-wrap correction', () => {
   assert.equal(old.qualified, true); assert.equal(qualifies(old.results), false);
   assert(requiredCases.includes('pasmo_wrapped_image'));
   assert(requiredCases.includes('sjasmplus_word_operators'));
+  assert(requiredCases.includes('sjasmplus_logical_expressions'));
 });

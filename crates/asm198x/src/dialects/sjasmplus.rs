@@ -607,6 +607,10 @@ impl Z80Syntax for SjasmplusSyntax {
         true
     }
 
+    fn sjasmplus_expressions(&self) -> bool {
+        true
+    }
+
     fn has_lua(&self) -> bool {
         true
     }
