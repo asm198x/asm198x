@@ -48,7 +48,7 @@ use crate::dialect::{Dialect, Oversize};
 use crate::dialects::macros::{self, Expand};
 use crate::dialects::z80::{self, Z80Syntax};
 use crate::directives::{Category, Directive, Pattern};
-use crate::engine::{AsmError, Expr, Operation, Piece, Statement};
+use crate::engine::{AsmError, Expr, Operation, Statement};
 use crate::source::{SourceLoader, SourceMap};
 
 /// The sjasmplus Z80 dialect. `z80n` selects the target instruction set
@@ -985,19 +985,19 @@ impl Z80Syntax for SjasmplusSyntax {
             return self.parse_savecpr(args, line).map(Some);
         }
         // Keep common and SjASMPlus-specific data on the same item parser,
-        // including its explicit refusal of unsupported decoded escapes.
+        // including its native double-quoted escape decoding.
         let lower = word.to_ascii_lowercase();
         match lower.as_str() {
             "db" | "defb" | "defm" | "dm" | "byte" => {
                 return Ok(Some(Operation::Bytes(flat(data_items(args, line)?))));
             }
             "dw" | "defw" | "word" => {
-                return Ok(Some(Operation::Words(flat(data_items(args, line)?))));
+                return Ok(Some(Operation::Words(packed(data_items(args, line)?))));
             }
             "dword" | "dd" | "defd" => {
-                return Ok(Some(wide(flat(data_items(args, line)?), 4)));
+                return Ok(Some(wide(packed(data_items(args, line)?), 4)));
             }
-            "d24" => return Ok(Some(wide(flat(data_items(args, line)?), 3))),
+            "d24" => return Ok(Some(wide(packed(data_items(args, line)?), 3))),
             // `dz` terminates with a zero; `dc` sets bit 7 on the last
             // character of each string and leaves numbers alone.
             "dz" => {
@@ -1129,9 +1129,9 @@ impl Z80Syntax for SjasmplusSyntax {
 /// `dc` and `abytec` set bit 7 on the **last character of each string** and
 /// leave a number alone (`dc "ab",3,"cd"` is `61 E2 03 63 E4`), so the item
 /// boundaries have to survive the parse rather than being flattened away.
-struct DataItem {
-    from_string: bool,
-    bytes: Vec<Expr>,
+enum DataItem {
+    String(Vec<u8>),
+    Value(Expr),
 }
 
 fn data_items(rest: &str, line: usize) -> Result<Vec<DataItem>, AsmError> {
@@ -1139,59 +1139,88 @@ fn data_items(rest: &str, line: usize) -> Result<Vec<DataItem>, AsmError> {
     if rest.is_empty() {
         return Err(AsmError::new(line, "directive needs at least one value"));
     }
-    // The reference decodes these pairs only inside double quotes. Refuse
-    // rather than emit their undecoded characters; single-quoted backslashes
-    // and unknown pairs such as \q remain literal in native SjASMPlus.
+    let mut pieces = Vec::new();
     let mut quote = None;
+    let mut escaped = false;
+    let mut start = 0;
     for (i, ch) in rest.char_indices() {
-        if quote == Some('"')
-            && ch == '\\'
-            && rest.as_bytes().get(i + 1).is_some_and(|next| {
-                matches!(
-                    next.to_ascii_lowercase(),
-                    b'\\'
-                        | b'"'
-                        | b'\''
-                        | b'?'
-                        | b'0'
-                        | b'a'
-                        | b'b'
-                        | b'd'
-                        | b'e'
-                        | b'f'
-                        | b'n'
-                        | b'r'
-                        | b't'
-                        | b'v'
-                )
-            })
-        {
-            return Err(AsmError::unsupported(
-                line,
-                "SjASMPlus string escape decoding is not supported yet; use numeric data values for escaped bytes",
-            ));
+        if escaped {
+            escaped = false;
+            continue;
         }
         match quote {
+            Some('"') if ch == '\\' => escaped = true,
             Some(q) if ch == q => quote = None,
+            Some(_) => {}
             None if ch == '"' || ch == '\'' => quote = Some(ch),
-            _ => {}
+            None if ch == ',' => {
+                pieces.push(rest[start..i].trim());
+                start = i + 1;
+            }
+            None => {}
         }
     }
-    let mut out = Vec::new();
-    for piece in z80::split_data_items(rest) {
-        if let Some(text) = z80::string_literal(piece) {
-            out.push(DataItem {
-                from_string: true,
-                bytes: text.chars().map(|c| Expr::Num(c as i64)).collect(),
-            });
-        } else {
-            out.push(DataItem {
-                from_string: false,
-                bytes: vec![z80::parse_value(&SjasmplusSyntax, piece, line)?],
-            });
-        }
+    if quote.is_some() {
+        return Err(AsmError::new(line, "unterminated quoted data"));
     }
-    Ok(out)
+    pieces.push(rest[start..].trim());
+    pieces
+        .into_iter()
+        .map(|piece| {
+            if piece.starts_with('"') {
+                Ok(DataItem::String(decoded_string(piece, line)?))
+            } else {
+                Ok(DataItem::Value(z80::parse_value(
+                    &SjasmplusSyntax,
+                    piece,
+                    line,
+                )?))
+            }
+        })
+        .collect()
+}
+
+/// Native SjASMPlus decodes these pairs only in double quotes. Unknown pairs
+/// keep both bytes; source UTF-8 remains bytes rather than Unicode code points.
+fn decoded_string(piece: &str, line: usize) -> Result<Vec<u8>, AsmError> {
+    let source = piece.as_bytes();
+    let mut bytes = Vec::new();
+    let mut i = 1;
+    while let Some(&byte) = source.get(i) {
+        if byte == b'"' {
+            return if i + 1 == source.len() {
+                Ok(bytes)
+            } else {
+                Err(AsmError::new(line, "unexpected tokens after quoted data"))
+            };
+        }
+        if byte == b'\\'
+            && let Some(&next) = source.get(i + 1)
+        {
+            let decoded = match next.to_ascii_lowercase() {
+                b'\\' | b'"' | b'\'' | b'?' => Some(next),
+                b'0' => Some(0),
+                b'a' => Some(7),
+                b'b' => Some(8),
+                b'd' => Some(127),
+                b'e' => Some(27),
+                b'f' => Some(12),
+                b'n' => Some(10),
+                b'r' => Some(13),
+                b't' => Some(9),
+                b'v' => Some(11),
+                _ => None,
+            };
+            if let Some(decoded) = decoded {
+                bytes.push(decoded);
+                i += 2;
+                continue;
+            }
+        }
+        bytes.push(byte);
+        i += 1;
+    }
+    Err(AsmError::new(line, "unterminated quoted data"))
 }
 
 /// `dh`/`hex`/`defh` — hex digit pairs, with or without commas between them:
@@ -1256,44 +1285,57 @@ fn graphic_bytes(rest: &str, line: usize) -> Result<Vec<Expr>, AsmError> {
 
 /// Every item's bytes, in order, with the item boundaries dropped.
 fn flat(items: Vec<DataItem>) -> Vec<Expr> {
-    items.into_iter().flat_map(|i| i.bytes).collect()
+    items
+        .into_iter()
+        .flat_map(|item| match item {
+            DataItem::String(bytes) => bytes.into_iter().map(|b| Expr::Num(i64::from(b))).collect(),
+            DataItem::Value(value) => vec![value],
+        })
+        .collect()
 }
 
-/// The same, with bit 7 set on the last byte of every item that came from a
-/// string — `dc` and `abytec`'s terminator convention.
-fn marked(items: Vec<DataItem>) -> Vec<Expr> {
-    let mut out = Vec::new();
-    for item in items {
-        let last = item.bytes.len().saturating_sub(1);
-        for (i, byte) in item.bytes.into_iter().enumerate() {
-            if item.from_string && i == last {
-                out.push(Expr::Bin(
-                    crate::engine::BinOp::Or,
-                    Box::new(byte),
-                    Box::new(Expr::Num(0x80)),
-                ));
-            } else {
-                out.push(byte);
+/// In word/wide directives each string is one big-endian packed 32-bit value,
+/// subsequently emitted little-endian at the directive's width.
+fn packed(items: Vec<DataItem>) -> Vec<Expr> {
+    items
+        .into_iter()
+        .map(|item| match item {
+            DataItem::String(bytes) => {
+                Expr::Num(i64::from(bytes.into_iter().fold(0u32, |value, byte| {
+                    value.wrapping_shl(8) | u32::from(byte)
+                })))
             }
-        }
-    }
-    out
+            DataItem::Value(value) => value,
+        })
+        .collect()
 }
 
-/// Lay a value down over `width` bytes, little-endian, as computed pieces so a
-/// symbol still resolves in pass two.
-fn wide(values: Vec<Expr>, width: u8) -> Operation {
-    Operation::Encoded(
-        values
+/// Set bit 7 on each string's last decoded byte; scalar values stay unchanged.
+fn marked(items: Vec<DataItem>) -> Vec<Expr> {
+    flat(
+        items
             .into_iter()
-            .map(|expr| Piece::Val {
-                expr,
-                bytes: width,
-                rel: false,
-                signed: false,
+            .map(|item| match item {
+                DataItem::String(mut bytes) => {
+                    if let Some(last) = bytes.last_mut() {
+                        *last |= 0x80;
+                    }
+                    DataItem::String(bytes)
+                }
+                other => other,
             })
             .collect(),
     )
+}
+
+/// Data-width lowering uses the shared data truncation/warning policy, not
+/// the strict range checks on instruction encoding pieces.
+fn wide(values: Vec<Expr>, width: u8) -> Operation {
+    Operation::Sized {
+        width,
+        big_endian: false,
+        values,
+    }
 }
 
 // ---------------------------------------------------------------------------

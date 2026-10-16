@@ -2537,6 +2537,7 @@ fn assemble_statements(
             Some(
                 Operation::Bytes(_)
                     | Operation::Words(_)
+                    | Operation::Sized { .. }
                     | Operation::Os9Module { .. }
                     | Operation::Os9EndModule
                     | Operation::Instruction { .. }
