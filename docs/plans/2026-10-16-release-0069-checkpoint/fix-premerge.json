@@ -1,0 +1,170 @@
+{
+  "head": "4a3cbaf309aba9ac17ae0bd4a7767063894e5795",
+  "checks": [
+    {
+      "name": "Build (macos-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "CodeQL",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Replay",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "publish-homebrew-formula",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "Docs",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Build (windows-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "custom-notify-discord",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "announce",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "custom-test-linux-packages",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "host",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "build-global-artifacts",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "build-local-artifacts (${{ join(matrix.targets, ', ') }})",
+      "state": "SKIPPED"
+    },
+    {
+      "name": "Coverage",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Lua (macos-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Qualify archive (aarch64-unknown-linux-gnu)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Qualify archive (aarch64-apple-darwin)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Qualify archive (x86_64-apple-darwin)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Web shell (wasm-bindgen)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Format",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Qualify archive (x86_64-pc-windows-msvc)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Clippy",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Lua (ubuntu-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Lua (windows-latest)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "plan",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Analyze (python)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Analyze (csharp)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Analyze (actions)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Analyze (c-cpp)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Qualify archive (x86_64-unknown-linux-gnu)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Analyze (javascript-typescript)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Analyze (rust)",
+      "state": "SUCCESS"
+    },
+    {
+      "name": "Released versions have changelog entries",
+      "state": "SKIPPED"
+    }
+  ],
+  "runs": [
+    {
+      "conclusion": "skipped",
+      "databaseId": 38905568441,
+      "headSha": "4a3cbaf309aba9ac17ae0bd4a7767063894e5795",
+      "status": "completed",
+      "workflowName": "Release PR"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38905568687,
+      "headSha": "4a3cbaf309aba9ac17ae0bd4a7767063894e5795",
+      "status": "completed",
+      "workflowName": "Release"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38905568616,
+      "headSha": "4a3cbaf309aba9ac17ae0bd4a7767063894e5795",
+      "status": "completed",
+      "workflowName": "CI"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38905568603,
+      "headSha": "4a3cbaf309aba9ac17ae0bd4a7767063894e5795",
+      "status": "completed",
+      "workflowName": "Candidate packages"
+    },
+    {
+      "conclusion": "success",
+      "databaseId": 38905566876,
+      "headSha": "4a3cbaf309aba9ac17ae0bd4a7767063894e5795",
+      "status": "completed",
+      "workflowName": "CodeQL"
+    }
+  ]
+}

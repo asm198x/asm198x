@@ -1,0 +1,1651 @@
+{
+  "source_lock": {
+    "schema_version": 1,
+    "kind": "producer-source-lock",
+    "signed": false,
+    "source_commit": "7f4d65255dab43abb7c485fbd45212526f908bcb",
+    "committed_lock_sha256": "2a5b6ea0c33464cb57953b68d102fa244fd8f224bb772dcff4523053559732b7",
+    "before_lock_sha256": "2a5b6ea0c33464cb57953b68d102fa244fd8f224bb772dcff4523053559732b7",
+    "after_lock_sha256": "2a5b6ea0c33464cb57953b68d102fa244fd8f224bb772dcff4523053559732b7",
+    "target": "aarch64-unknown-linux-gnu",
+    "archive": "asm198x-aarch64-unknown-linux-gnu.tar.xz",
+    "archive_sha256": "ad5a0f1fe17ba9689805474529ed73a8a70b22b87b09e13defd2475f4c5b147e",
+    "executable_sha256": "e3657ba6f75fb41d6bcdf5c13bd2c4d937b65e786459e492dc95c7fabd7876d6",
+    "version": "0.0.69",
+    "build": {
+      "job": "build-local-artifacts",
+      "run_id": "38908454874",
+      "run_attempt": "1"
+    },
+    "command": [
+      "dist",
+      "build",
+      "--tag=asm198x-v0.0.69",
+      "--print=linkage",
+      "--output-format=json",
+      "--artifacts=local",
+      "--target=aarch64-unknown-linux-gnu"
+    ],
+    "compiled_dependency_graph": "unknown"
+  },
+  "source_lock_scope": "verified-producer-lock",
+  "kind": "candidate",
+  "version": "0.0.69",
+  "parsed_plan_sha256": "2fba1ec41ac1347b82ca684af42cea908c93a1bbe2a5ac8a0d4d1877daeabc58",
+  "checkout_commit": "7f4d65255dab43abb7c485fbd45212526f908bcb",
+  "target": "aarch64-unknown-linux-gnu",
+  "host": {
+    "platform": "linux",
+    "arch": "arm64",
+    "release": "6.8.0-1064-azure",
+    "node": "v24.21.0",
+    "github_run": "38908454874",
+    "github_attempt": "1"
+  },
+  "archive": "asm198x-aarch64-unknown-linux-gnu.tar.xz",
+  "archive_sha256": "ad5a0f1fe17ba9689805474529ed73a8a70b22b87b09e13defd2475f4c5b147e",
+  "executable_sha256": "e3657ba6f75fb41d6bcdf5c13bd2c4d937b65e786459e492dc95c7fabd7876d6",
+  "checksum_mutation_rejected": true,
+  "fixture": {
+    "commit": "35b4968be3bdd26804a5d195557d1225497a0358",
+    "files": {
+      "LICENSE": "62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203",
+      "helloworld.asm": "9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5",
+      "libs/loader.asm": "32b0dfd80eacbbdfa69774280122d9c7f115fe0602a14bc5d630b24e08cd82cc",
+      "libs/screen.asm": "d33fbb4f0d549567438138efa38adbb4eb154aa17d6e1c0dee496f065cf469c6"
+    }
+  },
+  "qualified": true,
+  "results": [
+    {
+      "name": "archive_identity",
+      "status": "pass",
+      "runs": []
+    },
+    {
+      "name": "version",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--version"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x v0.0.69\n"
+        }
+      ]
+    },
+    {
+      "name": "reference_bytes",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "acme",
+            "good.s",
+            "-o",
+            "first.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> first.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "determinism",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "acme",
+            "good.s",
+            "-o",
+            "second.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 3 byte(s) at $8000 -> second.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "structured_success",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "acme",
+            "--message-format=json",
+            "good.s",
+            "-o",
+            "json.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[169,5,96],\"origin\":32768,\"symbols\":{\"start\":32768},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[{\"name\":\"start\",\"kind\":\"label\",\"section\":0,\"offset\":0}],\"lines\":[{\"line\":3,\"offset\":0,\"length\":2},{\"line\":4,\"offset\":2,\"length\":1}],\"cycles\":[{\"line\":3,\"offset\":0,\"base\":2,\"page_cross\":0,\"branch_taken\":0},{\"line\":4,\"offset\":2,\"base\":6,\"page_cross\":0,\"branch_taken\":0}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":3,\"free\":65533,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"good.s\"]}\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "structured_failure",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "acme",
+            "bad.s",
+            "-o",
+            "bad.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: bad.s:2:6: error: value 4095 does not fit in a byte\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "acme",
+            "--message-format=json",
+            "bad.s",
+            "-o",
+            "bad.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":6,\"expansion_frames\":[],\"path\":\"bad.s\"},\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"value 4095 does not fit in a byte\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "preserve_previous_outputs",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "acme",
+            "bad.s",
+            "-o",
+            "previous.bin",
+            "--debug=previous.debug198x",
+            "--sym=previous.sym",
+            "--listing=previous.lst"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: bad.s:2:6: error: value 4095 does not fit in a byte\n"
+        }
+      ]
+    },
+    {
+      "name": "missing_input_json",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--message-format=json",
+            "missing.s",
+            "-o",
+            "missing.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"cannot read missing.s: No such file or directory (os error 2)\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "unknown_cpu",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "--cpu",
+            "nonsense",
+            "--message-format=json",
+            "z80.s",
+            "-o",
+            "unknown_cpu.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"unknown CPU target `nonsense`\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "incompatible_cpu",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "--cpu",
+            "68000",
+            "--message-format=json",
+            "z80.s",
+            "-o",
+            "incompatible_cpu.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":null,\"code\":\"AssemblyError\",\"severity\":\"Error\",\"message\":\"CPU target `68000` is incompatible with dialect `pasmo`\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "hardlink_source",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "linked.s",
+            "-o",
+            "linked.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: refusing to overwrite input linked.s with the primary image at linked.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "hardlink_sidecar",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "sidecar.s",
+            "-o",
+            "sidecar.bin",
+            "--sym=sidecar.sym"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: refusing to overwrite the input with the symbol table — pass an explicit `=<path>`\n"
+        }
+      ]
+    },
+    {
+      "name": "formatter_container",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--prg",
+            "good.s",
+            "-o",
+            "formatter_container.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: container output options apply to assembly, not `fmt`\n"
+        }
+      ]
+    },
+    {
+      "name": "formatter_origin",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--org",
+            "0",
+            "good.s",
+            "-o",
+            "formatter_origin.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: `--org` is a disassembly option, not valid with `fmt`\n"
+        }
+      ]
+    },
+    {
+      "name": "lua",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "lua.s",
+            "-o",
+            "lua.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $0000 -> lua.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "disasm_options",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "disasm",
+            "--cpu",
+            "z80",
+            "raw-z80.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "        org $0000\n        NOP\n",
+          "stderr": "disassembled 1 byte(s) at $0000\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "disasm",
+            "--cpu",
+            "z80",
+            "raw-z80.bin",
+            "-o",
+            "listing.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: `-o/--output` is not valid with ordinary `disasm`\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "disasm",
+            "--cpu",
+            "z80",
+            "raw-z80.bin",
+            "--map=listing.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: `--debug`/`--sym`/`--listing` apply to an assembly run, not `--fmt`/`--disasm`\n"
+        }
+      ]
+    },
+    {
+      "name": "disasm_wide_origin",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "disasm",
+            "--cpu",
+            "68000",
+            "--org",
+            "0xff8000",
+            "m68k.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "\tbra.s $FF8004\n",
+          "stderr": "disassembled 2 byte(s) at $FF8000\n"
+        }
+      ]
+    },
+    {
+      "name": "pasmo_nested_repeat",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "nested.s",
+            "-o",
+            "nested.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 7 byte(s) at $8000 -> nested.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmonext",
+            "nested.s",
+            "-o",
+            "nested.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 7 byte(s) at $8000 -> nested.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "pasmo_word_arithmetic",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmonext",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmonext",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmonext",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmonext",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmonext",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmonext",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmonext",
+            "arithmetic.s",
+            "-o",
+            "arithmetic.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $1000 -> arithmetic.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "ca65_configured_extent",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "extent.cfg",
+            "extent.s",
+            "-o",
+            "extent.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled + linked 32768 byte(s) -> extent.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "extent.cfg",
+            "extent.s",
+            "-o",
+            "extent.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled + linked 32768 byte(s) -> extent.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "ca65_absent_segments",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "absent.cfg",
+            "absent.s",
+            "-o",
+            "absent.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled + linked 32768 byte(s) -> absent.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "absent.cfg",
+            "absent.s",
+            "-o",
+            "absent.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: absent.s: segment `TABLE` starts at $FFFA, but memory area `PRG` is already filled to $10000\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "absent.cfg",
+            "absent.s",
+            "-o",
+            "absent.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled + linked 16 byte(s) -> absent.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "ca65_extent_refusal",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "extent.cfg",
+            "extent.s",
+            "-o",
+            "extent.bin",
+            "--sym=extent.sym",
+            "--listing=extent.lst",
+            "--debug=extent.debug198x"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: extent.s: segment `PROGRAM` (5 bytes at $8000) exceeds memory area `PRG` ($8000..$8004)\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "ca65",
+            "-C",
+            "extent.cfg",
+            "extent.s",
+            "-o",
+            "extent.bin",
+            "--sym=extent.sym",
+            "--listing=extent.lst",
+            "--debug=extent.debug198x"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: extent.s: segment `TABLE` starts at $8002, but memory area `PRG` is already filled to $8003\n"
+        }
+      ]
+    },
+    {
+      "name": "quoted_data_native",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 14 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[97,59,98,44,99,59,42,97,39,98,59,99,120,7],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":7},{\"line\":3,\"offset\":7,\"length\":7}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":14,\"free\":65522,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmonext",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmonext",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[34,7],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":2}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[44,7],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":2}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 10 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[34,97,39,59,47,47,98,59,44,7],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":10}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":10,\"free\":65526,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 14 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[97,47,47,98,59,99,7,100,59,101,47,47,102,8],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":7},{\"line\":3,\"offset\":7,\"length\":7}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":14,\"free\":65522,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[92,7],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":2}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":2,\"free\":65534,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--message-format",
+            "human",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 6 byte(s) at $8000 -> quoted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--message-format",
+            "json",
+            "quoted.s",
+            "-o",
+            "quoted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "{\"version\":1,\"bytes\":[97,92,113,59,98,7],\"origin\":32768,\"symbols\":{},\"start\":null,\"warnings\":[],\"debug\":{\"symbols\":[],\"lines\":[{\"line\":2,\"offset\":0,\"length\":6}],\"cycle_coverage\":\"full\"},\"areas\":[{\"name\":\"address space\",\"start\":0,\"size\":65536,\"used\":6,\"free\":65530,\"largest_free\":32768}],\"diagnostics\":[],\"files\":[\"quoted.s\"]}\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "quoted_data_format",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "pasmo",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "pasmo",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 14 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "pasmonext",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "pasmonext",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmonext",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "pasmo",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "pasmo",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 10 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 14 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> formatted.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "quoted.s",
+            "-o",
+            "formatted.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted quoted.s -> formatted.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "fmt",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "twice.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "formatted formatted.s -> twice.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "formatted.s",
+            "-o",
+            "formatted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 6 byte(s) at $8000 -> formatted.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "conversion_quoted_data",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "convert",
+            "--from",
+            "pasmo",
+            "--to",
+            "sjasmplus",
+            "convert.s",
+            "-o",
+            "converted.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "converted convert.s (pasmo -> sjasmplus, verified byte-identical) -> converted.s\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "converted.s",
+            "-o",
+            "converted.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 9 byte(s) at $8000 -> converted.bin\n"
+        }
+      ]
+    },
+    {
+      "name": "conversion_file_scope",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "convert.s",
+            "-o",
+            "included.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> included.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "convert",
+            "--from",
+            "pasmo",
+            "--to",
+            "sjasmplus",
+            "convert.s",
+            "-o",
+            "converted.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: convert.s: line 2: the input does not assemble under pasmo: cannot resolve `include \"child.inc\"` here — conversion accepts one self-contained source file and does not resolve INCLUDE or INCBIN files; replace file directives with source or data directives before converting\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "pasmo",
+            "convert.s",
+            "-o",
+            "included.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> included.bin\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "convert",
+            "--from",
+            "pasmo",
+            "--to",
+            "sjasmplus",
+            "convert.s",
+            "-o",
+            "converted.s"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: convert.s: line 2: the input does not assemble under pasmo: cannot resolve `incbin \"data.bin\"` here — conversion accepts one self-contained source file and does not resolve INCLUDE or INCBIN files; replace file directives with source or data directives before converting\n"
+        }
+      ]
+    },
+    {
+      "name": "unsupported_escape",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80",
+            "--message-format",
+            "human",
+            "escaped.s",
+            "-o",
+            "escaped.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: escaped.s:2: error: SjASMPlus string escape decoding is not supported yet; use numeric data values for escaped bytes\nFor more information: asm198x --explain UnsupportedFeature\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80",
+            "--message-format",
+            "json",
+            "escaped.s",
+            "-o",
+            "escaped.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":0,\"expansion_frames\":[],\"path\":\"escaped.s\"},\"code\":\"UnsupportedFeature\",\"severity\":\"Error\",\"message\":\"SjASMPlus string escape decoding is not supported yet; use numeric data values for escaped bytes\",\"fix\":null}]\n",
+          "stderr": ""
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "--message-format",
+            "human",
+            "escaped.s",
+            "-o",
+            "escaped.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "",
+          "stderr": "asm198x: escaped.s:2: error: SjASMPlus string escape decoding is not supported yet; use numeric data values for escaped bytes\nFor more information: asm198x --explain UnsupportedFeature\n"
+        },
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "--cpu",
+            "z80n",
+            "--message-format",
+            "json",
+            "escaped.s",
+            "-o",
+            "escaped.bin"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS",
+          "exit": 1,
+          "signal": null,
+          "stdout": "[{\"span\":{\"file\":0,\"line\":2,\"col\":0,\"expansion_frames\":[],\"path\":\"escaped.s\"},\"code\":\"UnsupportedFeature\",\"severity\":\"Error\",\"message\":\"SjASMPlus string escape decoding is not supported yet; use numeric data values for escaped bytes\",\"fix\":null}]\n",
+          "stderr": ""
+        }
+      ]
+    },
+    {
+      "name": "upstream_project",
+      "status": "pass",
+      "runs": [
+        {
+          "argv": [
+            "/tmp/asm198x-candidate-1w2KjS/asm198x",
+            "--dialect",
+            "acme",
+            "--prg",
+            "helloworld.asm",
+            "-o",
+            "hello.prg"
+          ],
+          "cwd": "/tmp/asm198x-candidate-1w2KjS/upstream",
+          "exit": 0,
+          "signal": null,
+          "stdout": "",
+          "stderr": "assembled 2081 byte(s) -> hello.prg (load $0801)\n"
+        }
+      ]
+    }
+  ]
+}
