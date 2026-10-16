@@ -879,6 +879,8 @@ struct KwCx<'a, S: Z80Syntax> {
     pending: Vec<Comment>,
     /// Inside a macro definition, whose lines are copied and never read.
     in_macro: bool,
+    /// Pasmo repetitions inside a copied macro share its ENDM closer.
+    macro_nested_blocks: usize,
     /// Inside a `STRUCT` (#477): members are copied verbatim for the same
     /// reason macro bodies are — the member name sits in the label column,
     /// where the formatter would peel it onto a line of its own and the
@@ -940,6 +942,7 @@ fn parse_text_keyword<S: Z80Syntax>(
         pos: 0,
         pending: Vec::new(),
         in_macro: false,
+        macro_nested_blocks: 0,
         in_struct: false,
         macro_names: std::collections::BTreeSet::new(),
         struct_names: std::collections::BTreeSet::new(),
@@ -1023,6 +1026,7 @@ impl<S: Z80Syntax> KwCx<'_, S> {
             pos: 0,
             pending: Vec::new(),
             in_macro: false,
+            macro_nested_blocks: 0,
             in_struct: false,
             macro_names: self.macro_names.clone(),
             struct_names: self.struct_names.clone(),
@@ -1165,8 +1169,16 @@ impl<S: Z80Syntax> KwCx<'_, S> {
                         self.in_macro = true;
                         true
                     }
+                    macros::MacroLine::NestedOpen if self.in_macro => {
+                        self.macro_nested_blocks += 1;
+                        true
+                    }
                     macros::MacroLine::Closes if self.in_macro => {
-                        self.in_macro = false;
+                        if self.macro_nested_blocks == 0 {
+                            self.in_macro = false;
+                        } else {
+                            self.macro_nested_blocks -= 1;
+                        }
                         true
                     }
                     macros::MacroLine::Invokes => true,
