@@ -11,15 +11,32 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
-- *(sjasmplus)* preserve quoted comment delimiters ([#697](https://github.com/asm198x/asm198x/pull/697))
-- *(z80)* preserve character literals in data lists ([#694](https://github.com/asm198x/asm198x/pull/694))
-- *(convert)* explain single-source file resolution limits ([#692](https://github.com/asm198x/asm198x/pull/692))
-- *(pasmo)* preserve semicolons inside quoted data ([#691](https://github.com/asm198x/asm198x/pull/691))
-- *(pasmo)* preserve repetitions inside macro bodies ([#689](https://github.com/asm198x/asm198x/pull/689))
-- *(docs)* describe implemented CLI operation coverage ([#685](https://github.com/asm198x/asm198x/pull/685))
-- *(cli)* preserve wider 68000 disassembly origins ([#683](https://github.com/asm198x/asm198x/pull/683))
-- *(cli)* reject unsupported ordinary disassembly options ([#682](https://github.com/asm198x/asm198x/pull/682))
-- *(packaging)* describe the implemented multi-CPU toolchain ([#676](https://github.com/asm198x/asm198x/pull/676))
+- Preserve quoted comment delimiters in SjASMPlus source, semicolons in Pasmo
+  strings and character literals in Z80 data lists. These values no longer lose
+  source text while parsing comments or splitting operands.
+  ([#697](https://github.com/asm198x/asm198x/pull/697), [#691](https://github.com/asm198x/asm198x/pull/691), [#694](https://github.com/asm198x/asm198x/pull/694))
+- Keep Pasmo repetition blocks inside macro bodies until the macro is expanded.
+  ([#689](https://github.com/asm198x/asm198x/pull/689))
+- Explain that dialect conversion works on one source file and cannot resolve
+  include files or other external inputs.
+  ([#692](https://github.com/asm198x/asm198x/pull/692))
+- Accept 68000 disassembly origins above 16 bits while retaining address-range
+  checks for narrower CPUs. Reject output-file, container and assembly-only
+  options that ordinary disassembly previously ignored, before reading input.
+  Ordinary listings still go to standard output.
+  ([#683](https://github.com/asm198x/asm198x/pull/683), [#682](https://github.com/asm198x/asm198x/pull/682))
+- Describe the implemented multi-CPU assembler, disassembler and formatter
+  coverage in package metadata, CLI help and the reference guide.
+  ([#676](https://github.com/asm198x/asm198x/pull/676), [#685](https://github.com/asm198x/asm198x/pull/685))
+
+### Changed
+
+- Require release packaging to use the committed Cargo.lock unchanged. Each
+  native archive comes with an unsigned receipt binding its source commit, lock,
+  target, producer run and archive/executable hashes. Candidate qualification
+  rejects missing or conflicting proof before publication. These receipts do
+  not establish the compiled dependency/features graph or a signing identity.
+  ([#684](https://github.com/asm198x/asm198x/pull/684))
 
 ## [0.0.66](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.65...asm198x-v0.0.66) - 2026-10-15
 
