@@ -7,6 +7,45 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.67](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.66...asm198x-v0.0.67) - 2026-10-16
+
+### Fixed
+
+- Preserve quoted comment delimiters in SjASMPlus source, semicolons in Pasmo
+  strings and character literals in Z80 data lists. These values no longer lose
+  source text while parsing comments or splitting operands.
+  ([#697](https://github.com/asm198x/asm198x/pull/697), [#691](https://github.com/asm198x/asm198x/pull/691), [#694](https://github.com/asm198x/asm198x/pull/694))
+- Keep Pasmo repetition blocks inside macro bodies until the macro is expanded.
+  ([#689](https://github.com/asm198x/asm198x/pull/689))
+- Explain that dialect conversion works on one source file and cannot resolve
+  include files or other external inputs.
+  ([#692](https://github.com/asm198x/asm198x/pull/692))
+- Accept 68000 disassembly origins above 16 bits while retaining address-range
+  checks for narrower CPUs. Reject output-file, container and assembly-only
+  options that ordinary disassembly previously ignored, before reading input.
+  Ordinary listings still go to standard output.
+  ([#683](https://github.com/asm198x/asm198x/pull/683), [#682](https://github.com/asm198x/asm198x/pull/682))
+- Describe the implemented multi-CPU assembler, disassembler and formatter
+  coverage in package metadata, CLI help and the reference guide.
+  ([#676](https://github.com/asm198x/asm198x/pull/676), [#685](https://github.com/asm198x/asm198x/pull/685))
+
+### Changed
+
+- Require release packaging to use the committed Cargo.lock unchanged. Each
+  native archive comes with an unsigned receipt binding its source commit, lock,
+  target, producer run and archive/executable hashes. Candidate qualification
+  rejects missing or conflicting proof before publication. These receipts do
+  not establish the compiled dependency/features graph or a signing identity.
+  ([#684](https://github.com/asm198x/asm198x/pull/684))
+
+- Require 24 archive qualification cases on all five native targets, including
+  the recent disassembly, conversion and quoted-data fixes.
+  ([#680](https://github.com/asm198x/asm198x/pull/680))
+- Reject SjASMPlus string escapes that require unsupported decoding rather than
+  emitting incorrect bytes. Full native escape compatibility remains tracked
+  in [#696](https://github.com/asm198x/asm198x/issues/696).
+  ([#697](https://github.com/asm198x/asm198x/pull/697))
+
 ## [0.0.66](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.65...asm198x-v0.0.66) - 2026-10-15
 
 ### Fixed

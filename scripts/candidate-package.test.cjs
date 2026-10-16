@@ -74,3 +74,8 @@ test('reusable workflow writes the exact supplied candidate plan as valid JSON',
     for (const name of ['package-test-manifest.json', 'candidate-plan.json']) assert.deepEqual(JSON.parse(fs.readFileSync(path.join(directory, 'target', name), 'utf8')), plan);
   } finally { fs.rmSync(directory, {recursive: true, force: true}); }
 });
+test('the older public qualification is not sufficient for this release cohort', () => {
+  const old = JSON.parse(fs.readFileSync(path.join(__dirname, '../docs/plans/2026-10-15-post-fix-release-qualification/published/aarch64-apple-darwin/report.json'), 'utf8'));
+  assert.equal(old.qualified, true);
+  assert(!qualifies(old.results));
+});
