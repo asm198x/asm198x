@@ -74,7 +74,7 @@ jobs:
         run: |
           set -euo pipefail
           node scripts/generate-release-workflow.cjs --check
-          node --test scripts/candidate-package.test.cjs scripts/source-lock.test.cjs .github/actions/setup/index.test.cjs
+          node --test scripts/candidate-package.test.cjs scripts/source-lock.test.cjs scripts/ecosystem-retention.test.cjs .github/actions/setup/index.test.cjs
       - name: Cache Rust artifacts
         if: inputs.plan == '' && inputs.published-version == ''
         uses: Swatinem/rust-cache@v2
