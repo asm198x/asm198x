@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.68](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.67...asm198x-v0.0.68) - 2026-10-16
+
+### Fixed
+
+- Pasmo and PasmoNext now apply native 16-bit arithmetic before enclosing
+  operations, so overflow, division, comparisons and shift counts produce the
+  same bytes as the reference assembler. Native operator spellings and signed
+  index displacements retain their dialect rules.
+  ([#701](https://github.com/asm198x/asm198x/pull/701))
+- A supplied ca65 linker layout can use its full declared memory area without
+  inheriting NROM's vector limit. Real segment overlaps and ROM/RAM overflow
+  fail against the active layout before bytes can be truncated. Default NROM
+  vector-overlap diagnostics remain helpful.
+  ([#703](https://github.com/asm198x/asm198x/pull/703))
+
 ## [0.0.67](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.66...asm198x-v0.0.67) - 2026-10-16
 
 ### Fixed
