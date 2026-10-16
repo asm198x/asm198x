@@ -49,3 +49,27 @@ complete SjASMPlus expression compatibility.
 Final local validation: 1,497 workspace tests passed, 38 explicitly ignored.
 Clippy with all targets/Lua and warnings denied, formatting, generated docs,
 Ruff and all 50 Node package/workflow checks passed. Their logs are retained.
+
+
+## Unchanged SpecNext build
+
+The clean producer `fee20f09e7e3f234cbd7cd9178c6175740f4991a` was built and
+executed by the explicit ecosystem runner against upstream pin
+`e3211ea8ad2e83aca4d07d70bd8e09b7b51a9a1d`. The original native build succeeds
+and produces the same 33,280-byte NEX, SHA-256
+`5fbed92a7d60dab47de8b22162c9227df051eaf67c26e85e618b24f6429dd07f`.
+`specnext-after-remainder/report.json` retains that complete image as hex and
+all ten process streams are retained alongside it and checked against the report.
+
+Asm198x passes the original remainder assertion and reaches `src/main.asm:272`,
+then refuses `DISPLAY "Code start: ",/H,CODE_START` with `expected a value`.
+`display-boundary.json` retains a minimal native control (one emitted byte `01`)
+and the Asm refusal. This is a separate display-format boundary; the complete
+project is still not equivalent.
+
+An independent pre-existing DEFINE bug is captured in `define-boundary.json`.
+Native `DEFINE FF 7` followed by `db $FF` or `db #FF` emits `07`; Asm emits `ff`
+without an error. Native `DEFINE X 3` followed by `db 1X` emits `0d`, while Asm
+rejects the number. Both executables, versions, hashes, exact source, diagnostics
+and bytes are retained. The hex/digit-led protection in `substitute_once` is
+unchanged by this remainder correction and needs its own native-parity fix.

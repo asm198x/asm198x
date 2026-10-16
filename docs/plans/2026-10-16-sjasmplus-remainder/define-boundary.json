@@ -1,0 +1,115 @@
+{
+  "source_commit": "fee20f09e7e3f234cbd7cd9178c6175740f4991a",
+  "tools": [
+    {
+      "path": "/usr/local/bin/sjasmplus",
+      "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+      "version": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+      }
+    },
+    {
+      "path": "/private/tmp/asm198x-remainder-build/debug/asm198x",
+      "sha256": "10dcebda234cf93670000abb168493fb30e57ab4534e53de1b62de1930cc24f9",
+      "version": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "asm198x v0.0.71\n"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "source": " DEFINE FF 7\n db $FF\n",
+      "runs": [
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+          "hex": "07"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-remainder-build/debug/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $0000 -> asm.bin\n",
+          "hex": "ff"
+        }
+      ]
+    },
+    {
+      "source": " DEFINE FF 7\n db #FF\n",
+      "runs": [
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+          "hex": "07"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-remainder-build/debug/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 1 byte(s) at $0000 -> asm.bin\n",
+          "hex": "ff"
+        }
+      ]
+    },
+    {
+      "source": " DEFINE X 3\n db 1X\n",
+      "runs": [
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+          "hex": "0d"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-remainder-build/debug/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.asm:2: error: invalid number `1X`\n",
+          "hex": null
+        }
+      ]
+    }
+  ]
+}
