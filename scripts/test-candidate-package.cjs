@@ -16,6 +16,7 @@ requiredCases.push('sjasmplus_logical_expressions');
 requiredCases.push('sjasmplus_shift_widths');
 requiredCases.push('sjasmplus_digit_separators');
 requiredCases.push('sjasmplus_remainder');
+requiredCases.push('sjasmplus_define_numbers');
 const sourceFiles = {
   'LICENSE': '62cd567bc9270c722abcaa6ad88b6a1fe861698d63890f787cc557d2395be203',
   'helloworld.asm': '9e57c82435c0cf35e56089d56d6b83991c61624c2b3448ab6c66fb13a884a0a5',
@@ -279,6 +280,20 @@ async function audit(plan, target, dist, { corruptOutput = false, corruptArchive
           assert.deepEqual(read('remainder.bin'), Buffer.from(fact.hex, 'hex'), fact.name);
         } else {
           reject(p); assert.equal(read('remainder.bin').toString(), 'previous image', fact.name);
+        }
+      }
+    });
+    test('sjasmplus_define_numbers', () => {
+      const facts = require('../crates/asm198x/tests/fixtures/sjasmplus-define-numbers.json');
+      assert.equal(facts.cases.length, 136);
+      for (const fact of facts.cases) {
+        write('defines.asm', fact.source); write('defines.bin', 'previous image');
+        const p = run(['--dialect', 'sjasmplus', 'defines.asm', '-o', 'defines.bin']);
+        if (fact.exit === 0) {
+          assert.equal(p.status, 0, fact.name + ': ' + p.stderr);
+          assert.deepEqual(read('defines.bin'), Buffer.from(fact.hex, 'hex'), fact.name);
+        } else {
+          reject(p); assert.equal(read('defines.bin').toString(), 'previous image', fact.name);
         }
       }
     });

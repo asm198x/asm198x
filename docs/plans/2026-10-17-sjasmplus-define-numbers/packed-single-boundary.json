@@ -1,0 +1,145 @@
+{
+  "source_commit": "44288a241c2f341bb35dfb6b12a1e8a9283d2905",
+  "tools": [
+    {
+      "path": "/usr/local/bin/sjasmplus",
+      "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+      "version": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+      }
+    },
+    {
+      "path": "/private/tmp/asm198x-define-numbers-build/debug/asm198x",
+      "sha256": "467fa851066e6d862372638e6319e02131d30d9af40fd52044f2eaee149d1c34",
+      "version": {
+        "exit": 0,
+        "stdout": "",
+        "stderr": "asm198x v0.0.71\n"
+      }
+    }
+  ],
+  "cases": [
+    {
+      "source": " dd 'FF'\n",
+      "runs": [
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.001 seconds\n",
+          "hex": "46460000"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-define-numbers-build/debug/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.asm:1: error: malformed character literal\n",
+          "hex": null
+        }
+      ]
+    },
+    {
+      "source": " DEFINE FF 7\n dd 'FF'\n",
+      "runs": [
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+          "hex": "46460000"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-define-numbers-build/debug/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.asm:2: error: malformed character literal\n",
+          "hex": null
+        }
+      ]
+    },
+    {
+      "source": " dd \"FF\"\n",
+      "runs": [
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n",
+          "hex": "46460000"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-define-numbers-build/debug/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 4 byte(s) at $0000 -> asm.bin\n",
+          "hex": "46460000"
+        }
+      ]
+    },
+    {
+      "source": " dd 'F'\n",
+      "runs": [
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native.bin",
+            "input.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 2 lines, work time: 0.000 seconds\n",
+          "hex": "46000000"
+        },
+        {
+          "argv": [
+            "/private/tmp/asm198x-define-numbers-build/debug/asm198x",
+            "--dialect",
+            "sjasmplus",
+            "input.asm",
+            "-o",
+            "asm.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 4 byte(s) at $0000 -> asm.bin\n",
+          "hex": "46000000"
+        }
+      ]
+    }
+  ]
+}

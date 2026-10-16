@@ -114,3 +114,10 @@ test('0.0.71 evidence cannot qualify SjASMPlus remainder support', () => {
   assert.equal(old.qualified, true); assert.equal(qualifies(old.results), false);
   assert(requiredCases.includes('sjasmplus_remainder'));
 });
+
+
+test('0.0.71 evidence cannot qualify DEFINE numeric substitution', () => {
+  const old = JSON.parse(fs.readFileSync(path.join(__dirname, '../docs/plans/2026-10-16-release-0071-checkpoint/published/aarch64-apple-darwin/report.json'), 'utf8'));
+  assert.equal(old.qualified, true); assert.equal(qualifies(old.results), false);
+  assert(requiredCases.includes('sjasmplus_define_numbers'));
+});

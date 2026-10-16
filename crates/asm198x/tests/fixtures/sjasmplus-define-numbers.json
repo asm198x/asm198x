@@ -1,0 +1,1783 @@
+{
+  "tool": "/usr/local/bin/sjasmplus",
+  "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+  "version": {
+    "argv": [
+      "/usr/local/bin/sjasmplus",
+      "--version"
+    ],
+    "exit": 0,
+    "stdout": "",
+    "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+  },
+  "cases": [
+    {
+      "name": "number_0_FF",
+      "source": " DEFINE FF 7\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "07000000"
+    },
+    {
+      "name": "number_0_F",
+      "source": " DEFINE F 7\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_xFF",
+      "source": " DEFINE xFF 7\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_XFF",
+      "source": " DEFINE XFF 7\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_b10",
+      "source": " DEFINE b10 1\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_B10",
+      "source": " DEFINE B10 1\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_h",
+      "source": " DEFINE h 2\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_H",
+      "source": " DEFINE H 2\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_b",
+      "source": " DEFINE b 1\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_B",
+      "source": " DEFINE B 1\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_X",
+      "source": " DEFINE X 3\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_A",
+      "source": " DEFINE A 3\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_AA",
+      "source": " DEFINE AA 3\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0__X",
+      "source": " DEFINE _X 3\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0__FF",
+      "source": " DEFINE _FF 7\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_FOO",
+      "source": " DEFINE FOO 7\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_0_DIGITS",
+      "source": " DEFINE DIGITS 101\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_1_FF",
+      "source": " DEFINE FF 7\n dd #FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "07000000"
+    },
+    {
+      "name": "number_1_F",
+      "source": " DEFINE F 7\n dd #FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_FF",
+      "source": " DEFINE FF 7\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_F",
+      "source": " DEFINE F 7\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_xFF",
+      "source": " DEFINE xFF 7\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "07000000"
+    },
+    {
+      "name": "number_2_XFF",
+      "source": " DEFINE XFF 7\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_b10",
+      "source": " DEFINE b10 1\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_B10",
+      "source": " DEFINE B10 1\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_h",
+      "source": " DEFINE h 2\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_H",
+      "source": " DEFINE H 2\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_b",
+      "source": " DEFINE b 1\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_B",
+      "source": " DEFINE B 1\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_X",
+      "source": " DEFINE X 3\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_A",
+      "source": " DEFINE A 3\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_AA",
+      "source": " DEFINE AA 3\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2__X",
+      "source": " DEFINE _X 3\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2__FF",
+      "source": " DEFINE _FF 7\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_FOO",
+      "source": " DEFINE FOO 7\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_2_DIGITS",
+      "source": " DEFINE DIGITS 101\n dd 0xFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_3_FF",
+      "source": " DEFINE FF 7\n dd 0XFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_3_F",
+      "source": " DEFINE F 7\n dd 0XFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_3_XFF",
+      "source": " DEFINE XFF 7\n dd 0XFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "07000000"
+    },
+    {
+      "name": "number_3_X",
+      "source": " DEFINE X 3\n dd 0XFF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "number_4_b10",
+      "source": " DEFINE b10 1\n dd 0b10\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "01000000"
+    },
+    {
+      "name": "number_4_b",
+      "source": " DEFINE b 1\n dd 0b10\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "02000000"
+    },
+    {
+      "name": "number_5_B10",
+      "source": " DEFINE B10 1\n dd 0B10\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "01000000"
+    },
+    {
+      "name": "number_5_B",
+      "source": " DEFINE B 1\n dd 0B10\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "02000000"
+    },
+    {
+      "name": "number_6_h",
+      "source": " DEFINE h 2\n dd 12h\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "7a000000"
+    },
+    {
+      "name": "number_7_H",
+      "source": " DEFINE H 2\n dd 12H\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "7a000000"
+    },
+    {
+      "name": "number_8_b",
+      "source": " DEFINE b 1\n dd 10b\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "65000000"
+    },
+    {
+      "name": "number_9_B",
+      "source": " DEFINE B 1\n dd 10B\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "65000000"
+    },
+    {
+      "name": "number_10_FF",
+      "source": " DEFINE FF 7\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_F",
+      "source": " DEFINE F 7\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_xFF",
+      "source": " DEFINE xFF 7\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_XFF",
+      "source": " DEFINE XFF 7\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_b10",
+      "source": " DEFINE b10 1\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_B10",
+      "source": " DEFINE B10 1\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_h",
+      "source": " DEFINE h 2\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_H",
+      "source": " DEFINE H 2\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_b",
+      "source": " DEFINE b 1\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_B",
+      "source": " DEFINE B 1\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_X",
+      "source": " DEFINE X 3\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "0d000000"
+    },
+    {
+      "name": "number_10_A",
+      "source": " DEFINE A 3\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_AA",
+      "source": " DEFINE AA 3\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10__X",
+      "source": " DEFINE _X 3\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10__FF",
+      "source": " DEFINE _FF 7\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_FOO",
+      "source": " DEFINE FOO 7\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_10_DIGITS",
+      "source": " DEFINE DIGITS 101\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_11_A",
+      "source": " DEFINE A 3\n dd 12A\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "7b000000"
+    },
+    {
+      "name": "number_12_A",
+      "source": " DEFINE A 3\n dd 12AA\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 12AA\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_12_AA",
+      "source": " DEFINE AA 3\n dd 12AA\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "7b000000"
+    },
+    {
+      "name": "number_13_X",
+      "source": " DEFINE X 3\n dd 1X0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X0\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_14_X",
+      "source": " DEFINE X 3\n dd 1X_0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Unexpected: _0\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "0d000000"
+    },
+    {
+      "name": "number_15_X",
+      "source": " DEFINE X 3\n dd 1X.0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: 1X.0\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_16_X",
+      "source": " DEFINE X 3\n dd 1_X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Unexpected: _3\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "01000000"
+    },
+    {
+      "name": "number_16__X",
+      "source": " DEFINE _X 3\n dd 1_X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "0d000000"
+    },
+    {
+      "name": "number_17_FF",
+      "source": " DEFINE FF 7\n dd $_FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Unexpected: _7\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "00000000"
+    },
+    {
+      "name": "number_17_F",
+      "source": " DEFINE F 7\n dd $_FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Unexpected: _FF\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "00000000"
+    },
+    {
+      "name": "number_17__FF",
+      "source": " DEFINE _FF 7\n dd $_FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "07000000"
+    },
+    {
+      "name": "number_18_F",
+      "source": " DEFINE F 7\n dd $FOO\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: $FOO\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "number_18_FOO",
+      "source": " DEFINE FOO 7\n dd $FOO\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "07000000"
+    },
+    {
+      "name": "number_19_DIGITS",
+      "source": " DEFINE DIGITS 101\n dd %DIGITS\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "05000000"
+    },
+    {
+      "name": "number_20_b",
+      "source": " DEFINE b 1\n dd 1'0b\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "65000000"
+    },
+    {
+      "name": "number_21_F",
+      "source": " DEFINE F 7\n dd $F'F\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "77000000"
+    },
+    {
+      "name": "number_22_FF",
+      "source": " DEFINE FF 7\n dd $F'A'FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "a70f0000"
+    },
+    {
+      "name": "number_22_F",
+      "source": " DEFINE F 7\n dd $F'A'FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff7a0000"
+    },
+    {
+      "name": "number_22_A",
+      "source": " DEFINE A 3\n dd $F'A'FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "fff30000"
+    },
+    {
+      "name": "number_23_FF",
+      "source": " DEFINE FF 7\n dd $FF'FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "77000000"
+    },
+    {
+      "name": "number_23_F",
+      "source": " DEFINE F 7\n dd $FF'FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ffff0000"
+    },
+    {
+      "name": "number_24_F",
+      "source": " DEFINE F 7\n dd 0F'Fh\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "7f000000"
+    },
+    {
+      "name": "number_24_h",
+      "source": " DEFINE h 2\n dd 0F'Fh\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "ff000000"
+    },
+    {
+      "name": "operator_0",
+      "source": " DEFINE N 5\nValue equ N+2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N+2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n",
+      "hex": "070000005a"
+    },
+    {
+      "name": "operator_1",
+      "source": " DEFINE N 5\nValue equ N-2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N-2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.000 seconds\n",
+      "hex": "030000005a"
+    },
+    {
+      "name": "operator_2",
+      "source": " DEFINE N 5\nValue equ N*2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N*2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n",
+      "hex": "0a0000005a"
+    },
+    {
+      "name": "operator_3",
+      "source": " DEFINE N 5\nValue equ N/2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N/2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.000 seconds\n",
+      "hex": "020000005a"
+    },
+    {
+      "name": "operator_4",
+      "source": " DEFINE N 5\nValue equ N%2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N%2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n",
+      "hex": "010000005a"
+    },
+    {
+      "name": "operator_5",
+      "source": " DEFINE N 5\nValue equ N<<2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N<<2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.000 seconds\n",
+      "hex": "140000005a"
+    },
+    {
+      "name": "operator_6",
+      "source": " DEFINE N 5\nValue equ N>>2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N>>2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.000 seconds\n",
+      "hex": "010000005a"
+    },
+    {
+      "name": "operator_7",
+      "source": " DEFINE N 5\nValue equ N&2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N&2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n",
+      "hex": "000000005a"
+    },
+    {
+      "name": "operator_8",
+      "source": " DEFINE N 5\nValue equ N|2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N|2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.000 seconds\n",
+      "hex": "070000005a"
+    },
+    {
+      "name": "operator_9",
+      "source": " DEFINE N 5\nValue equ N^2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N^2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n",
+      "hex": "070000005a"
+    },
+    {
+      "name": "operator_10",
+      "source": " DEFINE N 5\nValue equ N==2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N==2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.000 seconds\n",
+      "hex": "000000005a"
+    },
+    {
+      "name": "operator_11",
+      "source": " DEFINE N 5\nValue equ N!=2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N!=2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Label not found: N!\ninput.asm(9): error: Label not found: N!\nPass 3 complete\nErrors: 2, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n",
+      "hex": "000000005a"
+    },
+    {
+      "name": "operator_12",
+      "source": " DEFINE N 5\nValue equ N<2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N<2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.000 seconds\n",
+      "hex": "000000005a"
+    },
+    {
+      "name": "operator_13",
+      "source": " DEFINE N 5\nValue equ N<=2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N<=2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n",
+      "hex": "000000005a"
+    },
+    {
+      "name": "operator_14",
+      "source": " DEFINE N 5\nValue equ N>2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N>2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.000 seconds\n",
+      "hex": "ffffffffa5"
+    },
+    {
+      "name": "operator_15",
+      "source": " DEFINE N 5\nValue equ N>=2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N>=2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffa5"
+    },
+    {
+      "name": "operator_16",
+      "source": " DEFINE N 5\nValue equ N&&2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N&&2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n",
+      "hex": "ffffffffa5"
+    },
+    {
+      "name": "operator_17",
+      "source": " DEFINE N 5\nValue equ N||2\n dd Value\n IF Value<0\n db $a5\n ELSE\n db $5a\n ENDIF\n ASSERT Value==(N||2)\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.000 seconds\n",
+      "hex": "ffffffffa5"
+    },
+    {
+      "name": "chain_1",
+      "source": " DEFINE V0 7\n dd $V0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "07000000"
+    },
+    {
+      "name": "chain_2",
+      "source": " DEFINE V0 V1\n DEFINE V1 7\n dd $V0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 4 lines, work time: 0.000 seconds\n",
+      "hex": "07000000"
+    },
+    {
+      "name": "chain_18",
+      "source": " DEFINE V0 V1\n DEFINE V1 V2\n DEFINE V2 V3\n DEFINE V3 V4\n DEFINE V4 V5\n DEFINE V5 V6\n DEFINE V6 V7\n DEFINE V7 V8\n DEFINE V8 V9\n DEFINE V9 V10\n DEFINE V10 V11\n DEFINE V11 V12\n DEFINE V12 V13\n DEFINE V13 V14\n DEFINE V14 V15\n DEFINE V15 V16\n DEFINE V16 V17\n DEFINE V17 7\n dd $V0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 20 lines, work time: 0.000 seconds\n",
+      "hex": "07000000"
+    },
+    {
+      "name": "chain_19",
+      "source": " DEFINE V0 V1\n DEFINE V1 V2\n DEFINE V2 V3\n DEFINE V3 V4\n DEFINE V4 V5\n DEFINE V5 V6\n DEFINE V6 V7\n DEFINE V7 V8\n DEFINE V8 V9\n DEFINE V9 V10\n DEFINE V10 V11\n DEFINE V11 V12\n DEFINE V12 V13\n DEFINE V13 V14\n DEFINE V14 V15\n DEFINE V15 V16\n DEFINE V16 V17\n DEFINE V17 V18\n DEFINE V18 7\n dd $V0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 21 lines, work time: 0.001 seconds\n",
+      "hex": "07000000"
+    },
+    {
+      "name": "chain_20",
+      "source": " DEFINE V0 V1\n DEFINE V1 V2\n DEFINE V2 V3\n DEFINE V3 V4\n DEFINE V4 V5\n DEFINE V5 V6\n DEFINE V6 V7\n DEFINE V7 V8\n DEFINE V8 V9\n DEFINE V9 V10\n DEFINE V10 V11\n DEFINE V11 V12\n DEFINE V12 V13\n DEFINE V13 V14\n DEFINE V14 V15\n DEFINE V15 V16\n DEFINE V16 V17\n DEFINE V17 V18\n DEFINE V18 V19\n DEFINE V19 7\n dd $V0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 22 lines, work time: 0.000 seconds\n",
+      "hex": "07000000"
+    },
+    {
+      "name": "chain_21",
+      "source": " DEFINE V0 V1\n DEFINE V1 V2\n DEFINE V2 V3\n DEFINE V3 V4\n DEFINE V4 V5\n DEFINE V5 V6\n DEFINE V6 V7\n DEFINE V7 V8\n DEFINE V8 V9\n DEFINE V9 V10\n DEFINE V10 V11\n DEFINE V11 V12\n DEFINE V12 V13\n DEFINE V13 V14\n DEFINE V14 V15\n DEFINE V15 V16\n DEFINE V16 V17\n DEFINE V17 V18\n DEFINE V18 V19\n DEFINE V19 V20\n DEFINE V20 7\n dd $V0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(22): error: Unable to finish substitions, line after 20th iteration:  dd $7\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 23 lines, work time: 0.001 seconds\n",
+      "hex": "07000000"
+    },
+    {
+      "name": "chain_22",
+      "source": " DEFINE V0 V1\n DEFINE V1 V2\n DEFINE V2 V3\n DEFINE V3 V4\n DEFINE V4 V5\n DEFINE V5 V6\n DEFINE V6 V7\n DEFINE V7 V8\n DEFINE V8 V9\n DEFINE V9 V10\n DEFINE V10 V11\n DEFINE V11 V12\n DEFINE V12 V13\n DEFINE V13 V14\n DEFINE V14 V15\n DEFINE V15 V16\n DEFINE V16 V17\n DEFINE V17 V18\n DEFINE V18 V19\n DEFINE V19 V20\n DEFINE V20 V21\n DEFINE V21 7\n dd $V0\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(23): error: Unable to finish substitions, line after 20th iteration:  dd $V21\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 24 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "original",
+      "source": " DEFINE FF 7\n db $FF,#FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "0707"
+    },
+    {
+      "name": "decimal",
+      "source": " DEFINE X 3\n db 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "0d"
+    },
+    {
+      "name": "quoted",
+      "source": " DEFINE FF 7\n dd \"FF\",'F',\"FF\"\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "464600004600000046460000"
+    },
+    {
+      "name": "quotes_after_numeric",
+      "source": " DEFINE A 3\n dd $F'A'FF,'A',\"AA\"\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "fff300004100000041410000"
+    },
+    {
+      "name": "escaped_quote",
+      "source": " DEFINE N 3\n db \"N\\\"N\",N\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "4e224e03"
+    },
+    {
+      "name": "escaped_backslash",
+      "source": " DEFINE N 3\n db \"N\\\\\",N\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "4e5c03"
+    },
+    {
+      "name": "string_chars",
+      "source": " DEFINE N 3\n db \"N;,//N\",N,';',',','\"'\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "4e3b2c2f2f4e033b2c22"
+    },
+    {
+      "name": "utf8",
+      "source": " DEFINE N 3\n db \"\u00e9N\",N\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "c3a94e03"
+    },
+    {
+      "name": "af",
+      "source": " DEFINE AF 3\n ex af,af'\n db AF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 4 lines, work time: 0.000 seconds\n",
+      "hex": "0803"
+    },
+    {
+      "name": "af_refusal",
+      "source": " DEFINE af 3\n ex af,af'\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Illegal instruction:  ex af,af'\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "comment_semicolon",
+      "source": " DEFINE LOOP LOOP\n db 1 ; LOOP\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "01"
+    },
+    {
+      "name": "comment_slashes",
+      "source": " DEFINE LOOP LOOP\n db 1 // LOOP\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 3 lines, work time: 0.001 seconds\n",
+      "hex": "01"
+    },
+    {
+      "name": "cycle_self",
+      "source": "Value equ 1\n DEFINE Value Value\n db Value\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(3): error: Unable to finish substitions, line after 20th iteration:  db Value\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 4 lines, work time: 0.000 seconds\n",
+      "hex": "01"
+    },
+    {
+      "name": "cycle_indirect",
+      "source": " DEFINE X Y\n DEFINE Y X\n db X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(3): error: Unable to finish substitions, line after 20th iteration:  db Y\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 4 lines, work time: 0.000 seconds\n",
+      "hex": "00"
+    },
+    {
+      "name": "cycle_growth",
+      "source": " DEFINE X X+X\n dd X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: line too long after macro expansion:  dd X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+X+\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.002 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "chain_prefix",
+      "source": " DEFINE FF N\n DEFINE N 7\n db $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 4 lines, work time: 0.000 seconds\n",
+      "hex": "07"
+    },
+    {
+      "name": "chain_value",
+      "source": " DEFINE N $FF\n DEFINE FF 7\n db N\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 4 lines, work time: 0.001 seconds\n",
+      "hex": "07"
+    },
+    {
+      "name": "chained_quotes",
+      "source": " DEFINE V \"FF\"\n DEFINE FF 7\n dd V\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 4 lines, work time: 0.000 seconds\n",
+      "hex": "46460000"
+    },
+    {
+      "name": "macro",
+      "source": " DEFINE FF 7\n MACRO emit x\n db x,#FF\n ENDM\n emit $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.000 seconds\n",
+      "hex": "0707"
+    },
+    {
+      "name": "struct",
+      "source": " DEFINE FF 7\n STRUCT S\nmember BYTE $FF\n ENDS\nthing S {}\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 0,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 6 lines, work time: 0.000 seconds\n",
+      "hex": "07"
+    },
+    {
+      "name": "equ_is_not_define",
+      "source": " DEFINE X Y\nY equ 7\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(3): error: Digit not in base: 1Y\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 4 lines, work time: 0.001 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "replacement_invalid_base",
+      "source": " DEFINE FF G\n dd $FF\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Digit not in base: $G\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": ""
+    },
+    {
+      "name": "replacement_overflow",
+      "source": " DEFINE X 4294967296\n dd 1X\n",
+      "argv": [
+        "/usr/local/bin/sjasmplus",
+        "--raw=native.bin",
+        "input.asm"
+      ],
+      "exit": 1,
+      "stdout": "",
+      "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\ninput.asm(2): error: Overflow: 14294967296\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 3 lines, work time: 0.000 seconds\n",
+      "hex": "00e40b54"
+    }
+  ]
+}

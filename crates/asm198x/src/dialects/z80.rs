@@ -3305,14 +3305,10 @@ pub(crate) fn parse_program_multi_keyword_warned<S: Z80Syntax>(
     )
 }
 
-/// Expand `DEFINE` names in one line of source, per the probe-pinned
-/// reference semantics: identifier tokens replace at exact boundaries (`NN`
-/// is not an occurrence of `N` — probe p20); `"…"` strings and `'c'` char
-/// literals are untouched (probe p21). Existing digit-led and hexadecimal
-/// token protection stays here; `%` leaves the next identifier available for
-/// DEFINE expansion in binary literals and remainder operands. Chained defines
-/// expand pass by pass to a fixed point
-/// (probe p24), with a depth cap against recursive definitions.
+/// Expand default-mode SjASMPlus `DEFINE` names at identifier boundaries,
+/// including inside numeric spellings. Protect complete quoted literals and
+/// leave comments alone. Chained definitions expand to a fixed point with
+/// the reference's limit of twenty replacements (plus an unchanged check).
 fn substitute_defines(
     s: &str,
     defines: &BTreeMap<String, String>,
@@ -3322,9 +3318,9 @@ fn substitute_defines(
         return Ok(s.to_string());
     }
     let mut cur = s.to_string();
-    for _ in 0..32 {
+    for _ in 0..=20 {
         let (next, changed) = substitute_once(&cur, defines);
-        if !changed || next == cur {
+        if !changed {
             return Ok(next);
         }
         cur = next;
@@ -3347,47 +3343,40 @@ fn substitute_once(s: &str, defines: &BTreeMap<String, String>) -> (String, bool
     let mut out = String::with_capacity(s.len());
     let mut changed = false;
     let mut i = 0;
+    let mut after_non_alnum = true;
     while i < chars.len() {
         let c = chars[i];
-        if c == '"' {
-            // Copy a string literal whole (or to end-of-line if unterminated).
+        let quote_allowed = after_non_alnum;
+        after_non_alnum = !c.is_ascii_alphanumeric();
+        if c == ';' || (c == '/' && chars.get(i + 1) == Some(&'/')) {
+            out.extend(chars[i..].iter());
+            break;
+        }
+        if quote_allowed && (c == '"' || c == '\'') {
+            // Single-quoted packed characters have no backslash escaping;
+            // double quotes protect the character after every backslash.
             out.push(c);
             i += 1;
             while i < chars.len() {
-                out.push(chars[i]);
-                let closed = chars[i] == '"';
+                let ch = chars[i];
+                out.push(ch);
                 i += 1;
-                if closed {
+                if ch == c {
                     break;
                 }
+                if c == '"' && ch == '\\' && i < chars.len() {
+                    out.push(chars[i]);
+                    i += 1;
+                }
             }
-        } else if c == '\'' && i + 2 < chars.len() && chars[i + 2] == '\'' {
-            // A `'c'` char literal (the tokenizer's shape); a lone `'`
-            // (`af'`) copies below.
-            out.push(chars[i]);
-            out.push(chars[i + 1]);
-            out.push(chars[i + 2]);
-            i += 3;
-        } else if c == '$' || c == '#' {
-            // Hex sigils retain their existing substitution behavior. `%`
-            // must leave the following DEFINE visible: `5%DIVISOR` is
-            // remainder, and even `%DIGITS` expands before binary parsing.
-            out.push(c);
-            i += 1;
-            while i < chars.len() && chars[i].is_ascii_alphanumeric() {
-                out.push(chars[i]);
-                i += 1;
-            }
-        } else if c.is_ascii_digit() {
-            // A digit-led number (incl. `10h`/`0x10` forms): copy whole.
-            while i < chars.len() && chars[i].is_ascii_alphanumeric() {
-                out.push(chars[i]);
-                i += 1;
-            }
-        } else if c.is_ascii_alphabetic() || c == '_' || c == '.' {
+        } else if c.is_ascii_alphabetic() || c == '_' {
+            // A numeric sigil or leading digits do not hide an identifier:
+            // `$FF` can become `$7`, and `1X` can become `13`. Copy the full
+            // identifier so `X0`, `xFF` and similar runs cannot match `X`/`FF`.
             let start = i;
             while i < chars.len()
-                && (chars[i].is_ascii_alphanumeric() || chars[i] == '_' || chars[i] == '.')
+                && (chars[i].is_ascii_alphanumeric()
+                    || matches!(chars[i], '_' | '.' | '?' | '!' | '#' | '@'))
             {
                 i += 1;
             }
@@ -3405,6 +3394,25 @@ fn substitute_once(s: &str, defines: &BTreeMap<String, String>) -> (String, bool
         }
     }
     (out, changed)
+}
+
+#[cfg(test)]
+mod define_substitution_tests {
+    use super::*;
+
+    #[test]
+    fn numeric_identifiers_expand_without_rewriting_packed_single_quotes() {
+        // Native DD 'FF' emits 0x4646, regardless of DEFINE FF 7. The
+        // expression parser's separate packed-single-quote gap must not
+        // allow this stage to turn it into an accepted, incorrect '7'.
+        let defines = BTreeMap::from([
+            ("FF".to_string(), "7".to_string()),
+            ("X".to_string(), "3".to_string()),
+        ]);
+        let (expanded, changed) = substitute_once(" dd $FF,'FF',1X", &defines);
+        assert!(changed);
+        assert_eq!(expanded, " dd $7,'FF',13");
+    }
 }
 
 /// Evaluate a keyword `IF` condition to a value (nonzero = taken) against the
