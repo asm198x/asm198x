@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.0.71](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.70...asm198x-v0.0.71) - 2026-10-16
+
+### Fixed
+
+- *(sjasmplus)* match signed 32-bit shifts and intermediates
+- *(sjasmplus)* preserve native logical truth and eager evaluation
+- *(ca65)* emit used extents for unfilled file areas
+
 ## [0.0.70](https://github.com/asm198x/asm198x/compare/asm198x-v0.0.69...asm198x-v0.0.70) - 2026-10-16
 
 ### Fixed
