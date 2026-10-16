@@ -1,0 +1,4050 @@
+{
+  "identity": {
+    "tracked_production_clean": true,
+    "cargo_lock_sha256": "011c22b2935ce1dc57bd713a02e712c4da92148e14a1b3ce85b1e106046f0e68",
+    "rustc": "rustc 1.98.0 (88d9e12ae 2026-08-18)",
+    "build_command": [
+      "cargo",
+      "build",
+      "-p",
+      "asm198x",
+      "--bin",
+      "asm198x"
+    ],
+    "source": "c96f2b89e474675a0f9f8d199907fd7d7f505011",
+    "platform": "macOS-27.0-arm64-arm-64bit-Mach-O",
+    "python": "3.14.3",
+    "tools": {
+      "asm198x": {
+        "path": "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+        "sha256": "bf39e792c607350558c454bf38c5c9ebb7ca491cc3ab2421b6876f52757bd417",
+        "version_process": {
+          "argv": [
+            "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+            "--version"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "asm198x v0.0.66\n"
+        }
+      },
+      "pasmo": {
+        "path": "/usr/local/bin/pasmo",
+        "sha256": "e9628f5c32f3c74a963c649781e6cb87e9eaeb4bbfe7b52d3de27f4986bbf136",
+        "version_process": {
+          "argv": [
+            "/usr/local/bin/pasmo"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "PasmoNext v0.1.3 (PC) (C) 2004-2005 Julian Albo\nModified by C Kirby\nUsage:\n\n\tpasmo [options] source object [symbol]\n\nSee the README file for details.\n"
+        }
+      },
+      "sjasmplus": {
+        "path": "/usr/local/bin/sjasmplus",
+        "sha256": "454bfa33058d5a0f5323db1ee65bbdd2b5871f7d697c328e2ee1f1a950f0d78b",
+        "version_process": {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--version"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\n"
+        }
+      }
+    }
+  },
+  "observations": [
+    {
+      "name": "basic_stdout",
+      "repetition": 1,
+      "classification": "success",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "        org 8000h\nstart:\n        ld a,5\n        ret\n",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> stdout\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000413917 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "basic_new",
+      "repetition": 1,
+      "classification": "success",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> out.asm\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000220625 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "basic_existing",
+      "repetition": 1,
+      "classification": "success",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> out.asm\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000565875 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "inplace",
+      "repetition": 1,
+      "classification": "observation",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> input.asm\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000475584 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "hardlink",
+      "repetition": 1,
+      "classification": "observation",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "alias.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "alias.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> alias.asm\n"
+      },
+      "after": {
+        "alias.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000271666 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "alias.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "symlink",
+      "repetition": 1,
+      "classification": "observation",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "alias.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": "input.asm"
+        },
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "alias.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> alias.asm\n"
+      },
+      "after": {
+        "alias.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": "input.asm"
+        },
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000286959 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "alias.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": "input.asm"
+        },
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "repeat_comments",
+      "repetition": 1,
+      "classification": "success",
+      "source": " org 8000h\n rept 2 ; repeat start\n nop ; body\n endm ; repeat end\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20726570742032203b207265706561742073746172740a206e6f70203b20626f64790a20656e646d203b2072657065617420656e640a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "        org 8000h\n        rept 2   ; repeat start\n        nop   ; body\n        endr   ; repeat end\n        ret\n",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> stdout\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20726570742032203b207265706561742073746172740a206e6f70203b20626f64790a20656e646d203b2072657065617420656e640a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "0000c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.0002705 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.002 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a20202020202020207265707420322020203b207265706561742073746172740a20202020202020206e6f702020203b20626f64790a2020202020202020656e64722020203b2072657065617420656e640a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20726570742032203b207265706561742073746172740a206e6f70203b20626f64790a20656e646d203b2072657065617420656e640a207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a20726570742032203b207265706561742073746172740a206e6f70203b20626f64790a20656e646d203b2072657065617420656e640a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "0000c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "0000c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "conditional_comments",
+      "repetition": 1,
+      "classification": "success",
+      "source": " org 8000h\n if 1 ; if start\n ld a,5\n else ; else marker\n ld a,6\n endif ; if end\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a2069662031203b2069662073746172740a206c6420612c350a20656c7365203b20656c7365206d61726b65720a206c6420612c360a20656e646966203b20696620656e640a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "        org 8000h\n        if 1   ; if start\n        ld a,5\n        else\n        ; else marker\n        ld a,6\n        endif\n; if end\n        ret\n",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> stdout\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a2069662031203b2069662073746172740a206c6420612c350a20656c7365203b20656c7365206d61726b65720a206c6420612c360a20656e646966203b20696620656e640a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000195208 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.003 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a2020202020202020696620312020203b2069662073746172740a20202020202020206c6420612c350a2020202020202020656c73650a20202020202020203b20656c7365206d61726b65720a20202020202020206c6420612c360a2020202020202020656e6469660a3b20696620656e640a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a2069662031203b2069662073746172740a206c6420612c350a20656c7365203b20656c7365206d61726b65720a206c6420612c360a20656e646966203b20696620656e640a207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a2069662031203b2069662073746172740a206c6420612c350a20656c7365203b20656c7365206d61726b65720a206c6420612c360a20656e646966203b20696620656e640a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "macro",
+      "repetition": 1,
+      "classification": "success",
+      "source": " org 8000h\nsetv macro\n ld a,5\n endm\n setv\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a206c6420612c350a20656e646d0a20736574760a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "        org 8000h\nsetv macro\n ld a,5\n endm\n setv\n        ret\n",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> stdout\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a206c6420612c350a20656e646d0a20736574760a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000210542 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73657476206d6163726f0a206c6420612c350a20656e646d0a20736574760a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a206c6420612c350a20656e646d0a20736574760a207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a206c6420612c350a20656e646d0a20736574760a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "nested_macro_repeat",
+      "repetition": 1,
+      "classification": "defect",
+      "source": " org 8000h\nsetv macro\n rept 2\n nop\n endm\n endm\n setv\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a207265707420320a206e6f700a20656e646d0a20656e646d0a20736574760a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.asm: line 6: the input does not parse under pasmo: `endm` closes a repetition block that was never opened\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a207265707420320a206e6f700a20656e646d0a20656e646d0a20736574760a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "0000",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000606416 s\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+            "--dialect",
+            "pasmo",
+            "input.asm",
+            "-o",
+            "ordinary.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.asm:6: error: `endm` closes a repetition block that was never opened\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native-target.bin",
+            "native-target.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 15 lines, work time: 0.002 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a207265707420320a206e6f700a20656e646d0a20656e646d0a20736574760a",
+          "symlink": null
+        },
+        "native-target.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a207265707420320a206e6f700a20656e64720a20656e646d0a20736574760a",
+          "symlink": null
+        },
+        "native-target.bin": {
+          "hex": "0000",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "0000",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "include_present",
+      "repetition": 1,
+      "classification": "limitation",
+      "source": " org 8000h\n include \"child.inc\"\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e636c75646520226368696c642e696e63220a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.asm: line 2: the input does not assemble under pasmo: cannot resolve `include \"child.inc\"` here \u2014 the single-source API assembles one file; use the multi-file entry point (the CLI resolves includes automatically)\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e636c75646520226368696c642e696e63220a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "2ac9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000279458 s\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+            "--dialect",
+            "pasmo",
+            "input.asm",
+            "-o",
+            "ordinary.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> ordinary.bin\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e636c75646520226368696c642e696e63220a207265740a",
+          "symlink": null
+        },
+        "ordinary.bin": {
+          "hex": "2ac9",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "2ac9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "incbin_present",
+      "repetition": 1,
+      "classification": "limitation",
+      "source": " org 8000h\n incbin \"data.bin\"\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e6362696e2022646174612e62696e220a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.asm: line 2: the input does not assemble under pasmo: cannot resolve `incbin \"data.bin\"` here \u2014 the single-source API assembles one file; use the multi-file entry point (the CLI resolves binary inclusions automatically)\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e6362696e2022646174612e62696e220a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "2ac9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000642167 s\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+            "--dialect",
+            "pasmo",
+            "input.asm",
+            "-o",
+            "ordinary.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> ordinary.bin\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e6362696e2022646174612e62696e220a207265740a",
+          "symlink": null
+        },
+        "ordinary.bin": {
+          "hex": "2ac9",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "2ac9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "invalid_syntax",
+      "repetition": 1,
+      "classification": "rejection",
+      "source": " org 8000h\n xyzzy 1\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a2078797a7a7920310a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.asm: line 2: the input does not assemble under pasmo: unknown instruction `XYZZY`\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a2078797a7a7920310a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": null,
+      "references": [],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a2078797a7a7920310a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "unsupported_pair",
+      "repetition": 1,
+      "classification": "rejection",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "acme",
+          "--to",
+          "ca65",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.asm: no converter from `acme` to `ca65` yet \u2014 v1 converts pasmo/pasmonext source to sjasmplus (#502 tracks the rest)\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": null,
+      "references": [],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "unsupported_option",
+      "repetition": 1,
+      "classification": "rejection",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "--message-format=json",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: unknown convert flag `--message-format=json`\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": null,
+      "references": [],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "missing_input",
+      "repetition": 1,
+      "classification": "rejection",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "missing.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: cannot read missing.asm: No such file or directory (os error 2)\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": null,
+      "references": [],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "output_directory",
+      "repetition": 1,
+      "classification": "rejection",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: cannot write out.asm: Is a directory (os error 21)\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": null,
+      "references": [],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "pasmonext_base",
+      "repetition": 1,
+      "classification": "success",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmonext",
+          "--to",
+          "sjasmplus",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "        org 8000h\nstart:\n        ld a,5\n        ret\n",
+        "stderr": "converted input.asm (pasmonext -> sjasmplus, verified byte-identical) -> stdout\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000636875 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "pasmonext_extended",
+      "repetition": 1,
+      "classification": "success",
+      "source": " org 8000h\n swapnib\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20737761706e69620a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmonext",
+          "--to",
+          "sjasmplus",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "        org 8000h\n        swapnib\n        ret\n",
+        "stderr": "converted input.asm (pasmonext -> sjasmplus, verified byte-identical) -> stdout\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20737761706e69620a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "ed23c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000198791 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--zxnext",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 4 lines, work time: 0.001 seconds\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=unconfigured.bin",
+            "converted.asm"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nconverted.asm(2): error: Unrecognized instruction: swapnib\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 4 lines, work time: 0.002 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a2020202020202020737761706e69620a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20737761706e69620a207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a20737761706e69620a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "ed23c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "ed23c9",
+          "symlink": null
+        },
+        "unconfigured.bin": {
+          "hex": "c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "include_missing",
+      "repetition": 1,
+      "classification": "rejection",
+      "source": " org 8000h\n include \"missing.inc\"\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e636c75646520226d697373696e672e696e63220a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.asm: line 2: the input does not assemble under pasmo: cannot resolve `include \"missing.inc\"` here \u2014 the single-source API assembles one file; use the multi-file entry point (the CLI resolves includes automatically)\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e636c75646520226d697373696e672e696e63220a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": null,
+      "references": [],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e636c75646520226d697373696e672e696e63220a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "basic_stdout",
+      "repetition": 2,
+      "classification": "success",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "        org 8000h\nstart:\n        ld a,5\n        ret\n",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> stdout\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.0005645 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "basic_new",
+      "repetition": 2,
+      "classification": "success",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> out.asm\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000304459 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "basic_existing",
+      "repetition": 2,
+      "classification": "success",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> out.asm\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000611958 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "inplace",
+      "repetition": 2,
+      "classification": "observation",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> input.asm\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000461084 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "hardlink",
+      "repetition": 2,
+      "classification": "observation",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "alias.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "alias.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> alias.asm\n"
+      },
+      "after": {
+        "alias.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000201542 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "alias.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "symlink",
+      "repetition": 2,
+      "classification": "observation",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "alias.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": "input.asm"
+        },
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "alias.asm"
+        ],
+        "exit": 0,
+        "stdout": "",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> alias.asm\n"
+      },
+      "after": {
+        "alias.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": "input.asm"
+        },
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000721833 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.002 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "alias.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": "input.asm"
+        },
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "repeat_comments",
+      "repetition": 2,
+      "classification": "success",
+      "source": " org 8000h\n rept 2 ; repeat start\n nop ; body\n endm ; repeat end\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20726570742032203b207265706561742073746172740a206e6f70203b20626f64790a20656e646d203b2072657065617420656e640a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "        org 8000h\n        rept 2   ; repeat start\n        nop   ; body\n        endr   ; repeat end\n        ret\n",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> stdout\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20726570742032203b207265706561742073746172740a206e6f70203b20626f64790a20656e646d203b2072657065617420656e640a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "0000c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000222375 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.002 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a20202020202020207265707420322020203b207265706561742073746172740a20202020202020206e6f702020203b20626f64790a2020202020202020656e64722020203b2072657065617420656e640a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20726570742032203b207265706561742073746172740a206e6f70203b20626f64790a20656e646d203b2072657065617420656e640a207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a20726570742032203b207265706561742073746172740a206e6f70203b20626f64790a20656e646d203b2072657065617420656e640a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "0000c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "0000c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "conditional_comments",
+      "repetition": 2,
+      "classification": "success",
+      "source": " org 8000h\n if 1 ; if start\n ld a,5\n else ; else marker\n ld a,6\n endif ; if end\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a2069662031203b2069662073746172740a206c6420612c350a20656c7365203b20656c7365206d61726b65720a206c6420612c360a20656e646966203b20696620656e640a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "        org 8000h\n        if 1   ; if start\n        ld a,5\n        else\n        ; else marker\n        ld a,6\n        endif\n; if end\n        ret\n",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> stdout\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a2069662031203b2069662073746172740a206c6420612c350a20656c7365203b20656c7365206d61726b65720a206c6420612c360a20656e646966203b20696620656e640a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000250083 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 8 lines, work time: 0.001 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a2020202020202020696620312020203b2069662073746172740a20202020202020206c6420612c350a2020202020202020656c73650a20202020202020203b20656c7365206d61726b65720a20202020202020206c6420612c360a2020202020202020656e6469660a3b20696620656e640a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a2069662031203b2069662073746172740a206c6420612c350a20656c7365203b20656c7365206d61726b65720a206c6420612c360a20656e646966203b20696620656e640a207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a2069662031203b2069662073746172740a206c6420612c350a20656c7365203b20656c7365206d61726b65720a206c6420612c360a20656e646966203b20696620656e640a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "macro",
+      "repetition": 2,
+      "classification": "success",
+      "source": " org 8000h\nsetv macro\n ld a,5\n endm\n setv\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a206c6420612c350a20656e646d0a20736574760a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "        org 8000h\nsetv macro\n ld a,5\n endm\n setv\n        ret\n",
+        "stderr": "converted input.asm (pasmo -> sjasmplus, verified byte-identical) -> stdout\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a206c6420612c350a20656e646d0a20736574760a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000235667 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 9 lines, work time: 0.001 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73657476206d6163726f0a206c6420612c350a20656e646d0a20736574760a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a206c6420612c350a20656e646d0a20736574760a207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a206c6420612c350a20656e646d0a20736574760a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "nested_macro_repeat",
+      "repetition": 2,
+      "classification": "defect",
+      "source": " org 8000h\nsetv macro\n rept 2\n nop\n endm\n endm\n setv\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a207265707420320a206e6f700a20656e646d0a20656e646d0a20736574760a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.asm: line 6: the input does not parse under pasmo: `endm` closes a repetition block that was never opened\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a207265707420320a206e6f700a20656e646d0a20656e646d0a20736574760a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "0000",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000545459 s\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+            "--dialect",
+            "pasmo",
+            "input.asm",
+            "-o",
+            "ordinary.bin"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "asm198x: input.asm:6: error: `endm` closes a repetition block that was never opened\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=native-target.bin",
+            "native-target.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 15 lines, work time: 0.001 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a207265707420320a206e6f700a20656e646d0a20656e646d0a20736574760a",
+          "symlink": null
+        },
+        "native-target.asm": {
+          "hex": "206f72672038303030680a73657476206d6163726f0a207265707420320a206e6f700a20656e64720a20656e646d0a20736574760a",
+          "symlink": null
+        },
+        "native-target.bin": {
+          "hex": "0000",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "0000",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "include_present",
+      "repetition": 2,
+      "classification": "limitation",
+      "source": " org 8000h\n include \"child.inc\"\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e636c75646520226368696c642e696e63220a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.asm: line 2: the input does not assemble under pasmo: cannot resolve `include \"child.inc\"` here \u2014 the single-source API assembles one file; use the multi-file entry point (the CLI resolves includes automatically)\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e636c75646520226368696c642e696e63220a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "2ac9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.00024975 s\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+            "--dialect",
+            "pasmo",
+            "input.asm",
+            "-o",
+            "ordinary.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> ordinary.bin\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e636c75646520226368696c642e696e63220a207265740a",
+          "symlink": null
+        },
+        "ordinary.bin": {
+          "hex": "2ac9",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "2ac9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "incbin_present",
+      "repetition": 2,
+      "classification": "limitation",
+      "source": " org 8000h\n incbin \"data.bin\"\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e6362696e2022646174612e62696e220a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.asm: line 2: the input does not assemble under pasmo: cannot resolve `incbin \"data.bin\"` here \u2014 the single-source API assembles one file; use the multi-file entry point (the CLI resolves binary inclusions automatically)\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e6362696e2022646174612e62696e220a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "2ac9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000322375 s\n"
+        },
+        {
+          "argv": [
+            "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+            "--dialect",
+            "pasmo",
+            "input.asm",
+            "-o",
+            "ordinary.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "assembled 2 byte(s) at $8000 -> ordinary.bin\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e6362696e2022646174612e62696e220a207265740a",
+          "symlink": null
+        },
+        "ordinary.bin": {
+          "hex": "2ac9",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "2ac9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "invalid_syntax",
+      "repetition": 2,
+      "classification": "rejection",
+      "source": " org 8000h\n xyzzy 1\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a2078797a7a7920310a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.asm: line 2: the input does not assemble under pasmo: unknown instruction `XYZZY`\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a2078797a7a7920310a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": null,
+      "references": [],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a2078797a7a7920310a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "unsupported_pair",
+      "repetition": 2,
+      "classification": "rejection",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "acme",
+          "--to",
+          "ca65",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.asm: no converter from `acme` to `ca65` yet \u2014 v1 converts pasmo/pasmonext source to sjasmplus (#502 tracks the rest)\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": null,
+      "references": [],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "unsupported_option",
+      "repetition": 2,
+      "classification": "rejection",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "--message-format=json",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: unknown convert flag `--message-format=json`\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": null,
+      "references": [],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "missing_input",
+      "repetition": 2,
+      "classification": "rejection",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "missing.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: cannot read missing.asm: No such file or directory (os error 2)\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": null,
+      "references": [],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "output_directory",
+      "repetition": 2,
+      "classification": "rejection",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: cannot write out.asm: Is a directory (os error 21)\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": null,
+      "references": [],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "pasmonext_base",
+      "repetition": 2,
+      "classification": "success",
+      "source": " org 8000h\nstart: ld a,5\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmonext",
+          "--to",
+          "sjasmplus",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "        org 8000h\nstart:\n        ld a,5\n        ret\n",
+        "stderr": "converted input.asm (pasmonext -> sjasmplus, verified byte-identical) -> stdout\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "3e05c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000247125 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 5 lines, work time: 0.001 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a73746172743a0a20202020202020206c6420612c350a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a73746172743a206c6420612c350a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "3e05c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "pasmonext_extended",
+      "repetition": 2,
+      "classification": "success",
+      "source": " org 8000h\n swapnib\n ret\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20737761706e69620a207265740a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmonext",
+          "--to",
+          "sjasmplus",
+          "input.asm"
+        ],
+        "exit": 0,
+        "stdout": "        org 8000h\n        swapnib\n        ret\n",
+        "stderr": "converted input.asm (pasmonext -> sjasmplus, verified byte-identical) -> stdout\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20737761706e69620a207265740a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": "ed23c9",
+      "references": [
+        {
+          "argv": [
+            "/usr/local/bin/pasmo",
+            "--bin",
+            "reference-input.asm",
+            "reference.bin"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "\nElapsed time: 0.000216083 s\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--zxnext",
+            "--raw=target.bin",
+            "converted.asm"
+          ],
+          "exit": 0,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nPass 3 complete\nErrors: 0, warnings: 0, compiled: 4 lines, work time: 0.001 seconds\n"
+        },
+        {
+          "argv": [
+            "/usr/local/bin/sjasmplus",
+            "--raw=unconfigured.bin",
+            "converted.asm"
+          ],
+          "exit": 1,
+          "stdout": "",
+          "stderr": "SjASMPlus Z80 Cross-Assembler v1.21.0 (https://github.com/z00m128/sjasmplus)\nPass 1 complete (0 errors)\nPass 2 complete (0 errors)\nconverted.asm(2): error: Unrecognized instruction: swapnib\nPass 3 complete\nErrors: 1, warnings: 0, compiled: 4 lines, work time: 0.001 seconds\n"
+        }
+      ],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "converted.asm": {
+          "hex": "20202020202020206f72672038303030680a2020202020202020737761706e69620a20202020202020207265740a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20737761706e69620a207265740a",
+          "symlink": null
+        },
+        "reference-input.asm": {
+          "hex": "206f72672038303030680a20737761706e69620a207265740a",
+          "symlink": null
+        },
+        "reference.bin": {
+          "hex": "ed23c9",
+          "symlink": null
+        },
+        "target.bin": {
+          "hex": "ed23c9",
+          "symlink": null
+        },
+        "unconfigured.bin": {
+          "hex": "c9",
+          "symlink": null
+        }
+      }
+    },
+    {
+      "name": "include_missing",
+      "repetition": 2,
+      "classification": "rejection",
+      "source": " org 8000h\n include \"missing.inc\"\n",
+      "before": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e636c75646520226d697373696e672e696e63220a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "result": {
+        "argv": [
+          "/private/tmp/198x-conversion-audit-build/debug/asm198x",
+          "convert",
+          "--from",
+          "pasmo",
+          "--to",
+          "sjasmplus",
+          "input.asm",
+          "-o",
+          "out.asm"
+        ],
+        "exit": 1,
+        "stdout": "",
+        "stderr": "asm198x: input.asm: line 2: the input does not assemble under pasmo: cannot resolve `include \"missing.inc\"` here \u2014 the single-source API assembles one file; use the multi-file entry point (the CLI resolves includes automatically)\n"
+      },
+      "after": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e636c75646520226d697373696e672e696e63220a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      },
+      "native_binary_hex": null,
+      "references": [],
+      "reference_files": {
+        "child.inc": {
+          "hex": "2064622034320a",
+          "symlink": null
+        },
+        "data.bin": {
+          "hex": "2a",
+          "symlink": null
+        },
+        "input.asm": {
+          "hex": "206f72672038303030680a20696e636c75646520226d697373696e672e696e63220a",
+          "symlink": null
+        },
+        "out.asm": {
+          "hex": "70726576696f757320736f757263650a",
+          "symlink": null
+        }
+      }
+    }
+  ]
+}

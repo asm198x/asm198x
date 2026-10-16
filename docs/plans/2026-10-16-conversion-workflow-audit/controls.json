@@ -1,0 +1,11 @@
+{
+  "failing_executable": {
+    "exit": 1,
+    "error": "AssertionError: positive success control failed: basic_stdout: {'argv': ['/usr/bin/false', 'convert', '--from', 'pasmo', '--to', 'sjasmplus', 'input.asm'], 'exit': 1, 'stdout': '', 'stderr': ''}",
+    "output_created": false
+  },
+  "empty_observations": {
+    "exit": 1,
+    "error": "missing/empty observations"
+  }
+}

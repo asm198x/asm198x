@@ -10,3 +10,6 @@ docs/plans/2026-10-15-disassembly-workflow-audit/** text eol=lf
 
 # Producer receipts compare checkout lock bytes with the committed Git blob.
 Cargo.lock text eol=lf
+
+# Preserve exact retained conversion-audit bytes across checkout platforms.
+docs/plans/2026-10-16-conversion-workflow-audit/** text eol=lf
