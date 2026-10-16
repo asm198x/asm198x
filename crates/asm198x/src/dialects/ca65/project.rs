@@ -33,7 +33,9 @@ pub(super) fn parsed_from_program(
     let mut st = Projection {
         seg: "CODE".to_string(),
         seg_stack: Vec::new(),
-        declared_segments: BTreeSet::new(),
+        // ca65 selects its default CODE segment even for an empty source.
+        // A configured start for it therefore reserves a file gap in ld65.
+        declared_segments: BTreeSet::from(["CODE".to_string()]),
         stmts: Vec::new(),
         label_seg: BTreeMap::new(),
         consts: BTreeMap::new(),

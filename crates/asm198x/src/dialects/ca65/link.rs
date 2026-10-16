@@ -87,7 +87,13 @@ pub(super) fn link(
 
     // The image is the layout's shape: its file areas stacked and filled.
     let size = layout.image_size;
-    let (_, rom) = crate::engine::lay_out(runs, layout.fill, 1, Some(0), false, |_| Some(size))?;
+    let (_, mut rom) =
+        crate::engine::lay_out(runs, layout.fill, 1, Some(0), false, |_| Some(size))?;
+    // The shared engine has no image when every run is empty. A configured
+    // ld65 file can still consist entirely of filled memory areas.
+    if layout.from_config {
+        rom.resize(size, layout.fill);
+    }
     Ok(rom)
 }
 
@@ -147,6 +153,7 @@ pub(super) fn resolve(
     size_env: &BTreeMap<String, i64>,
     off: u32,
     line: usize,
+    default_fill: u8,
 ) -> Result<(Resolved, usize), AsmError> {
     Ok(match kind {
         Kind::Empty => (Resolved::Nothing, 0),
@@ -158,7 +165,7 @@ pub(super) fn resolve(
         Kind::Align(boundary, fill) => {
             let pad = (boundary - i64::from(off).rem_euclid(boundary)) % boundary;
             let pad = usize::try_from(pad).expect("non-negative");
-            (Resolved::Fill(pad, fill), pad)
+            (Resolved::Fill(pad, fill.unwrap_or(default_fill)), pad)
         }
         Kind::Raw(v) => {
             let n = v.len();
@@ -180,7 +187,7 @@ pub(super) fn resolve(
             let n = v.len() * 4;
             (Resolved::DWords(v), n)
         }
-        Kind::Res(count, fill) => (Resolved::Fill(count, fill), count),
+        Kind::Res(count, fill) => (Resolved::Fill(count, fill.unwrap_or(default_fill)), count),
         Kind::Constant(..) | Kind::Org(_) | Kind::Reloc => (Resolved::Nothing, 0),
         Kind::Message(severity, text) => (Resolved::Message(severity, text), 0),
         Kind::Visible {
