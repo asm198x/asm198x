@@ -54,7 +54,7 @@ function build(root, target, manifest, dist, argv, env = process.env) {
   const receiptPath = path.join(dist, `asm198x-${target}-source-lock.json`);
   assert(!fs.existsSync(receiptPath), 'stale producer receipt exists');
   const source = guardedCommand(root, argv, manifest);
-  const artifact = archiveIdentity(JSON.parse(fs.readFileSync(manifest, 'utf8')), target, dist);
+  const artifact = archiveIdentity(JSON.parse(fs.readFileSync(manifest, 'utf8')), target, dist, false);
   const receipt = {
     schema_version: 1, kind: 'producer-source-lock', signed: false,
     source_commit: source.commit, committed_lock_sha256: source.cargo_lock_sha256,

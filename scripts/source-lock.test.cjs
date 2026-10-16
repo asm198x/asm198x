@@ -7,7 +7,7 @@ const os = require('node:os');
 const { spawnSync } = require('node:child_process');
 const { sourceIdentity, guardedCommand, verifyReceipt } = require('./build-locked-package.cjs');
 const { lockBuild, buildCommand, guardedBuild } = require('./generate-release-workflow.cjs');
-const { sha } = require('./package-identity.cjs');
+const { sha, packageIdentity, targets, archiveName } = require('./package-identity.cjs');
 function fixture(t) {
   const root = fs.mkdtempSync(path.join(os.tmpdir(), 'asm198x-lock-control-'));
   t.after(() => fs.rmSync(root, { recursive: true, force: true }));
@@ -90,5 +90,18 @@ test('native PR and reusable candidates cannot silently use artifact-only eviden
   for (const name of ['report.json', 'wrong-bytes.json', 'corrupt-archive.json']) {
     const line = text.split('\n').find(line => line.includes('node scripts/test-candidate-package.cjs') && line.includes(name));
     assert(line.includes('"${receipt_flags[@]}"'));
+  }
+});
+
+test('producer manifests validate their selected target while qualification requires the full set', () => {
+  for (const target of targets) {
+    const archive = archiveName(target);
+    const local = { releases: [{app_name: 'asm198x', app_version: '1.0.0', artifacts: [archive]}], artifacts: { [archive]: { target_triples: [target], checksum: archive + '.sha256' } } };
+    assert.equal(packageIdentity(local, target, false).target, target);
+    assert.throws(() => packageIdentity(local, target), /plan omits/);
+    const wrong = targets.find(other => other !== target);
+    assert.throws(() => packageIdentity(local, wrong, false), /plan omits/);
+    local.artifacts[archive].target_triples = [wrong];
+    assert.throws(() => packageIdentity(local, target, false), /wrong planned target/);
   }
 });

@@ -7,13 +7,13 @@ const { versionOf, verifyChecksum, runChecked } = require('../.github/actions/se
 const targets = ['aarch64-apple-darwin', 'x86_64-apple-darwin', 'x86_64-pc-windows-msvc', 'x86_64-unknown-linux-gnu', 'aarch64-unknown-linux-gnu'];
 const sha = data => createHash('sha256').update(data).digest('hex');
 const archiveName = target => `asm198x-${target}.${target.includes('windows') ? 'zip' : 'tar.xz'}`;
-function packageIdentity(plan, target) {
+function packageIdentity(plan, target, allTargets = true) {
   assert(targets.includes(target), 'unsupported target');
   assert.equal(plan.releases?.length, 1, 'expected one release');
   const release = plan.releases[0];
   assert.equal(release.app_name, 'asm198x');
   const version = versionOf(release.app_version);
-  for (const expected of targets) {
+  for (const expected of allTargets ? targets : [target]) {
     const name = archiveName(expected);
     assert(release.artifacts.includes(name), `plan omits ${expected}`);
     assert.deepEqual(plan.artifacts[name]?.target_triples, [expected], `wrong planned target ${expected}`);
@@ -39,8 +39,8 @@ function binaryTarget(data) {
   }
   throw new Error('unknown or unsupported executable architecture');
 }
-function archiveIdentity(plan, target, dist) {
-  const identity = packageIdentity(plan, target);
+function archiveIdentity(plan, target, dist, allTargets = true) {
+  const identity = packageIdentity(plan, target, allTargets);
   const archivePath = path.join(dist, identity.archive);
   const archive = fs.readFileSync(archivePath);
   verifyChecksum(archive, fs.readFileSync(archivePath + '.sha256', 'utf8'), identity.archive);
