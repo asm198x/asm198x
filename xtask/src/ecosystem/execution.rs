@@ -496,6 +496,7 @@ fn target_audit(
     if let Some(control) = control {
         record.tools = control.tools.clone();
     }
+    let probes = OwnedTree::new(work.join(format!("{name}-version-probes")))?;
     for tool in &plan.tools {
         if control.is_some()
             && !plan
@@ -509,9 +510,11 @@ fn target_audit(
         let sha256 = process::digest(&path, 128 * 1024 * 1024)?.1;
         let mut argv = vec![path.display().to_string()];
         argv.extend(tool.probe.clone());
+        let probe_directory = probes.0.join(&tool.name);
+        std::fs::create_dir(&probe_directory).map_err(|e| e.to_string())?;
         let version = process::run(
             &argv,
-            repo,
+            &probe_directory,
             logs,
             &format!("{name}-version-{}", tool.name),
             10,
