@@ -76,12 +76,19 @@ pub(super) fn resolve(name: &str) -> Result<PathBuf, String> {
             })
             .collect()
     };
-    candidates
+    let path = candidates
         .into_iter()
         .find(|path| path.is_file())
-        .ok_or_else(|| format!("missing tool `{name}`"))?
-        .canonicalize()
-        .map_err(|e| e.to_string())
+        .ok_or_else(|| format!("missing tool `{name}`"))?;
+    // rustup and other executable proxies dispatch using argv[0]. Follow the
+    // link when hashing its bytes, but keep the invoked name when executing.
+    if path.is_absolute() {
+        Ok(path)
+    } else {
+        Ok(std::env::current_dir()
+            .map_err(|e| e.to_string())?
+            .join(path))
+    }
 }
 
 pub(super) fn run(
@@ -284,6 +291,34 @@ mod tests {
             std::env::temp_dir().join(format!("asm198x-process-{name}-{}", std::process::id()));
         std::fs::create_dir(&path).expect("isolated directory");
         path
+    }
+    #[test]
+    fn executable_proxies_keep_the_invoked_name_and_hash_the_target_bytes() {
+        use std::os::unix::fs::symlink;
+        let dir = directory("proxy");
+        let alias = dir.join("proxy-name");
+        symlink("/bin/sh", &alias).expect("proxy");
+        let resolved = resolve(alias.to_str().expect("path")).expect("resolve");
+        assert_eq!(
+            digest(&resolved, 128 * 1024 * 1024).expect("proxy hash"),
+            digest(Path::new("/bin/sh"), 128 * 1024 * 1024).expect("target hash")
+        );
+        let result = run(
+            &[
+                resolved.display().to_string(),
+                "-c".into(),
+                "printf %s \"$0\"".into(),
+            ],
+            &dir,
+            &dir,
+            "proxy",
+            5,
+            &[],
+        )
+        .expect("run proxy");
+        assert!(result.succeeded());
+        assert_eq!(result.stdout, alias.display().to_string());
+        std::fs::remove_dir_all(dir).expect("cleanup");
     }
     #[test]
     fn digest_matches_independent_standard_vector_and_checks_the_bound() {
