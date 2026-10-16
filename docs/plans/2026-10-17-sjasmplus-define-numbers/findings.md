@@ -72,3 +72,5 @@ from the same clean checkout and freshly built debug executable, including both
 tool identities and full process results. Native `dd 'FF'`, with or without
 DEFINE, emits `46460000`; Asm refuses `malformed character literal`. Positive
 controls `dd "FF"` and `dd 'F'` match native. The build log is retained as well.
+
+The independent packed-literal gap is tracked in [#737](https://github.com/asm198x/asm198x/issues/737).
